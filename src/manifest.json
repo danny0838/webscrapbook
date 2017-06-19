@@ -4,7 +4,7 @@
   "description": "__MSG_ExtensionDescription__",
   "version": "0.1.0",
   "author": "Danny Lin",
-  "default_locale": "zh_TW",
+  "default_locale": "en",
 
   "icons": {
     "128": "core/scrapbook_128.png"
