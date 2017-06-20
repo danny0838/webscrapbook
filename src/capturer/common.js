@@ -43,12 +43,14 @@ capturer.captureDocumentOrFile = function (doc, settings, options, callback) {
         settings: settings,
         options: options
       }, callback);
-      return true;
+      return true; // async response
     }
   }
 
   // otherwise, capture as document
   capturer.captureDocument(doc, settings, options, callback);
+
+  return true; // async response
 };
 
 capturer.captureDocument = function (doc, settings, options, callback) {
@@ -1149,6 +1151,8 @@ capturer.captureDocument = function (doc, settings, options, callback) {
     documentName = response.documentName;
     captureMain();
   });
+
+  return true; // async response
 };
 
 capturer.getFrameContent = function (frameElement, timeId, settings, options, callback) {
