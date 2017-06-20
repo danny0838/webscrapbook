@@ -1,0 +1,58 @@
+{
+  "BrowserActionTitle": {
+    "description": "Title for the browser action that's visible to the user of extension",
+    "message": "用 WebScrapBook 擷取網頁"
+  },
+  "CaptureTab": {
+    "message": "擷取目前網頁"
+  },
+  "CaptureAllTabs": {
+    "message": "擷取所有分頁"
+  },
+  "ErrorCapture": {
+    "message": "擷取失敗: $URL$",
+    "placeholders": {
+      "url": {"content" : "$1"}
+    }
+  },
+  "ErrorContentScriptNotReady": {
+    "message": "內容處理腳本未就緒，請重新整理本頁面並確認所有內容已完全載入再嘗試。"
+  },
+  "ErrorContentScriptNotReady2": {
+    "message": "內容處理腳本未就緒，請重新整理本頁面並確認所有內容已完全載入再嘗試。於 '$URL$' (分頁 $TAB$)",
+    "placeholders": {
+      "url": {"content" : "$1"},
+      "tab": {"content" : "$2"}
+    }
+  },
+  "ErrorDocumentNotReady": {
+    "message": "頁面未載入: $URL$",
+    "placeholders": {
+      "url": {"content" : "$1"}
+    }
+  },
+  "ErrorFileDownloadError": {
+    "message": "下載檔案錯誤 ($REASON$): $URL$",
+    "placeholders": {
+      "url": {"content": "$1"},
+      "reason": {"content": "$2"}
+    }
+  },
+  "ErrorFileDownloadTimeout": {
+    "message": "下載檔案逾時: $URL$",
+    "placeholders": {
+      "url": {"content" : "$1"}
+    }
+  },
+  "ExtensionDescription": {
+    "description": "Description of the extension as it's visible to the outside world",
+    "message": "擷取網頁內容，提供多種客製化設定。"
+  },
+  "ExtensionName": {
+    "description": "Name of the extension as it's visible to the outside world",
+    "message": "Web ScrapBook"
+  },
+  "OptionPageTitle": {
+    "message": "選項設定"
+  }
+}

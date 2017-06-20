@@ -1,0 +1,58 @@
+{
+  "BrowserActionTitle": {
+    "description": "Title for the browser action that's visible to the user of extension",
+    "message": "Capture the web page with WebScrapBook"
+  },
+  "CaptureTab": {
+    "message": "Capture the current page"
+  },
+  "CaptureAllTabs": {
+    "message": "Capture all tabs"
+  },
+  "ErrorCapture": {
+    "message": "Capture failed: $URL$",
+    "placeholders": {
+      "url": {"content" : "$1"}
+    }
+  },
+  "ErrorContentScriptNotReady": {
+    "message": "The content script is not ready. Refresh this page, wait for all elements to be loaded, and try again."
+  },
+  "ErrorContentScriptNotReady2": {
+    "message": "The content script is not ready. Refresh this page, wait for all elements to be loaded, and try again. At '$URL$' (tab $TAB$)",
+    "placeholders": {
+      "url": {"content" : "$1"},
+      "tab": {"content" : "$2"}
+    }
+  },
+  "ErrorDocumentNotReady": {
+    "message": "Page not load: $URL$",
+    "placeholders": {
+      "url": {"content" : "$1"}
+    }
+  },
+  "ErrorFileDownloadError": {
+    "message": "Error when downloading file ($REASON$): $URL$",
+    "placeholders": {
+      "url": {"content": "$1"},
+      "reason": {"content": "$2"}
+    }
+  },
+  "ErrorFileDownloadTimeout": {
+    "message": "Timeout when downloading file: $URL$",
+    "placeholders": {
+      "url": {"content" : "$1"}
+    }
+  },
+  "ExtensionDescription": {
+    "description": "Description of the extension as it's visible to the outside world",
+    "message": "Captures the web page with highly customizable configurations."
+  },
+  "ExtensionName": {
+    "description": "Name of the extension as it's visible to the outside world",
+    "message": "Web ScrapBook"
+  },
+  "OptionPageTitle": {
+    "message": "Options"
+  }
+}
