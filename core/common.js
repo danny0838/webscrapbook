@@ -16,9 +16,9 @@ var isDebug = false;
 
 scrapbook.options = {
   "capture.dataFolder": "ScrapBook",
+  "capture.saveAs": ["downloads", "zip", "singleHtml", 1],
   "capture.saveSelectionOnly": true,
   "capture.saveAsciiFilename": false,
-  "capture.saveFileAsDataUri": false,
   "capture.saveInlineAsHtml": false,
   "capture.saveDataUriAsFile": false,
   "capture.favicon": ["save", "link", "blank", "remove", 0],
@@ -154,8 +154,8 @@ scrapbook.validateFilename = function (filename, forceAscii) {
   filename = filename
       .replace(/[\x00-\x1F\x7F]+|^ +/g, "")
       .replace(/^\./, "_.").replace(/^ +/, "").replace(/[. ]+$/, "")  // leading/trailing spaces and dots are not allowed in Windows
-      .replace(/[:"?*\\/|&~]/g, "_")
-      .replace(/[<]/g, "(").replace(/[>]/g, ")");
+      .replace(/[:"?*\\/|]/g, "_")
+      .replace(/[~]/g, "-").replace(/[<]/g, "(").replace(/[>]/g, ")");
   if (forceAscii) {
     filename = filename.replace(/[^\x00-\x7F]+/g, m => encodeURI(m));
   }

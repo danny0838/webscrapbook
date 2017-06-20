@@ -41,14 +41,19 @@ capturer.captureDocumentOrFile = function (doc, settings, options, callback) {
       capturer.invoke("captureFile", {
         url: doc.URL,
         settings: settings,
-        options: options
+        options: options,
+        data: {
+          title: doc.title
+        }
       }, callback);
-      return true;
+      return true; // async response
     }
   }
 
   // otherwise, capture as document
   capturer.captureDocument(doc, settings, options, callback);
+
+  return true; // async response
 };
 
 capturer.captureDocument = function (doc, settings, options, callback) {
@@ -500,11 +505,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
               let captureFrameCallback = function (result) {
                 isDebug && console.debug("captureFrameCallback", result);
                 if (result) {
-                  if (!result.error) {
-                    captureRewriteUri(frame, "src", result.filename);
-                  } else {
-                    captureRewriteUri(frame, "src", result.url);
-                  }
+                  captureRewriteUri(frame, "src", result.url);
                 } else {
                   captureRewriteAttr(frame, "src", null);
                 }
@@ -1062,14 +1063,15 @@ capturer.captureDocument = function (doc, settings, options, callback) {
     // save document
     var content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
     capturer.invoke("saveDocument", {
-      frameUrl: doc.URL,
+      sourceUrl: doc.URL,
+      documentName: documentName,
       settings: settings,
       options: options,
       data: {
-        documentName: documentName,
         mime: mime,
         charset: "UTF-8",
         content: content,
+        title: doc.title
       }
     }, callback);
   };
@@ -1149,6 +1151,8 @@ capturer.captureDocument = function (doc, settings, options, callback) {
     documentName = response.documentName;
     captureMain();
   });
+
+  return true; // async response
 };
 
 capturer.getFrameContent = function (frameElement, timeId, settings, options, callback) {
