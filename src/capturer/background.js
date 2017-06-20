@@ -240,10 +240,10 @@ capturer.captureFile = function (params, callback) {
       let html = '<html' + meta + '><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;URL=' + scrapbook.escapeHtml(response.url) + '"></head><body></body></html>';
       capturer.saveDocument({
         sourceUrl: sourceUrl,
+        documentName: settings.documentName,
         settings: settings,
         options: options,
         data: {
-          documentName: settings.documentName,
           mime: "text/html",
           content: html
         }
@@ -289,19 +289,21 @@ capturer.registerDocument = function (params, callback) {
  *     - {Object} params.settings
  *     - {Object} params.options
  *     - {string} params.sourceUrl
- *     - {{documentName: string, mime: string, charset: string, content: string}} params.data
+ *     - {string} params.documentName
+ *     - {{mime: string, charset: string, content: string}} params.data
  */
 capturer.saveDocument = function (params, callback) {
   isDebug && console.debug("call: saveDocument", params);
 
   var settings = params.settings;
   var options = params.options;
+  var sourceUrl = params.sourceUrl;
+  var documentName = params.documentName;
   var data = params.data;
   var timeId = settings.timeId;
-  var sourceUrl = params.sourceUrl;
   var targetDir = options["capture.dataFolder"] + "/" + timeId;
   var autoErase = !settings.frameIsMain;
-  var filename = data.documentName + "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+  var filename = documentName + "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
   filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
   filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
 

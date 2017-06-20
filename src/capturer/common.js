@@ -1061,10 +1061,10 @@ capturer.captureDocument = function (doc, settings, options, callback) {
     var content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
     capturer.invoke("saveDocument", {
       sourceUrl: doc.URL,
+      documentName: documentName,
       settings: settings,
       options: options,
       data: {
-        documentName: documentName,
         mime: mime,
         charset: "UTF-8",
         content: content,
