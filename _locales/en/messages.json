@@ -6,6 +6,9 @@
   "CaptureTab": {
     "message": "Capture the current page"
   },
+  "CaptureTabSource": {
+    "message": "Capture the current page (source)"
+  },
   "CaptureAllTabs": {
     "message": "Capture all tabs"
   },
@@ -52,7 +55,16 @@
     "description": "Name of the extension as it's visible to the outside world",
     "message": "Web ScrapBook"
   },
+  "OpenOptions": {
+    "message": "Options"
+  },
   "OptionPageTitle": {
     "message": "Options"
+  },
+  "OptionsSaveLabel": {
+    "message": "Save"
+  },
+  "OptionsResetLabel": {
+    "message": "Reset"
   }
 }

@@ -17,11 +17,11 @@ var isDebug = false;
 scrapbook.options = {
   "capture.dataFolder": "ScrapBook",
   "capture.saveSelectionOnly": true,
-  "capture.saveAsUtf8": true,
   "capture.saveAsciiFilename": false,
   "capture.saveFileAsDataUri": false,
   "capture.saveInlineAsHtml": false,
   "capture.saveDataUriAsFile": false,
+  "capture.favicon": ["save", "link", "blank", "remove", 0],
   "capture.image": ["save", "link", "blank", "remove", 0],
   "capture.imageBackground": ["save", "link", "remove", 0],
   "capture.audio": ["save", "link", "blank", "remove", 0],
@@ -118,6 +118,11 @@ scrapbook.loadLanguages = function (rootNode) {
     if (/^__MSG_(.*?)__$/.test(str)) {
       elem.textContent = scrapbook.lang(RegExp.$1);
     }
+    Array.prototype.forEach.call(elem.attributes, (attr) => {
+      if (/^__MSG_(.*?)__$/.test(attr.nodeValue)) {
+        attr.nodeValue = scrapbook.lang(RegExp.$1);
+      }
+    }, this);
   }, this);
 };
 
@@ -134,7 +139,7 @@ scrapbook.loadLanguages = function (rootNode) {
  * see also: validateFilename
  */
 scrapbook.escapeFilename = function (filename) {
-  return filename.replace(/[#]+|(?:%[0-9A-Fa-f]{2})+/g, m => encodeURIComponent(m));
+  return filename.replace(/[ #]+|(?:%[0-9A-Fa-f]{2})+/g, m => encodeURIComponent(m));
 };
 
 /**
@@ -149,7 +154,7 @@ scrapbook.validateFilename = function (filename, forceAscii) {
   filename = filename
       .replace(/[\x00-\x1F\x7F]+|^ +/g, "")
       .replace(/^\./, "_.").replace(/^ +/, "").replace(/[. ]+$/, "")  // leading/trailing spaces and dots are not allowed in Windows
-      .replace(/[:"?*\\/|]/g, "_")
+      .replace(/[:"?*\\/|&~]/g, "_")
       .replace(/[<]/g, "(").replace(/[>]/g, ")");
   if (forceAscii) {
     filename = filename.replace(/[^\x00-\x7F]+/g, m => encodeURI(m));
@@ -295,6 +300,18 @@ scrapbook.getUuid = function () {
   });
 };
 
+scrapbook.escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
+  var list = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': (noDoubleQuotes ? '"' : "&quot;"),
+    "'": (singleQuotes ? "&#39;" : "'"),
+    " ": (spaces ? "&nbsp;" : " ")
+  };
+  return str.replace(/[&<>"']| (?= )/g, m => list[m]);
+};
+
 scrapbook.escapeRegExp = function (str) {
   return str.replace(/([\*\+\?\.\^\/\$\\\|\[\]\{\}\(\)])/g, "\\$1");
 };
@@ -303,7 +320,11 @@ scrapbook.escapeHtmlComment = function (str) {
   return str.replace(/-([\u200B]*)-/g, "-\u200B$1-");
 };
 
-scrapbook.unescapeCss = function(str) {
+scrapbook.escapeQuotes = function (str) {
+  return str.replace(/[\\"]/g, "\\$&");
+};
+
+scrapbook.unescapeCss = function (str) {
   var that = arguments.callee;
   if (!that.replaceRegex) {
     that.replaceRegex = /\\([0-9A-Fa-f]{1,6}) ?|\\(.)/g;
@@ -412,11 +433,11 @@ scrapbook.intToFixedStr = function (number, width, padder) {
 };
 
 scrapbook.byteStringToArrayBuffer = function (bstr) {
-  return (new Uint8Array(Array.prototype.map.call(bstr, x => x.charCodeAt(0)))).buffer;
+  return new TextEncoder("utf-8").encode(bstr);
 };
 
 scrapbook.arrayBufferToByteString = function (ab) {
-  return String.fromCharCode.apply(null, new Uint8Array(ab));
+  return new TextDecoder("utf-8").decode(ab);
 };
 
 

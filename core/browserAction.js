@@ -11,14 +11,27 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById("captureTab").addEventListener('click', () => {
     chrome.runtime.getBackgroundPage((win) => {
       win.capturer.captureActiveTab();
-      window.close();
     });
+    window.close();
+  });
+
+  document.getElementById("captureTabSource").addEventListener('click', () => {
+    chrome.runtime.getBackgroundPage((win) => {
+      win.capturer.captureActiveTabSource();
+    });
+    window.close();
   });
 
   document.getElementById("captureAllTabs").addEventListener('click', () => {
     chrome.runtime.getBackgroundPage((win) => {
       win.capturer.captureAllTabs();
-      window.close();
     });
+    window.close();
+  });
+
+  document.getElementById("openOptions").addEventListener('click', () => {
+    chrome.tabs.create({url: chrome.runtime.getURL("core/options.html"), active: true}, () => {
+    });
+    window.close();
   });
 });

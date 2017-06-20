@@ -6,6 +6,9 @@
   "CaptureTab": {
     "message": "擷取目前網頁"
   },
+  "CaptureTabSource": {
+    "message": "擷取目前網頁 (原始狀態)"
+  },
   "CaptureAllTabs": {
     "message": "擷取所有分頁"
   },
@@ -52,7 +55,16 @@
     "description": "Name of the extension as it's visible to the outside world",
     "message": "Web ScrapBook"
   },
+  "OpenOptions": {
+    "message": "選項"
+  },
   "OptionPageTitle": {
     "message": "選項設定"
+  },
+  "OptionsSaveLabel": {
+    "message": "儲存"
+  },
+  "OptionsResetLabel": {
+    "message": "重設"
   }
 }

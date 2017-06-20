@@ -21,7 +21,7 @@ capturer.downloadInfo = {};
  * Prevent filename conflictAction. Appends a number if the given filename is used.
  *
  * @param {string} timeId
- * @param {string} filename - The unfixed filename.
+ * @param {string} filename - The unfixed filename. Should be validated (via scrapbook.validateFilename).
  * @param {string|true} src - The source URL of the filename source. Use true means always create a new filename.
  * @return {{newFilename: string, isDuplicate: boolean}}
  */
@@ -35,7 +35,6 @@ capturer.getUniqueFilename = function (timeId, filename, src) {
   };
 
   var newFilename = filename || "untitled";
-  newFilename = scrapbook.validateFilename(newFilename);
   var {base: newFilenameBase, extension: newFilenameExt} = scrapbook.filenameParts(newFilename);
   newFilenameBase = scrapbook.crop(scrapbook.crop(newFilenameBase, 240, true), 128);
   newFilenameExt = newFilenameExt ? "." + newFilenameExt : "";
@@ -83,6 +82,7 @@ capturer.captureTab = function (tab, quiet) {
       timeId: timeId,
       frameIsMain: true,
       documentName: "index",
+      favIconUrl: tab.favIconUrl
     },
     options: scrapbook.getOptions("capture"),
   };
@@ -96,6 +96,40 @@ capturer.captureTab = function (tab, quiet) {
       } else{
         console.error(scrapbook.lang("ErrorCapture", [scrapbook.lang("ErrorContentScriptNotReady2", [tab.url, tab.id])]));
       }
+      return;
+    }
+    if (response.error) {
+      console.error(scrapbook.lang("ErrorCapture", ["tab " + tabId]));
+      return;
+    }
+    delete(capturer.captureInfo[timeId]);
+  });
+};
+
+capturer.captureActiveTabSource = function () {
+  chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+    capturer.captureTabSource(tabs[0]);
+  });
+};
+
+capturer.captureTabSource = function (tab) {
+  var timeId = scrapbook.dateToId();
+  var tabId = tab.id;
+  var message = {
+    url: tab.url,
+    settings: {
+      timeId: timeId,
+      frameIsMain: true,
+      documentName: "index",
+    },
+    options: scrapbook.getOptions("capture")
+  };
+
+  isDebug && console.debug("(main) send", tabId, message);
+  capturer.captureUrl(message, function (response) {
+    isDebug && console.debug("(main) response", tabId, response);
+    if (!response) {
+      alert(scrapbook.lang("ErrorCapture", [scrapbook.lang("ErrorContentScriptNotReady")]));
       return;
     }
     if (response.error) {
@@ -123,10 +157,12 @@ capturer.captureUrl = function (params, callback) {
   var filename;
   
   var xhr = new XMLHttpRequest();
+
   var xhr_shutdown = function () {
     xhr.onreadystatechange = xhr.onerror = xhr.ontimeout = null;
     xhr.abort();
   };
+
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 2) {
       // if header Content-Disposition is defined, use it
@@ -152,20 +188,28 @@ capturer.captureUrl = function (params, callback) {
       }
     }
   };
+
   xhr.ontimeout = function () {
     console.warn(scrapbook.lang("ErrorFileDownloadTimeout", sourceUrl));
     callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: "timeout"});
     xhr_shutdown();
   };
+
   xhr.onerror = function () {
     var err = [xhr.status, xhr.statusText].join(" ");
     console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
     callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: err});
     xhr_shutdown();
   };
-  xhr.responseType = "document";
-  xhr.open("GET", sourceUrl, true);
-  xhr.send();
+
+  try {
+    xhr.responseType = "document";
+    xhr.open("GET", sourceUrl, true);
+    xhr.send();
+  } catch (ex) {
+    console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex]));
+    callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
+  }
 
   return true; // async response
 };
@@ -191,9 +235,9 @@ capturer.captureFile = function (params, callback) {
     options: options
   }, (response) => {
     if (settings.frameIsMain) {
-      let meta = params.options["capture.recordDocumentMeta"] ? ' data-sb' + timeId + '-source="' + sourceUrl + '"' : "";
+      let meta = params.options["capture.recordDocumentMeta"] ? ' data-sb' + timeId + '-source="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
       // for the main frame, create a index.html that redirects to the file
-      let html = '<html' + meta + '><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;URL=' + response.url + '"></head><body></body></html>';
+      let html = '<html' + meta + '><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;URL=' + scrapbook.escapeHtml(response.url) + '"></head><body></body></html>';
       capturer.saveDocument({
         frameUrl: sourceUrl,
         settings: settings,
@@ -247,17 +291,19 @@ capturer.registerDocument = function (params, callback) {
 capturer.saveDocument = function (params, callback) {
   isDebug && console.debug("call: saveDocument", params);
 
-  var timeId = params.settings.timeId;
+  var settings = params.settings;
+  var options = params.options;
+  var timeId = settings.timeId;
   var frameUrl = params.frameUrl;
-  var targetDir = params.options["capture.dataFolder"] + "/" + timeId;
-  var autoErase = !params.settings.frameIsMain;
+  var targetDir = options["capture.dataFolder"] + "/" + timeId;
+  var autoErase = !settings.frameIsMain;
   var filename = params.data.documentName + "." + ((params.data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-  filename = scrapbook.validateFilename(filename);
+  filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
   filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
 
   // save as data URI?
   // the main frame should still be downloaded
-  if (params.options["capture.saveFileAsDataUri"] && !params.settings.frameIsMain) {
+  if (options["capture.saveFileAsDataUri"] && !settings.frameIsMain) {
     let dataUri = scrapbook.stringToDataUri(params.data.content, params.data.mime, params.data.charset);
     callback({timeId: timeId, frameUrl: frameUrl, targetDir: targetDir, filename: dataUri});
     return true; // async response
@@ -281,12 +327,12 @@ capturer.saveDocument = function (params, callback) {
           callback({timeId: timeId, frameUrl: frameUrl, targetDir: targetDir, filename: filename});
         },
         onError: (err) => {
-          callback({url: capturer.getErrorUrl(frameUrl, params.options), error: err});
+          callback({url: capturer.getErrorUrl(frameUrl, options), error: err});
         }
       };
     } else {
       let err = chrome.runtime.lastError.message;
-      callback({url: capturer.getErrorUrl(frameUrl, params.options), error: err});
+      callback({url: capturer.getErrorUrl(frameUrl, options), error: err});
     }
   });
   return true; // async response
@@ -360,11 +406,11 @@ capturer.downloadFile = function (params, callback) {
         console.error(ex);
       }
 
-      filename = scrapbook.validateFilename(filename);
+      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
       if (!options["capture.saveFileAsDataUri"]) {
         ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
         if (isDuplicate) {
-          callback({url: filename, isDuplicate: true});
+          callback({url: scrapbook.escapeFilename(filename), isDuplicate: true});
           xhr_shutdown();
         }
       }
@@ -414,9 +460,14 @@ capturer.downloadFile = function (params, callback) {
     xhr_shutdown();
   };
 
-  xhr.responseType = "blob";
-  xhr.open("GET", sourceUrl, true);
-  xhr.send();
+  try {
+    xhr.responseType = "blob";
+    xhr.open("GET", sourceUrl, true);
+    xhr.send();
+  } catch (ex) {
+    console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex]));
+    callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
+  }
 
   return true; // async response
 };
@@ -445,7 +496,7 @@ capturer.downloadDataUri = function (params, callback) {
     let file = scrapbook.dataUriToFile(sourceUrl);
     if (file) {
       filename = file.name;
-      filename = scrapbook.validateFilename(filename);
+      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
       ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
       if (!isDuplicate) {
         if (rewriteMethod && capturer[rewriteMethod]) {
@@ -474,7 +525,7 @@ capturer.downloadDataUri = function (params, callback) {
           }, callback);
         }
       } else {
-        callback({url: filename, isDuplicate: true});
+        callback({url: scrapbook.escapeFilename(filename), isDuplicate: true});
       }
     } else {
       callback({url: capturer.getErrorUrl(sourceUrl, options), error: "data URI cannot be read as file"});
@@ -538,7 +589,7 @@ capturer.saveBlob = function (params, callback) {
         autoErase: true,
         onComplete: () => {
           // @TODO: do we need to escape the URL to be safe to included in CSS or so?
-          callback({url: filename});
+          callback({url: scrapbook.escapeFilename(filename)});
         },
         onError: (err) => {
           callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
