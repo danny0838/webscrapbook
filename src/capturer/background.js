@@ -250,8 +250,11 @@ capturer.captureFile = function (params, callback) {
       }, callback);
     } else {
       callback({
+        timeId: timeId,
         frameUrl: sourceUrl,
-        filename: response.url
+        targetDir: response.targetDir, 
+        filename: response.filename,
+        url: response.url
       });
     }
   });
@@ -305,7 +308,7 @@ capturer.saveDocument = function (params, callback) {
   // the main frame should still be downloaded
   if (options["capture.saveFileAsDataUri"] && !settings.frameIsMain) {
     let dataUri = scrapbook.stringToDataUri(params.data.content, params.data.mime, params.data.charset);
-    callback({timeId: timeId, frameUrl: frameUrl, targetDir: targetDir, filename: dataUri});
+    callback({timeId: timeId, frameUrl: frameUrl, targetDir: targetDir, url: dataUri});
     return true; // async response
   }
 
@@ -324,7 +327,7 @@ capturer.saveDocument = function (params, callback) {
         src: frameUrl,
         autoErase: autoErase,
         onComplete: () => {
-          callback({timeId: timeId, frameUrl: frameUrl, targetDir: targetDir, filename: filename});
+          callback({timeId: timeId, frameUrl: frameUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
         },
         onError: (err) => {
           callback({url: capturer.getErrorUrl(frameUrl, options), error: err});

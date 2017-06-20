@@ -502,11 +502,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
               let captureFrameCallback = function (result) {
                 isDebug && console.debug("captureFrameCallback", result);
                 if (result) {
-                  if (!result.error) {
-                    captureRewriteUri(frame, "src", result.filename);
-                  } else {
-                    captureRewriteUri(frame, "src", result.url);
-                  }
+                  captureRewriteUri(frame, "src", result.url);
                 } else {
                   captureRewriteAttr(frame, "src", null);
                 }
