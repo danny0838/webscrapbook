@@ -410,7 +410,7 @@ capturer.downloadFile = function (params, callback) {
       if (!options["capture.saveFileAsDataUri"]) {
         ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
         if (isDuplicate) {
-          callback({url: scrapbook.escapeFilename(filename), isDuplicate: true});
+          callback({filename: filename, url: scrapbook.escapeFilename(filename), isDuplicate: true});
           xhr_shutdown();
         }
       }
@@ -525,7 +525,7 @@ capturer.downloadDataUri = function (params, callback) {
           }, callback);
         }
       } else {
-        callback({url: scrapbook.escapeFilename(filename), isDuplicate: true});
+        callback({filename: filename, url: scrapbook.escapeFilename(filename), isDuplicate: true});
       }
     } else {
       callback({url: capturer.getErrorUrl(sourceUrl, options), error: "data URI cannot be read as file"});
@@ -588,7 +588,7 @@ capturer.saveBlob = function (params, callback) {
         src: sourceUrl,
         autoErase: true,
         onComplete: () => {
-          callback({url: scrapbook.escapeFilename(filename)});
+          callback({filename: filename, url: scrapbook.escapeFilename(filename)});
         },
         onError: (err) => {
           callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
