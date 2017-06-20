@@ -316,15 +316,15 @@ capturer.saveDocument = function (params, callback) {
   var autoErase = !settings.frameIsMain;
 
   if (options["capture.saveAs"] === "singleHtml") {
+    var targetDir = options["capture.dataFolder"];
     var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
     filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
     var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
     if (!filename.endsWith(ext)) filename += ext;
     var downloadParams = {
       url: URL.createObjectURL(new Blob([data.content], {type: data.mime})),
-      filename: filename,
-      saveAs: true,
-      conflictAction: "overwrite"
+      filename: targetDir + "/" + filename,
+      conflictAction: "uniquify"
     };
   } else {
     var targetDir = options["capture.dataFolder"] + "/" + timeId;
