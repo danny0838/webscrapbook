@@ -13,7 +13,8 @@
   "applications": {
     "gecko": {
       "id": "webscrapbook.beta@danny0838.addons.mozilla.org",
-      "strict_min_version": "48.0"
+      "strict_min_version": "48.0",
+      "update_url": "https://danny0838.github.io/webscrapbook/files/firefox/updates.json"
     }
   },
 
