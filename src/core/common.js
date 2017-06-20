@@ -154,8 +154,8 @@ scrapbook.validateFilename = function (filename, forceAscii) {
   filename = filename
       .replace(/[\x00-\x1F\x7F]+|^ +/g, "")
       .replace(/^\./, "_.").replace(/^ +/, "").replace(/[. ]+$/, "")  // leading/trailing spaces and dots are not allowed in Windows
-      .replace(/[:"?*\\/|&~]/g, "_")
-      .replace(/[<]/g, "(").replace(/[>]/g, ")");
+      .replace(/[:"?*\\/|&]/g, "_")
+      .replace(/[~]/g, "-").replace(/[<]/g, "(").replace(/[>]/g, ")");
   if (forceAscii) {
     filename = filename.replace(/[^\x00-\x7F]+/g, m => encodeURI(m));
   }
