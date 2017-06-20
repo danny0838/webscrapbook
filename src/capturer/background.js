@@ -296,24 +296,25 @@ capturer.saveDocument = function (params, callback) {
 
   var settings = params.settings;
   var options = params.options;
+  var data = params.data;
   var timeId = settings.timeId;
   var sourceUrl = params.sourceUrl;
   var targetDir = options["capture.dataFolder"] + "/" + timeId;
   var autoErase = !settings.frameIsMain;
-  var filename = params.data.documentName + "." + ((params.data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+  var filename = data.documentName + "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
   filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
   filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
 
   // save as data URI?
   // the main frame should still be downloaded
   if (options["capture.saveFileAsDataUri"] && !settings.frameIsMain) {
-    let dataUri = scrapbook.stringToDataUri(params.data.content, params.data.mime, params.data.charset);
+    let dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
     callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, url: dataUri});
     return true; // async response
   }
 
   var downloadParams = {
-    url: URL.createObjectURL(new Blob([params.data.content], {type: params.data.mime})),
+    url: URL.createObjectURL(new Blob([data.content], {type: data.mime})),
     filename: targetDir + "/" + filename,
     conflictAction: "uniquify",
   };
