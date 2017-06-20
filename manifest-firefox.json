@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "__MSG_ExtensionName__",
   "description": "__MSG_ExtensionDescription__",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Danny Lin",
   "default_locale": "en",
 
@@ -13,7 +13,8 @@
   "applications": {
     "gecko": {
       "id": "webscrapbook@danny0838.addons.mozilla.org",
-      "strict_min_version": "48.0"
+      "strict_min_version": "48.0",
+      "update_url": "https://danny0838.github.io/webscrapbook/files/updates.json"
     }
   },
 
