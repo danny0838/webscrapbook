@@ -41,7 +41,10 @@ capturer.captureDocumentOrFile = function (doc, settings, options, callback) {
       capturer.invoke("captureFile", {
         url: doc.URL,
         settings: settings,
-        options: options
+        options: options,
+        data: {
+          title: doc.title
+        }
       }, callback);
       return true; // async response
     }
@@ -1068,6 +1071,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
         mime: mime,
         charset: "UTF-8",
         content: content,
+        title: doc.title
       }
     }, callback);
   };

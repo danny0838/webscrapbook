@@ -220,6 +220,7 @@ capturer.captureUrl = function (params, callback) {
  *     - {Object} params.settings
  *     - {Object} params.options
  *     - {string} params.url
+ *     - {{title: string}} params.data
  */
 capturer.captureFile = function (params, callback) {
   isDebug && console.debug("call: captureFile", params);
@@ -228,6 +229,7 @@ capturer.captureFile = function (params, callback) {
   var sourceUrl = params.url;
   var settings = params.settings;
   var options = params.options;
+  var data = params.data;
 
   capturer.downloadFile({
     url: sourceUrl,
@@ -244,6 +246,7 @@ capturer.captureFile = function (params, callback) {
         settings: settings,
         options: options,
         data: {
+          title: data.title,
           mime: "text/html",
           content: html
         }
@@ -290,7 +293,7 @@ capturer.registerDocument = function (params, callback) {
  *     - {Object} params.options
  *     - {string} params.sourceUrl
  *     - {string} params.documentName
- *     - {{mime: string, charset: string, content: string}} params.data
+ *     - {{mime: string, charset: string, content: string, title: string}} params.data
  */
 capturer.saveDocument = function (params, callback) {
   isDebug && console.debug("call: saveDocument", params);
@@ -310,20 +313,24 @@ capturer.saveDocument = function (params, callback) {
     return true; // async response
   }
 
-  var targetDir = options["capture.dataFolder"] + "/" + timeId;
   var autoErase = !settings.frameIsMain;
-  var filename = documentName + "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-  filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-  filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
 
   if (options["capture.saveAs"] === "singleHtml") {
+    var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+    filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+    var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+    if (!filename.endsWith(ext)) filename += ext;
     var downloadParams = {
       url: URL.createObjectURL(new Blob([data.content], {type: data.mime})),
       filename: filename,
       saveAs: true,
-      conflictAction: "uniquify"
+      conflictAction: "overwrite"
     };
   } else {
+    var targetDir = options["capture.dataFolder"] + "/" + timeId;
+    var filename = documentName + "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+    filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+    filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
     var downloadParams = {
       url: URL.createObjectURL(new Blob([data.content], {type: data.mime})),
       filename: targetDir + "/" + filename,
