@@ -301,25 +301,35 @@ capturer.saveDocument = function (params, callback) {
   var documentName = params.documentName;
   var data = params.data;
   var timeId = settings.timeId;
+
+  // save as data URI?
+  // the main frame should still be downloaded
+  if (options["capture.saveAs"] === "singleHtml" && !settings.frameIsMain) {
+    let dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
+    callback({timeId: timeId, sourceUrl: sourceUrl, url: dataUri});
+    return true; // async response
+  }
+
   var targetDir = options["capture.dataFolder"] + "/" + timeId;
   var autoErase = !settings.frameIsMain;
   var filename = documentName + "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
   filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
   filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
 
-  // save as data URI?
-  // the main frame should still be downloaded
-  if (options["capture.saveFileAsDataUri"] && !settings.frameIsMain) {
-    let dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
-    callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, url: dataUri});
-    return true; // async response
+  if (options["capture.saveAs"] === "singleHtml") {
+    var downloadParams = {
+      url: URL.createObjectURL(new Blob([data.content], {type: data.mime})),
+      filename: filename,
+      saveAs: true,
+      conflictAction: "uniquify"
+    };
+  } else {
+    var downloadParams = {
+      url: URL.createObjectURL(new Blob([data.content], {type: data.mime})),
+      filename: targetDir + "/" + filename,
+      conflictAction: "uniquify"
+    };
   }
-
-  var downloadParams = {
-    url: URL.createObjectURL(new Blob([data.content], {type: data.mime})),
-    filename: targetDir + "/" + filename,
-    conflictAction: "uniquify",
-  };
 
   isDebug && console.debug("download start", downloadParams);
   chrome.downloads.download(downloadParams, (downloadId) => {
@@ -413,7 +423,7 @@ capturer.downloadFile = function (params, callback) {
       }
 
       filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-      if (!options["capture.saveFileAsDataUri"]) {
+      if (options["capture.saveAs"] !== "singleHtml") {
         ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
         if (isDuplicate) {
           callback({filename: filename, url: scrapbook.escapeFilename(filename), isDuplicate: true});
@@ -498,7 +508,7 @@ capturer.downloadDataUri = function (params, callback) {
   var filename;
   var isDuplicate;
 
-  if (options["capture.saveDataUriAsFile"] && !options["capture.saveFileAsDataUri"]) {
+  if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
     let file = scrapbook.dataUriToFile(sourceUrl);
     if (file) {
       filename = file.name;
@@ -568,7 +578,7 @@ capturer.saveBlob = function (params, callback) {
   }
 
   // save blob as data URI?
-  if (options["capture.saveFileAsDataUri"]) {
+  if (options["capture.saveAs"] === "singleHtml") {
     let reader = new FileReader();
     reader.onloadend = function(event) {
       let dataUri = event.target.result;

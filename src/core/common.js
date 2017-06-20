@@ -16,9 +16,9 @@ var isDebug = false;
 
 scrapbook.options = {
   "capture.dataFolder": "ScrapBook",
+  "capture.saveAs": ["downloads", "singleHtml", 0],
   "capture.saveSelectionOnly": true,
   "capture.saveAsciiFilename": false,
-  "capture.saveFileAsDataUri": false,
   "capture.saveInlineAsHtml": false,
   "capture.saveDataUriAsFile": false,
   "capture.favicon": ["save", "link", "blank", "remove", 0],
