@@ -347,6 +347,60 @@ capturer.saveDocument = function (params, callback) {
       break;
     }
 
+    case "zip": {
+      var filename = documentName + "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+      filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
+          
+      if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
+      var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+
+      zip.file(filename, new Blob([data.content], {type: data.mime}), {
+        compression: "DEFLATE",
+        compressionOptions: {level: 9}
+      });
+
+      if (!settings.frameIsMain) {
+        callback({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename)});
+      } else {
+        // generate and download the zip file
+        zip.generateAsync({type: "blob"}).then((zipBlob) => {
+          var targetDir = options["capture.dataFolder"];
+          var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+          filename += ".zip";
+          
+          var downloadParams = {
+            url: URL.createObjectURL(zipBlob),
+            filename: targetDir + "/" + filename,
+            conflictAction: "uniquify"
+          };
+
+          isDebug && console.debug("download start", downloadParams);
+          chrome.downloads.download(downloadParams, (downloadId) => {
+            isDebug && console.debug("download response", downloadId);
+            if (downloadId) {
+              capturer.downloadInfo[downloadId] = {
+                timeId: timeId,
+                src: sourceUrl,
+                autoErase: false,
+                onComplete: () => {
+                  callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
+                },
+                onError: (err) => {
+                  callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
+                }
+              };
+            } else {
+              let err = chrome.runtime.lastError.message;
+              callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
+            }
+          });
+        });
+      }
+      break;
+    }
+
     case "downloads":
     default: {
       var autoErase = !settings.frameIsMain;
@@ -620,6 +674,25 @@ capturer.saveBlob = function (params, callback) {
         callback({url: dataUri});
       }
       reader.readAsDataURL(blob);
+      break;
+    }
+
+    case "zip": {
+      if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
+      var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+
+      if (blob.type.startsWith("text/") && blob.size >= 128) {
+        zip.file(filename, blob, {
+          compression: "DEFLATE",
+          compressionOptions: {level: 9}
+        });
+      } else {
+        zip.file(filename, blob, {
+          compression: "STORE"
+        });
+      }
+
+      callback({filename: filename, url: scrapbook.escapeFilename(filename)});
       break;
     }
 

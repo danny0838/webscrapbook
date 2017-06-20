@@ -25,6 +25,7 @@
       "core/common.js",
       "lib/jsSHA.js",
       "lib/mime.js",
+      "lib/jszip.js",
       "core/optionsAuto.js",
       "capturer/common.js",
       "capturer/background.js"
