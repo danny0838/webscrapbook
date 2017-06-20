@@ -588,7 +588,6 @@ capturer.saveBlob = function (params, callback) {
         src: sourceUrl,
         autoErase: true,
         onComplete: () => {
-          // @TODO: do we need to escape the URL to be safe to included in CSS or so?
           callback({url: scrapbook.escapeFilename(filename)});
         },
         onError: (err) => {
