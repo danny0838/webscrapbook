@@ -589,6 +589,9 @@ capturer.saveBlob = function (params, callback) {
     let reader = new FileReader();
     reader.onloadend = function(event) {
       let dataUri = event.target.result;
+      if (filename) {
+        dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");
+      }
       callback({url: dataUri});
     }
     reader.readAsDataURL(blob);
