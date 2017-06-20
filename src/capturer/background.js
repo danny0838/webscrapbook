@@ -239,7 +239,7 @@ capturer.captureFile = function (params, callback) {
       // for the main frame, create a index.html that redirects to the file
       let html = '<html' + meta + '><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;URL=' + scrapbook.escapeHtml(response.url) + '"></head><body></body></html>';
       capturer.saveDocument({
-        frameUrl: sourceUrl,
+        sourceUrl: sourceUrl,
         settings: settings,
         options: options,
         data: {
@@ -251,7 +251,7 @@ capturer.captureFile = function (params, callback) {
     } else {
       callback({
         timeId: timeId,
-        frameUrl: sourceUrl,
+        sourceUrl: sourceUrl,
         targetDir: response.targetDir, 
         filename: response.filename,
         url: response.url
@@ -288,7 +288,7 @@ capturer.registerDocument = function (params, callback) {
  * @param {Object} params 
  *     - {Object} params.settings
  *     - {Object} params.options
- *     - {string} params.frameUrl
+ *     - {string} params.sourceUrl
  *     - {{documentName: string, mime: string, charset: string, content: string}} params.data
  */
 capturer.saveDocument = function (params, callback) {
@@ -297,7 +297,7 @@ capturer.saveDocument = function (params, callback) {
   var settings = params.settings;
   var options = params.options;
   var timeId = settings.timeId;
-  var frameUrl = params.frameUrl;
+  var sourceUrl = params.sourceUrl;
   var targetDir = options["capture.dataFolder"] + "/" + timeId;
   var autoErase = !settings.frameIsMain;
   var filename = params.data.documentName + "." + ((params.data.mime === "application/xhtml+xml") ? "xhtml" : "html");
@@ -308,7 +308,7 @@ capturer.saveDocument = function (params, callback) {
   // the main frame should still be downloaded
   if (options["capture.saveFileAsDataUri"] && !settings.frameIsMain) {
     let dataUri = scrapbook.stringToDataUri(params.data.content, params.data.mime, params.data.charset);
-    callback({timeId: timeId, frameUrl: frameUrl, targetDir: targetDir, url: dataUri});
+    callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, url: dataUri});
     return true; // async response
   }
 
@@ -324,18 +324,18 @@ capturer.saveDocument = function (params, callback) {
     if (downloadId) {
       capturer.downloadInfo[downloadId] = {
         timeId: timeId,
-        src: frameUrl,
+        src: sourceUrl,
         autoErase: autoErase,
         onComplete: () => {
-          callback({timeId: timeId, frameUrl: frameUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
+          callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
         },
         onError: (err) => {
-          callback({url: capturer.getErrorUrl(frameUrl, options), error: err});
+          callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
         }
       };
     } else {
       let err = chrome.runtime.lastError.message;
-      callback({url: capturer.getErrorUrl(frameUrl, options), error: err});
+      callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
     }
   });
   return true; // async response

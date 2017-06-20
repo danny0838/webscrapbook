@@ -1060,7 +1060,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
     // save document
     var content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
     capturer.invoke("saveDocument", {
-      frameUrl: doc.URL,
+      sourceUrl: doc.URL,
       settings: settings,
       options: options,
       data: {
