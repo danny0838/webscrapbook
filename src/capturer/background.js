@@ -368,7 +368,7 @@ capturer.saveDocument = function (params, callback) {
           var targetDir = options["capture.dataFolder"];
           var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          filename += ".zip";
+          filename += ".htz";
           
           var downloadParams = {
             url: URL.createObjectURL(zipBlob),
