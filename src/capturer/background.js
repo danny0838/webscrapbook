@@ -681,7 +681,7 @@ capturer.saveBlob = function (params, callback) {
       if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
       var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
 
-      if (blob.type.startsWith("text/") && blob.size >= 128) {
+      if (/^text\/|\b(?:xml|json|javascript)\b/.test(blob.type) && blob.size >= 128) {
         zip.file(filename, blob, {
           compression: "DEFLATE",
           compressionOptions: {level: 9}
