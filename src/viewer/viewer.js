@@ -170,7 +170,8 @@ document.addEventListener("DOMContentLoaded", function () {
       var srcUrl = new URL(src);
       var urlSearch = srcUrl.search;
       var urlHash = mainUrl.hash;
-      srcUrl.searchParams.set("noredirect", 1);
+      // use a random hash to avoid recursive redirect
+      srcUrl.searchParams.set("ipimkkaicmlacnnmkmejigldfflpcmhl", 1);
       var src = srcUrl.toString();
 
       var xhr = new XMLHttpRequest();
