@@ -1,3 +1,10 @@
+/**
+ * A JavaScript implementation for mimetype and file extension conversion
+ *
+ * Copyright Danny Lin 2017
+ * Distributed under the MIT License
+ * https://opensource.org/licenses/MIT
+ */
 function Mime() {}
 
 /**
