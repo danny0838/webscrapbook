@@ -58,6 +58,9 @@
   "OpenOptions": {
     "message": "Options"
   },
+  "OpenViewer": {
+    "message": "View archived page"
+  },
   "OptionPageTitle": {
     "message": "Options"
   },
@@ -66,5 +69,11 @@
   },
   "OptionsResetLabel": {
     "message": "Reset"
+  },
+  "ViewerTitle": {
+    "message": "View archived page"
+  },
+  "ViewerFileSelectorText": {
+    "message": "Click here or drop an HTML archive file here to open it..."
   }
 }
