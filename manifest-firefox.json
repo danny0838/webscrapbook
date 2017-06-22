@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "__MSG_ExtensionName__",
   "description": "__MSG_ExtensionDescription__",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Danny Lin",
   "default_locale": "en",
 
@@ -22,11 +22,13 @@
     "downloads",
     "tabs",
     "storage",
+    "webRequest",
+    "webRequestBlocking",
     "<all_urls>"
   ],
 
   "background": {
-    "persistent": false,
+    "persistent": true,
     "scripts": [
       "core/common.js",
       "lib/jsSHA.js",
@@ -34,7 +36,8 @@
       "lib/jszip.js",
       "core/optionsAuto.js",
       "capturer/common.js",
-      "capturer/background.js"
+      "capturer/background.js",
+      "viewer/background.js"
     ]
   },
 

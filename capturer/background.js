@@ -368,7 +368,7 @@ capturer.saveDocument = function (params, callback) {
           var targetDir = options["capture.dataFolder"];
           var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          filename += ".zip";
+          filename += ".htz";
           
           var downloadParams = {
             url: URL.createObjectURL(zipBlob),
@@ -681,7 +681,7 @@ capturer.saveBlob = function (params, callback) {
       if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
       var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
 
-      if (blob.type.startsWith("text/") && blob.size >= 128) {
+      if (/^text\/|\b(?:xml|json|javascript)\b/.test(blob.type) && blob.size >= 128) {
         zip.file(filename, blob, {
           compression: "DEFLATE",
           compressionOptions: {level: 9}
@@ -753,28 +753,32 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-chrome.downloads.onChanged.addListener((downloadDelta) => {
+chrome.downloads.onChanged.addListener(function (downloadDelta) {
   isDebug && console.debug("downloads.onChanged", downloadDelta);
 
   var downloadId = downloadDelta.id;
+  if (!capturer.downloadInfo[downloadId]) { return; }
 
-  var erase = function (downloadId) {
-    if (capturer.downloadInfo[downloadId].autoErase) {
-      chrome.downloads.erase({id: downloadId}, (erasedIds) => {});
-    }
-    delete capturer.downloadInfo[downloadId];
-  };
+  var that = arguments.callee;
+  if (!that.erase) {
+    that.erase = function (downloadId) {
+      if (capturer.downloadInfo[downloadId].autoErase) {
+        chrome.downloads.erase({id: downloadId}, (erasedIds) => {});
+      }
+      delete capturer.downloadInfo[downloadId];
+    };
+  }
 
   if (downloadDelta.state && downloadDelta.state.current === "complete") {
     // erase the download history of additional downloads (those recorded in capturer.downloadEraseIds)
     capturer.downloadInfo[downloadId].onComplete();
-    erase(downloadId);
+    that.erase(downloadId);
   } else if (downloadDelta.error) {
     chrome.downloads.search({id: downloadId}, (results) => {
       let err = results[0].error;
       console.warn(scrapbook.lang("ErrorFileDownloadError", [capturer.downloadInfo[downloadId].src, err]));
       capturer.downloadInfo[downloadId].onError(err);
-      erase(downloadId);
+      that.erase(downloadId);
     });
   }
 });

@@ -34,4 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     window.close();
   });
+
+  document.getElementById("openViewer").addEventListener('click', () => {
+    chrome.tabs.create({url: chrome.runtime.getURL("viewer/viewer.html"), active: true}, () => {
+    });
+    window.close();
+  });
 });
