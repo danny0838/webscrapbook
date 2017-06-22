@@ -15,7 +15,7 @@ var isDebug = false;
  *******************************************************************/
 
 scrapbook.options = {
-  "capture.dataFolder": "ScrapBook",
+  "capture.dataFolder": "WebScrapBook",
   "capture.saveAs": ["downloads", "zip", "singleHtml", 1],
   "capture.saveSelectionOnly": true,
   "capture.saveAsciiFilename": false,
