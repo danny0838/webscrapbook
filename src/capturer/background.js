@@ -757,6 +757,7 @@ chrome.downloads.onChanged.addListener((downloadDelta) => {
   isDebug && console.debug("downloads.onChanged", downloadDelta);
 
   var downloadId = downloadDelta.id;
+  if (!capturer.downloadInfo[downloadId]) { return; }
 
   var erase = function (downloadId) {
     if (capturer.downloadInfo[downloadId].autoErase) {
