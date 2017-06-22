@@ -60,7 +60,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
         let input = document.createElement("input");
         input.id = OPTION_PREFIX + id;
         input.setAttribute("type", "checkbox");
-        input.setAttribute("checked", value ? "true" : "false");
+        value && input.setAttribute("checked", "checked");
         p.appendChild(input);
         break;
       }
