@@ -10,7 +10,7 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
   var url = new URL(details.url);
   if (!/\.htz/i.test(url.pathname) || url.searchParams.has("noredirect")) { return; }
 
-  var newUrl = chrome.runtime.getURL("viewer/viewer.html" + "?src=" + encodeURIComponent(url.href));
+  var newUrl = chrome.runtime.getURL("viewer/viewer.html" + "?src=" + encodeURIComponent(url.href) + url.hash);
   // return {redirectUrl: newUrl}; // this doesn't work
   chrome.tabs.update(details.tabId, {url: newUrl}, () => {});
   return {cancel: true};

@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var onZipExtracted = function (indexFileEntry) {
     var url = indexFileEntry.toURL();
-    viewer.src = url;
+    viewer.src = url + urlSearch + urlHash;
     wrapper.style.display = 'block';
     fileSelector.style.display = 'none';
   };
@@ -126,6 +126,8 @@ document.addEventListener("DOMContentLoaded", function () {
   var fileSelectorInput = document.getElementById('file-selector-input');
   var wrapper = document.getElementById('wrapper');
   var viewer = document.getElementById('viewer');
+  var urlSearch = "";
+  var urlHash = "";
 
   fileSelectorDrop.addEventListener("dragover", (e) => {
     e.preventDefault();
@@ -161,11 +163,13 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // if a source htz is specified, load it
-  var url = new URL(document.URL);
-  var src = url.searchParams.get("src");
+  var mainUrl = new URL(document.URL);
+  var src = mainUrl.searchParams.get("src");
   if (src) {
     try {
       var srcUrl = new URL(src);
+      var urlSearch = srcUrl.search;
+      var urlHash = mainUrl.hash;
       srcUrl.searchParams.set("noredirect", 1);
       var src = srcUrl.toString();
 
