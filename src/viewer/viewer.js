@@ -194,14 +194,22 @@ document.addEventListener("DOMContentLoaded", function () {
       // use a random hash to avoid recursive redirect
       srcUrl.searchParams.set("ipimkkaicmlacnnmkmejigldfflpcmhl", 1);
       var src = srcUrl.toString();
+      var filename = scrapbook.urlToFilename(src);
 
       var xhr = new XMLHttpRequest();
 
       xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
+        if (xhr.readyState === 2) {
+          // if header Content-Disposition is defined, use it
+          try {
+            let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+            let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            filename = contentDisposition.parameters.filename || filename;
+          } catch (ex) {}
+        } else if (xhr.readyState === 4) {
           if (xhr.status == 200 || xhr.status == 0) {
-            var blob = xhr.response;
-            extractZipFile(blob, onZipExtracted);
+            var file = new File([xhr.response], filename);
+            extractZipFile(file, onZipExtracted);
           }
         }
       };
