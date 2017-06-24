@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
   window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, function (fs) {
     myFileSystem = fs;
+    init();
   });
 
   /**
@@ -174,51 +175,54 @@ document.addEventListener("DOMContentLoaded", function () {
     document.title = viewer.contentDocument.title;
   });
 
-  // if a source htz is specified, load it
-  var mainUrl = new URL(document.URL);
+  var init = function () {
+    // if a source htz is specified, load it
+    var mainUrl = new URL(document.URL);
 
-  var href = mainUrl.searchParams.get("href");
-  if (href) {
-    var url = new URL(href);
-    url.hash = mainUrl.hash;
-    loadUrl(url.href);
-    return;
-  }
-
-  var src = mainUrl.searchParams.get("src");
-  if (src) {
-    try {
-      var srcUrl = new URL(src);
-      var urlSearch = srcUrl.search;
-      var urlHash = mainUrl.hash;
-      // use a random hash to avoid recursive redirect
-      srcUrl.searchParams.set("ipimkkaicmlacnnmkmejigldfflpcmhl", 1);
-      var src = srcUrl.toString();
-      var filename = scrapbook.urlToFilename(src);
-
-      var xhr = new XMLHttpRequest();
-
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 2) {
-          // if header Content-Disposition is defined, use it
-          try {
-            let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-            let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-            filename = contentDisposition.parameters.filename || filename;
-          } catch (ex) {}
-        } else if (xhr.readyState === 4) {
-          if (xhr.status == 200 || xhr.status == 0) {
-            var file = new File([xhr.response], filename);
-            extractZipFile(file, onZipExtracted);
-          }
-        }
-      };
-
-      xhr.responseType = "blob";
-      xhr.open("GET", src, true);
-      xhr.send();
-    } catch (ex) {
-      alert("Unable to load the specified zip file '" + src + "': " + ex);
+    var href = mainUrl.searchParams.get("href");
+    if (href) {
+      var url = new URL(href);
+      url.hash = mainUrl.hash;
+      loadUrl(url.href);
+      return;
     }
-  }
+
+    var src = mainUrl.searchParams.get("src");
+    if (src) {
+      try {
+        var srcUrl = new URL(src);
+        var urlSearch = srcUrl.search;
+        var urlHash = mainUrl.hash;
+        // use a random hash to avoid recursive redirect
+        srcUrl.searchParams.set("ipimkkaicmlacnnmkmejigldfflpcmhl", 1);
+        var src = srcUrl.toString();
+        var filename = scrapbook.urlToFilename(src);
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 2) {
+            // if header Content-Disposition is defined, use it
+            try {
+              let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+              let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+              filename = contentDisposition.parameters.filename || filename;
+            } catch (ex) {}
+          } else if (xhr.readyState === 4) {
+            if (xhr.status == 200 || xhr.status == 0) {
+              var file = new File([xhr.response], filename);
+              extractZipFile(file, onZipExtracted);
+            }
+          }
+        };
+
+        xhr.responseType = "blob";
+        xhr.open("GET", src, true);
+        xhr.send();
+      } catch (ex) {
+        alert("Unable to load the specified zip file '" + src + "': " + ex);
+      }
+    }
+  };
+
 });
