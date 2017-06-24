@@ -167,13 +167,13 @@ capturer.captureUrl = function (params, callback) {
     if (xhr.readyState === 2) {
       // if header Content-Disposition is defined, use it
       try {
-        var headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-        var contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+        let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+        let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
         filename = contentDisposition.parameters.filename || filename;
       } catch (ex) {}
     } else if (xhr.readyState === 4) {
       if (xhr.status == 200 || xhr.status == 0) {
-        var doc = xhr.response;
+        let doc = xhr.response;
         if (doc) {
           capturer.captureDocumentOrFile(doc, settings, options, callback);
         } else {
