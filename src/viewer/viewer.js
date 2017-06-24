@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var urlObj = new URL(url);
     docUrl.hash = urlObj.hash;
     urlObj.hash = "";
-    docUrl.search = "?href=" + encodeURIComponent(urlObj.href);
+    docUrl.search = "?href=" + encodeURIComponent(urlObj.pathname.slice(1) + urlObj.search);
     history.pushState({}, null, docUrl.href);
 
     loadUrl(url);
@@ -181,9 +181,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var href = mainUrl.searchParams.get("href");
     if (href) {
-      var url = new URL(href);
-      url.hash = mainUrl.hash;
-      loadUrl(url.href);
+      var url = new URL(href, "file://");
+      myFileSystem.root.getFile(url.pathname, {}, (indexFileEntry) => {
+        var targetUrl = indexFileEntry.toURL() + url.search + mainUrl.hash;
+        loadUrl(targetUrl);
+      }, (ex) => {
+        alert("Unable to load file: '" + href + "': " + ex);
+      });
       return;
     }
 
