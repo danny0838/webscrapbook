@@ -149,11 +149,13 @@ document.addEventListener("DOMContentLoaded", function () {
             });
           }, (ex) => {
             directoryEntry.createReader().readEntries((entries) => {
-              entries.forEach((fileEntry) => {
-                if (fileEntry.name.startsWith("index.")) {
-                  callback(fileEntry);
+              for (let i = 0, I = entries.length; i < I; ++i) {
+                let entry = entries[i];
+                if (entry.isFile && entry.name.startsWith("index.")) {
+                  callback(entry);
+                  return;
                 }
-              });
+              }
             });
           });
         };
