@@ -112,8 +112,20 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   var onZipExtracted = function (indexFileEntry) {
-    var url = indexFileEntry.toURL();
-    viewer.src = url + urlSearch + urlHash;
+    var url = indexFileEntry.toURL() + urlSearch + urlHash;
+
+    var docUrl = new URL(document.URL);
+    var urlObj = new URL(url);
+    docUrl.hash = urlObj.hash;
+    urlObj.hash = "";
+    docUrl.search = "?href=" + encodeURIComponent(urlObj.href);
+    history.pushState({}, null, docUrl.href);
+
+    loadUrl(url);
+  };
+
+  var loadUrl = function (url) {
+    viewer.src = url;
     wrapper.style.display = 'block';
     fileSelector.style.display = 'none';
   };
@@ -164,6 +176,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // if a source htz is specified, load it
   var mainUrl = new URL(document.URL);
+
+  var href = mainUrl.searchParams.get("href");
+  if (href) {
+    var url = new URL(href);
+    url.hash = mainUrl.hash;
+    loadUrl(url.href);
+    return;
+  }
+
   var src = mainUrl.searchParams.get("src");
   if (src) {
     try {
