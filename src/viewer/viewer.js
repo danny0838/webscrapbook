@@ -82,15 +82,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var pendingZipEntry = 0;
     var ns = scrapbook.getUuid();
 
-    var onAllZipEntryProcessed = function () {
-      var indexFile = ns + "/" + "index.html";
-      myFileSystem.root.getFile(indexFile, {}, (fileEntry) => {
-        callback(fileEntry);
-      }, (ex) => {
-        alert("Unable to get file: '" + indexFile + "': " + ex);
-      });
-    };
-
     var zip = new JSZip();
     zip.loadAsync(file).then((zip) => {
       myFileSystem.root.getDirectory(ns, {create: true}, () => {
@@ -99,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
           zipObj.async("arraybuffer").then((ab) => {
             ++pendingZipEntry;
             createFile(myFileSystem.root, ns + "/" + relativePath, new Blob([ab], {type: "text/plain"}), () => {
-              if (--pendingZipEntry === 0) { onAllZipEntryProcessed(); }
+              if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(ns, callback); }
             });
           });
         });
@@ -108,6 +99,15 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }).catch((ex) => {
       alert("Unable to load the zip file: " + ex);
+    });
+  };
+
+  var onAllZipEntriesProcessed = function (ns, callback) {
+    var indexFile = ns + "/" + "index.html";
+    myFileSystem.root.getFile(indexFile, {}, (fileEntry) => {
+      callback(fileEntry);
+    }, (ex) => {
+      alert("Unable to get file: '" + indexFile + "': " + ex);
     });
   };
 
