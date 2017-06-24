@@ -401,6 +401,78 @@ capturer.saveDocument = function (params, callback) {
       break;
     }
 
+    case "maff": {
+      var filename = documentName + "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+      filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
+          
+      if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
+      var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+
+      zip.file(timeId + "/" + filename, new Blob([data.content], {type: data.mime}), {
+        compression: "DEFLATE",
+        compressionOptions: {level: 9}
+      });
+
+      var rdfContent = '<?xml version="1.0"?>\n' +
+          '<RDF:RDF xmlns:MAF="http://maf.mozdev.org/metadata/rdf#"\n' +
+          '         xmlns:NC="http://home.netscape.com/NC-rdf#"\n' +
+          '         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n' +
+          '  <RDF:Description RDF:about="urn:root">\n' +
+          '    <MAF:originalurl RDF:resource="' + scrapbook.escapeHtml(sourceUrl) + '"/>\n' +
+          '    <MAF:title RDF:resource="' + scrapbook.escapeHtml(data.title) + '"/>\n' +
+          '    <MAF:archivetime RDF:resource="' + scrapbook.escapeHtml(scrapbook.idToDate(timeId).toUTCString()) + '"/>\n' +
+          '    <MAF:indexfilename RDF:resource="index.html"/>\n' +
+          '    <MAF:charset RDF:resource="UTF-8"/>\n' +
+          '  </RDF:Description>\n' +
+          '</RDF:RDF>\n';
+
+      zip.file(timeId + "/" + "index.rdf", new Blob([rdfContent], {type: "application/rdf+xml"}), {
+        compression: "DEFLATE",
+        compressionOptions: {level: 9}
+      });
+
+      if (!settings.frameIsMain) {
+        callback({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename)});
+      } else {
+        // generate and download the zip file
+        zip.generateAsync({type: "blob"}).then((zipBlob) => {
+          var targetDir = options["capture.dataFolder"];
+          var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+          filename += ".maff";
+          
+          var downloadParams = {
+            url: URL.createObjectURL(zipBlob),
+            filename: targetDir + "/" + filename,
+            conflictAction: "uniquify"
+          };
+
+          isDebug && console.debug("download start", downloadParams);
+          chrome.downloads.download(downloadParams, (downloadId) => {
+            isDebug && console.debug("download response", downloadId);
+            if (downloadId) {
+              capturer.downloadInfo[downloadId] = {
+                timeId: timeId,
+                src: sourceUrl,
+                autoErase: false,
+                onComplete: () => {
+                  callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
+                },
+                onError: (err) => {
+                  callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
+                }
+              };
+            } else {
+              let err = chrome.runtime.lastError.message;
+              callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
+            }
+          });
+        });
+      }
+      break;
+    }
+
     case "downloads":
     default: {
       var autoErase = !settings.frameIsMain;
@@ -688,6 +760,25 @@ capturer.saveBlob = function (params, callback) {
         });
       } else {
         zip.file(filename, blob, {
+          compression: "STORE"
+        });
+      }
+
+      callback({filename: filename, url: scrapbook.escapeFilename(filename)});
+      break;
+    }
+
+    case "maff": {
+      if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
+      var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+
+      if (/^text\/|\b(?:xml|json|javascript)\b/.test(blob.type) && blob.size >= 128) {
+        zip.file(timeId + "/" + filename, blob, {
+          compression: "DEFLATE",
+          compressionOptions: {level: 9}
+        });
+      } else {
+        zip.file(timeId + "/" + filename, blob, {
           compression: "STORE"
         });
       }
