@@ -133,37 +133,61 @@ document.addEventListener("DOMContentLoaded", function () {
           return result;
         };
         
-        var processMaffDirectoryEntry = function (directoryEntry) {
-          directoryEntry.getFile("index.rdf", {}, (fileEntry) => {
-            fileEntry.file((file) => {
-              readRdfFile(file, (doc) => {
-                var meta = processRdfDocument(doc);
-                directoryEntry.getFile(meta.indexfilename, {}, (fileEntry) => {
-                  callback(fileEntry);
-                }, (ex) => {
-                  alert("Unable to get index file in the directory: '" + directoryEntry.fullPath + "': " + ex);
+        var processMaffDirectoryEntry = function (directoryEntry, callback) {
+          if (directoryEntry.isDirectory) {
+            directoryEntry.getFile("index.rdf", {}, (fileEntry) => {
+              fileEntry.file((file) => {
+                readRdfFile(file, (doc) => {
+                  var meta = processRdfDocument(doc);
+                  directoryEntry.getFile(meta.indexfilename, {}, (fileEntry) => {
+                    callback(fileEntry);
+                  }, (ex) => {
+                    alert("Unable to get index file '" + meta.indexfilename + "' in the directory: '" + directoryEntry.fullPath + "': " + ex);
+                    callback(null);
+                  });
                 });
+              }, (ex) => {
+                alert("Unable to read index.ref in the directory: '" + directoryEntry.fullPath + "'");
+                callback(null);
               });
             }, (ex) => {
-            alert("Unable to read index.ref in the directory: '" + directoryEntry.fullPath + "'");
-            });
-          }, (ex) => {
-            directoryEntry.createReader().readEntries((entries) => {
-              for (let i = 0, I = entries.length; i < I; ++i) {
-                let entry = entries[i];
-                if (entry.isFile && entry.name.startsWith("index.")) {
-                  callback(entry);
-                  return;
+              directoryEntry.createReader().readEntries((entries) => {
+                for (let i = 0, I = entries.length; i < I; ++i) {
+                  let entry = entries[i];
+                  if (entry.isFile && entry.name.startsWith("index.")) {
+                    callback(entry);
+                    return;
+                  }
                 }
-              }
+              }, (ex) => {
+                alert("Unable to read directory: '" + directoryEntry.fullPath + "'");
+                callback(null);
+              });
             });
+          } else {
+            callback(null);
+          }
+        };
+
+        var onAllDirectoryParsed = function (indexFileEntries) {
+          indexFileEntries.forEach((indexFileEntry) => {
+            indexFileEntry && callback(indexFileEntry);
           });
         };
         
         myFileSystem.root.getDirectory(ns, {}, (mainEntry) => {
           mainEntry.createReader().readEntries((entries) => {
+            let remainingDirectories = 0, indexFileEntries = [];
             entries.forEach((entry) => {
-              processMaffDirectoryEntry(entry);
+              remainingDirectories++;
+              let index = indexFileEntries.length;
+              indexFileEntries.length++;
+              processMaffDirectoryEntry(entry, (indexFileEntry) => {
+                indexFileEntries[index] = indexFileEntry;
+                if (--remainingDirectories === 0) {
+                  onAllDirectoryParsed(indexFileEntries);
+                }
+              });
             });
           }, (ex) => {
             alert("Unable to read directory: '" + ns + "'");
