@@ -169,7 +169,7 @@ capturer.captureUrl = function (params, callback) {
       try {
         var headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
         var contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-        filename = contentDisposition.parameters.filename;
+        filename = contentDisposition.parameters.filename || filename;
       } catch (ex) {}
     } else if (xhr.readyState === 4) {
       if (xhr.status == 200 || xhr.status == 0) {
