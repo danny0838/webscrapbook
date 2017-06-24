@@ -82,6 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var extractZipFile = function (file, callback) {
     var pendingZipEntry = 0;
     var ns = scrapbook.getUuid();
+    var type = scrapbook.filenameParts(file.name).extension.toLowerCase();
 
     var zip = new JSZip();
     zip.loadAsync(file).then((zip) => {
@@ -91,7 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
           zipObj.async("arraybuffer").then((ab) => {
             ++pendingZipEntry;
             createFile(myFileSystem.root, ns + "/" + relativePath, new Blob([ab], {type: "text/plain"}), () => {
-              if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(ns, callback); }
+              if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns, callback); }
             });
           });
         });
@@ -103,13 +104,84 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  var onAllZipEntriesProcessed = function (ns, callback) {
-    var indexFile = ns + "/" + "index.html";
-    myFileSystem.root.getFile(indexFile, {}, (fileEntry) => {
-      callback(fileEntry);
-    }, (ex) => {
-      alert("Unable to get file: '" + indexFile + "': " + ex);
-    });
+  var onAllZipEntriesProcessed = function (type, ns, callback) {
+    switch (type) {
+      case "maff": {
+        var readRdfFile = function (file, callback) {
+          var xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+              if (xhr.status == 200 || xhr.status == 0) {
+                callback(xhr.response);
+              }
+            }
+          };
+          xhr.responseType = "document";
+          xhr.open("GET", URL.createObjectURL(file), true);
+          xhr.send();
+        };
+
+        var processRdfDocument = function (doc) {
+          var RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+          var MAF = "http://maf.mozdev.org/metadata/rdf#";
+          var result = {};
+
+          var elems = doc.getElementsByTagNameNS(MAF, "indexfilename");
+          var elem = elems[0];
+          if (elem) { result.indexfilename = elem.getAttributeNS(RDF, "resource"); }
+
+          return result;
+        };
+        
+        var processMaffDirectoryEntry = function (directoryEntry) {
+          directoryEntry.getFile("index.rdf", {}, (fileEntry) => {
+            fileEntry.file((file) => {
+              readRdfFile(file, (doc) => {
+                var meta = processRdfDocument(doc);
+                directoryEntry.getFile(meta.indexfilename, {}, (fileEntry) => {
+                  callback(fileEntry);
+                }, (ex) => {
+                  alert("Unable to get index file in the directory: '" + directoryEntry.fullPath + "': " + ex);
+                });
+              });
+            }, (ex) => {
+            alert("Unable to read index.ref in the directory: '" + directoryEntry.fullPath + "'");
+            });
+          }, (ex) => {
+            directoryEntry.createReader().readEntries((entries) => {
+              entries.forEach((fileEntry) => {
+                if (fileEntry.name.startsWith("index.")) {
+                  callback(fileEntry);
+                }
+              });
+            });
+          });
+        };
+        
+        myFileSystem.root.getDirectory(ns, {}, (mainEntry) => {
+          mainEntry.createReader().readEntries((entries) => {
+            entries.forEach((entry) => {
+              processMaffDirectoryEntry(entry);
+            });
+          }, (ex) => {
+            alert("Unable to read directory: '" + ns + "'");
+          });
+        }, (ex) => {
+          alert("Unable to get directory: '" + ns + "'");
+        });
+        break;
+      }
+      case "htz":
+      default: {
+        var indexFile = ns + "/" + "index.html";
+        myFileSystem.root.getFile(indexFile, {}, (fileEntry) => {
+          callback(fileEntry);
+        }, (ex) => {
+          alert("Unable to get file: '" + indexFile + "': " + ex);
+        });
+        break;
+      }
+    }
   };
 
   var onZipExtracted = function (indexFileEntry) {
