@@ -782,8 +782,40 @@ capturer.saveBlob = function (params, onComplete, onError) {
     return;
   }
 
-  var downloadParams = {
+  capturer.saveUrl({
     url: URL.createObjectURL(blob),
+    directory: directory,
+    filename: filename,
+    sourceUrl: sourceUrl,
+    autoErase: autoErase
+  }, onComplete, onError);
+
+  return true; // async response
+};
+
+/**
+ * @param {Object} params 
+ *     - {string} params.timeId
+ *     - {string} params.url
+ *     - {string} params.directory
+ *     - {string} params.filename
+ *     - {string} params.sourceUrl
+ *     - {boolean} params.autoErase
+ * @param {function} onComplete - function () {}
+ * @param {function} onError - function (ex) {}
+ */
+capturer.saveUrl = function (params, onComplete, onError) {
+  isDebug && console.debug("call: saveUrl", params);
+
+  var timeId = params.timeId;
+  var url = params.url;
+  var directory = params.directory;
+  var filename = params.filename;
+  var sourceUrl = params.sourceUrl;
+  var autoErase = params.autoErase;
+
+  var downloadParams = {
+    url: url,
     filename: (directory ? directory + "/" : "") + filename,
     conflictAction: "uniquify"
   };
