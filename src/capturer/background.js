@@ -230,6 +230,7 @@ capturer.captureFile = function (params, callback) {
   var settings = params.settings;
   var options = params.options;
   var data = params.data;
+  var title = data && data.title;
 
   capturer.downloadFile({
     url: sourceUrl,
@@ -246,7 +247,7 @@ capturer.captureFile = function (params, callback) {
         settings: settings,
         options: options,
         data: {
-          title: data.title,
+          title: title,
           mime: "text/html",
           content: html
         }
