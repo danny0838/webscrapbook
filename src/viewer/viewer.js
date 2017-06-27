@@ -89,13 +89,14 @@ document.addEventListener("DOMContentLoaded", function () {
       myFileSystem.root.getDirectory(ns, {create: true}, () => {
         zip.forEach((relativePath, zipObj) => {
           if (zipObj.dir) { return; }
+          ++pendingZipEntry;
           zipObj.async("arraybuffer").then((ab) => {
-            ++pendingZipEntry;
             createFile(myFileSystem.root, ns + "/" + relativePath, new Blob([ab], {type: "text/plain"}), () => {
               if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns, callback); }
             });
           });
         });
+        if (pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns, callback); }
       }, (ex) => {
         alert("Unable to create directory: '" + ns + "': " + ex);
       });
@@ -134,61 +135,65 @@ document.addEventListener("DOMContentLoaded", function () {
         };
         
         var processMaffDirectoryEntry = function (directoryEntry, callback) {
-          if (directoryEntry.isDirectory) {
-            directoryEntry.getFile("index.rdf", {}, (fileEntry) => {
-              fileEntry.file((file) => {
-                readRdfFile(file, (doc) => {
-                  var meta = processRdfDocument(doc);
-                  directoryEntry.getFile(meta.indexfilename, {}, (fileEntry) => {
-                    callback(fileEntry);
-                  }, (ex) => {
-                    alert("Unable to get index file '" + meta.indexfilename + "' in the directory: '" + directoryEntry.fullPath + "': " + ex);
-                    callback(null);
-                  });
+          directoryEntry.getFile("index.rdf", {}, (fileEntry) => {
+            fileEntry.file((file) => {
+              readRdfFile(file, (doc) => {
+                var meta = processRdfDocument(doc);
+                directoryEntry.getFile(meta.indexfilename, {}, (fileEntry) => {
+                  callback(fileEntry);
+                }, (ex) => {
+                  alert("Unable to get index file '" + meta.indexfilename + "' in the directory: '" + directoryEntry.fullPath + "': " + ex);
+                  callback(null);
                 });
-              }, (ex) => {
-                alert("Unable to read index.ref in the directory: '" + directoryEntry.fullPath + "'");
-                callback(null);
               });
             }, (ex) => {
-              directoryEntry.createReader().readEntries((entries) => {
-                for (let i = 0, I = entries.length; i < I; ++i) {
-                  let entry = entries[i];
-                  if (entry.isFile && entry.name.startsWith("index.")) {
-                    callback(entry);
-                    return;
-                  }
-                }
-              }, (ex) => {
-                alert("Unable to read directory: '" + directoryEntry.fullPath + "'");
-                callback(null);
-              });
+              alert("Unable to read index.ref in the directory: '" + directoryEntry.fullPath + "'");
+              callback(null);
             });
-          } else {
-            callback(null);
-          }
+          }, (ex) => {
+            directoryEntry.createReader().readEntries((entries) => {
+              for (let i = 0, I = entries.length; i < I; ++i) {
+                let entry = entries[i];
+                if (entry.isFile && entry.name.startsWith("index.")) {
+                  callback(entry);
+                  return;
+                }
+              }
+              callback(null);
+            }, (ex) => {
+              alert("Unable to read directory: '" + directoryEntry.fullPath + "'");
+              callback(null);
+            });
+          });
         };
 
         var onAllDirectoryParsed = function (indexFileEntries) {
+          var validIndexes = 0;
           indexFileEntries.forEach((indexFileEntry) => {
-            indexFileEntry && callback(indexFileEntry);
+            if (indexFileEntry) {
+              validIndexes++;
+              callback(indexFileEntry);
+            }
           });
+          if (validIndexes === 0) {
+            alert("No available data can be loaded from this maff file.");
+          }
         };
         
         myFileSystem.root.getDirectory(ns, {}, (mainEntry) => {
           mainEntry.createReader().readEntries((entries) => {
             let remainingDirectories = 0, indexFileEntries = [];
             entries.forEach((entry) => {
+              if (!entry.isDirectory) { return; }
               remainingDirectories++;
               let index = indexFileEntries.length;
               indexFileEntries.length++;
               processMaffDirectoryEntry(entry, (indexFileEntry) => {
                 indexFileEntries[index] = indexFileEntry;
-                if (--remainingDirectories === 0) {
-                  onAllDirectoryParsed(indexFileEntries);
-                }
+                if (--remainingDirectories === 0) { onAllDirectoryParsed(indexFileEntries); }
               });
             });
+            if (remainingDirectories === 0) { onAllDirectoryParsed(indexFileEntries); }
           }, (ex) => {
             alert("Unable to read directory: '" + ns + "'");
           });
