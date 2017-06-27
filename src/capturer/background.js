@@ -792,20 +792,27 @@ capturer.saveBlob = function (params, onComplete, onError) {
     }, onComplete, onError);
   };
 
-  chrome.extension.isAllowedIncognitoAccess((isAllowedAccess) => {
-    if (isAllowedAccess) {
-      // If incognito access is allowed, there is an internal restriction
-      // causing blob URI not allowed for XMLHttpRequest, and we have to 
-      // use data URI instead
-      var reader = new FileReader();
-      reader.addEventListener("loadend", () => {
-        saveUrl(reader.result);
-      });
-      reader.readAsDataURL(blob);
-    } else {
-      saveUrl(URL.createObjectURL(blob));
-    }
-  });
+  var manifest = chrome.runtime.getManifest();
+  if (manifest.applications && manifest.applications.gecko) {
+    // Firefox WebExtension does not allow data URI for XMLHttpRequest,
+    // but always allows blob URI
+    saveUrl(URL.createObjectURL(blob));
+  } else {
+    chrome.extension.isAllowedIncognitoAccess((isAllowedAccess) => {
+      if (isAllowedAccess) {
+        // If incognito access is allowed, there is an internal restriction
+        // causing blob URI not allowed for XMLHttpRequest, and we have to 
+        // use data URI instead
+        var reader = new FileReader();
+        reader.addEventListener("loadend", () => {
+          saveUrl(reader.result);
+        });
+        reader.readAsDataURL(blob);
+      } else {
+        saveUrl(URL.createObjectURL(blob));
+      }
+    });
+  }
 
   return true; // async response
 };
