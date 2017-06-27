@@ -240,7 +240,7 @@ capturer.captureFile = function (params, callback) {
     if (settings.frameIsMain) {
       let meta = params.options["capture.recordDocumentMeta"] ? ' data-sb' + timeId + '-source="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
       // for the main frame, create a index.html that redirects to the file
-      let html = '<html' + meta + '><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;URL=' + scrapbook.escapeHtml(response.url) + '"></head><body></body></html>';
+      let html = '<html' + meta + '><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;URL=' + scrapbook.escapeHtml(response.url) + '">' + (title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>' : '') + '</head><body></body></html>';
       capturer.saveDocument({
         sourceUrl: sourceUrl,
         documentName: settings.documentName,
