@@ -1184,18 +1184,7 @@ capturer.getFrameContent = function (frameElement, timeId, settings, options, ca
 };
 
 capturer.resolveRelativeUrl = function (baseUrl, relativeUrl) {
-  if (!arguments.callee.rewriters) { arguments.callee.rewriters = {}; }
-  var rewriters = arguments.callee.rewriters;
-  if (!rewriters[baseUrl]) {
-    var subDoc = document.implementation.createHTMLDocument("");
-    var base = subDoc.createElement("base");
-    base.href = baseUrl;
-    subDoc.querySelector("head").appendChild(base);
-    var a = subDoc.createElement("a");
-    rewriters[baseUrl] = a;
-  }
-  rewriters[baseUrl].setAttribute("href", relativeUrl);
-  return rewriters[baseUrl].href;
+  return new URL(relativeUrl, baseUrl).href;
 };
 
 capturer.getErrorUrl = function (sourceUrl, options) {
