@@ -782,13 +782,30 @@ capturer.saveBlob = function (params, onComplete, onError) {
     return;
   }
 
-  capturer.saveUrl({
-    url: URL.createObjectURL(blob),
-    directory: directory,
-    filename: filename,
-    sourceUrl: sourceUrl,
-    autoErase: autoErase
-  }, onComplete, onError);
+  var saveUrl = function (url) {
+    capturer.saveUrl({
+      url: url,
+      directory: directory,
+      filename: filename,
+      sourceUrl: sourceUrl,
+      autoErase: autoErase
+    }, onComplete, onError);
+  };
+
+  chrome.extension.isAllowedIncognitoAccess((isAllowedAccess) => {
+    if (isAllowedAccess) {
+      // If incognito access is allowed, there is an internal restriction
+      // causing blob URI not allowed for XMLHttpRequest, and we have to 
+      // use data URI instead
+      var reader = new FileReader();
+      reader.addEventListener("loadend", () => {
+        saveUrl(reader.result);
+      });
+      reader.readAsDataURL(blob);
+    } else {
+      saveUrl(URL.createObjectURL(blob));
+    }
+  });
 
   return true; // async response
 };
