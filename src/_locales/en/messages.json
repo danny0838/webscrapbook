@@ -13,20 +13,17 @@
     "message": "Capture all tabs"
   },
   "ErrorCapture": {
-    "message": "Capture failed: $URL$",
+    "message": "Capture failed ($SOURCE$): $REASON$",
     "placeholders": {
-      "url": {"content" : "$1"}
+      "source": {"content" : "$1"},
+      "reason": {"content" : "$2"}
     }
+  },
+  "ErrorCaptureGeneral": {
+    "message": "See browser console for more detail."
   },
   "ErrorContentScriptNotReady": {
     "message": "The content script is not ready. Refresh this page, wait for all elements to be loaded, and try again."
-  },
-  "ErrorContentScriptNotReady2": {
-    "message": "The content script is not ready. Refresh this page, wait for all elements to be loaded, and try again. At '$URL$' (tab $TAB$)",
-    "placeholders": {
-      "url": {"content" : "$1"},
-      "tab": {"content" : "$2"}
-    }
   },
   "ErrorDocumentNotReady": {
     "message": "Page not load: $URL$",

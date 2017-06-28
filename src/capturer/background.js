@@ -90,14 +90,15 @@ capturer.captureTab = function (tab, quiet) {
   isDebug && console.debug(cmd + " (main) send", tabId, message);
   chrome.tabs.sendMessage(tabId, message, {frameId: 0}, (response) => {
     isDebug && console.debug(cmd + " (main) response", tabId, response);
+    var source = "[" + tab.id + "] " + tab.url;
     if (!response) {
       if (!quiet) {
-        alert(scrapbook.lang("ErrorCapture", [scrapbook.lang("ErrorContentScriptNotReady")]));
+        alert(scrapbook.lang("ErrorCapture", [source, scrapbook.lang("ErrorContentScriptNotReady")]));
       } else{
-        console.error(scrapbook.lang("ErrorCapture", [scrapbook.lang("ErrorContentScriptNotReady2", [tab.url, tab.id])]));
+        console.error(scrapbook.lang("ErrorCapture", [source, scrapbook.lang("ErrorContentScriptNotReady")]));
       }
     } else if (response.error) {
-      console.error(scrapbook.lang("ErrorCapture", ["tab " + tabId]));
+      console.error(scrapbook.lang("ErrorCapture", [source, scrapbook.lang("ErrorCaptureGeneral")]));
     }
     delete(capturer.captureInfo[timeId]);
   });
@@ -125,10 +126,11 @@ capturer.captureTabSource = function (tab) {
   isDebug && console.debug("(main) send", tabId, message);
   capturer.captureUrl(message, function (response) {
     isDebug && console.debug("(main) response", tabId, response);
+    var source = tab.url;
     if (!response) {
-      alert(scrapbook.lang("ErrorCapture", [scrapbook.lang("ErrorContentScriptNotReady")]));
+      alert(scrapbook.lang("ErrorCapture", [source, scrapbook.lang("ErrorContentScriptNotReady")]));
     } else if (response.error) {
-      console.error(scrapbook.lang("ErrorCapture", ["tab " + tabId]));
+      console.error(scrapbook.lang("ErrorCapture", [source, scrapbook.lang("ErrorCaptureGeneral")]));
     }
     delete(capturer.captureInfo[timeId]);
   });
