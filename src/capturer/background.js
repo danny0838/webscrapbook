@@ -793,8 +793,7 @@ capturer.saveBlob = function (params, onComplete, onError) {
     }, onComplete, onError);
   };
 
-  var manifest = chrome.runtime.getManifest();
-  if (manifest.applications && manifest.applications.gecko) {
+  if (scrapbook.runtime.isGecko) {
     // Firefox WebExtension does not allow data URI for XMLHttpRequest,
     // but always allows blob URI
     saveUrl(URL.createObjectURL(blob));
