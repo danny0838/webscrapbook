@@ -9,35 +9,30 @@ document.addEventListener('DOMContentLoaded', () => {
   scrapbook.loadLanguages(document);
 
   document.getElementById("captureTab").addEventListener('click', () => {
-    chrome.runtime.getBackgroundPage((win) => {
-      win.capturer.captureActiveTab();
-    });
+    var win = chrome.extension.getBackgroundPage();
+    win.capturer.captureActiveTab();
     window.close();
   });
 
   document.getElementById("captureTabSource").addEventListener('click', () => {
-    chrome.runtime.getBackgroundPage((win) => {
-      win.capturer.captureActiveTabSource();
-    });
+    var win = chrome.extension.getBackgroundPage();
+    win.capturer.captureActiveTabSource();
     window.close();
   });
 
   document.getElementById("captureAllTabs").addEventListener('click', () => {
-    chrome.runtime.getBackgroundPage((win) => {
-      win.capturer.captureAllTabs();
-    });
+    var win = chrome.extension.getBackgroundPage();
+    win.capturer.captureAllTabs();
     window.close();
   });
 
   document.getElementById("openOptions").addEventListener('click', () => {
-    chrome.tabs.create({url: chrome.runtime.getURL("core/options.html"), active: true}, () => {
-    });
+    chrome.tabs.create({url: chrome.runtime.getURL("core/options.html"), active: true}, () => {});
     window.close();
   });
 
   document.getElementById("openViewer").addEventListener('click', () => {
-    chrome.tabs.create({url: chrome.runtime.getURL("viewer/viewer.html"), active: true}, () => {
-    });
+    chrome.tabs.create({url: chrome.runtime.getURL("viewer/viewer.html"), active: true}, () => {});
     window.close();
   });
 });
