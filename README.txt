@@ -8,7 +8,7 @@ See also:
 Chrome web store:
 https://chrome.google.com/webstore/detail/web-scrapbook/oegnpmiddfljlloiklpkeelagaeejfai
 
-Firefox addon:
+Firefox addon (Firefox 50+):
 https://danny0838.github.io/webscrapbook/files/web_scrapbook.xpi
 
 Project repository:
