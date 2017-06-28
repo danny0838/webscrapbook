@@ -794,15 +794,15 @@ capturer.saveBlob = function (params, onComplete, onError) {
   };
 
   if (scrapbook.runtime.isGecko) {
-    // Firefox WebExtension does not allow data URI for XMLHttpRequest,
-    // but always allows blob URI
+    // XMLHttpRequest cannot access data URI in Firefox WebExtension,
+    // while blob URI is not restricted at all.
     saveUrl(URL.createObjectURL(blob));
   } else {
     chrome.extension.isAllowedIncognitoAccess((isAllowedAccess) => {
       if (isAllowedAccess) {
-        // If incognito access is allowed, there is an internal restriction
-        // causing blob URI not allowed for XMLHttpRequest, and we have to 
-        // use data URI instead
+        // XMLHttpRequest cannot access blob URI if incognito access is allowed.
+        // Use data URI instead. (This could cause a performance drop especially
+        // for very large blobs.)
         var reader = new FileReader();
         reader.addEventListener("loadend", () => {
           saveUrl(reader.result);
