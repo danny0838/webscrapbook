@@ -4,26 +4,7 @@
  *
  *******************************************************************/
 
-document.addEventListener("DOMContentLoaded", function () {
-  // load languages
-  scrapbook.loadLanguages(document);
-
-  /**
-   * check requestFileSystem
-   */
-  var myFileSystem = window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
-
-  if (!myFileSystem) {
-    alert("This module won't work because your browser does not support requestFileSystem API.");
-    return;
-  }
-
-  // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
-  window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, function (fs) {
-    myFileSystem = fs;
-    init();
-  });
-
+function init(myFileSystem) {
   /**
    * common helper functions
    */
@@ -278,58 +259,75 @@ document.addEventListener("DOMContentLoaded", function () {
     document.title = viewer.contentDocument.title;
   });
 
-  var init = function () {
-    // if a source htz is specified, load it
-    var mainUrl = new URL(document.URL);
+  // if a source htz is specified, load it
+  var mainUrl = new URL(document.URL);
 
-    var href = mainUrl.searchParams.get("href");
-    if (href) {
-      var url = new URL(href, "file://");
-      myFileSystem.root.getFile(url.pathname, {}, (indexFileEntry) => {
-        var targetUrl = indexFileEntry.toURL() + url.search + mainUrl.hash;
-        loadUrl(targetUrl);
-      }, (ex) => {
-        alert("Unable to load file: '" + href + "': " + ex);
-      });
-      return;
-    }
+  var href = mainUrl.searchParams.get("href");
+  if (href) {
+    var url = new URL(href, "file://");
+    myFileSystem.root.getFile(url.pathname, {}, (indexFileEntry) => {
+      var targetUrl = indexFileEntry.toURL() + url.search + mainUrl.hash;
+      loadUrl(targetUrl);
+    }, (ex) => {
+      alert("Unable to load file: '" + href + "': " + ex);
+    });
+    return;
+  }
 
-    var src = mainUrl.searchParams.get("src");
-    if (src) {
-      try {
-        var srcUrl = new URL(src);
-        var urlSearch = srcUrl.search;
-        var urlHash = mainUrl.hash;
-        // use a random hash to avoid recursive redirect
-        srcUrl.searchParams.set("ipimkkaicmlacnnmkmejigldfflpcmhl", 1);
-        var src = srcUrl.toString();
-        var filename = scrapbook.urlToFilename(src);
+  var src = mainUrl.searchParams.get("src");
+  if (src) {
+    try {
+      var srcUrl = new URL(src);
+      var urlSearch = srcUrl.search;
+      var urlHash = mainUrl.hash;
+      // use a random hash to avoid recursive redirect
+      srcUrl.searchParams.set("ipimkkaicmlacnnmkmejigldfflpcmhl", 1);
+      var src = srcUrl.toString();
+      var filename = scrapbook.urlToFilename(src);
 
-        var xhr = new XMLHttpRequest();
+      var xhr = new XMLHttpRequest();
 
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === 2) {
-            // if header Content-Disposition is defined, use it
-            try {
-              let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-              let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-              filename = contentDisposition.parameters.filename || filename;
-            } catch (ex) {}
-          } else if (xhr.readyState === 4) {
-            if (xhr.status == 200 || xhr.status == 0) {
-              var file = new File([xhr.response], filename);
-              extractZipFile(file, onZipExtracted);
-            }
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 2) {
+          // if header Content-Disposition is defined, use it
+          try {
+            let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+            let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            filename = contentDisposition.parameters.filename || filename;
+          } catch (ex) {}
+        } else if (xhr.readyState === 4) {
+          if (xhr.status == 200 || xhr.status == 0) {
+            var file = new File([xhr.response], filename);
+            extractZipFile(file, onZipExtracted);
           }
-        };
+        }
+      };
 
-        xhr.responseType = "blob";
-        xhr.open("GET", src, true);
-        xhr.send();
-      } catch (ex) {
-        alert("Unable to load the specified zip file '" + src + "': " + ex);
-      }
+      xhr.responseType = "blob";
+      xhr.open("GET", src, true);
+      xhr.send();
+    } catch (ex) {
+      alert("Unable to load the specified zip file '" + src + "': " + ex);
     }
-  };
+  }
+}
 
+document.addEventListener("DOMContentLoaded", function () {
+  // load languages
+  scrapbook.loadLanguages(document);
+
+  /**
+   * check requestFileSystem
+   */
+  var myFileSystem = window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+
+  if (!myFileSystem) {
+    alert("This module won't work because your browser does not support requestFileSystem API.");
+    return;
+  }
+
+  // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
+  window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, function (fs) {
+    init(fs);
+  });
 });
