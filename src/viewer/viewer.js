@@ -259,14 +259,14 @@ function init(myFileSystem) {
     document.title = viewer.contentDocument.title;
   });
 
-  // if a source htz is specified, load it
-  var mainUrl = new URL(document.URL);
+  // if source is specified, load it
+  let mainUrl = new URL(document.URL);
 
-  var href = mainUrl.searchParams.get("href");
+  let href = mainUrl.searchParams.get("href");
   if (href) {
-    var url = new URL(href, "file://");
+    let url = new URL(href, "file://");
     myFileSystem.root.getFile(url.pathname, {}, (indexFileEntry) => {
-      var targetUrl = indexFileEntry.toURL() + url.search + mainUrl.hash;
+      let targetUrl = indexFileEntry.toURL() + url.search + mainUrl.hash;
       loadUrl(targetUrl);
     }, (ex) => {
       alert("Unable to load file: '" + href + "': " + ex);
@@ -274,18 +274,18 @@ function init(myFileSystem) {
     return;
   }
 
-  var src = mainUrl.searchParams.get("src");
+  let src = mainUrl.searchParams.get("src");
   if (src) {
     try {
-      var srcUrl = new URL(src);
-      var urlSearch = srcUrl.search;
-      var urlHash = mainUrl.hash;
+      let srcUrl = new URL(src);
+      urlSearch = srcUrl.search;
+      urlHash = mainUrl.hash;
       // use a random hash to avoid recursive redirect
       srcUrl.searchParams.set("ipimkkaicmlacnnmkmejigldfflpcmhl", 1);
-      var src = srcUrl.toString();
-      var filename = scrapbook.urlToFilename(src);
+      src = srcUrl.toString();
+      let filename = scrapbook.urlToFilename(src);
 
-      var xhr = new XMLHttpRequest();
+      let xhr = new XMLHttpRequest();
 
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 2) {
@@ -297,7 +297,7 @@ function init(myFileSystem) {
           } catch (ex) {}
         } else if (xhr.readyState === 4) {
           if (xhr.status == 200 || xhr.status == 0) {
-            var file = new File([xhr.response], filename);
+            let file = new File([xhr.response], filename);
             extractZipFile(file, onZipExtracted);
           }
         }
@@ -309,6 +309,7 @@ function init(myFileSystem) {
     } catch (ex) {
       alert("Unable to load the specified zip file '" + src + "': " + ex);
     }
+    return;
   }
 }
 
@@ -319,9 +320,9 @@ document.addEventListener("DOMContentLoaded", function () {
   /**
    * check requestFileSystem
    */
-  var myFileSystem = window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+  window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 
-  if (!myFileSystem) {
+  if (!window.requestFileSystem) {
     alert("This module won't work because your browser does not support requestFileSystem API.");
     return;
   }
