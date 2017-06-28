@@ -14,8 +14,8 @@
 
   "permissions": [
     "downloads",
-    "tabs",
     "storage",
+    "tabs",
     "webRequest",
     "webRequestBlocking",
     "<all_urls>"
