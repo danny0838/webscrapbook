@@ -317,18 +317,20 @@ document.addEventListener("DOMContentLoaded", function () {
   // load languages
   scrapbook.loadLanguages(document);
 
-  /**
-   * check requestFileSystem
-   */
+  // request FileSystem
+  var errorHandler = function (ex) {
+    console.error(ex);
+    alert("This module won't work because your browser configuration does not support requestFileSystem API.");
+  };
+
   window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 
-  if (!window.requestFileSystem) {
-    alert("This module won't work because your browser does not support requestFileSystem API.");
-    return;
+  try {
+    // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
+    window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, (fs) => {
+      init(fs);
+    }, errorHandler);
+  } catch (ex) {
+    errorHandler(ex);
   }
-
-  // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
-  window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, function (fs) {
-    init(fs);
-  });
 });
