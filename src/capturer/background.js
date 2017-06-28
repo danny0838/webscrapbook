@@ -96,11 +96,8 @@ capturer.captureTab = function (tab, quiet) {
       } else{
         console.error(scrapbook.lang("ErrorCapture", [scrapbook.lang("ErrorContentScriptNotReady2", [tab.url, tab.id])]));
       }
-      return;
-    }
-    if (response.error) {
+    } else if (response.error) {
       console.error(scrapbook.lang("ErrorCapture", ["tab " + tabId]));
-      return;
     }
     delete(capturer.captureInfo[timeId]);
   });
@@ -130,11 +127,8 @@ capturer.captureTabSource = function (tab) {
     isDebug && console.debug("(main) response", tabId, response);
     if (!response) {
       alert(scrapbook.lang("ErrorCapture", [scrapbook.lang("ErrorContentScriptNotReady")]));
-      return;
-    }
-    if (response.error) {
+    } else if (response.error) {
       console.error(scrapbook.lang("ErrorCapture", ["tab " + tabId]));
-      return;
     }
     delete(capturer.captureInfo[timeId]);
   });
