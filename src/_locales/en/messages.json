@@ -23,7 +23,7 @@
     "message": "See browser console for more detail."
   },
   "ErrorContentScriptNotReady": {
-    "message": "The content script is not ready. Refresh this page, wait for all elements to be loaded, and try again."
+    "message": "The content script is not ready or cannot be loaded. Refresh this page, wait for all elements to be loaded, and try again."
   },
   "ErrorDocumentNotReady": {
     "message": "Page not load: $URL$",
