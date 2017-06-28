@@ -902,13 +902,21 @@ chrome.downloads.onChanged.addListener(function (downloadDelta) {
 
   if (downloadDelta.state && downloadDelta.state.current === "complete") {
     // erase the download history of additional downloads (those recorded in capturer.downloadEraseIds)
-    capturer.downloadInfo[downloadId].onComplete();
+    try {
+      capturer.downloadInfo[downloadId].onComplete();
+    } catch (ex) {
+      console.error(ex);
+    }
     that.erase(downloadId);
   } else if (downloadDelta.error) {
     chrome.downloads.search({id: downloadId}, (results) => {
       let err = results[0].error;
       console.warn(scrapbook.lang("ErrorFileDownloadError", [capturer.downloadInfo[downloadId].src, err]));
-      capturer.downloadInfo[downloadId].onError(err);
+      try {
+        capturer.downloadInfo[downloadId].onError(err);
+      } catch (ex) {
+        console.error(ex);
+      }
       that.erase(downloadId);
     });
   }
