@@ -325,6 +325,7 @@ function initWithFileSystem(myFileSystem) {
 function initWithoutFileSystem() {
   var extractedfiles = {};
   var virtualBase = chrome.runtime.getURL("viewer/!/");
+  var virtualRef = virtualBase;
 
   /**
    * common helper functions
@@ -370,16 +371,20 @@ function initWithoutFileSystem() {
 
   var loadFile = function (relativePath) {
     var file = extractedfiles[relativePath];
-    var reader = new FileReader();
-    reader.addEventListener("loadend", () => {
-      var content = reader.result;
-      var parser = new DOMParser();
-      var doc = parser.parseFromString(content, "text/html");
-      updateFrameContent(doc);
-      wrapper.style.display = 'block';
-      fileSelector.style.display = 'none';
-    });
-    reader.readAsText(file, "UTF-8");
+    if (["text/html", "application/xhtml+xml"].indexOf(file.type) !== -1) {
+      var reader = new FileReader();
+      reader.addEventListener("loadend", () => {
+        var content = reader.result;
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(content, "text/html");
+        updateFrameContent(doc);
+        wrapper.style.display = 'block';
+        fileSelector.style.display = 'none';
+      });
+      reader.readAsText(file, "UTF-8");
+    } else {
+      viewer.src = URL.createObjectURL(file);
+    }
   };
 
   var updateFrameContent = function (doc) {
@@ -399,6 +404,34 @@ function initWithoutFileSystem() {
       }
       return absoluteUrl.href;
     };
+
+    // check meta refresh
+    if (metaRefreshAvailable > 0) {
+      let metaRefreshTarget;
+      Array.prototype.forEach.call(doc.querySelectorAll("meta"), (elem) => {
+        if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content") &&
+            elem.getAttribute("http-equiv").toLowerCase() == "refresh" && 
+            elem.getAttribute("content").match(/^[^;]*;\s*url=(.*)$/i) ) {
+          metaRefreshTarget = new URL(RegExp.$1, virtualRef);
+        }
+      });
+      if (metaRefreshTarget) {
+        metaRefreshAvailable--;
+        if (metaRefreshTarget.href.startsWith(virtualBase)) {
+          var search = metaRefreshTarget.search;
+          var hash = metaRefreshTarget.hash;
+          metaRefreshTarget.search = "";
+          metaRefreshTarget.hash = "";
+          virtualRef = metaRefreshTarget.href;
+          var relativePath = metaRefreshTarget.href.slice(virtualBase.length);
+          relativePath = relativePath.split("/").map(x => decodeURIComponent(x)).join("/");
+          loadFile(relativePath);
+        } else {
+          viewer.src = metaRefreshTarget.href;
+        }
+        return;
+      }
+    }
     
     // modify base
     Array.prototype.forEach.call(doc.querySelectorAll("base"), (elem) => {
@@ -566,6 +599,7 @@ function initWithoutFileSystem() {
   var viewer = document.getElementById('viewer');
   var urlSearch = "";
   var urlHash = "";
+  var metaRefreshAvailable = 5;
 
   fileSelectorDrop.addEventListener("dragover", (e) => {
     e.preventDefault();
