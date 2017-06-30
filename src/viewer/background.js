@@ -4,6 +4,8 @@
  *
  *******************************************************************/
 
+// This event won't fire when visiting a file URL if
+// isAllowedFileSchemeAccess is set to false
 chrome.webRequest.onBeforeRequest.addListener(function (details) {
   if (details.frameId !== 0) { return; }
 
@@ -20,4 +22,4 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
   // return {redirectUrl: newUrl}; // this doesn't work
   chrome.tabs.update(details.tabId, {url: newUrl}, () => {});
   return {cancel: true};
-}, { urls: ["<all_urls>"] }, ["blocking"]);
+}, {urls: ["<all_urls>"]}, ["blocking"]);
