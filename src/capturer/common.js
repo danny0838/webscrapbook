@@ -1435,9 +1435,9 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
     var keys = Object.keys(this.urlHash), len = keys.length;
     if (len > 0) {
       keys.forEach((key) => {
-        let targetUrl = scrapbook.splitUrlByAnchor(this.urlHash[key].url)[0];
+        let targetUrl = this.urlHash[key].url;
         if (this.options["capture.saveAs"] === "singleHtml") {
-          if (this.settings.recurseChain.indexOf(targetUrl) >= 0) {
+          if (this.settings.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) >= 0) {
             let sourceUrl = this.settings.recurseChain[this.settings.recurseChain.length - 1];
             console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
             this.urlHash[key].newUrl = this.options["capture.recordErrorUri"] ? "urn:scrapbook:download:circular:" + targetUrl : "about:blank";
