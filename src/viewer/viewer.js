@@ -553,9 +553,7 @@ function initWithoutFileSystem() {
 
     // flush content
     var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
-    viewer.contentDocument.open();
-    viewer.contentDocument.write(content);
-    viewer.contentDocument.close();
+    viewer.src = URL.createObjectURL(new Blob([content], {type: "text/html"}));
   };
 
   /**
