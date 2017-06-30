@@ -193,17 +193,12 @@ scrapbook.splitUrlByAnchor = function (url) {
   return [name + search, hash];
 };
 
-/**
- * @return {Object} an array with filename and file extension.
- *   - {string} base
- *   - {string} extension - does not contain the leading "."
- */
 scrapbook.filenameParts = function (filename) {
   var pos = filename.lastIndexOf(".");
   if (pos != -1) {
-    return {base: filename.substring(0, pos), extension: filename.substring(pos + 1, filename.length)};
+    return [filename.substring(0, pos), filename.substring(pos + 1, filename.length)];
   }
-  return {base: filename, extension: ""};
+  return [filename, ""];
 };
 
 /**

@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var extractZipFile = function (file, callback) {
     var pendingZipEntry = 0;
     var ns = scrapbook.getUuid();
-    var type = scrapbook.filenameParts(file.name).extension.toLowerCase();
+    var type = scrapbook.filenameParts(file.name)[1].toLowerCase();
 
     var zip = new JSZip();
     zip.loadAsync(file).then((zip) => {

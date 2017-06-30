@@ -35,7 +35,7 @@ capturer.getUniqueFilename = function (timeId, filename, src) {
   };
 
   var newFilename = filename || "untitled";
-  var {base: newFilenameBase, extension: newFilenameExt} = scrapbook.filenameParts(newFilename);
+  var [newFilenameBase, newFilenameExt] = scrapbook.filenameParts(newFilename);
   newFilenameBase = scrapbook.crop(scrapbook.crop(newFilenameBase, 240, true), 128);
   newFilenameExt = newFilenameExt ? "." + newFilenameExt : "";
   tokenSrc = (typeof src === "string") ? scrapbook.splitUrlByAnchor(src)[0] : src;
@@ -516,7 +516,7 @@ capturer.downloadFile = function (params, callback) {
           headers.contentType = contentType.contentType;
           headers.charset = contentType.charset;
           if (headers.contentType) {
-            let {base, extension} = scrapbook.filenameParts(filename);
+            let [base, extension] = scrapbook.filenameParts(filename);
             if (!extension) {
               extension = Mime.prototype.extension(headers.contentType);
               filename = base + "." + (extension || "dat");
