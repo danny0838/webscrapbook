@@ -82,7 +82,8 @@ capturer.captureTab = function (tab, quiet) {
       timeId: timeId,
       frameIsMain: true,
       documentName: "index",
-      favIconUrl: tab.favIconUrl
+      favIconUrl: tab.favIconUrl,
+      recurseChain: []
     },
     options: scrapbook.getOptions("capture"),
   };
@@ -119,6 +120,7 @@ capturer.captureTabSource = function (tab) {
       timeId: timeId,
       frameIsMain: true,
       documentName: "index",
+      recurseChain: []
     },
     options: scrapbook.getOptions("capture")
   };

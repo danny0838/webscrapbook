@@ -72,5 +72,12 @@
   },
   "ViewerFileSelectorText": {
     "message": "點擊這裡或拖曳 HTML 封存檔案到這裡以開啟之..."
+  },
+  "WarnCaptureCyclicRefercing": {
+    "message": "資源 '$SOURCE$' 循環參照至 '$TARGET$'，由於目前的擷取設定不支援循環參照，參照目標將轉向至空值。",
+    "placeholders": {
+      "source": {"content" : "$1"},
+      "target": {"content" : "$2"}
+    }
   }
 }

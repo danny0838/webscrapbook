@@ -372,7 +372,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
               switch (options["capture.rewriteCss"]) {
                 case "url":
                   remainingTasks++;
-                  let downloader = new capturer.ComplexUrlDownloader(settings, options);
+                  let downloader = new capturer.ComplexUrlDownloader(settings, options, doc.URL);
                   let rewriteCss = capturer.ProcessCssFileText(elem.textContent, doc.URL, downloader, options);
                   downloader.startDownloads(() => {
                     elem.textContent = downloader.finalRewrite(rewriteCss);
@@ -980,7 +980,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
             switch (options["capture.rewriteCss"]) {
               case "url":
                 remainingTasks++;
-                let downloader = new capturer.ComplexUrlDownloader(settings, options);
+                let downloader = new capturer.ComplexUrlDownloader(settings, options, doc.URL);
                 let rewriteCss = capturer.ProcessCssFileText(elem.getAttribute("style"), doc.URL, downloader, options);
                 downloader.startDownloads(() => {
                   elem.setAttribute("style", downloader.finalRewrite(rewriteCss));
@@ -1242,7 +1242,7 @@ capturer.processCssFile = function (params, callback) {
   };
 
   var processCss = function (text) {
-    var downloader = new capturer.ComplexUrlDownloader(params.settings, params.options);
+    var downloader = new capturer.ComplexUrlDownloader(params.settings, params.options, refUrl);
     var rewriteCss = capturer.ProcessCssFileText(text, refUrl, downloader, params.options);
     downloader.startDownloads(() => {
       text = downloader.finalRewrite(rewriteCss);
@@ -1408,11 +1408,17 @@ capturer.ProcessCssFileText = function (cssText, refUrl, downloader, options) {
  * @class ComplexUrlDownloader
  *******************************************************************/
 capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
-  constructor(settings, options) {
+  constructor(settings, options, refUrl) {
     this.urlHash = {};
     this.urlRewrittenCount = 0;
     this.settings = settings;
     this.options = options;
+    if (refUrl) {
+      // if a refUrl is specified, record the recurse chain
+      // for future check of circular referencing
+      this.settings = JSON.parse(JSON.stringify(this.settings));
+      this.settings.recurseChain.push(scrapbook.splitUrlByAnchor(refUrl)[0]);
+    }
   }
 
   getUrlHash(url, rewriteMethod) {
@@ -1429,8 +1435,21 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
     var keys = Object.keys(this.urlHash), len = keys.length;
     if (len > 0) {
       keys.forEach((key) => {
+        let targetUrl = scrapbook.splitUrlByAnchor(this.urlHash[key].url)[0];
+        if (this.options["capture.saveAs"] === "singleHtml") {
+          if (this.settings.recurseChain.indexOf(targetUrl) >= 0) {
+            let sourceUrl = this.settings.recurseChain[this.settings.recurseChain.length - 1];
+            console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
+            this.urlHash[key].newUrl = this.options["capture.recordErrorUri"] ? "urn:scrapbook:download:circular:" + targetUrl : "about:blank";
+            if (++this.urlRewrittenCount === len) {
+              callback();
+            }
+            return;
+          }
+        }
+
         capturer.invoke("downloadFile", {
-          url: this.urlHash[key].url,
+          url: targetUrl,
           rewriteMethod: this.urlHash[key].rewriteMethod,
           settings: this.settings,
           options: this.options
