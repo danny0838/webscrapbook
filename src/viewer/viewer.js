@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
               });
             }, (ex) => {
-              alert("Unable to read index.ref in the directory: '" + directoryEntry.fullPath + "'");
+              alert("Unable to read index.rdf in the directory: '" + directoryEntry.fullPath + "'");
               callback(null);
             });
           }, (ex) => {
