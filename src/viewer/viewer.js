@@ -4,7 +4,7 @@
  *
  *******************************************************************/
 
-function init(myFileSystem) {
+function initWithFileSystem(myFileSystem) {
   /**
    * common helper functions
    */
@@ -322,14 +322,171 @@ function init(myFileSystem) {
   }
 }
 
+function initWithoutFileSystem() {
+  var extractedfiles = {};
+  var virtualBase = chrome.runtime.getURL("viewer/!/");
+
+  /**
+   * common helper functions
+   */
+  var extractZipFile = function (file, callback) {
+    var pendingZipEntry = 0;
+    var type = scrapbook.filenameParts(file.name)[1].toLowerCase();
+
+    var zip = new JSZip();
+    zip.loadAsync(file).then((zip) => {
+      zip.forEach((relativePath, zipObj) => {
+        if (zipObj.dir) { return; }
+        ++pendingZipEntry;
+        zipObj.async("arraybuffer").then((ab) => {
+          extractedfiles[relativePath] = new File([ab], scrapbook.urlToFilename(relativePath), {type: "text/plain"});
+          if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, callback); }
+        });
+      });
+      if (pendingZipEntry === 0) { onAllZipEntriesProcessed(type, callback); }
+    }).catch((ex) => {
+      alert("Unable to load the zip file: " + ex);
+    });
+  };
+
+  var onAllZipEntriesProcessed = function (type, callback) {
+    switch (type) {
+      case "maff": {
+        break;
+      }
+      case "htz":
+      default: {
+        var indexFile = "index.html";
+        callback(indexFile);
+        break;
+      }
+    }
+  };
+
+  var onZipExtracted = function (indexFilePath) {
+    loadFile(indexFilePath);
+  };
+
+  var loadFile = function (relativePath) {
+    var file = extractedfiles[relativePath];
+    var reader = new FileReader();
+    reader.addEventListener("loadend", () => {
+      var content = reader.result;
+      viewer.srcdoc = content;
+      wrapper.style.display = 'block';
+      fileSelector.style.display = 'none';
+    });
+    reader.readAsText(file, "UTF-8");
+  };
+
+  /**
+   * main script
+   */
+  var fileSelector = document.getElementById('file-selector');
+  var fileSelectorDrop = document.getElementById('file-selector-drop');
+  var fileSelectorInput = document.getElementById('file-selector-input');
+  var wrapper = document.getElementById('wrapper');
+  var viewer = document.getElementById('viewer');
+  var urlSearch = "";
+  var urlHash = "";
+
+  fileSelectorDrop.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  }, false);
+
+  fileSelectorDrop.addEventListener("drop", (e) => {
+    e.preventDefault();
+
+    Array.prototype.forEach.call(e.dataTransfer.items, (item) => {
+      var entry = item.webkitGetAsEntry();
+      if (entry.isFile) {
+        entry.file((file) => {
+          extractZipFile(file, onZipExtracted);
+        });
+      }
+    });
+  }, false);
+
+  fileSelectorDrop.addEventListener("click", (e) => {
+    e.preventDefault();
+    fileSelectorInput.click();
+  }, false);
+
+  fileSelectorInput.addEventListener("change", (e) => {
+    e.preventDefault();
+    var file = e.target.files[0];
+    extractZipFile(file, onZipExtracted);
+  }, false);
+
+  viewer.addEventListener("load", (e) => {
+    var doc = viewer.contentDocument;
+    document.title = doc.title;
+
+    // set base
+    Array.prototype.forEach.call(doc.querySelectorAll("base"), (elem) => {
+      elem.parentNode.removeChild(elem);
+    });
+    var base = doc.createElement("base");
+    base.href = virtualBase;
+    doc.querySelector("head").appendChild(base);
+  });
+
+  // if source is specified, load it
+  let mainUrl = new URL(document.URL);
+
+  let href = mainUrl.searchParams.get("href");
+  if (href) {
+    alert("Unable to load file: '" + href + "': " + ex);
+  }
+
+  let src = mainUrl.searchParams.get("src");
+  if (src) {
+    try {
+      let srcUrl = new URL(src);
+      urlSearch = srcUrl.search;
+      urlHash = mainUrl.hash;
+      // use a random hash to avoid recursive redirect
+      srcUrl.searchParams.set(scrapbook.runtime.viewerRedirectKey, 1);
+      src = srcUrl.toString();
+      let filename = scrapbook.urlToFilename(src);
+
+      let xhr = new XMLHttpRequest();
+
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 2) {
+          // if header Content-Disposition is defined, use it
+          try {
+            let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+            let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            filename = contentDisposition.parameters.filename || filename;
+          } catch (ex) {}
+        } else if (xhr.readyState === 4) {
+          if (xhr.status == 200 || xhr.status == 0) {
+            let file = new File([xhr.response], filename);
+            extractZipFile(file, onZipExtracted);
+          }
+        }
+      };
+
+      xhr.responseType = "blob";
+      xhr.open("GET", src, true);
+      xhr.send();
+    } catch (ex) {
+      alert("Unable to load the specified zip file '" + src + "': " + ex);
+    }
+    return;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   // load languages
   scrapbook.loadLanguages(document);
 
   // request FileSystem
   var errorHandler = function (ex) {
-    console.error(ex);
-    alert("This module won't work because your browser configuration does not support requestFileSystem API.");
+    // console.error(ex);
+    initWithoutFileSystem();
   };
 
   window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
@@ -337,7 +494,7 @@ document.addEventListener("DOMContentLoaded", function () {
   try {
     // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
     window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, (fs) => {
-      init(fs);
+      initWithFileSystem(fs);
     }, errorHandler);
   } catch (ex) {
     errorHandler(ex);
