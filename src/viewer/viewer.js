@@ -339,7 +339,8 @@ function initWithoutFileSystem() {
         if (zipObj.dir) { return; }
         ++pendingZipEntry;
         zipObj.async("arraybuffer").then((ab) => {
-          extractedfiles[relativePath] = new File([ab], scrapbook.urlToFilename(relativePath), {type: "text/plain"});
+          let mime = Mime.prototype.lookup(relativePath);
+          extractedfiles[relativePath] = new File([ab], scrapbook.urlToFilename(relativePath), {type: mime});
           if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, callback); }
         });
       });
@@ -372,11 +373,189 @@ function initWithoutFileSystem() {
     var reader = new FileReader();
     reader.addEventListener("loadend", () => {
       var content = reader.result;
-      viewer.srcdoc = content;
+      var parser = new DOMParser();
+      var doc = parser.parseFromString(content, "text/html");
+      updateFrameContent(doc);
       wrapper.style.display = 'block';
       fileSelector.style.display = 'none';
     });
     reader.readAsText(file, "UTF-8");
+  };
+
+  var updateFrameContent = function (doc) {
+    // helper functions
+    var rewriteUrl = function (url) {
+      var absoluteUrl = new URL(url, virtualBase);
+      if (absoluteUrl.href.startsWith(virtualBase)) {
+        var search = absoluteUrl.search;
+        var hash = absoluteUrl.hash;
+        absoluteUrl.search = "";
+        absoluteUrl.hash = "";
+        var relativePath = absoluteUrl.href.slice(virtualBase.length);
+        relativePath = relativePath.split("/").map(x => decodeURIComponent(x)).join("/");
+        if (extractedfiles[relativePath]) {
+          return URL.createObjectURL(extractedfiles[relativePath]) + search + hash;
+        }
+      }
+      return absoluteUrl.href;
+    };
+    
+    // modify base
+    Array.prototype.forEach.call(doc.querySelectorAll("base"), (elem) => {
+      elem.parentNode.removeChild(elem);
+    });
+    var baseElem = doc.createElement("base");
+    baseElem.href = virtualBase;
+    doc.querySelector("head").appendChild(baseElem);
+
+    // modify URLs
+    Array.prototype.forEach.call(doc.querySelectorAll("*"), (elem) => {
+      // skip elements that are already removed from the DOM tree
+      if (!elem.parentNode) { return; }
+
+      switch (elem.nodeName.toLowerCase()) {
+        case "meta": {
+          if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
+            switch (elem.getAttribute("property").toLowerCase()) {
+              case "og:image":
+              case "og:image:url":
+              case "og:image:secure_url":
+              case "og:audio":
+              case "og:audio:url":
+              case "og:audio:secure_url":
+              case "og:video":
+              case "og:video:url":
+              case "og:video:secure_url":
+              case "og:url":
+                elem.setAttribute("content", rewriteUrl(elem.getAttribute("content")));
+                break;
+            }
+          }
+          break;
+        }
+
+        // @TODO: content of the target should be parsed
+        case "link": {
+          if (elem.hasAttribute("href")) {
+            elem.setAttribute("href", rewriteUrl(elem.href));
+          }
+          break;
+        }
+
+        // @TODO: content should be parsed
+        case "style": {
+          break;
+        }
+
+        case "script": {
+          if (elem.hasAttribute("src")) {
+            elem.setAttribute("src", rewriteUrl(elem.src));
+          }
+          break;
+        }
+
+        case "body":
+        case "table":
+        case "tr":
+        case "th":
+        case "td": {
+          // deprecated: background attribute (deprecated since HTML5)
+          if (elem.hasAttribute("background")) {
+            elem.setAttribute("background", rewriteUrl(elem.getAttribute("background")));
+          }
+          break;
+        }
+
+        // @TODO: content of the target should be parsed
+        case "frame":
+        case "iframe": {
+          if (elem.hasAttribute("src")) {
+            elem.setAttribute("src", rewriteUrl(elem.src));
+          }
+          break;
+        }
+
+        // @TODO: content of the target should be parsed
+        case "a":
+        case "area": {
+          if (elem.hasAttribute("href")) {
+            elem.setAttribute("href", rewriteUrl(elem.href));
+          }
+          break;
+        }
+
+        case "img": {
+          if (elem.hasAttribute("src")) {
+            elem.setAttribute("src", rewriteUrl(elem.src));
+          }
+          if (elem.hasAttribute("srcset")) {
+            elem.setAttribute("srcset",
+              scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
+                return rewriteUrl(url);
+              })
+            );
+          }
+          break;
+        }
+
+        case "source": {
+          if (elem.hasAttribute("srcset")) {
+            elem.setAttribute("srcset",
+              scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
+                return rewriteUrl(url);
+              })
+            );
+          }
+          break;
+        }
+
+        case "embed": {
+          if (elem.hasAttribute("src")) {
+            elem.setAttribute("src", rewriteUrl(elem.src));
+          }
+          break;
+        }
+
+        case "object": {
+          if (elem.hasAttribute("data")) {
+            elem.setAttribute("data", rewriteUrl(elem.data));
+          }
+          break;
+        }
+
+        case "applet": {
+          if (elem.hasAttribute("archive")) {
+            elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive")));
+          }
+          break;
+        }
+
+        case "form": {
+          if ( elem.hasAttribute("action") ) {
+            elem.setAttribute("action", rewriteUrl(elem.action));
+          }
+          break;
+        }
+
+        case "input": {
+          switch (elem.type.toLowerCase()) {
+            // images: input
+            case "image":
+              if (elem.hasAttribute("src")) {
+                elem.setAttribute("src", rewriteUrl(elem.src));
+              }
+              break;
+          }
+          break;
+        }
+      }
+    });
+
+    // flush content
+    var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
+    viewer.contentDocument.open();
+    viewer.contentDocument.write(content);
+    viewer.contentDocument.close();
   };
 
   /**
@@ -422,14 +601,6 @@ function initWithoutFileSystem() {
   viewer.addEventListener("load", (e) => {
     var doc = viewer.contentDocument;
     document.title = doc.title;
-
-    // set base
-    Array.prototype.forEach.call(doc.querySelectorAll("base"), (elem) => {
-      elem.parentNode.removeChild(elem);
-    });
-    var base = doc.createElement("base");
-    base.href = virtualBase;
-    doc.querySelector("head").appendChild(base);
   });
 
   // if source is specified, load it
