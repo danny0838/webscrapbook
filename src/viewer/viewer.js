@@ -281,7 +281,7 @@ function init(myFileSystem) {
       urlSearch = srcUrl.search;
       urlHash = mainUrl.hash;
       // use a random hash to avoid recursive redirect
-      srcUrl.searchParams.set("ipimkkaicmlacnnmkmejigldfflpcmhl", 1);
+      srcUrl.searchParams.set(scrapbook.runtime.viewerRedirectKey, 1);
       src = srcUrl.toString();
       let filename = scrapbook.urlToFilename(src);
 

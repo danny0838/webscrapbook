@@ -17,7 +17,8 @@ var isDebug = false;
  *******************************************************************/
 
 scrapbook.runtime = {
-  isGecko: false
+  isGecko: false,
+  viewerRedirectKey: "kwo7vzrTJ9btCVZ"
 };
 
 {
