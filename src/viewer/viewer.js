@@ -381,10 +381,8 @@ function initWithoutFileSystem() {
   var loadFile = function (inZipPath, url) {
     let searchAndHash = "";
     if (url) {
-      try {
-        let urlObj = new URL(url);
-        searchAndHash = urlObj.search + urlObj.hash;
-      } catch (ex) {}
+      let [base, search, hash] = scrapbook.splitUrl(url);
+      searchAndHash = hash;
     }
     let f = inZipFiles[inZipPath];
     if (f) {
