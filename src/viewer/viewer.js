@@ -400,7 +400,9 @@ function initWithoutFileSystem() {
   };
 
   var parseDocument = function (doc, inZipPath) {
-    // helper functions
+    /**
+     * helper functions
+     */
     var rewriteUrl = function (url) {
       var absoluteUrl = new URL(url, virtualBase);
       if (absoluteUrl.href.startsWith(virtualBase)) {
@@ -416,6 +418,10 @@ function initWithoutFileSystem() {
       }
       return absoluteUrl.href;
     };
+
+    /**
+     * main
+     */
 
     // check meta refresh
     if (metaRefreshAvailable > 0) {
