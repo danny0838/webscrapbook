@@ -323,7 +323,7 @@ function initWithFileSystem(myFileSystem) {
 }
 
 function initWithoutFileSystem() {
-  var extractedfiles = {};
+  var inZipFiles = {};
   var virtualBase = chrome.runtime.getURL("viewer/!/");
   var virtualRef = virtualBase;
 
@@ -341,7 +341,7 @@ function initWithoutFileSystem() {
         ++pendingZipEntry;
         zipObj.async("arraybuffer").then((ab) => {
           let mime = Mime.prototype.lookup(inZipPath);
-          extractedfiles[inZipPath] = new File([ab], scrapbook.urlToFilename(inZipPath), {type: mime});
+          inZipFiles[inZipPath] = new File([ab], scrapbook.urlToFilename(inZipPath), {type: mime});
           if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, callback); }
         });
       });
@@ -370,7 +370,7 @@ function initWithoutFileSystem() {
   };
 
   var loadFile = function (inZipPath) {
-    var file = extractedfiles[inZipPath];
+    var file = inZipFiles[inZipPath];
     if (["text/html", "application/xhtml+xml"].indexOf(file.type) !== -1) {
       var reader = new FileReader();
       reader.addEventListener("loadend", () => {
@@ -398,8 +398,8 @@ function initWithoutFileSystem() {
         absoluteUrl.hash = "";
         var inZipPath = absoluteUrl.href.slice(virtualBase.length);
         inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
-        if (extractedfiles[inZipPath]) {
-          return URL.createObjectURL(extractedfiles[inZipPath]) + search + hash;
+        if (inZipFiles[inZipPath]) {
+          return URL.createObjectURL(inZipFiles[inZipPath]) + search + hash;
         }
       }
       return absoluteUrl.href;
