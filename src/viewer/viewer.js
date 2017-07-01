@@ -402,22 +402,24 @@ function initWithoutFileSystem() {
     /**
      * helper functions
      */
-    var rewriteUrl = function (url) {
-      var absoluteUrl = new URL(url, refUrl);
+    var parseUrl = function (url) {
+      let absoluteUrl = new URL(url, refUrl);
       if (absoluteUrl.href.startsWith(virtualBase)) {
-        var search = absoluteUrl.search;
-        var hash = absoluteUrl.hash;
+        let search = absoluteUrl.search;
+        let hash = absoluteUrl.hash;
         absoluteUrl.search = "";
         absoluteUrl.hash = "";
-        var inZipPath = absoluteUrl.href.slice(virtualBase.length);
+        let inZipPath = absoluteUrl.href.slice(virtualBase.length);
         inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
-        if (inZipFiles[inZipPath]) {
-          return URL.createObjectURL(inZipFiles[inZipPath]) + search + hash;
-        } else {
-          return url;
-        }
+        let inZip = !!inZipFiles[inZipPath];
+        let returnUrl = inZip ? URL.createObjectURL(inZipFiles[inZipPath]) + search + hash : url;
+        return {url: returnUrl, inZip: inZip, inZipPath: inZipPath};
       }
-      return absoluteUrl.href;
+      return {url: absoluteUrl.href, inZip: false, inZipPath: null};
+    };
+
+    var rewriteUrl = function (url) {
+      return parseUrl(url).url;
     };
 
     /**
@@ -432,22 +434,13 @@ function initWithoutFileSystem() {
         if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content") &&
             elem.getAttribute("http-equiv").toLowerCase() == "refresh" && 
             elem.getAttribute("content").match(/^[^;]*;\s*url=(.*)$/i) ) {
-          metaRefreshTarget = new URL(RegExp.$1, refUrl);
+          metaRefreshTarget = RegExp.$1;
         }
       });
       if (metaRefreshTarget) {
         metaRefreshAvailable--;
-        if (metaRefreshTarget.href.startsWith(virtualBase)) {
-          var search = metaRefreshTarget.search;
-          var hash = metaRefreshTarget.hash;
-          metaRefreshTarget.search = "";
-          metaRefreshTarget.hash = "";
-          var inZipPath = metaRefreshTarget.href.slice(virtualBase.length);
-          inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
-          loadFile(inZipPath);
-        } else {
-          viewer.src = metaRefreshTarget.href;
-        }
+        let info = parseUrl(metaRefreshTarget);
+        info.inZip ? loadFile(info.inZipPath) : loadUrl(info.url);
         return null;
       }
     }
