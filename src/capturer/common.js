@@ -1197,6 +1197,13 @@ capturer.getErrorUrl = function (sourceUrl, options) {
   return sourceUrl;
 };
 
+capturer.getCircularUrl = function (sourceUrl, options) {
+  if (!options || options["capture.recordErrorUri"]) {
+    return "urn:scrapbook:download:circular:" + sourceUrl;
+  }
+  return "about:blank";
+};
+
 /**
  * Process a downloaded CSS file and rewrite it
  *
@@ -1437,10 +1444,10 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
       keys.forEach((key) => {
         let targetUrl = this.urlHash[key].url;
         if (this.options["capture.saveAs"] === "singleHtml") {
-          if (this.settings.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) >= 0) {
+          if (this.settings.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) !== -1) {
             let sourceUrl = this.settings.recurseChain[this.settings.recurseChain.length - 1];
             console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
-            this.urlHash[key].newUrl = this.options["capture.recordErrorUri"] ? "urn:scrapbook:download:circular:" + targetUrl : "about:blank";
+            this.urlHash[key].newUrl = capturer.getCircularUrl(targetUrl, this.options);
             if (++this.urlRewrittenCount === len) {
               callback();
             }
