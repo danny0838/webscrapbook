@@ -403,7 +403,7 @@ function initWithoutFileSystem() {
      * helper functions
      */
     var rewriteUrl = function (url) {
-      var absoluteUrl = new URL(url, virtualBase);
+      var absoluteUrl = new URL(url, refUrl);
       if (absoluteUrl.href.startsWith(virtualBase)) {
         var search = absoluteUrl.search;
         var hash = absoluteUrl.hash;
@@ -413,6 +413,8 @@ function initWithoutFileSystem() {
         inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
         if (inZipFiles[inZipPath]) {
           return URL.createObjectURL(inZipFiles[inZipPath]) + search + hash;
+        } else {
+          return url;
         }
       }
       return absoluteUrl.href;
