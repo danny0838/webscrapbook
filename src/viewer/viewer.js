@@ -381,17 +381,25 @@ function initWithoutFileSystem() {
         var content = reader.result;
         var parser = new DOMParser();
         var doc = parser.parseFromString(content, "text/html");
-        updateFrameContent(doc);
-        wrapper.style.display = 'block';
-        fileSelector.style.display = 'none';
+        var url = parseDocument(doc, inZipPath);
+        if (url) {
+          loadUrl(url);
+        }
       });
+      // @TODO: use specified file encoding if it's not UTF-8?
       reader.readAsText(file, "UTF-8");
     } else {
-      viewer.src = URL.createObjectURL(file);
+      loadUrl(URL.createObjectURL(file));
     }
   };
 
-  var updateFrameContent = function (doc) {
+  var loadUrl = function (url) {
+    viewer.src = url;
+    wrapper.style.display = 'block';
+    fileSelector.style.display = 'none';
+  };
+
+  var parseDocument = function (doc, inZipPath) {
     // helper functions
     var rewriteUrl = function (url) {
       var absoluteUrl = new URL(url, virtualBase);
@@ -433,7 +441,7 @@ function initWithoutFileSystem() {
         } else {
           viewer.src = metaRefreshTarget.href;
         }
-        return;
+        return null;
       }
     }
     
@@ -588,9 +596,9 @@ function initWithoutFileSystem() {
       }
     });
 
-    // flush content
+    // return the content
     var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
-    viewer.src = URL.createObjectURL(new Blob([content], {type: "text/html"}));
+    return URL.createObjectURL(new Blob([content], {type: "text/html"}));
   };
 
   /**
