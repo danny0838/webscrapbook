@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Create a FileWriter object for our FileEntry (log.txt).
         fileEntry.createWriter((fileWriter) => {
 
-          fileWriter.onwriteend = function(e) {
+          fileWriter.onwriteend = function (e) {
             callback();
           };
 

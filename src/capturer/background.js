@@ -684,7 +684,7 @@ capturer.downloadBlob = function (params, callback) {
   switch (options["capture.saveAs"]) {
     case "singleHtml": {
       let reader = new FileReader();
-      reader.onloadend = function(event) {
+      reader.onloadend = function (event) {
         let dataUri = event.target.result;
         if (filename) {
           dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");

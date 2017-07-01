@@ -223,7 +223,7 @@ scrapbook.filenameParts = function (filename) {
  * @param  {Date|undefined} date - Given day, or now if undefined
  * @return {string} the ScrapBook ID
  */
-scrapbook.dateToId = function(date) {
+scrapbook.dateToId = function (date) {
   var dd = date || new Date();
   return dd.getUTCFullYear() +
       this.intToFixedStr(dd.getUTCMonth() + 1, 2) +
@@ -237,7 +237,7 @@ scrapbook.dateToId = function(date) {
 /**
  * @param {Date} id - Given ScrapBook ID
  */
-scrapbook.idToDate = function(id) {
+scrapbook.idToDate = function (id) {
   var dd;
   if (id.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})$/)) {
     dd = new Date(
@@ -256,7 +256,7 @@ scrapbook.idToDate = function(id) {
  * @param {Date|undefined} date - Given day, or now if undefined
  * @return {string} the ScrapBook ID
  */
-scrapbook.dateToIdOld = function(date) {
+scrapbook.dateToIdOld = function (date) {
   var dd = date || new Date();
   return dd.getFullYear() +
       this.intToFixedStr(dd.getMonth() + 1, 2) +
@@ -270,7 +270,7 @@ scrapbook.dateToIdOld = function(date) {
  * @deprecated Used by older ScrapBook 1.x, may get inaccurate if used across different timezone
  * @param {Date} id - Given ScrapBook ID
  */
-scrapbook.idToDateOld = function(id) {
+scrapbook.idToDateOld = function (id) {
   var dd;
   if (id.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/)) {
     dd = new Date(

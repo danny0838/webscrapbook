@@ -1219,7 +1219,7 @@ capturer.getErrorUrl = function (sourceUrl, options) {
  *     - {string} params.charset
  *     - {string} params.url
  */
-capturer.processCssFile = function(params, callback) {
+capturer.processCssFile = function (params, callback) {
   var data = params.data;
   var charset = params.charset;
   var refUrl = params.url;

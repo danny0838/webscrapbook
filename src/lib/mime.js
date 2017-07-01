@@ -10,7 +10,7 @@ function Mime() {}
 /**
  * Lookup a mime type based on extension
  */
-Mime.prototype.lookup = function(path, fallback) {
+Mime.prototype.lookup = function (path, fallback) {
   var ext = path.replace(/.*[\.\/\\]/, '').toLowerCase();
 
   return this.types[ext] || fallback || "application/octet-stream";
@@ -19,7 +19,7 @@ Mime.prototype.lookup = function(path, fallback) {
 /**
  * Return the first file extension associated with a mime type
  */
-Mime.prototype.extension = function(mimeType) {
+Mime.prototype.extension = function (mimeType) {
   var type = mimeType.match(/^\s*([^;\s]*)(?:;|\s|$)/)[1].toLowerCase();
   if (this.db[type] && this.db[type].extensions) {
     return this.db[type].extensions[0];
@@ -30,7 +30,7 @@ Mime.prototype.extension = function(mimeType) {
 /**
  * Return the file extensions associated with a mime type
  */
-Mime.prototype.allExtensions = function(mimeType) {
+Mime.prototype.allExtensions = function (mimeType) {
   var type = mimeType.match(/^\s*([^;\s]*)(?:;|\s|$)/)[1].toLowerCase();
   if (this.db[type] && this.db[type].extensions) {
     return JSON.parse(JSON.stringify(this.db[type].extensions));
