@@ -179,13 +179,13 @@ scrapbook.urlToFilename = function (url) {
   return name;
 };
 
-scrapbook.splitUrlByAnchor = function(url) {
+scrapbook.splitUrlByAnchor = function (url) {
   var pos = url.indexOf("#");
   if (pos >= 0) {
     return [url.substring(0, pos), url.substring(pos, url.length)];
   }
   return [url, ""];
-},
+};
 
 /**
  * @return {Object} an array with filename and file extension.
