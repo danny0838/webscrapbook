@@ -336,12 +336,12 @@ function initWithoutFileSystem() {
 
     var zip = new JSZip();
     zip.loadAsync(file).then((zip) => {
-      zip.forEach((relativePath, zipObj) => {
+      zip.forEach((inZipPath, zipObj) => {
         if (zipObj.dir) { return; }
         ++pendingZipEntry;
         zipObj.async("arraybuffer").then((ab) => {
-          let mime = Mime.prototype.lookup(relativePath);
-          extractedfiles[relativePath] = new File([ab], scrapbook.urlToFilename(relativePath), {type: mime});
+          let mime = Mime.prototype.lookup(inZipPath);
+          extractedfiles[inZipPath] = new File([ab], scrapbook.urlToFilename(inZipPath), {type: mime});
           if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, callback); }
         });
       });
@@ -369,8 +369,8 @@ function initWithoutFileSystem() {
     loadFile(indexFilePath);
   };
 
-  var loadFile = function (relativePath) {
-    var file = extractedfiles[relativePath];
+  var loadFile = function (inZipPath) {
+    var file = extractedfiles[inZipPath];
     if (["text/html", "application/xhtml+xml"].indexOf(file.type) !== -1) {
       var reader = new FileReader();
       reader.addEventListener("loadend", () => {
@@ -396,10 +396,10 @@ function initWithoutFileSystem() {
         var hash = absoluteUrl.hash;
         absoluteUrl.search = "";
         absoluteUrl.hash = "";
-        var relativePath = absoluteUrl.href.slice(virtualBase.length);
-        relativePath = relativePath.split("/").map(x => decodeURIComponent(x)).join("/");
-        if (extractedfiles[relativePath]) {
-          return URL.createObjectURL(extractedfiles[relativePath]) + search + hash;
+        var inZipPath = absoluteUrl.href.slice(virtualBase.length);
+        inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
+        if (extractedfiles[inZipPath]) {
+          return URL.createObjectURL(extractedfiles[inZipPath]) + search + hash;
         }
       }
       return absoluteUrl.href;
@@ -423,9 +423,9 @@ function initWithoutFileSystem() {
           metaRefreshTarget.search = "";
           metaRefreshTarget.hash = "";
           virtualRef = metaRefreshTarget.href;
-          var relativePath = metaRefreshTarget.href.slice(virtualBase.length);
-          relativePath = relativePath.split("/").map(x => decodeURIComponent(x)).join("/");
-          loadFile(relativePath);
+          var inZipPath = metaRefreshTarget.href.slice(virtualBase.length);
+          inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
+          loadFile(inZipPath);
         } else {
           viewer.src = metaRefreshTarget.href;
         }
