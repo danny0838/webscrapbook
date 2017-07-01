@@ -489,7 +489,7 @@ function initWithoutFileSystem() {
         // @TODO: content of the target should be parsed
         case "link": {
           if (elem.hasAttribute("href")) {
-            elem.setAttribute("href", rewriteUrl(elem.href));
+            elem.setAttribute("href", rewriteUrl(elem.getAttribute("href")));
           }
           break;
         }
@@ -501,7 +501,7 @@ function initWithoutFileSystem() {
 
         case "script": {
           if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.src));
+            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src")));
           }
           break;
         }
@@ -522,7 +522,7 @@ function initWithoutFileSystem() {
         case "frame":
         case "iframe": {
           if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.src));
+            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src")));
           }
           break;
         }
@@ -531,14 +531,14 @@ function initWithoutFileSystem() {
         case "a":
         case "area": {
           if (elem.hasAttribute("href")) {
-            elem.setAttribute("href", rewriteUrl(elem.href));
+            elem.setAttribute("href", rewriteUrl(elem.getAttribute("href")));
           }
           break;
         }
 
         case "img": {
           if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.src));
+            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src")));
           }
           if (elem.hasAttribute("srcset")) {
             elem.setAttribute("srcset",
@@ -563,14 +563,14 @@ function initWithoutFileSystem() {
 
         case "embed": {
           if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.src));
+            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src")));
           }
           break;
         }
 
         case "object": {
           if (elem.hasAttribute("data")) {
-            elem.setAttribute("data", rewriteUrl(elem.data));
+            elem.setAttribute("data", rewriteUrl(elem.getAttribute("data")));
           }
           break;
         }
@@ -584,7 +584,7 @@ function initWithoutFileSystem() {
 
         case "form": {
           if ( elem.hasAttribute("action") ) {
-            elem.setAttribute("action", rewriteUrl(elem.action));
+            elem.setAttribute("action", rewriteUrl(elem.getAttribute("action")));
           }
           break;
         }
@@ -594,7 +594,7 @@ function initWithoutFileSystem() {
             // images: input
             case "image":
               if (elem.hasAttribute("src")) {
-                elem.setAttribute("src", rewriteUrl(elem.src));
+                elem.setAttribute("src", rewriteUrl(elem.getAttribute("src")));
               }
               break;
           }
