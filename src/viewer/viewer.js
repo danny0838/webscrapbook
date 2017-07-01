@@ -68,11 +68,11 @@ function init(myFileSystem) {
     var zip = new JSZip();
     zip.loadAsync(file).then((zip) => {
       myFileSystem.root.getDirectory(ns, {create: true}, () => {
-        zip.forEach((relativePath, zipObj) => {
+        zip.forEach((inZipPath, zipObj) => {
           if (zipObj.dir) { return; }
           ++pendingZipEntry;
           zipObj.async("arraybuffer").then((ab) => {
-            createFile(myFileSystem.root, ns + "/" + relativePath, new Blob([ab], {type: "text/plain"}), () => {
+            createFile(myFileSystem.root, ns + "/" + inZipPath, new Blob([ab], {type: "text/plain"}), () => {
               if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns, callback); }
             });
           });
