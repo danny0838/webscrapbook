@@ -551,6 +551,109 @@ scrapbook.doctypeToString = function (doctype) {
 };
 
 /**
+ * The function that is called to process the rewritten CSS.
+ *
+ * @callback parseCssFileRewriteFuncCallback
+ * @param {string} cssText - the rewritten CSS text
+ */
+
+/**
+ * The function that rewrites the CSS text.
+ *
+ * @callback parseCssFileRewriteFunc
+ * @param {string} oldText - the original CSS text
+ * @param {parseCssFileRewriteFuncCallback} onRewriteComplete
+ */
+
+/**
+ * @callback parseCssFileCallback
+ * @param {Blob} cssBlob - the rewritten CSS blob
+ */
+
+/**
+ * Process a CSS file and rewrite it
+ *
+ * Browser normally determine the charset of a CSS file via:
+ * 1. HTTP header content-type
+ * 2. Unicode BOM in the CSS file
+ * 3. @charset rule in the CSS file
+ * 4. assume it's UTF-8
+ *
+ * We save the CSS file as UTF-8 for better compatibility.
+ * For case 3, a UTF-8 BOM is prepended to suppress the @charset rule.
+ * We don't follow case 4 and save the CSS file as byte string so that
+ * the user could fix the encoding manually.
+ *
+ * @param {Blob} data
+ * @param {string} charset
+ * @param {parseCssFileRewriteFunc} rewriteFunc
+ * @param {parseCssFileCallback} onComplete
+ */
+scrapbook.parseCssFile = function (data, charset, rewriteFunc, onComplete) {
+  var readCssText = function (blob, charset, callback) {
+    var reader = new FileReader();
+    reader.addEventListener("loadend", () => {
+      callback(reader.result);
+    });
+    reader.readAsText(blob, charset);
+  };
+
+  var readCssBytes = function (blob, callback) {
+    var reader = new FileReader();
+    reader.addEventListener("loadend", () => {
+      var bstr = scrapbook.arrayBufferToByteString(reader.result);
+      callback(bstr);
+    });
+    reader.readAsArrayBuffer(blob);
+  };
+
+  var processCss = function (oldText) {
+    rewriteFunc(oldText, (text) => {
+      if (charset) {
+        var blob = new Blob([text], {type: "text/css;charset=UTF-8"});
+      } else {
+        var ab = scrapbook.byteStringToArrayBuffer(text);
+        var blob = new Blob([ab], {type: "text/css"});
+      }
+      onComplete(blob);
+    });
+  };
+
+  if (charset) {
+    readCssText(data, charset, (text) => {
+      processCss(text);
+    });
+  } else {
+    readCssBytes(data, (bytes) => {
+      if (bytes.startsWith("\xEF\xBB\xBF")) {
+        charset = "UTF-8";
+      } else if (bytes.startsWith("\xFE\xFF")) {
+        charset = "UTF-16BE";
+      } else if (bytes.startsWith("\xFF\xFE")) {
+        charset = "UTF-16LE";
+      } else if (bytes.startsWith("\x00\x00\xFE\xFF")) {
+        charset = "UTF-32BE";
+      } else if (bytes.startsWith("\x00\x00\xFF\xFE")) {
+        charset = "UTF-32LE";
+      } else if (/^@charset (["'])(\w+)\1;/.test(bytes)) {
+        charset = RegExp.$2;
+      }
+      if (charset) {
+        readCssText(data, charset, (text) => {
+          // The read text does not contain a BOM.
+          // Add a BOM so that browser will read this CSS as UTF-8 in the future.
+          // This added UTF-16 BOM will be converted to UTF-8 BOM automatically when creating blob.
+          text = "\ufeff" + text;
+          processCss(text);
+        });
+      } else {
+        processCss(bytes);
+      }
+    });
+  }
+};
+
+/**
  * The function that rewrites each URL into a new URL.
  *
  * @callback parseCssTextRewriteFunc
