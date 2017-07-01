@@ -330,7 +330,7 @@ function initWithoutFileSystem() {
   /**
    * common helper functions
    */
-  var extractZipFile = function (file, callback) {
+  var extractZipFile = function (file) {
     var pendingZipEntry = 0;
     var type = scrapbook.filenameParts(file.name)[1].toLowerCase();
 
@@ -342,16 +342,16 @@ function initWithoutFileSystem() {
         zipObj.async("arraybuffer").then((ab) => {
           let mime = Mime.prototype.lookup(inZipPath);
           inZipFiles[inZipPath] = new File([ab], scrapbook.urlToFilename(inZipPath), {type: mime});
-          if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, callback); }
+          if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type); }
         });
       });
-      if (pendingZipEntry === 0) { onAllZipEntriesProcessed(type, callback); }
+      if (pendingZipEntry === 0) { onAllZipEntriesProcessed(type); }
     }).catch((ex) => {
       alert("Unable to load the zip file: " + ex);
     });
   };
 
-  var onAllZipEntriesProcessed = function (type, callback) {
+  var onAllZipEntriesProcessed = function (type) {
     switch (type) {
       case "maff": {
         break;
@@ -359,14 +359,18 @@ function initWithoutFileSystem() {
       case "htz":
       default: {
         var indexFile = "index.html";
-        callback(indexFile);
+        onZipExtracted(indexFile);
         break;
       }
     }
   };
 
-  var onZipExtracted = function (indexFilePath) {
-    loadFile(indexFilePath);
+  var onZipExtracted = function (indexFilePaths) {
+    if (Object.prototype.toString.call(indexFilePaths) !== "[object Array]") {
+      indexFilePaths = [indexFilePaths];
+    }
+
+    loadFile(indexFilePaths[0]);
   };
 
   var loadFile = function (inZipPath) {
@@ -613,7 +617,7 @@ function initWithoutFileSystem() {
       var entry = item.webkitGetAsEntry();
       if (entry.isFile) {
         entry.file((file) => {
-          extractZipFile(file, onZipExtracted);
+          extractZipFile(file);
         });
       }
     });
@@ -627,7 +631,7 @@ function initWithoutFileSystem() {
   fileSelectorInput.addEventListener("change", (e) => {
     e.preventDefault();
     var file = e.target.files[0];
-    extractZipFile(file, onZipExtracted);
+    extractZipFile(file);
   }, false);
 
   viewer.addEventListener("load", (e) => {
@@ -667,7 +671,7 @@ function initWithoutFileSystem() {
         } else if (xhr.readyState === 4) {
           if (xhr.status == 200 || xhr.status == 0) {
             let file = new File([xhr.response], filename);
-            extractZipFile(file, onZipExtracted);
+            extractZipFile(file);
           }
         }
       };
