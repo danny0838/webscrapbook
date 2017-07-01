@@ -553,6 +553,82 @@ scrapbook.doctypeToString = function (doctype) {
 /**
  * The function that rewrites each URL into a new URL.
  *
+ * @callback parseCssTextRewriteFunc
+ * @param {string} url
+ * @return {string} newUrl
+ */
+
+/**
+ * process the CSS text of whole <style> or a CSS file
+ *
+ * @TODO: current code is rather heuristic and ugly,
+ *        consider implementing a real CSS parser to prevent potential errors
+ *        for certain complicated CSS
+ *
+ * @param {string} cssText
+ * @param {Object} rewriteFuncs
+ *     - {parseCssTextRewriteFunc} rewriteImportUrl
+ *     - {parseCssTextRewriteFunc} rewriteFontFaceUrl
+ *     - {parseCssTextRewriteFunc} rewriteBackgroundUrl
+ */
+scrapbook.parseCssText = function (cssText, rewriteFuncs) {
+  var pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
+  var pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
+  var pCmSp = "(?:" + "(?:" + pCm + "|" + pSp + ")" + "*" + ")"; // comment or space
+  var pChar = "(?:\\\\.|[^\\\\])"; // a char, or a escaped char sequence
+  var pStr = "(?:" + pChar + "*?" + ")"; // string
+  var pSStr = "(?:" + pCmSp + pStr + pCmSp + ")"; // spaced string
+  var pDQStr = "(?:" + '"' + pStr + '"' + ")"; // double quoted string
+  var pSQStr = "(?:" + "'" + pStr + "'" + ")"; // single quoted string
+  var pES = "(?:" + "(?:" + [pCm, pDQStr, pSQStr, pChar].join("|") + ")*?" + ")"; // embeded string
+  var pUrl = "(?:" + "url\\(" + pSp + "(?:" + [pDQStr, pSQStr, pSStr].join("|") + ")" + pSp + "\\)" + ")"; // URL
+  var pUrl2 = "(" + "url\\(" + pSp + ")(" + [pDQStr, pSQStr, pSStr].join("|") + ")(" + pSp + "\\)" + ")"; // URL; catch 3
+  var pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")(" + pCmSp + ";" + ")"; // rule import; catch 3
+  var pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // rule font-face; catch 1
+
+  var parseUrl = function (text, callback) {
+    return text.replace(new RegExp(pUrl2, "gi"), (m, pre, url, post) => {
+      if (url.startsWith('"') && url.endsWith('"')) {
+        var url = scrapbook.unescapeCss(url.slice(1, -1));
+        var ret = callback(url);
+      } else if (url.startsWith("'") && url.endsWith("'")) {
+        var url = scrapbook.unescapeCss(url.slice(1, -1));
+        var ret = callback(url);
+      } else {
+        var url = scrapbook.unescapeCss(url.trim());
+        var ret = callback(url);
+      }
+      return pre + '"' + scrapbook.escapeQuotes(ret) + '"' + post;
+    });
+  };
+
+  var cssText = cssText.replace(
+    new RegExp([pCm, pRImport, pRFontFace, "("+pUrl+")"].join("|"), "gi"),
+    (m, im1, im2, im3, ff, u) => {
+      if (im2) {
+        if (im2.startsWith('"') && im2.endsWith('"')) {
+          var url = scrapbook.unescapeCss(im2.slice(1, -1));
+          var ret = 'url("' + scrapbook.escapeQuotes(rewriteFuncs.rewriteImportUrl(url)) + '")';
+        } else if (im2.startsWith("'") && im2.endsWith("'")) {
+          var url = scrapbook.unescapeCss(im2.slice(1, -1));
+          var ret = 'url("' + scrapbook.escapeQuotes(rewriteFuncs.rewriteImportUrl(url)) + '")';
+        } else {
+          var ret = parseUrl(im2, rewriteFuncs.rewriteImportUrl);
+        }
+        return im1 + ret + im3;
+      } else if (ff) {
+        return parseUrl(m, rewriteFuncs.rewriteFontFaceUrl);
+      } else if (u) {
+        return parseUrl(m, rewriteFuncs.rewriteBackgroundUrl);
+      }
+      return m;
+    });
+  return cssText;
+};
+
+/**
+ * The function that rewrites each URL into a new URL.
+ *
  * @callback parseSrcsetRewriteFunc
  * @param {string} url
  * @return {string} newUrl
