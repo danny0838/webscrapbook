@@ -325,6 +325,7 @@ function initWithFileSystem(myFileSystem) {
 function initWithoutFileSystem() {
   var inZipFiles = {};
   var virtualBase = chrome.runtime.getURL("viewer/!/");
+  var loaderKey = "data-sb-" + scrapbook.dateToId() + "-viewer-inzippath";
 
   /**
    * common helper functions
@@ -372,7 +373,14 @@ function initWithoutFileSystem() {
     loadFile(indexFilePaths[0]);
   };
 
-  var loadFile = function (inZipPath) {
+  var loadFile = function (inZipPath, url) {
+    let searchAndHash = "";
+    if (url) {
+      try {
+        let urlObj = new URL(url);
+        searchAndHash = urlObj.search + urlObj.hash;
+      } catch (ex) {}
+    }
     var file = inZipFiles[inZipPath];
     if (["text/html", "application/xhtml+xml"].indexOf(file.type) !== -1) {
       var reader = new FileReader();
@@ -381,13 +389,13 @@ function initWithoutFileSystem() {
         var parser = new DOMParser();
         var doc = parser.parseFromString(content, "text/html");
         parseDocument(doc, inZipPath, (blobUrl) => {
-          if (blobUrl) { loadUrl(blobUrl); }
+          if (blobUrl) { loadUrl(blobUrl + searchAndHash); }
         });
       });
       // @TODO: use specified file encoding if it's not UTF-8?
       reader.readAsText(file, "UTF-8");
     } else {
-      loadUrl(URL.createObjectURL(file));
+      loadUrl(URL.createObjectURL(file) + searchAndHash);
     }
   };
 
@@ -410,11 +418,21 @@ function initWithoutFileSystem() {
         absoluteUrl.hash = "";
         let inZipPath = absoluteUrl.href.slice(virtualBase.length);
         inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
-        let inZip = !!inZipFiles[inZipPath];
-        let returnUrl = inZip ? URL.createObjectURL(inZipFiles[inZipPath]) + search + hash : url;
-        return {url: returnUrl, inZip: inZip, inZipPath: inZipPath};
+        let file = inZipFiles[inZipPath];
+        if (file) {
+          return {
+            url: URL.createObjectURL(file) + search + hash,
+            inZip: true,
+            inZipPath: inZipPath,
+            mime: file.type,
+            search: search,
+            hash: hash
+          };
+        } else {
+          return {url: url, inZip: false};
+        }
       }
-      return {url: absoluteUrl.href, inZip: false, inZipPath: null};
+      return {url: absoluteUrl.href, inZip: false};
     };
 
     var rewriteUrl = function (url) {
@@ -448,7 +466,7 @@ function initWithoutFileSystem() {
       if (metaRefreshTarget) {
         metaRefreshAvailable--;
         let info = parseUrl(metaRefreshTarget);
-        info.inZip ? loadFile(info.inZipPath) : loadUrl(info.url);
+        info.inZip ? loadFile(info.inZipPath, info.url) : loadUrl(info.url);
         return null;
       }
     }
@@ -528,11 +546,20 @@ function initWithoutFileSystem() {
           break;
         }
 
-        // @TODO: content of the target should be parsed
         case "a":
         case "area": {
           if (elem.hasAttribute("href")) {
-            elem.setAttribute("href", rewriteUrl(elem.getAttribute("href")));
+            let info = parseUrl(elem.getAttribute("href"));
+            if (info.inZip) {
+              elem.setAttribute("href", info.url);
+              if (["text/html", "application/xhtml+xml"].indexOf(info.mime) !== -1) {
+                // link to another document in the zip
+                elem.setAttribute(loaderKey, info.inZipPath);
+              }
+            } else {
+              // link target is not in the zip
+              elem.setAttribute("href", info.url);
+            }
           }
           break;
         }
@@ -661,6 +688,18 @@ function initWithoutFileSystem() {
   viewer.addEventListener("load", (e) => {
     var doc = viewer.contentDocument;
     document.title = doc.title;
+    Array.prototype.forEach.call(doc.querySelectorAll("a, area"), (elem) => {
+      if (elem.hasAttribute(loaderKey)) {
+        elem[loaderKey] = elem.getAttribute(loaderKey);
+        elem.removeAttribute(loaderKey);
+        elem.addEventListener("click", (e) => {
+          e.preventDefault();
+          let elem = e.target;
+          let inZipPath = elem[loaderKey];
+          loadFile(inZipPath, elem.href);
+        });
+      }
+    });
   });
 
   // if source is specified, load it
