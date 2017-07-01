@@ -537,14 +537,22 @@ capturer.captureDocument = function (doc, settings, options, callback) {
               } else {
                 // frame window inaccessible: this happens when the document is retrieved via AJAX
                 if (!frame.hasAttribute("srcdoc")) {
-                  remainingTasks++;
-                  capturer.invoke("captureUrl", {
-                    settings: frameSettings,
-                    options: options,
-                    url: frameSrc.src
-                  }, function (response) {
-                    captureFrameCallback(response);
-                  });
+                  let sourceUrl = scrapbook.splitUrlByAnchor(doc.URL)[0];
+                  let targetUrl = scrapbook.splitUrlByAnchor(frameSrc.src)[0];
+                  frameSettings.recurseChain.push(sourceUrl);
+                  if (frameSettings.recurseChain.indexOf(targetUrl) === -1) {
+                    remainingTasks++;
+                    capturer.invoke("captureUrl", {
+                      settings: frameSettings,
+                      options: options,
+                      url: frameSrc.src
+                    }, function (response) {
+                      captureFrameCallback(response);
+                    });
+                  } else {
+                    console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
+                    captureRewriteAttr(frame, "src", capturer.getCircularUrl(targetUrl, options));
+                  }
                 } else {
                   captureRewriteAttr(frame, "src", null);
                 }
