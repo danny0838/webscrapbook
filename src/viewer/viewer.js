@@ -482,21 +482,26 @@ function initWithoutFileSystem() {
 document.addEventListener("DOMContentLoaded", function () {
   // load languages
   scrapbook.loadLanguages(document);
+  
+  scrapbook.loadOptions(() => {
+    // request FileSystem
+    var errorHandler = function (ex) {
+      // console.error(ex);
+      initWithoutFileSystem();
+    };
 
-  // request FileSystem
-  var errorHandler = function (ex) {
-    // console.error(ex);
-    initWithoutFileSystem();
-  };
-
-  window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
-
-  try {
-    // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
-    window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, (fs) => {
-      initWithFileSystem(fs);
-    }, errorHandler);
-  } catch (ex) {
-    errorHandler(ex);
-  }
+    try {
+      if (scrapbook.options["viewer.useFileSystemApi"]) {
+        window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+        // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
+        window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, (fs) => {
+          initWithFileSystem(fs);
+        }, errorHandler);
+      } else {
+        initWithoutFileSystem();
+      }
+    } catch (ex) {
+      errorHandler(ex);
+    }
+  });
 });

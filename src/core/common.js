@@ -64,6 +64,7 @@ scrapbook.options = {
   "capture.recordRewrittenAttr": false,
   "capture.recordSourceUri": false,
   "capture.recordErrorUri": false,
+  "viewer.useFileSystemApi": true,
 };
 
 scrapbook.isOptionsSynced = false;
