@@ -380,10 +380,9 @@ function initWithoutFileSystem() {
         var content = reader.result;
         var parser = new DOMParser();
         var doc = parser.parseFromString(content, "text/html");
-        var url = parseDocument(doc, inZipPath);
-        if (url) {
-          loadUrl(url);
-        }
+        parseDocument(doc, inZipPath, (blobUrl) => {
+          if (blobUrl) { loadUrl(blobUrl); }
+        });
       });
       // @TODO: use specified file encoding if it's not UTF-8?
       reader.readAsText(file, "UTF-8");
@@ -398,7 +397,7 @@ function initWithoutFileSystem() {
     fileSelector.style.display = 'none';
   };
 
-  var parseDocument = function (doc, inZipPath) {
+  var parseDocument = function (doc, inZipPath, onComplete) {
     /**
      * helper functions
      */
@@ -422,10 +421,19 @@ function initWithoutFileSystem() {
       return parseUrl(url).url;
     };
 
+    var parserCheckDone = function () {};
+
+    var parserDone = function () {
+      var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
+      var blobUrl = URL.createObjectURL(new Blob([content], {type: doc.contentType}));
+      onComplete(blobUrl);
+    };
+
     /**
      * main
      */
     var refUrl = virtualBase + inZipPath;
+    var remainingTasks = 0;
 
     // check meta refresh
     if (metaRefreshAvailable > 0) {
@@ -596,9 +604,17 @@ function initWithoutFileSystem() {
       }
     });
 
-    // return the content
-    var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
-    return URL.createObjectURL(new Blob([content], {type: doc.contentType}));
+    // parserCheckDone calls before here should be nullified
+    // since the document parsing is not finished yet at that moment
+    parserCheckDone = function () {
+      if (remainingTasks <= 0) {
+        parserDone();
+      }
+    };
+
+    // the document parsing is finished, finalize the document 
+    // if there is no pending parsing now
+    parserCheckDone();
   };
 
   /**
