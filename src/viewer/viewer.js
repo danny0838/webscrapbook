@@ -149,14 +149,10 @@ function init(myFileSystem) {
         };
 
         var onAllDirectoryParsed = function (indexFileEntries) {
-          var validIndexes = 0;
-          indexFileEntries.forEach((indexFileEntry) => {
-            if (indexFileEntry) {
-              validIndexes++;
-              onZipExtracted(indexFileEntry);
-            }
-          });
-          if (validIndexes === 0) {
+          let validIndexFileEntries = indexFileEntries.filter(x => !!x);
+          if (validIndexFileEntries.length) {
+            onZipExtracted(validIndexFileEntries);
+          } else {
             alert("No available data can be loaded from this maff file.");
           }
         };
@@ -196,8 +192,21 @@ function init(myFileSystem) {
     }
   };
 
-  var onZipExtracted = function (indexFileEntry) {
-    var url = indexFileEntry.toURL() + urlSearch + urlHash;
+  var onZipExtracted = function (indexFileEntries) {
+    if (Object.prototype.toString.call(indexFileEntries) !== "[object Array]") {
+      indexFileEntries = [indexFileEntries];
+    }
+
+    let url;
+    indexFileEntries.forEach((indexFileEntry) => {
+      url = loadEntry(indexFileEntry);
+    });
+
+    loadUrl(url);
+  };
+
+  var loadEntry = function (entry) {
+    var url = entry.toURL() + urlSearch + urlHash;
 
     var docUrl = new URL(document.URL);
     var urlObj = new URL(url);
@@ -206,7 +215,7 @@ function init(myFileSystem) {
     docUrl.search = "?href=" + encodeURIComponent(urlObj.pathname.slice(1) + urlObj.search);
     history.pushState({}, null, docUrl.href);
 
-    loadUrl(url);
+    return url;
   };
 
   var loadUrl = function (url) {
