@@ -470,14 +470,6 @@ function initWithoutFileSystem() {
         return null;
       }
     }
-    
-    // modify base
-    Array.prototype.forEach.call(doc.querySelectorAll("base"), (elem) => {
-      elem.parentNode.removeChild(elem);
-    });
-    var baseElem = doc.createElement("base");
-    baseElem.href = virtualBase;
-    doc.querySelector("head").appendChild(baseElem);
 
     // modify URLs
     Array.prototype.forEach.call(doc.querySelectorAll("*"), (elem) => {
@@ -551,10 +543,15 @@ function initWithoutFileSystem() {
           if (elem.hasAttribute("href")) {
             let info = parseUrl(elem.getAttribute("href"));
             if (info.inZip) {
-              elem.setAttribute("href", info.url);
-              if (["text/html", "application/xhtml+xml"].indexOf(info.mime) !== -1) {
-                // link to another document in the zip
-                elem.setAttribute(loaderKey, info.inZipPath);
+              if (info.inZipPath !== inZipPath) {
+                elem.setAttribute("href", info.url);
+                if (["text/html", "application/xhtml+xml"].indexOf(info.mime) !== -1) {
+                  // link to another document in the zip
+                  elem.setAttribute(loaderKey, info.inZipPath);
+                }
+              } else {
+                // link to self
+                elem.setAttribute("href", info.search + info.hash || "#");
               }
             } else {
               // link target is not in the zip
