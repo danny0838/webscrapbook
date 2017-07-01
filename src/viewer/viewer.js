@@ -375,7 +375,7 @@ function initWithoutFileSystem() {
       blobUrlToInZipPath[inZipFiles[path].url] = path;
     }
 
-    loadFile(indexFilePaths[0]);
+    loadFile(indexFilePaths[0], urlSearch + urlHash);
   };
 
   var loadFile = function (inZipPath, url) {
