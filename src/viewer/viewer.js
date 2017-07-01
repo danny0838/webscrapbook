@@ -598,7 +598,7 @@ function initWithoutFileSystem() {
 
     // return the content
     var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
-    return URL.createObjectURL(new Blob([content], {type: "text/html"}));
+    return URL.createObjectURL(new Blob([content], {type: doc.contentType}));
   };
 
   /**
