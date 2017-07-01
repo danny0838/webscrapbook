@@ -179,12 +179,18 @@ scrapbook.urlToFilename = function (url) {
   return name;
 };
 
+scrapbook.splitUrl = function (url) {
+  var name = url, search = "", hash = "", pos;
+  pos = name.indexOf("#");
+  if (pos !== -1) { hash = name.slice(pos); name = name.slice(0, pos); }
+  pos = name.indexOf("?");
+  if (pos !== -1) { search = name.slice(pos); name = name.slice(0, pos); }
+  return [name, search, hash];
+};
+
 scrapbook.splitUrlByAnchor = function (url) {
-  var pos = url.indexOf("#");
-  if (pos >= 0) {
-    return [url.substring(0, pos), url.substring(pos, url.length)];
-  }
-  return [url, ""];
+  var [name, search, hash] = scrapbook.splitUrl(url);
+  return [name + search, hash];
 };
 
 /**
