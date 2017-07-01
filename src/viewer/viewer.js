@@ -60,7 +60,7 @@ function init(myFileSystem) {
     });
   };
 
-  var extractZipFile = function (file, callback) {
+  var extractZipFile = function (file) {
     var pendingZipEntry = 0;
     var ns = scrapbook.getUuid();
     var type = scrapbook.filenameParts(file.name)[1].toLowerCase();
@@ -73,11 +73,11 @@ function init(myFileSystem) {
           ++pendingZipEntry;
           zipObj.async("arraybuffer").then((ab) => {
             createFile(myFileSystem.root, ns + "/" + inZipPath, new Blob([ab], {type: "text/plain"}), () => {
-              if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns, callback); }
+              if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns); }
             });
           });
         });
-        if (pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns, callback); }
+        if (pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns); }
       }, (ex) => {
         alert("Unable to create directory: '" + ns + "': " + ex);
       });
@@ -86,7 +86,7 @@ function init(myFileSystem) {
     });
   };
 
-  var onAllZipEntriesProcessed = function (type, ns, callback) {
+  var onAllZipEntriesProcessed = function (type, ns) {
     switch (type) {
       case "maff": {
         var readRdfFile = function (file, callback) {
@@ -153,7 +153,7 @@ function init(myFileSystem) {
           indexFileEntries.forEach((indexFileEntry) => {
             if (indexFileEntry) {
               validIndexes++;
-              callback(indexFileEntry);
+              onZipExtracted(indexFileEntry);
             }
           });
           if (validIndexes === 0) {
@@ -187,7 +187,7 @@ function init(myFileSystem) {
       default: {
         var indexFile = ns + "/" + "index.html";
         myFileSystem.root.getFile(indexFile, {}, (fileEntry) => {
-          callback(fileEntry);
+          onZipExtracted(fileEntry);
         }, (ex) => {
           alert("Unable to get file: '" + indexFile + "': " + ex);
         });
@@ -238,7 +238,7 @@ function init(myFileSystem) {
       var entry = item.webkitGetAsEntry();
       if (entry.isFile) {
         entry.file((file) => {
-          extractZipFile(file, onZipExtracted);
+          extractZipFile(file);
         });
       }
     });
@@ -252,7 +252,7 @@ function init(myFileSystem) {
   fileSelectorInput.addEventListener("change", (e) => {
     e.preventDefault();
     var file = e.target.files[0];
-    extractZipFile(file, onZipExtracted);
+    extractZipFile(file);
   }, false);
 
   viewer.addEventListener("load", (e) => {
@@ -298,7 +298,7 @@ function init(myFileSystem) {
         } else if (xhr.readyState === 4) {
           if (xhr.status == 200 || xhr.status == 0) {
             let file = new File([xhr.response], filename);
-            extractZipFile(file, onZipExtracted);
+            extractZipFile(file);
           }
         }
       };
