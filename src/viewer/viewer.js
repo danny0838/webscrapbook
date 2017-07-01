@@ -324,8 +324,8 @@ function initWithFileSystem(myFileSystem) {
 
 function initWithoutFileSystem() {
   var inZipFiles = {};
+  var blobUrlToInZipPath = {};
   var virtualBase = chrome.runtime.getURL("viewer/!/");
-  var loaderKey = "data-sb-" + scrapbook.dateToId() + "-viewer-inzippath";
 
   /**
    * common helper functions
@@ -369,6 +369,10 @@ function initWithoutFileSystem() {
   var onZipExtracted = function (indexFilePaths) {
     if (Object.prototype.toString.call(indexFilePaths) !== "[object Array]") {
       indexFilePaths = [indexFilePaths];
+    }
+
+    for (let path in inZipFiles) {
+      blobUrlToInZipPath[inZipFiles[path].url] = path;
     }
 
     loadFile(indexFilePaths[0]);
@@ -550,10 +554,6 @@ function initWithoutFileSystem() {
             if (info.inZip) {
               if (info.inZipPath !== inZipPath) {
                 elem.setAttribute("href", info.url);
-                if (["text/html", "application/xhtml+xml"].indexOf(info.mime) !== -1) {
-                  // link to another document in the zip
-                  elem.setAttribute(loaderKey, info.inZipPath);
-                }
               } else {
                 // link to self
                 elem.setAttribute("href", info.search + info.hash || "#");
@@ -690,18 +690,26 @@ function initWithoutFileSystem() {
   viewer.addEventListener("load", (e) => {
     var doc = viewer.contentDocument;
     document.title = doc.title;
-    Array.prototype.forEach.call(doc.querySelectorAll("a, area"), (elem) => {
-      if (elem.hasAttribute(loaderKey)) {
-        elem[loaderKey] = elem.getAttribute(loaderKey);
-        elem.removeAttribute(loaderKey);
-        elem.addEventListener("click", (e) => {
-          e.preventDefault();
-          let elem = e.target;
-          let inZipPath = elem[loaderKey];
-          loadFile(inZipPath, elem.href);
-        });
+
+    doc.documentElement.addEventListener("click", (e) => {
+      let elem = e.target;
+      switch (elem.nodeName.toLowerCase()) {
+        case "a": case "area":
+          try {
+            let url = new URL(elem.href);
+            url.search = url.hash = "";
+            let inZipPath = blobUrlToInZipPath[url.href];
+            if (inZipPath) {
+              let f = inZipFiles[inZipPath];
+              if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
+                e.preventDefault();
+                e.stopPropagation();
+                loadFile(inZipPath, elem.href);
+              }
+            }
+          } catch (ex) {}
       }
-    });
+    }, false);
   });
 
   // if source is specified, load it
