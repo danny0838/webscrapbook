@@ -341,7 +341,8 @@ function initWithoutFileSystem() {
         ++pendingZipEntry;
         zipObj.async("arraybuffer").then((ab) => {
           let mime = Mime.prototype.lookup(inZipPath);
-          inZipFiles[inZipPath] = new File([ab], scrapbook.urlToFilename(inZipPath), {type: mime});
+          let f = new File([ab], scrapbook.urlToFilename(inZipPath), {type: mime});
+          inZipFiles[inZipPath] = {file: f, url: URL.createObjectURL(f)};
           if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type); }
         });
       });
@@ -381,21 +382,25 @@ function initWithoutFileSystem() {
         searchAndHash = urlObj.search + urlObj.hash;
       } catch (ex) {}
     }
-    var file = inZipFiles[inZipPath];
-    if (["text/html", "application/xhtml+xml"].indexOf(file.type) !== -1) {
-      var reader = new FileReader();
-      reader.addEventListener("loadend", () => {
-        var content = reader.result;
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(content, "text/html");
-        parseDocument(doc, inZipPath, (blobUrl) => {
-          if (blobUrl) { loadUrl(blobUrl + searchAndHash); }
+    let f = inZipFiles[inZipPath];
+    if (f) {
+      if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
+        var reader = new FileReader();
+        reader.addEventListener("loadend", () => {
+          var content = reader.result;
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(content, "text/html");
+          parseDocument(doc, inZipPath, (blobUrl) => {
+            if (blobUrl) { loadUrl(blobUrl + searchAndHash); }
+          });
         });
-      });
-      // @TODO: use specified file encoding if it's not UTF-8?
-      reader.readAsText(file, "UTF-8");
+        // @TODO: use specified file encoding if it's not UTF-8?
+        reader.readAsText(f.file, "UTF-8");
+      } else {
+        loadUrl(f.url + searchAndHash);
+      }
     } else {
-      loadUrl(URL.createObjectURL(file) + searchAndHash);
+      loadUrl("about:blank" + searchAndHash);
     }
   };
 
@@ -418,13 +423,13 @@ function initWithoutFileSystem() {
         absoluteUrl.hash = "";
         let inZipPath = absoluteUrl.href.slice(virtualBase.length);
         inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
-        let file = inZipFiles[inZipPath];
-        if (file) {
+        let f = inZipFiles[inZipPath];
+        if (f) {
           return {
-            url: URL.createObjectURL(file) + search + hash,
+            url: f.url + search + hash,
             inZip: true,
             inZipPath: inZipPath,
-            mime: file.type,
+            mime: f.file.type,
             search: search,
             hash: hash
           };
