@@ -696,9 +696,8 @@ function initWithoutFileSystem() {
       switch (elem.nodeName.toLowerCase()) {
         case "a": case "area":
           try {
-            let url = new URL(elem.href);
-            url.search = url.hash = "";
-            let inZipPath = blobUrlToInZipPath[url.href];
+            let url = scrapbook.splitUrl(elem.href)[0];
+            let inZipPath = blobUrlToInZipPath[url];
             if (inZipPath) {
               let f = inZipFiles[inZipPath];
               if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
