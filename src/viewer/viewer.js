@@ -325,7 +325,6 @@ function initWithFileSystem(myFileSystem) {
 function initWithoutFileSystem() {
   var inZipFiles = {};
   var virtualBase = chrome.runtime.getURL("viewer/!/");
-  var virtualRef = virtualBase;
 
   /**
    * common helper functions
@@ -422,6 +421,7 @@ function initWithoutFileSystem() {
     /**
      * main
      */
+    var refUrl = virtualBase + inZipPath;
 
     // check meta refresh
     if (metaRefreshAvailable > 0) {
@@ -430,7 +430,7 @@ function initWithoutFileSystem() {
         if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content") &&
             elem.getAttribute("http-equiv").toLowerCase() == "refresh" && 
             elem.getAttribute("content").match(/^[^;]*;\s*url=(.*)$/i) ) {
-          metaRefreshTarget = new URL(RegExp.$1, virtualRef);
+          metaRefreshTarget = new URL(RegExp.$1, refUrl);
         }
       });
       if (metaRefreshTarget) {
@@ -440,7 +440,6 @@ function initWithoutFileSystem() {
           var hash = metaRefreshTarget.hash;
           metaRefreshTarget.search = "";
           metaRefreshTarget.hash = "";
-          virtualRef = metaRefreshTarget.href;
           var inZipPath = metaRefreshTarget.href.slice(virtualBase.length);
           inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
           loadFile(inZipPath);
