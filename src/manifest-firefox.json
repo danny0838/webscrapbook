@@ -14,8 +14,6 @@
     }
   },
 
-  "content_security_policy": "script-src 'self' 'unsafe-eval' blob:; object-src 'self' blob:",
-
   "homepage_url": "https://github.com/danny0838/webscrapbook",
 
   "icons": {
@@ -59,6 +57,14 @@
       ],
       "all_frames": true
     }
+  ],
+
+  "web_accessible_resources": [
+    "core/common.js",
+    "lib/jsSHA.js",
+    "lib/mime.js",
+    "lib/jszip.js",
+    "viewer/zipviewer.js"
   ],
 
   "options_ui": {

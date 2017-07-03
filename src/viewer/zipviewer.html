@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>__MSG_ViewerTitle__</title>
+<script></script>
+<script src="../core/common.js"></script>
+<script src="../lib/jsSHA.js"></script>
+<script src="../lib/jszip.js"></script>
+<script src="../lib/mime.js"></script>
+<script src="zipviewer.js"></script>
+<style>
+body {
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+#wrapper {
+  position: relative;
+  display: none;
+}
+
+#viewer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+</style>
+</head>
+<body>
+<div id="wrapper">
+  <iframe id="viewer" sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"></iframe>
+</div>
+</body>
+</html>

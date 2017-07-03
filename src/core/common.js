@@ -21,10 +21,10 @@ scrapbook.runtime = {
   viewerRedirectKey: "kwo7vzrTJ9btCVZ"
 };
 
-{
+try {
   let manifest = chrome.runtime.getManifest();
   scrapbook.runtime.isGecko = manifest.applications && manifest.applications.gecko;
-}
+} catch (ex) {}
 
 
 /********************************************************************

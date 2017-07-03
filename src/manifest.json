@@ -16,8 +16,6 @@
     "128": "core/scrapbook_128.png"
   },
 
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
-
   "permissions": [
     "downloads",
     "storage",
@@ -54,6 +52,14 @@
       ],
       "all_frames": true
     }
+  ],
+
+  "web_accessible_resources": [
+    "core/common.js",
+    "lib/jsSHA.js",
+    "lib/mime.js",
+    "lib/jszip.js",
+    "viewer/zipviewer.js"
   ],
 
   "options_ui": {
