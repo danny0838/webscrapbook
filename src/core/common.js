@@ -551,17 +551,19 @@ scrapbook.doctypeToString = function (doctype) {
 };
 
 /**
- * @callback SrcsetReplaceFunc
+ * The function that rewrites each URL into a new URL.
+ *
+ * @callback parseSrcsetRewriteFunc
  * @param {string} url
  * @return {string} newUrl
  */
 
 /**
  * @param {string} srcset
- * @param {SrcsetReplaceFunc} replaceFunc - the function that replaces each URL into a new URL
+ * @param {parseSrcsetRewriteFunc} rewriteFunc
  */
-scrapbook.parseSrcset = function (srcset, replaceFunc) {
+scrapbook.parseSrcset = function (srcset, rewriteFunc) {
   return srcset.replace(/(\s*)([^ ,][^ ]*[^ ,])(\s*(?: [^ ,]+)?\s*(?:,|$))/g, (m, m1, m2, m3) => {
-    return m1 + replaceFunc(m2) + m3;
+    return m1 + rewriteFunc(m2) + m3;
   });
 };
