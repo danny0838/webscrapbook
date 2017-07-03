@@ -197,31 +197,17 @@ function initWithFileSystem(myFileSystem) {
       indexFileEntries = [indexFileEntries];
     }
 
-    let url;
-    indexFileEntries.forEach((indexFileEntry) => {
-      url = loadEntry(indexFileEntry);
+    chrome.tabs.getCurrent((tab) => {
+      mainUrl.search = mainUrl.hash = "";
+      history.replaceState({}, null, mainUrl);
+      let mainFileEntry = indexFileEntries.shift();
+      indexFileEntries.forEach((indexFileEntry) => {
+        let url = indexFileEntry.toURL() + urlSearch + urlHash;
+        chrome.tabs.create({url: url}, () => {});
+      });
+      let url = mainFileEntry.toURL() + urlSearch + urlHash;
+      chrome.tabs.update(tab.id, {url: url}, () => {});
     });
-
-    loadUrl(url);
-  };
-
-  var loadEntry = function (entry) {
-    var url = entry.toURL() + urlSearch + urlHash;
-
-    var docUrl = new URL(document.URL);
-    var urlObj = new URL(url);
-    docUrl.hash = urlObj.hash;
-    urlObj.hash = "";
-    docUrl.search = "?href=" + encodeURIComponent(urlObj.pathname.slice(1) + urlObj.search);
-    history.pushState({}, null, docUrl.href);
-
-    return url;
-  };
-
-  var loadUrl = function (url) {
-    viewer.src = url;
-    wrapper.style.display = 'block';
-    fileSelector.style.display = 'none';
   };
 
   /**
@@ -230,8 +216,6 @@ function initWithFileSystem(myFileSystem) {
   var fileSelector = document.getElementById('file-selector');
   var fileSelectorDrop = document.getElementById('file-selector-drop');
   var fileSelectorInput = document.getElementById('file-selector-input');
-  var wrapper = document.getElementById('wrapper');
-  var viewer = document.getElementById('viewer');
   var urlSearch = "";
   var urlHash = "";
 
@@ -264,24 +248,8 @@ function initWithFileSystem(myFileSystem) {
     extractZipFile(file);
   }, false);
 
-  viewer.addEventListener("load", (e) => {
-    document.title = viewer.contentDocument.title;
-  });
-
   // if source is specified, load it
   let mainUrl = new URL(document.URL);
-
-  let href = mainUrl.searchParams.get("href");
-  if (href) {
-    let url = new URL(href, "file://");
-    myFileSystem.root.getFile(url.pathname, {}, (indexFileEntry) => {
-      let targetUrl = indexFileEntry.toURL() + url.search + mainUrl.hash;
-      loadUrl(targetUrl);
-    }, (ex) => {
-      alert("Unable to load file: '" + href + "': " + ex);
-    });
-    return;
-  }
 
   let src = mainUrl.searchParams.get("src");
   if (src) {
