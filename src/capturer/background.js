@@ -781,36 +781,13 @@ capturer.saveBlob = function (params, onComplete, onError) {
     return;
   }
 
-  var saveUrl = function (url) {
-    capturer.saveUrl({
-      url: url,
-      directory: directory,
-      filename: filename,
-      sourceUrl: sourceUrl,
-      autoErase: autoErase
-    }, onComplete, onError);
-  };
-
-  if (scrapbook.runtime.isGecko) {
-    // XMLHttpRequest cannot access data URI in Firefox WebExtension,
-    // while blob URI is not restricted at all.
-    saveUrl(URL.createObjectURL(blob));
-  } else {
-    chrome.extension.isAllowedIncognitoAccess((isAllowedAccess) => {
-      if (isAllowedAccess) {
-        // XMLHttpRequest cannot access blob URI if incognito access is allowed.
-        // Use data URI instead. (This could cause a performance drop especially
-        // for very large blobs.)
-        var reader = new FileReader();
-        reader.addEventListener("loadend", () => {
-          saveUrl(reader.result);
-        });
-        reader.readAsDataURL(blob);
-      } else {
-        saveUrl(URL.createObjectURL(blob));
-      }
-    });
-  }
+  capturer.saveUrl({
+    url: URL.createObjectURL(blob),
+    directory: directory,
+    filename: filename,
+    sourceUrl: sourceUrl,
+    autoErase: autoErase
+  }, onComplete, onError);
 
   return true; // async response
 };
