@@ -153,61 +153,47 @@ capturer.captureUrl = function (params, callback) {
   var options = params.options;
 
   var filename;
-  
-  var xhr = new XMLHttpRequest();
 
-  var xhr_shutdown = function () {
-    xhr.onreadystatechange = xhr.onerror = xhr.ontimeout = null;
-    xhr.abort();
-  };
-
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 2) {
-      // if header Content-Disposition is defined, use it
-      try {
-        let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-        let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-        filename = contentDisposition.parameters.filename || filename;
-      } catch (ex) {}
-    } else if (xhr.readyState === 4) {
-      if (xhr.status == 200 || xhr.status == 0) {
-        let doc = xhr.response;
-        if (doc) {
-          capturer.captureDocumentOrFile(doc, settings, options, callback);
+  scrapbook.xhr({
+    url: sourceUrl,
+    responseType: "document",
+    onreadystatechange: function (xhr, xhrAbort) {
+      if (xhr.readyState === 2) {
+        // if header Content-Disposition is defined, use it
+        try {
+          let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+          let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+          filename = contentDisposition.parameters.filename || filename;
+        } catch (ex) {}
+      } else if (xhr.readyState === 4) {
+        if (xhr.status == 200 || xhr.status == 0) {
+          let doc = xhr.response;
+          if (doc) {
+            capturer.captureDocumentOrFile(doc, settings, options, callback);
+          } else {
+            capturer.captureFile({
+              url: params.url,
+              settings: params.settings,
+              options: params.options
+            }, callback);
+          }
         } else {
-          capturer.captureFile({
-            url: params.url,
-            settings: params.settings,
-            options: params.options
-          }, callback);
+          xhr.onerror();
         }
-      } else {
-        xhr.onerror();
       }
+    },
+    ontimeout: function (xhr, xhrAbort) {
+      console.warn(scrapbook.lang("ErrorFileDownloadTimeout", sourceUrl));
+      callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: "timeout"});
+      xhrAbort();
+    },
+    onerror: function (xhr, xhrAbort) {
+      var err = [xhr.status, xhr.statusText].join(" ");
+      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
+      callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: err});
+      xhrAbort();
     }
-  };
-
-  xhr.ontimeout = function () {
-    console.warn(scrapbook.lang("ErrorFileDownloadTimeout", sourceUrl));
-    callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: "timeout"});
-    xhr_shutdown();
-  };
-
-  xhr.onerror = function () {
-    var err = [xhr.status, xhr.statusText].join(" ");
-    console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
-    callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: err});
-    xhr_shutdown();
-  };
-
-  try {
-    xhr.responseType = "document";
-    xhr.open("GET", sourceUrl, true);
-    xhr.send();
-  } catch (ex) {
-    console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex]));
-    callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
-  }
+  });
 
   return true; // async response
 };
@@ -535,108 +521,94 @@ capturer.downloadFile = function (params, callback) {
     return true; // async response
   }
 
-  var xhr = new XMLHttpRequest();
+  scrapbook.xhr({
+    url: sourceUrl,
+    responseType: "blob",
+    onreadystatechange: function (xhr, xhrAbort) {
+      if (xhr.readyState === 2) {
+        // determine the filename
+        // if header Content-Disposition is defined, use it
+        try {
+          let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+          if (headerContentDisposition) {
+            let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            headers.isAttachment = (contentDisposition.type === "attachment");
+            headers.filename = contentDisposition.parameters.filename;
+            filename = headers.filename || filename;
+          }
+        } catch (ex) {}
 
-  var xhr_shutdown = function () {
-    xhr.onreadystatechange = xhr.onerror = xhr.ontimeout = null;
-    xhr.abort();
-  };
-
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 2) {
-      // determine the filename
-      // if header Content-Disposition is defined, use it
-      try {
-        let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-        if (headerContentDisposition) {
-          let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-          headers.isAttachment = (contentDisposition.type === "attachment");
-          headers.filename = contentDisposition.parameters.filename;
-          filename = headers.filename || filename;
-        }
-      } catch (ex) {}
-
-      // if no file extension, give one according to header Content-Type.
-      try {
-        let headerContentType = xhr.getResponseHeader("Content-Type");
-        if (headerContentType) {
-          let contentType = scrapbook.parseHeaderContentType(headerContentType);
-          headers.contentType = contentType.contentType;
-          headers.charset = contentType.charset;
-          if (headers.contentType) {
-            let [base, extension] = scrapbook.filenameParts(filename);
-            if (!extension) {
-              extension = Mime.prototype.extension(headers.contentType);
-              filename = base + "." + (extension || "dat");
+        // if no file extension, give one according to header Content-Type.
+        try {
+          let headerContentType = xhr.getResponseHeader("Content-Type");
+          if (headerContentType) {
+            let contentType = scrapbook.parseHeaderContentType(headerContentType);
+            headers.contentType = contentType.contentType;
+            headers.charset = contentType.charset;
+            if (headers.contentType) {
+              let [base, extension] = scrapbook.filenameParts(filename);
+              if (!extension) {
+                extension = Mime.prototype.extension(headers.contentType);
+                filename = base + "." + (extension || "dat");
+              }
             }
           }
+        } catch (ex) {
+          console.error(ex);
         }
-      } catch (ex) {
-        console.error(ex);
-      }
 
-      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-      if (options["capture.saveAs"] !== "singleHtml") {
-        ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
-        if (isDuplicate) {
-          callback({filename: filename, url: scrapbook.escapeFilename(filename), isDuplicate: true});
-          xhr_shutdown();
+        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        if (options["capture.saveAs"] !== "singleHtml") {
+          ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
+          if (isDuplicate) {
+            callback({filename: filename, url: scrapbook.escapeFilename(filename), isDuplicate: true});
+            xhrAbort();
+          }
         }
-      }
-    } else if (xhr.readyState === 4) {
-      if ((xhr.status == 200 || xhr.status == 0) && xhr.response) {
-        if (rewriteMethod && capturer[rewriteMethod]) {
-          capturer[rewriteMethod]({
-            settings: settings,
-            options: options,
-            data: xhr.response,
-            charset: headers.charset,
-            url: xhr.responseURL
-          }, (response) => {
+      } else if (xhr.readyState === 4) {
+        if ((xhr.status == 200 || xhr.status == 0) && xhr.response) {
+          if (rewriteMethod && capturer[rewriteMethod]) {
+            capturer[rewriteMethod]({
+              settings: settings,
+              options: options,
+              data: xhr.response,
+              charset: headers.charset,
+              url: xhr.responseURL
+            }, (response) => {
+              capturer.downloadBlob({
+                settings: settings,
+                options: options,
+                blob: response,
+                filename: filename,
+                sourceUrl: sourceUrl,
+              }, callback);
+            });
+          } else {
             capturer.downloadBlob({
               settings: settings,
               options: options,
-              blob: response,
+              blob: xhr.response,
               filename: filename,
               sourceUrl: sourceUrl,
             }, callback);
-          });
+          }
         } else {
-          capturer.downloadBlob({
-            settings: settings,
-            options: options,
-            blob: xhr.response,
-            filename: filename,
-            sourceUrl: sourceUrl,
-          }, callback);
+          xhr.onerror();
         }
-      } else {
-        xhr.onerror();
       }
+    },
+    ontimeout: function (xhr, xhrAbort) {
+      console.warn(scrapbook.lang("ErrorFileDownloadTimeout", sourceUrl));
+      callback({url: capturer.getErrorUrl(sourceUrl, options), error: "timeout"});
+      xhrAbort();
+    },
+    onerror: function (xhr, xhrAbort) {
+      let err = [xhr.status, xhr.statusText].join(" ");
+      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
+      callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
+      xhrAbort();
     }
-  };
-
-  xhr.ontimeout = function () {
-    console.warn(scrapbook.lang("ErrorFileDownloadTimeout", sourceUrl));
-    callback({url: capturer.getErrorUrl(sourceUrl, options), error: "timeout"});
-    xhr_shutdown();
-  };
-
-  xhr.onerror = function () {
-    let err = [xhr.status, xhr.statusText].join(" ");
-    console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
-    callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
-    xhr_shutdown();
-  };
-
-  try {
-    xhr.responseType = "blob";
-    xhr.open("GET", sourceUrl, true);
-    xhr.send();
-  } catch (ex) {
-    console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex]));
-    callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
-  }
+  });
 
   return true; // async response
 };

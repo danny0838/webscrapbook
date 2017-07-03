@@ -567,3 +567,61 @@ scrapbook.parseSrcset = function (srcset, rewriteFunc) {
     return m1 + rewriteFunc(m2) + m3;
   });
 };
+
+
+/********************************************************************
+ * Network utilities
+ *******************************************************************/
+
+/**
+ * The callback function that aborts the XMLHttpRequest when called.
+ *
+ * @callback xhrAbortCallback
+ */
+
+/**
+ * @callback xhrEventHandler
+ * @param {XMLHttpRequest} xhr
+ * @param {xhrAbortCallback} xhrAbort
+ */
+
+/**
+ * A simple XMLHttpRequest wrapper for most common tasks
+ *
+ * @param {Object} params
+ *     - {string} params.url
+ *     - {string} params.responseType
+ *     - {xhrEventHandler} params.onreadystatechange
+ *     - {xhrEventHandler} params.onerror
+ *     - {xhrEventHandler} params.ontimeout
+ */
+scrapbook.xhr = function (params) {
+  var xhr = new XMLHttpRequest();
+
+  var xhrAbort = function () {
+    xhr.onreadystatechange = xhr.onerror = xhr.ontimeout = null;
+    xhr.abort();
+  };
+
+  xhr.onreadystatechange = function () {
+    params && params.onreadystatechange && params.onreadystatechange(xhr, xhrAbort);
+  };
+
+  xhr.onerror = function () {
+    params && params.onerror && params.onerror(xhr, xhrAbort);
+  };
+
+  xhr.ontimeout = function () {
+    var handler = params && params.ontimeout || params.onerror;
+    handler && handler(xhr, xhrAbort);
+  };
+
+  try {
+    xhr.responseType = params.responseType;
+    xhr.open("GET", params.url, true);
+    xhr.send();
+  } catch (ex) {
+    console.error(ex);
+    xhr.onerror();
+  }
+};
