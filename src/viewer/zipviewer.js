@@ -1,16 +1,6 @@
 (function (window, undefined) {
-  var virtualBase = window.viewerData.virtualBase;
 
-  var inZipFiles = {};
-  var blobUrlToInZipPath = {};
-
-  var viewer;
-  var wrapper;
-
-  var urlSearch = "";
-  var urlHash = location.hash;
-  var metaRefreshAvailable = 5;
-
+document.addEventListener("DOMContentLoaded", function () {
   /**
    * common helper functions
    */
@@ -20,22 +10,24 @@
     return u8ar.buffer;
   };
 
-  var dataUriToBlob = function (dataUri) {
+  var dataUriToFile = function (dataUri) {
     if (dataUri.startsWith("data:")) {
       dataUri = dataUri.slice(5);
 
       var pos = dataUri.indexOf(",");
+      var meta = dataUri.slice(0, pos);
+      var [mime, filename, base64] = meta.split(";");
+      var filename = decodeURIComponent(filename.replace(/^filename=/i, ""));
       var data = dataUri.slice(pos + 1);
       var bstr = atob(data), ab = byteStringToArrayBuffer(bstr);
-      return new Blob([ab], {type: "application/octet-stream"});
+      return new File([ab], filename, {type: "application/octet-stream"});
     }
     return null;
   };
 
   var extractZipFile = function (file) {
     var pendingZipEntry = 0;
-    // @TODO: support other types such as maff
-    var type = "zip";
+    var type = scrapbook.filenameParts(file.name)[1].toLowerCase();
 
     var zip = new JSZip();
     zip.loadAsync(file).then((zip) => {
@@ -346,35 +338,46 @@
     parserCheckDone();
   };
 
-  document.addEventListener("DOMContentLoaded", function () {
-    viewer = document.getElementById('viewer');
-    wrapper = document.getElementById('wrapper');
+  /**
+   * main
+   */
+  var virtualBase = window.viewerData.virtualBase;
 
-    viewer.addEventListener("load", (e) => {
-      var doc = viewer.contentDocument;
-      document.title = doc.title;
+  var inZipFiles = {};
+  var blobUrlToInZipPath = {};
 
-      doc.documentElement.addEventListener("click", (e) => {
-        let elem = e.target;
-        switch (elem.nodeName.toLowerCase()) {
-          case "a": case "area":
-            try {
-              let url = scrapbook.splitUrl(elem.href)[0];
-              let inZipPath = blobUrlToInZipPath[url];
-              if (inZipPath) {
-                let f = inZipFiles[inZipPath];
-                if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  loadFile(inZipPath, elem.href);
-                }
+  var viewer = document.getElementById('viewer');
+  var wrapper = document.getElementById('wrapper');
+
+  var urlSearch = "";
+  var urlHash = location.hash;
+  var metaRefreshAvailable = 5;
+
+  viewer.addEventListener("load", (e) => {
+    var doc = viewer.contentDocument;
+    document.title = doc.title;
+
+    doc.documentElement.addEventListener("click", (e) => {
+      let elem = e.target;
+      switch (elem.nodeName.toLowerCase()) {
+        case "a": case "area":
+          try {
+            let url = scrapbook.splitUrl(elem.href)[0];
+            let inZipPath = blobUrlToInZipPath[url];
+            if (inZipPath) {
+              let f = inZipFiles[inZipPath];
+              if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
+                e.preventDefault();
+                e.stopPropagation();
+                loadFile(inZipPath, elem.href);
               }
-            } catch (ex) {}
-        }
-      }, false);
-    });
-
-    extractZipFile(dataUriToBlob(window.viewerData.zip));
+            }
+          } catch (ex) {}
+      }
+    }, false);
   });
+
+  extractZipFile(dataUriToFile(window.viewerData.zip));
+});
 
 })(window, undefined);
