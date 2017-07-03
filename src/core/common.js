@@ -388,10 +388,9 @@ scrapbook.dataUriToFile = function (dataUri) {
       ext = ext ? ("." + ext) : "";
 
       if (base64) {
-        var bstr = atob(data), n = bstr.length, u8ar = new Uint8Array(n);
-        while (n--) { u8ar[n] = bstr.charCodeAt(n); }
-        var filename = scrapbook.sha1(u8ar, "ARRAYBUFFER") + ext;
-        var file = new File([u8ar], filename, {type: mime});
+        var bstr = atob(data), ab = scrapbook.byteStringToArrayBuffer(bstr);
+        var filename = scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
+        var file = new File([ab], filename, {type: mime});
       } else {
         var charset = (parameters.charset || "US-ASCII").toLowerCase();
         switch (charset) {
