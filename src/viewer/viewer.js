@@ -285,18 +285,18 @@ function initWithFileSystem(myFileSystem) {
 
   let src = mainUrl.searchParams.get("src");
   if (src) {
-    try {
-      let srcUrl = new URL(src);
-      urlSearch = srcUrl.search;
-      urlHash = mainUrl.hash;
-      // use a random hash to avoid recursive redirect
-      srcUrl.searchParams.set(scrapbook.runtime.viewerRedirectKey, 1);
-      src = srcUrl.toString();
-      let filename = scrapbook.urlToFilename(src);
+    let srcUrl = new URL(src);
+    urlSearch = srcUrl.search;
+    urlHash = mainUrl.hash;
+    // use a random hash to avoid recursive redirect
+    srcUrl.searchParams.set(scrapbook.runtime.viewerRedirectKey, 1);
+    src = srcUrl.href;
+    let filename = scrapbook.urlToFilename(src);
 
-      let xhr = new XMLHttpRequest();
-
-      xhr.onreadystatechange = function () {
+    scrapbook.xhr({
+      url: src,
+      responseType: "blob",
+      onreadystatechange: function (xhr, xhrAbort) {
         if (xhr.readyState === 2) {
           // if header Content-Disposition is defined, use it
           try {
@@ -310,14 +310,11 @@ function initWithFileSystem(myFileSystem) {
             extractZipFile(file);
           }
         }
-      };
-
-      xhr.responseType = "blob";
-      xhr.open("GET", src, true);
-      xhr.send();
-    } catch (ex) {
-      alert("Unable to load the specified zip file '" + src + "': " + ex);
-    }
+      },
+      onerror: function (xhr, xhrAbort) {
+        alert("Unable to load the specified zip file '" + src + "'");
+      }
+    });
     return;
   }
 }
