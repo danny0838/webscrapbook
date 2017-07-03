@@ -29,6 +29,19 @@
     "<all_urls>"
   ],
 
+  "options_ui": {
+    "chrome_style": true,
+    "page": "core/options.html"
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "128": "core/scrapbook_128.png"
+    },
+    "default_title": "__MSG_BrowserActionTitle__",
+    "default_popup": "core/browserAction.html"
+  },
+
   "background": {
     "persistent": true,
     "scripts": [
@@ -41,19 +54,6 @@
       "capturer/background.js",
       "viewer/background.js"
     ]
-  },
-
-  "options_ui": {
-    "chrome_style": true,
-    "page": "core/options.html"
-  },
-
-  "browser_action": {
-    "default_icon": {
-      "128": "core/scrapbook_128.png"
-    },
-    "default_title": "__MSG_BrowserActionTitle__",
-    "default_popup": "core/browserAction.html"
   },
 
   "content_scripts": [
