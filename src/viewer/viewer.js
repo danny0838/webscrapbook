@@ -198,8 +198,6 @@ function initWithFileSystem(myFileSystem) {
     }
 
     chrome.tabs.getCurrent((tab) => {
-      mainUrl.search = mainUrl.hash = "";
-      history.replaceState({}, null, mainUrl);
       let mainFileEntry = indexFileEntries.shift();
       indexFileEntries.forEach((indexFileEntry) => {
         let url = indexFileEntry.toURL() + urlSearch + urlHash;
@@ -210,14 +208,59 @@ function initWithFileSystem(myFileSystem) {
     });
   };
 
+  var loadFromUrlParams = function () {
+    let src = mainUrl.searchParams.get("src");
+    if (!src) { return; }
+
+    let srcUrl = new URL(src);
+    urlSearch = srcUrl.search;
+    urlHash = mainUrl.hash;
+    // use a random hash to avoid recursive redirect
+    srcUrl.searchParams.set(scrapbook.runtime.viewerRedirectKey, 1);
+    src = srcUrl.href;
+    let filename = scrapbook.urlToFilename(src);
+
+    scrapbook.xhr({
+      url: src,
+      responseType: "blob",
+      onreadystatechange: function (xhr, xhrAbort) {
+        if (xhr.readyState === 2) {
+          // if header Content-Disposition is defined, use it
+          try {
+            let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+            let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            filename = contentDisposition.parameters.filename || filename;
+          } catch (ex) {}
+        } else if (xhr.readyState === 4) {
+          if (xhr.status == 200 || xhr.status == 0) {
+            let file = new File([xhr.response], filename);
+            extractZipFile(file);
+          }
+        }
+      },
+      onerror: function (xhr, xhrAbort) {
+        alert("Unable to load the specified zip file '" + src + "'");
+      }
+    });
+
+    mainUrl.searchParams.set("reload", 1);
+    history.replaceState({}, null, mainUrl);
+  };
+
   /**
    * main script
    */
+  var reloader = document.getElementById('reloader');
   var fileSelector = document.getElementById('file-selector');
   var fileSelectorDrop = document.getElementById('file-selector-drop');
   var fileSelectorInput = document.getElementById('file-selector-input');
   var urlSearch = "";
   var urlHash = "";
+
+  reloader.addEventListener("click", (e) => {
+    e.preventDefault();
+    loadFromUrlParams();
+  }, false);
 
   fileSelectorDrop.addEventListener("dragover", (e) => {
     e.preventDefault();
@@ -251,39 +294,11 @@ function initWithFileSystem(myFileSystem) {
   // if source is specified, load it
   let mainUrl = new URL(document.URL);
 
-  let src = mainUrl.searchParams.get("src");
-  if (src) {
-    let srcUrl = new URL(src);
-    urlSearch = srcUrl.search;
-    urlHash = mainUrl.hash;
-    // use a random hash to avoid recursive redirect
-    srcUrl.searchParams.set(scrapbook.runtime.viewerRedirectKey, 1);
-    src = srcUrl.href;
-    let filename = scrapbook.urlToFilename(src);
-
-    scrapbook.xhr({
-      url: src,
-      responseType: "blob",
-      onreadystatechange: function (xhr, xhrAbort) {
-        if (xhr.readyState === 2) {
-          // if header Content-Disposition is defined, use it
-          try {
-            let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-            let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-            filename = contentDisposition.parameters.filename || filename;
-          } catch (ex) {}
-        } else if (xhr.readyState === 4) {
-          if (xhr.status == 200 || xhr.status == 0) {
-            let file = new File([xhr.response], filename);
-            extractZipFile(file);
-          }
-        }
-      },
-      onerror: function (xhr, xhrAbort) {
-        alert("Unable to load the specified zip file '" + src + "'");
-      }
-    });
-    return;
+  if (mainUrl.searchParams.has("reload")) {
+    fileSelector.style.display = "none";
+    reloader.style.display = "block";
+  } else {
+    loadFromUrlParams();
   }
 }
 

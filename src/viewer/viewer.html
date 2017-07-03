@@ -15,7 +15,11 @@ body {
   padding: 0;
 }
 
-#file-selector-drop {
+#reloader {
+  display: none;
+}
+
+#file-selector-drop, #reloader-reload {
   width: 100%;
   height: 100px;
   color: white;
@@ -48,6 +52,9 @@ body {
 </style>
 </head>
 <body>
+<div id="reloader">
+  <div id="reloader-reload">__MSG_ViewerReloadText__</div>
+</div>
 <div id="file-selector">
   <div id="file-selector-drop">__MSG_ViewerFileSelectorText__</div>
   <input id="file-selector-input" type="file">
