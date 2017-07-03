@@ -34,6 +34,7 @@ scrapbook.runtime = {
 scrapbook.options = {
   "capture.dataFolder": "WebScrapBook",
   "capture.saveAs": ["downloads", "zip", "maff", "singleHtml", 1],
+  "capture.savePrompt": false,
   "capture.saveAsciiFilename": false,
   "capture.saveSelectionOnly": true,
   "capture.saveInlineAsHtml": false,

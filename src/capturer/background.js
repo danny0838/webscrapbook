@@ -322,7 +322,8 @@ capturer.saveDocument = function (params, callback) {
           directory: targetDir,
           filename: filename,
           sourceUrl: sourceUrl,
-          autoErase: autoErase
+          autoErase: autoErase,
+          savePrompt: options["capture.savePrompt"]
         }, () => {
           callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
         }, (ex) => {
@@ -361,7 +362,8 @@ capturer.saveDocument = function (params, callback) {
             directory: targetDir,
             filename: filename,
             sourceUrl: sourceUrl,
-            autoErase: false
+            autoErase: false,
+            savePrompt: options["capture.savePrompt"]
           }, () => {
             callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
           }, (ex) => {
@@ -421,7 +423,8 @@ capturer.saveDocument = function (params, callback) {
             directory: targetDir,
             filename: filename,
             sourceUrl: sourceUrl,
-            autoErase: false
+            autoErase: false,
+            savePrompt: options["capture.savePrompt"]
           }, () => {
             callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
           }, (ex) => {
@@ -446,7 +449,8 @@ capturer.saveDocument = function (params, callback) {
         directory: targetDir,
         filename: filename,
         sourceUrl: sourceUrl,
-        autoErase: autoErase
+        autoErase: autoErase,
+        savePrompt: false
       }, () => {
         callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
       }, (ex) => {
@@ -744,7 +748,8 @@ capturer.downloadBlob = function (params, callback) {
         directory: targetDir,
         filename: filename,
         sourceUrl: sourceUrl,
-        autoErase: true
+        autoErase: true,
+        savePrompt: false
       }, () => {
         callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
       }, (ex) => {
@@ -765,6 +770,7 @@ capturer.downloadBlob = function (params, callback) {
  *     - {string} params.filename
  *     - {string} params.sourceUrl
  *     - {boolean} params.autoErase
+ *     - {boolean} params.savePrompt
  * @param {function} onComplete - function () {}
  * @param {function} onError - function (ex) {}
  */
@@ -777,6 +783,7 @@ capturer.saveBlob = function (params, onComplete, onError) {
   var filename = params.filename;
   var sourceUrl = params.sourceUrl;
   var autoErase = params.autoErase;
+  var savePrompt = params.savePrompt;
 
   if (!blob) {
     onComplete();
@@ -788,7 +795,8 @@ capturer.saveBlob = function (params, onComplete, onError) {
     directory: directory,
     filename: filename,
     sourceUrl: sourceUrl,
-    autoErase: autoErase
+    autoErase: autoErase,
+    savePrompt: savePrompt
   }, onComplete, onError);
 
   return true; // async response
@@ -802,6 +810,7 @@ capturer.saveBlob = function (params, onComplete, onError) {
  *     - {string} params.filename
  *     - {string} params.sourceUrl
  *     - {boolean} params.autoErase
+ *     - {boolean} params.savePrompt
  * @param {function} onComplete - function () {}
  * @param {function} onError - function (ex) {}
  */
@@ -814,11 +823,13 @@ capturer.saveUrl = function (params, onComplete, onError) {
   var filename = params.filename;
   var sourceUrl = params.sourceUrl;
   var autoErase = params.autoErase;
+  var savePrompt = params.savePrompt;
 
   var downloadParams = {
     url: url,
     filename: (directory ? directory + "/" : "") + filename,
-    conflictAction: "uniquify"
+    conflictAction: "uniquify",
+    saveAs: savePrompt
   };
 
   isDebug && console.debug("download start", downloadParams);
