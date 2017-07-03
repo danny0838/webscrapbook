@@ -1276,7 +1276,6 @@ capturer.processCssFile = function (params, callback) {
       processCss(text);
     });
   } else {
-    var hasCharsetRule = false;
     readCssBytes(data, (bytes) => {
       if (bytes.startsWith("\xEF\xBB\xBF")) {
         charset = "UTF-8";
@@ -1290,14 +1289,13 @@ capturer.processCssFile = function (params, callback) {
         charset = "UTF-32LE";
       } else if (/^@charset (["'])(\w+)\1;/.test(bytes)) {
         charset = RegExp.$2;
-        hasCharsetRule = true;
       }
       if (charset) {
         readCssText(data, charset, (text) => {
           // The read text does not contain a BOM.
+          // Add a BOM so that browser will read this CSS as UTF-8 in the future.
           // This added UTF-16 BOM will be converted to UTF-8 BOM automatically when creating blob.
-          if (hasCharsetRule) { text = "\ufeff" + text; }
-          processCss(text);
+          processCss("\ufeff" + text);
         });
       } else {
         processCss(bytes);
