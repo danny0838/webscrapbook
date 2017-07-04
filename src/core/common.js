@@ -592,6 +592,7 @@ scrapbook.parseSrcset = function (srcset, rewriteFunc) {
  *     - {string} params.url
  *     - {string} params.responseType
  *     - {xhrEventHandler} params.onreadystatechange
+ *     - {xhrEventHandler} params.onloadend
  *     - {xhrEventHandler} params.onerror
  *     - {xhrEventHandler} params.ontimeout
  */
@@ -605,6 +606,10 @@ scrapbook.xhr = function (params) {
 
   xhr.onreadystatechange = function () {
     params && params.onreadystatechange && params.onreadystatechange(xhr, xhrAbort);
+  };
+
+  xhr.onloadend = function () {
+    params && params.onloadend && params.onloadend(xhr, xhrAbort);
   };
 
   xhr.onerror = function () {
