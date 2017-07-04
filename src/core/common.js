@@ -451,16 +451,11 @@ scrapbook.intToFixedStr = function (number, width, padder) {
 };
 
 scrapbook.byteStringToArrayBuffer = function (bstr) {
-  return (new Uint8Array(Array.prototype.map.call(bstr, x => x.charCodeAt(0)))).buffer;
+  return new TextEncoder("utf-8").encode(bstr).buffer;
 };
 
 scrapbook.arrayBufferToByteString = function (ab) {
-  var bufferView = new Uint8Array(ab), result = "", chunkSize = 0xFFFF;
-  for (let i = 0, length = bufferView.length; i < length; i += chunkSize) {
-    if (i + chunkSize > length) { chunkSize = length - i; }
-    result += String.fromCharCode.apply(null, bufferView.subarray(i, i + chunkSize));
-  }
-  return result;
+  return new TextDecoder("utf-8").decode(new Uint8Array(ab));
 };
 
 
