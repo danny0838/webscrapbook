@@ -25,6 +25,44 @@ document.addEventListener("DOMContentLoaded", function () {
     return null;
   };
 
+  var inZipPathToUrl = function (inZipPath) {
+    return virtualBase + (inZipPath || "").split("/").map(x => encodeURIComponent(x)).join("/");
+  };
+
+  var parseUrl = function (url, refUrl) {
+    try {
+      var absoluteUrl = new URL(url, refUrl || undefined);
+    } catch (ex) {
+      // url cannot be resolved, return original (invalid)
+      return {url: url, inZip: false};
+    }
+    if (absoluteUrl.href.startsWith(virtualBase)) {
+      let search = absoluteUrl.search;
+      let hash = absoluteUrl.hash;
+      absoluteUrl.search = "";
+      absoluteUrl.hash = "";
+      let inZipPath = absoluteUrl.href.slice(virtualBase.length);
+      inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
+      let f = inZipFiles[inZipPath];
+      if (f) {
+        // url targets a file in zip, return its blob URL
+        return {
+          url: f.url + search + hash,
+          inZip: true,
+          inZipPath: inZipPath,
+          mime: f.file.type,
+          search: search,
+          hash: hash
+        };
+      } else {
+        // url targets a non-exist file in zip, return original (invalid)
+        return {url: url, inZip: false};
+      }
+    }
+    // url target not in zip, return absolute URL
+    return {url: absoluteUrl.href, inZip: false};
+  };
+
   var extractZipFile = function (file) {
     var pendingZipEntry = 0;
     var type = scrapbook.filenameParts(file.name)[1].toLowerCase();
@@ -73,32 +111,83 @@ document.addEventListener("DOMContentLoaded", function () {
     loadFile(indexFilePaths[0], urlSearch + urlHash);
   };
 
+  /**
+   * @callback fetchFileRewriteFuncCallback
+   * @param {Blob} rewrittenBlob
+   */
+
+  /**
+   * @callback fetchFileRewriteFunc
+   * @param {Object} params
+   *     - {Blob} data
+   *     - {string} charset
+   *     - {string} url
+   * @param {function(rewrittenBlob)} callback
+   */
+
+  /**
+   * @callback fetchFileOnComplete
+   * @param {string} fetchedUrl
+   */
+
+  /**
+   * @param {Object} params 
+   *     - {string} params.inZipPath
+   *     - {fetchFileRewriteFunc} params.rewriteFunc
+   * @param {fetchFileOnComplete} callback
+   */
+  var fetchFile = function (params, callback) {
+    let inZipPath = params.inZipPath;
+    let rewriteFunc = params.rewriteFunc;
+
+    let f = inZipFiles[inZipPath];
+    if (f) {
+      if (rewriteFunc) {
+        rewriteFunc({
+          data: f.file,
+          charset: null,
+          url: inZipPathToUrl(inZipPath)
+        }, (rewrittenFile) => {
+          callback(URL.createObjectURL(rewrittenFile));
+        });
+      } else {
+        callback(f.url);
+      }
+    } else {
+      callback(null);
+    }
+  };
+
   var loadFile = function (inZipPath, url) {
     let searchAndHash = "";
     if (url) {
       let [base, search, hash] = scrapbook.splitUrl(url);
       searchAndHash = hash;
     }
-    let f = inZipFiles[inZipPath];
-    if (f) {
-      if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
-        var reader = new FileReader();
-        reader.addEventListener("loadend", () => {
-          var content = reader.result;
-          var parser = new DOMParser();
-          var doc = parser.parseFromString(content, "text/html");
-          parseDocument(doc, inZipPath, (blobUrl) => {
-            if (blobUrl) { loadUrl(blobUrl + searchAndHash); }
+    fetchFile({
+      inZipPath: inZipPath,
+      rewriteFunc: (params, onRewrite) => {
+        var data = params.data;
+        var charset = params.charset;
+
+        if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
+          var reader = new FileReader();
+          reader.addEventListener("loadend", () => {
+            var content = reader.result;
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(content, data.type);
+            parseDocument(doc, inZipPath, (blob) => {
+              onRewrite(blob);
+            });
           });
-        });
-        // @TODO: use specified file encoding if it's not UTF-8?
-        reader.readAsText(f.file, "UTF-8");
-      } else {
-        loadUrl(f.url + searchAndHash);
+          reader.readAsText(data, charset || "UTF-8");
+        } else {
+          onRewrite(data);
+        }
       }
-    } else {
-      loadUrl("about:blank" + searchAndHash);
-    }
+    }, (fetchedUrl) => {
+      loadUrl((fetchedUrl || "about:blank") + searchAndHash);
+    });
   };
 
   var loadUrl = function (url) {
@@ -111,48 +200,21 @@ document.addEventListener("DOMContentLoaded", function () {
     /**
      * helper functions
      */
-    var parseUrl = function (url) {
-      let absoluteUrl = new URL(url, refUrl);
-      if (absoluteUrl.href.startsWith(virtualBase)) {
-        let search = absoluteUrl.search;
-        let hash = absoluteUrl.hash;
-        absoluteUrl.search = "";
-        absoluteUrl.hash = "";
-        let inZipPath = absoluteUrl.href.slice(virtualBase.length);
-        inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
-        let f = inZipFiles[inZipPath];
-        if (f) {
-          return {
-            url: f.url + search + hash,
-            inZip: true,
-            inZipPath: inZipPath,
-            mime: f.file.type,
-            search: search,
-            hash: hash
-          };
-        } else {
-          return {url: url, inZip: false};
-        }
-      }
-      return {url: absoluteUrl.href, inZip: false};
-    };
-
-    var rewriteUrl = function (url) {
-      return parseUrl(url).url;
+    var rewriteUrl = function (url, refUrlOverwrite) {
+      return parseUrl(url, refUrlOverwrite || refUrl).url;
     };
 
     var parserCheckDone = function () {};
 
     var parserDone = function () {
       var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
-      var blobUrl = URL.createObjectURL(new Blob([content], {type: doc.contentType}));
-      onComplete(blobUrl);
+      onComplete(new Blob([content], {type: doc.contentType}));
     };
 
     /**
      * main
      */
-    var refUrl = virtualBase + inZipPath;
+    var refUrl = inZipPathToUrl(inZipPath);
     var remainingTasks = 0;
 
     // check meta refresh
@@ -167,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       if (metaRefreshTarget) {
         metaRefreshAvailable--;
-        let info = parseUrl(metaRefreshTarget);
+        let info = parseUrl(metaRefreshTarget, refUrl);
         info.inZip ? loadFile(info.inZipPath, info.url) : loadUrl(info.url);
         return null;
       }
@@ -192,7 +254,7 @@ document.addEventListener("DOMContentLoaded", function () {
               case "og:video:url":
               case "og:video:secure_url":
               case "og:url":
-                elem.setAttribute("content", rewriteUrl(elem.getAttribute("content")));
+                elem.setAttribute("content", rewriteUrl(elem.getAttribute("content"), refUrl));
                 break;
             }
           }
@@ -202,7 +264,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // @TODO: content of the target should be parsed
         case "link": {
           if (elem.hasAttribute("href")) {
-            elem.setAttribute("href", rewriteUrl(elem.getAttribute("href")));
+            elem.setAttribute("href", rewriteUrl(elem.getAttribute("href"), refUrl));
           }
           break;
         }
@@ -214,7 +276,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         case "script": {
           if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src")));
+            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
           }
           break;
         }
@@ -226,7 +288,7 @@ document.addEventListener("DOMContentLoaded", function () {
         case "td": {
           // deprecated: background attribute (deprecated since HTML5)
           if (elem.hasAttribute("background")) {
-            elem.setAttribute("background", rewriteUrl(elem.getAttribute("background")));
+            elem.setAttribute("background", rewriteUrl(elem.getAttribute("background"), refUrl));
           }
           break;
         }
@@ -235,7 +297,7 @@ document.addEventListener("DOMContentLoaded", function () {
         case "frame":
         case "iframe": {
           if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src")));
+            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
           }
           break;
         }
@@ -243,7 +305,7 @@ document.addEventListener("DOMContentLoaded", function () {
         case "a":
         case "area": {
           if (elem.hasAttribute("href")) {
-            let info = parseUrl(elem.getAttribute("href"));
+            let info = parseUrl(elem.getAttribute("href"), refUrl);
             if (info.inZip) {
               if (info.inZipPath !== inZipPath) {
                 elem.setAttribute("href", info.url);
@@ -261,12 +323,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         case "img": {
           if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src")));
+            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
           }
           if (elem.hasAttribute("srcset")) {
             elem.setAttribute("srcset",
               scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
-                return rewriteUrl(url);
+                return rewriteUrl(url, refUrl);
               })
             );
           }
@@ -277,7 +339,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (elem.hasAttribute("srcset")) {
             elem.setAttribute("srcset",
               scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
-                return rewriteUrl(url);
+                return rewriteUrl(url, refUrl);
               })
             );
           }
@@ -286,28 +348,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
         case "embed": {
           if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src")));
+            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
           }
           break;
         }
 
         case "object": {
           if (elem.hasAttribute("data")) {
-            elem.setAttribute("data", rewriteUrl(elem.getAttribute("data")));
+            elem.setAttribute("data", rewriteUrl(elem.getAttribute("data"), refUrl));
           }
           break;
         }
 
         case "applet": {
           if (elem.hasAttribute("archive")) {
-            elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive")));
+            elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive"), refUrl));
           }
           break;
         }
 
         case "form": {
           if ( elem.hasAttribute("action") ) {
-            elem.setAttribute("action", rewriteUrl(elem.getAttribute("action")));
+            elem.setAttribute("action", rewriteUrl(elem.getAttribute("action"), refUrl));
           }
           break;
         }
@@ -317,7 +379,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // images: input
             case "image":
               if (elem.hasAttribute("src")) {
-                elem.setAttribute("src", rewriteUrl(elem.getAttribute("src")));
+                elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
               }
               break;
           }
