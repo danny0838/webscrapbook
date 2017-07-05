@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var doc = parser.parseFromString(content, data.type);
             parseDocument(doc, inZipPath, (blob) => {
               onRewrite(blob);
-            });
+            }, []);
           });
           reader.readAsText(data, charset || "UTF-8");
         } else {
@@ -200,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
     viewer.src = url;
   };
 
-  var parseDocument = function (doc, inZipPath, onComplete) {
+  var parseDocument = function (doc, inZipPath, onComplete, recurseChain) {
     /**
      * helper functions
      */
@@ -319,11 +319,50 @@ document.addEventListener("DOMContentLoaded", function () {
           break;
         }
 
-        // @TODO: content of the target should be parsed
         case "frame":
         case "iframe": {
           if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            let frameRecurseChain = JSON.parse(JSON.stringify(recurseChain));
+            frameRecurseChain.push(refUrl);
+            let info = parseUrl(elem.getAttribute("src"), refUrl);
+            if (info.inZip) {
+              let targetUrl = inZipPathToUrl(info.inZipPath);
+              if (frameRecurseChain.indexOf(targetUrl) !== -1) {
+                // console.warn("Resource '" + refUrl + "' has a circular reference to '" + targetUrl + "'.");
+                elem.setAttribute("src", "about:blank");
+                break;
+              }
+            }
+
+            remainingTasks++;
+            fetchFile({
+              inZipPath: info.inZipPath,
+              rewriteFunc: (params, onRewrite) => {
+                var data = params.data;
+                var charset = params.charset;
+                var recurseChain = params.recurseChain;
+
+                if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
+                  var reader = new FileReader();
+                  reader.addEventListener("loadend", () => {
+                    var content = reader.result;
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(content, data.type);
+                    parseDocument(doc, info.inZipPath, (blob) => {
+                      onRewrite(blob);
+                    }, recurseChain);
+                  });
+                  reader.readAsText(data, charset || "UTF-8");
+                } else {
+                  onRewrite(data);
+                }
+              },
+              recurseChain: frameRecurseChain
+            }, (fetchedUrl) => {
+              elem.setAttribute("src", fetchedUrl || info.url);
+              remainingTasks--;
+              parserCheckDone();
+            });
           }
           break;
         }
