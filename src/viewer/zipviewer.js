@@ -102,8 +102,9 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   var loadUrl = function (url) {
+    loading.style.display = 'block';
+    viewer.style.display = 'none';
     viewer.src = url;
-    wrapper.style.display = 'block';
   };
 
   var parseDocument = function (doc, inZipPath, onComplete) {
@@ -347,7 +348,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var blobUrlToInZipPath = {};
 
   var viewer = document.getElementById('viewer');
-  var wrapper = document.getElementById('wrapper');
+  var loading = document.getElementById('loading');
 
   var urlSearch = "";
   var urlHash = location.hash;
@@ -375,6 +376,9 @@ document.addEventListener("DOMContentLoaded", function () {
           } catch (ex) {}
       }
     }, false);
+
+    loading.style.display = 'none';
+    viewer.style.display = 'block';
   });
 
   extractZipFile(dataUriToFile(window.viewerData.zip));
