@@ -134,11 +134,13 @@ document.addEventListener("DOMContentLoaded", function () {
    * @param {Object} params 
    *     - {string} params.inZipPath
    *     - {fetchFileRewriteFunc} params.rewriteFunc
+   *     - {Array} params.recurseChain
    * @param {fetchFileOnComplete} callback
    */
   var fetchFile = function (params, callback) {
     let inZipPath = params.inZipPath;
     let rewriteFunc = params.rewriteFunc;
+    let recurseChain = params.recurseChain;
 
     let f = inZipFiles[inZipPath];
     if (f) {
@@ -146,7 +148,8 @@ document.addEventListener("DOMContentLoaded", function () {
         rewriteFunc({
           data: f.file,
           charset: null,
-          url: inZipPathToUrl(inZipPath)
+          url: inZipPathToUrl(inZipPath),
+          recurseChain: recurseChain
         }, (rewrittenFile) => {
           callback(URL.createObjectURL(rewrittenFile));
         });
@@ -184,7 +187,8 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
           onRewrite(data);
         }
-      }
+      },
+      recurseChain: []
     }, (fetchedUrl) => {
       loadUrl((fetchedUrl || "about:blank") + searchAndHash);
     });
@@ -261,16 +265,38 @@ document.addEventListener("DOMContentLoaded", function () {
           break;
         }
 
-        // @TODO: content of the target should be parsed
         case "link": {
           if (elem.hasAttribute("href")) {
-            elem.setAttribute("href", rewriteUrl(elem.getAttribute("href"), refUrl));
+            // elem.rel == "" if "rel" attribute not defined
+            let rels = elem.rel.toLowerCase().split(/[ \t\r\n\v\f]+/);
+            if (rels.indexOf("stylesheet") >= 0) {
+              remainingTasks++;
+              let info = parseUrl(elem.getAttribute("href"), refUrl);
+              fetchFile({
+                inZipPath: info.inZipPath,
+                rewriteFunc: processCssFile,
+                recurseChain: [refUrl]
+              }, (fetchedUrl) => {
+                elem.setAttribute("href", fetchedUrl || info.url);
+                remainingTasks--;
+                parserCheckDone();
+              });
+            } else {
+              elem.setAttribute("href", rewriteUrl(elem.getAttribute("href")));
+            }
           }
           break;
         }
 
-        // @TODO: content should be parsed
         case "style": {
+          remainingTasks++;
+          let fetcher = new ComplexUrlFetcher(refUrl);
+          let rewriteCss = processCssFileText(elem.textContent, refUrl, fetcher);
+          fetcher.startFetches(() => {
+            elem.textContent = fetcher.finalRewrite(rewriteCss);
+            remainingTasks--;
+            parserCheckDone();
+          });
           break;
         }
 
@@ -386,6 +412,18 @@ document.addEventListener("DOMContentLoaded", function () {
           break;
         }
       }
+
+      // styles: style attribute
+      if (elem.hasAttribute("style")) {
+        remainingTasks++;
+        let fetcher = new ComplexUrlFetcher(refUrl);
+        let rewriteCss = processCssFileText(elem.getAttribute("style"), refUrl, fetcher);
+        fetcher.startFetches(() => {
+          elem.setAttribute("style", fetcher.finalRewrite(rewriteCss));
+          remainingTasks--;
+          parserCheckDone();
+        });
+      }
     });
 
     // parserCheckDone calls before here should be nullified
@@ -399,6 +437,108 @@ document.addEventListener("DOMContentLoaded", function () {
     // the document parsing is finished, finalize the document 
     // if there is no pending parsing now
     parserCheckDone();
+  };
+
+  var ComplexUrlFetcher = class ComplexUrlFetcher {
+    constructor(refUrl, recurseChain) {
+      this.urlHash = {};
+      this.urlRewrittenCount = 0;
+      this.recurseChain = JSON.parse(JSON.stringify(recurseChain || []));
+      if (refUrl) {
+        // if a refUrl is specified, record the recurse chain
+        // for future check of circular referencing
+        this.recurseChain.push(scrapbook.splitUrlByAnchor(refUrl)[0]);
+      }
+    }
+
+    getUrlHash(url, rewriteMethod) {
+      var key = scrapbook.getUuid();
+      this.urlHash[key] = {
+        url: url,
+        newUrl: null,
+        rewriteMethod: rewriteMethod
+      };
+      return "urn:scrapbook:url:" + key;
+    }
+
+    startFetches(callback) {
+      var keys = Object.keys(this.urlHash), len = keys.length;
+      if (len > 0) {
+        keys.forEach((key) => {
+          let sourceUrl = this.recurseChain[this.recurseChain.length - 1];
+          let info = parseUrl(this.urlHash[key].url, sourceUrl);
+
+          if (info.inZip) {
+            let targetUrl = inZipPathToUrl(info.inZipPath);
+            if (this.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) !== -1) {
+              // console.warn("Resource '" + sourceUrl + "' has a circular reference to '" + targetUrl + "'.");
+              this.urlHash[key].newUrl = "about:blank";
+              if (++this.urlRewrittenCount === len) {
+                callback();
+              }
+              return;
+            }
+          }
+
+          fetchFile({
+            inZipPath: info.inZipPath,
+            rewriteFunc: this.urlHash[key].rewriteMethod,
+            url: inZipPathToUrl(info.inZipPath),
+            recurseChain: this.recurseChain
+          }, (fetchedUrl) => {
+            this.urlHash[key].newUrl = fetchedUrl || info.url;
+            if (++this.urlRewrittenCount === len) {
+              callback();
+            }
+          });
+        });
+      } else {
+        callback();
+      }
+    }
+
+    finalRewrite(text) {
+      return text.replace(/urn:scrapbook:url:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
+        if (this.urlHash[key]) { return this.urlHash[key].newUrl; }
+        // This could happen when a web page really contains a content text in our format.
+        // We return the original text for keys not defineded in the map to prevent a bad replace
+        // since it's nearly impossible for them to hit on the hash keys we are using.
+        return match;
+      });
+    }
+  };
+
+  var processCssFile = function (params, callback) {
+    var data = params.data;
+    var charset = params.charset;
+    var refUrl = params.url;
+    var recurseChain = params.recurseChain;
+
+    scrapbook.parseCssFile(data, charset, (text, onReplaceComplete) => {
+      var fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
+      var rewriteCss = processCssFileText(text, refUrl, fetcher);
+      fetcher.startFetches(() => {
+        text = fetcher.finalRewrite(rewriteCss);
+        onReplaceComplete(text);
+      });
+    }, (replacedCssBlob) => {
+      callback(replacedCssBlob);
+    });
+  };
+
+  var processCssFileText = function (cssText, refUrl, fetcher) {
+    var result = scrapbook.parseCssText(cssText, {
+      rewriteImportUrl: function (url) {
+        return fetcher.getUrlHash(url, processCssFile);
+      },
+      rewriteFontFaceUrl: function (url) {
+        return fetcher.getUrlHash(url);
+      },
+      rewriteBackgroundUrl: function (url) {
+        return fetcher.getUrlHash(url);
+      }
+    });
+    return result;
   };
 
   /**
