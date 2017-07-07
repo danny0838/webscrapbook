@@ -118,7 +118,7 @@ function init() {
       if (viewer.filesystem) {
         viewer.viewZipInFileSystem(zipFile);
       } else {
-        viewer.invokeZipViewer(zipFile);
+        viewer.viewZipInMemory(zipFile);
       }
     },
 
@@ -270,102 +270,116 @@ function init() {
       extractZipFile(zipFile);
     },
 
-    invokeZipViewer: function (zipFile) {
-      let onZipRead = function (zipData) {
-        let viewerData = {
-          virtualBase: chrome.runtime.getURL("viewer/!/"),
-          indexFile: "index.html",
-          zip: zipData.replace(";", ";filename=" + encodeURIComponent(zipFile.name) + ";")
+    viewZipInMemory: function (zipFile) {
+      var invokeZipViewer = function (zipFile) {
+        let onZipRead = function (zipData) {
+          let viewerData = {
+            virtualBase: chrome.runtime.getURL("viewer/!/"),
+            indexFile: "index.html",
+            zip: zipData.replace(";", ";filename=" + encodeURIComponent(zipFile.name) + ";")
+          };
+
+          let content = '<!DOCTYPE html>\n' +
+              '<html>\n' +
+              '<head>\n' +
+              '<meta charset="UTF-8">\n' +
+              '<title>' + scrapbook.lang("ViewerTitle") + '</title>\n' +
+              '<script src="' + chrome.runtime.getURL("core/common.js") + '"></script>\n' +
+              '<script src="' + chrome.runtime.getURL("lib/jszip.js") + '"></script>\n' +
+              '<script src="' + chrome.runtime.getURL("lib/mime.js") + '"></script>\n' +
+              '<script src="' + chrome.runtime.getURL("viewer/zipviewer.js") + '">' + JSON.stringify(viewerData) + '</script>\n' +
+              '<style>\n' +
+              '@-webkit-keyframes spin {\n' +
+              '  from {-webkit-transform:rotate(0turn)}\n' +
+              '  to {-webkit-transform:rotate(1turn)}\n' +
+              '}\n' +
+              '\n' +
+              '@-moz-keyframes spin {\n' +
+              '  from {-moz-transform:rotate(0turn)}\n' +
+              '  to {-moz-transform:rotate(1turn)}\n' +
+              '}\n' +
+              '\n' +
+              '@keyframes spin {\n' +
+              '  from {transform:rotate(0turn)}\n' +
+              '  to {transform:rotate(1turn)}\n' +
+              '}\n' +
+              '\n' +
+              'body {\n' +
+              '  margin: 0;\n' +
+              '  border: 0;\n' +
+              '  padding: 0;\n' +
+              '}\n' +
+              '\n' +
+              '#wrapper {\n' +
+              '  position: relative;\n' +
+              '  height: 100vh;\n' +
+              '}\n' +
+              '\n' +
+              '#loading {\n' +
+              '  position: absolute;\n' +
+              '  top: 0;\n' +
+              '  left: 0;\n' +
+              '  right: 0;\n' +
+              '  bottom: 0;\n' +
+              '  margin: auto;\n' +
+              '  width: 32px;\n' +
+              '  height: 32px;\n' +
+              '  -webkit-border-radius: 20px;\n' +
+              '  -moz-border-radius: 20px;\n' +
+              '  -ms-border-radius: 20px;\n' +
+              '  -o-border-radius: 20px;\n' +
+              '  border-radius: 20px;\n' +
+              '  border: 4px solid #666;\n' +
+              '  border-color: #666 transparent;\n' +
+              '  background-color: transparent;\n' +
+              '  -webkit-animation: spin 1s linear infinite;\n' +
+              '  -moz-animation: spin 1s linear infinite;\n' +
+              '  -ms-animation: spin 1s linear infinite;\n' +
+              '  animation: spin 1s linear infinite;\n' +
+              '}\n' +
+              '\n' +
+              '#viewer {\n' +
+              '  position: absolute;\n' +
+              '  top: 0;\n' +
+              '  left: 0;\n' +
+              '  width: 100%;\n' +
+              '  height: 100%;\n' +
+              '  margin: 0;\n' +
+              '  border: 0;\n' +
+              '  padding: 0;\n' +
+              '}\n' +
+              '</style>\n' +
+              '</head>\n' +
+              '<body>\n' +
+              '<div id="wrapper">\n' +
+              '  <div id="loading"></div>\n' +
+              '  <iframe id="viewer" style="display: none;" sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"></iframe>\n' +
+              '</div>\n' +
+              '</body>\n' +
+              '</html>\n';
+
+          let url = URL.createObjectURL(new Blob([content], {type: "text/html"})) + viewer.urlHash;
+          document.location = url;
         };
 
-        let content = '<!DOCTYPE html>\n' +
-            '<html>\n' +
-            '<head>\n' +
-            '<meta charset="UTF-8">\n' +
-            '<title>' + scrapbook.lang("ViewerTitle") + '</title>\n' +
-            '<script src="' + chrome.runtime.getURL("core/common.js") + '"></script>\n' +
-            '<script src="' + chrome.runtime.getURL("lib/jszip.js") + '"></script>\n' +
-            '<script src="' + chrome.runtime.getURL("lib/mime.js") + '"></script>\n' +
-            '<script src="' + chrome.runtime.getURL("viewer/zipviewer.js") + '">' + JSON.stringify(viewerData) + '</script>\n' +
-            '<style>\n' +
-            '@-webkit-keyframes spin {\n' +
-            '  from {-webkit-transform:rotate(0turn)}\n' +
-            '  to {-webkit-transform:rotate(1turn)}\n' +
-            '}\n' +
-            '\n' +
-            '@-moz-keyframes spin {\n' +
-            '  from {-moz-transform:rotate(0turn)}\n' +
-            '  to {-moz-transform:rotate(1turn)}\n' +
-            '}\n' +
-            '\n' +
-            '@keyframes spin {\n' +
-            '  from {transform:rotate(0turn)}\n' +
-            '  to {transform:rotate(1turn)}\n' +
-            '}\n' +
-            '\n' +
-            'body {\n' +
-            '  margin: 0;\n' +
-            '  border: 0;\n' +
-            '  padding: 0;\n' +
-            '}\n' +
-            '\n' +
-            '#wrapper {\n' +
-            '  position: relative;\n' +
-            '  height: 100vh;\n' +
-            '}\n' +
-            '\n' +
-            '#loading {\n' +
-            '  position: absolute;\n' +
-            '  top: 0;\n' +
-            '  left: 0;\n' +
-            '  right: 0;\n' +
-            '  bottom: 0;\n' +
-            '  margin: auto;\n' +
-            '  width: 32px;\n' +
-            '  height: 32px;\n' +
-            '  -webkit-border-radius: 20px;\n' +
-            '  -moz-border-radius: 20px;\n' +
-            '  -ms-border-radius: 20px;\n' +
-            '  -o-border-radius: 20px;\n' +
-            '  border-radius: 20px;\n' +
-            '  border: 4px solid #666;\n' +
-            '  border-color: #666 transparent;\n' +
-            '  background-color: transparent;\n' +
-            '  -webkit-animation: spin 1s linear infinite;\n' +
-            '  -moz-animation: spin 1s linear infinite;\n' +
-            '  -ms-animation: spin 1s linear infinite;\n' +
-            '  animation: spin 1s linear infinite;\n' +
-            '}\n' +
-            '\n' +
-            '#viewer {\n' +
-            '  position: absolute;\n' +
-            '  top: 0;\n' +
-            '  left: 0;\n' +
-            '  width: 100%;\n' +
-            '  height: 100%;\n' +
-            '  margin: 0;\n' +
-            '  border: 0;\n' +
-            '  padding: 0;\n' +
-            '}\n' +
-            '</style>\n' +
-            '</head>\n' +
-            '<body>\n' +
-            '<div id="wrapper">\n' +
-            '  <div id="loading"></div>\n' +
-            '  <iframe id="viewer" style="display: none;" sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"></iframe>\n' +
-            '</div>\n' +
-            '</body>\n' +
-            '</html>\n';
-
-        let url = URL.createObjectURL(new Blob([content], {type: "text/html"})) + viewer.urlHash;
-        document.location = url;
+        let reader = new FileReader();
+        reader.onloadend = function (event) {
+          onZipRead(event.target.result);
+        }
+        reader.readAsDataURL(zipFile);
       };
 
-      let reader = new FileReader();
-      reader.onloadend = function (event) {
-        onZipRead(event.target.result);
+      var type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
+      switch (type) {
+        case "maff": {
+          break;
+        }
+        case "htz":
+        default: {
+          invokeZipViewer(zipFile);
+          break;
+        }
       }
-      reader.readAsDataURL(zipFile);
     }
   };
 
