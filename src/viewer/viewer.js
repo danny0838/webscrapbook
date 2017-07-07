@@ -496,10 +496,12 @@ function init() {
   fileSelectorDrop.addEventListener("dragover", (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
+    e.target.classList.add("dragover");
   }, false);
 
   fileSelectorDrop.addEventListener("drop", (e) => {
     e.preventDefault();
+    e.target.classList.remove("dragover");
     Array.prototype.forEach.call(e.dataTransfer.items, (item) => {
       var entry = item.webkitGetAsEntry();
       if (entry.isFile) {
@@ -508,6 +510,10 @@ function init() {
         });
       }
     });
+  }, false);
+
+  fileSelectorDrop.addEventListener("dragleave", (e) => {
+    e.target.classList.remove("dragover");
   }, false);
 
   fileSelectorDrop.addEventListener("click", (e) => {
