@@ -271,6 +271,98 @@ function init() {
     },
 
     viewZipInMemory: function (zipFile) {
+      var parseZipFile = function (file) {
+        var zip = new JSZip();
+        zip.loadAsync(file).then((zip) => {
+          var onAllMaffDirectoryParsed = function (topdirs) {
+            if (topdirs.length) {
+              let firstDir = topdirs.shift();
+
+              let onAllDirectoryProcessed = function () {
+                firstDir.zip.generateAsync({type: "blob"}).then((zipBlob) => {
+                  let f = new File([zipBlob], zipFile.name, {type: zipBlob.type});
+                  invokeZipViewer(f, firstDir.indexFile);
+                });
+              };
+
+              let remainingDirectories = 0;
+              topdirs.forEach((dir) => {
+                remainingDirectories++;
+                dir.zip.generateAsync({type: "blob"}).then((zipBlob) => {
+                  let f = new File([zipBlob], zipFile.name, {type: zipBlob.type});
+                  invokeZipViewer(f, dir.indexFile, true);
+                  if (--remainingDirectories === 0) { onAllDirectoryProcessed(); }
+                });
+              });
+              if (remainingDirectories === 0) { onAllDirectoryProcessed(); }
+            } else {
+              alert("No available data can be loaded from this maff file.");
+            }
+          };
+
+          var parseMaffDirectory = function (dirObj, callback) {
+            var rdfFile = dirObj.file("index.rdf");
+            if (rdfFile) {
+              rdfFile.async("arraybuffer").then((ab) => {
+                let filename = rdfFile.name.replace(/.*\//, "");
+                let mime = Mime.prototype.lookup(filename);
+                let file = new File([ab], filename, {type: mime});
+                viewer.readRdfFile(file, (doc) => {
+                  var meta = viewer.parseRdfDocument(doc);
+                  var indexFilename = meta.indexfilename;
+                  var indexFile = dirObj.file(indexFilename);
+                  if (indexFile) {
+                    callback({zip: dirObj, indexFile: indexFilename});
+                  } else {
+                    alert("Unable to get index file '" + indexFilename + "' in the directory: '" + dirObj.root + "'");
+                    callback(null);
+                  }
+                });
+              });
+            } else {
+              let indexFilename;
+              dirObj.forEach((subPath, zipObj) => {
+                if (!zipObj.dir && subPath.indexOf("/") === -1 && subPath.startsWith("index.")) {
+                  if (!indexFilename) { indexFilename = subPath; }
+                }
+              });
+              setTimeout(() => {
+                if (indexFilename) {
+                  callback({zip: dirObj, indexFile: indexFilename});
+                } else {
+                  callback(null);
+                }
+              }, 0);
+            }
+          };
+
+          // get a list of top-folders
+          let topdirs = {};
+          zip.forEach((subPath, zipObj) => {
+            let depth = Array.prototype.filter.call(subPath, x => x == "/").length;
+            if (depth == 1) {
+              let dirname = subPath.replace(/\/.*$/, "");
+              if (!topdirs[dirname]) { topdirs[dirname] = zip.folder(dirname); }
+            }
+          });
+
+          // filter for available top-folders
+          let validTopdirs = [];
+          let remainingDirectories = 0;
+          for (let i in topdirs) {
+            let topdir = topdirs[i];
+            remainingDirectories++;
+            parseMaffDirectory(topdir, (data) => {
+              if (data) { validTopdirs.push(data); }
+              if (--remainingDirectories === 0) { onAllMaffDirectoryParsed(validTopdirs); }
+            });
+          }
+          if (remainingDirectories === 0) { onAllMaffDirectoryParsed(validTopdirs); }
+        }).catch((ex) => {
+          alert("Unable to load the zip file: " + ex);
+        });
+      };
+
       var invokeZipViewer = function (zipFile, indexFile, inNewTab) {
         let onZipRead = function (zipData) {
           let viewerData = {
@@ -378,6 +470,7 @@ function init() {
       var type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
       switch (type) {
         case "maff": {
+          parseZipFile(zipFile);
           break;
         }
         case "htz":
