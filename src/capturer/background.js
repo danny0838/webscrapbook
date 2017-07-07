@@ -11,7 +11,7 @@ capturer.isContentScript = false;
  * @type {Object.<string~timeId, {usedDocumentNames: Object.<string~documentName, number~count>, fileToUrl: Object.<string~filename, string~src>}>}
  */
 capturer.captureInfo = {};
- 
+
 /**
  * @type {Object.<string~downloadId, {timeId: string, src: string, autoErase: boolean, onComplete: function, onError: function}>}
  */
@@ -336,7 +336,7 @@ capturer.saveDocument = function (params, callback) {
       var filename = documentName + "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
       filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
       filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
-          
+
       if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
       var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
 
@@ -376,7 +376,7 @@ capturer.saveDocument = function (params, callback) {
       var filename = documentName + "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
       filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
       filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
-          
+
       if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
       var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
 
@@ -678,7 +678,7 @@ capturer.downloadBlob = function (params, callback) {
   if (!blob) {
     callback({url: capturer.getErrorUrl(sourceUrl, options)});
   }
-  
+
   switch (options["capture.saveAs"]) {
     case "singleHtml": {
       let reader = new FileReader();

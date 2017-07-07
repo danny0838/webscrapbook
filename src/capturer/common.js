@@ -1181,7 +1181,7 @@ capturer.getFrameContent = function (frameElement, timeId, settings, options, ca
     if (message.extension !== chrome.runtime.id) { return; }
     if (message.timeId !== timeId) { return; }
     isDebug && console.debug("channel receive", event);
-    
+
     if (message.cmd === "capturer.captureDocumentOrFile.start") {
       clearTimeout(timeout);
     } else if (message.cmd === "capturer.captureDocumentOrFile.complete") {
