@@ -373,7 +373,8 @@ capturer.saveDocument = function (params, callback) {
     }
 
     case "maff": {
-      var filename = documentName + "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+      var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+      var filename = documentName + ext;
       filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
       filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
 
@@ -397,7 +398,7 @@ capturer.saveDocument = function (params, callback) {
             '    <MAF:originalurl RDF:resource="' + scrapbook.escapeHtml(sourceUrl) + '"/>\n' +
             '    <MAF:title RDF:resource="' + scrapbook.escapeHtml(data.title) + '"/>\n' +
             '    <MAF:archivetime RDF:resource="' + scrapbook.escapeHtml(scrapbook.idToDate(timeId).toUTCString()) + '"/>\n' +
-            '    <MAF:indexfilename RDF:resource="index.html"/>\n' +
+            '    <MAF:indexfilename RDF:resource="' + filename + '"/>\n' +
             '    <MAF:charset RDF:resource="UTF-8"/>\n' +
             '  </RDF:Description>\n' +
             '</RDF:RDF>\n';
