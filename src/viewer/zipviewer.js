@@ -67,7 +67,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var extractZipFile = function (file) {
     var pendingZipEntry = 0;
-    var type = scrapbook.filenameParts(file.name)[1].toLowerCase();
 
     var zip = new JSZip();
     zip.loadAsync(file).then((zip) => {
@@ -78,39 +77,21 @@ document.addEventListener("DOMContentLoaded", function () {
           let mime = Mime.prototype.lookup(inZipPath);
           let f = new File([ab], inZipPath.replace(/.*\//, ""), {type: mime});
           inZipFiles[inZipPath] = {file: f, url: URL.createObjectURL(f)};
-          if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type); }
+          if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(); }
         });
       });
-      if (pendingZipEntry === 0) { onAllZipEntriesProcessed(type); }
+      if (pendingZipEntry === 0) { onAllZipEntriesProcessed(); }
     }).catch((ex) => {
       alert("Unable to load the zip file: " + ex);
     });
   };
 
-  var onAllZipEntriesProcessed = function (type) {
-    switch (type) {
-      case "maff": {
-        break;
-      }
-      case "htz":
-      default: {
-        var indexFile = "index.html";
-        onZipExtracted(indexFile);
-        break;
-      }
-    }
-  };
-
-  var onZipExtracted = function (indexFilePaths) {
-    if (Object.prototype.toString.call(indexFilePaths) !== "[object Array]") {
-      indexFilePaths = [indexFilePaths];
-    }
-
+  var onAllZipEntriesProcessed = function () {
     for (let path in inZipFiles) {
       blobUrlToInZipPath[inZipFiles[path].url] = path;
     }
 
-    loadFile(indexFilePaths[0], urlSearch + urlHash);
+    loadFile(viewerData.indexFile || "index.html", urlSearch + urlHash);
   };
 
   /**

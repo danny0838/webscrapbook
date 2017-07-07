@@ -274,6 +274,7 @@ function init() {
       let onZipRead = function (zipData) {
         let viewerData = {
           virtualBase: chrome.runtime.getURL("viewer/!/"),
+          indexFile: "index.html",
           zip: zipData.replace(";", ";filename=" + encodeURIComponent(zipFile.name) + ";")
         };
 
