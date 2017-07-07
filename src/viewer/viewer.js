@@ -122,6 +122,28 @@ function init() {
       }
     },
 
+    readRdfFile: function (file, callback) {
+      scrapbook.xhr({
+        url: URL.createObjectURL(file),
+        responseType: "document",
+        onloadend: function (xhr, xhrAbort) {
+          callback(xhr.response);
+        }
+      });
+    },
+
+    parseRdfDocument: function (doc) {
+      var RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+      var MAF = "http://maf.mozdev.org/metadata/rdf#";
+      var result = {};
+
+      var elems = doc.getElementsByTagNameNS(MAF, "indexfilename");
+      var elem = elems[0];
+      if (elem) { result.indexfilename = elem.getAttributeNS(RDF, "resource"); }
+
+      return result;
+    },
+
     viewZipInFileSystem: function (zipFile) {
       var extractZipFile = function (file) {
         var pendingZipEntry = 0;
@@ -152,33 +174,11 @@ function init() {
       var onAllZipEntriesProcessed = function (type, ns) {
         switch (type) {
           case "maff": {
-            var readRdfFile = function (file, callback) {
-              scrapbook.xhr({
-                url: URL.createObjectURL(file),
-                responseType: "document",
-                onloadend: function (xhr, xhrAbort) {
-                  callback(xhr.response);
-                }
-              });
-            };
-
-            var parseRdfDocument = function (doc) {
-              var RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-              var MAF = "http://maf.mozdev.org/metadata/rdf#";
-              var result = {};
-
-              var elems = doc.getElementsByTagNameNS(MAF, "indexfilename");
-              var elem = elems[0];
-              if (elem) { result.indexfilename = elem.getAttributeNS(RDF, "resource"); }
-
-              return result;
-            };
-
             var processMaffDirectoryEntry = function (directoryEntry, callback) {
               directoryEntry.getFile("index.rdf", {}, (fileEntry) => {
                 fileEntry.file((file) => {
-                  readRdfFile(file, (doc) => {
-                    var meta = parseRdfDocument(doc);
+                  viewer.readRdfFile(file, (doc) => {
+                    var meta = viewer.parseRdfDocument(doc);
                     directoryEntry.getFile(meta.indexfilename, {}, (fileEntry) => {
                       callback(fileEntry);
                     }, (ex) => {
