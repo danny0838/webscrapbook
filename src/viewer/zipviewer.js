@@ -1,5 +1,7 @@
 (function (window, undefined) {
 
+var viewerData = JSON.parse(document.currentScript.textContent);
+
 document.addEventListener("DOMContentLoaded", function () {
   /**
    * common helper functions
@@ -583,13 +585,13 @@ document.addEventListener("DOMContentLoaded", function () {
   /**
    * main
    */
-  var virtualBase = window.viewerData.virtualBase;
-
-  var inZipFiles = {};
-  var blobUrlToInZipPath = {};
+  var virtualBase = viewerData.virtualBase;
 
   var viewer = document.getElementById('viewer');
   var loading = document.getElementById('loading');
+
+  var inZipFiles = {};
+  var blobUrlToInZipPath = {};
 
   var urlSearch = "";
   var urlHash = location.hash;
@@ -622,7 +624,7 @@ document.addEventListener("DOMContentLoaded", function () {
     viewer.style.display = 'block';
   });
 
-  extractZipFile(dataUriToFile(window.viewerData.zip));
+  extractZipFile(dataUriToFile(viewerData.zip));
 });
 
 })(window, undefined);
