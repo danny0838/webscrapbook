@@ -156,7 +156,7 @@ scrapbook.loadLanguages = function (rootNode) {
  * see also: validateFilename
  */
 scrapbook.escapeFilename = function (filename) {
-  return filename.replace(/[ #]+|(?:%[0-9A-Fa-f]{2})+/g, m => encodeURIComponent(m));
+  return filename.replace(/[ %#]+/g, m => encodeURIComponent(m));
 };
 
 /**
