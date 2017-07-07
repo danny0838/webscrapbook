@@ -1192,7 +1192,10 @@ capturer.getFrameContent = function (frameElement, timeId, settings, options, ca
 };
 
 capturer.resolveRelativeUrl = function (baseUrl, relativeUrl) {
-  return new URL(relativeUrl, baseUrl).href;
+  try {
+    return new URL(relativeUrl, baseUrl).href;
+  } catch (ex) {}
+  return relativeUrl;
 };
 
 capturer.getErrorUrl = function (sourceUrl, options) {
