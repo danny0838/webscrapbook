@@ -271,11 +271,11 @@ function init() {
     },
 
     viewZipInMemory: function (zipFile) {
-      var invokeZipViewer = function (zipFile) {
+      var invokeZipViewer = function (zipFile, indexFile, inNewTab) {
         let onZipRead = function (zipData) {
           let viewerData = {
             virtualBase: chrome.runtime.getURL("viewer/!/"),
-            indexFile: "index.html",
+            indexFile: indexFile,
             zip: zipData.replace(";", ";filename=" + encodeURIComponent(zipFile.name) + ";")
           };
 
@@ -359,7 +359,13 @@ function init() {
               '</html>\n';
 
           let url = URL.createObjectURL(new Blob([content], {type: "text/html"})) + viewer.urlHash;
-          document.location = url;
+          if (inNewTab) {
+            chrome.tabs.create({url: url}, () => {});
+          } else {
+            chrome.tabs.getCurrent((tab) => {
+              chrome.tabs.update(tab.id, {url: url}, () => {});
+            });
+          }
         };
 
         let reader = new FileReader();
@@ -376,7 +382,7 @@ function init() {
         }
         case "htz":
         default: {
-          invokeZipViewer(zipFile);
+          invokeZipViewer(zipFile, "index.html");
           break;
         }
       }
