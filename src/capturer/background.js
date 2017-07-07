@@ -385,27 +385,28 @@ capturer.saveDocument = function (params, callback) {
         compressionOptions: {level: 9}
       });
 
-      var rdfContent = '<?xml version="1.0"?>\n' +
-          '<RDF:RDF xmlns:MAF="http://maf.mozdev.org/metadata/rdf#"\n' +
-          '         xmlns:NC="http://home.netscape.com/NC-rdf#"\n' +
-          '         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n' +
-          '  <RDF:Description RDF:about="urn:root">\n' +
-          '    <MAF:originalurl RDF:resource="' + scrapbook.escapeHtml(sourceUrl) + '"/>\n' +
-          '    <MAF:title RDF:resource="' + scrapbook.escapeHtml(data.title) + '"/>\n' +
-          '    <MAF:archivetime RDF:resource="' + scrapbook.escapeHtml(scrapbook.idToDate(timeId).toUTCString()) + '"/>\n' +
-          '    <MAF:indexfilename RDF:resource="index.html"/>\n' +
-          '    <MAF:charset RDF:resource="UTF-8"/>\n' +
-          '  </RDF:Description>\n' +
-          '</RDF:RDF>\n';
-
-      zip.file(timeId + "/" + "index.rdf", new Blob([rdfContent], {type: "application/rdf+xml"}), {
-        compression: "DEFLATE",
-        compressionOptions: {level: 9}
-      });
-
       if (!settings.frameIsMain) {
         callback({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename)});
       } else {
+        // generate index.rdf
+        var rdfContent = '<?xml version="1.0"?>\n' +
+            '<RDF:RDF xmlns:MAF="http://maf.mozdev.org/metadata/rdf#"\n' +
+            '         xmlns:NC="http://home.netscape.com/NC-rdf#"\n' +
+            '         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n' +
+            '  <RDF:Description RDF:about="urn:root">\n' +
+            '    <MAF:originalurl RDF:resource="' + scrapbook.escapeHtml(sourceUrl) + '"/>\n' +
+            '    <MAF:title RDF:resource="' + scrapbook.escapeHtml(data.title) + '"/>\n' +
+            '    <MAF:archivetime RDF:resource="' + scrapbook.escapeHtml(scrapbook.idToDate(timeId).toUTCString()) + '"/>\n' +
+            '    <MAF:indexfilename RDF:resource="index.html"/>\n' +
+            '    <MAF:charset RDF:resource="UTF-8"/>\n' +
+            '  </RDF:Description>\n' +
+            '</RDF:RDF>\n';
+
+        zip.file(timeId + "/" + "index.rdf", new Blob([rdfContent], {type: "application/rdf+xml"}), {
+          compression: "DEFLATE",
+          compressionOptions: {level: 9}
+        });
+
         // generate and download the zip file
         zip.generateAsync({type: "blob"}).then((zipBlob) => {
           var targetDir = options["capture.dataFolder"];
