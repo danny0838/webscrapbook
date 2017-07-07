@@ -44,7 +44,7 @@
         ++pendingZipEntry;
         zipObj.async("arraybuffer").then((ab) => {
           let mime = Mime.prototype.lookup(inZipPath);
-          let f = new File([ab], scrapbook.urlToFilename(inZipPath), {type: mime});
+          let f = new File([ab], inZipPath.replace(/.*\//, ""), {type: mime});
           inZipFiles[inZipPath] = {file: f, url: URL.createObjectURL(f)};
           if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type); }
         });
