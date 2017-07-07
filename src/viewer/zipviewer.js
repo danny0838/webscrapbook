@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
       absoluteUrl.search = "";
       absoluteUrl.hash = "";
       let inZipPath = absoluteUrl.href.slice(virtualBase.length);
-      inZipPath = inZipPath.split("/").map(x => decodeURIComponent(x)).join("/");
+      inZipPath = inZipPath.split("/").map(x => scrapbook.decodeURIComponent(x)).join("/");
       let f = inZipFiles[inZipPath];
       if (f) {
         // url targets a file in zip, return its blob URL
