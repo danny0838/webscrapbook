@@ -581,7 +581,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
             // relink to the captured page only when the target node is included in the selected fragment.
             let hasLocalTarget = !selection;
             if (!hasLocalTarget) {
-              let targetId = decodeURIComponent(urlHash.slice(1)).replace(/\W/g, '\\$&');
+              let targetId = scrapbook.decodeURIComponent(urlHash.slice(1)).replace(/\W/g, '\\$&');
               if (rootNode.querySelector('[id="' + targetId + '"], a[name="' + targetId + '"]')) {
                 hasLocalTarget = true;
               }

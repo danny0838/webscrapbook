@@ -359,6 +359,11 @@ scrapbook.unescapeCss = function (str) {
   return str.replace(that.replaceRegex, that.replaceFunc);
 };
 
+scrapbook.decodeURIComponent = function (uri) {
+  // A URL containing standalone "%"s causes a malformed URI sequence error.
+  return uri.replace(/(%[0-9A-F]{2})+/gi, m => decodeURIComponent(m));
+};
+
 scrapbook.stringToDataUri = function (str, mime, charset) {
   mime = mime || "";
   charset = charset ? ";charset=" + charset : "";
