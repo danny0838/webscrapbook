@@ -286,6 +286,12 @@ document.addEventListener("DOMContentLoaded", function () {
         case "script": {
           if (elem.hasAttribute("src")) {
             elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+          } else if (viewerData.useInlineScriptShim) {
+            let text = elem.textContent;
+            if (text) {
+              elem.src = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
+              elem.textContent = "";
+            }
           }
           break;
         }
