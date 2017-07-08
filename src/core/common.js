@@ -11,23 +11,6 @@ var isDebug = false;
 
 
 /********************************************************************
- * Catch several environment information so that we can get it
- * synchronously later.  Note that there may be a delay before they 
- * can be loaded.
- *******************************************************************/
-
-scrapbook.runtime = {
-  isGecko: false,
-  viewerRedirectKey: "kwo7vzrTJ9btCVZ"
-};
-
-try {
-  let manifest = chrome.runtime.getManifest();
-  scrapbook.runtime.isGecko = manifest.applications && manifest.applications.gecko;
-} catch (ex) {}
-
-
-/********************************************************************
  * Options
  *******************************************************************/
 
@@ -64,6 +47,7 @@ scrapbook.options = {
   "capture.recordRewrittenAttr": false,
   "capture.recordSourceUri": false,
   "capture.recordErrorUri": false,
+  "viewer.redirectKey": "QEDbgTS2R2uqCZYy",
   "viewer.useFileSystemApi": true,
 };
 

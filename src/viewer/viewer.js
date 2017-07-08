@@ -82,7 +82,7 @@ function init() {
       viewer.urlSearch = zipSourceUrlObj.search;
       viewer.urlHash = viewer.mainUrl.hash;
       // use a random hash to avoid recursive redirect
-      zipSourceUrlObj.searchParams.set(scrapbook.runtime.viewerRedirectKey, 1);
+      zipSourceUrlObj.searchParams.set(scrapbook.options["viewer.redirectKey"], 1);
       zipSourceUrl = zipSourceUrlObj.href;
       let filename = scrapbook.urlToFilename(zipSourceUrl);
 

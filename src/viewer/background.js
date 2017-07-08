@@ -11,7 +11,7 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
 
   var url = new URL(details.url);
   // use a random hash to avoid recursive redirect
-  if (!/\.(htz|maff)/i.test(url.pathname) || url.searchParams.has(scrapbook.runtime.viewerRedirectKey)) { return; }
+  if (!/\.(htz|maff)/i.test(url.pathname) || url.searchParams.has(scrapbook.options["viewer.redirectKey"])) { return; }
 
   var newUrl = new URL(chrome.runtime.getURL("viewer/viewer.html"));
   newUrl.hash = url.hash;
