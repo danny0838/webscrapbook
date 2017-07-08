@@ -60,10 +60,9 @@
   ],
 
   "web_accessible_resources": [
-    "core/common.js",
-    "lib/jsSHA.js",
     "lib/mime.js",
     "lib/jszip.js",
+    "core/common.js",
     "viewer/zipviewer.js"
   ],
 

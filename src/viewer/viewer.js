@@ -376,9 +376,9 @@ function init() {
               '<head>\n' +
               '<meta charset="UTF-8">\n' +
               '<title>' + scrapbook.lang("ViewerTitle") + '</title>\n' +
-              '<script src="' + chrome.runtime.getURL("core/common.js") + '"></script>\n' +
               '<script src="' + chrome.runtime.getURL("lib/jszip.js") + '"></script>\n' +
               '<script src="' + chrome.runtime.getURL("lib/mime.js") + '"></script>\n' +
+              '<script src="' + chrome.runtime.getURL("core/common.js") + '"></script>\n' +
               '<script src="' + chrome.runtime.getURL("viewer/zipviewer.js") + '">' + JSON.stringify(viewerData) + '</script>\n' +
               '<style>\n' +
               '@-webkit-keyframes spin {\n' +
