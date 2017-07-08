@@ -168,15 +168,20 @@ scrapbook.escapeFilename = function (filename) {
  * @param {boolean} forceAscii - also escapes all non-ASCII chars
  */
 scrapbook.validateFilename = function (filename, forceAscii) {
-  filename = filename
+  var fn = filename
+      // control chars are bad for filename
       .replace(/[\x00-\x1F\x7F]+|^ +/g, "")
-      .replace(/^\./, "_.").replace(/^ +/, "").replace(/[. ]+$/, "")  // leading/trailing spaces and dots are not allowed in Windows
+      // leading/trailing spaces and dots are not allowed in Windows
+      .replace(/^\./, "_.").replace(/^ +/, "").replace(/[. ]+$/, "")
+      // bad chars in most OS
       .replace(/[:"?*\\/|]/g, "_")
+      // "~" is not allowed by Chromium downloader
       .replace(/[~]/g, "-").replace(/[<]/g, "(").replace(/[>]/g, ")");
   if (forceAscii) {
-    filename = filename.replace(/[^\x00-\x7F]+/g, m => encodeURI(m));
+    fn = fn.replace(/[^\x00-\x7F]+/g, m => encodeURIComponent(m));
   }
-  return filename;
+  fn = fn || "_"; // prevent empty filename
+  return fn;
 };
 
 scrapbook.urlToFilename = function (url) {
