@@ -61,6 +61,11 @@ function init() {
     createFileFromZipEntry: function (dirEntry, path, zipObj, callback) {
       this.createDir(dirEntry, path.split("/").slice(0, -1), () => {
         dirEntry.getFile(path, {create: true}, (fileEntry) => {
+          // @TODO: reading a large file (about 400~500 MB) once into an
+          //     arraybuffer could consume too much memory and cause the
+          //     extension to shutdown.  Loading in chunks avoids this but
+          //     is very slow and unuseful.  We currently use the faster
+          //     method.
           zipObj.async("arraybuffer").then((ab) => {
             fileEntry.createWriter((fileWriter) => {
               fileWriter.onwriteend = function (e) {
@@ -178,6 +183,8 @@ function init() {
         var type = scrapbook.filenameParts(file.name)[1].toLowerCase();
 
         var zip = new JSZip();
+        // @TODO: JSZip.loadAsync cannot load a large zip file
+        //     (around 2GB, tested in Chrome)
         zip.loadAsync(file).then((zip) => {
           let jobs = [];
           viewer.filesystem.root.getDirectory(ns, {create: true}, () => {
