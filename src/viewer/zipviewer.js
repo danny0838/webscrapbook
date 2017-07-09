@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   var getZipFile = function (uuid, callback) {
-    var indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
+    var indexedDB = window.indexedDB;
     var request = indexedDB.open("zipFiles", 1); 
 
     request.onupgradeneeded = function (evt) {

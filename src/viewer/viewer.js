@@ -403,7 +403,7 @@ function init() {
 
       var invokeZipViewer = function (zipFile, indexFile, inNewTab) {
         let storeZipData = function (zipFile, callback) {
-          var indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
+          var indexedDB = window.indexedDB;
           var request = indexedDB.open("zipFiles", 1); 
 
           request.onupgradeneeded = function (evt) {
