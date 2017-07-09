@@ -55,9 +55,6 @@
   "OpenOptions": {
     "message": "選項"
   },
-  "OpenViewer": {
-    "message": "檢視封存頁面"
-  },
   "OptionPageTitle": {
     "message": "選項設定"
   },
@@ -66,12 +63,6 @@
   },
   "OptionsResetLabel": {
     "message": "重設"
-  },
-  "ViewerTitle": {
-    "message": "檢視封存頁面"
-  },
-  "ViewerFileSelectorText": {
-    "message": "點擊這裡或拖曳 HTML 封存檔案到這裡以開啟之..."
   },
   "WarnCaptureCyclicRefercing": {
     "message": "資源 '$SOURCE$' 循環參照至 '$TARGET$'，由於目前的擷取設定不支援循環參照，參照目標將轉向至空值。",

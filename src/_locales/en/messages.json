@@ -55,9 +55,6 @@
   "OpenOptions": {
     "message": "Options"
   },
-  "OpenViewer": {
-    "message": "View archived page"
-  },
   "OptionPageTitle": {
     "message": "Options"
   },
@@ -66,12 +63,6 @@
   },
   "OptionsResetLabel": {
     "message": "Reset"
-  },
-  "ViewerTitle": {
-    "message": "View archived page"
-  },
-  "ViewerFileSelectorText": {
-    "message": "Click here or drop an HTML archive file here to open it..."
   },
   "WarnCaptureCyclicRefercing": {
     "message": "Resource '$SOURCE$' has a circular reference to '$TARGET$', which will be blanked because current capture configuration does not support circular reference.",

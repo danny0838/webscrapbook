@@ -18,14 +18,10 @@
     }
   },
 
-  "content_security_policy": "script-src 'self' 'unsafe-eval' blob:; object-src 'self' blob:",
-
   "permissions": [
     "downloads",
     "storage",
     "tabs",
-    "webRequest",
-    "webRequestBlocking",
     "<all_urls>"
   ],
 
@@ -51,8 +47,7 @@
       "lib/jszip.js",
       "core/optionsAuto.js",
       "capturer/common.js",
-      "capturer/background.js",
-      "viewer/background.js"
+      "capturer/background.js"
     ]
   },
 
