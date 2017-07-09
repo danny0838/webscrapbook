@@ -6,13 +6,13 @@
   "author": "Danny Lin",
   "default_locale": "en",
 
-  "icons": {
-    "128": "core/scrapbook_128.png"
-  },
-
   "minimum_chrome_version": "49",
 
   "incognito": "split",
+
+  "icons": {
+    "128": "core/scrapbook_128.png"
+  },
 
   "permissions": [
     "downloads",
@@ -20,19 +20,6 @@
     "tabs",
     "<all_urls>"
   ],
-
-  "options_ui": {
-    "chrome_style": true,
-    "page": "core/options.html"
-  },
-
-  "browser_action": {
-    "default_icon": {
-      "128": "core/scrapbook_128.png"
-    },
-    "default_title": "__MSG_BrowserActionTitle__",
-    "default_popup": "core/browserAction.html"
-  },
 
   "background": {
     "persistent": true,
@@ -60,5 +47,18 @@
       ],
       "all_frames": true
     }
-  ]
+  ],
+
+  "options_ui": {
+    "chrome_style": true,
+    "page": "core/options.html"
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "128": "core/scrapbook_128.png"
+    },
+    "default_title": "__MSG_BrowserActionTitle__",
+    "default_popup": "core/browserAction.html"
+  }
 }
