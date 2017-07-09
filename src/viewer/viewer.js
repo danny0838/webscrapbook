@@ -5,7 +5,7 @@
  *******************************************************************/
 
 function init() {
-  var zipHandler = {
+  var fileSystemHandler = {
     createDir: function (dirEntry, path, callback) {
       var folders = (Object.prototype.toString.call(path) === "[object Array]") ? path : path.split("/");
       dirEntry.getDirectory(folders.join("/"), {}, (dirEntry) => {
@@ -161,7 +161,7 @@ function init() {
               if (zipObj.dir) { return; }
               ++pendingZipEntry;
               zipObj.async("arraybuffer").then((ab) => {
-                zipHandler.createFile(viewer.filesystem.root, ns + "/" + inZipPath, new Blob([ab], {type: "text/plain"}), () => {
+                fileSystemHandler.createFile(viewer.filesystem.root, ns + "/" + inZipPath, new Blob([ab], {type: "text/plain"}), () => {
                   if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns); }
                 });
               });
