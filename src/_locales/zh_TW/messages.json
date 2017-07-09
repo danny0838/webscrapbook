@@ -1,7 +1,7 @@
 {
   "BrowserActionTitle": {
     "description": "Title for the browser action that's visible to the user of extension",
-    "message": "用 WebScrapBook 擷取網頁"
+    "message": "用網路剪貼簿擷取網頁"
   },
   "CaptureTab": {
     "message": "擷取目前網頁"
@@ -50,7 +50,7 @@
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
-    "message": "Web ScrapBook"
+    "message": "網路剪貼簿"
   },
   "OpenOptions": {
     "message": "選項"
