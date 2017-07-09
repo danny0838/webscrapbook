@@ -63,14 +63,14 @@ function initDefaultOptions() {
   // load from sync
   scrapbook.loadOptions((options) => {
     for (let id in options) {
-      let value = options[id];
-      setOptionToDocument(id, value);
+      setOptionToDocument(id, options[id]);
     }
   });
 }
 
 function getOptionFromDocument(id) {
   var elem = document.getElementById(OPTION_PREFIX + id);
+  if (!elem) { return; }
   switch (elem.getAttribute("type")) {
     case "checkbox":
       return elem.checked;
@@ -81,6 +81,7 @@ function getOptionFromDocument(id) {
 
 function setOptionToDocument(id, value) {
   var elem = document.getElementById(OPTION_PREFIX + id);
+  if (!elem) { return; }
   switch (elem.getAttribute("type")) {
     case "checkbox":
       elem.checked = value;
