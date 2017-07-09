@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById("openOptions").addEventListener('click', () => {
-    chrome.tabs.create({url: chrome.runtime.getURL("core/options.html"), active: true}, () => {});
+    window.open(chrome.runtime.getURL("core/options.html"));
     window.close();
   });
 });
