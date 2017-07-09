@@ -56,6 +56,30 @@ function init() {
           alert("Unable to create file: '" + path + "': " + ex);
         });
       });
+    },
+
+    createFileFromZipEntry: function (dirEntry, path, zipObj, callback) {
+      this.createDir(dirEntry, path.split("/").slice(0, -1), () => {
+        dirEntry.getFile(path, {create: true}, (fileEntry) => {
+          zipObj.async("arraybuffer").then((ab) => {
+            fileEntry.createWriter((fileWriter) => {
+              fileWriter.onwriteend = function (e) {
+                callback();
+              };
+              fileWriter.onerror = function (e) {
+                alert("Unable to create write file: '" + path + "'");
+                callback();
+              };
+              // fileWriter.seek(fileWriter.length);
+              fileWriter.write(new Blob([ab]));
+            }, (ex) => {
+              console.error("Unable to create file writer: '" + path + "': " + ex);
+            });
+          });
+        }, (ex) => {
+          alert("Unable to create file: '" + path + "': " + ex);
+        });
+      });
     }
   };
 
@@ -160,10 +184,8 @@ function init() {
             zip.forEach((inZipPath, zipObj) => {
               if (zipObj.dir) { return; }
               ++pendingZipEntry;
-              zipObj.async("arraybuffer").then((ab) => {
-                fileSystemHandler.createFile(viewer.filesystem.root, ns + "/" + inZipPath, new Blob([ab], {type: "text/plain"}), () => {
-                  if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns); }
-                });
+              fileSystemHandler.createFileFromZipEntry(viewer.filesystem.root, ns + "/" + inZipPath, zipObj, () => {
+                if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns); }
               });
             });
             if (pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns); }
