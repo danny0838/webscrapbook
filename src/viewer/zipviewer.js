@@ -65,6 +65,37 @@ document.addEventListener("DOMContentLoaded", function () {
     return {url: absoluteUrl.href, inZip: false};
   };
 
+  var getZipFile = function (uuid, callback) {
+    var indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
+    var request = indexedDB.open("zipFiles", 1); 
+
+    request.onupgradeneeded = function (evt) {
+      var db = evt.target.result;
+      var objectStore = db.createObjectStore("zipFiles", {keyPath: "uuid"});
+    }; 
+
+    request.onsuccess = function (evt) {
+      var db = evt.target.result;
+      var transaction = db.transaction("zipFiles", "readwrite");
+      var objectStore = transaction.objectStore(["zipFiles"]);
+
+      var req = objectStore.get(uuid);
+      req.onsuccess = function (evt) {
+        var data = evt.target.result;
+        var req2 = objectStore.delete(uuid);
+        callback(data.blob);
+      };
+
+      req.onerror = function (evt) {
+        alert("Unable to read the zip file.");
+      };
+    };
+     
+    request.onerror = function (evt) {
+      console.error(evt.target.error);
+    };
+  };
+
   var extractZipFile = function (file) {
     var pendingZipEntry = 0;
 
@@ -611,7 +642,7 @@ document.addEventListener("DOMContentLoaded", function () {
     viewer.style.display = 'block';
   });
 
-  extractZipFile(dataUriToFile(viewerData.zip));
+  getZipFile(viewerData.zipId, extractZipFile);
 });
 
 })(window, undefined);
