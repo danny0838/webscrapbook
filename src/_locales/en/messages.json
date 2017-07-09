@@ -44,6 +44,12 @@
       "url": {"content" : "$1"}
     }
   },
+  "ErrorImportOptions": {
+    "message": "Error on importing options: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
   "ExtensionDescription": {
     "description": "Description of the extension as it's visible to the outside world",
     "message": "Captures the web page with highly customizable configurations."
@@ -57,6 +63,15 @@
   },
   "OptionPageTitle": {
     "message": "Options"
+  },
+  "OptionsExportLabel": {
+    "message": "Export"
+  },
+  "OptionsImportLabel": {
+    "message": "Import"
+  },
+  "OptionsImportSuccess": {
+    "message": "Successfully imported options."
   },
   "OptionsSaveLabel": {
     "message": "Save"

@@ -44,6 +44,12 @@
       "url": {"content" : "$1"}
     }
   },
+  "ErrorImportOptions": {
+    "message": "匯入選項失敗: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
   "ExtensionDescription": {
     "description": "Description of the extension as it's visible to the outside world",
     "message": "擷取網頁內容，提供多種客製化設定。"
@@ -57,6 +63,15 @@
   },
   "OptionPageTitle": {
     "message": "選項設定"
+  },
+  "OptionsExportLabel": {
+    "message": "匯出"
+  },
+  "OptionsImportLabel": {
+    "message": "匯入"
+  },
+  "OptionsImportSuccess": {
+    "message": "匯入選項成功"
   },
   "OptionsSaveLabel": {
     "message": "儲存"
