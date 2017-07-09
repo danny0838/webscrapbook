@@ -174,21 +174,26 @@ function init() {
 
     viewZipInFileSystem: function (zipFile) {
       var extractZipFile = function (file) {
-        var pendingZipEntry = 0;
         var ns = scrapbook.getUuid();
         var type = scrapbook.filenameParts(file.name)[1].toLowerCase();
 
         var zip = new JSZip();
         zip.loadAsync(file).then((zip) => {
+          let jobs = [];
           viewer.filesystem.root.getDirectory(ns, {create: true}, () => {
+            let nextJob = function () {
+              if (jobs.length) {
+                let job = jobs.shift();
+                fileSystemHandler.createFileFromZipEntry.apply(fileSystemHandler, job);
+              } else {
+                onAllZipEntriesProcessed(type, ns);
+              }
+            };
             zip.forEach((inZipPath, zipObj) => {
               if (zipObj.dir) { return; }
-              ++pendingZipEntry;
-              fileSystemHandler.createFileFromZipEntry(viewer.filesystem.root, ns + "/" + inZipPath, zipObj, () => {
-                if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns); }
-              });
+              jobs.push([viewer.filesystem.root, ns + "/" + inZipPath, zipObj, nextJob]);
             });
-            if (pendingZipEntry === 0) { onAllZipEntriesProcessed(type, ns); }
+            nextJob();
           }, (ex) => {
             alert("Unable to create directory: '" + ns + "': " + ex);
           });
