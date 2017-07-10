@@ -1,0 +1,24 @@
+{
+  "addons": {
+    "webscrapbook.beta@danny0838.addons.mozilla.org": {
+      "updates": [
+        { "version": "0.1.2",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.1.2-an+fx.xpi" },
+        { "version": "0.2.0",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.2.0-an+fx.xpi" },
+        { "version": "0.3.0",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.3.0-an+fx.xpi" },
+        { "version": "0.4.0",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.4.0-an+fx.xpi" },
+        { "version": "0.5.0",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.5.0-an+fx.xpi" },
+        { "version": "0.6.0",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.6.0-an+fx.xpi" },
+        { "version": "0.6.1",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.6.1-an+fx.xpi" },
+        { "version": "0.7.0",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.7.0-an+fx.xpi" }
+      ]
+    }
+  }
+}
