@@ -427,7 +427,7 @@ scrapbook.base64ToUnicode = function (str) {
 };
 
 /**
- * supported data types: "B64", "BYTES", "TEXT", "ARRAYBUFFER"
+ * supported data types: HEX, TEXT, B64, BYTES, or ARRAYBUFFER
  *
  * @require jsSHA
  */
