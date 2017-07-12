@@ -49,6 +49,8 @@ scrapbook.options = {
   "capture.recordErrorUri": false,
   "viewer.redirectKey": "QEDbgTS2R2uqCZYy",
   "viewer.useFileSystemApi": true,
+  "viewer.viewHtz": true,
+  "viewer.viewMaff": true,
 };
 
 scrapbook.isOptionsSynced = false;

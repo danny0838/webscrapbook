@@ -274,6 +274,24 @@
   "OptionsResetLabel": {
     "message": "Reset"
   },
+  "OptionViewerUseFileSystemApiLabel": {
+    "message": "Use Filesystem API:"
+  },
+  "OptionViewerUseFileSystemApiTooltip": {
+    "message": "Use filesystem API to create a virtual filesystem and view the archive file when supported, to get a better performance and fidelity."
+  },
+  "OptionViewerViewHtzLabel": {
+    "message": "View .htz:"
+  },
+  "OptionViewerViewHtzTooltip": {
+    "message": "When the browser loads a .htz file, view it with the viewer."
+  },
+  "OptionViewerViewMaffLabel": {
+    "message": "View .maff:"
+  },
+  "OptionViewerViewMaffTooltip": {
+    "message": "When the browser loads a .maff file, view it with the viewer."
+  },
   "ViewerTitle": {
     "message": "View archive page"
   },
