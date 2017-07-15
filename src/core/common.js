@@ -91,7 +91,7 @@ scrapbook.loadOptions = function (callback) {
     }
     if (callback) {
       scrapbook.isOptionsSynced = true;
-      callback(scrapbook.options);
+      callback(items);
     }
   });
 };
