@@ -7,60 +7,6 @@
 var OPTION_PREFIX = "opt_";
 
 function initDefaultOptions() {
-  // create elements for default options
-  for (let id in scrapbook.options) {
-    let value = scrapbook.options[id];
-
-    let p = document.createElement("p");
-    document.getElementById("optionsWrapper").appendChild(p);
-
-    let label = document.createElement("label");
-    label.setAttribute("for", id);
-    label.textContent = id + ": ";
-    p.appendChild(label);
-
-    switch(Object.prototype.toString.call(value)) {
-      case "[object Boolean]": {
-        let input = document.createElement("input");
-        input.id = OPTION_PREFIX + id;
-        input.setAttribute("type", "checkbox");
-        value && input.setAttribute("checked", "checked");
-        p.appendChild(input);
-        break;
-      }
-      case "[object Number]": {
-        let input = document.createElement("input");
-        input.id = OPTION_PREFIX + id;
-        input.setAttribute("type", "number");
-        input.setAttribute("value", value);
-        p.appendChild(input);
-        break;
-      }
-      case "[object Array]": {
-        let input = document.createElement("select");
-        input.id = OPTION_PREFIX + id;
-        input.setAttribute("type", "select");
-        p.appendChild(input);
-        for (let i=0, I=value.length; i<I-1; ++i) {
-          let item = value[i];
-          let option = document.createElement("option");
-          option.value = option.textContent = item;
-          input.appendChild(option);
-        }
-        break;
-      }
-      default: {  // string
-        let input = document.createElement("input");
-        input.id = OPTION_PREFIX + id;
-        input.setAttribute("type", "text");
-        input.setAttribute("value", value);
-        p.appendChild(input);
-        break;
-      }
-    }
-  }
-
-  // load from sync
   scrapbook.loadOptions((options) => {
     for (let id in options) {
       setOptionToDocument(id, options[id]);

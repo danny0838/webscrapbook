@@ -61,6 +61,198 @@
   "OpenOptions": {
     "message": "選項"
   },
+  "OptionCaptureAppletLabel": {
+    "message": "APPLET 元素:"
+  },
+  "OptionCaptureAudioLabel": {
+    "message": "音訊:"
+  },
+  "OptionCaptureBaseLabel": {
+    "message": "BASE 元素:"
+  },
+  "OptionCaptureCanvasLabel": {
+    "message": "CANVAS 元素:"
+  },
+  "OptionCaptureCommonBlankLabel": {
+    "message": "清空"
+  },
+  "OptionCaptureCommonBlankTooltip": {
+    "message": "將元素保留在原始位置，但將連結或內容無效化。"
+  },
+  "OptionCaptureCommonLinkLabel": {
+    "message": "連結"
+  },
+  "OptionCaptureCommonLinkTooltip": {
+    "message": "將參照的連結改寫為連往原始位址。注意這會導致日後瀏覽時持續觸發網路傳輸及消耗網路流量。"
+  },
+  "OptionCaptureCommonSaveLabel": {
+    "message": "儲存"
+  },
+  "OptionCaptureCommonSaveTooltip": {
+    "message": "將參照的內容儲存至本地。"
+  },
+  "OptionCaptureCommonRemoveLabel": {
+    "message": "移除"
+  },
+  "OptionCaptureCommonRemoveTooltip": {
+    "message": "將元素完全移除。注意這可能會影響排版。"
+  },
+  "OptionCaptureDataFolderLabel": {
+    "message": "儲存擷取資料的資料夾:"
+  },
+  "OptionCaptureDataFolderTooltip": {
+    "message": "擷取的資料會統一儲存至這個子資料夾中。"
+  },
+  "OptionCaptureEmbedLabel": {
+    "message": "EMBED 元素:"
+  },
+  "OptionCaptureFaviconLabel": {
+    "message": "Favicon:"
+  },
+  "OptionCaptureFontLabel": {
+    "message": "字體:"
+  },
+  "OptionCaptureFrameLabel": {
+    "message": "框架頁:"
+  },
+  "OptionCaptureImageBackgroundLabel": {
+    "message": "背景圖片:"
+  },
+  "OptionCaptureImageLabel": {
+    "message": "圖片:"
+  },
+  "OptionCaptureNoscriptLabel": {
+    "message": "NOSCRIPT 元素:"
+  },
+  "OptionCaptureObjectLabel": {
+    "message": "OBJECT 元素:"
+  },
+  "OptionCaptureRecordDocumentMetaLabel": {
+    "message": "記錄文件後設資訊:"
+  },
+  "OptionCaptureRecordDocumentMetaTooltip": {
+    "message": "在擷取網頁的最外層 html 元素記錄來源位址等後設資訊。"
+  },
+  "OptionCaptureRecordRemovedAttrLabel": {
+    "message": "記錄移除的屬性:"
+  },
+  "OptionCaptureRecordRemovedAttrTooltip": {
+    "message": "擷取網頁時若有移除元素的屬性，則建立對應的 data-* 屬性記錄原始值。"
+  },
+  "OptionCaptureRecordErrorUriLabel": {
+    "message": "記錄錯誤的 URI:"
+  },
+  "OptionCaptureRecordErrorUriTooltip": {
+    "message": "擷取網頁時若有 URI 無法順利連上，會以 urn:scrapbook:* 的形式記錄。若不勾選則會連結至原始位址（可能仍無法連上而導致無效連線）。"
+  },
+  "OptionCaptureRecordRemovedNodeLabel": {
+    "message": "記錄移除的元素:"
+  },
+  "OptionCaptureRecordRemovedNodeTooltip": {
+    "message": "擷取網頁時若有移除元素，則在原位置建立 HTML 註解記錄原始內容。"
+  },
+  "OptionCaptureRecordSourceUriLabel": {
+    "message": "記錄原始的 URI:"
+  },
+  "OptionCaptureRecordSourceUriTooltip": {
+    "message": "擷取網頁時若有改寫連結，則建立對應的 data-* 屬性記錄改寫前的 URI 位址。"
+  },
+  "OptionCaptureRemoveIntegrityLabel": {
+    "message": "移除 integrity 屬性:"
+  },
+  "OptionCaptureRemoveIntegrityTooltip": {
+    "message": "擷取網頁時可能會改寫連結檔案的內容，若不移除 integrity 屬性將無法正常載入。"
+  },
+  "OptionCaptureRewriteCssLabel": {
+    "message": "改寫 CSS:"
+  },
+  "OptionCaptureRewriteCssNoneLabel": {
+    "message": "不改寫"
+  },
+  "OptionCaptureRewriteUrlLabel": {
+    "message": "改寫 URL"
+  },
+  "OptionCaptureSaveAsDownloadsLabel": {
+    "message": "下載串流"
+  },
+  "OptionCaptureSaveAsDownloadsTooltip": {
+    "message": "啟動一連串下載將擷取的資料儲存至自動產生的資料夾。（Chrome 建議關閉「下載每個檔案前先詢問儲存位置」，否則會一直跳視窗）"
+  },
+  "OptionCaptureSaveAsciiFilenameLabel": {
+    "message": "儲存為 ASCII 檔名:"
+  },
+  "OptionCaptureSaveAsciiFilenameTooltip": {
+    "message": "檔名中所有非 ASCII 字元會以編碼形式儲存。"
+  },
+  "OptionCaptureSaveAsLabel": {
+    "message": "儲存擷取資料為:"
+  },
+  "OptionCaptureSaveAsTooltip": {
+    "message": "指定擷取資料的儲存方式。.htz 及 .maff 封存檔案可用「檢視封存檔案」檢視或以支援 zip 的程式解壓縮後檢視。"
+  },
+  "OptionCaptureSaveAsMaffLabel": {
+    "message": "maff 封存檔案"
+  },
+  "OptionCaptureSaveAsMaffTooltip": {
+    "message": "將網頁及參照的資源以標準 zip 演算法打包成 .maff 封存檔案。"
+  },
+  "OptionCaptureSaveAsSingleHtmlLabel": {
+    "message": "單一 HTML 檔案"
+  },
+  "OptionCaptureSaveAsSingleHtmlTooltip": {
+    "message": "將網頁儲存為單一 HTML 檔案，參照的資源會以 data URI 的形式內嵌，大多數較新的瀏覽器都能正常讀取。"
+  },
+  "OptionCaptureSaveAsZipLabel": {
+    "message": "htz 封存檔案"
+  },
+  "OptionCaptureSaveAsZipTooltip": {
+    "message": "將網頁及參照資源以標準 zip 演算法打包成 .htz 封存檔案。"
+  },
+  "OptionCaptureSaveDataUriAsFileLabel": {
+    "message": "將 data URI 儲存為檔案:"
+  },
+  "OptionCaptureSaveDataUriAsFileTooltip": {
+    "message": "會自動根據 data URI 資料的 MIME 類型及內容的 SHA-1 雜湊值產生適當的檔名。"
+  },
+  "OptionCaptureSaveFileAsHtmlLabel": {
+    "message": "將檔案儲存為 HTML:"
+  },
+  "OptionCaptureSaveFileAsHtmlTooltip": {
+    "message": "將瀏覽器能檢視的非 HTML 檔案儲存為 HTML 網頁。"
+  },
+  "OptionCaptureSavePromptLabel": {
+    "message": "詢問封存檔的儲存位置:"
+  },
+  "OptionCaptureSavePromptTooltip": {
+    "message": "儲存為下載串流時將忽略此設定。"
+  },
+  "OptionCaptureSaveSelectionOnlyLabel": {
+    "message": "只儲存選取範圍:"
+  },
+  "OptionCaptureSaveSelectionOnlyTooltip": {
+    "message": "勾選時，只會擷取及儲存選取的範圍。"
+  },
+  "OptionCaptureScriptAnchorLabel": {
+    "message": "Javascript 連結:"
+  },
+  "OptionCaptureScriptAttrLabel": {
+    "message": "腳本式屬性:"
+  },
+  "OptionCaptureScriptAttrTooltip": {
+    "message": "如 onclick 等會觸發 javascript 腳本的元素屬性。"
+  },
+  "OptionCaptureScriptLabel": {
+    "message": "腳本:"
+  },
+  "OptionCaptureStyleInlineLabel": {
+    "message": "內聯樣式:"
+  },
+  "OptionCaptureStyleLabel": {
+    "message": "樣式:"
+  },
+  "OptionCaptureVideoLabel": {
+    "message": "視訊:"
+  },
   "OptionPageTitle": {
     "message": "選項設定"
   },

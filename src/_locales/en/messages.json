@@ -61,6 +61,198 @@
   "OpenOptions": {
     "message": "Options"
   },
+  "OptionCaptureAppletLabel": {
+    "message": "APPLET:"
+  },
+  "OptionCaptureAudioLabel": {
+    "message": "Audio:"
+  },
+  "OptionCaptureBaseLabel": {
+    "message": "BASE:"
+  },
+  "OptionCaptureCanvasLabel": {
+    "message": "CANVAS:"
+  },
+  "OptionCaptureCommonBlankLabel": {
+    "message": "Blank"
+  },
+  "OptionCaptureCommonBlankTooltip": {
+    "message": "Keep the element but disable its link or content."
+  },
+  "OptionCaptureCommonLinkLabel": {
+    "message": "Link"
+  },
+  "OptionCaptureCommonLinkTooltip": {
+    "message": "Rewrite the referenced link to its source. Note that this will trigger a network flow when browsing the captured document in the future."
+  },
+  "OptionCaptureCommonSaveLabel": {
+    "message": "Save"
+  },
+  "OptionCaptureCommonSaveTooltip": {
+    "message": "Save the referenced object to local."
+  },
+  "OptionCaptureCommonRemoveLabel": {
+    "message": "Remove"
+  },
+  "OptionCaptureCommonRemoveTooltip": {
+    "message": "Remove the element. Note that this could affect the layout."
+  },
+  "OptionCaptureDataFolderLabel": {
+    "message": "Folder to store captured data:"
+  },
+  "OptionCaptureDataFolderTooltip": {
+    "message": "All captured data will be saved to this subfolder."
+  },
+  "OptionCaptureEmbedLabel": {
+    "message": "EMBED:"
+  },
+  "OptionCaptureFaviconLabel": {
+    "message": "Favicon:"
+  },
+  "OptionCaptureFontLabel": {
+    "message": "Fonts:"
+  },
+  "OptionCaptureFrameLabel": {
+    "message": "Frames:"
+  },
+  "OptionCaptureImageBackgroundLabel": {
+    "message": "Background images:"
+  },
+  "OptionCaptureImageLabel": {
+    "message": "Images:"
+  },
+  "OptionCaptureNoscriptLabel": {
+    "message": "NOSCRIPT:"
+  },
+  "OptionCaptureObjectLabel": {
+    "message": "OBJECT:"
+  },
+  "OptionCaptureRecordDocumentMetaLabel": {
+    "message": "Record document metadata:"
+  },
+  "OptionCaptureRecordDocumentMetaTooltip": {
+    "message": "Record metadata such as source URL in the outermost html element."
+  },
+  "OptionCaptureRecordRemovedAttrLabel": {
+    "message": "Record removed attributes:"
+  },
+  "OptionCaptureRecordRemovedAttrTooltip": {
+    "message": "If an attribute is removed during the capture process, create a corresponding data-* attribute to record its original value."
+  },
+  "OptionCaptureRecordErrorUriLabel": {
+    "message": "Record error URI:"
+  },
+  "OptionCaptureRecordErrorUriTooltip": {
+    "message": "If connection to a URL failed during the capture process, record it as urn:scrapbook:*. If unchecked, link to the source address (which could still be unavailable and be an invalid connection)."
+  },
+  "OptionCaptureRecordRemovedNodeLabel": {
+    "message": "Record removed elements:"
+  },
+  "OptionCaptureRecordRemovedNodeTooltip": {
+    "message": "If an element is removed during the capture process, create a comment in place to record its original content."
+  },
+  "OptionCaptureRecordSourceUriLabel": {
+    "message": "Record source URI:"
+  },
+  "OptionCaptureRecordSourceUriTooltip": {
+    "message": "If a URL is rewritten during the capture process, create a corresponding data-* attribute to record its original address."
+  },
+  "OptionCaptureRemoveIntegrityLabel": {
+    "message": "Remove integrity:"
+  },
+  "OptionCaptureRemoveIntegrityTooltip": {
+    "message": "The content of captured object could be rewritten during the capture process. Not removing the integrity attribute will make them unloadable."
+  },
+  "OptionCaptureRewriteCssLabel": {
+    "message": "Rewrite CSS:"
+  },
+  "OptionCaptureRewriteCssNoneLabel": {
+    "message": "No rewrite"
+  },
+  "OptionCaptureRewriteUrlLabel": {
+    "message": "Rewrite URL"
+  },
+  "OptionCaptureSaveAsDownloadsLabel": {
+    "message": "Downloads"
+  },
+  "OptionCaptureSaveAsDownloadsTooltip": {
+    "message": "Save captured data into an auto-generated folder via a stream of downloads. (For Chrome, it's recommended that \"Ask where to save each file before downloading\" be unchecked to avoid tons of prompts.)"
+  },
+  "OptionCaptureSaveAsciiFilenameLabel": {
+    "message": "Save ASCII filename:"
+  },
+  "OptionCaptureSaveAsciiFilenameTooltip": {
+    "message": "The captured file will have non-ASCII chars in the filename encoded."
+  },
+  "OptionCaptureSaveAsLabel": {
+    "message": "Save captured data as:"
+  },
+  "OptionCaptureSaveAsTooltip": {
+    "message": "Determine how to save captured data. .htz and .maff files can be viewed via \"View archived page\" or via unzipping it."
+  },
+  "OptionCaptureSaveAsMaffLabel": {
+    "message": "maff package"
+  },
+  "OptionCaptureSaveAsMaffTooltip": {
+    "message": "Pack web pages and their referenced resources as a .maff file using the standard zip algorithm."
+  },
+  "OptionCaptureSaveAsSingleHtmlLabel": {
+    "message": "Single HTML"
+  },
+  "OptionCaptureSaveAsSingleHtmlTooltip": {
+    "message": "Save the captured web page as a single HTML file. Referenced resources are stored as data URI and can be viewed in most modern browsers."
+  },
+  "OptionCaptureSaveAsZipLabel": {
+    "message": "htz package"
+  },
+  "OptionCaptureSaveAsZipTooltip": {
+    "message": "Pack a web page and its referenced resources as a .htz file using the standard zip algorithm."
+  },
+  "OptionCaptureSaveDataUriAsFileLabel": {
+    "message": "Save data URI as file:"
+  },
+  "OptionCaptureSaveDataUriAsFileTooltip": {
+    "message": "A filename will be auto-generated according to the MIME type and the SHA-1 hash of the content of the data URI."
+  },
+  "OptionCaptureSaveFileAsHtmlLabel": {
+    "message": "Save file as HTML:"
+  },
+  "OptionCaptureSaveFileAsHtmlTooltip": {
+    "message": "Save a browser-viewable non-HTML file as an HTML web page."
+  },
+  "OptionCaptureSavePromptLabel": {
+    "message": "Ask where to save each captured pack:"
+  },
+  "OptionCaptureSavePromptTooltip": {
+    "message": "This does not applied when saving as downloads."
+  },
+  "OptionCaptureSaveSelectionOnlyLabel": {
+    "message": "Save selected area only:"
+  },
+  "OptionCaptureSaveSelectionOnlyTooltip": {
+    "message": "When checked, only the selected area will be captured."
+  },
+  "OptionCaptureScriptAnchorLabel": {
+    "message": "Javascript links:"
+  },
+  "OptionCaptureScriptAttrLabel": {
+    "message": "Script attributes:"
+  },
+  "OptionCaptureScriptAttrTooltip": {
+    "message": "Attributes that triggers a script, such as onclick."
+  },
+  "OptionCaptureScriptLabel": {
+    "message": "Scripts:"
+  },
+  "OptionCaptureStyleInlineLabel": {
+    "message": "Inline styles:"
+  },
+  "OptionCaptureStyleLabel": {
+    "message": "Styles:"
+  },
+  "OptionCaptureVideoLabel": {
+    "message": "Video:"
+  },
   "OptionPageTitle": {
     "message": "Options"
   },

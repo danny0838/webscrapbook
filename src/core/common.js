@@ -16,31 +16,31 @@ var isDebug = false;
 
 scrapbook.options = {
   "capture.dataFolder": "WebScrapBook",
-  "capture.saveAs": ["downloads", "zip", "maff", "singleHtml", 1],
+  "capture.saveAs": "zip", // "downloads", "zip", "maff", "singleHtml"
   "capture.savePrompt": false,
   "capture.saveAsciiFilename": false,
   "capture.saveSelectionOnly": true,
   "capture.saveFileAsHtml": false,
   "capture.saveDataUriAsFile": false,
-  "capture.favicon": ["save", "link", "blank", "remove", 0],
-  "capture.image": ["save", "link", "blank", "remove", 0],
-  "capture.imageBackground": ["save", "link", "remove", 0],
-  "capture.audio": ["save", "link", "blank", "remove", 0],
-  "capture.video": ["save", "link", "blank", "remove", 0],
-  "capture.embed": ["save", "link", "blank", "remove", 0],
-  "capture.object": ["save", "link", "blank", "remove", 0],
-  "capture.applet": ["save", "link", "blank", "remove", 0],
-  "capture.canvas": ["save", "blank", "remove", 0],
-  "capture.frame": ["save", "link", "blank", "remove", 0],
-  "capture.font": ["save", "link", "blank", "remove", 0],
-  "capture.style": ["save", "link", "blank", "remove", 0],
-  "capture.styleInline": ["save", "blank", "remove", 0],
-  "capture.rewriteCss": ["none", "url", 1],
-  "capture.script": ["save", "link", "blank", "remove", 2],
-  "capture.scriptAnchor": ["save", "blank", "remove", 1],
-  "capture.scriptAttr": ["save", "remove", 1],
-  "capture.noscript": ["save", "blank", "remove", 0],
-  "capture.base": ["save", "blank", "remove", 1],
+  "capture.favicon": "save", // "save", "link", "blank", "remove"
+  "capture.image": "save", // "save", "link", "blank", "remove"
+  "capture.imageBackground": "save", // "save", "link", "remove"
+  "capture.audio": "save", // "save", "link", "blank", "remove"
+  "capture.video": "save", // "save", "link", "blank", "remove"
+  "capture.embed": "save", // "save", "link", "blank", "remove"
+  "capture.object": "save", // "save", "link", "blank", "remove"
+  "capture.applet": "save", // "save", "link", "blank", "remove"
+  "capture.canvas": "save", // "save", "blank", "remove"
+  "capture.frame": "save", // "save", "link", "blank", "remove"
+  "capture.font": "save", // "save", "link", "blank", "remove"
+  "capture.style": "save", // "save", "link", "blank", "remove"
+  "capture.styleInline": "save", // "save", "blank", "remove"
+  "capture.rewriteCss": "url", // "none", "url"
+  "capture.script": "blank", // "save", "link", "blank", "remove"
+  "capture.scriptAnchor": "blank", // "save", "blank", "remove"
+  "capture.scriptAttr": "remove", // "save", "remove"
+  "capture.noscript": "save", // "save", "blank", "remove"
+  "capture.base": "blank", // "save", "blank", "remove"
   "capture.removeIntegrity": true,
   "capture.recordDocumentMeta": true,
   "capture.recordRemovedNode": false,
@@ -82,12 +82,7 @@ scrapbook.setOption = function (key, value, callback) {
 scrapbook.loadOptions = function (callback) {
   chrome.storage.sync.get(scrapbook.options, (items) => {
     for (let i in items) {
-      var item = items[i];
-      if (Object.prototype.toString.call(item) === "[object Array]") {
-        scrapbook.options[i] = item[item.pop()];
-      } else {
-        scrapbook.options[i] = item;
-      }
+      scrapbook.options[i] = items[i];
     }
     scrapbook.isOptionsSynced = true;
     if (callback) {
