@@ -20,7 +20,7 @@ scrapbook.options = {
   "capture.savePrompt": false,
   "capture.saveAsciiFilename": false,
   "capture.saveSelectionOnly": true,
-  "capture.saveInlineAsHtml": false,
+  "capture.saveFileAsHtml": false,
   "capture.saveDataUriAsFile": false,
   "capture.favicon": ["save", "link", "blank", "remove", 0],
   "capture.image": ["save", "link", "blank", "remove", 0],

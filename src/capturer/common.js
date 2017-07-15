@@ -37,7 +37,7 @@ capturer.captureDocumentOrFile = function (doc, settings, options, callback) {
 
   // if not HTML document, capture as file
   if (["text/html", "application/xhtml+xml"].indexOf(doc.contentType) === -1) {
-    if (!options["capture.saveInlineAsHtml"]) {
+    if (!options["capture.saveFileAsHtml"]) {
       capturer.invoke("captureFile", {
         url: doc.URL,
         settings: settings,
