@@ -115,13 +115,14 @@ scrapbook.lang = function (key, args) {
 
 scrapbook.loadLanguages = function (rootNode) {
   Array.prototype.forEach.call(rootNode.getElementsByTagName("*"), (elem) => {
-    if (elem.childNodes.length === 1 && /^__MSG_(.*?)__$/.test(elem.textContent)) {
-      elem.textContent = scrapbook.lang(RegExp.$1);
+    if (elem.childNodes.length === 1) {
+      let child = elem.firstChild;
+      if (child.nodeType === 3) {
+        child.nodeValue = child.nodeValue.replace(/__MSG_(.*?)__/, (m, k) => scrapbook.lang(k));
+      }
     }
     Array.prototype.forEach.call(elem.attributes, (attr) => {
-      if (/^__MSG_(.*?)__$/.test(attr.nodeValue)) {
-        attr.nodeValue = scrapbook.lang(RegExp.$1);
-      }
+      attr.nodeValue = attr.nodeValue.replace(/__MSG_(.*?)__/, (m, k) => scrapbook.lang(k));
     }, this);
   }, this);
 };
