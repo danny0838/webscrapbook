@@ -89,8 +89,8 @@ scrapbook.loadOptions = function (callback) {
         scrapbook.options[i] = item;
       }
     }
+    scrapbook.isOptionsSynced = true;
     if (callback) {
-      scrapbook.isOptionsSynced = true;
       callback(items);
     }
   });
