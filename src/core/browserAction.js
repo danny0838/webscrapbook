@@ -107,6 +107,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  document.getElementById("openViewer").addEventListener('click', () => {
+    chrome.tabs.getCurrent((tab) => {
+      if (!tab) {
+        // browserAction.html is a prompt diaglog
+        chrome.tabs.create({url: chrome.runtime.getURL("viewer/viewer.html"), active: true}, () => {});
+        window.close();
+      } else {
+        // browserAction.html is in a tab (or Firefox Android)
+        document.location = chrome.runtime.getURL("viewer/viewer.html");
+      }
+    });
+  });
+
   document.getElementById("openOptions").addEventListener('click', () => {
     chrome.tabs.getCurrent((tab) => {
       if (!tab) {
@@ -118,10 +131,5 @@ document.addEventListener('DOMContentLoaded', () => {
         document.location = chrome.runtime.getURL("core/options.html");
       }
     });
-  });
-
-  document.getElementById("openViewer").addEventListener('click', () => {
-    chrome.tabs.create({url: chrome.runtime.getURL("viewer/viewer.html"), active: true}, () => {});
-    window.close();
   });
 });
