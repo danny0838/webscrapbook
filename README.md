@@ -8,6 +8,8 @@ A wab page can be saved as:
 
 A .htz or .maff can be viewed after unzipping it with a regular compression software supporting zip, or use [Web Archive Viewer](https://github.com/danny0838/webarchiveviewer) or another browser extension or software to view it directly.
 
+This extension is available for Chromium-based browsers (Google Chrome, Opera, Vivaldi, etc), and Firefox for Desktop and Android.
+
 
 ## Caveats:
 
