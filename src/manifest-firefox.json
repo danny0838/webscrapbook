@@ -14,6 +14,8 @@
     }
   },
 
+  "content_security_policy": "script-src 'self' 'unsafe-eval' blob:; object-src 'self' blob:",
+
   "homepage_url": "https://github.com/danny0838/webscrapbook",
 
   "icons": {
@@ -24,6 +26,8 @@
     "downloads",
     "storage",
     "tabs",
+    "webRequest",
+    "webRequestBlocking",
     "<all_urls>"
   ],
 
@@ -37,7 +41,8 @@
       "core/optionsAuto.js",
       "core/pageActionLoader.js",
       "capturer/common.js",
-      "capturer/background.js"
+      "capturer/background.js",
+      "viewer/background.js"
     ]
   },
 

@@ -119,4 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  document.getElementById("openViewer").addEventListener('click', () => {
+    chrome.tabs.create({url: chrome.runtime.getURL("viewer/viewer.html"), active: true}, () => {});
+    window.close();
+  });
 });
