@@ -6,7 +6,7 @@ A wab page can be saved as:
 3. **maff**: A file format which each webpage as well as its referenced resources are packed into a top sub-directory of a file using the zip algorithm. See [official introduction](http://maf.mozdev.org/index.html) for detail.
 4. **single HTML**: A single html file that embeds referenced resources using data URI.
 
-A .htz or .maff can be viewed after unzipping it with a regular compression software supporting zip, or use [Web Archive Viewer](https://github.com/danny0838/webarchiveviewer) or another browser extension or software to view it directly.
+A .htz or .maff file can be viewed using "View archive page". You can also unzip it to view the source files directly.
 
 This extension is available for Chromium-based browsers (Google Chrome, Opera, Vivaldi, etc), and Firefox for Desktop and Android.
 
