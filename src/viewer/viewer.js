@@ -447,6 +447,7 @@ function init() {
               '<html>\n' +
               '<head>\n' +
               '<meta charset="UTF-8">\n' +
+              '<meta name="viewport" content="width=device-width">\n' +
               '<title>' + scrapbook.lang("ViewerTitle") + '</title>\n' +
               '<script src="' + chrome.runtime.getURL("lib/jszip.js") + '"></script>\n' +
               '<script src="' + chrome.runtime.getURL("lib/mime.js") + '"></script>\n' +
