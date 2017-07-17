@@ -25,7 +25,15 @@
         { "version": "0.8.1",
           "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.8.1-an+fx.xpi" },
         { "version": "0.8.2",
-          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.8.2-an+fx.xpi" }
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.8.2-an+fx.xpi" },
+        { "version": "0.8.3",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.8.3-an+fx.xpi" },
+        { "version": "0.8.4",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.8.4-an+fx.xpi" },
+        { "version": "0.8.5",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.8.5-an+fx.xpi" },
+        { "version": "0.8.6",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.8.6-an+fx.xpi" }
       ]
     }
   }
