@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.tabs.getCurrent((tab) => {
       if (!tab) {
         // browserAction.html is a prompt diaglog
-        window.open(chrome.runtime.getURL("core/options.html"));
+        chrome.tabs.create({url: chrome.runtime.getURL("core/options.html"), active: true}, () => {});
         window.close();
       } else {
         // browserAction.html is in a tab (or Firefox Android)
