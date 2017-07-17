@@ -6,15 +6,20 @@
 
 (function (window, undefined) {
 
-function redirectUrl(tabId, url, filename) {
-  var pathname = filename || url.pathname;
-
-  if (scrapbook.options["viewer.viewHtz"] && pathname.toLowerCase().endsWith(".htz")) {
+function redirectUrl(tabId, url, filename, mime) {
+  if (mime === "application/html+zip" && scrapbook.options["viewer.viewHtz"]) {
     // redirect
-  } else if (scrapbook.options["viewer.viewMaff"] && pathname.toLowerCase().endsWith(".maff")) {
+  } else if (mime === "application/x-maff" && scrapbook.options["viewer.viewMaff"]) {
     // redirect
   } else {
-    return; // no redirect
+    let pathname = (filename || url.pathname).toLowerCase();
+    if (pathname.endsWith(".htz") && scrapbook.options["viewer.viewHtz"]) {
+      // redirect
+    } else if (pathname.endsWith(".maff") && scrapbook.options["viewer.viewMaff"]) {
+      // redirect
+    } else {
+      return; // no redirect
+    }
   }
 
   var newUrl = new URL(chrome.runtime.getURL("viewer/viewer.html"));
@@ -41,10 +46,17 @@ chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
 chrome.webRequest.onHeadersReceived.addListener(function (details) {
   let headers = details.responseHeaders;
   for (let i in headers) {
-    if (headers[i].name.toLowerCase() === "content-disposition") {
-      let contentDisposition = scrapbook.parseHeaderContentDisposition(headers[i].value);
-      let filename = contentDisposition.parameters.filename;
-      return redirectUrl(details.tabId, new URL(details.url), filename);
+    switch (headers[i].name.toLowerCase()) {
+      case "content-type": {
+        let contentType = scrapbook.parseHeaderContentType(headers[i].value);
+        let mime = contentType.type;
+        return redirectUrl(details.tabId, new URL(details.url), null, mime);
+      }
+      case "content-disposition": {
+        let contentDisposition = scrapbook.parseHeaderContentDisposition(headers[i].value);
+        let filename = contentDisposition.parameters.filename;
+        return redirectUrl(details.tabId, new URL(details.url), filename);
+      }
     }
   }
 
