@@ -4,10 +4,10 @@
     "message": "Capture the web page with WebScrapBook"
   },
   "CaptureTab": {
-    "message": "Capture the current page"
+    "message": "Capture tab"
   },
   "CaptureTabSource": {
-    "message": "Capture the current page (source)"
+    "message": "Capture tab (source)"
   },
   "CaptureAllTabs": {
     "message": "Capture all tabs"
