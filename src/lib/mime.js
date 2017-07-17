@@ -464,6 +464,9 @@ Mime.prototype.db = {
   "application/held+xml": {
     "source": "iana"
   },
+  "application/html+zip": {
+    "extensions": ["htz"]
+  },
   "application/http": {
     "source": "iana"
   },
@@ -4695,6 +4698,9 @@ Mime.prototype.db = {
   "application/x-lzh-compressed": {
     "source": "apache",
     "extensions": ["lzh","lha"]
+  },
+  "application/x-maff": {
+    "extensions": ["maff"]
   },
   "application/x-makeself": {
     "source": "nginx",
