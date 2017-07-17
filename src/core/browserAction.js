@@ -25,23 +25,26 @@ document.addEventListener('DOMContentLoaded', () => {
           selector = document.createElement("div");
           base.parentNode.insertBefore(selector, base.nextSibling);
         }
-        chrome.tabs.query({
-          windowId: chrome.windows ? chrome.windows.WINDOW_ID_CURRENT : undefined,
-          url: ["http://*/*", "https://*/*", "file://*"]
-        }, (tabs) => {
-          tabs.forEach((tab) => {
-            let elem = document.createElement("div");
-            elem.classList.add("button");
-            elem.classList.add("sub");
-            elem.textContent = (tab.index + 1) + ": " + tab.title;
-            elem.addEventListener('click', (event) => {
-              event.preventDefault;
-              event.stopPropagation;
-              var win = chrome.extension.getBackgroundPage();
-              win.capturer.captureTab(tab);
-              selector.remove();
+        chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
+          let urlMatch = isAllowedAccess ? ["http://*/*", "https://*/*", "file://*"] : ["http://*/*", "https://*/*"];
+          chrome.tabs.query({
+            windowId: chrome.windows ? chrome.windows.WINDOW_ID_CURRENT : undefined,
+            url: urlMatch
+          }, (tabs) => {
+            tabs.forEach((tab) => {
+              let elem = document.createElement("div");
+              elem.classList.add("button");
+              elem.classList.add("sub");
+              elem.textContent = (tab.index + 1) + ": " + tab.title;
+              elem.addEventListener('click', (event) => {
+                event.preventDefault;
+                event.stopPropagation;
+                var win = chrome.extension.getBackgroundPage();
+                win.capturer.captureTab(tab);
+                selector.remove();
+              });
+              selector.appendChild(elem);
             });
-            selector.appendChild(elem);
           });
         });
       }
@@ -65,23 +68,26 @@ document.addEventListener('DOMContentLoaded', () => {
           selector = document.createElement("div");
           base.parentNode.insertBefore(selector, base.nextSibling);
         }
-        chrome.tabs.query({
-          windowId: chrome.windows ? chrome.windows.WINDOW_ID_CURRENT : undefined,
-          url: ["http://*/*", "https://*/*", "file://*"]
-        }, (tabs) => {
-          tabs.forEach((tab) => {
-            let elem = document.createElement("div");
-            elem.classList.add("button");
-            elem.classList.add("sub");
-            elem.textContent = (tab.index + 1) + ": " + tab.title;
-            elem.addEventListener('click', (event) => {
-              event.preventDefault;
-              event.stopPropagation;
-              var win = chrome.extension.getBackgroundPage();
-              win.capturer.captureTabSource(tab);
-              selector.remove();
+        chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
+          let urlMatch = isAllowedAccess ? ["http://*/*", "https://*/*", "file://*"] : ["http://*/*", "https://*/*"];
+          chrome.tabs.query({
+            windowId: chrome.windows ? chrome.windows.WINDOW_ID_CURRENT : undefined,
+            url: urlMatch
+          }, (tabs) => {
+            tabs.forEach((tab) => {
+              let elem = document.createElement("div");
+              elem.classList.add("button");
+              elem.classList.add("sub");
+              elem.textContent = (tab.index + 1) + ": " + tab.title;
+              elem.addEventListener('click', (event) => {
+                event.preventDefault;
+                event.stopPropagation;
+                var win = chrome.extension.getBackgroundPage();
+                win.capturer.captureTabSource(tab);
+                selector.remove();
+              });
+              selector.appendChild(elem);
             });
-            selector.appendChild(elem);
           });
         });
       }
