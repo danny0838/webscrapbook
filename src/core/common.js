@@ -47,7 +47,6 @@ scrapbook.options = {
   "capture.recordRewrittenAttr": false,
   "capture.recordSourceUri": false,
   "capture.recordErrorUri": false,
-  "viewer.redirectKey": "QEDbgTS2R2uqCZYy",
   "viewer.useFileSystemApi": true,
   "viewer.viewHtz": true,
   "viewer.viewMaff": true,
