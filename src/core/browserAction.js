@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
           let urlMatch = isAllowedAccess ? ["http://*/*", "https://*/*", "file://*"] : ["http://*/*", "https://*/*"];
           chrome.tabs.query({
-            windowId: chrome.windows ? chrome.windows.WINDOW_ID_CURRENT : undefined,
+            currentWindow: true,
             url: urlMatch
           }, (tabs) => {
             tabs.forEach((tab) => {
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
           let urlMatch = isAllowedAccess ? ["http://*/*", "https://*/*", "file://*"] : ["http://*/*", "https://*/*"];
           chrome.tabs.query({
-            windowId: chrome.windows ? chrome.windows.WINDOW_ID_CURRENT : undefined,
+            currentWindow: true,
             url: urlMatch
           }, (tabs) => {
             tabs.forEach((tab) => {
