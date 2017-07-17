@@ -26,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
           base.parentNode.insertBefore(selector, base.nextSibling);
         }
         chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
-          let urlMatch = isAllowedAccess ? ["http://*/*", "https://*/*", "file://*"] : ["http://*/*", "https://*/*"];
+          let urlMatch = ["http://*/*", "https://*/*", "ftp://*/*"];
+          if (isAllowedAccess) { urlMatch.push("file://*"); }
           chrome.tabs.query({
             currentWindow: true,
             url: urlMatch
@@ -69,7 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
           base.parentNode.insertBefore(selector, base.nextSibling);
         }
         chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
-          let urlMatch = isAllowedAccess ? ["http://*/*", "https://*/*", "file://*"] : ["http://*/*", "https://*/*"];
+          let urlMatch = ["http://*/*", "https://*/*", "ftp://*/*"];
+          if (isAllowedAccess) { urlMatch.push("file://*"); }
           chrome.tabs.query({
             currentWindow: true,
             url: urlMatch
