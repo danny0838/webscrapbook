@@ -92,6 +92,22 @@ function showMessage(msg) {
   window.scrollTo(0, 0);
 }
 
+function closeWindow() {
+  chrome.tabs.getCurrent((tab) => {
+    if (!tab) {
+      // options.html is a prompt diaglog
+      window.close();
+    } else if (tab.url.startsWith(chrome.runtime.getURL(""))) {
+      // options.html is in a tab (or Firefox Android)
+      // close the tab
+      chrome.tabs.remove(tab.id, () => {});
+    } else {
+      // options.html is embedded in about:addon in Firefox
+      // do not close the tab
+    }
+  });
+}
+
 window.addEventListener("DOMContentLoaded", (event) => {
   // load languages
   scrapbook.loadLanguages(document);
@@ -103,7 +119,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
       scrapbook.options[id] = getOptionFromDocument(id);
     }
     scrapbook.saveOptions(() => {
-      window.close();
+      closeWindow();
     });
   });
 
