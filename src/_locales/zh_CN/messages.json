@@ -1,4 +1,8 @@
 {
+  "ExtensionDescription": {
+    "description": "Description of the extension as it's visible to the outside world",
+    "message": "获取网页内容，提供多种客制化设定。"
+  },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
     "message": "网络剪贴簿"

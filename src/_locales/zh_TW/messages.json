@@ -1,4 +1,8 @@
 {
+  "ExtensionDescription": {
+    "description": "Description of the extension as it's visible to the outside world",
+    "message": "擷取網頁內容，提供多種客製化設定。"
+  },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
     "message": "網路剪貼簿"
