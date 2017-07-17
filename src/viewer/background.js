@@ -4,13 +4,14 @@
  *
  *******************************************************************/
 
-// This event won't fire when visiting a file URL if
-// isAllowedFileSchemeAccess is set to false
-chrome.webRequest.onBeforeRequest.addListener(function (details) {
-  var url = new URL(details.url);
-  if (scrapbook.options["viewer.viewHtz"] && url.pathname.toLowerCase().endsWith(".htz")) {
+(function (window, undefined) {
+
+function redirectUrl(tabId, url, filename) {
+  var pathname = filename || url.pathname;
+
+  if (scrapbook.options["viewer.viewHtz"] && pathname.toLowerCase().endsWith(".htz")) {
     // redirect
-  } else if (scrapbook.options["viewer.viewMaff"] && url.pathname.toLowerCase().endsWith(".maff")) {
+  } else if (scrapbook.options["viewer.viewMaff"] && pathname.toLowerCase().endsWith(".maff")) {
     // redirect
   } else {
     return; // no redirect
@@ -23,6 +24,14 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
   newUrl = newUrl.href;
 
   // return {redirectUrl: newUrl}; // this doesn't work
-  chrome.tabs.update(details.tabId, {url: newUrl}, () => {});
+  chrome.tabs.update(tabId, {url: newUrl}, () => {});
   return {cancel: true};
+}
+
+// This event won't fire when visiting a file URL if
+// isAllowedFileSchemeAccess is false
+chrome.webRequest.onBeforeRequest.addListener(function (details) {
+  return redirectUrl(details.tabId, new URL(details.url));
 }, {urls: ["<all_urls>"], types: ["main_frame"]}, ["blocking"]);
+
+})(window, undefined);
