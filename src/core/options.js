@@ -98,23 +98,23 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
   // event handlers
   document.getElementById("options").addEventListener("submit", (event) => {
+    event.preventDefault();
     for (let id in scrapbook.options) {
       scrapbook.options[id] = getOptionFromDocument(id);
     }
     scrapbook.saveOptions(() => {
       window.close();
     });
-    event.preventDefault();
   });
 
   document.getElementById("export").addEventListener("click", (event) => {
-    exportOptions();
     event.preventDefault();
+    exportOptions();
   });
 
   document.getElementById("import").addEventListener("click", (event) => {
-    importOptions();
     event.preventDefault();
+    importOptions();
   });
 
   document.getElementById("import-input").addEventListener("change", (event) => {
