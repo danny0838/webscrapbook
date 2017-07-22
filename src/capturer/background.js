@@ -543,8 +543,8 @@ capturer.downloadFile = function (params, callback) {
           let headerContentType = xhr.getResponseHeader("Content-Type");
           if (headerContentType) {
             let contentType = scrapbook.parseHeaderContentType(headerContentType);
-            headers.contentType = contentType.contentType;
-            headers.charset = contentType.charset;
+            headers.contentType = contentType.type;
+            headers.charset = contentType.parameters.charset;
             if (headers.contentType) {
               let [base, extension] = scrapbook.filenameParts(filename);
               if (!extension) {

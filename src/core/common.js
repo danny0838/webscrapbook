@@ -465,8 +465,32 @@ scrapbook.arrayBufferToByteString = function (ab) {
  * @return {{contentType: string, charset: string}}
  */
 scrapbook.parseHeaderContentType = function (string) {
-  var match = string.match(/^\s*(.*?)(?:\s*;\s*charset\s*=\s*(.*?))?$/i);
-  return {contentType: match[1], charset: match[2]};
+  var result = {type: undefined, parameters: {}};
+
+  if (typeof string !== 'string') {
+    return result;
+  }
+
+  if (/^(.*?)(?=;|$)/i.test(string)) {
+    string = RegExp.rightContext;
+    result.type = RegExp.$1.trim();
+    while (/;((?:"(?:\\.|[^"])*(?:"|$)|[^"])*?)(?=;|$)/i.test(string)) {
+      string = RegExp.rightContext;
+      var parameter = RegExp.$1;
+      if (/\s*(.*?)\s*=\s*("(?:\\.|[^"])*"|[^"]*?)\s*$/i.test(parameter)) {
+        var field = RegExp.$1;
+        var value = RegExp.$2;
+
+        // manage double quoted value
+        if (/^"(.*?)"$/.test(value)) {
+          value = scrapbook.unescapeQuotes(RegExp.$1);
+        }
+      }
+      result.parameters[field] = value;
+    }
+  }
+
+  return result;
 };
 
 /**
