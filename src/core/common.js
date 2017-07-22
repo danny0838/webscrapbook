@@ -476,7 +476,7 @@ scrapbook.parseHeaderContentType = function (string) {
 scrapbook.parseHeaderContentDisposition = function (string) {
   var result = {type: undefined, parameters: {}};
 
-  if (!string || typeof string !== 'string') {
+  if (typeof string !== 'string') {
     return result;
   }
 
@@ -494,7 +494,7 @@ scrapbook.parseHeaderContentDisposition = function (string) {
       }
 
       if (/^(.*)\*$/.test(field)) {
-        // ext-value
+        // the field uses an ext-value
         field = RegExp.$1;
         if (/^(.*?)'(.*?)'(.*?)$/.test(value)) {
           var charset = RegExp.$1.toLowerCase(), lang = RegExp.$2.toLowerCase(), value = RegExp.$3;
@@ -507,9 +507,9 @@ scrapbook.parseHeaderContentDisposition = function (string) {
               break;
             default:
               console.error('Unsupported charset in the extended field of header content-disposition: ' + charset);
-              return;
+              break;
           }
-        };
+        }
       }
       result.parameters[field] = value;
     }
