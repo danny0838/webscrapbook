@@ -443,10 +443,9 @@ scrapbook.byteStringToArrayBuffer = function (bstr) {
 };
 
 scrapbook.arrayBufferToByteString = function (ab) {
-  var bufferView = new Uint8Array(ab), result = "", chunkSize = 0xFFFF;
-  for (let i = 0, length = bufferView.length; i < length; i += chunkSize) {
-    if (i + chunkSize > length) { chunkSize = length - i; }
-    result += String.fromCharCode.apply(null, bufferView.subarray(i, i + chunkSize));
+  var bufferView = new Uint8Array(ab), result = "", CHUNK_SIZE = 65535;
+  for (let i = 0, length = bufferView.length; i < length; i += CHUNK_SIZE) {
+    result += String.fromCharCode.apply(null, bufferView.subarray(i, i + CHUNK_SIZE));
   }
   return result;
 };
