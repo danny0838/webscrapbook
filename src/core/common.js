@@ -326,6 +326,10 @@ scrapbook.escapeQuotes = function (str) {
   return str.replace(/[\\"]/g, "\\$&");
 };
 
+scrapbook.unescapeQuotes = function (str) {
+  return str.replace(/\\(.)/g, "$1");
+};
+
 scrapbook.unescapeCss = function (str) {
   var that = arguments.callee;
   if (!that.replaceRegex) {
@@ -480,40 +484,43 @@ scrapbook.parseHeaderContentDisposition = function (string) {
     return result;
   }
 
-  var parts = string.split(";");
-  result.type = parts.shift().trim();
+  if (/^(.*?)(?=;|$)/i.test(string)) {
+    string = RegExp.rightContext;
+    result.type = RegExp.$1.trim();
+    while (/;((?:"(?:\\.|[^"])*(?:"|$)|[^"])*?)(?=;|$)/i.test(string)) {
+      string = RegExp.rightContext;
+      var parameter = RegExp.$1;
+      if (/\s*(.*?)\s*=\s*("(?:\\.|[^"])*"|[^"]*?)\s*$/i.test(parameter)) {
+        var field = RegExp.$1;
+        var value = RegExp.$2;
 
-  parts.forEach((part) => {
-    if (/^(.*?)=(.*?)$/.test(part)) {
-      var field = RegExp.$1.trim();
-      var value = RegExp.$2.trim();
+        // manage double quoted value
+        if (/^"(.*?)"$/.test(value)) {
+          value = scrapbook.unescapeQuotes(RegExp.$1);
+        }
 
-      // manage double quoted value
-      if (/^"(.*?)"$/.test(value)) {
-        value = RegExp.$1;
-      }
-
-      if (/^(.*)\*$/.test(field)) {
-        // the field uses an ext-value
-        field = RegExp.$1;
-        if (/^(.*?)'(.*?)'(.*?)$/.test(value)) {
-          var charset = RegExp.$1.toLowerCase(), lang = RegExp.$2.toLowerCase(), value = RegExp.$3;
-          switch (charset) {
-            case 'iso-8859-1':
-              value = decodeURIComponent(value).replace(/[^\x20-\x7e\xa0-\xff]/g, "?");
-              break;
-            case 'utf-8':
-              value = decodeURIComponent(value);
-              break;
-            default:
-              console.error('Unsupported charset in the extended field of header content-disposition: ' + charset);
-              break;
+        if (/^(.*)\*$/.test(field)) {
+          // the field uses an ext-value
+          field = RegExp.$1;
+          if (/^(.*?)'(.*?)'(.*?)$/.test(value)) {
+            var charset = RegExp.$1.toLowerCase(), lang = RegExp.$2.toLowerCase(), value = RegExp.$3;
+            switch (charset) {
+              case 'iso-8859-1':
+                value = decodeURIComponent(value).replace(/[^\x20-\x7e\xa0-\xff]/g, "?");
+                break;
+              case 'utf-8':
+                value = decodeURIComponent(value);
+                break;
+              default:
+                console.error('Unsupported charset in the extended field of header content-disposition: ' + charset);
+                break;
+            }
           }
         }
       }
       result.parameters[field] = value;
     }
-  }, this);
+  }
 
   return result;
 };
