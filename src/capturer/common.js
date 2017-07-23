@@ -1100,7 +1100,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
     if (options["capture.recordRemovedAttr"]) {
       elem.setAttribute("data-sb-" + timeId + "-orig-" + attr, elem.getAttribute(attr));
     }
-    if (value === null && value === undefined) {
+    if (value === null || value === undefined) {
       elem.removeAttribute(attr);
     } else {
       elem.setAttribute(attr, value);
@@ -1113,7 +1113,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
     if (options["capture.recordRemovedAttr"]) {
       elem.setAttribute("data-sb-" + timeId + "-orig-textContent", elem.textContent);
     }
-    if (value === null && value === undefined) {
+    if (value === null || value === undefined) {
       elem.textContent = "";
     } else {
       elem.textContent = value;
@@ -1126,7 +1126,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
     if (options["capture.recordSourceUri"]) {
       elem.setAttribute("data-sb-" + timeId + "-orig-" + attr, elem.getAttribute(attr));
     }
-    if (value === null && value === undefined) {
+    if (value === null || value === undefined) {
       elem.removeAttribute(attr);
     } else {
       elem.setAttribute(attr, value);
