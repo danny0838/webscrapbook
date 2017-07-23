@@ -50,6 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // url targets a file in zip, return its blob URL
         return {
           url: f.url + hash, // blob URL with a search is invalid
+          virtualUrl: absoluteUrl.href + hash,
           inZip: true,
           inZipPath: inZipPath,
           mime: f.file.type,
@@ -240,24 +241,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var refUrl = inZipPathToUrl(inZipPath);
     var remainingTasks = 0;
 
-    // check meta refresh
-    if (metaRefreshAvailable > 0) {
-      let metaRefreshTarget;
-      Array.prototype.forEach.call(doc.querySelectorAll("meta"), (elem) => {
-        if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content") &&
-            elem.getAttribute("http-equiv").toLowerCase() == "refresh" && 
-            elem.getAttribute("content").match(/^[^;]*;\s*url=(.*)$/i) ) {
-          metaRefreshTarget = RegExp.$1;
-        }
-      });
-      if (metaRefreshTarget) {
-        metaRefreshAvailable--;
-        let info = parseUrl(metaRefreshTarget, refUrl);
-        info.inZip ? loadFile(info.inZipPath, info.url) : loadUrl(info.url);
-        return null;
-      }
-    }
-
     // modify URLs
     Array.prototype.forEach.call(doc.querySelectorAll("*"), (elem) => {
       // skip elements that are already removed from the DOM tree
@@ -265,7 +248,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
       switch (elem.nodeName.toLowerCase()) {
         case "meta": {
-          if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
+          if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content") &&
+              elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
+            let metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+            if (metaRefresh.url) {
+              let info = parseUrl(metaRefresh.url, refUrl);
+              let [sourcePage] = scrapbook.splitUrlByAnchor(refUrl);
+              let [targetPage, targetPageHash] = scrapbook.splitUrlByAnchor(info.virtualUrl || info.url);
+              if (targetPage !== sourcePage) {
+                if (recurseChain.indexOf(targetPage) !== -1) {
+                  // console.warn("Resource '" + sourcePage + "' has a circular reference to '" + targetPage + "'.");
+                  elem.setAttribute("content", metaRefresh.time + ";url=about:blank");
+                  break;
+                }
+                remainingTasks++;
+                let metaRecurseChain = JSON.parse(JSON.stringify(recurseChain));
+                metaRecurseChain.push(refUrl);
+                fetchPage(info.inZipPath, info.url, metaRecurseChain, (fetchedUrl) => {
+                  elem.setAttribute("content", metaRefresh.time + ";url=" + (fetchedUrl || info.url));
+                  remainingTasks--;
+                  parserCheckDone();
+                });
+              } else {
+                elem.setAttribute("content", metaRefresh.time + (targetPageHash ? ";url=" + targetPageHash : ""));
+              }
+            }
+          } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
             switch (elem.getAttribute("property").toLowerCase()) {
               case "og:image":
               case "og:image:url":
@@ -618,7 +626,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var urlSearch = "";
   var urlHash = location.hash;
-  var metaRefreshAvailable = 5;
 
   var frameRegisterLinkLoader = function (frame) {
     var frameOnLoad = function (frame) {
