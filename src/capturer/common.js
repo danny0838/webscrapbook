@@ -247,12 +247,12 @@ capturer.captureDocument = function (doc, settings, options, callback) {
 
         case "meta": {
           // force UTF-8
-          if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content") &&
-              elem.getAttribute("http-equiv").toLowerCase() == "content-type" && 
-              elem.getAttribute("content").match(/^[^;]*;\s*charset=(.*)$/i) ) {
-            metaCharsetNode = elem;
-            elem.setAttribute("content", "text/html; charset=UTF-8");
-          } else if ( elem.hasAttribute("charset") ) {
+          if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content")) {
+            if (elem.getAttribute("http-equiv").toLowerCase() == "content-type") {
+              metaCharsetNode = elem;
+              elem.setAttribute("content", "text/html; charset=UTF-8");
+            }
+          } else if (elem.hasAttribute("charset")) {
             metaCharsetNode = elem;
             elem.setAttribute("charset", "UTF-8");
           } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
