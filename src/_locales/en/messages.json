@@ -124,6 +124,9 @@
   "OptionCaptureImageLabel": {
     "message": "Images:"
   },
+  "OptionCaptureMetaRefreshLabel": {
+    "message": "META refresh:"
+  },
   "OptionCaptureNoscriptLabel": {
     "message": "NOSCRIPT:"
   },
