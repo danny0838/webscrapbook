@@ -251,6 +251,33 @@ capturer.captureDocument = function (doc, settings, options, callback) {
             if (elem.getAttribute("http-equiv").toLowerCase() == "content-type") {
               metaCharsetNode = elem;
               captureRewriteAttr(elem, "content", "text/html; charset=UTF-8");
+            } else if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
+              let metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+              let metaRefreshTarget = capturer.resolveRelativeUrl(doc.URL, metaRefresh.url);
+              let [source] = scrapbook.splitUrlByAnchor(doc.URL);
+              let [target, hash] = scrapbook.splitUrlByAnchor(metaRefreshTarget || "");
+              if (target !== source) {
+                if (settings.recurseChain.indexOf(target) === -1) {
+                  let captureUrlSettings = JSON.parse(JSON.stringify(settings));
+                  captureUrlSettings.recurseChain.push(source);
+                  captureUrlSettings.frameIsMain = false;
+                  remainingTasks++;
+                  capturer.invoke("captureUrl", {
+                    settings: captureUrlSettings,
+                    options: options,
+                    url: metaRefreshTarget
+                  }, function (response) {
+                    captureRewriteAttr(elem, "content", metaRefresh.time + ";URL=" + response.url);
+                    remainingTasks--;
+                    captureCheckDone();
+                  });
+                } else {
+                  console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [source, target]));
+                  captureRewriteAttr(elem, "content", metaRefresh.time + ";URL=" + capturer.getCircularUrl(metaRefreshTarget, options));
+                }
+              } else {
+                captureRewriteAttr(elem, "content", metaRefresh.time + (hash ? ";URL=" + hash : ""));
+              }
             }
           } else if (elem.hasAttribute("charset")) {
             metaCharsetNode = elem;
