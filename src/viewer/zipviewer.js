@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   };
 
-  var loadFile = function (inZipPath, url) {
+  var fetchPage = function (inZipPath, url, recurseChain, callback) {
     let searchAndHash = "";
     if (url) {
       let [base, search, hash] = scrapbook.splitUrl(url);
@@ -186,6 +186,7 @@ document.addEventListener("DOMContentLoaded", function () {
       rewriteFunc: (params, onRewrite) => {
         var data = params.data;
         var charset = params.charset;
+        var recurseChain = params.recurseChain;
 
         if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
           var reader = new FileReader();
@@ -195,16 +196,22 @@ document.addEventListener("DOMContentLoaded", function () {
             var doc = parser.parseFromString(content, data.type);
             parseDocument(doc, inZipPath, (blob) => {
               onRewrite(blob);
-            }, []);
+            }, recurseChain);
           });
           reader.readAsText(data, charset || "UTF-8");
         } else {
           onRewrite(data);
         }
       },
-      recurseChain: []
+      recurseChain: recurseChain
     }, (fetchedUrl) => {
-      loadUrl((fetchedUrl || "about:blank") + searchAndHash);
+      callback(fetchedUrl ? fetchedUrl + searchAndHash : fetchedUrl);
+    });
+  };
+
+  var loadFile = function (inZipPath, url) {
+    fetchPage(inZipPath, url, [], (fetchedUrl) => {
+      loadUrl(fetchedUrl || "about:blank");
     });
   };
 
