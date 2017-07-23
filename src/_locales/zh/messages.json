@@ -133,11 +133,11 @@
   "OptionCaptureRecordDocumentMetaTooltip": {
     "message": "在擷取網頁的最外層 html 元素記錄來源位址等後設資訊。"
   },
-  "OptionCaptureRecordRemovedAttrLabel": {
-    "message": "記錄移除的屬性:"
+  "OptionCaptureRecordRewrittenAttrLabel": {
+    "message": "記錄改寫的屬性:"
   },
-  "OptionCaptureRecordRemovedAttrTooltip": {
-    "message": "擷取網頁時若有移除元素的屬性，則建立對應的 data-* 屬性記錄原始值。"
+  "OptionCaptureRecordRewrittenAttrTooltip": {
+    "message": "擷取網頁時若有改寫元素的屬性，則建立對應的 data-* 屬性記錄原始值。"
   },
   "OptionCaptureRecordErrorUriLabel": {
     "message": "記錄錯誤的 URI:"

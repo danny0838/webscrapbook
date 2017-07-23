@@ -44,7 +44,7 @@ scrapbook.options = {
   "capture.removeIntegrity": true,
   "capture.recordDocumentMeta": true,
   "capture.recordRemovedNode": false,
-  "capture.recordRemovedAttr": false,
+  "capture.recordRewrittenAttr": false,
   "capture.recordSourceUri": false,
   "capture.recordErrorUri": false,
 };

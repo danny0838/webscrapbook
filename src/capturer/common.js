@@ -1097,7 +1097,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
   // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
   var captureRewriteAttr = function (elem, attr, value) {
     if (!elem.hasAttribute(attr)) return;
-    if (options["capture.recordRemovedAttr"]) {
+    if (options["capture.recordRewrittenAttr"]) {
       elem.setAttribute("data-sb-" + timeId + "-orig-" + attr, elem.getAttribute(attr));
     }
     if (value === null || value === undefined) {
@@ -1110,7 +1110,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
   // rewrite (or remove if value is null/undefined) the textContent, record it if option set
   var captureRewriteTextContent = function (elem, value) {
     if (!elem.textContent) return;
-    if (options["capture.recordRemovedAttr"]) {
+    if (options["capture.recordRewrittenAttr"]) {
       elem.setAttribute("data-sb-" + timeId + "-orig-textContent", elem.textContent);
     }
     if (value === null || value === undefined) {

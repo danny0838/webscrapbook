@@ -133,11 +133,11 @@
   "OptionCaptureRecordDocumentMetaTooltip": {
     "message": "Record metadata such as source URL in the outermost html element."
   },
-  "OptionCaptureRecordRemovedAttrLabel": {
-    "message": "Record removed attributes:"
+  "OptionCaptureRecordRewrittenAttrLabel": {
+    "message": "Record rewritten attributes:"
   },
-  "OptionCaptureRecordRemovedAttrTooltip": {
-    "message": "If an attribute is removed during the capture process, create a corresponding data-* attribute to record its original value."
+  "OptionCaptureRecordRewrittenAttrTooltip": {
+    "message": "If an attribute is rewritten during the capture process, create a corresponding data-* attribute to record its original value."
   },
   "OptionCaptureRecordErrorUriLabel": {
     "message": "Record error URI:"
