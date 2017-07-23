@@ -551,7 +551,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                     });
                   } else {
                     console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
-                    captureRewriteAttr(frame, "src", capturer.getCircularUrl(targetUrl, options));
+                    captureRewriteAttr(frame, "src", capturer.getCircularUrl(frameSrc.src, options));
                   }
                 } else {
                   captureRewriteAttr(frame, "src", null);
