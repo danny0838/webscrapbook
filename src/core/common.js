@@ -552,6 +552,37 @@ scrapbook.parseHeaderContentDisposition = function (string) {
   return result;
 };
 
+/**
+ * Parse Refresh string from the HTTP Header
+ *
+ * ref: https://www.w3.org/TR/html5/document-metadata.html
+ *
+ * @return {{time: string, url: string}}
+ */
+scrapbook.parseHeaderRefresh = function (string) {
+  var result = {time: undefined, url: undefined};
+
+  if (typeof string !== 'string') {
+    return result;
+  }
+
+  if (/^\s*(.*?)(?=[;,]|$)/i.test(string)) {
+    result.time = parseInt(RegExp.$1);
+    string = RegExp.rightContext;
+    if (/^[;,]\s*url\s*=\s*((["'])?.*)$/i.test(string)) {
+      var url = RegExp.$1;
+      var quote = RegExp.$2;
+      if (quote) {
+        let pos = url.indexOf(quote, 1);
+        if (pos !== -1) { url = url.slice(1, pos); }
+      }
+      url = url.trim().replace(/[\t\n\r]+/g, "");
+      result.url = url;
+    }
+  }
+
+  return result;
+};
 
 /********************************************************************
  * HTML DOM related utilities
