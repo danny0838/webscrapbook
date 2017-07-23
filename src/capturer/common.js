@@ -261,6 +261,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                   let captureUrlSettings = JSON.parse(JSON.stringify(settings));
                   captureUrlSettings.recurseChain.push(source);
                   captureUrlSettings.frameIsMain = false;
+                  captureUrlSettings.documentName = null;
                   remainingTasks++;
                   capturer.invoke("captureUrl", {
                     settings: captureUrlSettings,
