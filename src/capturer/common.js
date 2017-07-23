@@ -250,11 +250,11 @@ capturer.captureDocument = function (doc, settings, options, callback) {
           if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content")) {
             if (elem.getAttribute("http-equiv").toLowerCase() == "content-type") {
               metaCharsetNode = elem;
-              elem.setAttribute("content", "text/html; charset=UTF-8");
+              captureRewriteAttr(elem, "content", "text/html; charset=UTF-8");
             }
           } else if (elem.hasAttribute("charset")) {
             metaCharsetNode = elem;
-            elem.setAttribute("charset", "UTF-8");
+            captureRewriteAttr(elem, "charset", "UTF-8");
           } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
             switch (elem.getAttribute("property").toLowerCase()) {
               case "og:image":
