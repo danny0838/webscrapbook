@@ -619,32 +619,54 @@ document.addEventListener("DOMContentLoaded", function () {
   var urlHash = location.hash;
   var metaRefreshAvailable = 5;
 
-  viewer.addEventListener("load", (e) => {
-    var doc = viewer.contentDocument;
-    document.title = doc.title;
-
-    doc.documentElement.addEventListener("click", (e) => {
-      let elem = e.target;
-      switch (elem.nodeName.toLowerCase()) {
-        case "a": case "area":
-          try {
-            let url = elem.href;
-            let inZipPath = blobUrlToInZipPath[scrapbook.splitUrl(url)[0]];
-            if (inZipPath) {
-              let f = inZipFiles[inZipPath];
-              if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
-                e.preventDefault();
-                e.stopPropagation();
-                fetchPage(inZipPath, url, [], (fetchedUrl) => {
-                  elem.href = fetchedUrl || "about:blank";
-                  elem.click();
-                });
-              }
-            }
-          } catch (ex) {}
+  var frameRegisterLinkLoader = function (frame) {
+    var frameOnLoad = function (frame) {
+      try {
+        var frameDoc = frame.contentDocument;
+        if (!frameDoc) { throw "content document not accessible"; }
+      } catch (ex) {
+        return;
       }
-    }, false);
-  });
+
+      if (frame === viewer) {
+        document.title = frameDoc.title;
+      }
+
+      frameDoc.documentElement.addEventListener("click", (e) => {
+        let elem = e.target;
+        switch (elem.nodeName.toLowerCase()) {
+          case "a": case "area":
+            try {
+              let url = elem.href;
+              let inZipPath = blobUrlToInZipPath[scrapbook.splitUrl(url)[0]];
+              if (inZipPath) {
+                let f = inZipFiles[inZipPath];
+                if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  fetchPage(inZipPath, url, [], (fetchedUrl) => {
+                    elem.href = fetchedUrl || "about:blank";
+                    elem.click();
+                  });
+                }
+              }
+            } catch (ex) {}
+        }
+      }, false);
+
+      Array.prototype.forEach.call(frameDoc.querySelectorAll('frame, iframe'), (elem) => {
+        frameRegisterLinkLoader(elem);
+      });
+    };
+
+    frame.addEventListener("load", (e) => {
+      frameOnLoad(e.target);
+    });
+
+    frameOnLoad(frame);
+  };
+
+  frameRegisterLinkLoader(viewer);
 
   getZipFile(viewerData.zipId, extractZipFile);
 });
