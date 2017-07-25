@@ -609,6 +609,7 @@ document.addEventListener("DOMContentLoaded", function () {
    * main
    */
   var virtualBase = viewerData.virtualBase;
+  var defaultTitle = document.querySelector('title').textContent;
 
   var viewer = document.getElementById('viewer');
 
@@ -625,6 +626,9 @@ document.addEventListener("DOMContentLoaded", function () {
         var frameDoc = frame.contentDocument;
         if (!frameDoc) { throw "content document not accessible"; }
       } catch (ex) {
+        if (frame === viewer) {
+          document.title = defaultTitle;
+        }
         return;
       }
 
