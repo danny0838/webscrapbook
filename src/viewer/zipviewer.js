@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (f) {
         // url targets a file in zip, return its blob URL
         return {
-          url: f.url + search + hash,
+          url: f.url + hash, // blob URL with a search is invalid
           inZip: true,
           inZipPath: inZipPath,
           mime: f.file.type,
@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let searchAndHash = "";
     if (url) {
       let [base, search, hash] = scrapbook.splitUrl(url);
-      searchAndHash = hash;
+      searchAndHash = hash; // blob URL with a search is invalid
     }
     fetchFile({
       inZipPath: inZipPath,
