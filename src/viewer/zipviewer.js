@@ -123,7 +123,9 @@ document.addEventListener("DOMContentLoaded", function () {
       blobUrlToInZipPath[inZipFiles[path].url] = path;
     }
 
-    loadFile(viewerData.indexFile || "index.html", urlSearch + urlHash);
+    fetchPage(viewerData.indexFile || "index.html", urlSearch + urlHash, [], (fetchedUrl) => {
+      viewer.src = fetchedUrl || "about:blank";
+    });
   };
 
   /**
@@ -208,16 +210,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }, (fetchedUrl) => {
       callback(fetchedUrl ? fetchedUrl + searchAndHash : fetchedUrl);
     });
-  };
-
-  var loadFile = function (inZipPath, url) {
-    fetchPage(inZipPath, url, [], (fetchedUrl) => {
-      loadUrl(fetchedUrl || "about:blank");
-    });
-  };
-
-  var loadUrl = function (url) {
-    viewer.src = url;
   };
 
   var parseDocument = function (doc, inZipPath, onComplete, recurseChain) {
