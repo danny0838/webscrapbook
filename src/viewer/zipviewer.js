@@ -394,7 +394,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 elem.setAttribute("href", info.url);
               } else {
                 // link to self
-                elem.setAttribute("href", info.search + info.hash || "#");
+                elem.setAttribute("href", info.hash || "#");
               }
             } else {
               // link target is not in the zip
