@@ -209,8 +209,6 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   var loadUrl = function (url) {
-    loading.style.display = 'block';
-    viewer.style.display = 'none';
     viewer.src = url;
   };
 
@@ -606,7 +604,6 @@ document.addEventListener("DOMContentLoaded", function () {
   var virtualBase = viewerData.virtualBase;
 
   var viewer = document.getElementById('viewer');
-  var loading = document.getElementById('loading');
 
   var inZipFiles = {};
   var blobUrlToInZipPath = {};
@@ -637,9 +634,6 @@ document.addEventListener("DOMContentLoaded", function () {
           } catch (ex) {}
       }
     }, false);
-
-    loading.style.display = 'none';
-    viewer.style.display = 'block';
   });
 
   getZipFile(viewerData.zipId, extractZipFile);

@@ -477,29 +477,6 @@ function init() {
               '  height: 100vh;\n' +
               '}\n' +
               '\n' +
-              '#loading {\n' +
-              '  position: absolute;\n' +
-              '  top: 0;\n' +
-              '  left: 0;\n' +
-              '  right: 0;\n' +
-              '  bottom: 0;\n' +
-              '  margin: auto;\n' +
-              '  width: 32px;\n' +
-              '  height: 32px;\n' +
-              '  -webkit-border-radius: 20px;\n' +
-              '  -moz-border-radius: 20px;\n' +
-              '  -ms-border-radius: 20px;\n' +
-              '  -o-border-radius: 20px;\n' +
-              '  border-radius: 20px;\n' +
-              '  border: 4px solid #666;\n' +
-              '  border-color: #666 transparent;\n' +
-              '  background-color: transparent;\n' +
-              '  -webkit-animation: spin 1s linear infinite;\n' +
-              '  -moz-animation: spin 1s linear infinite;\n' +
-              '  -ms-animation: spin 1s linear infinite;\n' +
-              '  animation: spin 1s linear infinite;\n' +
-              '}\n' +
-              '\n' +
               '#viewer {\n' +
               '  position: absolute;\n' +
               '  top: 0;\n' +
@@ -514,8 +491,7 @@ function init() {
               '</head>\n' +
               '<body>\n' +
               '<div id="wrapper">\n' +
-              '  <div id="loading"></div>\n' +
-              '  <iframe id="viewer" style="display: none;" sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"></iframe>\n' +
+              '  <iframe id="viewer" sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"></iframe>\n' +
               '</div>\n' +
               '</body>\n' +
               '</html>\n';
