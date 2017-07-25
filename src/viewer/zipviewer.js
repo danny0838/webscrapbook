@@ -628,14 +628,14 @@ document.addEventListener("DOMContentLoaded", function () {
       switch (elem.nodeName.toLowerCase()) {
         case "a": case "area":
           try {
-            let url = scrapbook.splitUrl(elem.href)[0];
-            let inZipPath = blobUrlToInZipPath[url];
+            let url = elem.href;
+            let inZipPath = blobUrlToInZipPath[scrapbook.splitUrl(url)[0]];
             if (inZipPath) {
               let f = inZipFiles[inZipPath];
               if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
                 e.preventDefault();
                 e.stopPropagation();
-                loadFile(inZipPath, elem.href);
+                loadFile(inZipPath, url);
               }
             }
           } catch (ex) {}
