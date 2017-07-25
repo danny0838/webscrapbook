@@ -635,7 +635,10 @@ document.addEventListener("DOMContentLoaded", function () {
               if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
                 e.preventDefault();
                 e.stopPropagation();
-                loadFile(inZipPath, url);
+                fetchPage(inZipPath, url, [], (fetchedUrl) => {
+                  elem.href = fetchedUrl || "about:blank";
+                  elem.click();
+                });
               }
             }
           } catch (ex) {}
