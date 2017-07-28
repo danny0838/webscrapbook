@@ -88,12 +88,12 @@ document.addEventListener("DOMContentLoaded", function () {
       };
 
       req.onerror = function (evt) {
-        alert("Unable to read the zip file.");
+        alert("Unable to read the zip file: " + "(" + evt.target.error.name + ") " + evt.target.error.message);
       };
     };
      
     request.onerror = function (evt) {
-      console.error(evt.target.error);
+      alert("Unable to open indexedDB: " + "(" + evt.target.error.name + ") " + evt.target.error.message);
     };
   };
 

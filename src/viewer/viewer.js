@@ -421,12 +421,12 @@ function init() {
             };
 
             transaction.onerror = function (evt) {
-              alert("Unable to store the zip file: " + evt.target.error);
+              alert("Unable to store the zip file: " + "(" + evt.target.error.name + ") " + evt.target.error.message);
             };
           };
            
           request.onerror = function (evt) {
-            alert("Unable to store the zip file: " + evt.target.error);
+            alert("Unable to open indexedDB: " + "(" + evt.target.error.name + ") " + evt.target.error.message);
           };
         };
 
