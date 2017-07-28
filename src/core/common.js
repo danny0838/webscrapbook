@@ -827,7 +827,7 @@ scrapbook.xhr = function (params) {
   var xhr = new XMLHttpRequest();
 
   var xhrAbort = function () {
-    xhr.onreadystatechange = xhr.onerror = xhr.ontimeout = null;
+    xhr.onreadystatechange = xhr.onloadend = xhr.onerror = xhr.ontimeout = null;
     xhr.abort();
   };
 
@@ -836,16 +836,24 @@ scrapbook.xhr = function (params) {
   };
 
   xhr.onloadend = function () {
-    params && params.onloadend && params.onloadend(xhr, xhrAbort);
+    if (xhr.status == 200 || xhr.status == 0) {
+      // we only care about real loading success
+      params && params.onloadend && params.onloadend(xhr, xhrAbort);
+    } else {
+      // treat "404 Not found" or so as error
+      xhr.onerror();
+    }
   };
 
   xhr.onerror = function () {
-    params && params.onerror && params.onerror(xhr, xhrAbort);
+    params && params.onerror && params.onerror(xhr);
+    xhrAbort();
   };
 
   xhr.ontimeout = function () {
     var handler = params && params.ontimeout || params.onerror;
-    handler && handler(xhr, xhrAbort);
+    handler && handler(xhr);
+    xhrAbort();
   };
 
   try {

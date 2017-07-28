@@ -176,33 +176,28 @@ capturer.captureUrl = function (params, callback) {
           }
           params.settings.documentName = filename;
         }
-      } else if (xhr.readyState === 4) {
-        if (xhr.status == 200 || xhr.status == 0) {
-          let doc = xhr.response;
-          if (doc) {
-            capturer.captureDocumentOrFile(doc, settings, options, callback);
-          } else {
-            capturer.captureFile({
-              url: params.url,
-              settings: params.settings,
-              options: params.options
-            }, callback);
-          }
-        } else {
-          xhr.onerror();
-        }
+      }
+    },
+    onloadend: function (xhr, xhrAbort) {
+      let doc = xhr.response;
+      if (doc) {
+        capturer.captureDocumentOrFile(doc, settings, options, callback);
+      } else {
+        capturer.captureFile({
+          url: params.url,
+          settings: params.settings,
+          options: params.options
+        }, callback);
       }
     },
     ontimeout: function (xhr, xhrAbort) {
       console.warn(scrapbook.lang("ErrorFileDownloadTimeout", sourceUrl));
       callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: "timeout"});
-      xhrAbort();
     },
     onerror: function (xhr, xhrAbort) {
       var err = [xhr.status, xhr.statusText].join(" ");
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
       callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: err});
-      xhrAbort();
     }
   });
 
@@ -576,48 +571,43 @@ capturer.downloadFile = function (params, callback) {
             xhrAbort();
           }
         }
-      } else if (xhr.readyState === 4) {
-        if ((xhr.status == 200 || xhr.status == 0) && xhr.response) {
-          if (rewriteMethod && capturer[rewriteMethod]) {
-            capturer[rewriteMethod]({
-              settings: settings,
-              options: options,
-              data: xhr.response,
-              charset: headers.charset,
-              url: xhr.responseURL
-            }, (response) => {
-              capturer.downloadBlob({
-                settings: settings,
-                options: options,
-                blob: response,
-                filename: filename,
-                sourceUrl: sourceUrl,
-              }, callback);
-            });
-          } else {
-            capturer.downloadBlob({
-              settings: settings,
-              options: options,
-              blob: xhr.response,
-              filename: filename,
-              sourceUrl: sourceUrl,
-            }, callback);
-          }
-        } else {
-          xhr.onerror();
-        }
+      }
+    },
+    onloadend: function (xhr, xhrAbort) {
+      if (rewriteMethod && capturer[rewriteMethod]) {
+        capturer[rewriteMethod]({
+          settings: settings,
+          options: options,
+          data: xhr.response,
+          charset: headers.charset,
+          url: xhr.responseURL
+        }, (response) => {
+          capturer.downloadBlob({
+            settings: settings,
+            options: options,
+            blob: response,
+            filename: filename,
+            sourceUrl: sourceUrl,
+          }, callback);
+        });
+      } else {
+        capturer.downloadBlob({
+          settings: settings,
+          options: options,
+          blob: xhr.response,
+          filename: filename,
+          sourceUrl: sourceUrl,
+        }, callback);
       }
     },
     ontimeout: function (xhr, xhrAbort) {
       console.warn(scrapbook.lang("ErrorFileDownloadTimeout", sourceUrl));
       callback({url: capturer.getErrorUrl(sourceUrl, options), error: "timeout"});
-      xhrAbort();
     },
     onerror: function (xhr, xhrAbort) {
       let err = [xhr.status, xhr.statusText].join(" ");
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
       callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
-      xhrAbort();
     }
   });
 
