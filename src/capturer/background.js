@@ -85,7 +85,7 @@ capturer.captureTab = function (tab, quiet) {
       favIconUrl: tab.favIconUrl,
       recurseChain: []
     },
-    options: scrapbook.getOptions("capture"),
+    options: capturer.fixOptions(scrapbook.getOptions("capture"))
   };
 
   isDebug && console.debug(cmd + " (main) send", tabId, message);
@@ -122,7 +122,7 @@ capturer.captureTabSource = function (tab) {
       documentName: "index",
       recurseChain: []
     },
-    options: scrapbook.getOptions("capture")
+    options: capturer.fixOptions(scrapbook.getOptions("capture"))
   };
 
   isDebug && console.debug("(main) send", tabId, message);

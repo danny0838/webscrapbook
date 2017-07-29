@@ -32,6 +32,11 @@ capturer.invoke = function (method, args, callback) {
   }
 };
 
+capturer.fixOptions = function (options) {
+  options["capture.dataFolder"] = scrapbook.validateFilename(options["capture.dataFolder"] || "WebScrapBook");
+  return options;
+};
+
 capturer.captureDocumentOrFile = function (doc, settings, options, callback) {
   isDebug && console.debug("call: captureDocumentOrFile");
 
