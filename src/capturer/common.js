@@ -259,7 +259,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
             } else if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
               let metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
               let metaRefreshTarget = capturer.resolveRelativeUrl(doc.URL, metaRefresh.url);
-              elem.setAttribute("content", metaRefresh.time + ";URL=" + metaRefreshTarget);
+              elem.setAttribute("content", metaRefresh.time + ";url=" + metaRefreshTarget);
 
               switch (options["capture.metaRefresh"]) {
                 case "link":
@@ -287,16 +287,16 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                         options: options,
                         url: metaRefreshTarget
                       }, function (response) {
-                        captureRewriteAttr(elem, "content", metaRefresh.time + ";URL=" + response.url);
+                        captureRewriteAttr(elem, "content", metaRefresh.time + ";url=" + response.url);
                         remainingTasks--;
                         captureCheckDone();
                       });
                     } else {
                       console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [source, target]));
-                      captureRewriteAttr(elem, "content", metaRefresh.time + ";URL=" + capturer.getCircularUrl(metaRefreshTarget, options));
+                      captureRewriteAttr(elem, "content", metaRefresh.time + ";url=" + capturer.getCircularUrl(metaRefreshTarget, options));
                     }
                   } else {
-                    captureRewriteAttr(elem, "content", metaRefresh.time + (hash ? ";URL=" + hash : ""));
+                    captureRewriteAttr(elem, "content", metaRefresh.time + (hash ? ";url=" + hash : ""));
                   }
                   break;
               }

@@ -230,7 +230,7 @@ capturer.captureFile = function (params, callback) {
     if (settings.frameIsMain) {
       let meta = params.options["capture.recordDocumentMeta"] ? ' data-sb' + timeId + '-source="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
       // for the main frame, create a index.html that redirects to the file
-      let html = '<html' + meta + '><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;URL=' + scrapbook.escapeHtml(response.url) + '">' + (title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>' : '') + '</head><body></body></html>';
+      let html = '<html' + meta + '><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=' + scrapbook.escapeHtml(response.url) + '">' + (title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>' : '') + '</head><body></body></html>';
       capturer.saveDocument({
         sourceUrl: sourceUrl,
         documentName: settings.documentName,
@@ -344,7 +344,7 @@ capturer.saveDocument = function (params, callback) {
       } else {
         // create index.html that redirects to index.xhtml
         if (ext === ".xhtml") {
-          let html = '<html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;URL=index.xhtml"></head><body></body></html>';
+          let html = '<html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml"></head><body></body></html>';
           zip.file("index.html", new Blob([html], {type: "text/html"}), {
             compression: "DEFLATE",
             compressionOptions: {level: 9}
@@ -395,7 +395,7 @@ capturer.saveDocument = function (params, callback) {
       } else {
         // create index.html that redirects to index.xhtml
         if (ext === ".xhtml") {
-          let html = '<html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;URL=index.xhtml"></head><body></body></html>';
+          let html = '<html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml"></head><body></body></html>';
           zip.file(timeId + "/" + "index.html", new Blob([html], {type: "text/html"}), {
             compression: "DEFLATE",
             compressionOptions: {level: 9}
@@ -464,7 +464,7 @@ capturer.saveDocument = function (params, callback) {
         var saveBlobComplete = function () {
           // create index.html that redirects to index.xhtml
           let filename = "index.html";
-          let html = '<html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;URL=index.xhtml"></head><body></body></html>';
+          let html = '<html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml"></head><body></body></html>';
           capturer.saveBlob({
             timeId: timeId,
             blob: new Blob([html], {type: "text/html"}),
