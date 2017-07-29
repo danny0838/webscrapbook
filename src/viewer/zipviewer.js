@@ -647,13 +647,19 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      if (frame === viewer) {
-        document.title = frameDoc.title;
-      } else if (frameDoc.documentElement.hasAttribute(metaRefreshIdentifier)) {
+      if (frameDoc.documentElement.hasAttribute(metaRefreshIdentifier)) {
         let anchor = frameDoc.querySelector("a");
         let url = anchor.href;
-        anchor.ownerDocument.location.replace(url);
+        if (frame === viewer) {
+          document.location.replace(url);
+        } else {
+          anchor.ownerDocument.location.replace(url);
+        }
         return;
+      }
+
+      if (frame === viewer) {
+        document.title = frameDoc.title;
       }
 
       frameDoc.documentElement.addEventListener("click", (e) => {
