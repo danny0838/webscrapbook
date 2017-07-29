@@ -253,14 +253,29 @@ document.addEventListener("DOMContentLoaded", function () {
                   elem.setAttribute("content", metaRefresh.time + ";url=about:blank");
                   break;
                 }
-                remainingTasks++;
-                let metaRecurseChain = JSON.parse(JSON.stringify(recurseChain));
-                metaRecurseChain.push(refUrl);
-                fetchPage(info.inZipPath, info.url, metaRecurseChain, (fetchedUrl) => {
-                  elem.setAttribute("content", metaRefresh.time + ";url=" + (fetchedUrl || info.url));
-                  remainingTasks--;
-                  parserCheckDone();
-                });
+                if (info.inZip) {
+                  remainingTasks++;
+                  let metaRecurseChain = JSON.parse(JSON.stringify(recurseChain));
+                  metaRecurseChain.push(refUrl);
+                  fetchPage(info.inZipPath, info.url, metaRecurseChain, (fetchedUrl) => {
+                    elem.setAttribute("content", metaRefresh.time + ";url=" + (fetchedUrl || info.url));
+                    remainingTasks--;
+                    parserCheckDone();
+                  });
+                } else {
+                  let content = '<!DOCTYPE html>\n' +
+                      '<html>\n' +
+                      '<head>\n' +
+                      '<meta charset="UTF-8">\n' +
+                      '<meta name="viewport" content="width=device-width">\n' +
+                      '</head>\n' +
+                      '<body>\n' +
+                      'Redirecting to: <a href="' + scrapbook.escapeHtml(info.url) + '">' + scrapbook.escapeHtml(info.url, true) + '</a>' +
+                      '</body>\n' +
+                      '</html>\n';
+                  let url = URL.createObjectURL(new Blob([content], {type: "text/html"}));
+                  elem.setAttribute("content", metaRefresh.time + ";url=" + url);
+                }
               } else {
                 elem.setAttribute("content", metaRefresh.time + (targetPageHash ? ";url=" + targetPageHash : ""));
               }
