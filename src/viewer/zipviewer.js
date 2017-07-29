@@ -667,7 +667,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     elem.click();
                   });
                 }
-              } else if (!url.startsWith("blob:")) {
+              } else if (!url.startsWith("blob:") && frame === viewer) {
                 e.preventDefault();
                 e.stopPropagation();
                 location.href = url;
