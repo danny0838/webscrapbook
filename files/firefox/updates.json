@@ -37,7 +37,9 @@
         { "version": "0.8.7",
           "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.8.7-an+fx.xpi" },
         { "version": "0.9.0",
-          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.9.0-an+fx.xpi" }
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.9.0-an+fx.xpi" },
+        { "version": "0.9.1",
+          "update_link": "https://danny0838.github.io/webscrapbook/files/firefox/web_scrapbook-0.9.1-an+fx.xpi" }
       ]
     }
   }
