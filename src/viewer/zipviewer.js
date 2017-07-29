@@ -652,6 +652,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     elem.click();
                   });
                 }
+              } else if (!url.startsWith("blob:")) {
+                e.preventDefault();
+                e.stopPropagation();
+                location.href = url;
               }
             } catch (ex) {}
         }
