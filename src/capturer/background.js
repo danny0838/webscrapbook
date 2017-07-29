@@ -353,7 +353,7 @@ capturer.saveDocument = function (params, callback) {
       } else {
         // create index.html that redirects to index.xhtml
         if (ext === ".xhtml") {
-          let html = '<html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml"></head><body></body></html>';
+          let html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
           zip.file("index.html", new Blob([html], {type: "text/html"}), {
             compression: "DEFLATE",
             compressionOptions: {level: 9}
@@ -404,7 +404,7 @@ capturer.saveDocument = function (params, callback) {
       } else {
         // create index.html that redirects to index.xhtml
         if (ext === ".xhtml") {
-          let html = '<html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml"></head><body></body></html>';
+          let html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
           zip.file(timeId + "/" + "index.html", new Blob([html], {type: "text/html"}), {
             compression: "DEFLATE",
             compressionOptions: {level: 9}
@@ -473,7 +473,7 @@ capturer.saveDocument = function (params, callback) {
         var saveBlobComplete = function () {
           // create index.html that redirects to index.xhtml
           let filename = "index.html";
-          let html = '<html><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml"></head><body></body></html>';
+          let html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
           capturer.saveBlob({
             timeId: timeId,
             blob: new Blob([html], {type: "text/html"}),
