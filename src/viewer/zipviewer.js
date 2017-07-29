@@ -264,12 +264,12 @@ document.addEventListener("DOMContentLoaded", function () {
                   });
                 } else {
                   let content = '<!DOCTYPE html>\n' +
-                      '<html>\n' +
+                      '<html ' + metaRefreshIdentifier + '="1">\n' +
                       '<head>\n' +
                       '<meta charset="UTF-8">\n' +
                       '<meta name="viewport" content="width=device-width">\n' +
                       '</head>\n' +
-                      '<body>\n' +
+                      '<body>' +
                       'Redirecting to: <a href="' + scrapbook.escapeHtml(info.url) + '">' + scrapbook.escapeHtml(info.url, true) + '</a>' +
                       '</body>\n' +
                       '</html>\n';
@@ -625,6 +625,7 @@ document.addEventListener("DOMContentLoaded", function () {
    */
   var virtualBase = viewerData.virtualBase;
   var defaultTitle = document.querySelector('title').textContent;
+  var metaRefreshIdentifier = "data-sb-" + scrapbook.dateToId() + "-meta-refresh";
 
   var viewer = document.getElementById('viewer');
 
@@ -648,6 +649,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (frame === viewer) {
         document.title = frameDoc.title;
+      } else if (frameDoc.documentElement.hasAttribute(metaRefreshIdentifier)) {
+        let anchor = frameDoc.querySelector("a");
+        let url = anchor.href;
+        anchor.ownerDocument.location.replace(url);
+        return;
       }
 
       frameDoc.documentElement.addEventListener("click", (e) => {
