@@ -647,7 +647,7 @@ capturer.downloadDataUri = function (params, callback) {
   var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
 
   if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
-    let file = scrapbook.dataUriToFile(sourceUrl);
+    let file = scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]);
     if (file) {
       filename = file.name;
       filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
