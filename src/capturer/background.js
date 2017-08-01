@@ -304,6 +304,7 @@ capturer.saveDocument = function (params, callback) {
   var documentName = params.documentName;
   var data = params.data;
   var timeId = settings.timeId;
+  var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
 
   switch (options["capture.saveAs"]) {
     case "singleHtml": {
@@ -326,7 +327,7 @@ capturer.saveDocument = function (params, callback) {
           autoErase: autoErase,
           savePrompt: options["capture.savePrompt"]
         }, () => {
-          callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
+          callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
         }, (ex) => {
           callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
         });
@@ -349,7 +350,7 @@ capturer.saveDocument = function (params, callback) {
       });
 
       if (!settings.frameIsMain) {
-        callback({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename)});
+        callback({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
       } else {
         // create index.html that redirects to index.xhtml
         if (ext === ".xhtml") {
@@ -376,7 +377,7 @@ capturer.saveDocument = function (params, callback) {
             autoErase: false,
             savePrompt: options["capture.savePrompt"]
           }, () => {
-            callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
+            callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
           }, (ex) => {
             callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
           });
@@ -400,7 +401,7 @@ capturer.saveDocument = function (params, callback) {
       });
 
       if (!settings.frameIsMain) {
-        callback({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename)});
+        callback({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
       } else {
         // create index.html that redirects to index.xhtml
         if (ext === ".xhtml") {
@@ -446,7 +447,7 @@ capturer.saveDocument = function (params, callback) {
             autoErase: false,
             savePrompt: options["capture.savePrompt"]
           }, () => {
-            callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
+            callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
           }, (ex) => {
             callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
           });
@@ -466,7 +467,7 @@ capturer.saveDocument = function (params, callback) {
       if (!(settings.frameIsMain && (ext === ".xhtml"))) {
         var autoErase = !settings.frameIsMain;
         var saveBlobComplete = function () {
-          callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
+          callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
         };
       } else {
         var autoErase = true;
@@ -483,7 +484,7 @@ capturer.saveDocument = function (params, callback) {
             autoErase: false,
             savePrompt: false
           }, () => {
-            callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
+            callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
           }, (ex) => {
             callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
           });
@@ -523,11 +524,12 @@ capturer.downloadFile = function (params, callback) {
   var options = params.options;
   var timeId = settings.timeId;
   var targetDir = options["capture.dataFolder"] + "/" + timeId;
-  var sourceUrl = params.url; sourceUrl = scrapbook.splitUrlByAnchor(sourceUrl)[0];
+  var sourceUrl = params.url;
   var rewriteMethod = params.rewriteMethod;
   var filename = scrapbook.urlToFilename(sourceUrl);
   var isDuplicate;
   var headers = {};
+  var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
 
   // special management of data URI
   if (sourceUrl.startsWith("data:")) {
@@ -576,7 +578,7 @@ capturer.downloadFile = function (params, callback) {
         if (options["capture.saveAs"] !== "singleHtml") {
           ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
           if (isDuplicate) {
-            callback({filename: filename, url: scrapbook.escapeFilename(filename), isDuplicate: true});
+            callback({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
             xhrAbort();
           }
         }
@@ -638,10 +640,11 @@ capturer.downloadDataUri = function (params, callback) {
   var options = params.options;
   var timeId = settings.timeId;
   var targetDir = options["capture.dataFolder"] + "/" + timeId;
-  var sourceUrl = params.url; sourceUrl = scrapbook.splitUrlByAnchor(sourceUrl)[0];
+  var sourceUrl = params.url;
   var rewriteMethod = params.rewriteMethod;
   var filename;
   var isDuplicate;
+  var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
 
   if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
     let file = scrapbook.dataUriToFile(sourceUrl);
@@ -676,7 +679,7 @@ capturer.downloadDataUri = function (params, callback) {
           }, callback);
         }
       } else {
-        callback({filename: filename, url: scrapbook.escapeFilename(filename), isDuplicate: true});
+        callback({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
       }
     } else {
       callback({url: capturer.getErrorUrl(sourceUrl, options), error: "data URI cannot be read as file"});
@@ -706,6 +709,7 @@ capturer.downloadBlob = function (params, callback) {
   var blob = params.blob;
   var filename = params.filename;
   var sourceUrl = params.sourceUrl;
+  var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
 
   if (!blob) {
     callback({url: capturer.getErrorUrl(sourceUrl, options)});
@@ -719,7 +723,7 @@ capturer.downloadBlob = function (params, callback) {
         if (filename) {
           dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");
         }
-        callback({url: dataUri});
+        callback({url: dataUri + hash});
       }
       reader.readAsDataURL(blob);
       break;
@@ -740,7 +744,7 @@ capturer.downloadBlob = function (params, callback) {
         });
       }
 
-      callback({filename: filename, url: scrapbook.escapeFilename(filename)});
+      callback({filename: filename, url: scrapbook.escapeFilename(filename) + hash});
       break;
     }
 
@@ -759,7 +763,7 @@ capturer.downloadBlob = function (params, callback) {
         });
       }
 
-      callback({filename: filename, url: scrapbook.escapeFilename(filename)});
+      callback({filename: filename, url: scrapbook.escapeFilename(filename) + hash});
       break;
     }
 
@@ -777,7 +781,7 @@ capturer.downloadBlob = function (params, callback) {
         autoErase: true,
         savePrompt: false
       }, () => {
-        callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename)});
+        callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
       }, (ex) => {
         callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
       });
