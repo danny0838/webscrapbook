@@ -257,9 +257,12 @@ capturer.captureDocument = function (doc, settings, options, callback) {
               metaCharsetNode = elem;
               captureRewriteAttr(elem, "content", "text/html; charset=UTF-8");
             } else if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
+              let metaRefreshTarget = doc.URL;
               let metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
-              let metaRefreshTarget = capturer.resolveRelativeUrl(doc.URL, metaRefresh.url);
-              elem.setAttribute("content", metaRefresh.time + ";url=" + metaRefreshTarget);
+              if (metaRefresh.url) {
+                metaRefreshTarget = capturer.resolveRelativeUrl(doc.URL, metaRefresh.url);
+                elem.setAttribute("content", metaRefresh.time + ";url=" + metaRefreshTarget);
+              }
 
               switch (options["capture.metaRefresh"]) {
                 case "link":
