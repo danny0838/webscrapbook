@@ -967,10 +967,12 @@ capturer.captureDocument = function (doc, settings, options, callback) {
             case "save":
             default:
               try {
-                let text = "(" + canvasDataScript.toString().replace(/\s+/g, " ") + ")('" + canvasOrig.toDataURL() + "')";
-                let canvasScript = doc.createElement("script");
-                canvasScript.textContent = text;
-                elem.parentNode.insertBefore(canvasScript, elem.nextSibling);
+                let scriptText = getCanvasDataScript(canvasOrig);
+                if (scriptText) {
+                  let canvasScript = doc.createElement("script");
+                  canvasScript.textContent = scriptText;
+                  elem.parentNode.insertBefore(canvasScript, elem.nextSibling);
+                }
               } catch (ex) {
                 console.error(ex);
               }
@@ -1182,13 +1184,18 @@ capturer.captureDocument = function (doc, settings, options, callback) {
     }
   };
 
-  var canvasDataScript = function (data) {
-    var scripts = document.getElementsByTagName("script");
-    var script = scripts[scripts.length-1], canvas = script.previousSibling;
-    var img = new Image();
-    img.onload = function(){ canvas.getContext('2d').drawImage(img, 0, 0); };
-    img.src = data;
-    script.parentNode.removeChild(script);
+  var getCanvasDataScript = function (canvas) {
+    let data = canvas.toDataURL();
+    let dataScript = function (data) {
+      var s = document.getElementsByTagName("script"),
+          c = s[s.length - 1],
+          t = c.previousSibling,
+          i = new Image();
+      i.onload = function(){ t.getContext('2d').drawImage(i, 0, 0); };
+      i.src = data;
+      s.parentNode.removeChild(s);
+    };
+    return "(" + dataScript.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")('" + data + "')";
   };
 
   var remainingTasks = 0;
