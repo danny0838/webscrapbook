@@ -640,9 +640,8 @@ capturer.captureDocument = function (doc, settings, options, callback) {
           let [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
           if (urlMain === scrapbook.splitUrlByAnchor(doc.URL)[0]) {
             // This link targets the current page.
-            if (urlHash === '' || urlHash === '#') {
-              // link to the current page as a whole
-              elem.setAttribute('href', '#');
+            if (urlHash === '') {
+              elem.setAttribute('href', '');
               break;
             }
             // For full capture (no selection), relink to the captured page.
