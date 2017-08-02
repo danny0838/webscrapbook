@@ -195,7 +195,7 @@ capturer.captureUrl = function (params, callback) {
       callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: "timeout"});
     },
     onerror: function (xhr, xhrAbort) {
-      var err = [xhr.status, xhr.statusText].join(" ");
+      let err = xhr.statusText ? xhr.status + " " + xhr.statusText : xhr.status;
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
       callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: err});
     }
@@ -614,7 +614,7 @@ capturer.downloadFile = function (params, callback) {
       callback({url: capturer.getErrorUrl(sourceUrl, options), error: "timeout"});
     },
     onerror: function (xhr, xhrAbort) {
-      let err = [xhr.status, xhr.statusText].join(" ");
+      let err = xhr.statusText ? xhr.status + " " + xhr.statusText : xhr.status;
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
       callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
     }
