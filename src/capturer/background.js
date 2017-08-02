@@ -156,7 +156,7 @@ capturer.captureUrl = function (params, callback) {
     url: sourceUrl,
     responseType: "document",
     onreadystatechange: function (xhr, xhrAbort) {
-      if (xhr.readyState === 2) {
+      if (xhr.readyState === 2 && xhr.status !== 0) {
         if (!params.settings.documentName) {
           let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
           let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
@@ -542,7 +542,7 @@ capturer.downloadFile = function (params, callback) {
     url: sourceUrl,
     responseType: "blob",
     onreadystatechange: function (xhr, xhrAbort) {
-      if (xhr.readyState === 2) {
+      if (xhr.readyState === 2 && xhr.status !== 0) {
         // determine the filename
         // if header Content-Disposition is defined, use it
         try {
