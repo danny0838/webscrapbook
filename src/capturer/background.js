@@ -694,7 +694,7 @@ capturer.downloadDataUri = function (params, callback) {
  *     - {Object} params.settings
  *     - {Object} params.options
  *     - {string} params.blob
- *     - {string} params.filename
+ *     - {string} params.filename - validated and unique
  *     - {string} params.sourceUrl
  */
 capturer.downloadBlob = function (params, callback) {
