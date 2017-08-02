@@ -152,34 +152,59 @@ capturer.captureUrl = function (params, callback) {
   var settings = params.settings;
   var options = params.options;
 
+  var headers = {};
+  
+  var determineFilename = function (xhrAbort) {
+    // run this only once
+    if (arguments.callee.done) { return; }
+    arguments.callee.done = true;
+
+    // skip if documentName is already specified
+    if (params.settings.documentName) { return; }
+
+    // if filename defined by header Content-Disposition, use it
+    let filename = headers.filename ||
+        sourceUrl.startsWith("data:") ?
+            scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name :
+            scrapbook.urlToFilename(sourceUrl);
+
+    let mime = headers.contentType || Mime.prototype.lookup(filename) || "text/html";
+    let fn = filename.toLowerCase();
+    if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
+      let exts = Mime.prototype.allExtensions(mime);
+      for (let i = 0, I = exts.length; i < I; i++) {
+        let ext = ("." + exts[i]).toLowerCase();
+        if (fn.endsWith(ext)) {
+          filename = filename.slice(0, -ext.length);
+          break;
+        }
+      }
+    }
+
+    params.settings.documentName = filename;
+  };
+
   scrapbook.xhr({
     url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
     responseType: "document",
     onreadystatechange: function (xhr, xhrAbort) {
       if (xhr.readyState === 2 && xhr.status !== 0) {
-        if (!params.settings.documentName) {
-          let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+        let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+        if (headerContentDisposition) {
           let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-          let filename = contentDisposition.parameters.filename ||
-              sourceUrl.startsWith("data:") ? scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name : scrapbook.urlToFilename(sourceUrl);
-          let headerContentType = xhr.getResponseHeader("Content-Type");
+          headers.isAttachment = (contentDisposition.type === "attachment");
+          headers.filename = contentDisposition.parameters.filename;
+        }
+        let headerContentType = xhr.getResponseHeader("Content-Type");
+        if (headerContentType) {
           let contentType = scrapbook.parseHeaderContentType(headerContentType);
-          let mime = contentType.type || Mime.prototype.lookup(filename) || "text/html";
-          if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
-            let exts = Mime.prototype.allExtensions(mime);
-            for (let i = 0, I = exts.length; i < I; i++) {
-              let ext = "." + exts[i];
-              if (filename.endsWith(ext)) {
-                filename = filename.slice(0, -ext.length);
-                break;
-              }
-            }
-          }
-          params.settings.documentName = filename;
+          headers.contentType = contentType.type;
+          headers.charset = contentType.parameters.charset;
         }
       }
     },
     onloadend: function (xhr, xhrAbort) {
+      determineFilename(xhrAbort);
       let doc = xhr.response;
       if (doc) {
         capturer.captureDocumentOrFile(doc, settings, options, callback);
