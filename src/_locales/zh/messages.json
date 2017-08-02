@@ -120,9 +120,6 @@
   "OptionCaptureImageLabel": {
     "message": "圖片:"
   },
-  "OptionCaptureMetaRefreshLabel": {
-    "message": "META 刷新:"
-  },
   "OptionCaptureNoscriptLabel": {
     "message": "NOSCRIPT 元素:"
   },

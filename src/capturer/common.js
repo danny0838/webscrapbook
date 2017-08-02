@@ -258,51 +258,10 @@ capturer.captureDocument = function (doc, settings, options, callback) {
               metaCharsetNode = elem;
               captureRewriteAttr(elem, "content", "text/html; charset=UTF-8");
             } else if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
-              let metaRefreshTarget = doc.URL;
               let metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
               if (metaRefresh.url) {
-                metaRefreshTarget = capturer.resolveRelativeUrl(doc.URL, metaRefresh.url);
+                let metaRefreshTarget = capturer.resolveRelativeUrl(doc.URL, metaRefresh.url);
                 elem.setAttribute("content", metaRefresh.time + ";url=" + metaRefreshTarget);
-              }
-
-              switch (options["capture.metaRefresh"]) {
-                case "link":
-                  // do nothing
-                  break;
-                case "blank":
-                  captureRewriteAttr(elem, "content", null);
-                  break;
-                case "remove":
-                  captureRemoveNode(elem);
-                  return;
-                case "save":
-                default:
-                  let [source] = scrapbook.splitUrlByAnchor(doc.URL);
-                  let [target, hash] = scrapbook.splitUrlByAnchor(metaRefreshTarget || "");
-                  if (target !== source) {
-                    if (settings.recurseChain.indexOf(target) === -1) {
-                      let captureUrlSettings = JSON.parse(JSON.stringify(settings));
-                      captureUrlSettings.recurseChain.push(source);
-                      captureUrlSettings.frameIsMain = false;
-                      captureUrlSettings.documentName = null;
-                      remainingTasks++;
-                      capturer.invoke("captureUrl", {
-                        settings: captureUrlSettings,
-                        options: options,
-                        url: metaRefreshTarget
-                      }, function (response) {
-                        captureRewriteAttr(elem, "content", metaRefresh.time + ";url=" + response.url);
-                        remainingTasks--;
-                        captureCheckDone();
-                      });
-                    } else {
-                      console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [source, target]));
-                      captureRewriteAttr(elem, "content", metaRefresh.time + ";url=" + capturer.getCircularUrl(metaRefreshTarget, options));
-                    }
-                  } else {
-                    captureRewriteAttr(elem, "content", metaRefresh.time + (hash ? ";url=" + hash : ""));
-                  }
-                  break;
               }
             }
           } else if (elem.hasAttribute("charset")) {
