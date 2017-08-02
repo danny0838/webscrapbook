@@ -619,6 +619,23 @@ capturer.captureDocument = function (doc, settings, options, callback) {
           if (!elem.hasAttribute("href")) { break; }
           let url = elem.href;
 
+          // scripts: script-like anchors
+          if (url.toLowerCase().startsWith("javascript:")) {
+            switch (options["capture.scriptAnchor"]) {
+              case "save":
+                // do nothing
+                break;
+              case "blank":
+                captureRewriteAttr(elem, "href", "javascript:");
+                break;
+              case "remove":
+              default:
+                captureRewriteAttr(elem, "href", null);
+                break;
+            }
+            break;
+          }
+
           // adjust hash links to target the current page
           let [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
           if (urlMain === scrapbook.splitUrlByAnchor(doc.URL)[0]) {
@@ -645,22 +662,6 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                 elem.setAttribute('href', urlHash);
               }
               break;
-            }
-          }
-
-          // scripts: script-like anchors
-          if (elem.href.toLowerCase().startsWith("javascript:")) {
-            switch (options["capture.scriptAnchor"]) {
-              case "save":
-                // do nothing
-                break;
-              case "blank":
-                captureRewriteAttr(elem, "href", "javascript:");
-                break;
-              case "remove":
-              default:
-                captureRewriteAttr(elem, "href", null);
-                break;
             }
           }
 
