@@ -153,14 +153,15 @@ capturer.captureUrl = function (params, callback) {
   var options = params.options;
 
   scrapbook.xhr({
-    url: sourceUrl,
+    url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
     responseType: "document",
     onreadystatechange: function (xhr, xhrAbort) {
       if (xhr.readyState === 2 && xhr.status !== 0) {
         if (!params.settings.documentName) {
           let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
           let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-          let filename = contentDisposition.parameters.filename || scrapbook.urlToFilename(sourceUrl);
+          let filename = contentDisposition.parameters.filename ||
+              sourceUrl.startsWith("data:") ? scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name : scrapbook.urlToFilename(sourceUrl);
           let headerContentType = xhr.getResponseHeader("Content-Type");
           let contentType = scrapbook.parseHeaderContentType(headerContentType);
           let mime = contentType.type || Mime.prototype.lookup(filename) || "text/html";
