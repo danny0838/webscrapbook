@@ -260,7 +260,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
             } else if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
               let metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
               if (metaRefresh.url) {
-                let metaRefreshTarget = capturer.resolveRelativeUrl(doc.URL, metaRefresh.url);
+                let metaRefreshTarget = capturer.resolveRelativeUrl(metaRefresh.url, doc.URL);
                 elem.setAttribute("content", metaRefresh.time + ";url=" + metaRefreshTarget);
               }
             }
@@ -279,7 +279,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
               case "og:video:url":
               case "og:video:secure_url":
               case "og:url":
-                let rewriteUrl = capturer.resolveRelativeUrl(doc.URL, elem.getAttribute("content"));
+                let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("content"), doc.URL);
                 elem.setAttribute("content", rewriteUrl);
                 break;
             }
@@ -464,7 +464,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
         case "td": {
           // deprecated: background attribute (deprecated since HTML5)
           if (elem.hasAttribute("background")) {
-            let rewriteUrl = capturer.resolveRelativeUrl(doc.URL, elem.getAttribute("background"));
+            let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("background"), doc.URL);
             elem.setAttribute("background", rewriteUrl);
 
             switch (options["capture.imageBackground"]) {
@@ -637,7 +637,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
           if (elem.hasAttribute("srcset")) {
             elem.setAttribute("srcset",
               scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
-                return capturer.resolveRelativeUrl(doc.URL, url);
+                return capturer.resolveRelativeUrl(url, doc.URL);
               })
             );
           }
@@ -693,7 +693,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
           Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
             elem.setAttribute("srcset",
               scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
-                return capturer.resolveRelativeUrl(doc.URL, url);
+                return capturer.resolveRelativeUrl(url, doc.URL);
               })
             );
           }, this);
@@ -880,7 +880,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
         // media: applet
         case "applet": {
           if (elem.hasAttribute("archive")) {
-            let rewriteUrl = capturer.resolveRelativeUrl(doc.URL, elem.getAttribute("archive"));
+            let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("archive"), doc.URL);
             elem.setAttribute("archive", rewriteUrl);
           }
 
@@ -1210,7 +1210,7 @@ capturer.getFrameContent = function (frameElement, timeId, settings, options, ca
   };
 };
 
-capturer.resolveRelativeUrl = function (baseUrl, relativeUrl) {
+capturer.resolveRelativeUrl = function (relativeUrl, baseUrl) {
   try {
     return new URL(relativeUrl, baseUrl).href;
   } catch (ex) {}
@@ -1260,7 +1260,7 @@ capturer.processCssFile = function (params, callback) {
 capturer.ProcessCssFileText = function (cssText, refUrl, downloader, options) {
   return scrapbook.parseCssText(cssText, {
     rewriteImportUrl: function (url) {
-      var dataUrl = capturer.resolveRelativeUrl(refUrl, url);
+      var dataUrl = capturer.resolveRelativeUrl(url, refUrl);
       switch (options["capture.style"]) {
         case "link":
           // do nothing
@@ -1277,7 +1277,7 @@ capturer.ProcessCssFileText = function (cssText, refUrl, downloader, options) {
       return dataUrl;
     },
     rewriteFontFaceUrl: function (url) {
-      var dataUrl = capturer.resolveRelativeUrl(refUrl, url);
+      var dataUrl = capturer.resolveRelativeUrl(url, refUrl);
       switch (options["capture.font"]) {
         case "link":
           // do nothing
@@ -1294,7 +1294,7 @@ capturer.ProcessCssFileText = function (cssText, refUrl, downloader, options) {
       return dataUrl;
     },
     rewriteBackgroundUrl: function (url) {
-      var dataUrl = capturer.resolveRelativeUrl(refUrl, url);
+      var dataUrl = capturer.resolveRelativeUrl(url, refUrl);
       switch (options["capture.imageBackground"]) {
         case "link":
           // do nothing
