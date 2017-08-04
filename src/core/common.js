@@ -363,52 +363,20 @@ scrapbook.stringToDataUri = function (str, mime, charset) {
 };
 
 scrapbook.dataUriToFile = function (dataUri) {
-  if (dataUri.startsWith("data:")) {
-    dataUri = dataUri.slice(5);
+  if (/^data:([^,]*?)(;base64)?,(.*?)$/i.test(dataUri)) {
+    var mediatype = RegExp.$1;
+    var mime = mediatype.split(";").shift();
+    var base64 = !!RegExp.$2;
+    var data = RegExp.$3;
 
-    if (/^(.*?),(.*?)$/.test(dataUri)) {
-      var metas = RegExp.$1.split(";");
-      var data = RegExp.$2;
-      var mime = metas.shift();
-      var base64 = false;
-      var parameters = {};
+    var ext = Mime.prototype.extension(mime);
+    ext = ext ? ("." + ext) : "";
 
-      metas.forEach((meta) => {
-        if (/^(.*?)=(.*?)$/.test(meta)) {
-          parameters[RegExp.$1.toLowerCase()] = RegExp.$2;
-        } else if (meta == "base64") {
-          base64 = true;
-        }
-      }, this);
-
-      var ext = Mime.prototype.extension(mime);
-      ext = ext ? ("." + ext) : "";
-
-      if (base64) {
-        var bstr = atob(data);
-        var filename = scrapbook.sha1(bstr, "BYTES") + ext;
-        var file = new File([bstr], filename, {type: mime});
-      } else {
-        var charset = (parameters.charset || "US-ASCII").toLowerCase();
-        switch (charset) {
-          case "us-ascii":
-            var str = unescape(data);
-            var filename = scrapbook.sha1(str, "BYTES") + ext;
-            var file = new File([str], filename, {type: mime});
-            break;
-          case "utf-8":
-            var str = decodeURIComponent(data);
-            var filename = scrapbook.sha1(str, "TEXT") + ext;
-            var file = new File([str], filename, {type: mime});
-            break;
-          default:
-            console.error('Unsupported charset in data URI: ' + charset);
-            file = null;
-            break;
-        }
-      }
-      return file;
-    }
+    var bstr = base64 ? atob(data) : unescape(data);
+    var ab = scrapbook.byteStringToArrayBuffer(bstr);
+    var filename = scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
+    var file = new File([ab], filename, {type: mediatype});
+    return file;
   }
   return null;
 };
