@@ -72,6 +72,33 @@ capturer.captureDocument = function (doc, settings, options, callback) {
   }
 
   var captureMain = function () {
+    var rewriteLocalLink = function (url) {
+      let [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+
+      // This link targets the current page
+      if (urlMain === scrapbook.splitUrlByAnchor(doc.URL)[0]) {
+        if (urlHash === "") {
+          return "";
+        }
+
+        // For full capture (no selection), relink to the captured page.
+        // For partial capture, the captured page could be incomplete,
+        // relink to the captured page only when the target node is included in the selected fragment.
+        let hasLocalTarget = !selection;
+        if (!hasLocalTarget) {
+          let targetId = scrapbook.decodeURIComponent(urlHash.slice(1)).replace(/\W/g, '\\$&');
+          if (rootNode.querySelector('[id="' + targetId + '"], a[name="' + targetId + '"]')) {
+            hasLocalTarget = true;
+          }
+        }
+        if (hasLocalTarget) {
+          return urlHash;
+        }
+      }
+
+      return url;
+    };
+
     // give certain nodes an unique id for later refrence,
     // since cloned nodes may not have some information
     // e.g. cloned iframes has no content, cloned canvas has no image
@@ -260,8 +287,9 @@ capturer.captureDocument = function (doc, settings, options, callback) {
             } else if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
               let metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
               if (metaRefresh.url) {
-                let metaRefreshTarget = capturer.resolveRelativeUrl(metaRefresh.url, doc.URL);
-                elem.setAttribute("content", metaRefresh.time + ";url=" + metaRefreshTarget);
+                let url = capturer.resolveRelativeUrl(metaRefresh.url, doc.URL);
+                url = rewriteLocalLink(url);
+                elem.setAttribute("content", metaRefresh.time + (url ? ";url=" + url : ""));
               }
             }
           } else if (elem.hasAttribute("charset")) {
@@ -596,36 +624,9 @@ capturer.captureDocument = function (doc, settings, options, callback) {
             break;
           }
 
-          // adjust hash links to target the current page
-          let [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
-          if (urlMain === scrapbook.splitUrlByAnchor(doc.URL)[0]) {
-            // This link targets the current page.
-            if (urlHash === '') {
-              elem.setAttribute('href', '');
-              break;
-            }
-            // For full capture (no selection), relink to the captured page.
-            // For partial capture, the captured page could be incomplete,
-            // relink to the captured page only when the target node is included in the selected fragment.
-            let hasLocalTarget = !selection;
-            if (!hasLocalTarget) {
-              let targetId = scrapbook.decodeURIComponent(urlHash.slice(1)).replace(/\W/g, '\\$&');
-              if (rootNode.querySelector('[id="' + targetId + '"], a[name="' + targetId + '"]')) {
-                hasLocalTarget = true;
-              }
-            }
-            if (hasLocalTarget) {
-              // if the original link is already a pure hash, 
-              // skip the rewrite to prevent a potential encoding change
-              if (elem.getAttribute('href').charAt(0) != "#") {
-                elem.setAttribute('href', urlHash);
-              }
-              break;
-            }
-          }
-
-          // normal anchors
-          elem.setAttribute("href", elem.href);
+          // normal anchor
+          url = capturer.resolveRelativeUrl(url, doc.URL);
+          elem.setAttribute("href", rewriteLocalLink(url));
           break;
         }
 
