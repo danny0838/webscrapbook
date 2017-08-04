@@ -154,7 +154,7 @@ capturer.captureUrl = function (params, callback) {
 
   var headers = {};
   
-  var determineFilename = function (xhrAbort) {
+  var determineFilename = function () {
     // run this only once
     if (arguments.callee.done) { return; }
     arguments.callee.done = true;
@@ -204,7 +204,7 @@ capturer.captureUrl = function (params, callback) {
       }
     },
     onloadend: function (xhr, xhrAbort) {
-      determineFilename(xhrAbort);
+      determineFilename();
       let doc = xhr.response;
       if (doc) {
         capturer.captureDocumentOrFile(doc, settings, options, callback);
@@ -565,9 +565,9 @@ capturer.downloadFile = function (params, callback) {
     return true; // async response
   }
 
-  var determineFilename = function (xhrAbort) {
+  var determineFilename = function () {
     // run this only once
-    if (arguments.callee.done) { return; }
+    if (arguments.callee.done) { return true; }
     arguments.callee.done = true;
 
     // if filename defined by header Content-Disposition, use it
@@ -591,9 +591,10 @@ capturer.downloadFile = function (params, callback) {
       ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
       if (isDuplicate) {
         callback({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
-        xhrAbort();
+        return false;
       }
     }
+    return true;
   };
 
   scrapbook.xhr({
@@ -613,11 +614,11 @@ capturer.downloadFile = function (params, callback) {
           headers.contentType = contentType.type;
           headers.charset = contentType.parameters.charset;
         }
-        determineFilename(xhrAbort);
+        if (!determineFilename()) { xhrAbort(); }
       }
     },
     onloadend: function (xhr, xhrAbort) {
-      determineFilename(xhrAbort);
+      if (!determineFilename()) { return; }
       if (rewriteMethod && capturer[rewriteMethod]) {
         capturer[rewriteMethod]({
           settings: settings,
