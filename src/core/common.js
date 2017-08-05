@@ -372,16 +372,24 @@ scrapbook.stringToDataUri = function (str, mime, charset) {
 scrapbook.dataUriToFile = function (dataUri) {
   if (/^data:([^,]*?)(;base64)?,(.*?)$/i.test(dataUri)) {
     var mediatype = RegExp.$1;
-    var mime = mediatype.split(";").shift();
     var base64 = !!RegExp.$2;
     var data = RegExp.$3;
+
+    var parts = mediatype.split(";");
+    var mime = parts.shift();
+    var parameters = {};
+    parts.forEach((part) => {
+      if (/^(.*?)=(.*?)$/.test(part)) {
+        parameters[RegExp.$1.toLowerCase()] = RegExp.$2;
+      }
+    });
 
     var ext = Mime.prototype.extension(mime);
     ext = ext ? ("." + ext) : "";
 
     var bstr = base64 ? atob(data) : unescape(data);
     var ab = scrapbook.byteStringToArrayBuffer(bstr);
-    var filename = scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
+    var filename = parameters.filename ? decodeURIComponent(parameters.filename) : scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
     var file = new File([ab], filename, {type: mediatype});
     return file;
   }
