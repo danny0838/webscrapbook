@@ -421,11 +421,11 @@ scrapbook.byteStringToArrayBuffer = function (bstr) {
 };
 
 scrapbook.arrayBufferToByteString = function (ab) {
-  var bufferView = new Uint8Array(ab), result = "", CHUNK_SIZE = 65535;
-  for (let i = 0, length = bufferView.length; i < length; i += CHUNK_SIZE) {
-    result += String.fromCharCode.apply(null, bufferView.subarray(i, i + CHUNK_SIZE));
+  var u8ar = new Uint8Array(ab), bstr = "", CHUNK_SIZE = 65535;
+  for (let i = 0, I = u8ar.length; i < I; i += CHUNK_SIZE) {
+    bstr += String.fromCharCode.apply(null, u8ar.subarray(i, i + CHUNK_SIZE));
   }
-  return result;
+  return bstr;
 };
 
 
