@@ -562,8 +562,47 @@ capturer.downloadFile = function (params, callback) {
 
   // special management of data URI
   if (sourceUrl.startsWith("data:")) {
-    // params are identical
-    capturer.downloadDataUri(params, callback);
+    if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
+      let file = scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]);
+      if (file) {
+        filename = file.name;
+        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
+        if (!isDuplicate) {
+          if (rewriteMethod && capturer[rewriteMethod]) {
+            capturer[rewriteMethod]({
+              settings: settings,
+              options: options,
+              data: file,
+              charset: null,
+              url: null
+            }, (response) => {
+              capturer.downloadBlob({
+                settings: settings,
+                options: options,
+                blob: response,
+                filename: filename,
+                sourceUrl: sourceUrl,
+              }, callback);
+            });
+          } else {
+            capturer.downloadBlob({
+              settings: settings,
+              options: options,
+              blob: file,
+              filename: filename,
+              sourceUrl: sourceUrl,
+            }, callback);
+          }
+        } else {
+          callback({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
+        }
+      } else {
+        callback({url: capturer.getErrorUrl(sourceUrl, options), error: "data URI cannot be read as file"});
+      }
+    } else {
+      callback({url: sourceUrl});
+    }
     return true; // async response
   }
 
@@ -657,72 +696,6 @@ capturer.downloadFile = function (params, callback) {
       callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
     }
   });
-
-  return true; // async response
-};
-
-/**
- * @kind invokable
- * @param {Object} params 
- *     - {Object} params.settings
- *     - {Object} params.options
- *     - {string} params.url
- *     - {string} params.rewriteMethod
- */
-capturer.downloadDataUri = function (params, callback) {
-  isDebug && console.debug("call: downloadDataUri", params);
-
-  var settings = params.settings;
-  var options = params.options;
-  var timeId = settings.timeId;
-  var targetDir = options["capture.dataFolder"] + "/" + timeId;
-  var sourceUrl = params.url;
-  var rewriteMethod = params.rewriteMethod;
-  var filename;
-  var isDuplicate;
-  var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
-
-  if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
-    let file = scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]);
-    if (file) {
-      filename = file.name;
-      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-      ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
-      if (!isDuplicate) {
-        if (rewriteMethod && capturer[rewriteMethod]) {
-          capturer[rewriteMethod]({
-            settings: settings,
-            options: options,
-            data: file,
-            charset: null,
-            url: null
-          }, (response) => {
-            capturer.downloadBlob({
-              settings: settings,
-              options: options,
-              blob: response,
-              filename: filename,
-              sourceUrl: sourceUrl,
-            }, callback);
-          });
-        } else {
-          capturer.downloadBlob({
-            settings: settings,
-            options: options,
-            blob: file,
-            filename: filename,
-            sourceUrl: sourceUrl,
-          }, callback);
-        }
-      } else {
-        callback({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
-      }
-    } else {
-      callback({url: capturer.getErrorUrl(sourceUrl, options), error: "data URI cannot be read as file"});
-    }
-  } else {
-    callback({url: sourceUrl});
-  }
 
   return true; // async response
 };
