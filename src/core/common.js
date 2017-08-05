@@ -415,7 +415,9 @@ scrapbook.intToFixedStr = function (number, width, padder) {
 };
 
 scrapbook.byteStringToArrayBuffer = function (bstr) {
-  return (new Uint8Array(Array.prototype.map.call(bstr, x => x.charCodeAt(0)))).buffer;
+  var n = bstr.length, u8ar = new Uint8Array(n);
+  while (n--) { u8ar[n] = bstr.charCodeAt(n); }
+  return u8ar.buffer;
 };
 
 scrapbook.arrayBufferToByteString = function (ab) {
