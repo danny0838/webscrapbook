@@ -586,7 +586,7 @@ document.addEventListener("DOMContentLoaded", function () {
         text = fetcher.finalRewrite(rewriteCss);
         onReplaceComplete(text);
       });
-    }, (replacedCssBlob) => {
+    }).then((replacedCssBlob) => {
       callback(replacedCssBlob);
     });
   };

@@ -1250,7 +1250,7 @@ capturer.processCssFile = function (params, callback) {
       text = downloader.finalRewrite(rewriteCss);
       onReplaceComplete(text);
     });
-  }, (replacedCssBlob) => {
+  }).then((replacedCssBlob) => {
     callback(replacedCssBlob);
   });
 };

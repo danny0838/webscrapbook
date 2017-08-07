@@ -668,11 +668,6 @@ scrapbook.doctypeToString = function (doctype) {
  */
 
 /**
- * @callback parseCssFileCallback
- * @param {Blob} cssBlob - the rewritten CSS blob
- */
-
-/**
  * Process a CSS file and rewrite it
  *
  * Browser normally determine the charset of a CSS file via:
@@ -689,44 +684,14 @@ scrapbook.doctypeToString = function (doctype) {
  * @param {Blob} data
  * @param {string} charset
  * @param {parseCssFileRewriteFunc} rewriteFunc
- * @param {parseCssFileCallback} onComplete
+ * @return {Promise}
  */
-scrapbook.parseCssFile = function (data, charset, rewriteFunc, onComplete) {
-  var readCssText = function (blob, charset, callback) {
-    var reader = new FileReader();
-    reader.addEventListener("loadend", () => {
-      callback(reader.result);
-    });
-    reader.readAsText(blob, charset);
-  };
-
-  var readCssBytes = function (blob, callback) {
-    var reader = new FileReader();
-    reader.addEventListener("loadend", () => {
-      var bstr = scrapbook.arrayBufferToByteString(reader.result);
-      callback(bstr);
-    });
-    reader.readAsArrayBuffer(blob);
-  };
-
-  var processCss = function (oldText) {
-    rewriteFunc(oldText, (text) => {
-      if (charset) {
-        var blob = new Blob([text], {type: "text/css;charset=UTF-8"});
-      } else {
-        var ab = scrapbook.byteStringToArrayBuffer(text);
-        var blob = new Blob([ab], {type: "text/css"});
-      }
-      onComplete(blob);
-    });
-  };
-
-  if (charset) {
-    readCssText(data, charset, (text) => {
-      processCss(text);
-    });
-  } else {
-    readCssBytes(data, (bytes) => {
+scrapbook.parseCssFile = function (data, charset, rewriteFunc) {
+  return Promise.resolve().then(() => {
+    if (charset) {
+      return scrapbook.readFileAsText(data, charset);
+    }
+    return scrapbook.readFileAsText(data, false).then((bytes) => {
       if (bytes.startsWith("\xEF\xBB\xBF")) {
         charset = "UTF-8";
       } else if (bytes.startsWith("\xFE\xFF")) {
@@ -741,18 +706,28 @@ scrapbook.parseCssFile = function (data, charset, rewriteFunc, onComplete) {
         charset = RegExp.$2;
       }
       if (charset) {
-        readCssText(data, charset, (text) => {
-          // The read text does not contain a BOM.
-          // Add a BOM so that browser will read this CSS as UTF-8 in the future.
+        // Add BOM to make the browser read as UTF-8 despite @charset rule
+        return scrapbook.readFileAsText(data, charset).then((text) => {
+          // The read text does not contain a BOM if the original file has.
           // This added UTF-16 BOM will be converted to UTF-8 BOM automatically when creating blob.
-          text = "\ufeff" + text;
-          processCss(text);
+          return "\ufeff" + text;
         });
-      } else {
-        processCss(bytes);
       }
+      return bytes;
     });
-  }
+  }).then((origText) => {
+    return new Promise((resolve, reject) => {
+      rewriteFunc(origText, resolve);
+    });
+  }).then((rewrittenText) => {
+    if (charset) {
+      var blob = new Blob([rewrittenText], {type: "text/css;charset=UTF-8"});
+    } else {
+      var ab = scrapbook.byteStringToArrayBuffer(rewrittenText);
+      var blob = new Blob([ab], {type: "text/css"});
+    }
+    return blob;
+  });
 };
 
 /**
