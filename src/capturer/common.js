@@ -1248,21 +1248,21 @@ capturer.getCircularUrl = function (sourceUrl, options) {
 
 /**
  * Rewrite a downloaded CSS file
+ *
+ * @return {Promise}
  */
-capturer.processCssFile = function (params, callback) {
+capturer.processCssFile = function (params) {
   var data = params.data;
   var charset = params.charset;
   var refUrl = params.url;
 
-  scrapbook.parseCssFile(data, charset, (text, onReplaceComplete) => {
+  return scrapbook.parseCssFile(data, charset, (text, onReplaceComplete) => {
     var downloader = new capturer.ComplexUrlDownloader(params.settings, params.options, refUrl);
     var rewriteCss = capturer.ProcessCssFileText(text, refUrl, downloader, params.options);
     downloader.startDownloads(() => {
       text = downloader.finalRewrite(rewriteCss);
       onReplaceComplete(text);
     });
-  }).then((replacedCssBlob) => {
-    callback(replacedCssBlob);
   });
 };
 
