@@ -300,20 +300,23 @@ capturer.captureFile = function (params) {
  * @param {Object} params 
  *     - {Object} params.settings
  *     - {Object} params.options
+ * @return {Promise}
  */
-capturer.registerDocument = function (params, callback) {
-  isDebug && console.debug("call: registerDocument", params);
+capturer.registerDocument = function (params) {
+  return new Promise((resolve, reject) => {
+    isDebug && console.debug("call: registerDocument", params);
 
-  var timeId = params.settings.timeId;
-  var documentName = params.settings.documentName;
-  if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-  if (!capturer.captureInfo[timeId].usedDocumentNames) { capturer.captureInfo[timeId].usedDocumentNames = {}; }
-  if (!capturer.captureInfo[timeId].usedDocumentNames[documentName]) { capturer.captureInfo[timeId].usedDocumentNames[documentName] = 0; }
-  var fixedDocumentName = (capturer.captureInfo[timeId].usedDocumentNames[documentName] > 0) ?
-      (documentName + "_" + capturer.captureInfo[timeId].usedDocumentNames[documentName]) :
-      documentName;
-  capturer.captureInfo[timeId].usedDocumentNames[documentName]++;
-  callback({documentName: fixedDocumentName});
+    var timeId = params.settings.timeId;
+    var documentName = params.settings.documentName;
+    if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
+    if (!capturer.captureInfo[timeId].usedDocumentNames) { capturer.captureInfo[timeId].usedDocumentNames = {}; }
+    if (!capturer.captureInfo[timeId].usedDocumentNames[documentName]) { capturer.captureInfo[timeId].usedDocumentNames[documentName] = 0; }
+    var fixedDocumentName = (capturer.captureInfo[timeId].usedDocumentNames[documentName] > 0) ?
+        (documentName + "_" + capturer.captureInfo[timeId].usedDocumentNames[documentName]) :
+        documentName;
+    capturer.captureInfo[timeId].usedDocumentNames[documentName]++;
+    resolve({documentName: fixedDocumentName});
+  });
 };
 
 /**
