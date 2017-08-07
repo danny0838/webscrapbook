@@ -8,15 +8,15 @@
 (function (window, undefined) {
 
 function redirectUrl(tabId, url, filename, mime) {
-  if (mime === "application/html+zip" && scrapbook.options["viewer.viewHtz"]) {
+  if (mime === "application/html+zip" && scrapbook.getOption("viewer.viewHtz")) {
     // redirect
-  } else if (mime === "application/x-maff" && scrapbook.options["viewer.viewMaff"]) {
+  } else if (mime === "application/x-maff" && scrapbook.getOption("viewer.viewMaff")) {
     // redirect
   } else {
     let pathname = (filename || url.pathname).toLowerCase();
-    if (pathname.endsWith(".htz") && scrapbook.options["viewer.viewHtz"]) {
+    if (pathname.endsWith(".htz") && scrapbook.getOption("viewer.viewHtz")) {
       // redirect
-    } else if (pathname.endsWith(".maff") && scrapbook.options["viewer.viewMaff"]) {
+    } else if (pathname.endsWith(".maff") && scrapbook.getOption("viewer.viewMaff")) {
       // redirect
     } else {
       return; // no redirect

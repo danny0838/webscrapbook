@@ -558,7 +558,7 @@ function init() {
     };
 
     try {
-      if (scrapbook.options["viewer.useFileSystemApi"]) {
+      if (scrapbook.getOption("viewer.useFileSystemApi")) {
         window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
         // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
         window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, (fs) => {
