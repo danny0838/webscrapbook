@@ -646,7 +646,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var frameOnLoad = function (frame) {
       try {
         var frameDoc = frame.contentDocument;
-        if (!frameDoc) { throw "content document not accessible"; }
+        if (!frameDoc) { throw new Error("content document not accessible"); }
       } catch (ex) {
         if (frame === viewer) {
           document.title = defaultTitle;
