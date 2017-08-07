@@ -128,7 +128,7 @@ capturer.captureTabSource = function (tab) {
   };
 
   isDebug && console.debug("(main) send", tabId, message);
-  capturer.captureUrl(message, function (response) {
+  capturer.captureUrl(message).then((response) => {
     isDebug && console.debug("(main) response", tabId, response);
     var source = tab.url;
     if (!response) {
@@ -146,90 +146,91 @@ capturer.captureTabSource = function (tab) {
  *     - {Object} params.settings
  *     - {Object} params.options
  *     - {string} params.url
+ * @return {Promise}
  */
-capturer.captureUrl = function (params, callback) {
-  isDebug && console.debug("call: captureUrl", params);
+capturer.captureUrl = function (params) {
+  return new Promise((resolve, reject) => {
+    isDebug && console.debug("call: captureUrl", params);
 
-  var sourceUrl = params.url;
-  var settings = params.settings;
-  var options = params.options;
+    var sourceUrl = params.url;
+    var settings = params.settings;
+    var options = params.options;
 
-  var headers = {};
-  
-  var determineFilename = function () {
-    // run this only once
-    if (arguments.callee.done) { return; }
-    arguments.callee.done = true;
+    var headers = {};
+    
+    var determineFilename = function () {
+      // run this only once
+      if (arguments.callee.done) { return; }
+      arguments.callee.done = true;
 
-    // skip if documentName is already specified
-    if (params.settings.documentName) { return; }
+      // skip if documentName is already specified
+      if (params.settings.documentName) { return; }
 
-    // if filename defined by header Content-Disposition, use it
-    let filename = headers.filename ||
-        sourceUrl.startsWith("data:") ?
-            scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name :
-            scrapbook.urlToFilename(sourceUrl);
+      // if filename defined by header Content-Disposition, use it
+      let filename = headers.filename ||
+          sourceUrl.startsWith("data:") ?
+              scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name :
+              scrapbook.urlToFilename(sourceUrl);
 
-    let mime = headers.contentType || Mime.prototype.lookup(filename) || "text/html";
-    let fn = filename.toLowerCase();
-    if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
-      let exts = Mime.prototype.allExtensions(mime);
-      for (let i = 0, I = exts.length; i < I; i++) {
-        let ext = ("." + exts[i]).toLowerCase();
-        if (fn.endsWith(ext)) {
-          filename = filename.slice(0, -ext.length);
-          break;
+      let mime = headers.contentType || Mime.prototype.lookup(filename) || "text/html";
+      let fn = filename.toLowerCase();
+      if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
+        let exts = Mime.prototype.allExtensions(mime);
+        for (let i = 0, I = exts.length; i < I; i++) {
+          let ext = ("." + exts[i]).toLowerCase();
+          if (fn.endsWith(ext)) {
+            filename = filename.slice(0, -ext.length);
+            break;
+          }
         }
       }
-    }
 
-    params.settings.documentName = filename;
-  };
+      params.settings.documentName = filename;
+    };
 
-  scrapbook.xhr({
-    url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
-    responseType: "document",
-    onreadystatechange: function (xhr, xhrAbort) {
-      if (xhr.readyState === 2 && xhr.status !== 0) {
-        let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-        if (headerContentDisposition) {
-          let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-          headers.isAttachment = (contentDisposition.type === "attachment");
-          headers.filename = contentDisposition.parameters.filename;
+    scrapbook.xhr({
+      url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
+      responseType: "document",
+      onreadystatechange: function (xhr, xhrAbort) {
+        if (xhr.readyState === 2 && xhr.status !== 0) {
+          let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+          if (headerContentDisposition) {
+            let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            headers.isAttachment = (contentDisposition.type === "attachment");
+            headers.filename = contentDisposition.parameters.filename;
+          }
+          let headerContentType = xhr.getResponseHeader("Content-Type");
+          if (headerContentType) {
+            let contentType = scrapbook.parseHeaderContentType(headerContentType);
+            headers.contentType = contentType.type;
+            headers.charset = contentType.parameters.charset;
+          }
         }
-        let headerContentType = xhr.getResponseHeader("Content-Type");
-        if (headerContentType) {
-          let contentType = scrapbook.parseHeaderContentType(headerContentType);
-          headers.contentType = contentType.type;
-          headers.charset = contentType.parameters.charset;
+      },
+      onloadend: function (xhr, xhrAbort) {
+        determineFilename();
+        let doc = xhr.response;
+        if (doc) {
+          capturer.captureDocumentOrFile(doc, settings, options).then(resolve);
+        } else {
+          capturer.captureFile({
+            url: params.url,
+            settings: params.settings,
+            options: params.options
+          }, resolve);
         }
+      },
+      ontimeout: function (xhr, xhrAbort) {
+        console.warn(scrapbook.lang("ErrorFileDownloadTimeout", sourceUrl));
+        resolve({url: capturer.getErrorUrl(sourceUrl, params.options), error: "timeout"});
+      },
+      onerror: function (xhr, xhrAbort) {
+        let err = xhr.statusText ? xhr.status + " " + xhr.statusText : xhr.status;
+        console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
+        resolve({url: capturer.getErrorUrl(sourceUrl, params.options), error: err});
       }
-    },
-    onloadend: function (xhr, xhrAbort) {
-      determineFilename();
-      let doc = xhr.response;
-      if (doc) {
-        capturer.captureDocumentOrFile(doc, settings, options).then(callback);
-      } else {
-        capturer.captureFile({
-          url: params.url,
-          settings: params.settings,
-          options: params.options
-        }, callback);
-      }
-    },
-    ontimeout: function (xhr, xhrAbort) {
-      console.warn(scrapbook.lang("ErrorFileDownloadTimeout", sourceUrl));
-      callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: "timeout"});
-    },
-    onerror: function (xhr, xhrAbort) {
-      let err = xhr.statusText ? xhr.status + " " + xhr.statusText : xhr.status;
-      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
-      callback({url: capturer.getErrorUrl(sourceUrl, params.options), error: err});
-    }
+    });
   });
-
-  return true; // async response
 };
 
 /**
