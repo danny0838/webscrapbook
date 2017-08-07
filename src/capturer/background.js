@@ -217,7 +217,7 @@ capturer.captureUrl = function (params) {
             url: params.url,
             settings: params.settings,
             options: params.options
-          }, resolve);
+          }).then(resolve);
         }
       },
       ontimeout: function (xhr, xhrAbort) {
@@ -240,58 +240,59 @@ capturer.captureUrl = function (params) {
  *     - {Object} params.options
  *     - {string} params.url
  *     - {{title: string}} params.data
+ * @return {Promise}
  */
-capturer.captureFile = function (params, callback) {
-  isDebug && console.debug("call: captureFile", params);
+capturer.captureFile = function (params) {
+  return new Promise((resolve, reject) => {
+    isDebug && console.debug("call: captureFile", params);
 
-  var timeId = params.settings.timeId;
-  var sourceUrl = params.url;
-  var settings = params.settings;
-  var options = params.options;
-  var data = params.data;
-  var title = data && data.title;
+    var timeId = params.settings.timeId;
+    var sourceUrl = params.url;
+    var settings = params.settings;
+    var options = params.options;
+    var data = params.data;
+    var title = data && data.title;
 
-  capturer.downloadFile({
-    url: sourceUrl,
-    settings: settings,
-    options: options
-  }, (response) => {
-    if (settings.frameIsMain) {
-      let meta = params.options["capture.recordDocumentMeta"] ? ' data-sb' + timeId + '-source="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
-      // for the main frame, create a index.html that redirects to the file
-      let html = '<!DOCTYPE html>\n' +
-          '<html' + meta + '>\n' +
-          '<head>\n' +
-          '<meta charset="UTF-8">\n' +
-          '<meta http-equiv="refresh" content="0;url=' + scrapbook.escapeHtml(response.url) + '">\n' +
-          (title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : '') +
-          '</head>\n' +
-          '<body>\n' +
-          '</body>\n' +
-          '</html>';
-      capturer.saveDocument({
-        sourceUrl: sourceUrl,
-        documentName: settings.documentName,
-        settings: settings,
-        options: options,
-        data: {
-          title: title,
-          mime: "text/html",
-          content: html
-        }
-      }, callback);
-    } else {
-      callback({
-        timeId: timeId,
-        sourceUrl: sourceUrl,
-        targetDir: response.targetDir, 
-        filename: response.filename,
-        url: response.url
-      });
-    }
+    capturer.downloadFile({
+      url: sourceUrl,
+      settings: settings,
+      options: options
+    }, (response) => {
+      if (settings.frameIsMain) {
+        let meta = params.options["capture.recordDocumentMeta"] ? ' data-sb' + timeId + '-source="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
+        // for the main frame, create a index.html that redirects to the file
+        let html = '<!DOCTYPE html>\n' +
+            '<html' + meta + '>\n' +
+            '<head>\n' +
+            '<meta charset="UTF-8">\n' +
+            '<meta http-equiv="refresh" content="0;url=' + scrapbook.escapeHtml(response.url) + '">\n' +
+            (title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : '') +
+            '</head>\n' +
+            '<body>\n' +
+            '</body>\n' +
+            '</html>';
+        capturer.saveDocument({
+          sourceUrl: sourceUrl,
+          documentName: settings.documentName,
+          settings: settings,
+          options: options,
+          data: {
+            title: title,
+            mime: "text/html",
+            content: html
+          }
+        }, resolve);
+      } else {
+        resolve({
+          timeId: timeId,
+          sourceUrl: sourceUrl,
+          targetDir: response.targetDir, 
+          filename: response.filename,
+          url: response.url
+        });
+      }
+    });
   });
-
-  return true; // async response
 };
 
 /**
