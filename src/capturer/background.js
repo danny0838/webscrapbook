@@ -281,7 +281,7 @@ capturer.captureFile = function (params) {
             mime: "text/html",
             content: html
           }
-        }, resolve);
+        }).then(resolve);
       } else {
         resolve({
           timeId: timeId,
@@ -327,29 +327,204 @@ capturer.registerDocument = function (params) {
  *     - {string} params.sourceUrl
  *     - {string} params.documentName
  *     - {{mime: string, charset: string, content: string, title: string}} params.data
+ * @return {Promise}
  */
-capturer.saveDocument = function (params, callback) {
-  isDebug && console.debug("call: saveDocument", params);
+capturer.saveDocument = function (params) {
+  return new Promise((resolve, reject) => {
+    isDebug && console.debug("call: saveDocument", params);
 
-  var settings = params.settings;
-  var options = params.options;
-  var sourceUrl = params.sourceUrl;
-  var documentName = params.documentName;
-  var data = params.data;
-  var timeId = settings.timeId;
-  var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
+    var settings = params.settings;
+    var options = params.options;
+    var sourceUrl = params.sourceUrl;
+    var documentName = params.documentName;
+    var data = params.data;
+    var timeId = settings.timeId;
+    var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
 
-  switch (options["capture.saveAs"]) {
-    case "singleHtml": {
-      if (!settings.frameIsMain) {
-        let dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
-        callback({timeId: timeId, sourceUrl: sourceUrl, url: dataUri});
-      } else {
-        var targetDir = options["capture.dataFolder"];
-        var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+    switch (options["capture.saveAs"]) {
+      case "singleHtml": {
+        if (!settings.frameIsMain) {
+          let dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
+          resolve({timeId: timeId, sourceUrl: sourceUrl, url: dataUri});
+        } else {
+          var targetDir = options["capture.dataFolder"];
+          var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+          var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+          if (!filename.endsWith(ext)) filename += ext;
+
+          capturer.saveBlob({
+            timeId: timeId,
+            blob: new Blob([data.content], {type: data.mime}),
+            directory: targetDir,
+            filename: filename,
+            sourceUrl: sourceUrl,
+            autoErase: autoErase,
+            savePrompt: options["capture.savePrompt"]
+          }, () => {
+            resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+          }, (ex) => {
+            resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
+          });
+        }
+        break;
+      }
+
+      case "zip": {
         var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-        if (!filename.endsWith(ext)) filename += ext;
+        var filename = documentName + ext;
+        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
+
+        if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
+        var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+
+        zip.file(filename, new Blob([data.content], {type: data.mime}), {
+          compression: "DEFLATE",
+          compressionOptions: {level: 9}
+        });
+
+        if (!settings.frameIsMain) {
+          resolve({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+        } else {
+          // create index.html that redirects to index.xhtml
+          if (ext === ".xhtml") {
+            let html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
+            zip.file("index.html", new Blob([html], {type: "text/html"}), {
+              compression: "DEFLATE",
+              compressionOptions: {level: 9}
+            });
+          }
+
+          // generate and download the zip file
+          zip.generateAsync({type: "blob"}).then((zipBlob) => {
+            var targetDir = options["capture.dataFolder"];
+            var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+            filename += ".htz";
+
+            capturer.saveBlob({
+              timeId: timeId,
+              blob: zipBlob,
+              directory: targetDir,
+              filename: filename,
+              sourceUrl: sourceUrl,
+              autoErase: false,
+              savePrompt: options["capture.savePrompt"]
+            }, () => {
+              resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+            }, (ex) => {
+              resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
+            });
+          });
+        }
+        break;
+      }
+
+      case "maff": {
+        var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+        var filename = documentName + ext;
+        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
+
+        if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
+        var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+
+        zip.file(timeId + "/" + filename, new Blob([data.content], {type: data.mime}), {
+          compression: "DEFLATE",
+          compressionOptions: {level: 9}
+        });
+
+        if (!settings.frameIsMain) {
+          resolve({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+        } else {
+          // create index.html that redirects to index.xhtml
+          if (ext === ".xhtml") {
+            let html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
+            zip.file(timeId + "/" + "index.html", new Blob([html], {type: "text/html"}), {
+              compression: "DEFLATE",
+              compressionOptions: {level: 9}
+            });
+          }
+
+          // generate index.rdf
+          var rdfContent = '<?xml version="1.0"?>\n' +
+              '<RDF:RDF xmlns:MAF="http://maf.mozdev.org/metadata/rdf#"\n' +
+              '         xmlns:NC="http://home.netscape.com/NC-rdf#"\n' +
+              '         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n' +
+              '  <RDF:Description RDF:about="urn:root">\n' +
+              '    <MAF:originalurl RDF:resource="' + scrapbook.escapeHtml(sourceUrl) + '"/>\n' +
+              '    <MAF:title RDF:resource="' + scrapbook.escapeHtml(data.title) + '"/>\n' +
+              '    <MAF:archivetime RDF:resource="' + scrapbook.escapeHtml(scrapbook.idToDate(timeId).toUTCString()) + '"/>\n' +
+              '    <MAF:indexfilename RDF:resource="' + filename + '"/>\n' +
+              '    <MAF:charset RDF:resource="UTF-8"/>\n' +
+              '  </RDF:Description>\n' +
+              '</RDF:RDF>\n';
+
+          zip.file(timeId + "/" + "index.rdf", new Blob([rdfContent], {type: "application/rdf+xml"}), {
+            compression: "DEFLATE",
+            compressionOptions: {level: 9}
+          });
+
+          // generate and download the zip file
+          zip.generateAsync({type: "blob"}).then((zipBlob) => {
+            var targetDir = options["capture.dataFolder"];
+            var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+            filename += ".maff";
+
+            capturer.saveBlob({
+              timeId: timeId,
+              blob: zipBlob,
+              directory: targetDir,
+              filename: filename,
+              sourceUrl: sourceUrl,
+              autoErase: false,
+              savePrompt: options["capture.savePrompt"]
+            }, () => {
+              resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+            }, (ex) => {
+              resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
+            });
+          });
+        }
+        break;
+      }
+
+      case "downloads":
+      default: {
+        var targetDir = options["capture.dataFolder"] + "/" + timeId;
+        var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+        var filename = documentName + ext;
+        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
+
+        if (!(settings.frameIsMain && (ext === ".xhtml"))) {
+          var autoErase = !settings.frameIsMain;
+          var saveBlobComplete = function () {
+            resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+          };
+        } else {
+          var autoErase = true;
+          var saveBlobComplete = function () {
+            // create index.html that redirects to index.xhtml
+            let filename = "index.html";
+            let html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
+            capturer.saveBlob({
+              timeId: timeId,
+              blob: new Blob([html], {type: "text/html"}),
+              directory: targetDir,
+              filename: filename,
+              sourceUrl: sourceUrl,
+              autoErase: false,
+              savePrompt: false
+            }, () => {
+              resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+            }, (ex) => {
+              resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
+            });
+          };
+        }
 
         capturer.saveBlob({
           timeId: timeId,
@@ -358,188 +533,14 @@ capturer.saveDocument = function (params, callback) {
           filename: filename,
           sourceUrl: sourceUrl,
           autoErase: autoErase,
-          savePrompt: options["capture.savePrompt"]
-        }, () => {
-          callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-        }, (ex) => {
-          callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
+          savePrompt: false
+        }, saveBlobComplete, (ex) => {
+          resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
         });
+        break;
       }
-      break;
     }
-
-    case "zip": {
-      var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-      var filename = documentName + ext;
-      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-      filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
-
-      if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-      var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
-
-      zip.file(filename, new Blob([data.content], {type: data.mime}), {
-        compression: "DEFLATE",
-        compressionOptions: {level: 9}
-      });
-
-      if (!settings.frameIsMain) {
-        callback({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-      } else {
-        // create index.html that redirects to index.xhtml
-        if (ext === ".xhtml") {
-          let html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
-          zip.file("index.html", new Blob([html], {type: "text/html"}), {
-            compression: "DEFLATE",
-            compressionOptions: {level: 9}
-          });
-        }
-
-        // generate and download the zip file
-        zip.generateAsync({type: "blob"}).then((zipBlob) => {
-          var targetDir = options["capture.dataFolder"];
-          var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          filename += ".htz";
-
-          capturer.saveBlob({
-            timeId: timeId,
-            blob: zipBlob,
-            directory: targetDir,
-            filename: filename,
-            sourceUrl: sourceUrl,
-            autoErase: false,
-            savePrompt: options["capture.savePrompt"]
-          }, () => {
-            callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-          }, (ex) => {
-            callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
-          });
-        });
-      }
-      break;
-    }
-
-    case "maff": {
-      var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-      var filename = documentName + ext;
-      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-      filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
-
-      if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-      var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
-
-      zip.file(timeId + "/" + filename, new Blob([data.content], {type: data.mime}), {
-        compression: "DEFLATE",
-        compressionOptions: {level: 9}
-      });
-
-      if (!settings.frameIsMain) {
-        callback({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-      } else {
-        // create index.html that redirects to index.xhtml
-        if (ext === ".xhtml") {
-          let html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
-          zip.file(timeId + "/" + "index.html", new Blob([html], {type: "text/html"}), {
-            compression: "DEFLATE",
-            compressionOptions: {level: 9}
-          });
-        }
-
-        // generate index.rdf
-        var rdfContent = '<?xml version="1.0"?>\n' +
-            '<RDF:RDF xmlns:MAF="http://maf.mozdev.org/metadata/rdf#"\n' +
-            '         xmlns:NC="http://home.netscape.com/NC-rdf#"\n' +
-            '         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n' +
-            '  <RDF:Description RDF:about="urn:root">\n' +
-            '    <MAF:originalurl RDF:resource="' + scrapbook.escapeHtml(sourceUrl) + '"/>\n' +
-            '    <MAF:title RDF:resource="' + scrapbook.escapeHtml(data.title) + '"/>\n' +
-            '    <MAF:archivetime RDF:resource="' + scrapbook.escapeHtml(scrapbook.idToDate(timeId).toUTCString()) + '"/>\n' +
-            '    <MAF:indexfilename RDF:resource="' + filename + '"/>\n' +
-            '    <MAF:charset RDF:resource="UTF-8"/>\n' +
-            '  </RDF:Description>\n' +
-            '</RDF:RDF>\n';
-
-        zip.file(timeId + "/" + "index.rdf", new Blob([rdfContent], {type: "application/rdf+xml"}), {
-          compression: "DEFLATE",
-          compressionOptions: {level: 9}
-        });
-
-        // generate and download the zip file
-        zip.generateAsync({type: "blob"}).then((zipBlob) => {
-          var targetDir = options["capture.dataFolder"];
-          var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          filename += ".maff";
-
-          capturer.saveBlob({
-            timeId: timeId,
-            blob: zipBlob,
-            directory: targetDir,
-            filename: filename,
-            sourceUrl: sourceUrl,
-            autoErase: false,
-            savePrompt: options["capture.savePrompt"]
-          }, () => {
-            callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-          }, (ex) => {
-            callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
-          });
-        });
-      }
-      break;
-    }
-
-    case "downloads":
-    default: {
-      var targetDir = options["capture.dataFolder"] + "/" + timeId;
-      var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-      var filename = documentName + ext;
-      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-      filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
-
-      if (!(settings.frameIsMain && (ext === ".xhtml"))) {
-        var autoErase = !settings.frameIsMain;
-        var saveBlobComplete = function () {
-          callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-        };
-      } else {
-        var autoErase = true;
-        var saveBlobComplete = function () {
-          // create index.html that redirects to index.xhtml
-          let filename = "index.html";
-          let html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
-          capturer.saveBlob({
-            timeId: timeId,
-            blob: new Blob([html], {type: "text/html"}),
-            directory: targetDir,
-            filename: filename,
-            sourceUrl: sourceUrl,
-            autoErase: false,
-            savePrompt: false
-          }, () => {
-            callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-          }, (ex) => {
-            callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
-          });
-        };
-      }
-
-      capturer.saveBlob({
-        timeId: timeId,
-        blob: new Blob([data.content], {type: data.mime}),
-        directory: targetDir,
-        filename: filename,
-        sourceUrl: sourceUrl,
-        autoErase: autoErase,
-        savePrompt: false
-      }, saveBlobComplete, (ex) => {
-        callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
-      });
-      break;
-    }
-  }
-
-  return true; // async response
+  });
 };
 
 /**
