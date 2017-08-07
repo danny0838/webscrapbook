@@ -12,25 +12,28 @@ var capturer = {};
 capturer.isContentScript = true;
 
 /**
- * Invoke an invokable capturer method from the background script with
- * given arguments and call the callback function afterwards
+ * Invoke an invokable capturer method from the background script
+ *
+ * @return {Promise}
  */
-capturer.invoke = function (method, args, callback) {
-  if (capturer.isContentScript) {
-    var cmd = "capturer." + method;
-    var message = {
-      cmd: cmd,
-      args: args
-    };
+capturer.invoke = function (method, args) {
+  return new Promise((resolve, reject) => {
+    if (capturer.isContentScript) {
+      var cmd = "capturer." + method;
+      var message = {
+        cmd: cmd,
+        args: args
+      };
 
-    isDebug && console.debug(cmd + " send", args);
-    chrome.runtime.sendMessage(message, (response) => {
-      isDebug && console.debug(cmd + " response", response);
-      callback(response);
-    });
-  } else {
-    capturer[method](args, callback);
-  }
+      isDebug && console.debug(cmd + " send", args);
+      chrome.runtime.sendMessage(message, (response) => {
+        isDebug && console.debug(cmd + " response", response);
+        resolve(response);
+      });
+    } else {
+      capturer[method](args, resolve);
+    }
+  });
 };
 
 capturer.fixOptions = function (options) {
@@ -51,7 +54,7 @@ capturer.captureDocumentOrFile = function (doc, settings, options, callback) {
         data: {
           title: doc.title
         }
-      }, callback);
+      }).then(callback);
       return true; // async response
     }
   }
@@ -243,7 +246,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
             url: settings.favIconUrl,
             settings: settings,
             options: options
-          }, (response) => {
+          }).then((response) => {
             favIconUrl = response.url;
             remainingTasks--;
             captureCheckDone();
@@ -343,7 +346,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                       rewriteMethod: "processCssFile",
                       settings: settings,
                       options: options
-                    }, (response) => {
+                    }).then((response) => {
                       captureRewriteUri(elem, "href", response.url);
                       remainingTasks--;
                       captureCheckDone();
@@ -356,7 +359,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                       url: elem.href,
                       settings: settings,
                       options: options
-                    }, (response) => {
+                    }).then((response) => {
                       captureRewriteUri(elem, "href", response.url);
                       remainingTasks--;
                       captureCheckDone();
@@ -386,7 +389,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                   url: elem.href,
                   settings: settings,
                   options: options
-                }, (response) => {
+                }).then((response) => {
                   captureRewriteUri(elem, "href", response.url);
                   remainingTasks--;
                   captureCheckDone();
@@ -457,7 +460,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                   url: elem.src,
                   settings: settings,
                   options: options
-                }, (response) => {
+                }).then((response) => {
                   captureRewriteUri(elem, "src", response.url);
                   remainingTasks--;
                   captureCheckDone();
@@ -509,7 +512,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                   url: rewriteUrl,
                   settings: settings,
                   options: options
-                }, (response) => {
+                }).then((response) => {
                   captureRewriteUri(elem, "background", response.url);
                   remainingTasks--;
                   captureCheckDone();
@@ -586,7 +589,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                       settings: frameSettings,
                       options: options,
                       url: frameSrc.src
-                    }, function (response) {
+                    }).then((response) => {
                       captureFrameCallback(response);
                     });
                   } else {
@@ -666,7 +669,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                   url: elem.src,
                   settings: settings,
                   options: options
-                }, (response) => {
+                }).then((response) => {
                   captureRewriteUri(elem, "src", response.url);
                   remainingTasks--;
                   captureCheckDone();
@@ -756,7 +759,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                   url: elem.src,
                   settings: settings,
                   options: options
-                }, (response) => {
+                }).then((response) => {
                   captureRewriteUri(elem, "src", response.url);
                   remainingTasks--;
                   captureCheckDone();
@@ -793,7 +796,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                   url: elem.src,
                   settings: settings,
                   options: options
-                }, (response) => {
+                }).then((response) => {
                   captureRewriteUri(elem, "src", response.url);
                   remainingTasks--;
                   captureCheckDone();
@@ -830,7 +833,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                   url: elem.src,
                   settings: settings,
                   options: options
-                }, (response) => {
+                }).then((response) => {
                   captureRewriteUri(elem, "src", response.url);
                   remainingTasks--;
                   captureCheckDone();
@@ -867,7 +870,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                   url: elem.data,
                   settings: settings,
                   options: options
-                }, (response) => {
+                }).then((response) => {
                   captureRewriteUri(elem, "data", response.url);
                   remainingTasks--;
                   captureCheckDone();
@@ -905,7 +908,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                   url: elem.getAttribute("archive"),
                   settings: settings,
                   options: options,
-                }, (response) => {
+                }).then((response) => {
                   captureRewriteUri(elem, "archive", response.url);
                   remainingTasks--;
                   captureCheckDone();
@@ -976,7 +979,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
                     url: elem.src,
                     settings: settings,
                     options: options
-                  }, (response) => {
+                  }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
                     remainingTasks--;
                     captureCheckDone();
@@ -1096,7 +1099,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
         content: content,
         title: doc.title
       }
-    }, callback);
+    }).then(callback);
   };
 
   // remove the specified node, record it if option set
@@ -1175,7 +1178,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
   capturer.invoke("registerDocument", {
     settings: settings,
     options: options
-  }, (response) => {
+  }).then((response) => {
     documentName = response.documentName;
     captureMain();
   });
@@ -1368,7 +1371,7 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
           rewriteMethod: this.urlHash[key].rewriteMethod,
           settings: this.settings,
           options: this.options
-        }, (response) => {
+        }).then((response) => {
           this.urlHash[key].newUrl = response.url;
           if (++this.urlRewrittenCount === len) {
             callback();
