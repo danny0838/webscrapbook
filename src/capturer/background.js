@@ -591,7 +591,7 @@ capturer.downloadFile = function (params) {
                   blob: response,
                   filename: filename,
                   sourceUrl: sourceUrl,
-                }, resolve);
+                }).then(resolve);
               });
             } else {
               capturer.downloadBlob({
@@ -600,7 +600,7 @@ capturer.downloadFile = function (params) {
                 blob: file,
                 filename: filename,
                 sourceUrl: sourceUrl,
-              }, resolve);
+              }).then(resolve);
             }
           } else {
             resolve({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
@@ -682,7 +682,7 @@ capturer.downloadFile = function (params) {
               blob: response,
               filename: filename,
               sourceUrl: sourceUrl,
-            }, resolve);
+            }).then(resolve);
           });
         } else {
           capturer.downloadBlob({
@@ -691,7 +691,7 @@ capturer.downloadFile = function (params) {
             blob: xhr.response,
             filename: filename,
             sourceUrl: sourceUrl,
-          }, resolve);
+          }).then(resolve);
         }
       },
       ontimeout: function (xhr, xhrAbort) {
@@ -715,97 +715,98 @@ capturer.downloadFile = function (params) {
  *     - {string} params.blob
  *     - {string} params.filename - validated and unique
  *     - {string} params.sourceUrl
+ * @return {Promise}
  */
-capturer.downloadBlob = function (params, callback) {
-  isDebug && console.debug("call: downloadBlob", params);
+capturer.downloadBlob = function (params) {
+  return new Promise((resolve, reject) => {
+    isDebug && console.debug("call: downloadBlob", params);
 
-  var settings = params.settings;
-  var options = params.options;
-  var timeId = settings.timeId;
-  var blob = params.blob;
-  var filename = params.filename;
-  var sourceUrl = params.sourceUrl;
-  var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
+    var settings = params.settings;
+    var options = params.options;
+    var timeId = settings.timeId;
+    var blob = params.blob;
+    var filename = params.filename;
+    var sourceUrl = params.sourceUrl;
+    var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
 
-  if (!blob) {
-    callback({url: capturer.getErrorUrl(sourceUrl, options)});
-  }
+    if (!blob) {
+      resolve({url: capturer.getErrorUrl(sourceUrl, options)});
+    }
 
-  switch (options["capture.saveAs"]) {
-    case "singleHtml": {
-      let reader = new FileReader();
-      reader.onloadend = function (event) {
-        let dataUri = event.target.result;
-        if (filename) {
-          dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");
+    switch (options["capture.saveAs"]) {
+      case "singleHtml": {
+        let reader = new FileReader();
+        reader.onloadend = function (event) {
+          let dataUri = event.target.result;
+          if (filename) {
+            dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");
+          }
+          resolve({url: dataUri + hash});
         }
-        callback({url: dataUri + hash});
-      }
-      reader.readAsDataURL(blob);
-      break;
-    }
-
-    case "zip": {
-      if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-      var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
-
-      if (/^text\/|\b(?:xml|json|javascript)\b/.test(blob.type) && blob.size >= 128) {
-        zip.file(filename, blob, {
-          compression: "DEFLATE",
-          compressionOptions: {level: 9}
-        });
-      } else {
-        zip.file(filename, blob, {
-          compression: "STORE"
-        });
+        reader.readAsDataURL(blob);
+        break;
       }
 
-      callback({filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-      break;
-    }
+      case "zip": {
+        if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
+        var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
 
-    case "maff": {
-      if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-      var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+        if (/^text\/|\b(?:xml|json|javascript)\b/.test(blob.type) && blob.size >= 128) {
+          zip.file(filename, blob, {
+            compression: "DEFLATE",
+            compressionOptions: {level: 9}
+          });
+        } else {
+          zip.file(filename, blob, {
+            compression: "STORE"
+          });
+        }
 
-      if (/^text\/|\b(?:xml|json|javascript)\b/.test(blob.type) && blob.size >= 128) {
-        zip.file(timeId + "/" + filename, blob, {
-          compression: "DEFLATE",
-          compressionOptions: {level: 9}
-        });
-      } else {
-        zip.file(timeId + "/" + filename, blob, {
-          compression: "STORE"
-        });
+        resolve({filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+        break;
       }
 
-      callback({filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-      break;
+      case "maff": {
+        if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
+        var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+
+        if (/^text\/|\b(?:xml|json|javascript)\b/.test(blob.type) && blob.size >= 128) {
+          zip.file(timeId + "/" + filename, blob, {
+            compression: "DEFLATE",
+            compressionOptions: {level: 9}
+          });
+        } else {
+          zip.file(timeId + "/" + filename, blob, {
+            compression: "STORE"
+          });
+        }
+
+        resolve({filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+        break;
+      }
+
+      case "downloads":
+      default: {
+        // download the data
+        var targetDir = options["capture.dataFolder"] + "/" + timeId;
+
+        capturer.saveBlob({
+          timeId: timeId,
+          blob: blob,
+          directory: targetDir,
+          filename: filename,
+          sourceUrl: sourceUrl,
+          autoErase: true,
+          savePrompt: false
+        }, () => {
+          resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+        }, (ex) => {
+          resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
+        });
+        break;
+      }
     }
-
-    case "downloads":
-    default: {
-      // download the data
-      var targetDir = options["capture.dataFolder"] + "/" + timeId;
-
-      capturer.saveBlob({
-        timeId: timeId,
-        blob: blob,
-        directory: targetDir,
-        filename: filename,
-        sourceUrl: sourceUrl,
-        autoErase: true,
-        savePrompt: false
-      }, () => {
-        callback({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-      }, (ex) => {
-        callback({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
-      });
-      break;
-    }
-  }
-
-  return true; // async response
+  });
 };
 
 /**
