@@ -8,7 +8,7 @@
 var OPTION_PREFIX = "opt_";
 
 function initDefaultOptions() {
-  scrapbook.loadOptions((options) => {
+  scrapbook.loadOptions().then((options) => {
     for (let id in options) {
       setOptionToDocument(id, options[id]);
     }
@@ -56,36 +56,20 @@ function importOptions() {
 function importFile(file) {
   document.getElementById("import-input").value = null;
 
-  let reader = new FileReader();
-  reader.onloadend = function (event) {
-    var text = event.target.result;
-    try {
-      let data = JSON.parse(text);
-      var options = Object.assign(scrapbook.options, data);
-    } catch (ex) {
-      showMessage(scrapbook.lang("ErrorImportOptions", [ex]));
-      return;
-    }
-
-    // import options
-    let remaining = 0;
+  scrapbook.readFileAsText(file).then((text) => {
+    let data = JSON.parse(text);
+    var options = Object.assign(scrapbook.options, data);
     scrapbook.options = options;
-    scrapbook.saveOptions((options) => {
-      if (!chrome.runtime.lastError) {
-        try {
-          for (let id in options) {
-            setOptionToDocument(id, options[id]);
-          }
-          showMessage(scrapbook.lang("OptionsImportSuccess"));
-        } catch (ex) {
-          showMessage(scrapbook.lang("ErrorImportOptions", [ex]));
-        }
-      } else {
-        showMessage(scrapbook.lang("ErrorImportOptions", [chrome.runtime.lastError]));
-      }
-    });
-  }
-  reader.readAsText(file);
+    return scrapbook.saveOptions();
+  }).then((options) => {
+    for (let id in options) {
+      setOptionToDocument(id, options[id]);
+    }
+  }).then(() => {
+    showMessage(scrapbook.lang("OptionsImportSuccess"));
+  }).catch((ex) => {
+    showMessage(scrapbook.lang("ErrorImportOptions", [ex]));
+  });
 }
 
 function showMessage(msg) {
@@ -119,7 +103,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     for (let id in scrapbook.options) {
       scrapbook.options[id] = getOptionFromDocument(id);
     }
-    scrapbook.saveOptions(() => {
+    scrapbook.saveOptions().then(() => {
       closeWindow();
     });
   });

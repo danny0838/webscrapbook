@@ -576,5 +576,5 @@ function init() {
 
 document.addEventListener("DOMContentLoaded", function () {
   scrapbook.loadLanguages(document);
-  scrapbook.loadOptions(() => { init(); });
+  scrapbook.loadOptions().then(init);
 });

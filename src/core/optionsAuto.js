@@ -5,7 +5,7 @@
  * @require {Object} scrapbook
  *******************************************************************/
 
-scrapbook.loadOptions();
+scrapbook.loadOptions().then();
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
   for (let key in changes) {

@@ -80,32 +80,45 @@ scrapbook.getOptions = function (keyPrefix) {
   return result;
 };
 
-scrapbook.setOption = function (key, value, callback) {
-  scrapbook.options[key] = value;
-  chrome.storage.sync.set({key: value}, () => {
-    if (callback) {
-      callback({key: value});
-    }
+scrapbook.setOption = function (key, value) {
+  return new Promise((resolve, reject) => {
+    scrapbook.options[key] = value;
+    var pair = {key: value};
+    chrome.storage.sync.set(pair, () => {
+      if (!chrome.runtime.lastError) {
+        resolve(pair);
+      } else {
+        reject(chrome.runtime.lastError.message);
+      }
+    });
   });
 };
 
-scrapbook.loadOptions = function (callback) {
-  chrome.storage.sync.get(scrapbook.options, (items) => {
-    for (let i in items) {
-      scrapbook.options[i] = items[i];
-    }
-    scrapbook.isOptionsSynced = true;
-    if (callback) {
-      callback(items);
-    }
+scrapbook.loadOptions = function () {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get(scrapbook.options, (items) => {
+      if (!chrome.runtime.lastError) {
+        for (let i in items) {
+          scrapbook.options[i] = items[i];
+        }
+        scrapbook.isOptionsSynced = true;
+        resolve(items);
+      } else {
+        reject(chrome.runtime.lastError.message);
+      }
+    });
   });
 };
 
-scrapbook.saveOptions = function (callback) {
-  chrome.storage.sync.set(scrapbook.options, () => {
-    if (callback) {
-      callback(scrapbook.options);
-    }
+scrapbook.saveOptions = function () {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.set(scrapbook.options, () => {
+      if (!chrome.runtime.lastError) {
+        resolve(scrapbook.options);
+      } else {
+        reject(chrome.runtime.lastError.message);
+      }
+    });
   });
 };
 
