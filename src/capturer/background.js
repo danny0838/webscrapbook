@@ -257,7 +257,7 @@ capturer.captureFile = function (params) {
       url: sourceUrl,
       settings: settings,
       options: options
-    }, (response) => {
+    }).then((response) => {
       if (settings.frameIsMain) {
         let meta = params.options["capture.recordDocumentMeta"] ? ' data-sb' + timeId + '-source="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
         // for the main frame, create a index.html that redirects to the file
@@ -550,160 +550,161 @@ capturer.saveDocument = function (params) {
  *     - {Object} params.options
  *     - {string} params.url
  *     - {string} params.rewriteMethod
+ * @return {Promise}
  */
-capturer.downloadFile = function (params, callback) {
-  isDebug && console.debug("call: downloadFile", params);
+capturer.downloadFile = function (params) {
+  return new Promise((resolve, reject) => {
+    isDebug && console.debug("call: downloadFile", params);
 
-  var settings = params.settings;
-  var options = params.options;
-  var timeId = settings.timeId;
-  var targetDir = options["capture.dataFolder"] + "/" + timeId;
-  var sourceUrl = params.url;
-  var rewriteMethod = params.rewriteMethod;
+    var settings = params.settings;
+    var options = params.options;
+    var timeId = settings.timeId;
+    var targetDir = options["capture.dataFolder"] + "/" + timeId;
+    var sourceUrl = params.url;
+    var rewriteMethod = params.rewriteMethod;
 
-  var headers = {};
-  var filename;
-  var isDuplicate;
-  var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
+    var headers = {};
+    var filename;
+    var isDuplicate;
+    var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
 
-  // special management of data URI
-  if (sourceUrl.startsWith("data:")) {
-    if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
-      let file = scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]);
-      if (file) {
-        filename = file.name;
-        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-        ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
-        if (!isDuplicate) {
-          if (rewriteMethod && capturer[rewriteMethod]) {
-            capturer[rewriteMethod]({
-              settings: settings,
-              options: options,
-              data: file,
-              charset: null,
-              url: null
-            }).then((response) => {
+    // special management of data URI
+    if (sourceUrl.startsWith("data:")) {
+      if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
+        let file = scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]);
+        if (file) {
+          filename = file.name;
+          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+          ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
+          if (!isDuplicate) {
+            if (rewriteMethod && capturer[rewriteMethod]) {
+              capturer[rewriteMethod]({
+                settings: settings,
+                options: options,
+                data: file,
+                charset: null,
+                url: null
+              }).then((response) => {
+                capturer.downloadBlob({
+                  settings: settings,
+                  options: options,
+                  blob: response,
+                  filename: filename,
+                  sourceUrl: sourceUrl,
+                }, resolve);
+              });
+            } else {
               capturer.downloadBlob({
                 settings: settings,
                 options: options,
-                blob: response,
+                blob: file,
                 filename: filename,
                 sourceUrl: sourceUrl,
-              }, callback);
-            });
+              }, resolve);
+            }
           } else {
+            resolve({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
+          }
+        } else {
+          resolve({url: capturer.getErrorUrl(sourceUrl, options), error: "data URI cannot be read as file"});
+        }
+      } else {
+        resolve({url: sourceUrl});
+      }
+      return;
+    }
+
+    var determineFilename = function () {
+      // run this only once
+      if (arguments.callee.done) { return true; }
+      arguments.callee.done = true;
+
+      // if filename defined by header Content-Disposition, use it
+      // otherwise use the filename from URL
+      filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
+
+      // if no file extension, give one according to header Content-Type
+      if (headers.contentType) {
+        let [base, extension] = scrapbook.filenameParts(filename);
+        if (!extension) {
+          extension = Mime.prototype.extension(headers.contentType);
+          if (extension) {
+            filename = base + "." + extension;
+          }
+        }
+      }
+
+      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+      // singleHtml mode always save as dataURI and does not need to uniquify
+      if (options["capture.saveAs"] !== "singleHtml") {
+        ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
+        if (isDuplicate) {
+          resolve({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
+          return false;
+        }
+      }
+      return true;
+    };
+
+    scrapbook.xhr({
+      url: sourceUrl,
+      responseType: "blob",
+      onreadystatechange: function (xhr, xhrAbort) {
+        if (xhr.readyState === 2 && xhr.status !== 0) {
+          let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+          if (headerContentDisposition) {
+            let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            headers.isAttachment = (contentDisposition.type === "attachment");
+            headers.filename = contentDisposition.parameters.filename;
+          }
+          let headerContentType = xhr.getResponseHeader("Content-Type");
+          if (headerContentType) {
+            let contentType = scrapbook.parseHeaderContentType(headerContentType);
+            headers.contentType = contentType.type;
+            headers.charset = contentType.parameters.charset;
+          }
+          if (!determineFilename()) { xhrAbort(); }
+        }
+      },
+      onloadend: function (xhr, xhrAbort) {
+        if (!determineFilename()) { return; }
+        if (rewriteMethod && capturer[rewriteMethod]) {
+          capturer[rewriteMethod]({
+            settings: settings,
+            options: options,
+            data: xhr.response,
+            charset: headers.charset,
+            url: xhr.responseURL
+          }).then((response) => {
             capturer.downloadBlob({
               settings: settings,
               options: options,
-              blob: file,
+              blob: response,
               filename: filename,
               sourceUrl: sourceUrl,
-            }, callback);
-          }
+            }, resolve);
+          });
         } else {
-          callback({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
-        }
-      } else {
-        callback({url: capturer.getErrorUrl(sourceUrl, options), error: "data URI cannot be read as file"});
-      }
-    } else {
-      callback({url: sourceUrl});
-    }
-    return true; // async response
-  }
-
-  var determineFilename = function () {
-    // run this only once
-    if (arguments.callee.done) { return true; }
-    arguments.callee.done = true;
-
-    // if filename defined by header Content-Disposition, use it
-    // otherwise use the filename from URL
-    filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
-
-    // if no file extension, give one according to header Content-Type
-    if (headers.contentType) {
-      let [base, extension] = scrapbook.filenameParts(filename);
-      if (!extension) {
-        extension = Mime.prototype.extension(headers.contentType);
-        if (extension) {
-          filename = base + "." + extension;
-        }
-      }
-    }
-
-    filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-    // singleHtml mode always save as dataURI and does not need to uniquify
-    if (options["capture.saveAs"] !== "singleHtml") {
-      ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
-      if (isDuplicate) {
-        callback({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
-        return false;
-      }
-    }
-    return true;
-  };
-
-  scrapbook.xhr({
-    url: sourceUrl,
-    responseType: "blob",
-    onreadystatechange: function (xhr, xhrAbort) {
-      if (xhr.readyState === 2 && xhr.status !== 0) {
-        let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-        if (headerContentDisposition) {
-          let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-          headers.isAttachment = (contentDisposition.type === "attachment");
-          headers.filename = contentDisposition.parameters.filename;
-        }
-        let headerContentType = xhr.getResponseHeader("Content-Type");
-        if (headerContentType) {
-          let contentType = scrapbook.parseHeaderContentType(headerContentType);
-          headers.contentType = contentType.type;
-          headers.charset = contentType.parameters.charset;
-        }
-        if (!determineFilename()) { xhrAbort(); }
-      }
-    },
-    onloadend: function (xhr, xhrAbort) {
-      if (!determineFilename()) { return; }
-      if (rewriteMethod && capturer[rewriteMethod]) {
-        capturer[rewriteMethod]({
-          settings: settings,
-          options: options,
-          data: xhr.response,
-          charset: headers.charset,
-          url: xhr.responseURL
-        }).then((response) => {
           capturer.downloadBlob({
             settings: settings,
             options: options,
-            blob: response,
+            blob: xhr.response,
             filename: filename,
             sourceUrl: sourceUrl,
-          }, callback);
-        });
-      } else {
-        capturer.downloadBlob({
-          settings: settings,
-          options: options,
-          blob: xhr.response,
-          filename: filename,
-          sourceUrl: sourceUrl,
-        }, callback);
+          }, resolve);
+        }
+      },
+      ontimeout: function (xhr, xhrAbort) {
+        console.warn(scrapbook.lang("ErrorFileDownloadTimeout", sourceUrl));
+        resolve({url: capturer.getErrorUrl(sourceUrl, options), error: "timeout"});
+      },
+      onerror: function (xhr, xhrAbort) {
+        let err = xhr.statusText ? xhr.status + " " + xhr.statusText : xhr.status;
+        console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
+        resolve({url: capturer.getErrorUrl(sourceUrl, options), error: err});
       }
-    },
-    ontimeout: function (xhr, xhrAbort) {
-      console.warn(scrapbook.lang("ErrorFileDownloadTimeout", sourceUrl));
-      callback({url: capturer.getErrorUrl(sourceUrl, options), error: "timeout"});
-    },
-    onerror: function (xhr, xhrAbort) {
-      let err = xhr.statusText ? xhr.status + " " + xhr.statusText : xhr.status;
-      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
-      callback({url: capturer.getErrorUrl(sourceUrl, options), error: err});
-    }
+    });
   });
-
-  return true; // async response
 };
 
 /**
