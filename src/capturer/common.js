@@ -31,7 +31,7 @@ capturer.invoke = function (method, args) {
         resolve(response);
       });
     } else {
-      capturer[method](args, resolve);
+      capturer[method](args).then(resolve);
     }
   });
 };

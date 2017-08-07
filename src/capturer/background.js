@@ -576,7 +576,7 @@ capturer.downloadFile = function (params, callback) {
               data: file,
               charset: null,
               url: null
-            }, (response) => {
+            }).then((response) => {
               capturer.downloadBlob({
                 settings: settings,
                 options: options,
@@ -667,7 +667,7 @@ capturer.downloadFile = function (params, callback) {
           data: xhr.response,
           charset: headers.charset,
           url: xhr.responseURL
-        }, (response) => {
+        }).then((response) => {
           capturer.downloadBlob({
             settings: settings,
             options: options,
@@ -904,9 +904,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     let method = message.cmd.slice(9);
     if (capturer[method]) {
       message.args.tabId = sender.tab.id;
-      return capturer[method](message.args, (response) => {
+      capturer[method](message.args).then((response) => {
         sendResponse(response);
       });
+      return true; // async response
     }
   }
 });
