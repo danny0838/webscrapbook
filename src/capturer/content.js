@@ -18,7 +18,7 @@ window.addEventListener("message", (event) => {
       cmd: "capturer.captureDocumentOrFile.start",
       timeId: message.timeId
     });
-    capturer.captureDocumentOrFile(document, message.settings, message.options, (response) => {
+    capturer.captureDocumentOrFile(document, message.settings, message.options).then((response) => {
       event.ports[0].postMessage({
         extension: chrome.runtime.id,
         cmd: "capturer.captureDocumentOrFile.complete",
@@ -33,7 +33,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   isDebug && console.debug(message.cmd + " receive", message, sender);
 
   if (message.cmd === "capturer.captureDocumentOrFile") {
-    capturer.captureDocumentOrFile(document, message.settings, message.options, (response) => {
+    capturer.captureDocumentOrFile(document, message.settings, message.options).then((response) => {
       sendResponse(response);
     });
     return true; // async response

@@ -41,28 +41,31 @@ capturer.fixOptions = function (options) {
   return options;
 };
 
-capturer.captureDocumentOrFile = function (doc, settings, options, callback) {
-  isDebug && console.debug("call: captureDocumentOrFile");
+/**
+ * @return {Promise}
+ */
+capturer.captureDocumentOrFile = function (doc, settings, options) {
+  return new Promise((resolve, reject) => {
+    isDebug && console.debug("call: captureDocumentOrFile");
 
-  // if not HTML document, capture as file
-  if (["text/html", "application/xhtml+xml"].indexOf(doc.contentType) === -1) {
-    if (!options["capture.saveFileAsHtml"]) {
-      capturer.invoke("captureFile", {
-        url: doc.URL,
-        settings: settings,
-        options: options,
-        data: {
-          title: doc.title
-        }
-      }).then(callback);
-      return true; // async response
+    // if not HTML document, capture as file
+    if (["text/html", "application/xhtml+xml"].indexOf(doc.contentType) === -1) {
+      if (!options["capture.saveFileAsHtml"]) {
+        capturer.invoke("captureFile", {
+          url: doc.URL,
+          settings: settings,
+          options: options,
+          data: {
+            title: doc.title
+          }
+        }).then(resolve);
+        return;
+      }
     }
-  }
 
-  // otherwise, capture as document
-  capturer.captureDocument(doc, settings, options, callback);
-
-  return true; // async response
+    // otherwise, capture as document
+    capturer.captureDocument(doc, settings, options, resolve);
+  });
 };
 
 capturer.captureDocument = function (doc, settings, options, callback) {
@@ -568,7 +571,7 @@ capturer.captureDocument = function (doc, settings, options, callback) {
               if (frameDoc) {
                 // frame document accessible: capture the content document directly
                 remainingTasks++;
-                capturer.captureDocumentOrFile(frameDoc, frameSettings, options, (result) => {
+                capturer.captureDocumentOrFile(frameDoc, frameSettings, options).then((result) => {
                   captureFrameCallback(result);
                 });
               } else if (frameSrc.contentWindow) {

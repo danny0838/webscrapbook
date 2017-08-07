@@ -209,7 +209,7 @@ capturer.captureUrl = function (params, callback) {
       determineFilename();
       let doc = xhr.response;
       if (doc) {
-        capturer.captureDocumentOrFile(doc, settings, options, callback);
+        capturer.captureDocumentOrFile(doc, settings, options).then(callback);
       } else {
         capturer.captureFile({
           url: params.url,
