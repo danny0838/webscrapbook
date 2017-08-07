@@ -424,7 +424,7 @@ capturer.captureDocument = function (doc, settings, options) {
                     remainingTasks++;
                     let downloader = new capturer.ComplexUrlDownloader(settings, options, doc.URL);
                     let rewriteCss = capturer.ProcessCssFileText(elem.textContent, doc.URL, downloader, options);
-                    downloader.startDownloads(() => {
+                    downloader.startDownloads().then(() => {
                       elem.textContent = downloader.finalRewrite(rewriteCss);
                       remainingTasks--;
                       captureCheckDone();
@@ -688,7 +688,7 @@ capturer.captureDocument = function (doc, settings, options) {
                   let rewriteUrl = scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
                     return downloader.getUrlHash(url);
                   });
-                  downloader.startDownloads(() => {
+                  downloader.startDownloads().then(() => {
                     elem.setAttribute("srcset", downloader.finalRewrite(rewriteUrl));
                     remainingTasks--;
                     captureCheckDone();
@@ -729,7 +729,7 @@ capturer.captureDocument = function (doc, settings, options) {
                   let rewriteUrl = scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
                     return downloader.getUrlHash(url);
                   }, this);
-                  downloader.startDownloads(() => {
+                  downloader.startDownloads().then(() => {
                     elem.setAttribute("srcset", downloader.finalRewrite(rewriteUrl));
                     remainingTasks--;
                     captureCheckDone();
@@ -1015,7 +1015,7 @@ capturer.captureDocument = function (doc, settings, options) {
                   remainingTasks++;
                   let downloader = new capturer.ComplexUrlDownloader(settings, options, doc.URL);
                   let rewriteCss = capturer.ProcessCssFileText(elem.getAttribute("style"), doc.URL, downloader, options);
-                  downloader.startDownloads(() => {
+                  downloader.startDownloads().then(() => {
                     elem.setAttribute("style", downloader.finalRewrite(rewriteCss));
                     remainingTasks--;
                     captureCheckDone();
@@ -1259,7 +1259,7 @@ capturer.processCssFile = function (params) {
   return scrapbook.parseCssFile(data, charset, (text, onReplaceComplete) => {
     var downloader = new capturer.ComplexUrlDownloader(params.settings, params.options, refUrl);
     var rewriteCss = capturer.ProcessCssFileText(text, refUrl, downloader, params.options);
-    downloader.startDownloads(() => {
+    downloader.startDownloads().then(() => {
       text = downloader.finalRewrite(rewriteCss);
       onReplaceComplete(text);
     });
@@ -1355,38 +1355,40 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
     return "urn:scrapbook:url:" + key;
   }
 
-  startDownloads(callback) {
-    var keys = Object.keys(this.urlHash), len = keys.length;
-    if (len > 0) {
-      keys.forEach((key) => {
-        let targetUrl = this.urlHash[key].url;
-        if (this.options["capture.saveAs"] === "singleHtml") {
-          if (this.settings.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) !== -1) {
-            let sourceUrl = this.settings.recurseChain[this.settings.recurseChain.length - 1];
-            console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
-            this.urlHash[key].newUrl = capturer.getCircularUrl(targetUrl, this.options);
-            if (++this.urlRewrittenCount === len) {
-              callback();
+  startDownloads() {
+    return new Promise((resolve, reject) => {
+      var keys = Object.keys(this.urlHash), len = keys.length;
+      if (len > 0) {
+        keys.forEach((key) => {
+          let targetUrl = this.urlHash[key].url;
+          if (this.options["capture.saveAs"] === "singleHtml") {
+            if (this.settings.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) !== -1) {
+              let sourceUrl = this.settings.recurseChain[this.settings.recurseChain.length - 1];
+              console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
+              this.urlHash[key].newUrl = capturer.getCircularUrl(targetUrl, this.options);
+              if (++this.urlRewrittenCount === len) {
+                resolve();
+              }
+              return;
             }
-            return;
           }
-        }
 
-        capturer.invoke("downloadFile", {
-          url: targetUrl,
-          rewriteMethod: this.urlHash[key].rewriteMethod,
-          settings: this.settings,
-          options: this.options
-        }).then((response) => {
-          this.urlHash[key].newUrl = response.url;
-          if (++this.urlRewrittenCount === len) {
-            callback();
-          }
+          capturer.invoke("downloadFile", {
+            url: targetUrl,
+            rewriteMethod: this.urlHash[key].rewriteMethod,
+            settings: this.settings,
+            options: this.options
+          }).then((response) => {
+            this.urlHash[key].newUrl = response.url;
+            if (++this.urlRewrittenCount === len) {
+              resolve();
+            }
+          });
         });
-      });
-    } else {
-      callback();
-    }
+      } else {
+        resolve();
+      }
+    });
   }
 
   finalRewrite(text) {
