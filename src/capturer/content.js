@@ -10,32 +10,38 @@
 window.addEventListener("message", (event) => {
   var message = event.data;
   if (message.extension !== chrome.runtime.id) { return; }
-  isDebug && console.debug("content window receive", event);
+  isDebug && console.debug(message.cmd, "frame window receive", message.args);
 
-  if (message.cmd === "capturer.captureDocumentOrFile") {
-    event.ports[0].postMessage({
-      extension: chrome.runtime.id,
-      cmd: "capturer.captureDocumentOrFile.start",
-      timeId: message.timeId
-    });
-    capturer.captureDocumentOrFile(document, message.settings, message.options).then((response) => {
+  if (message.cmd.slice(0, 9) == "capturer.") {
+    let fn = capturer[message.cmd.slice(9)];
+    if (fn) {
       event.ports[0].postMessage({
         extension: chrome.runtime.id,
-        cmd: "capturer.captureDocumentOrFile.complete",
-        timeId: message.timeId,
-        response: response
+        uid: message.uid,
+        cmd: message.cmd + ".start"
       });
-    });
+      fn(message.args).then((response) => {
+        event.ports[0].postMessage({
+          extension: chrome.runtime.id,
+          uid: message.uid,
+          cmd: message.cmd + ".complete",
+          response: response
+        });
+      });
+    }
   }
 }, false);
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  isDebug && console.debug(message.cmd + " receive", message, sender);
+  isDebug && console.debug(message.cmd, "receive", message.args);
 
-  if (message.cmd === "capturer.captureDocumentOrFile") {
-    capturer.captureDocumentOrFile(document, message.settings, message.options).then((response) => {
-      sendResponse(response);
-    });
-    return true; // async response
+  if (message.cmd.slice(0, 9) == "capturer.") {
+    let fn = capturer[message.cmd.slice(9)];
+    if (fn) {
+      fn(message.args).then((response) => {
+        sendResponse(response);
+      });
+      return true; // async response
+    }
   }
 });

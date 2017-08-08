@@ -74,36 +74,41 @@ capturer.captureAllTabs = function () {
   });
 };
 
+/**
+ * @return {Promise}
+ */
 capturer.captureTab = function (tab, quiet) {
-  var cmd = "capturer.captureDocumentOrFile";
-  var timeId = scrapbook.dateToId();
-  var tabId = tab.id;
-  var message = {
-    cmd: cmd,
-    settings: {
-      timeId: timeId,
-      frameIsMain: true,
-      documentName: "index",
-      favIconUrl: tab.favIconUrl,
-      recurseChain: []
-    },
-    options: capturer.fixOptions(scrapbook.getOptions("capture"))
-  };
+  return Promise.resolve().then(() => {
+    var timeId = scrapbook.dateToId();
+    var tabId = tab.id;
+    var message = {
+      settings: {
+        timeId: timeId,
+        frameIsMain: true,
+        documentName: "index",
+        favIconUrl: tab.favIconUrl,
+        recurseChain: []
+      },
+      options: capturer.fixOptions(scrapbook.getOptions("capture"))
+    };
 
-  isDebug && console.debug(cmd + " (main) send", tabId, message);
-  chrome.tabs.sendMessage(tabId, message, {frameId: 0}, (response) => {
-    isDebug && console.debug(cmd + " (main) response", tabId, response);
-    var source = "[" + tab.id + "] " + tab.url;
-    if (!response) {
-      if (!quiet) {
-        alert(scrapbook.lang("ErrorCapture", [source, scrapbook.lang("ErrorContentScriptNotReady")]));
-      } else{
-        console.error(scrapbook.lang("ErrorCapture", [source, scrapbook.lang("ErrorContentScriptNotReady")]));
+    return Promise.resolve().then(() => {
+      isDebug && console.debug("(main) send", tabId, message);
+      return capturer.invoke("captureDocumentOrFile", message, tabId);
+    }).then((response) => {
+      isDebug && console.debug("(main) response", tabId, response);
+      var source = "[" + tab.id + "] " + tab.url;
+      if (!response) {
+        if (!quiet) {
+          alert(scrapbook.lang("ErrorCapture", [source, scrapbook.lang("ErrorContentScriptNotReady")]));
+        } else{
+          console.error(scrapbook.lang("ErrorCapture", [source, scrapbook.lang("ErrorContentScriptNotReady")]));
+        }
+      } else if (response.error) {
+        console.error(scrapbook.lang("ErrorCapture", [source, scrapbook.lang("ErrorCaptureGeneral")]));
       }
-    } else if (response.error) {
-      console.error(scrapbook.lang("ErrorCapture", [source, scrapbook.lang("ErrorCaptureGeneral")]));
-    }
-    delete(capturer.captureInfo[timeId]);
+      delete(capturer.captureInfo[timeId]);
+    });
   });
 };
 
@@ -211,7 +216,11 @@ capturer.captureUrl = function (params) {
         determineFilename();
         let doc = xhr.response;
         if (doc) {
-          capturer.captureDocumentOrFile(doc, settings, options).then(resolve);
+          capturer.captureDocumentOrFile({
+            doc: doc,
+            settings: settings,
+            options: options
+          }).then(resolve);
         } else {
           capturer.captureFile({
             url: params.url,
@@ -899,13 +908,13 @@ capturer.saveUrl = function (params) {
  */
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  isDebug && console.debug(message.cmd + " receive", sender.tab.id, message.args);
+  isDebug && console.debug(message.cmd, "receive", "[" + sender.tab.id + "]", message.args);
 
   if (message.cmd.slice(0, 9) == "capturer.") {
-    let method = message.cmd.slice(9);
-    if (capturer[method]) {
+    let fn = capturer[message.cmd.slice(9)];
+    if (fn) {
       message.args.tabId = sender.tab.id;
-      capturer[method](message.args).then((response) => {
+      fn(message.args).then((response) => {
         sendResponse(response);
       });
       return true; // async response

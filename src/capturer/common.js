@@ -12,26 +12,81 @@ var capturer = {};
 capturer.isContentScript = true;
 
 /**
- * Invoke an invokable capturer method from the background script
+ * Invoke an invokable capturer method from another script
  *
  * @return {Promise}
  */
-capturer.invoke = function (method, args) {
-  return new Promise((resolve, reject) => {
-    if (capturer.isContentScript) {
-      var cmd = "capturer." + method;
-      var message = {
-        cmd: cmd,
-        args: args
-      };
+capturer.invoke = function (method, args, tabId, frameWindow) {
+  return Promise.resolve().then(() => {
+    // to background script
+    if (typeof tabId !== "number" && !frameWindow) {
+      if (capturer.isContentScript) {
+        var cmd = "capturer." + method;
+        var message = {
+          cmd: cmd,
+          args: args
+        };
 
-      isDebug && console.debug(cmd + " send", args);
-      chrome.runtime.sendMessage(message, (response) => {
-        isDebug && console.debug(cmd + " response", response);
-        resolve(response);
+        isDebug && console.debug(cmd, "send to background script", args);
+        return new Promise((resolve, reject) => {
+          chrome.runtime.sendMessage(message, resolve);
+        }).then((response) => {
+          isDebug && console.debug(cmd, "response from background script", response);
+          return response;
+        });
+      } else {
+        return capturer[method](args);
+      }
+    // to content script
+    } else if (typeof tabId === "number") {
+      if (!capturer.isContentScript) {
+        var cmd = "capturer." + method;
+        var message = {
+          cmd: cmd,
+          args: args
+        };
+
+        isDebug && console.debug(cmd, "send to content script", "[" + tabId + "]", args);
+        return new Promise((resolve, reject) => {
+          chrome.tabs.sendMessage(tabId, message, {frameId: 0}, resolve);
+        }).then((response) => {
+          isDebug && console.debug(cmd, "response from content script", "[" + tabId + "]", response);
+          return response;
+        });
+      } else {
+        return capturer[method](args);
+      }
+    // to frame
+    } else if (frameWindow) {
+      return new Promise((resolve, reject) => {
+        var cmd = "capturer." + method;
+        var uid = scrapbook.dateToId();
+        var channel = new MessageChannel();
+        var timeout = setTimeout(() => {
+          resolve(undefined);
+          delete channel;
+        }, 1000);
+
+        isDebug && console.debug(cmd, "send to frame", args);
+        frameWindow.postMessage({
+          extension: chrome.runtime.id,
+          uid: uid,
+          cmd: cmd,
+          args: args
+        }, "*", [channel.port2]);
+        channel.port1.onmessage = (event) => {
+          var message = event.data;
+          if (message.extension !== chrome.runtime.id) { return; }
+          if (message.uid !== uid) { return; }
+          if (message.cmd === cmd + ".start") {
+            clearTimeout(timeout);
+          } else if (message.cmd === cmd + ".complete") {
+            isDebug && console.debug(cmd, "response from frame", message.response);
+            resolve(message.response);
+            delete channel;
+          }
+        };
       });
-    } else {
-      capturer[method](args).then(resolve);
     }
   });
 };
@@ -42,11 +97,20 @@ capturer.fixOptions = function (options) {
 };
 
 /**
+ * @kind invokable
+ * @param {Object} params
+ *     - {Document} params.doc
+ *     - {Object} params.settings
+ *     - {Object} params.options
  * @return {Promise}
  */
-capturer.captureDocumentOrFile = function (doc, settings, options) {
+capturer.captureDocumentOrFile = function (params) {
   return new Promise((resolve, reject) => {
     isDebug && console.debug("call: captureDocumentOrFile");
+
+    var doc = params.doc || document;
+    var settings = params.settings;
+    var options = params.options;
 
     // if not HTML document, capture as file
     if (["text/html", "application/xhtml+xml"].indexOf(doc.contentType) === -1) {
@@ -64,16 +128,25 @@ capturer.captureDocumentOrFile = function (doc, settings, options) {
     }
 
     // otherwise, capture as document
-    capturer.captureDocument(doc, settings, options).then(resolve);
+    capturer.captureDocument(params).then(resolve);
   });
 };
 
 /**
+ * @kind invokable
+ * @param {Object} params
+ *     - {Document} params.doc
+ *     - {Object} params.settings
+ *     - {Object} params.options
  * @return {Promise}
  */
-capturer.captureDocument = function (doc, settings, options) {
+capturer.captureDocument = function (params) {
   return new Promise((resolve, reject) => {
     isDebug && console.debug("call: captureDocument");
+
+    var doc = params.doc || document;
+    var settings = params.settings;
+    var options = params.options;
 
     if (doc.readyState === "loading") {
       console.error(scrapbook.lang("ErrorDocumentNotReady", [doc.URL]));
@@ -575,15 +648,18 @@ capturer.captureDocument = function (doc, settings, options) {
                 if (frameDoc) {
                   // frame document accessible: capture the content document directly
                   remainingTasks++;
-                  capturer.captureDocumentOrFile(frameDoc, frameSettings, options).then((result) => {
-                    captureFrameCallback(result);
-                  });
+                  capturer.captureDocumentOrFile({
+                    doc: frameDoc, 
+                    settings: frameSettings,
+                    options: options
+                  }).then(captureFrameCallback);
                 } else if (frameSrc.contentWindow) {
                   // frame document inaccessible: get the content document through a messaging technique, and then capture it
                   remainingTasks++;
-                  capturer.getFrameContent(frameSrc, timeId, frameSettings, options).then((response) => {
-                    captureFrameCallback(response);
-                  });
+                  capturer.invoke("captureDocumentOrFile", {
+                    settings: frameSettings,
+                    options: options
+                  }, null, frameSrc.contentWindow).then(captureFrameCallback);
                 } else {
                   // frame window inaccessible: this happens when the document is retrieved via AJAX
                   if (!frame.hasAttribute("srcdoc")) {
@@ -596,9 +672,7 @@ capturer.captureDocument = function (doc, settings, options) {
                         settings: frameSettings,
                         options: options,
                         url: frameSrc.src
-                      }).then((response) => {
-                        captureFrameCallback(response);
-                      });
+                      }).then(captureFrameCallback);
                     } else {
                       console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
                       captureRewriteAttr(frame, "src", capturer.getCircularUrl(frameSrc.src, options));
@@ -1189,36 +1263,6 @@ capturer.captureDocument = function (doc, settings, options) {
       documentName = response.documentName;
       captureMain();
     });
-  });
-};
-
-capturer.getFrameContent = function (frameElement, timeId, settings, options) {
-  return new Promise((resolve, reject) => {
-    var channel = new MessageChannel();
-    var timeout = setTimeout(() => {
-      resolve(undefined);
-      delete channel;
-    }, 1000);
-    frameElement.contentWindow.postMessage({
-      extension: chrome.runtime.id,
-      cmd: "capturer.captureDocumentOrFile",
-      timeId: timeId,
-      settings: settings,
-      options: options
-    }, "*", [channel.port2]);
-    channel.port1.onmessage = (event) => {
-      var message = event.data;
-      if (message.extension !== chrome.runtime.id) { return; }
-      if (message.timeId !== timeId) { return; }
-      isDebug && console.debug("channel receive", event);
-
-      if (message.cmd === "capturer.captureDocumentOrFile.start") {
-        clearTimeout(timeout);
-      } else if (message.cmd === "capturer.captureDocumentOrFile.complete") {
-        resolve(message.response);
-        delete channel;
-      }
-    };
   });
 };
 
