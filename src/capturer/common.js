@@ -105,30 +105,27 @@ capturer.fixOptions = function (options) {
  * @return {Promise}
  */
 capturer.captureDocumentOrFile = function (params) {
-  return new Promise((resolve, reject) => {
+  return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureDocumentOrFile");
 
-    var doc = params.doc || document;
-    var settings = params.settings;
-    var options = params.options;
+    var {doc = document, settings, options} = params;
 
     // if not HTML document, capture as file
     if (["text/html", "application/xhtml+xml"].indexOf(doc.contentType) === -1) {
       if (!options["capture.saveFileAsHtml"]) {
-        capturer.invoke("captureFile", {
+        return capturer.invoke("captureFile", {
           url: doc.URL,
           settings: settings,
           options: options,
           data: {
             title: doc.title
           }
-        }).then(resolve);
-        return;
+        });
       }
     }
 
     // otherwise, capture as document
-    capturer.captureDocument(params).then(resolve);
+    return capturer.captureDocument(params);
   });
 };
 
