@@ -361,9 +361,9 @@ capturer.saveDocument = function (params) {
             sourceUrl: sourceUrl,
             autoErase: autoErase,
             savePrompt: options["capture.savePrompt"]
-          }, () => {
+          }).then(() => {
             resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-          }, (ex) => {
+          }).catch((ex) => {
             resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
           });
         }
@@ -411,9 +411,9 @@ capturer.saveDocument = function (params) {
               sourceUrl: sourceUrl,
               autoErase: false,
               savePrompt: options["capture.savePrompt"]
-            }, () => {
+            }).then(() => {
               resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-            }, (ex) => {
+            }).catch((ex) => {
               resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
             });
           });
@@ -481,9 +481,9 @@ capturer.saveDocument = function (params) {
               sourceUrl: sourceUrl,
               autoErase: false,
               savePrompt: options["capture.savePrompt"]
-            }, () => {
+            }).then(() => {
               resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-            }, (ex) => {
+            }).catch((ex) => {
               resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
             });
           });
@@ -518,9 +518,9 @@ capturer.saveDocument = function (params) {
               sourceUrl: sourceUrl,
               autoErase: false,
               savePrompt: false
-            }, () => {
+            }).then(() => {
               resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-            }, (ex) => {
+            }).catch((ex) => {
               resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
             });
           };
@@ -534,7 +534,7 @@ capturer.saveDocument = function (params) {
           sourceUrl: sourceUrl,
           autoErase: autoErase,
           savePrompt: false
-        }, saveBlobComplete, (ex) => {
+        }).then(saveBlobComplete).catch((ex) => {
           resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
         });
         break;
@@ -798,9 +798,9 @@ capturer.downloadBlob = function (params) {
           sourceUrl: sourceUrl,
           autoErase: true,
           savePrompt: false
-        }, () => {
+        }).then(() => {
           resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-        }, (ex) => {
+        }).catch((ex) => {
           resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
         });
         break;
@@ -818,35 +818,29 @@ capturer.downloadBlob = function (params) {
  *     - {string} params.sourceUrl
  *     - {boolean} params.autoErase
  *     - {boolean} params.savePrompt
- * @param {function} onComplete - function () {}
- * @param {function} onError - function (ex) {}
+ * @return {Promise}
  */
-capturer.saveBlob = function (params, onComplete, onError) {
-  isDebug && console.debug("call: saveBlob", params);
+capturer.saveBlob = function (params) {
+  return Promise.resolve().then(() => {
+    isDebug && console.debug("call: saveBlob", params);
 
-  var timeId = params.timeId;
-  var blob = params.blob;
-  var directory = params.directory;
-  var filename = params.filename;
-  var sourceUrl = params.sourceUrl;
-  var autoErase = params.autoErase;
-  var savePrompt = params.savePrompt;
+    var timeId = params.timeId;
+    var blob = params.blob;
+    var directory = params.directory;
+    var filename = params.filename;
+    var sourceUrl = params.sourceUrl;
+    var autoErase = params.autoErase;
+    var savePrompt = params.savePrompt;
 
-  if (!blob) {
-    onComplete();
-    return;
-  }
-
-  capturer.saveUrl({
-    url: URL.createObjectURL(blob),
-    directory: directory,
-    filename: filename,
-    sourceUrl: sourceUrl,
-    autoErase: autoErase,
-    savePrompt: savePrompt
-  }).then(onComplete).catch(onError);
-
-  return true; // async response
+    return capturer.saveUrl({
+      url: URL.createObjectURL(blob),
+      directory: directory,
+      filename: filename,
+      sourceUrl: sourceUrl,
+      autoErase: autoErase,
+      savePrompt: savePrompt
+    });
+  });
 };
 
 /**
