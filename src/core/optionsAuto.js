@@ -2,6 +2,7 @@
  *
  * Loads and updates options automatically
  *
+ * @require {Object} scrapbook
  *******************************************************************/
 
 scrapbook.loadOptions();

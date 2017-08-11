@@ -1,7 +1,8 @@
 /********************************************************************
  *
- * Manage options
+ * Script for options.html
  *
+ * @require {Object} scrapbook
  *******************************************************************/
 
 var OPTION_PREFIX = "opt_";

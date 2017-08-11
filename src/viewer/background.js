@@ -2,6 +2,7 @@
  *
  * The background script for viewer functionality
  *
+ * @require {Object} scrapbook
  *******************************************************************/
 
 (function (window, undefined) {

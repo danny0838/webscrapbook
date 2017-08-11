@@ -2,6 +2,7 @@
  *
  * Script for browserAction.html
  *
+ * @require {Object} scrapbook
  *******************************************************************/
 
 document.addEventListener('DOMContentLoaded', () => {

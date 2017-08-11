@@ -1,3 +1,10 @@
+/********************************************************************
+ *
+ * Script for the generated viewer page
+ *
+ * @require {Object} scrapbook
+ *******************************************************************/
+
 (function (window, undefined) {
 
 var viewerData = JSON.parse(document.currentScript.textContent);

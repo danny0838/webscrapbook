@@ -2,6 +2,7 @@
  *
  * Script for viewer.html
  *
+ * @require {Object} scrapbook
  *******************************************************************/
 
 function init() {

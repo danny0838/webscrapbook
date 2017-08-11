@@ -2,6 +2,7 @@
  *
  * The common script for capture functionality
  *
+ * @require {boolean} isDebug
  * @require {Object} scrapbook
  * @public {Object} capturer
  *******************************************************************/

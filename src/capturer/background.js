@@ -2,7 +2,9 @@
  *
  * The background script for capture functionality
  *
+ * @require {boolean} isDebug
  * @require {Object} scrapbook
+ * @require {Object} capturer
  *******************************************************************/
 
 capturer.isContentScript = false;

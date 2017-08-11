@@ -3,6 +3,7 @@
  * Shared functions for most scripts, including background scripts and
  * content scripts.
  *
+ * @public {boolean} isDebug
  * @public {Object} scrapbook
  *******************************************************************/
 

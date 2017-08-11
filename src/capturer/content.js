@@ -2,7 +2,9 @@
  *
  * The content script for capture functionality
  *
+ * @require {boolean} isDebug
  * @require {Object} scrapbook
+ * @require {Object} capturer
  *******************************************************************/
 
 capturer.getFrameContent = function (frameElement, timeId, settings, options, callback) {
