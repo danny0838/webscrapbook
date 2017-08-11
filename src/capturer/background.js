@@ -844,7 +844,7 @@ capturer.saveBlob = function (params, onComplete, onError) {
     sourceUrl: sourceUrl,
     autoErase: autoErase,
     savePrompt: savePrompt
-  }, onComplete, onError);
+  }).then(onComplete).catch(onError);
 
   return true; // async response
 };
@@ -858,46 +858,45 @@ capturer.saveBlob = function (params, onComplete, onError) {
  *     - {string} params.sourceUrl
  *     - {boolean} params.autoErase
  *     - {boolean} params.savePrompt
- * @param {function} onComplete - function () {}
- * @param {function} onError - function (ex) {}
+ * @return {Promise}
  */
-capturer.saveUrl = function (params, onComplete, onError) {
-  isDebug && console.debug("call: saveUrl", params);
+capturer.saveUrl = function (params) {
+  return new Promise((resolve, reject) => {
+    isDebug && console.debug("call: saveUrl", params);
 
-  var timeId = params.timeId;
-  var url = params.url;
-  var directory = params.directory;
-  var filename = params.filename;
-  var sourceUrl = params.sourceUrl;
-  var autoErase = params.autoErase;
-  var savePrompt = params.savePrompt;
+    var timeId = params.timeId;
+    var url = params.url;
+    var directory = params.directory;
+    var filename = params.filename;
+    var sourceUrl = params.sourceUrl;
+    var autoErase = params.autoErase;
+    var savePrompt = params.savePrompt;
 
-  var downloadParams = {
-    url: url,
-    filename: (directory ? directory + "/" : "") + filename,
-    conflictAction: "uniquify",
-    saveAs: savePrompt
-  };
+    var downloadParams = {
+      url: url,
+      filename: (directory ? directory + "/" : "") + filename,
+      conflictAction: "uniquify",
+      saveAs: savePrompt
+    };
 
-  isDebug && console.debug("download start", downloadParams);
-  chrome.downloads.download(downloadParams, (downloadId) => {
-    isDebug && console.debug("download response", downloadId);
-    if (downloadId) {
-      capturer.downloadInfo[downloadId] = {
-        timeId: timeId,
-        src: sourceUrl,
-        autoErase: autoErase,
-        onComplete: onComplete,
-        onError: onError
-      };
-    } else {
-      let err = chrome.runtime.lastError.message;
-      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
-      onError(err);
-    }
+    isDebug && console.debug("download start", downloadParams);
+    chrome.downloads.download(downloadParams, (downloadId) => {
+      isDebug && console.debug("download response", downloadId);
+      if (downloadId) {
+        capturer.downloadInfo[downloadId] = {
+          timeId: timeId,
+          src: sourceUrl,
+          autoErase: autoErase,
+          onComplete: resolve,
+          onError: reject
+        };
+      } else {
+        let err = chrome.runtime.lastError.message;
+        console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
+        reject(err);
+      }
+    });
   });
-
-  return true; // async response
 };
 
 
