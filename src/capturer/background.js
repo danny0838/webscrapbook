@@ -169,10 +169,10 @@ capturer.captureTabSource = function (tab, quiet) {
     };
 
     return Promise.resolve().then(() => {
-      isDebug && console.debug("(main) send", tabId, message);
+      isDebug && console.debug("(main) send", tab.url, message);
       return capturer.captureUrl(message);
     }).then((response) => {
-      isDebug && console.debug("(main) response", tabId, response);
+      isDebug && console.debug("(main) response", tab.url, response);
       delete(capturer.captureInfo[timeId]);
       if (!response) {
         throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));
@@ -255,7 +255,7 @@ capturer.captureUrl = function (params) {
             }
           }
         },
-        onloadend: function (xhr, xhrAbort) {
+        onload: function (xhr, xhrAbort) {
           determineFilename();
           let doc = xhr.response;
           if (doc) {
@@ -272,16 +272,11 @@ capturer.captureUrl = function (params) {
             }).then(resolve);
           }
         },
-        ontimeout: function (xhr, xhrAbort) {
-          reject(new Error(scrapbook.lang("ErrorFileDownloadTimeout")));
-        },
-        onerror: function (xhr, xhrAbort) {
-          reject(new Error(xhr.statusText ? xhr.status + " " + xhr.statusText : xhr.status));
-        }
+        onerror: reject
       });
     }).catch((ex) => {
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return {url: capturer.getErrorUrl(sourceUrl, options), error: ex.message};
+      return {url: capturer.getErrorUrl(sourceUrl, options), error: ex};
     });
   });
 };
@@ -573,6 +568,7 @@ capturer.saveDocument = function (params) {
         }
       }
     }).catch((ex) => {
+      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: ex};
     });
   });
@@ -629,12 +625,12 @@ capturer.downloadFile = function (params) {
                   filename: filename,
                   sourceUrl: sourceUrl,
                 });
-              }).then(resolve);
+              }).then(resolve).catch(reject);
             } else {
               resolve({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
             }
           } else {
-            resolve({url: capturer.getErrorUrl(sourceUrl, options), error: "data URI cannot be read as file"});
+            reject(new Error("Malformed data URL."));
           }
         } else {
           resolve({url: sourceUrl});
@@ -694,7 +690,7 @@ capturer.downloadFile = function (params) {
             if (!determineFilename()) { xhrAbort(); }
           }
         },
-        onloadend: function (xhr, xhrAbort) {
+        onload: function (xhr, xhrAbort) {
           if (!determineFilename()) { return; }
           Promise.resolve(capturer[rewriteMethod]).then((fn) => {
             if (fn) {
@@ -715,18 +711,13 @@ capturer.downloadFile = function (params) {
               filename: filename,
               sourceUrl: sourceUrl,
             });
-          }).then(resolve);
+          }).then(resolve).catch(reject);
         },
-        ontimeout: function (xhr, xhrAbort) {
-          console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, scrapbook.lang("ErrorFileDownloadTimeout")]));
-          resolve({url: capturer.getErrorUrl(sourceUrl, options), error: "timeout"});
-        },
-        onerror: function (xhr, xhrAbort) {
-          let err = xhr.statusText ? xhr.status + " " + xhr.statusText : xhr.status;
-          console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
-          resolve({url: capturer.getErrorUrl(sourceUrl, options), error: err});
-        }
+        onerror: reject
       });
+    }).catch((ex) => {
+      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+      return {url: capturer.getErrorUrl(sourceUrl, options), error: ex};
     });
   });
 };
@@ -813,9 +804,7 @@ capturer.downloadBlob = function (params) {
           savePrompt: false
         }).then(() => {
           resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-        }).catch((ex) => {
-          resolve({url: capturer.getErrorUrl(sourceUrl, options), error: ex});
-        });
+        }).catch(reject);
         break;
       }
     }
@@ -886,9 +875,7 @@ capturer.saveUrl = function (params) {
           onError: reject
         };
       } else {
-        let err = chrome.runtime.lastError.message;
-        console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
-        reject(err);
+        reject(chrome.runtime.lastError);
       }
     });
   });
@@ -914,41 +901,34 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-chrome.downloads.onChanged.addListener(function (downloadDelta) {
+chrome.downloads.onChanged.addListener((downloadDelta) => {
   isDebug && console.debug("downloads.onChanged", downloadDelta);
 
-  var downloadId = downloadDelta.id;
-  if (!capturer.downloadInfo[downloadId]) { return; }
+  var downloadId = downloadDelta.id, downloadInfo = capturer.downloadInfo;
+  if (!downloadInfo[downloadId]) { return; }
 
-  var that = arguments.callee;
-  if (!that.erase) {
-    that.erase = function (downloadId) {
-      if (capturer.downloadInfo[downloadId].autoErase) {
-        chrome.downloads.erase({id: downloadId}, (erasedIds) => {});
-      }
-      delete capturer.downloadInfo[downloadId];
-    };
-  }
+  var erase = function (downloadId) {
+    // erase the download history of additional downloads (autoErase = true)
+    if (downloadInfo[downloadId].autoErase) {
+      chrome.downloads.erase({id: downloadId}, (erasedIds) => {});
+    }
+    delete downloadInfo[downloadId];
+  };
 
   if (downloadDelta.state && downloadDelta.state.current === "complete") {
-    // erase the download history of additional downloads (those recorded in capturer.downloadEraseIds)
     try {
-      capturer.downloadInfo[downloadId].onComplete();
+      downloadInfo[downloadId].onComplete();
     } catch (ex) {
       console.error(ex);
     }
-    that.erase(downloadId);
+    erase(downloadId);
   } else if (downloadDelta.error) {
-    chrome.downloads.search({id: downloadId}, (results) => {
-      let err = results[0].error;
-      console.warn(scrapbook.lang("ErrorFileDownloadError", [capturer.downloadInfo[downloadId].src, err]));
-      try {
-        capturer.downloadInfo[downloadId].onError(err);
-      } catch (ex) {
-        console.error(ex);
-      }
-      that.erase(downloadId);
-    });
+    try {
+      downloadInfo[downloadId].onError(new Error(downloadDelta.error.current));
+    } catch (ex) {
+      console.error(ex);
+    }
+    erase(downloadId);
   }
 });
 

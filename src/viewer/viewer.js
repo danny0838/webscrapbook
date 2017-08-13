@@ -153,7 +153,7 @@ function init() {
       scrapbook.xhr({
         url: URL.createObjectURL(file),
         responseType: "document",
-        onloadend: function (xhr, xhrAbort) {
+        onload: function (xhr, xhrAbort) {
           callback(xhr.response);
         }
       });

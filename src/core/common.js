@@ -812,6 +812,79 @@ scrapbook.parseSrcset = function (srcset, rewriteFunc) {
  * Network utilities
  *******************************************************************/
 
+scrapbook.httpStatusText = {
+  // 1××: Informational
+  100: "Continue",
+  101: "Switching Protocols",
+  102: "Processing",
+
+  // 2××: Success
+  200: "OK",
+  201: "Created",
+  202: "Accepted",
+  203: "Non-Authoritative Information",
+  204: "No Content",
+  205: "Reset Content",
+  206: "Partial Content",
+  207: "Multi-Status",
+  208: "Already Reported",
+  226: "IM Used",
+
+  // 3××: Redirection
+  300: "Multiple Choices",
+  301: "Moved Permanently",
+  302: "Found",
+  303: "See Other",
+  304: "Not Modified",
+  305: "Use Proxy",
+  306: "Switch Proxy",
+  307: "Temporary Redirect",
+  308: "Permanent Redirect",
+
+  // 4××: Client Errors
+  400: "Bad Request",
+  401: "Unauthorized",
+  402: "Payment Required",
+  403: "Forbidden",
+  404: "Not Found",
+  405: "Method Not Allowed",
+  406: "Not Acceptable",
+  407: "Proxy Authentication Required",
+  408: "Request Timeout",
+  409: "Conflict",
+  410: "Gone",
+  411: "Length Required",
+  412: "Precondition Failed",
+  413: "Payload Too Large",
+  414: "URI Too Long",
+  415: "Unsupported Media Type",
+  416: "Range Not Satisfiable",
+  417: "Expectation Failed",
+  418: "I'm a teapot",
+  421: "Misdirected Request",
+  422: "Unprocessable Entity",
+  423: "Locked",
+  424: "Failed Dependency",
+  426: "Upgrade Required",
+  428: "Precondition Required",
+  429: "Too Many Requests",
+  431: "Request Header Fields Too Large",
+  451: "Unavailable For Legal Reasons",
+
+  // 5××: Server Errors
+  500: "Internal Server Error",
+  501: "Not Implemented",
+  502: "Bad Gateway",
+  503: "Service Unavailable",
+  504: "Gateway Timeout",
+  505: "HTTP Version Not Supported",
+  506: "Variant Also Negotiates",
+  507: "Insufficient Storage",
+  508: "Loop Detected",
+  510: "Not Extended",
+  511: "Network Authentication Required"
+};
+
 /**
  * The callback function that aborts the XMLHttpRequest when called.
  *
@@ -831,7 +904,7 @@ scrapbook.parseSrcset = function (srcset, rewriteFunc) {
  *     - {string} params.url
  *     - {string} params.responseType
  *     - {xhrEventHandler} params.onreadystatechange
- *     - {xhrEventHandler} params.onloadend
+ *     - {xhrEventHandler} params.onload
  *     - {xhrEventHandler} params.onerror
  *     - {xhrEventHandler} params.ontimeout
  */
@@ -839,32 +912,38 @@ scrapbook.xhr = function (params) {
   var xhr = new XMLHttpRequest();
 
   var xhrAbort = function () {
-    xhr.onreadystatechange = xhr.onloadend = xhr.onerror = xhr.ontimeout = null;
+    xhr.onreadystatechange = xhr.onload = xhr.onerror = xhr.ontimeout = null;
     xhr.abort();
   };
 
-  xhr.onreadystatechange = function () {
+  var handleError = function (ex) {
+    params && params.onerror && params.onerror(ex);
+  };
+
+  xhr.onreadystatechange = function (event) {
     params && params.onreadystatechange && params.onreadystatechange(xhr, xhrAbort);
   };
 
-  xhr.onloadend = function () {
+  xhr.onload = function (event) {
     if (xhr.status == 200 || xhr.status == 0) {
       // we only care about real loading success
-      params && params.onloadend && params.onloadend(xhr, xhrAbort);
+      params && params.onload && params.onload(xhr, xhrAbort);
     } else {
       // treat "404 Not found" or so as error
-      xhr.onerror();
+      var statusText = xhr.statusText || scrapbook.httpStatusText[xhr.status];
+      statusText = statusText ? " " + statusText : "";
+      handleError(new Error(xhr.status + statusText));
     }
   };
 
-  xhr.onerror = function () {
-    params && params.onerror && params.onerror(xhr);
+  xhr.onerror = function (event) {
+    handleError(new Error("Network request failed."));
     xhrAbort();
   };
 
-  xhr.ontimeout = function () {
+  xhr.ontimeout = function (event) {
     var handler = params && params.ontimeout || params.onerror;
-    handler && handler(xhr);
+    handler && handler(new Error("Request timeout."));
     xhrAbort();
   };
 
@@ -873,8 +952,7 @@ scrapbook.xhr = function (params) {
     xhr.open("GET", params.url, true);
     xhr.send();
   } catch (ex) {
-    console.error(ex);
-    xhr.onerror();
+    handleError(ex);
   }
 };
 

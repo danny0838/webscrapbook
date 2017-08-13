@@ -34,9 +34,6 @@
       "reason": {"content": "$2"}
     }
   },
-  "ErrorFileDownloadTimeout": {
-    "message": "請求逾時。"
-  },
   "ErrorImportOptions": {
     "message": "匯入選項失敗: $REASON$",
     "placeholders": {

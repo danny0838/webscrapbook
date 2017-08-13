@@ -34,9 +34,6 @@
       "reason": {"content": "$2"}
     }
   },
-  "ErrorFileDownloadTimeout": {
-    "message": "Request timeout."
-  },
   "ErrorImportOptions": {
     "message": "Error on importing options: $REASON$",
     "placeholders": {
