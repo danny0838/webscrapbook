@@ -733,41 +733,30 @@ capturer.downloadFile = function (params) {
 
 /**
  * @kind invokable
- * @param {Object} params 
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {Object} params
  *     - {string} params.blob
  *     - {string} params.filename - validated and unique
  *     - {string} params.sourceUrl
+ *     - {Object} params.settings
+ *     - {Object} params.options
  * @return {Promise}
  */
 capturer.downloadBlob = function (params) {
   return new Promise((resolve, reject) => {
     isDebug && console.debug("call: downloadBlob", params);
 
-    var settings = params.settings;
-    var options = params.options;
-    var timeId = settings.timeId;
-    var blob = params.blob;
-    var filename = params.filename;
-    var sourceUrl = params.sourceUrl;
+    var {blob, filename, sourceUrl, settings, options} = params,
+        {timeId} = settings;
     var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
-
-    if (!blob) {
-      resolve({url: capturer.getErrorUrl(sourceUrl, options)});
-    }
 
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
-        let reader = new FileReader();
-        reader.onloadend = function (event) {
-          let dataUri = event.target.result;
+        scrapbook.readFileAsDataURL(blob).then((dataUri) => {
           if (filename) {
             dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");
           }
           resolve({url: dataUri + hash});
-        }
-        reader.readAsDataURL(blob);
+        });
         break;
       }
 
