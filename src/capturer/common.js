@@ -1256,12 +1256,11 @@ capturer.processCssFile = function (params) {
   var charset = params.charset;
   var refUrl = params.url;
 
-  return scrapbook.parseCssFile(data, charset, (text, onReplaceComplete) => {
+  return scrapbook.parseCssFile(data, charset, (text) => {
     var downloader = new capturer.ComplexUrlDownloader(params.settings, params.options, refUrl);
     var rewriteCss = capturer.ProcessCssFileText(text, refUrl, downloader, params.options);
-    downloader.startDownloads().then(() => {
-      text = downloader.finalRewrite(rewriteCss);
-      onReplaceComplete(text);
+    return downloader.startDownloads().then(() => {
+      return downloader.finalRewrite(rewriteCss);
     });
   });
 };

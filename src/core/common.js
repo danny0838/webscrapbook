@@ -653,21 +653,6 @@ scrapbook.doctypeToString = function (doctype) {
 };
 
 /**
- * The function that is called to process the rewritten CSS.
- *
- * @callback parseCssFileRewriteFuncCallback
- * @param {string} cssText - the rewritten CSS text
- */
-
-/**
- * The function that rewrites the CSS text.
- *
- * @callback parseCssFileRewriteFunc
- * @param {string} oldText - the original CSS text
- * @param {parseCssFileRewriteFuncCallback} onRewriteComplete
- */
-
-/**
  * Process a CSS file and rewrite it
  *
  * Browser normally determine the charset of a CSS file via:
@@ -683,10 +668,10 @@ scrapbook.doctypeToString = function (doctype) {
  *
  * @param {Blob} data
  * @param {string} charset
- * @param {parseCssFileRewriteFunc} rewriteFunc
+ * @param {Promise} rewriter - The Promise that rewrites the CSS text.
  * @return {Promise}
  */
-scrapbook.parseCssFile = function (data, charset, rewriteFunc) {
+scrapbook.parseCssFile = function (data, charset, rewriter) {
   return Promise.resolve().then(() => {
     if (charset) {
       return scrapbook.readFileAsText(data, charset);
@@ -716,9 +701,7 @@ scrapbook.parseCssFile = function (data, charset, rewriteFunc) {
       return bytes;
     });
   }).then((origText) => {
-    return new Promise((resolve, reject) => {
-      rewriteFunc(origText, resolve);
-    });
+    return rewriter(origText);
   }).then((rewrittenText) => {
     if (charset) {
       var blob = new Blob([rewrittenText], {type: "text/css;charset=UTF-8"});

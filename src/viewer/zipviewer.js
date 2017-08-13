@@ -579,12 +579,13 @@ document.addEventListener("DOMContentLoaded", function () {
     var refUrl = params.url;
     var recurseChain = params.recurseChain;
 
-    scrapbook.parseCssFile(data, charset, (text, onReplaceComplete) => {
+    scrapbook.parseCssFile(data, charset, (text) => {
       var fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
       var rewriteCss = processCssFileText(text, refUrl, fetcher);
-      fetcher.startFetches(() => {
-        text = fetcher.finalRewrite(rewriteCss);
-        onReplaceComplete(text);
+      return new Promise((resolve, reject) => {
+        fetcher.startFetches(() => {
+          resolve(fetcher.finalRewrite(rewriteCss));
+        });
       });
     }).then((replacedCssBlob) => {
       callback(replacedCssBlob);
