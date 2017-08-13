@@ -28,17 +28,14 @@
     }
   },
   "ErrorFileDownloadError": {
-    "message": "下載檔案錯誤 ($REASON$): $URL$",
+    "message": "下載檔案錯誤 ($URL$): $REASON$",
     "placeholders": {
       "url": {"content": "$1"},
       "reason": {"content": "$2"}
     }
   },
   "ErrorFileDownloadTimeout": {
-    "message": "下載檔案逾時: $URL$",
-    "placeholders": {
-      "url": {"content" : "$1"}
-    }
+    "message": "請求逾時。"
   },
   "ErrorImportOptions": {
     "message": "匯入選項失敗: $REASON$",

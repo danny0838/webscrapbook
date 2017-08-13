@@ -28,17 +28,14 @@
     }
   },
   "ErrorFileDownloadError": {
-    "message": "Error when downloading file ($REASON$): $URL$",
+    "message": "Error downloading file ($URL$): $REASON$",
     "placeholders": {
       "url": {"content": "$1"},
       "reason": {"content": "$2"}
     }
   },
   "ErrorFileDownloadTimeout": {
-    "message": "Timeout when downloading file: $URL$",
-    "placeholders": {
-      "url": {"content" : "$1"}
-    }
+    "message": "Request timeout."
   },
   "ErrorImportOptions": {
     "message": "Error on importing options: $REASON$",
