@@ -877,3 +877,17 @@ scrapbook.xhr = function (params) {
     xhr.onerror();
   }
 };
+
+
+/********************************************************************
+ * Promise utilities
+ *******************************************************************/
+
+/**
+ * @return {Promise}
+ */
+scrapbook.delay = function (ms) {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, ms);
+  });
+};
