@@ -191,22 +191,20 @@ capturer.captureTabSource = function (tab, quiet) {
 
 /**
  * @kind invokable
- * @param {Object} params 
+ * @param {Object} params
+ *     - {string} params.url
  *     - {Object} params.settings
  *     - {Object} params.options
- *     - {string} params.url
  * @return {Promise}
  */
 capturer.captureUrl = function (params) {
-  return new Promise((resolve, reject) => {
+  return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureUrl", params);
 
-    var sourceUrl = params.url;
-    var settings = params.settings;
-    var options = params.options;
+    var {url: sourceUrl, settings, options} = params;
 
     var headers = {};
-    
+
     var determineFilename = function () {
       // run this only once
       if (arguments.callee.done) { return; }
@@ -237,6 +235,7 @@ capturer.captureUrl = function (params) {
       params.settings.documentName = filename;
     };
 
+    return new Promise((resolve, reject) => {
       scrapbook.xhr({
         url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
         responseType: "document",
@@ -274,16 +273,17 @@ capturer.captureUrl = function (params) {
           }
         },
         ontimeout: function (xhr, xhrAbort) {
-          console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, scrapbook.lang("ErrorFileDownloadTimeout")]));
-          resolve({url: capturer.getErrorUrl(sourceUrl, params.options), error: "timeout"});
+          reject(new Error(scrapbook.lang("ErrorFileDownloadTimeout")));
         },
         onerror: function (xhr, xhrAbort) {
-          let err = xhr.statusText ? xhr.status + " " + xhr.statusText : xhr.status;
-          console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, err]));
-          resolve({url: capturer.getErrorUrl(sourceUrl, params.options), error: err});
+          reject(new Error(xhr.statusText ? xhr.status + " " + xhr.statusText : xhr.status));
         }
       });
+    }).catch((ex) => {
+      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+      return {url: capturer.getErrorUrl(sourceUrl, options), error: ex.message};
     });
+  });
 };
 
 /**
