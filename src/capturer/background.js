@@ -851,7 +851,7 @@ capturer.saveBlob = function (params) {
 };
 
 /**
- * @param {Object} params 
+ * @param {Object} params
  *     - {string} params.timeId
  *     - {string} params.url
  *     - {string} params.directory
@@ -865,13 +865,7 @@ capturer.saveUrl = function (params) {
   return new Promise((resolve, reject) => {
     isDebug && console.debug("call: saveUrl", params);
 
-    var timeId = params.timeId;
-    var url = params.url;
-    var directory = params.directory;
-    var filename = params.filename;
-    var sourceUrl = params.sourceUrl;
-    var autoErase = params.autoErase;
-    var savePrompt = params.savePrompt;
+    var {timeId, url, directory, filename, sourceUrl, autoErase, savePrompt} = params;
 
     var downloadParams = {
       url: url,
