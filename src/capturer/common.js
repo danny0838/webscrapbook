@@ -138,47 +138,118 @@ capturer.captureDocumentOrFile = function (params) {
  * @return {Promise}
  */
 capturer.captureDocument = function (params) {
-  return new Promise((resolve, reject) => {
+  return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureDocument");
 
-    var doc = params.doc || document;
-    var settings = params.settings;
-    var options = params.options;
+    var {doc = document, settings, options} = params,
+        {timeId, documentName} = settings,
+        {contentType: mime, documentElement: htmlNode} = doc;
 
     if (doc.readyState === "loading") {
-      console.error(scrapbook.lang("ErrorDocumentNotReady", [doc.URL]));
-      resolve({error: "document not load"});
-      return;
+      throw new Error(scrapbook.lang("ErrorDocumentNotReady", [doc.URL]));
     }
 
-    var captureMain = function () {
-      var rewriteLocalLink = function (url) {
-        let [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+    var tasks = [], taskIndex = 0;
+    var selection;
+    var rootNode, headNode;
+    var favIconNode, favIconUrl;
 
-        // This link targets the current page
-        if (urlMain === scrapbook.splitUrlByAnchor(doc.URL)[0]) {
-          if (urlHash === "" || urlHash === "#") {
-            return urlHash;
-          }
+    // remove the specified node, record it if option set
+    var captureRemoveNode = function (elem) {
+      if (options["capture.recordRemovedNode"]) {
+        elem.parentNode.replaceChild(doc.createComment("sb-" + timeId + "-orig-node--" + scrapbook.escapeHtmlComment(elem.outerHTML)), elem);
+      }
+      else {
+        elem.parentNode.removeChild(elem);
+      }
+    };
 
-          // For full capture (no selection), relink to the captured page.
-          // For partial capture, the captured page could be incomplete,
-          // relink to the captured page only when the target node is included in the selected fragment.
-          let hasLocalTarget = !selection;
-          if (!hasLocalTarget) {
-            let targetId = scrapbook.decodeURIComponent(urlHash.slice(1)).replace(/\W/g, '\\$&');
-            if (rootNode.querySelector('[id="' + targetId + '"], a[name="' + targetId + '"]')) {
-              hasLocalTarget = true;
-            }
-          }
-          if (hasLocalTarget) {
-            return urlHash;
-          }
+    // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
+    var captureRewriteAttr = function (elem, attr, value) {
+      if (!elem.hasAttribute(attr)) return;
+      if (options["capture.recordRewrittenAttr"]) {
+        elem.setAttribute("data-sb-" + timeId + "-orig-" + attr, elem.getAttribute(attr));
+      }
+      if (value === null || value === undefined) {
+        elem.removeAttribute(attr);
+      } else {
+        elem.setAttribute(attr, value);
+      }
+    };
+
+    // rewrite (or remove if value is null/undefined) the textContent, record it if option set
+    var captureRewriteTextContent = function (elem, value) {
+      if (!elem.textContent) return;
+      if (options["capture.recordRewrittenAttr"]) {
+        elem.setAttribute("data-sb-" + timeId + "-orig-textContent", elem.textContent);
+      }
+      if (value === null || value === undefined) {
+        elem.textContent = "";
+      } else {
+        elem.textContent = value;
+      }
+    };
+
+    // similar to captureRewriteAttr, but use option capture.recordSourceUri
+    var captureRewriteUri = function (elem, attr, value) {
+      if (!elem.hasAttribute(attr)) return;
+      if (options["capture.recordSourceUri"]) {
+        elem.setAttribute("data-sb-" + timeId + "-orig-" + attr, elem.getAttribute(attr));
+      }
+      if (value === null || value === undefined) {
+        elem.removeAttribute(attr);
+      } else {
+        elem.setAttribute(attr, value);
+      }
+    };
+
+    var rewriteLocalLink = function (url) {
+      let [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+
+      // This link targets the current page
+      if (urlMain === scrapbook.splitUrlByAnchor(doc.URL)[0]) {
+        if (urlHash === "" || urlHash === "#") {
+          return urlHash;
         }
 
-        return url;
-      };
+        // For full capture (no selection), relink to the captured page.
+        // For partial capture, the captured page could be incomplete,
+        // relink to the captured page only when the target node is included in the selected fragment.
+        let hasLocalTarget = !selection;
+        if (!hasLocalTarget) {
+          let targetId = scrapbook.decodeURIComponent(urlHash.slice(1)).replace(/\W/g, '\\$&');
+          if (rootNode.querySelector('[id="' + targetId + '"], a[name="' + targetId + '"]')) {
+            hasLocalTarget = true;
+          }
+        }
+        if (hasLocalTarget) {
+          return urlHash;
+        }
+      }
 
+      return url;
+    };
+
+    var getCanvasDataScript = function (canvas) {
+      let data = canvas.toDataURL();
+      let dataScript = function (data) {
+        var s = document.getElementsByTagName("script"),
+            c = s[s.length - 1],
+            t = c.previousSibling,
+            i = new Image();
+        i.onload = function(){ t.getContext('2d').drawImage(i, 0, 0); };
+        i.src = data;
+        s.parentNode.removeChild(s);
+      };
+      return "(" + dataScript.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")('" + data + "')";
+    };
+
+    return capturer.invoke("registerDocument", {
+      settings: settings,
+      options: options
+    }).then((response) => {
+      documentName = response.documentName;
+    }).then(() => {
       // give certain nodes an unique id for later refrence,
       // since cloned nodes may not have some information
       // e.g. cloned iframes has no content, cloned canvas has no image
@@ -189,7 +260,7 @@ capturer.captureDocument = function (params) {
       }, this);
 
       // construct the node list
-      var selection = doc.getSelection();
+      selection = doc.getSelection();
       {
         if (selection && selection.isCollapsed) { selection = null; }
         if (selection && !options["capture.saveSelectionOnly"]) { selection = null; }
@@ -318,15 +389,14 @@ capturer.captureDocument = function (params) {
           case "save":
           default:
             favIconUrl = "about:blank";  // temporary placeholder
-            remainingTasks++;
+            tasks[taskIndex++] = 
             capturer.invoke("downloadFile", {
               url: settings.favIconUrl,
               settings: settings,
               options: options
             }).then((response) => {
               favIconUrl = response.url;
-              remainingTasks--;
-              captureCheckDone();
+              return response;
             });
             break;
         }
@@ -417,7 +487,7 @@ capturer.captureDocument = function (params) {
                 default:
                   switch (options["capture.rewriteCss"]) {
                     case "url":
-                      remainingTasks++;
+                      tasks[taskIndex++] = 
                       capturer.invoke("downloadFile", {
                         url: elem.href,
                         rewriteMethod: "processCssFile",
@@ -425,21 +495,19 @@ capturer.captureDocument = function (params) {
                         options: options
                       }).then((response) => {
                         captureRewriteUri(elem, "href", response.url);
-                        remainingTasks--;
-                        captureCheckDone();
+                        return response;
                       });
                       break;
                     case "none":
                     default:
-                      remainingTasks++;
+                      tasks[taskIndex++] = 
                       capturer.invoke("downloadFile", {
                         url: elem.href,
                         settings: settings,
                         options: options
                       }).then((response) => {
                         captureRewriteUri(elem, "href", response.url);
-                        remainingTasks--;
-                        captureCheckDone();
+                        return response;
                       });
                       break;
                   }
@@ -461,15 +529,14 @@ capturer.captureDocument = function (params) {
                   return;
                 case "save":
                 default:
-                  remainingTasks++;
+                  tasks[taskIndex++] = 
                   capturer.invoke("downloadFile", {
                     url: elem.href,
                     settings: settings,
                     options: options
                   }).then((response) => {
                     captureRewriteUri(elem, "href", response.url);
-                    remainingTasks--;
-                    captureCheckDone();
+                    return response;
                   });
                   break;
               }
@@ -491,13 +558,11 @@ capturer.captureDocument = function (params) {
               default:
                 switch (options["capture.rewriteCss"]) {
                   case "url":
-                    remainingTasks++;
                     let downloader = new capturer.ComplexUrlDownloader(settings, options, doc.URL);
                     let rewriteCss = capturer.ProcessCssFileText(elem.textContent, doc.URL, downloader, options);
+                    tasks[taskIndex++] = 
                     downloader.startDownloads().then(() => {
                       elem.textContent = downloader.finalRewrite(rewriteCss);
-                      remainingTasks--;
-                      captureCheckDone();
                     });
                     break;
                   case "none":
@@ -532,15 +597,14 @@ capturer.captureDocument = function (params) {
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
-                  remainingTasks++;
+                  tasks[taskIndex++] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
                     settings: settings,
                     options: options
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
-                    remainingTasks--;
-                    captureCheckDone();
+                    return response;
                   });
                 }
                 break;
@@ -584,15 +648,14 @@ capturer.captureDocument = function (params) {
                   break;
                 case "save":
                 default:
-                  remainingTasks++;
+                  tasks[taskIndex++] = 
                   capturer.invoke("downloadFile", {
                     url: rewriteUrl,
                     settings: settings,
                     options: options
                   }).then((response) => {
                     captureRewriteUri(elem, "background", response.url);
-                    remainingTasks--;
-                    captureCheckDone();
+                    return response;
                   });
                   break;
               }
@@ -622,15 +685,14 @@ capturer.captureDocument = function (params) {
                 return;
               case "save":
               default:
-                let captureFrameCallback = function (result) {
-                  isDebug && console.debug("captureFrameCallback", result);
-                  if (result) {
-                    captureRewriteUri(frame, "src", result.url);
+                let captureFrameCallback = function (response) {
+                  isDebug && console.debug("captureFrameCallback", response);
+                  if (response) {
+                    captureRewriteUri(frame, "src", response.url);
                   } else {
                     captureRewriteAttr(frame, "src", null);
                   }
-                  remainingTasks--;
-                  captureCheckDone();
+                  return response;
                 };
 
                 let frameSettings = JSON.parse(JSON.stringify(settings));
@@ -644,7 +706,7 @@ capturer.captureDocument = function (params) {
                 }
                 if (frameDoc) {
                   // frame document accessible: capture the content document directly
-                  remainingTasks++;
+                  tasks[taskIndex++] = 
                   capturer.captureDocumentOrFile({
                     doc: frameDoc, 
                     settings: frameSettings,
@@ -652,7 +714,7 @@ capturer.captureDocument = function (params) {
                   }).then(captureFrameCallback);
                 } else if (frameSrc.contentWindow) {
                   // frame document inaccessible: get the content document through a messaging technique, and then capture it
-                  remainingTasks++;
+                  tasks[taskIndex++] = 
                   capturer.invoke("captureDocumentOrFile", {
                     settings: frameSettings,
                     options: options
@@ -664,7 +726,7 @@ capturer.captureDocument = function (params) {
                     let targetUrl = scrapbook.splitUrlByAnchor(frameSrc.src)[0];
                     frameSettings.recurseChain.push(sourceUrl);
                     if (frameSettings.recurseChain.indexOf(targetUrl) === -1) {
-                      remainingTasks++;
+                      tasks[taskIndex++] = 
                       capturer.invoke("captureUrl", {
                         settings: frameSettings,
                         options: options,
@@ -742,27 +804,24 @@ capturer.captureDocument = function (params) {
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
-                  remainingTasks++;
+                  tasks[taskIndex++] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
                     settings: settings,
                     options: options
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
-                    remainingTasks--;
-                    captureCheckDone();
+                    return response;
                   });
                 }
                 if (elem.hasAttribute("srcset")) {
-                  remainingTasks++;
                   let downloader = new capturer.ComplexUrlDownloader(settings, options);
                   let rewriteUrl = scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
                     return downloader.getUrlHash(url);
                   });
+                  tasks[taskIndex++] = 
                   downloader.startDownloads().then(() => {
                     elem.setAttribute("srcset", downloader.finalRewrite(rewriteUrl));
-                    remainingTasks--;
-                    captureCheckDone();
                   });
                 }
                 break;
@@ -795,15 +854,13 @@ capturer.captureDocument = function (params) {
               case "save":
               default:
                 Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                  remainingTasks++;
                   let downloader = new capturer.ComplexUrlDownloader(settings, options);
                   let rewriteUrl = scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
                     return downloader.getUrlHash(url);
                   }, this);
+                  tasks[taskIndex++] = 
                   downloader.startDownloads().then(() => {
                     elem.setAttribute("srcset", downloader.finalRewrite(rewriteUrl));
-                    remainingTasks--;
-                    captureCheckDone();
                   });
                 }, this);
                 break;
@@ -832,15 +889,14 @@ capturer.captureDocument = function (params) {
               case "save":
               default:
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                  remainingTasks++;
+                  tasks[taskIndex++] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
                     settings: settings,
                     options: options
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
-                    remainingTasks--;
-                    captureCheckDone();
+                    return response;
                   });
                 }, this);
                 break;
@@ -869,15 +925,14 @@ capturer.captureDocument = function (params) {
               case "save":
               default:
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                  remainingTasks++;
+                  tasks[taskIndex++] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
                     settings: settings,
                     options: options
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
-                    remainingTasks--;
-                    captureCheckDone();
+                    return response;
                   });
                 }, this);
                 break;
@@ -906,15 +961,14 @@ capturer.captureDocument = function (params) {
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
-                  remainingTasks++;
+                  tasks[taskIndex++] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
                     settings: settings,
                     options: options
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
-                    remainingTasks--;
-                    captureCheckDone();
+                    return response;
                   });
                 }
                 break;
@@ -943,15 +997,14 @@ capturer.captureDocument = function (params) {
               case "save":
               default:
                 if (elem.hasAttribute("data")) {
-                  remainingTasks++;
+                  tasks[taskIndex++] = 
                   capturer.invoke("downloadFile", {
                     url: elem.data,
                     settings: settings,
                     options: options
                   }).then((response) => {
                     captureRewriteUri(elem, "data", response.url);
-                    remainingTasks--;
-                    captureCheckDone();
+                    return response;
                   });
                 }
                 break;
@@ -981,15 +1034,14 @@ capturer.captureDocument = function (params) {
               case "save":
               default:
                 if (elem.hasAttribute("archive")) {
-                  remainingTasks++;
+                  tasks[taskIndex++] = 
                   capturer.invoke("downloadFile", {
                     url: elem.getAttribute("archive"),
                     settings: settings,
                     options: options,
                   }).then((response) => {
                     captureRewriteUri(elem, "archive", response.url);
-                    remainingTasks--;
-                    captureCheckDone();
+                    return response;
                   });
                 }
                 break;
@@ -1052,15 +1104,14 @@ capturer.captureDocument = function (params) {
                     return;
                   case "save":
                   default:
-                    remainingTasks++;
+                    tasks[taskIndex++] = 
                     capturer.invoke("downloadFile", {
                       url: elem.src,
                       settings: settings,
                       options: options
                     }).then((response) => {
                       captureRewriteUri(elem, "src", response.url);
-                      remainingTasks--;
-                      captureCheckDone();
+                      return response;
                     });
                     break;
                 }
@@ -1083,13 +1134,11 @@ capturer.captureDocument = function (params) {
             default:
               switch (options["capture.rewriteCss"]) {
                 case "url":
-                  remainingTasks++;
                   let downloader = new capturer.ComplexUrlDownloader(settings, options, doc.URL);
                   let rewriteCss = capturer.ProcessCssFileText(elem.getAttribute("style"), doc.URL, downloader, options);
+                  tasks[taskIndex++] = 
                   downloader.startDownloads().then(() => {
                     elem.setAttribute("style", downloader.finalRewrite(rewriteCss));
-                    remainingTasks--;
-                    captureCheckDone();
                   });
                   break;
                 case "none":
@@ -1143,22 +1192,8 @@ capturer.captureDocument = function (params) {
         headNode.appendChild(frag);
       }
 
-      // captureCheckDone calls before here should be nullified
-      // since the document parsing is not finished yet at that moment
-      captureCheckDone = function () {
-        if (remainingTasks <= 0) {
-          captureDone();
-        }
-      };
-
-      // the document parsing is finished, finalize the document 
-      // if there is no pending downloads now
-      captureCheckDone();
-    };
-
-    var captureCheckDone = function () {};
-
-    var captureDone = function () {
+      return Promise.all(tasks);
+    }).then((results) => {
       // manage favicon
       if (favIconUrl && favIconNode) {
         favIconNode.href = favIconUrl;
@@ -1166,7 +1201,7 @@ capturer.captureDocument = function (params) {
 
       // save document
       var content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
-      capturer.invoke("saveDocument", {
+      return capturer.invoke("saveDocument", {
         sourceUrl: doc.URL,
         documentName: documentName,
         settings: settings,
@@ -1177,89 +1212,12 @@ capturer.captureDocument = function (params) {
           content: content,
           title: doc.title
         }
-      }).then(resolve);
-    };
-
-    // remove the specified node, record it if option set
-    var captureRemoveNode = function (elem) {
-      if (options["capture.recordRemovedNode"]) {
-        elem.parentNode.replaceChild(doc.createComment("sb-" + timeId + "-orig-node--" + scrapbook.escapeHtmlComment(elem.outerHTML)), elem);
-      }
-      else {
-        elem.parentNode.removeChild(elem);
-      }
-    };
-
-    // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
-    var captureRewriteAttr = function (elem, attr, value) {
-      if (!elem.hasAttribute(attr)) return;
-      if (options["capture.recordRewrittenAttr"]) {
-        elem.setAttribute("data-sb-" + timeId + "-orig-" + attr, elem.getAttribute(attr));
-      }
-      if (value === null || value === undefined) {
-        elem.removeAttribute(attr);
-      } else {
-        elem.setAttribute(attr, value);
-      }
-    };
-
-    // rewrite (or remove if value is null/undefined) the textContent, record it if option set
-    var captureRewriteTextContent = function (elem, value) {
-      if (!elem.textContent) return;
-      if (options["capture.recordRewrittenAttr"]) {
-        elem.setAttribute("data-sb-" + timeId + "-orig-textContent", elem.textContent);
-      }
-      if (value === null || value === undefined) {
-        elem.textContent = "";
-      } else {
-        elem.textContent = value;
-      }
-    };
-
-    // similar to captureRewriteAttr, but use option capture.recordSourceUri
-    var captureRewriteUri = function (elem, attr, value) {
-      if (!elem.hasAttribute(attr)) return;
-      if (options["capture.recordSourceUri"]) {
-        elem.setAttribute("data-sb-" + timeId + "-orig-" + attr, elem.getAttribute(attr));
-      }
-      if (value === null || value === undefined) {
-        elem.removeAttribute(attr);
-      } else {
-        elem.setAttribute(attr, value);
-      }
-    };
-
-    var getCanvasDataScript = function (canvas) {
-      let data = canvas.toDataURL();
-      let dataScript = function (data) {
-        var s = document.getElementsByTagName("script"),
-            c = s[s.length - 1],
-            t = c.previousSibling,
-            i = new Image();
-        i.onload = function(){ t.getContext('2d').drawImage(i, 0, 0); };
-        i.src = data;
-        s.parentNode.removeChild(s);
-      };
-      return "(" + dataScript.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")('" + data + "')";
-    };
-
-    var remainingTasks = 0;
-    var timeId = settings.timeId;
-    var mime = doc.contentType;
-    var documentName = settings.documentName;
-    var htmlNode = doc.documentElement;
-    var rootNode;
-    var headNode;
-    var favIconNode;
-    var favIconUrl;
-
-    capturer.invoke("registerDocument", {
-      settings: settings,
-      options: options
-    }).then((response) => {
-      documentName = response.documentName;
-      captureMain();
+      });
     });
+  }).catch((ex) => {
+    console.error(ex);
+    console.warn(ex.message);
+    return {error: ex};
   });
 };
 
