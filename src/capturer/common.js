@@ -814,13 +814,10 @@ capturer.captureDocument = function (params) {
                   });
                 }
                 if (elem.hasAttribute("srcset")) {
-                  let downloader = new capturer.ComplexUrlDownloader(settings, options);
-                  let rewriteUrl = scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
-                    return downloader.getUrlHash(url);
-                  });
                   tasks[taskIndex++] = 
-                  downloader.startDownloads().then(() => {
-                    elem.setAttribute("srcset", downloader.finalRewrite(rewriteUrl));
+                  capturer.processSrcsetText(elem.getAttribute("srcset"), doc.URL, settings, options).then((response) => {
+                    elem.setAttribute("srcset", response);
+                    return response;
                   });
                 }
                 break;
@@ -853,13 +850,10 @@ capturer.captureDocument = function (params) {
               case "save":
               default:
                 Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                  let downloader = new capturer.ComplexUrlDownloader(settings, options);
-                  let rewriteUrl = scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
-                    return downloader.getUrlHash(url);
-                  }, this);
                   tasks[taskIndex++] = 
-                  downloader.startDownloads().then(() => {
-                    elem.setAttribute("srcset", downloader.finalRewrite(rewriteUrl));
+                  capturer.processSrcsetText(elem.getAttribute("srcset"), doc.URL, settings, options).then((response) => {
+                    elem.setAttribute("srcset", response);
+                    return response;
                   });
                 }, this);
                 break;
@@ -1241,6 +1235,21 @@ capturer.getCircularUrl = function (sourceUrl, options) {
     return "urn:scrapbook:download:circular:" + sourceUrl;
   }
   return "about:blank";
+};
+
+/**
+ * @return {Promise}
+ */
+capturer.processSrcsetText = function (text, refUrl, settings, options) {
+  var downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
+
+  var rewritten = scrapbook.parseSrcset(text, (url) => {
+    return downloader.getUrlHash(url);
+  });
+
+  return downloader.startDownloads().then((response) => {
+    return downloader.finalRewrite(rewritten);
+  });
 };
 
 /**
