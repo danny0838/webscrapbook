@@ -368,33 +368,6 @@ scrapbook.stringToDataUri = function (str, mime, charset) {
   return "data:" + mime + charset + ";base64," + this.unicodeToBase64(str);
 };
 
-scrapbook.dataUriToFile = function (dataUri) {
-  if (/^data:([^,]*?)(;base64)?,(.*?)$/i.test(dataUri)) {
-    var mediatype = RegExp.$1;
-    var base64 = !!RegExp.$2;
-    var data = RegExp.$3;
-
-    var parts = mediatype.split(";");
-    var mime = parts.shift();
-    var parameters = {};
-    parts.forEach((part) => {
-      if (/^(.*?)=(.*?)$/.test(part)) {
-        parameters[RegExp.$1.toLowerCase()] = RegExp.$2;
-      }
-    });
-
-    var ext = Mime.prototype.extension(mime);
-    ext = ext ? ("." + ext) : "";
-
-    var bstr = base64 ? atob(data) : unescape(data);
-    var ab = scrapbook.byteStringToArrayBuffer(bstr);
-    var filename = parameters.filename ? decodeURIComponent(parameters.filename) : scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
-    var file = new File([ab], filename, {type: mediatype});
-    return file;
-  }
-  return null;
-};
-
 scrapbook.unicodeToUtf8 = function (chars) {
   return unescape(encodeURIComponent(chars));
 };
@@ -568,6 +541,39 @@ scrapbook.parseHeaderRefresh = function (string) {
 
   return result;
 };
+
+
+/********************************************************************
+ * File/Blob utilities
+ *******************************************************************/
+
+scrapbook.dataUriToFile = function (dataUri) {
+  if (/^data:([^,]*?)(;base64)?,(.*?)$/i.test(dataUri)) {
+    var mediatype = RegExp.$1;
+    var base64 = !!RegExp.$2;
+    var data = RegExp.$3;
+
+    var parts = mediatype.split(";");
+    var mime = parts.shift();
+    var parameters = {};
+    parts.forEach((part) => {
+      if (/^(.*?)=(.*?)$/.test(part)) {
+        parameters[RegExp.$1.toLowerCase()] = RegExp.$2;
+      }
+    });
+
+    var ext = Mime.prototype.extension(mime);
+    ext = ext ? ("." + ext) : "";
+
+    var bstr = base64 ? atob(data) : unescape(data);
+    var ab = scrapbook.byteStringToArrayBuffer(bstr);
+    var filename = parameters.filename ? decodeURIComponent(parameters.filename) : scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
+    var file = new File([ab], filename, {type: mediatype});
+    return file;
+  }
+  return null;
+};
+
 
 /********************************************************************
  * HTML DOM related utilities
