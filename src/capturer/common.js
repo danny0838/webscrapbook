@@ -558,11 +558,10 @@ capturer.captureDocument = function (params) {
               default:
                 switch (options["capture.rewriteCss"]) {
                   case "url":
-                    let downloader = new capturer.ComplexUrlDownloader(settings, options, doc.URL);
-                    let rewriteCss = capturer.ProcessCssFileText(elem.textContent, doc.URL, downloader, options);
                     tasks[taskIndex++] = 
-                    downloader.startDownloads().then(() => {
-                      elem.textContent = downloader.finalRewrite(rewriteCss);
+                    capturer.processCssText(elem.textContent, doc.URL, settings, options).then((response) => {
+                      elem.textContent = response;
+                      return response;
                     });
                     break;
                   case "none":
@@ -1134,11 +1133,10 @@ capturer.captureDocument = function (params) {
             default:
               switch (options["capture.rewriteCss"]) {
                 case "url":
-                  let downloader = new capturer.ComplexUrlDownloader(settings, options, doc.URL);
-                  let rewriteCss = capturer.ProcessCssFileText(elem.getAttribute("style"), doc.URL, downloader, options);
                   tasks[taskIndex++] = 
-                  downloader.startDownloads().then(() => {
-                    elem.setAttribute("style", downloader.finalRewrite(rewriteCss));
+                  capturer.processCssText(elem.getAttribute("style"), doc.URL, settings, options).then((response) => {
+                    elem.setAttribute("style", response);
+                    return response;
                   });
                   break;
                 case "none":
@@ -1252,23 +1250,23 @@ capturer.getCircularUrl = function (sourceUrl, options) {
  */
 capturer.processCssFile = function (params) {
   return Promise.resolve().then(() => {
-    var {data, charset, url: refUrl} = params;
+    var {data, charset, url: refUrl, settings, options} = params;
 
-    return scrapbook.parseCssFile(data, charset, (text) => {
-      var downloader = new capturer.ComplexUrlDownloader(params.settings, params.options, refUrl);
-      var rewriteCss = capturer.ProcessCssFileText(text, refUrl, downloader, params.options);
-      return downloader.startDownloads().then(() => {
-        return downloader.finalRewrite(rewriteCss);
-      });
+    return scrapbook.parseCssFile(data, charset, (cssText) => {
+      return capturer.processCssText(cssText, refUrl, settings, options);
     });
   });
 };
 
 /**
  * process the CSS text of whole <style> or a CSS file
+ *
+ * @return {Promise}
  */
-capturer.ProcessCssFileText = function (cssText, refUrl, downloader, options) {
-  return scrapbook.parseCssText(cssText, {
+capturer.processCssText = function (cssText, refUrl, settings, options) {
+  var downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
+
+  var rewritten = scrapbook.parseCssText(cssText, {
     rewriteImportUrl: function (url) {
       var dataUrl = capturer.resolveRelativeUrl(url, refUrl);
       switch (options["capture.style"]) {
@@ -1319,6 +1317,10 @@ capturer.ProcessCssFileText = function (cssText, refUrl, downloader, options) {
       }
       return dataUrl;
     }
+  });
+
+  return downloader.startDownloads().then((response) => {
+    return downloader.finalRewrite(rewritten);
   });
 };
 
