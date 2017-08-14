@@ -547,6 +547,57 @@ scrapbook.parseHeaderRefresh = function (string) {
  * File/Blob utilities
  *******************************************************************/
 
+/**
+ * @param {Blob} blob - The Blob of File object to be read.
+ * @return {Promise}
+ */
+scrapbook.readFileAsArrayBuffer = function (blob) {
+  return new Promise((resolve, reject) => {
+    var reader = new FileReader();
+    reader.onload = resolve;
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(blob);
+  }).then((event) => {
+    return event.target.result;
+  });
+};
+
+/**
+ * @param {Blob} blob - The Blob of File object to be read.
+ * @return {Promise}
+ */
+scrapbook.readFileAsDataURL = function (blob) {
+  return new Promise((resolve, reject) => {
+    var reader = new FileReader();
+    reader.onload = resolve;
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  }).then((event) => {
+    return event.target.result;
+  });
+};
+
+/**
+ * @param {Blob} blob - The Blob of File object to be read.
+ * @param {string|false} charset - Read as UTF-8 if undefined and as raw bytes if falsy.
+ * @return {Promise}
+ */
+scrapbook.readFileAsText = function (blob, charset = "UTF-8") {
+  if (charset) {
+    return new Promise((resolve, reject) => {
+      var reader = new FileReader();
+      reader.onload = resolve;
+      reader.onerror = reject;
+      reader.readAsText(blob, charset);
+    }).then((event) => {
+      return event.target.result;
+    });
+  }
+  return scrapbook.readFileAsArrayBuffer(blob).then((ab) => {
+    return scrapbook.arrayBufferToByteString(ab);
+  });
+};
+
 scrapbook.dataUriToFile = function (dataUri) {
   if (/^data:([^,]*?)(;base64)?,(.*?)$/i.test(dataUri)) {
     var mediatype = RegExp.$1;
