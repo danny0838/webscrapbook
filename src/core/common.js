@@ -635,6 +635,23 @@ scrapbook.readFileAsText = function (blob, charset = "UTF-8") {
   });
 };
 
+/**
+ * @param {Blob} blob - The Blob of File object to be read.
+ * @return {Promise}
+ */
+scrapbook.readFileAsDocument = function (blob) {
+  return new Promise((resolve, reject) => {
+    scrapbook.xhr({
+      url: URL.createObjectURL(blob),
+      responseType: "document",
+      onload: function (xhr, xhrAbort) {
+        resolve(xhr.response);
+      },
+      onerror: reject
+    });
+  });
+};
+
 scrapbook.dataUriToFile = function (dataUri) {
   if (/^data:([^,]*?)(;base64)?,(.*?)$/i.test(dataUri)) {
     var mediatype = RegExp.$1;

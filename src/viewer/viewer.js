@@ -149,16 +149,6 @@ function init() {
       }
     },
 
-    readRdfFile: function (file, callback) {
-      scrapbook.xhr({
-        url: URL.createObjectURL(file),
-        responseType: "document",
-        onload: function (xhr, xhrAbort) {
-          callback(xhr.response);
-        }
-      });
-    },
-
     parseRdfDocument: function (doc) {
       var RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
       var MAF = "http://maf.mozdev.org/metadata/rdf#";
@@ -209,7 +199,7 @@ function init() {
             var processMaffDirectoryEntry = function (directoryEntry, callback) {
               directoryEntry.getFile("index.rdf", {}, (fileEntry) => {
                 fileEntry.file((file) => {
-                  viewer.readRdfFile(file, (doc) => {
+                  scrapbook.readFileAsDocument(file).then((doc) => {
                     var meta = viewer.parseRdfDocument(doc);
                     directoryEntry.getFile(meta.indexfilename, {}, (fileEntry) => {
                       callback(fileEntry);
@@ -339,7 +329,7 @@ function init() {
                 let filename = rdfFile.name.replace(/.*\//, "");
                 let mime = Mime.prototype.lookup(filename);
                 let file = new File([ab], filename, {type: mime});
-                viewer.readRdfFile(file, (doc) => {
+                scrapbook.readFileAsDocument(file).then((doc) => {
                   var meta = viewer.parseRdfDocument(doc);
                   var indexFilename = meta.indexfilename;
                   var indexFile = dirObj.file(indexFilename);
