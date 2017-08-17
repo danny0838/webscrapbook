@@ -193,6 +193,7 @@ capturer.captureTabSource = function (tab, quiet) {
  * @kind invokable
  * @param {Object} params
  *     - {string} params.url
+ *     - {string} params.refUrl
  *     - {Object} params.settings
  *     - {Object} params.options
  * @return {Promise}
@@ -201,7 +202,7 @@ capturer.captureUrl = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureUrl", params);
 
-    var {url: sourceUrl, settings, options} = params;
+    var {url: sourceUrl, refUrl, settings, options} = params;
 
     var headers = {};
 
@@ -235,10 +236,14 @@ capturer.captureUrl = function (params) {
       params.settings.documentName = filename;
     };
 
+    let requestHeaders = {};
+    if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
+
     return new Promise((resolve, reject) => {
       scrapbook.xhr({
         url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
         responseType: "document",
+        requestHeaders: requestHeaders,
         onreadystatechange: function (xhr, xhrAbort) {
           if (xhr.readyState === 2 && xhr.status !== 0) {
             let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
@@ -261,12 +266,14 @@ capturer.captureUrl = function (params) {
           if (doc) {
             capturer.captureDocumentOrFile({
               doc: doc,
+              refUrl: refUrl,
               settings: settings,
               options: options
             }).then(resolve);
           } else {
             capturer.captureFile({
               url: params.url,
+              refUrl: refUrl,
               settings: params.settings,
               options: params.options
             }).then(resolve);
@@ -285,6 +292,7 @@ capturer.captureUrl = function (params) {
  * @kind invokable
  * @param {Object} params
  *     - {string} params.url
+ *     - {string} params.refUrl
  *     - {{title: string}} params.data
  *     - {Object} params.settings
  *     - {Object} params.options
@@ -294,12 +302,13 @@ capturer.captureFile = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureFile", params);
 
-    var {url: sourceUrl, data = {}, settings, options} = params,
+    var {url: sourceUrl, refUrl, data = {}, settings, options} = params,
         {title} = data,
         {timeId} = settings;
 
     return capturer.downloadFile({
       url: sourceUrl,
+      refUrl: refUrl,
       settings: settings,
       options: options
     }).then((response) => {
@@ -578,6 +587,7 @@ capturer.saveDocument = function (params) {
  * @kind invokable
  * @param {Object} params
  *     - {string} params.url
+ *     - {string} params.refUrl
  *     - {string} params.rewriteMethod
  *     - {Object} params.settings
  *     - {Object} params.options
@@ -587,7 +597,7 @@ capturer.downloadFile = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: downloadFile", params);
 
-    var {url: sourceUrl, rewriteMethod, settings, options} = params,
+    var {url: sourceUrl, refUrl, rewriteMethod, settings, options} = params,
         {timeId} = settings;
     var targetDir = options["capture.dataFolder"] + "/" + timeId;
 
@@ -670,9 +680,13 @@ capturer.downloadFile = function (params) {
         return true;
       };
 
+      let requestHeaders = {};
+      if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
+
       scrapbook.xhr({
         url: sourceUrl,
         responseType: "blob",
+        requestHeaders: requestHeaders,
         onreadystatechange: function (xhr, xhrAbort) {
           if (xhr.readyState === 2 && xhr.status !== 0) {
             let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
@@ -932,5 +946,17 @@ chrome.downloads.onChanged.addListener((downloadDelta) => {
     console.error(ex);
   });
 });
+
+chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
+  // Some headers (e.g. "referer") are not allowed to be set via
+  // XMLHttpRequest.setRequestHeader directly.  Use a prefix and
+  // modify it here to workaround.
+  details.requestHeaders.forEach((header) => {
+    if (header.name.slice(0, 15) === "X-WebScrapBook-") {
+      header.name = header.name.slice(15);
+    }
+  });
+  return {requestHeaders: details.requestHeaders};
+}, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, ["blocking", "requestHeaders"]);
 
 // isDebug && console.debug("loading background.js");

@@ -903,6 +903,7 @@ scrapbook.httpStatusText = {
  * @param {Object} params
  *     - {string} params.url
  *     - {string} params.responseType
+ *     - {Array} params.requestHeaders
  *     - {xhrEventHandler} params.onreadystatechange
  *     - {xhrEventHandler} params.onload
  *     - {xhrEventHandler} params.onerror
@@ -950,6 +951,11 @@ scrapbook.xhr = function (params) {
   try {
     xhr.responseType = params.responseType;
     xhr.open("GET", params.url, true);
+    if (params.requestHeaders) {
+      for (let header in params.requestHeaders) {
+        xhr.setRequestHeader(header, params.requestHeaders[header]);
+      }
+    }
     xhr.send();
   } catch (ex) {
     handleError(ex);
