@@ -7,83 +7,76 @@
 
 function init() {
   var fileSystemHandler = {
-    createDir: function (dirEntry, path, callback) {
-      var folders = (Object.prototype.toString.call(path) === "[object Array]") ? path : path.split("/");
-      dirEntry.getDirectory(folders.join("/"), {}, (dirEntry) => {
-        callback();
-      }, (ex) => {
-        this.createDirInternal(dirEntry, folders, callback);
+    /**
+     * @return {Promise}
+     */
+    getDir: function (dirEntry, path) {
+      return new Promise((resolve, reject) => {
+        dirEntry.getDirectory(path, {}, resolve, reject);
       });
     },
 
-    createDirInternal: function (dirEntry, folders, callback) {
-      // Throw out './' or '/' and move on to prevent something like '/foo/.//bar'.
-      if (folders[0] == '.' || folders[0] == '') {
-        folders = folders.slice(1);
-      }
-
-      dirEntry.getDirectory(folders[0], {create: true}, (dirEntry) => {
-        // Recursively add the new subfolder (if we still have another to create).
-        if (folders.length) {
-          this.createDirInternal(dirEntry, folders.slice(1), callback);
-        } else {
-          callback();
-        }
-      }, (ex) => {
-        alert("Unable to create directory: '" + folders.join("/") + "': " + ex);
+    /**
+     * @return {Promise}
+     */
+    getFile: function (dirEntry, path) {
+      return new Promise((resolve, reject) => {
+        dirEntry.getFile(path, {}, resolve, reject);
       });
     },
 
-    createFile: function (dirEntry, path, fileBlob, callback) {
-      this.createDir(dirEntry, path.split("/").slice(0, -1), () => {
-        dirEntry.getFile(path, {create: true}, (fileEntry) => {
-          // Create a FileWriter object for our FileEntry (log.txt).
-          fileEntry.createWriter((fileWriter) => {
+    /**
+     * @return {Promise}
+     */
+    readDir: function (dirEntry) {
+      return new Promise((resolve, reject) => {
+        dirEntry.createReader().readEntries(resolve);
+      });
+    },
 
-            fileWriter.onwriteend = function (e) {
-              callback();
-            };
+    /**
+     * @return {Promise}
+     */
+    createDir: function (dirEntry, path) {
+      return Promise.resolve().then(() => {
+        var folders = (Object.prototype.toString.call(path) === "[object Array]") ? path : path.split("/");
+        // Throw out './' or '/' and move on to prevent something like '/foo/.//bar'.
+        folders = folders.filter(x => x && x !== '.');
 
-            fileWriter.onerror = function (e) {
-              alert("Unable to create write file: '" + path + "'");
-              callback();
-            };
-
-            fileWriter.write(fileBlob);
-          }, (ex) => {
-            alert("Unable to create file writer: '" + path + "': " + ex);
-          });
-        }, (ex) => {
-          alert("Unable to create file: '" + path + "': " + ex);
+        return fileSystemHandler.getDir(folders.join("/")).catch((ex) => {
+          var createDirInternal = function (dirEntry, folders) {
+            return new Promise((resolve, reject) => {
+              dirEntry.getDirectory(folders[0], {create: true}, resolve, reject);
+            }).then((dirEntry) => {
+              // Recursively add the new subfolder (if we still have another to create).
+              if (folders.length) {
+                return createDirInternal(dirEntry, folders.slice(1));
+              }
+              return dirEntry;
+            });
+          };
+          return createDirInternal(dirEntry, folders);
         });
       });
     },
 
-    createFileFromZipEntry: function (dirEntry, path, zipObj, callback) {
-      this.createDir(dirEntry, path.split("/").slice(0, -1), () => {
-        dirEntry.getFile(path, {create: true}, (fileEntry) => {
-          // @TODO: reading a large file (about 400~500 MB) once into an
-          //     arraybuffer could consume too much memory and cause the
-          //     extension to shutdown.  Loading in chunks avoids this but
-          //     is very slow and unuseful.  We currently use the faster
-          //     method.
-          zipObj.async("arraybuffer").then((ab) => {
-            fileEntry.createWriter((fileWriter) => {
-              fileWriter.onwriteend = function (e) {
-                callback();
-              };
-              fileWriter.onerror = function (e) {
-                alert("Unable to create write file: '" + path + "'");
-                callback();
-              };
-              // fileWriter.seek(fileWriter.length);
-              fileWriter.write(new Blob([ab]));
-            }, (ex) => {
-              console.error("Unable to create file writer: '" + path + "': " + ex);
-            });
-          });
-        }, (ex) => {
-          alert("Unable to create file: '" + path + "': " + ex);
+    /**
+     * @return {Promise}
+     */
+    createFile: function (dirEntry, path, fileBlob) {
+      return this.createDir(dirEntry, path.split("/").slice(0, -1)).then(() => {
+        return new Promise((resolve, reject) => {
+          dirEntry.getFile(path, {create: true}, resolve, reject);
+        });
+      }).then((fileEntry) => {
+        return new Promise((resolve, reject) => {
+          fileEntry.createWriter(resolve, reject);
+        });
+      }).then((fileWriter) => {
+        return new Promise((resolve, reject) => {
+          fileWriter.onwriteend = resolve;
+          fileWriter.onerror = reject;
+          fileWriter.write(fileBlob);
         });
       });
     }
@@ -94,6 +87,11 @@ function init() {
     filesystem: null,
     urlSearch: "",
     urlHash: "",
+
+    warn: function (msg) {
+      console.warn(msg);
+      alert(msg);
+    },
 
     start: function () {
       if (viewer.mainUrl.searchParams.has("reload")) {
@@ -161,135 +159,96 @@ function init() {
       return result;
     },
 
+    /**
+     * @return {Promise}
+     */
     viewZipInFileSystem: function (zipFile) {
-      var extractZipFile = function (file) {
+      return Promise.resolve().then(() => {
+        var root = viewer.filesystem.root;
         var ns = scrapbook.getUuid();
-        var type = scrapbook.filenameParts(file.name)[1].toLowerCase();
+        var type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
 
-        var zip = new JSZip();
         // @TODO: JSZip.loadAsync cannot load a large zip file
         //     (around 2GB, tested in Chrome)
-        zip.loadAsync(file).then((zip) => {
-          let jobs = [];
-          viewer.filesystem.root.getDirectory(ns, {create: true}, () => {
-            let nextJob = function () {
-              if (jobs.length) {
-                let job = jobs.shift();
-                fileSystemHandler.createFileFromZipEntry.apply(fileSystemHandler, job);
-              } else {
-                onAllZipEntriesProcessed(type, ns);
-              }
-            };
+        return new JSZip().loadAsync(zipFile).then((zip) => {
+          return fileSystemHandler.createDir(root, ns).then((dirEntry) => {
+            var p = Promise.resolve();
             zip.forEach((inZipPath, zipObj) => {
               if (zipObj.dir) { return; }
-              jobs.push([viewer.filesystem.root, ns + "/" + inZipPath, zipObj, nextJob]);
+              p = p.then(() => {
+                // @TODO: reading a large file (about 400~500 MB) once into an
+                //     arraybuffer could consume too much memory and cause the
+                //     extension to shutdown.  Loading in chunks avoids this but
+                //     is very slow and unuseful.  We currently use the faster
+                //     method.
+                return zipObj.async("arraybuffer");
+              }).then((ab) => {
+                return fileSystemHandler.createFile(root, ns + "/" + inZipPath, new Blob([ab]));
+              });
             });
-            nextJob();
-          }, (ex) => {
-            alert("Unable to create directory: '" + ns + "': " + ex);
+            return p;
           });
-        }).catch((ex) => {
-          alert("Unable to load the zip file: " + ex);
-        });
-      };
-
-      var onAllZipEntriesProcessed = function (type, ns) {
-        switch (type) {
-          case "maff": {
-            var processMaffDirectoryEntry = function (directoryEntry, callback) {
-              directoryEntry.getFile("index.rdf", {}, (fileEntry) => {
-                fileEntry.file((file) => {
-                  scrapbook.readFileAsDocument(file).then((doc) => {
-                    var meta = viewer.parseRdfDocument(doc);
-                    directoryEntry.getFile(meta.indexfilename, {}, (fileEntry) => {
-                      callback(fileEntry);
-                    }, (ex) => {
-                      alert("Unable to get index file '" + meta.indexfilename + "' in the directory: '" + directoryEntry.fullPath + "': " + ex);
-                      callback(null);
+        }).then(() => {
+          switch (type) {
+            case "maff": {
+              return fileSystemHandler.getDir(root, ns).then((dirEntry) => {
+                return fileSystemHandler.readDir(dirEntry);
+              }).then((entries) => {
+                var tasks = entries.filter(e => e.isDirectory).map((entry) => {
+                  return fileSystemHandler.getFile(entry, "index.rdf").then((fileEntry) => {
+                    return new Promise((resolve, reject) => {
+                      fileEntry.file(resolve, reject);
+                    }).then((file) => {
+                      return scrapbook.readFileAsDocument(file);
+                    }).then((doc) => {
+                      var meta = viewer.parseRdfDocument(doc);
+                      return fileSystemHandler.getFile(entry, meta.indexfilename);
                     });
-                  });
-                }, (ex) => {
-                  alert("Unable to read index.rdf in the directory: '" + directoryEntry.fullPath + "'");
-                  callback(null);
-                });
-              }, (ex) => {
-                directoryEntry.createReader().readEntries((entries) => {
-                  for (let i = 0, I = entries.length; i < I; ++i) {
-                    let entry = entries[i];
-                    if (entry.isFile && entry.name.startsWith("index.")) {
-                      callback(entry);
-                      return;
-                    }
-                  }
-                  callback(null);
-                }, (ex) => {
-                  alert("Unable to read directory: '" + directoryEntry.fullPath + "'");
-                  callback(null);
-                });
-              });
-            };
-
-            var onAllDirectoryParsed = function (indexFileEntries) {
-              let validIndexFileEntries = indexFileEntries.filter(x => !!x);
-              if (validIndexFileEntries.length) {
-                onZipExtracted(validIndexFileEntries);
-              } else {
-                alert("No available data can be loaded from this maff file.");
-              }
-            };
-
-            viewer.filesystem.root.getDirectory(ns, {}, (mainEntry) => {
-              mainEntry.createReader().readEntries((entries) => {
-                let remainingDirectories = 0, indexFileEntries = [];
-                entries.forEach((entry) => {
-                  if (!entry.isDirectory) { return; }
-                  remainingDirectories++;
-                  let index = indexFileEntries.length;
-                  indexFileEntries.length++;
-                  processMaffDirectoryEntry(entry, (indexFileEntry) => {
-                    indexFileEntries[index] = indexFileEntry;
-                    if (--remainingDirectories === 0) { onAllDirectoryParsed(indexFileEntries); }
+                  }, (ex) => {
+                    return fileSystemHandler.readDir(entry).then((entries) => {
+                      for (let i = 0, I = entries.length; i < I; ++i) {
+                        let entry = entries[i];
+                        if (entry.isFile && entry.name.startsWith("index.")) {
+                          return entry;
+                        }
+                      }
+                      throw new Error("no index.* in the directory");
+                    });
+                  }).catch((ex) => {
+                    viewer.warn("Unable to get index file in directory: '" + entry.fullPath + "'");
                   });
                 });
-                if (remainingDirectories === 0) { onAllDirectoryParsed(indexFileEntries); }
-              }, (ex) => {
-                alert("Unable to read directory: '" + ns + "'");
+                return Promise.all(tasks);
               });
-            }, (ex) => {
-              alert("Unable to get directory: '" + ns + "'");
-            });
-            break;
+            }
+            case "htz":
+            default: {
+              return fileSystemHandler.getFile(root, ns + "/" + "index.html").then((fileEntry) => {
+                return [fileEntry];
+              });
+            }
           }
-          case "htz":
-          default: {
-            var indexFile = ns + "/" + "index.html";
-            viewer.filesystem.root.getFile(indexFile, {}, (fileEntry) => {
-              onZipExtracted(fileEntry);
-            }, (ex) => {
-              alert("Unable to get file: '" + indexFile + "': " + ex);
-            });
-            break;
+        }).then((indexFileEntries) => {
+          indexFileEntries = indexFileEntries.filter(x => !!x);
+          if (!indexFileEntries.length) {
+            return viewer.warn("No available data can be loaded from this archive file.");
           }
-        }
-      };
-
-      var onZipExtracted = function (indexFileEntries) {
-        if (Object.prototype.toString.call(indexFileEntries) !== "[object Array]") {
-          indexFileEntries = [indexFileEntries];
-        }
-
-        chrome.tabs.getCurrent((tab) => {
-          let mainFileEntry = indexFileEntries.shift();
-          indexFileEntries.forEach((indexFileEntry) => {
-            let url = indexFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
-            chrome.tabs.create({url: url}, () => {});
+          return new Promise((resolve, reject) => {
+            chrome.tabs.getCurrent(resolve);
+          }).then((tab) => {
+            let mainFileEntry = indexFileEntries.shift();
+            indexFileEntries.forEach((indexFileEntry) => {
+              let url = indexFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
+              chrome.tabs.create({url: url}, () => {});
+            });
+            let url = mainFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
+            chrome.tabs.update(tab.id, {url: url}, () => {});
           });
-          let url = mainFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
-          chrome.tabs.update(tab.id, {url: url}, () => {});
         });
-      };
-
-      extractZipFile(zipFile);
+      }).catch((ex) => {
+        console.error(ex);
+        alert("Unable to open web page archive: " + ex.message);
+      });
     },
 
     viewZipInMemory: function (zipFile) {
