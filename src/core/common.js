@@ -7,6 +7,7 @@
  * @public {Object} scrapbook
  *******************************************************************/
 
+var isDebug = false;
 var scrapbook = {
   get isGecko() {
     let m = chrome.runtime.getManifest();
@@ -14,7 +15,6 @@ var scrapbook = {
     return this.isGecko = !!(m.applications && m.applications.gecko);
   }
 };
-var isDebug = false;
 
 
 /********************************************************************
