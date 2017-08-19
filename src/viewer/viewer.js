@@ -139,12 +139,20 @@ function init() {
       history.replaceState({}, null, refreshUrl);
     },
 
+    /**
+     * @return {Promise}
+     */
     processZipFile: function (zipFile) {
-      if (viewer.filesystem) {
-        viewer.viewZipInFileSystem(zipFile);
-      } else {
-        viewer.viewZipInMemory(zipFile);
-      }
+      return Promise.resolve().then(() => {
+        if (viewer.filesystem) {
+          return viewer.viewZipInFileSystem(zipFile);
+        } else {
+          return viewer.viewZipInMemory(zipFile);
+        }
+      }).catch((ex) => {
+        console.error(ex);
+        alert("Unable to open web page archive: " + ex.message);
+      });
     },
 
     parseRdfDocument: function (doc) {
@@ -245,9 +253,6 @@ function init() {
             chrome.tabs.update(tab.id, {url: url}, () => {});
           });
         });
-      }).catch((ex) => {
-        console.error(ex);
-        alert("Unable to open web page archive: " + ex.message);
       });
     },
 
@@ -432,9 +437,6 @@ body {
             return invokeZipViewer(zipFile, "index.html");
           }
         }
-      }).catch((ex) => {
-        console.error(ex);
-        alert("Unable to open web page archive: " + ex.message);
       });
     }
   };
@@ -484,27 +486,21 @@ body {
     viewer.processZipFile(file);
   }, false);
 
-  {
-    let errorHandler = function (ex) {
-      // console.error(ex);
-      viewer.start();
-    };
-
-    try {
-      if (scrapbook.getOption("viewer.useFileSystemApi")) {
+  return Promise.resolve().then(() => {
+    if (scrapbook.getOption("viewer.useFileSystemApi")) {
+      return new Promise((resolve, reject) => {
         window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
         // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
-        window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, (fs) => {
-          viewer.filesystem = fs;
-          viewer.start();
-        }, errorHandler);
-      } else {
-        viewer.start();
-      }
-    } catch (ex) {
-      errorHandler(ex);
+        window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, resolve, reject);
+      }).then((fs) => {
+        viewer.filesystem = fs;
+      });
     }
-  }
+  }).catch((ex) => {
+    // console.error(ex);
+  }).then(() => {
+    viewer.start();
+  });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
