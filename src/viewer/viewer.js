@@ -452,21 +452,6 @@ function init() {
               '<script src="' + chrome.runtime.getURL("core/common.js") + '"></script>\n' +
               '<script src="' + chrome.runtime.getURL("viewer/zipviewer.js") + '">' + JSON.stringify(viewerData) + '</script>\n' +
               '<style>\n' +
-              '@-webkit-keyframes spin {\n' +
-              '  from {-webkit-transform:rotate(0turn)}\n' +
-              '  to {-webkit-transform:rotate(1turn)}\n' +
-              '}\n' +
-              '\n' +
-              '@-moz-keyframes spin {\n' +
-              '  from {-moz-transform:rotate(0turn)}\n' +
-              '  to {-moz-transform:rotate(1turn)}\n' +
-              '}\n' +
-              '\n' +
-              '@keyframes spin {\n' +
-              '  from {transform:rotate(0turn)}\n' +
-              '  to {transform:rotate(1turn)}\n' +
-              '}\n' +
-              '\n' +
               'body {\n' +
               '  margin: 0;\n' +
               '  border: 0;\n' +
