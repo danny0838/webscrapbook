@@ -7,7 +7,13 @@
  * @public {Object} scrapbook
  *******************************************************************/
 
-var scrapbook = {};
+var scrapbook = {
+  get isGecko() {
+    let m = chrome.runtime.getManifest();
+    delete this.isGecko;
+    return this.isGecko = !!(m.applications && m.applications.gecko);
+  }
+};
 var isDebug = false;
 
 
