@@ -1,8 +1,4 @@
 {
-  "BrowserActionTitle": {
-    "description": "Title for the browser action that's visible to the user of extension",
-    "message": "Capture the web page with WebScrapBook"
-  },
   "CaptureTab": {
     "message": "Capture tab"
   },
