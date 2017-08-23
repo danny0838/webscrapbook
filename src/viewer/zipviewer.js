@@ -53,17 +53,12 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   /**
-   * @callback fetchFileRewriteFuncCallback
-   * @param {Blob} rewrittenBlob
-   */
-
-  /**
    * @callback fetchFileRewriteFunc
    * @param {Object} params
    *     - {Blob} params.data
    *     - {string} params.charset
    *     - {string} params.url
-   * @param {function(rewrittenBlob)} callback
+   * @return {Promise}
    */
 
   /**
@@ -80,15 +75,13 @@ document.addEventListener("DOMContentLoaded", function () {
       let f = inZipFiles[inZipPath];
       if (f) {
         if (rewriteFunc) {
-          return new Promise((resolve, reject) => {
-            rewriteFunc({
-              data: f.file,
-              charset: null,
-              url: inZipPathToUrl(inZipPath),
-              recurseChain: recurseChain
-            }, (rewrittenFile) => {
-              resolve(URL.createObjectURL(rewrittenFile));
-            });
+          return rewriteFunc({
+            data: f.file,
+            charset: null,
+            url: inZipPathToUrl(inZipPath),
+            recurseChain: recurseChain
+          }).then((rewrittenFile) => {
+            return URL.createObjectURL(rewrittenFile);
           });
         }
         return f.url;
@@ -115,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       return fetchFile({
         inZipPath: inZipPath,
-        rewriteFunc: (params, onRewrite) => {
+        rewriteFunc: (params) => {
           return Promise.resolve().then(() => {
             var {data, charset, recurseChain} = params;
             if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
@@ -131,8 +124,6 @@ document.addEventListener("DOMContentLoaded", function () {
               });
             }
             return data;
-          }).then((blob) => {
-            onRewrite(blob);
           });
         },
         recurseChain: recurseChain
@@ -252,7 +243,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 let info = parseUrl(elem.getAttribute("href"), refUrl);
                 fetchFile({
                   inZipPath: info.inZipPath,
-                  rewriteFunc: processCssFile,
+                  rewriteFunc: (params) => {
+                    return new Promise((resolve, reject) => {
+                      processCssFile(params, resolve);
+                    });
+                  },
                   recurseChain: [refUrl]
                 }).then((fetchedUrl) => {
                   elem.setAttribute("href", fetchedUrl || info.url);
@@ -536,7 +531,11 @@ document.addEventListener("DOMContentLoaded", function () {
   var processCssFileText = function (cssText, refUrl, fetcher) {
     var result = scrapbook.parseCssText(cssText, {
       rewriteImportUrl: function (url) {
-        return fetcher.getUrlHash(url, processCssFile);
+        return fetcher.getUrlHash(url, (params) => {
+          return new Promise((resolve, reject) => {
+            processCssFile(params, resolve);
+          });
+        });
       },
       rewriteFontFaceUrl: function (url) {
         return fetcher.getUrlHash(url);
