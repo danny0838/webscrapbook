@@ -337,6 +337,22 @@ scrapbook.escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
   return str.replace(/[&<>"']| (?= )/g, m => list[m]);
 };
 
+scrapbook.unescapeHtml = function (str) {
+  var list = {
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;" : ">",
+    "&quot;" : '"',
+    "&apos;" : "'",
+    "&nbsp;" : " "
+  };
+  return str.replace(/&(?:amp|lt|gt|quot|apos|nbsp);|&#(?:(\d+)|x([0-9A-Fa-f]+));/g, (entity, dec, hex) => {
+    if (dec) return String.fromCharCode(parseInt(dec, 10));
+    if (hex) return String.fromCharCode(parseInt(hex, 16));
+    return list[entity];
+  });
+};
+
 scrapbook.escapeRegExp = function (str) {
   return str.replace(/([\*\+\?\.\^\/\$\\\|\[\]\{\}\(\)])/g, "\\$1");
 };

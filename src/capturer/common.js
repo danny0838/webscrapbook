@@ -7,9 +7,16 @@
  * @public {Object} capturer
  *******************************************************************/
 
-var capturer = {};
-
-capturer.isContentScript = true;
+var capturer = {
+  isContentScript: true,
+  get isNoscriptEscaped() {
+    // Chromium has a feature (bug?) that the innerHTML of <noscript>
+    // becomes escaped after set if javascript is enabled.
+    let elem = document.createElement("noscript"); elem.innerHTML = "<br>";
+    delete capturer.isNoscriptEscaped;
+    return capturer.isNoscriptEscaped = (elem.innerHTML !== "<br>");
+  }
+};
 
 /**
  * Invoke an invokable capturer method from another script
@@ -156,6 +163,7 @@ capturer.captureDocument = function (params) {
     var selection;
     var rootNode, headNode;
     var favIconNode, favIconUrl;
+    var specialContentMap = {};
 
     // remove the specified node, record it if option set
     var captureRemoveNode = function (elem) {
@@ -630,7 +638,11 @@ capturer.captureDocument = function (params) {
                 return;
               case "save":
               default:
-                // do nothing
+                if (capturer.isNoscriptEscaped) {
+                  let key = scrapbook.getUuid();
+                  specialContentMap[key] = scrapbook.unescapeHtml(elem.innerHTML);
+                  elem.innerHTML = "urn:scrapbook:text:" + key;
+                }
                 break;
             }
             break;
@@ -1212,6 +1224,10 @@ capturer.captureDocument = function (params) {
 
       // save document
       var content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
+      content = content.replace(/urn:scrapbook:text:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
+        if (specialContentMap[key]) { return specialContentMap[key]; }
+        return match;
+      });
       return capturer.invoke("saveDocument", {
         sourceUrl: doc.URL,
         documentName: documentName,
