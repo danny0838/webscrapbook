@@ -250,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function () {
           remainingTasks++;
           let fetcher = new ComplexUrlFetcher(refUrl);
           let rewriteCss = processCssFileText(elem.textContent, refUrl, fetcher);
-          fetcher.startFetches(() => {
+          fetcher.startFetches().then(() => {
             elem.textContent = fetcher.finalRewrite(rewriteCss);
             remainingTasks--;
             parserCheckDone();
@@ -421,7 +421,7 @@ document.addEventListener("DOMContentLoaded", function () {
         remainingTasks++;
         let fetcher = new ComplexUrlFetcher(refUrl);
         let rewriteCss = processCssFileText(elem.getAttribute("style"), refUrl, fetcher);
-        fetcher.startFetches(() => {
+        fetcher.startFetches().then(() => {
           elem.setAttribute("style", fetcher.finalRewrite(rewriteCss));
           remainingTasks--;
           parserCheckDone();
@@ -454,50 +454,51 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    getUrlHash(url, rewriteMethod) {
+    getUrlHash(url, rewriteFunc) {
       var key = scrapbook.getUuid();
       this.urlHash[key] = {
         url: url,
         newUrl: null,
-        rewriteMethod: rewriteMethod
+        rewriteFunc: rewriteFunc
       };
       return "urn:scrapbook:url:" + key;
     }
 
-    startFetches(callback) {
-      var keys = Object.keys(this.urlHash), len = keys.length;
-      if (len > 0) {
-        keys.forEach((key) => {
-          let sourceUrl = this.recurseChain[this.recurseChain.length - 1];
-          let info = parseUrl(this.urlHash[key].url, sourceUrl);
+    /**
+     * @return {Promise}
+     */
+    startFetches() {
+      return Promise.resolve().then(() => {
+        var tasks = Object.keys(this.urlHash).map((key) => {
+          return Promise.resolve().then(() => {
+            let sourceUrl = this.recurseChain[this.recurseChain.length - 1];
+            let info = parseUrl(this.urlHash[key].url, sourceUrl);
 
-          if (info.inZip) {
-            let targetUrl = inZipPathToUrl(info.inZipPath);
-            if (this.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) !== -1) {
-              // console.warn("Resource '" + sourceUrl + "' has a circular reference to '" + targetUrl + "'.");
-              this.urlHash[key].newUrl = "about:blank";
-              if (++this.urlRewrittenCount === len) {
-                callback();
+            if (info.inZip) {
+              let targetUrl = inZipPathToUrl(info.inZipPath);
+              if (this.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) !== -1) {
+                // console.warn("Resource '" + sourceUrl + "' has a circular reference to '" + targetUrl + "'.");
+                return "about:blank";
               }
-              return;
             }
-          }
 
-          fetchFile({
-            inZipPath: info.inZipPath,
-            rewriteFunc: this.urlHash[key].rewriteMethod,
-            url: inZipPathToUrl(info.inZipPath),
-            recurseChain: this.recurseChain
-          }, (fetchedUrl) => {
-            this.urlHash[key].newUrl = fetchedUrl || info.url;
-            if (++this.urlRewrittenCount === len) {
-              callback();
-            }
+            return new Promise((resolve, reject) => {
+              fetchFile({
+                inZipPath: info.inZipPath,
+                rewriteFunc: this.urlHash[key].rewriteFunc,
+                url: inZipPathToUrl(info.inZipPath),
+                recurseChain: this.recurseChain
+              }, (fetchedUrl) => {
+                resolve(fetchedUrl || info.url);
+              });
+            });
+          }).then((response) => {
+            this.urlHash[key].newUrl = response;
+            return response;
           });
         });
-      } else {
-        callback();
-      }
+        return Promise.all(tasks);
+      });
     }
 
     finalRewrite(text) {
@@ -521,7 +522,7 @@ document.addEventListener("DOMContentLoaded", function () {
       var fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
       var rewriteCss = processCssFileText(text, refUrl, fetcher);
       return new Promise((resolve, reject) => {
-        fetcher.startFetches(() => {
+        fetcher.startFetches().then(() => {
           resolve(fetcher.finalRewrite(rewriteCss));
         });
       });
