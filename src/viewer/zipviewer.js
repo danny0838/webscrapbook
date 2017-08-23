@@ -97,41 +97,48 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  var fetchPage = function (inZipPath, url, recurseChain, callback) {
-    let searchAndHash = "";
-    if (url) {
-      let [base, search, hash] = scrapbook.splitUrl(url);
-      searchAndHash = hash; // blob URL with a search is invalid
-    }
-    fetchFile({
-      inZipPath: inZipPath,
-      rewriteFunc: (params, onRewrite) => {
-        var data = params.data;
-        var charset = params.charset;
-        var recurseChain = params.recurseChain;
+  /**
+   * @param {Object} params
+   *     - {string} params.inZipPath
+   *     - {string} params.url
+   *     - {Array} params.recurseChain
+   * @return {Promise}
+   */
+  var fetchPage = function (params) {
+    return Promise.resolve().then(() => {
+      var {inZipPath, url, recurseChain} = params;
 
-        if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
-          var reader = new FileReader();
-          reader.addEventListener("loadend", () => {
-            var content = reader.result;
-            var parser = new DOMParser();
-            var doc = parser.parseFromString(content, data.type);
-            parseDocument({
-              doc: doc,
-              inZipPath: inZipPath,
-              recurseChain: recurseChain
-            }).then((blob) => {
-              onRewrite(blob);
-            });
+      let searchAndHash = "";
+      if (url) {
+        let [base, search, hash] = scrapbook.splitUrl(url);
+        searchAndHash = hash; // blob URL with a search is invalid
+      }
+      return fetchFile({
+        inZipPath: inZipPath,
+        rewriteFunc: (params, onRewrite) => {
+          return Promise.resolve().then(() => {
+            var {data, charset, recurseChain} = params;
+            if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
+              return scrapbook.readFileAsDocument(data).then((doc) => {
+                if (!doc) { throw new Error("document cannot be loaded"); }
+                return parseDocument({
+                  doc: doc,
+                  inZipPath: inZipPath,
+                  recurseChain: recurseChain
+                });
+              }).catch((ex) => {
+                return data;
+              });
+            }
+            return data;
+          }).then((blob) => {
+            onRewrite(blob);
           });
-          reader.readAsText(data, charset || "UTF-8");
-        } else {
-          onRewrite(data);
-        }
-      },
-      recurseChain: recurseChain
-    }).then((fetchedUrl) => {
-      callback(fetchedUrl ? fetchedUrl + searchAndHash : fetchedUrl);
+        },
+        recurseChain: recurseChain
+      }).then((fetchedUrl) => {
+        return fetchedUrl ? fetchedUrl + searchAndHash : fetchedUrl;
+      });
     });
   };
 
@@ -190,7 +197,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     remainingTasks++;
                     let metaRecurseChain = JSON.parse(JSON.stringify(recurseChain));
                     metaRecurseChain.push(refUrl);
-                    fetchPage(info.inZipPath, info.url, metaRecurseChain, (fetchedUrl) => {
+                    fetchPage({
+                      inZipPath: info.inZipPath,
+                      url: info.url,
+                      recurseChain: metaRecurseChain
+                    }).then((fetchedUrl) => {
                       elem.setAttribute("content", metaRefresh.time + ";url=" + (fetchedUrl || info.url));
                       remainingTasks--;
                       parserCheckDone();
@@ -308,7 +319,11 @@ document.addEventListener("DOMContentLoaded", function () {
               }
 
               remainingTasks++;
-              fetchPage(info.inZipPath, info.url, frameRecurseChain, (fetchedUrl) => {
+              fetchPage({
+                inZipPath: info.inZipPath,
+                url: info.url,
+                recurseChain: frameRecurseChain
+              }).then((fetchedUrl) => {
                 elem.setAttribute("src", fetchedUrl || info.url);
                 remainingTasks--;
                 parserCheckDone();
@@ -587,7 +602,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
                   e.preventDefault();
                   e.stopPropagation();
-                  fetchPage(inZipPath, url, [], (fetchedUrl) => {
+                  fetchPage({
+                    inZipPath: inZipPath,
+                    url: url,
+                    recurseChain: []
+                  }).then((fetchedUrl) => {
                     elem.href = fetchedUrl || "about:blank";
                     elem.click();
                   });
@@ -667,7 +686,11 @@ document.addEventListener("DOMContentLoaded", function () {
       return Promise.all(tasks);
     });
   }).then((results) => {
-    fetchPage(viewerData.indexFile || "index.html", urlSearch + urlHash, [], (fetchedUrl) => {
+    fetchPage({
+      inZipPath: viewerData.indexFile || "index.html",
+      url: urlSearch + urlHash,
+      recurseChain: []
+    }).then((fetchedUrl) => {
       viewer.src = fetchedUrl || "about:blank";
     });
   }).catch((ex) => {
