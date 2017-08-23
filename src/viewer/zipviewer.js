@@ -546,11 +546,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
       if (frameDoc.documentElement.hasAttribute(metaRefreshIdentifier)) {
         let anchor = frameDoc.querySelector("a");
         let url = anchor.href;
-        if (frame === viewer) {
-          document.location.replace(url);
-        } else {
-          anchor.ownerDocument.location.replace(url);
-        }
+        (frame === viewer ? document : frameDoc).location.replace(url);
         return;
       }
 
