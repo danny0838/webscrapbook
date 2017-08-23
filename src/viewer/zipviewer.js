@@ -13,27 +13,6 @@ document.addEventListener("DOMContentLoaded", function () {
   /**
    * common helper functions
    */
-  var byteStringToArrayBuffer = function (bstr) {
-    var n = bstr.length, u8ar = new Uint8Array(n);
-    while (n--) { u8ar[n] = bstr.charCodeAt(n); }
-    return u8ar.buffer;
-  };
-
-  var dataUriToFile = function (dataUri) {
-    if (dataUri.startsWith("data:")) {
-      dataUri = dataUri.slice(5);
-
-      var pos = dataUri.indexOf(",");
-      var meta = dataUri.slice(0, pos);
-      var [mime, filename, base64] = meta.split(";");
-      var filename = decodeURIComponent(filename.replace(/^filename=/i, ""));
-      var data = dataUri.slice(pos + 1);
-      var bstr = atob(data), ab = byteStringToArrayBuffer(bstr);
-      return new File([ab], filename, {type: "application/octet-stream"});
-    }
-    return null;
-  };
-
   var inZipPathToUrl = function (inZipPath) {
     return virtualBase + (inZipPath || "").split("/").map(x => encodeURIComponent(x)).join("/");
   };
