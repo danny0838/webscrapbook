@@ -196,7 +196,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 </body>
 </html>
 `;
-                    let url = URL.createObjectURL(new Blob([content], {type: "text/html"}));
+                    let url = URL.createObjectURL(new Blob([content], {type: "text/html"})) + targetPageHash;
                     elem.setAttribute("content", metaRefresh.time + ";url=" + url);
                   }
                 } else {
