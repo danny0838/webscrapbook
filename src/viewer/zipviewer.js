@@ -52,68 +52,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return {url: absoluteUrl.href, inZip: false};
   };
 
-  var getZipFile = function (uuid, callback) {
-    var indexedDB = window.indexedDB;
-    var request = indexedDB.open("zipFiles", 1); 
-
-    request.onupgradeneeded = function (evt) {
-      var db = evt.target.result;
-      var objectStore = db.createObjectStore("zipFiles", {keyPath: "uuid"});
-    }; 
-
-    request.onsuccess = function (evt) {
-      var db = evt.target.result;
-      var transaction = db.transaction("zipFiles", "readwrite");
-      var objectStore = transaction.objectStore(["zipFiles"]);
-
-      var req = objectStore.get(uuid);
-      req.onsuccess = function (evt) {
-        var data = evt.target.result;
-        var req2 = objectStore.delete(uuid);
-        callback(data.blob);
-      };
-
-      req.onerror = function (evt) {
-        alert("Unable to read the zip file: " + "(" + evt.target.error.name + ") " + evt.target.error.message);
-      };
-    };
-     
-    request.onerror = function (evt) {
-      alert("Unable to open indexedDB: " + "(" + evt.target.error.name + ") " + evt.target.error.message);
-    };
-  };
-
-  var extractZipFile = function (file) {
-    var pendingZipEntry = 0;
-
-    var zip = new JSZip();
-    zip.loadAsync(file).then((zip) => {
-      zip.forEach((inZipPath, zipObj) => {
-        if (zipObj.dir) { return; }
-        ++pendingZipEntry;
-        zipObj.async("arraybuffer").then((ab) => {
-          let mime = Mime.prototype.lookup(inZipPath);
-          let f = new File([ab], inZipPath.replace(/.*\//, ""), {type: mime});
-          inZipFiles[inZipPath] = {file: f, url: URL.createObjectURL(f)};
-          if (--pendingZipEntry === 0) { onAllZipEntriesProcessed(); }
-        });
-      });
-      if (pendingZipEntry === 0) { onAllZipEntriesProcessed(); }
-    }).catch((ex) => {
-      alert("Unable to load the zip file: " + ex);
-    });
-  };
-
-  var onAllZipEntriesProcessed = function () {
-    for (let path in inZipFiles) {
-      blobUrlToInZipPath[inZipFiles[path].url] = path;
-    }
-
-    fetchPage(viewerData.indexFile || "index.html", urlSearch + urlHash, [], (fetchedUrl) => {
-      viewer.src = fetchedUrl || "about:blank";
-    });
-  };
-
   /**
    * @callback fetchFileRewriteFuncCallback
    * @param {Blob} rewrittenBlob
@@ -689,7 +627,65 @@ document.addEventListener("DOMContentLoaded", function () {
 
   frameRegisterLinkLoader(viewer);
 
-  getZipFile(viewerData.zipId, extractZipFile);
+  return Promise.resolve(viewerData.zipId).then((uuid) => {
+    return new Promise((resolve, reject) => {
+      var request = indexedDB.open("zipFiles", 1);
+      request.onupgradeneeded = (event) => {
+        reject(new Error("No data stored with the latest database version."));
+      };
+      request.onsuccess = (event) => {
+        resolve(event.target.result);
+      };
+      request.onerror = (event) => {
+        reject(event.target.error);
+      };
+    }).then((db) => {
+      var transaction = db.transaction("zipFiles", "readwrite");
+      var objectStore = transaction.objectStore(["zipFiles"]);
+      return new Promise((resolve, reject) => {
+        var request = objectStore.get(uuid);
+        request.onsuccess = function (event) {
+          resolve(event.target.result);
+        };
+        request.onerror = function (event) {
+          reject(event.target.error);
+        };
+      }).then((data) => {
+        new Promise((resolve, reject) => {
+          var request = objectStore.delete(uuid);
+          request.onsuccess = function (event) {
+            resolve(event.target.result);
+          };
+          request.onerror = function (event) {
+            reject(event.target.error);
+          };
+        });
+        return data.blob;
+      });
+    });
+  }).then((file) => {
+    return new JSZip().loadAsync(file).then((zip) => {
+      var tasks = [];
+      zip.forEach((inZipPath, zipObj) => {
+        if (zipObj.dir) { return; }
+        tasks[tasks.length] = zipObj.async("arraybuffer").then((ab) => {
+          let mime = Mime.prototype.lookup(inZipPath);
+          let f = new File([ab], inZipPath.replace(/.*\//, ""), {type: mime});
+          let u = URL.createObjectURL(f);
+          inZipFiles[inZipPath] = {file: f, url: u};
+          blobUrlToInZipPath[u] = inZipPath;
+        });
+      });
+      return Promise.all(tasks);
+    });
+  }).then((results) => {
+    fetchPage(viewerData.indexFile || "index.html", urlSearch + urlHash, [], (fetchedUrl) => {
+      viewer.src = fetchedUrl || "about:blank";
+    });
+  }).catch((ex) => {
+    console.error(ex);
+    alert("Unable to view data: " + ex.message);
+  });
 });
 
 })(window, undefined);
