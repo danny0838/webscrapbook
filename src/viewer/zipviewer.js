@@ -313,34 +313,7 @@ document.addEventListener("DOMContentLoaded", function () {
               }
 
               remainingTasks++;
-              fetchFile({
-                inZipPath: info.inZipPath,
-                rewriteFunc: (params, onRewrite) => {
-                  var data = params.data;
-                  var charset = params.charset;
-                  var recurseChain = params.recurseChain;
-
-                  if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
-                    var reader = new FileReader();
-                    reader.addEventListener("loadend", () => {
-                      var content = reader.result;
-                      var parser = new DOMParser();
-                      var doc = parser.parseFromString(content, data.type);
-                      parseDocument({
-                        doc: doc,
-                        inZipPath: info.inZipPath,
-                        recurseChain: recurseChain
-                      }).then((blob) => {
-                        onRewrite(blob);
-                      });
-                    });
-                    reader.readAsText(data, charset || "UTF-8");
-                  } else {
-                    onRewrite(data);
-                  }
-                },
-                recurseChain: frameRecurseChain
-              }, (fetchedUrl) => {
+              fetchPage(info.inZipPath, info.url, frameRecurseChain, (fetchedUrl) => {
                 elem.setAttribute("src", fetchedUrl || info.url);
                 remainingTasks--;
                 parserCheckDone();
