@@ -410,6 +410,42 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
     });
   };
 
+  /**
+   * @return {Promise}
+   */
+  var processCssFile = function (params) {
+    return Promise.resolve().then(() => {
+      var {data, charset, url: refUrl, recurseChain} = params;
+
+      return scrapbook.parseCssFile(data, charset, (text) => {
+        return processCssText(text, refUrl, recurseChain);
+      });
+    });
+  };
+
+  /**
+   * @return {Promise}
+   */
+  var processCssText = function (cssText, refUrl, recurseChain) {
+    var fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
+
+    var rewritten = scrapbook.parseCssText(cssText, {
+      rewriteImportUrl: function (url) {
+        return fetcher.getUrlHash(url, processCssFile);
+      },
+      rewriteFontFaceUrl: function (url) {
+        return fetcher.getUrlHash(url);
+      },
+      rewriteBackgroundUrl: function (url) {
+        return fetcher.getUrlHash(url);
+      }
+    });
+
+    return fetcher.startFetches().then((result) => {
+      return fetcher.finalRewrite(rewritten);
+    });
+  };
+
   var ComplexUrlFetcher = class ComplexUrlFetcher {
     constructor(refUrl, recurseChain) {
       this.urlHash = {};
@@ -478,42 +514,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         return match;
       });
     }
-  };
-
-  /**
-   * @return {Promise}
-   */
-  var processCssFile = function (params) {
-    return Promise.resolve().then(() => {
-      var {data, charset, url: refUrl, recurseChain} = params;
-
-      return scrapbook.parseCssFile(data, charset, (text) => {
-        return processCssText(text, refUrl, recurseChain);
-      });
-    });
-  };
-
-  /**
-   * @return {Promise}
-   */
-  var processCssText = function (cssText, refUrl, recurseChain) {
-    var fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
-
-    var rewritten = scrapbook.parseCssText(cssText, {
-      rewriteImportUrl: function (url) {
-        return fetcher.getUrlHash(url, processCssFile);
-      },
-      rewriteFontFaceUrl: function (url) {
-        return fetcher.getUrlHash(url);
-      },
-      rewriteBackgroundUrl: function (url) {
-        return fetcher.getUrlHash(url);
-      }
-    });
-
-    return fetcher.startFetches().then((result) => {
-      return fetcher.finalRewrite(rewritten);
-    });
   };
 
   /**
