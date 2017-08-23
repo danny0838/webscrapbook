@@ -243,11 +243,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 let info = parseUrl(elem.getAttribute("href"), refUrl);
                 fetchFile({
                   inZipPath: info.inZipPath,
-                  rewriteFunc: (params) => {
-                    return new Promise((resolve, reject) => {
-                      processCssFile(params, resolve);
-                    });
-                  },
+                  rewriteFunc: processCssFile,
                   recurseChain: [refUrl]
                 }).then((fetchedUrl) => {
                   elem.setAttribute("href", fetchedUrl || info.url);
@@ -263,10 +259,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
           case "style": {
             remainingTasks++;
-            let fetcher = new ComplexUrlFetcher(refUrl);
-            let rewriteCss = processCssFileText(elem.textContent, refUrl, fetcher);
-            fetcher.startFetches().then(() => {
-              elem.textContent = fetcher.finalRewrite(rewriteCss);
+            processCssText(elem.textContent, refUrl, recurseChain).then((response) => {
+              elem.textContent = response;
               remainingTasks--;
               parserCheckDone();
             });
@@ -415,10 +409,8 @@ document.addEventListener("DOMContentLoaded", function () {
         // styles: style attribute
         if (elem.hasAttribute("style")) {
           remainingTasks++;
-          let fetcher = new ComplexUrlFetcher(refUrl);
-          let rewriteCss = processCssFileText(elem.getAttribute("style"), refUrl, fetcher);
-          fetcher.startFetches().then(() => {
-            elem.setAttribute("style", fetcher.finalRewrite(rewriteCss));
+          processCssText(elem.getAttribute("style"), refUrl, recurseChain).then((response) => {
+            elem.setAttribute("style", response);
             remainingTasks--;
             parserCheckDone();
           });
@@ -509,33 +501,28 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   };
 
-  var processCssFile = function (params, callback) {
-    var data = params.data;
-    var charset = params.charset;
-    var refUrl = params.url;
-    var recurseChain = params.recurseChain;
+  /**
+   * @return {Promise}
+   */
+  var processCssFile = function (params) {
+    return Promise.resolve().then(() => {
+      var {data, charset, url: refUrl, recurseChain} = params;
 
-    scrapbook.parseCssFile(data, charset, (text) => {
-      var fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
-      var rewriteCss = processCssFileText(text, refUrl, fetcher);
-      return new Promise((resolve, reject) => {
-        fetcher.startFetches().then(() => {
-          resolve(fetcher.finalRewrite(rewriteCss));
-        });
+      return scrapbook.parseCssFile(data, charset, (text) => {
+        return processCssText(text, refUrl, recurseChain);
       });
-    }).then((replacedCssBlob) => {
-      callback(replacedCssBlob);
     });
   };
 
-  var processCssFileText = function (cssText, refUrl, fetcher) {
-    var result = scrapbook.parseCssText(cssText, {
+  /**
+   * @return {Promise}
+   */
+  var processCssText = function (cssText, refUrl, recurseChain) {
+    var fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
+
+    var rewritten = scrapbook.parseCssText(cssText, {
       rewriteImportUrl: function (url) {
-        return fetcher.getUrlHash(url, (params) => {
-          return new Promise((resolve, reject) => {
-            processCssFile(params, resolve);
-          });
-        });
+        return fetcher.getUrlHash(url, processCssFile);
       },
       rewriteFontFaceUrl: function (url) {
         return fetcher.getUrlHash(url);
@@ -544,7 +531,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return fetcher.getUrlHash(url);
       }
     });
-    return result;
+
+    return fetcher.startFetches().then((result) => {
+      return fetcher.finalRewrite(rewritten);
+    });
   };
 
   /**
