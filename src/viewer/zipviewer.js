@@ -141,28 +141,15 @@ document.addEventListener("DOMContentLoaded", function () {
    * @return {Promise}
    */
   var parseDocument = function (params) {
-    return new Promise((resolve, reject) => {
+    return Promise.resolve().then(() => {
       var {doc, inZipPath, recurseChain} = params;
 
-      /**
-       * helper functions
-       */
+      var refUrl = inZipPathToUrl(inZipPath);
+      var tasks = [];
+
       var rewriteUrl = function (url, refUrlOverwrite) {
         return parseUrl(url, refUrlOverwrite || refUrl).url;
       };
-
-      var parserCheckDone = function () {};
-
-      var parserDone = function () {
-        var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
-        resolve(new Blob([content], {type: doc.contentType}));
-      };
-
-      /**
-       * main
-       */
-      var refUrl = inZipPathToUrl(inZipPath);
-      var remainingTasks = 0;
 
       // modify URLs
       Array.prototype.forEach.call(doc.querySelectorAll("*"), (elem) => {
@@ -185,29 +172,30 @@ document.addEventListener("DOMContentLoaded", function () {
                     break;
                   }
                   if (info.inZip) {
-                    remainingTasks++;
                     let metaRecurseChain = JSON.parse(JSON.stringify(recurseChain));
                     metaRecurseChain.push(refUrl);
+                    tasks[tasks.length] = 
                     fetchPage({
                       inZipPath: info.inZipPath,
                       url: info.url,
                       recurseChain: metaRecurseChain
                     }).then((fetchedUrl) => {
-                      elem.setAttribute("content", metaRefresh.time + ";url=" + (fetchedUrl || info.url));
-                      remainingTasks--;
-                      parserCheckDone();
+                      let url = fetchedUrl || info.url;
+                      elem.setAttribute("content", metaRefresh.time + ";url=" + url);
+                      return url;
                     });
                   } else {
-                    let content = '<!DOCTYPE html>\n' +
-                        '<html ' + metaRefreshIdentifier + '="1">\n' +
-                        '<head>\n' +
-                        '<meta charset="UTF-8">\n' +
-                        '<meta name="viewport" content="width=device-width">\n' +
-                        '</head>\n' +
-                        '<body>' +
-                        'Redirecting to: <a href="' + scrapbook.escapeHtml(info.url) + '">' + scrapbook.escapeHtml(info.url, true) + '</a>' +
-                        '</body>\n' +
-                        '</html>\n';
+                    let content = `<!DOCTYPE html>
+<html ${metaRefreshIdentifier}="1">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+</head>
+<body>
+Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHtml(info.url, true)}</a>
+</body>
+</html>
+`;
                     let url = URL.createObjectURL(new Blob([content], {type: "text/html"}));
                     elem.setAttribute("content", metaRefresh.time + ";url=" + url);
                   }
@@ -239,16 +227,16 @@ document.addEventListener("DOMContentLoaded", function () {
               // elem.rel == "" if "rel" attribute not defined
               let rels = elem.rel.toLowerCase().split(/[ \t\r\n\v\f]+/);
               if (rels.indexOf("stylesheet") >= 0) {
-                remainingTasks++;
                 let info = parseUrl(elem.getAttribute("href"), refUrl);
+                tasks[tasks.length] = 
                 fetchFile({
                   inZipPath: info.inZipPath,
                   rewriteFunc: processCssFile,
                   recurseChain: [refUrl]
                 }).then((fetchedUrl) => {
-                  elem.setAttribute("href", fetchedUrl || info.url);
-                  remainingTasks--;
-                  parserCheckDone();
+                  let url = fetchedUrl || info.url;
+                  elem.setAttribute("href", url);
+                  return url;
                 });
               } else {
                 elem.setAttribute("href", rewriteUrl(elem.getAttribute("href")));
@@ -258,11 +246,10 @@ document.addEventListener("DOMContentLoaded", function () {
           }
 
           case "style": {
-            remainingTasks++;
+            tasks[tasks.length] = 
             processCssText(elem.textContent, refUrl, recurseChain).then((response) => {
               elem.textContent = response;
-              remainingTasks--;
-              parserCheckDone();
+              return response;
             });
             break;
           }
@@ -307,15 +294,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
               }
 
-              remainingTasks++;
+              tasks[tasks.length] = 
               fetchPage({
                 inZipPath: info.inZipPath,
                 url: info.url,
                 recurseChain: frameRecurseChain
               }).then((fetchedUrl) => {
-                elem.setAttribute("src", fetchedUrl || info.url);
-                remainingTasks--;
-                parserCheckDone();
+                let url = fetchedUrl || info.url;
+                elem.setAttribute("src", url);
+                return url;
               });
             }
             break;
@@ -408,26 +395,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // styles: style attribute
         if (elem.hasAttribute("style")) {
-          remainingTasks++;
+          tasks[tasks.length] = 
           processCssText(elem.getAttribute("style"), refUrl, recurseChain).then((response) => {
             elem.setAttribute("style", response);
-            remainingTasks--;
-            parserCheckDone();
+            return response;
           });
         }
       });
 
-      // parserCheckDone calls before here should be nullified
-      // since the document parsing is not finished yet at that moment
-      parserCheckDone = function () {
-        if (remainingTasks <= 0) {
-          parserDone();
-        }
-      };
-
-      // the document parsing is finished, finalize the document 
-      // if there is no pending parsing now
-      parserCheckDone();
+      return Promise.all(tasks).then((results) => {
+        var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
+        return new Blob([content], {type: doc.contentType});
+      });
     });
   };
 
