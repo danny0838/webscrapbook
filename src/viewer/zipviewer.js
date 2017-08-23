@@ -121,9 +121,13 @@ document.addEventListener("DOMContentLoaded", function () {
             var content = reader.result;
             var parser = new DOMParser();
             var doc = parser.parseFromString(content, data.type);
-            parseDocument(doc, inZipPath, (blob) => {
+            parseDocument({
+              doc: doc,
+              inZipPath: inZipPath,
+              recurseChain: recurseChain
+            }).then((blob) => {
               onRewrite(blob);
-            }, recurseChain);
+            });
           });
           reader.readAsText(data, charset || "UTF-8");
         } else {
@@ -136,310 +140,325 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   };
 
-  var parseDocument = function (doc, inZipPath, onComplete, recurseChain) {
-    /**
-     * helper functions
-     */
-    var rewriteUrl = function (url, refUrlOverwrite) {
-      return parseUrl(url, refUrlOverwrite || refUrl).url;
-    };
+  /**
+   * @param {Object} params
+   *     - {Document} params.doc
+   *     - {string} params.inZipPath
+   *     - {Array} params.recurseChain
+   * @return {Promise}
+   */
+  var parseDocument = function (params) {
+    return new Promise((resolve, reject) => {
+      var {doc, inZipPath, recurseChain} = params;
 
-    var parserCheckDone = function () {};
+      /**
+       * helper functions
+       */
+      var rewriteUrl = function (url, refUrlOverwrite) {
+        return parseUrl(url, refUrlOverwrite || refUrl).url;
+      };
 
-    var parserDone = function () {
-      var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
-      onComplete(new Blob([content], {type: doc.contentType}));
-    };
+      var parserCheckDone = function () {};
 
-    /**
-     * main
-     */
-    var refUrl = inZipPathToUrl(inZipPath);
-    var remainingTasks = 0;
+      var parserDone = function () {
+        var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
+        resolve(new Blob([content], {type: doc.contentType}));
+      };
 
-    // modify URLs
-    Array.prototype.forEach.call(doc.querySelectorAll("*"), (elem) => {
-      // skip elements that are already removed from the DOM tree
-      if (!elem.parentNode) { return; }
+      /**
+       * main
+       */
+      var refUrl = inZipPathToUrl(inZipPath);
+      var remainingTasks = 0;
 
-      switch (elem.nodeName.toLowerCase()) {
-        case "meta": {
-          if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content") &&
-              elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
-            let metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
-            if (metaRefresh.url) {
-              let info = parseUrl(metaRefresh.url, refUrl);
-              let [sourcePage] = scrapbook.splitUrlByAnchor(refUrl);
-              let [targetPage, targetPageHash] = scrapbook.splitUrlByAnchor(info.virtualUrl || info.url);
-              if (targetPage !== sourcePage) {
-                if (recurseChain.indexOf(targetPage) !== -1) {
-                  // console.warn("Resource '" + sourcePage + "' has a circular reference to '" + targetPage + "'.");
-                  elem.setAttribute("content", metaRefresh.time + ";url=about:blank");
+      // modify URLs
+      Array.prototype.forEach.call(doc.querySelectorAll("*"), (elem) => {
+        // skip elements that are already removed from the DOM tree
+        if (!elem.parentNode) { return; }
+
+        switch (elem.nodeName.toLowerCase()) {
+          case "meta": {
+            if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content") &&
+                elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
+              let metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+              if (metaRefresh.url) {
+                let info = parseUrl(metaRefresh.url, refUrl);
+                let [sourcePage] = scrapbook.splitUrlByAnchor(refUrl);
+                let [targetPage, targetPageHash] = scrapbook.splitUrlByAnchor(info.virtualUrl || info.url);
+                if (targetPage !== sourcePage) {
+                  if (recurseChain.indexOf(targetPage) !== -1) {
+                    // console.warn("Resource '" + sourcePage + "' has a circular reference to '" + targetPage + "'.");
+                    elem.setAttribute("content", metaRefresh.time + ";url=about:blank");
+                    break;
+                  }
+                  if (info.inZip) {
+                    remainingTasks++;
+                    let metaRecurseChain = JSON.parse(JSON.stringify(recurseChain));
+                    metaRecurseChain.push(refUrl);
+                    fetchPage(info.inZipPath, info.url, metaRecurseChain, (fetchedUrl) => {
+                      elem.setAttribute("content", metaRefresh.time + ";url=" + (fetchedUrl || info.url));
+                      remainingTasks--;
+                      parserCheckDone();
+                    });
+                  } else {
+                    let content = '<!DOCTYPE html>\n' +
+                        '<html ' + metaRefreshIdentifier + '="1">\n' +
+                        '<head>\n' +
+                        '<meta charset="UTF-8">\n' +
+                        '<meta name="viewport" content="width=device-width">\n' +
+                        '</head>\n' +
+                        '<body>' +
+                        'Redirecting to: <a href="' + scrapbook.escapeHtml(info.url) + '">' + scrapbook.escapeHtml(info.url, true) + '</a>' +
+                        '</body>\n' +
+                        '</html>\n';
+                    let url = URL.createObjectURL(new Blob([content], {type: "text/html"}));
+                    elem.setAttribute("content", metaRefresh.time + ";url=" + url);
+                  }
+                } else {
+                  elem.setAttribute("content", metaRefresh.time + (targetPageHash ? ";url=" + targetPageHash : ""));
+                }
+              }
+            } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
+              switch (elem.getAttribute("property").toLowerCase()) {
+                case "og:image":
+                case "og:image:url":
+                case "og:image:secure_url":
+                case "og:audio":
+                case "og:audio:url":
+                case "og:audio:secure_url":
+                case "og:video":
+                case "og:video:url":
+                case "og:video:secure_url":
+                case "og:url":
+                  elem.setAttribute("content", rewriteUrl(elem.getAttribute("content"), refUrl));
                   break;
-                }
-                if (info.inZip) {
-                  remainingTasks++;
-                  let metaRecurseChain = JSON.parse(JSON.stringify(recurseChain));
-                  metaRecurseChain.push(refUrl);
-                  fetchPage(info.inZipPath, info.url, metaRecurseChain, (fetchedUrl) => {
-                    elem.setAttribute("content", metaRefresh.time + ";url=" + (fetchedUrl || info.url));
-                    remainingTasks--;
-                    parserCheckDone();
-                  });
-                } else {
-                  let content = '<!DOCTYPE html>\n' +
-                      '<html ' + metaRefreshIdentifier + '="1">\n' +
-                      '<head>\n' +
-                      '<meta charset="UTF-8">\n' +
-                      '<meta name="viewport" content="width=device-width">\n' +
-                      '</head>\n' +
-                      '<body>' +
-                      'Redirecting to: <a href="' + scrapbook.escapeHtml(info.url) + '">' + scrapbook.escapeHtml(info.url, true) + '</a>' +
-                      '</body>\n' +
-                      '</html>\n';
-                  let url = URL.createObjectURL(new Blob([content], {type: "text/html"}));
-                  elem.setAttribute("content", metaRefresh.time + ";url=" + url);
-                }
+              }
+            }
+            break;
+          }
+
+          case "link": {
+            if (elem.hasAttribute("href")) {
+              // elem.rel == "" if "rel" attribute not defined
+              let rels = elem.rel.toLowerCase().split(/[ \t\r\n\v\f]+/);
+              if (rels.indexOf("stylesheet") >= 0) {
+                remainingTasks++;
+                let info = parseUrl(elem.getAttribute("href"), refUrl);
+                fetchFile({
+                  inZipPath: info.inZipPath,
+                  rewriteFunc: processCssFile,
+                  recurseChain: [refUrl]
+                }, (fetchedUrl) => {
+                  elem.setAttribute("href", fetchedUrl || info.url);
+                  remainingTasks--;
+                  parserCheckDone();
+                });
               } else {
-                elem.setAttribute("content", metaRefresh.time + (targetPageHash ? ";url=" + targetPageHash : ""));
+                elem.setAttribute("href", rewriteUrl(elem.getAttribute("href")));
               }
             }
-          } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
-            switch (elem.getAttribute("property").toLowerCase()) {
-              case "og:image":
-              case "og:image:url":
-              case "og:image:secure_url":
-              case "og:audio":
-              case "og:audio:url":
-              case "og:audio:secure_url":
-              case "og:video":
-              case "og:video:url":
-              case "og:video:secure_url":
-              case "og:url":
-                elem.setAttribute("content", rewriteUrl(elem.getAttribute("content"), refUrl));
-                break;
-            }
+            break;
           }
-          break;
-        }
 
-        case "link": {
-          if (elem.hasAttribute("href")) {
-            // elem.rel == "" if "rel" attribute not defined
-            let rels = elem.rel.toLowerCase().split(/[ \t\r\n\v\f]+/);
-            if (rels.indexOf("stylesheet") >= 0) {
-              remainingTasks++;
-              let info = parseUrl(elem.getAttribute("href"), refUrl);
-              fetchFile({
-                inZipPath: info.inZipPath,
-                rewriteFunc: processCssFile,
-                recurseChain: [refUrl]
-              }, (fetchedUrl) => {
-                elem.setAttribute("href", fetchedUrl || info.url);
-                remainingTasks--;
-                parserCheckDone();
-              });
-            } else {
-              elem.setAttribute("href", rewriteUrl(elem.getAttribute("href")));
-            }
-          }
-          break;
-        }
-
-        case "style": {
-          remainingTasks++;
-          let fetcher = new ComplexUrlFetcher(refUrl);
-          let rewriteCss = processCssFileText(elem.textContent, refUrl, fetcher);
-          fetcher.startFetches().then(() => {
-            elem.textContent = fetcher.finalRewrite(rewriteCss);
-            remainingTasks--;
-            parserCheckDone();
-          });
-          break;
-        }
-
-        case "script": {
-          if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
-          } else if (viewerData.useInlineScriptShim) {
-            let text = elem.textContent;
-            if (text) {
-              elem.src = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
-              elem.textContent = "";
-            }
-          }
-          break;
-        }
-
-        case "body":
-        case "table":
-        case "tr":
-        case "th":
-        case "td": {
-          // deprecated: background attribute (deprecated since HTML5)
-          if (elem.hasAttribute("background")) {
-            elem.setAttribute("background", rewriteUrl(elem.getAttribute("background"), refUrl));
-          }
-          break;
-        }
-
-        case "frame":
-        case "iframe": {
-          if (elem.hasAttribute("src")) {
-            let frameRecurseChain = JSON.parse(JSON.stringify(recurseChain));
-            frameRecurseChain.push(refUrl);
-            let info = parseUrl(elem.getAttribute("src"), refUrl);
-            if (info.inZip) {
-              let targetUrl = inZipPathToUrl(info.inZipPath);
-              if (frameRecurseChain.indexOf(targetUrl) !== -1) {
-                // console.warn("Resource '" + refUrl + "' has a circular reference to '" + targetUrl + "'.");
-                elem.setAttribute("src", "about:blank");
-                break;
-              }
-            }
-
+          case "style": {
             remainingTasks++;
-            fetchFile({
-              inZipPath: info.inZipPath,
-              rewriteFunc: (params, onRewrite) => {
-                var data = params.data;
-                var charset = params.charset;
-                var recurseChain = params.recurseChain;
-
-                if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
-                  var reader = new FileReader();
-                  reader.addEventListener("loadend", () => {
-                    var content = reader.result;
-                    var parser = new DOMParser();
-                    var doc = parser.parseFromString(content, data.type);
-                    parseDocument(doc, info.inZipPath, (blob) => {
-                      onRewrite(blob);
-                    }, recurseChain);
-                  });
-                  reader.readAsText(data, charset || "UTF-8");
-                } else {
-                  onRewrite(data);
-                }
-              },
-              recurseChain: frameRecurseChain
-            }, (fetchedUrl) => {
-              elem.setAttribute("src", fetchedUrl || info.url);
+            let fetcher = new ComplexUrlFetcher(refUrl);
+            let rewriteCss = processCssFileText(elem.textContent, refUrl, fetcher);
+            fetcher.startFetches().then(() => {
+              elem.textContent = fetcher.finalRewrite(rewriteCss);
               remainingTasks--;
               parserCheckDone();
             });
+            break;
           }
-          break;
-        }
 
-        case "a":
-        case "area": {
-          if (elem.hasAttribute("href")) {
-            let info = parseUrl(elem.getAttribute("href"), refUrl);
-            if (info.inZip) {
-              if (info.inZipPath !== inZipPath) {
-                elem.setAttribute("href", info.url);
-              } else {
-                // link to self
-                elem.setAttribute("href", info.hash || "#");
+          case "script": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            } else if (viewerData.useInlineScriptShim) {
+              let text = elem.textContent;
+              if (text) {
+                elem.src = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
+                elem.textContent = "";
               }
-            } else {
-              // link target is not in the zip
-              elem.setAttribute("href", info.url);
             }
+            break;
           }
-          break;
-        }
 
-        case "img": {
-          if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+          case "body":
+          case "table":
+          case "tr":
+          case "th":
+          case "td": {
+            // deprecated: background attribute (deprecated since HTML5)
+            if (elem.hasAttribute("background")) {
+              elem.setAttribute("background", rewriteUrl(elem.getAttribute("background"), refUrl));
+            }
+            break;
           }
-          if (elem.hasAttribute("srcset")) {
-            elem.setAttribute("srcset",
-              scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
-                return rewriteUrl(url, refUrl);
-              })
-            );
-          }
-          break;
-        }
 
-        case "source": {
-          if (elem.hasAttribute("srcset")) {
-            elem.setAttribute("srcset",
-              scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
-                return rewriteUrl(url, refUrl);
-              })
-            );
-          }
-          break;
-        }
-
-        case "embed": {
-          if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
-          }
-          break;
-        }
-
-        case "object": {
-          if (elem.hasAttribute("data")) {
-            elem.setAttribute("data", rewriteUrl(elem.getAttribute("data"), refUrl));
-          }
-          break;
-        }
-
-        case "applet": {
-          if (elem.hasAttribute("archive")) {
-            elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive"), refUrl));
-          }
-          break;
-        }
-
-        case "form": {
-          if ( elem.hasAttribute("action") ) {
-            elem.setAttribute("action", rewriteUrl(elem.getAttribute("action"), refUrl));
-          }
-          break;
-        }
-
-        case "input": {
-          switch (elem.type.toLowerCase()) {
-            // images: input
-            case "image":
-              if (elem.hasAttribute("src")) {
-                elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+          case "frame":
+          case "iframe": {
+            if (elem.hasAttribute("src")) {
+              let frameRecurseChain = JSON.parse(JSON.stringify(recurseChain));
+              frameRecurseChain.push(refUrl);
+              let info = parseUrl(elem.getAttribute("src"), refUrl);
+              if (info.inZip) {
+                let targetUrl = inZipPathToUrl(info.inZipPath);
+                if (frameRecurseChain.indexOf(targetUrl) !== -1) {
+                  // console.warn("Resource '" + refUrl + "' has a circular reference to '" + targetUrl + "'.");
+                  elem.setAttribute("src", "about:blank");
+                  break;
+                }
               }
-              break;
+
+              remainingTasks++;
+              fetchFile({
+                inZipPath: info.inZipPath,
+                rewriteFunc: (params, onRewrite) => {
+                  var data = params.data;
+                  var charset = params.charset;
+                  var recurseChain = params.recurseChain;
+
+                  if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
+                    var reader = new FileReader();
+                    reader.addEventListener("loadend", () => {
+                      var content = reader.result;
+                      var parser = new DOMParser();
+                      var doc = parser.parseFromString(content, data.type);
+                      parseDocument({
+                        doc: doc,
+                        inZipPath: info.inZipPath,
+                        recurseChain: recurseChain
+                      }).then((blob) => {
+                        onRewrite(blob);
+                      });
+                    });
+                    reader.readAsText(data, charset || "UTF-8");
+                  } else {
+                    onRewrite(data);
+                  }
+                },
+                recurseChain: frameRecurseChain
+              }, (fetchedUrl) => {
+                elem.setAttribute("src", fetchedUrl || info.url);
+                remainingTasks--;
+                parserCheckDone();
+              });
+            }
+            break;
           }
-          break;
+
+          case "a":
+          case "area": {
+            if (elem.hasAttribute("href")) {
+              let info = parseUrl(elem.getAttribute("href"), refUrl);
+              if (info.inZip) {
+                if (info.inZipPath !== inZipPath) {
+                  elem.setAttribute("href", info.url);
+                } else {
+                  // link to self
+                  elem.setAttribute("href", info.hash || "#");
+                }
+              } else {
+                // link target is not in the zip
+                elem.setAttribute("href", info.url);
+              }
+            }
+            break;
+          }
+
+          case "img": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            }
+            if (elem.hasAttribute("srcset")) {
+              elem.setAttribute("srcset",
+                scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
+                  return rewriteUrl(url, refUrl);
+                })
+              );
+            }
+            break;
+          }
+
+          case "source": {
+            if (elem.hasAttribute("srcset")) {
+              elem.setAttribute("srcset",
+                scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
+                  return rewriteUrl(url, refUrl);
+                })
+              );
+            }
+            break;
+          }
+
+          case "embed": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            }
+            break;
+          }
+
+          case "object": {
+            if (elem.hasAttribute("data")) {
+              elem.setAttribute("data", rewriteUrl(elem.getAttribute("data"), refUrl));
+            }
+            break;
+          }
+
+          case "applet": {
+            if (elem.hasAttribute("archive")) {
+              elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive"), refUrl));
+            }
+            break;
+          }
+
+          case "form": {
+            if ( elem.hasAttribute("action") ) {
+              elem.setAttribute("action", rewriteUrl(elem.getAttribute("action"), refUrl));
+            }
+            break;
+          }
+
+          case "input": {
+            switch (elem.type.toLowerCase()) {
+              // images: input
+              case "image":
+                if (elem.hasAttribute("src")) {
+                  elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+                }
+                break;
+            }
+            break;
+          }
         }
-      }
 
-      // styles: style attribute
-      if (elem.hasAttribute("style")) {
-        remainingTasks++;
-        let fetcher = new ComplexUrlFetcher(refUrl);
-        let rewriteCss = processCssFileText(elem.getAttribute("style"), refUrl, fetcher);
-        fetcher.startFetches().then(() => {
-          elem.setAttribute("style", fetcher.finalRewrite(rewriteCss));
-          remainingTasks--;
-          parserCheckDone();
-        });
-      }
+        // styles: style attribute
+        if (elem.hasAttribute("style")) {
+          remainingTasks++;
+          let fetcher = new ComplexUrlFetcher(refUrl);
+          let rewriteCss = processCssFileText(elem.getAttribute("style"), refUrl, fetcher);
+          fetcher.startFetches().then(() => {
+            elem.setAttribute("style", fetcher.finalRewrite(rewriteCss));
+            remainingTasks--;
+            parserCheckDone();
+          });
+        }
+      });
+
+      // parserCheckDone calls before here should be nullified
+      // since the document parsing is not finished yet at that moment
+      parserCheckDone = function () {
+        if (remainingTasks <= 0) {
+          parserDone();
+        }
+      };
+
+      // the document parsing is finished, finalize the document 
+      // if there is no pending parsing now
+      parserCheckDone();
     });
-
-    // parserCheckDone calls before here should be nullified
-    // since the document parsing is not finished yet at that moment
-    parserCheckDone = function () {
-      if (remainingTasks <= 0) {
-        parserDone();
-      }
-    };
-
-    // the document parsing is finished, finalize the document 
-    // if there is no pending parsing now
-    parserCheckDone();
   };
 
   var ComplexUrlFetcher = class ComplexUrlFetcher {
