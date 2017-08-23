@@ -60,46 +60,41 @@ document.addEventListener("DOMContentLoaded", function () {
   /**
    * @callback fetchFileRewriteFunc
    * @param {Object} params
-   *     - {Blob} data
-   *     - {string} charset
-   *     - {string} url
+   *     - {Blob} params.data
+   *     - {string} params.charset
+   *     - {string} params.url
    * @param {function(rewrittenBlob)} callback
    */
 
   /**
-   * @callback fetchFileOnComplete
-   * @param {string} fetchedUrl
-   */
-
-  /**
-   * @param {Object} params 
+   * @param {Object} params
    *     - {string} params.inZipPath
    *     - {fetchFileRewriteFunc} params.rewriteFunc
    *     - {Array} params.recurseChain
-   * @param {fetchFileOnComplete} callback
+   * @return {Promise}
    */
-  var fetchFile = function (params, callback) {
-    let inZipPath = params.inZipPath;
-    let rewriteFunc = params.rewriteFunc;
-    let recurseChain = params.recurseChain;
+  var fetchFile = function (params) {
+    return Promise.resolve().then(() => {
+      var {inZipPath, rewriteFunc, recurseChain} = params;
 
-    let f = inZipFiles[inZipPath];
-    if (f) {
-      if (rewriteFunc) {
-        rewriteFunc({
-          data: f.file,
-          charset: null,
-          url: inZipPathToUrl(inZipPath),
-          recurseChain: recurseChain
-        }, (rewrittenFile) => {
-          callback(URL.createObjectURL(rewrittenFile));
-        });
-      } else {
-        callback(f.url);
+      let f = inZipFiles[inZipPath];
+      if (f) {
+        if (rewriteFunc) {
+          return new Promise((resolve, reject) => {
+            rewriteFunc({
+              data: f.file,
+              charset: null,
+              url: inZipPathToUrl(inZipPath),
+              recurseChain: recurseChain
+            }, (rewrittenFile) => {
+              resolve(URL.createObjectURL(rewrittenFile));
+            });
+          });
+        }
+        return f.url;
       }
-    } else {
-      callback(null);
-    }
+      return null;
+    });
   };
 
   var fetchPage = function (inZipPath, url, recurseChain, callback) {
@@ -135,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       },
       recurseChain: recurseChain
-    }, (fetchedUrl) => {
+    }).then((fetchedUrl) => {
       callback(fetchedUrl ? fetchedUrl + searchAndHash : fetchedUrl);
     });
   };
@@ -248,7 +243,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   inZipPath: info.inZipPath,
                   rewriteFunc: processCssFile,
                   recurseChain: [refUrl]
-                }, (fetchedUrl) => {
+                }).then((fetchedUrl) => {
                   elem.setAttribute("href", fetchedUrl || info.url);
                   remainingTasks--;
                   parserCheckDone();
@@ -480,7 +475,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 rewriteFunc: this.urlHash[key].rewriteFunc,
                 url: inZipPathToUrl(info.inZipPath),
                 recurseChain: this.recurseChain
-              }, (fetchedUrl) => {
+              }).then((fetchedUrl) => {
                 resolve(fetchedUrl || info.url);
               });
             });
