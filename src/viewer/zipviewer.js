@@ -521,7 +521,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
    */
   var virtualBase = viewerData.virtualBase;
   var defaultTitle = document.querySelector('title').textContent;
-  var metaRefreshIdentifier = "data-sb-" + scrapbook.dateToId() + "-meta-refresh";
+  var metaRefreshIdentifier = "data-sb-meta-refresh-" + scrapbook.dateToId();
 
   var viewer = document.getElementById('viewer');
 

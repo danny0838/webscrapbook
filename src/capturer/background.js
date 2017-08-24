@@ -313,7 +313,7 @@ capturer.captureFile = function (params) {
       options: options
     }).then((response) => {
       if (settings.frameIsMain) {
-        let meta = params.options["capture.recordDocumentMeta"] ? ' data-sb' + timeId + '-source="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
+        let meta = params.options["capture.recordDocumentMeta"] ? ' data-sb-source-' + timeId + '="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
         // for the main frame, create a index.html that redirects to the file
         let html = `<!DOCTYPE html>
 <html${meta}>

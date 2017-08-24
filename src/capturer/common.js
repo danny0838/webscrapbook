@@ -179,7 +179,7 @@ capturer.captureDocument = function (params) {
     var captureRewriteAttr = function (elem, attr, value) {
       if (!elem.hasAttribute(attr)) return;
       if (options["capture.recordRewrittenAttr"]) {
-        elem.setAttribute("data-sb-" + timeId + "-orig-" + attr, elem.getAttribute(attr));
+        elem.setAttribute("data-sb-orig-" + attr + "-" + timeId, elem.getAttribute(attr));
       }
       if (value === null || value === undefined) {
         elem.removeAttribute(attr);
@@ -192,7 +192,7 @@ capturer.captureDocument = function (params) {
     var captureRewriteTextContent = function (elem, value) {
       if (!elem.textContent) return;
       if (options["capture.recordRewrittenAttr"]) {
-        elem.setAttribute("data-sb-" + timeId + "-orig-textContent", elem.textContent);
+        elem.setAttribute("data-sb-orig-textContent-" + timeId, elem.textContent);
       }
       if (value === null || value === undefined) {
         elem.textContent = "";
@@ -205,7 +205,7 @@ capturer.captureDocument = function (params) {
     var captureRewriteUri = function (elem, attr, value) {
       if (!elem.hasAttribute(attr)) return;
       if (options["capture.recordSourceUri"]) {
-        elem.setAttribute("data-sb-" + timeId + "-orig-" + attr, elem.getAttribute(attr));
+        elem.setAttribute("data-sb-orig-" + attr + "-" + timeId, elem.getAttribute(attr));
       }
       if (value === null || value === undefined) {
         elem.removeAttribute(attr);
@@ -264,7 +264,7 @@ capturer.captureDocument = function (params) {
       // give certain nodes an unique id for later refrence,
       // since cloned nodes may not have some information
       // e.g. cloned iframes has no content, cloned canvas has no image
-      var origRefKey = "data-sb-" + timeId + "-id";
+      var origRefKey = "data-sb-id-" + timeId;
       var origRefNodes = Array.prototype.slice.call(doc.querySelectorAll("frame, iframe, canvas"));
       origRefNodes.forEach((elem, index) => {
         elem.setAttribute(origRefKey, index);
@@ -381,7 +381,7 @@ capturer.captureDocument = function (params) {
       // record source URL
       if (options["capture.recordDocumentMeta"]) {
         let url = doc.URL.startsWith("data:") ? "data:" : doc.URL;
-        rootNode.setAttribute("data-sb-" + timeId + "-source", url);
+        rootNode.setAttribute("data-sb-source-" + timeId, url);
       }
 
       // remove the temporary map key
