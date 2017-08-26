@@ -77,8 +77,8 @@ capturer.captureDocument = function (doc, settings, options, callback) {
 
       // This link targets the current page
       if (urlMain === scrapbook.splitUrlByAnchor(doc.URL)[0]) {
-        if (urlHash === "") {
-          return "";
+        if (urlHash === "" || urlHash === "#") {
+          return urlHash;
         }
 
         // For full capture (no selection), relink to the captured page.
