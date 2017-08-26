@@ -268,7 +268,7 @@ function init() {
           var uuid = scrapbook.getUuid();
 
           return new Promise((resolve, reject) => {
-            var request = indexedDB.open("zipFiles", 1);
+            var request = indexedDB.open("scrapbook", 1);
             request.onupgradeneeded = (event) => {
               var db = event.target.result;
               var objectStore = db.createObjectStore("zipFiles", {keyPath: "uuid"});

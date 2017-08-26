@@ -600,7 +600,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
   return Promise.resolve(viewerData.zipId).then((uuid) => {
     return new Promise((resolve, reject) => {
-      var request = indexedDB.open("zipFiles", 1);
+      var request = indexedDB.open("scrapbook", 1);
       request.onupgradeneeded = (event) => {
         reject(new Error("No data stored with the latest database version."));
       };
