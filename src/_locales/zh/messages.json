@@ -90,10 +90,10 @@
   "OptionCaptureCommonRemoveTooltip": {
     "message": "將元素完全移除。注意這可能會影響排版。"
   },
-  "OptionCaptureDataFolderLabel": {
-    "message": "儲存擷取資料的資料夾:"
+  "OptionCaptureScrapbookFolderLabel": {
+    "message": "剪貼簿資料夾:"
   },
-  "OptionCaptureDataFolderTooltip": {
+  "OptionCaptureScrapbookFolderTooltip": {
     "message": "擷取的資料會統一儲存至這個子資料夾中。"
   },
   "OptionCaptureEmbedLabel": {
@@ -213,11 +213,11 @@
   "OptionCaptureSaveFileAsHtmlTooltip": {
     "message": "將瀏覽器能檢視的非 HTML 檔案儲存為 HTML 網頁。"
   },
-  "OptionCaptureSavePromptLabel": {
-    "message": "詢問封存檔的儲存位置:"
+  "OptionCaptureSaveInScrapbookLabel": {
+    "message": "將擷取資料儲存於剪貼簿內:"
   },
-  "OptionCaptureSavePromptTooltip": {
-    "message": "儲存為下載串流時將忽略此設定。"
+  "OptionCaptureSaveInScrapbookTooltip": {
+    "message": "儲存為下載串流時必定套用此設定。"
   },
   "OptionCaptureSaveSelectionOnlyLabel": {
     "message": "只儲存選取範圍:"

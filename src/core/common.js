@@ -22,9 +22,9 @@ var scrapbook = {
  *******************************************************************/
 
 scrapbook.options = {
-  "capture.dataFolder": "WebScrapBook",
+  "capture.scrapbookFolder": "WebScrapBook",
   "capture.saveAs": "zip", // "downloads", "zip", "maff", "singleHtml"
-  "capture.savePrompt": false,
+  "capture.saveInScrapbook": true,
   "capture.saveAsciiFilename": false,
   "capture.saveSelectionOnly": true,
   "capture.saveFileAsHtml": false,
@@ -215,6 +215,14 @@ scrapbook.splitUrl = function (url) {
 scrapbook.splitUrlByAnchor = function (url) {
   var [name, search, hash] = scrapbook.splitUrl(url);
   return [name + search, hash];
+};
+
+scrapbook.filepathParts = function (filepath) {
+  var pos = filepath.lastIndexOf("/");
+  if (pos != -1) {
+    return [filepath.slice(0, pos), filepath.slice(pos + 1, filepath.length)];
+  }
+  return ["", filepath];
 };
 
 scrapbook.filenameParts = function (filename) {

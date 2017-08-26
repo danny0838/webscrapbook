@@ -90,10 +90,10 @@
   "OptionCaptureCommonRemoveTooltip": {
     "message": "Remove the element. Note that this could affect the layout."
   },
-  "OptionCaptureDataFolderLabel": {
-    "message": "Folder to store captured data:"
+  "OptionCaptureScrapbookFolderLabel": {
+    "message": "Scrapbook Folder:"
   },
-  "OptionCaptureDataFolderTooltip": {
+  "OptionCaptureScrapbookFolderTooltip": {
     "message": "All captured data will be saved to this subfolder."
   },
   "OptionCaptureEmbedLabel": {
@@ -213,11 +213,11 @@
   "OptionCaptureSaveFileAsHtmlTooltip": {
     "message": "Save a browser-viewable non-HTML file as an HTML web page."
   },
-  "OptionCaptureSavePromptLabel": {
-    "message": "Ask where to save each captured pack:"
+  "OptionCaptureSaveInScrapbookLabel": {
+    "message": "Save captured data in ScrapBook:"
   },
-  "OptionCaptureSavePromptTooltip": {
-    "message": "This does not applied when saving as downloads."
+  "OptionCaptureSaveInScrapbookTooltip": {
+    "message": "This is always applied when saving as downloads."
   },
   "OptionCaptureSaveSelectionOnlyLabel": {
     "message": "Save selected area only:"

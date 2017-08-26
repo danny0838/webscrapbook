@@ -99,7 +99,7 @@ capturer.invoke = function (method, args, tabId, frameWindow) {
 };
 
 capturer.fixOptions = function (options) {
-  options["capture.dataFolder"] = scrapbook.validateFilename(options["capture.dataFolder"] || "WebScrapBook");
+  options["capture.scrapbookFolder"] = scrapbook.validateFilename(options["capture.scrapbookFolder"] || "WebScrapBook");
   return options;
 };
 

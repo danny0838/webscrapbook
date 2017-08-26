@@ -400,11 +400,19 @@ capturer.saveDocument = function (params) {
             let dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
             resolve({timeId: timeId, sourceUrl: sourceUrl, url: dataUri});
           } else {
-            var targetDir = options["capture.dataFolder"];
-            var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
             var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-            if (!filename.endsWith(ext)) filename += ext;
+
+            if (options["capture.saveInScrapbook"]) {
+              var targetDir = options["capture.scrapbookFolder"] + "/data";
+              var filename = timeId + ext;
+              var savePrompt = false;
+            } else {
+              var targetDir = "";
+              var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+              if (!filename.endsWith(ext)) filename += ext;
+              var savePrompt = true;
+            }
 
             capturer.saveBlob({
               timeId: timeId,
@@ -413,7 +421,7 @@ capturer.saveDocument = function (params) {
               filename: filename,
               sourceUrl: sourceUrl,
               autoErase: false,
-              savePrompt: options["capture.savePrompt"]
+              savePrompt: savePrompt
             }).then(() => {
               resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
             }).catch(reject);
@@ -449,10 +457,17 @@ capturer.saveDocument = function (params) {
 
             // generate and download the zip file
             zip.generateAsync({type: "blob"}).then((zipBlob) => {
-              var targetDir = options["capture.dataFolder"];
-              var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-              filename += ".htz";
+              if (options["capture.saveInScrapbook"]) {
+                var targetDir = options["capture.scrapbookFolder"] + "/data";
+                var filename = timeId + ".htz";
+                var savePrompt = false;
+              } else {
+                var targetDir = "";
+                var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+                filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+                filename += ".htz";
+                var savePrompt = true;
+              }
 
               capturer.saveBlob({
                 timeId: timeId,
@@ -461,7 +476,7 @@ capturer.saveDocument = function (params) {
                 filename: filename,
                 sourceUrl: sourceUrl,
                 autoErase: false,
-                savePrompt: options["capture.savePrompt"]
+                savePrompt: savePrompt
               }).then(() => {
                 resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
               }).catch(reject);
@@ -518,10 +533,17 @@ capturer.saveDocument = function (params) {
 
             // generate and download the zip file
             zip.generateAsync({type: "blob"}).then((zipBlob) => {
-              var targetDir = options["capture.dataFolder"];
-              var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-              filename += ".maff";
+              if (options["capture.saveInScrapbook"]) {
+                var targetDir = options["capture.scrapbookFolder"] + "/data";
+                var filename = timeId + ".maff";
+                var savePrompt = false;
+              } else {
+                var targetDir = "";
+                var filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+                filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+                filename += ".maff";
+                var savePrompt = true;
+              }
 
               capturer.saveBlob({
                 timeId: timeId,
@@ -530,7 +552,7 @@ capturer.saveDocument = function (params) {
                 filename: filename,
                 sourceUrl: sourceUrl,
                 autoErase: false,
-                savePrompt: options["capture.savePrompt"]
+                savePrompt: savePrompt
               }).then(() => {
                 resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
               }).catch(reject);
@@ -541,7 +563,7 @@ capturer.saveDocument = function (params) {
 
         case "downloads":
         default: {
-          var targetDir = options["capture.dataFolder"] + "/" + timeId;
+          var targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
           var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
           var filename = documentName + ext;
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
@@ -599,7 +621,6 @@ capturer.downloadFile = function (params) {
 
     var {url: sourceUrl, refUrl, rewriteMethod, settings, options} = params,
         {timeId} = settings;
-    var targetDir = options["capture.dataFolder"] + "/" + timeId;
 
     var headers = {};
     var filename;
@@ -806,7 +827,7 @@ capturer.downloadBlob = function (params) {
       case "downloads":
       default: {
         // download the data
-        var targetDir = options["capture.dataFolder"] + "/" + timeId;
+        var targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
 
         capturer.saveBlob({
           timeId: timeId,
