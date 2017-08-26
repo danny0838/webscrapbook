@@ -907,29 +907,30 @@ chrome.downloads.onChanged.addListener((downloadDelta) => {
   var downloadId = downloadDelta.id, downloadInfo = capturer.downloadInfo;
   if (!downloadInfo[downloadId]) { return; }
 
-  var erase = function (downloadId) {
+  var p;
+  if (downloadDelta.state && downloadDelta.state.current === "complete") {
+    p = Promise.resolve().then(() => {
+      downloadInfo[downloadId].onComplete();
+    });
+  } else if (downloadDelta.error) {
+    p = Promise.resolve().then(() => {
+      downloadInfo[downloadId].onError(new Error(downloadDelta.error.current));
+    });
+  }
+  p && p.catch((ex) => {
+    console.error(ex);
+  }).then(() => {
     // erase the download history of additional downloads (autoErase = true)
     if (downloadInfo[downloadId].autoErase) {
-      chrome.downloads.erase({id: downloadId}, (erasedIds) => {});
+      return new Promise((resolve, reject) => {
+        chrome.downloads.erase({id: downloadId}, resolve);
+      });
     }
+  }).then((erasedIds) => {
     delete downloadInfo[downloadId];
-  };
-
-  if (downloadDelta.state && downloadDelta.state.current === "complete") {
-    try {
-      downloadInfo[downloadId].onComplete();
-    } catch (ex) {
-      console.error(ex);
-    }
-    erase(downloadId);
-  } else if (downloadDelta.error) {
-    try {
-      downloadInfo[downloadId].onError(new Error(downloadDelta.error.current));
-    } catch (ex) {
-      console.error(ex);
-    }
-    erase(downloadId);
-  }
+  }).catch((ex) => {
+    console.error(ex);
+  });
 });
 
 // isDebug && console.debug("loading background.js");
