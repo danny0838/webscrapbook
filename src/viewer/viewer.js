@@ -271,7 +271,7 @@ function init() {
             var request = indexedDB.open("scrapbook", 1);
             request.onupgradeneeded = (event) => {
               var db = event.target.result;
-              var objectStore = db.createObjectStore("zipFiles", {keyPath: "uuid"});
+              var objectStore = db.createObjectStore("archiveZipFiles", {keyPath: "uuid"});
             };
             request.onsuccess = (event) => {
               resolve(event.target.result);
@@ -281,8 +281,8 @@ function init() {
             };
           }).then((db) => {
             return new Promise((resolve, reject) => {
-              var transaction = db.transaction("zipFiles", "readwrite");
-              var objectStore = transaction.objectStore(["zipFiles"]);
+              var transaction = db.transaction("archiveZipFiles", "readwrite");
+              var objectStore = transaction.objectStore(["archiveZipFiles"]);
               var request = objectStore.add({uuid: uuid, blob: zipFile});
               transaction.oncomplete = (event) => {
                 resolve(event.target);

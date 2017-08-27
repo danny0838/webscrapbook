@@ -611,8 +611,8 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         reject(event.target.error);
       };
     }).then((db) => {
-      var transaction = db.transaction("zipFiles", "readwrite");
-      var objectStore = transaction.objectStore(["zipFiles"]);
+      var transaction = db.transaction("archiveZipFiles", "readwrite");
+      var objectStore = transaction.objectStore(["archiveZipFiles"]);
       return new Promise((resolve, reject) => {
         var request = objectStore.get(uuid);
         request.onsuccess = function (event) {
