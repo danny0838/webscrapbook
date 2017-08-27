@@ -2,6 +2,9 @@
   "CaptureTab": {
     "message": "擷取分頁"
   },
+  "CaptureTabBookmark": {
+    "message": "擷取分頁為書籤"
+  },
   "CaptureTabSource": {
     "message": "擷取分頁 (原始狀態)"
   },

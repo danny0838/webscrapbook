@@ -2,6 +2,9 @@
   "CaptureTab": {
     "message": "Capture tab"
   },
+  "CaptureTabBookmark": {
+    "message": "Capture tab as bookmark"
+  },
   "CaptureTabSource": {
     "message": "Capture tab (source)"
   },

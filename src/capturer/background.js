@@ -86,6 +86,17 @@ capturer.captureActiveTabSource = function () {
 /**
  * @return {Promise}
  */
+capturer.captureActiveTabBookmark = function () {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({active: true, currentWindow: true}, resolve);
+  }).then((tabs) => {
+    return capturer.captureTabBookmark(tabs[0]);
+  });
+};
+
+/**
+ * @return {Promise}
+ */
 capturer.captureAllTabs = function () {
   return new Promise((resolve, reject) => {
     chrome.extension.isAllowedFileSchemeAccess(resolve);
@@ -172,6 +183,46 @@ capturer.captureTabSource = function (tab, quiet) {
     }).then((response) => {
       isDebug && console.debug("(main) response", tab.url, response);
       capturer.captureInfo.delete(timeId);
+      if (!response) {
+        throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));
+      } else if (response.error) {
+        throw new Error(scrapbook.lang("ErrorCaptureGeneral"));
+      }
+      return response;
+    }).catch((ex) => {
+      var source = "[" + tab.id + "] " + tab.url;
+      var err = scrapbook.lang("ErrorCapture", [source, ex.message]);
+      console.error(err);
+      if (!quiet) { alert(err); }
+      return new Error(err);
+    });
+  });
+};
+
+/**
+ * @return {Promise}
+ */
+capturer.captureTabBookmark = function (tab, quiet) {
+  return new Promise((resolve, reject) => {
+    var timeId = scrapbook.dateToId();
+    var tabId = tab.id;
+    var message = {
+      url: tab.url,
+      settings: {
+        timeId: timeId,
+        frameIsMain: true,
+        documentName: "index",
+        recurseChain: []
+      },
+      options: capturer.fixOptions(scrapbook.getOptions("capture"))
+    };
+
+    return Promise.resolve().then(() => {
+      isDebug && console.debug("(main) send", tab.url, message);
+      return capturer.captureBookmark(message);
+    }).then((response) => {
+      isDebug && console.debug("(main) response", tab.url, response);
+      delete(capturer.captureInfo[timeId]);
       if (!response) {
         throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));
       } else if (response.error) {
@@ -305,6 +356,69 @@ capturer.captureUrl = function (params) {
     });
     accessMap.set(accessToken, accessCurrent);
     return accessCurrent;
+  });
+};
+
+/**
+ * @kind invokable
+ * @param {Object} params
+ *     - {string} params.url
+ *     - {string} params.refUrl
+ *     - {Object} params.settings
+ *     - {Object} params.options
+ * @return {Promise}
+ */
+capturer.captureBookmark = function (params) {
+  return Promise.resolve().then(() => {
+    isDebug && console.debug("call: captureBookmark", params);
+
+    var {url: sourceUrl, refUrl, settings, options} = params,
+        {timeId} = settings;
+
+    var title;
+
+    let requestHeaders = {};
+    if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
+
+    return new Promise((resolve, reject) => {
+      scrapbook.xhr({
+        url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
+        responseType: "document",
+        requestHeaders: requestHeaders,
+        onload: function (xhr, xhrAbort) {
+          let doc = xhr.response;
+          if (doc) { title = doc.title; }
+          let meta = params.options["capture.recordDocumentMeta"] ? ' data-sb-source-' + timeId + '="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
+          let html = `<!DOCTYPE html>
+<html${meta}>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(sourceUrl)}">
+${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
+<body>
+Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
+</body>
+</html>`;
+          resolve(html);
+        },
+        onerror: reject
+      });
+    }).then((html) => {
+      return capturer.saveDocument({
+        sourceUrl: sourceUrl,
+        documentName: settings.documentName,
+        settings: settings,
+        options: options,
+        data: {
+          title: title,
+          mime: "text/html",
+          content: html
+        }
+      });
+    }).catch((ex) => {
+      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+      return {url: capturer.getErrorUrl(sourceUrl, options), error: ex};
+    });
   });
 };
 

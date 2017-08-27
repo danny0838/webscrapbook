@@ -75,6 +75,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  document.getElementById("captureTabBookmark").addEventListener('click', () => {
+    chrome.tabs.getCurrent((tab) => {
+      if (!tab) {
+        // browserAction.html is a prompt diaglog
+        var win = chrome.extension.getBackgroundPage();
+        win.capturer.captureActiveTabBookmark();
+        window.close();
+      } else {
+        // browserAction.html is in a tab (or Firefox Android)
+        generateActionButtonForTabs(document.getElementById("captureTabBookmark"), (tab) => {
+          var win = chrome.extension.getBackgroundPage();
+          win.capturer.captureTabBookmark(tab);
+        });
+      }
+    });
+  });
+
   document.getElementById("captureAllTabs").addEventListener('click', () => {
     var win = chrome.extension.getBackgroundPage();
     win.capturer.captureAllTabs();
