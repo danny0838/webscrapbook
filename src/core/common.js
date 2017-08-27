@@ -218,7 +218,7 @@ scrapbook.splitUrlByAnchor = function (url) {
 };
 
 scrapbook.filepathParts = function (filepath) {
-  var pos = filepath.lastIndexOf("/");
+  var pos = Math.max(filepath.lastIndexOf("/"), filepath.lastIndexOf("\\"));
   if (pos != -1) {
     return [filepath.slice(0, pos), filepath.slice(pos + 1, filepath.length)];
   }

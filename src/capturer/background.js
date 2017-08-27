@@ -450,7 +450,7 @@ capturer.saveDocument = function (params) {
               sourceUrl: sourceUrl,
               autoErase: false,
               savePrompt: savePrompt
-            }).then(() => {
+            }).then((filename) => {
               resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
             }).catch(reject);
           }
@@ -505,7 +505,7 @@ capturer.saveDocument = function (params) {
                 sourceUrl: sourceUrl,
                 autoErase: false,
                 savePrompt: savePrompt
-              }).then(() => {
+              }).then((filename) => {
                 resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
               }).catch(reject);
             });
@@ -581,7 +581,7 @@ capturer.saveDocument = function (params) {
                 sourceUrl: sourceUrl,
                 autoErase: false,
                 savePrompt: savePrompt
-              }).then(() => {
+              }).then((filename) => {
                 resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
               }).catch(reject);
             });
@@ -605,7 +605,7 @@ capturer.saveDocument = function (params) {
             sourceUrl: sourceUrl,
             autoErase: !settings.frameIsMain || (ext === ".xhtml"),
             savePrompt: false
-          }).then(() => {
+          }).then((filename) => {
             if (settings.frameIsMain && (ext === ".xhtml")) {
               // create index.html that redirects to index.xhtml
               filename = "index.html";
@@ -620,7 +620,8 @@ capturer.saveDocument = function (params) {
                 savePrompt: false
               });
             }
-          }).then(() => {
+            return filename;
+          }).then((filename) => {
             resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
           }).catch(reject);
           break;
@@ -875,7 +876,7 @@ capturer.downloadBlob = function (params) {
           sourceUrl: sourceUrl,
           autoErase: true,
           savePrompt: false
-        }).then(() => {
+        }).then((filename) => {
           resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
         }).catch(reject);
         break;
@@ -982,8 +983,11 @@ chrome.downloads.onChanged.addListener((downloadDelta) => {
 
   var p;
   if (downloadDelta.state && downloadDelta.state.current === "complete") {
-    p = Promise.resolve().then(() => {
-      downloadInfo.get(downloadId).onComplete();
+    p = new Promise((resolve, reject) => {
+      chrome.downloads.search({id: downloadId}, resolve);
+    }).then((results) => {
+      let [dir, filename] = scrapbook.filepathParts(results[0].filename);
+      downloadInfo.get(downloadId).onComplete(filename);
     });
   } else if (downloadDelta.error) {
     p = Promise.resolve().then(() => {
