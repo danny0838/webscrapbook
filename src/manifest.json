@@ -59,7 +59,8 @@
     "lib/mime.js",
     "lib/jszip.js",
     "core/common.js",
-    "viewer/zipviewer.js"
+    "core/scrapbook_128.png",
+    "viewer/*"
   ],
 
   "options_ui": {

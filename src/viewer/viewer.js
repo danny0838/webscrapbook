@@ -250,7 +250,7 @@ function init() {
               chrome.tabs.create({url: url}, () => {});
             });
             let url = mainFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
-            chrome.tabs.update(tab.id, {url: url}, () => {});
+            window.location.href = url;
           });
         });
       });
@@ -349,13 +349,7 @@ body {
                 chrome.tabs.create({url: url}, resolve);
               });
             } else {
-              return new Promise((resolve, reject) => {
-                chrome.tabs.getCurrent(resolve);
-              }).then((tab) => {
-                return new Promise((resolve, reject) => {
-                  chrome.tabs.update(tab.id, {url: url}, resolve);
-                });
-              });
+              window.location.href = url;
             }
           });
         });

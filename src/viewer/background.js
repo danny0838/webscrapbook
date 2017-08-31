@@ -29,16 +29,39 @@ function redirectUrl(tabId, type, url, filename, mime) {
   newUrl.search = "?src=" + encodeURIComponent(url.href);
   newUrl = newUrl.href;
 
-  // return {redirectUrl: newUrl}; // this doesn't work
   if (type === "main_frame") {
+    // Firefox does not allow direct redirecting to an extension page
+    // even if it is listed in web_accessible_resources.
+    // Using data URI with meta refresh works but generates an extra
+    // history entry.
+    //if (scrapbook.isGecko) {
+    //  newUrl = scrapbook.stringToDataUri(`<meta http-equiv="refresh" content="0;url=${newUrl}">`, "text/html", "UTF-8");
+    //}
+    //return {redirectUrl: newUrl};
     chrome.tabs.update(tabId, {url: newUrl}, () => {});
+    return {cancel: true};
   } else {
-    chrome.tabs.create({url: newUrl}, () => {});
-    let html = '<a href="' + scrapbook.escapeHtml(newUrl, false) + '" target="_blank">View HTML archive</a>';
+    // An extension frame page whose top frame page is not an extension page
+    // cannot redirect itself to a blob page it has generated.
+    let html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+a {
+  background: left/1em url("${scrapbook.escapeHtml(chrome.runtime.getURL("core/scrapbook_128.png"))}") no-repeat;
+  padding-left: 1em;
+}
+</style>
+</head>
+<body>
+<a href="${scrapbook.escapeHtml(newUrl, false)}" target="_blank">View HTML archive</a>
+</body>
+</html>
+`;
     let dataUrl = scrapbook.stringToDataUri(html, "text/html", "UTF-8");
     return {redirectUrl: dataUrl};
   }
-  return {cancel: true};
 }
 
 chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
