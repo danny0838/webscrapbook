@@ -10,7 +10,7 @@
 capturer.isContentScript = false;
 
 /**
- * @type {Object.<string~timeId, {usedDocumentNames: Object.<string~documentName, number~count>, fileToUrl: Object.<string~filename, string~src>, zip: JSZip}>}
+ * @type {Object.<string~timeId, {usedDocumentNames: Object.<string~documentName, number~count>, files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
  */
 capturer.captureInfo = {};
 
@@ -20,40 +20,45 @@ capturer.captureInfo = {};
 capturer.downloadInfo = {};
 
 /**
- * Prevent filename conflictAction. Appends a number if the given filename is used.
+ * Gets a unique token for an access,
+ * to be used in capturer.captureInfo[timeId].accessMap
+ *
+ * @param {string} method - The rewrite method name of how the URL is used
+ *     (i.e. as embedded file, as stylesheet, or as (headless) document).
+ */
+capturer.getAccessToken = function (url, method) {
+  var token = scrapbook.splitUrlByAnchor(url)[0] + "\t" + (method || "");
+  token = scrapbook.sha1(token, "TEXT");
+  return token;
+};
+
+/**
+ * Prevent filename conflict. Appends a number if the given filename is used.
  *
  * @param {string} timeId
  * @param {string} filename - The unfixed filename. Should be validated (via scrapbook.validateFilename).
- * @param {string|true} src - The source URL of the filename source. Use true means always create a new filename.
- * @return {{newFilename: string, isDuplicate: boolean}}
+ * @return {string} The fixed filename.
  */
-capturer.getUniqueFilename = function (timeId, filename, src) {
+capturer.getUniqueFilename = function (timeId, filename) {
   if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-  capturer.captureInfo[timeId].fileToUrl = capturer.captureInfo[timeId].fileToUrl || {
-    "index.html": true,
-    "index.xhtml": true,
-    "index.dat": true,
-    "index.rdf": true,
-  };
+  var files = capturer.captureInfo[timeId].files = capturer.captureInfo[timeId].files || new Set([
+    "index.html", "index.xhtml", "index.rdf", "index.dat"
+  ]);
 
   var newFilename = filename || "untitled";
   var [newFilenameBase, newFilenameExt] = scrapbook.filenameParts(newFilename);
   newFilenameBase = scrapbook.crop(scrapbook.crop(newFilenameBase, 240, true), 128);
   newFilenameExt = newFilenameExt ? "." + newFilenameExt : "";
-  tokenSrc = (typeof src === "string") ? scrapbook.splitUrlByAnchor(src)[0] : src;
 
-  var seq = 0;
-  newFilename = newFilenameBase + newFilenameExt;
-  var newFilenameCI = newFilename.toLowerCase();
-  while (capturer.captureInfo[timeId].fileToUrl[newFilenameCI] !== undefined) {
-    if (capturer.captureInfo[timeId].fileToUrl[newFilenameCI] === tokenSrc) {
-      return {newFilename: newFilename, isDuplicate: true};
-    }
-    newFilename = newFilenameBase + "-" + (++seq) + newFilenameExt;
+  var newFilename = newFilenameBase + newFilenameExt,
+      newFilenameCI = newFilename.toLowerCase(),
+      count = 0;
+  while (files.has(newFilenameCI)) {
+    newFilename = newFilenameBase + "-" + (++count) + newFilenameExt;
     newFilenameCI = newFilename.toLowerCase(); 
   }
-  capturer.captureInfo[timeId].fileToUrl[newFilenameCI] = tokenSrc;
-  return {newFilename: newFilename, isDuplicate: false};
+  files.add(newFilenameCI);
+  return newFilename;
 };
 
 /**
@@ -202,66 +207,85 @@ capturer.captureUrl = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureUrl", params);
 
-    var {url: sourceUrl, refUrl, settings, options} = params;
+    var {url: sourceUrl, refUrl, settings, options} = params,
+        {timeId} = settings;
 
     var headers = {};
 
-    var determineFilename = function () {
-      // run this only once
-      if (arguments.callee.done) { return; }
-      arguments.callee.done = true;
+    // init access check
+    if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
+    var accessMap = capturer.captureInfo[timeId].accessMap = capturer.captureInfo[timeId].accessMap || new Map();
 
-      // skip if documentName is already specified
-      if (params.settings.documentName) { return; }
-
-      // if filename defined by header Content-Disposition, use it
-      let filename = headers.filename ||
-          sourceUrl.startsWith("data:") ?
-              scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name :
-              scrapbook.urlToFilename(sourceUrl);
-
-      let mime = headers.contentType || Mime.prototype.lookup(filename) || "text/html";
-      let fn = filename.toLowerCase();
-      if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
-        let exts = Mime.prototype.allExtensions(mime);
-        for (let i = 0, I = exts.length; i < I; i++) {
-          let ext = ("." + exts[i]).toLowerCase();
-          if (fn.endsWith(ext)) {
-            filename = filename.slice(0, -ext.length);
-            break;
-          }
-        }
-      }
-
-      params.settings.documentName = filename;
-    };
+    // check for previous access
+    var rewriteMethod = "captureUrl";
+    var accessToken = capturer.getAccessToken(sourceUrl, rewriteMethod);
+    var accessPrevious = accessMap.get(accessToken);
+    if (accessPrevious) { return accessPrevious; }
 
     let requestHeaders = {};
     if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
 
-    return new Promise((resolve, reject) => {
+    var accessCurrent = new Promise((resolve, reject) => {
       scrapbook.xhr({
         url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
         responseType: "document",
         requestHeaders: requestHeaders,
         onreadystatechange: function (xhr, xhrAbort) {
-          if (xhr.readyState === 2 && xhr.status !== 0) {
-            let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-            if (headerContentDisposition) {
-              let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-              headers.isAttachment = (contentDisposition.type === "attachment");
-              headers.filename = contentDisposition.parameters.filename;
+          if (xhr.readyState === 2) {
+            // check for previous access if redirected
+            if (xhr.responseURL !== sourceUrl) {
+              var accessToken = capturer.getAccessToken(xhr.responseURL, rewriteMethod);
+              var accessPrevious = accessMap.get(accessToken);
+              if (accessPrevious) {
+                resolve(accessPrevious);
+                xhrAbort();
+                return;
+              }
+              accessMap.set(accessToken, accessCurrent);
             }
-            let headerContentType = xhr.getResponseHeader("Content-Type");
-            if (headerContentType) {
-              let contentType = scrapbook.parseHeaderContentType(headerContentType);
-              headers.contentType = contentType.type;
-              headers.charset = contentType.parameters.charset;
+
+            // get headers
+            if (xhr.status !== 0) {
+              let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+              if (headerContentDisposition) {
+                let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+                headers.isAttachment = (contentDisposition.type === "attachment");
+                headers.filename = contentDisposition.parameters.filename;
+              }
+              let headerContentType = xhr.getResponseHeader("Content-Type");
+              if (headerContentType) {
+                let contentType = scrapbook.parseHeaderContentType(headerContentType);
+                headers.contentType = contentType.type;
+                headers.charset = contentType.parameters.charset;
+              }
+            }
+
+            // generate a documentName if not specified
+            if (!params.settings.documentName) {
+              // use the filename if it has been defined by header Content-Disposition
+              let filename = headers.filename ||
+                  sourceUrl.startsWith("data:") ?
+                      scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name :
+                      scrapbook.urlToFilename(sourceUrl);
+
+              let mime = headers.contentType || Mime.prototype.lookup(filename) || "text/html";
+              let fn = filename.toLowerCase();
+              if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
+                let exts = Mime.prototype.allExtensions(mime);
+                for (let i = 0, I = exts.length; i < I; i++) {
+                  let ext = ("." + exts[i]).toLowerCase();
+                  if (fn.endsWith(ext)) {
+                    filename = filename.slice(0, -ext.length);
+                    break;
+                  }
+                }
+              }
+
+              params.settings.documentName = filename;
             }
           }
         },
         onload: function (xhr, xhrAbort) {
-          determineFilename();
           let doc = xhr.response;
           if (doc) {
             capturer.captureDocumentOrFile({
@@ -285,6 +309,8 @@ capturer.captureUrl = function (params) {
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: ex};
     });
+    accessMap.set(accessToken, accessCurrent);
+    return accessCurrent;
   });
 };
 
@@ -433,7 +459,7 @@ capturer.saveDocument = function (params) {
           var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
           var filename = documentName + ext;
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
+          if (documentName !== "index") { filename = capturer.getUniqueFilename(timeId, filename); }
 
           if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
           var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
@@ -489,7 +515,7 @@ capturer.saveDocument = function (params) {
           var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
           var filename = documentName + ext;
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
+          if (documentName !== "index") { filename = capturer.getUniqueFilename(timeId, filename); }
 
           if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
           var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
@@ -567,7 +593,7 @@ capturer.saveDocument = function (params) {
           var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
           var filename = documentName + ext;
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          filename = capturer.getUniqueFilename(timeId, filename, true).newFilename;
+          if (documentName !== "index") { filename = capturer.getUniqueFilename(timeId, filename); }
 
           capturer.saveBlob({
             timeId: timeId,
@@ -627,7 +653,16 @@ capturer.downloadFile = function (params) {
     var isDuplicate;
     var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
 
-    return new Promise((resolve, reject) => {
+    // init access check
+    if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
+    var accessMap = capturer.captureInfo[timeId].accessMap = capturer.captureInfo[timeId].accessMap || new Map();
+
+    // check for previous access
+    var accessToken = capturer.getAccessToken(sourceUrl, rewriteMethod);
+    var accessPrevious = accessMap.get(accessToken);
+    if (accessPrevious) { return accessPrevious; }
+
+    var accessCurrent = new Promise((resolve, reject) => {
       // special management of data URI
       if (sourceUrl.startsWith("data:")) {
         if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
@@ -635,31 +670,28 @@ capturer.downloadFile = function (params) {
           if (file) {
             filename = file.name;
             filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-            ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
-            if (!isDuplicate) {
-              Promise.resolve(capturer[rewriteMethod]).then((fn) => {
-                if (fn) {
-                  return fn({
-                    settings: settings,
-                    options: options,
-                    data: file,
-                    charset: null,
-                    url: null
-                  });
-                }
-                return file;
-              }).then((blob) => {
-                return capturer.downloadBlob({
+            filename = capturer.getUniqueFilename(timeId, filename);
+
+            Promise.resolve(capturer[rewriteMethod]).then((fn) => {
+              if (fn) {
+                return fn({
                   settings: settings,
                   options: options,
-                  blob: blob,
-                  filename: filename,
-                  sourceUrl: sourceUrl,
+                  data: file,
+                  charset: null,
+                  url: null
                 });
-              }).then(resolve).catch(reject);
-            } else {
-              resolve({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
-            }
+              }
+              return file;
+            }).then((blob) => {
+              return capturer.downloadBlob({
+                settings: settings,
+                options: options,
+                blob: blob,
+                filename: filename,
+                sourceUrl: sourceUrl,
+              });
+            }).then(resolve).catch(reject);
           } else {
             reject(new Error("Malformed data URL."));
           }
@@ -669,38 +701,6 @@ capturer.downloadFile = function (params) {
         return;
       }
 
-      var determineFilename = function () {
-        // run this only once
-        if (arguments.callee.done) { return true; }
-        arguments.callee.done = true;
-
-        // if filename defined by header Content-Disposition, use it
-        // otherwise use the filename from URL
-        filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
-
-        // if no file extension, give one according to header Content-Type
-        if (headers.contentType) {
-          let [base, extension] = scrapbook.filenameParts(filename);
-          if (!extension) {
-            extension = Mime.prototype.extension(headers.contentType);
-            if (extension) {
-              filename = base + "." + extension;
-            }
-          }
-        }
-
-        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-        // singleHtml mode always save as dataURI and does not need to uniquify
-        if (options["capture.saveAs"] !== "singleHtml") {
-          ({newFilename: filename, isDuplicate} = capturer.getUniqueFilename(timeId, filename, sourceUrl));
-          if (isDuplicate) {
-            resolve({filename: filename, url: scrapbook.escapeFilename(filename) + hash, isDuplicate: true});
-            return false;
-          }
-        }
-        return true;
-      };
-
       let requestHeaders = {};
       if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
 
@@ -709,24 +709,58 @@ capturer.downloadFile = function (params) {
         responseType: "blob",
         requestHeaders: requestHeaders,
         onreadystatechange: function (xhr, xhrAbort) {
-          if (xhr.readyState === 2 && xhr.status !== 0) {
-            let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-            if (headerContentDisposition) {
-              let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-              headers.isAttachment = (contentDisposition.type === "attachment");
-              headers.filename = contentDisposition.parameters.filename;
+          if (xhr.readyState === 2) {
+            // check for previous access if redirected
+            if (xhr.responseURL !== sourceUrl) {
+              var accessToken = capturer.getAccessToken(xhr.responseURL, rewriteMethod);
+              var accessPrevious = accessMap.get(accessToken);
+              if (accessPrevious) {
+                resolve(accessPrevious);
+                xhrAbort();
+                return;
+              }
+              accessMap.set(accessToken, accessCurrent);
             }
-            let headerContentType = xhr.getResponseHeader("Content-Type");
-            if (headerContentType) {
-              let contentType = scrapbook.parseHeaderContentType(headerContentType);
-              headers.contentType = contentType.type;
-              headers.charset = contentType.parameters.charset;
+
+            // get headers
+            if (xhr.status !== 0) {
+              let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+              if (headerContentDisposition) {
+                let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+                headers.isAttachment = (contentDisposition.type === "attachment");
+                headers.filename = contentDisposition.parameters.filename;
+              }
+              let headerContentType = xhr.getResponseHeader("Content-Type");
+              if (headerContentType) {
+                let contentType = scrapbook.parseHeaderContentType(headerContentType);
+                headers.contentType = contentType.type;
+                headers.charset = contentType.parameters.charset;
+              }
             }
-            if (!determineFilename()) { xhrAbort(); }
+
+            // determine the filename
+            // use the filename if it has been defined by header Content-Disposition
+            filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
+
+            // if no file extension, give one according to header Content-Type
+            if (headers.contentType) {
+              let [base, extension] = scrapbook.filenameParts(filename);
+              if (!extension) {
+                extension = Mime.prototype.extension(headers.contentType);
+                if (extension) {
+                  filename = base + "." + extension;
+                }
+              }
+            }
+
+            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+            // singleHtml mode always save as dataURI and does not need to uniquify
+            if (options["capture.saveAs"] !== "singleHtml") {
+              filename = capturer.getUniqueFilename(timeId, filename);
+            }
           }
         },
         onload: function (xhr, xhrAbort) {
-          if (!determineFilename()) { return; }
           Promise.resolve(capturer[rewriteMethod]).then((fn) => {
             if (fn) {
               return fn({
@@ -754,6 +788,8 @@ capturer.downloadFile = function (params) {
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: ex};
     });
+    accessMap.set(accessToken, accessCurrent);
+    return accessCurrent;
   });
 };
 
