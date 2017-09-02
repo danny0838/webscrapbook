@@ -336,13 +336,13 @@ ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</h
           }
         });
       } else {
-        return Promise.resolve({
+        return {
           timeId: timeId,
           sourceUrl: sourceUrl,
           targetDir: response.targetDir,
           filename: response.filename,
           url: response.url
-        });
+        };
       }
     });
   });
