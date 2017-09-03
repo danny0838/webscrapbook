@@ -10,7 +10,7 @@
 capturer.isContentScript = false;
 
 /**
- * @type {Object.<string~timeId, {usedDocumentNames: Object.<string~documentName, number~count>, files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
+ * @type {Object.<string~timeId, {documentNames: Set<string>, files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
  */
 capturer.captureInfo = {};
 
@@ -389,15 +389,17 @@ capturer.registerDocument = function (params) {
         {timeId, documentName} = settings;
 
     if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-    if (!capturer.captureInfo[timeId].usedDocumentNames) { capturer.captureInfo[timeId].usedDocumentNames = {}; }
-    if (!capturer.captureInfo[timeId].usedDocumentNames[documentName]) { capturer.captureInfo[timeId].usedDocumentNames[documentName] = 0; }
+    var documentNames = capturer.captureInfo[timeId].documentNames = capturer.captureInfo[timeId].documentNames || new Set();
 
-    var fixedDocumentName = (capturer.captureInfo[timeId].usedDocumentNames[documentName] > 0) ?
-        (documentName + "_" + capturer.captureInfo[timeId].usedDocumentNames[documentName]) :
-        documentName;
-    capturer.captureInfo[timeId].usedDocumentNames[documentName]++;
-
-    return {documentName: fixedDocumentName};
+    var newDocumentName = documentName,
+        newDocumentNameCI = newDocumentName.toLowerCase(),
+        count = 0;
+    while (documentNames.has(newDocumentNameCI)) {
+      newDocumentName = documentName + "_" + (++count);
+      newDocumentNameCI = newDocumentName.toLowerCase();
+    }
+    documentNames.add(newDocumentNameCI);
+    return {documentName: newDocumentName};
   });
 };
 
