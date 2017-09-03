@@ -9,8 +9,10 @@
 
 capturer.isContentScript = false;
 
+capturer.defaultFilesSet = new Set(["index.rdf", "index.dat"]);
+
 /**
- * @type {Map<string~timeId, {documentNames: Set<string>, files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
+ * @type {Map<string~timeId, {files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
  */
 capturer.captureInfo = new Map();
 
@@ -41,9 +43,7 @@ capturer.getAccessToken = function (url, method) {
  */
 capturer.getUniqueFilename = function (timeId, filename) {
   if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-  var files = capturer.captureInfo.get(timeId).files = capturer.captureInfo.get(timeId).files || new Set([
-    "index.html", "index.xhtml", "index.rdf", "index.dat"
-  ]);
+  var files = capturer.captureInfo.get(timeId).files = capturer.captureInfo.get(timeId).files || new Set(capturer.defaultFilesSet);
 
   var newFilename = filename || "untitled";
   var [newFilenameBase, newFilenameExt] = scrapbook.filenameParts(newFilename);
@@ -389,16 +389,17 @@ capturer.registerDocument = function (params) {
         {timeId, documentName} = settings;
 
     if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-    var documentNames = capturer.captureInfo.get(timeId).documentNames = capturer.captureInfo.get(timeId).documentNames || new Set();
+    var files = capturer.captureInfo.get(timeId).files = capturer.captureInfo.get(timeId).files || new Set(capturer.defaultFilesSet);
 
     var newDocumentName = documentName,
         newDocumentNameCI = newDocumentName.toLowerCase(),
         count = 0;
-    while (documentNames.has(newDocumentNameCI)) {
+    while (files.has(newDocumentNameCI + ".html") || files.has(newDocumentNameCI + ".xhtml")) {
       newDocumentName = documentName + "_" + (++count);
       newDocumentNameCI = newDocumentName.toLowerCase();
     }
-    documentNames.add(newDocumentNameCI);
+    files.add(newDocumentNameCI + ".html");
+    files.add(newDocumentNameCI + ".xhtml");
     return {documentName: newDocumentName};
   });
 };
@@ -461,7 +462,6 @@ capturer.saveDocument = function (params) {
           var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
           var filename = documentName + ext;
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          if (documentName !== "index") { filename = capturer.getUniqueFilename(timeId, filename); }
 
           if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
           var zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
@@ -517,7 +517,6 @@ capturer.saveDocument = function (params) {
           var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
           var filename = documentName + ext;
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          if (documentName !== "index") { filename = capturer.getUniqueFilename(timeId, filename); }
 
           if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
           var zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
@@ -595,7 +594,6 @@ capturer.saveDocument = function (params) {
           var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
           var filename = documentName + ext;
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          if (documentName !== "index") { filename = capturer.getUniqueFilename(timeId, filename); }
 
           capturer.saveBlob({
             timeId: timeId,
