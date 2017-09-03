@@ -165,17 +165,17 @@
   "OptionCaptureRewriteUrlLabel": {
     "message": "改寫 URL"
   },
-  "OptionCaptureSaveAsDownloadsLabel": {
-    "message": "下載串流"
-  },
-  "OptionCaptureSaveAsDownloadsTooltip": {
-    "message": "啟動一連串下載將擷取的資料儲存至自動產生的資料夾。（Chrome 建議關閉「下載每個檔案前先詢問儲存位置」，否則會一直跳視窗）"
-  },
   "OptionCaptureSaveAsciiFilenameLabel": {
     "message": "儲存為 ASCII 檔名:"
   },
   "OptionCaptureSaveAsciiFilenameTooltip": {
     "message": "檔名中所有非 ASCII 字元會以編碼形式儲存。"
+  },
+  "OptionCaptureSaveAsFolderLabel": {
+    "message": "資料夾"
+  },
+  "OptionCaptureSaveAsFolderTooltip": {
+    "message": "產生一個資料夾並將網頁及資源檔案存入其中。（Chrome 建議關閉「下載每個檔案前先詢問儲存位置」，否則會一直跳視窗）"
   },
   "OptionCaptureSaveAsLabel": {
     "message": "儲存擷取資料為:"

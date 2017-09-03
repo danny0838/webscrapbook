@@ -23,7 +23,7 @@ var scrapbook = {
 
 scrapbook.options = {
   "capture.scrapbookFolder": "WebScrapBook",
-  "capture.saveAs": "zip", // "downloads", "zip", "maff", "singleHtml"
+  "capture.saveAs": "zip", // "folder", "zip", "maff", "singleHtml"
   "capture.saveInScrapbook": true,
   "capture.saveAsciiFilename": false,
   "capture.saveSelectionOnly": true,

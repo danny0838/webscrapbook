@@ -561,7 +561,7 @@ capturer.saveDocument = function (params) {
           break;
         }
 
-        case "downloads":
+        case "folder":
         default: {
           var targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
           var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
@@ -824,7 +824,7 @@ capturer.downloadBlob = function (params) {
         break;
       }
 
-      case "downloads":
+      case "folder":
       default: {
         // download the data
         var targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;

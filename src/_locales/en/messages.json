@@ -165,17 +165,17 @@
   "OptionCaptureRewriteUrlLabel": {
     "message": "Rewrite URL"
   },
-  "OptionCaptureSaveAsDownloadsLabel": {
-    "message": "Downloads"
-  },
-  "OptionCaptureSaveAsDownloadsTooltip": {
-    "message": "Save captured data into an auto-generated folder via a stream of downloads. (For Chrome, it's recommended that \"Ask where to save each file before downloading\" be unchecked to avoid tons of prompts.)"
-  },
   "OptionCaptureSaveAsciiFilenameLabel": {
     "message": "Save ASCII filename:"
   },
   "OptionCaptureSaveAsciiFilenameTooltip": {
     "message": "The captured file will have non-ASCII chars in the filename encoded."
+  },
+  "OptionCaptureSaveAsFolderLabel": {
+    "message": "Folder"
+  },
+  "OptionCaptureSaveAsFolderTooltip": {
+    "message": "Generate a folder and save the web page and resource files into it. (For Chrome, it's recommended that \"Ask where to save each file before downloading\" be unchecked to avoid tons of prompts.)"
   },
   "OptionCaptureSaveAsLabel": {
     "message": "Save captured data as:"
