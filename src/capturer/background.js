@@ -15,9 +15,9 @@ capturer.isContentScript = false;
 capturer.captureInfo = new Map();
 
 /**
- * @type {Object.<string~downloadId, {timeId: string, src: string, autoErase: boolean, onComplete: function, onError: function}>}
+ * @type {Map<string~downloadId, {timeId: string, src: string, autoErase: boolean, onComplete: function, onError: function}>}
  */
-capturer.downloadInfo = {};
+capturer.downloadInfo = new Map();
 
 /**
  * Gets a unique token for an access,
@@ -940,13 +940,13 @@ capturer.saveUrl = function (params) {
     chrome.downloads.download(downloadParams, (downloadId) => {
       isDebug && console.debug("download response", downloadId);
       if (downloadId) {
-        capturer.downloadInfo[downloadId] = {
+        capturer.downloadInfo.set(downloadId, {
           timeId: timeId,
           src: sourceUrl,
           autoErase: autoErase,
           onComplete: resolve,
           onError: reject
-        };
+        });
       } else {
         reject(chrome.runtime.lastError);
       }
@@ -978,29 +978,29 @@ chrome.downloads.onChanged.addListener((downloadDelta) => {
   isDebug && console.debug("downloads.onChanged", downloadDelta);
 
   var downloadId = downloadDelta.id, downloadInfo = capturer.downloadInfo;
-  if (!downloadInfo[downloadId]) { return; }
+  if (!downloadInfo.has(downloadId)) { return; }
 
   var p;
   if (downloadDelta.state && downloadDelta.state.current === "complete") {
     p = Promise.resolve().then(() => {
-      downloadInfo[downloadId].onComplete();
+      downloadInfo.get(downloadId).onComplete();
     });
   } else if (downloadDelta.error) {
     p = Promise.resolve().then(() => {
-      downloadInfo[downloadId].onError(new Error(downloadDelta.error.current));
+      downloadInfo.get(downloadId).onError(new Error(downloadDelta.error.current));
     });
   }
   p && p.catch((ex) => {
     console.error(ex);
   }).then(() => {
     // erase the download history of additional downloads (autoErase = true)
-    if (downloadInfo[downloadId].autoErase) {
+    if (downloadInfo.get(downloadId).autoErase) {
       return new Promise((resolve, reject) => {
         chrome.downloads.erase({id: downloadId}, resolve);
       });
     }
   }).then((erasedIds) => {
-    delete downloadInfo[downloadId];
+    downloadInfo.delete(downloadId);
   }).catch((ex) => {
     console.error(ex);
   });
