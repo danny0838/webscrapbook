@@ -10,7 +10,7 @@
 capturer.isContentScript = false;
 
 /**
- * @type {Object.<string~timeId, {usedDocumentNames: Object.<string~documentName, number~count>, fileToUrl: Object.<string~filename, string~src>}>}
+ * @type {Object.<string~timeId, {usedDocumentNames: Object.<string~documentName, number~count>, fileToUrl: Object.<string~filename, string~src>, zip: JSZip}>}
  */
 capturer.captureInfo = {};
 
