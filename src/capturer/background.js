@@ -10,9 +10,9 @@
 capturer.isContentScript = false;
 
 /**
- * @type {Object.<string~timeId, {documentNames: Set<string>, files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
+ * @type {Map<string~timeId, {documentNames: Set<string>, files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
  */
-capturer.captureInfo = {};
+capturer.captureInfo = new Map();
 
 /**
  * @type {Object.<string~downloadId, {timeId: string, src: string, autoErase: boolean, onComplete: function, onError: function}>}
@@ -21,7 +21,7 @@ capturer.downloadInfo = {};
 
 /**
  * Gets a unique token for an access,
- * to be used in capturer.captureInfo[timeId].accessMap
+ * to be used in capturer.captureInfo.get(timeId).accessMap
  *
  * @param {string} method - The rewrite method name of how the URL is used
  *     (i.e. as embedded file, as stylesheet, or as (headless) document).
@@ -40,8 +40,8 @@ capturer.getAccessToken = function (url, method) {
  * @return {string} The fixed filename.
  */
 capturer.getUniqueFilename = function (timeId, filename) {
-  if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-  var files = capturer.captureInfo[timeId].files = capturer.captureInfo[timeId].files || new Set([
+  if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+  var files = capturer.captureInfo.get(timeId).files = capturer.captureInfo.get(timeId).files || new Set([
     "index.html", "index.xhtml", "index.rdf", "index.dat"
   ]);
 
@@ -124,7 +124,7 @@ capturer.captureTab = function (tab, quiet) {
       return capturer.invoke("captureDocumentOrFile", message, tabId);
     }).then((response) => {
       isDebug && console.debug("(main) response", tabId, response);
-      delete(capturer.captureInfo[timeId]);
+      capturer.captureInfo.delete(timeId);
       if (!response) {
         throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));
       } else if (response.error) {
@@ -178,7 +178,7 @@ capturer.captureTabSource = function (tab, quiet) {
       return capturer.captureUrl(message);
     }).then((response) => {
       isDebug && console.debug("(main) response", tab.url, response);
-      delete(capturer.captureInfo[timeId]);
+      capturer.captureInfo.delete(timeId);
       if (!response) {
         throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));
       } else if (response.error) {
@@ -213,8 +213,8 @@ capturer.captureUrl = function (params) {
     var headers = {};
 
     // init access check
-    if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-    var accessMap = capturer.captureInfo[timeId].accessMap = capturer.captureInfo[timeId].accessMap || new Map();
+    if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+    var accessMap = capturer.captureInfo.get(timeId).accessMap = capturer.captureInfo.get(timeId).accessMap || new Map();
 
     // check for previous access
     var rewriteMethod = "captureUrl";
@@ -388,8 +388,8 @@ capturer.registerDocument = function (params) {
     var {settings, options} = params,
         {timeId, documentName} = settings;
 
-    if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-    var documentNames = capturer.captureInfo[timeId].documentNames = capturer.captureInfo[timeId].documentNames || new Set();
+    if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+    var documentNames = capturer.captureInfo.get(timeId).documentNames = capturer.captureInfo.get(timeId).documentNames || new Set();
 
     var newDocumentName = documentName,
         newDocumentNameCI = newDocumentName.toLowerCase(),
@@ -463,8 +463,8 @@ capturer.saveDocument = function (params) {
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
           if (documentName !== "index") { filename = capturer.getUniqueFilename(timeId, filename); }
 
-          if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-          var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+          if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+          var zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
 
           zip.file(filename, new Blob([data.content], {type: data.mime}), {
             compression: "DEFLATE",
@@ -519,8 +519,8 @@ capturer.saveDocument = function (params) {
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
           if (documentName !== "index") { filename = capturer.getUniqueFilename(timeId, filename); }
 
-          if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-          var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+          if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+          var zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
 
           zip.file(timeId + "/" + filename, new Blob([data.content], {type: data.mime}), {
             compression: "DEFLATE",
@@ -656,8 +656,8 @@ capturer.downloadFile = function (params) {
     var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
 
     // init access check
-    if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-    var accessMap = capturer.captureInfo[timeId].accessMap = capturer.captureInfo[timeId].accessMap || new Map();
+    if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+    var accessMap = capturer.captureInfo.get(timeId).accessMap = capturer.captureInfo.get(timeId).accessMap || new Map();
 
     // check for previous access
     var accessToken = capturer.getAccessToken(sourceUrl, rewriteMethod);
@@ -825,8 +825,8 @@ capturer.downloadBlob = function (params) {
       }
 
       case "zip": {
-        if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-        var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+        var zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
 
         if (/^text\/|\b(?:xml|json|javascript)\b/.test(blob.type) && blob.size >= 128) {
           zip.file(filename, blob, {
@@ -844,8 +844,8 @@ capturer.downloadBlob = function (params) {
       }
 
       case "maff": {
-        if (!capturer.captureInfo[timeId]) { capturer.captureInfo[timeId] = {}; }
-        var zip = capturer.captureInfo[timeId].zip = capturer.captureInfo[timeId].zip || new JSZip();
+        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+        var zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
 
         if (/^text\/|\b(?:xml|json|javascript)\b/.test(blob.type) && blob.size >= 128) {
           zip.file(timeId + "/" + filename, blob, {
