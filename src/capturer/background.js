@@ -69,10 +69,6 @@ capturer.captureActiveTab = function () {
     chrome.tabs.query({active: true, currentWindow: true}, resolve);
   }).then((tabs) => {
     return capturer.captureTab(tabs[0]);
-  }).then((value) => {
-    if (Object.prototype.toString.call(value) === "[object Error]") {
-      alert(value.message);
-    }
   });
 };
 
@@ -84,10 +80,6 @@ capturer.captureActiveTabSource = function () {
     chrome.tabs.query({active: true, currentWindow: true}, resolve);
   }).then((tabs) => {
     return capturer.captureTabSource(tabs[0]);
-  }).then((value) => {
-    if (Object.prototype.toString.call(value) === "[object Error]") {
-      alert(value.message);
-    }
   });
 };
 
@@ -110,7 +102,7 @@ capturer.captureAllTabs = function () {
     var ms = -5;
     return Promise.all(tabs.map((tab) => {
       return scrapbook.delay(ms += 5).then(() => {
-        return capturer.captureTab(tab);
+        return capturer.captureTab(tab, true);
       });
     }));
   }).then((values) => {});
@@ -149,7 +141,8 @@ capturer.captureTab = function (tab, quiet) {
     }).catch((ex) => {
       var source = "[" + tab.id + "] " + tab.url;
       var err = scrapbook.lang("ErrorCapture", [source, ex.message]);
-      if (!quiet) { console.error(err); }
+      console.error(err);
+      if (!quiet) { alert(err); }
       return new Error(err);
     });
   });
@@ -188,7 +181,8 @@ capturer.captureTabSource = function (tab, quiet) {
     }).catch((ex) => {
       var source = "[" + tab.id + "] " + tab.url;
       var err = scrapbook.lang("ErrorCapture", [source, ex.message]);
-      if (!quiet) { console.error(err); }
+      console.error(err);
+      if (!quiet) { alert(err); }
       return new Error(err);
     });
   });
