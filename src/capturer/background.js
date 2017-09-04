@@ -375,6 +375,7 @@ capturer.captureBookmark = function (params) {
     var {url: sourceUrl, refUrl, settings, options} = params,
         {timeId} = settings;
 
+    var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
     var title;
 
     let requestHeaders = {};
@@ -404,16 +405,29 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
         onerror: reject
       });
     }).then((html) => {
-      return capturer.saveDocument({
+      var ext = ".htm";
+      if (options["capture.saveInScrapbook"]) {
+        var targetDir = options["capture.scrapbookFolder"] + "/data";
+        var filename = timeId + ext;
+        var savePrompt = false;
+      } else {
+        var targetDir = "";
+        var filename = (title ? title : scrapbook.urlToFilename(sourceUrl));
+        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        if (!filename.endsWith(ext)) filename += ext;
+        var savePrompt = true;
+      }
+
+      return capturer.saveBlob({
+        timeId: timeId,
+        blob: new Blob([html], {type: "text/html"}),
+        directory: targetDir,
+        filename: filename,
         sourceUrl: sourceUrl,
-        documentName: settings.documentName,
-        settings: settings,
-        options: options,
-        data: {
-          title: title,
-          mime: "text/html",
-          content: html
-        }
+        autoErase: false,
+        savePrompt: savePrompt
+      }).then((filename) => {
+        return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash};
       });
     }).catch((ex) => {
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
