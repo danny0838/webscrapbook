@@ -79,6 +79,21 @@ capturer.captureActiveTab = function () {
 /**
  * @return {Promise}
  */
+capturer.captureActiveTabSource = function () {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({active: true, currentWindow: true}, resolve);
+  }).then((tabs) => {
+    return capturer.captureTabSource(tabs[0]);
+  }).then((value) => {
+    if (Object.prototype.toString.call(value) === "[object Error]") {
+      alert(value.message);
+    }
+  });
+};
+
+/**
+ * @return {Promise}
+ */
 capturer.captureAllTabs = function () {
   return new Promise((resolve, reject) => {
     chrome.extension.isAllowedFileSchemeAccess(resolve);
@@ -137,21 +152,6 @@ capturer.captureTab = function (tab, quiet) {
       if (!quiet) { console.error(err); }
       return new Error(err);
     });
-  });
-};
-
-/**
- * @return {Promise}
- */
-capturer.captureActiveTabSource = function () {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({active: true, currentWindow: true}, resolve);
-  }).then((tabs) => {
-    return capturer.captureTabSource(tabs[0]);
-  }).then((value) => {
-    if (Object.prototype.toString.call(value) === "[object Error]") {
-      alert(value.message);
-    }
   });
 };
 
