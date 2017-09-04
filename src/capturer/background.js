@@ -416,12 +416,12 @@ capturer.saveDocument = function (params) {
         {timeId} = settings;
     var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
 
-    return new Promise((resolve, reject) => {
+    return Promise.resolve().then(() => {
       switch (options["capture.saveAs"]) {
         case "singleHtml": {
           if (!settings.frameIsMain) {
             let dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
-            resolve({timeId: timeId, sourceUrl: sourceUrl, url: dataUri});
+            return {timeId: timeId, sourceUrl: sourceUrl, url: dataUri};
           } else {
             var ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
 
@@ -437,7 +437,7 @@ capturer.saveDocument = function (params) {
               var savePrompt = true;
             }
 
-            capturer.saveBlob({
+            return capturer.saveBlob({
               timeId: timeId,
               blob: new Blob([data.content], {type: data.mime}),
               directory: targetDir,
@@ -446,8 +446,8 @@ capturer.saveDocument = function (params) {
               autoErase: false,
               savePrompt: savePrompt
             }).then((filename) => {
-              resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-            }).catch(reject);
+              return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash};
+            });
           }
           break;
         }
@@ -466,7 +466,7 @@ capturer.saveDocument = function (params) {
           });
 
           if (!settings.frameIsMain) {
-            resolve({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+            return {timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + hash};
           } else {
             // create index.html that redirects to index.xhtml
             if (ext === ".xhtml") {
@@ -478,7 +478,7 @@ capturer.saveDocument = function (params) {
             }
 
             // generate and download the zip file
-            zip.generateAsync({type: "blob"}).then((zipBlob) => {
+            return zip.generateAsync({type: "blob"}).then((zipBlob) => {
               if (options["capture.saveInScrapbook"]) {
                 var targetDir = options["capture.scrapbookFolder"] + "/data";
                 var filename = timeId + ".htz";
@@ -491,7 +491,7 @@ capturer.saveDocument = function (params) {
                 var savePrompt = true;
               }
 
-              capturer.saveBlob({
+              return capturer.saveBlob({
                 timeId: timeId,
                 blob: zipBlob,
                 directory: targetDir,
@@ -500,8 +500,8 @@ capturer.saveDocument = function (params) {
                 autoErase: false,
                 savePrompt: savePrompt
               }).then((filename) => {
-                resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-              }).catch(reject);
+                return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash};
+              });
             });
           }
           break;
@@ -521,7 +521,7 @@ capturer.saveDocument = function (params) {
           });
 
           if (!settings.frameIsMain) {
-            resolve({timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
+            return {timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + hash};
           } else {
             // create index.html that redirects to index.xhtml
             if (ext === ".xhtml") {
@@ -553,7 +553,7 @@ capturer.saveDocument = function (params) {
             });
 
             // generate and download the zip file
-            zip.generateAsync({type: "blob"}).then((zipBlob) => {
+            return zip.generateAsync({type: "blob"}).then((zipBlob) => {
               if (options["capture.saveInScrapbook"]) {
                 var targetDir = options["capture.scrapbookFolder"] + "/data";
                 var filename = timeId + ".maff";
@@ -566,7 +566,7 @@ capturer.saveDocument = function (params) {
                 var savePrompt = true;
               }
 
-              capturer.saveBlob({
+              return capturer.saveBlob({
                 timeId: timeId,
                 blob: zipBlob,
                 directory: targetDir,
@@ -575,8 +575,8 @@ capturer.saveDocument = function (params) {
                 autoErase: false,
                 savePrompt: savePrompt
               }).then((filename) => {
-                resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-              }).catch(reject);
+                return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash};
+              });
             });
           }
           break;
@@ -589,7 +589,7 @@ capturer.saveDocument = function (params) {
           var filename = documentName + ext;
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
-          capturer.saveBlob({
+          return capturer.saveBlob({
             timeId: timeId,
             blob: new Blob([data.content], {type: data.mime}),
             directory: targetDir,
@@ -614,8 +614,8 @@ capturer.saveDocument = function (params) {
             }
             return filename;
           }).then((filename) => {
-            resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash});
-          }).catch(reject);
+            return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + hash};
+          });
           break;
         }
       }
