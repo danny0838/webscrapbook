@@ -219,12 +219,6 @@
   "OptionCaptureSaveInScrapbookTooltip": {
     "message": "儲存為下載串流時必定套用此設定。"
   },
-  "OptionCaptureSaveSelectionOnlyLabel": {
-    "message": "只儲存選取範圍:"
-  },
-  "OptionCaptureSaveSelectionOnlyTooltip": {
-    "message": "勾選時，只會擷取及儲存選取的範圍。"
-  },
   "OptionCaptureScriptAnchorLabel": {
     "message": "Javascript 連結:"
   },

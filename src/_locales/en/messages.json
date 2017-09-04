@@ -219,12 +219,6 @@
   "OptionCaptureSaveInScrapbookTooltip": {
     "message": "This is always applied when saving as downloads."
   },
-  "OptionCaptureSaveSelectionOnlyLabel": {
-    "message": "Save selected area only:"
-  },
-  "OptionCaptureSaveSelectionOnlyTooltip": {
-    "message": "When checked, only the selected area will be captured."
-  },
   "OptionCaptureScriptAnchorLabel": {
     "message": "Javascript links:"
   },
