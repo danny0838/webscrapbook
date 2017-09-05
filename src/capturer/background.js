@@ -256,6 +256,7 @@ capturer.captureUrl = function (params) {
         {timeId} = settings;
 
     var headers = {};
+    var [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     // init access check
     if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
@@ -263,7 +264,7 @@ capturer.captureUrl = function (params) {
 
     // check for previous access
     var rewriteMethod = "captureUrl";
-    var accessToken = capturer.getAccessToken(sourceUrl, rewriteMethod);
+    var accessToken = capturer.getAccessToken(sourceUrlMain, rewriteMethod);
     var accessPrevious = accessMap.get(accessToken);
     if (accessPrevious) { return accessPrevious; }
 
@@ -278,8 +279,9 @@ capturer.captureUrl = function (params) {
         onreadystatechange: function (xhr, xhrAbort) {
           if (xhr.readyState === 2) {
             // check for previous access if redirected
-            if (xhr.responseURL !== sourceUrl) {
-              var accessToken = capturer.getAccessToken(xhr.responseURL, rewriteMethod);
+            let [responseUrlMain] = scrapbook.splitUrlByAnchor(xhr.responseURL);
+            if (responseUrlMain !== sourceUrlMain) {
+              var accessToken = capturer.getAccessToken(responseUrlMain, rewriteMethod);
               var accessPrevious = accessMap.get(accessToken);
               if (accessPrevious) {
                 resolve(accessPrevious);
@@ -774,22 +776,22 @@ capturer.downloadFile = function (params) {
     var headers = {};
     var filename;
     var isDuplicate;
-    var hash = scrapbook.splitUrlByAnchor(sourceUrl)[1];
+    var [sourceUrlMain, hash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     // init access check
     if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
     var accessMap = capturer.captureInfo.get(timeId).accessMap = capturer.captureInfo.get(timeId).accessMap || new Map();
 
     // check for previous access
-    var accessToken = capturer.getAccessToken(sourceUrl, rewriteMethod);
+    var accessToken = capturer.getAccessToken(sourceUrlMain, rewriteMethod);
     var accessPrevious = accessMap.get(accessToken);
     if (accessPrevious) { return accessPrevious; }
 
     var accessCurrent = new Promise((resolve, reject) => {
       // special management of data URI
-      if (sourceUrl.startsWith("data:")) {
+      if (sourceUrlMain.startsWith("data:")) {
         if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
-          let file = scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]);
+          let file = scrapbook.dataUriToFile(sourceUrlMain);
           if (file) {
             filename = file.name;
             filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
@@ -834,8 +836,9 @@ capturer.downloadFile = function (params) {
         onreadystatechange: function (xhr, xhrAbort) {
           if (xhr.readyState === 2) {
             // check for previous access if redirected
-            if (xhr.responseURL !== sourceUrl) {
-              var accessToken = capturer.getAccessToken(xhr.responseURL, rewriteMethod);
+            let [responseUrlMain] = scrapbook.splitUrlByAnchor(xhr.responseURL);
+            if (responseUrlMain !== sourceUrlMain) {
+              var accessToken = capturer.getAccessToken(responseUrlMain, rewriteMethod);
               var accessPrevious = accessMap.get(accessToken);
               if (accessPrevious) {
                 resolve(accessPrevious);
