@@ -929,7 +929,7 @@ capturer.downloadFile = function (params) {
  * @return {Promise}
  */
 capturer.downloadBlob = function (params) {
-  return new Promise((resolve, reject) => {
+  return Promise.resolve().then(() => {
     isDebug && console.debug("call: downloadBlob", params);
 
     var {blob, filename, sourceUrl, settings, options} = params,
@@ -938,13 +938,12 @@ capturer.downloadBlob = function (params) {
 
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
-        scrapbook.readFileAsDataURL(blob).then((dataUri) => {
+        return scrapbook.readFileAsDataURL(blob).then((dataUri) => {
           if (filename) {
             dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");
           }
-          resolve({url: dataUri + sourceUrlHash});
+          return {url: dataUri + sourceUrlHash};
         });
-        break;
       }
 
       case "zip": {
@@ -962,8 +961,7 @@ capturer.downloadBlob = function (params) {
           });
         }
 
-        resolve({filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash});
-        break;
+        return {filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       }
 
       case "maff": {
@@ -981,8 +979,7 @@ capturer.downloadBlob = function (params) {
           });
         }
 
-        resolve({filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash});
-        break;
+        return {filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       }
 
       case "folder":
@@ -990,7 +987,7 @@ capturer.downloadBlob = function (params) {
         // download the data
         var targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
 
-        capturer.saveBlob({
+        return capturer.saveBlob({
           timeId: timeId,
           blob: blob,
           directory: targetDir,
@@ -999,9 +996,8 @@ capturer.downloadBlob = function (params) {
           autoErase: true,
           savePrompt: false
         }).then((filename) => {
-          resolve({timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash});
-        }).catch(reject);
-        break;
+          return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        });
       }
     }
   });
