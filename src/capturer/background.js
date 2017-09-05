@@ -796,7 +796,7 @@ capturer.downloadFile = function (params) {
             filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
             filename = capturer.getUniqueFilename(timeId, filename);
 
-            Promise.resolve(capturer[rewriteMethod]).then((fn) => {
+            resolve(Promise.resolve(capturer[rewriteMethod]).then((fn) => {
               if (fn) {
                 return fn({
                   settings: settings,
@@ -815,7 +815,7 @@ capturer.downloadFile = function (params) {
                 filename: filename,
                 sourceUrl: sourceUrl,
               });
-            }).then(resolve).catch(reject);
+            }));
           } else {
             reject(new Error("Malformed data URL."));
           }
@@ -886,7 +886,7 @@ capturer.downloadFile = function (params) {
           }
         },
         onload: function (xhr, xhrAbort) {
-          Promise.resolve(capturer[rewriteMethod]).then((fn) => {
+          resolve(Promise.resolve(capturer[rewriteMethod]).then((fn) => {
             if (fn) {
               return fn({
                 settings: settings,
@@ -905,7 +905,7 @@ capturer.downloadFile = function (params) {
               filename: filename,
               sourceUrl: sourceUrl,
             });
-          }).then(resolve).catch(reject);
+          }));
         },
         onerror: reject
       });
