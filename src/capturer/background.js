@@ -335,19 +335,19 @@ capturer.captureUrl = function (params) {
         onload: function (xhr, xhrAbort) {
           let doc = xhr.response;
           if (doc) {
-            capturer.captureDocumentOrFile({
+            resolve(capturer.captureDocumentOrFile({
               doc: doc,
               refUrl: refUrl,
               settings: settings,
               options: options
-            }).then(resolve);
+            }));
           } else {
-            capturer.captureFile({
+            resolve(capturer.captureFile({
               url: params.url,
               refUrl: refUrl,
               settings: params.settings,
               options: params.options
-            }).then(resolve);
+            }));
           }
         },
         onerror: reject
