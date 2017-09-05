@@ -88,7 +88,7 @@ scrapbook.setOption = function (key, value) {
       if (!chrome.runtime.lastError) {
         resolve(pair);
       } else {
-        reject(chrome.runtime.lastError.message);
+        reject(chrome.runtime.lastError);
       }
     });
   });
@@ -104,7 +104,7 @@ scrapbook.loadOptions = function () {
         scrapbook.isOptionsSynced = true;
         resolve(items);
       } else {
-        reject(chrome.runtime.lastError.message);
+        reject(chrome.runtime.lastError);
       }
     });
   });
@@ -116,7 +116,7 @@ scrapbook.saveOptions = function () {
       if (!chrome.runtime.lastError) {
         resolve(scrapbook.options);
       } else {
-        reject(chrome.runtime.lastError.message);
+        reject(chrome.runtime.lastError);
       }
     });
   });
