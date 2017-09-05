@@ -5,7 +5,7 @@
  * @require {Object} scrapbook
  *******************************************************************/
 
-scrapbook.loadOptions().then();
+scrapbook.loadOptions();
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === "sync") {
