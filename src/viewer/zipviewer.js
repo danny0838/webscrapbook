@@ -655,7 +655,11 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
       url: urlSearch + urlHash,
       recurseChain: []
     }).then((fetchedUrl) => {
+      // remove viewer temporarily to avoid generating a history entry
+      let p = viewer.parentNode, n = viewer.nextSibling;
+      viewer.remove();
       viewer.src = fetchedUrl || "about:blank";
+      p.insertBefore(viewer, n);
     });
   }).catch((ex) => {
     console.error(ex);
