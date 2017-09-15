@@ -9,6 +9,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // load languages
   scrapbook.loadLanguages(document);
 
+  /**
+   * @return {Promise}
+   */
+  var getContentTabs = function () {
+    return new Promise((resolve, reject) => {
+      chrome.extension.isAllowedFileSchemeAccess(resolve);
+    }).then((isAllowedAccess) => {
+      let urlMatch = ["http://*/*", "https://*/*", "ftp://*/*"];
+      if (isAllowedAccess) { urlMatch.push("file://*"); }
+      return new Promise((resolve, reject) => {
+        chrome.tabs.query({currentWindow: true, url: urlMatch}, resolve);
+      });
+    });
+  };
+
   var generateActionButtonForTabs = function (base, action) {
     let selector = base.nextSibling;
     if (selector && selector.nodeType === 1) {
@@ -17,26 +32,19 @@ document.addEventListener('DOMContentLoaded', () => {
       selector = document.createElement("div");
       base.parentNode.insertBefore(selector, base.nextSibling);
     }
-    chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
-      let urlMatch = ["http://*/*", "https://*/*", "ftp://*/*"];
-      if (isAllowedAccess) { urlMatch.push("file://*"); }
-      chrome.tabs.query({
-        currentWindow: true,
-        url: urlMatch
-      }, (tabs) => {
-        tabs.forEach((tab) => {
-          let elem = document.createElement("div");
-          elem.classList.add("button");
-          elem.classList.add("sub");
-          elem.textContent = (tab.index + 1) + ": " + tab.title;
-          elem.addEventListener('click', (event) => {
-            event.preventDefault;
-            event.stopPropagation;
-            action(tab);
-            selector.remove();
-          });
-          selector.appendChild(elem);
+    getContentTabs().then((tabs) => {
+      tabs.forEach((tab) => {
+        let elem = document.createElement("div");
+        elem.classList.add("button");
+        elem.classList.add("sub");
+        elem.textContent = (tab.index + 1) + ": " + tab.title;
+        elem.addEventListener('click', (event) => {
+          event.preventDefault;
+          event.stopPropagation;
+          action(tab);
+          selector.remove();
         });
+        selector.appendChild(elem);
       });
     });
   };
