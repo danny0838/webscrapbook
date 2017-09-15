@@ -472,6 +472,7 @@ capturer.captureFile = function (params) {
 <meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(response.url)}">
 ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
 <body>
+Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
 </body>
 </html>`;
         return capturer.saveDocument({
