@@ -34,8 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     getContentTabs().then((tabs) => {
       tabs.forEach((tab) => {
-        let elem = document.createElement("div");
-        elem.classList.add("button");
+        let elem = document.createElement("button");
         elem.classList.add("sub");
         elem.textContent = (tab.index + 1) + ": " + tab.title;
         elem.addEventListener('click', (event) => {

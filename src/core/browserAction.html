@@ -7,19 +7,23 @@
 <script src="common.js"></script>
 <script src="browserAction.js"></script>
 <style>
-div.button {
+button {
+  display: block;
   cursor: pointer;
-  text-align: center;
+  outline: none;
+  border: none;
+  background: none;
   padding: 1px 3px;
+  width: 100%;
   font-size: 14px;
   white-space: nowrap;
 }
 
-div.button:hover {
+button:hover {
   background-color: #aaaaaa;
 }
 
-div.button:active {
+button:active {
   background-color: #000000;
   color: #FFFFFF;
 }
@@ -31,11 +35,11 @@ div.button:active {
 </style>
 </head>
 <body>
-<div class="button" id="captureTab">__MSG_CaptureTab__</div>
-<div class="button" id="captureTabSource">__MSG_CaptureTabSource__</div>
-<div class="button" id="captureTabBookmark">__MSG_CaptureTabBookmark__</div>
-<div class="button" id="captureAllTabs">__MSG_CaptureAllTabs__</div>
-<div class="button" id="openViewer">__MSG_OpenViewer__</div>
-<div class="button" id="openOptions">__MSG_OpenOptions__</div>
+<button id="captureTab">__MSG_CaptureTab__</button>
+<button id="captureTabSource">__MSG_CaptureTabSource__</button>
+<button id="captureTabBookmark">__MSG_CaptureTabBookmark__</button>
+<button id="captureAllTabs">__MSG_CaptureAllTabs__</button>
+<button id="openViewer">__MSG_OpenViewer__</button>
+<button id="openOptions">__MSG_OpenOptions__</button>
 </body>
 </html>
