@@ -41,9 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  document.getElementById("captureTab").addEventListener('click', () => {
-    chrome.tabs.getCurrent((tab) => {
-      if (!tab) {
+  chrome.tabs.getCurrent((currentTab) => {
+    document.getElementById("captureTab").addEventListener('click', () => {
+      if (!currentTab) {
         // browserAction.html is a prompt diaglog
         var win = chrome.extension.getBackgroundPage();
         win.capturer.captureActiveTab();
@@ -56,11 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     });
-  });
 
-  document.getElementById("captureTabSource").addEventListener('click', () => {
-    chrome.tabs.getCurrent((tab) => {
-      if (!tab) {
+    document.getElementById("captureTabSource").addEventListener('click', () => {
+      if (!currentTab) {
         // browserAction.html is a prompt diaglog
         var win = chrome.extension.getBackgroundPage();
         win.capturer.captureActiveTabSource();
@@ -73,11 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     });
-  });
 
-  document.getElementById("captureTabBookmark").addEventListener('click', () => {
-    chrome.tabs.getCurrent((tab) => {
-      if (!tab) {
+    document.getElementById("captureTabBookmark").addEventListener('click', () => {
+      if (!currentTab) {
         // browserAction.html is a prompt diaglog
         var win = chrome.extension.getBackgroundPage();
         win.capturer.captureActiveTabBookmark();
@@ -90,22 +86,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     });
-  });
 
-  document.getElementById("captureAllTabs").addEventListener('click', () => {
-    var win = chrome.extension.getBackgroundPage();
-    win.capturer.captureAllTabs();
-    chrome.tabs.getCurrent((tab) => {
-      if (!tab) {
+    document.getElementById("captureAllTabs").addEventListener('click', () => {
+      var win = chrome.extension.getBackgroundPage();
+      win.capturer.captureAllTabs();
+      if (!currentTab) {
         // browserAction.html is a prompt diaglog
         window.close();
       }
     });
-  });
 
-  document.getElementById("openViewer").addEventListener('click', () => {
-    chrome.tabs.getCurrent((tab) => {
-      if (!tab) {
+    document.getElementById("openViewer").addEventListener('click', () => {
+      if (!currentTab) {
         // browserAction.html is a prompt diaglog
         chrome.tabs.create({url: chrome.runtime.getURL("viewer/viewer.html"), active: true}, () => {});
         window.close();
@@ -114,11 +106,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.location = chrome.runtime.getURL("viewer/viewer.html");
       }
     });
-  });
 
-  document.getElementById("openOptions").addEventListener('click', () => {
-    chrome.tabs.getCurrent((tab) => {
-      if (!tab) {
+    document.getElementById("openOptions").addEventListener('click', () => {
+      if (!currentTab) {
         // browserAction.html is a prompt diaglog
         chrome.tabs.create({url: chrome.runtime.getURL("core/options.html"), active: true}, () => {});
         window.close();
