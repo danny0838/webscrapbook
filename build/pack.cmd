@@ -1,13 +1,10 @@
-:: Packing Instruction
-::
 :: System requirements:
 :: * OS: Windows
 :: * 7z
 ::
 :: Steps:
-:: * Place this packing script in the main project folder.
 :: * Adjust %filename% and %compressor% variables to fit your needs.
-:: * Run this script, and the packed files are created in the dist\ directory.
+:: * Run this script, and the packed files are created in the ..\dist\ directory.
 ::
 ::
 @echo off
