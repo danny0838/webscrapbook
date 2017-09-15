@@ -49,6 +49,20 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   chrome.tabs.getCurrent((currentTab) => {
+    if (!currentTab) {
+      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        let activeTab = tabs[0];
+        getContentTabs().then((tabs) => {
+          // disable capture options if active tab is not a valid content page
+          if (!tabs.find(x => x.id === activeTab.id)) {
+            document.getElementById("captureTab").disabled = true;
+            document.getElementById("captureTabSource").disabled = true;
+            document.getElementById("captureTabBookmark").disabled = true;
+          }
+        });
+      });
+    }
+
     document.getElementById("captureTab").addEventListener('click', () => {
       if (!currentTab) {
         // browserAction.html is a prompt diaglog
