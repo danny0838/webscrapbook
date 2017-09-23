@@ -81,15 +81,29 @@ scrapbook.getOptions = function (keyPrefix) {
 };
 
 scrapbook.setOption = function (key, value) {
-  return new Promise((resolve, reject) => {
+  return Promise.resolve().then(() => {
     scrapbook.options[key] = value;
     var pair = {key: value};
-    chrome.storage.sync.set(pair, () => {
-      if (!chrome.runtime.lastError) {
-        resolve(pair);
-      } else {
-        reject(chrome.runtime.lastError);
-      }
+    return new Promise((resolve, reject) => {
+      chrome.storage.sync.set(pair, () => {
+        if (!chrome.runtime.lastError) {
+          resolve(pair);
+        } else {
+          reject(chrome.runtime.lastError);
+        }
+      });
+    }).catch((ex) => {
+      // fallback to storage.local if storage.sync is not available
+      // or webextensions.storage.sync.enabled set to false in Firefox
+      return new Promise((resolve, reject) => {
+        chrome.storage.local.set(pair, () => {
+          if (!chrome.runtime.lastError) {
+            resolve(pair);
+          } else {
+            reject(chrome.runtime.lastError);
+          }
+        });
+      });
     });
   });
 };
@@ -98,15 +112,29 @@ scrapbook.loadOptions = function () {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.get(scrapbook.options, (items) => {
       if (!chrome.runtime.lastError) {
-        for (let i in items) {
-          scrapbook.options[i] = items[i];
-        }
-        scrapbook.isOptionsSynced = true;
         resolve(items);
       } else {
         reject(chrome.runtime.lastError);
       }
     });
+  }).catch((ex) => {
+    // fallback to storage.local if storage.sync is not available
+    // or webextensions.storage.sync.enabled set to false in Firefox
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.get(scrapbook.options, (items) => {
+        if (!chrome.runtime.lastError) {
+          resolve(items);
+        } else {
+          reject(chrome.runtime.lastError);
+        }
+      });
+    });
+  }).then((items) => {
+    for (let i in items) {
+      scrapbook.options[i] = items[i];
+      scrapbook.isOptionsSynced = true;
+    }
+    return items;
   });
 };
 
@@ -118,6 +146,18 @@ scrapbook.saveOptions = function () {
       } else {
         reject(chrome.runtime.lastError);
       }
+    });
+  }).catch((ex) => {
+    // fallback to storage.local if storage.sync is not available
+    // or webextensions.storage.sync.enabled set to false in Firefox
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.set(scrapbook.options, () => {
+        if (!chrome.runtime.lastError) {
+          resolve(scrapbook.options);
+        } else {
+          reject(chrome.runtime.lastError);
+        }
+      });
     });
   });
 };

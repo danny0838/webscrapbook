@@ -8,9 +8,16 @@
 scrapbook.loadOptions();
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === "sync") {
-    for (let key in changes) {
-      scrapbook.options[key] = changes[key].newValue;
-    }
+  // Config keys are stored in storage.sync and fallbacks to storage.local;
+  // cache keys are stored in storage.local and are valid JSON format.
+  // We only update when a config key is changed.
+  if (areaName !== "sync") {
+    try {
+      for (let key in changes) { JSON.parse(key); }
+      return;
+    } catch(ex) {}
+  }
+  for (let key in changes) {
+    scrapbook.options[key] = changes[key].newValue;
   }
 });
