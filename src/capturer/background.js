@@ -90,9 +90,9 @@ capturer.captureAllTabs = function (params) {
     var {mode} = params;
 
     capturer.getContentTabs().then((tabs) => {
-      var ms = -5;
+      var ms = -100;
       return Promise.all(tabs.map((tab) => {
-        return scrapbook.delay(ms += 5).then(() => {
+        return scrapbook.delay(ms += 100).then(() => {
           return capturer.captureTab({tab: tab, mode: mode});
         });
       }));
