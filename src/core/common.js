@@ -87,7 +87,7 @@ scrapbook.setOption = function (key, value) {
     return new Promise((resolve, reject) => {
       chrome.storage.sync.set(pair, () => {
         if (!chrome.runtime.lastError) {
-          resolve(pair);
+          resolve();
         } else {
           reject(chrome.runtime.lastError);
         }
@@ -98,7 +98,7 @@ scrapbook.setOption = function (key, value) {
       return new Promise((resolve, reject) => {
         chrome.storage.local.set(pair, () => {
           if (!chrome.runtime.lastError) {
-            resolve(pair);
+            resolve();
           } else {
             reject(chrome.runtime.lastError);
           }
@@ -142,7 +142,7 @@ scrapbook.saveOptions = function () {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.set(scrapbook.options, () => {
       if (!chrome.runtime.lastError) {
-        resolve(scrapbook.options);
+        resolve();
       } else {
         reject(chrome.runtime.lastError);
       }
@@ -153,7 +153,7 @@ scrapbook.saveOptions = function () {
     return new Promise((resolve, reject) => {
       chrome.storage.local.set(scrapbook.options, () => {
         if (!chrome.runtime.lastError) {
-          resolve(scrapbook.options);
+          resolve();
         } else {
           reject(chrome.runtime.lastError);
         }
