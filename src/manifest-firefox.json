@@ -32,7 +32,6 @@
   ],
 
   "background": {
-    "persistent": true,
     "scripts": [
       "core/common.js",
       "lib/jsSHA.js",
