@@ -98,6 +98,21 @@ capturer.invoke = function (method, args, tabId, frameWindow) {
   });
 };
 
+/**
+ * @return {Promise}
+ */
+capturer.getContentTabs = function () {
+  return new Promise((resolve, reject) => {
+    chrome.extension.isAllowedFileSchemeAccess(resolve);
+  }).then((isAllowedAccess) => {
+    let urlMatch = ["http://*/*", "https://*/*", "ftp://*/*"];
+    if (isAllowedAccess) { urlMatch.push("file://*"); }
+    return new Promise((resolve, reject) => {
+      chrome.tabs.query({currentWindow: true, url: urlMatch}, resolve);
+    });
+  });
+};
+
 capturer.fixOptions = function (options) {
   options["capture.scrapbookFolder"] = scrapbook.validateFilename(options["capture.scrapbookFolder"] || "WebScrapBook");
   return options;

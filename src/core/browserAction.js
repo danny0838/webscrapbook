@@ -9,21 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // load languages
   scrapbook.loadLanguages(document);
 
-  /**
-   * @return {Promise}
-   */
-  var getContentTabs = function () {
-    return new Promise((resolve, reject) => {
-      chrome.extension.isAllowedFileSchemeAccess(resolve);
-    }).then((isAllowedAccess) => {
-      let urlMatch = ["http://*/*", "https://*/*", "ftp://*/*"];
-      if (isAllowedAccess) { urlMatch.push("file://*"); }
-      return new Promise((resolve, reject) => {
-        chrome.tabs.query({currentWindow: true, url: urlMatch}, resolve);
-      });
-    });
-  };
-
   var generateActionButtonForTabs = function (base, action) {
     let selector = base.nextSibling;
     if (selector && selector.nodeType === 1) {
@@ -32,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selector = document.createElement("div");
       base.parentNode.insertBefore(selector, base.nextSibling);
     }
-    getContentTabs().then((tabs) => {
+    capturer.getContentTabs().then((tabs) => {
       tabs.forEach((tab) => {
         let elem = document.createElement("button");
         elem.classList.add("sub");
@@ -49,10 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   chrome.tabs.getCurrent((currentTab) => {
+    // currentTab === undefined => browserAction.html is a prompt diaglog;
+    //     else browserAction.html is in a tab (or Firefox Android)
     if (!currentTab) {
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         let activeTab = tabs[0];
-        getContentTabs().then((tabs) => {
+        capturer.getContentTabs().then((tabs) => {
           // disable capture options if active tab is not a valid content page
           if (!tabs.find(x => x.id === activeTab.id)) {
             document.getElementById("captureTab").disabled = true;
@@ -65,76 +52,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById("captureTab").addEventListener('click', () => {
       if (!currentTab) {
-        // browserAction.html is a prompt diaglog
-        var win = chrome.extension.getBackgroundPage();
-        win.capturer.captureActiveTab();
+        capturer.invoke("captureActiveTab", {mode: "document"});
         window.close();
       } else {
-        // browserAction.html is in a tab (or Firefox Android)
         generateActionButtonForTabs(document.getElementById("captureTab"), (tab) => {
-          var win = chrome.extension.getBackgroundPage();
-          win.capturer.captureTab(tab);
+          capturer.invoke("captureTab", {tab: tab, mode: "document"});
         });
       }
     });
 
     document.getElementById("captureTabSource").addEventListener('click', () => {
       if (!currentTab) {
-        // browserAction.html is a prompt diaglog
-        var win = chrome.extension.getBackgroundPage();
-        win.capturer.captureActiveTabSource();
+        capturer.invoke("captureActiveTab", {mode: "source"});
         window.close();
       } else {
-        // browserAction.html is in a tab (or Firefox Android)
         generateActionButtonForTabs(document.getElementById("captureTabSource"), (tab) => {
-          var win = chrome.extension.getBackgroundPage();
-          win.capturer.captureTabSource(tab);
+          capturer.invoke("captureTab", {tab: tab, mode: "source"});
         });
       }
     });
 
     document.getElementById("captureTabBookmark").addEventListener('click', () => {
       if (!currentTab) {
-        // browserAction.html is a prompt diaglog
-        var win = chrome.extension.getBackgroundPage();
-        win.capturer.captureActiveTabBookmark();
+        capturer.invoke("captureActiveTab", {mode: "bookmark"});
         window.close();
       } else {
-        // browserAction.html is in a tab (or Firefox Android)
         generateActionButtonForTabs(document.getElementById("captureTabBookmark"), (tab) => {
-          var win = chrome.extension.getBackgroundPage();
-          win.capturer.captureTabBookmark(tab);
+          capturer.invoke("captureTab", {tab: tab, mode: "bookmark"});
         });
       }
     });
 
     document.getElementById("captureAllTabs").addEventListener('click', () => {
-      var win = chrome.extension.getBackgroundPage();
-      win.capturer.captureAllTabs();
+      capturer.invoke("captureAllTabs", {mode: "document"});
       if (!currentTab) {
-        // browserAction.html is a prompt diaglog
         window.close();
       }
     });
 
     document.getElementById("openViewer").addEventListener('click', () => {
       if (!currentTab) {
-        // browserAction.html is a prompt diaglog
         chrome.tabs.create({url: chrome.runtime.getURL("viewer/viewer.html"), active: true}, () => {});
         window.close();
       } else {
-        // browserAction.html is in a tab (or Firefox Android)
         document.location = chrome.runtime.getURL("viewer/viewer.html");
       }
     });
 
     document.getElementById("openOptions").addEventListener('click', () => {
       if (!currentTab) {
-        // browserAction.html is a prompt diaglog
         chrome.tabs.create({url: chrome.runtime.getURL("core/options.html"), active: true}, () => {});
         window.close();
       } else {
-        // browserAction.html is in a tab (or Firefox Android)
         document.location = chrome.runtime.getURL("core/options.html");
       }
     });
