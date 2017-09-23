@@ -1,7 +1,6 @@
 /********************************************************************
  *
- * Loads the page action for which browser action is not supported
- * (for older versions of firefox Android)
+ * General background initialization
  *
  *******************************************************************/
 
@@ -18,4 +17,6 @@ if (!chrome.browserAction) {
     var url = chrome.runtime.getURL("core/browserAction.html");
     chrome.tabs.create({url: url, active: true}, () => {});
   });
+} else if (chrome.browserAction.setBadgeBackgroundColor) {
+  chrome.browserAction.setBadgeBackgroundColor({color: [255, 51, 51, 204]});
 }

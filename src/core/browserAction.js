@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // currentTab === undefined => browserAction.html is a prompt diaglog;
     //     else browserAction.html is in a tab (or Firefox Android)
     if (!currentTab) {
+      capturer.browserActionClearError();
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         let activeTab = tabs[0];
         capturer.getContentTabs().then((tabs) => {

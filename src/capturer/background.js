@@ -65,21 +65,16 @@ capturer.getUniqueFilename = function (timeId, filename) {
  * @kind invokable
  * @param {Object} params
  *     - {string} params.mode
- *     - {boolean} params.quiet
  * @return {Promise}
  */
 capturer.captureActiveTab = function (params) {
   return Promise.resolve().then(() => {
-    var {mode, quiet = false} = params;
+    var {mode} = params;
 
     return new Promise((resolve, reject) => {
       chrome.tabs.query({active: true, currentWindow: true}, resolve);
     }).then((tabs) => {
-      return capturer.captureTab({
-        tab: tabs[0],
-        mode: mode,
-        quiet: quiet
-      });
+      return capturer.captureTab({tab: tabs[0], mode: mode});
     });
   });
 };
@@ -88,22 +83,17 @@ capturer.captureActiveTab = function (params) {
  * @kind invokable
  * @param {Object} params
  *     - {string} params.mode
- *     - {boolean} params.quiet
  * @return {Promise}
  */
 capturer.captureAllTabs = function (params) {
   return Promise.resolve().then(() => {
-    var {mode, quiet = true} = params;
+    var {mode} = params;
 
     capturer.getContentTabs().then((tabs) => {
       var ms = -5;
       return Promise.all(tabs.map((tab) => {
         return scrapbook.delay(ms += 5).then(() => {
-          return capturer.captureTab({
-            tab: tab,
-            mode: mode,
-            quiet: quiet
-          });
+          return capturer.captureTab({tab: tab, mode: mode});
         });
       }));
     });
@@ -115,12 +105,11 @@ capturer.captureAllTabs = function (params) {
  * @param {Object} params
  *     - {Object} params.tab
  *     - {string} params.mode
- *     - {boolean} params.quiet
  * @return {Promise}
  */
 capturer.captureTab = function (params) {
   return new Promise((resolve, reject) => {
-    var {tab, mode, quiet = false} = params,
+    var {tab, mode} = params,
         {id: tabId, url: tabUrl, favIconUrl: tabFavIconUrl} = tab;
 
     var source = "[" + tabId + "] " + tabUrl;
@@ -160,7 +149,7 @@ capturer.captureTab = function (params) {
     }).catch((ex) => {
       var err = scrapbook.lang("ErrorCapture", [source, ex.message]);
       console.error(err);
-      if (!quiet) { alert(err); }
+      capturer.browserActionAddError();
       return new Error(err);
     });
   });

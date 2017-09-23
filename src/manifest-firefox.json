@@ -38,8 +38,8 @@
       "lib/jsSHA.js",
       "lib/mime.js",
       "lib/jszip.js",
+      "core/background.js",
       "core/optionsAuto.js",
-      "core/pageActionLoader.js",
       "capturer/common.js",
       "capturer/background.js",
       "viewer/background.js"
