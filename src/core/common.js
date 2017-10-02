@@ -1,14 +1,14 @@
 /********************************************************************
  *
- * Shared functions for most scripts, including background scripts and
+ * Shared utilities for most scripts, including background scripts and
  * content scripts.
  *
  * @public {boolean} isDebug
  * @public {Object} scrapbook
  *******************************************************************/
 
-var isDebug = false;
-var scrapbook = {
+let isDebug = false;
+let scrapbook = {
   get isGecko() {
     let m = chrome.runtime.getManifest();
     delete this.isGecko;
@@ -62,7 +62,7 @@ scrapbook.options = {
 scrapbook.isOptionsSynced = false;
 
 scrapbook.getOption = function (key, defaultValue) {
-  var result = scrapbook.options[key];
+  let result = scrapbook.options[key];
   if (result === undefined) {
     result = defaultValue;
   }
@@ -70,8 +70,8 @@ scrapbook.getOption = function (key, defaultValue) {
 };
 
 scrapbook.getOptions = function (keyPrefix) {
-  var result = {};
-  var regex = new RegExp("^" + scrapbook.escapeRegExp(keyPrefix) + ".");
+  let result = {};
+  let regex = new RegExp("^" + scrapbook.escapeRegExp(keyPrefix) + ".");
   for (let key in scrapbook.options) {
     if (regex.test(key)) {
       result[key] = scrapbook.getOption(key);
@@ -83,7 +83,7 @@ scrapbook.getOptions = function (keyPrefix) {
 scrapbook.setOption = function (key, value) {
   return Promise.resolve().then(() => {
     scrapbook.options[key] = value;
-    var pair = {key: value};
+    let pair = {key: value};
     return new Promise((resolve, reject) => {
       chrome.storage.sync.set(pair, () => {
         if (!chrome.runtime.lastError) {
@@ -210,7 +210,7 @@ scrapbook.escapeFilename = function (filename) {
  * @param {boolean} forceAscii - also escapes all non-ASCII chars
  */
 scrapbook.validateFilename = function (filename, forceAscii) {
-  var fn = filename
+  let fn = filename
       // control chars are bad for filename
       .replace(/[\x00-\x1F\x7F]+|^ +/g, "")
       // leading/trailing spaces and dots are not allowed in Windows
@@ -227,7 +227,7 @@ scrapbook.validateFilename = function (filename, forceAscii) {
 };
 
 scrapbook.urlToFilename = function (url) {
-  var name = url, pos;
+  let name = url, pos;
   pos = name.indexOf("?");
   if (pos !== -1) { name = name.substring(0, pos); }
   pos = name.indexOf("#");
@@ -244,7 +244,7 @@ scrapbook.urlToFilename = function (url) {
 };
 
 scrapbook.splitUrl = function (url) {
-  var name = url, search = "", hash = "", pos;
+  let name = url, search = "", hash = "", pos;
   pos = name.indexOf("#");
   if (pos !== -1) { hash = name.slice(pos); name = name.slice(0, pos); }
   pos = name.indexOf("?");
@@ -253,12 +253,12 @@ scrapbook.splitUrl = function (url) {
 };
 
 scrapbook.splitUrlByAnchor = function (url) {
-  var [name, search, hash] = scrapbook.splitUrl(url);
+  let [name, search, hash] = scrapbook.splitUrl(url);
   return [name + search, hash];
 };
 
 scrapbook.filepathParts = function (filepath) {
-  var pos = Math.max(filepath.lastIndexOf("/"), filepath.lastIndexOf("\\"));
+  let pos = Math.max(filepath.lastIndexOf("/"), filepath.lastIndexOf("\\"));
   if (pos != -1) {
     return [filepath.slice(0, pos), filepath.slice(pos + 1, filepath.length)];
   }
@@ -266,7 +266,7 @@ scrapbook.filepathParts = function (filepath) {
 };
 
 scrapbook.filenameParts = function (filename) {
-  var pos = filename.lastIndexOf(".");
+  let pos = filename.lastIndexOf(".");
   if (pos != -1) {
     return [filename.substring(0, pos), filename.substring(pos + 1, filename.length)];
   }
@@ -280,7 +280,7 @@ scrapbook.filenameParts = function (filename) {
  * @return {string} the ScrapBook ID
  */
 scrapbook.dateToId = function (date) {
-  var dd = date || new Date();
+  let dd = date || new Date();
   return dd.getUTCFullYear() +
       this.intToFixedStr(dd.getUTCMonth() + 1, 2) +
       this.intToFixedStr(dd.getUTCDate(), 2) +
@@ -294,7 +294,7 @@ scrapbook.dateToId = function (date) {
  * @param {Date} id - Given ScrapBook ID
  */
 scrapbook.idToDate = function (id) {
-  var dd;
+  let dd;
   if (id.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})$/)) {
     dd = new Date(
         parseInt(RegExp.$1, 10), parseInt(RegExp.$2, 10) - 1, parseInt(RegExp.$3, 10),
@@ -313,7 +313,7 @@ scrapbook.idToDate = function (id) {
  * @return {string} the ScrapBook ID
  */
 scrapbook.dateToIdOld = function (date) {
-  var dd = date || new Date();
+  let dd = date || new Date();
   return dd.getFullYear() +
       this.intToFixedStr(dd.getMonth() + 1, 2) +
       this.intToFixedStr(dd.getDate(), 2) +
@@ -327,7 +327,7 @@ scrapbook.dateToIdOld = function (date) {
  * @param {Date} id - Given ScrapBook ID
  */
 scrapbook.idToDateOld = function (id) {
-  var dd;
+  let dd;
   if (id.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/)) {
     dd = new Date(
         parseInt(RegExp.$1, 10), parseInt(RegExp.$2, 10) - 1, parseInt(RegExp.$3, 10),
@@ -352,7 +352,7 @@ scrapbook.idToDateOld = function (id) {
 scrapbook.crop = function (str, maxLength, byUtf8, ellipsis) {
   if (typeof ellipsis  === "undefined") { ellipsis = "..."; }
   if (byUtf8) {
-    var bytes = this.unicodeToUtf8(str);
+    let bytes = this.unicodeToUtf8(str);
     if (bytes.length <= maxLength) { return str; }
     bytes = bytes.substring(0, maxLength - this.unicodeToUtf8(ellipsis).length);
     while (true) {
@@ -368,13 +368,13 @@ scrapbook.crop = function (str, maxLength, byUtf8, ellipsis) {
 
 scrapbook.getUuid = function () {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    var r = Math.random()*16|0, v = (c == 'x') ? r : (r&0x3|0x8);
+    let r = Math.random()*16|0, v = (c == 'x') ? r : (r&0x3|0x8);
     return v.toString(16);
   });
 };
 
 scrapbook.escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
-  var list = {
+  let list = {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
@@ -386,7 +386,7 @@ scrapbook.escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
 };
 
 scrapbook.unescapeHtml = function (str) {
-  var list = {
+  let list = {
     "&amp;": "&",
     "&lt;": "<",
     "&gt;" : ">",
@@ -418,7 +418,7 @@ scrapbook.unescapeQuotes = function (str) {
 };
 
 scrapbook.unescapeCss = function (str) {
-  var that = arguments.callee;
+  let that = arguments.callee;
   if (!that.replaceRegex) {
     that.replaceRegex = /\\([0-9A-Fa-f]{1,6}) ?|\\(.)/g;
     that.getCodes = function (n) {
@@ -467,7 +467,7 @@ scrapbook.base64ToUnicode = function (str) {
  * @require jsSHA
  */
 scrapbook.sha1 = function (data, type) {
-  var shaObj = new jsSHA("SHA-1", type);
+  let shaObj = new jsSHA("SHA-1", type);
   shaObj.update(data);
   return shaObj.getHash("HEX");
 };
@@ -479,13 +479,13 @@ scrapbook.intToFixedStr = function (number, width, padder) {
 };
 
 scrapbook.byteStringToArrayBuffer = function (bstr) {
-  var n = bstr.length, u8ar = new Uint8Array(n);
+  let n = bstr.length, u8ar = new Uint8Array(n);
   while (n--) { u8ar[n] = bstr.charCodeAt(n); }
   return u8ar.buffer;
 };
 
 scrapbook.arrayBufferToByteString = function (ab) {
-  var u8ar = new Uint8Array(ab), bstr = "", CHUNK_SIZE = 65535;
+  let u8ar = new Uint8Array(ab), bstr = "", CHUNK_SIZE = 65535;
   for (let i = 0, I = u8ar.length; i < I; i += CHUNK_SIZE) {
     bstr += String.fromCharCode.apply(null, u8ar.subarray(i, i + CHUNK_SIZE));
   }
@@ -503,7 +503,7 @@ scrapbook.arrayBufferToByteString = function (ab) {
  * @return {{contentType: string, charset: string}}
  */
 scrapbook.parseHeaderContentType = function (string) {
-  var result = {type: undefined, parameters: {}};
+  let result = {type: undefined, parameters: {}};
 
   if (typeof string !== 'string') {
     return result;
@@ -514,17 +514,18 @@ scrapbook.parseHeaderContentType = function (string) {
     result.type = RegExp.$1.trim();
     while (/;((?:"(?:\\.|[^"])*(?:"|$)|[^"])*?)(?=;|$)/i.test(string)) {
       string = RegExp.rightContext;
-      var parameter = RegExp.$1;
+      let parameter = RegExp.$1;
       if (/\s*(.*?)\s*=\s*("(?:\\.|[^"])*"|[^"]*?)\s*$/i.test(parameter)) {
-        var field = RegExp.$1;
-        var value = RegExp.$2;
+        let field = RegExp.$1;
+        let value = RegExp.$2;
 
         // manage double quoted value
         if (/^"(.*?)"$/.test(value)) {
           value = scrapbook.unescapeQuotes(RegExp.$1);
         }
+
+        result.parameters[field] = value;
       }
-      result.parameters[field] = value;
     }
   }
 
@@ -540,7 +541,7 @@ scrapbook.parseHeaderContentType = function (string) {
  * @return {{type: ('inline'|'attachment'), parameters: {[filename: string]}}}
  */
 scrapbook.parseHeaderContentDisposition = function (string) {
-  var result = {type: undefined, parameters: {}};
+  let result = {type: undefined, parameters: {}};
 
   if (typeof string !== 'string') {
     return result;
@@ -551,10 +552,10 @@ scrapbook.parseHeaderContentDisposition = function (string) {
     result.type = RegExp.$1.trim();
     while (/;((?:"(?:\\.|[^"])*(?:"|$)|[^"])*?)(?=;|$)/i.test(string)) {
       string = RegExp.rightContext;
-      var parameter = RegExp.$1;
+      let parameter = RegExp.$1;
       if (/\s*(.*?)\s*=\s*("(?:\\.|[^"])*"|[^"]*?)\s*$/i.test(parameter)) {
-        var field = RegExp.$1;
-        var value = RegExp.$2;
+        let field = RegExp.$1;
+        let value = RegExp.$2;
 
         // manage double quoted value
         if (/^"(.*?)"$/.test(value)) {
@@ -565,7 +566,7 @@ scrapbook.parseHeaderContentDisposition = function (string) {
           // the field uses an ext-value
           field = RegExp.$1;
           if (/^(.*?)'(.*?)'(.*?)$/.test(value)) {
-            var charset = RegExp.$1.toLowerCase(), lang = RegExp.$2.toLowerCase(), value = RegExp.$3;
+            let charset = RegExp.$1.toLowerCase(), lang = RegExp.$2.toLowerCase(), value = RegExp.$3;
             switch (charset) {
               case 'iso-8859-1':
                 value = decodeURIComponent(value).replace(/[^\x20-\x7e\xa0-\xff]/g, "?");
@@ -579,8 +580,9 @@ scrapbook.parseHeaderContentDisposition = function (string) {
             }
           }
         }
+
+        result.parameters[field] = value;
       }
-      result.parameters[field] = value;
     }
   }
 
@@ -595,7 +597,7 @@ scrapbook.parseHeaderContentDisposition = function (string) {
  * @return {{time: string, url: string}}
  */
 scrapbook.parseHeaderRefresh = function (string) {
-  var result = {time: undefined, url: undefined};
+  let result = {time: undefined, url: undefined};
 
   if (typeof string !== 'string') {
     return result;
@@ -605,8 +607,8 @@ scrapbook.parseHeaderRefresh = function (string) {
     result.time = parseInt(RegExp.$1);
     string = RegExp.rightContext;
     if (/^[;,]\s*url\s*=\s*((["'])?.*)$/i.test(string)) {
-      var url = RegExp.$1;
-      var quote = RegExp.$2;
+      let url = RegExp.$1;
+      let quote = RegExp.$2;
       if (quote) {
         let pos = url.indexOf(quote, 1);
         if (pos !== -1) { url = url.slice(1, pos); }
@@ -630,7 +632,7 @@ scrapbook.parseHeaderRefresh = function (string) {
  */
 scrapbook.readFileAsArrayBuffer = function (blob) {
   return new Promise((resolve, reject) => {
-    var reader = new FileReader();
+    let reader = new FileReader();
     reader.onload = resolve;
     reader.onerror = reject;
     reader.readAsArrayBuffer(blob);
@@ -645,7 +647,7 @@ scrapbook.readFileAsArrayBuffer = function (blob) {
  */
 scrapbook.readFileAsDataURL = function (blob) {
   return new Promise((resolve, reject) => {
-    var reader = new FileReader();
+    let reader = new FileReader();
     reader.onload = resolve;
     reader.onerror = reject;
     reader.readAsDataURL(blob);
@@ -662,7 +664,7 @@ scrapbook.readFileAsDataURL = function (blob) {
 scrapbook.readFileAsText = function (blob, charset = "UTF-8") {
   if (charset) {
     return new Promise((resolve, reject) => {
-      var reader = new FileReader();
+      let reader = new FileReader();
       reader.onload = resolve;
       reader.onerror = reject;
       reader.readAsText(blob, charset);
@@ -694,26 +696,26 @@ scrapbook.readFileAsDocument = function (blob) {
 
 scrapbook.dataUriToFile = function (dataUri) {
   if (/^data:([^,]*?)(;base64)?,(.*?)$/i.test(dataUri)) {
-    var mediatype = RegExp.$1;
-    var base64 = !!RegExp.$2;
-    var data = RegExp.$3;
+    let mediatype = RegExp.$1;
+    let base64 = !!RegExp.$2;
+    let data = RegExp.$3;
 
-    var parts = mediatype.split(";");
-    var mime = parts.shift();
-    var parameters = {};
+    let parts = mediatype.split(";");
+    let mime = parts.shift();
+    let parameters = {};
     parts.forEach((part) => {
       if (/^(.*?)=(.*?)$/.test(part)) {
         parameters[RegExp.$1.toLowerCase()] = RegExp.$2;
       }
     });
 
-    var ext = Mime.prototype.extension(mime);
+    let ext = Mime.prototype.extension(mime);
     ext = ext ? ("." + ext) : "";
 
-    var bstr = base64 ? atob(data) : unescape(data);
-    var ab = scrapbook.byteStringToArrayBuffer(bstr);
-    var filename = parameters.filename ? decodeURIComponent(parameters.filename) : scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
-    var file = new File([ab], filename, {type: mediatype});
+    let bstr = base64 ? atob(data) : unescape(data);
+    let ab = scrapbook.byteStringToArrayBuffer(bstr);
+    let filename = parameters.filename ? decodeURIComponent(parameters.filename) : scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
+    let file = new File([ab], filename, {type: mediatype});
     return file;
   }
   return null;
@@ -726,7 +728,7 @@ scrapbook.dataUriToFile = function (dataUri) {
 
 scrapbook.doctypeToString = function (doctype) {
   if (!doctype) { return ""; }
-  var ret = "<!DOCTYPE " + doctype.name;
+  let ret = "<!DOCTYPE " + doctype.name;
   if (doctype.publicId) { ret += ' PUBLIC "' + doctype.publicId + '"'; }
   if (doctype.systemId) { ret += ' "'        + doctype.systemId + '"'; }
   ret += ">\n";
@@ -784,11 +786,12 @@ scrapbook.parseCssFile = function (data, charset, rewriter) {
   }).then((origText) => {
     return rewriter(origText);
   }).then((rewrittenText) => {
+    let blob;
     if (charset) {
-      var blob = new Blob([rewrittenText], {type: "text/css;charset=UTF-8"});
+      blob = new Blob([rewrittenText], {type: "text/css;charset=UTF-8"});
     } else {
-      var ab = scrapbook.byteStringToArrayBuffer(rewrittenText);
-      var blob = new Blob([ab], {type: "text/css"});
+      let ab = scrapbook.byteStringToArrayBuffer(rewrittenText);
+      blob = new Blob([ab], {type: "text/css"});
     }
     return blob;
   });
@@ -816,48 +819,50 @@ scrapbook.parseCssFile = function (data, charset, rewriter) {
  *     - {parseCssTextRewriteFunc} rewriteBackgroundUrl
  */
 scrapbook.parseCssText = function (cssText, rewriteFuncs) {
-  var pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
-  var pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
-  var pCmSp = "(?:" + "(?:" + pCm + "|" + pSp + ")" + "*" + ")"; // comment or space
-  var pChar = "(?:\\\\.|[^\\\\])"; // a char, or a escaped char sequence
-  var pStr = "(?:" + pChar + "*?" + ")"; // string
-  var pSStr = "(?:" + pCmSp + pStr + pCmSp + ")"; // spaced string
-  var pDQStr = "(?:" + '"' + pStr + '"' + ")"; // double quoted string
-  var pSQStr = "(?:" + "'" + pStr + "'" + ")"; // single quoted string
-  var pES = "(?:" + "(?:" + [pCm, pDQStr, pSQStr, pChar].join("|") + ")*?" + ")"; // embeded string
-  var pUrl = "(?:" + "url\\(" + pSp + "(?:" + [pDQStr, pSQStr, pSStr].join("|") + ")" + pSp + "\\)" + ")"; // URL
-  var pUrl2 = "(" + "url\\(" + pSp + ")(" + [pDQStr, pSQStr, pSStr].join("|") + ")(" + pSp + "\\)" + ")"; // URL; catch 3
-  var pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")(" + pCmSp + ";" + ")"; // rule import; catch 3
-  var pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // rule font-face; catch 1
+  let pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
+  let pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
+  let pCmSp = "(?:" + "(?:" + pCm + "|" + pSp + ")" + "*" + ")"; // comment or space
+  let pChar = "(?:\\\\.|[^\\\\])"; // a char, or a escaped char sequence
+  let pStr = "(?:" + pChar + "*?" + ")"; // string
+  let pSStr = "(?:" + pCmSp + pStr + pCmSp + ")"; // spaced string
+  let pDQStr = "(?:" + '"' + pStr + '"' + ")"; // double quoted string
+  let pSQStr = "(?:" + "'" + pStr + "'" + ")"; // single quoted string
+  let pES = "(?:" + "(?:" + [pCm, pDQStr, pSQStr, pChar].join("|") + ")*?" + ")"; // embeded string
+  let pUrl = "(?:" + "url\\(" + pSp + "(?:" + [pDQStr, pSQStr, pSStr].join("|") + ")" + pSp + "\\)" + ")"; // URL
+  let pUrl2 = "(" + "url\\(" + pSp + ")(" + [pDQStr, pSQStr, pSStr].join("|") + ")(" + pSp + "\\)" + ")"; // URL; catch 3
+  let pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")(" + pCmSp + ";" + ")"; // rule import; catch 3
+  let pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // rule font-face; catch 1
 
-  var parseUrl = function (text, callback) {
+  let parseUrl = function (text, callback) {
     return text.replace(new RegExp(pUrl2, "gi"), (m, pre, url, post) => {
+      let ret;
       if (url.startsWith('"') && url.endsWith('"')) {
-        var url = scrapbook.unescapeCss(url.slice(1, -1));
-        var ret = callback(url);
+        let u = scrapbook.unescapeCss(url.slice(1, -1));
+        ret = callback(u);
       } else if (url.startsWith("'") && url.endsWith("'")) {
-        var url = scrapbook.unescapeCss(url.slice(1, -1));
-        var ret = callback(url);
+        let u = scrapbook.unescapeCss(url.slice(1, -1));
+        ret = callback(u);
       } else {
-        var url = scrapbook.unescapeCss(url.trim());
-        var ret = callback(url);
+        let u = scrapbook.unescapeCss(url.trim());
+        ret = callback(u);
       }
       return pre + '"' + scrapbook.escapeQuotes(ret) + '"' + post;
     });
   };
 
-  var cssText = cssText.replace(
+  let newCssText = cssText.replace(
     new RegExp([pCm, pRImport, pRFontFace, "("+pUrl+")"].join("|"), "gi"),
     (m, im1, im2, im3, ff, u) => {
       if (im2) {
+        let ret;
         if (im2.startsWith('"') && im2.endsWith('"')) {
-          var url = scrapbook.unescapeCss(im2.slice(1, -1));
-          var ret = 'url("' + scrapbook.escapeQuotes(rewriteFuncs.rewriteImportUrl(url)) + '")';
+          let u = scrapbook.unescapeCss(im2.slice(1, -1));
+          ret = 'url("' + scrapbook.escapeQuotes(rewriteFuncs.rewriteImportUrl(u)) + '")';
         } else if (im2.startsWith("'") && im2.endsWith("'")) {
-          var url = scrapbook.unescapeCss(im2.slice(1, -1));
-          var ret = 'url("' + scrapbook.escapeQuotes(rewriteFuncs.rewriteImportUrl(url)) + '")';
+          let u = scrapbook.unescapeCss(im2.slice(1, -1));
+          ret = 'url("' + scrapbook.escapeQuotes(rewriteFuncs.rewriteImportUrl(u)) + '")';
         } else {
-          var ret = parseUrl(im2, rewriteFuncs.rewriteImportUrl);
+          ret = parseUrl(im2, rewriteFuncs.rewriteImportUrl);
         }
         return im1 + ret + im3;
       } else if (ff) {
@@ -867,7 +872,7 @@ scrapbook.parseCssText = function (cssText, rewriteFuncs) {
       }
       return m;
     });
-  return cssText;
+  return newCssText;
 };
 
 /**
@@ -991,14 +996,14 @@ scrapbook.httpStatusText = {
  *     - {xhrEventHandler} params.ontimeout
  */
 scrapbook.xhr = function (params) {
-  var xhr = new XMLHttpRequest();
+  const xhr = new XMLHttpRequest();
 
-  var xhrAbort = function () {
+  const xhrAbort = function () {
     xhr.onreadystatechange = xhr.onload = xhr.onerror = xhr.ontimeout = null;
     xhr.abort();
   };
 
-  var handleError = function (ex) {
+  const handleError = function (ex) {
     params && params.onerror && params.onerror(ex);
   };
 
@@ -1012,7 +1017,7 @@ scrapbook.xhr = function (params) {
       params && params.onload && params.onload(xhr, xhrAbort);
     } else {
       // treat "404 Not found" or so as error
-      var statusText = xhr.statusText || scrapbook.httpStatusText[xhr.status];
+      let statusText = xhr.statusText || scrapbook.httpStatusText[xhr.status];
       statusText = statusText ? " " + statusText : "";
       handleError(new Error(xhr.status + statusText));
     }
@@ -1024,7 +1029,7 @@ scrapbook.xhr = function (params) {
   };
 
   xhr.ontimeout = function (event) {
-    var handler = params && params.ontimeout || params.onerror;
+    let handler = params && params.ontimeout || params.onerror;
     handler && handler(new Error("Request timeout."));
     xhrAbort();
   };

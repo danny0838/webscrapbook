@@ -5,7 +5,7 @@
  * @require {Object} scrapbook
  *******************************************************************/
 
-var OPTION_PREFIX = "opt_";
+const OPTION_PREFIX = "opt_";
 
 function initDefaultOptions() {
   scrapbook.loadOptions().then((options) => {
@@ -16,7 +16,7 @@ function initDefaultOptions() {
 }
 
 function getOptionFromDocument(id) {
-  var elem = document.getElementById(OPTION_PREFIX + id);
+  const elem = document.getElementById(OPTION_PREFIX + id);
   if (!elem) { return; }
   switch (elem.getAttribute("type")) {
     case "checkbox":
@@ -27,7 +27,7 @@ function getOptionFromDocument(id) {
 }
 
 function setOptionToDocument(id, value) {
-  var elem = document.getElementById(OPTION_PREFIX + id);
+  const elem = document.getElementById(OPTION_PREFIX + id);
   if (!elem) { return; }
   switch (elem.getAttribute("type")) {
     case "checkbox":
@@ -40,8 +40,8 @@ function setOptionToDocument(id, value) {
 }
 
 function exportOptions() {
-  var data = new Blob([JSON.stringify(scrapbook.options, null, 2)], {type: "application/json"});
-  var elem = document.createElement("a");
+  const data = new Blob([JSON.stringify(scrapbook.options, null, 2)], {type: "application/json"});
+  const elem = document.createElement("a");
   elem.href = URL.createObjectURL(data);
   elem.download = "webscrapbook.options." + scrapbook.dateToId().slice(0, 8) + ".json";
   document.body.appendChild(elem);
@@ -57,8 +57,8 @@ function importFile(file) {
   document.getElementById("import-input").value = null;
 
   scrapbook.readFileAsText(file).then((text) => {
-    let data = JSON.parse(text);
-    var options = Object.assign(scrapbook.options, data);
+    const data = JSON.parse(text);
+    const options = Object.assign(scrapbook.options, data);
     scrapbook.options = options;
     return scrapbook.saveOptions();
   }).then((options) => {
@@ -120,7 +120,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
   document.getElementById("import-input").addEventListener("change", (event) => {
     event.preventDefault();
-    var file = event.target.files[0];
+    const file = event.target.files[0];
     importFile(file);
   });
 

@@ -7,7 +7,7 @@
  * @public {Object} capturer
  *******************************************************************/
 
-var capturer = {
+const capturer = {
   isContentScript: true,
   get isNoscriptEscaped() {
     // Chromium has a feature (bug?) that the innerHTML of <noscript>
@@ -28,8 +28,8 @@ capturer.invoke = function (method, args, tabId, frameWindow) {
     // to background script
     if (typeof tabId !== "number" && !frameWindow) {
       if (capturer.isContentScript) {
-        var cmd = "capturer." + method;
-        var message = {
+        const cmd = "capturer." + method;
+        const message = {
           cmd: cmd,
           args: args
         };
@@ -47,8 +47,8 @@ capturer.invoke = function (method, args, tabId, frameWindow) {
     // to content script
     } else if (typeof tabId === "number") {
       if (!capturer.isContentScript) {
-        var cmd = "capturer." + method;
-        var message = {
+        const cmd = "capturer." + method;
+        const message = {
           cmd: cmd,
           args: args
         };
@@ -66,10 +66,10 @@ capturer.invoke = function (method, args, tabId, frameWindow) {
     // to frame
     } else if (frameWindow) {
       return new Promise((resolve, reject) => {
-        var cmd = "capturer." + method;
-        var uid = scrapbook.dateToId();
-        var channel = new MessageChannel();
-        var timeout = setTimeout(() => {
+        const cmd = "capturer." + method;
+        const uid = scrapbook.dateToId();
+        const channel = new MessageChannel();
+        const timeout = setTimeout(() => {
           resolve(undefined);
           delete channel;
         }, 1000);
@@ -82,7 +82,7 @@ capturer.invoke = function (method, args, tabId, frameWindow) {
           args: args
         }, "*", [channel.port2]);
         channel.port1.onmessage = (event) => {
-          var message = event.data;
+          const message = event.data;
           if (message.extension !== chrome.runtime.id) { return; }
           if (message.uid !== uid) { return; }
           if (message.cmd === cmd + ".start") {
@@ -105,7 +105,7 @@ capturer.getContentTabs = function () {
   return new Promise((resolve, reject) => {
     chrome.extension.isAllowedFileSchemeAccess(resolve);
   }).then((isAllowedAccess) => {
-    let urlMatch = ["http://*/*", "https://*/*", "ftp://*/*"];
+    const urlMatch = ["http://*/*", "https://*/*", "ftp://*/*"];
     if (isAllowedAccess) { urlMatch.push("file://*"); }
     return new Promise((resolve, reject) => {
       chrome.tabs.query({currentWindow: true, url: urlMatch}, resolve);
@@ -120,7 +120,7 @@ capturer.browserActionAddError = function (tabId) {
   return new Promise((resolve, reject) => {
     chrome.browserAction.getBadgeText({tabId: tabId}, resolve);
   }).then((text) => {
-    var count = ((parseInt(text, 10) || 0) + 1).toString();
+    const count = ((parseInt(text, 10) || 0) + 1).toString();
     chrome.browserAction.setBadgeText({tabId: tabId, text: count});
   }).catch((ex) => {});
 };
@@ -152,7 +152,7 @@ capturer.captureDocumentOrFile = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureDocumentOrFile");
 
-    var {doc = document, refUrl, settings, options} = params;
+    const {doc = document, refUrl, settings, options} = params;
 
     // if not HTML document, capture as file
     if (["text/html", "application/xhtml+xml"].indexOf(doc.contentType) === -1) {
@@ -186,23 +186,24 @@ capturer.captureDocument = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureDocument");
 
-    var {doc = document, settings, options} = params,
-        {timeId, documentName} = settings,
-        {contentType: mime, documentElement: htmlNode} = doc;
+    const {doc = document, settings, options} = params;
+    const {timeId} = settings;
+    let {documentName} = settings;
+    let {contentType: mime, documentElement: htmlNode} = doc;
 
     if (doc.readyState === "loading") {
       throw new Error(scrapbook.lang("ErrorDocumentNotReady", [doc.URL]));
     }
 
-    var [refUrl] = scrapbook.splitUrlByAnchor(doc.URL);
-    var tasks = [];
-    var selection;
-    var rootNode, headNode;
-    var favIconNode, favIconUrl;
-    var specialContentMap = {};
+    const [refUrl] = scrapbook.splitUrlByAnchor(doc.URL);
+    const tasks = [];
+    let selection;
+    let rootNode, headNode;
+    let favIconNode, favIconUrl;
+    const specialContentMap = {};
 
     // remove the specified node, record it if option set
-    var captureRemoveNode = function (elem) {
+    const captureRemoveNode = function (elem) {
       if (options["capture.recordRemovedNode"]) {
         elem.parentNode.replaceChild(doc.createComment("sb-" + timeId + "-orig-node--" + scrapbook.escapeHtmlComment(elem.outerHTML)), elem);
       }
@@ -212,7 +213,7 @@ capturer.captureDocument = function (params) {
     };
 
     // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
-    var captureRewriteAttr = function (elem, attr, value) {
+    const captureRewriteAttr = function (elem, attr, value) {
       if (!elem.hasAttribute(attr)) return;
       if (options["capture.recordRewrittenAttr"]) {
         elem.setAttribute("data-sb-orig-" + attr + "-" + timeId, elem.getAttribute(attr));
@@ -225,7 +226,7 @@ capturer.captureDocument = function (params) {
     };
 
     // rewrite (or remove if value is null/undefined) the textContent, record it if option set
-    var captureRewriteTextContent = function (elem, value) {
+    const captureRewriteTextContent = function (elem, value) {
       if (!elem.textContent) return;
       if (options["capture.recordRewrittenAttr"]) {
         elem.setAttribute("data-sb-orig-textContent-" + timeId, elem.textContent);
@@ -238,7 +239,7 @@ capturer.captureDocument = function (params) {
     };
 
     // similar to captureRewriteAttr, but use option capture.recordSourceUri
-    var captureRewriteUri = function (elem, attr, value) {
+    const captureRewriteUri = function (elem, attr, value) {
       if (!elem.hasAttribute(attr)) return;
       if (options["capture.recordSourceUri"]) {
         elem.setAttribute("data-sb-orig-" + attr + "-" + timeId, elem.getAttribute(attr));
@@ -250,8 +251,8 @@ capturer.captureDocument = function (params) {
       }
     };
 
-    var rewriteLocalLink = function (url) {
-      let [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+    const rewriteLocalLink = function (url) {
+      const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
 
       // This link targets the current page
       if (urlMain === refUrl) {
@@ -264,8 +265,8 @@ capturer.captureDocument = function (params) {
         // relink to the captured page only when the target node is included in the selected fragment.
         let hasLocalTarget = !selection;
         if (!hasLocalTarget) {
-          let targetId = scrapbook.decodeURIComponent(urlHash.slice(1)).replace(/\W/g, '\\$&');
-          if (rootNode.querySelector('[id="' + targetId + '"], a[name="' + targetId + '"]')) {
+          const targetId = scrapbook.decodeURIComponent(urlHash.slice(1)).replace(/\W/g, '\\$&');
+          if (rootNode.querySelector(`[id="${targetId}"], a[name="${targetId}"]`)) {
             hasLocalTarget = true;
           }
         }
@@ -277,9 +278,9 @@ capturer.captureDocument = function (params) {
       return url;
     };
 
-    var getCanvasDataScript = function (canvas) {
-      let data = canvas.toDataURL();
-      let dataScript = function (data) {
+    const getCanvasDataScript = function (canvas) {
+      const data = canvas.toDataURL();
+      const dataScript = function (data) {
         var s = document.getElementsByTagName("script"),
             c = s[s.length - 1],
             t = c.previousSibling,
@@ -300,8 +301,8 @@ capturer.captureDocument = function (params) {
       // give certain nodes an unique id for later refrence,
       // since cloned nodes may not have some information
       // e.g. cloned iframes has no content, cloned canvas has no image
-      var origRefKey = "data-sb-id-" + timeId;
-      var origRefNodes = Array.prototype.slice.call(doc.querySelectorAll("frame, iframe, canvas"));
+      const origRefKey = "data-sb-id-" + timeId;
+      const origRefNodes = Array.prototype.slice.call(doc.querySelectorAll("frame, iframe, canvas"));
       origRefNodes.forEach((elem, index) => {
         elem.setAttribute(origRefKey, index);
       }, this);
@@ -451,7 +452,7 @@ capturer.captureDocument = function (params) {
       }
 
       // inspect nodes
-      var metaCharsetNode;
+      let metaCharsetNode;
       Array.prototype.forEach.call(rootNode.querySelectorAll("*"), (elem) => {
         // skip elements that are already removed from the DOM tree
         if (!elem.parentNode) { return; }
@@ -1259,7 +1260,7 @@ capturer.captureDocument = function (params) {
       }
 
       // save document
-      var content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
+      let content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
       content = content.replace(/urn:scrapbook:text:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
         if (specialContentMap[key]) { return specialContentMap[key]; }
         return match;
@@ -1293,7 +1294,7 @@ capturer.resolveRelativeUrl = function (relativeUrl, baseUrl) {
 
 capturer.getErrorUrl = function (sourceUrl, options) {
   if (!options || options["capture.recordErrorUri"]) {
-    var prefix = "urn:scrapbook:download:error:";
+    const prefix = "urn:scrapbook:download:error:";
     if (!sourceUrl.startsWith(prefix)) {
       return prefix + sourceUrl;
     }
@@ -1312,9 +1313,9 @@ capturer.getCircularUrl = function (sourceUrl, options) {
  * @return {Promise}
  */
 capturer.processSrcsetText = function (text, refUrl, settings, options) {
-  var downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
+  const downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
 
-  var rewritten = scrapbook.parseSrcset(text, (url) => {
+  const rewritten = scrapbook.parseSrcset(text, (url) => {
     return downloader.getUrlHash(url);
   });
 
@@ -1330,7 +1331,7 @@ capturer.processSrcsetText = function (text, refUrl, settings, options) {
  */
 capturer.processCssFile = function (params) {
   return Promise.resolve().then(() => {
-    var {data, charset, url: refUrl, settings, options} = params;
+    const {data, charset, url: refUrl, settings, options} = params;
 
     return scrapbook.parseCssFile(data, charset, (cssText) => {
       return capturer.processCssText(cssText, refUrl, settings, options);
@@ -1344,11 +1345,11 @@ capturer.processCssFile = function (params) {
  * @return {Promise}
  */
 capturer.processCssText = function (cssText, refUrl, settings, options) {
-  var downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
+  const downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
 
-  var rewritten = scrapbook.parseCssText(cssText, {
+  const rewritten = scrapbook.parseCssText(cssText, {
     rewriteImportUrl: function (url) {
-      var dataUrl = capturer.resolveRelativeUrl(url, refUrl);
+      let dataUrl = capturer.resolveRelativeUrl(url, refUrl);
       switch (options["capture.style"]) {
         case "link":
           // do nothing
@@ -1365,7 +1366,7 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
       return dataUrl;
     },
     rewriteFontFaceUrl: function (url) {
-      var dataUrl = capturer.resolveRelativeUrl(url, refUrl);
+      let dataUrl = capturer.resolveRelativeUrl(url, refUrl);
       switch (options["capture.font"]) {
         case "link":
           // do nothing
@@ -1382,7 +1383,7 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
       return dataUrl;
     },
     rewriteBackgroundUrl: function (url) {
-      var dataUrl = capturer.resolveRelativeUrl(url, refUrl);
+      let dataUrl = capturer.resolveRelativeUrl(url, refUrl);
       switch (options["capture.imageBackground"]) {
         case "link":
           // do nothing
@@ -1426,7 +1427,7 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
   }
 
   getUrlHash(url, rewriteMethod) {
-    var key = scrapbook.getUuid();
+    const key = scrapbook.getUuid();
     this.urlHash[key] = {
       url: url,
       newUrl: null,
@@ -1437,7 +1438,7 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
 
   startDownloads() {
     return Promise.resolve().then(() => {
-      var tasks = Object.keys(this.urlHash).map((key) => {
+      const tasks = Object.keys(this.urlHash).map((key) => {
         return Promise.resolve().then(() => {
           let targetUrl = this.urlHash[key].url;
           if (this.options["capture.saveAs"] === "singleHtml") {

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // load languages
   scrapbook.loadLanguages(document);
 
-  var generateActionButtonForTabs = function (base, action) {
+  const generateActionButtonForTabs = function (base, action) {
     let selector = base.nextSibling;
     if (selector && selector.nodeType === 1) {
       while (selector.firstChild) { selector.firstChild.remove(); }

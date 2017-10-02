@@ -7,23 +7,25 @@
 
 (function (window, undefined) {
 
-var viewerData = JSON.parse(document.currentScript.textContent);
+const viewerData = JSON.parse(document.currentScript.textContent);
 
 document.addEventListener("DOMContentLoaded", function () {
   /**
    * common helper functions
    */
-  var inZipPathToUrl = function (inZipPath) {
+  const inZipPathToUrl = function (inZipPath) {
     return virtualBase + (inZipPath || "").split("/").map(x => encodeURIComponent(x)).join("/");
   };
 
-  var parseUrl = function (url, refUrl) {
+  const parseUrl = function (url, refUrl) {
+    let absoluteUrl;
     try {
-      var absoluteUrl = new URL(url, refUrl || undefined);
+      absoluteUrl = new URL(url, refUrl || undefined);
     } catch (ex) {
       // url cannot be resolved, return original (invalid)
       return {url: url, inZip: false};
     }
+
     if (absoluteUrl.href.startsWith(virtualBase)) {
       let search = absoluteUrl.search;
       let hash = absoluteUrl.hash;
@@ -68,9 +70,9 @@ document.addEventListener("DOMContentLoaded", function () {
    *     - {Array} params.recurseChain
    * @return {Promise}
    */
-  var fetchFile = function (params) {
+  const fetchFile = function (params) {
     return Promise.resolve().then(() => {
-      var {inZipPath, rewriteFunc, recurseChain} = params;
+      const {inZipPath, rewriteFunc, recurseChain} = params;
 
       let f = inZipFiles[inZipPath];
       if (f) {
@@ -97,9 +99,9 @@ document.addEventListener("DOMContentLoaded", function () {
    *     - {Array} params.recurseChain
    * @return {Promise}
    */
-  var fetchPage = function (params) {
+  const fetchPage = function (params) {
     return Promise.resolve().then(() => {
-      var {inZipPath, url, recurseChain} = params;
+      const {inZipPath, url, recurseChain} = params;
 
       let searchAndHash = "";
       if (url) {
@@ -110,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
         inZipPath: inZipPath,
         rewriteFunc: (params) => {
           return Promise.resolve().then(() => {
-            var {data, charset, recurseChain} = params;
+            const {data, charset, recurseChain} = params;
             if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
               return scrapbook.readFileAsDocument(data).then((doc) => {
                 if (!doc) { throw new Error("document cannot be loaded"); }
@@ -140,14 +142,14 @@ document.addEventListener("DOMContentLoaded", function () {
    *     - {Array} params.recurseChain
    * @return {Promise}
    */
-  var parseDocument = function (params) {
+  const parseDocument = function (params) {
     return Promise.resolve().then(() => {
-      var {doc, inZipPath, recurseChain} = params;
+      const {doc, inZipPath, recurseChain} = params;
 
-      var refUrl = inZipPathToUrl(inZipPath);
-      var tasks = [];
+      let refUrl = inZipPathToUrl(inZipPath);
+      let tasks = [];
 
-      var rewriteUrl = function (url, refUrlOverwrite) {
+      const rewriteUrl = function (url, refUrlOverwrite) {
         return parseUrl(url, refUrlOverwrite || refUrl).url;
       };
 
@@ -404,7 +406,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
       });
 
       return Promise.all(tasks).then((results) => {
-        var content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
+        let content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
         return new Blob([content], {type: doc.contentType});
       });
     });
@@ -413,9 +415,9 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
   /**
    * @return {Promise}
    */
-  var processCssFile = function (params) {
+  const processCssFile = function (params) {
     return Promise.resolve().then(() => {
-      var {data, charset, url: refUrl, recurseChain} = params;
+      const {data, charset, url: refUrl, recurseChain} = params;
 
       return scrapbook.parseCssFile(data, charset, (text) => {
         return processCssText(text, refUrl, recurseChain);
@@ -426,10 +428,10 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
   /**
    * @return {Promise}
    */
-  var processCssText = function (cssText, refUrl, recurseChain) {
-    var fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
+  const processCssText = function (cssText, refUrl, recurseChain) {
+    const fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
 
-    var rewritten = scrapbook.parseCssText(cssText, {
+    let rewritten = scrapbook.parseCssText(cssText, {
       rewriteImportUrl: function (url) {
         return fetcher.getUrlHash(url, processCssFile);
       },
@@ -446,7 +448,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
     });
   };
 
-  var ComplexUrlFetcher = class ComplexUrlFetcher {
+  const ComplexUrlFetcher = class ComplexUrlFetcher {
     constructor(refUrl, recurseChain) {
       this.urlHash = {};
       this.urlRewrittenCount = 0;
@@ -459,7 +461,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
     }
 
     getUrlHash(url, rewriteFunc) {
-      var key = scrapbook.getUuid();
+      const key = scrapbook.getUuid();
       this.urlHash[key] = {
         url: url,
         newUrl: null,
@@ -473,7 +475,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
      */
     startFetches() {
       return Promise.resolve().then(() => {
-        var tasks = Object.keys(this.urlHash).map((key) => {
+        let tasks = Object.keys(this.urlHash).map((key) => {
           return Promise.resolve().then(() => {
             let sourceUrl = this.recurseChain[this.recurseChain.length - 1];
             let info = parseUrl(this.urlHash[key].url, sourceUrl);
@@ -519,22 +521,23 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
   /**
    * main
    */
-  var virtualBase = viewerData.virtualBase;
-  var defaultTitle = document.querySelector('title').textContent;
-  var metaRefreshIdentifier = "data-sb-meta-refresh-" + scrapbook.dateToId();
+  const virtualBase = viewerData.virtualBase;
+  const defaultTitle = document.querySelector('title').textContent;
+  const metaRefreshIdentifier = "data-sb-meta-refresh-" + scrapbook.dateToId();
 
-  var viewer = document.getElementById('viewer');
+  const viewer = document.getElementById('viewer');
 
-  var inZipFiles = {};
-  var blobUrlToInZipPath = {};
+  const inZipFiles = {};
+  const blobUrlToInZipPath = {};
 
-  var urlSearch = "";
-  var urlHash = location.hash;
+  let urlSearch = "";
+  let urlHash = location.hash;
 
-  var frameRegisterLinkLoader = function (frame) {
-    var frameOnLoad = function (frame) {
+  const frameRegisterLinkLoader = function (frame) {
+    const frameOnLoad = function (frame) {
+      let frameDoc;
       try {
-        var frameDoc = frame.contentDocument;
+        frameDoc = frame.contentDocument;
         if (!frameDoc) { throw new Error("content document not accessible"); }
       } catch (ex) {
         if (frame === viewer) {
@@ -600,7 +603,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
   return Promise.resolve(viewerData.zipId).then((uuid) => {
     return new Promise((resolve, reject) => {
-      var request = indexedDB.open("scrapbook", 1);
+      let request = indexedDB.open("scrapbook", 1);
       request.onupgradeneeded = (event) => {
         reject(new Error("No data stored with the latest database version."));
       };
@@ -611,10 +614,10 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         reject(event.target.error);
       };
     }).then((db) => {
-      var transaction = db.transaction("archiveZipFiles", "readwrite");
-      var objectStore = transaction.objectStore(["archiveZipFiles"]);
+      let transaction = db.transaction("archiveZipFiles", "readwrite");
+      let objectStore = transaction.objectStore(["archiveZipFiles"]);
       return new Promise((resolve, reject) => {
-        var request = objectStore.get(uuid);
+        let request = objectStore.get(uuid);
         request.onsuccess = function (event) {
           resolve(event.target.result);
         };
@@ -623,7 +626,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         };
       }).then((data) => {
         new Promise((resolve, reject) => {
-          var request = objectStore.delete(uuid);
+          let request = objectStore.delete(uuid);
           request.onsuccess = function (event) {
             resolve(event.target.result);
           };
@@ -636,7 +639,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
     });
   }).then((file) => {
     return new JSZip().loadAsync(file).then((zip) => {
-      var tasks = [];
+      let tasks = [];
       zip.forEach((inZipPath, zipObj) => {
         if (zipObj.dir) { return; }
         tasks[tasks.length] = zipObj.async("arraybuffer").then((ab) => {

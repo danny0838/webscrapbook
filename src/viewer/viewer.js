@@ -6,7 +6,7 @@
  *******************************************************************/
 
 function init() {
-  var fileSystemHandler = {
+  const fileSystemHandler = {
     /**
      * @return {Promise}
      */
@@ -39,12 +39,12 @@ function init() {
      */
     createDir: function (dirEntry, path) {
       return Promise.resolve().then(() => {
-        var folders = (Object.prototype.toString.call(path) === "[object Array]") ? path : path.split("/");
+        let folders = (Object.prototype.toString.call(path) === "[object Array]") ? path : path.split("/");
         // Throw out './' or '/' and move on to prevent something like '/foo/.//bar'.
         folders = folders.filter(x => x && x !== '.');
 
         return fileSystemHandler.getDir(folders.join("/")).catch((ex) => {
-          var createDirInternal = function (dirEntry, folders) {
+          const createDirInternal = function (dirEntry, folders) {
             return new Promise((resolve, reject) => {
               dirEntry.getDirectory(folders[0], {create: true}, resolve, reject);
             }).then((dirEntry) => {
@@ -82,7 +82,7 @@ function init() {
     }
   };
 
-  var viewer = {
+  const viewer = {
     mainUrl: new URL(document.URL),
     filesystem: null,
     urlSearch: "",
@@ -153,12 +153,12 @@ function init() {
     },
 
     parseRdfDocument: function (doc) {
-      var RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-      var MAF = "http://maf.mozdev.org/metadata/rdf#";
-      var result = {};
+      const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+      const MAF = "http://maf.mozdev.org/metadata/rdf#";
+      const result = {};
 
-      var elems = doc.getElementsByTagNameNS(MAF, "indexfilename");
-      var elem = elems[0];
+      let elems = doc.getElementsByTagNameNS(MAF, "indexfilename");
+      let elem = elems[0];
       if (elem) { result.indexfilename = elem.getAttributeNS(RDF, "resource"); }
 
       return result;
@@ -169,15 +169,15 @@ function init() {
      */
     viewZipInFileSystem: function (zipFile) {
       return Promise.resolve().then(() => {
-        var root = viewer.filesystem.root;
-        var ns = scrapbook.getUuid();
-        var type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
+        const root = viewer.filesystem.root;
+        const ns = scrapbook.getUuid();
+        const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
 
         // @TODO: JSZip.loadAsync cannot load a large zip file
         //     (around 2GB, tested in Chrome)
         return new JSZip().loadAsync(zipFile).then((zip) => {
           return fileSystemHandler.createDir(root, ns).then((dirEntry) => {
-            var p = Promise.resolve();
+            let p = Promise.resolve();
             zip.forEach((inZipPath, zipObj) => {
               if (zipObj.dir) { return; }
               p = p.then(() => {
@@ -199,14 +199,14 @@ function init() {
               return fileSystemHandler.getDir(root, ns).then((dirEntry) => {
                 return fileSystemHandler.readDir(dirEntry);
               }).then((entries) => {
-                var tasks = entries.filter(e => e.isDirectory).map((entry) => {
+                let tasks = entries.filter(e => e.isDirectory).map((entry) => {
                   return fileSystemHandler.getFile(entry, "index.rdf").then((fileEntry) => {
                     return new Promise((resolve, reject) => {
                       fileEntry.file(resolve, reject);
                     }).then((file) => {
                       return scrapbook.readFileAsDocument(file);
                     }).then((doc) => {
-                      var meta = viewer.parseRdfDocument(doc);
+                      let meta = viewer.parseRdfDocument(doc);
                       return fileSystemHandler.getFile(entry, meta.indexfilename);
                     });
                   }, (ex) => {
@@ -260,15 +260,15 @@ function init() {
       /**
        * @return {Promise}
        */
-      var invokeZipViewer = function (zipFile, indexFile, inNewTab) {
+      const invokeZipViewer = function (zipFile, indexFile, inNewTab) {
         return Promise.resolve().then(() => {
-          var uuid = scrapbook.getUuid();
+          const uuid = scrapbook.getUuid();
 
           return new Promise((resolve, reject) => {
-            var request = indexedDB.open("scrapbook", 1);
+            let request = indexedDB.open("scrapbook", 1);
             request.onupgradeneeded = (event) => {
-              var db = event.target.result;
-              var objectStore = db.createObjectStore("archiveZipFiles", {keyPath: "uuid"});
+              let db = event.target.result;
+              let objectStore = db.createObjectStore("archiveZipFiles", {keyPath: "uuid"});
             };
             request.onsuccess = (event) => {
               resolve(event.target.result);
@@ -278,9 +278,9 @@ function init() {
             };
           }).then((db) => {
             return new Promise((resolve, reject) => {
-              var transaction = db.transaction("archiveZipFiles", "readwrite");
-              var objectStore = transaction.objectStore(["archiveZipFiles"]);
-              var request = objectStore.add({uuid: uuid, blob: zipFile});
+              let transaction = db.transaction("archiveZipFiles", "readwrite");
+              let objectStore = transaction.objectStore(["archiveZipFiles"]);
+              let request = objectStore.add({uuid: uuid, blob: zipFile});
               transaction.oncomplete = (event) => {
                 resolve(event.target);
               };
@@ -353,7 +353,7 @@ body {
       };
 
       return Promise.resolve().then(() => {
-        var type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
+        const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
         switch (type) {
           case "maff": {
             return new JSZip().loadAsync(zipFile).then((zip) => {
@@ -368,11 +368,11 @@ body {
               });
               return topdirs;
             }).then((topdirs) => {
-              var tasks = [];
+              const tasks = [];
               for (let i in topdirs) {
                 let dirObj = topdirs[i];
                 tasks[tasks.length] = Promise.resolve().then(() => {
-                  var rdfFile = dirObj.file("index.rdf");
+                  let rdfFile = dirObj.file("index.rdf");
                   if (!rdfFile) { throw new Error("no index.rdf"); }
                   return rdfFile;
                 }).then((rdfFile) => {
@@ -382,7 +382,7 @@ body {
                     let file = new File([ab], filename, {type: mime});
                     return scrapbook.readFileAsDocument(file);
                   }).then((doc) => {
-                    var meta = viewer.parseRdfDocument(doc);
+                    let meta = viewer.parseRdfDocument(doc);
                     if (dirObj.file(meta.indexfilename)) {
                       return meta.indexfilename;
                     }
@@ -408,11 +408,11 @@ body {
               if (!topdirs.length) {
                 return viewer.warn("No available data can be loaded from this archive file.");
               }
-              var mainDir = topdirs.shift();
+              let mainDir = topdirs.shift();
               mainDir.inNewTab = false;
               topdirs.push(mainDir);
-              var p = Promise.resolve();
-              var tasks = topdirs.map((topdir) => {
+              let p = Promise.resolve();
+              let tasks = topdirs.map((topdir) => {
                 return p = p.then(() => {
                   return topdir.zip.generateAsync({type: "blob"});
                 }).then((zipBlob) => {
@@ -433,10 +433,10 @@ body {
   };
 
   // init common elements and events
-  var reloader = document.getElementById('reloader');
-  var fileSelector = document.getElementById('file-selector');
-  var fileSelectorDrop = document.getElementById('file-selector-drop');
-  var fileSelectorInput = document.getElementById('file-selector-input');
+  const reloader = document.getElementById('reloader');
+  const fileSelector = document.getElementById('file-selector');
+  const fileSelectorDrop = document.getElementById('file-selector-drop');
+  const fileSelectorInput = document.getElementById('file-selector-input');
 
   reloader.addEventListener("click", (e) => {
     e.preventDefault();
@@ -453,7 +453,7 @@ body {
     e.preventDefault();
     e.target.classList.remove("dragover");
     Array.prototype.forEach.call(e.dataTransfer.items, (item) => {
-      var entry = item.webkitGetAsEntry();
+      let entry = item.webkitGetAsEntry();
       if (entry.isFile) {
         entry.file((file) => {
           viewer.processZipFile(file);
@@ -473,7 +473,7 @@ body {
 
   fileSelectorInput.addEventListener("change", (e) => {
     e.preventDefault();
-    var file = e.target.files[0];
+    let file = e.target.files[0];
     viewer.processZipFile(file);
   }, false);
 

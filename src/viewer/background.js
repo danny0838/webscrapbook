@@ -23,7 +23,7 @@ function redirectUrl(tabId, type, url, filename, mime) {
     }
   }
 
-  var newUrl = new URL(chrome.runtime.getURL("viewer/viewer.html"));
+  let newUrl = new URL(chrome.runtime.getURL("viewer/viewer.html"));
   newUrl.hash = url.hash;
   url.hash = "";
   newUrl.search = "?src=" + encodeURIComponent(url.href);
@@ -43,7 +43,7 @@ function redirectUrl(tabId, type, url, filename, mime) {
   } else {
     // An extension frame page whose top frame page is not an extension page
     // cannot redirect itself to a blob page it has generated.
-    let html = `<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -59,7 +59,7 @@ a {
 </body>
 </html>
 `;
-    let dataUrl = scrapbook.stringToDataUri(html, "text/html", "UTF-8");
+    const dataUrl = scrapbook.stringToDataUri(html, "text/html", "UTF-8");
     return {redirectUrl: dataUrl};
   }
 }

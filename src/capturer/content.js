@@ -8,7 +8,7 @@
  *******************************************************************/
 
 window.addEventListener("message", (event) => {
-  var message = event.data;
+  const message = event.data;
   if (message.extension !== chrome.runtime.id) { return; }
   isDebug && console.debug(message.cmd, "frame window receive", message.args);
 
