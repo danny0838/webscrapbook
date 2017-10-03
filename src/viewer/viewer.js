@@ -309,33 +309,27 @@ function init() {
 <script src="${chrome.runtime.getURL("core/common.js")}"></script>
 <script src="${chrome.runtime.getURL("viewer/zipviewer.js")}">${JSON.stringify(viewerData)}</script>
 <style>
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  border: 0;
-  padding: 0;
-}
-
-#wrapper {
-  position: relative;
-  height: 100vh;
-}
-
-#viewer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
   height: 100%;
+}
+
+.full-viewport {
+  display: block;
   margin: 0;
   border: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
 }
 </style>
 </head>
 <body>
-<div id="wrapper">
-  <iframe id="viewer" sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"></iframe>
-</div>
+<iframe id="viewer" class="full-viewport" sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"></iframe>
 </body>
 </html>
 `;
@@ -435,7 +429,6 @@ body {
   // init common elements and events
   const reloader = document.getElementById('reloader');
   const fileSelector = document.getElementById('file-selector');
-  const fileSelectorDrop = document.getElementById('file-selector-drop');
   const fileSelectorInput = document.getElementById('file-selector-input');
 
   reloader.addEventListener("click", (e) => {
@@ -443,13 +436,13 @@ body {
     viewer.processUrlParams();
   }, false);
 
-  fileSelectorDrop.addEventListener("dragover", (e) => {
+  fileSelector.addEventListener("dragover", (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
     e.target.classList.add("dragover");
   }, false);
 
-  fileSelectorDrop.addEventListener("drop", (e) => {
+  fileSelector.addEventListener("drop", (e) => {
     e.preventDefault();
     e.target.classList.remove("dragover");
     Array.prototype.forEach.call(e.dataTransfer.items, (item) => {
@@ -462,11 +455,11 @@ body {
     });
   }, false);
 
-  fileSelectorDrop.addEventListener("dragleave", (e) => {
+  fileSelector.addEventListener("dragleave", (e) => {
     e.target.classList.remove("dragover");
   }, false);
 
-  fileSelectorDrop.addEventListener("click", (e) => {
+  fileSelector.addEventListener("click", (e) => {
     e.preventDefault();
     fileSelectorInput.click();
   }, false);
