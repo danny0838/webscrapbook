@@ -238,17 +238,13 @@ function init() {
           if (!indexFileEntries.length) {
             return viewer.warn("No available data can be loaded from this archive file.");
           }
-          return new Promise((resolve, reject) => {
-            chrome.tabs.getCurrent(resolve);
-          }).then((tab) => {
-            let mainFileEntry = indexFileEntries.shift();
-            indexFileEntries.forEach((indexFileEntry) => {
-              let url = indexFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
-              chrome.tabs.create({url: url}, () => {});
-            });
-            let url = mainFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
-            window.location.href = url;
+          let mainFileEntry = indexFileEntries.shift();
+          indexFileEntries.forEach((indexFileEntry) => {
+            let url = indexFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
+            chrome.tabs.create({url: url});
           });
+          let url = mainFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
+          window.location.href = url;
         });
       });
     },
