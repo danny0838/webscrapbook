@@ -259,32 +259,9 @@ function init() {
       const invokeZipViewer = function (zipFile, indexFile, inNewTab) {
         return Promise.resolve().then(() => {
           const uuid = scrapbook.getUuid();
+          const key = {table: "viewerCache", id: uuid};
 
-          return new Promise((resolve, reject) => {
-            let request = indexedDB.open("scrapbook", 1);
-            request.onupgradeneeded = (event) => {
-              let db = event.target.result;
-              let objectStore = db.createObjectStore("archiveZipFiles", {keyPath: "uuid"});
-            };
-            request.onsuccess = (event) => {
-              resolve(event.target.result);
-            };
-            request.onerror = (event) => {
-              reject(event.target.error);
-            };
-          }).then((db) => {
-            return new Promise((resolve, reject) => {
-              let transaction = db.transaction("archiveZipFiles", "readwrite");
-              let objectStore = transaction.objectStore(["archiveZipFiles"]);
-              let request = objectStore.add({uuid: uuid, blob: zipFile});
-              transaction.oncomplete = (event) => {
-                resolve(event.target);
-              };
-              transaction.onerror = (event) => {
-                reject(event.target.error);
-              };
-            });
-          }).then((transaction) => {
+          return scrapbook.setCache(key, zipFile).then(() => {
             let viewerData = {
               virtualBase: chrome.runtime.getURL("viewer/!/"),
               indexFile: indexFile,

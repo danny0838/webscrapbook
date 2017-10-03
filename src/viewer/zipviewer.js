@@ -9,6 +9,11 @@
 
 const viewerData = JSON.parse(document.currentScript.textContent);
 
+// Overwrite core/common.js to avoid error for Chrome,
+// whose blob URL cannot call chrome APIs
+delete(scrapbook.isGecko);
+scrapbook.isGecko = viewerData.isGecko;
+
 document.addEventListener("DOMContentLoaded", function () {
   /**
    * common helper functions
@@ -604,39 +609,10 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
   frameRegisterLinkLoader(viewer);
 
   return Promise.resolve(viewerData.zipId).then((uuid) => {
-    return new Promise((resolve, reject) => {
-      let request = indexedDB.open("scrapbook", 1);
-      request.onupgradeneeded = (event) => {
-        reject(new Error("No data stored with the latest database version."));
-      };
-      request.onsuccess = (event) => {
-        resolve(event.target.result);
-      };
-      request.onerror = (event) => {
-        reject(event.target.error);
-      };
-    }).then((db) => {
-      let transaction = db.transaction("archiveZipFiles", "readwrite");
-      let objectStore = transaction.objectStore(["archiveZipFiles"]);
-      return new Promise((resolve, reject) => {
-        let request = objectStore.get(uuid);
-        request.onsuccess = function (event) {
-          resolve(event.target.result);
-        };
-        request.onerror = function (event) {
-          reject(event.target.error);
-        };
-      }).then((data) => {
-        new Promise((resolve, reject) => {
-          let request = objectStore.delete(uuid);
-          request.onsuccess = function (event) {
-            resolve(event.target.result);
-          };
-          request.onerror = function (event) {
-            reject(event.target.error);
-          };
-        });
-        return data.blob;
+    const key = {table: "viewerCache", id: uuid};
+    return scrapbook.getCache(key).then((file) => {
+      return scrapbook.removeCache(key).then(() => {
+        return file;
       });
     });
   }).then((file) => {
