@@ -164,6 +164,162 @@ scrapbook.saveOptions = function () {
 
 
 /********************************************************************
+ * Cache
+ * 
+ * Use indexedDB for Chrome since storing Blobs is not supported.
+ * 
+ * Use storage API for Firefox since storing Blobs is supported, and
+ * indexedDB is not available for private windows.
+ *******************************************************************/
+
+scrapbook.cache = {
+  storage: {
+    get(key, defaultValue) {
+      return new Promise((resolve, reject) => {
+        let pair = {[key]: defaultValue};
+        chrome.storage.local.get(pair, (items) => {
+          if (!chrome.runtime.lastError) {
+            resolve(items[key]);
+          } else {
+            reject(chrome.runtime.lastError);
+          }
+        });
+      });
+    },
+
+    set(key, value) {
+      return new Promise((resolve, reject) => {
+        let pair = {[key]: value};
+        chrome.storage.local.set(pair, () => {
+          if (!chrome.runtime.lastError) {
+            resolve();
+          } else {
+            reject(chrome.runtime.lastError);
+          }
+        });
+      });
+    },
+
+    remove(key) {
+      return new Promise((resolve, reject) => {
+        chrome.storage.local.remove(key, () => {
+          if (!chrome.runtime.lastError) {
+            resolve();
+          } else {
+            reject(chrome.runtime.lastError);
+          }
+        });
+      });
+    },
+  },
+
+  indexedDB: {
+    connect() {
+      let p = new Promise((resolve, reject) => {
+        let request = indexedDB.open("scrapbook", 2);
+        request.onupgradeneeded = (event) => {
+          let db = event.target.result;
+          if (event.oldVersion === 1) {
+            db.deleteObjectStore("archiveZipFiles");
+          }
+          db.createObjectStore("cache", {keyPath: "key"});
+        };
+        request.onsuccess = (event) => {
+          resolve(event.target.result);
+        };
+        request.onerror = (event) => {
+          reject(event.target.error);
+        };
+      });
+      this.connect = function () {
+        return p;
+      };
+      return p;
+    },
+
+    get(key) {
+      return this.connect().then((db) => {
+        let transaction = db.transaction("cache", "readonly");
+        let objectStore = transaction.objectStore(["cache"]);
+        return new Promise((resolve, reject) => {
+          let request = objectStore.get(key);
+          request.onsuccess = function (event) {
+            let result = event.target.result;
+            resolve(result ? result.value : undefined);
+          };
+          request.onerror = function (event) {
+            reject(event.target.error);
+          };
+        });
+      });
+    },
+
+    set(key, value) {
+      return this.connect().then((db) => {
+        return new Promise((resolve, reject) => {
+          let transaction = db.transaction("cache", "readwrite");
+          let objectStore = transaction.objectStore(["cache"]);
+          let request = objectStore.add({key, value});
+          transaction.oncomplete = (event) => {
+            resolve();
+          };
+          transaction.onerror = (event) => {
+            reject(event.target.error);
+          };
+        });
+      });
+    },
+
+    remove(key) {
+      return this.connect().then((db) => {
+        return new Promise((resolve, reject) => {
+          let transaction = db.transaction("cache", "readwrite");
+          let objectStore = transaction.objectStore(["cache"]);
+          let request = objectStore.delete(key);
+          request.onsuccess = function (event) {
+            resolve();
+          };
+          request.onerror = function (event) {
+            reject(event.target.error);
+          };
+        });
+      });
+    },
+  },
+};
+
+scrapbook.getCache = function (key, defaultValue) {
+  const keyStr = JSON.stringify(key);
+
+  if (scrapbook.isGecko) {
+    return scrapbook.cache.storage.get(keyStr, defaultValue);
+  } else {
+    return scrapbook.cache.indexedDB.get(keyStr, defaultValue);
+  }
+};
+
+scrapbook.setCache = function (key, value) {
+  const keyStr = JSON.stringify(key);
+
+  if (scrapbook.isGecko) {
+    return scrapbook.cache.storage.set(keyStr, value);
+  } else {
+    return scrapbook.cache.indexedDB.set(keyStr, value);
+  }
+};
+
+scrapbook.removeCache = function (key) {
+  const keyStr = JSON.stringify(key);
+
+  if (scrapbook.isGecko) {
+    return scrapbook.cache.storage.remove(keyStr);
+  } else {
+    return scrapbook.cache.indexedDB.remove(keyStr);
+  }
+};
+
+
+/********************************************************************
  * Lang
  *******************************************************************/
 
