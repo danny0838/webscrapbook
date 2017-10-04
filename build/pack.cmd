@@ -27,6 +27,5 @@ del "%dist%\%fn%"
 "%compressor%" a -tzip -mx9 "%dist%\%fn%" "%src%\"*.* -r -x!.git*
 "%compressor%" d "%dist%\%fn%" manifest.json
 "%compressor%" rn "%dist%\%fn%" manifest-firefox.json manifest.json
-"%compressor%" d "%dist%\%fn%" _locales\zh_TW _locales\zh_CN
 
 pause
