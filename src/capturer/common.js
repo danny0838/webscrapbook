@@ -925,6 +925,9 @@ capturer.captureDocument = function (params) {
 
           // media: audio
           case "audio": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", elem.src);
+            }
             Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
               elem.setAttribute("src", elem.src);
             }, this);
@@ -934,6 +937,9 @@ capturer.captureDocument = function (params) {
                 // do nothing
                 break;
               case "blank":
+                if (elem.hasAttribute("src")) {
+                  captureRewriteUri(elem, "src", "about:blank");
+                }
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                   captureRewriteUri(elem, "src", "about:blank");
                 }, this);
@@ -943,6 +949,18 @@ capturer.captureDocument = function (params) {
                 return;
               case "save":
               default:
+                if (elem.hasAttribute("src")) {
+                  tasks[tasks.length] = 
+                  capturer.invoke("downloadFile", {
+                    url: elem.src,
+                    refUrl: refUrl,
+                    settings: settings,
+                    options: options
+                  }).then((response) => {
+                    captureRewriteUri(elem, "src", response.url);
+                    return response;
+                  });
+                }
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
@@ -962,6 +980,9 @@ capturer.captureDocument = function (params) {
 
           // media: video
           case "video": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", elem.src);
+            }
             Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
               elem.setAttribute("src", elem.src);
             }, this);
@@ -971,6 +992,9 @@ capturer.captureDocument = function (params) {
                 // do nothing
                 break;
               case "blank":
+                if (elem.hasAttribute("src")) {
+                  captureRewriteUri(elem, "src", "about:blank");
+                }
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                   captureRewriteUri(elem, "src", "about:blank");
                 }, this);
@@ -980,6 +1004,18 @@ capturer.captureDocument = function (params) {
                 return;
               case "save":
               default:
+                if (elem.hasAttribute("src")) {
+                  tasks[tasks.length] = 
+                  capturer.invoke("downloadFile", {
+                    url: elem.src,
+                    refUrl: refUrl,
+                    settings: settings,
+                    options: options
+                  }).then((response) => {
+                    captureRewriteUri(elem, "src", response.url);
+                    return response;
+                  });
+                }
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
