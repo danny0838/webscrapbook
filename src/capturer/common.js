@@ -980,6 +980,9 @@ capturer.captureDocument = function (params) {
 
           // media: video
           case "video": {
+            if (elem.hasAttribute("poster")) {
+              elem.setAttribute("poster", elem.poster);
+            }
             if (elem.hasAttribute("src")) {
               elem.setAttribute("src", elem.src);
             }
@@ -992,6 +995,9 @@ capturer.captureDocument = function (params) {
                 // do nothing
                 break;
               case "blank":
+                if (elem.hasAttribute("poster")) {
+                  captureRewriteUri(elem, "poster", "about:blank");
+                }
                 if (elem.hasAttribute("src")) {
                   captureRewriteUri(elem, "src", "about:blank");
                 }
@@ -1004,6 +1010,18 @@ capturer.captureDocument = function (params) {
                 return;
               case "save":
               default:
+                if (elem.hasAttribute("poster")) {
+                  tasks[tasks.length] = 
+                  capturer.invoke("downloadFile", {
+                    url: elem.poster,
+                    refUrl: refUrl,
+                    settings: settings,
+                    options: options
+                  }).then((response) => {
+                    captureRewriteUri(elem, "poster", response.url);
+                    return response;
+                  });
+                }
                 if (elem.hasAttribute("src")) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
