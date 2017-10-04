@@ -154,10 +154,10 @@
     "message": "擷取網頁時若有改寫連結，則建立對應的 data-* 屬性記錄改寫前的 URI 位址。"
   },
   "OptionCaptureRemoveIntegrityLabel": {
-    "message": "移除 integrity 屬性:"
+    "message": "移除資源驗證屬性:"
   },
   "OptionCaptureRemoveIntegrityTooltip": {
-    "message": "擷取網頁時可能會改寫連結檔案的內容，若不移除 integrity 屬性將無法正常載入。"
+    "message": "移除 integrity 及 crossorigin 等資源驗證屬性，以免因內容改寫或存取環境改變導致無法載入。"
   },
   "OptionCaptureRewriteCssLabel": {
     "message": "改寫 CSS:"

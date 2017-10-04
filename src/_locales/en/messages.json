@@ -157,7 +157,7 @@
     "message": "Remove integrity:"
   },
   "OptionCaptureRemoveIntegrityTooltip": {
-    "message": "The content of captured object could be rewritten during the capture process. Not removing the integrity attribute will make them unloadable."
+    "message": "Remove integrity, crossorigin or similar attributes to avoid a loading failure due to writing or a change of context of loading."
   },
   "OptionCaptureRewriteCssLabel": {
     "message": "Rewrite CSS:"

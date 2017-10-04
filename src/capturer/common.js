@@ -1278,11 +1278,12 @@ capturer.captureDocument = function (params) {
             }, this);
         }
 
-        // handle integrity
+        // handle integrity and crossorigin
         // We have to remove integrity check because we could modify the content
         // and they might not work correctly in the offline environment.
         if ( options["capture.removeIntegrity"] ) {
           captureRewriteAttr(elem, "integrity", null);
+          captureRewriteAttr(elem, "crossorigin", null);
         }
       }, this);
 
