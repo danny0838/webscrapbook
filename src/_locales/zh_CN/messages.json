@@ -1,4 +1,48 @@
 {
+  "CaptureTab": {
+    "message": "撷取分页"
+  },
+  "CaptureTabBookmark": {
+    "message": "撷取分页为书签"
+  },
+  "CaptureTabSource": {
+    "message": "撷取分页 (原始状态)"
+  },
+  "CaptureAllTabs": {
+    "message": "撷取所有分页"
+  },
+  "ErrorCapture": {
+    "message": "撷取失败 ($SOURCE$): $REASON$",
+    "placeholders": {
+      "source": {"content" : "$1"},
+      "reason": {"content" : "$2"}
+    }
+  },
+  "ErrorCaptureGeneral": {
+    "message": "细节请详见浏览器控制台。"
+  },
+  "ErrorContentScriptNotReady": {
+    "message": "内容处理脚本未就绪或无法载入。请重新整理页面并等待内容完全载入再尝试。"
+  },
+  "ErrorDocumentNotReady": {
+    "message": "页面未载入: $URL$",
+    "placeholders": {
+      "url": {"content" : "$1"}
+    }
+  },
+  "ErrorFileDownloadError": {
+    "message": "下载档案错误 ($URL$): $REASON$",
+    "placeholders": {
+      "url": {"content": "$1"},
+      "reason": {"content": "$2"}
+    }
+  },
+  "ErrorImportOptions": {
+    "message": "汇入选项失败: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
   "ExtensionDescription": {
     "description": "Description of the extension as it's visible to the outside world",
     "message": "获取网页内容，提供多种客制化设定。"
@@ -6,5 +50,249 @@
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
     "message": "网络剪贴簿"
+  },
+  "OpenOptions": {
+    "message": "选项"
+  },
+  "OpenViewer": {
+    "message": "检视封存网页"
+  },
+  "OptionCaptureAppletLabel": {
+    "message": "APPLET 元素:"
+  },
+  "OptionCaptureAudioLabel": {
+    "message": "音讯:"
+  },
+  "OptionCaptureBaseLabel": {
+    "message": "BASE 元素:"
+  },
+  "OptionCaptureCanvasLabel": {
+    "message": "CANVAS 元素:"
+  },
+  "OptionCaptureCommonBlankLabel": {
+    "message": "清空"
+  },
+  "OptionCaptureCommonBlankTooltip": {
+    "message": "将元素保留在原始位置，但将连结或内容无效化。"
+  },
+  "OptionCaptureCommonLinkLabel": {
+    "message": "连结"
+  },
+  "OptionCaptureCommonLinkTooltip": {
+    "message": "将参照的连结改写为连往原始位址。注意这会导致日后浏览时持续触发网路传输及消耗网路流量。"
+  },
+  "OptionCaptureCommonSaveLabel": {
+    "message": "储存"
+  },
+  "OptionCaptureCommonSaveTooltip": {
+    "message": "将参照的内容储存至本地。"
+  },
+  "OptionCaptureCommonRemoveLabel": {
+    "message": "移除"
+  },
+  "OptionCaptureCommonRemoveTooltip": {
+    "message": "将元素完全移除。注意这可能会影响排版。"
+  },
+  "OptionCaptureScrapbookFolderLabel": {
+    "message": "剪贴簿资料夹:"
+  },
+  "OptionCaptureScrapbookFolderTooltip": {
+    "message": "撷取的资料会统一储存至这个子资料夹中。"
+  },
+  "OptionCaptureEmbedLabel": {
+    "message": "EMBED 元素:"
+  },
+  "OptionCaptureFaviconLabel": {
+    "message": "Favicon:"
+  },
+  "OptionCaptureFontLabel": {
+    "message": "字体:"
+  },
+  "OptionCaptureFrameLabel": {
+    "message": "框架页:"
+  },
+  "OptionCaptureImageBackgroundLabel": {
+    "message": "背景图片:"
+  },
+  "OptionCaptureImageLabel": {
+    "message": "图片:"
+  },
+  "OptionCaptureNoscriptLabel": {
+    "message": "NOSCRIPT 元素:"
+  },
+  "OptionCaptureObjectLabel": {
+    "message": "OBJECT 元素:"
+  },
+  "OptionCaptureRecordDocumentMetaLabel": {
+    "message": "记录文件后设资讯:"
+  },
+  "OptionCaptureRecordDocumentMetaTooltip": {
+    "message": "在撷取网页的最外层 html 元素记录来源位址等后设资讯。"
+  },
+  "OptionCaptureRecordRewrittenAttrLabel": {
+    "message": "记录改写的属性:"
+  },
+  "OptionCaptureRecordRewrittenAttrTooltip": {
+    "message": "撷取网页时若有改写元素的属性，则建立对应的 data-* 属性记录原始值。"
+  },
+  "OptionCaptureRecordErrorUriLabel": {
+    "message": "记录错误的 URI:"
+  },
+  "OptionCaptureRecordErrorUriTooltip": {
+    "message": "撷取网页时若有 URI 无法顺利连上，会以 urn:scrapbook:* 的形式记录。若不勾选则会连结至原始位址（可能仍无法连上而导致无效连线）。"
+  },
+  "OptionCaptureRecordRemovedNodeLabel": {
+    "message": "记录移除的元素:"
+  },
+  "OptionCaptureRecordRemovedNodeTooltip": {
+    "message": "撷取网页时若有移除元素，则在原位置建立 HTML 注解记录原始内容。"
+  },
+  "OptionCaptureRecordSourceUriLabel": {
+    "message": "记录原始的 URI:"
+  },
+  "OptionCaptureRecordSourceUriTooltip": {
+    "message": "撷取网页时若有改写连结，则建立对应的 data-* 属性记录改写前的 URI 位址。"
+  },
+  "OptionCaptureRemoveIntegrityLabel": {
+    "message": "移除 integrity 属性:"
+  },
+  "OptionCaptureRemoveIntegrityTooltip": {
+    "message": "撷取网页时可能会改写连结档案的内容，若不移除 integrity 属性将无法正常载入。"
+  },
+  "OptionCaptureRewriteCssLabel": {
+    "message": "改写 CSS:"
+  },
+  "OptionCaptureRewriteCssNoneLabel": {
+    "message": "不改写"
+  },
+  "OptionCaptureRewriteUrlLabel": {
+    "message": "改写 URL"
+  },
+  "OptionCaptureSaveAsciiFilenameLabel": {
+    "message": "储存为 ASCII 档名:"
+  },
+  "OptionCaptureSaveAsciiFilenameTooltip": {
+    "message": "档名中所有非 ASCII 字元会以编码形式储存。"
+  },
+  "OptionCaptureSaveAsFolderLabel": {
+    "message": "资料夹"
+  },
+  "OptionCaptureSaveAsFolderTooltip": {
+    "message": "产生一个资料夹并将网页及资源档案存入其中。（Chrome 建议关闭“下载每个档案前先询问储存位置”，否则会一直跳视窗）"
+  },
+  "OptionCaptureSaveAsLabel": {
+    "message": "储存撷取资料为:"
+  },
+  "OptionCaptureSaveAsTooltip": {
+    "message": "指定撷取资料的储存方式。.htz 及 .maff 封存档案可用“检视封存档案”检视或以支援 zip 的程式解压缩后检视。"
+  },
+  "OptionCaptureSaveAsMaffLabel": {
+    "message": "maff 封存档案"
+  },
+  "OptionCaptureSaveAsMaffTooltip": {
+    "message": "将网页及参照的资源以标准 zip 演算法打包成 .maff 封存档案。"
+  },
+  "OptionCaptureSaveAsSingleHtmlLabel": {
+    "message": "单一 HTML 档案"
+  },
+  "OptionCaptureSaveAsSingleHtmlTooltip": {
+    "message": "将网页储存为单一 HTML 档案，参照的资源会以 data URI 的形式内嵌，大多数较新的浏览器都能正常读取。"
+  },
+  "OptionCaptureSaveAsZipLabel": {
+    "message": "htz 封存档案"
+  },
+  "OptionCaptureSaveAsZipTooltip": {
+    "message": "将网页及参照资源以标准 zip 演算法打包成 .htz 封存档案。"
+  },
+  "OptionCaptureSaveDataUriAsFileLabel": {
+    "message": "将 data URI 储存为档案:"
+  },
+  "OptionCaptureSaveDataUriAsFileTooltip": {
+    "message": "会自动根据 data URI 资料的 MIME 类型及内容的 SHA-1 杂凑值产生适当的档名。"
+  },
+  "OptionCaptureSaveFileAsHtmlLabel": {
+    "message": "将档案储存为 HTML:"
+  },
+  "OptionCaptureSaveFileAsHtmlTooltip": {
+    "message": "将浏览器能检视的非 HTML 档案储存为 HTML 网页。"
+  },
+  "OptionCaptureSaveInScrapbookLabel": {
+    "message": "将撷取资料储存于剪贴簿内:"
+  },
+  "OptionCaptureSaveInScrapbookTooltip": {
+    "message": "储存为下载串流时必定套用此设定。"
+  },
+  "OptionCaptureScriptAnchorLabel": {
+    "message": "Javascript 连结:"
+  },
+  "OptionCaptureScriptAttrLabel": {
+    "message": "脚本式属性:"
+  },
+  "OptionCaptureScriptAttrTooltip": {
+    "message": "如 onclick 等会触发 javascript 脚本的元素属性。"
+  },
+  "OptionCaptureScriptLabel": {
+    "message": "脚本:"
+  },
+  "OptionCaptureStyleInlineLabel": {
+    "message": "内联样式:"
+  },
+  "OptionCaptureStyleLabel": {
+    "message": "样式:"
+  },
+  "OptionCaptureVideoLabel": {
+    "message": "视讯:"
+  },
+  "OptionPageTitle": {
+    "message": "选项设定"
+  },
+  "OptionsExportLabel": {
+    "message": "汇出"
+  },
+  "OptionsImportLabel": {
+    "message": "汇入"
+  },
+  "OptionsImportSuccess": {
+    "message": "汇入选项成功"
+  },
+  "OptionsSaveLabel": {
+    "message": "储存"
+  },
+  "OptionsResetLabel": {
+    "message": "重设"
+  },
+  "OptionViewerUseFileSystemApiLabel": {
+    "message": "使用 Filesystem API:"
+  },
+  "OptionViewerUseFileSystemApiTooltip": {
+    "message": "在支援的浏览器上使用 filesystem API 建立虚拟档案系统检视封存档案，有佳的效能及保真性。"
+  },
+  "OptionViewerViewHtzLabel": {
+    "message": "检视 .htz:"
+  },
+  "OptionViewerViewHtzTooltip": {
+    "message": "浏览器载入 .htz 档案时，自动以检视器检视。"
+  },
+  "OptionViewerViewMaffLabel": {
+    "message": "检视 .maff:"
+  },
+  "OptionViewerViewMaffTooltip": {
+    "message": "浏览器载入 .maff 档案时，自动以检视器检视。"
+  },
+  "ViewerTitle": {
+    "message": "检视封存页面"
+  },
+  "ViewerFileSelectorText": {
+    "message": "点我或拖曳 HTML 封存档案至此以开启之..."
+  },
+  "ViewerReloadText": {
+    "message": "点我重新载入封存页面..."
+  },
+  "WarnCaptureCyclicRefercing": {
+    "message": "资源 '$SOURCE$' 循环参照至 '$TARGET$'，由于目前的撷取设定不支援循环参照，参照目标将转向至空值。",
+    "placeholders": {
+      "source": {"content" : "$1"},
+      "target": {"content" : "$2"}
+    }
   }
 }
