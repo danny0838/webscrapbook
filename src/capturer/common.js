@@ -214,40 +214,57 @@ capturer.captureDocument = function (params) {
 
     // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
     const captureRewriteAttr = function (elem, attr, value) {
-      if (!elem.hasAttribute(attr)) return;
-      if (options["capture.recordRewrittenAttr"]) {
-        elem.setAttribute("data-sb-orig-" + attr + "-" + timeId, elem.getAttribute(attr));
-      }
       if (value === null || value === undefined) {
-        elem.removeAttribute(attr);
+        if (elem.hasAttribute(attr)) {
+          if (options["capture.recordRewrittenAttr"]) {
+            elem.setAttribute("data-sb-orig-attr-" + attr + "-" + timeId, elem.getAttribute(attr));
+          }
+          elem.removeAttribute(attr);
+        }
       } else {
-        elem.setAttribute(attr, value);
+        if (elem.getAttribute(attr) !== value) {
+          if (options["capture.recordRewrittenAttr"]) {
+            if (elem.hasAttribute(attr)) {
+              elem.setAttribute("data-sb-orig-attr-" + attr + "-" + timeId, elem.getAttribute(attr));
+            } else {
+              elem.setAttribute("data-sb-orig-null-attr-" + attr + "-" + timeId, "");
+            }
+          }
+          elem.setAttribute(attr, value);
+        }
       }
     };
 
     // rewrite (or remove if value is null/undefined) the textContent, record it if option set
     const captureRewriteTextContent = function (elem, value) {
-      if (!elem.textContent) return;
-      if (options["capture.recordRewrittenAttr"]) {
-        elem.setAttribute("data-sb-orig-textContent-" + timeId, elem.textContent);
-      }
-      if (value === null || value === undefined) {
-        elem.textContent = "";
-      } else {
+      if (elem.textContent != value) {
+        if (options["capture.recordRewrittenAttr"]) {
+          elem.setAttribute("data-sb-orig-textContent-" + timeId, elem.textContent);
+        }
         elem.textContent = value;
       }
     };
 
     // similar to captureRewriteAttr, but use option capture.recordSourceUri
     const captureRewriteUri = function (elem, attr, value) {
-      if (!elem.hasAttribute(attr)) return;
-      if (options["capture.recordSourceUri"]) {
-        elem.setAttribute("data-sb-orig-" + attr + "-" + timeId, elem.getAttribute(attr));
-      }
       if (value === null || value === undefined) {
-        elem.removeAttribute(attr);
+        if (elem.hasAttribute(attr)) {
+          if (options["capture.recordSourceUri"]) {
+            elem.setAttribute("data-sb-orig-attr-" + attr + "-" + timeId, elem.getAttribute(attr));
+          }
+          elem.removeAttribute(attr);
+        }
       } else {
-        elem.setAttribute(attr, value);
+        if (elem.getAttribute(attr) !== value) {
+          if (options["capture.recordSourceUri"]) {
+            if (elem.hasAttribute(attr)) {
+              elem.setAttribute("data-sb-orig-attr-" + attr + "-" + timeId, elem.getAttribute(attr));
+            } else {
+              elem.setAttribute("data-sb-orig-null-attr-" + attr + "-" + timeId, "");
+            }
+          }
+          elem.setAttribute(attr, value);
+        }
       }
     };
 
@@ -600,7 +617,7 @@ capturer.captureDocument = function (params) {
           case "style": {
             switch (options["capture.style"]) {
               case "blank":
-                captureRewriteTextContent(elem, null);
+                captureRewriteTextContent(elem, "");
                 break;
               case "remove":
                 captureRemoveNode(elem);
@@ -640,7 +657,7 @@ capturer.captureDocument = function (params) {
                 if (elem.hasAttribute("src")) {
                   captureRewriteUri(elem, "src", "about:blank");
                 }
-                captureRewriteTextContent(elem, null);
+                captureRewriteTextContent(elem, "");
                 break;
               case "remove":
                 captureRemoveNode(elem);
@@ -668,7 +685,7 @@ capturer.captureDocument = function (params) {
           case "noscript": {
             switch (options["capture.noscript"]) {
               case "blank":
-                captureRewriteTextContent(elem, null);
+                captureRewriteTextContent(elem, "");
                 break;
               case "remove":
                 captureRemoveNode(elem);
