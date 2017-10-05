@@ -18,9 +18,6 @@
       "reason": {"content" : "$2"}
     }
   },
-  "ErrorCaptureGeneral": {
-    "message": "See browser console for more detail."
-  },
   "ErrorContentScriptNotReady": {
     "message": "The content script is not ready or cannot be loaded. Refresh this page, wait for all elements to be loaded, and try again."
   },

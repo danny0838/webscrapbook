@@ -1433,7 +1433,7 @@ capturer.captureDocument = function (params) {
     });
   }).catch((ex) => {
     console.error(ex);
-    return {error: ex};
+    return {error: {message: ex.message}};
   });
 };
 

@@ -18,9 +18,6 @@
       "reason": {"content" : "$2"}
     }
   },
-  "ErrorCaptureGeneral": {
-    "message": "細節請詳見瀏覽器控制台。"
-  },
   "ErrorContentScriptNotReady": {
     "message": "內容處理腳本未就緒或無法載入。請重新整理頁面並等待內容完全載入再嘗試。"
   },

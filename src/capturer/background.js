@@ -142,14 +142,14 @@ capturer.captureTab = function (params) {
       if (!response) {
         throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));
       } else if (response.error) {
-        throw new Error(scrapbook.lang("ErrorCaptureGeneral"));
+        throw new Error(response.error.message);
       }
       return response;
     }).catch((ex) => {
       const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
       console.error(err);
       capturer.browserActionAddError();
-      return new Error(err);
+      return {message: err};
     });
   });
 };
@@ -269,7 +269,7 @@ capturer.captureUrl = function (params) {
       });
     }).catch((ex) => {
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return {url: capturer.getErrorUrl(sourceUrl, options), error: ex};
+      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
     accessMap.set(accessToken, accessCurrent);
     return accessCurrent;
@@ -351,7 +351,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       });
     }).catch((ex) => {
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return {url: capturer.getErrorUrl(sourceUrl, options), error: ex};
+      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
   });
 };
@@ -681,7 +681,7 @@ capturer.saveDocument = function (params) {
       }
     }).catch((ex) => {
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return {url: capturer.getErrorUrl(sourceUrl, options), error: ex};
+      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
   });
 };
@@ -835,7 +835,7 @@ capturer.downloadFile = function (params) {
       });
     }).catch((ex) => {
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return {url: capturer.getErrorUrl(sourceUrl, options), error: ex};
+      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
 
     accessMap.set(accessToken, accessCurrent);
