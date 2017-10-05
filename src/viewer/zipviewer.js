@@ -22,17 +22,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return virtualBase + (inZipPath || "").split("/").map(x => encodeURIComponent(x)).join("/");
   };
 
-  const deApiScript = function () {
-    ["browser", "chrome", "indexedDB", "localStorage", "sessionStorage", "XMLHttpRequest", "fetch"].forEach((api) => {
-      if (window[api]) { window[api] = undefined; delete(window[api]); }
-    });
-  };
-
-  const deApiScriptUrl = (function () {
-    let text = "(" + deApiScript.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")()";
-    return URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
-  })();
-
   const parseUrl = function (url, refUrl) {
     let absoluteUrl;
     try {
@@ -443,14 +432,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         }
       });
 
-      // Remove privileged APIs to avoid a potential security risk.
-      {
-        let elem = doc.createElement("script");
-        elem.src = deApiScriptUrl;
-        let head = doc.querySelector("head");
-        head.insertBefore(elem, head.firstChild);
-      }
-
       return Promise.all(tasks).then((results) => {
         let content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
         return new Blob([content], {type: doc.contentType});
@@ -651,10 +632,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
     const key = {table: "viewerCache", id: uuid};
     return scrapbook.getCache(key).then((file) => {
       return scrapbook.removeCache(key).then(() => {
-        // Privilege-required loading processes were done,
-        // remove APIs to avoid a potential security risk.
-        deApiScript();
-
         return file;
       });
     });
