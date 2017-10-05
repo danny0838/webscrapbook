@@ -108,6 +108,15 @@
   "OptionCaptureFontLabel": {
     "message": "Fonts:"
   },
+  "OptionCaptureFormStatusLabel": {
+    "message": "Form status:"
+  },
+  "OptionCaptureFormStatusKeepLabel": {
+    "message": "Keep"
+  },
+  "OptionCaptureFormStatusResetLabel": {
+    "message": "Reset"
+  },
   "OptionCaptureFrameLabel": {
     "message": "Frames:"
   },

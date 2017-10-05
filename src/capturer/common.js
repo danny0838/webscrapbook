@@ -319,7 +319,7 @@ capturer.captureDocument = function (params) {
       // since cloned nodes may not have some information
       // e.g. cloned iframes has no content, cloned canvas has no image
       const origRefKey = "data-sb-id-" + timeId;
-      const origRefNodes = Array.prototype.slice.call(doc.querySelectorAll("frame, iframe, canvas"));
+      const origRefNodes = Array.prototype.slice.call(doc.querySelectorAll("frame, iframe, canvas, input, option, textarea"));
       origRefNodes.forEach((elem, index) => {
         elem.setAttribute(origRefKey, index);
       }, this);
@@ -1217,9 +1217,12 @@ capturer.captureDocument = function (params) {
           }
 
           case "input": {
+            let elemOrig = origRefNodes[elem.getAttribute(origRefKey)];
+            elem.removeAttribute(origRefKey);
+
             switch (elem.type.toLowerCase()) {
               // images: input
-              case "image":
+              case "image": {
                 if (elem.hasAttribute("src")) {
                   elem.setAttribute("src", elem.src);
                 }
@@ -1247,6 +1250,74 @@ capturer.captureDocument = function (params) {
                     });
                     break;
                 }
+                break;
+              }
+              // form: input (file, password)
+              case "password":
+              case "file": {
+                // always forget
+                break;
+              }
+              // form: input (radio, checkbox)
+              case "radio":
+              case "checkbox": {
+                switch (options["capture.formStatus"]) {
+                  case "keep":
+                    captureRewriteAttr(elem, "checked", elemOrig.checked ? "checked" : null);
+                    break;
+                  case "reset":
+                  default:
+                    // do nothing
+                    break;
+                }
+                break;
+              }
+              // form: input (other)
+              default: {
+                switch (options["capture.formStatus"]) {
+                  case "keep":
+                    captureRewriteAttr(elem, "value", elemOrig.value);
+                    break;
+                  case "reset":
+                  default:
+                    // do nothing
+                    break;
+                }
+                break;
+              }
+            }
+            break;
+          }
+
+          // form: option
+          case "option": {
+            let elemOrig = origRefNodes[elem.getAttribute(origRefKey)];
+            elem.removeAttribute(origRefKey);
+
+            switch (options["capture.formStatus"]) {
+              case "keep":
+                captureRewriteAttr(elem, "selected", elemOrig.selected ? "selected" : null);
+                break;
+              case "reset":
+              default:
+                // do nothing
+                break;
+            }
+            break;
+          }
+
+          // form: textarea
+          case "textarea": {
+            let elemOrig = origRefNodes[elem.getAttribute(origRefKey)];
+            elem.removeAttribute(origRefKey);
+
+            switch (options["capture.formStatus"]) {
+              case "keep":
+                captureRewriteTextContent(elem, elemOrig.value);
+                break;
+              case "reset":
+              default:
+                // do nothing
                 break;
             }
             break;

@@ -108,6 +108,15 @@
   "OptionCaptureFontLabel": {
     "message": "字體:"
   },
+  "OptionCaptureFormStatusLabel": {
+    "message": "表單狀態:"
+  },
+  "OptionCaptureFormStatusKeepLabel": {
+    "message": "保留"
+  },
+  "OptionCaptureFormStatusResetLabel": {
+    "message": "重設"
+  },
   "OptionCaptureFrameLabel": {
     "message": "框架頁:"
   },

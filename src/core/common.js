@@ -48,6 +48,7 @@ scrapbook.options = {
   "capture.scriptAttr": "remove", // "save", "remove"
   "capture.noscript": "save", // "save", "blank", "remove"
   "capture.base": "blank", // "save", "blank", "remove"
+  "capture.formStatus": "keep", // "keep", "reset"
   "capture.removeIntegrity": true,
   "capture.recordDocumentMeta": true,
   "capture.recordRemovedNode": false,
