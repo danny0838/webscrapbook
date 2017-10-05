@@ -202,7 +202,7 @@ capturer.captureDocument = function (params) {
     let {contentType: mime, documentElement: htmlNode} = doc;
 
     if (doc.readyState === "loading") {
-      throw new Error(scrapbook.lang("ErrorDocumentNotReady", [doc.URL]));
+      throw new Error(scrapbook.lang("ErrorDocumentNotReady"));
     }
 
     const [refUrl] = scrapbook.splitUrlByAnchor(doc.URL);

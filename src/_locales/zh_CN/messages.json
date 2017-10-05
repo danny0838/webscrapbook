@@ -25,10 +25,7 @@
     "message": "内容处理脚本未就绪或无法载入。请刷新页面并等待内容完全载入再尝试。"
   },
   "ErrorDocumentNotReady": {
-    "message": "页面未载入: $URL$",
-    "placeholders": {
-      "url": {"content" : "$1"}
-    }
+    "message": "页面未完全载入，请稍候再尝试。"
   },
   "ErrorFileDownloadError": {
     "message": "下载文件错误 ($URL$): $REASON$",

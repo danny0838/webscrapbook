@@ -25,10 +25,7 @@
     "message": "The content script is not ready or cannot be loaded. Refresh this page, wait for all elements to be loaded, and try again."
   },
   "ErrorDocumentNotReady": {
-    "message": "Page not load: $URL$",
-    "placeholders": {
-      "url": {"content" : "$1"}
-    }
+    "message": "Document not loaded completely. Please wait for a while and try again."
   },
   "ErrorFileDownloadError": {
     "message": "Error downloading file ($URL$): $REASON$",
