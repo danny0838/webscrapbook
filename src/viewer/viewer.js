@@ -308,9 +308,7 @@ body {
 
             let url = URL.createObjectURL(new Blob([content], {type: "text/html"})) + viewer.urlHash;
             if (inNewTab) {
-              return new Promise((resolve, reject) => {
-                chrome.tabs.create({url: url}, resolve);
-              });
+              return browser.tabs.create({url: url});
             } else {
               window.location.href = url;
             }

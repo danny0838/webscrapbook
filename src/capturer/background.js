@@ -70,9 +70,7 @@ capturer.captureActiveTab = function (params) {
   return Promise.resolve().then(() => {
     const {mode} = params;
 
-    return new Promise((resolve, reject) => {
-      chrome.tabs.query({active: true, currentWindow: true}, resolve);
-    }).then((tabs) => {
+    return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
       return capturer.captureTab({tab: tabs[0], mode: mode});
     });
   });
@@ -134,16 +132,16 @@ capturer.captureTab = function (params) {
         case "document":
         default:
           message.settings.favIconUrl = tabFavIconUrl;
-          return capturer.invoke("captureDocumentOrFile", message, {tabId});
+          return capturer.invoke("captureDocumentOrFile", message, {tabId}).catch((ex) => {
+            // This error is due to no content script with onMessage receiver.
+            // An error during capture document in the content script returns {error: ...} instead.
+            throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));
+          });
       }
     }).then((response) => {
       isDebug && console.debug("(main) response", source, response);
       capturer.captureInfo.delete(timeId);
-      if (!response) {
-        throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));
-      } else if (response.error) {
-        throw new Error(response.error.message);
-      }
+      if (response.error) { throw new Error(response.error.message); }
       return response;
     }).catch((ex) => {
       const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
@@ -1025,9 +1023,7 @@ chrome.downloads.onChanged.addListener((downloadDelta) => {
 
   let p;
   if (downloadDelta.state && downloadDelta.state.current === "complete") {
-    p = new Promise((resolve, reject) => {
-      chrome.downloads.search({id: downloadId}, resolve);
-    }).then((results) => {
+    p = browser.downloads.search({id: downloadId}).then((results) => {
       const [dir, filename] = scrapbook.filepathParts(results[0].filename);
       downloadInfo.get(downloadId).onComplete(filename);
     });
@@ -1041,9 +1037,7 @@ chrome.downloads.onChanged.addListener((downloadDelta) => {
   }).then(() => {
     // erase the download history of additional downloads (autoErase = true)
     if (downloadInfo.get(downloadId).autoErase) {
-      return new Promise((resolve, reject) => {
-        chrome.downloads.erase({id: downloadId}, resolve);
-      });
+      return browser.downloads.erase({id: downloadId});
     }
   }).then((erasedIds) => {
     downloadInfo.delete(downloadId);

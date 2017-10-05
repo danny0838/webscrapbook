@@ -36,9 +36,7 @@ capturer.invoke = function (method, args, details = {}) {
         };
 
         isDebug && console.debug(cmd, "send to content script", `[${tabId}:${frameId}]`, args);
-        return new Promise((resolve, reject) => {
-          chrome.tabs.sendMessage(tabId, message, {frameId}, resolve);
-        }).then((response) => {
+        return browser.tabs.sendMessage(tabId, message, {frameId}).then((response) => {
           isDebug && console.debug(cmd, "response from content script", `[${tabId}:${frameId}]`, response);
           return response;
         });
@@ -86,9 +84,7 @@ capturer.invoke = function (method, args, details = {}) {
         };
 
         isDebug && console.debug(cmd, "send to background script", args);
-        return new Promise((resolve, reject) => {
-          chrome.runtime.sendMessage(message, resolve);
-        }).then((response) => {
+        return browser.runtime.sendMessage(message).then((response) => {
           isDebug && console.debug(cmd, "response from background script", response);
           return response;
         });
@@ -103,14 +99,10 @@ capturer.invoke = function (method, args, details = {}) {
  * @return {Promise}
  */
 capturer.getContentTabs = function () {
-  return new Promise((resolve, reject) => {
-    chrome.extension.isAllowedFileSchemeAccess(resolve);
-  }).then((isAllowedAccess) => {
+  return browser.extension.isAllowedFileSchemeAccess().then((isAllowedAccess) => {
     const urlMatch = ["http://*/*", "https://*/*", "ftp://*/*"];
     if (isAllowedAccess) { urlMatch.push("file://*"); }
-    return new Promise((resolve, reject) => {
-      chrome.tabs.query({currentWindow: true, url: urlMatch}, resolve);
-    });
+    return browser.tabs.query({currentWindow: true, url: urlMatch});
   }).then((tabs) => {
     return tabs.filter((tab) => {
       if (scrapbook.isGecko) {
@@ -127,9 +119,7 @@ capturer.getContentTabs = function () {
  * @return {Promise}
  */
 capturer.browserActionAddError = function (tabId) {
-  return new Promise((resolve, reject) => {
-    chrome.browserAction.getBadgeText({tabId: tabId}, resolve);
-  }).then((text) => {
+  return browser.browserAction.getBadgeText({tabId: tabId}).then((text) => {
     const count = ((parseInt(text, 10) || 0) + 1).toString();
     chrome.browserAction.setBadgeText({tabId: tabId, text: count});
   }).catch((ex) => {});
