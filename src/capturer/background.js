@@ -111,7 +111,7 @@ capturer.captureTab = function (params) {
     const {tab, mode} = params;
     const {id: tabId, url: tabUrl, favIconUrl: tabFavIconUrl} = tab;
 
-    const source = "[" + tabId + "] " + tabUrl;
+    const source = `[${tabId}] ${tabUrl}`;
     const timeId = scrapbook.dateToId();
     const message = {
       url: tabUrl,
@@ -1004,7 +1004,7 @@ capturer.saveUrl = function (params) {
  */
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  isDebug && console.debug(message.cmd, "receive", "[" + (sender.tab ? sender.tab.id : -1) + "]", message.args);
+  isDebug && console.debug(message.cmd, "receive", `[${sender.tab ? sender.tab.id : -1}]`, message.args);
 
   if (message.cmd.slice(0, 9) == "capturer.") {
     const fn = capturer[message.cmd.slice(9)];

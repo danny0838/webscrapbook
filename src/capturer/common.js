@@ -53,11 +53,11 @@ capturer.invoke = function (method, args, tabId, frameWindow) {
           args: args
         };
 
-        isDebug && console.debug(cmd, "send to content script", "[" + tabId + "]", args);
+        isDebug && console.debug(cmd, "send to content script", `[${tabId}]`, args);
         return new Promise((resolve, reject) => {
           chrome.tabs.sendMessage(tabId, message, {frameId: 0}, resolve);
         }).then((response) => {
-          isDebug && console.debug(cmd, "response from content script", "[" + tabId + "]", response);
+          isDebug && console.debug(cmd, "response from content script", `[${tabId}]`, response);
           return response;
         });
       } else {
