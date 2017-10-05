@@ -110,6 +110,15 @@ capturer.getContentTabs = function () {
     return new Promise((resolve, reject) => {
       chrome.tabs.query({currentWindow: true, url: urlMatch}, resolve);
     });
+  }).then((tabs) => {
+    return tabs.filter((tab) => {
+      if (scrapbook.isGecko) {
+        if (tab.url.startsWith("https://addons.mozilla.org/")) { return false; }
+      } else {
+        if (tab.url.startsWith("https://chrome.google.com/webstore/")) { return false; }
+      }
+      return true;
+    })
   });
 };
 
