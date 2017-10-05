@@ -27,6 +27,7 @@
     "storage",
     "tabs",
     "unlimitedStorage",
+    "webNavigation",
     "webRequest",
     "webRequestBlocking",
     "http://*/*",
@@ -46,21 +47,6 @@
       "viewer/background.js"
     ]
   },
-
-  "content_scripts": [
-    {
-      "run_at": "document_start",
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "core/common.js",
-        "capturer/common.js",
-        "capturer/content.js"
-      ],
-      "all_frames": true
-    }
-  ],
 
   "web_accessible_resources": [
     "lib/mime.js",

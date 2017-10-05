@@ -131,8 +131,38 @@ capturer.captureTab = function (params) {
     };
 
     return Promise.resolve().then(() => {
+      // Simply detect the main frame and executeScript for allFrames doesn't
+      // work since it's possible that only partial frames have the content
+      // script loaded. E.g. the user ran this when the main frame hadn't been
+      // completed and some subframes hadn't been loaded.
       isDebug && console.debug("(main) send", source, message);
-      return capturer.invoke("captureDocumentOrFile", message, {tabId}).catch((ex) => {
+      return browser.webNavigation.getAllFrames({tabId}).then((details) => {
+        const tasks = [];
+        details.forEach((detail) => {
+          const {frameId, url} = detail;
+          if (!scrapbook.isContentPage(url)) { return; }
+
+          // Send a test message to check whether content script is loaded.
+          // If no content script, we get an error saying connection cannot be established.
+          tasks[tasks.length] = capturer.invoke("isScriptLoaded", null, {tabId, frameId}).catch((ex) => {
+            isDebug && console.debug("inject content scripts", tabId, frameId, url);
+            return browser.tabs.executeScript(tabId, {frameId, file: "core/common.js"}).then((result) => {
+              return browser.tabs.executeScript(tabId, {frameId, file: "capturer/common.js"});
+            }).then((result) => {
+              return browser.tabs.executeScript(tabId, {frameId, file: "capturer/content.js"});
+            }).catch((ex) => {
+              // Chrome may be failed to inject content script to some pages due to unclear reason.
+              // Record the error and pass.
+              const source = `[${tabId}:${frameId}] ${url}`;
+              const err = scrapbook.lang("ErrorContentScriptExecute", [source, ex.message]);
+              console.error(err);
+            });
+          });
+        });
+        return Promise.all(tasks);
+      }).then(() => {
+        return capturer.invoke("captureDocumentOrFile", message, {tabId});
+      }).catch((ex) => {
         // This error is due to no content script with onMessage receiver.
         // An error during capture document in the content script returns {error: ...} instead.
         throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));

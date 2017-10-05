@@ -18,8 +18,15 @@
       "reason": {"content" : "$2"}
     }
   },
+  "ErrorContentScriptExecute": {
+    "message": "Unable to execute content script ($SOURCE$): $REASON$",
+    "placeholders": {
+      "source": {"content" : "$1"},
+      "reason": {"content" : "$2"}
+    }
+  },
   "ErrorContentScriptNotReady": {
-    "message": "The content script is not ready or cannot be loaded. Refresh this page, wait for all elements to be loaded, and try again."
+    "message": "Content scripts are not loaded."
   },
   "ErrorDocumentNotReady": {
     "message": "Document not loaded completely. Please wait for a while and try again."

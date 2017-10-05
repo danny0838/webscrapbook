@@ -18,8 +18,15 @@
       "reason": {"content" : "$2"}
     }
   },
+  "ErrorContentScriptExecute": {
+    "message": "无法执行内容处理脚本 ($SOURCE$): $REASON$",
+    "placeholders": {
+      "source": {"content" : "$1"},
+      "reason": {"content" : "$2"}
+    }
+  },
   "ErrorContentScriptNotReady": {
-    "message": "内容处理脚本未就绪或无法载入。请刷新页面并等待内容完全载入再尝试。"
+    "message": "内容处理脚本未载入。"
   },
   "ErrorDocumentNotReady": {
     "message": "页面未完全载入，请稍候再尝试。"

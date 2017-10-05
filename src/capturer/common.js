@@ -133,6 +133,15 @@ capturer.fixOptions = function (options) {
 /**
  * @kind invokable
  * @param {Object} params
+ * @return {Promise}
+ */
+capturer.isScriptLoaded = function (params) {
+  return Promise.resolve(true);
+};
+
+/**
+ * @kind invokable
+ * @param {Object} params
  *     - {Document} params.doc
  *     - {string} params.refUrl
  *     - {Object} params.settings
@@ -1607,3 +1616,6 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
     });
   }
 };
+
+
+true; // return value of executeScript

@@ -165,6 +165,17 @@ if (typeof browser === "undefined" && typeof chrome !== "undefined") {
         });
       },
     },
+
+    webNavigation: {
+      getAllFrames(...args) {
+        return new Promise((resolve, reject) => {
+          chrome.webNavigation.getAllFrames(...args, (result) => {
+            if (!chrome.runtime.lastError) { resolve(result); }
+            else { reject(chrome.runtime.lastError); }
+          });
+        });
+      },
+    },
   };
 }
 
@@ -1367,3 +1378,6 @@ scrapbook.delay = function (ms) {
     setTimeout(resolve, ms);
   });
 };
+
+
+true; // return value of executeScript

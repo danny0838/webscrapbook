@@ -45,3 +45,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
   }
 });
+
+
+true; // return value of executeScript
