@@ -300,7 +300,8 @@ body {
 </style>
 </head>
 <body>
-<iframe id="viewer" class="full-viewport" sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"></iframe>
+<!-- not used: allow-scripts allow-forms allow-top-navigation-by-user-activation -->
+<iframe id="viewer" class="full-viewport" sandbox="allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-top-navigation"></iframe>
 </body>
 </html>
 `;
