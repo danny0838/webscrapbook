@@ -24,7 +24,7 @@ let scrapbook = {
 scrapbook.options = {
   "capture.scrapbookFolder": "WebScrapBook",
   "capture.saveAs": "zip", // "folder", "zip", "maff", "singleHtml"
-  "capture.saveInScrapbook": true,
+  "capture.saveInScrapbook": false,
   "capture.saveAsciiFilename": false,
   "capture.saveSelectionOnly": true,
   "capture.saveFileAsHtml": false,
