@@ -134,7 +134,7 @@ capturer.captureTab = function (params) {
         case "document":
         default:
           message.settings.favIconUrl = tabFavIconUrl;
-          return capturer.invoke("captureDocumentOrFile", message, tabId);
+          return capturer.invoke("captureDocumentOrFile", message, {tabId});
       }
     }).then((response) => {
       isDebug && console.debug("(main) response", source, response);

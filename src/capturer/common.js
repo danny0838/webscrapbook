@@ -23,29 +23,11 @@ const capturer = {
  *
  * @return {Promise}
  */
-capturer.invoke = function (method, args, tabId, frameWindow) {
+capturer.invoke = function (method, args, details = {}) {
   return Promise.resolve().then(() => {
-    // to background script
-    if (typeof tabId !== "number" && !frameWindow) {
-      if (capturer.isContentScript) {
-        const cmd = "capturer." + method;
-        const message = {
-          cmd: cmd,
-          args: args
-        };
-
-        isDebug && console.debug(cmd, "send to background script", args);
-        return new Promise((resolve, reject) => {
-          chrome.runtime.sendMessage(message, resolve);
-        }).then((response) => {
-          isDebug && console.debug(cmd, "response from background script", response);
-          return response;
-        });
-      } else {
-        return capturer[method](args);
-      }
-    // to content script
-    } else if (typeof tabId === "number") {
+    const {tabId = -1, frameId = 0, frameWindow = null} = details;
+    if (tabId !== -1) {
+      // to content script (or content script call self)
       if (!capturer.isContentScript) {
         const cmd = "capturer." + method;
         const message = {
@@ -53,18 +35,18 @@ capturer.invoke = function (method, args, tabId, frameWindow) {
           args: args
         };
 
-        isDebug && console.debug(cmd, "send to content script", `[${tabId}]`, args);
+        isDebug && console.debug(cmd, "send to content script", `[${tabId}:${frameId}]`, args);
         return new Promise((resolve, reject) => {
-          chrome.tabs.sendMessage(tabId, message, {frameId: 0}, resolve);
+          chrome.tabs.sendMessage(tabId, message, {frameId}, resolve);
         }).then((response) => {
-          isDebug && console.debug(cmd, "response from content script", `[${tabId}]`, response);
+          isDebug && console.debug(cmd, "response from content script", `[${tabId}:${frameId}]`, response);
           return response;
         });
       } else {
         return capturer[method](args);
       }
-    // to frame
     } else if (frameWindow) {
+      // to frame
       return new Promise((resolve, reject) => {
         const cmd = "capturer." + method;
         const uid = scrapbook.dateToId();
@@ -94,6 +76,25 @@ capturer.invoke = function (method, args, tabId, frameWindow) {
           }
         };
       });
+    } else {
+      // to background script (or background script call self)
+      if (capturer.isContentScript) {
+        const cmd = "capturer." + method;
+        const message = {
+          cmd: cmd,
+          args: args
+        };
+
+        isDebug && console.debug(cmd, "send to background script", args);
+        return new Promise((resolve, reject) => {
+          chrome.runtime.sendMessage(message, resolve);
+        }).then((response) => {
+          isDebug && console.debug(cmd, "response from background script", response);
+          return response;
+        });
+      } else {
+        return capturer[method](args);
+      }
     }
   });
 };
@@ -803,7 +804,7 @@ capturer.captureDocument = function (params) {
                     refUrl: refUrl,
                     settings: frameSettings,
                     options: options
-                  }, null, frameSrc.contentWindow).then(captureFrameCallback);
+                  }, {frameWindow: frameSrc.contentWindow}).then(captureFrameCallback);
                 } else {
                   // frame window inaccessible: this happens when the document is retrieved via AJAX
                   if (!frame.hasAttribute("srcdoc")) {
