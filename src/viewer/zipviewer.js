@@ -361,7 +361,27 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
             break;
           }
 
+          case "audio": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            }
+            break;
+          }
+
+          case "video": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            }
+            if (elem.hasAttribute("poster")) {
+              elem.setAttribute("poster", rewriteUrl(elem.getAttribute("poster"), refUrl));
+            }
+            break;
+          }
+
           case "source": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            }
             if (elem.hasAttribute("srcset")) {
               elem.setAttribute("srcset",
                 scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
