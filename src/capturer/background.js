@@ -923,7 +923,7 @@ capturer.downloadFile = function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.blob
+ *     - {Blob} params.blob
  *     - {string} params.filename - validated and unique
  *     - {string} params.sourceUrl
  *     - {Object} params.settings
@@ -1008,7 +1008,7 @@ capturer.downloadBlob = function (params) {
 /**
  * @param {Object} params
  *     - {string} params.timeId
- *     - {string} params.blob
+ *     - {Blob} params.blob
  *     - {string} params.directory
  *     - {string} params.filename
  *     - {string} params.sourceUrl
