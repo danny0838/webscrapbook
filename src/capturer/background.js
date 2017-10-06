@@ -109,20 +109,21 @@ capturer.captureAllTabs = function (params) {
 capturer.captureTab = function (params) {
   return new Promise((resolve, reject) => {
     const {tab, frameId, saveBeyondSelection, mode} = params;
-    const {id: tabId, url: tabUrl, title: tabTitle, favIconUrl: tabFavIconUrl} = tab;
+    const {id: tabId, url, title, favIconUrl} = tab;
 
     // redirect headless capture
-    // if frameId not provided, use current tab title
+    // if frameId not provided, use current tab title and favIcon
     if (mode === "bookmark" || mode === "source") {
       return Promise.resolve().then(() => {
-        if (typeof frameId === "undefined") { return {url: tabUrl, title: tabTitle}; }
+        if (typeof frameId === "undefined") { return {url, title, favIconUrl}; }
         return browser.webNavigation.getFrame({tabId, frameId});
       }).then((details) => {
-        return capturer.captureHeadless({url: details.url, title: details.title, mode});
+        const {url, title, favIconUrl} = details;
+        return capturer.captureHeadless({url, title, favIconUrl, mode});
       });
     }
 
-    const source = `[${tabId}] ${tabUrl}`;
+    const source = `[${tabId}] ${url}`;
     const timeId = scrapbook.dateToId();
     const message = {
       settings: {
@@ -130,7 +131,7 @@ capturer.captureTab = function (params) {
         frameIsMain: true,
         documentName: "index",
         recurseChain: [],
-        favIconUrl: tabFavIconUrl,
+        favIconUrl,
       },
       options: capturer.fixOptions(scrapbook.getOptions("capture"))
     };
@@ -195,12 +196,13 @@ capturer.captureTab = function (params) {
  *     - {string} params.url
  *     - {string} params.refUrl
  *     - {string} params.title
+ *     - {string} params.favIconUrl
  *     - {string} params.mode
  * @return {Promise}
  */
 capturer.captureHeadless = function (params) {
   return new Promise((resolve, reject) => {
-    const {url, refUrl, title, mode} = params;
+    const {url, refUrl, title, favIconUrl, mode} = params;
 
     const source = `${url}`;
     const timeId = scrapbook.dateToId();
@@ -214,6 +216,7 @@ capturer.captureHeadless = function (params) {
         frameIsMain: true,
         documentName: "index",
         recurseChain: [],
+        favIconUrl,
       },
       options: capturer.fixOptions(scrapbook.getOptions("capture"))
     };
@@ -380,38 +383,96 @@ capturer.captureBookmark = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureBookmark", params);
 
-    const {url: sourceUrl, refUrl, title: refTitle, settings, options} = params;
+    const {url: sourceUrl, refUrl, settings, options} = params;
     const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
-    let title = refTitle;
+    let {title} = params;
+    let {favIconUrl} = settings;
 
     const requestHeaders = {};
     if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
 
     return Promise.resolve().then(() => {
-      if (title) { return; }
+      // get title and favIcon
+      if (title && favIconUrl) { return; }
+
       return new Promise((resolve, reject) => {
         scrapbook.xhr({
           url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
           responseType: "document",
           requestHeaders: requestHeaders,
           onload: function (xhr, xhrAbort) {
-            const doc = xhr.response;
-            if (doc) { title = doc.title; }
-            resolve();
+            resolve(xhr.response);
           },
           onerror: reject
         });
+      }).then((doc) => {
+        if (!doc) { return; }
+
+        // use the document title if not provided
+        if (!title) {
+          title = doc.title;
+        }
+
+        // use the document favIcon if not provided
+        if (!favIconUrl) {
+          // "rel" is matched case-insensitively
+          // The "~=" selector checks for "icon" separated by space,
+          // not including "-icon" or "_icon".
+          let elem = doc.querySelector('link[rel~="icon"][href]');
+          if (elem) {
+            favIconUrl = elem.href;
+          }
+        }
+      }).catch((ex) => {
+        console.error(ex);
       });
     }).then(() => {
+      // retrieve favIcon if a URL is provided
+      if (!favIconUrl) { return; }
+
+      switch (options["capture.favicon"]) {
+        case "link":
+          // keep current favIconUrl
+          break;
+        case "blank":
+        case "remove":
+          // clear favIconUrl
+          favIconUrl = null;
+          break;
+        case "save":
+        default:
+          // retrieve favicon and save as data URL
+          return new Promise((resolve, reject) => {
+            scrapbook.xhr({
+              url: favIconUrl,
+              responseType: "blob",
+              requestHeaders: requestHeaders,
+              onload: function (xhr, xhrAbort) {
+                resolve(xhr.response);
+              },
+              onerror: reject
+            });
+          }).then((blob) => {
+            return scrapbook.readFileAsDataURL(blob);
+          }).then((dataUrl) => {
+            favIconUrl = dataUrl;
+          }).catch((ex) => {
+            console.error(ex);
+            favIconUrl = null;
+          });
+      }
+    }).then(() => {
       const meta = params.options["capture.recordDocumentMeta"] ? ' data-sb-source-' + timeId + '="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
+      const titleElem = title ? `<title>${scrapbook.escapeHtml(title, false)}</title>\n` : "";
+      const favIconElem = favIconUrl ? `<link rel="shortcut icon" href="${favIconUrl}">` : "";
       const html = `<!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(sourceUrl)}">
-${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
+${titleElem}${favIconElem}</head>
 <body>
 Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
 </body>
