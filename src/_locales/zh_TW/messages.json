@@ -1,12 +1,42 @@
 {
+  "CaptureFrame": {
+    "message": "擷取框架頁"
+  },
+  "CaptureFrameBookmark": {
+    "message": "擷取框架頁 (書籤)"
+  },
+  "CaptureFrameSource": {
+    "message": "擷取框架頁 (原貌)"
+  },
+  "CaptureLinkBookmark": {
+    "message": "擷取連結頁面 (書籤)"
+  },
+  "CaptureLinkSource": {
+    "message": "擷取連結頁面 (原貌)"
+  },
+  "CaptureMedia": {
+    "message": "擷取多媒體"
+  },
+  "CapturePage": {
+    "message": "擷取頁面"
+  },
+  "CapturePageBookmark": {
+    "message": "擷取頁面 (書籤)"
+  },
+  "CapturePageSource": {
+    "message": "擷取頁面 (原貌)"
+  },
+  "CaptureSelection": {
+    "message": "擷取選取範圍"
+  },
   "CaptureTab": {
     "message": "擷取分頁"
   },
   "CaptureTabBookmark": {
-    "message": "擷取分頁為書籤"
+    "message": "擷取分頁 (書籤)"
   },
   "CaptureTabSource": {
-    "message": "擷取分頁 (原始狀態)"
+    "message": "擷取分頁 (原貌)"
   },
   "CaptureAllTabs": {
     "message": "擷取所有分頁"

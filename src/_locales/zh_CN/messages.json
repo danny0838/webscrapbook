@@ -1,12 +1,42 @@
 {
+  "CaptureFrame": {
+    "message": "获取框架"
+  },
+  "CaptureFrameBookmark": {
+    "message": "获取框架 (书签)"
+  },
+  "CaptureFrameSource": {
+    "message": "获取框架 (原样)"
+  },
+  "CaptureLinkBookmark": {
+    "message": "获取链接页面 (书签)"
+  },
+  "CaptureLinkSource": {
+    "message": "获取链接页面 (原样)"
+  },
+  "CaptureMedia": {
+    "message": "获取多媒体"
+  },
+  "CapturePage": {
+    "message": "获取页面"
+  },
+  "CapturePageBookmark": {
+    "message": "获取页面 (书签)"
+  },
+  "CapturePageSource": {
+    "message": "获取页面 (原样)"
+  },
+  "CaptureSelection": {
+    "message": "获取选择范围"
+  },
   "CaptureTab": {
     "message": "获取分页"
   },
   "CaptureTabBookmark": {
-    "message": "获取分页为书签"
+    "message": "获取分页 (书签)"
   },
   "CaptureTabSource": {
-    "message": "获取分页 (原始状态)"
+    "message": "获取分页 (原样)"
   },
   "CaptureAllTabs": {
     "message": "获取所有分页"

@@ -1,9 +1,39 @@
 {
+  "CaptureFrame": {
+    "message": "Capture frame"
+  },
+  "CaptureFrameBookmark": {
+    "message": "Capture frame (bookmark)"
+  },
+  "CaptureFrameSource": {
+    "message": "Capture frame (source)"
+  },
+  "CaptureLinkBookmark": {
+    "message": "Capture linked page (bookmark)"
+  },
+  "CaptureLinkSource": {
+    "message": "Capture linked page (source)"
+  },
+  "CaptureMedia": {
+    "message": "Capture media"
+  },
+  "CapturePage": {
+    "message": "Capture Page"
+  },
+  "CapturePageBookmark": {
+    "message": "Capture Page (bookmark)"
+  },
+  "CapturePageSource": {
+    "message": "Capture Page (source)"
+  },
+  "CaptureSelection": {
+    "message": "Capture selected area"
+  },
   "CaptureTab": {
     "message": "Capture tab"
   },
   "CaptureTabBookmark": {
-    "message": "Capture tab as bookmark"
+    "message": "Capture tab (bookmark)"
   },
   "CaptureTabSource": {
     "message": "Capture tab (source)"

@@ -23,6 +23,7 @@
   "content_security_policy": "script-src 'self' 'unsafe-eval' blob:; object-src 'self' blob:",
 
   "permissions": [
+    "contextMenus",
     "downloads",
     "storage",
     "tabs",
