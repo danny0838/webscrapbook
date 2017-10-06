@@ -695,7 +695,7 @@ capturer.captureDocument = function (params) {
                 if (capturer.isNoscriptEscaped) {
                   let key = scrapbook.getUuid();
                   specialContentMap[key] = scrapbook.unescapeHtml(elem.innerHTML);
-                  elem.innerHTML = "urn:scrapbook:text:" + key;
+                  elem.textContent = "urn:scrapbook:text:" + key;
                 }
                 break;
             }
