@@ -37,12 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // currentTab === undefined => browserAction.html is a prompt diaglog;
     //     else browserAction.html is in a tab (or Firefox Android)
     if (!currentTab) {
+      // clear badge
       capturer.browserActionClearError();
-      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+
+      // disable capture options if active tab is not a valid content page
+      browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
         let activeTab = tabs[0];
-        capturer.getContentTabs().then((tabs) => {
-          // disable capture options if active tab is not a valid content page
-          if (!tabs.find(x => x.id === activeTab.id)) {
+        return browser.extension.isAllowedFileSchemeAccess().then((isAllowedFileSchemeAccess) => {
+          if (!scrapbook.isContentPage(activeTab.url, isAllowedFileSchemeAccess)) {
             document.getElementById("captureTab").disabled = true;
             document.getElementById("captureTabSource").disabled = true;
             document.getElementById("captureTabBookmark").disabled = true;

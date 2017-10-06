@@ -99,19 +99,10 @@ capturer.invoke = function (method, args, details = {}) {
  * @return {Promise}
  */
 capturer.getContentTabs = function () {
-  return browser.extension.isAllowedFileSchemeAccess().then((isAllowedAccess) => {
-    const urlMatch = ["http://*/*", "https://*/*"];
-    if (isAllowedAccess) { urlMatch.push("file://*"); }
+  return scrapbook.getContentPagePattern().then((urlMatch) => {
     return browser.tabs.query({currentWindow: true, url: urlMatch});
   }).then((tabs) => {
-    return tabs.filter((tab) => {
-      if (scrapbook.isGecko) {
-        if (tab.url.startsWith("https://addons.mozilla.org/")) { return false; }
-      } else {
-        if (tab.url.startsWith("https://chrome.google.com/webstore/")) { return false; }
-      }
-      return true;
-    })
+    return tabs.filter((tab) => (scrapbook.isContentPage(tab.url)));
   });
 };
 

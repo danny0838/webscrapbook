@@ -612,6 +612,37 @@ scrapbook.idToDateOld = function (id) {
   return dd;
 };
 
+/**
+ * @return {Promise} The rough match pattern for content pages.
+ */
+scrapbook.getContentPagePattern = function () {
+  const p = browser.extension.isAllowedFileSchemeAccess().then((isAllowedAccess) => {
+    const urlMatch = ["http://*/*", "https://*/*"];
+    if (isAllowedAccess) { urlMatch.push("file://*"); }
+    return urlMatch;
+  });
+  scrapbook.getContentPagePattern = function () {
+    return p;
+  };
+  return p;
+};
+
+/**
+ * @param {string} url
+ * @param {boolean} isAllowedFileSchemeAccess - Optional for better accuracy.
+ * @return {string} Whether the page url is allowed for content scripts.
+ */
+scrapbook.isContentPage = function (url, isAllowedFileSchemeAccess = !scrapbook.isGecko) {
+  const filter = new RegExp(`^(?:https?${isAllowedFileSchemeAccess ? "|file" : ""}):`);
+  if (!filter.test(url)) { return false; }
+  if (scrapbook.isGecko) {
+    if (url.startsWith("https://addons.mozilla.org/")) { return false; }
+  } else {
+    if (url.startsWith("https://chrome.google.com/webstore/")) { return false; }
+  }
+  return true;
+};
+
 
 /********************************************************************
  * String handling
