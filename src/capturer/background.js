@@ -107,14 +107,14 @@ capturer.captureAllTabs = function (params) {
 capturer.captureTab = function (params) {
   return new Promise((resolve, reject) => {
     const {tab, mode} = params;
-    const {id: tabId, url: tabUrl, favIconUrl: tabFavIconUrl} = tab;
+    const {id: tabId, url: tabUrl, title: tabTitle, favIconUrl: tabFavIconUrl} = tab;
 
     // redirect headless capture
     switch (mode) {
       case "bookmark":
-        return capturer.captureHeadless({url: tabUrl, mode});
+        return capturer.captureHeadless({url: tabUrl, title: tabTitle, mode});
       case "source":
-        return capturer.captureHeadless({url: tabUrl, mode});
+        return capturer.captureHeadless({url: tabUrl, title: tabTitle, mode});
     }
 
     const source = `[${tabId}] ${tabUrl}`;
@@ -186,18 +186,20 @@ capturer.captureTab = function (params) {
  * @param {Object} params
  *     - {string} params.url
  *     - {string} params.refUrl
+ *     - {string} params.title
  *     - {string} params.mode
  * @return {Promise}
  */
 capturer.captureHeadless = function (params) {
   return new Promise((resolve, reject) => {
-    const {url, refUrl, mode} = params;
+    const {url, refUrl, title, mode} = params;
 
     const source = `${url}`;
     const timeId = scrapbook.dateToId();
     const message = {
       url,
       refUrl,
+      title,
       settings: {
         timeId,
         isHeadless: true,
@@ -236,6 +238,7 @@ capturer.captureHeadless = function (params) {
  * @param {Object} params
  *     - {string} params.url
  *     - {string} params.refUrl
+ *     - {string} params.title
  *     - {Object} params.settings
  *     - {Object} params.options
  * @return {Promise}
@@ -244,7 +247,7 @@ capturer.captureUrl = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureUrl", params);
 
-    const {url: sourceUrl, refUrl, settings, options} = params;
+    const {url: sourceUrl, refUrl, title, settings, options} = params;
     const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
@@ -328,17 +331,19 @@ capturer.captureUrl = function (params) {
           const doc = xhr.response;
           if (doc) {
             resolve(capturer.captureDocumentOrFile({
-              doc: doc,
-              refUrl: refUrl,
+              doc,
+              refUrl,
+              title,
               settings: settings,
-              options: options
+              options: options,
             }));
           } else {
             resolve(capturer.captureFile({
-              url: params.url,
-              refUrl: refUrl,
+              url: sourceUrl,
+              refUrl,
+              title,
               settings: params.settings,
-              options: params.options
+              options: params.options,
             }));
           }
         },
@@ -358,6 +363,7 @@ capturer.captureUrl = function (params) {
  * @param {Object} params
  *     - {string} params.url
  *     - {string} params.refUrl
+ *     - {string} params.title
  *     - {Object} params.settings
  *     - {Object} params.options
  * @return {Promise}
@@ -366,25 +372,33 @@ capturer.captureBookmark = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureBookmark", params);
 
-    const {url: sourceUrl, refUrl, settings, options} = params;
+    const {url: sourceUrl, refUrl, title: refTitle, settings, options} = params;
     const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
-    let title;
+    let title = refTitle;
 
     const requestHeaders = {};
     if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
 
-    return new Promise((resolve, reject) => {
-      scrapbook.xhr({
-        url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
-        responseType: "document",
-        requestHeaders: requestHeaders,
-        onload: function (xhr, xhrAbort) {
-          const doc = xhr.response;
-          if (doc) { title = doc.title; }
-          const meta = params.options["capture.recordDocumentMeta"] ? ' data-sb-source-' + timeId + '="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
-          const html = `<!DOCTYPE html>
+    return Promise.resolve().then(() => {
+      if (title) { return; }
+      return new Promise((resolve, reject) => {
+        scrapbook.xhr({
+          url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
+          responseType: "document",
+          requestHeaders: requestHeaders,
+          onload: function (xhr, xhrAbort) {
+            const doc = xhr.response;
+            if (doc) { title = doc.title; }
+            resolve();
+          },
+          onerror: reject
+        });
+      });
+    }).then(() => {
+      const meta = params.options["capture.recordDocumentMeta"] ? ' data-sb-source-' + timeId + '="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
+      const html = `<!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
@@ -394,10 +408,7 @@ ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</h
 Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
 </body>
 </html>`;
-          resolve(html);
-        },
-        onerror: reject
-      });
+      return html;
     }).then((html) => {
       const ext = ".htm";
       let targetDir;
@@ -438,7 +449,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
  * @param {Object} params
  *     - {string} params.url
  *     - {string} params.refUrl
- *     - {{title: string}} params.data
+ *     - {string} params.title
  *     - {Object} params.settings
  *     - {Object} params.options
  * @return {Promise}
@@ -447,8 +458,7 @@ capturer.captureFile = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureFile", params);
 
-    const {url: sourceUrl, refUrl, data = {}, settings, options} = params;
-    const {title} = data;
+    const {url: sourceUrl, refUrl, title, settings, options} = params;
     const {timeId} = settings;
 
     return capturer.downloadFile({

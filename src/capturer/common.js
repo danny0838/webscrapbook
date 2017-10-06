@@ -144,6 +144,7 @@ capturer.isScriptLoaded = function (params) {
  * @param {Object} params
  *     - {Document} params.doc
  *     - {string} params.refUrl
+ *     - {string} params.title
  *     - {Object} params.settings
  *     - {Object} params.options
  * @return {Promise}
@@ -152,7 +153,7 @@ capturer.captureDocumentOrFile = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureDocumentOrFile");
 
-    const {doc = document, refUrl, settings, options} = params;
+    const {doc = document, refUrl, title, settings, options} = params;
 
     // if not HTML document, capture as file
     if (["text/html", "application/xhtml+xml"].indexOf(doc.contentType) === -1) {
@@ -160,11 +161,9 @@ capturer.captureDocumentOrFile = function (params) {
         return capturer.invoke("captureFile", {
           url: doc.URL,
           refUrl: refUrl,
+          title: title || doc.title,
           settings: settings,
           options: options,
-          data: {
-            title: doc.title
-          }
         });
       }
     }
@@ -178,6 +177,7 @@ capturer.captureDocumentOrFile = function (params) {
  * @kind invokable
  * @param {Object} params
  *     - {Document} params.doc
+ *     - {string} params.title
  *     - {Object} params.settings
  *     - {Object} params.options
  * @return {Promise}
@@ -186,7 +186,7 @@ capturer.captureDocument = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureDocument");
 
-    const {doc = document, settings, options} = params;
+    const {doc = document, title, settings, options} = params;
     const {timeId, isHeadless} = settings;
     let {documentName} = settings;
     let {contentType: mime, documentElement: htmlNode} = doc;
@@ -1385,6 +1385,21 @@ capturer.captureDocument = function (params) {
         headNode.insertBefore(frag, headNode.firstChild);
       }
 
+      // force title if a preset title is given
+      if (title) {
+        let titleElem = rootNode.querySelector('title');
+        if (titleElem) {
+          titleElem.textContent = title;
+        } else {
+          let frag = doc.createDocumentFragment();
+          titleElem = doc.createElement('title');
+          titleElem.textContent = title;
+          frag.appendChild(titleElem);
+          frag.appendChild(doc.createTextNode("\n"));
+          headNode.appendChild(frag);
+        }
+      }
+
       // create favicon node if none
       if (favIconUrl && !favIconNode) {
         let frag = doc.createDocumentFragment();
@@ -1417,7 +1432,7 @@ capturer.captureDocument = function (params) {
           mime: mime,
           charset: "UTF-8",
           content: content,
-          title: doc.title
+          title: title || doc.title,
         }
       });
     });
