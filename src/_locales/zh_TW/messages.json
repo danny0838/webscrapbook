@@ -283,6 +283,18 @@
   "OptionCaptureVideoLabel": {
     "message": "視訊:"
   },
+  "OptionGroupCapture": {
+    "message": "擷取 - 內容"
+  },
+  "OptionGroupMetadata": {
+    "message": "擷取 - 後設資訊"
+  },
+  "OptionGroupSave": {
+    "message": "擷取 - 儲存"
+  },
+  "OptionGroupViewer": {
+    "message": "檢視器"
+  },
   "OptionPageTitle": {
     "message": "選項設定"
   },

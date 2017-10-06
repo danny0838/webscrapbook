@@ -283,6 +283,18 @@
   "OptionCaptureVideoLabel": {
     "message": "视讯:"
   },
+  "OptionGroupCapture": {
+    "message": "获取 - 内容"
+  },
+  "OptionGroupMetadata": {
+    "message": "获取 - 元信息"
+  },
+  "OptionGroupSave": {
+    "message": "获取 - 保存"
+  },
+  "OptionGroupViewer": {
+    "message": "检视器"
+  },
   "OptionPageTitle": {
     "message": "选项设定"
   },

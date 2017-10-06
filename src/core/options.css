@@ -1,0 +1,13 @@
+#message {
+  color: red;
+  font-weight: bold;
+}
+
+#actionsWrapper {
+  margin-top: 0.75em;
+}
+
+fieldset {
+  margin: 0.2em;
+  padding: 0.2em;
+}

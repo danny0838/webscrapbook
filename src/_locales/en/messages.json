@@ -283,6 +283,18 @@
   "OptionCaptureVideoLabel": {
     "message": "Video:"
   },
+  "OptionGroupCapture": {
+    "message": "Capture - content"
+  },
+  "OptionGroupMetadata": {
+    "message": "Capture - metadata"
+  },
+  "OptionGroupSave": {
+    "message": "Capture - saving"
+  },
+  "OptionGroupViewer": {
+    "message": "Viewer"
+  },
   "OptionPageTitle": {
     "message": "Options"
   },
