@@ -76,7 +76,7 @@
   },
   "ExtensionDescription": {
     "description": "Description of the extension as it's visible to the outside world",
-    "message": "Captures the web page with highly customizable configurations."
+    "message": "Captures the web page faithfully with highly customizable configurations."
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
