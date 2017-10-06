@@ -178,11 +178,11 @@ capturer.captureDocument = function (params) {
     isDebug && console.debug("call: captureDocument");
 
     const {doc = document, settings, options} = params;
-    const {timeId} = settings;
+    const {timeId, isHeadless} = settings;
     let {documentName} = settings;
     let {contentType: mime, documentElement: htmlNode} = doc;
 
-    if (doc.readyState === "loading") {
+    if (!isHeadless && doc.readyState !== "complete") {
       throw new Error(scrapbook.lang("ErrorDocumentNotReady"));
     }
 
