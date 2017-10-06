@@ -23,7 +23,9 @@
     "unlimitedStorage",
     "webRequest",
     "webRequestBlocking",
-    "<all_urls>"
+    "http://*/*",
+    "https://*/*",
+    "file://*"
   ],
 
   "background": {

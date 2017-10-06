@@ -100,7 +100,7 @@ capturer.invoke = function (method, args, details = {}) {
  */
 capturer.getContentTabs = function () {
   return browser.extension.isAllowedFileSchemeAccess().then((isAllowedAccess) => {
-    const urlMatch = ["http://*/*", "https://*/*", "ftp://*/*"];
+    const urlMatch = ["http://*/*", "https://*/*"];
     if (isAllowedAccess) { urlMatch.push("file://*"); }
     return browser.tabs.query({currentWindow: true, url: urlMatch});
   }).then((tabs) => {

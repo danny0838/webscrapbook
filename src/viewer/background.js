@@ -71,7 +71,7 @@ chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
   // isAllowedFileSchemeAccess is false
   chrome.webRequest.onBeforeRequest.addListener(function (details) {
     return redirectUrl(details.tabId, details.type, new URL(details.url));
-  }, {urls: ["file://*", "ftp://*/*"], types: ["main_frame", "sub_frame"]}, ["blocking"]);
+  }, {urls: ["file://*"], types: ["main_frame", "sub_frame"]}, ["blocking"]);
 });
 
 chrome.webRequest.onHeadersReceived.addListener(function (details) {
