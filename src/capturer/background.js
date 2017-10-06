@@ -102,12 +102,13 @@ capturer.captureAllTabs = function (params) {
  * @param {Object} params
  *     - {Tab} params.tab
  *     - {integer} params.frameId
+ *     - {boolean} params.saveBeyondSelection
  *     - {string} params.mode
  * @return {Promise}
  */
 capturer.captureTab = function (params) {
   return new Promise((resolve, reject) => {
-    const {tab, frameId, mode} = params;
+    const {tab, frameId, saveBeyondSelection, mode} = params;
     const {id: tabId, url: tabUrl, title: tabTitle, favIconUrl: tabFavIconUrl} = tab;
 
     // redirect headless capture
@@ -133,6 +134,9 @@ capturer.captureTab = function (params) {
       },
       options: capturer.fixOptions(scrapbook.getOptions("capture"))
     };
+
+    // save whole page beyond selection?
+    message.options["capture.saveBeyondSelection"] = !!saveBeyondSelection;
 
     return Promise.resolve().then(() => {
       // Simply detect the main frame and executeScript for allFrames doesn't

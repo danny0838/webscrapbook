@@ -328,7 +328,7 @@ capturer.captureDocument = function (params) {
       selection = doc.getSelection();
       {
         if (selection && selection.isCollapsed) { selection = null; }
-        if (selection && !options["capture.saveSelectionOnly"]) { selection = null; }
+        if (selection && options["capture.saveBeyondSelection"]) { selection = null; }
         if (selection) {
           let selNodeTree = []; // @TODO: it's not enough to preserve order of sparsely selected table cells
           for (let iRange = 0, iRangeMax = selection.rangeCount; iRange < iRangeMax; ++iRange) {

@@ -212,7 +212,7 @@ scrapbook.options = {
   "capture.saveAs": "zip", // "folder", "zip", "maff", "singleHtml"
   "capture.saveInScrapbook": false,
   "capture.saveAsciiFilename": false,
-  "capture.saveSelectionOnly": true,
+  "capture.saveBeyondSelection": false,
   "capture.saveFileAsHtml": false,
   "capture.saveDataUriAsFile": false,
   "capture.favicon": "save", // "save", "link", "blank", "remove"
