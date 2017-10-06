@@ -100,7 +100,7 @@ capturer.captureAllTabs = function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {Object} params.tab
+ *     - {Tab} params.tab
  *     - {string} params.mode
  * @return {Promise}
  */
@@ -109,12 +109,68 @@ capturer.captureTab = function (params) {
     const {tab, mode} = params;
     const {id: tabId, url: tabUrl, favIconUrl: tabFavIconUrl} = tab;
 
+    // redirect headless capture
+    switch (mode) {
+      case "bookmark":
+        return capturer.captureHeadless({url: tabUrl, mode});
+      case "source":
+        return capturer.captureHeadless({url: tabUrl, mode});
+    }
+
     const source = `[${tabId}] ${tabUrl}`;
     const timeId = scrapbook.dateToId();
     const message = {
-      url: tabUrl,
       settings: {
         timeId: timeId,
+        frameIsMain: true,
+        documentName: "index",
+        recurseChain: [],
+        favIconUrl: tabFavIconUrl,
+      },
+      options: capturer.fixOptions(scrapbook.getOptions("capture"))
+    };
+
+    return Promise.resolve().then(() => {
+      isDebug && console.debug("(main) send", source, message);
+      return capturer.invoke("captureDocumentOrFile", message, {tabId}).catch((ex) => {
+        // This error is due to no content script with onMessage receiver.
+        // An error during capture document in the content script returns {error: ...} instead.
+        throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));
+      });
+    }).then((response) => {
+      isDebug && console.debug("(main) response", source, response);
+      capturer.captureInfo.delete(timeId);
+      if (response.error) { throw new Error(response.error.message); }
+      return response;
+    }).catch((ex) => {
+      const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
+      console.error(err);
+      capturer.browserActionAddError();
+      return {message: err};
+    });
+  });
+};
+
+/**
+ * @kind invokable
+ * @param {Object} params
+ *     - {string} params.url
+ *     - {string} params.refUrl
+ *     - {string} params.mode
+ * @return {Promise}
+ */
+capturer.captureHeadless = function (params) {
+  return new Promise((resolve, reject) => {
+    const {url, refUrl, mode} = params;
+
+    const source = `${url}`;
+    const timeId = scrapbook.dateToId();
+    const message = {
+      url,
+      refUrl,
+      settings: {
+        timeId,
+        isHeadless: true,
         frameIsMain: true,
         documentName: "index",
         recurseChain: [],
@@ -123,20 +179,13 @@ capturer.captureTab = function (params) {
     };
 
     return Promise.resolve().then(() => {
-      isDebug && console.debug("(main) send", source, message);
+      isDebug && console.debug("(main) capture", source, message);
       switch (mode) {
         case "bookmark":
           return capturer.captureBookmark(message);
         case "source":
-          return capturer.captureUrl(message);
-        case "document":
         default:
-          message.settings.favIconUrl = tabFavIconUrl;
-          return capturer.invoke("captureDocumentOrFile", message, {tabId}).catch((ex) => {
-            // This error is due to no content script with onMessage receiver.
-            // An error during capture document in the content script returns {error: ...} instead.
-            throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));
-          });
+          return capturer.captureUrl(message);
       }
     }).then((response) => {
       isDebug && console.debug("(main) response", source, response);
