@@ -389,7 +389,16 @@ body {
           }
           case "htz":
           default: {
-            return invokeZipViewer(zipFile, "index.html");
+            // @FIXME
+            // Firefox Android gets an error if we simply pass the zipFile
+            // due to unclear reason.  Passing regenerated (which is uncompressed)
+            // zip file resolves the issue.
+            return new JSZip().loadAsync(zipFile).then((zip) => {
+              return zip.generateAsync({type: "blob"});
+            }).then((zipBlob) => {
+              let f = new File([zipBlob], zipFile.name, {type: zipBlob.type});
+              return invokeZipViewer(f, "index.html");
+            });
           }
         }
       });
