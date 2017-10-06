@@ -167,6 +167,15 @@ if (typeof browser === "undefined" && typeof chrome !== "undefined") {
     },
 
     webNavigation: {
+      getFrame(...args) {
+        return new Promise((resolve, reject) => {
+          chrome.webNavigation.getFrame(...args, (result) => {
+            if (!chrome.runtime.lastError) { resolve(result); }
+            else { reject(chrome.runtime.lastError); }
+          });
+        });
+      },
+
       getAllFrames(...args) {
         return new Promise((resolve, reject) => {
           chrome.webNavigation.getAllFrames(...args, (result) => {

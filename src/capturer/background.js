@@ -101,20 +101,24 @@ capturer.captureAllTabs = function (params) {
  * @kind invokable
  * @param {Object} params
  *     - {Tab} params.tab
+ *     - {integer} params.frameId
  *     - {string} params.mode
  * @return {Promise}
  */
 capturer.captureTab = function (params) {
   return new Promise((resolve, reject) => {
-    const {tab, mode} = params;
+    const {tab, frameId, mode} = params;
     const {id: tabId, url: tabUrl, title: tabTitle, favIconUrl: tabFavIconUrl} = tab;
 
     // redirect headless capture
-    switch (mode) {
-      case "bookmark":
-        return capturer.captureHeadless({url: tabUrl, title: tabTitle, mode});
-      case "source":
-        return capturer.captureHeadless({url: tabUrl, title: tabTitle, mode});
+    // if frameId not provided, use current tab title
+    if (mode === "bookmark" || mode === "source") {
+      return Promise.resolve().then(() => {
+        if (typeof frameId === "undefined") { return {url: tabUrl, title: tabTitle}; }
+        return browser.webNavigation.getFrame({tabId, frameId});
+      }).then((details) => {
+        return capturer.captureHeadless({url: details.url, title: details.title, mode});
+      });
     }
 
     const source = `[${tabId}] ${tabUrl}`;
@@ -161,7 +165,7 @@ capturer.captureTab = function (params) {
         });
         return Promise.all(tasks);
       }).then(() => {
-        return capturer.invoke("captureDocumentOrFile", message, {tabId});
+        return capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
       }).catch((ex) => {
         // This error is due to no content script with onMessage receiver.
         // An error during capture document in the content script returns {error: ...} instead.
