@@ -376,8 +376,8 @@ body {
 </style>
 </head>
 <body>
-<!-- not used: allow-scripts allow-forms allow-top-navigation-by-user-activation -->
-<iframe id="viewer" class="full-viewport" sandbox="allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-top-navigation"></iframe>
+<!-- not used: allow-forms allow-top-navigation allow-top-navigation-by-user-activation -->
+<iframe id="viewer" class="full-viewport" sandbox="allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"></iframe>
 </body>
 </html>
 `;
