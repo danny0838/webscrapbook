@@ -36,6 +36,7 @@
       "lib/jsSHA.js",
       "lib/mime.js",
       "lib/jszip.js",
+      "core/polyfill.js",
       "core/common.js",
       "core/optionsAuto.js",
       "core/background.js",
@@ -48,6 +49,7 @@
   "web_accessible_resources": [
     "lib/mime.js",
     "lib/jszip.js",
+    "core/polyfill.js",
     "core/common.js",
     "core/scrapbook_128.png",
     "viewer/*"

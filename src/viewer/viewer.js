@@ -277,6 +277,7 @@ function init() {
 <title>${scrapbook.lang("ViewerTitle")}</title>
 <script src="${chrome.runtime.getURL("lib/jszip.js")}"></script>
 <script src="${chrome.runtime.getURL("lib/mime.js")}"></script>
+<script src="${chrome.runtime.getURL("core/polyfill.js")}"></script>
 <script src="${chrome.runtime.getURL("core/common.js")}"></script>
 <script src="${chrome.runtime.getURL("viewer/zipviewer.js")}">${JSON.stringify(viewerData)}</script>
 <style>

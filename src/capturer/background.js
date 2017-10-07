@@ -155,7 +155,9 @@ capturer.captureTab = function (params) {
           // If no content script, we get an error saying connection cannot be established.
           tasks[tasks.length] = capturer.invoke("isScriptLoaded", null, {tabId, frameId}).catch((ex) => {
             isDebug && console.debug("inject content scripts", tabId, frameId, url);
-            return browser.tabs.executeScript(tabId, {frameId, file: "core/common.js"}).then((result) => {
+            return browser.tabs.executeScript(tabId, {frameId, file: "core/polyfill.js"}).then((result) => {
+              return browser.tabs.executeScript(tabId, {frameId, file: "core/common.js"});
+            }).then((result) => {
               return browser.tabs.executeScript(tabId, {frameId, file: "capturer/common.js"});
             }).then((result) => {
               return browser.tabs.executeScript(tabId, {frameId, file: "capturer/content.js"});
