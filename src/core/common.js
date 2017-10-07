@@ -1,7 +1,7 @@
 /********************************************************************
  *
- * Shared utilities for most scripts, including background scripts and
- * content scripts.
+ * Shared utilities for most scripts, including background scripts
+ * and content scripts.
  *
  * @public {boolean} isDebug
  * @public {Object} scrapbook
@@ -343,12 +343,14 @@ scrapbook.validateFilename = function (filename, forceAscii) {
   let fn = filename
       // control chars are bad for filename
       .replace(/[\x00-\x1F\x7F]+|^ +/g, "")
-      // leading/trailing spaces and dots are not allowed in Windows
+      // leading/trailing spaces and dots are not allowed on Windows
       .replace(/^\./, "_.").replace(/^ +/, "").replace(/[. ]+$/, "")
-      // bad chars in most OS
+      // bad chars on most OS
       .replace(/[:"?*\\/|]/g, "_")
-      // "~" is not allowed by Chromium downloader
-      .replace(/[~]/g, "-").replace(/[<]/g, "(").replace(/[>]/g, ")");
+      // bad chars on Windows, replace with adequate direction
+      .replace(/[<]/g, "(").replace(/[>]/g, ")")
+      // "~" is not allowed by chrome.downloads
+      .replace(/[~]/g, "-");
   if (forceAscii) {
     fn = fn.replace(/[^\x00-\x7F]+/g, m => encodeURIComponent(m));
   }
@@ -519,7 +521,9 @@ scrapbook.crop = function (str, maxLength, byUtf8, ellipsis) {
     while (true) {
       try {
         return this.utf8ToUnicode(bytes) + ellipsis;
-      } catch (ex) {}
+      } catch (ex) {
+        // error if we cut a UTF-8 char sequence in the middle
+      }
       bytes= bytes.substring(0, bytes.length-1);
     }
   } else {
@@ -595,8 +599,11 @@ scrapbook.unescapeCss = function (str) {
   return str.replace(that.replaceRegex, that.replaceFunc);
 };
 
+/**
+ * A URL containing standalone "%"s, e.g. "http://example.com/50%",
+ * causes a "Malformed URI sequence" error on decodeURIComponent.
+ */
 scrapbook.decodeURIComponent = function (uri) {
-  // A URL containing standalone "%"s causes a malformed URI sequence error.
   return uri.replace(/(%[0-9A-F]{2})+/gi, m => decodeURIComponent(m));
 };
 
@@ -639,12 +646,39 @@ scrapbook.intToFixedStr = function (number, width, padder) {
   return number.length >= width ? number : new Array(width - number.length + 1).join(padder) + number;
 };
 
+/**
+ * Alt. 1:
+ *
+ * return new TextEncoder("utf-8").encode(bstr).buffer;
+ *
+ * Faster, but not used due to potential error (see TextDecoder below).
+ *
+ * Alt. 2:
+ *
+ * return (new Uint8Array(Array.prototype.map.call(bstr, x => x.charCodeAt(0)))).buffer;
+ *
+ * Straightforward, but slow (1/28 of current version).
+ */
 scrapbook.byteStringToArrayBuffer = function (bstr) {
   let n = bstr.length, u8ar = new Uint8Array(n);
   while (n--) { u8ar[n] = bstr.charCodeAt(n); }
   return u8ar.buffer;
 };
 
+/**
+ * Alt. 1:
+ *
+ * return new TextDecoder("utf-8").decode(new Uint8Array(ab));
+ *
+ * Faster, but UTF-16 BOM are incorrectly converted to U+FFFD.
+ *
+ * Alt. 2:
+ *
+ * return String.fromCharCode.apply(null, new Uint8Array(ab));
+ *
+ * Simpler, but passing a very large array to function.apply causes a
+ * "Maximum call stack size exceeded" error.
+ */
 scrapbook.arrayBufferToByteString = function (ab) {
   let u8ar = new Uint8Array(ab), bstr = "", CHUNK_SIZE = 65535;
   for (let i = 0, I = u8ar.length; i < I; i += CHUNK_SIZE) {

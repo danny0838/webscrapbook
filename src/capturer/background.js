@@ -289,6 +289,9 @@ capturer.captureHeadless = function (params) {
   });
 };
 
+// @FIXME
+// When run in a Firefox private window, the background script does not have same
+// crenditials as the private window document, and the capture may fail or go wrong.
 /**
  * @kind invokable
  * @param {Object} params
@@ -319,6 +322,8 @@ capturer.captureUrl = function (params) {
     const accessPrevious = accessMap.get(accessToken);
     if (accessPrevious) { return accessPrevious; }
 
+    // cannot assign "referer" header directly
+    // the prefix will be removed by the onBeforeSendHeaders listener
     const requestHeaders = {};
     if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
 
@@ -418,6 +423,9 @@ capturer.captureUrl = function (params) {
   });
 };
 
+// @FIXME
+// When run in a Firefox private window, the background script does not have same
+// crenditials as the private window document, and the capture may fail or go wrong.
 /**
  * @kind invokable
  * @param {Object} params
@@ -439,6 +447,8 @@ capturer.captureBookmark = function (params) {
     let {title} = params;
     let {favIconUrl} = settings;
 
+    // cannot assign "referer" header directly
+    // the prefix will be removed by the onBeforeSendHeaders listener
     const requestHeaders = {};
     if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
 
@@ -884,6 +894,9 @@ capturer.saveDocument = function (params) {
   });
 };
 
+// @FIXME
+// When run in a Firefox private window, the background script does not have same
+// crenditials as the private window document, and the capture may fail or go wrong.
 /**
  * @kind invokable
  * @param {Object} params
@@ -947,6 +960,8 @@ capturer.downloadFile = function (params) {
         return {url: sourceUrl};
       }
 
+      // cannot assign "referer" header directly
+      // the prefix will be removed by the onBeforeSendHeaders listener
       const requestHeaders = {};
       if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
 
