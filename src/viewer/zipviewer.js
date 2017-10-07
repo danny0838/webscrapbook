@@ -584,7 +584,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         document.title = frameDoc.title;
       }
 
-      frameDoc.documentElement.addEventListener("click", (e) => {
+      frame.contentWindow.addEventListener("click", (e) => {
         // e.target won't work if clicking on a descendant node of an anchor
         let elem = e.target.closest('a[href], area[href]');
         if (!elem) { return; }
