@@ -279,93 +279,97 @@ capturer.captureUrl = function (params) {
     const requestHeaders = {};
     if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
 
-    const accessCurrent = new Promise((resolve, reject) => {
-      scrapbook.xhr({
-        url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
-        responseType: "document",
-        requestHeaders: requestHeaders,
-        onreadystatechange: function (xhr, xhrAbort) {
-          if (xhr.readyState === 2) {
-            // check for previous access if redirected
-            const [responseUrlMain] = scrapbook.splitUrlByAnchor(xhr.responseURL);
-            if (responseUrlMain !== sourceUrlMain) {
-              const accessToken = capturer.getAccessToken(responseUrlMain, rewriteMethod);
-              const accessPrevious = accessMap.get(accessToken);
-              if (accessPrevious) {
-                resolve(accessPrevious);
-                xhrAbort();
-                return;
-              }
-              accessMap.set(accessToken, accessCurrent);
-            }
+    let accessPreviousRedirected;
+    const accessCurrent = scrapbook.xhr({
+      url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
+      responseType: "document",
+      requestHeaders: requestHeaders,
+      onreadystatechange: function (xhr) {
+        if (xhr.readyState !== 2) { return; }
 
-            // get headers
-            if (xhr.status !== 0) {
-              const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-              if (headerContentDisposition) {
-                const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-                headers.isAttachment = (contentDisposition.type === "attachment");
-                headers.filename = contentDisposition.parameters.filename;
-              }
-              const headerContentType = xhr.getResponseHeader("Content-Type");
-              if (headerContentType) {
-                const contentType = scrapbook.parseHeaderContentType(headerContentType);
-                headers.contentType = contentType.type;
-                headers.charset = contentType.parameters.charset;
-              }
-            }
+        // check for previous access if redirected
+        const [responseUrlMain] = scrapbook.splitUrlByAnchor(xhr.responseURL);
+        if (responseUrlMain !== sourceUrlMain) {
+          const accessTokenRedirected = capturer.getAccessToken(responseUrlMain, rewriteMethod);
+          accessPreviousRedirected = accessMap.get(accessTokenRedirected);
 
-            // generate a documentName if not specified
-            if (!params.settings.documentName) {
-              // use the filename if it has been defined by header Content-Disposition
-              let filename = headers.filename ||
-                  sourceUrl.startsWith("data:") ?
-                      scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name :
-                      scrapbook.urlToFilename(sourceUrl);
+          // use the previous access if found
+          if (accessPreviousRedirected) {
+            xhr.abort();
+            return;
+          }
 
-              let mime = headers.contentType || Mime.prototype.lookup(filename) || "text/html";
-              let fn = filename.toLowerCase();
-              if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
-                let exts = Mime.prototype.allExtensions(mime);
-                for (let i = 0, I = exts.length; i < I; i++) {
-                  let ext = ("." + exts[i]).toLowerCase();
-                  if (fn.endsWith(ext)) {
-                    filename = filename.slice(0, -ext.length);
-                    break;
-                  }
-                }
+          accessMap.set(accessTokenRedirected, accessPreviousRedirected);
+        }
+
+        // get headers
+        if (xhr.status !== 0) {
+          const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+          if (headerContentDisposition) {
+            const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            headers.isAttachment = (contentDisposition.type === "attachment");
+            headers.filename = contentDisposition.parameters.filename;
+          }
+          const headerContentType = xhr.getResponseHeader("Content-Type");
+          if (headerContentType) {
+            const contentType = scrapbook.parseHeaderContentType(headerContentType);
+            headers.contentType = contentType.type;
+            headers.charset = contentType.parameters.charset;
+          }
+        }
+
+        // generate a documentName if not specified
+        if (!params.settings.documentName) {
+          // use the filename if it has been defined by header Content-Disposition
+          let filename = headers.filename ||
+              sourceUrl.startsWith("data:") ?
+                  scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name :
+                  scrapbook.urlToFilename(sourceUrl);
+
+          let mime = headers.contentType || Mime.prototype.lookup(filename) || "text/html";
+          let fn = filename.toLowerCase();
+          if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
+            let exts = Mime.prototype.allExtensions(mime);
+            for (let i = 0, I = exts.length; i < I; i++) {
+              let ext = ("." + exts[i]).toLowerCase();
+              if (fn.endsWith(ext)) {
+                filename = filename.slice(0, -ext.length);
+                break;
               }
-
-              params.settings.documentName = filename;
             }
           }
-        },
-        onload: function (xhr, xhrAbort) {
-          const doc = xhr.response;
-          if (doc) {
-            resolve(capturer.captureDocumentOrFile({
-              doc,
-              refUrl,
-              title,
-              settings: settings,
-              options: options,
-            }));
-          } else {
-            resolve(capturer.captureFile({
-              url: sourceUrl,
-              refUrl,
-              title,
-              settings: params.settings,
-              options: params.options,
-            }));
-          }
-        },
-        onerror: reject
-      });
+
+          params.settings.documentName = filename;
+        }
+      },
+    }).then((xhr) => {
+      // Request aborted, only when a previous access is found.
+      // Return that Promise.
+      if (!xhr) { return accessPreviousRedirected; }
+
+      const doc = xhr.response;
+      if (doc) {
+        return capturer.captureDocumentOrFile({
+          doc,
+          refUrl,
+          title,
+          settings: settings,
+          options: options,
+        });
+      } else {
+        return capturer.captureFile({
+          url: sourceUrl,
+          refUrl,
+          title,
+          settings: params.settings,
+          options: params.options,
+        });
+      }
     }).catch((ex) => {
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
+
     accessMap.set(accessToken, accessCurrent);
     return accessCurrent;
   });
@@ -399,17 +403,14 @@ capturer.captureBookmark = function (params) {
       // get title and favIcon
       if (title && favIconUrl) { return; }
 
-      return new Promise((resolve, reject) => {
-        scrapbook.xhr({
-          url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
-          responseType: "document",
-          requestHeaders: requestHeaders,
-          onload: function (xhr, xhrAbort) {
-            resolve(xhr.response);
-          },
-          onerror: reject
-        });
+      return scrapbook.xhr({
+        url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
+        responseType: "document",
+        requestHeaders: requestHeaders,
+      }).then((xhr) => {
+        return xhr.response;
       }).then((doc) => {
+        // specified sourceUrl is not a document, maybe a malformed xhtml?
         if (!doc) { return; }
 
         // use the document title if not provided
@@ -446,16 +447,12 @@ capturer.captureBookmark = function (params) {
         case "save":
         default:
           // retrieve favicon and save as data URL
-          return new Promise((resolve, reject) => {
-            scrapbook.xhr({
-              url: favIconUrl,
-              responseType: "blob",
-              requestHeaders: requestHeaders,
-              onload: function (xhr, xhrAbort) {
-                resolve(xhr.response);
-              },
-              onerror: reject
-            });
+          return scrapbook.xhr({
+            url: favIconUrl,
+            responseType: "blob",
+            requestHeaders: requestHeaders,
+          }).then((xhr) => {
+            return xhr.response;
           }).then((blob) => {
             return scrapbook.readFileAsDataURL(blob);
           }).then((dataUrl) => {
@@ -910,85 +907,88 @@ capturer.downloadFile = function (params) {
       const requestHeaders = {};
       if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
 
-      return new Promise((resolve, reject) => {
-        scrapbook.xhr({
-          url: sourceUrl,
-          responseType: "blob",
-          requestHeaders: requestHeaders,
-          onreadystatechange: function (xhr, xhrAbort) {
-            if (xhr.readyState === 2) {
-              // check for previous access if redirected
-              const [responseUrlMain] = scrapbook.splitUrlByAnchor(xhr.responseURL);
-              if (responseUrlMain !== sourceUrlMain) {
-                const accessToken = capturer.getAccessToken(responseUrlMain, rewriteMethod);
-                const accessPrevious = accessMap.get(accessToken);
-                if (accessPrevious) {
-                  resolve(accessPrevious);
-                  xhrAbort();
-                  return;
-                }
-                accessMap.set(accessToken, accessCurrent);
-              }
+      let accessPreviousRedirected;
+      return scrapbook.xhr({
+        url: sourceUrl,
+        responseType: "blob",
+        requestHeaders: requestHeaders,
+        onreadystatechange: function (xhr) {
+          if (xhr.readyState !== 2) { return; }
 
-              // get headers
-              if (xhr.status !== 0) {
-                const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-                if (headerContentDisposition) {
-                  const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-                  headers.isAttachment = (contentDisposition.type === "attachment");
-                  headers.filename = contentDisposition.parameters.filename;
-                }
-                const headerContentType = xhr.getResponseHeader("Content-Type");
-                if (headerContentType) {
-                  const contentType = scrapbook.parseHeaderContentType(headerContentType);
-                  headers.contentType = contentType.type;
-                  headers.charset = contentType.parameters.charset;
-                }
-              }
+          // check for previous access if redirected
+          const [responseUrlMain] = scrapbook.splitUrlByAnchor(xhr.responseURL);
+          if (responseUrlMain !== sourceUrlMain) {
+            const accessTokenRedirected = capturer.getAccessToken(responseUrlMain, rewriteMethod);
+            accessPreviousRedirected = accessMap.get(accessTokenRedirected);
 
-              // determine the filename
-              // use the filename if it has been defined by header Content-Disposition
-              filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
+            // use the previous access if found
+            if (accessPreviousRedirected) {
+              xhr.abort();
+              return;
+            }
 
-              // if no file extension, give one according to header Content-Type
-              if (headers.contentType) {
-                let [base, extension] = scrapbook.filenameParts(filename);
-                if (!extension) {
-                  extension = Mime.prototype.extension(headers.contentType);
-                  if (extension) {
-                    filename = base + "." + extension;
-                  }
-                }
-              }
+            accessMap.set(accessTokenRedirected, accessPreviousRedirected);
+          }
 
-              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-              // singleHtml mode always save as dataURI and does not need to uniquify
-              if (options["capture.saveAs"] !== "singleHtml") {
-                filename = capturer.getUniqueFilename(timeId, filename);
+          // get headers
+          if (xhr.status !== 0) {
+            const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+            if (headerContentDisposition) {
+              const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+              headers.isAttachment = (contentDisposition.type === "attachment");
+              headers.filename = contentDisposition.parameters.filename;
+            }
+            const headerContentType = xhr.getResponseHeader("Content-Type");
+            if (headerContentType) {
+              const contentType = scrapbook.parseHeaderContentType(headerContentType);
+              headers.contentType = contentType.type;
+              headers.charset = contentType.parameters.charset;
+            }
+          }
+
+          // determine the filename
+          // use the filename if it has been defined by header Content-Disposition
+          filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
+
+          // if no file extension, give one according to header Content-Type
+          if (headers.contentType) {
+            let [base, extension] = scrapbook.filenameParts(filename);
+            if (!extension) {
+              extension = Mime.prototype.extension(headers.contentType);
+              if (extension) {
+                filename = base + "." + extension;
               }
             }
-          },
-          onload: function (xhr, xhrAbort) {
-            resolve(Promise.resolve(capturer[rewriteMethod]).then((fn) => {
-              if (!fn) { return xhr.response; }
-              return fn({
-                settings: settings,
-                options: options,
-                data: xhr.response,
-                charset: headers.charset,
-                url: xhr.responseURL
-              });
-            }).then((blob) => {
-              return capturer.downloadBlob({
-                settings: settings,
-                options: options,
-                blob: blob,
-                filename: filename,
-                sourceUrl: sourceUrl,
-              });
-            }));
-          },
-          onerror: reject
+          }
+
+          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+          // singleHtml mode always save as dataURI and does not need to uniquify
+          if (options["capture.saveAs"] !== "singleHtml") {
+            filename = capturer.getUniqueFilename(timeId, filename);
+          }
+        },
+      }).then((xhr) => {
+        // Request aborted, only when a previous access is found.
+        // Return that Promise.
+        if (!xhr) { return accessPreviousRedirected; }
+
+        return Promise.resolve(capturer[rewriteMethod]).then((fn) => {
+          if (!fn) { return xhr.response; }
+          return fn({
+            settings: settings,
+            options: options,
+            data: xhr.response,
+            charset: headers.charset,
+            url: xhr.responseURL
+          });
+        }).then((blob) => {
+          return capturer.downloadBlob({
+            settings: settings,
+            options: options,
+            blob: blob,
+            filename: filename,
+            sourceUrl: sourceUrl,
+          });
         });
       });
     }).catch((ex) => {

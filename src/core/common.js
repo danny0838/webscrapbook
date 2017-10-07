@@ -843,15 +843,11 @@ scrapbook.readFileAsText = function (blob, charset = "UTF-8") {
  * @return {Promise}
  */
 scrapbook.readFileAsDocument = function (blob) {
-  return new Promise((resolve, reject) => {
-    scrapbook.xhr({
-      url: URL.createObjectURL(blob),
-      responseType: "document",
-      onload: function (xhr, xhrAbort) {
-        resolve(xhr.response);
-      },
-      onerror: reject
-    });
+  return scrapbook.xhr({
+    url: URL.createObjectURL(blob),
+    responseType: "document",
+  }).then((xhr) => {
+    return xhr.response;
   });
 };
 
@@ -1133,80 +1129,64 @@ scrapbook.httpStatusText = {
 };
 
 /**
- * The callback function that aborts the XMLHttpRequest when called.
- *
- * @callback xhrAbortCallback
- */
-
-/**
- * @callback xhrEventHandler
- * @param {XMLHttpRequest} xhr
- * @param {xhrAbortCallback} xhrAbort
- */
-
-/**
- * A simple XMLHttpRequest wrapper for most common tasks
+ * A simple XMLHttpRequest wrapper for most common tasks.
+ * 
+ * Don't use fetch() since it doen't support file: protocol.
  *
  * @param {Object} params
  *     - {string} params.url
  *     - {string} params.responseType
  *     - {Array} params.requestHeaders
- *     - {xhrEventHandler} params.onreadystatechange
- *     - {xhrEventHandler} params.onload
- *     - {xhrEventHandler} params.onerror
- *     - {xhrEventHandler} params.ontimeout
+ *     - {function} params.onreadystatechange
  */
-scrapbook.xhr = function (params) {
-  const xhr = new XMLHttpRequest();
+scrapbook.xhr = function (params = {}) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
 
-  const xhrAbort = function () {
-    xhr.onreadystatechange = xhr.onload = xhr.onerror = xhr.ontimeout = null;
-    xhr.abort();
-  };
-
-  const handleError = function (ex) {
-    params && params.onerror && params.onerror(ex);
-  };
-
-  xhr.onreadystatechange = function (event) {
-    params && params.onreadystatechange && params.onreadystatechange(xhr, xhrAbort);
-  };
-
-  xhr.onload = function (event) {
-    if (xhr.status == 200 || xhr.status == 0) {
-      // we only care about real loading success
-      params && params.onload && params.onload(xhr, xhrAbort);
-    } else {
-      // treat "404 Not found" or so as error
-      let statusText = xhr.statusText || scrapbook.httpStatusText[xhr.status];
-      statusText = statusText ? " " + statusText : "";
-      handleError(new Error(xhr.status + statusText));
+    if (params.onreadystatechange) {
+      xhr.onreadystatechange = function (event) {
+        params.onreadystatechange(xhr);
+      };
     }
-  };
 
-  xhr.onerror = function (event) {
-    handleError(new Error("Network request failed."));
-    xhrAbort();
-  };
+    xhr.onload = function (event) {
+      if (xhr.status == 200 || xhr.status == 0) {
+        // we only care about real loading success
+        resolve(xhr);
+      } else {
+        // treat "404 Not found" or so as error
+        let statusText = xhr.statusText || scrapbook.httpStatusText[xhr.status];
+        statusText = xhr.status + (statusText ? " " + statusText : "");
+        reject(new Error(statusText));
+      }
+    };
 
-  xhr.ontimeout = function (event) {
-    let handler = params && params.ontimeout || params.onerror;
-    handler && handler(new Error("Request timeout."));
-    xhrAbort();
-  };
+    xhr.onabort = function (event) {
+      // resolve with no param
+      resolve();
+    };
 
-  try {
+    xhr.onerror = function (event) {
+      // No additional useful information can be get from the event object.
+      reject(new Error("Network request failed."));
+    };
+
+    xhr.ontimeout = function (event) {
+      reject(new Error("Request timeout."));
+    };
+
     xhr.responseType = params.responseType;
     xhr.open("GET", params.url, true);
+
+    // Must call setRequestHeader() after open(), but before send().
     if (params.requestHeaders) {
       for (let header in params.requestHeaders) {
         xhr.setRequestHeader(header, params.requestHeaders[header]);
       }
     }
+
     xhr.send();
-  } catch (ex) {
-    handleError(ex);
-  }
+  });
 };
 
 

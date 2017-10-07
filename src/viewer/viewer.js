@@ -114,21 +114,21 @@ function init() {
       scrapbook.xhr({
         url: zipSourceUrl,
         responseType: "blob",
-        onload: function (xhr, xhrAbort) {
-          if (xhr.status !== 0) {
-            // if header Content-Disposition is defined, use it
-            try {
-              let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-              let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-              filename = contentDisposition.parameters.filename || filename;
-            } catch (ex) {}
-          }
-          let file = new File([xhr.response], filename, {type: Mime.prototype.lookup(filename)});
-          viewer.processZipFile(file);
-        },
-        onerror: function (xhr, xhrAbort) {
-          alert("Unable to load the specified zip file '" + zipSourceUrl + "'");
+      }).then((xhr) => {
+        // if header Content-Disposition is defined, use it
+        // local request (status = 0) has no response header
+        if (xhr.status !== 0) {
+          try {
+            let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+            let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            filename = contentDisposition.parameters.filename || filename;
+          } catch (ex) {}
         }
+
+        let file = new File([xhr.response], filename, {type: Mime.prototype.lookup(filename)});
+        return viewer.processZipFile(file);        
+      }, (ex) => {
+        alert("Unable to load the specified zip file '" + zipSourceUrl + "'");
       });
 
       let refreshUrl = new URL(viewer.mainUrl.href);
