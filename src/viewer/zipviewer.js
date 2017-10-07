@@ -585,33 +585,33 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
       }
 
       frameDoc.documentElement.addEventListener("click", (e) => {
-        let elem = e.target;
-        switch (elem.nodeName.toLowerCase()) {
-          case "a": case "area":
-            try {
-              let url = elem.href;
-              let inZipPath = blobUrlToInZipPath[scrapbook.splitUrl(url)[0]];
-              if (inZipPath) {
-                let f = inZipFiles[inZipPath];
-                if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  fetchPage({
-                    inZipPath: inZipPath,
-                    url: url,
-                    recurseChain: []
-                  }).then((fetchedUrl) => {
-                    elem.href = fetchedUrl || "about:blank";
-                    elem.click();
-                  });
-                }
-              } else if (!url.startsWith("blob:") && frame === viewer) {
-                e.preventDefault();
-                e.stopPropagation();
-                location.href = url;
-              }
-            } catch (ex) {}
-        }
+        // e.target won't work if clicking on a descendant node of an anchor
+        let elem = e.target.closest('a[href], area[href]');
+        if (!elem) { return; }
+
+        try {
+          let url = elem.href;
+          let inZipPath = blobUrlToInZipPath[scrapbook.splitUrl(url)[0]];
+          if (inZipPath) {
+            let f = inZipFiles[inZipPath];
+            if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
+              e.preventDefault();
+              e.stopPropagation();
+              fetchPage({
+                inZipPath: inZipPath,
+                url: url,
+                recurseChain: []
+              }).then((fetchedUrl) => {
+                elem.href = fetchedUrl || "about:blank";
+                elem.click();
+              });
+            }
+          } else if (!url.startsWith("blob:") && frame === viewer) {
+            e.preventDefault();
+            e.stopPropagation();
+            location.href = url;
+          }
+        } catch (ex) {}
       }, false);
 
       Array.prototype.forEach.call(frameDoc.querySelectorAll('frame, iframe'), (elem) => {
