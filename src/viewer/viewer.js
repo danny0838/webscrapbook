@@ -5,6 +5,17 @@
  * @require {Object} scrapbook
  *******************************************************************/
 
+let _isFxBelow56;
+Promise.resolve().then(() => {
+  return browser.runtime.getBrowserInfo();
+}).then((info) => {
+  _isFxBelow56 =
+      (info.name === 'Firefox' || info.name === 'Fennec') &&
+      parseInt(info.version.match(/^(\d+)\./)[1], 10) < 56;
+}).catch((ex) => {
+  _isFxBelow56 = false;
+});
+
 function init() {
   const fileSystemHandler = {
     /**
@@ -261,7 +272,21 @@ function init() {
           const uuid = scrapbook.getUuid();
           const key = {table: "viewerCache", id: uuid};
 
-          return scrapbook.setCache(key, zipFile).then(() => {
+          return Promise.resolve().then(() => {
+            if (_isFxBelow56) {
+              return scrapbook.readFileAsText(zipFile, false).then((bytes) => {
+                return {
+                  name: zipFile.name,
+                  type: zipFile.type,
+                  value: bytes,
+                };
+              });
+            }
+
+            return zipFile;
+          }).then((data) => {
+            return scrapbook.setCache(key, data);
+          }).then(() => {
             let viewerData = {
               virtualBase: chrome.runtime.getURL("viewer/!/"),
               indexFile: indexFile,

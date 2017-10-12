@@ -630,7 +630,13 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
   return Promise.resolve(viewerData.zipId).then((uuid) => {
     const key = {table: "viewerCache", id: uuid};
-    return scrapbook.getCache(key).then((file) => {
+
+    return scrapbook.getCache(key).then((data) => {
+      if (data && !(data instanceof File)) {
+        return new File([scrapbook.byteStringToArrayBuffer(data.value)], data.name, {type: data.type});
+      }
+      return data;
+    }).then((file) => {
       return scrapbook.removeCache(key).then(() => {
         return file;
       });
