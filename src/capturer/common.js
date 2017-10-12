@@ -106,25 +106,6 @@ capturer.getContentTabs = function () {
   });
 };
 
-/**
- * @return {Promise}
- */
-capturer.browserActionAddError = function (tabId) {
-  return browser.browserAction.getBadgeText({tabId: tabId}).then((text) => {
-    const count = ((parseInt(text, 10) || 0) + 1).toString();
-    chrome.browserAction.setBadgeText({tabId: tabId, text: count});
-  }).catch((ex) => {});
-};
-
-/**
- * @return {Promise}
- */
-capturer.browserActionClearError = function (tabId) {
-  return Promise.resolve().then(() => {
-    chrome.browserAction.setBadgeText({tabId: tabId, text: ""});
-  }).catch((ex) => {});
-};
-
 capturer.fixOptions = function (options) {
   options["capture.scrapbookFolder"] = scrapbook.validateFilename(options["capture.scrapbookFolder"] || "WebScrapBook");
   return options;

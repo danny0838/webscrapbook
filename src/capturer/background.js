@@ -22,6 +22,49 @@ capturer.captureInfo = new Map();
 capturer.downloadInfo = new Map();
 
 /**
+ * @kind invokable
+ * @param {Object} params
+ *     - {tabId} params.tabId
+ *     - {string} params.action
+ * @return {Promise}
+ */
+capturer.browserActionSetError = function (params) {
+  return Promise.resolve().then(() => {
+    const {tabId = -1, action} = params;
+
+    if (!arguments.callee.errors) { arguments.callee.errors = []; }
+    let errors;
+    switch (action) {
+      case "add":
+        errors = arguments.callee.errors[tabId] += 1;
+        break;
+      case "reset":
+      default:
+        errors = arguments.callee.errors[tabId] = 0;
+        break;
+    }
+
+    if (chrome.browserAction) {
+      // supported since Firefox Android >= 55
+      if (chrome.browserAction.setTitle) {
+        chrome.browserAction.setTitle({
+          tabId: tabId !== -1 ? tabId : undefined,
+          title: scrapbook.lang("ExtensionName") + (errors ? " (" + errors + ")" : ""),
+        });
+      }
+
+      // Firefox Android not supported
+      if (chrome.browserAction.setBadgeText) {
+        chrome.browserAction.setBadgeText({
+          tabId: tabId !== -1 ? tabId : undefined,
+          text: errors ? errors.toString() : "",
+        });
+      }
+    }
+  });
+};
+
+/**
  * Gets a unique token for an access,
  * to be used in capturer.captureInfo.get(timeId).accessMap
  *
@@ -186,7 +229,7 @@ capturer.captureTab = function (params) {
     }).catch((ex) => {
       const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
       console.error(err);
-      capturer.browserActionAddError();
+      capturer.browserActionSetError({action: "add"});
       return {message: err};
     });
   });
@@ -240,7 +283,7 @@ capturer.captureHeadless = function (params) {
     }).catch((ex) => {
       const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
       console.error(err);
-      capturer.browserActionAddError();
+      capturer.browserActionSetError({action: "add"});
       return {message: err};
     });
   });

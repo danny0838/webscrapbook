@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //     else browserAction.html is in a tab (or Firefox Android)
     if (!currentTab) {
       // clear badge
-      capturer.browserActionClearError();
+      capturer.invoke("browserActionSetError", {action: "reset"});
 
       // disable capture options if active tab is not a valid content page
       browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {

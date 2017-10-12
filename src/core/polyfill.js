@@ -8,17 +8,6 @@
 /* polyfill for browser API in Chrome */
 if (typeof browser === "undefined" && typeof chrome !== "undefined") {
   this.browser = {
-    browserAction: {
-      getBadgeText(...args) {
-        return new Promise((resolve, reject) => {
-          chrome.browserAction.getBadgeText(...args, (result) => {
-            if (!chrome.runtime.lastError) { resolve(result); }
-            else { reject(chrome.runtime.lastError); }
-          });
-        });
-      },
-    },
-
     downloads: {
       erase(...args) {
         return new Promise((resolve, reject) => {
