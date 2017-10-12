@@ -104,6 +104,34 @@ function init() {
       alert(msg);
     },
 
+    openUrl(url, inNewTab = false) {
+      if (inNewTab) {
+        // In Firefox, a window.open popup is blocked by default, and the 
+        // user has to manually add an exception to the popup blocker.
+        // However, there's a bug causing notification now shown when
+        // a popup is blocked (Bug 1396745).
+        //
+        // browser.tabs.create fails silently in Firefox private window.
+        //
+        // browser.tabs is undefined in a Firefox addon page in a frame.
+        if (scrapbook.isGecko) {
+          return Promise.resolve().then(() => {
+            return browser.tabs.getCurrent().then((tab) => {
+              if (tab.incognito) { throw new Error('private window'); }
+              return browser.tabs.create({url: url});
+            });
+          }).catch((ex) => {
+            window.open(url);
+          });
+        }
+
+        window.open(url);
+        return;
+      }
+
+      window.location.href = url;
+    },
+
     start() {
       if (viewer.mainUrl.searchParams.has("reload")) {
         fileSelector.style.display = "none";
@@ -252,10 +280,10 @@ function init() {
           let mainFileEntry = indexFileEntries.shift();
           indexFileEntries.forEach((indexFileEntry) => {
             let url = indexFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
-            chrome.tabs.create({url: url});
+            viewer.openUrl(url, true);
           });
           let url = mainFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
-          window.location.href = url;
+          viewer.openUrl(url, false);
         });
       });
     },
@@ -333,11 +361,7 @@ body {
 `;
 
             let url = URL.createObjectURL(new Blob([content], {type: "text/html"})) + viewer.urlHash;
-            if (inNewTab) {
-              return browser.tabs.create({url: url});
-            } else {
-              window.location.href = url;
-            }
+            viewer.openUrl(url, inNewTab);
           });
         });
       };

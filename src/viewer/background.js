@@ -7,6 +7,17 @@
 
 (function (window, undefined) {
 
+let _isFxBelow56;
+Promise.resolve().then(() => {
+  return browser.runtime.getBrowserInfo();
+}).then((info) => {
+  _isFxBelow56 =
+      (info.name === 'Firefox' || info.name === 'Fennec') &&
+      parseInt(info.version.match(/^(\d+)\./)[1], 10) < 56;
+}).catch((ex) => {
+  _isFxBelow56 = false;
+});
+
 function redirectUrl(tabId, type, url, filename, mime) {
   if (mime === "application/html+zip" && scrapbook.getOption("viewer.viewHtz")) {
     // redirect
@@ -30,20 +41,28 @@ function redirectUrl(tabId, type, url, filename, mime) {
   newUrl = newUrl.href;
 
   if (type === "main_frame") {
-    // Firefox does not allow direct redirecting to an extension page
-    // even if it is listed in web_accessible_resources.
-    // Using data URI with meta refresh works but generates an extra
-    // history entry.
-    //if (scrapbook.isGecko) {
-    //  newUrl = scrapbook.stringToDataUri(`<meta http-equiv="refresh" content="0;url=${newUrl}">`, "text/html", "UTF-8");
-    //}
-    //return {redirectUrl: newUrl};
-    chrome.tabs.update(tabId, {url: newUrl}, () => {});
-    return {cancel: true};
+    // Firefox < 56 does not allow redirecting a page to an extension page,
+    // even if whom is listed in web_accessible_resources.  The redirect
+    // fails silently without throwing.
+    //
+    // Using data URI with meta or javascript refresh works but generates
+    // an extra history entry.
+    if (_isFxBelow56) {
+      chrome.tabs.update(tabId, {url: newUrl});
+      return {cancel: true};
+    }
+
+    return {redirectUrl: newUrl};
   } else {
-    // An extension frame page whose top frame page is not an extension page
-    // cannot redirect itself to a blob page it has generated.
-    const html = `<!DOCTYPE html>
+    // In Chromium, an extension frame page whose top frame page is not an
+    // extension page cannot redirect itself to a blob page it has generated.
+    // The redirect fails silently without throwing. (Issue 761341)
+    //
+    // Firefox < 56 does not allow redirecting a page to an extension page,
+    // even if whom is listed in web_accessible_resources.  The redirect
+    // fails silently without throwing.
+    if (!scrapbook.isGecko || _isFxBelow56) {
+      const html = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -59,8 +78,11 @@ a {
 </body>
 </html>
 `;
-    const dataUrl = scrapbook.stringToDataUri(html, "text/html", "UTF-8");
-    return {redirectUrl: dataUrl};
+      const dataUrl = scrapbook.stringToDataUri(html, "text/html", "UTF-8");
+      return {redirectUrl: dataUrl};
+    }
+
+    return {redirectUrl: newUrl};
   }
 }
 
