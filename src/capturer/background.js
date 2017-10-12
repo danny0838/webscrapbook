@@ -332,7 +332,7 @@ capturer.captureUrl = function (params) {
       url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
       responseType: "document",
       requestHeaders: requestHeaders,
-      onreadystatechange: function (xhr) {
+      onreadystatechange(xhr) {
         if (xhr.readyState !== 2) { return; }
 
         // check for previous access if redirected
@@ -970,7 +970,7 @@ capturer.downloadFile = function (params) {
         url: sourceUrl,
         responseType: "blob",
         requestHeaders: requestHeaders,
-        onreadystatechange: function (xhr) {
+        onreadystatechange(xhr) {
           if (xhr.readyState !== 2) { return; }
 
           // check for previous access if redirected

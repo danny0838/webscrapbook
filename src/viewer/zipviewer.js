@@ -459,13 +459,13 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
     const fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
 
     let rewritten = scrapbook.parseCssText(cssText, {
-      rewriteImportUrl: function (url) {
+      rewriteImportUrl(url) {
         return fetcher.getUrlHash(url, processCssFile);
       },
-      rewriteFontFaceUrl: function (url) {
+      rewriteFontFaceUrl(url) {
         return fetcher.getUrlHash(url);
       },
-      rewriteBackgroundUrl: function (url) {
+      rewriteBackgroundUrl(url) {
         return fetcher.getUrlHash(url);
       }
     });

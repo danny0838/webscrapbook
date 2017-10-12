@@ -1481,7 +1481,7 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
   const downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
 
   const rewritten = scrapbook.parseCssText(cssText, {
-    rewriteImportUrl: function (url) {
+    rewriteImportUrl(url) {
       let dataUrl = capturer.resolveRelativeUrl(url, refUrl);
       switch (options["capture.style"]) {
         case "link":
@@ -1498,7 +1498,7 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
       }
       return dataUrl;
     },
-    rewriteFontFaceUrl: function (url) {
+    rewriteFontFaceUrl(url) {
       let dataUrl = capturer.resolveRelativeUrl(url, refUrl);
       switch (options["capture.font"]) {
         case "link":
@@ -1515,7 +1515,7 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
       }
       return dataUrl;
     },
-    rewriteBackgroundUrl: function (url) {
+    rewriteBackgroundUrl(url) {
       let dataUrl = capturer.resolveRelativeUrl(url, refUrl);
       switch (options["capture.imageBackground"]) {
         case "link":

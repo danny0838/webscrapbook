@@ -10,7 +10,7 @@ function init() {
     /**
      * @return {Promise}
      */
-    getDir: function (dirEntry, path) {
+    getDir(dirEntry, path) {
       return new Promise((resolve, reject) => {
         dirEntry.getDirectory(path, {}, resolve, reject);
       });
@@ -19,7 +19,7 @@ function init() {
     /**
      * @return {Promise}
      */
-    getFile: function (dirEntry, path) {
+    getFile(dirEntry, path) {
       return new Promise((resolve, reject) => {
         dirEntry.getFile(path, {}, resolve, reject);
       });
@@ -28,7 +28,7 @@ function init() {
     /**
      * @return {Promise}
      */
-    readDir: function (dirEntry) {
+    readDir(dirEntry) {
       return new Promise((resolve, reject) => {
         dirEntry.createReader().readEntries(resolve);
       });
@@ -37,7 +37,7 @@ function init() {
     /**
      * @return {Promise}
      */
-    createDir: function (dirEntry, path) {
+    createDir(dirEntry, path) {
       return Promise.resolve().then(() => {
         let folders = (Object.prototype.toString.call(path) === "[object Array]") ? path : path.split("/");
         // Throw out './' or '/' and move on to prevent something like '/foo/.//bar'.
@@ -63,7 +63,7 @@ function init() {
     /**
      * @return {Promise}
      */
-    createFile: function (dirEntry, path, fileBlob) {
+    createFile(dirEntry, path, fileBlob) {
       return this.createDir(dirEntry, path.split("/").slice(0, -1)).then(() => {
         return new Promise((resolve, reject) => {
           dirEntry.getFile(path, {create: true}, resolve, reject);
@@ -88,12 +88,12 @@ function init() {
     urlSearch: "",
     urlHash: "",
 
-    warn: function (msg) {
+    warn(msg) {
       console.warn(msg);
       alert(msg);
     },
 
-    start: function () {
+    start() {
       if (viewer.mainUrl.searchParams.has("reload")) {
         fileSelector.style.display = "none";
         reloader.style.display = "block";
@@ -102,7 +102,7 @@ function init() {
       }
     },
 
-    processUrlParams: function () {
+    processUrlParams() {
       let zipSourceUrl = viewer.mainUrl.searchParams.get("src");
       if (!zipSourceUrl) { return; }
 
@@ -139,7 +139,7 @@ function init() {
     /**
      * @return {Promise}
      */
-    processZipFile: function (zipFile) {
+    processZipFile(zipFile) {
       return Promise.resolve().then(() => {
         if (viewer.filesystem) {
           return viewer.viewZipInFileSystem(zipFile);
@@ -152,7 +152,7 @@ function init() {
       });
     },
 
-    parseRdfDocument: function (doc) {
+    parseRdfDocument(doc) {
       const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
       const MAF = "http://maf.mozdev.org/metadata/rdf#";
       const result = {};
@@ -167,7 +167,7 @@ function init() {
     /**
      * @return {Promise}
      */
-    viewZipInFileSystem: function (zipFile) {
+    viewZipInFileSystem(zipFile) {
       return Promise.resolve().then(() => {
         const root = viewer.filesystem.root;
         const ns = scrapbook.getUuid();
@@ -252,7 +252,7 @@ function init() {
     /**
      * @return {Promise}
      */
-    viewZipInMemory: function (zipFile) {
+    viewZipInMemory(zipFile) {
       /**
        * @return {Promise}
        */
