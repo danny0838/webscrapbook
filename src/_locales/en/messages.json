@@ -55,9 +55,6 @@
       "reason": {"content" : "$2"}
     }
   },
-  "ErrorContentScriptNotReady": {
-    "message": "Content scripts are not loaded."
-  },
   "ErrorDocumentNotReady": {
     "message": "Document not loaded completely. Please wait for a while and try again."
   },

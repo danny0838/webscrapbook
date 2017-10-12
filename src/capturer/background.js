@@ -216,10 +216,6 @@ capturer.captureTab = function (params) {
         return Promise.all(tasks);
       }).then(() => {
         return capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
-      }).catch((ex) => {
-        // This error is due to no content script with onMessage receiver.
-        // An error during capture document in the content script returns {error: ...} instead.
-        throw new Error(scrapbook.lang("ErrorContentScriptNotReady"));
       });
     }).then((response) => {
       isDebug && console.debug("(main) response", source, response);

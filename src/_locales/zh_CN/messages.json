@@ -55,9 +55,6 @@
       "reason": {"content" : "$2"}
     }
   },
-  "ErrorContentScriptNotReady": {
-    "message": "内容处理脚本未载入。"
-  },
   "ErrorDocumentNotReady": {
     "message": "页面未完全载入，请稍候再尝试。"
   },

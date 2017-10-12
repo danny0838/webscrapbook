@@ -55,9 +55,6 @@
       "reason": {"content" : "$2"}
     }
   },
-  "ErrorContentScriptNotReady": {
-    "message": "內容處理腳本未載入。"
-  },
   "ErrorDocumentNotReady": {
     "message": "頁面未完全載入，請稍候再嘗試。"
   },
