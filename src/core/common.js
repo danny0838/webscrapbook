@@ -248,6 +248,32 @@ scrapbook.options = {
 
 scrapbook.isOptionsSynced = false;
 
+/**
+ * - Firefox < 52: chrome.storage.sync === undefined
+ *
+ * - Firefox 52: webextensions.storage.sync.enabled is default to false,
+ *   and chrome.storage.sync.*() gets an error.
+ *
+ * - Firefox >= 53: webextensions.storage.sync.enabled is default to true,
+ *   and chrome.storage.sync.*() works.
+ *
+ * An error would occur if the user manually sets 
+ * webextensions.storage.sync.enabled to false without restarting Firefox.
+ * We don't (and probably cannot) support such user operation since we
+ * cannot migrate configs from storage.sync to storage.local when it gets
+ * disabled, and we get an inconsistent status if we simply shift configs
+ * from storage.sync to storage.local.
+ */
+scrapbook.getOptionStorage = function () {
+  let p = Promise.resolve().then(() => {
+    if (!browser.storage.sync) { return browser.storage.local; }
+    return browser.storage.sync.get({})
+      .then(() => (browser.storage.sync), (ex) => (browser.storage.local));
+  });
+  scrapbook.getOptionStorage = function () { return p; };
+  return p;
+};
+
 scrapbook.getOption = function (key, defaultValue) {
   let result = scrapbook.options[key];
   if (result === undefined) {
@@ -271,19 +297,15 @@ scrapbook.setOption = function (key, value) {
   return Promise.resolve().then(() => {
     scrapbook.options[key] = value;
     let pair = {key: value};
-    return browser.storage.sync.set(pair).catch((ex) => {
-      // fallback to storage.local if storage.sync is not available
-      // or webextensions.storage.sync.enabled set to false in Firefox
-      return browser.storage.local.set(pair);
+    return scrapbook.getOptionStorage().then((storage) => {
+      return storage.set(pair);
     });
   });
 };
 
 scrapbook.loadOptions = function () {
-  return browser.storage.sync.get(scrapbook.options).catch((ex) => {
-    // fallback to storage.local if storage.sync is not available
-    // or webextensions.storage.sync.enabled set to false in Firefox
-    return browser.storage.local.get(scrapbook.options);
+  return scrapbook.getOptionStorage().then((storage) => {
+    return storage.get(scrapbook.options);
   }).then((items) => {
     for (let i in items) {
       scrapbook.options[i] = items[i];
@@ -294,10 +316,8 @@ scrapbook.loadOptions = function () {
 };
 
 scrapbook.saveOptions = function () {
-  return browser.storage.sync.set(scrapbook.options).catch((ex) => {
-    // fallback to storage.local if storage.sync is not available
-    // or webextensions.storage.sync.enabled set to false in Firefox
-    return browser.storage.local.set(scrapbook.options);
+  return scrapbook.getOptionStorage().then((storage) => {
+    return storage.set(scrapbook.options);
   });
 };
 
