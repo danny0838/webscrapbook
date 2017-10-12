@@ -352,9 +352,6 @@
   "ViewerFileSelectorText": {
     "message": "點我或拖曳 HTML 封存檔案至此以開啟之..."
   },
-  "ViewerReloadText": {
-    "message": "點我重新載入封存頁面..."
-  },
   "WarnCaptureCyclicRefercing": {
     "message": "資源 '$SOURCE$' 循環參照至 '$TARGET$'，由於目前的擷取設定不支援循環參照，參照目標將轉向至空值。",
     "placeholders": {

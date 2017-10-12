@@ -352,9 +352,6 @@
   "ViewerFileSelectorText": {
     "message": "点我或拖曳 HTML 封存文件至此以开启之..."
   },
-  "ViewerReloadText": {
-    "message": "点我重新载入封存页面..."
-  },
   "WarnCaptureCyclicRefercing": {
     "message": "资源 '$SOURCE$' 循环参照至 '$TARGET$'，由于目前的获取设定不支援循环参照，参照目标将转向至空值。",
     "placeholders": {

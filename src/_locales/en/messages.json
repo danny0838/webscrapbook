@@ -352,9 +352,6 @@
   "ViewerFileSelectorText": {
     "message": "Click me or drop an HTML archive file here to open it..."
   },
-  "ViewerReloadText": {
-    "message": "Click me to reload the archive file..."
-  },
   "WarnCaptureCyclicRefercing": {
     "message": "Resource '$SOURCE$' has a circular reference to '$TARGET$', which will be blanked because current capture configuration does not support circular reference.",
     "placeholders": {

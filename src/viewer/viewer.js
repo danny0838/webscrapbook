@@ -129,16 +129,11 @@ function init() {
         return;
       }
 
-      window.location.href = url;
+      window.location.replace(url);
     },
 
     start() {
-      if (viewer.mainUrl.searchParams.has("reload")) {
-        fileSelector.style.display = "none";
-        reloader.style.display = "block";
-      } else {
-        viewer.processUrlParams();
-      }
+      viewer.processUrlParams();
     },
 
     processUrlParams() {
@@ -169,10 +164,6 @@ function init() {
       }, (ex) => {
         alert("Unable to load the specified zip file '" + zipSourceUrl + "'");
       });
-
-      let refreshUrl = new URL(viewer.mainUrl.href);
-      refreshUrl.searchParams.set("reload", 1);
-      history.replaceState({}, null, refreshUrl);
     },
 
     /**
@@ -456,14 +447,8 @@ body {
   };
 
   // init common elements and events
-  const reloader = document.getElementById('reloader');
   const fileSelector = document.getElementById('file-selector');
   const fileSelectorInput = document.getElementById('file-selector-input');
-
-  reloader.addEventListener("click", (e) => {
-    e.preventDefault();
-    viewer.processUrlParams();
-  }, false);
 
   fileSelector.addEventListener("dragover", (e) => {
     e.preventDefault();
