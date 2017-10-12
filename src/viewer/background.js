@@ -63,13 +63,13 @@ function redirectUrl(tabId, type, url, filename, mime) {
     // fails silently without throwing.
     if (!scrapbook.isGecko || _isFxBelow56) {
       const html = `<!DOCTYPE html>
-<html>
+<html dir="${scrapbook.lang('@@bidi_dir')}">
 <head>
 <meta charset="UTF-8">
 <style>
 a {
-  background: left/1em url("${scrapbook.escapeHtml(chrome.runtime.getURL("core/scrapbook_128.png"))}") no-repeat;
-  padding-left: 1em;
+  background: ${scrapbook.lang('@@bidi_start_edge')}/1em url("${scrapbook.escapeHtml(chrome.runtime.getURL("core/scrapbook_128.png"))}") no-repeat;
+  padding-${scrapbook.lang('@@bidi_start_edge')}: 1em;
 }
 </style>
 </head>

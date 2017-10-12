@@ -345,7 +345,7 @@ function init() {
             };
 
             let content = `<!DOCTYPE html>
-<html>
+<html dir="${scrapbook.lang('@@bidi_dir')}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
