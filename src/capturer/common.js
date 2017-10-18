@@ -177,7 +177,29 @@ capturer.captureDocument = function (params) {
     let rootNode, headNode;
     let favIconNode, favIconUrl;
 
+    const origNodeMap = new Map();
     const specialContentMap = new Map();
+
+    // Map cloned nodes to the original for later reference,
+    // since cloned nodes may not have some information
+    // e.g. cloned iframes has no content, cloned canvas has no image,
+    // and cloned form elements has no current status.
+    const cloneNodeMapping = function (node, deep = false) {
+      const newNode = node.cloneNode(false);
+      origNodeMap.set(newNode, node);
+
+      // recursively clone descendant nodes
+      if (deep) {
+        const childs = node.childNodes;
+        const len = childs.length;
+        for (let i = 0; i < len; i++) {
+          const newChildNode = cloneNodeMapping(node.childNodes[i], true);
+          newNode.appendChild(newChildNode);
+        }
+      }
+
+      return newNode;
+    };
 
     // remove the specified node, record it if option set
     const captureRemoveNode = function (elem) {
@@ -292,15 +314,6 @@ capturer.captureDocument = function (params) {
     }).then((response) => {
       documentName = response.documentName;
     }).then(() => {
-      // give certain nodes an unique id for later refrence,
-      // since cloned nodes may not have some information
-      // e.g. cloned iframes has no content, cloned canvas has no image
-      const origRefKey = "data-sb-id-" + timeId;
-      const origRefNodes = Array.prototype.slice.call(doc.querySelectorAll("frame, iframe, canvas, input, option, textarea"));
-      origRefNodes.forEach((elem, index) => {
-        elem.setAttribute(origRefKey, index);
-      }, this);
-
       // construct the node list
       selection = doc.getSelection();
       {
@@ -320,9 +333,9 @@ capturer.captureDocument = function (params) {
             }
 
             if (iRange === 0) {
-              rootNode = htmlNode.cloneNode(false);
+              rootNode = cloneNodeMapping(htmlNode, false);
               headNode = doc.querySelector("head");
-              headNode = headNode ? headNode.cloneNode(true) : doc.createElement("head");
+              headNode = headNode ? cloneNodeMapping(headNode, true) : doc.createElement("head");
               rootNode.appendChild(headNode);
               rootNode.appendChild(doc.createTextNode("\n"));
             }
@@ -348,7 +361,7 @@ capturer.captureDocument = function (params) {
               }
 
               if (iBranch === branchList.length) {
-                let clonedNode = tmpNodeList[iDepth].cloneNode(false);
+                const clonedNode = cloneNodeMapping(tmpNodeList[iDepth], false);
                 parentNode.appendChild(clonedNode);
                 branchList.push({
                   origNode: tmpNodeList[iDepth],
@@ -375,7 +388,7 @@ capturer.captureDocument = function (params) {
           }
         }
         if (!selection) {
-          rootNode = htmlNode.cloneNode(true);
+          rootNode = cloneNodeMapping(htmlNode, true);
           headNode = rootNode.querySelector("head");
           if (!headNode) {
             headNode = doc.createElement("head");
@@ -414,9 +427,6 @@ capturer.captureDocument = function (params) {
         let url = doc.URL.startsWith("data:") ? "data:" : doc.URL;
         rootNode.setAttribute("data-sb-source-" + timeId, url);
       }
-
-      // remove the temporary map key
-      origRefNodes.forEach((elem) => { elem.removeAttribute(origRefKey); }, this);
 
       // favicon: the tab favicon
       if (settings.frameIsMain && settings.favIconUrl) {
@@ -716,9 +726,8 @@ capturer.captureDocument = function (params) {
 
           case "frame":
           case "iframe": {
-            let frame = elem;
-            let frameSrc = origRefNodes[frame.getAttribute(origRefKey)];
-            frame.removeAttribute(origRefKey);
+            const frame = elem;
+            const frameSrc = origNodeMap.get(frame);
             frame.setAttribute("src", frame.src);
             if (frameSrc.contentWindow) {
               captureRewriteAttr(frame, "srcdoc", null); // prevent src being overwritten
@@ -1159,8 +1168,7 @@ capturer.captureDocument = function (params) {
 
           // media: canvas
           case "canvas": {
-            let canvasOrig = origRefNodes[elem.getAttribute(origRefKey)];
-            elem.removeAttribute(origRefKey);
+            const canvasOrig = origNodeMap.get(elem);
 
             switch (options["capture.canvas"]) {
               case "blank":
@@ -1198,8 +1206,7 @@ capturer.captureDocument = function (params) {
           }
 
           case "input": {
-            let elemOrig = origRefNodes[elem.getAttribute(origRefKey)];
-            elem.removeAttribute(origRefKey);
+            const elemOrig = origNodeMap.get(elem);
 
             switch (elem.type.toLowerCase()) {
               // images: input
@@ -1272,8 +1279,7 @@ capturer.captureDocument = function (params) {
 
           // form: option
           case "option": {
-            let elemOrig = origRefNodes[elem.getAttribute(origRefKey)];
-            elem.removeAttribute(origRefKey);
+            const elemOrig = origNodeMap.get(elem);
 
             switch (options["capture.formStatus"]) {
               case "keep":
@@ -1289,8 +1295,7 @@ capturer.captureDocument = function (params) {
 
           // form: textarea
           case "textarea": {
-            let elemOrig = origRefNodes[elem.getAttribute(origRefKey)];
-            elem.removeAttribute(origRefKey);
+            const elemOrig = origNodeMap.get(elem);
 
             switch (options["capture.formStatus"]) {
               case "keep":
