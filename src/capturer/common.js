@@ -871,7 +871,7 @@ capturer.captureDocument = function (params) {
                 if (elem.hasAttribute("srcset")) {
                   tasks[tasks.length] = 
                   capturer.processSrcsetText(elem.getAttribute("srcset"), refUrl, settings, options).then((response) => {
-                    elem.setAttribute("srcset", response);
+                    captureRewriteUri(elem, "srcset", response);
                     return response;
                   });
                 }
@@ -907,7 +907,7 @@ capturer.captureDocument = function (params) {
                 Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
                   tasks[tasks.length] = 
                   capturer.processSrcsetText(elem.getAttribute("srcset"), refUrl, settings, options).then((response) => {
-                    elem.setAttribute("srcset", response);
+                    captureRewriteUri(elem, "srcset", response);
                     return response;
                   });
                 }, this);
