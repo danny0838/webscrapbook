@@ -176,7 +176,8 @@ capturer.captureDocument = function (params) {
     let selection;
     let rootNode, headNode;
     let favIconNode, favIconUrl;
-    const specialContentMap = {};
+
+    const specialContentMap = new Map();
 
     // remove the specified node, record it if option set
     const captureRemoveNode = function (elem) {
@@ -670,7 +671,7 @@ capturer.captureDocument = function (params) {
               default:
                 if (capturer.isNoscriptEscaped) {
                   let key = scrapbook.getUuid();
-                  specialContentMap[key] = scrapbook.unescapeHtml(elem.innerHTML);
+                  specialContentMap.set(key, scrapbook.unescapeHtml(elem.innerHTML));
                   elem.textContent = "urn:scrapbook:text:" + key;
                 }
                 break;
@@ -1400,7 +1401,7 @@ capturer.captureDocument = function (params) {
       // save document
       let content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
       content = content.replace(/urn:scrapbook:text:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
-        if (specialContentMap[key]) { return specialContentMap[key]; }
+        if (specialContentMap.has(key)) { return specialContentMap.get(key); }
         return match;
       });
       return capturer.invoke("saveDocument", {
