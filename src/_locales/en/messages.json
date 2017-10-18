@@ -127,8 +127,14 @@
   "OptionCaptureCommonSaveLabel": {
     "message": "Save"
   },
+  "OptionCaptureCommonSaveCurrentLabel": {
+    "message": "Save current"
+  },
+  "OptionCaptureCommonSaveCurrentTooltip": {
+    "message": "Save only the currently referenced resource to local. This reduces size but could break cross-platform compatibility and could cause a missing of required files if scripts are saved."
+  },
   "OptionCaptureCommonSaveTooltip": {
-    "message": "Save the referenced object to local."
+    "message": "Save the referenced resource to local."
   },
   "OptionCaptureCommonRemoveLabel": {
     "message": "Remove"

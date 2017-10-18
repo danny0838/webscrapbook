@@ -127,8 +127,14 @@
   "OptionCaptureCommonSaveLabel": {
     "message": "儲存"
   },
+  "OptionCaptureCommonSaveCurrentLabel": {
+    "message": "儲存現用"
+  },
+  "OptionCaptureCommonSaveCurrentTooltip": {
+    "message": "只將目前參照的資源儲存至本地。這可以縮小容量，但可能破壞跨平台相容性，且儲存腳本時可能導致所需檔案遺失。"
+  },
   "OptionCaptureCommonSaveTooltip": {
-    "message": "將參照的內容儲存至本地。"
+    "message": "將參照的資源儲存至本地。"
   },
   "OptionCaptureCommonRemoveLabel": {
     "message": "移除"

@@ -216,7 +216,10 @@ capturer.captureDocument = function (params) {
       if (value === null || value === undefined) {
         if (elem.hasAttribute(attr)) {
           if (options["capture.recordRewrittenAttr"]) {
-            elem.setAttribute("data-sb-orig-attr-" + attr + "-" + timeId, elem.getAttribute(attr));
+            const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
+            if (!elem.hasAttribute(recordAttr)) {
+              elem.setAttribute(recordAttr, elem.getAttribute(attr));
+            }
           }
           elem.removeAttribute(attr);
         }
@@ -224,9 +227,15 @@ capturer.captureDocument = function (params) {
         if (elem.getAttribute(attr) !== value) {
           if (options["capture.recordRewrittenAttr"]) {
             if (elem.hasAttribute(attr)) {
-              elem.setAttribute("data-sb-orig-attr-" + attr + "-" + timeId, elem.getAttribute(attr));
+              const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
+              if (!elem.hasAttribute(recordAttr)) {
+                elem.setAttribute(recordAttr, elem.getAttribute(attr));
+              }
             } else {
-              elem.setAttribute("data-sb-orig-null-attr-" + attr + "-" + timeId, "");
+              const recordAttr = "data-sb-orig-null-attr-" + attr + "-" + timeId;
+              if (!elem.hasAttribute(recordAttr)) {
+                elem.setAttribute(recordAttr, "");
+              }
             }
           }
           elem.setAttribute(attr, value);
@@ -238,7 +247,10 @@ capturer.captureDocument = function (params) {
     const captureRewriteTextContent = function (elem, value) {
       if (elem.textContent != value) {
         if (options["capture.recordRewrittenAttr"]) {
-          elem.setAttribute("data-sb-orig-textContent-" + timeId, elem.textContent);
+          const recordAttr = "data-sb-orig-textContent-" + timeId;
+          if (!elem.hasAttribute(recordAttr)) {
+            elem.setAttribute(recordAttr, elem.textContent);
+          }
         }
         elem.textContent = value;
       }
@@ -249,7 +261,10 @@ capturer.captureDocument = function (params) {
       if (value === null || value === undefined) {
         if (elem.hasAttribute(attr)) {
           if (options["capture.recordSourceUri"]) {
-            elem.setAttribute("data-sb-orig-attr-" + attr + "-" + timeId, elem.getAttribute(attr));
+            const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
+            if (!elem.hasAttribute(recordAttr)) {
+              elem.setAttribute(recordAttr, elem.getAttribute(attr));
+            }
           }
           elem.removeAttribute(attr);
         }
@@ -257,9 +272,15 @@ capturer.captureDocument = function (params) {
         if (elem.getAttribute(attr) !== value) {
           if (options["capture.recordSourceUri"]) {
             if (elem.hasAttribute(attr)) {
-              elem.setAttribute("data-sb-orig-attr-" + attr + "-" + timeId, elem.getAttribute(attr));
+              const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
+              if (!elem.hasAttribute(recordAttr)) {
+                elem.setAttribute(recordAttr, elem.getAttribute(attr));
+              }
             } else {
-              elem.setAttribute("data-sb-orig-null-attr-" + attr + "-" + timeId, "");
+              const recordAttr = "data-sb-orig-null-attr-" + attr + "-" + timeId;
+              if (!elem.hasAttribute(recordAttr)) {
+                elem.setAttribute(recordAttr, "");
+              }
             }
           }
           elem.setAttribute(attr, value);
@@ -838,6 +859,8 @@ capturer.captureDocument = function (params) {
 
           // images: img
           case "img": {
+            const elemOrig = origNodeMap.get(elem);
+
             if (elem.hasAttribute("src")) {
               elem.setAttribute("src", elem.src);
             }
@@ -864,6 +887,25 @@ capturer.captureDocument = function (params) {
               case "remove":
                 captureRemoveNode(elem);
                 return;
+              case "save-current":
+                if (!isHeadless) {
+                  if (elemOrig.currentSrc) {
+                    captureRewriteAttr(elem, "src", elemOrig.currentSrc);
+                    captureRewriteAttr(elem, "srcset", null);
+                    tasks[tasks.length] = 
+                    capturer.invoke("downloadFile", {
+                      url: elem.src,
+                      refUrl: refUrl,
+                      settings: settings,
+                      options: options
+                    }).then((response) => {
+                      captureRewriteUri(elem, "src", response.url);
+                      return response;
+                    });
+                  }
+                  break;
+                }
+                // Headless capture doesn't support currentSrc, fallback to "save".
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
@@ -912,6 +954,22 @@ capturer.captureDocument = function (params) {
               case "remove":
                 captureRemoveNode(elem);
                 return;
+              case "save-current":
+                if (!isHeadless) {
+                  Array.prototype.forEach.call(elem.querySelectorAll('img'), (elem) => {
+                    const elemOrig = origNodeMap.get(elem);
+
+                    if (elemOrig.currentSrc) {
+                      captureRewriteAttr(elem, "src", elemOrig.currentSrc);
+                      captureRewriteAttr(elem, "srcset", null);
+                    }
+                  }, this);
+                  Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
+                    captureRemoveNode(elem);
+                  }, this);
+                  break;
+                }
+                // Headless capture doesn't support currentSrc, fallback to "save".
               case "save":
               default:
                 Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
@@ -928,6 +986,8 @@ capturer.captureDocument = function (params) {
 
           // media: audio
           case "audio": {
+            const elemOrig = origNodeMap.get(elem);
+
             if (elem.hasAttribute("src")) {
               elem.setAttribute("src", elem.src);
             }
@@ -950,6 +1010,27 @@ capturer.captureDocument = function (params) {
               case "remove":
                 captureRemoveNode(elem);
                 return;
+              case "save-current":
+                if (!isHeadless) {
+                  if (elemOrig.currentSrc) {
+                    captureRewriteAttr(elem, "src", elemOrig.currentSrc);
+                    Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
+                      captureRemoveNode(elem);
+                    }, this);
+                    tasks[tasks.length] = 
+                    capturer.invoke("downloadFile", {
+                      url: elem.src,
+                      refUrl: refUrl,
+                      settings: settings,
+                      options: options
+                    }).then((response) => {
+                      captureRewriteUri(elem, "src", response.url);
+                      return response;
+                    });
+                  }
+                  break;
+                }
+                // Headless capture doesn't support currentSrc, fallback to "save".
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
@@ -983,6 +1064,8 @@ capturer.captureDocument = function (params) {
 
           // media: video
           case "video": {
+            const elemOrig = origNodeMap.get(elem);
+
             if (elem.hasAttribute("poster")) {
               elem.setAttribute("poster", elem.poster);
             }
@@ -1011,6 +1094,39 @@ capturer.captureDocument = function (params) {
               case "remove":
                 captureRemoveNode(elem);
                 return;
+              case "save-current":
+                if (!isHeadless) {
+                  if (elem.hasAttribute("poster")) {
+                    tasks[tasks.length] = 
+                    capturer.invoke("downloadFile", {
+                      url: elem.poster,
+                      refUrl: refUrl,
+                      settings: settings,
+                      options: options
+                    }).then((response) => {
+                      captureRewriteUri(elem, "poster", response.url);
+                      return response;
+                    });
+                  }
+                  if (elemOrig.currentSrc) {
+                    captureRewriteAttr(elem, "src", elemOrig.currentSrc);
+                    Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
+                      captureRemoveNode(elem);
+                    }, this);
+                    tasks[tasks.length] = 
+                    capturer.invoke("downloadFile", {
+                      url: elem.src,
+                      refUrl: refUrl,
+                      settings: settings,
+                      options: options
+                    }).then((response) => {
+                      captureRewriteUri(elem, "src", response.url);
+                      return response;
+                    });
+                  }
+                  break;
+                }
+                // Headless capture doesn't support currentSrc, fallback to "save".
               case "save":
               default:
                 if (elem.hasAttribute("poster")) {
@@ -1224,6 +1340,8 @@ capturer.captureDocument = function (params) {
                   case "remove":
                     captureRemoveNode(elem);
                     return;
+                  case "save-current":
+                    // srcset and currentSrc are not supported, do the same as save
                   case "save":
                   default:
                     tasks[tasks.length] = 

@@ -31,10 +31,10 @@ scrapbook.options = {
   "capture.saveFileAsHtml": false,
   "capture.saveDataUriAsFile": false,
   "capture.favicon": "save", // "save", "link", "blank", "remove"
-  "capture.image": "save", // "save", "link", "blank", "remove"
+  "capture.image": "save", // "save", "save-current", "link", "blank", "remove"
   "capture.imageBackground": "save", // "save", "link", "remove"
-  "capture.audio": "save", // "save", "link", "blank", "remove"
-  "capture.video": "save", // "save", "link", "blank", "remove"
+  "capture.audio": "save", // "save", "save-current", "link", "blank", "remove"
+  "capture.video": "save", // "save", "save-current", "link", "blank", "remove"
   "capture.embed": "save", // "save", "link", "blank", "remove"
   "capture.object": "save", // "save", "link", "blank", "remove"
   "capture.applet": "save", // "save", "link", "blank", "remove"
