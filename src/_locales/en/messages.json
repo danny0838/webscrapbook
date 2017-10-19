@@ -280,15 +280,6 @@
   "OptionCaptureSaveInScrapbookTooltip": {
     "message": "Saves captured files to <default download folder>/<Scrapbook Folder>/data/ directory. Files are always saved in ScrapBook when saved as folder."
   },
-  "OptionCaptureScriptAnchorLabel": {
-    "message": "Javascript links:"
-  },
-  "OptionCaptureScriptAttrLabel": {
-    "message": "Script attributes:"
-  },
-  "OptionCaptureScriptAttrTooltip": {
-    "message": "Attributes that triggers a script, such as onclick."
-  },
   "OptionCaptureScriptLabel": {
     "message": "Scripts:"
   },

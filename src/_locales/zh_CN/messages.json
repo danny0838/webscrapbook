@@ -280,15 +280,6 @@
   "OptionCaptureSaveInScrapbookTooltip": {
     "message": "将获取的文件保存于 <默认下载文件夹>/<剪贴簿文件夹>/data/ 目录下。保存为文件夹时必定会保存于剪贴簿内。"
   },
-  "OptionCaptureScriptAnchorLabel": {
-    "message": "Javascript 链接:"
-  },
-  "OptionCaptureScriptAttrLabel": {
-    "message": "脚本式属性:"
-  },
-  "OptionCaptureScriptAttrTooltip": {
-    "message": "如 onclick 等会触发 javascript 脚本的元素属性。"
-  },
   "OptionCaptureScriptLabel": {
     "message": "脚本:"
   },

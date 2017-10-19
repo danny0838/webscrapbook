@@ -280,15 +280,6 @@
   "OptionCaptureSaveInScrapbookTooltip": {
     "message": "將擷取的檔案儲存於 <預設下載資料夾>/<剪貼簿資料夾>/data/ 目錄下。儲存為資料夾時必定會儲存剪貼簿內。"
   },
-  "OptionCaptureScriptAnchorLabel": {
-    "message": "Javascript 連結:"
-  },
-  "OptionCaptureScriptAttrLabel": {
-    "message": "腳本式屬性:"
-  },
-  "OptionCaptureScriptAttrTooltip": {
-    "message": "如 onclick 等會觸發 javascript 腳本的元素屬性。"
-  },
   "OptionCaptureScriptLabel": {
     "message": "腳本:"
   },

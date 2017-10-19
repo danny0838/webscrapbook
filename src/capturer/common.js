@@ -851,16 +851,15 @@ capturer.captureDocument = function (params) {
 
             // scripts: script-like anchors
             if (url.toLowerCase().startsWith("javascript:")) {
-              switch (options["capture.scriptAnchor"]) {
+              switch (options["capture.script"]) {
                 case "save":
+                case "link":
                   // do nothing
                   break;
                 case "blank":
-                  captureRewriteAttr(elem, "href", "javascript:");
-                  break;
                 case "remove":
                 default:
-                  captureRewriteAttr(elem, "href", null);
+                  captureRewriteAttr(elem, "href", "javascript:");
                   break;
               }
               break;
@@ -1529,10 +1528,12 @@ capturer.captureDocument = function (params) {
         }
 
         // scripts: script-like attributes (on* attributes)
-        switch (options["capture.scriptAttr"]) {
+        switch (options["capture.script"]) {
           case "save":
+          case "link":
             // do nothing
             break;
+          case "blank":
           case "remove":
           default:
             Array.prototype.forEach.call(elem.attributes, (attr) => {

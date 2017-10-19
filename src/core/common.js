@@ -45,8 +45,6 @@ scrapbook.options = {
   "capture.styleInline": "save", // "save", "blank", "remove"
   "capture.rewriteCss": "url", // "none", "url"
   "capture.script": "blank", // "save", "link", "blank", "remove"
-  "capture.scriptAnchor": "blank", // "save", "blank", "remove"
-  "capture.scriptAttr": "remove", // "save", "remove"
   "capture.noscript": "save", // "save", "blank", "remove"
   "capture.base": "blank", // "save", "blank", "remove"
   "capture.formStatus": "keep", // "keep", "reset"
