@@ -1004,27 +1004,29 @@ scrapbook.parseCssFile = function (data, charset, rewriter) {
  *        for certain complicated CSS
  *
  * @param {string} cssText
- * @param {Object} rewriteFuncs
+ * @param {Object} options
  *     - {parseCssTextRewriteFunc} rewriteImportUrl
  *     - {parseCssTextRewriteFunc} rewriteFontFaceUrl
  *     - {parseCssTextRewriteFunc} rewriteBackgroundUrl
  */
-scrapbook.parseCssText = function (cssText, rewriteFuncs) {
-  let pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
-  let pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
-  let pCmSp = "(?:" + "(?:" + pCm + "|" + pSp + ")" + "*" + ")"; // comment or space
-  let pChar = "(?:\\\\.|[^\\\\])"; // a char, or a escaped char sequence
-  let pStr = "(?:" + pChar + "*?" + ")"; // string
-  let pSStr = "(?:" + pCmSp + pStr + pCmSp + ")"; // spaced string
-  let pDQStr = "(?:" + '"' + pStr + '"' + ")"; // double quoted string
-  let pSQStr = "(?:" + "'" + pStr + "'" + ")"; // single quoted string
-  let pES = "(?:" + "(?:" + [pCm, pDQStr, pSQStr, pChar].join("|") + ")*?" + ")"; // embeded string
-  let pUrl = "(?:" + "url\\(" + pSp + "(?:" + [pDQStr, pSQStr, pSStr].join("|") + ")" + pSp + "\\)" + ")"; // URL
-  let pUrl2 = "(" + "url\\(" + pSp + ")(" + [pDQStr, pSQStr, pSStr].join("|") + ")(" + pSp + "\\)" + ")"; // URL; catch 3
-  let pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")(" + pCmSp + ";" + ")"; // rule import; catch 3
-  let pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // rule font-face; catch 1
+scrapbook.parseCssText = function (cssText, options = {}) {
+  const {rewriteImportUrl, rewriteFontFaceUrl, rewriteBackgroundUrl} = options;
 
-  let parseUrl = function (text, callback) {
+  const pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
+  const pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
+  const pCmSp = "(?:" + "(?:" + pCm + "|" + pSp + ")" + "*" + ")"; // comment or space
+  const pChar = "(?:\\\\.|[^\\\\])"; // a char, or a escaped char sequence
+  const pStr = "(?:" + pChar + "*?" + ")"; // string
+  const pSStr = "(?:" + pCmSp + pStr + pCmSp + ")"; // spaced string
+  const pDQStr = "(?:" + '"' + pStr + '"' + ")"; // double quoted string
+  const pSQStr = "(?:" + "'" + pStr + "'" + ")"; // single quoted string
+  const pES = "(?:" + "(?:" + [pCm, pDQStr, pSQStr, pChar].join("|") + ")*?" + ")"; // embeded string
+  const pUrl = "(?:" + "url\\(" + pSp + "(?:" + [pDQStr, pSQStr, pSStr].join("|") + ")" + pSp + "\\)" + ")"; // URL
+  const pUrl2 = "(" + "url\\(" + pSp + ")(" + [pDQStr, pSQStr, pSStr].join("|") + ")(" + pSp + "\\)" + ")"; // URL; catch 3
+  const pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")(" + pCmSp + ";" + ")"; // rule import; catch 3
+  const pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // rule font-face; catch 1
+
+  const parseUrl = function (text, callback) {
     return text.replace(new RegExp(pUrl2, "gi"), (m, pre, url, post) => {
       let ret;
       if (url.startsWith('"') && url.endsWith('"')) {
@@ -1041,28 +1043,29 @@ scrapbook.parseCssText = function (cssText, rewriteFuncs) {
     });
   };
 
-  let newCssText = cssText.replace(
+  const newCssText = cssText.replace(
     new RegExp([pCm, pRImport, pRFontFace, "("+pUrl+")"].join("|"), "gi"),
     (m, im1, im2, im3, ff, u) => {
       if (im2) {
         let ret;
         if (im2.startsWith('"') && im2.endsWith('"')) {
           let u = scrapbook.unescapeCss(im2.slice(1, -1));
-          ret = 'url("' + scrapbook.escapeQuotes(rewriteFuncs.rewriteImportUrl(u)) + '")';
+          ret = 'url("' + scrapbook.escapeQuotes(rewriteImportUrl(u)) + '")';
         } else if (im2.startsWith("'") && im2.endsWith("'")) {
           let u = scrapbook.unescapeCss(im2.slice(1, -1));
-          ret = 'url("' + scrapbook.escapeQuotes(rewriteFuncs.rewriteImportUrl(u)) + '")';
+          ret = 'url("' + scrapbook.escapeQuotes(rewriteImportUrl(u)) + '")';
         } else {
-          ret = parseUrl(im2, rewriteFuncs.rewriteImportUrl);
+          ret = parseUrl(im2, rewriteImportUrl);
         }
         return im1 + ret + im3;
       } else if (ff) {
-        return parseUrl(m, rewriteFuncs.rewriteFontFaceUrl);
+        return parseUrl(m, rewriteFontFaceUrl);
       } else if (u) {
-        return parseUrl(m, rewriteFuncs.rewriteBackgroundUrl);
+        return parseUrl(m, rewriteBackgroundUrl);
       }
       return m;
     });
+
   return newCssText;
 };
 
