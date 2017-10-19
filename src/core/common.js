@@ -582,6 +582,10 @@ scrapbook.unescapeQuotes = function (str) {
   return str.replace(/\\(.)/g, "$1");
 };
 
+scrapbook.escapeCssComment = function (str) {
+  return str.replace(/\*\//g, "*\u200B/");
+};
+
 scrapbook.unescapeCss = function (str) {
   let that = arguments.callee;
   if (!that.replaceRegex) {
@@ -993,7 +997,7 @@ scrapbook.parseCssFile = function (data, charset, rewriter) {
  *
  * @callback parseCssTextRewriteFunc
  * @param {string} url
- * @return {string} newUrl
+ * @return {{url: string, recordUrl: string}} newUrl
  */
 
 /**
@@ -1026,20 +1030,30 @@ scrapbook.parseCssText = function (cssText, options = {}) {
   const pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")(" + pCmSp + ";" + ")"; // rule import; catch 3
   const pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // rule font-face; catch 1
 
+  const getRecordUrl = function (url, recordUrl) {
+    if (!recordUrl) { return ""; }
+    if (url === recordUrl) { return ""; }
+    return '/*sb-orig-url="' + scrapbook.escapeCssComment(recordUrl) + '"*/';
+  };
+
   const parseUrl = function (text, callback) {
     return text.replace(new RegExp(pUrl2, "gi"), (m, pre, url, post) => {
-      let ret;
+      let rewritten;
       if (url.startsWith('"') && url.endsWith('"')) {
         let u = scrapbook.unescapeCss(url.slice(1, -1));
-        ret = callback(u);
+        rewritten = callback(u);
       } else if (url.startsWith("'") && url.endsWith("'")) {
         let u = scrapbook.unescapeCss(url.slice(1, -1));
-        ret = callback(u);
+        rewritten = callback(u);
       } else {
         let u = scrapbook.unescapeCss(url.trim());
-        ret = callback(u);
+        rewritten = callback(u);
       }
-      return pre + '"' + scrapbook.escapeQuotes(ret) + '"' + post;
+
+      let {url: rewrittenUrl, recordUrl} = rewritten;
+      let record = getRecordUrl(rewrittenUrl, recordUrl);
+
+      return record + pre + '"' + scrapbook.escapeQuotes(rewrittenUrl) + '"' + post;
     });
   };
 
@@ -1047,17 +1061,21 @@ scrapbook.parseCssText = function (cssText, options = {}) {
     new RegExp([pCm, pRImport, pRFontFace, "("+pUrl+")"].join("|"), "gi"),
     (m, im1, im2, im3, ff, u) => {
       if (im2) {
-        let ret;
+        let rewritten;
         if (im2.startsWith('"') && im2.endsWith('"')) {
           let u = scrapbook.unescapeCss(im2.slice(1, -1));
-          ret = 'url("' + scrapbook.escapeQuotes(rewriteImportUrl(u)) + '")';
+          let {url: rewrittenUrl, recordUrl} = rewriteImportUrl(u);
+          let record = getRecordUrl(rewrittenUrl, recordUrl);
+          rewritten = record + 'url("' + scrapbook.escapeQuotes(rewrittenUrl) + '")';
         } else if (im2.startsWith("'") && im2.endsWith("'")) {
           let u = scrapbook.unescapeCss(im2.slice(1, -1));
-          ret = 'url("' + scrapbook.escapeQuotes(rewriteImportUrl(u)) + '")';
+          let {url: rewrittenUrl, recordUrl} = rewriteImportUrl(u);
+          let record = getRecordUrl(rewrittenUrl, recordUrl);
+          rewritten = record + 'url("' + scrapbook.escapeQuotes(rewrittenUrl) + '")';
         } else {
-          ret = parseUrl(im2, rewriteImportUrl);
+          rewritten = parseUrl(im2, rewriteImportUrl);
         }
-        return im1 + ret + im3;
+        return im1 + rewritten + im3;
       } else if (ff) {
         return parseUrl(m, rewriteFontFaceUrl);
       } else if (u) {

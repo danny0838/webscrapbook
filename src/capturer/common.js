@@ -1482,7 +1482,9 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
 
   const rewritten = scrapbook.parseCssText(cssText, {
     rewriteImportUrl(url) {
-      let dataUrl = capturer.resolveRelativeUrl(url, refUrl);
+      const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
+      let dataUrl = sourceUrl;
+      let recordUrl = options["capture.recordSourceUri"] ? sourceUrl : "";
       switch (options["capture.style"]) {
         case "link":
           // do nothing
@@ -1496,10 +1498,12 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
           dataUrl = downloader.getUrlHash(dataUrl, "processCssFile");
           break;
       }
-      return dataUrl;
+      return {url: dataUrl, recordUrl};
     },
     rewriteFontFaceUrl(url) {
-      let dataUrl = capturer.resolveRelativeUrl(url, refUrl);
+      const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
+      let dataUrl = sourceUrl;
+      let recordUrl = options["capture.recordSourceUri"] ? sourceUrl : "";
       switch (options["capture.font"]) {
         case "link":
           // do nothing
@@ -1513,10 +1517,12 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
           dataUrl = downloader.getUrlHash(dataUrl);
           break;
       }
-      return dataUrl;
+      return {url: dataUrl, recordUrl};
     },
     rewriteBackgroundUrl(url) {
-      let dataUrl = capturer.resolveRelativeUrl(url, refUrl);
+      const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
+      let dataUrl = sourceUrl;
+      let recordUrl = options["capture.recordSourceUri"] ? sourceUrl : "";
       switch (options["capture.imageBackground"]) {
         case "link":
           // do nothing
@@ -1529,7 +1535,7 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
           dataUrl = downloader.getUrlHash(dataUrl);
           break;
       }
-      return dataUrl;
+      return {url: dataUrl, recordUrl};
     }
   });
 

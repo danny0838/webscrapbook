@@ -460,13 +460,13 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
     let rewritten = scrapbook.parseCssText(cssText, {
       rewriteImportUrl(url) {
-        return fetcher.getUrlHash(url, processCssFile);
+        return {url: fetcher.getUrlHash(url, processCssFile)};
       },
       rewriteFontFaceUrl(url) {
-        return fetcher.getUrlHash(url);
+        return {url: fetcher.getUrlHash(url)};
       },
       rewriteBackgroundUrl(url) {
-        return fetcher.getUrlHash(url);
+        return {url: fetcher.getUrlHash(url)};
       }
     });
 
