@@ -1294,6 +1294,11 @@ capturer.captureDocument = function (params) {
 
           // media: applet
           case "applet": {
+            if (elem.hasAttribute("code")) {
+              let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("code"), refUrl);
+              elem.setAttribute("code", rewriteUrl);
+            }
+
             if (elem.hasAttribute("archive")) {
               let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("archive"), refUrl);
               elem.setAttribute("archive", rewriteUrl);
@@ -1304,6 +1309,10 @@ capturer.captureDocument = function (params) {
                 // do nothing
                 break;
               case "blank":
+                if (elem.hasAttribute("code")) {
+                  captureRewriteAttr(elem, "code", null);
+                }
+
                 if (elem.hasAttribute("archive")) {
                   captureRewriteAttr(elem, "archive", "about:blank");
                 }
@@ -1313,6 +1322,19 @@ capturer.captureDocument = function (params) {
                 return;
               case "save":
               default:
+                if (elem.hasAttribute("code")) {
+                  tasks[tasks.length] = 
+                  capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("code"),
+                    refUrl: refUrl,
+                    settings: settings,
+                    options: options,
+                  }).then((response) => {
+                    captureRewriteUri(elem, "code", response.url);
+                    return response;
+                  });
+                }
+
                 if (elem.hasAttribute("archive")) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
