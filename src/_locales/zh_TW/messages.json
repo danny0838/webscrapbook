@@ -137,7 +137,7 @@
     "message": "移除"
   },
   "OptionCaptureCommonRemoveTooltip": {
-    "message": "將元素完全移除。注意這可能會影響排版。"
+    "message": "將元素移除。注意這可能會影響網頁排版。"
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "剪貼簿資料夾:"
@@ -215,7 +215,7 @@
     "message": "移除 integrity 及 crossorigin 等資源驗證屬性，以免因內容改寫或存取環境改變導致無法載入。"
   },
   "OptionCaptureRewriteCssLabel": {
-    "message": "改寫 CSS:"
+    "message": "改寫樣式表:"
   },
   "OptionCaptureRewriteCssNoneLabel": {
     "message": "不改寫"
@@ -275,7 +275,7 @@
     "message": "將擷取資料儲存於剪貼簿內:"
   },
   "OptionCaptureSaveInScrapbookTooltip": {
-    "message": "儲存為下載串流時必定套用此設定。"
+    "message": "將擷取的檔案儲存於 <預設下載資料夾>/<剪貼簿資料夾>/data/ 目錄下。儲存為資料夾時必定會儲存剪貼簿內。"
   },
   "OptionCaptureScriptAnchorLabel": {
     "message": "Javascript 連結:"
@@ -288,6 +288,12 @@
   },
   "OptionCaptureScriptLabel": {
     "message": "腳本:"
+  },
+  "OptionCaptureScriptLikeTooltip": {
+    "message": "此類物件在離線環境下可能無法正常運作，且有潛在的安全風險。"
+  },
+  "OptionCaptureScriptTooltip": {
+    "message": "決定所有網頁腳本的處理，包括 SCRIPT 元素、javascript: 協定的超連結、onclick 之類的動態屬性等等。注意：儲存的腳本在離線環境下可能無法正常運作，且有潛在的安全風險。"
   },
   "OptionCaptureStyleInlineLabel": {
     "message": "內聯樣式:"

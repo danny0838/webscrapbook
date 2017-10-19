@@ -137,7 +137,7 @@
     "message": "Remove"
   },
   "OptionCaptureCommonRemoveTooltip": {
-    "message": "Remove the element. Note that this could affect the layout."
+    "message": "Remove the element. Note that this could affect the web page layout."
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "Scrapbook Folder:"
@@ -275,7 +275,7 @@
     "message": "Save captured data in ScrapBook:"
   },
   "OptionCaptureSaveInScrapbookTooltip": {
-    "message": "This is always applied when saving as downloads."
+    "message": "Saves captured files to <default download folder>/<Scrapbook Folder>/data/ directory. Files are always saved in ScrapBook when saved as folder."
   },
   "OptionCaptureScriptAnchorLabel": {
     "message": "Javascript links:"
@@ -288,6 +288,12 @@
   },
   "OptionCaptureScriptLabel": {
     "message": "Scripts:"
+  },
+  "OptionCaptureScriptLikeTooltip": {
+    "message": "Such saved objects may not work correctly in the offline context and have a potential security risk."
+  },
+  "OptionCaptureScriptTooltip": {
+    "message": "This determines how to handle all page scripts, including SCRIPT elements, links with javascript: protocol, and dynamic attributes such as onclick, etc. NOTE: saved scripts may not work correctly in the offline context and have a potential security risk."
   },
   "OptionCaptureStyleInlineLabel": {
     "message": "Inline styles:"
