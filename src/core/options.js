@@ -60,11 +60,11 @@ function importFile(file) {
     const data = JSON.parse(text);
     const options = Object.assign(scrapbook.options, data);
     scrapbook.options = options;
-    return scrapbook.saveOptions();
-  }).then((options) => {
-    for (let id in options) {
-      setOptionToDocument(id, options[id]);
-    }
+    return scrapbook.saveOptions().then(() => {
+      for (let id in options) {
+        setOptionToDocument(id, options[id]);
+      }
+    });
   }).then(() => {
     showMessage(scrapbook.lang("OptionsImportSuccess"));
   }).catch((ex) => {
