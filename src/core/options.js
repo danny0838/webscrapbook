@@ -68,7 +68,7 @@ function importFile(file) {
   }).then(() => {
     showMessage(scrapbook.lang("OptionsImportSuccess"));
   }).catch((ex) => {
-    showMessage(scrapbook.lang("ErrorImportOptions", [ex]));
+    showMessage(scrapbook.lang("ErrorImportOptions", [ex.message]));
   });
 }
 
