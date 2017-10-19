@@ -1170,6 +1170,9 @@ capturer.captureDocument = function (params) {
                 return;
               case "save":
               default:
+                // we get only blank canvas in headless capture 
+                if (isHeadless) { break; }
+
                 try {
                   let scriptText = getCanvasDataScript(canvasOrig);
                   if (scriptText) {
@@ -1180,6 +1183,7 @@ capturer.captureDocument = function (params) {
                 } catch (ex) {
                   console.error(ex);
                 }
+
                 break;
             }
             break;
