@@ -97,8 +97,23 @@
   "OptionCaptureBaseLabel": {
     "message": "BASE 元素:"
   },
+  "OptionCaptureCanvasBlankLabel": {
+    "message": "儲存初始狀態"
+  },
+  "OptionCaptureCanvasBlankTooltip": {
+    "message": "儲存初始空白畫布。儲存腳本時建議使用此選項。"
+  },
   "OptionCaptureCanvasLabel": {
-    "message": "CANVAS 元素:"
+    "message": "畫布:"
+  },
+  "OptionCaptureCanvasSaveLabel": {
+    "message": "儲存目前狀態"
+  },
+  "OptionCaptureCanvasSaveTooltip": {
+    "message": "產生初始化腳本記錄目前畫布狀態並在網頁載入時重繪。儲存腳本時此選項可能造成衝突。"
+  },
+  "OptionCaptureCanvasTooltip": {
+    "message": "畫布初始為空白狀態而後由網頁腳本動態繪製，不儲存腳本時可選擇「儲存目前狀態」，儲存腳本時則建議選擇「儲存初始狀態」以避免衝突。"
   },
   "OptionCaptureCommonBlankLabel": {
     "message": "清空"

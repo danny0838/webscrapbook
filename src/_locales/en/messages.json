@@ -97,8 +97,23 @@
   "OptionCaptureBaseLabel": {
     "message": "BASE:"
   },
+  "OptionCaptureCanvasBlankLabel": {
+    "message": "Save initial status"
+  },
+  "OptionCaptureCanvasBlankTooltip": {
+    "message": "Save the initial blank canvas. This is recommended if scripts are saved."
+  },
   "OptionCaptureCanvasLabel": {
-    "message": "CANVAS:"
+    "message": "Canvases:"
+  },
+  "OptionCaptureCanvasSaveLabel": {
+    "message": "Save current status"
+  },
+  "OptionCaptureCanvasSaveTooltip": {
+    "message": "Generate a initialization script that records the current canvas status and draw it when the saved web page is loaded. This can cause a conflict if scripts are saved."
+  },
+  "OptionCaptureCanvasTooltip": {
+    "message": "Canvases are blank initially and drawn by web page scripts. \"Save current status\" can be used when scripts are not saved, and \"Save initial status\" is more recommended when scripts are saved."
   },
   "OptionCaptureCommonBlankLabel": {
     "message": "Blank"
