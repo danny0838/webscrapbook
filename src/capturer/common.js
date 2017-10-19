@@ -106,11 +106,6 @@ capturer.getContentTabs = function () {
   });
 };
 
-capturer.fixOptions = function (options) {
-  options["capture.scrapbookFolder"] = scrapbook.validateFilename(options["capture.scrapbookFolder"] || "WebScrapBook");
-  return options;
-};
-
 /**
  * @kind invokable
  * @param {Object} params

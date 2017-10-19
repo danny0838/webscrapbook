@@ -98,6 +98,11 @@ window.addEventListener("DOMContentLoaded", (event) => {
   scrapbook.loadLanguages(document);
 
   // event handlers
+  document.getElementById("opt_capture.scrapbookFolder").addEventListener("change", (event) => {
+    const elem = event.target;
+    elem.value = scrapbook.validateFilename(elem.value);
+  });
+
   document.getElementById("options").addEventListener("submit", (event) => {
     event.preventDefault();
     for (let id in scrapbook.options) {

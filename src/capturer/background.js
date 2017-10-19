@@ -176,7 +176,7 @@ capturer.captureTab = function (params) {
         recurseChain: [],
         favIconUrl,
       },
-      options: capturer.fixOptions(scrapbook.getOptions("capture"))
+      options: scrapbook.getOptions("capture"),
     };
 
     // save whole page beyond selection?
@@ -263,7 +263,7 @@ capturer.captureHeadless = function (params) {
         recurseChain: [],
         favIconUrl,
       },
-      options: capturer.fixOptions(scrapbook.getOptions("capture"))
+      options: scrapbook.getOptions("capture"),
     };
 
     return Promise.resolve().then(() => {
