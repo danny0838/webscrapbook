@@ -1490,7 +1490,7 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
         case "blank":
         case "remove":
           dataUrl = "about:blank";
-          return;
+          break;
         case "save":
         default:
           dataUrl = downloader.getUrlHash(dataUrl, "processCssFile");
