@@ -191,10 +191,10 @@
     "message": "获取网页时若有改写元素的属性，则建立对应的 data-* 属性记录原始值。"
   },
   "OptionCaptureRecordErrorUriLabel": {
-    "message": "记录错误的 URI:"
+    "message": "记录错误的 URL:"
   },
   "OptionCaptureRecordErrorUriTooltip": {
-    "message": "获取网页时若有 URI 无法顺利连上，会以 urn:scrapbook:* 的形式记录。若不勾选则会链接至原始位址（可能仍无法连上而导致无效连线）。"
+    "message": "获取网页时若有 URL 无法顺利连上，会以 urn:scrapbook:* 的形式记录。若不勾选则会链接至原始位址（可能仍无法连上而导致无效连线）。"
   },
   "OptionCaptureRecordRemovedNodeLabel": {
     "message": "记录移除的元素:"
@@ -203,10 +203,10 @@
     "message": "获取网页时若有移除元素，则在原位置建立 HTML 注解记录原始内容。"
   },
   "OptionCaptureRecordSourceUriLabel": {
-    "message": "记录原始的 URI:"
+    "message": "记录原始的 URL:"
   },
   "OptionCaptureRecordSourceUriTooltip": {
-    "message": "获取网页时若有改写链接，则建立对应的 data-* 属性记录改写前的 URI 位址。"
+    "message": "获取网页时若有改写链接，则建立对应的 data-* 属性记录改写前的 URL 位址。"
   },
   "OptionCaptureRewriteCssLabel": {
     "message": "改写样式表:"
@@ -245,7 +245,7 @@
     "message": "单一 HTML 文件"
   },
   "OptionCaptureSaveAsSingleHtmlTooltip": {
-    "message": "将网页保存为单一 HTML 文件，参照的资源会以 data URI 的形式内嵌，大多数较新的浏览器都能正常读取。"
+    "message": "将网页保存为单一 HTML 文件，参照的资源会以 data URL 的形式内嵌，大多数较新的浏览器都能正常读取。"
   },
   "OptionCaptureSaveAsZipLabel": {
     "message": "htz 封存文件"
@@ -254,10 +254,10 @@
     "message": "将网页及参照资源以标准 zip 算法打包成 .htz 封存文件。"
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
-    "message": "将 data URI 保存为文件:"
+    "message": "将 data URL 保存为文件:"
   },
   "OptionCaptureSaveDataUriAsFileTooltip": {
-    "message": "会自动根据 data URI 资料的 MIME 类型及内容的 SHA-1 哈希值产生适当的文件名。"
+    "message": "会自动根据 data URL 资料的 MIME 类型及内容的 SHA-1 哈希值产生适当的文件名。"
   },
   "OptionCaptureSaveFileAsHtmlLabel": {
     "message": "将文件保存为 HTML:"

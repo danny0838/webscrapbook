@@ -191,7 +191,7 @@
     "message": "If an attribute is rewritten during the capture process, create a corresponding data-* attribute to record its original value."
   },
   "OptionCaptureRecordErrorUriLabel": {
-    "message": "Record error URI:"
+    "message": "Record error URL:"
   },
   "OptionCaptureRecordErrorUriTooltip": {
     "message": "If connection to a URL failed during the capture process, record it as urn:scrapbook:*. If unchecked, link to the source address (which could still be unavailable and be an invalid connection)."
@@ -203,7 +203,7 @@
     "message": "If an element is removed during the capture process, create a comment in place to record its original content."
   },
   "OptionCaptureRecordSourceUriLabel": {
-    "message": "Record source URI:"
+    "message": "Record source URL:"
   },
   "OptionCaptureRecordSourceUriTooltip": {
     "message": "If a URL is rewritten during the capture process, create a corresponding data-* attribute to record its original address."
@@ -245,7 +245,7 @@
     "message": "Single HTML"
   },
   "OptionCaptureSaveAsSingleHtmlTooltip": {
-    "message": "Save the captured web page as a single HTML file. Referenced resources are stored as data URI and can be viewed in most modern browsers."
+    "message": "Save the captured web page as a single HTML file. Referenced resources are stored as data URL and can be viewed in most modern browsers."
   },
   "OptionCaptureSaveAsZipLabel": {
     "message": "htz package"
@@ -254,10 +254,10 @@
     "message": "Pack a web page and its referenced resources as a .htz file using the standard zip algorithm."
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
-    "message": "Save data URI as file:"
+    "message": "Save data URL as file:"
   },
   "OptionCaptureSaveDataUriAsFileTooltip": {
-    "message": "A filename will be auto-generated according to the MIME type and the SHA-1 hash of the content of the data URI."
+    "message": "A filename will be auto-generated according to the MIME type and the SHA-1 hash of the content of the data URL."
   },
   "OptionCaptureSaveFileAsHtmlLabel": {
     "message": "Save file as HTML:"
