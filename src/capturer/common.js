@@ -489,7 +489,7 @@ capturer.captureDocument = function (params) {
 
             switch (options["capture.base"]) {
               case "blank":
-                captureRewriteAttr(elem, "href", null);
+                captureRewriteUri(elem, "href", null);
                 break;
               case "remove":
                 captureRemoveNode(elem);
@@ -554,7 +554,7 @@ capturer.captureDocument = function (params) {
                 case "blank":
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // If the href attribute is absent, then the element does not define a link.
-                  captureRewriteAttr(elem, "href", "about:blank");
+                  captureRewriteUri(elem, "href", "about:blank");
                   break;
                 case "remove":
                   captureRemoveNode(elem);
@@ -602,7 +602,7 @@ capturer.captureDocument = function (params) {
                 case "blank":
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // If the href attribute is absent, then the element does not define a link.
-                  captureRewriteAttr(elem, "href", "about:blank");
+                  captureRewriteUri(elem, "href", "about:blank");
                   break;
                 case "remove":
                   captureRemoveNode(elem);
@@ -671,7 +671,7 @@ capturer.captureDocument = function (params) {
                 //
                 // script with src="about:blank" can cause an error in some contexts
                 if (elem.hasAttribute("src")) {
-                  captureRewriteAttr(elem, "src", null);
+                  captureRewriteUri(elem, "src", null);
                 }
                 captureRewriteTextContent(elem, "");
                 break;
@@ -733,7 +733,7 @@ capturer.captureDocument = function (params) {
                   // do nothing
                   break;
                 case "remove":
-                  captureRewriteAttr(elem, "background", null);
+                  captureRewriteUri(elem, "background", null);
                   break;
                 case "save":
                 default:
@@ -771,7 +771,7 @@ capturer.captureDocument = function (params) {
               case "blank":
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The src attribute, if present, must be a valid non-empty URL.
-                captureRewriteAttr(frame, "src", null);
+                captureRewriteUri(frame, "src", null);
                 break;
               case "remove":
                 captureRemoveNode(frame);
@@ -783,7 +783,7 @@ capturer.captureDocument = function (params) {
                   if (response) {
                     captureRewriteUri(frame, "src", response.url);
                   } else {
-                    captureRewriteAttr(frame, "src", null);
+                    captureRewriteUri(frame, "src", null);
                   }
                   return response;
                 };
@@ -819,7 +819,7 @@ capturer.captureDocument = function (params) {
                   // frame window inaccessible: this happens when the document is headlessly captured,
                   // use srcdoc or (headlessly) capture src
                   if (frame.hasAttribute("srcdoc")) {
-                    captureRewriteAttr(frame, "src", null);
+                    captureRewriteUri(frame, "src", null);
                     break;
                   }
 
@@ -836,7 +836,7 @@ capturer.captureDocument = function (params) {
                     }).then(captureFrameCallback);
                   } else {
                     console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
-                    captureRewriteAttr(frame, "src", capturer.getCircularUrl(frameSrc.src, options));
+                    captureRewriteUri(frame, "src", capturer.getCircularUrl(frameSrc.src, options));
                   }
                 }
                 break;
@@ -859,7 +859,7 @@ capturer.captureDocument = function (params) {
                 case "blank":
                 case "remove":
                 default:
-                  captureRewriteAttr(elem, "href", "javascript:");
+                  captureRewriteUri(elem, "href", "javascript:");
                   break;
               }
               break;
@@ -895,11 +895,11 @@ capturer.captureDocument = function (params) {
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The src attribute must be present, and must contain a valid non-empty URL.
                 if (elem.hasAttribute("src")) {
-                  captureRewriteAttr(elem, "src", "about:blank");
+                  captureRewriteUri(elem, "src", "about:blank");
                 }
 
                 if (elem.hasAttribute("srcset")) {
-                  captureRewriteAttr(elem, "srcset", null);
+                  captureRewriteUri(elem, "srcset", null);
                 }
 
                 break;
@@ -909,8 +909,8 @@ capturer.captureDocument = function (params) {
               case "save-current":
                 if (!isHeadless) {
                   if (elemOrig.currentSrc) {
-                    captureRewriteAttr(elem, "src", elemOrig.currentSrc);
-                    captureRewriteAttr(elem, "srcset", null);
+                    captureRewriteUri(elem, "src", elemOrig.currentSrc);
+                    captureRewriteUri(elem, "srcset", null);
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
                       url: elem.src,
@@ -968,7 +968,7 @@ capturer.captureDocument = function (params) {
                 break;
               case "blank":
                 Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                  captureRewriteAttr(elem, "srcset", null);
+                  captureRewriteUri(elem, "srcset", null);
                 }, this);
                 break;
               case "remove":
@@ -980,8 +980,8 @@ capturer.captureDocument = function (params) {
                     const elemOrig = origNodeMap.get(elem);
 
                     if (elemOrig.currentSrc) {
-                      captureRewriteAttr(elem, "src", elemOrig.currentSrc);
-                      captureRewriteAttr(elem, "srcset", null);
+                      captureRewriteUri(elem, "src", elemOrig.currentSrc);
+                      captureRewriteUri(elem, "srcset", null);
                     }
                   }, this);
 
@@ -1024,13 +1024,13 @@ capturer.captureDocument = function (params) {
                 break;
               case "blank":
                 if (elem.hasAttribute("src")) {
-                  captureRewriteAttr(elem, "src", "about:blank");
+                  captureRewriteUri(elem, "src", "about:blank");
                 }
 
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The src attribute must be present and be a valid non-empty URL.
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                  captureRewriteAttr(elem, "src", "about:blank");
+                  captureRewriteUri(elem, "src", "about:blank");
                 }, this);
 
                 break;
@@ -1040,7 +1040,7 @@ capturer.captureDocument = function (params) {
               case "save-current":
                 if (!isHeadless) {
                   if (elemOrig.currentSrc) {
-                    captureRewriteAttr(elem, "src", elemOrig.currentSrc);
+                    captureRewriteUri(elem, "src", elemOrig.currentSrc);
                     Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                       captureRemoveNode(elem);
                     }, this);
@@ -1115,17 +1115,17 @@ capturer.captureDocument = function (params) {
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The attribute, if present, must contain a valid non-empty URL.
                 if (elem.hasAttribute("poster")) {
-                  captureRewriteAttr(elem, "poster", null);
+                  captureRewriteUri(elem, "poster", null);
                 }
 
                 if (elem.hasAttribute("src")) {
-                  captureRewriteAttr(elem, "src", "about:blank");
+                  captureRewriteUri(elem, "src", "about:blank");
                 }
 
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The src attribute must be present and be a valid non-empty URL.
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                  captureRewriteAttr(elem, "src", "about:blank");
+                  captureRewriteUri(elem, "src", "about:blank");
                 }, this);
 
                 break;
@@ -1148,7 +1148,7 @@ capturer.captureDocument = function (params) {
                   }
 
                   if (elemOrig.currentSrc) {
-                    captureRewriteAttr(elem, "src", elemOrig.currentSrc);
+                    captureRewriteUri(elem, "src", elemOrig.currentSrc);
                     Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                       captureRemoveNode(elem);
                     }, this);
@@ -1227,7 +1227,7 @@ capturer.captureDocument = function (params) {
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The src attribute, if present, must contain a valid non-empty URL.
                 if (elem.hasAttribute("src")) {
-                  captureRewriteAttr(elem, "src", null);
+                  captureRewriteUri(elem, "src", null);
                 }
                 break;
               case "remove":
@@ -1266,7 +1266,7 @@ capturer.captureDocument = function (params) {
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The data attribute, if present, must be a valid non-empty URL.
                 if (elem.hasAttribute("data")) {
-                  captureRewriteAttr(elem, "data", null);
+                  captureRewriteUri(elem, "data", null);
                 }
                 break;
               case "remove":
@@ -1309,11 +1309,11 @@ capturer.captureDocument = function (params) {
                 break;
               case "blank":
                 if (elem.hasAttribute("code")) {
-                  captureRewriteAttr(elem, "code", null);
+                  captureRewriteUri(elem, "code", null);
                 }
 
                 if (elem.hasAttribute("archive")) {
-                  captureRewriteAttr(elem, "archive", "about:blank");
+                  captureRewriteUri(elem, "archive", "about:blank");
                 }
                 break;
               case "remove":
@@ -1406,7 +1406,7 @@ capturer.captureDocument = function (params) {
                   case "blank":
                     // HTML 5.1 2nd Edition / W3C Recommendation:
                     // The src attribute must be present, and must contain a valid non-empty URL.
-                    captureRewriteAttr(elem, "src", "about:blank");
+                    captureRewriteUri(elem, "src", "about:blank");
                     break;
                   case "remove":
                     captureRemoveNode(elem);
