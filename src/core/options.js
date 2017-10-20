@@ -111,7 +111,14 @@ window.addEventListener("DOMContentLoaded", (event) => {
   document.getElementById("options").addEventListener("submit", (event) => {
     event.preventDefault();
     for (let id in scrapbook.options) {
-      scrapbook.options[id] = getOptionFromDocument(id);
+      // Overwrite only keys with a defined value so that
+      // keys not listed in the options page are not nullified.
+      // In Chrome, storageArea.set({key: undefined}) does not store to key.
+      // In Firefox, storageArea.set({key: undefined}) stores null to key.
+      const value = getOptionFromDocument(id);
+      if (typeof value !== "undefined") {
+        scrapbook.options[id] = value;
+      }
     }
     scrapbook.saveOptions().then(() => {
       closeWindow();
