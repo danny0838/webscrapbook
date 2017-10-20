@@ -202,8 +202,8 @@ capturer.captureDocument = function (params) {
     };
 
     // remove the specified node, record it if option set
-    const captureRemoveNode = function (elem) {
-      if (options["capture.recordRemovedNode"]) {
+    const captureRemoveNode = function (elem, record = options["capture.recordRemovedNode"]) {
+      if (record) {
         elem.parentNode.replaceChild(doc.createComment("sb-orig-node-" + timeId + "--" + scrapbook.escapeHtmlComment(elem.outerHTML)), elem);
       }
       else {
@@ -212,55 +212,10 @@ capturer.captureDocument = function (params) {
     };
 
     // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
-    const captureRewriteAttr = function (elem, attr, value) {
-      if (value === null || value === undefined) {
-      if (elem.hasAttribute(attr)) {
-          if (options["capture.recordRewrittenAttr"]) {
-            const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
-            if (!elem.hasAttribute(recordAttr)) {
-              elem.setAttribute(recordAttr, elem.getAttribute(attr));
-            }
-          }
-          elem.removeAttribute(attr);
-        }
-        } else {
-        if (elem.getAttribute(attr) !== value) {
-          if (options["capture.recordRewrittenAttr"]) {
-            if (elem.hasAttribute(attr)) {
-          const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
-              if (!elem.hasAttribute(recordAttr)) {
-                elem.setAttribute(recordAttr, elem.getAttribute(attr));
-        }
-      } else {
-          const recordAttr = "data-sb-orig-null-attr-" + attr + "-" + timeId;
-              if (!elem.hasAttribute(recordAttr)) {
-                elem.setAttribute(recordAttr, "");
-        }
-      }
-          }
-          elem.setAttribute(attr, value);
-        }
-      }
-    };
-
-    // rewrite (or remove if value is null/undefined) the textContent, record it if option set
-    const captureRewriteTextContent = function (elem, value) {
-      if (elem.textContent != value) {
-        if (options["capture.recordRewrittenAttr"]) {
-          const recordAttr = "data-sb-orig-textContent-" + timeId;
-          if (!elem.hasAttribute(recordAttr)) {
-            elem.setAttribute(recordAttr, elem.textContent);
-          }
-        }
-        elem.textContent = value;
-      }
-    };
-
-    // similar to captureRewriteAttr, but use option capture.recordSourceUri
-    const captureRewriteUri = function (elem, attr, value) {
+    const captureRewriteAttr = function (elem, attr, value, record = options["capture.recordRewrittenAttr"]) {
       if (value === null || value === undefined) {
         if (elem.hasAttribute(attr)) {
-          if (options["capture.recordSourceUri"]) {
+          if (record) {
             const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
             if (!elem.hasAttribute(recordAttr)) {
               elem.setAttribute(recordAttr, elem.getAttribute(attr));
@@ -270,7 +225,7 @@ capturer.captureDocument = function (params) {
         }
       } else {
         if (elem.getAttribute(attr) !== value) {
-          if (options["capture.recordSourceUri"]) {
+          if (record) {
             if (elem.hasAttribute(attr)) {
               const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
               if (!elem.hasAttribute(recordAttr)) {
@@ -286,6 +241,24 @@ capturer.captureDocument = function (params) {
           elem.setAttribute(attr, value);
         }
       }
+    };
+
+    // rewrite (or remove if value is null/undefined) the textContent, record it if option set
+    const captureRewriteTextContent = function (elem, value, record = options["capture.recordRewrittenAttr"]) {
+      if (elem.textContent != value) {
+        if (record) {
+          const recordAttr = "data-sb-orig-textContent-" + timeId;
+          if (!elem.hasAttribute(recordAttr)) {
+            elem.setAttribute(recordAttr, elem.textContent);
+          }
+        }
+        elem.textContent = value;
+      }
+    };
+
+    // similar to captureRewriteAttr, but use option capture.recordSourceUri
+    const captureRewriteUri = function (elem, attr, value, record = options["capture.recordSourceUri"]) {
+      return captureRewriteAttr(elem, attr, value, record);
     };
 
     const rewriteLocalLink = function (url) {
