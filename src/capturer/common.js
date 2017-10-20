@@ -203,56 +203,54 @@ capturer.captureDocument = function (params) {
 
     // remove the specified node, record it if option set
     const captureRemoveNode = function (elem, record = options["capture.recordRemovedNode"]) {
+      if (!elem.parentNode) { return; }
+
       if (record) {
-        elem.parentNode.replaceChild(doc.createComment("sb-orig-node-" + timeId + "--" + scrapbook.escapeHtmlComment(elem.outerHTML)), elem);
-      }
-      else {
+        const comment = doc.createComment(`sb-orig-node-${timeId}--${scrapbook.escapeHtmlComment(elem.outerHTML)}`);
+        elem.parentNode.replaceChild(comment, elem);
+      } else {
         elem.parentNode.removeChild(elem);
       }
     };
 
     // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
     const captureRewriteAttr = function (elem, attr, value, record = options["capture.recordRewrittenAttr"]) {
-      if (value === null || value === undefined) {
-        if (elem.hasAttribute(attr)) {
-          if (record) {
-            const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
-            if (!elem.hasAttribute(recordAttr)) {
-              elem.setAttribute(recordAttr, elem.getAttribute(attr));
-            }
-          }
+      if (elem.hasAttribute(attr)) {
+        const oldValue = elem.getAttribute(attr);
+        if (oldValue === value) { return; }
+
+        if (value === null || value === undefined) {
           elem.removeAttribute(attr);
+        } else {
+          elem.setAttribute(attr, value);
+        }
+
+        if (record) {
+          const recordAttr = `data-sb-orig-attr-${attr}-${timeId}`;
+          if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, oldValue); }
         }
       } else {
-        if (elem.getAttribute(attr) !== value) {
-          if (record) {
-            if (elem.hasAttribute(attr)) {
-              const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
-              if (!elem.hasAttribute(recordAttr)) {
-                elem.setAttribute(recordAttr, elem.getAttribute(attr));
-              }
-            } else {
-              const recordAttr = "data-sb-orig-null-attr-" + attr + "-" + timeId;
-              if (!elem.hasAttribute(recordAttr)) {
-                elem.setAttribute(recordAttr, "");
-              }
-            }
-          }
-          elem.setAttribute(attr, value);
+        if (value === null || value === undefined) { return; }
+
+        elem.setAttribute(attr, value);
+
+        if (record) {
+          const recordAttr = `data-sb-orig-null-attr-${attr}-${timeId}`;
+          if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, ""); }
         }
       }
     };
 
     // rewrite (or remove if value is null/undefined) the textContent, record it if option set
     const captureRewriteTextContent = function (elem, value, record = options["capture.recordRewrittenAttr"]) {
-      if (elem.textContent != value) {
-        if (record) {
-          const recordAttr = "data-sb-orig-textContent-" + timeId;
-          if (!elem.hasAttribute(recordAttr)) {
-            elem.setAttribute(recordAttr, elem.textContent);
-          }
-        }
-        elem.textContent = value;
+      const oldValue = elem.textContent;
+      if (oldValue === value) { return; }
+
+      elem.textContent = value;
+
+      if (record) {
+        const recordAttr = `data-sb-orig-textContent-${timeId}`;
+        if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, oldValue); }
       }
     };
 
