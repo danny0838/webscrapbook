@@ -957,7 +957,7 @@ capturer.captureDocument = function (params) {
                   }, this);
 
                   Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                    captureRemoveNode(elem);
+                    captureRemoveNode(elem, options["capture.recordSourceUri"]);
                   }, this);
 
                   break;
@@ -1013,7 +1013,7 @@ capturer.captureDocument = function (params) {
                   if (elemOrig.currentSrc) {
                     captureRewriteUri(elem, "src", elemOrig.currentSrc);
                     Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                      captureRemoveNode(elem);
+                      captureRemoveNode(elem, options["capture.recordSourceUri"]);
                     }, this);
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
@@ -1121,7 +1121,7 @@ capturer.captureDocument = function (params) {
                   if (elemOrig.currentSrc) {
                     captureRewriteUri(elem, "src", elemOrig.currentSrc);
                     Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                      captureRemoveNode(elem);
+                      captureRemoveNode(elem, options["capture.recordSourceUri"]);
                     }, this);
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {

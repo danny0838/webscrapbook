@@ -200,13 +200,13 @@
     "message": "Record removed elements:"
   },
   "OptionCaptureRecordRemovedNodeTooltip": {
-    "message": "If an element is removed during the capture process, create a comment in place to record its original content."
+    "message": "If an element is removed during the capture process, create an HTML comment in place to record its original content."
   },
   "OptionCaptureRecordSourceUriLabel": {
     "message": "Record source URL:"
   },
   "OptionCaptureRecordSourceUriTooltip": {
-    "message": "If a URL is rewritten during the capture process, create a corresponding data-* attribute to record its original address."
+    "message": "If a URL is rewritten during the capture process, create a data-* attribute or HTML comment to record its original address."
   },
   "OptionCaptureRewriteCssLabel": {
     "message": "Rewrite CSS:"

@@ -206,7 +206,7 @@
     "message": "記錄原始的 URL:"
   },
   "OptionCaptureRecordSourceUriTooltip": {
-    "message": "擷取網頁時若有改寫連結，則建立對應的 data-* 屬性記錄改寫前的 URL 位址。"
+    "message": "擷取網頁時若有改寫連結，則建立 data-* 屬性或  HTML 註解記錄原始 URL 位址。"
   },
   "OptionCaptureRewriteCssLabel": {
     "message": "改寫樣式表:"
