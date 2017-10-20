@@ -18,24 +18,22 @@ function initDefaultOptions() {
 function getOptionFromDocument(id) {
   const elem = document.getElementById(OPTION_PREFIX + id);
   if (!elem) { return; }
-  switch (elem.getAttribute("type")) {
-    case "checkbox":
-      return elem.checked;
-    default:
-      return elem.value;
+
+  if (elem.matches('input[type="checkbox"]')) {
+    return elem.checked;
+  } else {
+    return elem.value;
   }
 }
 
 function setOptionToDocument(id, value) {
   const elem = document.getElementById(OPTION_PREFIX + id);
   if (!elem) { return; }
-  switch (elem.getAttribute("type")) {
-    case "checkbox":
-      elem.checked = value;
-      break;
-    default:
-      elem.value = value;
-      break;
+
+  if (elem.matches('input[type="checkbox"]')) {
+    elem.checked = !!value;
+  } else {
+    elem.value = value;
   }
 }
 
@@ -49,11 +47,7 @@ function exportOptions() {
   elem.remove();
 }
 
-function importOptions() {
-  document.getElementById("import-input").click();
-}
-
-function importFile(file) {
+function importOptions(file) {
   document.getElementById("import-input").value = null;
 
   scrapbook.readFileAsText(file).then((text) => {
@@ -120,13 +114,13 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
   document.getElementById("import").addEventListener("click", (event) => {
     event.preventDefault();
-    importOptions();
+    document.getElementById("import-input").click();
   });
 
   document.getElementById("import-input").addEventListener("change", (event) => {
     event.preventDefault();
     const file = event.target.files[0];
-    importFile(file);
+    importOptions(file);
   });
 
   // default options
