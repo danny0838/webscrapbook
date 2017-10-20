@@ -204,7 +204,7 @@ capturer.captureDocument = function (params) {
     // remove the specified node, record it if option set
     const captureRemoveNode = function (elem) {
       if (options["capture.recordRemovedNode"]) {
-        elem.parentNode.replaceChild(doc.createComment("sb-" + timeId + "-orig-node--" + scrapbook.escapeHtmlComment(elem.outerHTML)), elem);
+        elem.parentNode.replaceChild(doc.createComment("sb-orig-node-" + timeId + "--" + scrapbook.escapeHtmlComment(elem.outerHTML)), elem);
       }
       else {
         elem.parentNode.removeChild(elem);
@@ -214,7 +214,7 @@ capturer.captureDocument = function (params) {
     // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
     const captureRewriteAttr = function (elem, attr, value) {
       if (value === null || value === undefined) {
-        if (elem.hasAttribute(attr)) {
+      if (elem.hasAttribute(attr)) {
           if (options["capture.recordRewrittenAttr"]) {
             const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
             if (!elem.hasAttribute(recordAttr)) {
@@ -223,20 +223,20 @@ capturer.captureDocument = function (params) {
           }
           elem.removeAttribute(attr);
         }
-      } else {
+        } else {
         if (elem.getAttribute(attr) !== value) {
           if (options["capture.recordRewrittenAttr"]) {
             if (elem.hasAttribute(attr)) {
-              const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
+          const recordAttr = "data-sb-orig-attr-" + attr + "-" + timeId;
               if (!elem.hasAttribute(recordAttr)) {
                 elem.setAttribute(recordAttr, elem.getAttribute(attr));
-              }
-            } else {
-              const recordAttr = "data-sb-orig-null-attr-" + attr + "-" + timeId;
+        }
+      } else {
+          const recordAttr = "data-sb-orig-null-attr-" + attr + "-" + timeId;
               if (!elem.hasAttribute(recordAttr)) {
                 elem.setAttribute(recordAttr, "");
-              }
-            }
+        }
+      }
           }
           elem.setAttribute(attr, value);
         }
