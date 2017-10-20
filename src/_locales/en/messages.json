@@ -211,12 +211,6 @@
   "OptionCaptureRecordSourceUriTooltip": {
     "message": "If a URL is rewritten during the capture process, create a corresponding data-* attribute to record its original address."
   },
-  "OptionCaptureRemoveIntegrityLabel": {
-    "message": "Remove integrity:"
-  },
-  "OptionCaptureRemoveIntegrityTooltip": {
-    "message": "Remove integrity, crossorigin or similar attributes to avoid a loading failure due to writing or a change of context of loading."
-  },
   "OptionCaptureRewriteCssLabel": {
     "message": "Rewrite CSS:"
   },

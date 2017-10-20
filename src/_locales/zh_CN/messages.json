@@ -211,12 +211,6 @@
   "OptionCaptureRecordSourceUriTooltip": {
     "message": "获取网页时若有改写链接，则建立对应的 data-* 属性记录改写前的 URI 位址。"
   },
-  "OptionCaptureRemoveIntegrityLabel": {
-    "message": "移除资源验证属性:"
-  },
-  "OptionCaptureRemoveIntegrityTooltip": {
-    "message": "移除 integrity 及 crossorigin 等资源验证属性，以免因内容改写或存取环境改变導致无法载入。"
-  },
   "OptionCaptureRewriteCssLabel": {
     "message": "改写样式表:"
   },
