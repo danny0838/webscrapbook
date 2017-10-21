@@ -16,5 +16,5 @@ This extension is available for Chromium-based browsers (Google Chrome, Opera, V
 ## See also:
 
 * [Download Chrome extension in Chrome web store](https://chrome.google.com/webstore/detail/web-scrapbook/oegnpmiddfljlloiklpkeelagaeejfai)
-* [Download Firefox addon](https://danny0838.github.io/webscrapbook/files/firefox/latest.html)
+* [Download Firefox addon in AMO](https://addons.mozilla.org/firefox/addon/web-scrapbook/)
 * [View project repository](https://github.com/danny0838/webscrapbook)
