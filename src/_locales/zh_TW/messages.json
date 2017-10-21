@@ -154,6 +154,9 @@
   "OptionCaptureFontLabel": {
     "message": "字體:"
   },
+  "OptionCaptureFontSaveUsedTooltip": {
+    "message": "只儲存套用於目前網頁的字體。這可以縮小容量，但儲存腳本時可能導致所需檔案遺失。"
+  },
   "OptionCaptureFormStatusLabel": {
     "message": "表單狀態:"
   },
@@ -168,6 +171,9 @@
   },
   "OptionCaptureImageBackgroundLabel": {
     "message": "背景圖片:"
+  },
+  "OptionCaptureImageBackgroundSaveUsedTooltip": {
+    "message": "只儲存套用於目前網頁的背景圖片。這可以縮小容量，但儲存腳本時可能導致所需檔案遺失。"
   },
   "OptionCaptureImageLabel": {
     "message": "圖片:"

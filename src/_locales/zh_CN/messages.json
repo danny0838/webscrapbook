@@ -154,6 +154,9 @@
   "OptionCaptureFontLabel": {
     "message": "字体:"
   },
+  "OptionCaptureFontSaveUsedTooltip": {
+    "message": "只保存应用于目前网页的字体。这可以缩小容量，但保存脚本时可能导致所需文件遗失。"
+  },
   "OptionCaptureFormStatusLabel": {
     "message": "表单状态:"
   },
@@ -168,6 +171,9 @@
   },
   "OptionCaptureImageBackgroundLabel": {
     "message": "背景图片:"
+  },
+  "OptionCaptureImageBackgroundSaveUsedTooltip": {
+    "message": "只保存应用于目前网页的背景图片。这可以缩小容量，但保存脚本时可能导致所需文件遗失。"
   },
   "OptionCaptureImageLabel": {
     "message": "图片:"

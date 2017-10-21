@@ -154,6 +154,9 @@
   "OptionCaptureFontLabel": {
     "message": "Fonts:"
   },
+  "OptionCaptureFontSaveUsedTooltip": {
+    "message": "Save only the fonts that is applied to the current web page. This reduces size but could cause a missing of required files if scripts are saved."
+  },
   "OptionCaptureFormStatusLabel": {
     "message": "Form status:"
   },
@@ -168,6 +171,9 @@
   },
   "OptionCaptureImageBackgroundLabel": {
     "message": "Background images:"
+  },
+  "OptionCaptureImageBackgroundSaveUsedTooltip": {
+    "message": "Save only the background images that is applied to the current web page. This reduces size but could cause a missing of required files if scripts are saved."
   },
   "OptionCaptureImageLabel": {
     "message": "Images:"

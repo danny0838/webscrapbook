@@ -414,6 +414,281 @@ capturer.captureDocument = function (params) {
         }
       }
 
+      // map used background images and fonts
+      // @TODO: nodes removed during capture process still have resources downloaded
+      if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
+        const usedCssFontUrl = {};
+        const usedCssImageUrl = {};
+
+        const fontFamilyMapper = {
+          list: {},
+
+          get(fontFamily) {
+            if (!this.list[fontFamily]) {
+              this.list[fontFamily] = {used: false, urls: []};
+            }
+
+            return this.list[fontFamily];
+          },
+
+          addUrl(fontFamily, url) {
+            this.get(fontFamily).urls.push(url);
+          },
+
+          /**
+           * @param {string} fontFamily - Raw font-family text value
+           */
+          use(fontFamily) {
+            if (!fontFamily) { return; }
+
+            // The fontFamily property value is normalized:
+            // - Names are separated with ", ".
+            // - Unsafe names are quoted with "", not '' ('"'s inside are escaped with '\"').
+            // - Unicode escape sequences are unescaped.
+            // - No CSS comment.
+            const regex = /("(?:\\"|[^"])*")|([^,\s]+)(?:,\s*|$)/g;
+            const names = [];
+            while (regex.test(fontFamily)) {
+              if (RegExp.$1) {
+                names.push(RegExp.$1.slice(1, -1).replace(/\\(.)/g, "$1"));
+              } else {
+                names.push(RegExp.$2);
+              }
+            }
+
+            names.forEach((fontFamily) => {
+              this.get(fontFamily).used = true;
+            });
+          },
+        };
+
+        const animationMapper = {
+          list: {},
+
+          get(name) {
+            if (!this.list[name]) {
+              this.list[name] = {used: false, urls: []};
+            }
+
+            return this.list[name];
+          },
+
+          addUrl(name, url) {
+            this.get(name).urls.push(url);
+          },
+
+          use(name) {
+            if (!name) { return; }
+
+            this.get(name).used = true;
+          },
+        };
+
+        const verifySelector = function (root, selectorText) {
+          try {
+            if (root.querySelector(selectorText)) { return true; }
+
+            // querySelector of selectors like a:hover or so always return null
+            //
+            // Preserve a pseudo-class(:*) or pseudo-element(::*) only if:
+            // 1. it's a pure pseudo (e.g. :hover), or
+            // 2. its non-pseudo version (e.g. a for a:hover) exist
+            var hasPseudo = false;
+            var inPseudo = false;
+            var depseudoSelectors = [""];
+            selectorText.replace(
+              /(,\s+)|(\s+)|((?:[\-0-9A-Za-z_\u00A0-\uFFFF]|\\[0-9A-Fa-f]{1,6} ?|\\.)+)|(\[(?:"(?:\\.|[^"])*"|\\.|[^\]])*\])|(.)/g,
+              (m, m1, m2, m3, m4, m5) => {
+                if (m1) {
+                  depseudoSelectors.push("");
+                  inPseudo = false;
+                } else if (m5 == ":") {
+                  hasPseudo = true;
+                  inPseudo = true;
+                } else if (inPseudo) {
+                  if (!(m3 || m5)) {
+                    inPseudo = false;
+                    depseudoSelectors[depseudoSelectors.length - 1] += m;
+                  }
+                } else {
+                  depseudoSelectors[depseudoSelectors.length - 1] += m;
+                }
+                return m;
+              }
+            );
+            if (hasPseudo) {
+              for (let i=0, I=depseudoSelectors.length; i<I; ++i) {
+                if (depseudoSelectors[i] === "" || root.querySelector(depseudoSelectors[i])) return true;
+              };
+            }
+          } catch (ex) {}
+
+          return false;
+        };
+
+        const parseCss = function (css, refUrl) {
+          if (css.disabled) { return; }
+          if (!css.cssRules) { return; }
+
+          Array.prototype.forEach.call(css.cssRules, (cssRule) => parseCssRule(cssRule, css.href || refUrl));
+        };
+
+        const parseCssRule = function (cssRule, refUrl) {
+          switch (cssRule.type) {
+            case CSSRule.STYLE_RULE: {
+              // this CSS rule applies to no node in the captured area
+              if (!verifySelector(rootNode, cssRule.selectorText)) { break; }
+
+              fontFamilyMapper.use(cssRule.style.fontFamily);
+              animationMapper.use(cssRule.style.animationName);
+
+              parseCssText(cssRule.cssText, refUrl, (url) => {
+                usedCssImageUrl[url] = true;
+              });
+              break;
+            }
+            // @FIXME:
+            // In some browsers (e.g. Chrome), cssRules.styleSheet is null
+            // if the document is in file: (maybe others?) scheme.
+            case CSSRule.IMPORT_RULE: {
+              if (!cssRule.styleSheet) { break; }
+
+              parseCss(cssRule.styleSheet, refUrl);
+              break;
+            }
+            case CSSRule.MEDIA_RULE: {
+              if (!cssRule.cssRules) { break; }
+
+              Array.prototype.forEach.call(cssRule.cssRules, (cssRule) => parseCssRule(cssRule, refUrl));
+              break;
+            }
+            case CSSRule.FONT_FACE_RULE: {
+              if (!cssRule.cssText) { break; }
+
+              const {fontFamily, src} = cssRule.style;
+
+              if (!fontFamily || !src) { break; }
+
+              // record this font family and its font URL
+              parseCssText(src, refUrl, (url) => {
+                fontFamilyMapper.addUrl(fontFamily, url);
+              });
+
+              break;
+            }
+            case CSSRule.PAGE_RULE: {
+              if (!cssRule.cssText) { break; }
+
+              fontFamilyMapper.use(cssRule.style.fontFamily);
+              animationMapper.use(cssRule.style.animationName);
+
+              parseCssText(cssRule.cssText, refUrl, (url) => {
+                usedCssImageUrl[url] = true;
+              });
+              break;
+            }
+            case CSSRule.KEYFRAMES_RULE: {
+              if (!cssRule.cssRules) { break; }
+
+              animationMapper.get(cssRule.name);
+
+              Array.prototype.forEach.call(cssRule.cssRules, (cssRule) => parseCssRule(cssRule, refUrl));
+              break;
+            }
+            case CSSRule.KEYFRAME_RULE: {
+              if (!cssRule.cssText) { break; }
+
+              fontFamilyMapper.use(cssRule.style.fontFamily);
+
+              parseCssText(cssRule.cssText, refUrl, (url) => {
+                animationMapper.addUrl(cssRule.parentRule.name, url);
+              });
+              break;
+            }
+            // @TODO: this is only supported by Firefox and the API is unstable
+            // @TODO: check if this counter-style is really used
+            case 11/* CSSRule.COUNTER_STYLE_RULE */: {
+              if (!cssRule.symbols) { break; }
+
+              parseCssText(cssRule.symbols, refUrl, (url) => {
+                usedCssImageUrl[url] = true;
+              });
+              break;
+            }
+            // @TODO: check supported or not
+            case CSSRule.SUPPORTS_RULE: {
+              if (!cssRule.cssRules) { break; }
+
+              Array.prototype.forEach.call(cssRule.cssRules, (cssRule) => parseCssRule(cssRule, refUrl));
+              break;
+            }
+            // @TODO: this is only supported by Firefox (with -moz-) and the API is unstable
+            case 13/* CSSRule.DOCUMENT_RULE */: {
+              if (!cssRule.cssRules) { break; }
+
+              Array.prototype.forEach.call(cssRule.cssRules, (cssRule) => parseCssRule(cssRule, refUrl));
+              break;
+            }
+          }
+        };
+
+        // We pass only elemental css text, which should not contain any at-rule
+        const parseCssText = function (cssText, refUrl, callback = x => x) {
+          scrapbook.parseCssText(cssText, {
+            rewriteImportUrl(url) { return {url}; },
+            rewriteFontFaceUrl(url) { return {url}; },
+            rewriteBackgroundUrl(url) {
+              const targetUrl = capturer.resolveRelativeUrl(url, refUrl);
+              callback(targetUrl);
+              return {url};
+            },
+          });
+        };
+
+        Array.prototype.forEach.call(doc.styleSheets, (css) => parseCss(css, doc.URL));
+
+        Array.prototype.forEach.call(rootNode.querySelectorAll("*"), (elem) => {
+          const {style} = elem;
+
+          fontFamilyMapper.use(style.fontFamily);
+          animationMapper.use(style.animationName);
+
+          for (let i of style) {
+            parseCssText(style.getPropertyValue(i), doc.URL, (url) => {
+              usedCssImageUrl[url] = true;
+            });
+          }
+        });
+
+        // collect used font families
+        for (let fontFamily in fontFamilyMapper.list) {
+          const f = fontFamilyMapper.list[fontFamily];
+          if (f.used) {
+            for (let url of f.urls) {
+              usedCssFontUrl[url] = true;
+            }
+          }
+        }
+
+        // collect used animation background images
+        for (let name in animationMapper.list) {
+          const f = animationMapper.list[name];
+          if (f.used) {
+            for (let url of f.urls) {
+              usedCssImageUrl[url] = true;
+            }
+          }
+        }
+
+        // expose filter to settings
+        if (options["capture.imageBackground"] === "save-used") {
+          settings.usedCssImageUrl = usedCssImageUrl;
+        }
+        if (options["capture.font"] === "save-used") {
+          settings.usedCssFontUrl = usedCssFontUrl;
+        }
+      }
+
       // record source URL
       if (options["capture.recordDocumentMeta"]) {
         let url = doc.URL.startsWith("data:") ? "data:" : doc.URL;
@@ -706,6 +981,7 @@ capturer.captureDocument = function (params) {
                 case "remove":
                   captureRewriteUri(elem, "background", null);
                   break;
+                case "save-used":
                 case "save":
                 default:
                   tasks[tasks.length] = 
@@ -1651,6 +1927,7 @@ capturer.processCssFile = function (params) {
  */
 capturer.processCssText = function (cssText, refUrl, settings, options) {
   const downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
+  const {usedCssFontUrl, usedCssImageUrl} = settings;
 
   const rewritten = scrapbook.parseCssText(cssText, {
     rewriteImportUrl(url) {
@@ -1686,6 +1963,11 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
           break;
         case "save":
         default:
+          if (usedCssFontUrl && !usedCssFontUrl[sourceUrl]) {
+            dataUrl = "";
+            break;
+          }
+
           dataUrl = downloader.getUrlHash(dataUrl);
           break;
       }
@@ -1702,8 +1984,14 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
         case "remove":
           dataUrl = "";
           break;
+        case "save-used":
         case "save":
         default:
+          if (usedCssImageUrl && !usedCssImageUrl[sourceUrl]) {
+            dataUrl = "";
+            break;
+          }
+
           dataUrl = downloader.getUrlHash(dataUrl);
           break;
       }

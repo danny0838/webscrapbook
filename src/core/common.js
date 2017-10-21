@@ -31,7 +31,7 @@ scrapbook.options = {
   "capture.saveFileAsHtml": false,
   "capture.saveDataUriAsFile": false,
   "capture.image": "save", // "save", "save-current", "link", "blank", "remove"
-  "capture.imageBackground": "save", // "save", "link", "remove"
+  "capture.imageBackground": "save", // "save", "save-used", "link", "remove"
   "capture.favicon": "save", // "save", "link", "blank", "remove"
   "capture.canvas": "save", // "save", "blank", "remove"
   "capture.audio": "save", // "save", "save-current", "link", "blank", "remove"
@@ -40,7 +40,7 @@ scrapbook.options = {
   "capture.object": "blank", // "save", "link", "blank", "remove"
   "capture.applet": "blank", // "save", "link", "blank", "remove"
   "capture.frame": "save", // "save", "link", "blank", "remove"
-  "capture.font": "save", // "save", "link", "blank", "remove"
+  "capture.font": "save", // "save", "save-used", "link", "blank", "remove"
   "capture.style": "save", // "save", "link", "blank", "remove"
   "capture.styleInline": "save", // "save", "blank", "remove"
   "capture.rewriteCss": "url", // "none", "url"
