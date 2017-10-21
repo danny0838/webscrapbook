@@ -77,7 +77,7 @@
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
-    "message": "網路剪貼簿"
+    "message": "網頁剪貼簿"
   },
   "OpenOptions": {
     "message": "選項"
