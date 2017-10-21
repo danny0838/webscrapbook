@@ -281,10 +281,10 @@
     "message": "腳本:"
   },
   "OptionCaptureScriptLikeTooltip": {
-    "message": "此類物件在離線環境下可能無法正常運作，且有潛在的安全風險。"
+    "message": "此類物件在離線環境下或檢視器中可能無法正常運作，且有潛在的安全風險。"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "決定所有網頁腳本的處理，包括 SCRIPT 元素、javascript: 協定的超連結、onclick 之類的動態屬性等等。注意：儲存的腳本在離線環境下可能無法正常運作，且有潛在的安全風險。"
+    "message": "決定所有網頁腳本的處理，包括 SCRIPT 元素、javascript: 協定的超連結、onclick 之類的動態屬性等等。注意：儲存的腳本在離線環境下或檢視器中可能無法正常運作，且有潛在的安全風險。"
   },
   "OptionCaptureStyleInlineLabel": {
     "message": "內聯樣式:"

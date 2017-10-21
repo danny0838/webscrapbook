@@ -281,10 +281,10 @@
     "message": "脚本:"
   },
   "OptionCaptureScriptLikeTooltip": {
-    "message": "这类物件在离线环境下可能无法正常运作，且有潜在的安全风险。"
+    "message": "这类物件在离线环境下或检视器中可能无法正常运作，且有潜在的安全风险。"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "决定所有页面脚本的处理，包括 SCRIPT 元素、javascript: 协定的链接、onclick 之类的动态属性等等。注意：保存的脚本在离线环境下可能无法正常运作，且有潜在的安全风险。"
+    "message": "决定所有页面脚本的处理，包括 SCRIPT 元素、javascript: 协定的链接、onclick 之类的动态属性等等。注意：保存的脚本在离线环境下或检视器中可能无法正常运作，且有潜在的安全风险。"
   },
   "OptionCaptureStyleInlineLabel": {
     "message": "内联样式:"
