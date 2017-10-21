@@ -91,9 +91,6 @@
   "OptionCaptureAudioLabel": {
     "message": "Audio:"
   },
-  "OptionCaptureBaseLabel": {
-    "message": "BASE:"
-  },
   "OptionCaptureCanvasBlankLabel": {
     "message": "Save initial status"
   },

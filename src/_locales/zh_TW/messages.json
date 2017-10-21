@@ -91,9 +91,6 @@
   "OptionCaptureAudioLabel": {
     "message": "音訊:"
   },
-  "OptionCaptureBaseLabel": {
-    "message": "BASE 元素:"
-  },
   "OptionCaptureCanvasBlankLabel": {
     "message": "儲存初始狀態"
   },
