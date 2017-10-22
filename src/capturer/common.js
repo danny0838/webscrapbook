@@ -334,7 +334,7 @@ capturer.captureDocument = function (params) {
 
           // @TODO: it's not enough to preserve order of sparsely selected table cells
           let iRange = 0, iRangeMax = selection.rangeCount, curRange;
-          let caNode, scNode, ecNode;
+          let caNode, scNode, ecNode, ecNodePrev;
           for (; iRange < iRangeMax; ++iRange) {
             curRange = selection.getRangeAt(iRange);
             caNode = curRange.commonAncestorContainer;
@@ -364,16 +364,20 @@ capturer.captureDocument = function (params) {
             if (!clonedRefNode) {
               cloneNodeAndAncestors(refNode);
               clonedRefNode = clonedNodeMap.get(refNode);
-            } else {
-              // @TODO:
-              // Perhaps a similar splitter should be added for any node type,
-              // but some tags like <td> require special care.
-              if (caNode.nodeName === "#text") {
-                clonedRefNode.appendChild(doc.createComment("sb-capture-selected-splitter"));
-                clonedRefNode.appendChild(doc.createTextNode(" … "));
-                clonedRefNode.appendChild(doc.createComment("/sb-capture-selected-splitter"));
-              }
             }
+
+            // Add splitter.
+            //
+            // @TODO:
+            // Perhaps a similar splitter should be added for any node type,
+            // but some tags like <td> require special care.
+            if (ecNodePrev && scNode.parentNode === ecNodePrev.parentNode &&
+                ecNodePrev.nodeName === "#text" && scNode.nodeName === "#text" ) {
+              clonedRefNode.appendChild(doc.createComment("sb-capture-selected-splitter"));
+              clonedRefNode.appendChild(doc.createTextNode(" … "));
+              clonedRefNode.appendChild(doc.createComment("/sb-capture-selected-splitter"));
+            }
+            ecNodePrev = ecNode;
 
             // Clone sparingly selected nodes in the common ancestor.
             // (with special handling of text nodes)
