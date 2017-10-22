@@ -339,7 +339,7 @@ capturer.captureDocument = function (params) {
 
           // @TODO: it's not enough to preserve order of sparsely selected table cells
           let iRange = 0, iRangeMax = selection.rangeCount, curRange;
-          let caNode, firstNode, lastNode, lastNodePrev;
+          let caNode, scNode, ecNode, firstNode, lastNode, lastNodePrev;
           for (; iRange < iRangeMax; ++iRange) {
             curRange = selection.getRangeAt(iRange);
             caNode = curRange.commonAncestorContainer;
@@ -361,12 +361,12 @@ capturer.captureDocument = function (params) {
             }
 
             // Calculate the first and last node of selection
-            firstNode = curRange.startContainer;
-            if (!isTextNode(firstNode) && curRange.startOffset !== 0) {
+            firstNode = scNode = curRange.startContainer;
+            if (!isTextNode(scNode) && curRange.startOffset !== 0) {
               firstNode = firstNode.childNodes[curRange.startOffset];
             }
-            lastNode = curRange.endContainer;
-            if (!isTextNode(lastNode) && curRange.endOffset !== 0) {
+            lastNode = ecNode = curRange.endContainer;
+            if (!isTextNode(ecNode) && curRange.endOffset !== 0) {
               lastNode = lastNode.childNodes[curRange.endOffset - 1];
             }
 
@@ -407,15 +407,17 @@ capturer.captureDocument = function (params) {
                   started = true;
 
                   // handle start container
-                  if (isTextNode(node)) {
+                  if (isTextNode(scNode)) {
+                    // firstNode is a partial selected text-like node,
+                    // clone it with cropped text. Do not map it since
+                    // there could be another selection.
                     const start = curRange.startOffset;
                     const end = (node === lastNode) ? curRange.endOffset : undefined;
-                    const text = node.nodeValue.slice(start, end);
-
                     cloneNodeAndAncestors(node.parentNode);
                     const newParentNode = clonedNodeMap.get(node.parentNode);
-                    const textNode = doc.createTextNode(text);
-                    newParentNode.appendChild(textNode);
+                    const newNode = node.cloneNode(false);
+                    newNode.nodeValue = node.nodeValue.slice(start, end);
+                    newParentNode.appendChild(newNode);
                   } else {
                     cloneNodeAndAncestors(node);
                   }
@@ -428,15 +430,17 @@ capturer.captureDocument = function (params) {
                 if (node === lastNode) {
                   if (node !== firstNode) {
                     // handle end container
-                    if (isTextNode(node)) {
+                    if (isTextNode(ecNode)) {
+                      // lastNode is a partial selected text-like node,
+                      // clone it with cropped text. Do not map it since
+                      // there could be another selection.
                       const start = 0;
                       const end = curRange.endOffset;
-                      const text = node.nodeValue.slice(start, end);
-
                       cloneNodeAndAncestors(node.parentNode);
                       const newParentNode = clonedNodeMap.get(node.parentNode);
-                      const textNode = doc.createTextNode(text);
-                      newParentNode.appendChild(textNode);
+                      const newNode = node.cloneNode(false);
+                      newNode.nodeValue = node.nodeValue.slice(start, end);
+                      newParentNode.appendChild(newNode);
                     } else {
                       cloneNodeAndAncestors(node);
                     }
