@@ -763,13 +763,13 @@ scrapbook.parseHeaderContentDisposition = function (string) {
           // the field uses an ext-value
           field = RegExp.$1;
           if (/^(.*?)'(.*?)'(.*?)$/.test(value)) {
-            let charset = RegExp.$1.toLowerCase(), lang = RegExp.$2.toLowerCase(), value = RegExp.$3;
+            let charset = RegExp.$1.toLowerCase(), lang = RegExp.$2.toLowerCase(), valueEncoded = RegExp.$3;
             switch (charset) {
               case 'iso-8859-1':
-                value = decodeURIComponent(value).replace(/[^\x20-\x7e\xa0-\xff]/g, "?");
+                value = decodeURIComponent(valueEncoded).replace(/[^\x20-\x7e\xa0-\xff]/g, "?");
                 break;
               case 'utf-8':
-                value = decodeURIComponent(value);
+                value = decodeURIComponent(valueEncoded);
                 break;
               default:
                 console.error('Unsupported charset in the extended field of header content-disposition: ' + charset);
