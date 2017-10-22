@@ -178,15 +178,17 @@ capturer.captureDocument = function (params) {
     let favIconNode, favIconUrl;
 
     const origNodeMap = new Map();
+    const clonedNodeMap = new Map();
     const specialContentMap = new Map();
 
-    // Map cloned nodes to the original for later reference,
-    // since cloned nodes may not have some information
+    // Map cloned nodes and the original for later reference
+    // since cloned nodes may lose some information,
     // e.g. cloned iframes has no content, cloned canvas has no image,
     // and cloned form elements has no current status.
     const cloneNodeMapping = function (node, deep = false) {
       const newNode = node.cloneNode(false);
       origNodeMap.set(newNode, node);
+      clonedNodeMap.set(node, newNode);
 
       // recursively clone descendant nodes
       if (deep) {
@@ -311,19 +313,45 @@ capturer.captureDocument = function (params) {
       {
         if (selection && selection.isCollapsed) { selection = null; }
         if (selection && options["capture.saveBeyondSelection"]) { selection = null; }
+
+        // clone selected nodes
         if (selection) {
-          let selNodeTree = []; // @TODO: it's not enough to preserve order of sparsely selected table cells
-          for (let iRange = 0, iRangeMax = selection.rangeCount; iRange < iRangeMax; ++iRange) {
-            let myRange = selection.getRangeAt(iRange);
-            let curNode = myRange.commonAncestorContainer;
-            if (curNode.nodeName.toUpperCase() == "HTML") {
-              // in some case (e.g. view image) the selection is the html node
-              // and will cause subsequent errors.
-              // in this case we just process as if there's no selection
+          const cloneNodeAndAncestors = function (node) {
+            const nodeChain = [];
+            let tmpNode = node;
+
+            while (tmpNode && !clonedNodeMap.has(tmpNode)) {
+              nodeChain.unshift(tmpNode);
+              tmpNode = tmpNode.parentNode;
+            }
+
+            for (tmpNode of nodeChain) {
+              const newParentNode = clonedNodeMap.get(tmpNode.parentNode);
+              const newNode = cloneNodeMapping(tmpNode, false);
+              newParentNode.appendChild(newNode);
+            }
+          };
+
+          // #text, CDATA, COMMENT
+          const isTextNode = function (node) {
+            return [3, 4, 8].includes(node.nodeType);
+          };
+
+          // @TODO: it's not enough to preserve order of sparsely selected table cells
+          let iRange = 0, iRangeMax = selection.rangeCount, curRange;
+          let caNode, firstNode, lastNode, lastNodePrev;
+          for (; iRange < iRangeMax; ++iRange) {
+            curRange = selection.getRangeAt(iRange);
+            caNode = curRange.commonAncestorContainer;
+
+            // In some cases (e.g. view image) the selection is the html node and
+            // causes subsequent errors. We treat it as if there's no selection.
+            if (caNode.nodeName.toLowerCase() === "html") {
               selection = null;
               break;
             }
 
+            // For the first range, clone html and head.
             if (iRange === 0) {
               rootNode = cloneNodeMapping(htmlNode, false);
               headNode = doc.querySelector("head");
@@ -332,53 +360,100 @@ capturer.captureDocument = function (params) {
               rootNode.appendChild(doc.createTextNode("\n"));
             }
 
-            if (curNode.nodeName == "#text") { curNode = curNode.parentNode; }
+            // Calculate the first and last node of selection
+            firstNode = curRange.startContainer;
+            if (!isTextNode(firstNode) && curRange.startOffset !== 0) {
+              firstNode = firstNode.childNodes[curRange.startOffset];
+            }
+            lastNode = curRange.endContainer;
+            if (!isTextNode(lastNode) && curRange.endOffset !== 0) {
+              lastNode = lastNode.childNodes[curRange.endOffset - 1];
+            }
 
-            let tmpNodeList = [];
-            do {
-              tmpNodeList.unshift(curNode);
-              curNode = curNode.parentNode;
-            } while (curNode.nodeName.toUpperCase() != "HTML");
+            // Clone nodes from root to common ancestor.
+            // (with special handling of text nodes)
+            const refNode = (isTextNode(caNode)) ? caNode.parentNode : caNode;
+            let clonedRefNode = clonedNodeMap.get(refNode);
+            if (!clonedRefNode) {
+              cloneNodeAndAncestors(refNode);
+              clonedRefNode = clonedNodeMap.get(refNode);
+            }
 
-            let parentNode = rootNode;
-            let branchList = selNodeTree;
-            let matchedDepth = -2;
-            let iDepth, iDepthLen, iBranch, iBranchLen;
-            for(iDepth = 0, iDepthLen = tmpNodeList.length; iDepth < iDepthLen; ++iDepth) {
-              for (iBranch = 0, iBranchLen = branchList.length; iBranch < iBranchLen; ++iBranch) {
-                if (tmpNodeList[iDepth] === branchList[iBranch].origNode) {
-                  matchedDepth = iDepth;
+            // Add splitter.
+            //
+            // @TODO:
+            // Perhaps a similar splitter should be added for any node type,
+            // but some tags like <td> require special care.
+            if (lastNodePrev && firstNode.parentNode === lastNodePrev.parentNode &&
+                isTextNode(lastNodePrev) && isTextNode(firstNode)) {
+              clonedRefNode.appendChild(doc.createComment("sb-capture-selected-splitter"));
+              clonedRefNode.appendChild(doc.createTextNode(" … "));
+              clonedRefNode.appendChild(doc.createComment("/sb-capture-selected-splitter"));
+            }
+            lastNodePrev = lastNode;
+
+            // Clone sparingly selected nodes in the common ancestor.
+            // (with special handling of text nodes)
+            clonedRefNode.appendChild(doc.createComment("sb-capture-selected"));
+            {
+              const iterator = doc.createNodeIterator(refNode, -1);
+              let node, started = false;
+              while ((node = iterator.nextNode())) {
+                if (!started) {
+                  // skip nodes before the start container
+                  if (node !== firstNode) { continue; }
+
+                  // mark started
+                  started = true;
+
+                  // handle start container
+                  if (isTextNode(node)) {
+                    const start = curRange.startOffset;
+                    const end = (node === lastNode) ? curRange.endOffset : undefined;
+                    const text = node.nodeValue.slice(start, end);
+
+                    cloneNodeAndAncestors(node.parentNode);
+                    const newParentNode = clonedNodeMap.get(node.parentNode);
+                    const textNode = doc.createTextNode(text);
+                    newParentNode.appendChild(textNode);
+                  } else {
+                    cloneNodeAndAncestors(node);
+                  }
+
+                  if (node === lastNode) { break; }
+
+                  continue;
+                }
+                
+                if (node === lastNode) {
+                  if (node !== firstNode) {
+                    // handle end container
+                    if (isTextNode(node)) {
+                      const start = 0;
+                      const end = curRange.endOffset;
+                      const text = node.nodeValue.slice(start, end);
+
+                      cloneNodeAndAncestors(node.parentNode);
+                      const newParentNode = clonedNodeMap.get(node.parentNode);
+                      const textNode = doc.createTextNode(text);
+                      newParentNode.appendChild(textNode);
+                    } else {
+                      cloneNodeAndAncestors(node);
+                    }
+                  }
+
                   break;
                 }
-              }
 
-              if (iBranch === branchList.length) {
-                const clonedNode = cloneNodeMapping(tmpNodeList[iDepth], false);
-                parentNode.appendChild(clonedNode);
-                branchList.push({
-                  origNode: tmpNodeList[iDepth],
-                  clonedNode: clonedNode,
-                  children: []
-                });
-              }
-              parentNode = branchList[iBranch].clonedNode;
-              branchList = branchList[iBranch].children;
-            }
-            if (matchedDepth === tmpNodeList.length - 1) {
-              // @TODO:
-              // Perhaps a similar splitter should be added for any node type
-              // but some tags e.g. <td> require special care
-              if (myRange.commonAncestorContainer.nodeName === "#text") {
-                parentNode.appendChild(doc.createComment("DOCUMENT_FRAGMENT_SPLITTER"));
-                parentNode.appendChild(doc.createTextNode(" … "));
-                parentNode.appendChild(doc.createComment("/DOCUMENT_FRAGMENT_SPLITTER"));
+                // clone the node
+                cloneNodeAndAncestors(node);
               }
             }
-            parentNode.appendChild(doc.createComment("DOCUMENT_FRAGMENT"));
-            parentNode.appendChild(myRange.cloneContents());
-            parentNode.appendChild(doc.createComment("/DOCUMENT_FRAGMENT"));
+            clonedRefNode.appendChild(doc.createComment("/sb-capture-selected"));
           }
         }
+
+        // clone all nodes
         if (!selection) {
           rootNode = cloneNodeMapping(htmlNode, true);
           headNode = rootNode.querySelector("head");
@@ -389,25 +464,25 @@ capturer.captureDocument = function (params) {
         }
 
         // add linefeeds to head and body to improve layout
-        let headNodeBefore = headNode.previousSibling;
+        const headNodeBefore = headNode.previousSibling;
         if (!headNodeBefore || headNodeBefore.nodeType != 3) {
           rootNode.insertBefore(doc.createTextNode("\n"), headNode);
         }
-        let headNodeStart = headNode.firstChild;
+        const headNodeStart = headNode.firstChild;
         if (!headNodeStart || headNodeStart.nodeType != 3) {
           headNode.insertBefore(doc.createTextNode("\n"), headNodeStart);
         }
-        let headNodeEnd = headNode.lastChild;
+        const headNodeEnd = headNode.lastChild;
         if (!headNodeEnd || headNodeEnd.nodeType != 3) {
           headNode.appendChild(doc.createTextNode("\n"));
         }
-        let headNodeAfter = headNode.nextSibling;
+        const headNodeAfter = headNode.nextSibling;
         if (!headNodeAfter || headNodeAfter.nodeType != 3) {
           rootNode.insertBefore(doc.createTextNode("\n"), headNodeAfter);
         }
-        let bodyNode = rootNode.querySelector("body");
+        const bodyNode = rootNode.querySelector("body");
         if (bodyNode) {
-          let bodyNodeAfter = bodyNode.nextSibling;
+          const bodyNodeAfter = bodyNode.nextSibling;
           if (!bodyNodeAfter) {
             rootNode.insertBefore(doc.createTextNode("\n"), bodyNodeAfter);
           }
