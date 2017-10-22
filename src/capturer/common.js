@@ -333,9 +333,13 @@ capturer.captureDocument = function (params) {
           };
 
           // @TODO: it's not enough to preserve order of sparsely selected table cells
-          for (let iRange = 0, iRangeMax = selection.rangeCount; iRange < iRangeMax; ++iRange) {
-            const curRange = selection.getRangeAt(iRange);
-            const caNode = curRange.commonAncestorContainer;
+          let iRange = 0, iRangeMax = selection.rangeCount, curRange;
+          let caNode, scNode, ecNode;
+          for (; iRange < iRangeMax; ++iRange) {
+            curRange = selection.getRangeAt(iRange);
+            caNode = curRange.commonAncestorContainer;
+            scNode = curRange.startContainer;
+            ecNode = curRange.endContainer;
 
             // In some cases (e.g. view image) the selection is the html node and
             // causes subsequent errors. We treat it as if there's no selection.
@@ -353,6 +357,8 @@ capturer.captureDocument = function (params) {
               rootNode.appendChild(doc.createTextNode("\n"));
             }
 
+            // Clone nodes from root to common ancestor.
+            // (with special handling of text nodes)
             const refNode = (caNode.nodeName === "#text") ? caNode.parentNode : caNode;
             let clonedRefNode = clonedNodeMap.get(refNode);
             if (!clonedRefNode) {
@@ -369,15 +375,16 @@ capturer.captureDocument = function (params) {
               }
             }
 
+            // Clone sparingly selected nodes in the common ancestor.
+            // (with special handling of text nodes)
             clonedRefNode.appendChild(doc.createComment("sb-capture-selected"));
             {
-              const sc = curRange.startContainer, ec = curRange.endContainer;
               const iterator = doc.createNodeIterator(refNode, -1);
               let node, started = false;
               while ((node = iterator.nextNode())) {
                 if (!started) {
                   // skip nodes before the start container
-                  if (node !== sc) { continue; }
+                  if (node !== scNode) { continue; }
 
                   // mark started
                   started = true;
@@ -385,7 +392,7 @@ capturer.captureDocument = function (params) {
                   // handle start container
                   if (node.nodeName === "#text") {
                     const start = curRange.startOffset;
-                    const end = (node === ec) ? curRange.endOffset : undefined;
+                    const end = (node === ecNode) ? curRange.endOffset : undefined;
                     const text = node.nodeValue.slice(start, end);
 
                     cloneNodeAndAncestors(node.parentNode);
@@ -396,13 +403,13 @@ capturer.captureDocument = function (params) {
                     cloneNodeAndAncestors(node);
                   }
 
-                  if (node === ec) { break; }
+                  if (node === ecNode) { break; }
 
                   continue;
                 }
                 
-                if (node === ec) {
-                  if (node !== sc) {
+                if (node === ecNode) {
+                  if (node !== scNode) {
                     // handle end container
                     if (node.nodeName === "#text") {
                       const start = 0;
