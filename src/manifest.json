@@ -13,6 +13,7 @@
   "incognito": "split",
 
   "icons": {
+    "32": "core/scrapbook_32.png",
     "128": "core/scrapbook_128.png"
   },
 
@@ -51,6 +52,7 @@
     "lib/jszip.js",
     "core/polyfill.js",
     "core/common.js",
+    "core/scrapbook_32.png",
     "core/scrapbook_128.png",
     "viewer/*"
   ],
@@ -62,6 +64,7 @@
 
   "browser_action": {
     "default_icon": {
+      "32": "core/scrapbook_32.png",
       "128": "core/scrapbook_128.png"
     },
     "default_title": "__MSG_ExtensionName__",
