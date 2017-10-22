@@ -606,8 +606,16 @@ capturer.captureDocument = function (params) {
         };
 
         const parseCss = function (css, refUrl) {
+          // @FIXME:
+          // In Firefox, CSS from a different domain throws a SecurityError when accessing .cssRules
+          // In Chrome, CSS from a different domain gets .cssRules = null
+          try {
+            if (!css.cssRules) { throw new Error('CSS rules not accessible'); }
+          } catch (ex) {
+            return;
+          }
+
           if (css.disabled) { return; }
-          if (!css.cssRules) { return; }
 
           Array.prototype.forEach.call(css.cssRules, (cssRule) => parseCssRule(cssRule, css.href || refUrl));
         };
@@ -626,9 +634,6 @@ capturer.captureDocument = function (params) {
               });
               break;
             }
-            // @FIXME:
-            // In some browsers (e.g. Chrome), cssRules.styleSheet is null
-            // if the document is in file: (maybe others?) scheme.
             case CSSRule.IMPORT_RULE: {
               if (!cssRule.styleSheet) { break; }
 
