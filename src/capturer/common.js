@@ -370,7 +370,61 @@ capturer.captureDocument = function (params) {
             }
 
             clonedRefNode.appendChild(doc.createComment("sb-capture-selected"));
-            clonedRefNode.appendChild(curRange.cloneContents());
+            {
+              const sc = curRange.startContainer, ec = curRange.endContainer;
+              const iterator = doc.createNodeIterator(refNode, -1);
+              let node, started = false;
+              while ((node = iterator.nextNode())) {
+                if (!started) {
+                  // skip nodes before the start container
+                  if (node !== sc) { continue; }
+
+                  // mark started
+                  started = true;
+
+                  // handle start container
+                  if (node.nodeName === "#text") {
+                    const start = curRange.startOffset;
+                    const end = (node === ec) ? curRange.endOffset : undefined;
+                    const text = node.nodeValue.slice(start, end);
+
+                    cloneNodeAndAncestors(node.parentNode);
+                    const newParentNode = clonedNodeMap.get(node.parentNode);
+                    const textNode = doc.createTextNode(text);
+                    newParentNode.appendChild(textNode);
+                  } else {
+                    cloneNodeAndAncestors(node);
+                  }
+
+                  if (node === ec) { break; }
+
+                  continue;
+                }
+                
+                if (node === ec) {
+                  if (node !== sc) {
+                    // handle end container
+                    if (node.nodeName === "#text") {
+                      const start = 0;
+                      const end = curRange.endOffset;
+                      const text = node.nodeValue.slice(start, end);
+
+                      cloneNodeAndAncestors(node.parentNode);
+                      const newParentNode = clonedNodeMap.get(node.parentNode);
+                      const textNode = doc.createTextNode(text);
+                      newParentNode.appendChild(textNode);
+                    } else {
+                      cloneNodeAndAncestors(node);
+                    }
+                  }
+
+                  break;
+                }
+
+                // clone the node
+                cloneNodeAndAncestors(node);
+              }
+            }
             clonedRefNode.appendChild(doc.createComment("/sb-capture-selected"));
           }
         }
