@@ -332,14 +332,17 @@ capturer.captureDocument = function (params) {
             }
           };
 
+          // #text, CDATA, COMMENT
+          const isTextNode = function (node) {
+            return [3, 4, 8].includes(node.nodeType);
+          };
+
           // @TODO: it's not enough to preserve order of sparsely selected table cells
           let iRange = 0, iRangeMax = selection.rangeCount, curRange;
-          let caNode, scNode, ecNode, ecNodePrev;
+          let caNode, firstNode, lastNode, lastNodePrev;
           for (; iRange < iRangeMax; ++iRange) {
             curRange = selection.getRangeAt(iRange);
             caNode = curRange.commonAncestorContainer;
-            scNode = curRange.startContainer;
-            ecNode = curRange.endContainer;
 
             // In some cases (e.g. view image) the selection is the html node and
             // causes subsequent errors. We treat it as if there's no selection.
@@ -357,9 +360,19 @@ capturer.captureDocument = function (params) {
               rootNode.appendChild(doc.createTextNode("\n"));
             }
 
+            // Calculate the first and last node of selection
+            firstNode = curRange.startContainer;
+            if (!isTextNode(firstNode) && curRange.startOffset !== 0) {
+              firstNode = firstNode.childNodes[curRange.startOffset];
+            }
+            lastNode = curRange.endContainer;
+            if (!isTextNode(lastNode) && curRange.endOffset !== 0) {
+              lastNode = lastNode.childNodes[curRange.endOffset - 1];
+            }
+
             // Clone nodes from root to common ancestor.
             // (with special handling of text nodes)
-            const refNode = (caNode.nodeName === "#text") ? caNode.parentNode : caNode;
+            const refNode = (isTextNode(caNode)) ? caNode.parentNode : caNode;
             let clonedRefNode = clonedNodeMap.get(refNode);
             if (!clonedRefNode) {
               cloneNodeAndAncestors(refNode);
@@ -371,13 +384,13 @@ capturer.captureDocument = function (params) {
             // @TODO:
             // Perhaps a similar splitter should be added for any node type,
             // but some tags like <td> require special care.
-            if (ecNodePrev && scNode.parentNode === ecNodePrev.parentNode &&
-                ecNodePrev.nodeName === "#text" && scNode.nodeName === "#text" ) {
+            if (lastNodePrev && firstNode.parentNode === lastNodePrev.parentNode &&
+                isTextNode(lastNodePrev) && isTextNode(firstNode)) {
               clonedRefNode.appendChild(doc.createComment("sb-capture-selected-splitter"));
               clonedRefNode.appendChild(doc.createTextNode(" … "));
               clonedRefNode.appendChild(doc.createComment("/sb-capture-selected-splitter"));
             }
-            ecNodePrev = ecNode;
+            lastNodePrev = lastNode;
 
             // Clone sparingly selected nodes in the common ancestor.
             // (with special handling of text nodes)
@@ -388,15 +401,15 @@ capturer.captureDocument = function (params) {
               while ((node = iterator.nextNode())) {
                 if (!started) {
                   // skip nodes before the start container
-                  if (node !== scNode) { continue; }
+                  if (node !== firstNode) { continue; }
 
                   // mark started
                   started = true;
 
                   // handle start container
-                  if (node.nodeName === "#text") {
+                  if (isTextNode(node)) {
                     const start = curRange.startOffset;
-                    const end = (node === ecNode) ? curRange.endOffset : undefined;
+                    const end = (node === lastNode) ? curRange.endOffset : undefined;
                     const text = node.nodeValue.slice(start, end);
 
                     cloneNodeAndAncestors(node.parentNode);
@@ -407,15 +420,15 @@ capturer.captureDocument = function (params) {
                     cloneNodeAndAncestors(node);
                   }
 
-                  if (node === ecNode) { break; }
+                  if (node === lastNode) { break; }
 
                   continue;
                 }
                 
-                if (node === ecNode) {
-                  if (node !== scNode) {
+                if (node === lastNode) {
+                  if (node !== firstNode) {
                     // handle end container
-                    if (node.nodeName === "#text") {
+                    if (isTextNode(node)) {
                       const start = 0;
                       const end = curRange.endOffset;
                       const text = node.nodeValue.slice(start, end);
