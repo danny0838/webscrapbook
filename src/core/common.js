@@ -950,7 +950,14 @@ scrapbook.doctypeToString = function (doctype) {
 scrapbook.parseCssFile = function (data, charset, rewriter) {
   return Promise.resolve().then(() => {
     if (charset) {
-      return scrapbook.readFileAsText(data, charset);
+      return scrapbook.readFileAsText(data, charset).then((text) => {
+        // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
+        if (/^@charset "([^"]*)";/.test(text)) {
+          return "\ufeff" + text;
+        }
+
+        return text;
+      });
     }
     return scrapbook.readFileAsText(data, false).then((bytes) => {
       if (bytes.startsWith("\xEF\xBB\xBF")) {
@@ -963,8 +970,8 @@ scrapbook.parseCssFile = function (data, charset, rewriter) {
         charset = "UTF-32BE";
       } else if (bytes.startsWith("\x00\x00\xFF\xFE")) {
         charset = "UTF-32LE";
-      } else if (/^@charset (["'])(\w+)\1;/.test(bytes)) {
-        charset = RegExp.$2;
+      } else if (/^@charset "([^"]*)";/.test(bytes)) {
+        charset = RegExp.$1;
       }
       if (charset) {
         // Add BOM to make the browser read as UTF-8 despite @charset rule
