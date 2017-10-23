@@ -133,6 +133,9 @@
   "OptionCaptureCommonSaveTooltip": {
     "message": "将参照的资源保存至本地。"
   },
+  "OptionCaptureCommonSaveUsedLabel": {
+    "message": "保存现用 [实验中]"
+  },
   "OptionCaptureCommonRemoveLabel": {
     "message": "移除"
   },
@@ -155,7 +158,7 @@
     "message": "字体:"
   },
   "OptionCaptureFontSaveUsedTooltip": {
-    "message": "只保存应用于目前网页的字体。这可以缩小容量，但保存脚本时可能导致所需文件遗失。"
+    "message": "只保存应用于目前网页的字体。这可以缩小容量，但保存脚本时可能导致所需文件遗失。\n\n* 由于同源政策的安全性限制，此功能目前只能正常运作于同网域的样式表。"
   },
   "OptionCaptureFormStatusLabel": {
     "message": "表单状态:"
@@ -173,7 +176,7 @@
     "message": "背景图片:"
   },
   "OptionCaptureImageBackgroundSaveUsedTooltip": {
-    "message": "只保存应用于目前网页的背景图片。这可以缩小容量，但保存脚本时可能导致所需文件遗失。"
+    "message": "只保存应用于目前网页的背景图片。这可以缩小容量，但保存脚本时可能导致所需文件遗失。\n\n* 由于同源政策的安全性限制，此功能目前只能正常运作于同网域的样式表。"
   },
   "OptionCaptureImageLabel": {
     "message": "图片:"

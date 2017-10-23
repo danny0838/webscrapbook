@@ -133,6 +133,9 @@
   "OptionCaptureCommonSaveTooltip": {
     "message": "將參照的資源儲存至本地。"
   },
+  "OptionCaptureCommonSaveUsedLabel": {
+    "message": "儲存現用 [實驗中]"
+  },
   "OptionCaptureCommonRemoveLabel": {
     "message": "移除"
   },
@@ -155,7 +158,7 @@
     "message": "字體:"
   },
   "OptionCaptureFontSaveUsedTooltip": {
-    "message": "只儲存套用於目前網頁的字體。這可以縮小容量，但儲存腳本時可能導致所需檔案遺失。"
+    "message": "只儲存套用於目前網頁的字體。這可以縮小容量，但儲存腳本時可能導致所需檔案遺失。\n\n* 由於同源政策的安全性限制，此功能目前只能正常運作於同網域的樣式表。"
   },
   "OptionCaptureFormStatusLabel": {
     "message": "表單狀態:"
@@ -173,7 +176,7 @@
     "message": "背景圖片:"
   },
   "OptionCaptureImageBackgroundSaveUsedTooltip": {
-    "message": "只儲存套用於目前網頁的背景圖片。這可以縮小容量，但儲存腳本時可能導致所需檔案遺失。"
+    "message": "只儲存套用於目前網頁的背景圖片。這可以縮小容量，但儲存腳本時可能導致所需檔案遺失。\n\n* 由於同源政策的安全性限制，此功能目前只能正常運作於同網域的樣式表。"
   },
   "OptionCaptureImageLabel": {
     "message": "圖片:"

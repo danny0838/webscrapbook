@@ -133,6 +133,9 @@
   "OptionCaptureCommonSaveTooltip": {
     "message": "Save the referenced resource to local."
   },
+  "OptionCaptureCommonSaveUsedLabel": {
+    "message": "Save current [Experimental]"
+  },
   "OptionCaptureCommonRemoveLabel": {
     "message": "Remove"
   },
@@ -155,7 +158,7 @@
     "message": "Fonts:"
   },
   "OptionCaptureFontSaveUsedTooltip": {
-    "message": "Save only the fonts that is applied to the current web page. This reduces size but could cause a missing of required files if scripts are saved."
+    "message": "Save only the fonts that is applied to the current web page. This reduces size but could cause a missing of required files if scripts are saved.\n\n* Due to the security restriction of same origin policy, this feature works only for stylesheets from the same domain currently."
   },
   "OptionCaptureFormStatusLabel": {
     "message": "Form status:"
@@ -173,7 +176,7 @@
     "message": "Background images:"
   },
   "OptionCaptureImageBackgroundSaveUsedTooltip": {
-    "message": "Save only the background images that is applied to the current web page. This reduces size but could cause a missing of required files if scripts are saved."
+    "message": "Save only the background images that is applied to the current web page. This reduces size but could cause a missing of required files if scripts are saved.\n\n* Due to the security restriction of same origin policy, this feature works only for stylesheets from the same domain currently."
   },
   "OptionCaptureImageLabel": {
     "message": "Images:"
