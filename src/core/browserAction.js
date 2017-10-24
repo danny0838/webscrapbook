@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("captureTab").addEventListener('click', () => {
       if (!currentTab) {
         capturer.invoke("captureActiveTab", {mode: "document"});
-        window.close();
       } else {
         generateActionButtonForTabs(document.getElementById("captureTab"), (tab) => {
           capturer.invoke("captureTab", {tab: tab, mode: "document"});
@@ -67,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("captureTabSource").addEventListener('click', () => {
       if (!currentTab) {
         capturer.invoke("captureActiveTab", {mode: "source"});
-        window.close();
       } else {
         generateActionButtonForTabs(document.getElementById("captureTabSource"), (tab) => {
           capturer.invoke("captureTab", {tab: tab, mode: "source"});
@@ -78,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("captureTabBookmark").addEventListener('click', () => {
       if (!currentTab) {
         capturer.invoke("captureActiveTab", {mode: "bookmark"});
-        window.close();
       } else {
         generateActionButtonForTabs(document.getElementById("captureTabBookmark"), (tab) => {
           capturer.invoke("captureTab", {tab: tab, mode: "bookmark"});
@@ -88,15 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById("captureAllTabs").addEventListener('click', () => {
       capturer.invoke("captureAllTabs", {mode: "document"});
-      if (!currentTab) {
-        window.close();
-      }
     });
 
     document.getElementById("openViewer").addEventListener('click', () => {
       if (!currentTab) {
-        chrome.tabs.create({url: chrome.runtime.getURL("viewer/viewer.html"), active: true}, () => {});
-        window.close();
+        chrome.tabs.create({url: chrome.runtime.getURL("viewer/viewer.html"), active: true});
       } else {
         document.location = chrome.runtime.getURL("viewer/viewer.html");
       }
@@ -104,8 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById("openOptions").addEventListener('click', () => {
       if (!currentTab) {
-        chrome.tabs.create({url: chrome.runtime.getURL("core/options.html"), active: true}, () => {});
-        window.close();
+        chrome.tabs.create({url: chrome.runtime.getURL("core/options.html"), active: true});
       } else {
         document.location = chrome.runtime.getURL("core/options.html");
       }
