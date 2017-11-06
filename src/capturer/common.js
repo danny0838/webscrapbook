@@ -776,7 +776,8 @@ capturer.captureDocument = function (params) {
       // record source URL
       if (options["capture.recordDocumentMeta"]) {
         let url = doc.URL.startsWith("data:") ? "data:" : doc.URL;
-        rootNode.setAttribute("data-scrapbook-source-" + timeId, url);
+        rootNode.setAttribute("data-scrapbook-source", url);
+        rootNode.setAttribute("data-scrapbook-create", timeId);
       }
 
       // favicon: the tab favicon
