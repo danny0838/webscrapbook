@@ -164,7 +164,15 @@ const viewer = {
 
   start() {
     return Promise.resolve().then(() => {
-      if (scrapbook.getOption("viewer.useFileSystemApi")) {
+      if (!scrapbook.getOption("viewer.useFileSystemApi")) { return; }
+
+      // filesystem scheme never works in an incognito window,
+      // but sometimes the requestFileSystem call doesn't throw, 
+      // and an error occurs afterwards instead. Add a chesk
+      // to prevent such error.
+      return browser.tabs.getCurrent().then((tab) => {
+        if (tab.incognito) { return; }
+
         return new Promise((resolve, reject) => {
           window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
           // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
@@ -172,7 +180,7 @@ const viewer = {
         }).then((fs) => {
           viewer.filesystem = fs;
         });
-      }
+      });
     }).catch((ex) => {
       // console.error(ex);
     }).then(() => {

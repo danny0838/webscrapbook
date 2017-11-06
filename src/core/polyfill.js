@@ -129,6 +129,15 @@ if (typeof browser === "undefined" && typeof chrome !== "undefined") {
         });
       },
 
+      getCurrent(...args) {
+        return new Promise((resolve, reject) => {
+          chrome.tabs.getCurrent(...args, (result) => {
+            if (!chrome.runtime.lastError) { resolve(result); }
+            else { reject(chrome.runtime.lastError); }
+          });
+        });
+      },
+
       sendMessage(...args) {
         return new Promise((resolve, reject) => {
           chrome.tabs.sendMessage(...args, (result) => {
