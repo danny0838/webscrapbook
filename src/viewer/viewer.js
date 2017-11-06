@@ -49,7 +49,7 @@ const fileSystemHandler = {
    */
   createDir(dirEntry, path) {
     return Promise.resolve().then(() => {
-      let folders = (Object.prototype.toString.call(path) === "[object Array]") ? path : path.split("/");
+      let folders = Array.isArray(path) ? path : path.split("/");
       // Throw out './' or '/' and move on to prevent something like '/foo/.//bar'.
       folders = folders.filter(x => x && x !== '.');
 
