@@ -34,7 +34,7 @@ function redirectUrl(tabId, type, url, filename, mime) {
     }
   }
 
-  let newUrl = new URL(chrome.runtime.getURL("viewer/viewer.html"));
+  let newUrl = new URL(chrome.runtime.getURL("viewer/load.html"));
   newUrl.hash = url.hash;
   url.hash = "";
   newUrl.search = "?src=" + encodeURIComponent(url.href);

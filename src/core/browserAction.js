@@ -89,9 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById("openViewer").addEventListener('click', () => {
       if (!currentTab) {
-        chrome.tabs.create({url: chrome.runtime.getURL("viewer/viewer.html"), active: true});
+        chrome.tabs.create({url: chrome.runtime.getURL("viewer/load.html"), active: true});
       } else {
-        document.location = chrome.runtime.getURL("viewer/viewer.html");
+        document.location = chrome.runtime.getURL("viewer/load.html");
       }
     });
 
