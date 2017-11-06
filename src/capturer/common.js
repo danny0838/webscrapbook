@@ -208,7 +208,7 @@ capturer.captureDocument = function (params) {
       if (!elem.parentNode) { return; }
 
       if (record) {
-        const comment = doc.createComment(`sb-orig-node-${timeId}--${scrapbook.escapeHtmlComment(elem.outerHTML)}`);
+        const comment = doc.createComment(`scrapbook-orig-node-${timeId}--${scrapbook.escapeHtmlComment(elem.outerHTML)}`);
         elem.parentNode.replaceChild(comment, elem);
       } else {
         elem.parentNode.removeChild(elem);
@@ -228,7 +228,7 @@ capturer.captureDocument = function (params) {
         }
 
         if (record) {
-          const recordAttr = `data-sb-orig-attr-${attr}-${timeId}`;
+          const recordAttr = `data-scrapbook-orig-attr-${attr}-${timeId}`;
           if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, oldValue); }
         }
       } else {
@@ -237,7 +237,7 @@ capturer.captureDocument = function (params) {
         elem.setAttribute(attr, value);
 
         if (record) {
-          const recordAttr = `data-sb-orig-null-attr-${attr}-${timeId}`;
+          const recordAttr = `data-scrapbook-orig-null-attr-${attr}-${timeId}`;
           if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, ""); }
         }
       }
@@ -251,7 +251,7 @@ capturer.captureDocument = function (params) {
       elem.textContent = value;
 
       if (record) {
-        const recordAttr = `data-sb-orig-textContent-${timeId}`;
+        const recordAttr = `data-scrapbook-orig-textContent-${timeId}`;
         if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, oldValue); }
       }
     };
@@ -386,15 +386,15 @@ capturer.captureDocument = function (params) {
             // but some tags like <td> require special care.
             if (lastNodePrev && firstNode.parentNode === lastNodePrev.parentNode &&
                 isTextNode(lastNodePrev) && isTextNode(firstNode)) {
-              clonedRefNode.appendChild(doc.createComment("sb-capture-selected-splitter"));
+              clonedRefNode.appendChild(doc.createComment("scrapbook-capture-selected-splitter"));
               clonedRefNode.appendChild(doc.createTextNode(" … "));
-              clonedRefNode.appendChild(doc.createComment("/sb-capture-selected-splitter"));
+              clonedRefNode.appendChild(doc.createComment("/scrapbook-capture-selected-splitter"));
             }
             lastNodePrev = lastNode;
 
             // Clone sparingly selected nodes in the common ancestor.
             // (with special handling of text nodes)
-            clonedRefNode.appendChild(doc.createComment("sb-capture-selected"));
+            clonedRefNode.appendChild(doc.createComment("scrapbook-capture-selected"));
             {
               const iterator = doc.createNodeIterator(refNode, -1);
               let node, started = false;
@@ -453,7 +453,7 @@ capturer.captureDocument = function (params) {
                 cloneNodeAndAncestors(node);
               }
             }
-            clonedRefNode.appendChild(doc.createComment("/sb-capture-selected"));
+            clonedRefNode.appendChild(doc.createComment("/scrapbook-capture-selected"));
           }
         }
 
@@ -776,7 +776,7 @@ capturer.captureDocument = function (params) {
       // record source URL
       if (options["capture.recordDocumentMeta"]) {
         let url = doc.URL.startsWith("data:") ? "data:" : doc.URL;
-        rootNode.setAttribute("data-sb-source-" + timeId, url);
+        rootNode.setAttribute("data-scrapbook-source-" + timeId, url);
       }
 
       // favicon: the tab favicon

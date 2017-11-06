@@ -512,7 +512,7 @@ capturer.captureBookmark = function (params) {
           });
       }
     }).then(() => {
-      const meta = params.options["capture.recordDocumentMeta"] ? ' data-sb-source-' + timeId + '="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
+      const meta = params.options["capture.recordDocumentMeta"] ? ' data-scrapbook-source-' + timeId + '="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
       const titleElem = title ? `<title>${scrapbook.escapeHtml(title, false)}</title>\n` : "";
       const favIconElem = favIconUrl ? `<link rel="shortcut icon" href="${favIconUrl}">` : "";
       const html = `<!DOCTYPE html>
@@ -585,7 +585,7 @@ capturer.captureFile = function (params) {
       options: options
     }).then((response) => {
       if (settings.frameIsMain) {
-        const meta = params.options["capture.recordDocumentMeta"] ? ' data-sb-source-' + timeId + '="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
+        const meta = params.options["capture.recordDocumentMeta"] ? ' data-scrapbook-source-' + timeId + '="' + scrapbook.escapeHtml(sourceUrl) + '"' : "";
         // for the main frame, create a index.html that redirects to the file
         const html = `<!DOCTYPE html>
 <html${meta}>

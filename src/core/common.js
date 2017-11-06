@@ -1040,7 +1040,7 @@ scrapbook.parseCssText = function (cssText, options = {}) {
   const getRecordUrl = function (url, recordUrl) {
     if (!recordUrl) { return ""; }
     if (url === recordUrl) { return ""; }
-    return '/*sb-orig-url="' + scrapbook.escapeCssComment(recordUrl) + '"*/';
+    return '/*scrapbook-orig-url="' + scrapbook.escapeCssComment(recordUrl) + '"*/';
   };
 
   const parseUrl = function (text, callback) {
