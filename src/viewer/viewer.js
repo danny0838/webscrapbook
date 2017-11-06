@@ -163,7 +163,21 @@ const viewer = {
   },
 
   start() {
-    viewer.processUrlParams();
+    return Promise.resolve().then(() => {
+      if (scrapbook.getOption("viewer.useFileSystemApi")) {
+        return new Promise((resolve, reject) => {
+          window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+          // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
+          window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, resolve, reject);
+        }).then((fs) => {
+          viewer.filesystem = fs;
+        });
+      }
+    }).catch((ex) => {
+      // console.error(ex);
+    }).then(() => {
+      viewer.processUrlParams();
+    });
   },
 
   processUrlParams() {
@@ -476,63 +490,47 @@ height: 100%;
   }
 };
 
-function init() {
-  // init common elements and events
-  const fileSelector = document.getElementById('file-selector');
-  const fileSelectorInput = document.getElementById('file-selector-input');
-
-  fileSelector.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
-    e.target.classList.add("dragover");
-  }, false);
-
-  fileSelector.addEventListener("drop", (e) => {
-    e.preventDefault();
-    e.target.classList.remove("dragover");
-    Array.prototype.forEach.call(e.dataTransfer.items, (item) => {
-      let entry = item.webkitGetAsEntry();
-      if (entry.isFile) {
-        entry.file((file) => {
-          viewer.processZipFile(file);
-        });
-      }
-    });
-  }, false);
-
-  fileSelector.addEventListener("dragleave", (e) => {
-    e.target.classList.remove("dragover");
-  }, false);
-
-  fileSelector.addEventListener("click", (e) => {
-    e.preventDefault();
-    fileSelectorInput.click();
-  }, false);
-
-  fileSelectorInput.addEventListener("change", (e) => {
-    e.preventDefault();
-    let file = e.target.files[0];
-    viewer.processZipFile(file);
-  }, false);
-
-  return Promise.resolve().then(() => {
-    if (scrapbook.getOption("viewer.useFileSystemApi")) {
-      return new Promise((resolve, reject) => {
-        window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
-        // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
-        window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, resolve, reject);
-      }).then((fs) => {
-        viewer.filesystem = fs;
-      });
-    }
-  }).catch((ex) => {
-    // console.error(ex);
-  }).then(() => {
-    viewer.start();
-  });
-}
-
 document.addEventListener("DOMContentLoaded", function () {
   scrapbook.loadLanguages(document);
-  scrapbook.loadOptions().then(init);
+  scrapbook.loadOptions().then(() => {
+    // init common elements and events
+    const fileSelector = document.getElementById('file-selector');
+    const fileSelectorInput = document.getElementById('file-selector-input');
+
+    fileSelector.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+      e.target.classList.add("dragover");
+    }, false);
+
+    fileSelector.addEventListener("drop", (e) => {
+      e.preventDefault();
+      e.target.classList.remove("dragover");
+      Array.prototype.forEach.call(e.dataTransfer.items, (item) => {
+        let entry = item.webkitGetAsEntry();
+        if (entry.isFile) {
+          entry.file((file) => {
+            viewer.processZipFile(file);
+          });
+        }
+      });
+    }, false);
+
+    fileSelector.addEventListener("dragleave", (e) => {
+      e.target.classList.remove("dragover");
+    }, false);
+
+    fileSelector.addEventListener("click", (e) => {
+      e.preventDefault();
+      fileSelectorInput.click();
+    }, false);
+
+    fileSelectorInput.addEventListener("change", (e) => {
+      e.preventDefault();
+      let file = e.target.files[0];
+      viewer.processZipFile(file);
+    }, false);
+
+    viewer.start();
+  });
 });
