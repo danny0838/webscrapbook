@@ -187,12 +187,6 @@
   "OptionCaptureObjectLabel": {
     "message": "OBJECT 元素:"
   },
-  "OptionCaptureRecordDocumentMetaLabel": {
-    "message": "记录文件元信息:"
-  },
-  "OptionCaptureRecordDocumentMetaTooltip": {
-    "message": "在获取网页的最外层 html 元素记录来源位址等元信息。"
-  },
   "OptionCaptureRecordRewrittenAttrLabel": {
     "message": "记录改写的属性:"
   },

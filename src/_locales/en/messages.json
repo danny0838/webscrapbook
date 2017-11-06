@@ -187,12 +187,6 @@
   "OptionCaptureObjectLabel": {
     "message": "OBJECT:"
   },
-  "OptionCaptureRecordDocumentMetaLabel": {
-    "message": "Record document metadata:"
-  },
-  "OptionCaptureRecordDocumentMetaTooltip": {
-    "message": "Record metadata such as source URL in the outermost html element."
-  },
   "OptionCaptureRecordRewrittenAttrLabel": {
     "message": "Record rewritten attributes:"
   },
