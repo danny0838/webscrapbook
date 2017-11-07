@@ -625,7 +625,9 @@ document.addEventListener("DOMContentLoaded", function () {
             e.stopPropagation();
             location.href = url;
           }
-        } catch (ex) {}
+        } catch (ex) {
+          console.error(ex);
+        }
       }, false);
 
       Array.prototype.forEach.call(frameDoc.querySelectorAll('frame, iframe'), (elem) => {
