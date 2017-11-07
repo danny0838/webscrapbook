@@ -291,6 +291,23 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           case "script": {
             if (elem.hasAttribute("src")) {
               elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+
+              // External scripts are not allowed by extension CSP, retrieve and 
+              // convert them into blob URLs as a shim.
+              if (!elem.src.startsWith('blob:')) {
+                tasks[tasks.length] = 
+                scrapbook.xhr({
+                  url: elem.src,
+                  responseType: 'blob',
+                }).then((xhr) => {
+                  return xhr.response;
+                }).then((blob) => {
+                  if (!blob) { return; }
+                  elem.src = URL.createObjectURL(blob); 
+                }).catch((ex) => {
+                  console.error(ex);
+                });
+              }
             } else {
               // Inline scripts are not allowed by extension CSP, convert them into
               // blob URLs as a shim.
@@ -408,6 +425,11 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
             break;
           }
 
+
+          // @FIXME:
+          // embed, objects, and applet doesn't seem to work as in a regular web page.
+          // External embedding is not allowed by extension CSP, should we implementation
+          // a shim?
           case "embed": {
             if (elem.hasAttribute("src")) {
               try {
