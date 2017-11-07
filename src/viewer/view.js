@@ -17,6 +17,29 @@ const viewerData = {
 
 const viewer = {
   metaRefreshIdentifier: "data-scrapbook-meta-refresh-" + scrapbook.dateToId(),
+  get deApiScriptUrl() {
+    // @TODO: window.top is readonly and cannot be replaced
+    const script = function () {
+      [
+        "browser",
+        "chrome",
+        "indexedDB",
+        "localStorage",
+        "sessionStorage",
+        "XMLHttpRequest",
+        "fetch",
+      ].forEach((api) => {
+        if (typeof window[api] !== "undefined") {
+          window[api] = undefined;
+          delete(window[api]);
+        }
+      });
+    };
+    const text = "(" + script.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")()";
+    const url = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
+    delete viewer.deApiScriptUrl;
+    return viewer.deApiScriptUrl = url;
+  },
   inZipFiles: new Map(),
   blobUrlToInZipPath: new Map(),
   
@@ -450,6 +473,14 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           });
         }
       });
+
+      // Remove privileged APIs to avoid a potential security risk.
+      {
+        const elem = doc.createElement("script");
+        elem.src = viewer.deApiScriptUrl;
+        const head = doc.querySelector("head");
+        head.insertBefore(elem, head.firstChild);
+      }
 
       return Promise.all(tasks).then((results) => {
         const content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
