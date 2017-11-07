@@ -344,6 +344,7 @@ const viewer = {
         const key = {table: "viewerCache", id: uuid};
 
         return Promise.resolve().then(() => {
+          // In Firefox < 56, Blobs cannot be stored in chrome.storage
           if (_isFxBelow56) {
             return scrapbook.readFileAsText(zipFile, false).then((bytes) => {
               return {
