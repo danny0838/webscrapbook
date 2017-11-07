@@ -15,15 +15,16 @@ const viewerData = {
   indexFile: urlObj.searchParams.get('index'),
 };
 
-document.addEventListener("DOMContentLoaded", function () {
-  /**
-   * common helper functions
-   */
-  const inZipPathToUrl = function (inZipPath) {
-    return virtualBase + (inZipPath || "").split("/").map(x => encodeURIComponent(x)).join("/");
-  };
+const viewer = {
+  metaRefreshIdentifier: "data-scrapbook-meta-refresh-" + scrapbook.dateToId(),
+  inZipFiles: {},
+  blobUrlToInZipPath: {},
+  
+  inZipPathToUrl(inZipPath) {
+    return viewerData.virtualBase + (inZipPath || "").split("/").map(x => encodeURIComponent(x)).join("/");
+  },
 
-  const parseUrl = function (url, refUrl) {
+  parseUrl(url, refUrl) {
     let absoluteUrl;
     try {
       absoluteUrl = new URL(url, refUrl || undefined);
@@ -32,14 +33,14 @@ document.addEventListener("DOMContentLoaded", function () {
       return {url: url, inZip: false};
     }
 
-    if (absoluteUrl.href.startsWith(virtualBase)) {
+    if (absoluteUrl.href.startsWith(viewerData.virtualBase)) {
       let search = absoluteUrl.search;
       let hash = absoluteUrl.hash;
       absoluteUrl.search = "";
       absoluteUrl.hash = "";
-      let inZipPath = absoluteUrl.href.slice(virtualBase.length);
+      let inZipPath = absoluteUrl.href.slice(viewerData.virtualBase.length);
       inZipPath = inZipPath.split("/").map(x => scrapbook.decodeURIComponent(x)).join("/");
-      let f = inZipFiles[inZipPath];
+      let f = viewer.inZipFiles[inZipPath];
       if (f) {
         // url targets a file in zip, return its blob URL
         return {
@@ -58,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     // url target not in zip, return absolute URL
     return {url: absoluteUrl.href, inZip: false};
-  };
+  },
 
   /**
    * @callback fetchFileRewriteFunc
@@ -76,17 +77,17 @@ document.addEventListener("DOMContentLoaded", function () {
    *     - {Array} params.recurseChain
    * @return {Promise}
    */
-  const fetchFile = function (params) {
+  fetchFile(params) {
     return Promise.resolve().then(() => {
       const {inZipPath, rewriteFunc, recurseChain} = params;
 
-      let f = inZipFiles[inZipPath];
+      let f = viewer.inZipFiles[inZipPath];
       if (f) {
         if (rewriteFunc) {
           return rewriteFunc({
             data: f.file,
             charset: null,
-            url: inZipPathToUrl(inZipPath),
+            url: viewer.inZipPathToUrl(inZipPath),
             recurseChain: recurseChain
           }).then((rewrittenFile) => {
             return URL.createObjectURL(rewrittenFile);
@@ -96,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       return null;
     });
-  };
+  },
 
   /**
    * @param {Object} params
@@ -105,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
    *     - {Array} params.recurseChain
    * @return {Promise}
    */
-  const fetchPage = function (params) {
+  fetchPage(params) {
     return Promise.resolve().then(() => {
       const {inZipPath, url, recurseChain} = params;
 
@@ -114,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let [base, search, hash] = scrapbook.splitUrl(url);
         searchAndHash = hash; // blob URL with a search is invalid
       }
-      return fetchFile({
+      return viewer.fetchFile({
         inZipPath: inZipPath,
         rewriteFunc: (params) => {
           return Promise.resolve().then(() => {
@@ -122,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
               return scrapbook.readFileAsDocument(data).then((doc) => {
                 if (!doc) { throw new Error("document cannot be loaded"); }
-                return parseDocument({
+                return viewer.parseDocument({
                   doc: doc,
                   inZipPath: inZipPath,
                   recurseChain: recurseChain
@@ -139,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return fetchedUrl ? fetchedUrl + searchAndHash : fetchedUrl;
       });
     });
-  };
+  },
 
   /**
    * @param {Object} params
@@ -148,15 +149,15 @@ document.addEventListener("DOMContentLoaded", function () {
    *     - {Array} params.recurseChain
    * @return {Promise}
    */
-  const parseDocument = function (params) {
+  parseDocument(params) {
     return Promise.resolve().then(() => {
       const {doc, inZipPath, recurseChain} = params;
 
-      let refUrl = inZipPathToUrl(inZipPath);
+      let refUrl = viewer.inZipPathToUrl(inZipPath);
       let tasks = [];
 
       const rewriteUrl = function (url, refUrlOverwrite) {
-        return parseUrl(url, refUrlOverwrite || refUrl).url;
+        return viewer.parseUrl(url, refUrlOverwrite || refUrl).url;
       };
 
       // modify URLs
@@ -170,7 +171,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
               let metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
               if (metaRefresh.url) {
-                let info = parseUrl(metaRefresh.url, refUrl);
+                let info = viewer.parseUrl(metaRefresh.url, refUrl);
                 let [sourcePage] = scrapbook.splitUrlByAnchor(refUrl);
                 let [targetPage, targetPageHash] = scrapbook.splitUrlByAnchor(info.virtualUrl || info.url);
                 if (targetPage !== sourcePage) {
@@ -183,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     let metaRecurseChain = JSON.parse(JSON.stringify(recurseChain));
                     metaRecurseChain.push(refUrl);
                     tasks[tasks.length] = 
-                    fetchPage({
+                    viewer.fetchPage({
                       inZipPath: info.inZipPath,
                       url: info.url,
                       recurseChain: metaRecurseChain
@@ -194,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
                   } else {
                     let content = `<!DOCTYPE html>
-<html ${metaRefreshIdentifier}="1">
+<html ${viewer.metaRefreshIdentifier}="1">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
@@ -235,11 +236,11 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               // elem.rel == "" if "rel" attribute not defined
               let rels = elem.rel.toLowerCase().split(/[ \t\r\n\v\f]+/);
               if (rels.indexOf("stylesheet") >= 0) {
-                let info = parseUrl(elem.getAttribute("href"), refUrl);
+                let info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
                 tasks[tasks.length] = 
-                fetchFile({
+                viewer.fetchFile({
                   inZipPath: info.inZipPath,
-                  rewriteFunc: processCssFile,
+                  rewriteFunc: viewer.processCssFile,
                   recurseChain: [refUrl]
                 }).then((fetchedUrl) => {
                   let url = fetchedUrl || info.url;
@@ -255,7 +256,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
           case "style": {
             tasks[tasks.length] = 
-            processCssText(elem.textContent, refUrl, recurseChain).then((response) => {
+            viewer.processCssText(elem.textContent, refUrl, recurseChain).then((response) => {
               elem.textContent = response;
               return response;
             });
@@ -294,9 +295,9 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
             if (elem.hasAttribute("src")) {
               let frameRecurseChain = JSON.parse(JSON.stringify(recurseChain));
               frameRecurseChain.push(refUrl);
-              let info = parseUrl(elem.getAttribute("src"), refUrl);
+              let info = viewer.parseUrl(elem.getAttribute("src"), refUrl);
               if (info.inZip) {
-                let targetUrl = inZipPathToUrl(info.inZipPath);
+                let targetUrl = viewer.inZipPathToUrl(info.inZipPath);
                 if (frameRecurseChain.indexOf(targetUrl) !== -1) {
                   // console.warn("Resource '" + refUrl + "' has a circular reference to '" + targetUrl + "'.");
                   elem.setAttribute("src", "about:blank");
@@ -305,7 +306,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               }
 
               tasks[tasks.length] = 
-              fetchPage({
+              viewer.fetchPage({
                 inZipPath: info.inZipPath,
                 url: info.url,
                 recurseChain: frameRecurseChain
@@ -321,7 +322,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           case "a":
           case "area": {
             if (elem.hasAttribute("href")) {
-              let info = parseUrl(elem.getAttribute("href"), refUrl);
+              let info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
               if (info.inZip) {
                 if (info.inZipPath !== inZipPath) {
                   elem.setAttribute("href", info.url);
@@ -441,7 +442,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         // styles: style attribute
         if (elem.hasAttribute("style")) {
           tasks[tasks.length] = 
-          processCssText(elem.getAttribute("style"), refUrl, recurseChain).then((response) => {
+          viewer.processCssText(elem.getAttribute("style"), refUrl, recurseChain).then((response) => {
             elem.setAttribute("style", response);
             return response;
           });
@@ -453,30 +454,30 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         return new Blob([content], {type: doc.contentType});
       });
     });
-  };
+  },
 
   /**
    * @return {Promise}
    */
-  const processCssFile = function (params) {
+  processCssFile(params) {
     return Promise.resolve().then(() => {
       const {data, charset, url: refUrl, recurseChain} = params;
 
       return scrapbook.parseCssFile(data, charset, (text) => {
-        return processCssText(text, refUrl, recurseChain);
+        return viewer.processCssText(text, refUrl, recurseChain);
       });
     });
-  };
+  },
 
   /**
    * @return {Promise}
    */
-  const processCssText = function (cssText, refUrl, recurseChain) {
+  processCssText(cssText, refUrl, recurseChain) {
     const fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
 
     let rewritten = scrapbook.parseCssText(cssText, {
       rewriteImportUrl(url) {
-        return {url: fetcher.getUrlHash(url, processCssFile)};
+        return {url: fetcher.getUrlHash(url, viewer.processCssFile)};
       },
       rewriteFontFaceUrl(url) {
         return {url: fetcher.getUrlHash(url)};
@@ -489,91 +490,84 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
     return fetcher.startFetches().then((result) => {
       return fetcher.finalRewrite(rewritten);
     });
-  };
+  },
+};
 
-  const ComplexUrlFetcher = class ComplexUrlFetcher {
-    constructor(refUrl, recurseChain) {
-      this.urlHash = {};
-      this.urlRewrittenCount = 0;
-      this.recurseChain = JSON.parse(JSON.stringify(recurseChain || []));
-      if (refUrl) {
-        // if a refUrl is specified, record the recurse chain
-        // for future check of circular referencing
-        this.recurseChain.push(scrapbook.splitUrlByAnchor(refUrl)[0]);
-      }
+class ComplexUrlFetcher {
+  constructor(refUrl, recurseChain) {
+    this.urlHash = {};
+    this.urlRewrittenCount = 0;
+    this.recurseChain = JSON.parse(JSON.stringify(recurseChain || []));
+    if (refUrl) {
+      // if a refUrl is specified, record the recurse chain
+      // for future check of circular referencing
+      this.recurseChain.push(scrapbook.splitUrlByAnchor(refUrl)[0]);
     }
+  }
 
-    getUrlHash(url, rewriteFunc) {
-      const key = scrapbook.getUuid();
-      this.urlHash[key] = {
-        url: url,
-        newUrl: null,
-        rewriteFunc: rewriteFunc
-      };
-      return "urn:scrapbook:url:" + key;
-    }
-
-    /**
-     * @return {Promise}
-     */
-    startFetches() {
-      return Promise.resolve().then(() => {
-        let tasks = Object.keys(this.urlHash).map((key) => {
-          return Promise.resolve().then(() => {
-            let sourceUrl = this.recurseChain[this.recurseChain.length - 1];
-            let info = parseUrl(this.urlHash[key].url, sourceUrl);
-
-            if (info.inZip) {
-              let targetUrl = inZipPathToUrl(info.inZipPath);
-              if (this.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) !== -1) {
-                // console.warn("Resource '" + sourceUrl + "' has a circular reference to '" + targetUrl + "'.");
-                return "about:blank";
-              }
-            }
-
-            return new Promise((resolve, reject) => {
-              fetchFile({
-                inZipPath: info.inZipPath,
-                rewriteFunc: this.urlHash[key].rewriteFunc,
-                url: inZipPathToUrl(info.inZipPath),
-                recurseChain: this.recurseChain
-              }).then((fetchedUrl) => {
-                resolve(fetchedUrl || info.url);
-              });
-            });
-          }).then((response) => {
-            this.urlHash[key].newUrl = response;
-            return response;
-          });
-        });
-        return Promise.all(tasks);
-      });
-    }
-
-    finalRewrite(text) {
-      return text.replace(/urn:scrapbook:url:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
-        if (this.urlHash[key]) { return this.urlHash[key].newUrl; }
-        // This could happen when a web page really contains a content text in our format.
-        // We return the original text for keys not defineded in the map to prevent a bad replace
-        // since it's nearly impossible for them to hit on the hash keys we are using.
-        return match;
-      });
-    }
-  };
+  getUrlHash(url, rewriteFunc) {
+    const key = scrapbook.getUuid();
+    this.urlHash[key] = {
+      url: url,
+      newUrl: null,
+      rewriteFunc: rewriteFunc
+    };
+    return "urn:scrapbook:url:" + key;
+  }
 
   /**
-   * main
+   * @return {Promise}
    */
+  startFetches() {
+    return Promise.resolve().then(() => {
+      let tasks = Object.keys(this.urlHash).map((key) => {
+        return Promise.resolve().then(() => {
+          let sourceUrl = this.recurseChain[this.recurseChain.length - 1];
+          let info = viewer.parseUrl(this.urlHash[key].url, sourceUrl);
+
+          if (info.inZip) {
+            let targetUrl = viewer.inZipPathToUrl(info.inZipPath);
+            if (this.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) !== -1) {
+              // console.warn("Resource '" + sourceUrl + "' has a circular reference to '" + targetUrl + "'.");
+              return "about:blank";
+            }
+          }
+
+          return new Promise((resolve, reject) => {
+            viewer.fetchFile({
+              inZipPath: info.inZipPath,
+              rewriteFunc: this.urlHash[key].rewriteFunc,
+              url: viewer.inZipPathToUrl(info.inZipPath),
+              recurseChain: this.recurseChain
+            }).then((fetchedUrl) => {
+              resolve(fetchedUrl || info.url);
+            });
+          });
+        }).then((response) => {
+          this.urlHash[key].newUrl = response;
+          return response;
+        });
+      });
+      return Promise.all(tasks);
+    });
+  }
+
+  finalRewrite(text) {
+    return text.replace(/urn:scrapbook:url:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
+      if (this.urlHash[key]) { return this.urlHash[key].newUrl; }
+      // This could happen when a web page really contains a content text in our format.
+      // We return the original text for keys not defineded in the map to prevent a bad replace
+      // since it's nearly impossible for them to hit on the hash keys we are using.
+      return match;
+    });
+  }
+};
+
+document.addEventListener("DOMContentLoaded", function () {
   scrapbook.loadLanguages(document);
 
-  const virtualBase = viewerData.virtualBase;
   const defaultTitle = document.querySelector('title').textContent;
-  const metaRefreshIdentifier = "data-scrapbook-meta-refresh-" + scrapbook.dateToId();
-
-  const viewer = document.getElementById('viewer');
-
-  const inZipFiles = {};
-  const blobUrlToInZipPath = {};
+  const iframe = document.getElementById('viewer');
 
   let urlSearch = "";
   let urlHash = location.hash;
@@ -585,20 +579,20 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         frameDoc = frame.contentDocument;
         if (!frameDoc) { throw new Error("content document not accessible"); }
       } catch (ex) {
-        if (frame === viewer) {
+        if (frame === iframe) {
           document.title = defaultTitle;
         }
         return;
       }
 
-      if (frameDoc.documentElement.hasAttribute(metaRefreshIdentifier)) {
+      if (frameDoc.documentElement.hasAttribute(viewer.metaRefreshIdentifier)) {
         let anchor = frameDoc.querySelector("a");
         let url = anchor.href;
-        (frame === viewer ? document : frameDoc).location.replace(url);
+        (frame === iframe ? document : frameDoc).location.replace(url);
         return;
       }
 
-      if (frame === viewer) {
+      if (frame === iframe) {
         document.title = frameDoc.title;
       }
 
@@ -609,13 +603,13 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
         try {
           let url = elem.href;
-          let inZipPath = blobUrlToInZipPath[scrapbook.splitUrl(url)[0]];
+          let inZipPath = viewer.blobUrlToInZipPath[scrapbook.splitUrl(url)[0]];
           if (inZipPath) {
-            let f = inZipFiles[inZipPath];
+            let f = viewer.inZipFiles[inZipPath];
             if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
               e.preventDefault();
               e.stopPropagation();
-              fetchPage({
+              viewer.fetchPage({
                 inZipPath: inZipPath,
                 url: url,
                 recurseChain: []
@@ -624,7 +618,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                 elem.click();
               });
             }
-          } else if (!url.startsWith("blob:") && frame === viewer) {
+          } else if (!url.startsWith("blob:") && frame === iframe) {
             e.preventDefault();
             e.stopPropagation();
             location.href = url;
@@ -644,7 +638,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
     frameOnLoad(frame);
   };
 
-  frameRegisterLinkLoader(viewer);
+  frameRegisterLinkLoader(iframe);
 
   return Promise.resolve(viewerData.zipId).then((uuid) => {
     const key = {table: "viewerCache", id: uuid};
@@ -668,23 +662,23 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           let mime = Mime.prototype.lookup(inZipPath);
           let f = new File([ab], inZipPath.replace(/.*\//, ""), {type: mime});
           let u = URL.createObjectURL(f);
-          inZipFiles[inZipPath] = {file: f, url: u};
-          blobUrlToInZipPath[u] = inZipPath;
+          viewer.inZipFiles[inZipPath] = {file: f, url: u};
+          viewer.blobUrlToInZipPath[u] = inZipPath;
         });
       });
       return Promise.all(tasks);
     });
   }).then((results) => {
-    fetchPage({
+    viewer.fetchPage({
       inZipPath: viewerData.indexFile || "index.html",
       url: urlSearch + urlHash,
       recurseChain: []
     }).then((fetchedUrl) => {
       // remove viewer temporarily to avoid generating a history entry
-      let p = viewer.parentNode, n = viewer.nextSibling;
-      viewer.remove();
-      viewer.src = fetchedUrl || "about:blank";
-      p.insertBefore(viewer, n);
+      let p = iframe.parentNode, n = iframe.nextSibling;
+      iframe.remove();
+      iframe.src = fetchedUrl || "about:blank";
+      p.insertBefore(iframe, n);
     });
   }).catch((ex) => {
     console.error(ex);
