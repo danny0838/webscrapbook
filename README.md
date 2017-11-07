@@ -6,11 +6,10 @@ This extension is available for Chromium-based browsers (Google Chrome, Opera, V
 
 
 ## Caveats:
-* Restrictions in Firefox:
-  * Several features may not work correctly in a private window.
-  * "Allow access to file URLs" is not supported.
+* Several features may not work correctly in a private window in Firefox.
+* "Allow access to file URLs" is not supported in Firefox.
 * A vary large zip archive file (around 2 GiB) cannot be read by the browser. A large file in the zip archive (around 400~500 MiB) can exhaust the memory and crash the extension.
-* Javascript in the archive file might not work correctly, especially when it loads an external script or file dynamically. (Firefox is more likely to run into this issue due to more restriction of its addon framework.)
+* Javascripts and objects may not work correctly and has a potential security risk in the archive page viewer.
 
 
 ## See also:
