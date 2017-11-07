@@ -384,21 +384,36 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
           case "embed": {
             if (elem.hasAttribute("src")) {
-              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+              try {
+                elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+              } catch (ex) {
+                // In Firefox < 53, an error could be thrown here.
+                // The modification still take effect, though.
+              }
             }
             break;
           }
 
           case "object": {
             if (elem.hasAttribute("data")) {
-              elem.setAttribute("data", rewriteUrl(elem.getAttribute("data"), refUrl));
+              try {
+                elem.setAttribute("data", rewriteUrl(elem.getAttribute("data"), refUrl));
+              } catch (ex) {
+                // In Firefox < 53, an error could be thrown here.
+                // The modification still take effect, though.
+              }
             }
             break;
           }
 
           case "applet": {
             if (elem.hasAttribute("archive")) {
-              elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive"), refUrl));
+              try {
+                elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive"), refUrl));
+              } catch (ex) {
+                // In Firefox < 53, an error could be thrown here.
+                // The modification still take effect, though.
+              }
             }
             break;
           }
