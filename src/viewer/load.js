@@ -158,10 +158,10 @@ const viewer = {
   },
 
   processUrlParams() {
-    let zipSourceUrl = viewer.mainUrl.searchParams.get("src");
+    const zipSourceUrl = viewer.mainUrl.searchParams.get("src");
     if (!zipSourceUrl) { return; }
 
-    let zipSourceUrlObj = new URL(zipSourceUrl);
+    const zipSourceUrlObj = new URL(zipSourceUrl);
     viewer.urlSearch = zipSourceUrlObj.search;
     viewer.urlHash = viewer.mainUrl.hash;
     let filename = scrapbook.urlToFilename(zipSourceUrl);
@@ -174,13 +174,13 @@ const viewer = {
       // local request (status = 0) has no response header
       if (xhr.status !== 0) {
         try {
-          let headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-          let contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+          const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+          const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
           filename = contentDisposition.parameters.filename || filename;
         } catch (ex) {}
       }
 
-      let file = new File([xhr.response], filename, {type: Mime.prototype.lookup(filename)});
+      const file = new File([xhr.response], filename, {type: Mime.prototype.lookup(filename)});
       return viewer.processZipFile(file);        
     }, (ex) => {
       alert("Unable to load the specified zip file '" + zipSourceUrl + "'");
@@ -208,8 +208,8 @@ const viewer = {
     const MAF = "http://maf.mozdev.org/metadata/rdf#";
     const result = {};
 
-    let elems = doc.getElementsByTagNameNS(MAF, "indexfilename");
-    let elem = elems[0];
+    const elems = doc.getElementsByTagNameNS(MAF, "indexfilename");
+    const elem = elems[0];
     if (elem) { result.indexfilename = elem.getAttributeNS(RDF, "resource"); }
 
     return result;
@@ -250,20 +250,20 @@ const viewer = {
             return fileSystemHandler.getDir(root, ns).then((dirEntry) => {
               return fileSystemHandler.readDir(dirEntry);
             }).then((entries) => {
-              let tasks = entries.filter(e => e.isDirectory).map((entry) => {
+              const tasks = entries.filter(e => e.isDirectory).map((entry) => {
                 return fileSystemHandler.getFile(entry, "index.rdf").then((fileEntry) => {
                   return new Promise((resolve, reject) => {
                     fileEntry.file(resolve, reject);
                   }).then((file) => {
                     return scrapbook.readFileAsDocument(file);
                   }).then((doc) => {
-                    let meta = viewer.parseRdfDocument(doc);
+                    const meta = viewer.parseRdfDocument(doc);
                     return fileSystemHandler.getFile(entry, meta.indexfilename);
                   });
                 }, (ex) => {
                   return fileSystemHandler.readDir(entry).then((entries) => {
                     for (let i = 0, I = entries.length; i < I; ++i) {
-                      let entry = entries[i];
+                      const entry = entries[i];
                       if (entry.isFile && entry.name.startsWith("index.")) {
                         return entry;
                       }
@@ -289,12 +289,12 @@ const viewer = {
         if (!indexFileEntries.length) {
           return viewer.warn("No available data can be loaded from this archive file.");
         }
-        let mainFileEntry = indexFileEntries.shift();
+        const mainFileEntry = indexFileEntries.shift();
         indexFileEntries.forEach((indexFileEntry) => {
-          let url = indexFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
+          const url = indexFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
           viewer.openUrl(url, true);
         });
-        let url = mainFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
+        const url = mainFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
         viewer.openUrl(url, false);
       });
     });
@@ -343,11 +343,11 @@ const viewer = {
         case "maff": {
           return new JSZip().loadAsync(zipFile).then((zip) => {
             // get a list of top-folders
-            let topdirs = {};
+            const topdirs = {};
             zip.forEach((subPath, zipObj) => {
-              let depth = Array.prototype.filter.call(subPath, x => x == "/").length;
+              const depth = Array.prototype.filter.call(subPath, x => x == "/").length;
               if (depth == 1) {
-                let dirname = subPath.replace(/\/.*$/, "");
+                const dirname = subPath.replace(/\/.*$/, "");
                 if (!topdirs[dirname]) { topdirs[dirname] = zip.folder(dirname); }
               }
             });
@@ -355,19 +355,19 @@ const viewer = {
           }).then((topdirs) => {
             const tasks = [];
             for (let i in topdirs) {
-              let dirObj = topdirs[i];
+              const dirObj = topdirs[i];
               tasks[tasks.length] = Promise.resolve().then(() => {
-                let rdfFile = dirObj.file("index.rdf");
+                const rdfFile = dirObj.file("index.rdf");
                 if (!rdfFile) { throw new Error("no index.rdf"); }
                 return rdfFile;
               }).then((rdfFile) => {
                 return rdfFile.async("arraybuffer").then((ab) => {
-                  let filename = rdfFile.name.replace(/.*\//, "");
-                  let mime = Mime.prototype.lookup(filename);
-                  let file = new File([ab], filename, {type: mime});
+                  const filename = rdfFile.name.replace(/.*\//, "");
+                  const mime = Mime.prototype.lookup(filename);
+                  const file = new File([ab], filename, {type: mime});
                   return scrapbook.readFileAsDocument(file);
                 }).then((doc) => {
-                  let meta = viewer.parseRdfDocument(doc);
+                  const meta = viewer.parseRdfDocument(doc);
                   if (dirObj.file(meta.indexfilename)) {
                     return meta.indexfilename;
                   }
@@ -393,15 +393,15 @@ const viewer = {
             if (!topdirs.length) {
               return viewer.warn("No available data can be loaded from this archive file.");
             }
-            let mainDir = topdirs.shift();
+            const mainDir = topdirs.shift();
             mainDir.inNewTab = false;
             topdirs.push(mainDir);
             let p = Promise.resolve();
-            let tasks = topdirs.map((topdir) => {
+            const tasks = topdirs.map((topdir) => {
               return p = p.then(() => {
                 return topdir.zip.generateAsync({type: "blob"});
               }).then((zipBlob) => {
-                let f = new File([zipBlob], zipFile.name, {type: zipBlob.type});
+                const f = new File([zipBlob], zipFile.name, {type: zipBlob.type});
                 return invokeZipViewer(f, topdir.indexFile, topdir.inNewTab);
               });
             });
@@ -417,7 +417,7 @@ const viewer = {
           return new JSZip().loadAsync(zipFile).then((zip) => {
             return zip.generateAsync({type: "blob"});
           }).then((zipBlob) => {
-            let f = new File([zipBlob], zipFile.name, {type: zipBlob.type});
+            const f = new File([zipBlob], zipFile.name, {type: zipBlob.type});
             return invokeZipViewer(f, "index.html");
           });
         }
@@ -443,7 +443,7 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       e.target.classList.remove("dragover");
       Array.prototype.forEach.call(e.dataTransfer.items, (item) => {
-        let entry = item.webkitGetAsEntry();
+        const entry = item.webkitGetAsEntry();
         if (entry.isFile) {
           entry.file((file) => {
             viewer.processZipFile(file);
@@ -463,7 +463,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fileSelectorInput.addEventListener("change", (e) => {
       e.preventDefault();
-      let file = e.target.files[0];
+      const file = e.target.files[0];
       viewer.processZipFile(file);
     }, false);
 
