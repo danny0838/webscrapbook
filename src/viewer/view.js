@@ -17,8 +17,8 @@ const viewerData = {
 
 const viewer = {
   metaRefreshIdentifier: "data-scrapbook-meta-refresh-" + scrapbook.dateToId(),
-  inZipFiles: {},
-  blobUrlToInZipPath: {},
+  inZipFiles: new Map(),
+  blobUrlToInZipPath: new Map(),
   
   inZipPathToUrl(inZipPath) {
     return viewerData.virtualBase + (inZipPath || "").split("/").map(x => encodeURIComponent(x)).join("/");
@@ -40,7 +40,7 @@ const viewer = {
       absoluteUrl.hash = "";
       let inZipPath = absoluteUrl.href.slice(viewerData.virtualBase.length);
       inZipPath = inZipPath.split("/").map(x => scrapbook.decodeURIComponent(x)).join("/");
-      let f = viewer.inZipFiles[inZipPath];
+      let f = viewer.inZipFiles.get(inZipPath);
       if (f) {
         // url targets a file in zip, return its blob URL
         return {
@@ -81,7 +81,7 @@ const viewer = {
     return Promise.resolve().then(() => {
       const {inZipPath, rewriteFunc, recurseChain} = params;
 
-      let f = viewer.inZipFiles[inZipPath];
+      let f = viewer.inZipFiles.get(inZipPath);
       if (f) {
         if (rewriteFunc) {
           return rewriteFunc({
@@ -603,9 +603,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
           let url = elem.href;
-          let inZipPath = viewer.blobUrlToInZipPath[scrapbook.splitUrl(url)[0]];
+          let inZipPath = viewer.blobUrlToInZipPath.get(scrapbook.splitUrl(url)[0]);
           if (inZipPath) {
-            let f = viewer.inZipFiles[inZipPath];
+            let f = viewer.inZipFiles.get(inZipPath);
             if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
               e.preventDefault();
               e.stopPropagation();
@@ -662,8 +662,8 @@ document.addEventListener("DOMContentLoaded", function () {
           let mime = Mime.prototype.lookup(inZipPath);
           let f = new File([ab], inZipPath.replace(/.*\//, ""), {type: mime});
           let u = URL.createObjectURL(f);
-          viewer.inZipFiles[inZipPath] = {file: f, url: u};
-          viewer.blobUrlToInZipPath[u] = inZipPath;
+          viewer.inZipFiles.set(inZipPath, {file: f, url: u});
+          viewer.blobUrlToInZipPath.set(u, inZipPath);
         });
       });
       return Promise.all(tasks);
