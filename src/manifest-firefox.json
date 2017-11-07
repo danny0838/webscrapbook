@@ -49,13 +49,11 @@
   },
 
   "web_accessible_resources": [
-    "lib/mime.js",
-    "lib/jszip.js",
     "core/polyfill.js",
     "core/common.js",
     "core/scrapbook_32.png",
     "core/scrapbook_128.png",
-    "viewer/*"
+    "viewer/load.html"
   ],
 
   "options_ui": {
