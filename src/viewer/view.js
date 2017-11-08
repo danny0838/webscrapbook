@@ -460,8 +460,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
           // @FIXME:
           // embed, objects, and applet doesn't seem to work as in a regular web page.
-          // External embedding is not allowed by extension CSP, should we implementation
-          // a shim?
           case "embed": {
             if (elem.hasAttribute("src")) {
               try {
@@ -469,6 +467,24 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               } catch (ex) {
                 // In Firefox < 53, an error could be thrown here.
                 // The modification still take effect, though.
+              }
+
+              // External resources are not allowed by extension CSP, retrieve and 
+              // convert them into blob URLs as a shim.
+              const url = elem.getAttribute("src");
+              if (!url.startsWith('blob:')) {
+                tasks[tasks.length] = 
+                scrapbook.xhr({
+                  url: url,
+                  responseType: 'blob',
+                }).then((xhr) => {
+                  return xhr.response;
+                }).then((blob) => {
+                  if (!blob) { return; }
+                  elem.setAttribute("src", URL.createObjectURL(blob));
+                }).catch((ex) => {
+                  console.error(ex);
+                });
               }
             }
             break;
@@ -482,6 +498,24 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                 // In Firefox < 53, an error could be thrown here.
                 // The modification still take effect, though.
               }
+
+              // External resources are not allowed by extension CSP, retrieve and 
+              // convert them into blob URLs as a shim.
+              const url = elem.getAttribute("data");
+              if (!url.startsWith('blob:')) {
+                tasks[tasks.length] = 
+                scrapbook.xhr({
+                  url: url,
+                  responseType: 'blob',
+                }).then((xhr) => {
+                  return xhr.response;
+                }).then((blob) => {
+                  if (!blob) { return; }
+                  elem.setAttribute("data", URL.createObjectURL(blob));
+                }).catch((ex) => {
+                  console.error(ex);
+                });
+              }
             }
             break;
           }
@@ -494,6 +528,24 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                 // In Firefox < 53, an error could be thrown here.
                 // The modification still take effect, though.
               }
+
+              // External resources are not allowed by extension CSP, retrieve and 
+              // convert them into blob URLs as a shim.
+              const url = elem.getAttribute("code");
+              if (!url.startsWith('blob:')) {
+                tasks[tasks.length] = 
+                scrapbook.xhr({
+                  url: url,
+                  responseType: 'blob',
+                }).then((xhr) => {
+                  return xhr.response;
+                }).then((blob) => {
+                  if (!blob) { return; }
+                  elem.setAttribute("code", URL.createObjectURL(blob));
+                }).catch((ex) => {
+                  console.error(ex);
+                });
+              }
             }
 
             if (elem.hasAttribute("archive")) {
@@ -502,6 +554,24 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               } catch (ex) {
                 // In Firefox < 53, an error could be thrown here.
                 // The modification still take effect, though.
+              }
+
+              // External resources are not allowed by extension CSP, retrieve and 
+              // convert them into blob URLs as a shim.
+              const url = elem.getAttribute("archive");
+              if (!url.startsWith('blob:')) {
+                tasks[tasks.length] = 
+                scrapbook.xhr({
+                  url: url,
+                  responseType: 'blob',
+                }).then((xhr) => {
+                  return xhr.response;
+                }).then((blob) => {
+                  if (!blob) { return; }
+                  elem.setAttribute("archive", URL.createObjectURL(blob));
+                }).catch((ex) => {
+                  console.error(ex);
+                });
               }
             }
             break;
