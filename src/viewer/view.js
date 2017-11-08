@@ -487,6 +487,15 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
 
           case "applet": {
+            if (elem.hasAttribute("code")) {
+              try {
+                elem.setAttribute("code", rewriteUrl(elem.getAttribute("code"), refUrl));
+              } catch (ex) {
+                // In Firefox < 53, an error could be thrown here.
+                // The modification still take effect, though.
+              }
+            }
+
             if (elem.hasAttribute("archive")) {
               try {
                 elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive"), refUrl));
