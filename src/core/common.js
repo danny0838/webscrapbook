@@ -159,6 +159,32 @@ scrapbook.cache = {
       });
     },
 
+    getAll(filter) {
+      return new Promise((resolve, reject) => {
+        chrome.storage.local.get(null, (items) => {
+          if (!chrome.runtime.lastError) {
+            for (let key in items) {
+              try {
+                let obj = JSON.parse(key);
+                for (let cond in filter) {
+                  if (obj[cond] !== filter[cond]) {
+                    throw new Error("filter not matched");
+                  }
+                }
+              } catch (ex) {
+                // invalid JSON format => meaning not a cache
+                // or does not match the filter
+                delete(items[key]);
+              }
+            }
+            resolve(items);
+          } else {
+            reject(chrome.runtime.lastError);
+          }
+        });
+      });
+    },
+
     set(key, value) {
       return new Promise((resolve, reject) => {
         let pair = {[key]: value};
@@ -172,9 +198,9 @@ scrapbook.cache = {
       });
     },
 
-    remove(key) {
+    remove(keys) {
       return new Promise((resolve, reject) => {
-        chrome.storage.local.remove(key, () => {
+        chrome.storage.local.remove(keys, () => {
           if (!chrome.runtime.lastError) {
             resolve();
           } else {
@@ -226,6 +252,38 @@ scrapbook.cache = {
       });
     },
 
+    getAll(filter) {
+      return this.connect().then((db) => {
+        let transaction = db.transaction("cache", "readonly");
+        let objectStore = transaction.objectStore(["cache"]);
+        return new Promise((resolve, reject) => {
+          let request = objectStore.getAll();
+          request.onsuccess = function (event) {
+            let items = event.target.result;
+            let result = {};
+            for (let item of items) {
+              try {
+                let obj = JSON.parse(item.key);
+                for (let cond in filter) {
+                  if (obj[cond] !== filter[cond]) {
+                    throw new Error("filter not matched");
+                  }
+                }
+                result[item.key] = item.value;
+              } catch (ex) {
+                // invalid JSON format => meaning not a cache
+                // or does not match the filter
+              }
+            }
+            resolve(result);
+          };
+          request.onerror = function (event) {
+            reject(event.target.error);
+          };
+        });
+      });
+    },
+
     set(key, value) {
       return this.connect().then((db) => {
         return new Promise((resolve, reject) => {
@@ -242,26 +300,35 @@ scrapbook.cache = {
       });
     },
 
-    remove(key) {
+    remove(keys) {
       return this.connect().then((db) => {
-        return new Promise((resolve, reject) => {
-          let transaction = db.transaction("cache", "readwrite");
-          let objectStore = transaction.objectStore(["cache"]);
-          let request = objectStore.delete(key);
-          request.onsuccess = function (event) {
-            resolve();
-          };
-          request.onerror = function (event) {
-            reject(event.target.error);
-          };
+        let transaction = db.transaction("cache", "readwrite");
+        let objectStore = transaction.objectStore(["cache"]);
+        let tasks = keys.map((key) => {
+          return new Promise((resolve, reject) => {
+            let request = objectStore.delete(key);
+            request.onsuccess = function (event) {
+              resolve();
+            };
+            request.onerror = function (event) {
+              reject(event.target.error);
+            };
+          });
+        });
+        return Promise.all(tasks).catch((ex) => {
+          transaction.abort();
+          throw ex;
         });
       });
     },
   },
 };
 
+/**
+ * @param {string|Object} key
+ */
 scrapbook.getCache = function (key, defaultValue) {
-  const keyStr = JSON.stringify(key);
+  const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
 
   if (scrapbook.isGecko) {
     return scrapbook.cache.storage.get(keyStr, defaultValue);
@@ -270,8 +337,22 @@ scrapbook.getCache = function (key, defaultValue) {
   }
 };
 
+/**
+ * @param {Object} filter - an object filter that each item key must match
+ */
+scrapbook.getCaches = function (filter) {
+  if (scrapbook.isGecko) {
+    return scrapbook.cache.storage.getAll(filter);
+  } else {
+    return scrapbook.cache.indexedDB.getAll(filter);
+  }
+};
+
+/**
+ * @param {string|Object} key
+ */
 scrapbook.setCache = function (key, value) {
-  const keyStr = JSON.stringify(key);
+  const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
 
   if (scrapbook.isGecko) {
     return scrapbook.cache.storage.set(keyStr, value);
@@ -280,13 +361,19 @@ scrapbook.setCache = function (key, value) {
   }
 };
 
-scrapbook.removeCache = function (key) {
-  const keyStr = JSON.stringify(key);
+/**
+ * @param {string|Object|Array} keys - a key (string or Object) or an array of keys
+ */
+scrapbook.removeCaches = function (keys) {
+  if (!Array.isArray(keys)) { keys = [keys]; }
+  keys = keys.map((key) => {
+    return (typeof key === "string") ? key : JSON.stringify(key);
+  });
 
   if (scrapbook.isGecko) {
-    return scrapbook.cache.storage.remove(keyStr);
+    return scrapbook.cache.storage.remove(keys);
   } else {
-    return scrapbook.cache.indexedDB.remove(keyStr);
+    return scrapbook.cache.indexedDB.remove(keys);
   }
 };
 

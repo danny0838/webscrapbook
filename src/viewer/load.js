@@ -104,31 +104,33 @@ const viewer = {
   },
 
   openUrl(url, inNewTab = false) {
-    if (inNewTab) {
-      // In Firefox, a window.open popup is blocked by default, and the 
-      // user has to manually add an exception to the popup blocker.
-      // However, there's a bug causing notification now shown when
-      // a popup is blocked (Bug 1396745).
-      //
-      // browser.tabs.create fails silently in Firefox private window.
-      //
-      // browser.tabs is undefined in a Firefox addon page in a frame.
-      if (scrapbook.isGecko) {
-        return Promise.resolve().then(() => {
-          return browser.tabs.getCurrent().then((tab) => {
-            if (tab.incognito) { throw new Error('private window'); }
-            return browser.tabs.create({url: url, active: false});
+    return Promise.resolve().then(() => {
+      if (inNewTab) {
+        // In Firefox, a window.open popup is blocked by default, and the 
+        // user has to manually add an exception to the popup blocker.
+        // However, there's a bug causing notification now shown when
+        // a popup is blocked (Bug 1396745).
+        //
+        // browser.tabs.create fails silently in Firefox private window.
+        //
+        // browser.tabs is undefined in a Firefox addon page in a frame.
+        if (scrapbook.isGecko) {
+          return Promise.resolve().then(() => {
+            return browser.tabs.getCurrent().then((tab) => {
+              if (tab.incognito) { throw new Error('private window'); }
+              return browser.tabs.create({url: url, active: false});
+            });
+          }).catch((ex) => {
+            window.open(url);
           });
-        }).catch((ex) => {
-          window.open(url);
-        });
+        }
+
+        window.open(url);
+        return;
       }
 
-      window.open(url);
-      return;
-    }
-
-    window.location.replace(url);
+      window.location.replace(url);
+    });
   },
 
   start() {
@@ -289,13 +291,19 @@ const viewer = {
         if (!indexFileEntries.length) {
           return viewer.warn("No available data can be loaded from this archive file.");
         }
+
+        let p = Promise.resolve();
         const mainFileEntry = indexFileEntries.shift();
         indexFileEntries.forEach((indexFileEntry) => {
-          const url = indexFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
-          viewer.openUrl(url, true);
+          p = p.then(() => {
+            const url = indexFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
+            return viewer.openUrl(url, true);
+          });
         });
-        const url = mainFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
-        viewer.openUrl(url, false);
+        p = p.then(() => {
+          const url = mainFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
+          return viewer.openUrl(url, false);
+        });
       });
     });
   },
@@ -304,124 +312,134 @@ const viewer = {
    * @return {Promise}
    */
   viewZipInMemory(zipFile) {
-    /**
-     * @return {Promise}
-     */
-    const invokeZipViewer = function (zipFile, indexFile, inNewTab) {
-      return Promise.resolve().then(() => {
-        const uuid = scrapbook.getUuid();
-        const key = {table: "viewerCache", id: uuid};
-
-        return Promise.resolve().then(() => {
-          // In Firefox < 56, Blobs cannot be stored in chrome.storage
-          if (_isFxBelow56) {
-            return scrapbook.readFileAsText(zipFile, false).then((bytes) => {
-              return {
-                name: zipFile.name,
-                type: zipFile.type,
-                value: bytes,
-              };
-            });
-          }
-
-          return zipFile;
-        }).then((data) => {
-          return scrapbook.setCache(key, data);
-        }).then(() => {
-          const url = new URL(chrome.runtime.getURL("viewer/view.html"));
-          const s = url.searchParams;
-          s.set("id", uuid);
-          s.set("index", indexFile);
-          viewer.openUrl(url.href, inNewTab);
-        });
-      });
+    const uuid = scrapbook.getUuid();
+    const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
+    const zipData = {
+      name: zipFile.name,
+      files: {},
     };
 
-    return Promise.resolve().then(() => {
-      const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
+    return new JSZip().loadAsync(zipFile).then((zip) => {
+      let p = Promise.resolve();
+      zip.forEach((inZipPath, zipObj) => {
+        p = p.then(() => {
+          if (zipObj.dir) {
+            zipData.files[inZipPath] = {dir: true};
+            return;
+          }
+
+          return zipObj.async("arraybuffer").then((ab) => {
+            const mime = Mime.prototype.lookup(inZipPath);
+
+            let data;
+            // In Firefox < 56, Blob cannot be stored in chrome.storage,
+            // fallback to byte string.
+            if (_isFxBelow56) {
+              data = scrapbook.arrayBufferToByteString(ab);
+            } else {
+              data = new Blob([ab], {type: mime});
+            }
+
+            zipData.files[inZipPath] = {
+              dir: false,
+              type: mime,
+              value: data,
+            };
+          });
+        });
+      });
+      return p;
+    }).then(() => {
+      const key = {table: "viewerCache", id: uuid};
+      return scrapbook.setCache(key, zipData);
+    }).then(() => {
       switch (type) {
         case "maff": {
-          return new JSZip().loadAsync(zipFile).then((zip) => {
-            // get a list of top-folders
-            const topdirs = {};
-            zip.forEach((subPath, zipObj) => {
-              const depth = Array.prototype.filter.call(subPath, x => x == "/").length;
-              if (depth == 1) {
-                const dirname = subPath.replace(/\/.*$/, "");
-                if (!topdirs[dirname]) { topdirs[dirname] = zip.folder(dirname); }
+          // get the list of top-folders
+          const topdirs = new Set();
+          for (let inZipPath in zipData.files) {
+            const depth = Array.prototype.filter.call(inZipPath, x => x == "/").length;
+            if (depth === 1) {
+              const dirname = inZipPath.replace(/\/.*$/, "");
+              topdirs.add(dirname + '/');
+            }
+          }
+
+          // get index files in each topdir
+          const indexFiles = [];
+          let p = Promise.resolve();
+          topdirs.forEach((topdir) => {
+            p = p.then(() => {
+              const indexRdfData = zipData.files[topdir + 'index.rdf'];
+              if (!indexRdfData) { throw new Error("no index.rdf"); }
+
+              const file = new File([indexRdfData.value], 'index.rdf', {type: indexRdfData.type});
+              return scrapbook.readFileAsDocument(file).then((doc) => {
+                const meta = viewer.parseRdfDocument(doc);
+                const indexFile = topdir + meta.indexfilename;
+                if (zipData.files[indexFile]) {
+                  return indexFile;
+                }
+              });
+            }).catch((ex) => {
+              let indexFilename;
+              for (let inZipPath in zipData.files) {
+                if (!inZipPath.startsWith(topdir)) { continue; }
+
+                const filename = inZipPath.slice(inZipPath.lastIndexOf("/") + 1);
+                if (filename.startsWith("index.")) {
+                  indexFilename = inZipPath;
+                  break;
+                }
               }
+              return indexFilename;
+            }).then((indexFilename) => {
+              if (!indexFilename) { throw new Error("no available index file"); }
+
+              indexFiles.push(indexFilename);
+            }).catch((ex) => {
+              viewer.warn("Unable to get index file in the directory: '" + topdir + "'");
             });
-            return topdirs;
-          }).then((topdirs) => {
-            const tasks = [];
-            for (let i in topdirs) {
-              const dirObj = topdirs[i];
-              tasks[tasks.length] = Promise.resolve().then(() => {
-                const rdfFile = dirObj.file("index.rdf");
-                if (!rdfFile) { throw new Error("no index.rdf"); }
-                return rdfFile;
-              }).then((rdfFile) => {
-                return rdfFile.async("arraybuffer").then((ab) => {
-                  const filename = rdfFile.name.replace(/.*\//, "");
-                  const mime = Mime.prototype.lookup(filename);
-                  const file = new File([ab], filename, {type: mime});
-                  return scrapbook.readFileAsDocument(file);
-                }).then((doc) => {
-                  const meta = viewer.parseRdfDocument(doc);
-                  if (dirObj.file(meta.indexfilename)) {
-                    return meta.indexfilename;
-                  }
-                });
-              }, (ex) => {
-                let indexFilename;
-                dirObj.forEach((subPath, zipObj) => {
-                  if (!zipObj.dir && subPath.indexOf("/") === -1 && subPath.startsWith("index.")) {
-                    if (!indexFilename) { indexFilename = subPath; }
-                  }
-                });
-                return indexFilename;
-              }).then((indexFilename) => {
-                if (!indexFilename) { throw new Error("no available index file"); }
-                return {zip: dirObj, indexFile: indexFilename, inNewTab: true};
-              }).catch((ex) => {
-                viewer.warn("Unable to get index file in the directory: '" + dirObj.root + "'");
-              });
-            }
-            return Promise.all(tasks);
-          }).then((topdirs) => {
-            topdirs = topdirs.filter(x => !!(x && x.indexFile));
-            if (!topdirs.length) {
-              return viewer.warn("No available data can be loaded from this archive file.");
-            }
-            const mainDir = topdirs.shift();
-            mainDir.inNewTab = false;
-            topdirs.push(mainDir);
-            let p = Promise.resolve();
-            const tasks = topdirs.map((topdir) => {
-              return p = p.then(() => {
-                return topdir.zip.generateAsync({type: "blob"});
-              }).then((zipBlob) => {
-                const f = new File([zipBlob], zipFile.name, {type: zipBlob.type});
-                return invokeZipViewer(f, topdir.indexFile, topdir.inNewTab);
-              });
-            });
-            return Promise.all(tasks);
+          });
+          return p.then(() => {
+            return indexFiles;
           });
         }
         case "htz":
         default: {
-          // @FIXME
-          // Firefox Android gets an error if we simply pass the zipFile
-          // due to unclear reason.  Passing regenerated (which is uncompressed)
-          // zip file resolves the issue.
-          return new JSZip().loadAsync(zipFile).then((zip) => {
-            return zip.generateAsync({type: "blob"});
-          }).then((zipBlob) => {
-            const f = new File([zipBlob], zipFile.name, {type: zipBlob.type});
-            return invokeZipViewer(f, "index.html");
-          });
+          return ["index.html"];
         }
       }
+    }).then((indexFiles) => {
+      if (!indexFiles.length) {
+        return viewer.warn("No available data can be loaded from this archive file.");
+      }
+
+      const url = new URL(chrome.runtime.getURL("viewer/view.html"));
+      const s = url.searchParams;
+      s.set("id", uuid);
+      url.hash = viewer.urlHash;
+
+      let p = Promise.resolve();
+      const mainIndexFile = indexFiles.shift();
+      indexFiles.forEach((indexFile) => {
+        p = p.then(() => {
+          const pos = indexFile.lastIndexOf('/');
+          if (pos !== -1) { s.set("dir", indexFile.slice(0, pos)); }
+          else { s.delete("dir"); }
+
+          s.set("index", indexFile);
+          return viewer.openUrl(url.href, true);
+        });
+      });
+      p = p.then(() => {
+        const pos = mainIndexFile.lastIndexOf('/');
+        if (pos !== -1) { s.set("dir", mainIndexFile.slice(0, pos)); }
+        else { s.delete("dir"); }
+
+        s.set("index", mainIndexFile);
+        return viewer.openUrl(url.href, false);
+      });
     });
   }
 };

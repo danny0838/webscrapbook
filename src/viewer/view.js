@@ -12,6 +12,7 @@ const urlObj = new URL(document.URL);
 const viewerData = {
   virtualBase: chrome.runtime.getURL("viewer/!/"),
   zipId: urlObj.searchParams.get('id'),
+  dir: urlObj.searchParams.get('dir'),
   indexFile: urlObj.searchParams.get('index'),
 };
 
@@ -810,51 +811,59 @@ document.addEventListener("DOMContentLoaded", function () {
 
   return Promise.resolve(viewerData.zipId).then((uuid) => {
     const key = {table: "viewerCache", id: uuid};
+    const dir = viewerData.dir;
+    const indexFile = viewerData.indexFile || "index.html";
 
     return scrapbook.getCache(key).then((data) => {
-      if (data && !(data instanceof File)) {
-        return new File([scrapbook.byteStringToArrayBuffer(data.value)], data.name, {type: data.type});
-      }
-      return data;
-    }).then((file) => {
-      return scrapbook.removeCache(key).then(() => {
-        // Privilege-required loading processes were done,
-        // remove APIs to avoid a potential security risk.
-        viewer.deApiScriptMain();
+      // Privilege-required loading process is done,
+      // remove APIs to avoid a potential security risk.
+      viewer.deApiScriptMain();
 
-        return file;
+      return data;
+    }).then((zipData) => {
+      if (!zipData) {
+        throw new Error(`Archive '${uuid}' does not exist or has been cleared.`);
+      }
+
+      // generate files map
+      for (let inZipPath in zipData.files) {
+        const zipObj = zipData.files[inZipPath];
+        if (zipObj.dir) { continue; }
+        if (dir && !inZipPath.startsWith(dir + '/')) { continue; }
+
+        const mime = zipObj.type;
+        let data = zipObj.value;
+
+        // convert byte string to array buffer to pass to new File()
+        if (typeof data === 'string') {
+          data = scrapbook.byteStringToArrayBuffer(data);
+        }
+
+        const f = new File([data], inZipPath.replace(/.*\//, ""), {type: mime});
+        const u = URL.createObjectURL(f);
+        viewer.inZipFiles.set(inZipPath, {file: f, url: u});
+        viewer.blobUrlToInZipPath.set(u, inZipPath);
+      }
+    }).then(() => {
+      return viewer.fetchPage({
+        inZipPath: indexFile,
+        url: urlSearch + urlHash,
+        recurseChain: [],
       });
-    });
-  }).then((file) => {
-    return new JSZip().loadAsync(file).then((zip) => {
-      const tasks = [];
-      zip.forEach((inZipPath, zipObj) => {
-        if (zipObj.dir) { return; }
-        tasks[tasks.length] = zipObj.async("arraybuffer").then((ab) => {
-          const mime = Mime.prototype.lookup(inZipPath);
-          const f = new File([ab], inZipPath.replace(/.*\//, ""), {type: mime});
-          const u = URL.createObjectURL(f);
-          viewer.inZipFiles.set(inZipPath, {file: f, url: u});
-          viewer.blobUrlToInZipPath.set(u, inZipPath);
-        });
-      });
-      return Promise.all(tasks);
-    });
-  }).then((results) => {
-    viewer.fetchPage({
-      inZipPath: viewerData.indexFile || "index.html",
-      url: urlSearch + urlHash,
-      recurseChain: [],
     }).then((fetchedUrl) => {
-      // remove viewer temporarily to avoid generating a history entry
+      if (!fetchedUrl) {
+        throw new Error(`Specified index file '${indexFile}' not found.`);
+      }
+
+      // remove iframe temporarily to avoid generating a history entry
       const p = iframe.parentNode, n = iframe.nextSibling;
       iframe.remove();
-      iframe.src = fetchedUrl || "about:blank";
+      iframe.src = fetchedUrl;
       p.insertBefore(iframe, n);
     });
   }).catch((ex) => {
     console.error(ex);
-    alert("Unable to view data: " + ex.message);
+    alert(`Unable to view: ${ex.message}`);
   });
 });
 

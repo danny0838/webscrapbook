@@ -116,4 +116,9 @@ chrome.webRequest.onHeadersReceived.addListener(function (details) {
   return redirectUrl(details.tabId, details.type, new URL(details.url));
 }, {urls: ["http://*/*", "https://*/*"], types: ["main_frame", "sub_frame"]}, ["blocking", "responseHeaders"]);
 
+// clear viewer caches
+scrapbook.getCaches({table: "viewerCache"}).then((items) => {
+  scrapbook.removeCaches(Object.keys(items));
+});
+
 })(window, undefined);
