@@ -17,6 +17,38 @@ const viewerData = {
 
 const viewer = {
   metaRefreshIdentifier: "data-scrapbook-meta-refresh-" + scrapbook.dateToId(),
+
+  // It'd be better if the archive page content be served in a sandboxed iframe
+  // without "allow-same-origin", which is not viable since such iframe cannot
+  // access its iframes under blob: or data: scheme in Firefox or Chrome.
+  //
+  // Serving an archive page in an iframe of a extension page is necessary at
+  // present. Scripts in the archive page thus gain extension privilege, which
+  // could introduce a security risk.
+  //
+  // Fortunately it's very unlikely to happen since the potential offending
+  // code is meaningless in a regular web page and thus is unlikely written,
+  // and the page must be captured with javascripts (which is discouraged), be
+  // captured as htz or maff, and be viewed via Web ScrapBook.
+  //
+  // Though, we do our best to minimize the risk by removing privileged APIs
+  // that are not required by the viewer page.
+  deApiScriptMain() {
+    // XMLHttpRequest (or fetch) is required to load blob as document and to
+    // load external resources.
+    [
+      "browser",
+      "chrome",
+      "indexedDB",
+      "localStorage",
+      "sessionStorage",
+    ].forEach((api) => {
+      if (typeof window[api] !== "undefined") {
+        window[api] = undefined;
+        delete(window[api]);
+      }
+    });
+  },
   get deApiScriptUrl() {
     // @TODO: window.top is readonly and cannot be replaced
     const script = function () {
@@ -707,6 +739,10 @@ document.addEventListener("DOMContentLoaded", function () {
       return data;
     }).then((file) => {
       return scrapbook.removeCache(key).then(() => {
+        // Privilege-required loading processes were done,
+        // remove APIs to avoid a potential security risk.
+        viewer.deApiScriptMain();
+
         return file;
       });
     });
