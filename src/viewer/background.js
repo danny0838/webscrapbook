@@ -51,12 +51,11 @@ function redirectUrl(tabId, type, url, filename, mime) {
       chrome.tabs.update(tabId, {url: newUrl});
       return {cancel: true};
     }
-
-    return {redirectUrl: newUrl};
-  } else {
+  } else { // sub_frame
     // In Chromium, an extension frame page whose top frame page is not an
-    // extension page cannot redirect itself to a blob page it has generated.
-    // The redirect fails silently without throwing. (Issue 761341)
+    // extension page cannot load a blob page in an iframe, which becomes
+    // empty silently.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=761341
     //
     // Firefox < 56 does not allow redirecting a page to an extension page,
     // even if whom is listed in web_accessible_resources.  The redirect
@@ -81,9 +80,9 @@ a {
       const dataUrl = scrapbook.stringToDataUri(html, "text/html", "UTF-8");
       return {redirectUrl: dataUrl};
     }
-
-    return {redirectUrl: newUrl};
   }
+
+  return {redirectUrl: newUrl};
 }
 
 chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {

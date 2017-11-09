@@ -108,8 +108,9 @@ const viewer = {
       if (inNewTab) {
         // In Firefox, a window.open popup is blocked by default, and the 
         // user has to manually add an exception to the popup blocker.
-        // However, there's a bug causing notification now shown when
-        // a popup is blocked (Bug 1396745).
+        // Morever, a bug causes the notification not shown for the
+        // blocked popup.
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1396745
         //
         // browser.tabs.create fails silently in Firefox private window.
         //

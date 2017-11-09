@@ -21,7 +21,8 @@ const viewer = {
 
   // It'd be better if the archive page content be served in a sandboxed iframe
   // without "allow-same-origin", which is not viable since such iframe cannot
-  // access its iframes under blob: or data: scheme in Firefox or Chrome.
+  // access its frames under blob: or data: scheme.
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=1091887
   //
   // Serving an archive page in an iframe of a extension page is necessary at
   // present. Scripts in the archive page thus gain extension privilege, which
