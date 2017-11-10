@@ -452,10 +452,25 @@ document.addEventListener("DOMContentLoaded", function () {
     const fileSelector = document.getElementById('file-selector');
     const fileSelectorInput = document.getElementById('file-selector-input');
 
+    fileSelector.addEventListener("dragenter", (e) => {
+      e.target.classList.add("dragover");
+    }, false);
+
+    // This fires every few mileseconds.
+    // If we set these at dragenter instead of dragover,
+    // it will be overwritten by default here soon.
     fileSelector.addEventListener("dragover", (e) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = "copy";
-      e.target.classList.add("dragover");
+    }, false);
+
+    fileSelector.addEventListener("dragleave", (e) => {
+      e.target.classList.remove("dragover");
+    }, false);
+
+    fileSelector.addEventListener("click", (e) => {
+      e.preventDefault();
+      fileSelectorInput.click();
     }, false);
 
     fileSelector.addEventListener("drop", (e) => {
@@ -469,15 +484,6 @@ document.addEventListener("DOMContentLoaded", function () {
           });
         }
       });
-    }, false);
-
-    fileSelector.addEventListener("dragleave", (e) => {
-      e.target.classList.remove("dragover");
-    }, false);
-
-    fileSelector.addEventListener("click", (e) => {
-      e.preventDefault();
-      fileSelectorInput.click();
     }, false);
 
     fileSelectorInput.addEventListener("change", (e) => {
