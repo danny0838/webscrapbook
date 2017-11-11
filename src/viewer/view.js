@@ -815,7 +815,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const dir = viewerData.dir;
     const indexFile = viewerData.indexFile || "index.html";
 
-    return scrapbook.getCache(key).then((data) => {
+    return scrapbook.cache.get(key).then((data) => {
       // Privilege-required loading process is done,
       // remove APIs to avoid a potential security risk.
       viewer.deApiScriptMain();

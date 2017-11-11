@@ -213,9 +213,11 @@ const viewer = {
               const mime = Mime.prototype.lookup(inZipPath);
 
               let data;
-              // In Firefox < 56, Blob cannot be stored in chrome.storage,
+              // In Firefox < 56 and Chromium,
+              // Blob cannot be stored in chrome.storage,
               // fallback to byte string.
-              if (_isFxBelow56) {
+              if (scrapbook.cache.current === 'storage' &&
+                  (_isFxBelow56 || !scrapbook.isGecko)) {
                 data = scrapbook.arrayBufferToByteString(ab);
               } else {
                 data = new Blob([ab], {type: mime});
@@ -247,7 +249,7 @@ const viewer = {
 
         /* In-memory view */
         const key = {table: "viewerCache", id: uuid};
-        return scrapbook.setCache(key, zipData);
+        return scrapbook.cache.set(key, zipData);
       }).then(() => {
         switch (type) {
           case "maff": {

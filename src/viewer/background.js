@@ -116,8 +116,8 @@ chrome.webRequest.onHeadersReceived.addListener(function (details) {
 }, {urls: ["http://*/*", "https://*/*"], types: ["main_frame", "sub_frame"]}, ["blocking", "responseHeaders"]);
 
 // clear viewer caches
-scrapbook.getCaches({table: "viewerCache"}).then((items) => {
-  scrapbook.removeCaches(Object.keys(items));
+scrapbook.cache.getAll({table: "viewerCache"}).then((items) => {
+  scrapbook.cache.remove(Object.keys(items));
 });
 
 })(window, undefined);

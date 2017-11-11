@@ -145,11 +145,61 @@ scrapbook.saveOptions = function () {
  *******************************************************************/
 
 scrapbook.cache = {
+  _current: 'auto',
+
+  get current() {
+    if (this._current === 'auto') {
+      if (scrapbook.isGecko) {
+        this.current = 'storage';
+      } else {
+        this.current = 'indexedDB';
+      }
+    }
+    return this._current;
+  },
+
+  set current(value) {
+    this._current = value;
+  },
+
+  /**
+   * @param {string|Object} key
+   */
+  get(key, defaultValue) {
+    const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
+    return this[this.current].get(keyStr, defaultValue);
+  },
+
+  /**
+   * @param {Object} filter - an object filter that each item key must match
+   */
+  getAll(filter) {
+    return this[this.current].getAll(filter);
+  },
+
+  /**
+   * @param {string|Object} key
+   */
+  set(key, value) {
+    const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
+    return this[this.current].set(keyStr, value);
+  },
+
+  /**
+   * @param {string|Object|Array} keys - a key (string or Object) or an array of keys
+   */
+  remove(keys) {
+    if (!Array.isArray(keys)) { keys = [keys]; }
+    keys = keys.map((key) => {
+      return (typeof key === "string") ? key : JSON.stringify(key);
+    });
+    return this[this.current].remove(keys);
+  },
+
   storage: {
-    get(key, defaultValue) {
+    get(key) {
       return new Promise((resolve, reject) => {
-        let pair = {[key]: defaultValue};
-        chrome.storage.local.get(pair, (items) => {
+        chrome.storage.local.get(key, (items) => {
           if (!chrome.runtime.lastError) {
             resolve(items[key]);
           } else {
@@ -322,59 +372,6 @@ scrapbook.cache = {
       });
     },
   },
-};
-
-/**
- * @param {string|Object} key
- */
-scrapbook.getCache = function (key, defaultValue) {
-  const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
-
-  if (scrapbook.isGecko) {
-    return scrapbook.cache.storage.get(keyStr, defaultValue);
-  } else {
-    return scrapbook.cache.indexedDB.get(keyStr, defaultValue);
-  }
-};
-
-/**
- * @param {Object} filter - an object filter that each item key must match
- */
-scrapbook.getCaches = function (filter) {
-  if (scrapbook.isGecko) {
-    return scrapbook.cache.storage.getAll(filter);
-  } else {
-    return scrapbook.cache.indexedDB.getAll(filter);
-  }
-};
-
-/**
- * @param {string|Object} key
- */
-scrapbook.setCache = function (key, value) {
-  const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
-
-  if (scrapbook.isGecko) {
-    return scrapbook.cache.storage.set(keyStr, value);
-  } else {
-    return scrapbook.cache.indexedDB.set(keyStr, value);
-  }
-};
-
-/**
- * @param {string|Object|Array} keys - a key (string or Object) or an array of keys
- */
-scrapbook.removeCaches = function (keys) {
-  if (!Array.isArray(keys)) { keys = [keys]; }
-  keys = keys.map((key) => {
-    return (typeof key === "string") ? key : JSON.stringify(key);
-  });
-
-  if (scrapbook.isGecko) {
-    return scrapbook.cache.storage.remove(keys);
-  } else {
-    return scrapbook.cache.indexedDB.remove(keys);
-  }
 };
 
 
