@@ -195,11 +195,183 @@ const viewer = {
    */
   processZipFile(zipFile) {
     return Promise.resolve().then(() => {
-      if (viewer.filesystem) {
-        return viewer.viewZipInFileSystem(zipFile);
-      } else {
-        return viewer.viewZipInMemory(zipFile);
-      }
+      const uuid = scrapbook.getUuid();
+      const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
+      const zipData = {
+        name: zipFile.name,
+        files: {},
+      };
+
+      // @TODO: JSZip.loadAsync cannot load a large zip file
+      //     (around 2GB, tested in Chrome)
+      return new JSZip().loadAsync(zipFile).then((zip) => {
+        let p = Promise.resolve();
+        zip.forEach((inZipPath, zipObj) => {
+          p = p.then(() => {
+            if (zipObj.dir) {
+              zipData.files[inZipPath] = {dir: true};
+              return;
+            }
+
+            // @TODO: reading a large file (about 400~500 MB) once into an
+            //     arraybuffer could consume too much memory and cause the
+            //     extension to shutdown.  Loading in chunks avoids this but
+            //     is very slow and unuseful.  We currently use the faster
+            //     method.
+            return zipObj.async("arraybuffer").then((ab) => {
+              const mime = Mime.prototype.lookup(inZipPath);
+
+              let data;
+              // In Firefox < 56, Blob cannot be stored in chrome.storage,
+              // fallback to byte string.
+              if (_isFxBelow56) {
+                data = scrapbook.arrayBufferToByteString(ab);
+              } else {
+                data = new Blob([ab], {type: mime});
+              }
+
+              zipData.files[inZipPath] = {
+                dir: false,
+                type: mime,
+                value: data,
+              };
+            });
+          });
+        });
+        return p;
+      }).then(() => {
+        /* Filesystem API view */
+        if (viewer.filesystem) {
+          const root = viewer.filesystem.root;
+          let p = Promise.resolve();
+          for (const inZipPath in zipData.files) {
+            const entry = zipData.files[inZipPath];
+            if (entry.dir) { continue; }
+            p = p.then(() => {
+              return fileSystemHandler.createFile(root, uuid + "/" + inZipPath, entry.value);
+            });
+          }
+          return p;
+        }
+
+        /* In-memory view */
+        const key = {table: "viewerCache", id: uuid};
+        return scrapbook.setCache(key, zipData);
+      }).then(() => {
+        switch (type) {
+          case "maff": {
+            // get the list of top-folders
+            const topdirs = new Set();
+            for (let inZipPath in zipData.files) {
+              const depth = Array.prototype.filter.call(inZipPath, x => x == "/").length;
+              if (depth === 1) {
+                const dirname = inZipPath.replace(/\/.*$/, "");
+                topdirs.add(dirname + '/');
+              }
+            }
+
+            // get index files in each topdir
+            const indexFiles = [];
+            let p = Promise.resolve();
+            topdirs.forEach((topdir) => {
+              p = p.then(() => {
+                const indexRdfData = zipData.files[topdir + 'index.rdf'];
+                if (!indexRdfData) { throw new Error("no index.rdf"); }
+
+                const file = new File([indexRdfData.value], 'index.rdf', {type: indexRdfData.type});
+                return scrapbook.readFileAsDocument(file).then((doc) => {
+                  const meta = viewer.parseRdfDocument(doc);
+                  const indexFile = topdir + meta.indexfilename;
+                  if (zipData.files[indexFile]) {
+                    return indexFile;
+                  }
+                });
+              }).catch((ex) => {
+                let indexFilename;
+                for (let inZipPath in zipData.files) {
+                  if (!inZipPath.startsWith(topdir)) { continue; }
+
+                  const filename = inZipPath.slice(inZipPath.lastIndexOf("/") + 1);
+                  if (filename.startsWith("index.")) {
+                    indexFilename = inZipPath;
+                    break;
+                  }
+                }
+                return indexFilename;
+              }).then((indexFilename) => {
+                if (!indexFilename) { throw new Error("no available index file"); }
+
+                indexFiles.push(indexFilename);
+              }).catch((ex) => {
+                viewer.warn("Unable to get index file in the directory: '" + topdir + "'");
+              });
+            });
+            return p.then(() => {
+              return indexFiles;
+            });
+          }
+          case "htz":
+          default: {
+            return ["index.html"];
+          }
+        }
+      }).then((indexFiles) => {
+        if (!indexFiles.length) {
+          return viewer.warn("No available data can be loaded from this archive file.");
+        }
+
+        /* Filesystem API view */
+        if (viewer.filesystem) {
+          const root = viewer.filesystem.root;
+          let p = Promise.resolve();
+          const mainIndexFile = indexFiles.shift();
+          indexFiles.forEach((indexFile) => {
+            p = p.then(() => {
+              return fileSystemHandler.getFile(root, uuid + "/" + indexFile);
+            }).then((fileEntry) => {
+              const url = new URL(fileEntry.toURL());
+              url.search = viewer.urlSearch;
+              url.hash = viewer.urlHash;
+              return viewer.openUrl(url.href, true);
+            });
+          });
+          return p = p.then(() => {
+            return fileSystemHandler.getFile(root, uuid + "/" + mainIndexFile);
+          }).then((fileEntry) => {
+            const url = new URL(fileEntry.toURL());
+            url.search = viewer.urlSearch;
+            url.hash = viewer.urlHash;
+            return viewer.openUrl(url.href, false);
+          });
+        }
+
+        /* In-memory view */
+        const url = new URL(chrome.runtime.getURL("viewer/view.html"));
+        const s = url.searchParams;
+        s.set("id", uuid);
+        url.hash = viewer.urlHash;
+
+        let p = Promise.resolve();
+        const mainIndexFile = indexFiles.shift();
+        indexFiles.forEach((indexFile) => {
+          p = p.then(() => {
+            const pos = indexFile.lastIndexOf('/');
+            if (pos !== -1) { s.set("dir", indexFile.slice(0, pos)); }
+            else { s.delete("dir"); }
+
+            s.set("index", indexFile);
+            return viewer.openUrl(url.href, true);
+          });
+        });
+        return p = p.then(() => {
+          const pos = mainIndexFile.lastIndexOf('/');
+          if (pos !== -1) { s.set("dir", mainIndexFile.slice(0, pos)); }
+          else { s.delete("dir"); }
+
+          s.set("index", mainIndexFile);
+          return viewer.openUrl(url.href, false);
+        });
+      });
     }).catch((ex) => {
       console.error(ex);
       alert("Unable to open web page archive: " + ex.message);
@@ -217,232 +389,6 @@ const viewer = {
 
     return result;
   },
-
-  /**
-   * @return {Promise}
-   */
-  viewZipInFileSystem(zipFile) {
-    return Promise.resolve().then(() => {
-      const root = viewer.filesystem.root;
-      const ns = scrapbook.getUuid();
-      const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
-
-      // @TODO: JSZip.loadAsync cannot load a large zip file
-      //     (around 2GB, tested in Chrome)
-      return new JSZip().loadAsync(zipFile).then((zip) => {
-        return fileSystemHandler.createDir(root, ns).then((dirEntry) => {
-          let p = Promise.resolve();
-          zip.forEach((inZipPath, zipObj) => {
-            if (zipObj.dir) { return; }
-            p = p.then(() => {
-              // @TODO: reading a large file (about 400~500 MB) once into an
-              //     arraybuffer could consume too much memory and cause the
-              //     extension to shutdown.  Loading in chunks avoids this but
-              //     is very slow and unuseful.  We currently use the faster
-              //     method.
-              return zipObj.async("arraybuffer");
-            }).then((ab) => {
-              return fileSystemHandler.createFile(root, ns + "/" + inZipPath, new Blob([ab]));
-            });
-          });
-          return p;
-        });
-      }).then(() => {
-        switch (type) {
-          case "maff": {
-            return fileSystemHandler.getDir(root, ns).then((dirEntry) => {
-              return fileSystemHandler.readDir(dirEntry);
-            }).then((entries) => {
-              const tasks = entries.filter(e => e.isDirectory).map((entry) => {
-                return fileSystemHandler.getFile(entry, "index.rdf").then((fileEntry) => {
-                  return new Promise((resolve, reject) => {
-                    fileEntry.file(resolve, reject);
-                  }).then((file) => {
-                    return scrapbook.readFileAsDocument(file);
-                  }).then((doc) => {
-                    const meta = viewer.parseRdfDocument(doc);
-                    return fileSystemHandler.getFile(entry, meta.indexfilename);
-                  });
-                }, (ex) => {
-                  return fileSystemHandler.readDir(entry).then((entries) => {
-                    for (let i = 0, I = entries.length; i < I; ++i) {
-                      const entry = entries[i];
-                      if (entry.isFile && entry.name.startsWith("index.")) {
-                        return entry;
-                      }
-                    }
-                    throw new Error("no index.* in the directory");
-                  });
-                }).catch((ex) => {
-                  viewer.warn("Unable to get index file in directory: '" + entry.fullPath + "'");
-                });
-              });
-              return Promise.all(tasks);
-            });
-          }
-          case "htz":
-          default: {
-            return fileSystemHandler.getFile(root, ns + "/" + "index.html").then((fileEntry) => {
-              return [fileEntry];
-            });
-          }
-        }
-      }).then((indexFileEntries) => {
-        indexFileEntries = indexFileEntries.filter(x => !!x);
-        if (!indexFileEntries.length) {
-          return viewer.warn("No available data can be loaded from this archive file.");
-        }
-
-        let p = Promise.resolve();
-        const mainFileEntry = indexFileEntries.shift();
-        indexFileEntries.forEach((indexFileEntry) => {
-          p = p.then(() => {
-            const url = indexFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
-            return viewer.openUrl(url, true);
-          });
-        });
-        p = p.then(() => {
-          const url = mainFileEntry.toURL() + viewer.urlSearch + viewer.urlHash;
-          return viewer.openUrl(url, false);
-        });
-      });
-    });
-  },
-
-  /**
-   * @return {Promise}
-   */
-  viewZipInMemory(zipFile) {
-    const uuid = scrapbook.getUuid();
-    const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
-    const zipData = {
-      name: zipFile.name,
-      files: {},
-    };
-
-    return new JSZip().loadAsync(zipFile).then((zip) => {
-      let p = Promise.resolve();
-      zip.forEach((inZipPath, zipObj) => {
-        p = p.then(() => {
-          if (zipObj.dir) {
-            zipData.files[inZipPath] = {dir: true};
-            return;
-          }
-
-          return zipObj.async("arraybuffer").then((ab) => {
-            const mime = Mime.prototype.lookup(inZipPath);
-
-            let data;
-            // In Firefox < 56, Blob cannot be stored in chrome.storage,
-            // fallback to byte string.
-            if (_isFxBelow56) {
-              data = scrapbook.arrayBufferToByteString(ab);
-            } else {
-              data = new Blob([ab], {type: mime});
-            }
-
-            zipData.files[inZipPath] = {
-              dir: false,
-              type: mime,
-              value: data,
-            };
-          });
-        });
-      });
-      return p;
-    }).then(() => {
-      const key = {table: "viewerCache", id: uuid};
-      return scrapbook.setCache(key, zipData);
-    }).then(() => {
-      switch (type) {
-        case "maff": {
-          // get the list of top-folders
-          const topdirs = new Set();
-          for (let inZipPath in zipData.files) {
-            const depth = Array.prototype.filter.call(inZipPath, x => x == "/").length;
-            if (depth === 1) {
-              const dirname = inZipPath.replace(/\/.*$/, "");
-              topdirs.add(dirname + '/');
-            }
-          }
-
-          // get index files in each topdir
-          const indexFiles = [];
-          let p = Promise.resolve();
-          topdirs.forEach((topdir) => {
-            p = p.then(() => {
-              const indexRdfData = zipData.files[topdir + 'index.rdf'];
-              if (!indexRdfData) { throw new Error("no index.rdf"); }
-
-              const file = new File([indexRdfData.value], 'index.rdf', {type: indexRdfData.type});
-              return scrapbook.readFileAsDocument(file).then((doc) => {
-                const meta = viewer.parseRdfDocument(doc);
-                const indexFile = topdir + meta.indexfilename;
-                if (zipData.files[indexFile]) {
-                  return indexFile;
-                }
-              });
-            }).catch((ex) => {
-              let indexFilename;
-              for (let inZipPath in zipData.files) {
-                if (!inZipPath.startsWith(topdir)) { continue; }
-
-                const filename = inZipPath.slice(inZipPath.lastIndexOf("/") + 1);
-                if (filename.startsWith("index.")) {
-                  indexFilename = inZipPath;
-                  break;
-                }
-              }
-              return indexFilename;
-            }).then((indexFilename) => {
-              if (!indexFilename) { throw new Error("no available index file"); }
-
-              indexFiles.push(indexFilename);
-            }).catch((ex) => {
-              viewer.warn("Unable to get index file in the directory: '" + topdir + "'");
-            });
-          });
-          return p.then(() => {
-            return indexFiles;
-          });
-        }
-        case "htz":
-        default: {
-          return ["index.html"];
-        }
-      }
-    }).then((indexFiles) => {
-      if (!indexFiles.length) {
-        return viewer.warn("No available data can be loaded from this archive file.");
-      }
-
-      const url = new URL(chrome.runtime.getURL("viewer/view.html"));
-      const s = url.searchParams;
-      s.set("id", uuid);
-      url.hash = viewer.urlHash;
-
-      let p = Promise.resolve();
-      const mainIndexFile = indexFiles.shift();
-      indexFiles.forEach((indexFile) => {
-        p = p.then(() => {
-          const pos = indexFile.lastIndexOf('/');
-          if (pos !== -1) { s.set("dir", indexFile.slice(0, pos)); }
-          else { s.delete("dir"); }
-
-          s.set("index", indexFile);
-          return viewer.openUrl(url.href, true);
-        });
-      });
-      p = p.then(() => {
-        const pos = mainIndexFile.lastIndexOf('/');
-        if (pos !== -1) { s.set("dir", mainIndexFile.slice(0, pos)); }
-        else { s.delete("dir"); }
-
-        s.set("index", mainIndexFile);
-        return viewer.openUrl(url.href, false);
-      });
-    });
-  }
 };
 
 document.addEventListener("DOMContentLoaded", function () {
