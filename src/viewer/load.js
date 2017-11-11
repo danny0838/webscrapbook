@@ -320,29 +320,24 @@ const viewer = {
           return viewer.warn("No available data can be loaded from this archive file.");
         }
 
+        // move main index file to the last
+        indexFiles.push(indexFiles.shift());
+
         /* Filesystem API view */
         if (viewer.filesystem) {
           const root = viewer.filesystem.root;
           let p = Promise.resolve();
-          const mainIndexFile = indexFiles.shift();
-          indexFiles.forEach((indexFile) => {
+          indexFiles.forEach((indexFile, i) => {
             p = p.then(() => {
               return fileSystemHandler.getFile(root, uuid + "/" + indexFile);
             }).then((fileEntry) => {
               const url = new URL(fileEntry.toURL());
               url.search = viewer.urlSearch;
               url.hash = viewer.urlHash;
-              return viewer.openUrl(url.href, true);
+              return viewer.openUrl(url.href, i !== indexFiles.length - 1);
             });
           });
-          return p = p.then(() => {
-            return fileSystemHandler.getFile(root, uuid + "/" + mainIndexFile);
-          }).then((fileEntry) => {
-            const url = new URL(fileEntry.toURL());
-            url.search = viewer.urlSearch;
-            url.hash = viewer.urlHash;
-            return viewer.openUrl(url.href, false);
-          });
+          return p;
         }
 
         /* In-memory view */
@@ -352,25 +347,22 @@ const viewer = {
         url.hash = viewer.urlHash;
 
         let p = Promise.resolve();
-        const mainIndexFile = indexFiles.shift();
-        indexFiles.forEach((indexFile) => {
+        indexFiles.forEach((indexFile, i) => {
           p = p.then(() => {
             const pos = indexFile.lastIndexOf('/');
-            if (pos !== -1) { s.set("dir", indexFile.slice(0, pos)); }
-            else { s.delete("dir"); }
+
+            // set dir filter
+            if (pos !== -1) {
+              s.set("dir", indexFile.slice(0, pos));
+            } else {
+              s.delete("dir");
+            }
 
             s.set("index", indexFile);
-            return viewer.openUrl(url.href, true);
+            return viewer.openUrl(url.href, i !== indexFiles.length - 1);
           });
         });
-        return p = p.then(() => {
-          const pos = mainIndexFile.lastIndexOf('/');
-          if (pos !== -1) { s.set("dir", mainIndexFile.slice(0, pos)); }
-          else { s.delete("dir"); }
-
-          s.set("index", mainIndexFile);
-          return viewer.openUrl(url.href, false);
-        });
+        return p;
       });
     }).catch((ex) => {
       console.error(ex);
