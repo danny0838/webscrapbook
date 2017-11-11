@@ -38,15 +38,6 @@ const fileSystemHandler = {
   /**
    * @return {Promise}
    */
-  readDir(dirEntry) {
-    return new Promise((resolve, reject) => {
-      dirEntry.createReader().readEntries(resolve);
-    });
-  },
-
-  /**
-   * @return {Promise}
-   */
   createDir(dirEntry, path) {
     return Promise.resolve().then(() => {
       let folders = Array.isArray(path) ? path : path.split("/");
