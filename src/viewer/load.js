@@ -280,7 +280,7 @@ const viewer = {
 
                 const file = new File([indexRdfData.value], 'index.rdf', {type: indexRdfData.type});
                 return scrapbook.readFileAsDocument(file).then((doc) => {
-                  const meta = viewer.parseRdfDocument(doc);
+                  const meta = scrapbook.parseMaffRdfDocument(doc);
                   const indexFile = topdir + meta.indexfilename;
                   if (zipData.files[indexFile]) {
                     return indexFile;
@@ -368,18 +368,6 @@ const viewer = {
       console.error(ex);
       alert("Unable to open web page archive: " + ex.message);
     });
-  },
-
-  parseRdfDocument(doc) {
-    const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-    const MAF = "http://maf.mozdev.org/metadata/rdf#";
-    const result = {};
-
-    const elems = doc.getElementsByTagNameNS(MAF, "indexfilename");
-    const elem = elems[0];
-    if (elem) { result.indexfilename = elem.getAttributeNS(RDF, "resource"); }
-
-    return result;
   },
 };
 

@@ -1199,6 +1199,30 @@ scrapbook.parseSrcset = function (srcset, rewriteFunc) {
   });
 };
 
+scrapbook.parseMaffRdfDocument = function (doc) {
+  const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+  const MAF = "http://maf.mozdev.org/metadata/rdf#";
+  const result = {};
+  let elem;
+
+  elem = doc.getElementsByTagNameNS(MAF, "originalurl")[0];
+  if (elem) { result.originalurl = elem.getAttributeNS(RDF, "resource"); }
+
+  elem = doc.getElementsByTagNameNS(MAF, "title")[0];
+  if (elem) { result.title = elem.getAttributeNS(RDF, "resource"); }
+
+  elem = doc.getElementsByTagNameNS(MAF, "archivetime")[0];
+  if (elem) { result.archivetime = elem.getAttributeNS(RDF, "resource"); }
+
+  elem = doc.getElementsByTagNameNS(MAF, "indexfilename")[0];
+  if (elem) { result.indexfilename = elem.getAttributeNS(RDF, "resource"); }
+
+  elem = doc.getElementsByTagNameNS(MAF, "charset")[0];
+  if (elem) { result.charset = elem.getAttributeNS(RDF, "resource"); }
+
+  return result;
+};
+
 
 /********************************************************************
  * Network utilities
