@@ -344,12 +344,12 @@ const viewer = {
 
             // set dir filter
             if (pos !== -1) {
-              s.set("dir", indexFile.slice(0, pos));
+              s.set("d", indexFile.slice(0, pos));
             } else {
-              s.delete("dir");
+              s.delete("d");
             }
 
-            s.set("index", indexFile);
+            s.set("p", indexFile);
             return viewer.openUrl(url.href, i !== indexFiles.length - 1);
           });
         });

@@ -12,8 +12,8 @@ const urlObj = new URL(document.URL);
 const viewerData = {
   virtualBase: chrome.runtime.getURL("viewer/!/"),
   zipId: urlObj.searchParams.get('id'),
-  dir: urlObj.searchParams.get('dir'),
-  indexFile: urlObj.searchParams.get('index'),
+  dir: urlObj.searchParams.get('d'),
+  indexFile: urlObj.searchParams.get('p'),
 };
 
 const viewer = {
@@ -853,7 +853,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }).then((fetchedUrl) => {
       if (!fetchedUrl) {
-        throw new Error(`Specified index file '${indexFile}' not found.`);
+        throw new Error(`Specified file '${indexFile}' not found.`);
       }
 
       // remove iframe temporarily to avoid generating a history entry
