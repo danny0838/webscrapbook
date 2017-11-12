@@ -322,6 +322,12 @@
   "OptionsResetLabel": {
     "message": "重设"
   },
+  "OptionViewerAllowScriptsLabel": {
+    "message": "允许执行页面程式码及外挂物件:"
+  },
+  "OptionViewerAllowScriptsTooltip": {
+    "message": "选中时，封存页面中的代码及外挂程式物件将在特殊权限下执行，这可能导它们无法正常运作，还可能让恶意代码在无保护下执行而造成安全风险。一般而言此类页面不建议以检视器检视。"
+  },
   "OptionViewerUseFileSystemApiLabel": {
     "message": "使用 Filesystem API:"
   },

@@ -322,6 +322,12 @@
   "OptionsResetLabel": {
     "message": "Reset"
   },
+  "OptionViewerAllowScriptsLabel": {
+    "message": "Allow execution of scripts and embedded objects:"
+  },
+  "OptionViewerAllowScriptsTooltip": {
+    "message": "When checked, scripts and embedded objects will be run in a special privileged environment, such that they may not work correctly, and can allow malicious codes to be executed without protection. It is generally not recommended to view such archive page using the viewer."
+  },
   "OptionViewerUseFileSystemApiLabel": {
     "message": "Use Filesystem API:"
   },

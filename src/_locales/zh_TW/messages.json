@@ -322,6 +322,12 @@
   "OptionsResetLabel": {
     "message": "重設"
   },
+  "OptionViewerAllowScriptsLabel": {
+    "message": "允許執行頁面程式碼及外掛物件:"
+  },
+  "OptionViewerAllowScriptsTooltip": {
+    "message": "勾選時，封存頁面中的程式碼及外掛程式物件將在特殊權限下執行，這可能導它們無法正常運作，還可能讓惡意程式碼在無保護下執行而造成安全風險。一般而言此類頁面不建議以檢視器檢視。"
+  },
   "OptionViewerUseFileSystemApiLabel": {
     "message": "使用 Filesystem API:"
   },

@@ -323,6 +323,11 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
 
           case "script": {
+            if (!scrapbook.getOption("viewer.allowScripts")) {
+              elem.remove();
+              break;
+            }
+
             if (elem.hasAttribute("src")) {
               elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
 
@@ -463,6 +468,11 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           // @FIXME:
           // embed, objects, and applet doesn't seem to work as in a regular web page.
           case "embed": {
+            if (!scrapbook.getOption("viewer.allowScripts")) {
+              elem.remove();
+              break;
+            }
+
             if (elem.hasAttribute("src")) {
               try {
                 elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
@@ -493,6 +503,11 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
 
           case "object": {
+            if (!scrapbook.getOption("viewer.allowScripts")) {
+              elem.remove();
+              break;
+            }
+
             if (elem.hasAttribute("data")) {
               try {
                 elem.setAttribute("data", rewriteUrl(elem.getAttribute("data"), refUrl));
@@ -523,6 +538,11 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
 
           case "applet": {
+            if (!scrapbook.getOption("viewer.allowScripts")) {
+              elem.remove();
+              break;
+            }
+
             if (elem.hasAttribute("code")) {
               try {
                 elem.setAttribute("code", rewriteUrl(elem.getAttribute("code"), refUrl));
@@ -731,140 +751,143 @@ class ComplexUrlFetcher {
   }
 };
 
+const loadOptions = scrapbook.loadOptions();
+
 document.addEventListener("DOMContentLoaded", function () {
   scrapbook.loadLanguages(document);
+  loadOptions.then(() => {
+    const defaultTitle = document.querySelector('title').textContent;
+    const iframe = document.getElementById('viewer');
 
-  const defaultTitle = document.querySelector('title').textContent;
-  const iframe = document.getElementById('viewer');
+    const urlSearch = "";
+    const urlHash = location.hash;
 
-  const urlSearch = "";
-  const urlHash = location.hash;
-
-  const frameRegisterLinkLoader = function (frame) {
-    const frameOnLoad = function (frame) {
-      let frameDoc;
-      try {
-        frameDoc = frame.contentDocument;
-        if (!frameDoc) { throw new Error("content document not accessible"); }
-      } catch (ex) {
-        if (frame === iframe) {
-          document.title = defaultTitle;
-        }
-        return;
-      }
-
-      if (frameDoc.documentElement.hasAttribute(viewer.metaRefreshIdentifier)) {
-        const anchor = frameDoc.querySelector("a");
-        const url = anchor.href;
-        (frame === iframe ? document : frameDoc).location.replace(url);
-        return;
-      }
-
-      if (frame === iframe) {
-        document.title = frameDoc.title;
-      }
-
-      frame.contentWindow.addEventListener("click", (e) => {
-        // e.target won't work if clicking on a descendant node of an anchor
-        const elem = e.target.closest('a[href], area[href]');
-        if (!elem) { return; }
-
+    const frameRegisterLinkLoader = function (frame) {
+      const frameOnLoad = function (frame) {
+        let frameDoc;
         try {
-          const url = elem.href;
-          const inZipPath = viewer.blobUrlToInZipPath.get(scrapbook.splitUrl(url)[0]);
-          if (inZipPath) {
-            const f = viewer.inZipFiles.get(inZipPath);
-            if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
+          frameDoc = frame.contentDocument;
+          if (!frameDoc) { throw new Error("content document not accessible"); }
+        } catch (ex) {
+          if (frame === iframe) {
+            document.title = defaultTitle;
+          }
+          return;
+        }
+
+        if (frameDoc.documentElement.hasAttribute(viewer.metaRefreshIdentifier)) {
+          const anchor = frameDoc.querySelector("a");
+          const url = anchor.href;
+          (frame === iframe ? document : frameDoc).location.replace(url);
+          return;
+        }
+
+        if (frame === iframe) {
+          document.title = frameDoc.title;
+        }
+
+        frame.contentWindow.addEventListener("click", (e) => {
+          // e.target won't work if clicking on a descendant node of an anchor
+          const elem = e.target.closest('a[href], area[href]');
+          if (!elem) { return; }
+
+          try {
+            const url = elem.href;
+            const inZipPath = viewer.blobUrlToInZipPath.get(scrapbook.splitUrl(url)[0]);
+            if (inZipPath) {
+              const f = viewer.inZipFiles.get(inZipPath);
+              if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
+                e.preventDefault();
+                e.stopPropagation();
+                viewer.fetchPage({
+                  inZipPath: inZipPath,
+                  url: url,
+                  recurseChain: [],
+                }).then((fetchedUrl) => {
+                  elem.href = fetchedUrl || "about:blank";
+                  elem.click();
+                });
+              }
+            } else if (!url.startsWith("blob:") && frame === iframe) {
               e.preventDefault();
               e.stopPropagation();
-              viewer.fetchPage({
-                inZipPath: inZipPath,
-                url: url,
-                recurseChain: [],
-              }).then((fetchedUrl) => {
-                elem.href = fetchedUrl || "about:blank";
-                elem.click();
-              });
+              location.href = url;
             }
-          } else if (!url.startsWith("blob:") && frame === iframe) {
-            e.preventDefault();
-            e.stopPropagation();
-            location.href = url;
+          } catch (ex) {
+            console.error(ex);
           }
-        } catch (ex) {
-          console.error(ex);
-        }
-      }, false);
+        }, false);
 
-      Array.prototype.forEach.call(frameDoc.querySelectorAll('frame, iframe'), (elem) => {
-        frameRegisterLinkLoader(elem);
+        Array.prototype.forEach.call(frameDoc.querySelectorAll('frame, iframe'), (elem) => {
+          frameRegisterLinkLoader(elem);
+        });
+      };
+
+      frame.addEventListener("load", (e) => {
+        frameOnLoad(e.target);
       });
+
+      frameOnLoad(frame);
     };
 
-    frame.addEventListener("load", (e) => {
-      frameOnLoad(e.target);
-    });
+    frameRegisterLinkLoader(iframe);
 
-    frameOnLoad(frame);
-  };
+    return Promise.resolve(viewerData.zipId).then((uuid) => {
+      const key = {table: "viewerCache", id: uuid};
+      const dir = viewerData.dir;
+      const indexFile = viewerData.indexFile || "index.html";
 
-  frameRegisterLinkLoader(iframe);
+      return scrapbook.cache.get(key).then((data) => {
+        // Privilege-required loading process is done,
+        // remove APIs to avoid a potential security risk.
+        viewer.deApiScriptMain();
 
-  return Promise.resolve(viewerData.zipId).then((uuid) => {
-    const key = {table: "viewerCache", id: uuid};
-    const dir = viewerData.dir;
-    const indexFile = viewerData.indexFile || "index.html";
-
-    return scrapbook.cache.get(key).then((data) => {
-      // Privilege-required loading process is done,
-      // remove APIs to avoid a potential security risk.
-      viewer.deApiScriptMain();
-
-      return data;
-    }).then((zipData) => {
-      if (!zipData) {
-        throw new Error(`Archive '${uuid}' does not exist or has been cleared.`);
-      }
-
-      // generate files map
-      for (let inZipPath in zipData.files) {
-        const zipObj = zipData.files[inZipPath];
-        if (zipObj.dir) { continue; }
-        if (dir && !inZipPath.startsWith(dir + '/')) { continue; }
-
-        const mime = zipObj.type;
-        let data = zipObj.value;
-
-        // convert byte string to array buffer to pass to new File()
-        if (typeof data === 'string') {
-          data = scrapbook.byteStringToArrayBuffer(data);
+        return data;
+      }).then((zipData) => {
+        if (!zipData) {
+          throw new Error(`Archive '${uuid}' does not exist or has been cleared.`);
         }
 
-        const f = new File([data], inZipPath.replace(/.*\//, ""), {type: mime});
-        const u = URL.createObjectURL(f);
-        viewer.inZipFiles.set(inZipPath, {file: f, url: u});
-        viewer.blobUrlToInZipPath.set(u, inZipPath);
-      }
-    }).then(() => {
-      return viewer.fetchPage({
-        inZipPath: indexFile,
-        url: urlSearch + urlHash,
-        recurseChain: [],
-      });
-    }).then((fetchedUrl) => {
-      if (!fetchedUrl) {
-        throw new Error(`Specified file '${indexFile}' not found.`);
-      }
+        // generate files map
+        for (let inZipPath in zipData.files) {
+          const zipObj = zipData.files[inZipPath];
+          if (zipObj.dir) { continue; }
+          if (dir && !inZipPath.startsWith(dir + '/')) { continue; }
 
-      // remove iframe temporarily to avoid generating a history entry
-      const p = iframe.parentNode, n = iframe.nextSibling;
-      iframe.remove();
-      iframe.src = fetchedUrl;
-      p.insertBefore(iframe, n);
+          const mime = zipObj.type;
+          let data = zipObj.value;
+
+          // convert byte string to array buffer to pass to new File()
+          if (typeof data === 'string') {
+            data = scrapbook.byteStringToArrayBuffer(data);
+          }
+
+          const f = new File([data], inZipPath.replace(/.*\//, ""), {type: mime});
+          const u = URL.createObjectURL(f);
+          viewer.inZipFiles.set(inZipPath, {file: f, url: u});
+          viewer.blobUrlToInZipPath.set(u, inZipPath);
+        }
+      }).then(() => {
+        return viewer.fetchPage({
+          inZipPath: indexFile,
+          url: urlSearch + urlHash,
+          recurseChain: [],
+        });
+      }).then((fetchedUrl) => {
+        if (!fetchedUrl) {
+          throw new Error(`Specified file '${indexFile}' not found.`);
+        }
+
+        // remove iframe temporarily to avoid generating a history entry
+        const p = iframe.parentNode, n = iframe.nextSibling;
+        iframe.remove();
+        iframe.src = fetchedUrl;
+        p.insertBefore(iframe, n);
+      });
+    }).catch((ex) => {
+      console.error(ex);
+      alert(`Unable to view: ${ex.message}`);
     });
-  }).catch((ex) => {
-    console.error(ex);
-    alert(`Unable to view: ${ex.message}`);
   });
 });
 

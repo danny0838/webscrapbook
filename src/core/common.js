@@ -57,6 +57,7 @@ scrapbook.options = {
   "viewer.useFileSystemApi": true,
   "viewer.viewHtz": true,
   "viewer.viewMaff": true,
+  "viewer.allowScripts": false,
 };
 
 scrapbook.isOptionsSynced = false;
