@@ -6,10 +6,10 @@ This extension is available for Chromium-based browsers (Google Chrome, Opera, V
 
 
 ## Caveats:
+* JavaScript and embedded objects in a captured web page may not work correctly and can cause a security risk. This risk is even higher if the page is viewed using the archive page viewer, as they are run in a privileged environment. Related options are all off by default. Use them very carefully and at your own risk.
 * Several features may not work correctly in a private window in Firefox.
-* "Allow access to file URLs" is not supported in Firefox.
+* "Allow access to file URLs", which allows the browser to open and view a local archive page directly, is currently not supported in Firefox.
 * A vary large zip archive file (around 2 GiB) cannot be read by the browser. A large file in the zip archive (around 400~500 MiB) can exhaust the memory and crash the extension.
-* Javascripts and objects may not work correctly and has a potential security risk in the archive page viewer.
 
 
 ## See also:
