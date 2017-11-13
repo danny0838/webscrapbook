@@ -481,38 +481,6 @@ capturer.captureBookmark = function (params) {
         console.error(ex);
       });
     }).then(() => {
-      // retrieve favIcon if a URL is provided
-      if (!favIconUrl) { return; }
-
-      switch (options["capture.favicon"]) {
-        case "link":
-          // keep current favIconUrl
-          break;
-        case "blank":
-        case "remove":
-          // clear favIconUrl
-          favIconUrl = null;
-          break;
-        case "save":
-        default:
-          // retrieve favicon and save as data URL
-          return scrapbook.xhr({
-            url: favIconUrl,
-            responseType: "blob",
-            requestHeaders: requestHeaders,
-            timeout: 5000,
-          }).then((xhr) => {
-            return xhr.response;
-          }).then((blob) => {
-            return scrapbook.readFileAsDataURL(blob);
-          }).then((dataUrl) => {
-            favIconUrl = dataUrl;
-          }).catch((ex) => {
-            console.error(ex);
-            favIconUrl = null;
-          });
-      }
-    }).then(() => {
       const meta = params.options["capture.recordDocumentMeta"] ? 
           ' data-scrapbook-source="' + scrapbook.escapeHtml(sourceUrl) + '"' + 
           ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
