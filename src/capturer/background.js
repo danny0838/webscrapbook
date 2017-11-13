@@ -500,6 +500,7 @@ capturer.captureBookmark = function (params) {
             url: favIconUrl,
             responseType: "blob",
             requestHeaders: requestHeaders,
+            timeout: 5000,
           }).then((xhr) => {
             return xhr.response;
           }).then((blob) => {
