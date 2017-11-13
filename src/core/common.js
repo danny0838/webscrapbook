@@ -1307,6 +1307,7 @@ scrapbook.httpStatusText = {
  * @param {Object} params
  *     - {string} params.url
  *     - {string} params.responseType
+ *     - {integer} params.timeout
  *     - {Array} params.requestHeaders
  *     - {function} params.onreadystatechange
  */
@@ -1348,6 +1349,8 @@ scrapbook.xhr = function (params = {}) {
 
     xhr.responseType = params.responseType;
     xhr.open("GET", params.url, true);
+
+    if (params.timeout) { xhr.timeout = params.timeout; }
 
     // Must call setRequestHeader() after open(), but before send().
     if (params.requestHeaders) {
