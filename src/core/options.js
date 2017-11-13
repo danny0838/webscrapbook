@@ -105,7 +105,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
   // event handlers
   document.getElementById("opt_capture.scrapbookFolder").addEventListener("change", (event) => {
     const elem = event.target;
-    elem.value = scrapbook.validateFilename(elem.value);
+    // make sure it's a valid path for chrome.downloads.download
+    elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
   });
 
   document.getElementById("options").addEventListener("submit", (event) => {
