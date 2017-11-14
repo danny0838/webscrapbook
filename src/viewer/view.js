@@ -837,36 +837,35 @@ document.addEventListener("DOMContentLoaded", function () {
       const dir = viewerData.dir;
       const indexFile = viewerData.indexFile || "index.html";
 
-      return scrapbook.cache.get(key).then((data) => {
-        // Privilege-required loading process is done,
-        // remove APIs to avoid a potential security risk.
-        viewer.deApiScriptMain();
-
-        return data;
-      }).then((zipData) => {
-        if (!zipData) {
+      return scrapbook.cache.get(key).then((zipFiles) => {
+        if (!zipFiles) {
           throw new Error(`Archive '${uuid}' does not exist or has been cleared.`);
         }
 
-        // generate files map
-        for (let inZipPath in zipData.files) {
-          const zipObj = zipData.files[inZipPath];
+        let p = Promise.resolve();
+        for (let inZipPath in zipFiles) {
+          const zipObj = zipFiles[inZipPath];
           if (zipObj.dir) { continue; }
           if (dir && !inZipPath.startsWith(dir + '/')) { continue; }
 
           const mime = zipObj.type;
-          let data = zipObj.value;
+          const key = {table: "viewerCache", id: uuid, path: inZipPath};
+          
+          p = p.then(() => {
+            return scrapbook.cache.get(key);
+          }).then((data) => {
+            // convert byte string to array buffer to pass to new File()
+            if (typeof data === 'string') {
+              data = scrapbook.byteStringToArrayBuffer(data);
+            }
 
-          // convert byte string to array buffer to pass to new File()
-          if (typeof data === 'string') {
-            data = scrapbook.byteStringToArrayBuffer(data);
-          }
-
-          const f = new File([data], inZipPath.replace(/.*\//, ""), {type: mime});
-          const u = URL.createObjectURL(f);
-          viewer.inZipFiles.set(inZipPath, {file: f, url: u});
-          viewer.blobUrlToInZipPath.set(u, inZipPath);
+            const f = new File([data], inZipPath.replace(/.*\//, ""), {type: mime});
+            const u = URL.createObjectURL(f);
+            viewer.inZipFiles.set(inZipPath, {file: f, url: u});
+            viewer.blobUrlToInZipPath.set(u, inZipPath);
+          });
         }
+        return p;
       }).then(() => {
         return viewer.fetchPage({
           inZipPath: indexFile,

@@ -191,6 +191,7 @@ const viewer = {
       const zipData = {
         name: zipFile.name,
         files: {},
+        blobs: {},
       };
 
       // @TODO: JSZip.loadAsync cannot load a large zip file
@@ -212,44 +213,50 @@ const viewer = {
             return zipObj.async("arraybuffer").then((ab) => {
               const mime = Mime.prototype.lookup(inZipPath);
 
+              zipData.files[inZipPath] = {
+                dir: false,
+                type: mime,
+              };
+
               let data;
               // In Firefox < 56 and Chromium,
               // Blob cannot be stored in chrome.storage,
               // fallback to byte string.
               if (scrapbook.cache.current === 'storage' &&
+                  !viewer.filesystem &&
                   (_isFxBelow56 || !scrapbook.isGecko)) {
                 data = scrapbook.arrayBufferToByteString(ab);
               } else {
                 data = new Blob([ab], {type: mime});
               }
 
-              zipData.files[inZipPath] = {
-                dir: false,
-                type: mime,
-                value: data,
-              };
+              // store blob data for special files that could be used later
+              if (type === 'maff' && /^[^/]+[/]index.rdf$/.test(inZipPath)) {
+                zipData.blobs[inZipPath] = new Blob([ab], {type: mime});
+              }
+
+              /* Filesystem API view */
+              if (viewer.filesystem) {
+                return fileSystemHandler.createFile(viewer.filesystem.root, uuid + "/" + inZipPath, data);
+              }
+
+              /* In-memory view */
+              const key = {table: "viewerCache", id: uuid, path: inZipPath};
+              return scrapbook.cache.set(key, data);
             });
           });
         });
-        return p;
-      }).then(() => {
-        /* Filesystem API view */
-        if (viewer.filesystem) {
-          const root = viewer.filesystem.root;
-          let p = Promise.resolve();
-          for (const inZipPath in zipData.files) {
-            const entry = zipData.files[inZipPath];
-            if (entry.dir) { continue; }
-            p = p.then(() => {
-              return fileSystemHandler.createFile(root, uuid + "/" + inZipPath, entry.value);
-            });
+        return p.then(() => {
+          /* Filesystem API view */
+          if (viewer.filesystem) {
+            // do nothing
+            return;
           }
-          return p;
-        }
 
-        /* In-memory view */
-        const key = {table: "viewerCache", id: uuid};
-        return scrapbook.cache.set(key, zipData);
+          /* In-memory view */
+          const key = {table: "viewerCache", id: uuid};
+          return scrapbook.cache.set(key, zipData.files);
+        });
       }).then(() => {
         switch (type) {
           case "maff": {
@@ -271,7 +278,7 @@ const viewer = {
                 const indexRdfData = zipData.files[topdir + 'index.rdf'];
                 if (!indexRdfData) { throw new Error("no index.rdf"); }
 
-                const file = new File([indexRdfData.value], 'index.rdf', {type: indexRdfData.type});
+                const file = zipData.blobs[topdir + 'index.rdf'];
                 return scrapbook.readFileAsDocument(file).then((doc) => {
                   const meta = scrapbook.parseMaffRdfDocument(doc);
                   const indexFile = topdir + meta.indexfilename;
