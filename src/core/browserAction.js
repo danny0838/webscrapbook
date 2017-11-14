@@ -33,6 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  const visitLink = function (url, target = null) {
+    const a = visitLink.anchor = visitLink.anchor || document.createElement('a');
+    a.href = url;
+    if (target) { a.target = target; }
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
   chrome.tabs.getCurrent((currentTab) => {
     // currentTab === undefined => browserAction.html is a prompt diaglog;
     //     else browserAction.html is in a tab (or Firefox Android)
@@ -88,19 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById("openViewer").addEventListener('click', () => {
-      if (!currentTab) {
-        chrome.tabs.create({url: chrome.runtime.getURL("viewer/load.html"), active: true});
-      } else {
-        document.location = chrome.runtime.getURL("viewer/load.html");
-      }
+      visitLink(chrome.runtime.getURL("viewer/load.html"), (!currentTab ? '_blank' : ''));
     });
 
     document.getElementById("openOptions").addEventListener('click', () => {
-      if (!currentTab) {
-        chrome.tabs.create({url: chrome.runtime.getURL("core/options.html"), active: true});
-      } else {
-        document.location = chrome.runtime.getURL("core/options.html");
-      }
+      visitLink(chrome.runtime.getURL("core/options.html"), (!currentTab ? 'browseraction' : ''));
     });
   });
 });
