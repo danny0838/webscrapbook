@@ -55,7 +55,8 @@
     "core/common.js",
     "core/scrapbook_32.png",
     "core/scrapbook_128.png",
-    "viewer/load.html"
+    "viewer/load.html",
+    "viewer/view.html"
   ],
 
   "options_ui": {

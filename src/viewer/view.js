@@ -76,6 +76,7 @@ const viewer = {
   },
   inZipFiles: new Map(),
   blobUrlToInZipPath: new Map(),
+  rewrittenBlobUrl: new Set(),
   
   inZipPathToUrl(inZipPath) {
     return viewerData.virtualBase + (inZipPath || "").split("/").map(x => encodeURIComponent(x)).join("/");
@@ -149,7 +150,10 @@ const viewer = {
             url: viewer.inZipPathToUrl(inZipPath),
             recurseChain: recurseChain,
           }).then((rewrittenFile) => {
-            return URL.createObjectURL(rewrittenFile);
+            const u = URL.createObjectURL(rewrittenFile);
+            viewer.blobUrlToInZipPath.set(u, inZipPath);
+            viewer.rewrittenBlobUrl.add(u);
+            return u;
           });
         }
         return f.url;
@@ -802,30 +806,61 @@ document.addEventListener("DOMContentLoaded", function () {
           const elem = e.target.closest('a[href], area[href]');
           if (!elem) { return; }
 
-          try {
-            const url = elem.href;
-            const inZipPath = viewer.blobUrlToInZipPath.get(scrapbook.splitUrl(url)[0]);
-            if (inZipPath) {
-              const f = viewer.inZipFiles.get(inZipPath);
-              if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
-                e.preventDefault();
-                e.stopPropagation();
-                viewer.fetchPage({
-                  inZipPath: inZipPath,
-                  url: url,
-                  recurseChain: [],
-                }).then((fetchedUrl) => {
-                  elem.href = fetchedUrl || "about:blank";
-                  elem.click();
-                });
+          const url = elem.href;
+          if (frame === iframe) {
+            if (url.startsWith("blob:")) {
+              // in-zip file link
+              const [main, search, hash] = scrapbook.splitUrl(url);
+              const inZipPath = viewer.blobUrlToInZipPath.get(main);
+              if (!inZipPath) { return; }
+
+              e.preventDefault();
+              e.stopPropagation();
+
+              const urlObj = new URL(location.href);
+              if (inZipPath !== urlObj.searchParams.get('p')) {
+                urlObj.searchParams.set('p', inZipPath);
+                urlObj.hash = hash;
+                location.href = urlObj.href;
+              } else {
+                frameDoc.location.href = url;
+                urlObj.hash = hash;
+                history.replaceState({}, null, urlObj.href);
               }
-            } else if (!url.startsWith("blob:") && frame === iframe) {
+            } else if (url.indexOf(':') !== -1) {
+              // external link
               e.preventDefault();
               e.stopPropagation();
               location.href = url;
+            } else {
+              // a relative link targeting a non-existed file in the zip, e.g. 'nonexist.html'
+              // in Chrome, url.href is ''
+              // in Firefox, url.href is raw 'nonexist.html'
+              e.preventDefault();
+              e.stopPropagation();
+              location.href = 'about:blank';
             }
-          } catch (ex) {
-            console.error(ex);
+          } else {
+            const [main, search, hash] = scrapbook.splitUrl(url);
+            const inZipPath = viewer.blobUrlToInZipPath.get(main);
+            if (!inZipPath) { return; }
+            if (viewer.rewrittenBlobUrl.has(main)) { return; }
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const f = viewer.inZipFiles.get(inZipPath);
+            if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
+              return viewer.fetchPage({
+                inZipPath: inZipPath,
+                url: url,
+                recurseChain: [],
+              }).then((fetchedUrl) => {
+                const rewrittenUrl = fetchedUrl || "about:blank";
+                elem.href = rewrittenUrl;
+                frameDoc.location = rewrittenUrl;
+              });
+            }
           }
         }, false);
 
