@@ -758,6 +758,7 @@ document.addEventListener("DOMContentLoaded", function () {
   loadOptions.then(() => {
     const defaultTitle = document.querySelector('title').textContent;
     const iframe = document.getElementById('viewer');
+    const faviconElem = document.getElementById('favicon');
 
     const urlSearch = "";
     const urlHash = location.hash;
@@ -784,6 +785,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (frame === iframe) {
           document.title = frameDoc.title;
+
+          // "rel" is matched case-insensitively
+          // The "~=" selector checks for "icon" separated by space,
+          // not including "-icon" or "_icon".
+          const elem = frameDoc.querySelector('link[rel~="icon"][href]');
+          if (elem) {
+            faviconElem.href = elem.href;
+          } else {
+            faviconElem.removeAttribute('href');
+          }
         }
 
         frame.contentWindow.addEventListener("click", (e) => {
