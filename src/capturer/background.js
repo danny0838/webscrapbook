@@ -692,11 +692,7 @@ capturer.saveDocument = function (params) {
 
           if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
           const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-
-          zip.file(filename, new Blob([data.content], {type: data.mime}), {
-            compression: "DEFLATE",
-            compressionOptions: {level: 9}
-          });
+          scrapbook.zipAddFile(zip, filename, new Blob([data.content], {type: data.mime}), true);
 
           if (!settings.frameIsMain) {
             return {timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
@@ -704,10 +700,7 @@ capturer.saveDocument = function (params) {
             // create index.html that redirects to index.xhtml
             if (ext === ".xhtml") {
               const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
-              zip.file("index.html", new Blob([html], {type: "text/html"}), {
-                compression: "DEFLATE",
-                compressionOptions: {level: 9}
-              });
+              scrapbook.zipAddFile(zip, "index.html", new Blob([html], {type: "text/html"}), true);
             }
 
             // generate and download the zip file
@@ -751,11 +744,7 @@ capturer.saveDocument = function (params) {
 
           if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
           const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-
-          zip.file(timeId + "/" + filename, new Blob([data.content], {type: data.mime}), {
-            compression: "DEFLATE",
-            compressionOptions: {level: 9}
-          });
+          scrapbook.zipAddFile(zip, timeId + "/" + filename, new Blob([data.content], {type: data.mime}), true);
 
           if (!settings.frameIsMain) {
             return {timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
@@ -763,10 +752,7 @@ capturer.saveDocument = function (params) {
             // create index.html that redirects to index.xhtml
             if (ext === ".xhtml") {
               const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
-              zip.file(timeId + "/" + "index.html", new Blob([html], {type: "text/html"}), {
-                compression: "DEFLATE",
-                compressionOptions: {level: 9}
-              });
+              scrapbook.zipAddFile(zip, timeId + "/" + "index.html", new Blob([html], {type: "text/html"}), true);
             }
 
             // generate index.rdf
@@ -783,11 +769,7 @@ capturer.saveDocument = function (params) {
   </RDF:Description>
 </RDF:RDF>
 `;
-
-            zip.file(timeId + "/" + "index.rdf", new Blob([rdfContent], {type: "application/rdf+xml"}), {
-              compression: "DEFLATE",
-              compressionOptions: {level: 9}
-            });
+            scrapbook.zipAddFile(zip, timeId + "/" + "index.rdf", new Blob([rdfContent], {type: "application/rdf+xml"}), true);
 
             // generate and download the zip file
             return zip.generateAsync({type: "blob"}).then((zipBlob) => {
@@ -1063,36 +1045,14 @@ capturer.downloadBlob = function (params) {
       case "zip": {
         if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
         const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-
-        if (/^text\/|\b(?:xml|json|javascript)\b/.test(blob.type) && blob.size >= 128) {
-          zip.file(filename, blob, {
-            compression: "DEFLATE",
-            compressionOptions: {level: 9}
-          });
-        } else {
-          zip.file(filename, blob, {
-            compression: "STORE"
-          });
-        }
-
+        scrapbook.zipAddFile(zip, filename, blob);
         return {filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       }
 
       case "maff": {
         if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
         const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-
-        if (/^text\/|\b(?:xml|json|javascript)\b/.test(blob.type) && blob.size >= 128) {
-          zip.file(timeId + "/" + filename, blob, {
-            compression: "DEFLATE",
-            compressionOptions: {level: 9}
-          });
-        } else {
-          zip.file(timeId + "/" + filename, blob, {
-            compression: "STORE"
-          });
-        }
-
+        scrapbook.zipAddFile(zip, timeId + "/" + filename, blob);
         return {filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       }
 
