@@ -244,8 +244,14 @@
   "OptionCaptureSaveAsMaffTooltip": {
     "message": "将网页及参照的资源以标准 zip 算法打包成 .maff 封存文件。"
   },
+  "OptionCaptureSaveAsSingleHtmlJsLabel": {
+    "message": "脚本化单一 HTML 文件"
+  },
   "OptionCaptureSaveAsSingleHtmlLabel": {
     "message": "单一 HTML 文件"
+  },
+  "OptionCaptureSaveAsSingleHtmlJsTooltip": {
+    "message": "将参照的资源储存於脚本并于开启时载入，相较于 data URI 可提升效能及缩小容量。须使用较新且启用 JavaScript 的浏览器读取，例如 Chrome >= 20、Firefox >= 13、Edge、Safari >= 6、Opera >= 12.1、IE >= 10。注意：储存脚本时不建议使用。"
   },
   "OptionCaptureSaveAsSingleHtmlTooltip": {
     "message": "将参照的资源以 data URL 形式内嵌。多数浏览器都能读取，例如 Chrome、Firefox、Safari、Opera >= 7.2，以及 IE >= 8 (限 32 KiB)。"

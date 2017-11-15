@@ -244,8 +244,14 @@
   "OptionCaptureSaveAsMaffTooltip": {
     "message": "Pack web pages and their referenced resources as a .maff file using the standard zip algorithm."
   },
+  "OptionCaptureSaveAsSingleHtmlJsLabel": {
+    "message": "Scripted single HTML"
+  },
   "OptionCaptureSaveAsSingleHtmlLabel": {
     "message": "Single HTML"
+  },
+  "OptionCaptureSaveAsSingleHtmlJsTooltip": {
+    "message": "Referenced resources are stored in the script and re-generated on loading. This has a better performance and a reduced size compared with data URI, but requires a modern browser with JavaScript enabled, such as: Chrome >= 20, Firefox >= 13, Edge, Safari >= 6, Opera >= 12.1, and IE >= 10. NOTE: this is not recommended if scripts are saved."
   },
   "OptionCaptureSaveAsSingleHtmlTooltip": {
     "message": "Referenced resources are stored as data URL, which is supported by most browsers, such as Chrome, Firefox, Safari, Opera >= 7.2, and IE >= 8 (limited 32 KiB)."

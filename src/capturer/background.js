@@ -688,6 +688,114 @@ capturer.saveDocument = function (params) {
           break;
         }
 
+        case "singleHtmlJs": {
+          const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+          let filename = documentName + ext;
+          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+
+          if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+          const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+          scrapbook.zipAddFile(zip, filename, new Blob([data.content], {type: data.mime}), true);
+
+          if (!settings.frameIsMain) {
+            const url = `data:${blob.type};filename=${encodeURIComponent(filename)},${sourceUrlHash}`;
+            return {timeId, sourceUrl, filename, url};
+          } else {
+            let targetDir;
+            let filename;
+            let savePrompt;
+
+            if (options["capture.saveInScrapbook"]) {
+              targetDir = options["capture.scrapbookFolder"] + "/data";
+              filename = timeId + ext;
+              savePrompt = false;
+            } else {
+              targetDir = "";
+              filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+              if (!filename.endsWith(ext)) filename += ext;
+              savePrompt = true;
+            }
+
+            const zipResMap = capturer.captureInfo.get(timeId).zipResMap = capturer.captureInfo.get(timeId).zipResMap || new Map();
+            const zipData = [];
+            let p = Promise.resolve();
+            zip.forEach((path, entry) => {
+              p = p.then(() => {
+                return entry.async('base64');
+              }).then((data) => {
+                zipData[zipResMap.get(path)] = {p: path, d: data};
+              });
+            });
+
+            return p.then(() => {
+              const pageloader = function (data) {
+                var bs2ab = function (bstr) {
+                  var n = bstr.length, u8ar = new Uint8Array(n);
+                  while (n--) { u8ar[n] = bstr.charCodeAt(n); }
+                  return u8ar.buffer;
+                };
+
+                var getRes = function (i, t) {
+                  if (getRes[i]) { return getRes[i]; }
+                  var s = readRes(atob(data[i].d));
+                  return getRes[i] = URL.createObjectURL(new Blob([bs2ab(s)], {type: t}));
+                };
+
+                var readRes = function (s) {
+                  return s.replace(/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/g, function (m, t, i, h) {
+                    return getRes(i, t) + (h || '');
+                  });
+                };
+
+                var loadRes = function (node) {
+                  var o = node.nodeValue, n = readRes(o);
+                  if (n !== o) { node.nodeValue = n; }
+                };
+
+                var s = document.getElementsByTagName('script'); s = s[s.length - 1];
+                s.parentNode.removeChild(s);
+
+                var e = document.getElementsByTagName('*');
+                for (var i = 0, I = e.length; i < I; i++) {
+                  if (['style'].indexOf(e[i].nodeName.toLowerCase()) !== -1) {
+                    var c = e[i].childNodes;
+                    for (var j = 0, J = c.length; j < J; j++) {
+                      if (c[j].nodeType === 3) { loadRes(c[j]); }
+                    }
+                  }
+                  var a = e[i].attributes;
+                  for (var j = 0, J = a.length; j < J; j++) {
+                    if (['href', 'src', 'srcset', 'style', 'background', 'content', 'poster', 'data', 'code', 'archive']
+                        .indexOf(a[j].nodeName) !== -1) {
+                      loadRes(a[j]);
+                    }
+                  }
+                }
+              };
+              
+              const content = data.content.replace(/<\/body>\s*<\/html>\s*$/, (m) => {
+                return '\n' + '<script data-scrapbook-elem="pageloader">' + 
+                    `(${scrapbook.compressJsFunc(pageloader)})(${JSON.stringify(zipData)});` + 
+                    '</script>' + m;
+                });
+
+              return capturer.saveBlob({
+                timeId,
+                blob: new Blob([content], {type: data.mime}),
+                directory: targetDir,
+                filename,
+                sourceUrl,
+                autoErase: false,
+                savePrompt,
+              }).then((filename) => {
+                return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+              });
+            });
+          }
+          break;
+        }
+
         case "zip": {
           const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
           let filename = documentName + ext;
@@ -1043,6 +1151,17 @@ capturer.downloadBlob = function (params) {
           }
           return {url: dataUri + sourceUrlHash};
         });
+      }
+
+      case "singleHtmlJs": {
+        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+        const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+        const zipResMap = capturer.captureInfo.get(timeId).zipResMap = capturer.captureInfo.get(timeId).zipResMap || new Map();
+        scrapbook.zipAddFile(zip, filename, blob);
+        const zipResId = zipResMap.size;
+        zipResMap.set(filename, zipResId);
+        const url = `data:${blob.type};scrapbook-resource=${zipResId},${sourceUrlHash}`;
+        return {filename, url};
       }
 
       case "zip": {
