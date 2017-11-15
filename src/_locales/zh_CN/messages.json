@@ -79,6 +79,27 @@
     "description": "Name of the extension as it's visible to the outside world",
     "message": "网页剪贴簿"
   },
+  "IndexerDesc": {
+    "message": "选择网页剪贴簿文件夹或其压缩文件。你可以拖曳它们至此视窗，或使用以下按钮："
+  },
+  "IndexerPickDir": {
+    "message": "选择文件夹"
+  },
+  "IndexerPickDirTooltip": {
+    "message": "用此方式选择文件夹时，若根目录下只有单一文件夹，会无法正确辨识根目录。用拖曳的方式选择文件夹或在根目录下增加文件或含有文件的文件夹可避免此问题。"
+  },
+  "IndexerPickFiles": {
+    "message": "选择压缩文件"
+  },
+  "IndexerSourceLinkTitle": {
+    "message": "来源链接"
+  },
+  "IndexerTitle": {
+    "message": "创建网站索引"
+  },
+  "OpenIndexer": {
+    "message": "创建网站索引"
+  },
   "OpenOptions": {
     "message": "选项"
   },
@@ -301,6 +322,9 @@
   "OptionGroupCapture": {
     "message": "获取 - 内容"
   },
+  "OptionGroupIndexer": {
+    "message": "索引器"
+  },
   "OptionGroupMetadata": {
     "message": "获取 - 元信息"
   },
@@ -309,6 +333,12 @@
   },
   "OptionGroupViewer": {
     "message": "检视器"
+  },
+  "OptionIndexerAutoDownloadLabel": {
+    "message": "自动下载更新的索引文件:"
+  },
+  "OptionIndexerAutoDownloadTooltip": {
+    "message": "输入做站台索引的资料夹必须是设定的剪贴簿文件夹，否则可能造成错误覆盖及资料流失。"
   },
   "OptionPageTitle": {
     "message": "选项设定"

@@ -9,6 +9,15 @@
 if (typeof browser === "undefined" && typeof chrome !== "undefined") {
   this.browser = {
     downloads: {
+      download(...args) {
+        return new Promise((resolve, reject) => {
+          chrome.downloads.download(...args, (result) => {
+            if (!chrome.runtime.lastError) { resolve(result); }
+            else { reject(chrome.runtime.lastError); }
+          });
+        });
+      },
+
       erase(...args) {
         return new Promise((resolve, reject) => {
           chrome.downloads.erase(...args, (result) => {

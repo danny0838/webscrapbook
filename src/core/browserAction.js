@@ -100,6 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
       visitLink(chrome.runtime.getURL("viewer/load.html"), (!currentTab ? '_blank' : ''));
     });
 
+    document.getElementById("openIndexer").addEventListener('click', () => {
+      visitLink(chrome.runtime.getURL("indexer/load.html"), (!currentTab ? 'browseraction' : ''));
+    });
+
     document.getElementById("openOptions").addEventListener('click', () => {
       visitLink(chrome.runtime.getURL("core/options.html"), (!currentTab ? 'browseraction' : ''));
     });

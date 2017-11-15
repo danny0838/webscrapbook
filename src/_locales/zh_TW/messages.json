@@ -79,6 +79,27 @@
     "description": "Name of the extension as it's visible to the outside world",
     "message": "網頁剪貼簿"
   },
+  "IndexerDesc": {
+    "message": "選擇網頁剪貼簿資料夾或其壓縮檔。你可以拖曳它們至此視窗，或使用以下按鈕："
+  },
+  "IndexerPickDir": {
+    "message": "選擇資料夾"
+  },
+  "IndexerPickDirTooltip": {
+    "message": "用此方式選擇資料夾時，若根目錄下只有單一資料夾，會無法正確辨識根目錄。用拖曳的方式選擇資料夾或在根目錄下增加檔案或含有檔案的資料夾可避免此問題。"
+  },
+  "IndexerPickFiles": {
+    "message": "選擇壓縮檔"
+  },
+  "IndexerSourceLinkTitle": {
+    "message": "來源連結"
+  },
+  "IndexerTitle": {
+    "message": "建立站台索引"
+  },
+  "OpenIndexer": {
+    "message": "建立站台索引"
+  },
   "OpenOptions": {
     "message": "選項"
   },
@@ -301,6 +322,9 @@
   "OptionGroupCapture": {
     "message": "擷取 - 內容"
   },
+  "OptionGroupIndexer": {
+    "message": "索引器"
+  },
   "OptionGroupMetadata": {
     "message": "擷取 - 後設資訊"
   },
@@ -309,6 +333,12 @@
   },
   "OptionGroupViewer": {
     "message": "檢視器"
+  },
+  "OptionIndexerAutoDownloadLabel": {
+    "message": "自動下載更新的索引檔案:"
+  },
+  "OptionIndexerAutoDownloadTooltip": {
+    "message": "輸入做站台索引的資料夾必須是設定的剪貼簿資料夾，否則可能造成錯誤覆蓋及資料流失。"
   },
   "OptionPageTitle": {
     "message": "選項設定"

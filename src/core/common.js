@@ -58,6 +58,7 @@ scrapbook.options = {
   "viewer.viewHtz": true,
   "viewer.viewMaff": true,
   "viewer.allowScripts": false,
+  "indexer.autoDownload": false,
 };
 
 scrapbook.isOptionsSynced = false;

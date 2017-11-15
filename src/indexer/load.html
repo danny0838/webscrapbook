@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html dir="__MSG_@@bidi_dir__">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<title>__MSG_IndexerTitle__</title>
+<style>
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-size: 16px;
+}
+
+#dropmask {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 100000;
+  background-color: SkyBlue;
+  opacity: 0.7;
+}
+
+#panel {
+  padding: .5em 1em;
+  background-color: grey;
+  color: white;
+  text-align: center;
+}
+
+#panel div {
+  margin-bottom: 0.5em;
+  font-size: 1.25em;
+  line-height: 1.5em;
+}
+
+#panel label {
+  display: inline-block;
+  margin: 0 .2em;
+  padding: .4em 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #47A4A5;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+#logger {
+  padding: .5em;
+  font-family: monospace;
+  white-space: pre;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+</style>
+<script src="../lib/jszip.js"></script>
+<script src="../lib/mime.js"></script>
+<script src="../lib/sha_dev.js"></script>
+<script src="../core/polyfill.js"></script>
+<script src="../core/common.js"></script>
+<script src="../core/optionsAuto.js"></script>
+<script src="load.js"></script>
+</head>
+<body>
+<div id="dropmask" style="display: none;"></div>
+<div id="panel">
+<div>__MSG_IndexerDesc__</div>
+<label id="selector-label" for="dir-selector" title="__MSG_IndexerPickDirTooltip__">__MSG_IndexerPickDir__</label>
+<input type="file" id="dir-selector" webkitdirectory directory style="display: none;">
+<label id="selector-label" for="files-selector">__MSG_IndexerPickFiles__</label>
+<input type="file" id="files-selector" style="display: none;" multiple>
+</div>
+<div id="logger"></div>
+</body>
+</html>

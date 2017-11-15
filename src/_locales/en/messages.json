@@ -79,6 +79,27 @@
     "description": "Name of the extension as it's visible to the outside world",
     "message": "Web ScrapBook"
   },
+  "IndexerDesc": {
+    "message": "Pick directories or zip archive files of a Web ScrapBook folder, via dropping them into this window, or using the buttons below:"
+  },
+  "IndexerPickDir": {
+    "message": "Pick a folder"
+  },
+  "IndexerPickDirTooltip": {
+    "message": "When selecting a folder in this way, the root directory cannot be correctly identified if the root directory contains only a single folder. Select a folder via dropping, or add a file or a folder containing files to the root directory, to avoid this issue."
+  },
+  "IndexerPickFiles": {
+    "message": "Pick zip files"
+  },
+  "IndexerSourceLinkTitle": {
+    "message": "Source link"
+  },
+  "IndexerTitle": {
+    "message": "Generate site index"
+  },
+  "OpenIndexer": {
+    "message": "Generate site index"
+  },
   "OpenOptions": {
     "message": "Options"
   },
@@ -301,6 +322,9 @@
   "OptionGroupCapture": {
     "message": "Capture - content"
   },
+  "OptionGroupIndexer": {
+    "message": "Indexer"
+  },
   "OptionGroupMetadata": {
     "message": "Capture - metadata"
   },
@@ -309,6 +333,12 @@
   },
   "OptionGroupViewer": {
     "message": "Viewer"
+  },
+  "OptionIndexerAutoDownloadLabel": {
+    "message": "Auto download updated files:"
+  },
+  "OptionIndexerAutoDownloadTooltip": {
+    "message": "The input folder must be configured ScrapBook Folder, or the files could be incorrectly overwritten."
   },
   "OptionPageTitle": {
     "message": "Options"
