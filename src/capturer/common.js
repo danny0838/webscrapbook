@@ -288,7 +288,7 @@ capturer.captureDocument = function (params) {
         i.src = data;
         s.parentNode.removeChild(s);
       };
-      return "(" + dataScript.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")('" + data + "')";
+      return "(" + scrapbook.compressJsFunc(dataScript) + ")('" + data + "')";
     };
 
     return capturer.invoke("registerDocument", {

@@ -907,6 +907,23 @@ scrapbook.parseHeaderRefresh = function (string) {
 
 
 /********************************************************************
+ * String handling - Misc. utilities
+ *******************************************************************/
+
+/**
+ * A simple tool to compress javascript code
+ *
+ * Note: this not handle comments inside a string
+ */
+scrapbook.compressJsFunc = function (func) {
+  return func.toString()
+    .replace(/\/\/.*$/mg, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(?!\w\s+\w)(.)\s+/g, "$1");
+};
+
+
+/********************************************************************
  * File/Blob utilities
  *******************************************************************/
 
