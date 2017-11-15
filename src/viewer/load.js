@@ -110,7 +110,7 @@ const viewer = {
           return Promise.resolve().then(() => {
             return browser.tabs.getCurrent().then((tab) => {
               if (tab.incognito) { throw new Error('private window'); }
-              return browser.tabs.create({url: url, active: false});
+              return browser.tabs.create({url, active: false});
             });
           }).catch((ex) => {
             window.open(url);

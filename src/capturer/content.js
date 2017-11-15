@@ -25,7 +25,7 @@ window.addEventListener("message", (event) => {
           extension: chrome.runtime.id,
           uid: message.uid,
           cmd: message.cmd + ".complete",
-          response: response
+          response,
         });
       });
     }

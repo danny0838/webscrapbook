@@ -114,7 +114,7 @@ capturer.captureActiveTab = function (params) {
     const {mode} = params;
 
     return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
-      return capturer.captureTab({tab: tabs[0], mode: mode});
+      return capturer.captureTab({tab: tabs[0], mode});
     });
   });
 };
@@ -133,7 +133,7 @@ capturer.captureAllTabs = function (params) {
       let ms = -100;
       return Promise.all(tabs.map((tab) => {
         return scrapbook.delay(ms += 100).then(() => {
-          return capturer.captureTab({tab: tab, mode: mode});
+          return capturer.captureTab({tab, mode});
         });
       }));
     });
@@ -170,7 +170,7 @@ capturer.captureTab = function (params) {
     const timeId = scrapbook.dateToId();
     const message = {
       settings: {
-        timeId: timeId,
+        timeId,
         frameIsMain: true,
         documentName: "index",
         recurseChain: [],
@@ -327,7 +327,7 @@ capturer.captureUrl = function (params) {
     const accessCurrent = scrapbook.xhr({
       url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
       responseType: "document",
-      requestHeaders: requestHeaders,
+      requestHeaders,
       onreadystatechange(xhr) {
         if (xhr.readyState !== 2) { return; }
 
@@ -397,8 +397,8 @@ capturer.captureUrl = function (params) {
           doc,
           refUrl,
           title,
-          settings: settings,
-          options: options,
+          settings,
+          options,
         });
       } else {
         return capturer.captureFile({
@@ -455,7 +455,7 @@ capturer.captureBookmark = function (params) {
       return scrapbook.xhr({
         url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
         responseType: "document",
-        requestHeaders: requestHeaders,
+        requestHeaders,
       }).then((xhr) => {
         return xhr.response;
       }).then((doc) => {
@@ -517,15 +517,15 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       }
 
       return capturer.saveBlob({
-        timeId: timeId,
+        timeId,
         blob: new Blob([html], {type: "text/html"}),
         directory: targetDir,
-        filename: filename,
-        sourceUrl: sourceUrl,
+        filename,
+        sourceUrl,
         autoErase: false,
-        savePrompt: savePrompt
+        savePrompt,
       }).then((filename) => {
-        return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       });
     }).catch((ex) => {
       console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
@@ -553,9 +553,9 @@ capturer.captureFile = function (params) {
 
     return capturer.downloadFile({
       url: sourceUrl,
-      refUrl: refUrl,
-      settings: settings,
-      options: options
+      refUrl,
+      settings,
+      options,
     }).then((response) => {
       if (settings.frameIsMain) {
         const meta = params.options["capture.recordDocumentMeta"] ? 
@@ -575,23 +575,23 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 </body>
 </html>`;
         return capturer.saveDocument({
-          sourceUrl: sourceUrl,
+          sourceUrl,
           documentName: settings.documentName,
-          settings: settings,
-          options: options,
+          settings,
+          options,
           data: {
-            title: title,
+            title,
             mime: "text/html",
-            content: html
+            content: html,
           }
         });
       } else {
         return {
-          timeId: timeId,
-          sourceUrl: sourceUrl,
+          timeId,
+          sourceUrl,
           targetDir: response.targetDir,
           filename: response.filename,
-          url: response.url
+          url: response.url,
         };
       }
     });
@@ -651,7 +651,7 @@ capturer.saveDocument = function (params) {
         case "singleHtml": {
           if (!settings.frameIsMain) {
             const dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
-            return {timeId: timeId, sourceUrl: sourceUrl, url: dataUri};
+            return {timeId, sourceUrl, url: dataUri};
           } else {
             const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
             let targetDir;
@@ -671,15 +671,15 @@ capturer.saveDocument = function (params) {
             }
 
             return capturer.saveBlob({
-              timeId: timeId,
+              timeId,
               blob: new Blob([data.content], {type: data.mime}),
               directory: targetDir,
-              filename: filename,
-              sourceUrl: sourceUrl,
+              filename,
+              sourceUrl,
               autoErase: false,
-              savePrompt: savePrompt
+              savePrompt,
             }).then((filename) => {
-              return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+              return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
             });
           }
           break;
@@ -695,7 +695,7 @@ capturer.saveDocument = function (params) {
           scrapbook.zipAddFile(zip, filename, new Blob([data.content], {type: data.mime}), true);
 
           if (!settings.frameIsMain) {
-            return {timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+            return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
           } else {
             // create index.html that redirects to index.xhtml
             if (ext === ".xhtml") {
@@ -722,15 +722,15 @@ capturer.saveDocument = function (params) {
               }
 
               return capturer.saveBlob({
-                timeId: timeId,
+                timeId,
                 blob: zipBlob,
                 directory: targetDir,
-                filename: filename,
-                sourceUrl: sourceUrl,
+                filename,
+                sourceUrl,
                 autoErase: false,
-                savePrompt: savePrompt
+                savePrompt,
               }).then((filename) => {
-                return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+                return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
               });
             });
           }
@@ -747,7 +747,7 @@ capturer.saveDocument = function (params) {
           scrapbook.zipAddFile(zip, timeId + "/" + filename, new Blob([data.content], {type: data.mime}), true);
 
           if (!settings.frameIsMain) {
-            return {timeId: timeId, sourceUrl: sourceUrl, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+            return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
           } else {
             // create index.html that redirects to index.xhtml
             if (ext === ".xhtml") {
@@ -790,15 +790,15 @@ capturer.saveDocument = function (params) {
               }
 
               return capturer.saveBlob({
-                timeId: timeId,
+                timeId,
                 blob: zipBlob,
                 directory: targetDir,
-                filename: filename,
-                sourceUrl: sourceUrl,
+                filename,
+                sourceUrl,
                 autoErase: false,
-                savePrompt: savePrompt
+                savePrompt,
               }).then((filename) => {
-                return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+                return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
               });
             });
           }
@@ -813,31 +813,31 @@ capturer.saveDocument = function (params) {
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
           return capturer.saveBlob({
-            timeId: timeId,
+            timeId,
             blob: new Blob([data.content], {type: data.mime}),
             directory: targetDir,
-            filename: filename,
-            sourceUrl: sourceUrl,
+            filename,
+            sourceUrl,
             autoErase: !settings.frameIsMain || (ext === ".xhtml"),
-            savePrompt: false
+            savePrompt: false,
           }).then((filename) => {
             if (settings.frameIsMain && (ext === ".xhtml")) {
               // create index.html that redirects to index.xhtml
               const filename = "index.html";
               const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
               return capturer.saveBlob({
-                timeId: timeId,
+                timeId,
                 blob: new Blob([html], {type: "text/html"}),
                 directory: targetDir,
-                filename: filename,
-                sourceUrl: sourceUrl,
+                filename,
+                sourceUrl,
                 autoErase: false,
-                savePrompt: false
+                savePrompt: false,
               });
             }
             return filename;
           }).then((filename) => {
-            return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+            return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
           });
           break;
         }
@@ -896,19 +896,19 @@ capturer.downloadFile = function (params) {
           return Promise.resolve(capturer[rewriteMethod]).then((fn) => {
             if (!fn) { return file; }
             return fn({
-              settings: settings,
-              options: options,
+              settings,
+              options,
               data: file,
               charset: null,
-              url: null
+              url: null,
             });
           }).then((blob) => {
             return capturer.downloadBlob({
-              settings: settings,
-              options: options,
-              blob: blob,
-              filename: filename,
-              sourceUrl: sourceUrl,
+              settings,
+              options,
+              blob,
+              filename,
+              sourceUrl,
             });
           });
         }
@@ -924,7 +924,7 @@ capturer.downloadFile = function (params) {
       return scrapbook.xhr({
         url: sourceUrl,
         responseType: "blob",
-        requestHeaders: requestHeaders,
+        requestHeaders,
         onreadystatechange(xhr) {
           if (xhr.readyState !== 2) { return; }
 
@@ -988,19 +988,19 @@ capturer.downloadFile = function (params) {
         return Promise.resolve(capturer[rewriteMethod]).then((fn) => {
           if (!fn) { return xhr.response; }
           return fn({
-            settings: settings,
-            options: options,
+            settings,
+            options,
             data: xhr.response,
             charset: headers.charset,
-            url: xhr.responseURL
+            url: xhr.responseURL,
           });
         }).then((blob) => {
           return capturer.downloadBlob({
-            settings: settings,
-            options: options,
-            blob: blob,
-            filename: filename,
-            sourceUrl: sourceUrl,
+            settings,
+            options,
+            blob,
+            filename,
+            sourceUrl,
           });
         });
       });
@@ -1046,14 +1046,14 @@ capturer.downloadBlob = function (params) {
         if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
         const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
         scrapbook.zipAddFile(zip, filename, blob);
-        return {filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       }
 
       case "maff": {
         if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
         const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
         scrapbook.zipAddFile(zip, timeId + "/" + filename, blob);
-        return {filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       }
 
       case "folder":
@@ -1062,15 +1062,15 @@ capturer.downloadBlob = function (params) {
         const targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
 
         return capturer.saveBlob({
-          timeId: timeId,
-          blob: blob,
+          timeId,
+          blob,
           directory: targetDir,
-          filename: filename,
-          sourceUrl: sourceUrl,
+          filename,
+          sourceUrl,
           autoErase: true,
-          savePrompt: false
+          savePrompt: false,
         }).then((filename) => {
-          return {timeId: timeId, sourceUrl: sourceUrl, targetDir: targetDir, filename: filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+          return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
         });
       }
     }
@@ -1096,11 +1096,11 @@ capturer.saveBlob = function (params) {
 
     return capturer.saveUrl({
       url: URL.createObjectURL(blob),
-      directory: directory,
-      filename: filename,
-      sourceUrl: sourceUrl,
-      autoErase: autoErase,
-      savePrompt: savePrompt
+      directory,
+      filename,
+      sourceUrl,
+      autoErase,
+      savePrompt,
     });
   });
 };
@@ -1123,10 +1123,10 @@ capturer.saveUrl = function (params) {
     const {timeId, url, directory, filename, sourceUrl, autoErase, savePrompt} = params;
 
     const downloadParams = {
-      url: url,
+      url,
       filename: (directory ? directory + "/" : "") + filename,
       conflictAction: "uniquify",
-      saveAs: savePrompt
+      saveAs: savePrompt,
     };
 
     isDebug && console.debug("download start", downloadParams);
@@ -1134,11 +1134,11 @@ capturer.saveUrl = function (params) {
       isDebug && console.debug("download response", downloadId);
       if (downloadId) {
         capturer.downloadInfo.set(downloadId, {
-          timeId: timeId,
+          timeId,
           src: sourceUrl,
-          autoErase: autoErase,
+          autoErase,
           onComplete: resolve,
-          onError: reject
+          onError: reject,
         });
       } else {
         reject(chrome.runtime.lastError);

@@ -88,7 +88,7 @@ const viewer = {
       absoluteUrl = new URL(url, refUrl || undefined);
     } catch (ex) {
       // url cannot be resolved, return original (invalid)
-      return {url: url, inZip: false};
+      return {url, inZip: false};
     }
 
     if (absoluteUrl.href.startsWith(viewerData.virtualBase)) {
@@ -107,14 +107,14 @@ const viewer = {
           url: f.url + hash, // blob URL with a search is invalid
           virtualUrl: absoluteUrl.href + hash,
           inZip: true,
-          inZipPath: inZipPath,
+          inZipPath,
           mime: f.file.type,
-          search: search,
-          hash: hash,
+          search,
+          hash,
         };
       } else {
         // url targets a non-exist file in zip, return original (invalid)
-        return {url: url, inZip: false};
+        return {url, inZip: false};
       }
     }
     // url target not in zip, return absolute URL
@@ -148,7 +148,7 @@ const viewer = {
             data: f.file,
             charset: null,
             url: viewer.inZipPathToUrl(inZipPath),
-            recurseChain: recurseChain,
+            recurseChain,
           }).then((rewrittenFile) => {
             const u = URL.createObjectURL(rewrittenFile);
             viewer.blobUrlToInZipPath.set(u, inZipPath);
@@ -187,9 +187,9 @@ const viewer = {
               return scrapbook.readFileAsDocument(data).then((doc) => {
                 if (!doc) { throw new Error("document cannot be loaded"); }
                 return viewer.parseDocument({
-                  doc: doc,
-                  inZipPath: inZipPath,
-                  recurseChain: recurseChain,
+                  doc,
+                  inZipPath,
+                  recurseChain,
                 });
               }).catch((ex) => {
                 return data;
@@ -198,7 +198,7 @@ const viewer = {
             return data;
           });
         },
-        recurseChain: recurseChain,
+        recurseChain,
       }).then((fetchedUrl) => {
         return fetchedUrl ? fetchedUrl + searchAndHash : fetchedUrl;
       });
@@ -491,7 +491,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               if (!url.startsWith('blob:')) {
                 tasks[tasks.length] = 
                 scrapbook.xhr({
-                  url: url,
+                  url,
                   responseType: 'blob',
                 }).then((xhr) => {
                   return xhr.response;
@@ -526,7 +526,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               if (!url.startsWith('blob:')) {
                 tasks[tasks.length] = 
                 scrapbook.xhr({
-                  url: url,
+                  url,
                   responseType: 'blob',
                 }).then((xhr) => {
                   return xhr.response;
@@ -561,7 +561,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               if (!url.startsWith('blob:')) {
                 tasks[tasks.length] = 
                 scrapbook.xhr({
-                  url: url,
+                  url,
                   responseType: 'blob',
                 }).then((xhr) => {
                   return xhr.response;
@@ -588,7 +588,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               if (!url.startsWith('blob:')) {
                 tasks[tasks.length] = 
                 scrapbook.xhr({
-                  url: url,
+                  url,
                   responseType: 'blob',
                 }).then((xhr) => {
                   return xhr.response;
@@ -700,9 +700,9 @@ class ComplexUrlFetcher {
   getUrlHash(url, rewriteFunc) {
     const key = scrapbook.getUuid();
     this.urlHash[key] = {
-      url: url,
+      url,
       newUrl: null,
-      rewriteFunc: rewriteFunc,
+      rewriteFunc,
     };
     return "urn:scrapbook:url:" + key;
   }
@@ -852,8 +852,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const f = viewer.inZipFiles.get(inZipPath);
             if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
               return viewer.fetchPage({
-                inZipPath: inZipPath,
-                url: url,
+                inZipPath,
+                url,
                 recurseChain: [],
               }).then((fetchedUrl) => {
                 const rewrittenUrl = fetchedUrl || "about:blank";

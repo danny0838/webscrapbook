@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         capturer.invoke("captureActiveTab", {mode: "document"});
       } else {
         generateActionButtonForTabs(document.getElementById("captureTab"), (tab) => {
-          capturer.invoke("captureTab", {tab: tab, mode: "document"});
+          capturer.invoke("captureTab", {tab, mode: "document"});
         });
       }
     });
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         capturer.invoke("captureActiveTab", {mode: "source"});
       } else {
         generateActionButtonForTabs(document.getElementById("captureTabSource"), (tab) => {
-          capturer.invoke("captureTab", {tab: tab, mode: "source"});
+          capturer.invoke("captureTab", {tab, mode: "source"});
         });
       }
     });
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         capturer.invoke("captureActiveTab", {mode: "bookmark"});
       } else {
         generateActionButtonForTabs(document.getElementById("captureTabBookmark"), (tab) => {
-          capturer.invoke("captureTab", {tab: tab, mode: "bookmark"});
+          capturer.invoke("captureTab", {tab, mode: "bookmark"});
         });
       }
     });

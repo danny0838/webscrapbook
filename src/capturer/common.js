@@ -30,10 +30,7 @@ capturer.invoke = function (method, args, details = {}) {
       // to content script (or content script call self)
       if (!capturer.isContentScript) {
         const cmd = "capturer." + method;
-        const message = {
-          cmd: cmd,
-          args: args
-        };
+        const message = {cmd, args};
 
         isDebug && console.debug(cmd, "send to content script", `[${tabId}:${frameId}]`, args);
         return browser.tabs.sendMessage(tabId, message, {frameId}).then((response) => {
@@ -55,12 +52,7 @@ capturer.invoke = function (method, args, details = {}) {
         }, 1000);
 
         isDebug && console.debug(cmd, "send to frame", args);
-        frameWindow.postMessage({
-          extension: chrome.runtime.id,
-          uid: uid,
-          cmd: cmd,
-          args: args
-        }, "*", [channel.port2]);
+        frameWindow.postMessage({extension: chrome.runtime.id, uid, cmd, args}, "*", [channel.port2]);
         channel.port1.onmessage = (event) => {
           const message = event.data;
           if (message.extension !== chrome.runtime.id) { return; }
@@ -78,10 +70,7 @@ capturer.invoke = function (method, args, details = {}) {
       // to background script (or background script call self)
       if (capturer.isContentScript) {
         const cmd = "capturer." + method;
-        const message = {
-          cmd: cmd,
-          args: args
-        };
+        const message = {cmd, args};
 
         isDebug && console.debug(cmd, "send to background script", args);
         return browser.runtime.sendMessage(message).then((response) => {
@@ -136,10 +125,10 @@ capturer.captureDocumentOrFile = function (params) {
       if (!options["capture.saveFileAsHtml"]) {
         return capturer.invoke("captureFile", {
           url: doc.URL,
-          refUrl: refUrl,
+          refUrl,
           title: title || doc.title,
-          settings: settings,
-          options: options,
+          settings,
+          options,
         });
       }
     }
@@ -303,8 +292,8 @@ capturer.captureDocument = function (params) {
     };
 
     return capturer.invoke("registerDocument", {
-      settings: settings,
-      options: options
+      settings,
+      options,
     }).then((response) => {
       documentName = response.documentName;
     }).then(() => {
@@ -796,9 +785,9 @@ capturer.captureDocument = function (params) {
             tasks[tasks.length] = 
             capturer.invoke("downloadFile", {
               url: settings.favIconUrl,
-              refUrl: refUrl,
-              settings: settings,
-              options: options
+              refUrl,
+              settings,
+              options,
             }).then((response) => {
               favIconUrl = response.url;
               return response;
@@ -897,10 +886,10 @@ capturer.captureDocument = function (params) {
                       tasks[tasks.length] = 
                       capturer.invoke("downloadFile", {
                         url: elem.href,
-                        refUrl: refUrl,
+                        refUrl,
                         rewriteMethod: "processCssFile",
-                        settings: settings,
-                        options: options
+                        settings,
+                        options,
                       }).then((response) => {
                         captureRewriteUri(elem, "href", response.url);
                         return response;
@@ -911,9 +900,9 @@ capturer.captureDocument = function (params) {
                       tasks[tasks.length] = 
                       capturer.invoke("downloadFile", {
                         url: elem.href,
-                        refUrl: refUrl,
-                        settings: settings,
-                        options: options
+                        refUrl,
+                        settings,
+                        options,
                       }).then((response) => {
                         captureRewriteUri(elem, "href", response.url);
                         return response;
@@ -943,9 +932,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.href,
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "href", response.url);
                     return response;
@@ -1015,9 +1004,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
                     return response;
@@ -1072,9 +1061,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: rewriteUrl,
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "background", response.url);
                     return response;
@@ -1134,18 +1123,18 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.captureDocumentOrFile({
                     doc: frameDoc,
-                    refUrl: refUrl,
+                    refUrl,
                     settings: frameSettings,
-                    options: options
+                    options,
                   }).then(captureFrameCallback);
                 } else if (frameSrc.contentWindow) {
                   // frame document inaccessible: get the content document through a
                   // messaging technique, and then capture it
                   tasks[tasks.length] = 
                   capturer.invoke("captureDocumentOrFile", {
-                    refUrl: refUrl,
+                    refUrl,
                     settings: frameSettings,
-                    options: options
+                    options,
                   }, {frameWindow: frameSrc.contentWindow}).then(captureFrameCallback);
                 } else {
                   // frame window inaccessible: this happens when the document is headlessly captured,
@@ -1162,9 +1151,9 @@ capturer.captureDocument = function (params) {
                     tasks[tasks.length] = 
                     capturer.invoke("captureUrl", {
                       url: frameSrc.src,
-                      refUrl: refUrl,
+                      refUrl,
                       settings: frameSettings,
-                      options: options
+                      options,
                     }).then(captureFrameCallback);
                   } else {
                     console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
@@ -1246,9 +1235,9 @@ capturer.captureDocument = function (params) {
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
                       url: elem.src,
-                      refUrl: refUrl,
-                      settings: settings,
-                      options: options
+                      refUrl,
+                      settings,
+                      options,
                     }).then((response) => {
                       captureRewriteUri(elem, "src", response.url);
                       return response;
@@ -1263,9 +1252,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
                     return response;
@@ -1379,9 +1368,9 @@ capturer.captureDocument = function (params) {
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
                       url: elem.src,
-                      refUrl: refUrl,
-                      settings: settings,
-                      options: options
+                      refUrl,
+                      settings,
+                      options,
                     }).then((response) => {
                       captureRewriteUri(elem, "src", response.url);
                       return response;
@@ -1396,9 +1385,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
                     return response;
@@ -1409,9 +1398,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
                     return response;
@@ -1470,9 +1459,9 @@ capturer.captureDocument = function (params) {
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
                       url: elem.poster,
-                      refUrl: refUrl,
-                      settings: settings,
-                      options: options
+                      refUrl,
+                      settings,
+                      options,
                     }).then((response) => {
                       captureRewriteUri(elem, "poster", response.url);
                       return response;
@@ -1487,9 +1476,9 @@ capturer.captureDocument = function (params) {
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
                       url: elem.src,
-                      refUrl: refUrl,
-                      settings: settings,
-                      options: options
+                      refUrl,
+                      settings,
+                      options,
                     }).then((response) => {
                       captureRewriteUri(elem, "src", response.url);
                       return response;
@@ -1505,9 +1494,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.poster,
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "poster", response.url);
                     return response;
@@ -1518,9 +1507,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
                     return response;
@@ -1531,9 +1520,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
                     return response;
@@ -1571,9 +1560,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.src,
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "src", response.url);
                     return response;
@@ -1610,9 +1599,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.data,
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "data", response.url);
                     return response;
@@ -1657,9 +1646,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.getAttribute("code"),
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options,
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "code", response.url);
                     return response;
@@ -1670,9 +1659,9 @@ capturer.captureDocument = function (params) {
                   tasks[tasks.length] = 
                   capturer.invoke("downloadFile", {
                     url: elem.getAttribute("archive"),
-                    refUrl: refUrl,
-                    settings: settings,
-                    options: options,
+                    refUrl,
+                    settings,
+                    options,
                   }).then((response) => {
                     captureRewriteUri(elem, "archive", response.url);
                     return response;
@@ -1750,9 +1739,9 @@ capturer.captureDocument = function (params) {
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
                       url: elem.src,
-                      refUrl: refUrl,
-                      settings: settings,
-                      options: options
+                      refUrl,
+                      settings,
+                      options,
                     }).then((response) => {
                       captureRewriteUri(elem, "src", response.url);
                       return response;
@@ -1934,13 +1923,13 @@ capturer.captureDocument = function (params) {
       });
       return capturer.invoke("saveDocument", {
         sourceUrl: doc.URL,
-        documentName: documentName,
-        settings: settings,
-        options: options,
+        documentName,
+        settings,
+        options,
         data: {
-          mime: mime,
+          mime,
           charset: "UTF-8",
-          content: content,
+          content,
           title: title || doc.title,
         }
       });
@@ -2113,9 +2102,9 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
   getUrlHash(url, rewriteMethod) {
     const key = scrapbook.getUuid();
     this.urlHash[key] = {
-      url: url,
+      url,
       newUrl: null,
-      rewriteMethod: rewriteMethod
+      rewriteMethod,
     };
     return "urn:scrapbook:url:" + key;
   }
