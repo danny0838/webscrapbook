@@ -248,7 +248,7 @@
     "message": "Single HTML"
   },
   "OptionCaptureSaveAsSingleHtmlTooltip": {
-    "message": "Save the captured web page as a single HTML file. Referenced resources are stored as data URL and can be viewed in most modern browsers."
+    "message": "Referenced resources are stored as data URL, which is supported by most browsers, such as Chrome, Firefox, Safari, Opera >= 7.2, and IE >= 8 (limited 32 KiB)."
   },
   "OptionCaptureSaveAsZipLabel": {
     "message": "htz package"

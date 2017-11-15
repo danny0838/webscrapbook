@@ -248,7 +248,7 @@
     "message": "單一 HTML 檔案"
   },
   "OptionCaptureSaveAsSingleHtmlTooltip": {
-    "message": "將網頁儲存為單一 HTML 檔案，參照的資源會以 data URL 的形式內嵌，大多數較新的瀏覽器都能正常讀取。"
+    "message": "將參照的資源以 data URL 形式內嵌。多數瀏覽器都能讀取，例如 Chrome、Firefox、Safari、Opera >= 7.2，以及 IE >= 8 (限 32 KiB)。"
   },
   "OptionCaptureSaveAsZipLabel": {
     "message": "htz 封存檔案"
