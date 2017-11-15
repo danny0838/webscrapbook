@@ -595,6 +595,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         };
       }
     });
+  }).catch((ex) => {
+    console.error(ex);
+    return {error: {message: ex.message}};
   });
 };
 
