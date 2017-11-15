@@ -167,7 +167,7 @@
     "message": "Scrapbook Folder:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "All captured data will be saved to this subfolder."
+    "message": "Captured files will be saved in <download folder>/<Scrapbook Folder>/data/ directory when \"Save captured data in ScrapBook\" is checked. You can create a symbolic link targeting a desired directory if necessary."
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED:"
@@ -299,7 +299,7 @@
     "message": "Save captured data in ScrapBook:"
   },
   "OptionCaptureSaveInScrapbookTooltip": {
-    "message": "Saves captured files to <default download folder>/<Scrapbook Folder>/data/ directory. Files are always saved in ScrapBook when saved as folder."
+    "message": "Captured files will be saved in <download folder>/<Scrapbook Folder>/data/ directory. Files are always saved in ScrapBook when saved as folder."
   },
   "OptionCaptureScriptLabel": {
     "message": "Scripts:"

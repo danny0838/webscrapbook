@@ -167,7 +167,7 @@
     "message": "剪贴簿文件夹:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "获取的资料会统一保存至这个子文件夹中。"
+    "message": "勾选“将获取资料保存于剪贴簿中”时，获取的文件会保存于 <下载文件夹>/<剪贴簿文件夹>/data/ 目录中。如有需要，可建立符号链接指向其他文件夹。"
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
@@ -296,10 +296,10 @@
     "message": "将浏览器能检视的非 HTML 文件保存为 HTML 网页。"
   },
   "OptionCaptureSaveInScrapbookLabel": {
-    "message": "将获取资料保存于剪贴簿内:"
+    "message": "将获取资料保存于剪贴簿中:"
   },
   "OptionCaptureSaveInScrapbookTooltip": {
-    "message": "将获取的文件保存于 <默认下载文件夹>/<剪贴簿文件夹>/data/ 目录下。保存为文件夹时必定会保存于剪贴簿内。"
+    "message": "将获取的文件保存于 <下载文件夹>/<剪贴簿文件夹>/data/ 目录中。保存为文件夹时必定会保存于剪贴簿中。"
   },
   "OptionCaptureScriptLabel": {
     "message": "脚本:"
