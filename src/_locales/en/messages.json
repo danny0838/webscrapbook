@@ -80,7 +80,7 @@
     "message": "Web ScrapBook"
   },
   "IndexerDesc": {
-    "message": "Pick directories or zip archive files of a Web ScrapBook folder, via dropping them into this window, or using the buttons below:"
+    "message": "Pick directories or ZIP archive files of a Web ScrapBook folder, via dropping them into this window, or using the buttons below:"
   },
   "IndexerPickDir": {
     "message": "Pick a folder"
@@ -89,7 +89,7 @@
     "message": "When selecting a folder in this way, the root directory cannot be correctly identified if the root directory contains only a single folder. Select a folder via dropping, or add a file or a folder containing files to the root directory, to avoid this issue."
   },
   "IndexerPickFiles": {
-    "message": "Pick zip files"
+    "message": "Pick ZIP files"
   },
   "IndexerSourceLinkTitle": {
     "message": "Source link"
@@ -125,7 +125,7 @@
     "message": "Save current status"
   },
   "OptionCaptureCanvasSaveTooltip": {
-    "message": "Generate a initialization script that records the current canvas status and draw it when the saved web page is loaded. This can cause a conflict if scripts are saved."
+    "message": "Generate a initialization script that records the current canvas status and draw it when the saved web page is loaded. NOTE: This could introduce a conflict if scripts are saved."
   },
   "OptionCaptureCanvasTooltip": {
     "message": "Canvases are blank initially and drawn by web page scripts. \"Save current status\" can be used when scripts are not saved, and \"Save initial status\" is more recommended when scripts are saved."
@@ -257,13 +257,13 @@
     "message": "Save captured data as:"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "Determine how to save captured data. .htz and .maff files can be viewed via \"View archived page\" or via unzipping it."
+    "message": "HTZ and MAFF files can be viewed via \"View archived page\" or via unzipping it."
   },
   "OptionCaptureSaveAsMaffLabel": {
-    "message": "maff package"
+    "message": "MAFF package"
   },
   "OptionCaptureSaveAsMaffTooltip": {
-    "message": "Pack web pages and their referenced resources as a .maff file using the standard zip algorithm."
+    "message": "Web pages and their referenced resources are packed into a MAFF file using ZIP algorithm."
   },
   "OptionCaptureSaveAsSingleHtmlJsLabel": {
     "message": "Scripted single HTML"
@@ -272,16 +272,16 @@
     "message": "Single HTML"
   },
   "OptionCaptureSaveAsSingleHtmlJsTooltip": {
-    "message": "Referenced resources are stored in the script and re-generated on loading. This has a better performance and a reduced size compared with data URI, but requires a modern browser with JavaScript enabled, such as: Chrome >= 20, Firefox >= 13, Edge, Safari >= 6, Opera >= 12.1, and IE >= 10. NOTE: this is not recommended if scripts are saved."
+    "message": "Referenced resources are stored in the script and re-generated on loading. This has a better performance and a reduced size compared with data URI, but requires a modern browser with JavaScript enabled, such as: Chrome ≥ 20, Firefox ≥ 13, Edge, Safari ≥ 6, Opera ≥ 12.1, and IE ≥ 10. NOTE: This could introduce a conflict if scripts are saved."
   },
   "OptionCaptureSaveAsSingleHtmlTooltip": {
-    "message": "Referenced resources are stored as data URL, which is supported by most browsers, such as Chrome, Firefox, Safari, Opera >= 7.2, and IE >= 8 (limited 32 KiB)."
+    "message": "Referenced resources are stored as data URL, which is supported by most browsers, such as Chrome, Firefox, Edge, Safari, Opera ≥ 7.2, and IE ≥ 8 (limited 32 KiB)."
   },
   "OptionCaptureSaveAsZipLabel": {
-    "message": "htz package"
+    "message": "HTZ package"
   },
   "OptionCaptureSaveAsZipTooltip": {
-    "message": "Pack a web page and its referenced resources as a .htz file using the standard zip algorithm."
+    "message": "Web page and its referenced resources are packed into an HTZ file using ZIP algorithm."
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
     "message": "Save data URL as file:"
@@ -308,7 +308,7 @@
     "message": "Such saved objects may not work correctly in the offline context or in the viewer, and have a potential security risk."
   },
   "OptionCaptureScriptTooltip": {
-    "message": "This determines how to handle all page scripts, including SCRIPT elements, links with javascript: protocol, and dynamic attributes such as onclick, etc. NOTE: saved scripts may not work correctly in the offline context or in the viewer, and have a potential security risk."
+    "message": "This determines how to handle all page scripts, including SCRIPT elements, links with javascript: protocol, and dynamic attributes such as onclick, etc. NOTE: Saved scripts may not work correctly in the offline context or in the viewer, and have a potential security risk."
   },
   "OptionCaptureStyleInlineLabel": {
     "message": "Inline styles:"
@@ -371,22 +371,22 @@
     "message": "Use filesystem API to create a virtual filesystem and view the archive file when supported, to get a better performance and fidelity."
   },
   "OptionViewerViewHtzLabel": {
-    "message": "View .htz:"
+    "message": "View HTZ file:"
   },
   "OptionViewerViewHtzTooltip": {
-    "message": "When the browser loads a .htz file, view it with the viewer."
+    "message": "When the browser loads an HTZ file, view it with the viewer. Check \"Allow access to file URLs\" in a supported browser to enable opening such files directly."
   },
   "OptionViewerViewMaffLabel": {
-    "message": "View .maff:"
+    "message": "View MAFF file:"
   },
   "OptionViewerViewMaffTooltip": {
-    "message": "When the browser loads a .maff file, view it with the viewer."
+    "message": "When the browser loads a MAFF file, view it with the viewer. Check \"Allow access to file URLs\" in a supported browser to enable opening such files directly."
   },
   "ViewerTitle": {
     "message": "View archive page"
   },
   "ViewerFileSelectorText": {
-    "message": "Click me or drop an HTML archive file here to open it..."
+    "message": "Click me or drop an HTZ or MAFF archive file to open it..."
   },
   "WarnCaptureCyclicRefercing": {
     "message": "Resource '$SOURCE$' has a circular reference to '$TARGET$', which will be blanked because current capture configuration does not support circular reference.",

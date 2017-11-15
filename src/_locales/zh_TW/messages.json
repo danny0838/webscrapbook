@@ -80,16 +80,16 @@
     "message": "網頁剪貼簿"
   },
   "IndexerDesc": {
-    "message": "選擇網頁剪貼簿資料夾或其壓縮檔。你可以拖曳它們至此視窗，或使用以下按鈕："
+    "message": "選擇網頁剪貼簿資料夾或其 ZIP 壓縮檔。你可以拖放它們至此視窗，或使用以下按鈕："
   },
   "IndexerPickDir": {
     "message": "選擇資料夾"
   },
   "IndexerPickDirTooltip": {
-    "message": "用此方式選擇資料夾時，若根目錄下只有單一資料夾，會無法正確辨識根目錄。用拖曳的方式選擇資料夾或在根目錄下增加檔案或含有檔案的資料夾可避免此問題。"
+    "message": "用此方式選擇資料夾時，若根目錄下只有單一資料夾，會無法正確辨識根目錄。用拖放方式選擇資料夾或在根目錄下增加檔案或含有檔案的資料夾可避免此問題。"
   },
   "IndexerPickFiles": {
-    "message": "選擇壓縮檔"
+    "message": "選擇 ZIP 壓縮檔"
   },
   "IndexerSourceLinkTitle": {
     "message": "來源連結"
@@ -125,7 +125,7 @@
     "message": "儲存目前狀態"
   },
   "OptionCaptureCanvasSaveTooltip": {
-    "message": "產生初始化腳本記錄目前畫布狀態並在網頁載入時重繪。儲存腳本時此選項可能造成衝突。"
+    "message": "產生初始化腳本記錄目前畫布狀態並在網頁載入時重繪。注意：儲存腳本時可能發生衝突。"
   },
   "OptionCaptureCanvasTooltip": {
     "message": "畫布初始為空白狀態而後由網頁腳本動態繪製，不儲存腳本時可選擇「儲存目前狀態」，儲存腳本時則建議選擇「儲存初始狀態」以避免衝突。"
@@ -257,13 +257,13 @@
     "message": "儲存擷取資料為:"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "指定擷取資料的儲存方式。.htz 及 .maff 封存檔案可用「檢視封存檔案」檢視或以支援 zip 的程式解壓縮後檢視。"
+    "message": "HTZ 及 MAFF 封存檔案可用「檢視封存網頁」檢視或以支援 ZIP 的程式解壓縮後檢視。"
   },
   "OptionCaptureSaveAsMaffLabel": {
-    "message": "maff 封存檔案"
+    "message": "MAFF 封存檔"
   },
   "OptionCaptureSaveAsMaffTooltip": {
-    "message": "將網頁及參照的資源以標準 zip 演算法打包成 .maff 封存檔案。"
+    "message": "將網頁及參照的資源以 ZIP 演算法打包成 MAFF 封存檔。"
   },
   "OptionCaptureSaveAsSingleHtmlJsLabel": {
     "message": "腳本化單一 HTML 檔案"
@@ -272,16 +272,16 @@
     "message": "單一 HTML 檔案"
   },
   "OptionCaptureSaveAsSingleHtmlJsTooltip": {
-    "message": "將參照的資源儲存於腳本並於開啟時載入，相較於 data URI 可提升效能及縮小容量。須使用較新且啟用 JavaScript 的瀏覽器讀取，例如 Chrome >= 20、Firefox >= 13、Edge、Safari >= 6、Opera >= 12.1、IE >= 10。注意：儲存腳本時不建議使用。"
+    "message": "將參照的資源儲存於腳本並於開啟時載入，相較於 data URI 可提升效能及縮小容量。須使用較新且啟用 JavaScript 的瀏覽器讀取，例如 Chrome ≥ 20、Firefox ≥ 13、Edge、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。注意：儲存腳本時可能發生衝突。"
   },
   "OptionCaptureSaveAsSingleHtmlTooltip": {
-    "message": "將參照的資源以 data URL 形式內嵌。多數瀏覽器都能讀取，例如 Chrome、Firefox、Safari、Opera >= 7.2，以及 IE >= 8 (限 32 KiB)。"
+    "message": "將參照的資源以 data URL 形式內嵌。多數瀏覽器都能讀取，例如 Chrome、Firefox、Edge、Safari、Opera ≥ 7.2，以及 IE ≥ 8 (限 32 KiB)。"
   },
   "OptionCaptureSaveAsZipLabel": {
-    "message": "htz 封存檔案"
+    "message": "HTZ 封存檔"
   },
   "OptionCaptureSaveAsZipTooltip": {
-    "message": "將網頁及參照資源以標準 zip 演算法打包成 .htz 封存檔案。"
+    "message": "將網頁及參照資源以 ZIP 演算法打包成 HTZ 封存檔。"
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
     "message": "將 data URL 儲存為檔案:"
@@ -371,22 +371,22 @@
     "message": "在支援的瀏覽器上使用 filesystem API 建立虛擬檔案系統檢視封存檔案，有較佳的效能及保真性。"
   },
   "OptionViewerViewHtzLabel": {
-    "message": "檢視 .htz:"
+    "message": "檢視 HTZ 檔案:"
   },
   "OptionViewerViewHtzTooltip": {
-    "message": "瀏覽器載入 .htz 檔案時，自動以檢視器檢視。"
+    "message": "瀏覽器載入 HTZ 檔案時，自動以檢視器檢視。在支援的瀏覽器勾選「允許存取檔案網址」即可用瀏覽器直接開啟此類檔案。"
   },
   "OptionViewerViewMaffLabel": {
-    "message": "檢視 .maff:"
+    "message": "檢視 MAFF 檔案:"
   },
   "OptionViewerViewMaffTooltip": {
-    "message": "瀏覽器載入 .maff 檔案時，自動以檢視器檢視。"
+    "message": "瀏覽器載入 MAFF 檔案時，自動以檢視器檢視。在支援的瀏覽器勾選「允許存取檔案網址」即可用瀏覽器直接開啟此類檔案。"
   },
   "ViewerTitle": {
     "message": "檢視封存頁面"
   },
   "ViewerFileSelectorText": {
-    "message": "點我或拖曳 HTML 封存檔案至此以開啟之..."
+    "message": "點擊或拖放選擇 HTZ 或 MAFF 封存檔以開啟之..."
   },
   "WarnCaptureCyclicRefercing": {
     "message": "資源 '$SOURCE$' 循環參照至 '$TARGET$'，由於目前的擷取設定不支援循環參照，參照目標將轉向至空值。",
