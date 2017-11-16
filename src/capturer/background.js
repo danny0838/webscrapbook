@@ -1098,10 +1098,7 @@ capturer.downloadFile = function (params) {
           }
 
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          // singleHtml mode always save as dataURI and does not need to uniquify
-          if (options["capture.saveAs"] !== "singleHtml") {
-            filename = capturer.getUniqueFilename(timeId, filename);
-          }
+          filename = capturer.getUniqueFilename(timeId, filename);
         },
       }).then((xhr) => {
         // Request aborted, only when a previous access is found.
