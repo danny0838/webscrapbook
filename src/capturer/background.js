@@ -695,10 +695,14 @@ capturer.saveDocument = function (params) {
 
           if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
           const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-          scrapbook.zipAddFile(zip, filename, new Blob([data.content], {type: data.mime}), true);
+          const zipResMap = capturer.captureInfo.get(timeId).zipResMap = capturer.captureInfo.get(timeId).zipResMap || new Map();
+          const blob = new Blob([data.content], {type: data.mime});
+          scrapbook.zipAddFile(zip, filename, blob, true);
+          const zipResId = zipResMap.size;
+          zipResMap.set(filename, zipResId);
 
           if (!settings.frameIsMain) {
-            const url = `data:${blob.type};filename=${encodeURIComponent(filename)},${sourceUrlHash}`;
+            const url = `data:${blob.type};scrapbook-resource=${zipResId},${sourceUrlHash}`;
             return {timeId, sourceUrl, filename, url};
           } else {
             let targetDir;
@@ -717,7 +721,6 @@ capturer.saveDocument = function (params) {
               savePrompt = true;
             }
 
-            const zipResMap = capturer.captureInfo.get(timeId).zipResMap = capturer.captureInfo.get(timeId).zipResMap || new Map();
             const zipData = [];
             let p = Promise.resolve();
             zip.forEach((path, entry) => {
