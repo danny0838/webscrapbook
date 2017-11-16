@@ -518,7 +518,7 @@ const indexer = {
           if (!index) { continue; }
 
           this.log(`Generating metadata entry for '${id}' from 'data/${index}'...`);
-          scrapbookData.meta[id] = this.getDefaultMeta();
+          const meta = scrapbookData.meta[id] = this.getDefaultMeta();
 
           p = p.then(() => {
             if (index.endsWith('/index.html') ||
@@ -548,13 +548,15 @@ const indexer = {
                     const rdfMeta = scrapbook.parseMaffRdfDocument(doc);
 
                     // merge rdf metadata to scrapbookData.meta
-                    const meta = {
-                      title: rdfMeta.title,
-                      source: rdfMeta.originalurl,
-                    };
-                    if (rdfMeta.archivetime) { meta.create = scrapbook.dateToId(new Date(rdfMeta.archivetime)); }
-
-                    scrapbookData.meta[id] = Object.assign(scrapbookData.meta[id], meta);
+                    if (rdfMeta.title) {
+                      meta.title = rdfMeta.title;
+                    }
+                    if (rdfMeta.originalurl) {
+                      meta.source = rdfMeta.originalurl;
+                    }
+                    if (rdfMeta.archivetime) {
+                      meta.create = scrapbook.dateToId(new Date(rdfMeta.archivetime));
+                    }
 
                     // load pointed index file
                     return zipDir.file(rdfMeta.indexfilename).async("arraybuffer").then((ab) => {
@@ -580,67 +582,61 @@ const indexer = {
 
             const html = doc.documentElement;
 
+            /* meta.index */
+            meta.index = index;
+
             /* meta.type */
-            let type = html.hasAttribute('data-scrapbook-type') ?
+            meta.type = html.hasAttribute('data-scrapbook-type') ?
                 html.getAttribute('data-scrapbook-type') :
-                (scrapbookData.meta[id].type || "");
+                (meta.type || "");
 
             /* meta.source */
-            let source = html.hasAttribute('data-scrapbook-source') ?
+            meta.source = html.hasAttribute('data-scrapbook-source') ?
                 html.getAttribute('data-scrapbook-source') : 
-                (scrapbookData.meta[id].source || "");
+                (meta.source || "");
 
             /* meta.title */
             // fallback to source and then id
-            let title = doc.title || scrapbookData.meta[id].title || 
-                (source ? scrapbook.urlToFilename(source) : "") || 
+            meta.title = doc.title || meta.title || 
+                (meta.source ? scrapbook.urlToFilename(meta.source) : "") || 
                 id;
+
+            /* meta.modify */
+            // update using last modified time of the index file
+            const fileModify = scrapbook.dateToId(new Date(itemFiles[index].lastModified));
+            if (fileModify > meta.modify) { meta.modify = fileModify; }
+
+            /* meta.create */
+            // fallback to modify time
+            meta.create = html.hasAttribute('data-scrapbook-create') ? 
+                html.getAttribute('data-scrapbook-create') : 
+                (meta.create || meta.modify);
+
+            /* meta.comment */
+            meta.comment = html.hasAttribute('data-scrapbook-comment') ? 
+                html.getAttribute('data-scrapbook-comment') : 
+                (meta.comment || "");
 
             /* meta.icon */
             let icon;
-            {
-              const favIconElem = doc.querySelector('link[rel~="icon"][href]');
-              if (favIconElem && favIconElem.hasAttribute('href')) {
-                icon = favIconElem.getAttribute('href');
+            const favIconElem = doc.querySelector('link[rel~="icon"][href]');
+            if (favIconElem && favIconElem.hasAttribute('href')) {
+              icon = favIconElem.getAttribute('href');
 
-                // special handling of singleHtmlJs generated data URI
-                if (/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(icon)) {
-                  const resType = RegExp.$1;
-                  const resId = RegExp.$2;
-                  const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-                  if (/(\[[^\]]*\])\);$/.test(loader.textContent)) {
-                    const data = JSON.parse(RegExp.$1);
-                    icon = `data:${resType};base64,${data[resId].d}`;
-                  }
+              // special handling of singleHtmlJs generated data URI
+              if (/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(icon)) {
+                const resType = RegExp.$1;
+                const resId = RegExp.$2;
+                const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
+                if (/(\[[^\]]*\])\);$/.test(loader.textContent)) {
+                  const data = JSON.parse(RegExp.$1);
+                  icon = `data:${resType};base64,${data[resId].d}`;
                 }
               }
             }
             icon = icon || scrapbookData.meta[id].icon || "";
             if (icon) { icon = this.parseUrl(icon, index, itemFiles).url; }
-
-            /* meta.modify */
-            // use the later one of file last modified time and metadata value
-            let modify = scrapbook.dateToId(new Date(itemFiles[index].lastModified));
-            let modify2 = scrapbookData.meta[id].modify;
-            modify = (modify >= modify2) ? modify : modify2;
-            // fallback to current time
-            if (!modify) { modify = scrapbook.dateToId(); }
-
-            /* meta.create */
-            // fallback to modify time
-            let create = html.hasAttribute('data-scrapbook-create') ? 
-                html.getAttribute('data-scrapbook-create') : 
-                (scrapbookData.meta[id].create || modify);
-
-            /* meta.comment */
-            let comment = html.hasAttribute('data-scrapbook-comment') ? 
-                html.getAttribute('data-scrapbook-comment') : 
-                (scrapbookData.meta[id].comment || "");
-
-            /* merge to scrapbookData.meta */
-            scrapbookData.meta[id] = Object.assign(scrapbookData.meta[id], {
-              index, title, type, create, modify, source, icon, comment,
-            });
+            meta.icon = icon;
           }).catch((ex) => {
             this.error(`Error inspecting 'data/${index}': ${ex.message}`);
           });
