@@ -519,6 +519,7 @@ const indexer = {
 
           this.log(`Generating metadata entry for '${id}' from 'data/${index}'...`);
           const meta = scrapbookData.meta[id] = this.getDefaultMeta();
+          let zipDataDir;
 
           p = p.then(() => {
             if (index.endsWith('/index.html') ||
@@ -529,6 +530,8 @@ const indexer = {
               return scrapbook.readFileAsDocument(itemFiles[index]);
             } else if (index.endsWith('.htz')) {
               return new JSZip().loadAsync(itemFiles[index]).then((zip) => {
+                zipDataDir = zip;
+
                 return zip.file("index.html").async("arraybuffer").then((ab) => {
                   const blob = new Blob([ab], {type: "text/html"});
                   return scrapbook.readFileAsDocument(blob);
@@ -539,6 +542,8 @@ const indexer = {
               // support multiple entries in one maff file
               return new JSZip().loadAsync(itemFiles[index], {createFolders: true}).then((zip) => {
                 const zipDir = zip.folder(Object.keys(zip.files)[0]);
+                zipDataDir = zipDir;
+
                 const zipRdfFile = zipDir.file("index.rdf");
                 if (zipRdfFile) {
                   return zipRdfFile.async("arraybuffer").then((ab) => {
@@ -618,25 +623,46 @@ const indexer = {
                 (meta.comment || "");
 
             /* meta.icon */
-            let icon;
-            const favIconElem = doc.querySelector('link[rel~="icon"][href]');
-            if (favIconElem && favIconElem.hasAttribute('href')) {
-              icon = favIconElem.getAttribute('href');
+            return Promise.resolve().then(() => {
+              let icon;
+              const favIconElem = doc.querySelector('link[rel~="icon"][href]');
+              if (favIconElem && favIconElem.hasAttribute('href')) {
+                icon = favIconElem.getAttribute('href');
 
-              // special handling of singleHtmlJs generated data URI
-              if (/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(icon)) {
-                const resType = RegExp.$1;
-                const resId = RegExp.$2;
-                const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-                if (/(\[[^\]]*\])\);$/.test(loader.textContent)) {
-                  const data = JSON.parse(RegExp.$1);
-                  icon = `data:${resType};base64,${data[resId].d}`;
+                // special handling if data is in zip
+                // return data URL for further caching
+                if (zipDataDir) {
+                  return zipDataDir.file(icon).async('arraybuffer').then((ab) => {
+                    const mime = Mime.prototype.extension(icon);
+                    const blob = new Blob([ab], {type: mime});
+                    return scrapbook.readFileAsDataURL(blob);
+                  }).then((dataUrl) => {
+                    this.log(`Retrieved favicon at '${icon}' for packed 'data/${index}' as '${dataUrl}'`);
+                    return dataUrl;
+                  }).catch((ex) => {
+                    console.error(ex);
+                    this.error(`Unable to retrieve favicon at '${icon}' for packed 'data/${index}': ${ex.message}`);
+                  });
+                }
+
+                // special handling of singleHtmlJs generated data URI
+                if (/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(icon)) {
+                  const resType = RegExp.$1;
+                  const resId = RegExp.$2;
+                  const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
+                  if (/(\[[^\]]*\])\);$/.test(loader.textContent)) {
+                    const data = JSON.parse(RegExp.$1);
+                    icon = `data:${resType};base64,${data[resId].d}`;
+                  }
                 }
               }
-            }
-            icon = icon || scrapbookData.meta[id].icon || "";
-            if (icon) { icon = this.parseUrl(icon, index, itemFiles).url; }
-            meta.icon = icon;
+              return icon;
+            }).then((icon) => {
+              meta.icon = icon || meta.icon || "";
+              if (meta.icon) {
+                meta.icon = this.parseUrl(meta.icon, index, itemFiles).url;
+              }
+            });
           }).catch((ex) => {
             this.error(`Error inspecting 'data/${index}': ${ex.message}`);
           });
@@ -1302,10 +1328,8 @@ var scrapbook = {
       if (meta.type === 'folder') { a.onclick = scrapbook.onClickFolder; }
       div.appendChild(a);
 
-      // @TODO:
-      // support icon for archive files
       var icon = document.createElement('img');
-      if (meta.icon && !/\\.(?:htz|maff|mht|epub)$/i.test(meta.index)) {
+      if (meta.icon) {
         icon.src = (meta.icon.indexOf(':') === -1) ? 
             ('../data/' + meta.index).replace(/\\/[^\\/]*$/, '') + '/' + meta.icon : 
             meta.icon;
