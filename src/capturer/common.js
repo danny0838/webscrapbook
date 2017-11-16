@@ -535,7 +535,7 @@ capturer.captureDocument = function (params) {
 
           get(name) {
             if (!this.list[name]) {
-              this.list[name] = {used: false, urls: []};
+              this.list[name] = {used: false, urls: [], fontFamilies: []};
             }
 
             return this.list[name];
@@ -543,6 +543,10 @@ capturer.captureDocument = function (params) {
 
           addUrl(name, url) {
             this.get(name).urls.push(url);
+          },
+
+          addfontFamily(name, fontFamily) {
+            this.get(name).fontFamilies.push(fontFamily);
           },
 
           use(name) {
@@ -671,7 +675,7 @@ capturer.captureDocument = function (params) {
             case CSSRule.KEYFRAME_RULE: {
               if (!cssRule.cssText) { break; }
 
-              fontFamilyMapper.use(cssRule.style.fontFamily);
+              animationMapper.addfontFamily(cssRule.parentRule.name, cssRule.style.fontFamily);
 
               parseCssText(cssRule.cssText, refUrl, (url) => {
                 animationMapper.addUrl(cssRule.parentRule.name, url);
@@ -733,22 +737,25 @@ capturer.captureDocument = function (params) {
           }
         });
 
+        // collect used animation and their used font family and background images
+        for (let name in animationMapper.list) {
+          const f = animationMapper.list[name];
+          if (f.used) {
+            for (let url of f.urls) {
+              usedCssImageUrl[url] = true;
+            }
+            for (let fontFamily of f.fontFamilies) {
+              fontFamilyMapper.use(fontFamily);
+            }
+          }
+        }
+
         // collect used font families
         for (let fontFamily in fontFamilyMapper.list) {
           const f = fontFamilyMapper.list[fontFamily];
           if (f.used) {
             for (let url of f.urls) {
               usedCssFontUrl[url] = true;
-            }
-          }
-        }
-
-        // collect used animation background images
-        for (let name in animationMapper.list) {
-          const f = animationMapper.list[name];
-          if (f.used) {
-            for (let url of f.urls) {
-              usedCssImageUrl[url] = true;
             }
           }
         }
