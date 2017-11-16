@@ -599,7 +599,7 @@ const indexer = {
             // fallback to source and then id
             meta.title = doc.title || meta.title || 
                 (meta.source ? scrapbook.urlToFilename(meta.source) : "") || 
-                id;
+                (meta.type !== 'separator' ? id : '');
 
             /* meta.modify */
             // update using last modified time of the index file
