@@ -776,7 +776,7 @@ capturer.saveDocument = function (params) {
               
               const content = data.content.replace(/<\/body>\s*<\/html>\s*$/, (m) => {
                 return '\n' + '<script data-scrapbook-elem="pageloader">' + 
-                    `(${scrapbook.compressJsFunc(pageloader)})(${JSON.stringify(zipData)});` + 
+                    `(${scrapbook.compressJsFunc(pageloader)})(\n${JSON.stringify(zipData)}\n);` + 
                     '</script>' + m;
                 });
 

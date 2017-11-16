@@ -650,7 +650,7 @@ const indexer = {
                   const resType = RegExp.$1;
                   const resId = RegExp.$2;
                   const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-                  if (/(\[[^\]]*\])\);$/.test(loader.textContent)) {
+                  if (/\([\n\r]+(.+)[\n\r]+\);$/.test(loader.textContent)) {
                     const data = JSON.parse(RegExp.$1);
                     icon = `data:${resType};base64,${data[resId].d}`;
                   }
