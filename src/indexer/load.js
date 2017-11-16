@@ -341,7 +341,7 @@ const indexer = {
       const dataDirs = {};
       const treeFiles = {};
       const otherFiles = {};
-      for (let {path, file} of inputData.files) {
+      for (const {path, file} of inputData.files) {
         // record legacy ScrapBook files
         if (path === 'scrapbook.rdf') {
           otherFiles[path] = file;
@@ -471,7 +471,7 @@ const indexer = {
               }
 
               const data = JSON.parse(RegExp.$1);
-              for (let id in data) {
+              for (const id in data) {
                 if (!scrapbookData.meta[id]) { scrapbookData.meta[id] = this.getDefaultMeta(); }
                 scrapbookData.meta[id] = Object.assign(scrapbookData.meta[id], data[id]);
               }
@@ -510,7 +510,7 @@ const indexer = {
 
         this.log(`Inspecting data files...`);
         let p = Promise.resolve();
-        for (let id of Object.keys(dataDirs).sort()) {
+        for (const id of Object.keys(dataDirs).sort()) {
           if (scrapbookData.meta[id]) { continue; }
 
           const itemFiles = dataDirs[id];
@@ -563,7 +563,7 @@ const indexer = {
                     });
                   });
                 } else {
-                  for (let path in zipDir.files) {
+                  for (const path in zipDir.files) {
                     const subPath = path.slice(zipDir.root.length);
                     if (subPath.startsWith("index.")) {
                       return zipDir.file(subPath).async("arraybuffer").then((ab) => {
@@ -893,7 +893,7 @@ const indexer = {
         };
 
         let p = Promise.resolve();
-        for (let path in resToInclude) {
+        for (const path in resToInclude) {
           if (treeFiles[path]) { continue; }
           p = p.then(() => {
             return scrapbook.xhr({
@@ -1077,7 +1077,7 @@ const indexer = {
       return {url: subPath, exist: !!itemFiles[subPath] ? 1 : 0};
     }
 
-    // url target not in zip, return absolute URL
+    // url target not in the provided directory, return absolute URL
     return {url: absoluteUrl.href, exist: -1};
   },
 
