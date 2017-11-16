@@ -2126,7 +2126,7 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
             refUrl: this.settings.recurseChain[this.settings.recurseChain.length - 1],
             rewriteMethod: this.urlHash[key].rewriteMethod,
             settings: this.settings,
-            options: this.options
+            options: this.options,
           });
         }).then((response) => {
           this.urlHash[key].newUrl = response.url;

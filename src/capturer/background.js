@@ -990,8 +990,8 @@ capturer.downloadFile = function (params) {
     isDebug && console.debug("call: downloadFile", params);
 
     const {url: sourceUrl, refUrl, rewriteMethod, settings, options} = params;
-    const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
+    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const {timeId, recurseChain} = settings;
 
     const headers = {};
     let filename;
@@ -1003,7 +1003,21 @@ capturer.downloadFile = function (params) {
     // check for previous access
     const accessToken = capturer.getAccessToken(sourceUrlMain, rewriteMethod);
     const accessPrevious = accessMap.get(accessToken);
-    if (accessPrevious) { return accessPrevious; }
+    if (accessPrevious) {
+      // Normally we wait until the file be downloaded, and possibly
+      // renamed, cancelled, or thrown error. However, if there is
+      // a circular reference, we have to return early to pervent a
+      // dead lock. This returned data could be incorrect if something
+      // unexpected happen to the accessPrevious.
+      if (recurseChain.indexOf(sourceUrlMain) !== -1) {
+        return {
+          filename: accessPrevious.filename,
+          url: scrapbook.escapeFilename(accessPrevious.filename) + sourceUrlHash,
+          isCircular: true,
+        };
+      }
+      return accessPrevious;
+    }
 
     const accessCurrent = Promise.resolve().then(() => {
       // special management for data URI
@@ -1043,7 +1057,7 @@ capturer.downloadFile = function (params) {
       const requestHeaders = {};
       if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
 
-      let accessPreviousRedirected;
+      let accessPreviousReturn;
       return scrapbook.xhr({
         url: sourceUrl,
         responseType: "blob",
@@ -1052,18 +1066,26 @@ capturer.downloadFile = function (params) {
           if (xhr.readyState !== 2) { return; }
 
           // check for previous access if redirected
-          const [responseUrlMain] = scrapbook.splitUrlByAnchor(xhr.responseURL);
-          if (responseUrlMain !== sourceUrlMain) {
-            const accessTokenRedirected = capturer.getAccessToken(responseUrlMain, rewriteMethod);
-            accessPreviousRedirected = accessMap.get(accessTokenRedirected);
+          const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
 
-            // use the previous access if found
-            if (accessPreviousRedirected) {
+          if (responseUrlMain !== sourceUrlMain) {
+            const accessToken = capturer.getAccessToken(responseUrlMain, rewriteMethod);
+            const accessPrevious = accessMap.get(accessToken);
+            if (accessPrevious) {
               xhr.abort();
-              return;
+
+              // See accessPrevious check above in this method
+              if (recurseChain.indexOf(responseUrlMain) !== -1) {
+                return accessPreviousReturn = {
+                  filename: accessPrevious.filename,
+                  url: scrapbook.escapeFilename(accessPrevious.filename) + responseUrlHash,
+                  isCircular: true,
+                };
+              }
+              return accessPreviousReturn = accessPrevious;
             }
 
-            accessMap.set(accessTokenRedirected, accessPreviousRedirected);
+            accessMap.set(accessToken, accessPrevious);
           }
 
           // get headers
@@ -1099,11 +1121,15 @@ capturer.downloadFile = function (params) {
 
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
           filename = capturer.getUniqueFilename(timeId, filename);
+
+          // record the currently available filename
+          // we need this data for early return of circular referencing
+          accessCurrent.filename = filename;
         },
       }).then((xhr) => {
         // Request aborted, only when a previous access is found.
         // Return that Promise.
-        if (!xhr) { return accessPreviousRedirected; }
+        if (!xhr) { return accessPreviousReturn; }
 
         return Promise.resolve(capturer[rewriteMethod]).then((fn) => {
           if (!fn) { return xhr.response; }
