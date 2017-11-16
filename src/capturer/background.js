@@ -756,25 +756,29 @@ capturer.saveDocument = function (params) {
                   if (n !== o) { node.nodeValue = n; }
                 };
 
+                var loadDocRes = function (doc) {
+                  var e = doc.getElementsByTagName('*');
+                  for (var i = 0, I = e.length; i < I; i++) {
+                    if (['style'].indexOf(e[i].nodeName.toLowerCase()) !== -1) {
+                      var c = e[i].childNodes;
+                      for (var j = 0, J = c.length; j < J; j++) {
+                        if (c[j].nodeType === 3) { loadRes(c[j]); }
+                      }
+                    }
+                    var a = e[i].attributes;
+                    for (var j = 0, J = a.length; j < J; j++) {
+                      if (['href', 'src', 'srcset', 'style', 'background', 'content', 'poster', 'data', 'code', 'archive']
+                          .indexOf(a[j].nodeName) !== -1) {
+                        loadRes(a[j]);
+                      }
+                    }
+                  }
+                };
+
                 var s = document.getElementsByTagName('script'); s = s[s.length - 1];
                 s.parentNode.removeChild(s);
 
-                var e = document.getElementsByTagName('*');
-                for (var i = 0, I = e.length; i < I; i++) {
-                  if (['style'].indexOf(e[i].nodeName.toLowerCase()) !== -1) {
-                    var c = e[i].childNodes;
-                    for (var j = 0, J = c.length; j < J; j++) {
-                      if (c[j].nodeType === 3) { loadRes(c[j]); }
-                    }
-                  }
-                  var a = e[i].attributes;
-                  for (var j = 0, J = a.length; j < J; j++) {
-                    if (['href', 'src', 'srcset', 'style', 'background', 'content', 'poster', 'data', 'code', 'archive']
-                        .indexOf(a[j].nodeName) !== -1) {
-                      loadRes(a[j]);
-                    }
-                  }
-                }
+                loadDocRes(document);
               };
               
               const content = data.content.replace(/<\/body>\s*<\/html>\s*$/, (m) => {
