@@ -1157,7 +1157,7 @@ capturer.captureDocument = function (params) {
                     }).then(captureFrameCallback);
                   } else {
                     console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
-                    captureRewriteUri(frame, "src", capturer.getCircularUrl(frameSrc.src, options));
+                    captureRewriteUri(frame, "src", `urn:scrapbook:download:cyclic:url:${frameSrc.src}`);
                   }
                 }
                 break;
@@ -1957,13 +1957,6 @@ capturer.getErrorUrl = function (sourceUrl, options) {
   return sourceUrl;
 };
 
-capturer.getCircularUrl = function (sourceUrl, options) {
-  if (!options || options["capture.recordErrorUri"]) {
-    return "urn:scrapbook:download:circular:" + sourceUrl;
-  }
-  return "about:blank";
-};
-
 /**
  * @return {Promise}
  */
@@ -2113,24 +2106,26 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
     return Promise.resolve().then(() => {
       const tasks = Object.keys(this.urlHash).map((key) => {
         return Promise.resolve().then(() => {
-          let targetUrl = this.urlHash[key].url;
-          if (this.options["capture.saveAs"] === "singleHtml") {
-            if (this.settings.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) !== -1) {
-              let sourceUrl = this.settings.recurseChain[this.settings.recurseChain.length - 1];
-              console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
-              return {url: capturer.getCircularUrl(targetUrl, this.options)};
-            }
-          }
+          const targetUrl = this.urlHash[key].url;
           return capturer.invoke("downloadFile", {
             url: targetUrl,
             refUrl: this.settings.recurseChain[this.settings.recurseChain.length - 1],
             rewriteMethod: this.urlHash[key].rewriteMethod,
             settings: this.settings,
             options: this.options,
+          }).then((response) => {
+            if (response.isCircular) {
+              if (this.options["capture.saveAs"] === "singleHtml" || 
+                  this.options["capture.saveAs"] === "singleHtmlJs") {
+                const sourceUrl = this.settings.recurseChain[this.settings.recurseChain.length - 1];
+                console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
+                response.url = `urn:scrapbook:download:cyclic:filename:${response.url}`;
+              }
+            }
+
+            this.urlHash[key].newUrl = response.url;
+            return response;
           });
-        }).then((response) => {
-          this.urlHash[key].newUrl = response.url;
-          return response;
         });
       });
       return Promise.all(tasks);
