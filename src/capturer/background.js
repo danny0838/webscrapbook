@@ -653,7 +653,12 @@ capturer.saveDocument = function (params) {
       switch (options["capture.saveAs"]) {
         case "singleHtml": {
           if (!settings.frameIsMain) {
-            const dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
+            const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+            let filename = documentName + ext;
+            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+
+            let dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
+            dataUri = dataUri.replace(";base64", ";filename=" + encodeURIComponent(filename) + ";base64");
             return {timeId, sourceUrl, url: dataUri};
           } else {
             const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
@@ -1156,7 +1161,7 @@ capturer.downloadBlob = function (params) {
           if (filename) {
             dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");
           }
-          return {url: dataUri + sourceUrlHash};
+          return {filename, url: dataUri + sourceUrlHash};
         });
       }
 
