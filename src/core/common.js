@@ -53,7 +53,7 @@ scrapbook.options = {
   "capture.recordRemovedNode": false,
   "capture.recordRewrittenAttr": false,
   "capture.recordSourceUri": false,
-  "capture.recordErrorUri": false,
+  "capture.recordErrorUri": true,
   "viewer.useFileSystemApi": true,
   "viewer.viewHtz": true,
   "viewer.viewMaff": true,
