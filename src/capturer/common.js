@@ -948,6 +948,19 @@ capturer.captureDocument = function (params) {
                   });
                   break;
               }
+            } else if (rels.indexOf("preload") >= 0) {
+              // @TODO:
+              // We currently simply remove all preloads since it's too cumbersome
+              // to check whether to capture by options and "as" attr...
+              // Maybe we'll find a good way to deal with it in the future?
+              switch (options["capture.favicon"]) {
+                case "remove":
+                  captureRemoveNode(elem);
+                  return;
+                default:
+                  captureRewriteUri(elem, "href", null);
+                  break;
+              }
             }
             break;
           }
