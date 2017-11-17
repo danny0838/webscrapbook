@@ -7,16 +7,15 @@
 
 function onDragEnter(e) {
   indexer.dropmask.style.display = '';
-  indexer.lastDragTarget = e.target;
+  indexer.lastDropTarget = e.target;
 };
 
 function onDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = "copy";
+  e.preventDefault(); // required to allow drop
 };
 
 function onDragLeave(e) {
-  if (e.target === indexer.lastDragTarget) {
+  if (e.target === indexer.lastDropTarget) {
     indexer.dropmask.style.display = 'none';
   }
 };
