@@ -382,11 +382,14 @@
   "OptionViewerViewMaffTooltip": {
     "message": "浏览器载入 MAFF 文件时，自动以检视器检视。在支援的浏览器勾选“允许訪問文件网址”即可用浏览器直接开启此类文件。"
   },
+  "ViewerDesc": {
+    "message": "选择 HTZ 或 MAFF 封存文件以开启之。你可以拖放它们至此视窗，或使用以下按钮："
+  },
+  "ViewerPickFiles": {
+    "message": "选择 ZIP 压缩文件"
+  },
   "ViewerTitle": {
     "message": "检视封存页面"
-  },
-  "ViewerFileSelectorText": {
-    "message": "点击或拖放选择 HTZ 或 MAFF 封存文件以开启之..."
   },
   "WarnCaptureCyclicRefercing": {
     "message": "资源 '$SOURCE$' 循环参照至 '$TARGET$'，由于目前的获取设定不支援循环参照，参照目标将转向至空值。",

@@ -10,40 +10,55 @@
 <script src="../core/common.js"></script>
 <script src="load.js"></script>
 <style>
-html {
-  height: 100%;
-}
-
 body {
   margin: 0;
-  height: 100%;
-}
-
-.full-viewport {
-  display: block;
-  margin: 0;
-  border: 0;
   padding: 0;
-  width: 100%;
-  height: 100%;
+  font-size: 16px;
 }
 
-#file-selector {
+#dropmask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 100000;
+  background-color: SkyBlue;
+  opacity: 0.7;
+}
+
+#panel {
+  padding: .5em 1em;
   background-color: grey;
   color: white;
   text-align: center;
-  font-size: 20px;
-  line-height: 40px;
-  cursor: pointer;
 }
 
-#file-selector.dragover {
-  background-color: SkyBlue;
+#panel div {
+  margin-bottom: 0.5em;
+  font-size: 1.25em;
+  line-height: 1.5em;
+}
+
+#panel label {
+  display: inline-block;
+  margin: 0 .2em;
+  padding: .4em 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #47A4A5;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 </style>
 </head>
 <body>
-<div id="file-selector" class="full-viewport">__MSG_ViewerFileSelectorText__</div>
-<input type="file" id="file-selector-input" style="display: none;">
+<div id="panel">
+<div>__MSG_ViewerDesc__</div>
+<label id="files-selector-label" for="files-selector" style="display: none;">__MSG_ViewerPickFiles__</label>
+<input type="file" id="files-selector" style="display: none;">
+</div>
+<div id="dropmask" style="display: none;"></div>
 </body>
 </html>

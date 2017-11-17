@@ -16,6 +16,49 @@ Promise.resolve().then(() => {
   _isFxBelow56 = false;
 });
 
+/**
+ * We usually get:
+ *
+ * onDragEnter html
+ * onDragEnter .dropmask
+ * onDragLeave html
+ * onDragOver .dropmask
+ * onDragOver .dropmask
+ * ...
+ * onDragLeave .dropmask (document in Firefox, which is weird?)
+ *  or
+ * onDrop   .dropmask (in this case onDragLeave doesn't fire)
+ */
+function onDragEnter(e) {
+  viewer.dropmask.style.display = '';
+  viewer.lastDropTarget = e.target;
+};
+
+function onDragOver(e) {
+  e.preventDefault(); // required to allow drop
+  e.dataTransfer.dropEffect = "copy";
+};
+
+function onDragLeave(e) {
+  if (e.target === viewer.lastDropTarget || e.target === document) {
+    viewer.dropmask.style.display = 'none';
+  }
+};
+
+function onDrop(e) {
+  e.preventDefault();
+  viewer.dropmask.style.display = 'none';
+  viewer.loadDrop(e.dataTransfer.items);
+};
+
+function onChangeFiles(e) {
+  e.preventDefault();
+  const files = e.target.files;
+  if (!(files && files.length)) { return; }
+
+  viewer.loadInputFiles(files);
+};
+
 const fileSystemHandler = {
   /**
    * @return {Promise}
@@ -89,6 +132,39 @@ const viewer = {
   urlSearch: "",
   urlHash: "",
 
+  initEvents() {
+    window.addEventListener("dragenter", onDragEnter, false);
+    window.addEventListener("dragover", onDragOver, false);
+    window.addEventListener("dragleave", onDragLeave, false);
+    window.addEventListener("drop", onDrop, false);
+    this.filesSelector.addEventListener("change", onChangeFiles, false);
+  },
+
+  uninitEvents() {
+    window.removeEventListener("dragenter", onDragEnter, false);
+    window.removeEventListener("dragover", onDragOver, false);
+    window.removeEventListener("dragleave", onDragLeave, false);
+    window.removeEventListener("drop", onDrop, false);
+    this.filesSelector.removeEventListener("change", onChangeFiles, false);
+  },
+
+  // @TODO: process multiple directory and files
+  loadDrop(items) {
+    Array.prototype.forEach.call(items, (item) => {
+      const entry = item.webkitGetAsEntry();
+      if (entry.isFile) {
+        entry.file((file) => {
+          viewer.processZipFile(file);
+        });
+      }
+    });
+  },
+
+  // @TODO: process multiple input files
+  loadInputFiles(files) {
+    viewer.processZipFile(files[0]);
+  },
+
   warn(msg) {
     console.warn(msg);
     alert(msg);
@@ -147,45 +223,58 @@ const viewer = {
     }).catch((ex) => {
       // console.error(ex);
     }).then(() => {
-      viewer.processUrlParams();
-    });
-  },
-
-  processUrlParams() {
-    const zipSourceUrl = viewer.mainUrl.searchParams.get("src");
-    if (!zipSourceUrl) { return; }
-
-    const zipSourceUrlObj = new URL(zipSourceUrl);
-    viewer.urlSearch = zipSourceUrlObj.search;
-    viewer.urlHash = viewer.mainUrl.hash;
-    let filename = scrapbook.urlToFilename(zipSourceUrl);
-
-    scrapbook.xhr({
-      url: zipSourceUrl,
-      responseType: "blob",
-    }).then((xhr) => {
-      // if header Content-Disposition is defined, use it
-      // local request (status = 0) has no response header
-      if (xhr.status !== 0) {
-        try {
-          const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-          const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-          filename = contentDisposition.parameters.filename || filename;
-        } catch (ex) {}
+      return viewer.processUrlParams();
+    }).then((loaded) => {
+      if (!loaded) {
+        viewer.initEvents();
+        document.getElementById('files-selector-label').style.display = '';
       }
-
-      const file = new File([xhr.response], filename, {type: Mime.prototype.lookup(filename)});
-      return viewer.processZipFile(file);        
-    }, (ex) => {
-      alert("Unable to load the specified zip file '" + zipSourceUrl + "'");
     });
   },
 
   /**
-   * @return {Promise}
+   * @return {Promise} resolves to boolean: whether a file is successfully loaded 
+   */
+  processUrlParams() {
+    return Promise.resolve().then(() => {
+      const zipSourceUrl = viewer.mainUrl.searchParams.get("src");
+      if (!zipSourceUrl) { return false; }
+
+      const zipSourceUrlObj = new URL(zipSourceUrl);
+      viewer.urlSearch = zipSourceUrlObj.search;
+      viewer.urlHash = viewer.mainUrl.hash;
+      let filename = scrapbook.urlToFilename(zipSourceUrl);
+
+      return scrapbook.xhr({
+        url: zipSourceUrl,
+        responseType: "blob",
+      }).then((xhr) => {
+        // if header Content-Disposition is defined, use it
+        // local request (status = 0) has no response header
+        if (xhr.status !== 0) {
+          try {
+            const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+            const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            filename = contentDisposition.parameters.filename || filename;
+          } catch (ex) {}
+        }
+
+        const file = new File([xhr.response], filename, {type: Mime.prototype.lookup(filename)});
+        return viewer.processZipFile(file);
+      }, (ex) => {
+        alert("Unable to load the specified zip file '" + zipSourceUrl + "'");
+        return false;
+      });
+    });
+  },
+
+  /**
+   * @return {Promise} resolves to boolean: whether the file is successfully loaded 
    */
   processZipFile(zipFile) {
     return Promise.resolve().then(() => {
+      this.uninitEvents();
+    }).then(() => {
       const uuid = scrapbook.getUuid();
       const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
       const zipData = {
@@ -364,60 +453,27 @@ const viewer = {
         });
         return p;
       });
+    }).then(() => {
+      return true;
     }).catch((ex) => {
       console.error(ex);
       alert("Unable to open web page archive: " + ex.message);
+
+      this.initEvents();
+      this.filesSelector.value = null;
+      return false;
     });
   },
 };
 
 document.addEventListener("DOMContentLoaded", function () {
   scrapbook.loadLanguages(document);
+
+  // init common elements and events
+  viewer.dropmask = document.getElementById('dropmask');
+  viewer.filesSelector = document.getElementById('files-selector');
+
   scrapbook.loadOptions().then(() => {
-    // init common elements and events
-    const fileSelector = document.getElementById('file-selector');
-    const fileSelectorInput = document.getElementById('file-selector-input');
-
-    fileSelector.addEventListener("dragenter", (e) => {
-      e.target.classList.add("dragover");
-    }, false);
-
-    // This fires every few mileseconds.
-    // If we set these at dragenter instead of dragover,
-    // it will be overwritten by default here soon.
-    fileSelector.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "copy";
-    }, false);
-
-    fileSelector.addEventListener("dragleave", (e) => {
-      e.target.classList.remove("dragover");
-    }, false);
-
-    fileSelector.addEventListener("click", (e) => {
-      e.preventDefault();
-      fileSelectorInput.click();
-    }, false);
-
-    fileSelector.addEventListener("drop", (e) => {
-      e.preventDefault();
-      e.target.classList.remove("dragover");
-      Array.prototype.forEach.call(e.dataTransfer.items, (item) => {
-        const entry = item.webkitGetAsEntry();
-        if (entry.isFile) {
-          entry.file((file) => {
-            viewer.processZipFile(file);
-          });
-        }
-      });
-    }, false);
-
-    fileSelectorInput.addEventListener("change", (e) => {
-      e.preventDefault();
-      const file = e.target.files[0];
-      viewer.processZipFile(file);
-    }, false);
-
     viewer.start();
   });
 });

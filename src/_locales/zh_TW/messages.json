@@ -382,11 +382,14 @@
   "OptionViewerViewMaffTooltip": {
     "message": "瀏覽器載入 MAFF 檔案時，自動以檢視器檢視。在支援的瀏覽器勾選「允許存取檔案網址」即可用瀏覽器直接開啟此類檔案。"
   },
+  "ViewerDesc": {
+    "message": "選擇 HTZ 或 MAFF 封存檔以開啟之。你可以拖放它們至此視窗，或使用以下按鈕："
+  },
+  "ViewerPickFiles": {
+    "message": "選擇 ZIP 壓縮檔"
+  },
   "ViewerTitle": {
     "message": "檢視封存頁面"
-  },
-  "ViewerFileSelectorText": {
-    "message": "點擊或拖放選擇 HTZ 或 MAFF 封存檔以開啟之..."
   },
   "WarnCaptureCyclicRefercing": {
     "message": "資源 '$SOURCE$' 循環參照至 '$TARGET$'，由於目前的擷取設定不支援循環參照，參照目標將轉向至空值。",

@@ -382,11 +382,14 @@
   "OptionViewerViewMaffTooltip": {
     "message": "When the browser loads a MAFF file, view it with the viewer. Check \"Allow access to file URLs\" in a supported browser to enable opening such files directly."
   },
+  "ViewerDesc": {
+    "message": "Pick an HTZ or MAFF archive file to open, via dropping it into this window, or using the buttons below:"
+  },
+  "ViewerPickFiles": {
+    "message": "Pick a ZIP file"
+  },
   "ViewerTitle": {
     "message": "View archive page"
-  },
-  "ViewerFileSelectorText": {
-    "message": "Click me or drop an HTZ or MAFF archive file to open it..."
   },
   "WarnCaptureCyclicRefercing": {
     "message": "Resource '$SOURCE$' has a circular reference to '$TARGET$', which will be blanked because current capture configuration does not support circular reference.",
