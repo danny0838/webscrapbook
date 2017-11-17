@@ -5,6 +5,19 @@
  * @require {Object} scrapbook
  *******************************************************************/
 
+/**
+ * We usually get:
+ *
+ * onDragEnter html
+ * onDragEnter .dropmask
+ * onDragLeave html
+ * onDragOver .dropmask
+ * onDragOver .dropmask
+ * ...
+ * onDragLeave .dropmask (document in Firefox, which is weird?)
+ *  or
+ * onDrop   .dropmask (in this case onDragLeave doesn't fire)
+ */
 function onDragEnter(e) {
   indexer.dropmask.style.display = '';
   indexer.lastDropTarget = e.target;
@@ -15,7 +28,7 @@ function onDragOver(e) {
 };
 
 function onDragLeave(e) {
-  if (e.target === indexer.lastDropTarget) {
+  if (e.target === indexer.lastDropTarget || e.target === document) {
     indexer.dropmask.style.display = 'none';
   }
 };
