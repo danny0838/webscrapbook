@@ -638,7 +638,7 @@ const indexer = {
                     const blob = new Blob([ab], {type: mime});
                     return scrapbook.readFileAsDataURL(blob);
                   }).then((dataUrl) => {
-                    this.log(`Retrieved favicon at '${icon}' for packed 'data/${index}' as '${dataUrl}'`);
+                    this.log(`Retrieved favicon at '${icon}' for packed 'data/${index}' as '${scrapbook.crop(dataUrl, 256)}'`);
                     return dataUrl;
                   }).catch((ex) => {
                     console.error(ex);
@@ -807,22 +807,22 @@ const indexer = {
 
               if (!treeFiles[path]) {
                 scrapbook.zipAddFile(zip, path, file, false);
-                this.log(`Saved favicon '${favIconUrl}' for '${id}' at '${path}'.`);
+                this.log(`Saved favicon '${scrapbook.crop(favIconUrl, 256)}' for '${id}' at '${path}'.`);
               } else {
-                this.log(`Use saved favicon for '${favIconUrl}' for '${id}' at '${path}'.`);
+                this.log(`Use saved favicon for '${scrapbook.crop(favIconUrl, 256)}' for '${id}' at '${path}'.`);
               }
 
               const url = `${index.indexOf('/') !== -1 ? '../' : ''}../${path}`;
               return url;
             }).catch((ex) => {
               console.error(ex);
-              this.error(`Removed invalid favicon '${favIconUrl}' for '${id}': ${ex.message}`);
+              this.error(`Removed invalid favicon '${scrapbook.crop(favIconUrl, 256)}' for '${id}': ${ex.message}`);
             });
           }).then((favIconUrl) => {
             scrapbookData.meta[id].icon = favIconUrl || "";
           }).catch((ex) => {
             console.error(ex);
-            this.error(`Error inspecting favicon '${favIconUrl}' for '${id}': ${ex.message}`);
+            this.error(`Error inspecting favicon '${scrapbook.crop(favIconUrl, 256)}' for '${id}': ${ex.message}`);
           });
         }
         return Promise.all(tasks);
