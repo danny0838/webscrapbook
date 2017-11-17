@@ -845,6 +845,10 @@ const indexer = {
           if (/^tree[/]favicon[/]/.test(path)) {
             if (!referedFavIcons.has(path)) {
               this.error(`Unused favicon: '${path}'`);
+
+              // generate an empty icon file to replace it
+              const file = new Blob([""], {type: "application/octet-stream"});
+              scrapbook.zipAddFile(zip, path, file, false);
             }
           }
         }
