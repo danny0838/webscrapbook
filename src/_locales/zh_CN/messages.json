@@ -272,10 +272,10 @@
     "message": "单一 HTML 文件"
   },
   "OptionCaptureSaveAsSingleHtmlJsTooltip": {
-    "message": "将参照的资源保存於脚本并于开启时载入，相较于 data URI 可提升效能及缩小容量。须使用较新且启用 JavaScript 的浏览器读取，例如 Chrome ≥ 20、Firefox ≥ 13、Edge、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。注意：保存脚本时可能发生冲突。"
+    "message": "将参照的资源保存於脚本并于开启时载入，相较于 data URL 可提升效能及缩小容量。须使用较新且启用 JavaScript 的浏览器读取，例如 Chrome ≥ 20、Firefox ≥ 13、Edge、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。注意：保存脚本时可能发生冲突。"
   },
   "OptionCaptureSaveAsSingleHtmlTooltip": {
-    "message": "将参照的资源以 data URL 形式内嵌。多数浏览器都能读取，例如 Chrome、Firefox、Edge、Safari、Opera ≥ 7.2，以及 IE ≥ 8 (限 32 KiB)。"
+    "message": "将参照的资源以 data URL 内嵌。多数浏览器都能读取，例如 Chrome、Firefox、Edge、Safari、Opera ≥ 7.2、IE ≥ 8 (IE 限制很多)。注意：data URL 用于某些页面效能不佳且可能使文件大幅膨胀。"
   },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ 封存文件"
