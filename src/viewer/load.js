@@ -203,6 +203,8 @@ const viewer = {
 
   start() {
     return Promise.resolve().then(() => {
+      /* check and read filesystem API */
+
       if (!scrapbook.getOption("viewer.useFileSystemApi")) { return; }
 
       // filesystem scheme never works in an incognito window,
@@ -219,24 +221,13 @@ const viewer = {
         }).then((fs) => {
           viewer.filesystem = fs;
         });
+      }).catch((ex) => {
+        // error for filesystem API
+        // console.error(ex);
       });
-    }).catch((ex) => {
-      // console.error(ex);
     }).then(() => {
-      return viewer.processUrlParams();
-    }).then((loaded) => {
-      if (!loaded) {
-        viewer.initEvents();
-        document.getElementById('files-selector-label').style.display = '';
-      }
-    });
-  },
+      /* process URL params */
 
-  /**
-   * @return {Promise} resolves to boolean: whether a file is successfully loaded 
-   */
-  processUrlParams() {
-    return Promise.resolve().then(() => {
       const zipSourceUrl = viewer.mainUrl.searchParams.get("src");
       if (!zipSourceUrl) { return false; }
 
@@ -265,6 +256,11 @@ const viewer = {
         alert("Unable to load the specified zip file '" + zipSourceUrl + "'");
         return false;
       });
+    }).then((loaded) => {
+      if (!loaded) {
+        viewer.initEvents();
+        document.getElementById('files-selector-label').style.display = '';
+      }
     });
   },
 
