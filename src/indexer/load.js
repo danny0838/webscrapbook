@@ -752,7 +752,7 @@ const indexer = {
 
               const p = Promise.resolve().then(() => {
                 if (favIconUrl.startsWith("data:")) {
-                  return scrapbook.dataUriToFile(favIconUrl);
+                  return scrapbook.dataUriToFile(favIconUrl, false);
                 }
 
                 return scrapbook.xhr({
