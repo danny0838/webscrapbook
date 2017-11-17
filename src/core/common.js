@@ -992,28 +992,34 @@ scrapbook.readFileAsDocument = function (blob) {
   });
 };
 
-scrapbook.dataUriToFile = function (dataUri) {
+scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
   if (/^data:([^,]*?)(;base64)?,(.*?)$/i.test(dataUri)) {
-    let mediatype = RegExp.$1;
-    let base64 = !!RegExp.$2;
-    let data = RegExp.$3;
+    const mediatype = RegExp.$1;
+    const base64 = !!RegExp.$2;
+    const data = RegExp.$3;
 
-    let parts = mediatype.split(";");
-    let mime = parts.shift();
-    let parameters = {};
+    const parts = mediatype.split(";");
+    const mime = parts.shift();
+    const parameters = {};
     parts.forEach((part) => {
       if (/^(.*?)=(.*?)$/.test(part)) {
         parameters[RegExp.$1.toLowerCase()] = RegExp.$2;
       }
     });
 
-    let ext = Mime.prototype.extension(mime);
-    ext = ext ? ("." + ext) : "";
+    const bstr = base64 ? atob(data) : unescape(data);
+    const ab = scrapbook.byteStringToArrayBuffer(bstr);
 
-    let bstr = base64 ? atob(data) : unescape(data);
-    let ab = scrapbook.byteStringToArrayBuffer(bstr);
-    let filename = parameters.filename ? decodeURIComponent(parameters.filename) : scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
-    let file = new File([ab], filename, {type: mediatype});
+    let filename;
+    if (useFilename && parameters.filename) {
+      filename = decodeURIComponent(parameters.filename);
+    } else {
+      let ext = parameters.filename || Mime.prototype.extension(mime);
+      ext = ext ? ("." + ext) : "";
+      filename = scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
+    }
+
+    const file = new File([ab], filename, {type: mediatype});
     return file;
   }
   return null;
