@@ -44,6 +44,7 @@ function onChangeFiles(e) {
 };
 
 const indexer = {
+  isMobile: false,
   virtualBase: chrome.runtime.getURL("indexer/!/"),
   autoEraseSet: new Set(),
 
@@ -1561,11 +1562,27 @@ chrome.downloads.onChanged.addListener((downloadDelta) => {
 document.addEventListener("DOMContentLoaded", function () {
   scrapbook.loadLanguages(document);
   scrapbook.loadOptionsAuto.then(() => {
+    return Promise.resolve().then(() => {
+      return browser.runtime.getBrowserInfo();
+    }).then((info) => {
+      if (info.name === 'Fennec') { indexer.isMobile = true; }
+    }).catch((ex) => {
+      // not mobile
+    });
+  }).then(() => {
     // init common elements and events
     indexer.dropmask = document.getElementById('dropmask');
     indexer.dirSelector = document.getElementById('dir-selector');
     indexer.filesSelector = document.getElementById('files-selector');
     indexer.logger = document.getElementById('logger');
+
+    // adjust GUI for mobile
+    if (indexer.isMobile) {
+      indexer.dirSelector.disabled = true;
+      document.getElementById('dir-selector-label').remove();
+    }
+
+    // init events
     indexer.initEvents();
   });
 });
