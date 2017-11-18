@@ -251,10 +251,10 @@
     "message": "产生一个文件夹并将网页及资源文件存入其中。（Chrome 建议关闭“下载前询问每个文件的保存位置”，否则会一直跳视窗）"
   },
   "OptionCaptureSaveAsLabel": {
-    "message": "保存获取资料为:"
+    "message": "保存获取数据为:"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "指定获取资料的保存方式。HTZ 及 MAFF 封存文件可用“检视封存网页”检视或以支援 ZIP 的程序解压缩后检视。"
+    "message": "指定获取数据的保存方式。HTZ 及 MAFF 封存文件可用“检视封存网页”检视或以支援 ZIP 的程序解压缩后检视。"
   },
   "OptionCaptureSaveAsMaffLabel": {
     "message": "MAFF 封存文件"
@@ -284,7 +284,7 @@
     "message": "将 data URL 保存为文件:"
   },
   "OptionCaptureSaveDataUriAsFileTooltip": {
-    "message": "会自动根据 data URL 资料的 MIME 类型及内容的 SHA-1 哈希值产生适当的文件名。"
+    "message": "会自动根据 data URL 数据的 MIME 类型及内容的 SHA-1 哈希值产生适当的文件名。"
   },
   "OptionCaptureSaveFileAsHtmlLabel": {
     "message": "将文件保存为 HTML:"
@@ -293,7 +293,7 @@
     "message": "将浏览器能检视的非 HTML 文件保存为 HTML 网页。"
   },
   "OptionCaptureSaveInScrapbookLabel": {
-    "message": "将获取资料保存于剪贴簿中:"
+    "message": "将获取数据保存于剪贴簿中:"
   },
   "OptionCaptureSaveInScrapbookTooltip": {
     "message": "将获取的文件保存于 <下载文件夹>/<剪贴簿文件夹>/data/ 目录中。保存为文件夹时必定会保存于剪贴簿中。"
@@ -302,7 +302,7 @@
     "message": "剪贴簿文件夹:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "勾选“将获取资料保存于剪贴簿中”时，获取的文件会保存于 <下载文件夹>/<剪贴簿文件夹>/data/ 目录中。如有需要，可建立符号链接指向其他文件夹。"
+    "message": "勾选“将获取数据保存于剪贴簿中”时，获取的文件会保存于 <下载文件夹>/<剪贴簿文件夹>/data/ 目录中。如有需要，可建立符号链接指向其他文件夹。"
   },
   "OptionCaptureScriptLabel": {
     "message": "脚本:"
@@ -341,7 +341,7 @@
     "message": "自动下载更新的索引文件:"
   },
   "OptionIndexerAutoDownloadTooltip": {
-    "message": "输入做站台索引的资料夹必须是设定的剪贴簿文件夹，否则可能造成错误覆盖及资料流失。"
+    "message": "输入做站台索引的文件夹必须是设定的剪贴簿文件夹，否则可能造成错误覆盖及数据丟失。"
   },
   "OptionPageTitle": {
     "message": "选项设定"
