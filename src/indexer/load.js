@@ -80,6 +80,7 @@ const indexer = {
   start() {
     this.uninitEvents();
     this.logger.textContent = '';
+    this.logger.className = '';
     this.options = Object.assign({}, scrapbook.options);
   },
 

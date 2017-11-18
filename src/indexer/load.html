@@ -53,6 +53,10 @@ body {
   white-space: pre;
 }
 
+#logger.wrap {
+  white-space: pre-wrap;
+}
+
 .error {
   color: red;
   font-weight: bold;
@@ -68,13 +72,13 @@ body {
 </head>
 <body>
 <div id="panel">
-<div>__MSG_IndexerDesc__</div>
+<div>__MSG_IndexerHeader__</div>
 <label id="dir-selector-label" for="dir-selector" title="__MSG_IndexerPickDirTooltip__" style="display: none;">__MSG_IndexerPickDir__</label>
 <input type="file" id="dir-selector" webkitdirectory directory style="display: none;">
 <label id="files-selector-label" for="files-selector" style="display: none;">__MSG_IndexerPickFiles__</label>
 <input type="file" id="files-selector" style="display: none;" multiple>
 </div>
-<div id="logger"></div>
+<div id="logger" class="wrap">__MSG_IndexerDesc__</div>
 <div id="dropmask" style="display: none;"></div>
 </body>
 </html>

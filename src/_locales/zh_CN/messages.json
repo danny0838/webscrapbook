@@ -80,6 +80,9 @@
     "message": "网页剪贴簿"
   },
   "IndexerDesc": {
+    "message": "索引建立完成后，会产生一个 ZIP 压缩文件供下载。可将其内容解压缩放入原文件夹，并开启 ./tree/map.html 或 ./tree/frame.html，即可检视产生的页面列表。\n\n产生的数据文件如 ./tree/meta.js 和 ./tree/toc.js，分别为各页面的元信息以及目录表，可以人工修改，只要保持数据格式正确即可。\n\n获取新页面或修改数据文件后可再次执行此索引器以加入新项目或检查潜在错误，再重新整理 ./tree/map.html 或 ./tree/frame.html 检视更新结果。\n\n可到选项页面勾选“自动下载更新的索引文件”使系统自动下载新文件及覆盖旧的。"
+  },
+  "IndexerHeader": {
     "message": "选择网页剪贴簿文件夹或其 ZIP 压缩文件。你可以拖放它们至此视窗，或使用以下按钮："
   },
   "IndexerPickDir": {

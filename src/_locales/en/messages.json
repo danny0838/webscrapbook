@@ -80,6 +80,9 @@
     "message": "Web ScrapBook"
   },
   "IndexerDesc": {
+    "message": "When the indexing process completes, a zip file is generated and downloadable. You can extract the contents to the original folder and open the generated ./tree/map.html or ./tree/frame.html to view the list of captured pages.\n\nFiles such as ./tree/meta.js and ./tree/toc.js, for metadata and table of contents (TOC) respectively, can be manually edited, as long as the data format is kept correct.\n\nAfter new pages are captured or metadata is edited, run this indexer repeatedly to add newly captured pages and to check for potential errors, and refresh ./tree/map.html or ./tree/frame.html to view the updated result.\n\nYou can check the \"Auto download updated files\" in the options page so that the updated files are downloaded and the old ones are overwritten automatically."
+  },
+  "IndexerHeader": {
     "message": "Pick directories or ZIP archive files of a Web ScrapBook folder, via dropping them into this window, or using the buttons below:"
   },
   "IndexerPickDir": {

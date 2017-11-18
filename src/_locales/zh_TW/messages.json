@@ -80,6 +80,9 @@
     "message": "網頁剪貼簿"
   },
   "IndexerDesc": {
+    "message": "索引建立完成後，會產生一個 ZIP 壓縮檔供下載。可將其內容解壓縮放入原資料夾，並開啟 ./tree/map.html 或 ./tree/frame.html，即可檢視產生的頁面列表。\n\n產生的資料檔案如 ./tree/meta.js 和 ./tree/toc.js，分別為各頁面的後設資訊以及目錄結構表，可以人工修改，只要保持資料格式正確即可。\n\n擷取新頁面或修改資料檔後可再次執行此索引器以加入新項目或檢查潛在錯誤，再重新整理 ./tree/map.html 或 ./tree/frame.html 檢視更新結果。\n\n可到選項頁面勾選「自動下載更新的索引檔案」使系統自動下載新檔案及覆蓋舊的。"
+  },
+  "IndexerHeader": {
     "message": "選擇網頁剪貼簿資料夾或其 ZIP 壓縮檔。你可以拖放它們至此視窗，或使用以下按鈕："
   },
   "IndexerPickDir": {
