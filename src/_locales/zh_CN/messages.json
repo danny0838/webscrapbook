@@ -166,6 +166,49 @@
   "OptionCaptureCommonRemoveTooltip": {
     "message": "将元素移除。注意这可能会影响网页排版。"
   },
+  "OptionCaptureDownLinkFilterErrorLine": {
+    "message": "第 $LINE$ 行：$ERROR$",
+    "placeholders": {
+      "line": {"content": "$1"},
+      "error": {"content": "$2"}
+    }
+  },
+  "OptionCaptureDownLinkExtFilterError": {
+    "message": "以下扩展名过滤器的正则表达式语法有误，执行时会忽略它们，要停下来修正吗？\n\n$LINES$",
+    "placeholders": {
+      "lines": {"content": "$1"}
+    }
+  },
+  "OptionCaptureDownLinkExtFilterDesc": {
+    "message": "下载完整扩展名匹配以下规则的链接。以下每行为一个正则表达式（/<规则>/<修饰>）或以 \",\" 區隔的扩展名列表（不分大小写）。以 \"#\" 开头的行会被略过。"
+  },
+  "OptionCaptureDownLinkExtFilterTitle": {
+    "message": "扩展名过滤器"
+  },
+  "OptionCaptureDownLinkModeHeaderLabel": {
+    "message": "比对 HTTP 标头及网址扩展名"
+  },
+  "OptionCaptureDownLinkModeHeaderTooltip": {
+    "message": "访问每个链接取得 HTTP 标头及精确的扩展名。注意：可能会因此访问到不适当的链接（例如登出网站），使用时应设置适当的网址过滤器以避免问题。"
+  },
+  "OptionCaptureDownLinkModeNoneLabel": {
+    "message": "停用下载链接文件"
+  },
+  "OptionCaptureDownLinkModeUrlLabel": {
+    "message": "比对网址扩展名"
+  },
+  "OptionCaptureDownLinkUrlFilterDesc": {
+    "message": "过滤掉网址匹配以下规则的链接。以下每行为一个正则表达式（/<规则>/<修饰>）或网址。以 \"#\" 开头的行会被略过。"
+  },
+  "OptionCaptureDownLinkUrlFilterError": {
+    "message": "以下网址过滤器的正则表达式语法有误，执行时会忽略它们，要停下来修正吗？\n\n$LINES$",
+    "placeholders": {
+      "lines": {"content": "$1"}
+    }
+  },
+  "OptionCaptureDownLinkUrlFilterTitle": {
+    "message": "网址过滤器"
+  },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
   },
@@ -324,6 +367,9 @@
   },
   "OptionGroupCapture": {
     "message": "获取 - 内容"
+  },
+  "OptionGroupDownLink": {
+    "message": "获取 - 下载链接文件"
   },
   "OptionGroupIndexer": {
     "message": "索引器"

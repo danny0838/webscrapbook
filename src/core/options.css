@@ -6,3 +6,13 @@ fieldset {
   margin: 0.2em;
   padding: 0.2em;
 }
+
+#capture\.downLink div {
+  margin: 0.5em 0.2em;
+}
+
+#capture\.downLink textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 80px;
+}

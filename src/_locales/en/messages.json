@@ -166,6 +166,49 @@
   "OptionCaptureCommonRemoveTooltip": {
     "message": "Remove the element. Note that this could affect the web page layout."
   },
+  "OptionCaptureDownLinkFilterErrorLine": {
+    "message": "Line $LINE$: $ERROR$",
+    "placeholders": {
+      "line": {"content": "$1"},
+      "error": {"content": "$2"}
+    }
+  },
+  "OptionCaptureDownLinkExtFilterError": {
+    "message": "The following regular expressions in file extension filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
+    "placeholders": {
+      "lines": {"content": "$1"}
+    }
+  },
+  "OptionCaptureDownLinkExtFilterDesc": {
+    "message": "Download files whose full extension matches any of following rules. Each following line is a regular expression (/<rule>/<flags>) or a list of extensions separated with \",\" (case-insensitively). Lines starting with \"#\" are ignored."
+  },
+  "OptionCaptureDownLinkExtFilterTitle": {
+    "message": "File extension filter"
+  },
+  "OptionCaptureDownLinkModeHeaderLabel": {
+    "message": "Match HTTP header and file extension"
+  },
+  "OptionCaptureDownLinkModeHeaderTooltip": {
+    "message": "Visit every link to get the HTTP header and a precise file extension. NOTE: Inappropriate links (such as logging out a site) could be visited . Be sure to set an appropriate URL filter to avoid an unexpected result."
+  },
+  "OptionCaptureDownLinkModeNoneLabel": {
+    "message": "Disable download linked files"
+  },
+  "OptionCaptureDownLinkModeUrlLabel": {
+    "message": "Match URL file extension"
+  },
+  "OptionCaptureDownLinkUrlFilterDesc": {
+    "message": "URLs matching any of following rules are ruled out. Each following line is a regular expression (/<rule>/<flags>) or a URL. Lines starting with \"#\" are ignored."
+  },
+  "OptionCaptureDownLinkUrlFilterError": {
+    "message": "The following regular expressions in URL filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
+    "placeholders": {
+      "lines": {"content": "$1"}
+    }
+  },
+  "OptionCaptureDownLinkUrlFilterTitle": {
+    "message": "URL filter"
+  },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED:"
   },
@@ -324,6 +367,9 @@
   },
   "OptionGroupCapture": {
     "message": "Capture - content"
+  },
+  "OptionGroupDownLink": {
+    "message": "Capture - Download linked files"
   },
   "OptionGroupIndexer": {
     "message": "Indexer"

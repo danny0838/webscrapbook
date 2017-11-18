@@ -1173,6 +1173,90 @@ capturer.downloadFile = function (params) {
   });
 };
 
+// @FIXME
+// When run in a Firefox private window, the background script does not have same
+// crenditials as the private window document, and the capture may fail or go wrong.
+//
+// @TODO:
+// implement accessMap cache for same URL
+/**
+ * @kind invokable
+ * @param {Object} params
+ *     - {string} params.url
+ *     - {string} params.refUrl
+ * @return {Promise}
+ */
+capturer.downLinkFetchHeader = function (params) {
+  return Promise.resolve().then(() => {
+    isDebug && console.debug("call: downLinkFetchHeader", params);
+
+    const {url: sourceUrl, refUrl} = params;
+    const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
+
+    const headers = {};
+
+    // cannot assign "referer" header directly
+    // the prefix will be removed by the onBeforeSendHeaders listener
+    const requestHeaders = {};
+    if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
+
+    return scrapbook.xhr({
+      url: sourceUrlMain,
+      responseType: 'blob',
+      timeout: 8000,
+      requestHeaders,
+      onreadystatechange(xhr) {
+        if (xhr.readyState !== 2) { return; }
+
+        // get headers
+        if (xhr.status !== 0) {
+          const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+          if (headerContentDisposition) {
+            const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+            headers.isAttachment = (contentDisposition.type === "attachment");
+            headers.filename = contentDisposition.parameters.filename;
+          }
+          const headerContentType = xhr.getResponseHeader("Content-Type");
+          if (headerContentType) {
+            const contentType = scrapbook.parseHeaderContentType(headerContentType);
+            headers.contentType = contentType.type;
+            headers.charset = contentType.parameters.charset;
+          }
+        }
+
+        const responseURL = xhr.responseURL;
+        if (responseURL !== sourceUrlMain) {
+          prevAccessMap.set(responseURL, p);
+        }
+
+        xhr.abort();
+      },
+    }).catch((ex) => {
+      // something wrong for the XMLHttpRequest
+      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+      return null;
+    }).then(() => {
+      if (headers.filename) {
+        let [, ext] = scrapbook.filenameParts(headers.filename);
+
+        if (!ext && headers.contentType) {
+          ext = Mime.prototype.extension(headers.contentType);
+        }
+
+        return ext;
+      } else {
+        if (headers.contentType) {
+          return Mime.prototype.extension(headers.contentType);
+        }
+
+        let filename = scrapbook.urlToFilename(sourceUrlMain);
+        let [, ext] = scrapbook.filenameParts(filename);
+        return ext;
+      }
+    });
+  });
+};
+
 /**
  * @kind invokable
  * @param {Object} params

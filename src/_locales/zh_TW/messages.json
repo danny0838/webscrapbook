@@ -166,6 +166,49 @@
   "OptionCaptureCommonRemoveTooltip": {
     "message": "將元素移除。注意這可能會影響網頁排版。"
   },
+  "OptionCaptureDownLinkFilterErrorLine": {
+    "message": "第 $LINE$ 行：$ERROR$",
+    "placeholders": {
+      "line": {"content": "$1"},
+      "error": {"content": "$2"}
+    }
+  },
+  "OptionCaptureDownLinkExtFilterError": {
+    "message": "以下副檔名過濾器的正規表述式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",
+    "placeholders": {
+      "lines": {"content": "$1"}
+    }
+  },
+  "OptionCaptureDownLinkExtFilterDesc": {
+    "message": "下載完整副檔名符合以下規則的連結。以下每行為一個正規表述式（/<規則>/<修飾>）或以 \",\" 分隔的副檔名列表（不分大小寫）。以 \"#\" 開頭的行會被略過。"
+  },
+  "OptionCaptureDownLinkExtFilterTitle": {
+    "message": "副檔名過濾器"
+  },
+  "OptionCaptureDownLinkModeHeaderLabel": {
+    "message": "比對 HTTP 標頭及網址副檔名"
+  },
+  "OptionCaptureDownLinkModeHeaderTooltip": {
+    "message": "走訪每個連結取得 HTTP 標頭及精確的副檔名。注意：可能會因此走訪到不適當的連結（例如登出網站），使用時應設定適當的網址過濾器以避免問題。"
+  },
+  "OptionCaptureDownLinkModeNoneLabel": {
+    "message": "停用下載連結檔案"
+  },
+  "OptionCaptureDownLinkModeUrlLabel": {
+    "message": "比對網址副檔名"
+  },
+  "OptionCaptureDownLinkUrlFilterDesc": {
+    "message": "過濾掉網址符合以下規則的連結。以下每行為一個正規表述式（/<規則>/<修飾>）或 URL。以 \"#\" 開頭的行會被略過。"
+  },
+  "OptionCaptureDownLinkUrlFilterError": {
+    "message": "以下網址過濾器的正規表述式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",
+    "placeholders": {
+      "lines": {"content": "$1"}
+    }
+  },
+  "OptionCaptureDownLinkUrlFilterTitle": {
+    "message": "網址過濾器"
+  },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
   },
@@ -324,6 +367,9 @@
   },
   "OptionGroupCapture": {
     "message": "擷取 - 內容"
+  },
+  "OptionGroupDownLink": {
+    "message": "擷取 - 下載連結檔案"
   },
   "OptionGroupIndexer": {
     "message": "索引器"

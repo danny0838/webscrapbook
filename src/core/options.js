@@ -85,6 +85,45 @@ function importOptions(file) {
   });
 }
 
+function checkRegexRules(rules) {
+  const checkRule = (rules) => {
+    rules.split(/(?:\n|\r\n?)/).forEach(function (srcLine, index) {
+      if (srcLine.charAt(0) === "#") { return; }
+
+      let line = srcLine.trim();
+      if (line === "") { return; }
+      if (!/^\/(.*)\/([a-z]*)$/.test(line)) { return; }
+
+      try {
+        new RegExp("^(?:" + line + ")$");
+      } catch (ex) {
+        line = scrapbook.lang("OptionCaptureDownLinkFilterErrorLine", [index + 1, srcLine]);
+        errors.push(line);
+      }
+    });
+  };
+
+  let errors;
+
+  errors = [];
+  checkRule(document.getElementById("opt_capture.downLink.extFilter").value);
+  if (errors.length) {
+    if (confirm(scrapbook.lang("OptionCaptureDownLinkExtFilterError", [errors.join('\n\n')]))) {
+      return false;
+    }
+  }
+
+  errors = [];
+  checkRule(document.getElementById("opt_capture.downLink.urlFilter").value);
+  if (errors.length) {
+    if (confirm(scrapbook.lang("OptionCaptureDownLinkUrlFilterError", [errors.join('\n\n')]))) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function closeWindow() {
   chrome.tabs.getCurrent((tab) => {
     if (!tab) {
@@ -114,6 +153,12 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
   document.getElementById("options").addEventListener("submit", (event) => {
     event.preventDefault();
+
+    // check for input regex rules
+    if (!checkRegexRules()) {
+      return;
+    }
+    
     for (const id in scrapbook.options) {
       // Overwrite only keys with a defined value so that
       // keys not listed in the options page are not nullified.

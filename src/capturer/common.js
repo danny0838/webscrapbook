@@ -1209,7 +1209,71 @@ capturer.captureDocument = function (params) {
 
             // normal anchor
             url = capturer.resolveRelativeUrl(url, refUrl);
-            elem.setAttribute("href", rewriteLocalLink(url));
+
+            // check local link and rewrite url
+            const urlLocal = rewriteLocalLink(url);
+            if (urlLocal !== url) {
+              elem.setAttribute("href", urlLocal);
+              break;
+            }
+            elem.setAttribute("href", url);
+
+            // check downLink
+            if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
+              switch (options["capture.downLink.mode"]) {
+                case "header": {
+                  if (capturer.downLinkUrlFilter(url, options)) {
+                    break;
+                  }
+
+                  tasks[tasks.length] = 
+                  capturer.invoke("downLinkFetchHeader", {
+                    url,
+                    refUrl,
+                  }).then((ext) => {
+                    if (ext === null) { return null; }
+                    if (!capturer.downLinkExtFilter(ext, options)) { return null; }
+
+                    return capturer.invoke("downloadFile", {
+                      url,
+                      refUrl,
+                      settings,
+                      options,
+                    }).then((response) => {
+                      captureRewriteUri(elem, "href", response.url);
+                      return response;
+                    });
+                  });
+                  break;
+                }
+                case "url": {
+                  if (capturer.downLinkUrlFilter(url, options)) {
+                    break;
+                  }
+
+                  const filename = scrapbook.urlToFilename(url);
+                  const [, ext] = scrapbook.filenameParts(filename);
+                  if (!capturer.downLinkExtFilter(ext, options)) { break; }
+
+                  tasks[tasks.length] = 
+                  capturer.invoke("downloadFile", {
+                    url,
+                    refUrl,
+                    settings,
+                    options,
+                  }).then((response) => {
+                    captureRewriteUri(elem, "href", response.url);
+                    return response;
+                  });
+                  break;
+                }
+                case "none":
+                default: {
+                  break;
+                }
+              }
+            }
+
             break;
           }
 
@@ -1975,6 +2039,73 @@ capturer.getErrorUrl = function (sourceUrl, options) {
     }
   }
   return sourceUrl;
+};
+
+capturer.downLinkExtFilter = function (ext, options) {
+  // use cached filter regex if not changed
+  if (arguments.callee._filter !== options["capture.downLink.extFilter"]) {
+    arguments.callee._filter = options["capture.downLink.extFilter"];
+    arguments.callee.filters = (function () {
+      const ret = [];
+      options["capture.downLink.extFilter"].split(/[\r\n]/).forEach((line) => {
+        if (line.charAt(0) === "#") { return; }
+        line = line.trim();
+        if (line === "") { return; }
+
+        if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+          try {
+            ret.push(new RegExp(`^(?:${RegExp.$1})$`, RegExp.$2));
+          } catch (ex) {
+            console.error(ex);
+          }
+        } else {
+          const regex = line.split(/[,; ]+/)
+            .map(x => scrapbook.escapeRegExp(x))
+            .filter(x => !!x)
+            .join('|');
+          ret.push(new RegExp(`^(?:${regex})$`, 'i'));
+        }
+      });
+      return ret;
+    })();
+  }
+
+  return arguments.callee.filters.some((filter) => {
+    return filter.test(ext);
+  });
+};
+
+capturer.downLinkUrlFilter = function (url, options) {
+  // use the cache if the filter is not changed
+  if (arguments.callee._filter !== options["capture.downLink.urlFilter"]) {
+    arguments.callee._filter = options["capture.downLink.urlFilter"];
+    arguments.callee.filters = (function () {
+      const ret = [];
+      options["capture.downLink.urlFilter"].split(/[\r\n]/).forEach((line) => {
+        if (line.charAt(0) === "#") { return; }
+        line = line.trim();
+        if (line === "") { return; }
+
+        if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+          try {
+            ret.push(new RegExp(RegExp.$1, RegExp.$2));
+          } catch (ex) {
+            console.error(ex);
+          }
+        } else {
+          ret.push(scrapbook.splitUrlByAnchor(line)[0]);
+        }
+      });
+      return ret;
+    })();
+  }
+
+  return arguments.callee.filters.some(function (filter) {
+    if (typeof filter === 'string') {
+      return filter === url;
+    }
+    return filter.test(url);
+  });
 };
 
 /**
