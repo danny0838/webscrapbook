@@ -7,6 +7,8 @@
 
 const OPTION_PREFIX = "opt_";
 
+const defaultOptions = JSON.parse(JSON.stringify(scrapbook.options));
+
 function initDefaultOptions() {
   scrapbook.loadOptions().then((options) => {
     for (const id in options) {
@@ -45,6 +47,12 @@ function setOptionToDocument(id, value) {
       elem.appendChild(c);
       elem.value = value;
     }
+  }
+}
+
+function resetOptions(file) {
+  for (const id in defaultOptions) {
+    setOptionToDocument(id, defaultOptions[id]);
   }
 }
 
@@ -124,6 +132,11 @@ window.addEventListener("DOMContentLoaded", (event) => {
     scrapbook.saveOptions().then(() => {
       closeWindow();
     });
+  });
+
+  document.getElementById("reset").addEventListener("click", (event) => {
+    event.preventDefault();
+    resetOptions();
   });
 
   document.getElementById("export").addEventListener("click", (event) => {
