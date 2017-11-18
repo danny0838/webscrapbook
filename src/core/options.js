@@ -9,7 +9,7 @@ const OPTION_PREFIX = "opt_";
 
 function initDefaultOptions() {
   scrapbook.loadOptions().then((options) => {
-    for (let id in options) {
+    for (const id in options) {
       setOptionToDocument(id, options[id]);
     }
   });
@@ -39,7 +39,7 @@ function setOptionToDocument(id, value) {
     // generate a hidden option element for it, so that
     // importing hacking value is allowed.
     if (elem.matches('select') && elem.value != value) {
-      let c = document.createElement('option');
+      const c = document.createElement('option');
       c.style.display = 'none';
       c.value = c.textContent = value;
       elem.appendChild(c);
@@ -66,7 +66,7 @@ function importOptions(file) {
     const options = Object.assign(scrapbook.options, data);
     scrapbook.options = options;
     return scrapbook.saveOptions().then(() => {
-      for (let id in options) {
+      for (const id in options) {
         setOptionToDocument(id, options[id]);
       }
     });
@@ -111,7 +111,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
 
   document.getElementById("options").addEventListener("submit", (event) => {
     event.preventDefault();
-    for (let id in scrapbook.options) {
+    for (const id in scrapbook.options) {
       // Overwrite only keys with a defined value so that
       // keys not listed in the options page are not nullified.
       // In Chrome, storageArea.set({key: undefined}) does not store to key.
