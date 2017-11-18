@@ -44,15 +44,15 @@
   "ErrorCapture": {
     "message": "Capture failed ($SOURCE$): $REASON$",
     "placeholders": {
-      "source": {"content" : "$1"},
-      "reason": {"content" : "$2"}
+      "source": {"content": "$1"},
+      "reason": {"content": "$2"}
     }
   },
   "ErrorContentScriptExecute": {
     "message": "Unable to execute content script ($SOURCE$): $REASON$",
     "placeholders": {
-      "source": {"content" : "$1"},
-      "reason": {"content" : "$2"}
+      "source": {"content": "$1"},
+      "reason": {"content": "$2"}
     }
   },
   "ErrorDocumentNotReady": {
@@ -162,12 +162,6 @@
   },
   "OptionCaptureCommonRemoveTooltip": {
     "message": "Remove the element. Note that this could affect the web page layout."
-  },
-  "OptionCaptureScrapbookFolderLabel": {
-    "message": "Scrapbook Folder:"
-  },
-  "OptionCaptureScrapbookFolderTooltip": {
-    "message": "Captured files will be saved in <download folder>/<Scrapbook Folder>/data/ directory when \"Save captured data in ScrapBook\" is checked. You can create a symbolic link targeting a desired directory if necessary."
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED:"
@@ -301,6 +295,12 @@
   "OptionCaptureSaveInScrapbookTooltip": {
     "message": "Captured files will be saved in <download folder>/<Scrapbook Folder>/data/ directory. Files are always saved in ScrapBook when saved as folder."
   },
+  "OptionCaptureScrapbookFolderLabel": {
+    "message": "Scrapbook Folder:"
+  },
+  "OptionCaptureScrapbookFolderTooltip": {
+    "message": "Captured files will be saved in <download folder>/<Scrapbook Folder>/data/ directory when \"Save captured data in ScrapBook\" is checked. You can create a symbolic link targeting a desired directory if necessary."
+  },
   "OptionCaptureScriptLabel": {
     "message": "Scripts:"
   },
@@ -394,8 +394,8 @@
   "WarnCaptureCyclicRefercing": {
     "message": "Resource '$SOURCE$' has a circular reference to '$TARGET$', which will be blanked because current capture configuration does not support circular reference.",
     "placeholders": {
-      "source": {"content" : "$1"},
-      "target": {"content" : "$2"}
+      "source": {"content": "$1"},
+      "target": {"content": "$2"}
     }
   }
 }

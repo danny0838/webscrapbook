@@ -44,15 +44,15 @@
   "ErrorCapture": {
     "message": "获取失败 ($SOURCE$): $REASON$",
     "placeholders": {
-      "source": {"content" : "$1"},
-      "reason": {"content" : "$2"}
+      "source": {"content": "$1"},
+      "reason": {"content": "$2"}
     }
   },
   "ErrorContentScriptExecute": {
     "message": "无法执行内容处理脚本 ($SOURCE$): $REASON$",
     "placeholders": {
-      "source": {"content" : "$1"},
-      "reason": {"content" : "$2"}
+      "source": {"content": "$1"},
+      "reason": {"content": "$2"}
     }
   },
   "ErrorDocumentNotReady": {
@@ -162,12 +162,6 @@
   },
   "OptionCaptureCommonRemoveTooltip": {
     "message": "将元素移除。注意这可能会影响网页排版。"
-  },
-  "OptionCaptureScrapbookFolderLabel": {
-    "message": "剪贴簿文件夹:"
-  },
-  "OptionCaptureScrapbookFolderTooltip": {
-    "message": "勾选“将获取资料保存于剪贴簿中”时，获取的文件会保存于 <下载文件夹>/<剪贴簿文件夹>/data/ 目录中。如有需要，可建立符号链接指向其他文件夹。"
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
@@ -301,6 +295,12 @@
   "OptionCaptureSaveInScrapbookTooltip": {
     "message": "将获取的文件保存于 <下载文件夹>/<剪贴簿文件夹>/data/ 目录中。保存为文件夹时必定会保存于剪贴簿中。"
   },
+  "OptionCaptureScrapbookFolderLabel": {
+    "message": "剪贴簿文件夹:"
+  },
+  "OptionCaptureScrapbookFolderTooltip": {
+    "message": "勾选“将获取资料保存于剪贴簿中”时，获取的文件会保存于 <下载文件夹>/<剪贴簿文件夹>/data/ 目录中。如有需要，可建立符号链接指向其他文件夹。"
+  },
   "OptionCaptureScriptLabel": {
     "message": "脚本:"
   },
@@ -394,8 +394,8 @@
   "WarnCaptureCyclicRefercing": {
     "message": "资源 '$SOURCE$' 循环参照至 '$TARGET$'，由于目前的获取设定不支援循环参照，参照目标将转向至空值。",
     "placeholders": {
-      "source": {"content" : "$1"},
-      "target": {"content" : "$2"}
+      "source": {"content": "$1"},
+      "target": {"content": "$2"}
     }
   }
 }

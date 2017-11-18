@@ -44,15 +44,15 @@
   "ErrorCapture": {
     "message": "擷取失敗 ($SOURCE$): $REASON$",
     "placeholders": {
-      "source": {"content" : "$1"},
-      "reason": {"content" : "$2"}
+      "source": {"content": "$1"},
+      "reason": {"content": "$2"}
     }
   },
   "ErrorContentScriptExecute": {
     "message": "無法執行內容處理腳本 ($SOURCE$): $REASON$",
     "placeholders": {
-      "source": {"content" : "$1"},
-      "reason": {"content" : "$2"}
+      "source": {"content": "$1"},
+      "reason": {"content": "$2"}
     }
   },
   "ErrorDocumentNotReady": {
@@ -162,12 +162,6 @@
   },
   "OptionCaptureCommonRemoveTooltip": {
     "message": "將元素移除。注意這可能會影響網頁排版。"
-  },
-  "OptionCaptureScrapbookFolderLabel": {
-    "message": "剪貼簿資料夾:"
-  },
-  "OptionCaptureScrapbookFolderTooltip": {
-    "message": "勾選「將擷取資料儲存於剪貼簿中」時，擷取的檔案會儲存於 <下載資料夾>/<剪貼簿資料夾>/data/ 目錄中。如有需要，可建立符號連結指向其他資料夾。"
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
@@ -301,6 +295,12 @@
   "OptionCaptureSaveInScrapbookTooltip": {
     "message": "將擷取的檔案儲存於 <下載資料夾>/<剪貼簿資料夾>/data/ 目錄中。儲存為資料夾時必定會儲存剪貼簿中。"
   },
+  "OptionCaptureScrapbookFolderLabel": {
+    "message": "剪貼簿資料夾:"
+  },
+  "OptionCaptureScrapbookFolderTooltip": {
+    "message": "勾選「將擷取資料儲存於剪貼簿中」時，擷取的檔案會儲存於 <下載資料夾>/<剪貼簿資料夾>/data/ 目錄中。如有需要，可建立符號連結指向其他資料夾。"
+  },
   "OptionCaptureScriptLabel": {
     "message": "腳本:"
   },
@@ -394,8 +394,8 @@
   "WarnCaptureCyclicRefercing": {
     "message": "資源 '$SOURCE$' 循環參照至 '$TARGET$'，由於目前的擷取設定不支援循環參照，參照目標將轉向至空值。",
     "placeholders": {
-      "source": {"content" : "$1"},
-      "target": {"content" : "$2"}
+      "source": {"content": "$1"},
+      "target": {"content": "$2"}
     }
   }
 }
