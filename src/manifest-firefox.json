@@ -61,6 +61,7 @@
 
   "options_ui": {
     "browser_style": true,
+    "open_in_tab": true,
     "page": "core/options.html"
   },
 

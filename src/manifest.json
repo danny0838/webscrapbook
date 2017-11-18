@@ -60,6 +60,7 @@
 
   "options_ui": {
     "chrome_style": true,
+    "open_in_tab": true,
     "page": "core/options.html"
   },
 

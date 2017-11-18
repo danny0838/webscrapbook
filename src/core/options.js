@@ -79,15 +79,10 @@ function importOptions(file) {
       }
     });
   }).then(() => {
-    showMessage(scrapbook.lang("OptionsImportSuccess"));
+    alert(scrapbook.lang("OptionsImportSuccess"));
   }).catch((ex) => {
-    showMessage(scrapbook.lang("ErrorImportOptions", [ex.message]));
+    alert(scrapbook.lang("ErrorImportOptions", [ex.message]));
   });
-}
-
-function showMessage(msg) {
-  document.getElementById("message").textContent = msg;
-  window.scrollTo(0, 0);
 }
 
 function closeWindow() {
