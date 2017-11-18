@@ -1969,9 +1969,8 @@ capturer.resolveRelativeUrl = function (relativeUrl, baseUrl) {
 
 capturer.getErrorUrl = function (sourceUrl, options) {
   if (!options || options["capture.recordErrorUri"]) {
-    const prefix = "urn:scrapbook:download:error:";
-    if (!sourceUrl.startsWith(prefix)) {
-      return prefix + sourceUrl;
+    if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("file:")) {
+      return `urn:scrapbook:download:error:${sourceUrl}`;
     }
   }
   return sourceUrl;
