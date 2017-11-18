@@ -1034,13 +1034,10 @@ const indexer = {
 
         this.log(`Generating zip file...`);
         return zip.generateAsync({type: "blob"}).then((blob) => {
-          const url = URL.createObjectURL(blob);
-          const elem = document.createElement('a');
-          elem.href = url;
-          elem.download = `${scrapbookData.title}.zip`;
-          document.body.appendChild(elem);
-          elem.click();
-          elem.remove();
+          browser.downloads.download({
+            url: URL.createObjectURL(blob),
+            filename: `${scrapbookData.title}.zip`,
+          });
         });
       }).then(() => {
         /* We are done! */
