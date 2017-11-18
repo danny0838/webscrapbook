@@ -116,8 +116,27 @@ chrome.webRequest.onHeadersReceived.addListener(function (details) {
 }, {urls: ["http://*/*", "https://*/*"], types: ["main_frame", "sub_frame"]}, ["blocking", "responseHeaders"]);
 
 // clear viewer caches
-scrapbook.cache.getAll({table: "viewerCache"}).then((items) => {
-  scrapbook.cache.remove(Object.keys(items));
+browser.tabs.query({}).then((tabs) => {
+  /* build a set with the ids that are still being viewed */
+  const usedIds = new Set();
+  tabs.forEach((tab) => {
+    const u = new URL(tab.url);
+    if (u.href.startsWith(chrome.runtime.getURL("viewer/view.html") + '?')) {
+      const id = u.searchParams.get('id');
+      if (id) { usedIds.add(id); }
+    }
+  });
+
+  /* remove cache entry for all IDs that are not being viewed */
+  scrapbook.cache.getAll({table: "viewerCache"}).then((items) => {
+    for (const key in items) {
+      const keyData = JSON.parse(key);
+      if (usedIds.has(keyData.id)) {
+        delete(items[key]);
+      }
+    }
+    scrapbook.cache.remove(Object.keys(items));
+  });
 });
 
 })(window, undefined);
