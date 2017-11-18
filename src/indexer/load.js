@@ -36,7 +36,11 @@ function onDragLeave(e) {
 function onDrop(e) {
   e.preventDefault();
   indexer.dropmask.style.display = 'none';
-  indexer.loadDrop(e.dataTransfer.items);
+  const entries = Array.prototype.map.call(
+    e.dataTransfer.items,
+    x => x.webkitGetAsEntry && x.webkitGetAsEntry()
+  );
+  indexer.loadDrop(entries);
 };
 
 function onChangeDir(e) {
@@ -245,13 +249,13 @@ const indexer = {
     });
   },
 
-  loadDrop(items) {
+  loadDrop(entries) {
     return Promise.resolve().then(() => {
       this.start();
     }).then(() => {
       let hasValidEntry = false;
       let p = Promise.resolve();
-      Array.prototype.map.call(items, x => x.webkitGetAsEntry && x.webkitGetAsEntry()).forEach((entry) => {
+      entries.forEach((entry) => {
         if (!entry) { return; }
 
         hasValidEntry = true;
