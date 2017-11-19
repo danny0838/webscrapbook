@@ -520,7 +520,7 @@ const viewer = {
       return true;
     }).catch((ex) => {
       console.error(ex);
-      this.error(`Unable to open web page archive: ${ex.message}`);
+      this.error(`Unable to open archive: ${ex.message}`);
       return false;
     }).then((success) => {
       this.log('');
