@@ -165,9 +165,11 @@ const viewer = {
     viewer.processZipFile(files[0]);
   },
 
-  warn(msg) {
-    console.warn(msg);
-    alert(msg);
+  error(msg) {
+    const span = document.createElement('span');
+    span.className = 'error';
+    span.appendChild(document.createTextNode(msg + '\n'));
+    logger.appendChild(span);
   },
 
   openUrl(url, inNewTab = false) {
@@ -253,7 +255,7 @@ const viewer = {
         const file = new File([xhr.response], filename, {type: Mime.prototype.lookup(filename)});
         return viewer.processZipFile(file);
       }, (ex) => {
-        alert(`Unable to load the specified zip file '${zipSourceUrl}'`);
+        this.error(`Unable to load the specified zip file '${zipSourceUrl}'`);
         return false;
       });
     }).then((loaded) => {
@@ -272,6 +274,7 @@ const viewer = {
       this.uninitEvents();
       this.filesSelector.disabled = true;
       this.loadmask.style.display = '';
+      this.logger.textContent = '';
     }).then(() => {
       const uuid = scrapbook.getUuid();
       const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
@@ -390,7 +393,7 @@ const viewer = {
 
                 indexFiles.push(indexFilename);
               }).catch((ex) => {
-                viewer.warn(`Unable to get index file in the directory: '${topdir}'`);
+                this.error(`Unable to get index file in the directory: '${topdir}'`);
               });
             });
             return p.then(() => {
@@ -459,7 +462,7 @@ const viewer = {
       return true;
     }).catch((ex) => {
       console.error(ex);
-      alert(`Unable to open web page archive: ${ex.message}`);
+      this.error(`Unable to open web page archive: ${ex.message}`);
 
       this.initEvents();
       this.filesSelector.disabled = false;
@@ -477,6 +480,7 @@ document.addEventListener("DOMContentLoaded", function () {
   viewer.dropmask = document.getElementById('dropmask');
   viewer.loadmask = document.getElementById('loadmask');
   viewer.filesSelector = document.getElementById('files-selector');
+  viewer.logger = document.getElementById('logger');
 
   scrapbook.loadOptions().then(() => {
     viewer.start();

@@ -72,6 +72,16 @@ body {
   text-transform: uppercase;
   cursor: pointer;
 }
+
+#logger {
+  padding: .5em;
+  white-space: pre;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
 </style>
 </head>
 <body>
@@ -80,6 +90,7 @@ body {
 <label id="files-selector-label" for="files-selector">__MSG_ViewerPickFiles__</label>
 <input type="file" id="files-selector" style="display: none;" disabled>
 </div>
+<div id="logger"></div>
 <div id="loadmask" style="display: none;"></div>
 <div id="dropmask" style="display: none;"></div>
 </body>
