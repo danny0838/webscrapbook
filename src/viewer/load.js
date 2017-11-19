@@ -259,7 +259,7 @@ const viewer = {
     }).then((loaded) => {
       if (!loaded) {
         viewer.initEvents();
-        document.getElementById('files-selector-label').style.display = '';
+        this.filesSelector.disabled = false;
       }
     });
   },
