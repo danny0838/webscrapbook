@@ -2019,6 +2019,16 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
   const rewritten = scrapbook.parseCssText(cssText, {
     rewriteImportUrl(url) {
       const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
+
+      // avoid error for url() or url(#foo)
+      const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+      if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
+        return {
+          url: sourceUrlHash,
+          recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
+        };
+      }
+
       let dataUrl = sourceUrl;
       let recordUrl = options["capture.recordSourceUri"] ? sourceUrl : "";
       switch (options["capture.style"]) {
@@ -2038,6 +2048,16 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
     },
     rewriteFontFaceUrl(url) {
       const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
+
+      // avoid error for url() or url(#foo)
+      const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+      if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
+        return {
+          url: sourceUrlHash,
+          recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
+        };
+      }
+
       let dataUrl = sourceUrl;
       let recordUrl = options["capture.recordSourceUri"] ? sourceUrl : "";
       switch (options["capture.font"]) {
@@ -2062,6 +2082,16 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
     },
     rewriteBackgroundUrl(url) {
       const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
+
+      // avoid error for url() or url(#foo)
+      const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+      if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
+        return {
+          url: sourceUrlHash,
+          recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
+        };
+      }
+
       let dataUrl = sourceUrl;
       let recordUrl = options["capture.recordSourceUri"] ? sourceUrl : "";
       switch (options["capture.imageBackground"]) {
