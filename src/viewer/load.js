@@ -432,20 +432,31 @@ const viewer = {
             let p = Promise.resolve();
             topdirs.forEach((topdir) => {
               p = p.then(() => {
-                const indexRdfData = zipData.files[topdir + 'index.rdf'];
-                if (!indexRdfData) { throw new Error("no index.rdf"); }
+                if (zipData.files[topdir + 'index.rdf']) {
+                  const file = zipData.blobs[topdir + 'index.rdf'];
+                  return scrapbook.readFileAsDocument(file).then((doc) => {
+                    if (!doc) {
+                      throw new Error(`'index.rdf' is corrupted.`);
+                    }
 
-                const file = zipData.blobs[topdir + 'index.rdf'];
-                return scrapbook.readFileAsDocument(file).then((doc) => {
-                  const meta = scrapbook.parseMaffRdfDocument(doc);
-                  const indexFile = topdir + meta.indexfilename;
-                  if (zipData.files[indexFile]) {
-                    return indexFile;
-                  }
-                });
-              }).catch((ex) => {
+                    const meta = scrapbook.parseMaffRdfDocument(doc);
+                    if (!meta.indexfilename) {
+                      throw new Error(`'index.rdf' specifies no index file.`);
+                    }
+
+                    const indexFilename = topdir + (meta.indexfilename || '');
+                    if (!zipData.files[indexFilename]) {
+                      throw new Error(`'index.rdf' specified index file '${meta.indexfilename}' not found.`);
+                    }
+
+                    return indexFilename;
+                  }).catch((ex) => {
+                    throw ex;
+                  });
+                }
+
                 let indexFilename;
-                for (let inZipPath in zipData.files) {
+                for (const inZipPath in zipData.files) {
                   if (!inZipPath.startsWith(topdir)) { continue; }
 
                   const filename = inZipPath.slice(inZipPath.lastIndexOf("/") + 1);
@@ -456,11 +467,11 @@ const viewer = {
                 }
                 return indexFilename;
               }).then((indexFilename) => {
-                if (!indexFilename) { throw new Error(`no available index file`); }
+                if (!indexFilename) { throw new Error(`'index.*' file not found.`); }
 
                 indexFiles.push(indexFilename);
               }).catch((ex) => {
-                this.error(`Unable to get index file in the directory: '${topdir}'`);
+                this.error(`Unable to get index file in directory: '${topdir}': ${ex.message}`);
               });
             });
             return p.then(() => {
