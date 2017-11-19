@@ -165,6 +165,10 @@ const viewer = {
     viewer.processZipFile(files[0]);
   },
 
+  log(msg) {
+    logger.appendChild(document.createTextNode(msg + '\n'));
+  },
+
   error(msg) {
     const span = document.createElement('span');
     span.className = 'error';
@@ -275,6 +279,7 @@ const viewer = {
       this.filesSelector.disabled = true;
       this.loadmask.style.display = '';
       this.logger.textContent = '';
+      this.log(`Loading: '${zipFile.name}'...`);
     }).then(() => {
       const uuid = scrapbook.getUuid();
       const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
