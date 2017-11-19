@@ -403,7 +403,7 @@ const viewer = {
         }
       }).then((indexFiles) => {
         if (!indexFiles.length) {
-          return viewer.warn("No available data can be loaded from this archive file.");
+          throw new Error(`No available page found.`);
         }
 
         // move main index file to the last
