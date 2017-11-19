@@ -403,6 +403,8 @@ const viewer = {
             return ["index.html"];
           }
         }
+      }, (ex) => {
+        throw new Error(`Zip file invalid or unsupported.`);
       }).then((indexFiles) => {
         if (!indexFiles.length) {
           throw new Error(`No available page found.`);
