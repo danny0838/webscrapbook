@@ -222,12 +222,12 @@ capturer.captureTab = function (params) {
       capturer.captureInfo.delete(timeId);
       if (response.error) { throw new Error(response.error.message); }
       return response;
-    }).catch((ex) => {
-      const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
-      console.error(err);
-      capturer.browserActionSetError({action: "add"});
-      return {message: err};
     });
+  }).catch((ex) => {
+    const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
+    console.error(err);
+    capturer.browserActionSetError({action: "add"});
+    return {message: err};
   });
 };
 
@@ -276,12 +276,12 @@ capturer.captureHeadless = function (params) {
       capturer.captureInfo.delete(timeId);
       if (response.error) { throw new Error(response.error.message); }
       return response;
-    }).catch((ex) => {
-      const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
-      console.error(err);
-      capturer.browserActionSetError({action: "add"});
-      return {message: err};
     });
+  }).catch((ex) => {
+    const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
+    console.error(err);
+    capturer.browserActionSetError({action: "add"});
+    return {message: err};
   });
 };
 
