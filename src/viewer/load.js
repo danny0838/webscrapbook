@@ -48,11 +48,33 @@ function onDragLeave(e) {
 function onDrop(e) {
   e.preventDefault();
   viewer.dropmask.style.display = 'none';
+
   const entries = Array.prototype.map.call(
     e.dataTransfer.items,
     x => x.webkitGetAsEntry && x.webkitGetAsEntry()
   );
-  viewer.loadDrop(entries);
+
+  const files = [];
+  return Promise.resolve().then(() => {
+    let p = Promise.resolve(false);
+    entries.forEach((entry) => {
+      if (!entry.isFile) { return; }
+
+      p = p.then(() => {
+        return new Promise((resolve, reject) => {
+          entry.file(resolve, reject);
+        }).then((file) => {
+          files.push(file);
+        });
+      }).catch((ex) => {
+        // this should never happen
+        console.error(ex);
+      });
+    });
+    return p;
+  }).then(() => {
+    return viewer.loadFiles(files);
+  });
 };
 
 function onChangeFiles(e) {
@@ -60,7 +82,7 @@ function onChangeFiles(e) {
   const files = Array.from(e.target.files);
   if (!(files && files.length)) { return; }
 
-  viewer.loadInputFiles(files);
+  return viewer.loadFiles(files);
 };
 
 const fileSystemHandler = {
@@ -135,6 +157,7 @@ const viewer = {
   filesystem: null,
   urlSearch: "",
   urlHash: "",
+  pageList: [],
 
   initEvents() {
     window.addEventListener("dragenter", onDragEnter, false);
@@ -152,76 +175,6 @@ const viewer = {
     this.filesSelector.removeEventListener("change", onChangeFiles, false);
   },
 
-  // @TODO: process multiple directory and files
-  loadDrop(entries) {
-    return Promise.resolve().then(() => {
-      this.loadStart();
-    }).then(() => {
-      let p = Promise.resolve(false);
-      entries.sort(this.sortFileObj).forEach((entry) => {
-        if (!entry.isFile) { return; }
-
-        p = p.then((success) => {
-          // skip further loading if success
-          if (success) { return success; }
-
-          return new Promise((resolve, reject) => {
-            entry.file(resolve, reject);
-          }).then((file) => {
-            return viewer.processZipFile(file);
-          }).catch((ex) => {
-            // this should never happen
-            console.error(ex);
-            return false;
-          });
-        });
-      });
-      return p;
-    }).then((success) => {
-      if (success) { return; }
-      this.loadEnd();
-    });
-  },
-
-  // @TODO: process multiple input files
-  loadInputFiles(files) {
-    return Promise.resolve().then(() => {
-      this.loadStart();
-    }).then(() => {
-      let p = Promise.resolve(false);
-      files.sort(this.sortFileObj).forEach((file) => {
-        p = p.then((success) => {
-          // skip further loading if success
-          if (success) { return success; }
-
-          return viewer.processZipFile(file).catch((ex) => {
-            // this should never happen
-            console.error(ex);
-            return false;
-          });
-        });
-      });
-      return p;
-    }).then((success) => {
-      if (success) { return; }
-      this.loadEnd();
-    });
-  },
-
-  loadStart() {
-    this.uninitEvents();
-    this.filesSelector.disabled = true;
-    this.loadmask.style.display = '';
-    this.logger.textContent = '';
-  },
-
-  loadEnd() {
-    this.initEvents();
-    this.filesSelector.disabled = false;
-    this.filesSelector.value = null;
-    this.loadmask.style.display = 'none';
-  },
-
   log(msg) {
     logger.appendChild(document.createTextNode(msg + '\n'));
   },
@@ -231,15 +184,6 @@ const viewer = {
     span.className = 'error';
     span.appendChild(document.createTextNode(msg + '\n'));
     logger.appendChild(span);
-  },
-
-  /**
-   * Use to sort File or FileSystemFileEntry
-   */
-  sortFileObj(a, b) {
-    if (a.name > b.name) { return 1; }
-    if (a.name < b.name) { return -1; }
-    return 0;
   },
 
   openUrl(url, inNewTab = false) {
@@ -273,6 +217,19 @@ const viewer = {
     });
   },
 
+  openUrls(urls) {
+    // move main index file to the last
+    urls.push(urls.shift());
+
+    let p = Promise.resolve();
+    urls.forEach((url, i) => {
+      p = p.then(() => {
+        return viewer.openUrl(url, i !== urls.length - 1);
+      });
+    });
+    return p;
+  },
+
   start() {
     return Promise.resolve().then(() => {
       /* check and read filesystem API */
@@ -301,7 +258,7 @@ const viewer = {
       /* process URL params */
 
       const zipSourceUrl = viewer.mainUrl.searchParams.get("src");
-      if (!zipSourceUrl) { return false; }
+      if (!zipSourceUrl) { return []; }
 
       const zipSourceUrlObj = new URL(zipSourceUrl);
       viewer.urlSearch = zipSourceUrlObj.search;
@@ -323,21 +280,57 @@ const viewer = {
         }
 
         const file = new File([xhr.response], filename, {type: Mime.prototype.lookup(filename)});
-        return viewer.processZipFile(file);
-      }, (ex) => {
-        this.error(`Unable to load the specified zip file '${zipSourceUrl}'`);
-        return false;
+        return [file];
+      }).catch((ex) => {
+        this.error(`Unable to fetch specified zip file '${zipSourceUrl}'`);
+        return [];
       });
-    }).then((loaded) => {
-      if (!loaded) {
-        viewer.initEvents();
+    }).then((files) => {
+      return this.loadFiles(files);
+    });
+  },
+
+  /**
+   * @return {Promise}
+   */
+  loadFiles(files) {
+    return Promise.resolve().then(() => {
+      this.pageList = [];
+      this.uninitEvents();
+      this.filesSelector.disabled = true;
+      this.loadmask.style.display = '';
+      this.logger.textContent = '';
+    }).then(() => {
+      let p = Promise.resolve();
+      files.sort((a, b) => {
+        if (a.name > b.name) { return 1; }
+        if (a.name < b.name) { return -1; }
+        return 0;
+      }).forEach((file) => {
+        p = p.then(() => {
+          return viewer.processZipFile(file);
+        }).catch((ex) => {
+          // this should never happen
+          console.error(ex);
+        });
+      });
+      return p;
+    }).then(() => {
+      if (this.pageList.length) {
+        this.log('Done.');
+        this.log('');
+        return this.openUrls(this.pageList);
+      } else {
+        this.initEvents();
         this.filesSelector.disabled = false;
+        this.filesSelector.value = null;
+        this.loadmask.style.display = 'none';
       }
     });
   },
 
   /**
-   * @return {Promise} resolves to boolean: whether the file is successfully loaded 
+   * @return {Promise}
    */
   processZipFile(zipFile) {
     return Promise.resolve().then(() => {
@@ -492,9 +485,6 @@ const viewer = {
           throw new Error(`No available page found.`);
         }
 
-        // move main index file to the last
-        indexFiles.push(indexFiles.shift());
-
         /* Filesystem API view */
         if (viewer.filesystem) {
           const root = viewer.filesystem.root;
@@ -506,7 +496,7 @@ const viewer = {
               const url = new URL(fileEntry.toURL());
               url.search = viewer.urlSearch;
               url.hash = viewer.urlHash;
-              return viewer.openUrl(url.href, i !== indexFiles.length - 1);
+              this.pageList.push(url.href);
             });
           });
           return p;
@@ -531,20 +521,16 @@ const viewer = {
             }
 
             s.set("p", indexFile);
-            return viewer.openUrl(url.href, i !== indexFiles.length - 1);
+            this.pageList.push(url.href);
           });
         });
         return p;
       });
-    }).then(() => {
-      return true;
     }).catch((ex) => {
       console.error(ex);
       this.error(`Unable to open archive: ${ex.message}`);
-      return false;
-    }).then((success) => {
+    }).then(() => {
       this.log('');
-      return success;
     });
   },
 };

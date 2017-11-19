@@ -432,10 +432,10 @@
     "message": "When the browser loads a MAFF file, view it with the viewer. Check \"Allow access to file URLs\" in a supported browser to enable opening such files directly."
   },
   "ViewerDesc": {
-    "message": "Pick an HTZ or MAFF archive file to open, via dropping it into this window, or using the buttons below:"
+    "message": "Pick HTZ or MAFF archive files to open, via dropping them into this window, or using the buttons below:"
   },
   "ViewerPickFiles": {
-    "message": "Pick a ZIP file"
+    "message": "Pick ZIP files"
   },
   "ViewerTitle": {
     "message": "View archive page"
