@@ -270,6 +270,7 @@ const viewer = {
   processZipFile(zipFile) {
     return Promise.resolve().then(() => {
       this.uninitEvents();
+      this.filesSelector.disabled = true;
     }).then(() => {
       const uuid = scrapbook.getUuid();
       const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
@@ -456,6 +457,7 @@ const viewer = {
       alert("Unable to open web page archive: " + ex.message);
 
       this.initEvents();
+      this.filesSelector.disabled = false;
       this.filesSelector.value = null;
       return false;
     });
