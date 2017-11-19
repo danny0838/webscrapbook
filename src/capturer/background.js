@@ -129,13 +129,26 @@ capturer.captureAllTabs = function (params) {
   return Promise.resolve().then(() => {
     const {mode} = params;
 
-    capturer.getContentTabs().then((tabs) => {
-      let ms = -100;
-      return Promise.all(tabs.map((tab) => {
-        return scrapbook.delay(ms += 100).then(() => {
+    return capturer.getContentTabs().then((tabs) => {
+      let p = Promise.resolve();
+      tabs.forEach((tab) => {
+        const {id: tabId, url} = tab;
+        const source = `[${tabId}] ${url}`;
+        p = p.then(() => {
+          return scrapbook.delay(5);
+        }).then(() => {
+          // throws if the tab has been closed
+          return browser.tabs.get(tabId);
+        }).then(() => {
           return capturer.captureTab({tab, mode});
+        }).catch((ex) => {
+          const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
+          console.error(err);
+          capturer.browserActionSetError({action: "add"});
+          return {message: err};
         });
-      }));
+      });
+      return p;
     });
   });
 };
