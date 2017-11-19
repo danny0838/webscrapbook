@@ -253,7 +253,7 @@ const viewer = {
         const file = new File([xhr.response], filename, {type: Mime.prototype.lookup(filename)});
         return viewer.processZipFile(file);
       }, (ex) => {
-        alert("Unable to load the specified zip file '" + zipSourceUrl + "'");
+        alert(`Unable to load the specified zip file '${zipSourceUrl}'`);
         return false;
       });
     }).then((loaded) => {
@@ -385,11 +385,11 @@ const viewer = {
                 }
                 return indexFilename;
               }).then((indexFilename) => {
-                if (!indexFilename) { throw new Error("no available index file"); }
+                if (!indexFilename) { throw new Error(`no available index file`); }
 
                 indexFiles.push(indexFilename);
               }).catch((ex) => {
-                viewer.warn("Unable to get index file in the directory: '" + topdir + "'");
+                viewer.warn(`Unable to get index file in the directory: '${topdir}'`);
               });
             });
             return p.then(() => {
@@ -458,7 +458,7 @@ const viewer = {
       return true;
     }).catch((ex) => {
       console.error(ex);
-      alert("Unable to open web page archive: " + ex.message);
+      alert(`Unable to open web page archive: ${ex.message}`);
 
       this.initEvents();
       this.filesSelector.disabled = false;
