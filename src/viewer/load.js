@@ -48,7 +48,11 @@ function onDragLeave(e) {
 function onDrop(e) {
   e.preventDefault();
   viewer.dropmask.style.display = 'none';
-  viewer.loadDrop(e.dataTransfer.items);
+  const entries = Array.prototype.map.call(
+    e.dataTransfer.items,
+    x => x.webkitGetAsEntry && x.webkitGetAsEntry()
+  );
+  viewer.loadDrop(entries);
 };
 
 function onChangeFiles(e) {
@@ -149,20 +153,73 @@ const viewer = {
   },
 
   // @TODO: process multiple directory and files
-  loadDrop(items) {
-    Array.prototype.forEach.call(items, (item) => {
-      const entry = item.webkitGetAsEntry();
-      if (entry.isFile) {
-        entry.file((file) => {
-          viewer.processZipFile(file);
+  loadDrop(entries) {
+    return Promise.resolve().then(() => {
+      this.loadStart();
+    }).then(() => {
+      let p = Promise.resolve(false);
+      entries.forEach((entry) => {
+        if (!entry.isFile) { return; }
+
+        p = p.then((success) => {
+          // skip further loading if success
+          if (success) { return success; }
+
+          return new Promise((resolve, reject) => {
+            entry.file(resolve, reject);
+          }).then((file) => {
+            return viewer.processZipFile(file);
+          }).catch((ex) => {
+            // this should never happen
+            console.error(ex);
+            return false;
+          });
         });
-      }
+      });
+      return p;
+    }).then((success) => {
+      if (success) { return; }
+      this.loadEnd();
     });
   },
 
   // @TODO: process multiple input files
   loadInputFiles(files) {
-    viewer.processZipFile(files[0]);
+    return Promise.resolve().then(() => {
+      this.loadStart();
+    }).then(() => {
+      let p = Promise.resolve(false);
+      Array.prototype.forEach.call(files, (file) => {
+        p = p.then((success) => {
+          // skip further loading if success
+          if (success) { return success; }
+
+          return viewer.processZipFile(file).catch((ex) => {
+            // this should never happen
+            console.error(ex);
+            return false;
+          });
+        });
+      });
+      return p;
+    }).then((success) => {
+      if (success) { return; }
+      this.loadEnd();
+    });
+  },
+
+  loadStart() {
+    this.uninitEvents();
+    this.filesSelector.disabled = true;
+    this.loadmask.style.display = '';
+    this.logger.textContent = '';
+  },
+
+  loadEnd() {
+    this.initEvents();
+    this.filesSelector.disabled = false;
+    this.filesSelector.value = null;
+    this.loadmask.style.display = 'none';
   },
 
   log(msg) {
@@ -275,10 +332,6 @@ const viewer = {
    */
   processZipFile(zipFile) {
     return Promise.resolve().then(() => {
-      this.uninitEvents();
-      this.filesSelector.disabled = true;
-      this.loadmask.style.display = '';
-      this.logger.textContent = '';
       this.log(`Loading: '${zipFile.name}'...`);
     }).then(() => {
       const uuid = scrapbook.getUuid();
@@ -468,12 +521,10 @@ const viewer = {
     }).catch((ex) => {
       console.error(ex);
       this.error(`Unable to open web page archive: ${ex.message}`);
-
-      this.initEvents();
-      this.filesSelector.disabled = false;
-      this.filesSelector.value = null;
-      this.loadmask.style.display = 'none';
       return false;
+    }).then((success) => {
+      this.log('');
+      return success;
     });
   },
 };
