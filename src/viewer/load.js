@@ -57,7 +57,7 @@ function onDrop(e) {
 
 function onChangeFiles(e) {
   e.preventDefault();
-  const files = e.target.files;
+  const files = Array.from(e.target.files);
   if (!(files && files.length)) { return; }
 
   viewer.loadInputFiles(files);
@@ -158,7 +158,7 @@ const viewer = {
       this.loadStart();
     }).then(() => {
       let p = Promise.resolve(false);
-      entries.forEach((entry) => {
+      entries.sort(this.sortFileObj).forEach((entry) => {
         if (!entry.isFile) { return; }
 
         p = p.then((success) => {
@@ -189,7 +189,7 @@ const viewer = {
       this.loadStart();
     }).then(() => {
       let p = Promise.resolve(false);
-      Array.prototype.forEach.call(files, (file) => {
+      files.sort(this.sortFileObj).forEach((file) => {
         p = p.then((success) => {
           // skip further loading if success
           if (success) { return success; }
@@ -231,6 +231,15 @@ const viewer = {
     span.className = 'error';
     span.appendChild(document.createTextNode(msg + '\n'));
     logger.appendChild(span);
+  },
+
+  /**
+   * Use to sort File or FileSystemFileEntry
+   */
+  sortFileObj(a, b) {
+    if (a.name > b.name) { return 1; }
+    if (a.name < b.name) { return -1; }
+    return 0;
   },
 
   openUrl(url, inNewTab = false) {
