@@ -271,6 +271,7 @@ const viewer = {
     return Promise.resolve().then(() => {
       this.uninitEvents();
       this.filesSelector.disabled = true;
+      this.loadmask.style.display = '';
     }).then(() => {
       const uuid = scrapbook.getUuid();
       const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
@@ -463,6 +464,7 @@ const viewer = {
       this.initEvents();
       this.filesSelector.disabled = false;
       this.filesSelector.value = null;
+      this.loadmask.style.display = 'none';
       return false;
     });
   },
@@ -473,6 +475,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // init common elements and events
   viewer.dropmask = document.getElementById('dropmask');
+  viewer.loadmask = document.getElementById('loadmask');
   viewer.filesSelector = document.getElementById('files-selector');
 
   scrapbook.loadOptions().then(() => {
