@@ -398,6 +398,8 @@ const viewer = {
           }
           case "htz":
           default: {
+            if (!zipData.files["index.html"]) { return []; }
+
             return ["index.html"];
           }
         }
