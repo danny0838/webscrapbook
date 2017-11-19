@@ -88,9 +88,10 @@ capturer.invoke = function (method, args, details = {}) {
  * @return {Promise}
  */
 capturer.getContentTabs = function () {
-  return scrapbook.getContentPagePattern().then((urlMatch) => {
-    return browser.tabs.query({currentWindow: true, url: urlMatch});
-  }).then((tabs) => {
+  // scrapbook.getContentPagePattern() resolves to [] on Firefox Android 57
+  // due to a bug of browser.tabs.query:
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=1418737
+  return browser.tabs.query({currentWindow: true, url: "<all_urls>"}).then((tabs) => {
     return tabs.filter((tab) => (scrapbook.isContentPage(tab.url)));
   });
 };
