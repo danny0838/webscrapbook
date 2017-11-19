@@ -150,7 +150,7 @@ capturer.captureAllTabs = function (params) {
  * @return {Promise}
  */
 capturer.captureTab = function (params) {
-  return new Promise((resolve, reject) => {
+  return Promise.resolve().then(() => {
     const {tab, frameId, saveBeyondSelection, mode} = params;
     const {id: tabId, url, title, favIconUrl} = tab;
 
@@ -242,7 +242,7 @@ capturer.captureTab = function (params) {
  * @return {Promise}
  */
 capturer.captureHeadless = function (params) {
-  return new Promise((resolve, reject) => {
+  return Promise.resolve().then(() => {
     const {url, refUrl, title, favIconUrl, mode} = params;
 
     const source = `${url}`;
