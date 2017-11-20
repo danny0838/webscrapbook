@@ -80,9 +80,13 @@ capturer.getAccessToken = function (url, method) {
 /**
  * Prevent filename conflict. Appends a number if the given filename is used.
  *
+ * Filename and path limitation:
+ * - Windows API: filepath limited to 260 UTF-16 chars
+ * - ext4: filename limited to 255 UTF-8 bytes
+ *
  * @param {string} timeId
- * @param {string} filename - The unfixed filename. Should be validated (via scrapbook.validateFilename).
- * @return {string} The fixed filename.
+ * @param {string} filename - A validated filename (via scrapbook.validateFilename).
+ * @return {string} The uniquified filename.
  */
 capturer.getUniqueFilename = function (timeId, filename) {
   if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
@@ -90,7 +94,7 @@ capturer.getUniqueFilename = function (timeId, filename) {
 
   let newFilename = filename || "untitled";
   let [newFilenameBase, newFilenameExt] = scrapbook.filenameParts(newFilename);
-  newFilenameBase = scrapbook.crop(scrapbook.crop(newFilenameBase, 240, true), 128);
+  newFilenameBase = scrapbook.crop(newFilenameBase, 128, 240);
   newFilenameExt = newFilenameExt ? "." + newFilenameExt : "";
   newFilename = newFilenameBase + newFilenameExt;
   let newFilenameCI = newFilename.toLowerCase();

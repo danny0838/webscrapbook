@@ -595,27 +595,31 @@ scrapbook.isContentPage = function (url, isAllowedFileSchemeAccess = !scrapbook.
 /**
  * Crops the given string
  *
- * @param {boolean} byUtf8   - true to crop texts according to each byte under UTF-8 encoding
- *                             false to crop according to each UTF-16 char
- * @param {boolean} ellipsis - string for ellipsis
+ * @param {integer} charLimit - UTF-16 chars limit, beyond which will be cropped. 0 means no crop.
+ * @param {integer} byteLimit - UTF-8 bytes limit, beyond which will be cropped. 0 means no crop.
+ * @param {string} ellipsis - string for ellipsis
  */
-scrapbook.crop = function (str, maxLength, byUtf8, ellipsis) {
-  if (typeof ellipsis  === "undefined") { ellipsis = "..."; }
-  if (byUtf8) {
-    let bytes = this.unicodeToUtf8(str);
-    if (bytes.length <= maxLength) { return str; }
-    bytes = bytes.substring(0, maxLength - this.unicodeToUtf8(ellipsis).length);
-    while (true) {
-      try {
-        return this.utf8ToUnicode(bytes) + ellipsis;
-      } catch (ex) {
-        // error if we cut a UTF-8 char sequence in the middle
-      }
-      bytes= bytes.substring(0, bytes.length-1);
+scrapbook.crop = function (str, charLimit, byteLimit, ellipsis = '...') {
+  if (charLimit) {
+    if (str.length > charLimit) {
+      str = str.substring(0, charLimit - ellipsis.length) + ellipsis;
     }
-  } else {
-    return (str.length > maxLength) ? str.substr(0, maxLength - ellipsis.length) + ellipsis : str;
   }
+  if (byteLimit) {
+    let bytes = this.unicodeToUtf8(str);
+    if (bytes.length > byteLimit) {
+      bytes = bytes.substring(0, byteLimit - this.unicodeToUtf8(ellipsis).length);
+      while (true) {
+        try {
+          return this.utf8ToUnicode(bytes) + ellipsis;
+        } catch(e) {
+          // error if we cut a UTF-8 char sequence in the middle
+        };
+        bytes = bytes.substring(0, bytes.length-1);
+      }
+    }
+  }
+  return str;
 };
 
 scrapbook.getUuid = function () {
