@@ -1024,6 +1024,8 @@ const indexer = {
                 });
               }).then((downloadId) => {
                 this.autoEraseSet.add(downloadId);
+              }).catch((ex) => {
+                this.error(`Error downloading ${directory + "/" + inZipPath}: ${ex.message}`);
               });
             });
             return p;
