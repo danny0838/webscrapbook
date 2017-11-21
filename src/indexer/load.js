@@ -608,26 +608,32 @@ const indexer = {
             const html = doc.documentElement;
 
             /* meta.id */
+            const newId = meta.id = html.hasAttribute('data-scrapbook-id') ? 
+                html.getAttribute('data-scrapbook-id') : 
+                meta.id || id;
+
             // tweak ID if the id is not used
-            if (html.hasAttribute('data-scrapbook-id')) {
-              const newId = html.getAttribute('data-scrapbook-id');
-              if (newId && newId !== id) {
-                if (!scrapbookData.meta[newId]) {
-                  meta = scrapbookData.meta[newId] = scrapbookData.meta[id];
-                  dataDirs[newId] = dataDirs[id];
-                  delete(scrapbookData.meta[id]);
-                  delete(dataDirs[id]);
-                  id = newId;
-                } else if (scrapbookData.meta[newId].index === index) {
-                  // it's self
-                  dataDirs[newId] = dataDirs[id];
-                  delete(dataDirs[id]);
-                  this.log(`'data/${index}' is already used by '${newId}', skip generating.`);
-                  return;
-                } else {
-                  delete(scrapbookData.meta[id]);
-                  throw new Error(`Specified ID '${newId}' has been used.`);
-                }
+            if (newId !== id) {
+              if (!scrapbookData.meta[newId]) {
+                // previous data for id shoudld be belong to newId
+                meta = scrapbookData.meta[newId] = scrapbookData.meta[id];
+                dataDirs[newId] = dataDirs[id];
+                delete(scrapbookData.meta[id]);
+                delete(dataDirs[id]);
+                this.log(`Tweaked previous '${id}' to '${newId}'.`);
+                id = newId;
+              } else if (scrapbookData.meta[newId].index === index) {
+                // it's self
+                // meta record for newId matches data files for id
+                // update pointer of dataDirs
+                dataDirs[newId] = dataDirs[id];
+                delete(dataDirs[id]);
+                this.log(`'data/${index}' is already used by '${newId}', skip generating.`);
+                return;
+              } else {
+                // already a data belong to newId, mark this as invalid
+                delete(scrapbookData.meta[id]);
+                throw new Error(`Specified ID '${newId}' has been used.`);
               }
             }
 
@@ -824,7 +830,8 @@ const indexer = {
             titleIdMap.set(scrapbookData.meta[id].title, id);
           }
 
-          // folder and exported are temporary, do not store forever
+          // id, folder, and exported are temporary
+          delete(scrapbookData.meta[id].id);
           delete(scrapbookData.meta[id].folder);
           delete(scrapbookData.meta[id].exported);
         }
