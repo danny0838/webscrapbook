@@ -668,6 +668,16 @@ const indexer = {
                 html.getAttribute('data-scrapbook-comment') : 
                 (meta.comment || "");
 
+            /* meta.folder */
+            meta.folder = html.hasAttribute('data-scrapbook-folder') ? 
+                html.getAttribute('data-scrapbook-folder') : 
+                (meta.folder || "");
+
+            /* meta.exported */
+            meta.exported = html.hasAttribute('data-scrapbook-exported') ? 
+                html.getAttribute('data-scrapbook-exported') : 
+                (meta.exported || "");
+
             /* meta.icon */
             return Promise.resolve().then(() => {
               if (html.hasAttribute('data-scrapbook-icon')) {
@@ -746,6 +756,7 @@ const indexer = {
 
         this.log(`Inspecting TOC...`);
         const referredIds = new Set();
+        const titleIdMap = new Map();
         for (const id in scrapbookData.toc) {
           if (!scrapbookData.meta[id] && id !== 'root' && id !== 'hidden') {
             delete(scrapbookData.toc[id]);
@@ -763,6 +774,7 @@ const indexer = {
               return false;
             }
             referredIds.add(refId);
+            titleIdMap.set(scrapbookData.meta[refId].title, refId);
             return true;
           });
 
@@ -772,11 +784,49 @@ const indexer = {
           }
         }
 
-        for (const id in scrapbookData.meta) {
-          if (!referredIds.has(id) && id !== 'root' && id !== 'hidden') {
-            this.log(`Added '${id}' to root of TOC.`);
-            scrapbookData.toc.root.push(id);
+        /* Add new items to TOC */
+        this.log(`Adding new items to TOC...`);
+
+        const insertToToc = (id, toc, metas) => {
+          if (!metas[id].folder) {
+            this.log(`Appended '${id}' to root of TOC.`);
+            toc['root'].push(id);
+            return;
           }
+
+          let parentId = 'root';
+          metas[id].folder.split(/[\t\n\r\v\f]+/).forEach((folder) => {
+            let folderId = titleIdMap.get(folder);
+            if (!(metas[folderId] && toc[parentId].indexOf(folderId) !== -1)) {
+              folderId = this.generateFolder(folder, metas);
+              toc[parentId].push(folderId);
+              titleIdMap.set(folder, folderId);
+              this.log(`Generated folder '${folderId}' with name '${folder}'.`);
+            }
+            if (!toc[folderId]) {
+              toc[folderId] = [];
+            }
+            parentId = folderId;
+          });
+          toc[parentId].push(id);
+          this.log(`Appended '${id}' to '${parentId}'.`);
+        };
+
+        for (const id of Object.keys(scrapbookData.meta).sort((a, b) => {
+          const token_a = [scrapbookData.meta[a].exported, a];
+          const token_b = [scrapbookData.meta[b].exported, b];
+          if (token_a > token_b) { return 1; }
+          if (token_a < token_b) { return -1; }
+          return 0;
+        })) {
+          if (!referredIds.has(id) && id !== 'root' && id !== 'hidden') {
+            insertToToc(id, scrapbookData.toc, scrapbookData.meta);
+            titleIdMap.set(scrapbookData.meta[id].title, id);
+          }
+
+          // folder and exported are temporary, do not store forever
+          delete(scrapbookData.meta[id].folder);
+          delete(scrapbookData.meta[id].exported);
         }
       }).then(() => {
         /* Generate cache for favicon */
@@ -1168,6 +1218,29 @@ const indexer = {
       icon: undefined,
       comment: undefined,
     };
+  },
+
+  getUniqueId(id, metas) {
+    if (!metas[id]) { return id; }
+
+    const d = scrapbook.idToDate(id);
+    let v = d.valueOf();
+    do {
+      v += 1;
+      d.setTime(v);
+      id = scrapbook.dateToId(d);
+    } while (metas[id]);
+
+    return id;
+  },
+
+  generateFolder(title, metas) {
+    const folderId = this.getUniqueId(scrapbook.dateToId(), metas);
+    const meta = metas[folderId] = this.getDefaultMeta();
+    meta.type = 'folder';
+    meta.title = title;
+    meta.create = folderId;
+    return folderId;
   },
 
   generateMetaFile(jsonData) {
