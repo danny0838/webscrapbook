@@ -1097,7 +1097,7 @@ const indexer = {
   },
 
   parseUrl(url, index, itemFiles) {
-    let base = this.virtualBase + index;
+    let base = this.virtualBase + index.split("/").map(x => encodeURIComponent(x)).join("/");
     let absoluteUrl;
     try {
       absoluteUrl = new URL(url, base);
