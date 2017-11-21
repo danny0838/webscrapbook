@@ -527,14 +527,14 @@ const indexer = {
 
         this.log(`Inspecting data files...`);
         let p = Promise.resolve();
-        for (const id of Object.keys(dataDirs).sort()) {
+        for (let id of Object.keys(dataDirs).sort()) {
           if (scrapbookData.meta[id]) { continue; }
 
           const itemFiles = dataDirs[id];
           const index = this.getIndexPath(itemFiles, id);
           if (!index) { continue; }
 
-          const meta = scrapbookData.meta[id] = this.getDefaultMeta();
+          let meta = scrapbookData.meta[id] = this.getDefaultMeta();
           let zipDataDir;
 
           p = p.then(() => {
@@ -603,6 +603,30 @@ const indexer = {
             if (!doc) { throw new Error(`Unable to load index file 'data/${index}'`); }
 
             const html = doc.documentElement;
+
+            /* meta.id */
+            // tweak ID if the id is not used
+            if (html.hasAttribute('data-scrapbook-id')) {
+              const newId = html.getAttribute('data-scrapbook-id');
+              if (newId && newId !== id) {
+                if (!scrapbookData.meta[newId]) {
+                  meta = scrapbookData.meta[newId] = scrapbookData.meta[id];
+                  dataDirs[newId] = dataDirs[id];
+                  delete(scrapbookData.meta[id]);
+                  delete(dataDirs[id]);
+                  id = newId;
+                } else if (scrapbookData.meta[newId].index === index) {
+                  // it's self
+                  dataDirs[newId] = dataDirs[id];
+                  delete(dataDirs[id]);
+                  this.log(`'data/${index}' is already used by '${newId}', skip generating.`);
+                  return;
+                } else {
+                  delete(scrapbookData.meta[id]);
+                  throw new Error(`Specified ID '${newId}' has been used.`);
+                }
+              }
+            }
 
             /* meta.index */
             meta.index = index;
