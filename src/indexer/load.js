@@ -418,7 +418,7 @@ const indexer = {
               modify: rdfMeta.modify ? scrapbook.dateToId(scrapbook.idToDateOld(rdfMeta.modify)) : "",
               source: rdfMeta.source,
               icon: rdfMeta.icon,
-              comment: rdfMeta.comment,
+              comment: rdfMeta.comment.replace(/ __BR__ /g, '\n'),
             };
 
             /* meta.charset, meta.locked */
