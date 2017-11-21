@@ -530,217 +530,225 @@ const indexer = {
 
         this.log(`Inspecting data files...`);
         let p = Promise.resolve();
-        for (let id of Object.keys(dataDirs).sort()) {
+        for (const id of Object.keys(dataDirs).sort()) {
           if (scrapbookData.meta[id]) { continue; }
 
-          const itemFiles = dataDirs[id];
-          const index = this.getIndexPath(itemFiles, id);
-          if (!index) { continue; }
-
-          let meta = scrapbookData.meta[id] = this.getDefaultMeta();
-          let zipDataDir;
-
           p = p.then(() => {
-            this.log(`Generating metadata entry for '${id}' from 'data/${index}'...`);
-            if (index.endsWith('/index.html') ||
-                index.endsWith('.html') ||
-                index.endsWith('.htm') ||
-                index.endsWith('.xhtml') ||
-                index.endsWith('.xht')) {
-              return scrapbook.readFileAsDocument(itemFiles[index]);
-            } else if (index.endsWith('.htz')) {
-              return new JSZip().loadAsync(itemFiles[index]).then((zip) => {
-                zipDataDir = zip;
+            const itemFiles = dataDirs[id];
+            const index = this.getIndexPath(itemFiles, id);
 
-                return zip.file("index.html").async("arraybuffer").then((ab) => {
-                  const blob = new Blob([ab], {type: "text/html"});
-                  return scrapbook.readFileAsDocument(blob);
-                });
-              });
-            } else if (index.endsWith('.maff')) {
-              // @TODO:
-              // support multiple entries in one maff file
-              return new JSZip().loadAsync(itemFiles[index], {createFolders: true}).then((zip) => {
-                const zipDir = zip.folder(Object.keys(zip.files)[0]);
-                zipDataDir = zipDir;
+            let meta;
+            let zipDataDir;
 
-                const zipRdfFile = zipDir.file("index.rdf");
-                if (zipRdfFile) {
-                  return zipRdfFile.async("arraybuffer").then((ab) => {
-                    const blob = new Blob([ab], {type: "application/rdf+xml"});
-                    return scrapbook.readFileAsDocument(blob);
-                  }).then((doc) => {
-                    const rdfMeta = scrapbook.parseMaffRdfDocument(doc);
+            return Promise.resolve().then(() => {
+              if (!index) { return; }
 
-                    // merge rdf metadata to scrapbookData.meta
-                    if (rdfMeta.title) {
-                      meta.title = rdfMeta.title;
-                    }
-                    if (rdfMeta.originalurl) {
-                      meta.source = rdfMeta.originalurl;
-                    }
-                    if (rdfMeta.archivetime) {
-                      meta.create = scrapbook.dateToId(new Date(rdfMeta.archivetime));
-                    }
+              meta = scrapbookData.meta[id] = scrapbookData.meta[id] || this.getDefaultMeta();
 
-                    // load pointed index file
-                    return zipDir.file(rdfMeta.indexfilename).async("arraybuffer").then((ab) => {
+              /* meta.index */
+              meta.index = index;
+
+              /* meta.modify */
+              // update using last modified time of the index file
+              const fileModify = scrapbook.dateToId(new Date(itemFiles[index].lastModified));
+              if (fileModify > meta.modify) { meta.modify = fileModify; }
+
+              return Promise.resolve().then(() => {
+                this.log(`Generating metadata entry from 'data/${index}'...`);
+                if (index.endsWith('/index.html') ||
+                    index.endsWith('.html') ||
+                    index.endsWith('.htm') ||
+                    index.endsWith('.xhtml') ||
+                    index.endsWith('.xht')) {
+                  return scrapbook.readFileAsDocument(itemFiles[index]);
+                } else if (index.endsWith('.htz')) {
+                  return new JSZip().loadAsync(itemFiles[index]).then((zip) => {
+                    zipDataDir = zip;
+
+                    return zip.file("index.html").async("arraybuffer").then((ab) => {
                       const blob = new Blob([ab], {type: "text/html"});
                       return scrapbook.readFileAsDocument(blob);
                     });
                   });
-                } else {
-                  for (const path in zipDir.files) {
-                    const subPath = path.slice(zipDir.root.length);
-                    if (subPath.startsWith("index.")) {
-                      return zipDir.file(subPath).async("arraybuffer").then((ab) => {
-                        const blob = new Blob([ab], {type: "text/html"});
+                } else if (index.endsWith('.maff')) {
+                  // @TODO:
+                  // support multiple entries in one maff file
+                  return new JSZip().loadAsync(itemFiles[index], {createFolders: true}).then((zip) => {
+                    const zipDir = zip.folder(Object.keys(zip.files)[0]);
+                    zipDataDir = zipDir;
+
+                    const zipRdfFile = zipDir.file("index.rdf");
+                    if (zipRdfFile) {
+                      return zipRdfFile.async("arraybuffer").then((ab) => {
+                        const blob = new Blob([ab], {type: "application/rdf+xml"});
                         return scrapbook.readFileAsDocument(blob);
+                      }).then((doc) => {
+                        const rdfMeta = scrapbook.parseMaffRdfDocument(doc);
+
+                        // merge rdf metadata to scrapbookData.meta
+                        if (rdfMeta.title) {
+                          meta.title = rdfMeta.title;
+                        }
+                        if (rdfMeta.originalurl) {
+                          meta.source = rdfMeta.originalurl;
+                        }
+                        if (rdfMeta.archivetime) {
+                          meta.create = scrapbook.dateToId(new Date(rdfMeta.archivetime));
+                        }
+
+                        // load pointed index file
+                        return zipDir.file(rdfMeta.indexfilename).async("arraybuffer").then((ab) => {
+                          const blob = new Blob([ab], {type: "text/html"});
+                          return scrapbook.readFileAsDocument(blob);
+                        });
                       });
+                    } else {
+                      for (const path in zipDir.files) {
+                        const subPath = path.slice(zipDir.root.length);
+                        if (subPath.startsWith("index.")) {
+                          return zipDir.file(subPath).async("arraybuffer").then((ab) => {
+                            const blob = new Blob([ab], {type: "text/html"});
+                            return scrapbook.readFileAsDocument(blob);
+                          });
+                        }
+                      }
                     }
-                  }
-                }
-              });
-            }
-          }).then((doc) => {
-            if (!doc) { throw new Error(`Unable to load index file 'data/${index}'`); }
-
-            const html = doc.documentElement;
-
-            /* meta.id */
-            const newId = meta.id = html.hasAttribute('data-scrapbook-id') ? 
-                html.getAttribute('data-scrapbook-id') : 
-                meta.id || id;
-
-            // tweak ID if the id is not used
-            if (newId !== id) {
-              if (!scrapbookData.meta[newId]) {
-                // previous data for id shoudld be belong to newId
-                meta = scrapbookData.meta[newId] = scrapbookData.meta[id];
-                dataDirs[newId] = dataDirs[id];
-                delete(scrapbookData.meta[id]);
-                delete(dataDirs[id]);
-                this.log(`Tweaked previous '${id}' to '${newId}'.`);
-                id = newId;
-              } else if (scrapbookData.meta[newId].index === index) {
-                // it's self
-                // meta record for newId matches data files for id
-                // update pointer of dataDirs
-                dataDirs[newId] = dataDirs[id];
-                delete(dataDirs[id]);
-                this.log(`'data/${index}' is already used by '${newId}', skip generating.`);
-                return;
-              } else {
-                // already a data belong to newId, mark this as invalid
-                delete(scrapbookData.meta[id]);
-                throw new Error(`Specified ID '${newId}' has been used.`);
-              }
-            }
-
-            /* meta.index */
-            meta.index = index;
-
-            /* meta.type */
-            meta.type = html.hasAttribute('data-scrapbook-type') ? 
-                html.getAttribute('data-scrapbook-type') : 
-                (meta.type || "");
-
-            /* meta.source */
-            meta.source = html.hasAttribute('data-scrapbook-source') ? 
-                html.getAttribute('data-scrapbook-source') : 
-                (meta.source || "");
-
-            /* meta.title */
-            // fallback to source and then id
-            meta.title = html.hasAttribute('data-scrapbook-title') ? 
-                html.getAttribute('data-scrapbook-title') : 
-                doc.title || meta.title || 
-                (meta.source ? scrapbook.urlToFilename(meta.source) : "") || 
-                (meta.type !== 'separator' ? id : '');
-
-            /* meta.modify */
-            // update using last modified time of the index file
-            const fileModify = scrapbook.dateToId(new Date(itemFiles[index].lastModified));
-            if (fileModify > meta.modify) { meta.modify = fileModify; }
-
-            /* meta.create */
-            // fallback to modify time
-            meta.create = html.hasAttribute('data-scrapbook-create') ? 
-                html.getAttribute('data-scrapbook-create') : 
-                (meta.create || meta.modify);
-
-            /* meta.comment */
-            meta.comment = html.hasAttribute('data-scrapbook-comment') ? 
-                html.getAttribute('data-scrapbook-comment') : 
-                (meta.comment || "");
-
-            /* meta.folder */
-            meta.folder = html.hasAttribute('data-scrapbook-folder') ? 
-                html.getAttribute('data-scrapbook-folder') : 
-                (meta.folder || "");
-
-            /* meta.exported */
-            meta.exported = html.hasAttribute('data-scrapbook-exported') ? 
-                html.getAttribute('data-scrapbook-exported') : 
-                (meta.exported || "");
-
-            /* meta.icon */
-            return Promise.resolve().then(() => {
-              if (html.hasAttribute('data-scrapbook-icon')) {
-                return html.getAttribute('data-scrapbook-icon');
-              }
-
-              let icon;
-              const favIconElem = doc.querySelector('link[rel~="icon"][href]');
-              if (favIconElem) {
-                icon = favIconElem.getAttribute('href');
-
-                // special handling if data is in zip
-                // return data URL for further caching
-                if (zipDataDir) {
-                  return zipDataDir.file(icon).async('arraybuffer').then((ab) => {
-                    const mime = Mime.prototype.extension(icon);
-                    const blob = new Blob([ab], {type: mime});
-                    return scrapbook.readFileAsDataURL(blob);
-                  }).then((dataUrl) => {
-                    this.log(`Retrieved favicon at '${icon}' for packed 'data/${index}' as '${scrapbook.crop(dataUrl, 256)}'`);
-                    return dataUrl;
-                  }).catch((ex) => {
-                    console.error(ex);
-                    this.error(`Unable to retrieve favicon at '${icon}' for packed 'data/${index}': ${ex.message}`);
                   });
                 }
+              }).then((doc) => {
+                if (!doc) { throw new Error(`Unable to load index file 'data/${index}'`); }
 
-                // special handling of singleHtmlJs generated data URI
-                if (/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(icon)) {
-                  const resType = RegExp.$1;
-                  const resId = RegExp.$2;
-                  const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-                  if (/\([\n\r]+(.+)[\n\r]+\);$/.test(loader.textContent)) {
-                    const data = JSON.parse(RegExp.$1);
-                    icon = `data:${resType};base64,${data[resId].d}`;
+                /* Merge information from html document to meta */
+                const html = doc.documentElement;
+
+                /* meta.id */
+                meta.id = html.hasAttribute('data-scrapbook-id') ? 
+                    html.getAttribute('data-scrapbook-id') : 
+                    meta.id;
+
+                /* meta.type */
+                meta.type = html.hasAttribute('data-scrapbook-type') ? 
+                    html.getAttribute('data-scrapbook-type') : 
+                    meta.type;
+
+                /* meta.source */
+                meta.source = html.hasAttribute('data-scrapbook-source') ? 
+                    html.getAttribute('data-scrapbook-source') : 
+                    meta.source;
+
+                /* meta.title */
+                meta.title = html.hasAttribute('data-scrapbook-title') ? 
+                    html.getAttribute('data-scrapbook-title') : 
+                    doc.title || meta.title;
+
+                /* meta.create */
+                meta.create = html.hasAttribute('data-scrapbook-create') ? 
+                    html.getAttribute('data-scrapbook-create') : 
+                    meta.create;
+
+                /* meta.comment */
+                meta.comment = html.hasAttribute('data-scrapbook-comment') ? 
+                    html.getAttribute('data-scrapbook-comment') : 
+                    meta.comment;
+
+                /* meta.folder */
+                meta.folder = html.hasAttribute('data-scrapbook-folder') ? 
+                    html.getAttribute('data-scrapbook-folder') : 
+                    meta.folder;
+
+                /* meta.exported */
+                meta.exported = html.hasAttribute('data-scrapbook-exported') ? 
+                    html.getAttribute('data-scrapbook-exported') : 
+                    meta.exported;
+
+                /* meta.icon */
+                return Promise.resolve().then(() => {
+                  let icon;
+
+                  if (html.hasAttribute('data-scrapbook-icon')) {
+                    icon = html.getAttribute('data-scrapbook-icon');
+                  } else {
+                    const favIconElem = doc.querySelector('link[rel~="icon"][href]');
+                    if (favIconElem) {
+                      icon = favIconElem.getAttribute('href');
+                    }
                   }
-                }
-              }
-              return icon;
-            }).then((icon) => {
-              meta.icon = icon || meta.icon || "";
-              if (meta.icon) {
-                meta.icon = this.parseUrl(meta.icon, index, itemFiles).url;
-              }
+
+                  // special handling if data is in zip
+                  // return data URL for further caching
+                  if (zipDataDir) {
+                    return zipDataDir.file(icon).async('arraybuffer').then((ab) => {
+                      const mime = Mime.prototype.extension(icon);
+                      const blob = new Blob([ab], {type: mime});
+                      return scrapbook.readFileAsDataURL(blob);
+                    }).then((dataUrl) => {
+                      this.log(`Retrieved favicon at '${icon}' for packed 'data/${index}' as '${scrapbook.crop(dataUrl, 256)}'`);
+                      return dataUrl;
+                    }).catch((ex) => {
+                      console.error(ex);
+                      this.error(`Unable to retrieve favicon at '${icon}' for packed 'data/${index}': ${ex.message}`);
+                    });
+                  }
+
+                  // special handling of singleHtmlJs generated data URI
+                  if (/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(icon)) {
+                    const resType = RegExp.$1;
+                    const resId = RegExp.$2;
+                    const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
+                    if (/\([\n\r]+(.+)[\n\r]+\);$/.test(loader.textContent)) {
+                      const data = JSON.parse(RegExp.$1);
+                      icon = `data:${resType};base64,${data[resId].d}`;
+                    }
+                  }
+
+                  return icon;
+                }).then((icon) => {
+                  meta.icon = icon || meta.icon;
+                });
+              }).catch((ex) => {
+                console.error(ex);
+                this.error(`Error inspecting 'data/${index}': ${ex.message}`);
+              });
             });
-          }).catch((ex) => {
-            console.error(ex);
-            this.error(`Error inspecting 'data/${index}': ${ex.message}`);
           });
         }
         return p;
       }).then(() => {
         /* Fix meta and toc */
 
+        /* Process metadata */
         this.log(`Inspecting metadata...`);
-        for (const id in scrapbookData.meta) {
-          const meta = scrapbookData.meta[id];
+        for (let id in scrapbookData.meta) {
+          let meta = scrapbookData.meta[id];
+
+          // tweak ID if we have a meta id different to dir id
+          const newId = meta.id;
+          if (newId && newId !== id) {
+            if (!scrapbookData.meta[newId]) {
+              // previous data for id shoudld be belong to newId
+              scrapbookData.meta[newId] = meta;
+              delete(scrapbookData.meta[id]);
+              dataDirs[newId] = dataDirs[id];
+              delete(dataDirs[id]);
+              this.log(`Tweaked '${id}' to '${newId}'.`);
+              id = newId;
+            } else if (scrapbookData.meta[newId].index === index) {
+              // it's self
+              // meta record for newId matches data files for id
+              // update pointer of dataDirs
+              dataDirs[newId] = dataDirs[id];
+              delete(dataDirs[id]);
+              this.log(`'data/${index}' is already used by '${newId}', skip generating.`);
+              return;
+            } else {
+              // already a data belong to newId, mark this as invalid
+              delete(scrapbookData.meta[id]);
+              this.error(`Removed bad metadata entry '${id}': specified ID '${newId}' has been used.`);
+            }
+          }
+
+          // remove stale items
+          // fix missing index file
           if (!['folder', 'separator', 'bookmark'].includes(meta.type)) {
             if (!dataDirs[id]) {
               delete(scrapbookData.meta[id]);
@@ -758,8 +766,41 @@ const indexer = {
               }
             }
           }
+
+          // fix meta
+
+          /* meta.type */
+          meta.type = meta.type || "";
+
+          /* meta.source */
+          meta.source = meta.source || "";
+
+          /* meta.title */
+          // fallback to source and then id
+          meta.title = meta.title || 
+              (meta.source ? scrapbook.urlToFilename(meta.source) : '') || 
+              (meta.type !== 'separator' ? id : '');
+
+          /* meta.modify */
+          // fallback to current time
+          meta.modify = meta.modify || scrapbook.dateToId();
+
+          /* meta.create */
+          // fallback to modify time
+          meta.create = meta.create || meta.modify;
+
+          /* meta.icon */
+          meta.icon = meta.icon || "";
+          if (meta.icon && meta.index) {
+            meta.icon = this.parseUrl(meta.icon, meta.index, dataDirs[id]).url;
+          }
+
+          /* meta.comment */
+          meta.comment = meta.comment || "";
         }
 
+        /* Remove stale items from TOC */
+        // generate referredIds and titleIdMap during the loop for later use
         this.log(`Inspecting TOC...`);
         const referredIds = new Set();
         const titleIdMap = new Map();
