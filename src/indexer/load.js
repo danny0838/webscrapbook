@@ -1005,9 +1005,9 @@ const indexer = {
         }
 
         if (this.options["indexer.autoDownload"]) {
-          const directory = scrapbook.getOption("capture.scrapbookFolder").replace(/^.*[\\\/]/, "");
+          const directory = scrapbook.getOption("capture.scrapbookFolder");
 
-          if (scrapbook.validateFilename(scrapbookData.title) === directory) {
+          if (scrapbook.validateFilename(scrapbookData.title) === directory.replace(/^.*[\\\/]/, "")) {
             this.log(`Downloading files...`);
             let p = Promise.resolve();
             zip.forEach((inZipPath, zipObj) => {
