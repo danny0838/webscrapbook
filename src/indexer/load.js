@@ -534,11 +534,11 @@ const indexer = {
           const index = this.getIndexPath(itemFiles, id);
           if (!index) { continue; }
 
-          this.log(`Generating metadata entry for '${id}' from 'data/${index}'...`);
           const meta = scrapbookData.meta[id] = this.getDefaultMeta();
           let zipDataDir;
 
           p = p.then(() => {
+            this.log(`Generating metadata entry for '${id}' from 'data/${index}'...`);
             if (index.endsWith('/index.html') ||
                 index.endsWith('.html') ||
                 index.endsWith('.htm') ||
