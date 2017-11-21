@@ -608,18 +608,20 @@ const indexer = {
             meta.index = index;
 
             /* meta.type */
-            meta.type = html.hasAttribute('data-scrapbook-type') ?
-                html.getAttribute('data-scrapbook-type') :
+            meta.type = html.hasAttribute('data-scrapbook-type') ? 
+                html.getAttribute('data-scrapbook-type') : 
                 (meta.type || "");
 
             /* meta.source */
-            meta.source = html.hasAttribute('data-scrapbook-source') ?
+            meta.source = html.hasAttribute('data-scrapbook-source') ? 
                 html.getAttribute('data-scrapbook-source') : 
                 (meta.source || "");
 
             /* meta.title */
             // fallback to source and then id
-            meta.title = doc.title || meta.title || 
+            meta.title = html.hasAttribute('data-scrapbook-title') ? 
+                html.getAttribute('data-scrapbook-title') : 
+                doc.title || meta.title || 
                 (meta.source ? scrapbook.urlToFilename(meta.source) : "") || 
                 (meta.type !== 'separator' ? id : '');
 
@@ -641,9 +643,13 @@ const indexer = {
 
             /* meta.icon */
             return Promise.resolve().then(() => {
+              if (html.hasAttribute('data-scrapbook-icon')) {
+                return html.getAttribute('data-scrapbook-icon');
+              }
+
               let icon;
               const favIconElem = doc.querySelector('link[rel~="icon"][href]');
-              if (favIconElem && favIconElem.hasAttribute('href')) {
+              if (favIconElem) {
                 icon = favIconElem.getAttribute('href');
 
                 // special handling if data is in zip
