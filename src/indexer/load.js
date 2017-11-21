@@ -693,16 +693,16 @@ const indexer = {
           const meta = scrapbookData.meta[id];
           if (!['folder', 'separator', 'bookmark'].includes(meta.type)) {
             if (!dataDirs[id]) {
-              this.error(`Removed metadata entry for '${id}': Missing data files.`);
               delete(scrapbookData.meta[id]);
+              this.error(`Removed metadata entry for '${id}': Missing data files.`);
               continue;
             }
 
             if (!meta.index || !dataDirs[id][meta.index]) {
               const index = this.getIndexPath(dataDirs[id], id);
               if (index) {
-                this.error(`Missing index file '${meta.index || ''}' for '${id}'. Shifted to '${index}'.`);
                 meta.index = index;
+                this.error(`Missing index file '${meta.index || ''}' for '${id}'. Shifted to '${index}'.`);
               } else {
                 this.error(`Missing index file '${meta.index || ''}' for '${id}'.`);
               }
@@ -714,8 +714,8 @@ const indexer = {
         const referredIds = new Set();
         for (const id in scrapbookData.toc) {
           if (!scrapbookData.meta[id] && id !== 'root' && id !== 'hidden') {
-            this.error(`Removed TOC entry '${id}': Missing metadata entry.`);
             delete(scrapbookData.toc[id]);
+            this.error(`Removed TOC entry '${id}': Missing metadata entry.`);
             continue;
           }
 
@@ -733,8 +733,8 @@ const indexer = {
           });
 
           if (!scrapbookData.toc[id].length && id !== 'root' && id !== 'hidden') {
-            this.error(`Removed empty TOC entry '${id}'.`);
             delete(scrapbookData.toc[id]);
+            this.error(`Removed empty TOC entry '${id}'.`);
           }
         }
 
