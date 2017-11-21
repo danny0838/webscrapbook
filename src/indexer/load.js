@@ -1360,7 +1360,8 @@ var scrapbook = {
 
     var elem = document.createElement('li');
     elem.id = 'item-' + id;
-    if (meta.type) { elem.className = 'scrapbook-type-' + meta.type; };
+    if (meta.type) { elem.className = 'scrapbook-type-' + meta.type + ' '; };
+    if (meta.marked) { elem.className += 'scrapbook-marked '; }
     parent.container.appendChild(elem);
 
     var div = document.createElement('div');
