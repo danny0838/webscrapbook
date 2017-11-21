@@ -409,47 +409,9 @@ const indexer = {
               lock: elem.getAttributeNS(NS1, "lock"),
             };
 
-            const meta = {
-              id,
-              index: dataDirs[id] && this.getIndexPath(dataDirs[id], id) || undefined,
-              title: rdfMeta.title,
-              type: rdfMeta.type,
-              create: rdfMeta.create ? scrapbook.dateToId(scrapbook.idToDateOld(rdfMeta.create)) : "",
-              modify: rdfMeta.modify ? scrapbook.dateToId(scrapbook.idToDateOld(rdfMeta.modify)) : "",
-              source: rdfMeta.source,
-              icon: rdfMeta.icon,
-              comment: rdfMeta.comment.replace(/ __BR__ /g, '\n'),
-            };
-
-            /* meta.charset, meta.locked */
-            if (rdfMeta.chars) { meta.charset = rdfMeta.chars; }
-            if (rdfMeta.lock) { meta.locked = rdfMeta.lock; }
-
-            /* meta.type, meta.marked */
-            meta.type = {
-              "note": "postit",
-              "notex": "note",
-              "combine": "site",
-            }[meta.type] || meta.type || "";
-
-            if (meta.type == "marked") {
-              meta.type = "";
-              meta.marked = true;
-            }
-
-            /* meta.icon */
-            let resProtocolBase = `resource://scrapbook/data/${id}/`;
-            let resProtocolBase2 = `resource://scrapbook/icon/`;
-            if (meta.icon.startsWith(resProtocolBase)) {
-              meta.icon = meta.icon.slice(resProtocolBase.length);
-            } else if (meta.icon.startsWith(resProtocolBase2)) {
-              meta.icon = `../../icon/${meta.icon.slice(resProtocolBase2.length)}`;
-            } else if (meta.icon.startsWith('moz-icon://')) {
-              meta.icon = "";
-            }
-
             if (!scrapbookData.meta[id]) { scrapbookData.meta[id] = this.getDefaultMeta(); }
-            scrapbookData.meta[id] = Object.assign(scrapbookData.meta[id], meta);
+            scrapbookData.meta[id].index = dataDirs[id] && this.getIndexPath(dataDirs[id], id) || undefined,
+            this.mergeLegacyMeta(scrapbookData.meta[id], rdfMeta);
           };
 
           const parseSeqElem = (elem) => {
@@ -539,8 +501,29 @@ const indexer = {
 
             let meta;
             let zipDataDir;
+            let importedIndexDat = false;
 
             return Promise.resolve().then(() => {
+              // check for index.dat of legacy ScrapBook X
+              if (!(!index || index.endsWith('/index.html'))) { return; }
+
+              const indexDatPath = `${id}/index.dat`;
+              const indexDatFile = itemFiles[indexDatPath];
+              if (!indexDatFile) { return; }
+
+              this.log(`Found 'data/${indexDatPath}' for legacy ScrapBook. Importing...`);
+              return scrapbook.readFileAsText(indexDatFile).then((text) => {
+                const indexDatMeta = this.parseIndexDat(text);
+                if (!indexDatMeta) { return; }
+
+                if (!scrapbookData.meta[id]) { scrapbookData.meta[id] = this.getDefaultMeta(); }
+                this.mergeLegacyMeta(scrapbookData.meta[id], indexDatMeta);
+                importedIndexDat = true;
+              }).catch((ex) => {
+                console.error(ex);
+                this.error(`Error importing 'data/${indexDatPath}': ${ex.message}`);
+              });
+            }).then(() => {
               if (!index) { return; }
 
               meta = scrapbookData.meta[id] = scrapbookData.meta[id] || this.getDefaultMeta();
@@ -552,6 +535,11 @@ const indexer = {
               // update using last modified time of the index file
               const fileModify = scrapbook.dateToId(new Date(itemFiles[index].lastModified));
               if (fileModify > meta.modify) { meta.modify = fileModify; }
+
+              // skip importing index file if index.dat has been imported
+              if (importedIndexDat) {
+                return;
+              }
 
               return Promise.resolve().then(() => {
                 this.log(`Generating metadata entry from 'data/${index}'...`);
@@ -1266,6 +1254,68 @@ const indexer = {
       icon: undefined,
       comment: undefined,
     };
+  },
+
+  parseIndexDat(text) {
+    const data = text.split('\n');
+    if (data.length < 2) { return null; }
+    const meta = this.getDefaultMeta();
+    for (const d of data) {
+      const [key, ...values] = d.split('\t');
+      if (!values.length) { continue; }
+      meta[key] = values.join('\t');
+    }
+    return meta;
+  },
+
+  /**
+   * @param {Object} newMeta - current scrapbookData.meta[id] object, will be modified
+   * @param {Object} legacyMeta - meta object from legacy ScrapBook X
+   */
+  mergeLegacyMeta(newMeta, legacyMeta) {
+    const id = legacyMeta.id;
+
+    const meta = {
+      id,
+      title: legacyMeta.title,
+      type: legacyMeta.type,
+      create: legacyMeta.create ? scrapbook.dateToId(scrapbook.idToDateOld(legacyMeta.create)) : "",
+      modify: legacyMeta.modify ? scrapbook.dateToId(scrapbook.idToDateOld(legacyMeta.modify)) : "",
+      source: legacyMeta.source,
+      icon: legacyMeta.icon,
+      comment: legacyMeta.comment.replace(/ __BR__ /g, '\n'),
+      folder: legacyMeta.folder,
+      exported: legacyMeta.exported ? scrapbook.dateToId(new Date(legacyMeta.exported)) : undefined,
+    };
+
+    /* meta.charset, meta.locked */
+    if (legacyMeta.chars) { meta.charset = legacyMeta.chars; }
+    if (legacyMeta.lock) { meta.locked = legacyMeta.lock; }
+
+    /* meta.type, meta.marked */
+    meta.type = {
+      "note": "postit",
+      "notex": "note",
+      "combine": "site",
+    }[meta.type] || meta.type || "";
+
+    if (meta.type == "marked") {
+      meta.type = "";
+      meta.marked = true;
+    }
+
+    /* meta.icon */
+    const resProtocolBase = `resource://scrapbook/data/${id}/`;
+    const resProtocolBase2 = `resource://scrapbook/icon/`;
+    if (meta.icon.startsWith(resProtocolBase)) {
+      meta.icon = meta.icon.slice(resProtocolBase.length);
+    } else if (meta.icon.startsWith(resProtocolBase2)) {
+      meta.icon = `../../icon/${meta.icon.slice(resProtocolBase2.length)}`;
+    } else if (meta.icon.startsWith('moz-icon://')) {
+      meta.icon = "";
+    }
+
+    newMeta = Object.assign(newMeta, meta);
   },
 
   getUniqueId(id, metas) {
