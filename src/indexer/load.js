@@ -439,8 +439,11 @@ const indexer = {
 
             /* meta.icon */
             let resProtocolBase = `resource://scrapbook/data/${id}/`;
+            let resProtocolBase2 = `resource://scrapbook/icon/`;
             if (meta.icon.startsWith(resProtocolBase)) {
               meta.icon = meta.icon.slice(resProtocolBase.length);
+            } else if (meta.icon.startsWith(resProtocolBase2)) {
+              meta.icon = `../../icon/${meta.icon.slice(resProtocolBase2.length)}`;
             } else if (meta.icon.startsWith('moz-icon://')) {
               meta.icon = "";
             }
