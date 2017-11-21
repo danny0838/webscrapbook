@@ -681,6 +681,7 @@ const indexer = {
               }
             });
           }).catch((ex) => {
+            console.error(ex);
             this.error(`Error inspecting 'data/${index}': ${ex.message}`);
           });
         }
