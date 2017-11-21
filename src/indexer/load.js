@@ -821,7 +821,7 @@ const indexer = {
             }).then((file) => {
               const path = `tree/favicon/${file.name}`;
 
-              if (!treeFiles[path]) {
+              if (!treeFiles[path] || treeFiles[path].size === 0) {
                 scrapbook.zipAddFile(zip, path, file, false);
                 this.log(`Saved favicon '${scrapbook.crop(favIconUrl, 256)}' for '${id}' at '${path}'.`);
               } else {
