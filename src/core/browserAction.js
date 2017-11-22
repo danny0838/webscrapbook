@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById("openIndexer").addEventListener('click', () => {
-      visitLink(chrome.runtime.getURL("indexer/load.html"), (!currentTab ? 'browseraction' : ''));
+      visitLink(chrome.runtime.getURL("indexer/load.html"), (!currentTab ? '_blank' : ''));
     });
 
     document.getElementById("openOptions").addEventListener('click', () => {
