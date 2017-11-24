@@ -779,9 +779,6 @@ const indexer = {
 
           /* meta.icon */
           meta.icon = meta.icon || "";
-          if (meta.icon && meta.index) {
-            meta.icon = this.parseUrl(meta.icon, meta.index, dataDirs[id]).url;
-          }
 
           /* meta.comment */
           meta.comment = meta.comment || "";
@@ -1214,33 +1211,6 @@ const indexer = {
     if (itemFiles[index]) { return index; }
 
     return null;
-  },
-
-  parseUrl(url, index, itemFiles) {
-    let base = this.virtualBase + index.split("/").map(x => encodeURIComponent(x)).join("/");
-    let absoluteUrl;
-    try {
-      absoluteUrl = new URL(url, base);
-    } catch (ex) {
-      // url cannot be resolved, return original (invalid)
-      return {url: url, exist: 0};
-    }
-
-    if (absoluteUrl.href.startsWith(this.virtualBase)) {
-      const search = absoluteUrl.search;
-      const hash = absoluteUrl.hash;
-      absoluteUrl.search = "";
-      absoluteUrl.hash = "";
-
-      let subPath = absoluteUrl.href.slice(base.lastIndexOf('/') + 1);
-      subPath = subPath.split("/").map(x => scrapbook.decodeURIComponent(x)).join("/");
-
-      // return subpath
-      return {url: subPath, exist: !!itemFiles[subPath] ? 1 : 0};
-    }
-
-    // url target not in the provided directory, return absolute URL
-    return {url: absoluteUrl.href, exist: -1};
   },
 
   getDefaultMeta() {
