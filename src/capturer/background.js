@@ -682,20 +682,23 @@ capturer.saveDocument = function (params) {
             let targetDir;
             let filename;
             let savePrompt;
+            let saveMethod;
 
             if (options["capture.saveInScrapbook"]) {
               targetDir = options["capture.scrapbookFolder"] + "/data";
               filename = timeId + ext;
               savePrompt = false;
+              saveMethod = "saveBlob";
             } else {
               targetDir = "";
               filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
               filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
               if (!filename.endsWith(ext)) filename += ext;
               savePrompt = true;
+              saveMethod = "saveBlobNaturally";
             }
 
-            return capturer.saveBlob({
+            return capturer[saveMethod]({
               timeId,
               blob: new Blob([data.content], {type: data.mime}),
               directory: targetDir,
@@ -730,17 +733,20 @@ capturer.saveDocument = function (params) {
             let targetDir;
             let filename;
             let savePrompt;
+            let saveMethod;
 
             if (options["capture.saveInScrapbook"]) {
               targetDir = options["capture.scrapbookFolder"] + "/data";
               filename = timeId + ext;
               savePrompt = false;
+              saveMethod = "saveBlob";
             } else {
               targetDir = "";
               filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
               filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
               if (!filename.endsWith(ext)) filename += ext;
               savePrompt = true;
+              saveMethod = "saveBlobNaturally";
             }
 
             const zipData = [];
@@ -809,7 +815,7 @@ capturer.saveDocument = function (params) {
                     '</script>' + '\n' + m;
                 });
 
-              return capturer.saveBlob({
+              return capturer[saveMethod]({
                 timeId,
                 blob: new Blob([content], {type: data.mime}),
                 directory: targetDir,
@@ -848,20 +854,23 @@ capturer.saveDocument = function (params) {
               let targetDir;
               let filename;
               let savePrompt;
+              let saveMethod;
 
               if (options["capture.saveInScrapbook"]) {
                 targetDir = options["capture.scrapbookFolder"] + "/data";
                 filename = timeId + ".htz";
                 savePrompt = false;
+                saveMethod = "saveBlob";
               } else {
                 targetDir = "";
                 filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
                 filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
                 filename += ".htz";
                 savePrompt = true;
+                saveMethod = "saveBlobNaturally";
               }
 
-              return capturer.saveBlob({
+              return capturer[saveMethod]({
                 timeId,
                 blob: zipBlob,
                 directory: targetDir,
@@ -916,20 +925,23 @@ capturer.saveDocument = function (params) {
               let targetDir;
               let filename;
               let savePrompt;
+              let saveMethod;
 
               if (options["capture.saveInScrapbook"]) {
                 targetDir = options["capture.scrapbookFolder"] + "/data";
                 filename = timeId + ".maff";
                 savePrompt = false;
+                saveMethod = "saveBlob";
               } else {
                 targetDir = "";
                 filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
                 filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
                 filename += ".maff";
                 savePrompt = true;
+                saveMethod = "saveBlobNaturally";
               }
 
-              return capturer.saveBlob({
+              return capturer[saveMethod]({
                 timeId,
                 blob: zipBlob,
                 directory: targetDir,
@@ -1331,6 +1343,61 @@ capturer.downloadBlob = function (params) {
           return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
         });
       }
+    }
+  });
+};
+
+/**
+ * @param {Object} params
+ *     - {string} params.timeId
+ *     - {Blob} params.blob
+ *     - {string} params.filename
+ *     - {string} params.sourceUrl
+ * @return {Promise}
+ */
+capturer.saveBlobNaturally = function (params) {
+  return Promise.resolve().then(() => {
+    const {timeId, blob, filename, sourceUrl} = params;
+    
+    if (scrapbook.isGecko) {
+      // Firefox has a bug that the screen turns unresponsive
+      // when an addon page is redirected to a blob URL.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
+      //
+      // Workaround by opening a File in a new tab, but this
+      // doesn't work for (X)HTML, and a.click() and
+      // window.open() doesn't work in a background page,
+      //
+      // This works bad in Chrome as File.name is not taken.
+      const file  = new File([blob], filename, {type: blob.type});
+      const url = URL.createObjectURL(file);
+
+      if (["text/html", "application/xhtml+xml"].indexOf(blob.type) === -1) {
+        browser.tabs.create({url}).then((tab) => {
+          // This doesn't seem to work on Firefox < 52
+          return browser.tabs.remove(tab.id);
+        });
+        return filename;
+      } else {
+        // fallback to saveUrl
+        return capturer.saveUrl({
+          timeId,
+          url,
+          filename,
+          sourceUrl,
+          autoErase: false,
+          savePrompt: true,
+        });
+      }
+    } else {
+      // Use the natural download attribute to generate a download.
+      const elem = document.createElement('a');
+      elem.download = filename;
+      elem.href = URL.createObjectURL(blob);
+      document.body.appendChild(elem);
+      elem.click();
+      elem.remove();
+      return filename;
     }
   });
 };
