@@ -121,6 +121,7 @@ const indexer = {
           }
         }
 
+        let hasDataDir = false;
         let p = Promise.resolve();
         zipObj.forEach((inZipPath, zipEntryObj) => {
           if (zipEntryObj.dir) { return; }
@@ -128,18 +129,27 @@ const indexer = {
           p = p.then(() => {
             // async('blob') has type = '' and has no lastModified
             return zipEntryObj.async('arraybuffer').then((ab) => {
+              const path = inZipPath.slice(cut);
               const filename = inZipPath.replace(/^.*[/]/, '');
+              if (path.startsWith('data/')) { hasDataDir = true; }
               inputData.files.push({
-                path: inZipPath.slice(cut),
+                path,
                 file: new File([ab], filename, {
                   type: Mime.prototype.lookup(filename),
                   lastModified: scrapbook.zipFixModifiedTime(zipEntryObj.date),
                 }),
-              });                    
+              });
             });
           });
         });
         return p.then(() => {
+          // not a valid ScrapBook folder
+          if (!hasDataDir) {
+            this.error(`Skipped invalid zip of ScrapBook folder.`);
+            this.log('');
+            return;
+          }
+
           this.log(`Found ${inputData.files.length} files.`);
           return indexer.import(inputData);
         });
@@ -173,6 +183,7 @@ const indexer = {
       let newCut = cut;
       let newBase = '';
 
+      let hasDataDir = false;
       for (const file of files) {
         let path = file.webkitRelativePath;
 
@@ -208,16 +219,28 @@ const indexer = {
           }
         }
 
+        path = path.slice(cut);
+        if (path.startsWith('data/')) { hasDataDir = true; }
         inputData.files.push({
-          path: path.slice(cut),
-          file: file,
+          path,
+          file,
         });
       }
 
       if (isWrongDir) {
+        hasDataDir = false;
         for (f of inputData.files) {
-          f.path = newBase + f.file.webkitRelativePath.slice(newCut);
+          const path = newBase + f.file.webkitRelativePath.slice(newCut);
+          if (path.startsWith('data/')) { hasDataDir = true; }
+          f.path = path;
         }
+      }
+
+      // not a valid ScrapBook folder
+      if (!hasDataDir) {
+        this.error(`Skipped invalid zip of ScrapBook folder.`);
+        this.log('');
+        return;
       }
 
       this.log(`Found ${inputData.files.length} files.`);
@@ -271,6 +294,7 @@ const indexer = {
             this.log(`Got directory '${inputData.name}'.`);
             this.log(`Inspecting files...`);
 
+            let hasDataDir = false;
             const scanFiles = (dirEntry) => {
               return Promise.resolve().then(() => {
                 let results = [];
@@ -297,9 +321,11 @@ const indexer = {
                     return new Promise((resolve, reject) => {
                       entry.file(resolve, reject);
                     }).then((file) => {
+                      const path = entry.fullPath.slice(cut);
+                      if (path.startsWith('data/')) { hasDataDir = true; }
                       inputData.files.push({
-                        path: entry.fullPath.slice(cut),
-                        file: file,
+                        path,
+                        file,
                       });
                     });
                   });
@@ -309,6 +335,13 @@ const indexer = {
             };
 
             return scanFiles(entry).then(() => {
+              // not a valid ScrapBook folder
+              if (!hasDataDir) {
+                this.error(`Skipped invalid ScrapBook folder.`);
+                this.log('');
+                return;
+              }
+
               this.log(`Found ${inputData.files.length} files.`);
               return indexer.import(inputData);
             });
