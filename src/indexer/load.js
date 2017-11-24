@@ -1186,14 +1186,29 @@ const indexer = {
 
         this.log(`Generating zip file...`);
         return zip.generateAsync({type: "blob"}).then((blob) => {
-          const url = URL.createObjectURL(blob);
+          /* Download the blob */
+          const filename = `${scrapbookData.title}.zip`;
+
           const elem = document.createElement('a');
-          elem.href = url;
-          elem.target = '_blank';
-          elem.download = `${scrapbookData.title}.zip`;
-          document.body.appendChild(elem);
+          if (scrapbook.isGecko) {
+            // Firefox has a bug that the screen turns unresponsive
+            // when an addon page is redirected to a blob URL.
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
+            //
+            // Workaround by opening a File in a new tab.
+            // This works bad in Chrome as File.name is not taken.
+            blob = new File([blob], filename, {type: blob.type});
+            elem.target = 'download';
+          } else {
+            // Use the natural download attribute to generate a download.
+            elem.download = filename;
+          }
+          elem.href = URL.createObjectURL(blob);
+          this.logger.appendChild(elem);
           elem.click();
-          elem.remove();
+          // in case it still doesn't work or blocked by popup blocker
+          elem.textContent = `If the download doesn't start, click me.`;
+          this.log(``);
         });
       }).then(() => {
         /* We are done! */
