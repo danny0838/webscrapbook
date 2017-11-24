@@ -1186,10 +1186,14 @@ const indexer = {
 
         this.log(`Generating zip file...`);
         return zip.generateAsync({type: "blob"}).then((blob) => {
-          browser.downloads.download({
-            url: URL.createObjectURL(blob),
-            filename: `${scrapbookData.title}.zip`,
-          });
+          const url = URL.createObjectURL(blob);
+          const elem = document.createElement('a');
+          elem.href = url;
+          elem.target = '_blank';
+          elem.download = `${scrapbookData.title}.zip`;
+          document.body.appendChild(elem);
+          elem.click();
+          elem.remove();
         });
       }).then(() => {
         /* We are done! */
