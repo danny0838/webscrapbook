@@ -521,19 +521,23 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       let targetDir;
       let filename;
       let savePrompt;
+      let saveMethod;
+
       if (options["capture.saveInScrapbook"]) {
         targetDir = options["capture.scrapbookFolder"] + "/data";
         filename = timeId + ext;
         savePrompt = false;
+        saveMethod = "saveBlob";
       } else {
         targetDir = "";
         filename = (title ? title : scrapbook.urlToFilename(sourceUrl));
         filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
         if (!filename.endsWith(ext)) { filename += ext; }
         savePrompt = true;
+        saveMethod = "saveBlobNaturally";
       }
 
-      return capturer.saveBlob({
+      return capturer[saveMethod]({
         timeId,
         blob: new Blob([html], {type: "text/html"}),
         directory: targetDir,
