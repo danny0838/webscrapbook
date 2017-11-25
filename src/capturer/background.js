@@ -808,12 +808,33 @@ capturer.saveDocument = function (params) {
 
                 loadDocRes(document);
               };
-              
-              const content = data.content.replace(/<\/body>\s*<\/html>\s*$/, (m) => {
-                return '\n' + '<script data-scrapbook-elem="pageloader">' + 
-                    `(${scrapbook.compressJsFunc(pageloader)})(\n${JSON.stringify(zipData)}\n);` + 
-                    '</script>' + '\n' + m;
+
+              const pageloaderScript = `
+<script data-scrapbook-elem="pageloader">(${scrapbook.compressJsFunc(pageloader)})(
+${JSON.stringify(zipData)}
+);</script>
+`;
+              let inserted = false;
+              let content = data.content.replace(/<\/body>\s*<\/html>\s*$/i, (m) => {
+                inserted = true;
+                return pageloaderScript + m;
+              });
+
+              if (!inserted) {
+                // fix broken html
+                // Failure of previous insertion is due to post-body contents.
+                // Such HTML doc won't validate, but in such cases we need
+                // to insert our pageloader after them.
+                content = data.content.replace(/<\/html>\s*$/i, (m) => {
+                  inserted = true;
+                  return pageloaderScript + m;
                 });
+              }
+
+              if (!inserted) {
+                // this is unexpected and should never happen
+                throw new Error(`Unable to find the end tag of HTML doc`);
+              }
 
               return capturer[saveMethod]({
                 timeId,
