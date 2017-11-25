@@ -875,7 +875,7 @@ ${JSON.stringify(zipData)}
             }
 
             // generate and download the zip file
-            return zip.generateAsync({type: "blob"}).then((zipBlob) => {
+            return zip.generateAsync({type: "blob", mimeType: "application/html+zip"}).then((zipBlob) => {
               let targetDir;
               let filename;
               let savePrompt;
@@ -946,7 +946,7 @@ ${JSON.stringify(zipData)}
             scrapbook.zipAddFile(zip, timeId + "/" + "index.rdf", new Blob([rdfContent], {type: "application/rdf+xml"}), true);
 
             // generate and download the zip file
-            return zip.generateAsync({type: "blob"}).then((zipBlob) => {
+            return zip.generateAsync({type: "blob", mimeType: "application/x-maff"}).then((zipBlob) => {
               let targetDir;
               let filename;
               let savePrompt;
