@@ -1,4 +1,4 @@
-*Web ScrapBook* is a browser addon that captures the web page with highly customizable configurations.
+*Web ScrapBook* is a browser addon that captures the web page faithfully with highly customizable configurations.
 
 A wab page can be saved as a folder, a single HTML file, a scripted single HTML file, or a zip-packed archive file (HTZ or MAFF). An archive file can be viewed via the built-in archive page viewer, or by opening the entry page after unzipping.
 
