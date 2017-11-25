@@ -172,6 +172,7 @@ const viewer = {
   urlSearch: "",
   urlHash: "",
   pageList: [],
+  autoLoading: false,
 
   initEvents() {
     window.addEventListener("dragenter", onDragEnter, false);
@@ -227,7 +228,11 @@ const viewer = {
         return;
       }
 
-      window.location.replace(url);
+      if (this.autoLoading) {
+        window.location.replace(url);
+      } else {
+        window.location.assign(url);
+      }
     });
   },
 
@@ -294,6 +299,7 @@ const viewer = {
         }
 
         const file = new File([xhr.response], filename, {type: Mime.prototype.lookup(filename)});
+        this.autoLoading = true;
         return [file];
       }).catch((ex) => {
         this.error(`Unable to fetch specified zip file '${zipSourceUrl}'`);
@@ -335,6 +341,7 @@ const viewer = {
         this.log('');
         return this.openUrls(this.pageList);
       } else {
+        this.autoLoading = false;
         this.initEvents();
         this.filesSelector.disabled = false;
         this.filesSelector.value = null;
