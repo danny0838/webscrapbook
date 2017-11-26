@@ -31,7 +31,7 @@ if (chrome.contextMenus) {
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
         onclick: (info, tab) => {
-          return capturer.captureTab({tab});
+          return capturer.invokeCapture({target: tab.id});
         }
       });
       chrome.contextMenus.create({
@@ -39,7 +39,7 @@ if (chrome.contextMenus) {
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
         onclick: (info, tab) => {
-          return capturer.captureTab({tab, mode: "source"});
+          return capturer.invokeCapture({target: tab.id, mode: "source"});
         }
       });
       chrome.contextMenus.create({
@@ -47,7 +47,7 @@ if (chrome.contextMenus) {
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
         onclick: (info, tab) => {
-          return capturer.captureTab({tab, mode: "bookmark"});
+          return capturer.invokeCapture({target: tab.id, mode: "bookmark"});
         }
       });
     } catch (ex) {
@@ -58,7 +58,7 @@ if (chrome.contextMenus) {
       contexts: ["page"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return capturer.captureTab({tab, saveBeyondSelection: true});
+        return capturer.invokeCapture({target: tab.id, full: true});
       }
     });
     chrome.contextMenus.create({
@@ -66,7 +66,7 @@ if (chrome.contextMenus) {
       contexts: ["page"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return capturer.captureHeadless({url: info.pageUrl, mode: "source"});
+        return capturer.invokeCapture({url: info.pageUrl, mode: "source"});
       }
     });
     chrome.contextMenus.create({
@@ -74,7 +74,7 @@ if (chrome.contextMenus) {
       contexts: ["page"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return capturer.captureHeadless({url: info.pageUrl, mode: "bookmark"});
+        return capturer.invokeCapture({url: info.pageUrl, mode: "bookmark"});
       }
     });
     chrome.contextMenus.create({
@@ -82,7 +82,7 @@ if (chrome.contextMenus) {
       contexts: ["frame"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return capturer.captureTab({tab, frameId: info.frameId, saveBeyondSelection: true});
+        return capturer.invokeCapture({target: `${tab.id}:${info.frameId}`, full: true});
       }
     });
     chrome.contextMenus.create({
@@ -90,7 +90,7 @@ if (chrome.contextMenus) {
       contexts: ["frame"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return capturer.captureHeadless({url: info.frameUrl, mode: "source"});
+        return capturer.invokeCapture({url: info.frameUrl, mode: "source"});
       }
     });
     chrome.contextMenus.create({
@@ -98,7 +98,7 @@ if (chrome.contextMenus) {
       contexts: ["frame"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return capturer.captureHeadless({url: info.frameUrl, mode: "bookmark"});
+        return capturer.invokeCapture({url: info.frameUrl, mode: "bookmark"});
       }
     });
     chrome.contextMenus.create({
@@ -106,7 +106,7 @@ if (chrome.contextMenus) {
       contexts: ["selection"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return capturer.captureTab({tab, frameId: info.frameId, saveBeyondSelection: false});
+        return capturer.invokeCapture({target: `${tab.id}:${info.frameId}`, full: false});
       }
     });
     chrome.contextMenus.create({
@@ -114,7 +114,7 @@ if (chrome.contextMenus) {
       contexts: ["link"],
       targetUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return capturer.captureHeadless({url: info.linkUrl});
+        return capturer.invokeCapture({url: info.linkUrl});
       }
     });
     chrome.contextMenus.create({
@@ -122,7 +122,7 @@ if (chrome.contextMenus) {
       contexts: ["link"],
       targetUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return capturer.captureHeadless({url: info.linkUrl, mode: "bookmark"});
+        return capturer.invokeCapture({url: info.linkUrl, mode: "bookmark"});
       }
     });
     chrome.contextMenus.create({
@@ -130,8 +130,20 @@ if (chrome.contextMenus) {
       contexts: ["image", "audio", "video"],
       targetUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return capturer.captureHeadless({url: info.srcUrl});
+        return capturer.invokeCapture({url: info.srcUrl});
       }
     });
   });
 }
+
+chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
+  // Some headers (e.g. "referer") are not allowed to be set via
+  // XMLHttpRequest.setRequestHeader directly.  Use a prefix and
+  // modify it here to workaround.
+  details.requestHeaders.forEach((header) => {
+    if (header.name.slice(0, 15) === "X-WebScrapBook-") {
+      header.name = header.name.slice(15);
+    }
+  });
+  return {requestHeaders: details.requestHeaders};
+}, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, ["blocking", "requestHeaders"]);

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html dir="__MSG_@@bidi_dir__">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<title>__MSG_CapturerTitle__</title>
+<style>
+body {
+  font-family: initial;
+  font-size: 12px;
+}
+
+#logger {
+  white-space: pre;
+}
+
+.warn {
+  color: #f0ad4e;
+  font-weight: bold;
+}
+
+.error {
+  color: #d9534f;
+  font-weight: bold;
+}
+</style>
+<script src="../lib/jszip.js"></script>
+<script src="../lib/mime.js"></script>
+<script src="../lib/sha_dev.js"></script>
+<script src="../core/polyfill.js"></script>
+<script src="../core/common.js"></script>
+<script src="common.js"></script>
+<script src="capturer.js"></script>
+</head>
+<body>
+<div id="logger"></div>
+</body>
+</html>

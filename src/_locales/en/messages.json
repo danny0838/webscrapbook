@@ -41,12 +41,8 @@
   "CaptureAllTabs": {
     "message": "Capture all tabs"
   },
-  "ErrorCapture": {
-    "message": "Capture failed ($SOURCE$): $REASON$",
-    "placeholders": {
-      "source": {"content": "$1"},
-      "reason": {"content": "$2"}
-    }
+  "CapturerTitle": {
+    "message": "Capture page"
   },
   "ErrorContentScriptExecute": {
     "message": "Unable to execute content script ($SOURCE$): $REASON$",

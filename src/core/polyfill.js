@@ -156,18 +156,27 @@ if (typeof browser === "undefined" && typeof chrome !== "undefined") {
         });
       },
 
-      sendMessage(...args) {
+      query(...args) {
         return new Promise((resolve, reject) => {
-          chrome.tabs.sendMessage(...args, (result) => {
+          chrome.tabs.query(...args, (result) => {
             if (!chrome.runtime.lastError) { resolve(result); }
             else { reject(chrome.runtime.lastError); }
           });
         });
       },
 
-      query(...args) {
+      remove(...args) {
         return new Promise((resolve, reject) => {
-          chrome.tabs.query(...args, (result) => {
+          chrome.tabs.remove(...args, (result) => {
+            if (!chrome.runtime.lastError) { resolve(result); }
+            else { reject(chrome.runtime.lastError); }
+          });
+        });
+      },
+
+      sendMessage(...args) {
+        return new Promise((resolve, reject) => {
+          chrome.tabs.sendMessage(...args, (result) => {
             if (!chrome.runtime.lastError) { resolve(result); }
             else { reject(chrome.runtime.lastError); }
           });
@@ -188,6 +197,33 @@ if (typeof browser === "undefined" && typeof chrome !== "undefined") {
       getAllFrames(...args) {
         return new Promise((resolve, reject) => {
           chrome.webNavigation.getAllFrames(...args, (result) => {
+            if (!chrome.runtime.lastError) { resolve(result); }
+            else { reject(chrome.runtime.lastError); }
+          });
+        });
+      },
+    },
+
+    windows: {
+      create(...args) {
+        return new Promise((resolve, reject) => {
+          chrome.windows.create(...args, (result) => {
+            if (!chrome.runtime.lastError) { resolve(result); }
+            else { reject(chrome.runtime.lastError); }
+          });
+        });
+      },
+      getCurrent(...args) {
+        return new Promise((resolve, reject) => {
+          chrome.windows.getCurrent(...args, (result) => {
+            if (!chrome.runtime.lastError) { resolve(result); }
+            else { reject(chrome.runtime.lastError); }
+          });
+        });
+      },
+      remove(...args) {
+        return new Promise((resolve, reject) => {
+          chrome.windows.remove(...args, (result) => {
             if (!chrome.runtime.lastError) { resolve(result); }
             else { reject(chrome.runtime.lastError); }
           });

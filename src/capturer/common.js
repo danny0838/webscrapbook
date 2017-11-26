@@ -67,32 +67,20 @@ capturer.invoke = function (method, args, details = {}) {
         };
       });
     } else {
-      // to background script (or background script call self)
+      // to capturer.html page (or capturer.html call self)
       if (capturer.isContentScript) {
         const cmd = "capturer." + method;
         const message = {cmd, args};
 
-        isDebug && console.debug(cmd, "send to background script", args);
+        isDebug && console.debug(cmd, "send to capturer page", args);
         return browser.runtime.sendMessage(message).then((response) => {
-          isDebug && console.debug(cmd, "response from background script", response);
+          isDebug && console.debug(cmd, "response from capturer page", response);
           return response;
         });
       } else {
         return capturer[method](args);
       }
     }
-  });
-};
-
-/**
- * @return {Promise}
- */
-capturer.getContentTabs = function () {
-  // scrapbook.getContentPagePattern() resolves to [] on Firefox Android 57
-  // due to a bug of browser.tabs.query:
-  // https://bugzilla.mozilla.org/show_bug.cgi?id=1418737
-  return browser.tabs.query({currentWindow: true, url: "<all_urls>"}).then((tabs) => {
-    return tabs.filter((tab) => (scrapbook.isContentPage(tab.url)));
   });
 };
 

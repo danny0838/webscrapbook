@@ -41,12 +41,8 @@
   "CaptureAllTabs": {
     "message": "获取所有分页"
   },
-  "ErrorCapture": {
-    "message": "获取失败 ($SOURCE$): $REASON$",
-    "placeholders": {
-      "source": {"content": "$1"},
-      "reason": {"content": "$2"}
-    }
+  "CapturerTitle": {
+    "message": "获取页面"
   },
   "ErrorContentScriptExecute": {
     "message": "无法执行内容处理脚本 ($SOURCE$): $REASON$",

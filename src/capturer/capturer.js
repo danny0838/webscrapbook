@@ -1,13 +1,19 @@
 /********************************************************************
  *
- * The background script for capture functionality
+ * Script for load.html
  *
  * @require {boolean} isDebug
  * @require {Object} scrapbook
  * @require {Object} capturer
  *******************************************************************/
 
+let _isFxBelow55;
+let _isFxAndroid;
+
 capturer.isContentScript = false;
+
+// missionId is fixed to this page, to identify the capture mission
+capturer.missionId = scrapbook.getUuid();
 
 capturer.defaultFilesSet = new Set(["index.rdf", "index.dat"]);
 
@@ -21,47 +27,22 @@ capturer.captureInfo = new Map();
  */
 capturer.downloadInfo = new Map();
 
-/**
- * @kind invokable
- * @param {Object} params
- *     - {tabId} params.tabId
- *     - {string} params.action
- * @return {Promise}
- */
-capturer.browserActionSetError = function (params) {
-  return Promise.resolve().then(() => {
-    const {tabId = -1, action} = params;
+capturer.log = function (msg) {
+  capturer.logger.appendChild(document.createTextNode(msg + '\n'));
+};
 
-    if (!arguments.callee.errors) { arguments.callee.errors = []; }
-    let errors;
-    switch (action) {
-      case "add":
-        errors = arguments.callee.errors[tabId] += 1;
-        break;
-      case "reset":
-      default:
-        errors = arguments.callee.errors[tabId] = 0;
-        break;
-    }
+capturer.warn = function (msg) {
+  const span = document.createElement('span');
+  span.className = 'warn';
+  span.appendChild(document.createTextNode(msg + '\n'));
+  logger.appendChild(span);
+};
 
-    if (chrome.browserAction) {
-      // supported since Firefox Android >= 55
-      if (chrome.browserAction.setTitle) {
-        chrome.browserAction.setTitle({
-          tabId: tabId !== -1 ? tabId : undefined,
-          title: scrapbook.lang("ExtensionName") + (errors ? " (" + errors + ")" : ""),
-        });
-      }
-
-      // Firefox Android not supported
-      if (chrome.browserAction.setBadgeText) {
-        chrome.browserAction.setBadgeText({
-          tabId: tabId !== -1 ? tabId : undefined,
-          text: errors ? errors.toString() : "",
-        });
-      }
-    }
-  });
+capturer.error = function (msg) {
+  const span = document.createElement('span');
+  span.className = 'error';
+  span.appendChild(document.createTextNode(msg + '\n'));
+  logger.appendChild(span);
 };
 
 /**
@@ -110,56 +91,6 @@ capturer.getUniqueFilename = function (timeId, filename) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.mode
- * @return {Promise}
- */
-capturer.captureActiveTab = function (params) {
-  return Promise.resolve().then(() => {
-    const {mode} = params;
-
-    return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
-      return capturer.captureTab({tab: tabs[0], mode});
-    });
-  });
-};
-
-/**
- * @kind invokable
- * @param {Object} params
- *     - {string} params.mode
- * @return {Promise}
- */
-capturer.captureAllTabs = function (params) {
-  return Promise.resolve().then(() => {
-    const {mode} = params;
-
-    return capturer.getContentTabs().then((tabs) => {
-      let p = Promise.resolve();
-      tabs.forEach((tab) => {
-        const {id: tabId, url} = tab;
-        const source = `[${tabId}] ${url}`;
-        p = p.then(() => {
-          return scrapbook.delay(5);
-        }).then(() => {
-          // throws if the tab has been closed
-          return browser.tabs.get(tabId);
-        }).then(() => {
-          return capturer.captureTab({tab, mode});
-        }).catch((ex) => {
-          const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
-          console.error(err);
-          capturer.browserActionSetError({action: "add"});
-          return {message: err};
-        });
-      });
-      return p;
-    });
-  });
-};
-
-/**
- * @kind invokable
- * @param {Object} params
  *     - {Tab} params.tab
  *     - {integer} params.frameId
  *     - {boolean} params.saveBeyondSelection
@@ -183,10 +114,11 @@ capturer.captureTab = function (params) {
       });
     }
 
-    const source = `[${tabId}] ${url}`;
+    const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
     const timeId = scrapbook.dateToId();
     const message = {
       settings: {
+        missionId: capturer.missionId,
         timeId,
         frameIsMain: true,
         documentName: "index",
@@ -205,6 +137,7 @@ capturer.captureTab = function (params) {
       // script loaded. E.g. the user ran this when the main frame hadn't been
       // completed and some subframes hadn't been loaded.
       isDebug && console.debug("(main) send", source, message);
+      capturer.log(`Capturing (document) ${source} ...`);
       return browser.webNavigation.getAllFrames({tabId}).then((details) => {
         const tasks = [];
         details.forEach((detail) => {
@@ -215,18 +148,18 @@ capturer.captureTab = function (params) {
           // If no content script, we get an error saying connection cannot be established.
           tasks[tasks.length] = capturer.invoke("isScriptLoaded", null, {tabId, frameId}).catch((ex) => {
             isDebug && console.debug("inject content scripts", tabId, frameId, url);
-            return browser.tabs.executeScript(tabId, {frameId, file: "core/polyfill.js"}).then((result) => {
-              return browser.tabs.executeScript(tabId, {frameId, file: "core/common.js"});
+            return browser.tabs.executeScript(tabId, {frameId, file: "/core/polyfill.js"}).then((result) => {
+              return browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js"});
             }).then((result) => {
-              return browser.tabs.executeScript(tabId, {frameId, file: "capturer/common.js"});
+              return browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js"});
             }).then((result) => {
-              return browser.tabs.executeScript(tabId, {frameId, file: "capturer/content.js"});
+              return browser.tabs.executeScript(tabId, {frameId, file: "/capturer/content.js"});
             }).catch((ex) => {
               // Chrome may be failed to inject content script to some pages due to unclear reason.
               // Record the error and pass.
               const source = `[${tabId}:${frameId}] ${url}`;
               const err = scrapbook.lang("ErrorContentScriptExecute", [source, ex.message]);
-              console.error(err);
+              capturer.error(err);
             });
           });
         });
@@ -240,10 +173,9 @@ capturer.captureTab = function (params) {
       if (response.error) { throw new Error(response.error.message); }
       return response;
     }).catch((ex) => {
-      const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
-      console.error(err);
-      capturer.browserActionSetError({action: "add"});
-      return {message: err};
+      const err = `Fatal error: ${ex.message}`;
+      capturer.error(err);
+      return {error: {message: err}};
     });
   });
 };
@@ -281,6 +213,7 @@ capturer.captureHeadless = function (params) {
 
     return Promise.resolve().then(() => {
       isDebug && console.debug("(main) capture", source, message);
+      capturer.log(`Capturing (${mode}) ${source} ...`);
       switch (mode) {
         case "bookmark":
           return capturer.captureBookmark(message);
@@ -294,17 +227,13 @@ capturer.captureHeadless = function (params) {
       if (response.error) { throw new Error(response.error.message); }
       return response;
     }).catch((ex) => {
-      const err = scrapbook.lang("ErrorCapture", [source, ex.message]);
-      console.error(err);
-      capturer.browserActionSetError({action: "add"});
-      return {message: err};
+      const err = `Fatal error: ${ex.message}`;
+      capturer.error(err);
+      return {error: {message: err}};
     });
   });
 };
 
-// @FIXME
-// When run in a Firefox private window, the background script does not have same
-// crenditials as the private window document, and the capture may fail or go wrong.
 /**
  * @kind invokable
  * @param {Object} params
@@ -427,7 +356,7 @@ capturer.captureUrl = function (params) {
         });
       }
     }).catch((ex) => {
-      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
 
@@ -436,9 +365,6 @@ capturer.captureUrl = function (params) {
   });
 };
 
-// @FIXME
-// When run in a Firefox private window, the background script does not have same
-// crenditials as the private window document, and the capture may fail or go wrong.
 /**
  * @kind invokable
  * @param {Object} params
@@ -549,7 +475,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
         return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       });
     }).catch((ex) => {
-      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
   });
@@ -702,6 +628,7 @@ capturer.saveDocument = function (params) {
               saveMethod = "saveBlobNaturally";
             }
 
+            capturer.log(`Preparing download...`);
             return capturer[saveMethod]({
               timeId,
               blob: new Blob([data.content], {type: data.mime}),
@@ -840,6 +767,7 @@ ${JSON.stringify(zipData)}
                 throw new Error(`Unable to find the end tag of HTML doc`);
               }
 
+              capturer.log(`Preparing download...`);
               return capturer[saveMethod]({
                 timeId,
                 blob: new Blob([content], {type: data.mime}),
@@ -895,6 +823,7 @@ ${JSON.stringify(zipData)}
                 saveMethod = "saveBlobNaturally";
               }
 
+              capturer.log(`Preparing download...`);
               return capturer[saveMethod]({
                 timeId,
                 blob: zipBlob,
@@ -966,6 +895,7 @@ ${JSON.stringify(zipData)}
                 saveMethod = "saveBlobNaturally";
               }
 
+              capturer.log(`Preparing download...`);
               return capturer[saveMethod]({
                 timeId,
                 blob: zipBlob,
@@ -1020,15 +950,12 @@ ${JSON.stringify(zipData)}
         }
       }
     }).catch((ex) => {
-      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
   });
 };
 
-// @FIXME
-// When run in a Firefox private window, the background script does not have same
-// crenditials as the private window document, and the capture may fail or go wrong.
 /**
  * @kind invokable
  * @param {Object} params
@@ -1205,7 +1132,7 @@ capturer.downloadFile = function (params) {
         });
       });
     }).catch((ex) => {
-      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
 
@@ -1214,10 +1141,6 @@ capturer.downloadFile = function (params) {
   });
 };
 
-// @FIXME
-// When run in a Firefox private window, the background script does not have same
-// crenditials as the private window document, and the capture may fail or go wrong.
-//
 // @TODO:
 // implement accessMap cache for same URL
 /**
@@ -1274,7 +1197,7 @@ capturer.downLinkFetchHeader = function (params) {
       },
     }).catch((ex) => {
       // something wrong for the XMLHttpRequest
-      console.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return null;
     }).then(() => {
       if (headers.filename) {
@@ -1385,28 +1308,68 @@ capturer.saveBlobNaturally = function (params) {
     const {timeId, blob, filename, sourceUrl} = params;
     
     if (scrapbook.isGecko) {
-      // In Firefox, location.href, window.open, and a.click()
-      // in a background page doesn't work. Workaround by
-      // opening a stream File in a new tab.
+      // Firefox has a bug that the screen turns unresponsive
+      // when an addon page is redirected to a blob URL.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
+      //
+      // Workaround by opening a File in a new tab.
+      // This works bad in Chrome as File.name is not taken.
+      if (_isFxBelow55 || _isFxAndroid) {      
+        // In Firefox < 55, download.onCreate cannot catch
+        // the generated download from new tab, and the Promise
+        // will never resolve. Fallback to download method.
+        return capturer.saveBlob({
+          timeId,
+          blob,
+          filename,
+          sourceUrl,
+          savePrompt: true,
+        });
+      }
+
       const file  = new File([blob], filename, {type: "application/octet-stream"});
       const url = URL.createObjectURL(file);
 
-      browser.tabs.create({url, active: false}).then((tab) => {
-        // This doesn't work on Firefox < 52,
-        // and the Promise does not resolve.
-        return browser.tabs.remove(tab.id);
+      // @FIXME:
+      // If the user does not accept the download, the Promise never
+      // resolve or reject.
+      return new Promise((resolve, reject) => {
+        capturer.downloadInfo.set(url, {
+          timeId,
+          src: sourceUrl,
+          onComplete: resolve,
+          onError: reject,
+        });
+
+        browser.tabs.create({url, active: false});
+
+        const elem = document.createElement('a');
+        elem.href = url;
+        elem.target = 'download';
+        elem.textContent = `If the download doesn't start, click me.`;
+        capturer.logger.appendChild(elem);
+        capturer.log('');
       });
-      return filename;
     }
 
     // Use the natural download attribute to generate a download.
-    const elem = document.createElement('a');
-    elem.download = filename;
-    elem.href = URL.createObjectURL(blob);
-    document.body.appendChild(elem);
-    elem.click();
-    elem.remove();
-    return filename;
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+
+      capturer.downloadInfo.set(url, {
+        timeId,
+        src: sourceUrl,
+        onComplete: resolve,
+        onError: reject,
+      });
+
+      const elem = document.createElement('a');
+      elem.download = filename;
+      elem.href = url;
+      document.body.appendChild(elem);
+      elem.click();
+      elem.remove();
+    });
   });
 };
 
@@ -1486,6 +1449,15 @@ capturer.saveUrl = function (params) {
  */
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  try {
+    if (message.args.settings.missionId !== capturer.missionId) {
+      return;
+    }
+  } catch (ex) {
+    // no entry of message.args.settings.missionId
+    return;
+  }
+
   isDebug && console.debug(message.cmd, "receive", `[${sender.tab ? sender.tab.id : -1}]`, message.args);
 
   if (message.cmd.slice(0, 9) == "capturer.") {
@@ -1497,6 +1469,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true; // async response
     }
   }
+});
+
+chrome.downloads.onCreated.addListener((downloadItem) => {
+  isDebug && console.debug("downloads.onCreated", downloadItem);
+
+  const downloadInfo = capturer.downloadInfo;
+  const {id, url} = downloadItem;
+  if (!downloadInfo.has(url)) { return; }
+
+  downloadInfo.set(id, downloadInfo.get(url));
+  downloadInfo.delete(url);
 });
 
 chrome.downloads.onChanged.addListener((downloadDelta) => {
@@ -1530,16 +1513,105 @@ chrome.downloads.onChanged.addListener((downloadDelta) => {
   });
 });
 
-chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
-  // Some headers (e.g. "referer") are not allowed to be set via
-  // XMLHttpRequest.setRequestHeader directly.  Use a prefix and
-  // modify it here to workaround.
-  details.requestHeaders.forEach((header) => {
-    if (header.name.slice(0, 15) === "X-WebScrapBook-") {
-      header.name = header.name.slice(15);
-    }
-  });
-  return {requestHeaders: details.requestHeaders};
-}, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, ["blocking", "requestHeaders"]);
+// init
+document.addEventListener("DOMContentLoaded", function () {
+  scrapbook.loadLanguages(document);
 
-// isDebug && console.debug("loading background.js");
+  capturer.logger = document.getElementById('logger');
+
+  scrapbook.loadOptions().then(() => {
+    return Promise.resolve().then(() => {
+      return browser.runtime.getBrowserInfo();
+    }).then((info) => {
+      _isFxBelow55 = parseInt(info.version.match(/^(\d+)\./)[1], 10) < 55;
+      _isFxAndroid = (info.name === 'Fennec');
+    }).catch((ex) => {
+      _isFxBelow55 = false;
+      _isFxAndroid = false;
+    });
+  }).then(() => {
+    const urlObj = new URL(document.URL);
+    const s = urlObj.searchParams;
+    const tabFrameList = s.has('t') ? s.get('t').split(',').map(x => {
+      const [tabId = -1, frameId] = x.split(':');
+      return {tabId: parseInt(tabId, 10), frameId: parseInt(frameId, 10) || 0};
+    }) : undefined;
+    const urlTitleList = s.has('u') ? s.get('u').split(',').map(x => {
+      const [url, ...titleParts] = x.split(' ');
+      return {url, title: titleParts.join(' ')};
+    }) : undefined;
+    const mode = s.get('m') || undefined;
+    const saveBeyondSelection = !!s.get('f');
+
+    if (tabFrameList) {
+      let hasError = false;
+      let p = Promise.resolve();
+      tabFrameList.forEach(({tabId, frameId}) => {
+        const source = `[${tabId}:${frameId}]`;
+        p = p.then(() => {
+          // throws if the tab has been closed
+          return browser.tabs.get(tabId);
+        }).then((tab) => {
+          return capturer.captureTab({
+            tab,
+            frameId,
+            saveBeyondSelection,
+            mode,
+          });
+        }).catch((ex) => {
+          const err = `Unexpected error: ${ex.message}`;
+          capturer.error(err);
+          return {error: {message: err}};
+        }).then((response) => {
+          if (response.error) { hasError = true; }
+          else { capturer.log(`Done.`); }
+          return scrapbook.delay(5);
+        });
+      });
+      return p.then(() => {
+        return hasError;
+      });
+    } else if (urlTitleList) {
+      let hasError = false;
+      let p = Promise.resolve();
+      urlTitleList.forEach(({url, title}) => {
+        const source = `${url}`;
+        p = p.then(() => {
+          return capturer.captureHeadless({
+            url,
+            title,
+            mode,
+          });
+        }).catch((ex) => {
+          const err = `Unexpected error: ${ex.message}`;
+          console.error(err);
+          return {error: {message: err}};
+        }).then((response) => {
+          if (response.error) { hasError = true; }
+          else { capturer.log(`Done.`); }
+          return scrapbook.delay(5);
+        });
+      });
+      return p.then(() => {
+        return hasError;
+      });
+    } else {
+      console.error(`Invalid capture parameters.`);
+      return true;
+    }
+  }).then((hasError) => {
+    if (hasError) { return; }
+
+    return scrapbook.delay(1000).then(() => {
+      if (chrome.windows) {
+        return browser.windows.getCurrent().then((win) => {
+          return browser.windows.remove(win.id);
+        });
+      } else {
+        return browser.tabs.getCurrent().then((tab) => {
+          return browser.tabs.remove(tab.id);
+        });
+      }
+    });
+  });
+});

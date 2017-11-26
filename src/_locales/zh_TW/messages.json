@@ -41,12 +41,8 @@
   "CaptureAllTabs": {
     "message": "擷取所有分頁"
   },
-  "ErrorCapture": {
-    "message": "擷取失敗 ($SOURCE$): $REASON$",
-    "placeholders": {
-      "source": {"content": "$1"},
-      "reason": {"content": "$2"}
-    }
+  "CapturerTitle": {
+    "message": "擷取頁面"
   },
   "ErrorContentScriptExecute": {
     "message": "無法執行內容處理腳本 ($SOURCE$): $REASON$",

@@ -46,9 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // currentTab === undefined => browserAction.html is a prompt diaglog;
     //     else browserAction.html is in a tab (or Firefox Android)
     if (!currentTab) {
-      // clear badge
-      capturer.invoke("browserActionSetError", {action: "reset"});
-
       // disable capture options if active tab is not a valid content page
       browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
         let activeTab = tabs[0];
@@ -62,49 +59,66 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    document.getElementById("captureTab").addEventListener('click', () => {
+    document.getElementById("captureTab").addEventListener('click', (event) => {
       if (!currentTab) {
-        capturer.invoke("captureActiveTab", {mode: "document"});
+        return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
+          const target = tabs[0].id;
+          return capturer.invokeCapture({target});
+        });
       } else {
         generateActionButtonForTabs(document.getElementById("captureTab"), (tab) => {
-          capturer.invoke("captureTab", {tab, mode: "document"});
+          const target = tab.id;
+          return capturer.invokeCapture({target});
         });
       }
     });
 
-    document.getElementById("captureTabSource").addEventListener('click', () => {
+    document.getElementById("captureTabSource").addEventListener('click', (event) => {
+      const mode = 'source';
       if (!currentTab) {
-        capturer.invoke("captureActiveTab", {mode: "source"});
+        return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
+          const target = tabs[0].id;
+          return capturer.invokeCapture({target, mode});
+        });
       } else {
         generateActionButtonForTabs(document.getElementById("captureTabSource"), (tab) => {
-          capturer.invoke("captureTab", {tab, mode: "source"});
+          const target = tab.id;
+          return capturer.invokeCapture({target, mode});
         });
       }
     });
 
-    document.getElementById("captureTabBookmark").addEventListener('click', () => {
+    document.getElementById("captureTabBookmark").addEventListener('click', (event) => {
+      const mode = 'bookmark';
       if (!currentTab) {
-        capturer.invoke("captureActiveTab", {mode: "bookmark"});
+        return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
+          const target = tabs[0].id;
+          return capturer.invokeCapture({target, mode});
+        });
       } else {
-        generateActionButtonForTabs(document.getElementById("captureTabBookmark"), (tab) => {
-          capturer.invoke("captureTab", {tab, mode: "bookmark"});
+        generateActionButtonForTabs(document.getElementById("captureTabSource"), (tab) => {
+          const target = tab.id;
+          return capturer.invokeCapture({target, mode});
         });
       }
     });
 
-    document.getElementById("captureAllTabs").addEventListener('click', () => {
-      capturer.invoke("captureAllTabs", {mode: "document"});
+    document.getElementById("captureAllTabs").addEventListener('click', (event) => {
+      return capturer.getContentTabs().then((tabs) => {
+        const target = tabs.map(x => x.id).join(',');
+        return capturer.invokeCapture({target});
+      });
     });
 
-    document.getElementById("openViewer").addEventListener('click', () => {
+    document.getElementById("openViewer").addEventListener('click', (event) => {
       visitLink(chrome.runtime.getURL("viewer/load.html"), (!currentTab ? '_blank' : ''));
     });
 
-    document.getElementById("openIndexer").addEventListener('click', () => {
+    document.getElementById("openIndexer").addEventListener('click', (event) => {
       visitLink(chrome.runtime.getURL("indexer/load.html"), (!currentTab ? '_blank' : ''));
     });
 
-    document.getElementById("openOptions").addEventListener('click', () => {
+    document.getElementById("openOptions").addEventListener('click', (event) => {
       visitLink(chrome.runtime.getURL("core/options.html"), (!currentTab ? 'browseraction' : ''));
     });
   });

@@ -36,15 +36,11 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "lib/sha_dev.js",
-      "lib/mime.js",
-      "lib/jszip.js",
       "core/polyfill.js",
       "core/common.js",
       "core/optionsAuto.js",
       "core/background.js",
-      "capturer/common.js",
-      "capturer/background.js",
+      "capturer/extension.js",
       "viewer/background.js"
     ]
   },
