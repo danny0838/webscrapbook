@@ -1391,6 +1391,7 @@ capturer.saveBlob = function (params) {
     const {timeId, blob, directory, filename, sourceUrl, autoErase, savePrompt} = params;
 
     return capturer.saveUrl({
+      timeId,
       url: URL.createObjectURL(blob),
       directory,
       filename,
