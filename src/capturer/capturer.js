@@ -455,11 +455,9 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
         savePrompt = false;
         saveMethod = "saveBlob";
       } else {
-        targetDir = "";
         filename = (title ? title : scrapbook.urlToFilename(sourceUrl));
         filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
         if (!filename.endsWith(ext)) { filename += ext; }
-        savePrompt = true;
         saveMethod = "saveBlobNaturally";
       }
 
@@ -620,11 +618,9 @@ capturer.saveDocument = function (params) {
               savePrompt = false;
               saveMethod = "saveBlob";
             } else {
-              targetDir = "";
               filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
               filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
               if (!filename.endsWith(ext)) filename += ext;
-              savePrompt = true;
               saveMethod = "saveBlobNaturally";
             }
 
@@ -672,11 +668,9 @@ capturer.saveDocument = function (params) {
               savePrompt = false;
               saveMethod = "saveBlob";
             } else {
-              targetDir = "";
               filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
               filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
               if (!filename.endsWith(ext)) filename += ext;
-              savePrompt = true;
               saveMethod = "saveBlobNaturally";
             }
 
@@ -815,11 +809,9 @@ ${JSON.stringify(zipData)}
                 savePrompt = false;
                 saveMethod = "saveBlob";
               } else {
-                targetDir = "";
                 filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
                 filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
                 filename += ".htz";
-                savePrompt = true;
                 saveMethod = "saveBlobNaturally";
               }
 
@@ -887,11 +879,9 @@ ${JSON.stringify(zipData)}
                 savePrompt = false;
                 saveMethod = "saveBlob";
               } else {
-                targetDir = "";
                 filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
                 filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
                 filename += ".maff";
-                savePrompt = true;
                 saveMethod = "saveBlobNaturally";
               }
 
