@@ -2139,13 +2139,25 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
     rewriteImportUrl(url) {
       const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
 
-      // avoid error for url() or url(#foo)
-      const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-      if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
+      // sourceUrl cannot be resolved,
+      // probably because url is relative and refUrl is data: or blob:
+      if (sourceUrl.indexOf(':') === -1) {
         return {
-          url: sourceUrlHash,
-          recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
+          url: sourceUrl,
+          recordUrl: options["capture.recordSourceUri"] ? sourceUrl : "",
         };
+      }
+
+      // url() or url(#foo), or path resolves to self
+      // do not fetch URL to avoid an infinite cyclic loop
+      if (refUrl) {
+        const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+        if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
+          return {
+            url: sourceUrlHash,
+            recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
+          };
+        }
       }
 
       let dataUrl = sourceUrl;
@@ -2168,13 +2180,25 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
     rewriteFontFaceUrl(url) {
       const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
 
-      // avoid error for url() or url(#foo)
-      const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-      if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
+      // sourceUrl cannot be resolved,
+      // probably because url is relative and refUrl is data: or blob:
+      if (sourceUrl.indexOf(':') === -1) {
         return {
-          url: sourceUrlHash,
-          recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
+          url: sourceUrl,
+          recordUrl: options["capture.recordSourceUri"] ? sourceUrl : "",
         };
+      }
+
+      // url() or url(#foo), or path resolves to self
+      // do not fetch URL to avoid an infinite cyclic loop
+      if (refUrl) {
+        const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+        if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
+          return {
+            url: sourceUrlHash,
+            recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
+          };
+        }
       }
 
       let dataUrl = sourceUrl;
@@ -2202,13 +2226,25 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
     rewriteBackgroundUrl(url) {
       const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
 
-      // avoid error for url() or url(#foo)
-      const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-      if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
+      // sourceUrl cannot be resolved,
+      // probably because url is relative and refUrl is data: or blob:
+      if (sourceUrl.indexOf(':') === -1) {
         return {
-          url: sourceUrlHash,
-          recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
+          url: sourceUrl,
+          recordUrl: options["capture.recordSourceUri"] ? sourceUrl : "",
         };
+      }
+
+      // url() or url(#foo), or path resolves to self
+      // do not fetch URL to avoid an infinite cyclic loop
+      if (refUrl) {
+        const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+        if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
+          return {
+            url: sourceUrlHash,
+            recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
+          };
+        }
       }
 
       let dataUrl = sourceUrl;
