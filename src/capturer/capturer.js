@@ -7,6 +7,7 @@
  * @require {Object} capturer
  *******************************************************************/
 
+let _isFxBelow52;
 let _isFxBelow55;
 let _isFxAndroid;
 
@@ -1413,8 +1414,13 @@ capturer.saveUrl = function (params) {
       url,
       filename: (directory ? directory + "/" : "") + filename,
       conflictAction: "uniquify",
-      saveAs: savePrompt,
     };
+
+    // Firefox < 52 gets an error if saveAs is defined
+    // Firefox Android gets an error if saveAs = true
+    if (!_isFxBelow52 && !_isFxAndroid) {
+      downloadParams.saveAs = savePrompt;
+    }
 
     isDebug && console.debug("download start", downloadParams);
     chrome.downloads.download(downloadParams, (downloadId) => {
@@ -1514,9 +1520,11 @@ document.addEventListener("DOMContentLoaded", function () {
     return Promise.resolve().then(() => {
       return browser.runtime.getBrowserInfo();
     }).then((info) => {
+      _isFxBelow52 = parseInt(info.version.match(/^(\d+)\./)[1], 10) < 52;
       _isFxBelow55 = parseInt(info.version.match(/^(\d+)\./)[1], 10) < 55;
       _isFxAndroid = (info.name === 'Fennec');
     }).catch((ex) => {
+      _isFxBelow52 = false;
       _isFxBelow55 = false;
       _isFxAndroid = false;
     });
