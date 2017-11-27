@@ -10,6 +10,15 @@ body {
   font-size: 12px;
 }
 
+#downloader {
+  /* display: none; causes child a.click() not work in Firefox */
+  visibility: hidden;
+  position: absolute;
+  border: none;
+  width: 0;
+  height: 0;
+}
+
 #logger {
   white-space: pre;
 }
@@ -34,5 +43,6 @@ body {
 </head>
 <body>
 <div id="logger"></div>
+<iframe id="downloader"></iframe>
 </body>
 </html>

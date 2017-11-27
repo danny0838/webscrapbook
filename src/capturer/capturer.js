@@ -8,7 +8,6 @@
  *******************************************************************/
 
 let _isFxBelow52;
-let _isFxBelow55;
 let _isFxAndroid;
 
 capturer.isContentScript = false;
@@ -1330,51 +1329,6 @@ capturer.downloadBlob = function (params) {
 capturer.saveBlobNaturally = function (params) {
   return Promise.resolve().then(() => {
     const {timeId, blob, filename, sourceUrl} = params;
-    
-    if (scrapbook.isGecko) {
-      // Firefox has a bug that the screen turns unresponsive
-      // when an addon page is redirected to a blob URL.
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
-      //
-      // Workaround by opening a File in a new tab.
-      // This works bad in Chrome as File.name is not taken.
-      if (_isFxBelow55 || _isFxAndroid) {      
-        // In Firefox < 55, download.onCreate cannot catch
-        // the generated download from new tab, and the Promise
-        // will never resolve. Fallback to download method.
-        return capturer.saveBlob({
-          timeId,
-          blob,
-          filename,
-          sourceUrl,
-          savePrompt: true,
-        });
-      }
-
-      const file  = new File([blob], filename, {type: "application/octet-stream"});
-      const url = URL.createObjectURL(file);
-
-      // @FIXME:
-      // If the user does not accept the download, the Promise never
-      // resolve or reject.
-      return new Promise((resolve, reject) => {
-        capturer.downloadInfo.set(url, {
-          timeId,
-          src: sourceUrl,
-          onComplete: resolve,
-          onError: reject,
-        });
-
-        browser.tabs.create({url, active: false});
-
-        const elem = document.createElement('a');
-        elem.href = url;
-        elem.target = 'download';
-        elem.textContent = `If the download doesn't start, click me.`;
-        capturer.logger.appendChild(elem);
-        capturer.log('');
-      });
-    }
 
     // Use the natural download attribute to generate a download.
     return new Promise((resolve, reject) => {
@@ -1387,12 +1341,51 @@ capturer.saveBlobNaturally = function (params) {
         onError: reject,
       });
 
+      if (scrapbook.isGecko) {
+        // Firefox has a bug that the screen turns unresponsive
+        // when an addon page is redirected to a blob URL.
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
+        //
+        // Workaround by creating the anchor in an iframe.
+        const iDoc = this.downloader.contentDocument;
+        const a = iDoc.createElement('a');
+        a.download = filename;
+        a.href = url;
+        iDoc.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        // In case the download still fails.
+        const file = new File([blob], filename, {type: "application/octet-stream"});
+        const url2 = URL.createObjectURL(file);
+
+        capturer.downloadInfo.set(url2, {
+          timeId,
+          src: sourceUrl,
+          onComplete: resolve,
+          onError: reject,
+        });
+
+        const elem = document.createElement('a');
+        elem.target = 'download';
+        elem.href = url2;
+        elem.textContent = `If the download doesn't start, click me.`;
+        capturer.logger.appendChild(elem);
+        capturer.log('');
+        return;
+      }
+
       const elem = document.createElement('a');
       elem.download = filename;
       elem.href = url;
-      document.body.appendChild(elem);
+      elem.textContent = `If the download doesn't start, click me.`;
+      capturer.logger.appendChild(elem);
       elem.click();
-      elem.remove();
+      capturer.log('');
+    }).catch((ex) => {
+      // probably USER_CANCELLED
+      // treat as capture success and return the filename
+      return filename;
     });
   });
 };
@@ -1505,10 +1498,22 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
   isDebug && console.debug("downloads.onCreated", downloadItem);
 
   const downloadInfo = capturer.downloadInfo;
-  const {id, url} = downloadItem;
+  const {id, url, filename} = downloadItem;
   if (!downloadInfo.has(url)) { return; }
 
-  downloadInfo.set(id, downloadInfo.get(url));
+  // In Chrome, the onCreated is fired when the "Save as" prompt popups.
+  //
+  // In Firefox, the onCreated is fired only when the user clicks
+  // save in the "Save as" prompt, and no event if the user clicks
+  // cancel.
+  //
+  // We wait until the user clicks save (or cancel in Chrome) to resolve
+  // the Promise (and then the window may close).
+  if (scrapbook.isGecko) {
+    downloadInfo.get(url).onComplete(scrapbook.filepathParts(filename)[1]);
+  } else {
+    downloadInfo.set(id, downloadInfo.get(url));
+  }
   downloadInfo.delete(url);
 });
 
@@ -1548,17 +1553,16 @@ document.addEventListener("DOMContentLoaded", function () {
   scrapbook.loadLanguages(document);
 
   capturer.logger = document.getElementById('logger');
+  capturer.downloader = document.getElementById('downloader');
 
   scrapbook.loadOptions().then(() => {
     return Promise.resolve().then(() => {
       return browser.runtime.getBrowserInfo();
     }).then((info) => {
       _isFxBelow52 = parseInt(info.version.match(/^(\d+)\./)[1], 10) < 52;
-      _isFxBelow55 = parseInt(info.version.match(/^(\d+)\./)[1], 10) < 55;
       _isFxAndroid = (info.name === 'Fennec');
     }).catch((ex) => {
       _isFxBelow52 = false;
-      _isFxBelow55 = false;
       _isFxAndroid = false;
     });
   }).then(() => {
