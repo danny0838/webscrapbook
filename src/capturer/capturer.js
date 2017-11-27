@@ -158,6 +158,7 @@ capturer.captureTab = function (params) {
             }).catch((ex) => {
               // Chrome may be failed to inject content script to some pages due to unclear reason.
               // Record the error and pass.
+              console.error(ex);
               const source = `[${tabId}:${frameId}] ${url}`;
               const err = scrapbook.lang("ErrorContentScriptExecute", [source, ex.message]);
               capturer.error(err);
@@ -174,6 +175,7 @@ capturer.captureTab = function (params) {
       if (response.error) { throw new Error(response.error.message); }
       return response;
     }).catch((ex) => {
+      console.error(ex);
       const err = `Fatal error: ${ex.message}`;
       capturer.error(err);
       return {error: {message: err}};
@@ -228,6 +230,7 @@ capturer.captureHeadless = function (params) {
       if (response.error) { throw new Error(response.error.message); }
       return response;
     }).catch((ex) => {
+      console.error(ex);
       const err = `Fatal error: ${ex.message}`;
       capturer.error(err);
       return {error: {message: err}};
@@ -357,6 +360,7 @@ capturer.captureUrl = function (params) {
         });
       }
     }).catch((ex) => {
+      console.warn(ex);
       capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
@@ -474,6 +478,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
         return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       });
     }).catch((ex) => {
+      console.warn(ex);
       capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
@@ -941,6 +946,7 @@ ${JSON.stringify(zipData)}
         }
       }
     }).catch((ex) => {
+      console.warn(ex);
       capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
@@ -1123,6 +1129,7 @@ capturer.downloadFile = function (params) {
         });
       });
     }).catch((ex) => {
+      console.warn(ex);
       capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     });
@@ -1188,6 +1195,7 @@ capturer.downLinkFetchHeader = function (params) {
       },
     }).catch((ex) => {
       // something wrong for the XMLHttpRequest
+      console.warn(ex);
       capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return null;
     }).then(() => {
