@@ -22,6 +22,15 @@ body {
   opacity: 0.7;
 }
 
+#downloader {
+  /* display: none; causes child a.click() not work in Firefox */
+  visibility: hidden;
+  position: absolute;
+  border: none;
+  width: 0;
+  height: 0;
+}
+
 #panel {
   padding: .5em 1em;
   background-color: grey;
@@ -79,5 +88,6 @@ body {
 </div>
 <div id="logger" class="wrap">__MSG_IndexerDesc__</div>
 <div id="dropmask" style="display: none;"></div>
+<iframe id="downloader"></iframe>
 </body>
 </html>
