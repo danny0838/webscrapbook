@@ -1000,8 +1000,9 @@ capturer.downloadFile = function (params) {
     const accessCurrent = Promise.resolve().then(() => {
       // special management for data URI
       if (sourceUrlMain.startsWith("data:")) {
+        /* save the data URI as file? */
         if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
-          let file = scrapbook.dataUriToFile(sourceUrlMain);
+          const file = scrapbook.dataUriToFile(sourceUrlMain);
           if (!file) { throw new Error("Malformed data URL."); }
 
           filename = file.name;
@@ -1027,6 +1028,30 @@ capturer.downloadFile = function (params) {
             });
           });
         }
+
+        /* rewrite content of the data URI? */
+        if (rewriteMethod && capturer[rewriteMethod]) {
+          const file = scrapbook.dataUriToFile(sourceUrlMain);
+          if (!file) { throw new Error("Malformed data URL."); }
+
+          // Save inner URLs as data URL since data URL is null origin
+          // and no relative URLs are allowed in it.
+          const innerOptions = JSON.parse(JSON.stringify(options));
+          innerOptions["capture.saveAs"] = "singleHtml";
+
+          return capturer[rewriteMethod]({
+            settings,
+            options: innerOptions,
+            data: file,
+            charset: null,
+            url: null,
+          }).then((blob) => {
+            return scrapbook.readFileAsDataURL(blob);
+          }).then((dataURL) => {
+            return {url: dataURL};
+          });
+        }
+
         return {url: sourceUrl};
       }
 
