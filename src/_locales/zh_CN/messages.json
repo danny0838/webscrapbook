@@ -436,7 +436,7 @@
   "ViewerTitle": {
     "message": "检视封存页面"
   },
-  "WarnCaptureCyclicRefercing": {
+  "WarnCaptureCyclic": {
     "message": "资源 '$SOURCE$' 循环参照至 '$TARGET$'，由于目前的获取设定不支援循环参照，参照目标将转向至空值。",
     "placeholders": {
       "source": {"content": "$1"},

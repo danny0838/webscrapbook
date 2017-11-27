@@ -1165,7 +1165,7 @@ capturer.captureDocument = function (params) {
                       options,
                     }).then(captureFrameCallback);
                   } else {
-                    console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
+                    console.warn(scrapbook.lang("WarnCaptureCyclic", [sourceUrl, targetUrl]));
                     captureRewriteUri(frame, "src", `urn:scrapbook:download:cyclic:url:${frameSrc.src}`);
                   }
                 }
@@ -2287,7 +2287,7 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
               if (this.options["capture.saveAs"] === "singleHtml" || 
                   this.options["capture.saveAs"] === "singleHtmlJs") {
                 const sourceUrl = this.settings.recurseChain[this.settings.recurseChain.length - 1];
-                console.warn(scrapbook.lang("WarnCaptureCyclicRefercing", [sourceUrl, targetUrl]));
+                console.warn(scrapbook.lang("WarnCaptureCyclic", [sourceUrl, targetUrl]));
                 response.url = `urn:scrapbook:download:cyclic:filename:${response.url}`;
               }
             }

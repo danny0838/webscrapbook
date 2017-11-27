@@ -436,7 +436,7 @@
   "ViewerTitle": {
     "message": "View archive page"
   },
-  "WarnCaptureCyclicRefercing": {
+  "WarnCaptureCyclic": {
     "message": "Resource '$SOURCE$' has a circular reference to '$TARGET$', which will be blanked because current capture configuration does not support circular reference.",
     "placeholders": {
       "source": {"content": "$1"},
