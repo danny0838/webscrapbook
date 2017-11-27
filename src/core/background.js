@@ -136,6 +136,15 @@ if (chrome.contextMenus) {
   });
 }
 
+if (chrome.history) {
+  chrome.history.onVisited.addListener((result) => {
+    // suppress extension pages from generating a history entry
+    if (result.url.startsWith(chrome.runtime.getURL(""))) {
+      chrome.history.deleteUrl({url: result.url});
+    }
+  });
+}
+
 chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
   // Some headers (e.g. "referer") are not allowed to be set via
   // XMLHttpRequest.setRequestHeader directly.  Use a prefix and
