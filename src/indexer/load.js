@@ -1331,7 +1331,7 @@ const indexer = {
       modify: legacyMeta.modify ? scrapbook.dateToId(scrapbook.idToDateOld(legacyMeta.modify)) : "",
       source: legacyMeta.source,
       icon: legacyMeta.icon,
-      comment: legacyMeta.comment.replace(/ __BR__ /g, '\n'),
+      comment: legacyMeta.comment ? legacyMeta.comment.replace(/ __BR__ /g, '\n') : "",
       folder: legacyMeta.folder,
       exported: legacyMeta.exported ? scrapbook.dateToId(new Date(legacyMeta.exported)) : undefined,
     };
