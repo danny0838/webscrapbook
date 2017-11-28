@@ -97,13 +97,17 @@ const indexer = {
 
   start() {
     this.uninitEvents();
+    this.dirSelector.disabled = true;
+    this.filesSelector.disabled = true;
     this.logger.textContent = '';
     this.logger.className = '';
     this.options = Object.assign({}, scrapbook.options);
   },
 
   end() {
+    this.dirSelector.disabled = false;
     this.dirSelector.value = null;
+    this.filesSelector.disabled = false;
     this.filesSelector.value = null;
     this.initEvents();
   },
