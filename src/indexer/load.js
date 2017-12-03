@@ -406,7 +406,8 @@ const indexer = {
       const zip = new JSZip();
 
       // collect files meaningful for ScrapBook
-      const dataDirs = {};
+      const dataDirIds = new Set();
+      const dataFiles = {};
       const treeFiles = {};
       const otherFiles = {};
       for (const {path, file} of inputData.files) {
@@ -423,8 +424,8 @@ const indexer = {
         // map files in data/*
         if (/^data\/(([^\/]+)(?:\/.+|[.][^.]+))$/.test(path)) {
           const {$1: path, $2: id} = RegExp;
-          if (!dataDirs[id]) { dataDirs[id] = {}; }
-          dataDirs[id][path] = file;
+          dataFiles[path] = file;
+          dataDirIds.add(id);
         }
       }
 
@@ -461,7 +462,7 @@ const indexer = {
             };
 
             if (!scrapbookData.meta[id]) { scrapbookData.meta[id] = this.getDefaultMeta(); }
-            scrapbookData.meta[id].index = dataDirs[id] && this.getIndexPath(dataDirs[id], id) || undefined,
+            scrapbookData.meta[id].index = this.getIndexPath(dataFiles, id) || undefined,
             this.mergeLegacyMeta(scrapbookData.meta[id], rdfMeta);
           };
 
@@ -543,12 +544,11 @@ const indexer = {
 
         this.log(`Inspecting data files...`);
         let p = Promise.resolve();
-        for (const id of Object.keys(dataDirs).sort()) {
+        for (const id of [...dataDirIds].sort()) {
           if (scrapbookData.meta[id]) { continue; }
 
           p = p.then(() => {
-            const itemFiles = dataDirs[id];
-            const index = this.getIndexPath(itemFiles, id);
+            const index = this.getIndexPath(dataFiles, id);
 
             let meta;
             let zipDataDir;
@@ -559,7 +559,7 @@ const indexer = {
               if (!(!index || index.endsWith('/index.html'))) { return; }
 
               const indexDatPath = `${id}/index.dat`;
-              const indexDatFile = itemFiles[indexDatPath];
+              const indexDatFile = dataFiles[indexDatPath];
               if (!indexDatFile) { return; }
 
               this.log(`Found 'data/${indexDatPath}' for legacy ScrapBook. Importing...`);
@@ -584,7 +584,7 @@ const indexer = {
 
               /* meta.modify */
               // update using last modified time of the index file
-              const fileModify = scrapbook.dateToId(new Date(itemFiles[index].lastModified));
+              const fileModify = scrapbook.dateToId(new Date(dataFiles[index].lastModified));
               if (fileModify > meta.modify) { meta.modify = fileModify; }
 
               // skip importing index file if index.dat has been imported
@@ -599,9 +599,9 @@ const indexer = {
                     index.endsWith('.htm') ||
                     index.endsWith('.xhtml') ||
                     index.endsWith('.xht')) {
-                  return scrapbook.readFileAsDocument(itemFiles[index]);
+                  return scrapbook.readFileAsDocument(dataFiles[index]);
                 } else if (index.endsWith('.htz')) {
-                  return new JSZip().loadAsync(itemFiles[index]).then((zip) => {
+                  return new JSZip().loadAsync(dataFiles[index]).then((zip) => {
                     zipDataDir = zip;
 
                     return zip.file("index.html").async("arraybuffer").then((ab) => {
@@ -612,7 +612,7 @@ const indexer = {
                 } else if (index.endsWith('.maff')) {
                   // @TODO:
                   // support multiple entries in one maff file
-                  return new JSZip().loadAsync(itemFiles[index], {createFolders: true}).then((zip) => {
+                  return new JSZip().loadAsync(dataFiles[index], {createFolders: true}).then((zip) => {
                     const zipDir = zip.folder(Object.keys(zip.files)[0]);
                     zipDataDir = zipDir;
 
@@ -759,33 +759,43 @@ const indexer = {
         this.log(`Inspecting metadata...`);
 
         // handle tweaked ID
-        for (const id in scrapbookData.meta) {
+        const indexIdMap = new Map();
+        for (let id in scrapbookData.meta) {
           const meta = scrapbookData.meta[id];
 
-          const newId = meta.id;
-          // scrapbookData.meta[newId] is imported from meta#.js
-          // scrapbookData.meta[id] is imported from dataDir
-          if (newId && newId !== id) {
-            if (!scrapbookData.meta[newId]) {
-              // move scrapbookData.meta[id] to scrapbookData.meta[newId]
-              // move dataDirs[id] to dataDirs[newId]
-              scrapbookData.meta[newId] = meta;
-              delete(scrapbookData.meta[id]);
-              dataDirs[newId] = dataDirs[id];
-              delete(dataDirs[id]);
-              this.log(`Tweaked '${id}' to '${newId}'.`);
-            } else if (scrapbookData.meta[newId].index === meta.index) {
-              // discard scrapbookData.meta[id]
-              // move dataDirs[id] to dataDirs[newId]
-              delete(scrapbookData.meta[id]);
-              dataDirs[newId] = dataDirs[id];
-              delete(dataDirs[id]);
-              this.log(`Tweaked '${id}' to '${newId}'. Discarded imported metadata from 'data/${meta.index}'.`);
-            } else {
-              // already a data belong to newId, mark this as invalid
-              delete(scrapbookData.meta[id]);
-              this.error(`Removed bad metadata entry '${id}': specified ID '${newId}' has been used.`);
+          if (meta.id) {
+            const newId = meta.id;
+            // scrapbookData.meta[newId] is imported from meta#.js
+            // scrapbookData.meta[id] is imported from dataDir
+            if (newId !== id) {
+              if (!scrapbookData.meta[newId]) {
+                // scrapbookData.meta[newId] not used
+                scrapbookData.meta[newId] = meta;
+                delete(scrapbookData.meta[id]);
+                this.log(`Tweaked '${id}' to '${newId}'.`);
+                id = newId;
+              } else if (scrapbookData.meta[newId].index === meta.index) {
+                // scrapbookData.meta[newId] used by self
+                delete(scrapbookData.meta[id]);
+                this.log(`Tweaked '${id}' to '${newId}'. Discarded metadata of '${id}'.`);
+                continue;
+              } else {
+                // scrapbookData.meta[newId] used by another item, mark this as invalid
+                delete(scrapbookData.meta[id]);
+                this.error(`Removed bad metadata entry '${id}': specified ID '${newId}' has been used.`);
+                continue;
+              }
             }
+          }
+
+          if (meta.index) {
+            const indexId = indexIdMap.get(meta.index);
+            if (indexId) {
+              delete(scrapbookData.meta[id]);
+              this.log(`Tweaked '${id}' to '${indexId}'. Discarded metadata of '${id}'.`);
+              continue;
+            }
+            indexIdMap.set(meta.index, id);
           }
         }
 
@@ -795,19 +805,15 @@ const indexer = {
           // remove stale items
           // fix missing index file
           if (!['folder', 'separator', 'bookmark'].includes(meta.type)) {
-            if (!dataDirs[id]) {
-              delete(scrapbookData.meta[id]);
-              this.error(`Removed metadata entry for '${id}': Missing data files.`);
-              continue;
-            }
-
-            if (!meta.index || !dataDirs[id][meta.index]) {
-              const index = this.getIndexPath(dataDirs[id], id);
+            if (!meta.index || !dataFiles[meta.index]) {
+              const index = this.getIndexPath(dataFiles, id);
               if (index) {
                 meta.index = index;
                 this.error(`Missing index file '${meta.index || ''}' for '${id}'. Shifted to '${index}'.`);
               } else {
-                this.error(`Missing index file '${meta.index || ''}' for '${id}'.`);
+                delete(scrapbookData.meta[id]);
+                this.error(`Removed metadata entry for '${id}': Missing index file.`);
+                continue;
               }
             }
           }
@@ -1268,35 +1274,35 @@ const indexer = {
     logger.appendChild(span);
   },
 
-  getIndexPath(itemFiles, id) {
+  getIndexPath(dataFiles, id) {
     let index;
 
     index = `${id}/index.html`;
-    if (itemFiles[index]) { return index; }
+    if (dataFiles[index]) { return index; }
 
     index = `${id}.html`;
-    if (itemFiles[index]) { return index; }
+    if (dataFiles[index]) { return index; }
 
     index = `${id}.htm`;
-    if (itemFiles[index]) { return index; }
+    if (dataFiles[index]) { return index; }
 
     index = `${id}.xhtml`;
-    if (itemFiles[index]) { return index; }
+    if (dataFiles[index]) { return index; }
 
     index = `${id}.xht`;
-    if (itemFiles[index]) { return index; }
+    if (dataFiles[index]) { return index; }
 
     index = `${id}.maff`;
-    if (itemFiles[index]) { return index; }
+    if (dataFiles[index]) { return index; }
 
     index = `${id}.htz`;
-    if (itemFiles[index]) { return index; }
+    if (dataFiles[index]) { return index; }
 
     index = `${id}.mht`;
-    if (itemFiles[index]) { return index; }
+    if (dataFiles[index]) { return index; }
 
     index = `${id}.epub`;
-    if (itemFiles[index]) { return index; }
+    if (dataFiles[index]) { return index; }
 
     return null;
   },
