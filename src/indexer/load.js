@@ -757,34 +757,40 @@ const indexer = {
 
         /* Process metadata */
         this.log(`Inspecting metadata...`);
-        for (let id in scrapbookData.meta) {
-          let meta = scrapbookData.meta[id];
 
-          // tweak ID if we have a meta id different to dir id
+        // handle tweaked ID
+        for (const id in scrapbookData.meta) {
+          const meta = scrapbookData.meta[id];
+
           const newId = meta.id;
+          // scrapbookData.meta[newId] is imported from meta#.js
+          // scrapbookData.meta[id] is imported from dataDir
           if (newId && newId !== id) {
             if (!scrapbookData.meta[newId]) {
-              // previous data for id shoudld be belong to newId
+              // move scrapbookData.meta[id] to scrapbookData.meta[newId]
+              // move dataDirs[id] to dataDirs[newId]
               scrapbookData.meta[newId] = meta;
               delete(scrapbookData.meta[id]);
               dataDirs[newId] = dataDirs[id];
               delete(dataDirs[id]);
               this.log(`Tweaked '${id}' to '${newId}'.`);
-              id = newId;
-            } else if (scrapbookData.meta[newId].index === index) {
-              // it's self
-              // meta record for newId matches data files for id
-              // update pointer of dataDirs
+            } else if (scrapbookData.meta[newId].index === meta.index) {
+              // discard scrapbookData.meta[id]
+              // move dataDirs[id] to dataDirs[newId]
+              delete(scrapbookData.meta[id]);
               dataDirs[newId] = dataDirs[id];
               delete(dataDirs[id]);
-              this.log(`'data/${index}' is already used by '${newId}', skip generating.`);
-              return;
+              this.log(`Tweaked '${id}' to '${newId}'. Discarded imported metadata from 'data/${meta.index}'.`);
             } else {
               // already a data belong to newId, mark this as invalid
               delete(scrapbookData.meta[id]);
               this.error(`Removed bad metadata entry '${id}': specified ID '${newId}' has been used.`);
             }
           }
+        }
+
+        for (const id in scrapbookData.meta) {
+          const meta = scrapbookData.meta[id];
 
           // remove stale items
           // fix missing index file
