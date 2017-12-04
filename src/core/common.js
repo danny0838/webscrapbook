@@ -9,13 +9,28 @@
  *******************************************************************/
 
 let isDebug = false;
-let scrapbook = {
-  get isGecko() {
+let scrapbook = {};
+
+// set local variable for APIs in case these APIs are removed by viewer/view.js
+(function (
+  window,
+  undefined,
+  scrapbook,
+  browser,
+  chrome,
+  indexedDB,
+  localStorage,
+  sessionStorage,
+  XMLHttpRequest,
+  fetch,
+) {
+Object.defineProperty(scrapbook, 'isGecko', {
+  get: function() {
     let m = chrome.runtime.getManifest();
     delete this.isGecko;
     return this.isGecko = !!(m.applications && m.applications.gecko);
-  }
-};
+  },
+});
 
 
 /********************************************************************
@@ -1445,5 +1460,15 @@ scrapbook.zipFixModifiedTime = function (dateInZip) {
   return new Date(dateInZip.valueOf() + dateInZip.getTimezoneOffset() * 60 * 1000);
 };
 
-
-true; // return value of executeScript
+})(
+  window,
+  undefined,
+  scrapbook,
+  browser,
+  chrome,
+  indexedDB,
+  localStorage,
+  sessionStorage,
+  XMLHttpRequest,
+  fetch,
+);

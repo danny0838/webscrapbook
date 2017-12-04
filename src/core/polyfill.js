@@ -5,9 +5,14 @@
  * @public {Object} browser
  *******************************************************************/
 
+(function (
+  window,
+  undefined,
+  chrome,
+) {
 /* polyfill for browser API in Chrome */
 if (typeof browser === "undefined" && typeof chrome !== "undefined") {
-  this.browser = {
+  window.browser = {
     downloads: {
       download(...args) {
         return new Promise((resolve, reject) => {
@@ -232,3 +237,9 @@ if (typeof browser === "undefined" && typeof chrome !== "undefined") {
     },
   };
 }
+
+})(
+  window,
+  undefined,
+  typeof chrome !== "undefined" && chrome || undefined,
+);

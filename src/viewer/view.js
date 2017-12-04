@@ -5,8 +5,19 @@
  * @require {Object} scrapbook
  *******************************************************************/
 
-(function (window, undefined) {
-
+// cache APIs for later use
+(function (
+  window,
+  undefined,
+  scrapbook,
+  browser,
+  chrome,
+  indexedDB,
+  localStorage,
+  sessionStorage,
+  XMLHttpRequest,
+  fetch,
+) {
 const urlObj = new URL(document.URL);
 
 const viewerData = {
@@ -24,26 +35,21 @@ const viewer = {
   // access its frames under blob: or data: scheme.
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1091887
   //
-  // Serving an archive page in an iframe of a extension page is necessary at
+  // Serving an archive page in an iframe of an extension page is necessary at
   // present. Scripts in the archive page thus gain extension privilege, which
   // could introduce a security risk.
   //
-  // Fortunately it's very unlikely to happen since the potential offending
-  // code is meaningless in a regular web page and thus is unlikely written,
-  // and the page must be captured with javascripts (which is discouraged), be
-  // captured as htz or maff, and be viewed via Web ScrapBook.
-  //
-  // Though, we do our best to minimize the risk by removing privileged APIs
-  // that are not required by the viewer page.
-  deApiScriptMain() {
-    // XMLHttpRequest (or fetch) is required to load blob as document and to
-    // load external resources.
+  // We minimize the risk by removing privileged APIs from this page and all
+  // frames serving the web page content.
+  deApiScript: function () {
     [
       "browser",
       "chrome",
       "indexedDB",
       "localStorage",
       "sessionStorage",
+      "XMLHttpRequest",
+      "fetch",
     ].forEach((api) => {
       if (typeof window[api] !== "undefined") {
         window[api] = undefined;
@@ -52,24 +58,7 @@ const viewer = {
     });
   },
   get deApiScriptUrl() {
-    // @TODO: window.top is readonly and cannot be replaced
-    const script = function () {
-      [
-        "browser",
-        "chrome",
-        "indexedDB",
-        "localStorage",
-        "sessionStorage",
-        "XMLHttpRequest",
-        "fetch",
-      ].forEach((api) => {
-        if (typeof window[api] !== "undefined") {
-          window[api] = undefined;
-          delete(window[api]);
-        }
-      });
-    };
-    const text = "(" + script.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")()";
+    const text = "(" + this.deApiScript.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")()";
     const url = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
     delete viewer.deApiScriptUrl;
     return viewer.deApiScriptUrl = url;
@@ -913,6 +902,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         return p;
       }).then(() => {
+        // remove privileged APIs in this page
+        // An error happens if browser.* is called when window.chrome
+        // is removed in Chrome, so defer the removal after no extension
+        // API is needed.
+        viewer.deApiScript();
+      }).then(() => {
         return viewer.fetchPage({
           inZipPath: indexFile,
           url: urlSearch + urlHash,
@@ -936,4 +931,18 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-})(window, undefined);
+})(
+  window,
+  undefined,
+  scrapbook,
+  browser,
+  chrome,
+  indexedDB,
+  localStorage,
+  sessionStorage,
+  XMLHttpRequest,
+  fetch,
+);
+
+// remove scrapbook APIs from the global scope
+scrapbook = undefined;
