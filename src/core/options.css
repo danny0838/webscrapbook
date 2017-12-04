@@ -16,3 +16,12 @@ fieldset {
   width: 100%;
   min-height: 80px;
 }
+
+#downloader {
+  /* display: none; causes child a.click() not work in Firefox */
+  visibility: hidden;
+  position: absolute;
+  border: none;
+  width: 0;
+  height: 0;
+}

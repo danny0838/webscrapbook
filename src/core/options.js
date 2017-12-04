@@ -57,10 +57,28 @@ function resetOptions(file) {
 }
 
 function exportOptions() {
-  const data = new Blob([JSON.stringify(scrapbook.options, null, 2)], {type: "application/json"});
-  const elem = document.createElement("a");
-  elem.href = URL.createObjectURL(data);
-  elem.download = "webscrapbook.options." + scrapbook.dateToId().slice(0, 8) + ".json";
+  const blob = new Blob([JSON.stringify(scrapbook.options, null, 2)], {type: "application/json"});
+  const filename = `webscrapbook.options.${scrapbook.dateToId().slice(0, 8)}.json`;
+
+  if (scrapbook.isGecko) {
+    // Firefox has a bug that the screen turns unresponsive
+    // when an addon page is redirected to a blob URL.
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
+    //
+    // Workaround by creating the anchor in an iframe.
+    const iDoc = document.getElementById('downloader').contentDocument;
+    const a = iDoc.createElement('a');
+    a.download = filename;
+    a.href = URL.createObjectURL(blob);
+    iDoc.body.appendChild(a);
+    a.click();
+    a.remove();
+    return;
+  }
+
+  const elem = document.createElement('a');
+  elem.download = filename;
+  elem.href = URL.createObjectURL(blob);
   document.body.appendChild(elem);
   elem.click();
   elem.remove();
