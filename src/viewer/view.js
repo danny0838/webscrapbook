@@ -470,7 +470,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
 
           // @FIXME:
-          // embed, objects, and applet doesn't seem to work as in a regular web page.
+          // embed, objects, and applet don't work as in a regular web page.
           case "embed": {
             if (!scrapbook.getOption("viewer.allowScripts")) {
               elem.remove();
