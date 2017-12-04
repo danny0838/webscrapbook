@@ -9,8 +9,7 @@
     chrome.runtime.getURL('viewer/view.js'),
   ];
 
-  let m = chrome.runtime.getManifest();
-  if (!(m.applications && m.applications.gecko)) {
+  if (true) {
     // if script-src blob: is allowed in CSP
     const loadScripts = (urls) => {
       const tasks = urls.map((url) => {
