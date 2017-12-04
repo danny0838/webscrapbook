@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width">
 <title>__MSG_ViewerTitle__</title>
 <link id="favicon" rel="shortcut icon">
-<script src="../core/polyfill.js"></script>
-<script src="../core/common.js"></script>
-<script src="view.js"></script>
 <style>
 html {
   height: 100%;
@@ -31,5 +28,6 @@ body {
 <body>
 <!-- not used: allow-forms allow-top-navigation allow-top-navigation-by-user-activation -->
 <iframe id="viewer" class="full-viewport" sandbox="allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-scripts allow-same-origin"></iframe>
+<script src="view-loader.js"></script>
 </body>
 </html>
