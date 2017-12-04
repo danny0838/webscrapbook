@@ -20,8 +20,6 @@
     "128": "core/scrapbook_128.png"
   },
 
-  "content_security_policy": "script-src 'self' blob:; object-src 'self' blob:",
-
   "permissions": [
     "contextMenus",
     "downloads",
