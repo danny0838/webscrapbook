@@ -303,11 +303,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
 
           case "script": {
-            if (!scrapbook.getOption("viewer.allowScripts")) {
-              elem.remove();
-              break;
-            }
-
             if (elem.hasAttribute("src")) {
               elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
 
@@ -448,11 +443,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           // @FIXME:
           // embed, objects, and applet don't work as in a regular web page.
           case "embed": {
-            if (!scrapbook.getOption("viewer.allowScripts")) {
-              elem.remove();
-              break;
-            }
-
             if (elem.hasAttribute("src")) {
               try {
                 elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
@@ -483,11 +473,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
 
           case "object": {
-            if (!scrapbook.getOption("viewer.allowScripts")) {
-              elem.remove();
-              break;
-            }
-
             if (elem.hasAttribute("data")) {
               try {
                 elem.setAttribute("data", rewriteUrl(elem.getAttribute("data"), refUrl));
@@ -518,11 +503,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
 
           case "applet": {
-            if (!scrapbook.getOption("viewer.allowScripts")) {
-              elem.remove();
-              break;
-            }
-
             if (elem.hasAttribute("code")) {
               try {
                 elem.setAttribute("code", rewriteUrl(elem.getAttribute("code"), refUrl));
