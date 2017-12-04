@@ -892,7 +892,9 @@ loadOptions.then(() => {
       // An error happens if browser.* is called when window.chrome
       // is removed in Chrome, so defer the removal until extension
       // APIs are no more needed.
-      viewer.deApiScript();
+      if (!scrapbook.isGecko) {
+        viewer.deApiScript();
+      }
     }).then(() => {
       return viewer.fetchPage({
         inZipPath: indexFile,
