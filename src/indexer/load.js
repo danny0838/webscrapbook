@@ -1711,7 +1711,7 @@ var scrapbook = {
     if (anchor) {
       if (self !== top) {
         top.document.title = anchor.childNodes[1].nodeValue || scrapbook.data.title;
-        top.frames["main"].location = anchor.href;
+        if (anchor.href) { top.frames["main"].location = anchor.href; }
       }
       setTimeout(function(){ anchor.focus(); }, 0);
     }
