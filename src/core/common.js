@@ -920,7 +920,7 @@ scrapbook.parseHeaderRefresh = function (string) {
 /**
  * A simple tool to compress javascript code
  *
- * Note: this not handle comments inside a string
+ * Note: this does not handle comments inside a string
  */
 scrapbook.compressJsFunc = function (func) {
   return func.toString()
