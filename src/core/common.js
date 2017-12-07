@@ -1410,6 +1410,8 @@ scrapbook.delay = function (ms) {
 
 /********************************************************************
  * Zip utilities
+ *
+ * @require JSZip
  *******************************************************************/
 
 // @TODO:
@@ -1442,6 +1444,77 @@ scrapbook.zipAddFile = function (zipObj, filename, blob, isText, options = {}) {
 // https://github.com/Stuk/jszip/issues/369
 scrapbook.zipFixModifiedTime = function (dateInZip) {
   return new Date(dateInZip.valueOf() + dateInZip.getTimezoneOffset() * 60 * 1000);
+};
+
+scrapbook.getMaffIndexFiles = function (zipObj) {
+  return Promise.resolve().then(() => {
+    // get the list of top-folders
+    const topdirs = new Set();
+    for (const inZipPath in zipObj.files) {
+      const depth = Array.prototype.filter.call(inZipPath, x => x === "/").length;
+      if (depth === 1) {
+        const dirname = inZipPath.replace(/\/.*$/, "");
+        topdirs.add(dirname + '/');
+      }
+    }
+
+    // get index files in each topdir
+    const indexFiles = [];
+    let p = Promise.resolve();
+    topdirs.forEach((topdir) => {
+      p = p.then(() => {
+        const indexRdfFile = topdir + 'index.rdf';
+        if (zipObj.files[indexRdfFile]) {
+          return zipObj.file(indexRdfFile).async('arraybuffer').then((ab) => {
+            return new File([ab], 'index.rdf', {type: "application/rdf+xml"});
+          }, (ex) => {
+            throw new Error(`'index.rdf' cannot be loaded.`);
+          }).then((file) => {
+            return scrapbook.readFileAsDocument(file);
+          }).then((doc) => {
+            if (!doc) {
+              throw new Error(`'index.rdf' is corrupted.`);
+            }
+
+            const meta = scrapbook.parseMaffRdfDocument(doc);
+            if (!meta.indexfilename) {
+              throw new Error(`'index.rdf' specifies no index file.`);
+            }
+
+            const indexFilename = topdir + (meta.indexfilename || '');
+            if (!zipObj.files[indexFilename]) {
+              throw new Error(`'index.rdf' specified index file '${meta.indexfilename}' not found.`);
+            }
+
+            return indexFilename;
+          }).catch((ex) => {
+            throw ex;
+          });
+        }
+
+        let indexFilename;
+        for (const inZipPath in zipObj.files) {
+          if (!inZipPath.startsWith(topdir)) { continue; }
+
+          const [, filename] = scrapbook.filepathParts(inZipPath);
+          if (filename.startsWith("index.")) {
+            indexFilename = inZipPath;
+            break;
+          }
+        }
+        return indexFilename;
+      }).then((indexFilename) => {
+        if (!indexFilename) { throw new Error(`'index.*' file not found.`); }
+
+        indexFiles.push(indexFilename);
+      }).catch((ex) => {
+        throw new Error(`Unable to get index file in directory: '${topdir}': ${ex.message}`);
+      });
+    });
+    return p.then(() => {
+      return indexFiles;
+    });
+  });
 };
 
 

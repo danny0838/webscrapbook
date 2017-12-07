@@ -362,7 +362,6 @@ const viewer = {
       const zipData = {
         name: zipFile.name,
         files: {},
-        blobs: {},
       };
 
       // @TODO: JSZip.loadAsync cannot load a large zip file
@@ -401,11 +400,6 @@ const viewer = {
                 data = new Blob([ab], {type: mime});
               }
 
-              // store blob data for special files that could be used later
-              if (type === 'maff' && /^[^/]+[/]index.rdf$/.test(inZipPath)) {
-                zipData.blobs[inZipPath] = new Blob([ab], {type: mime});
-              }
-
               /* Filesystem API view */
               if (viewer.filesystem) {
                 return fileSystemHandler.createFile(viewer.filesystem.root, uuid + "/" + inZipPath, data);
@@ -427,74 +421,20 @@ const viewer = {
           /* In-memory view */
           const key = {table: "viewerCache", id: uuid};
           return scrapbook.cache.set(key, zipData.files);
+        }).then(() => {
+          return zip;
         });
-      }).then(() => {
+      }).then((zip) => {
         switch (type) {
           case "maff": {
-            // get the list of top-folders
-            const topdirs = new Set();
-            for (let inZipPath in zipData.files) {
-              const depth = Array.prototype.filter.call(inZipPath, x => x == "/").length;
-              if (depth === 1) {
-                const dirname = inZipPath.replace(/\/.*$/, "");
-                topdirs.add(dirname + '/');
-              }
-            }
-
-            // get index files in each topdir
-            const indexFiles = [];
-            let p = Promise.resolve();
-            topdirs.forEach((topdir) => {
-              p = p.then(() => {
-                if (zipData.files[topdir + 'index.rdf']) {
-                  const file = zipData.blobs[topdir + 'index.rdf'];
-                  return scrapbook.readFileAsDocument(file).then((doc) => {
-                    if (!doc) {
-                      throw new Error(`'index.rdf' is corrupted.`);
-                    }
-
-                    const meta = scrapbook.parseMaffRdfDocument(doc);
-                    if (!meta.indexfilename) {
-                      throw new Error(`'index.rdf' specifies no index file.`);
-                    }
-
-                    const indexFilename = topdir + (meta.indexfilename || '');
-                    if (!zipData.files[indexFilename]) {
-                      throw new Error(`'index.rdf' specified index file '${meta.indexfilename}' not found.`);
-                    }
-
-                    return indexFilename;
-                  }).catch((ex) => {
-                    throw ex;
-                  });
-                }
-
-                let indexFilename;
-                for (const inZipPath in zipData.files) {
-                  if (!inZipPath.startsWith(topdir)) { continue; }
-
-                  const filename = inZipPath.slice(inZipPath.lastIndexOf("/") + 1);
-                  if (filename.startsWith("index.")) {
-                    indexFilename = inZipPath;
-                    break;
-                  }
-                }
-                return indexFilename;
-              }).then((indexFilename) => {
-                if (!indexFilename) { throw new Error(`'index.*' file not found.`); }
-
-                indexFiles.push(indexFilename);
-              }).catch((ex) => {
-                this.error(`Unable to get index file in directory: '${topdir}': ${ex.message}`);
-              });
-            });
-            return p.then(() => {
-              return indexFiles;
+            return scrapbook.getMaffIndexFiles(zip).catch((ex) => {
+              this.error(ex.message);
+              return [];
             });
           }
           case "htz":
           default: {
-            if (!zipData.files["index.html"]) { return []; }
+            if (!zip.files["index.html"]) { return []; }
 
             return ["index.html"];
           }
