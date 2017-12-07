@@ -302,7 +302,7 @@ const viewer = {
         this.autoLoading = true;
         return [file];
       }).catch((ex) => {
-        this.error(`Unable to fetch specified zip file '${zipSourceUrl}'`);
+        this.error(`Unable to fetch specified ZIP file '${zipSourceUrl}'`);
         return [];
       });
     }).then((files) => {
@@ -500,7 +500,7 @@ const viewer = {
           }
         }
       }, (ex) => {
-        throw new Error(`Zip file invalid or unsupported.`);
+        throw new Error(`ZIP file invalid or unsupported.`);
       }).then((indexFiles) => {
         if (!indexFiles.length) {
           throw new Error(`No available page found.`);
