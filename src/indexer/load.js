@@ -1123,47 +1123,98 @@ const indexer = {
   generateFiles({scrapbookData, treeFiles, zip}) {
     return Promise.resolve().then(() => {
       this.log(`Checking for created and updated files...`);
-      let content;
-      let file;
+
+      let metaFiles = 0;
+      let tocFiles = 0;
 
       /* tree/meta#.js */
-      content = this.generateMetaFile(scrapbookData.meta);
-      file = new Blob([content], {type: "application/javascript"});
-      scrapbook.zipAddFile(zip, 'tree/meta.js', file, true);
+      // A javascript string >= 256 MiB (UTF-16 chars) causes an error
+      // in the browser. Split each js file at around 256 K items to
+      // prevent the issue. (An item is mostly < 512 bytes)
+      {
+        const exportFile = (meta, i) => {
+          const content = this.generateMetaFile(meta);
+          const file = new Blob([content], {type: "application/javascript"});
+          scrapbook.zipAddFile(zip, `tree/meta${i || ""}.js`, file, true);
+        };
 
-      // fill an empty file for loaded tree/meta#.js since we don't want to use it
-      // 
-      // @TODO:
-      // generate multiple meta#.js for large size meta
-      for (let i = 1; ; i++) {
-        const path = `tree/meta${i}.js`;
-        let file = treeFiles[path];
-        if (!file) { break; }
+        const sizeThreshold = 256 * 1024;
+        let i = 0;
+        let size = 0;
+        let meta = {};
+        for (const id in scrapbookData.meta) {
+          meta[id] = scrapbookData.meta[id];
+          size += 1;
 
-        file = new Blob([""], {type: "application/javascript"});
-        scrapbook.zipAddFile(zip, path, file, true);
+          if (size >= sizeThreshold) {
+            exportFile(meta, i);
+            i += 1;
+            size = 0;
+            meta = {};
+          }
+        }
+        if (Object.keys(meta).length) {
+          exportFile(meta, i);
+          i += 1;
+        }
+        metaFiles = i;
+
+        // fill an empty file for unused tree/meta#.js
+        for (; ; i++) {
+          const path = `tree/meta${i}.js`;
+          let file = treeFiles[path];
+          if (!file) { break; }
+
+          file = new Blob([""], {type: "application/javascript"});
+          scrapbook.zipAddFile(zip, path, file, true);
+        }
       }
 
       /* tree/toc#.js */
-      content = this.generateTocFile(scrapbookData.toc);
-      file = new Blob([content], {type: "application/javascript"});
-      scrapbook.zipAddFile(zip, 'tree/toc.js', file, true);
+      // A javascript string >= 256 MiB (UTF-16 chars) causes an error
+      // in the browser. Split each js file at around 4 M entries to
+      // prevent the issue. (An entry is mostly < 32 bytes)
+      {
+        const exportFile = (toc, i) => {
+          const content = this.generateTocFile(toc);
+          const file = new Blob([content], {type: "application/javascript"});
+          scrapbook.zipAddFile(zip, `tree/toc${i || ""}.js`, file, true);
+        };
 
-      // fill an empty file for loaded tree/toc#.js since we don't want to use it
-      // 
-      // @TODO:
-      // generate multiple toc#.js for large size toc
-      for (let i = 1; ; i++) {
-        const path = `tree/toc${i}.js`;
-        let file = treeFiles[path];
-        if (!file) { break; }
+        const sizeThreshold = 4 * 1024 * 1024;
+        let i = 0;
+        let size = 0;
+        let toc = {};
+        for (const id in scrapbookData.toc) {
+          toc[id] = scrapbookData.toc[id];
+          size += 1 + toc[id].length;
 
-        file = new Blob([""], {type: "application/javascript"});
-        scrapbook.zipAddFile(zip, path, file, true);
+          if (size >= sizeThreshold) {
+            exportFile(toc, i);
+            i += 1;
+            size = 0;
+            toc = {};
+          }
+        }
+        if (Object.keys(toc).length) {
+          exportFile(toc, i);
+          i += 1;
+        }
+        tocFiles = i;
+
+        // fill an empty file for unused tree/toc#.js
+        for (; ; i++) {
+          const path = `tree/toc${i}.js`;
+          let file = treeFiles[path];
+          if (!file) { break; }
+
+          file = new Blob([""], {type: "application/javascript"});
+          scrapbook.zipAddFile(zip, path, file, true);
+        }
       }
 
       /* tree/map.html */
-      content = this.generateMapFile(scrapbookData);
+      content = this.generateMapFile(scrapbookData, metaFiles, tocFiles);
       file = new Blob([content], {type: "text/html"});
       scrapbook.zipAddFile(zip, 'tree/map.html', file, true);
 
@@ -1488,7 +1539,23 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
    *
    * Also remember to escape '\' with '\\' in this long string.
    */
-  generateMapFile(scrapbookData) {
+  generateMapFile(scrapbookData, metaFiles = 1, tocFiles = 1) {
+    const loadMetaJs = () => {
+      let result = [];
+      for (let i = 0; i < metaFiles; i++) {
+        result.push(`<script src="meta${i || ""}.js"></script>`);
+      }
+      return result.join("\n");
+    };
+
+    const loadTocJs = () => {
+      let result = [];
+      for (let i = 0; i < tocFiles; i++) {
+        result.push(`<script src="toc${i || ""}.js"></script>`);
+      }
+      return result.join("\n");
+    };
+
     return `<!DOCTYPE html>
 <!--
   This file is generated by Web ScrapBook and is not intended to be edited.
@@ -1621,11 +1688,15 @@ var scrapbook = {
   },
 
   toc: function (data) {
-    this.data.toc = data;
+    for (var id in data) {
+      this.data.toc[id] = data[id];
+    }
   },
 
   meta: function (data) {
-    this.data.meta = data;
+    for (var id in data) {
+      this.data.meta[id] = data[id];
+    }
   },
 
   init: function () {
@@ -1860,8 +1931,8 @@ var scrapbook = {
   }
 };
 </script>
-<script src="meta.js"></script>
-<script src="toc.js"></script>
+${loadMetaJs()}
+${loadTocJs()}
 <script src="map.js"></script>
 </head>
 <body>
