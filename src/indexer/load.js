@@ -1558,8 +1558,7 @@ var scrapbook = {
   data: {
     title: document.title,
     toc: {},
-    meta: {},
-    cache: {}
+    meta: {}
   },
 
   toc: function (data) {
@@ -1816,6 +1815,11 @@ var scrapbook = {
 `;
   },
 
+  /**
+   * The generated page ought to work on most browsers.
+   *
+   * Also remember to escape '\' with '\\' in this long string.
+   */
   generateFrameFile(scrapbookData) {
     return `<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
 <!--
