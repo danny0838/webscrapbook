@@ -77,6 +77,20 @@ const indexer = {
   virtualBase: chrome.runtime.getURL("indexer/!/"),
   autoEraseSet: new Set(),
 
+  /**
+   * UI related methods
+   */
+  log(msg) {
+    logger.appendChild(document.createTextNode(msg + '\n'));
+  },
+
+  error(msg) {
+    const span = document.createElement('span');
+    span.className = 'error';
+    span.appendChild(document.createTextNode(msg + '\n'));
+    logger.appendChild(span);
+  },
+
   initEvents() {
     window.addEventListener("dragenter", onDragEnter, false);
     window.addEventListener("dragover", onDragOver, false);
@@ -179,6 +193,25 @@ const indexer = {
     });
   },
 
+  loadInputFiles(files) {
+    return Promise.resolve().then(() => {
+      this.start();
+    }).then(() => {
+      let p = Promise.resolve();
+      Array.prototype.forEach.call(files, (file) => {
+        return p = p.then(() => {
+          return this.loadZipFile(file);
+        });
+      });
+      return p;
+    }).catch((ex) => {
+      console.error(ex);
+      this.error(`Unexpected error: ${ex.message}`);
+    }).then(() => {
+      this.end();
+    });
+  },
+
   loadInputDir(files) {
     return Promise.resolve().then(() => {
       this.start();
@@ -263,25 +296,6 @@ const indexer = {
 
       this.log(`Found ${inputData.files.length} files.`);
       return this.import(inputData);
-    }).catch((ex) => {
-      console.error(ex);
-      this.error(`Unexpected error: ${ex.message}`);
-    }).then(() => {
-      this.end();
-    });
-  },
-
-  loadInputFiles(files) {
-    return Promise.resolve().then(() => {
-      this.start();
-    }).then(() => {
-      let p = Promise.resolve();
-      Array.prototype.forEach.call(files, (file) => {
-        return p = p.then(() => {
-          return this.loadZipFile(file);
-        });
-      });
-      return p;
     }).catch((ex) => {
       console.error(ex);
       this.error(`Unexpected error: ${ex.message}`);
@@ -1317,17 +1331,6 @@ const indexer = {
         this.log('');
       });
     });
-  },
-
-  log(msg) {
-    logger.appendChild(document.createTextNode(msg + '\n'));
-  },
-
-  error(msg) {
-    const span = document.createElement('span');
-    span.className = 'error';
-    span.appendChild(document.createTextNode(msg + '\n'));
-    logger.appendChild(span);
   },
 
   getIndexPath(dataFiles, id) {
