@@ -508,12 +508,18 @@ capturer.captureFile = function (params) {
       options,
     }).then((response) => {
       if (settings.frameIsMain) {
+        // for the main frame, create a index.html that redirects to the file
         const meta = params.options["capture.recordDocumentMeta"] ? 
           ' data-scrapbook-source="' + scrapbook.escapeHtml(sourceUrl) + '"' + 
           ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
           ' data-scrapbook-type="file"' : 
           "";
-        // for the main frame, create a index.html that redirects to the file
+
+        // do not generate link for singleHtml to avoid doubling the data URL
+        const anchor = (options["capture.saveAs"] === "singleHtml") ? 
+            `${scrapbook.escapeHtml(response.filename, false)}` : 
+            `<a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>`;
+
         const html = `<!DOCTYPE html>
 <html${meta}>
 <head>
@@ -521,7 +527,7 @@ capturer.captureFile = function (params) {
 <meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(response.url)}">
 ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
 <body>
-Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
+Redirecting to file ${anchor}
 </body>
 </html>`;
         return capturer.saveDocument({
