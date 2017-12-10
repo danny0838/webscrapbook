@@ -103,10 +103,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    document.getElementById("captureAllTabs").addEventListener('click', (event) => {
-      return capturer.getContentTabs().then((tabs) => {
-        const target = tabs.map(x => x.id).join(',');
-        return capturer.invokeCapture({target});
+    document.getElementById("captureFollowingTabs").addEventListener('click', (event) => {
+      return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
+        const index = tabs[0].index;
+        return capturer.getContentTabs().then((tabs) => {
+          const target = tabs.filter(t => 
+            t.index >= index
+          ).map(x => x.id).join(',');
+          return capturer.invokeCapture({target});
+        });
       });
     });
 

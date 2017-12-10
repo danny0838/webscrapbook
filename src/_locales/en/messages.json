@@ -38,8 +38,8 @@
   "CaptureTabSource": {
     "message": "Capture tab (source)"
   },
-  "CaptureAllTabs": {
-    "message": "Capture all tabs"
+  "CaptureFollowingTabs": {
+    "message": "Capture following tabs"
   },
   "CapturerTitle": {
     "message": "Capture page"

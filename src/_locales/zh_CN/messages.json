@@ -38,8 +38,8 @@
   "CaptureTabSource": {
     "message": "获取分页 (原样)"
   },
-  "CaptureAllTabs": {
-    "message": "获取所有分页"
+  "CaptureFollowingTabs": {
+    "message": "获取以后分页"
   },
   "CapturerTitle": {
     "message": "获取页面"

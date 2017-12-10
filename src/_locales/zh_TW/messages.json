@@ -38,8 +38,8 @@
   "CaptureTabSource": {
     "message": "擷取分頁 (原貌)"
   },
-  "CaptureAllTabs": {
-    "message": "擷取所有分頁"
+  "CaptureFollowingTabs": {
+    "message": "擷取以後分頁"
   },
   "CapturerTitle": {
     "message": "擷取頁面"
