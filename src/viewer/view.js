@@ -757,6 +757,9 @@ loadOptions.then(() => {
       }
 
       frame.contentWindow.addEventListener("click", (e) => {
+        // ignore non-left click
+        if (e.button !== 0) { return; }
+
         // e.target won't work if clicking on a descendant node of an anchor
         const elem = e.target.closest('a[href], area[href]');
         if (!elem) { return; }
