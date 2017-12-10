@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const index = tabs[0].index;
         return capturer.getContentTabs().then((tabs) => {
           const target = tabs.filter(t => 
-            t.index >= index
+            t.index >= index && !t.discarded
           ).map(x => x.id).join(',');
           return capturer.invokeCapture({target});
         });
