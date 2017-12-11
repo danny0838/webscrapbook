@@ -354,6 +354,15 @@ const indexer = {
                     }).then((file) => {
                       const path = entry.fullPath.slice(cut);
                       if (path.startsWith('data/')) { hasDataDir = true; }
+
+                      // Fix a Firefox bug that the returned File type is always ""
+                      // when a FileSystemFileEntry read from a FileSystemDirectoryEntry
+                      // calls file().
+                      // https://bugzilla.mozilla.org/show_bug.cgi?id=1424689
+                      if (scrapbook.isGecko) {
+                        file = new File([file], file.name, {type: Mime.prototype.lookup(file.name)});
+                      }
+
                       inputData.files.push({
                         path,
                         file,
