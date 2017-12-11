@@ -1403,7 +1403,14 @@ const indexer = {
               const ref = getRelativeFilePath.ref = getRelativeFilePath.ref || 
                   new URL(path.replace(/[^/]+/g, m => encodeURIComponent(m)), base).href;
               const [urlMain] = scrapbook.splitUrlByAnchor(url);
-              const target = new URL(urlMain, ref).href;
+
+              let target;
+              try {
+                target = new URL(urlMain, ref).href;
+              } catch (ex) {
+                // urlMain cannot be resolved
+              }
+              if (!target) { return null; }
               if (!target.startsWith(base)) { return null; }
               if (target === ref) { return null; } // ignore referring self
               return decodeURIComponent(target.slice(base.length));
