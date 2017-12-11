@@ -774,11 +774,19 @@ const indexer = {
 
                 // special handling if data is in zip
                 // return data URL for further caching
-                if (zipDataDir) {
-                  return zipDataDir.file(icon).async('arraybuffer').then((ab) => {
-                    const mime = Mime.prototype.extension(icon);
-                    const blob = new Blob([ab], {type: mime});
-                    return scrapbook.readFileAsDataURL(blob);
+                if (zipDataDir && icon) {
+                  return Promise.resolve().then(() => {
+                    const file = zipDataDir.file(icon);
+
+                    if (!file) {
+                      throw new Error(`'${icon}' does not exist.`);
+                    }
+
+                    return file.async('arraybuffer').then((ab) => {
+                      const mime = Mime.prototype.extension(icon);
+                      const blob = new Blob([ab], {type: mime});
+                      return scrapbook.readFileAsDataURL(blob);
+                    });
                   }).then((dataUrl) => {
                     this.log(`Retrieved favicon at '${icon}' for packed 'data/${index}' as '${scrapbook.crop(dataUrl, 256)}'`);
                     return dataUrl;
