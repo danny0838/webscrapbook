@@ -116,6 +116,7 @@ capturer.captureDocumentOrFile = function (params) {
           url: doc.URL,
           refUrl,
           title: title || doc.title,
+          charset: doc.characterSet,
           settings,
           options,
         });

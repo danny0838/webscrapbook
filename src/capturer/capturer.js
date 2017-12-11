@@ -490,6 +490,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
  *     - {string} params.url
  *     - {string} params.refUrl
  *     - {string} params.title
+ *     - {string} params.charset
  *     - {Object} params.settings
  *     - {Object} params.options
  * @return {Promise}
@@ -498,7 +499,7 @@ capturer.captureFile = function (params) {
   return Promise.resolve().then(() => {
     isDebug && console.debug("call: captureFile", params);
 
-    const {url: sourceUrl, refUrl, title, settings, options} = params;
+    const {url: sourceUrl, refUrl, title, charset, settings, options} = params;
     const {timeId} = settings;
 
     return capturer.downloadFile({
@@ -512,7 +513,8 @@ capturer.captureFile = function (params) {
         const meta = params.options["capture.recordDocumentMeta"] ? 
           ' data-scrapbook-source="' + scrapbook.escapeHtml(sourceUrl) + '"' + 
           ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
-          ' data-scrapbook-type="file"' : 
+          ' data-scrapbook-type="file"' + 
+          (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
           "";
 
         // do not generate link for singleHtml to avoid doubling the data URL
