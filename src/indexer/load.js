@@ -1332,12 +1332,14 @@ const indexer = {
       }).then(() => {
         /* Build cache for items */
         const noIndexTags = new Set([
+          "head",
           "style", "script",
           "frame", "iframe",
           "embed", "object", "applet",
           "audio", "video",
           "canvas",
           "noframes", "noscript",
+          "parsererror",
           "svg", "math",
         ]);
 
@@ -1538,7 +1540,7 @@ const indexer = {
                 return null;
               }
 
-              return getElementTextRecursively(doc.body).then(() => {
+              return getElementTextRecursively(doc).then(() => {
                 return results.join(" ").replace(/\s+/g, " ");
               });
             });
