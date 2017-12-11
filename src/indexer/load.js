@@ -749,6 +749,11 @@ const indexer = {
                   html.getAttribute('data-scrapbook-comment') : 
                   meta.comment;
 
+              /* meta.charset */
+              meta.charset = html.hasAttribute('data-scrapbook-charset') ? 
+                  html.getAttribute('data-scrapbook-charset') : 
+                  meta.charset;
+
               /* meta.folder */
               meta.folder = html.hasAttribute('data-scrapbook-folder') ? 
                   html.getAttribute('data-scrapbook-folder') : 
