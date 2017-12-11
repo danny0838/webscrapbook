@@ -360,7 +360,10 @@ const indexer = {
                       // calls file().
                       // https://bugzilla.mozilla.org/show_bug.cgi?id=1424689
                       if (scrapbook.isGecko) {
-                        file = new File([file], file.name, {type: Mime.prototype.lookup(file.name)});
+                        file = new File([file], file.name, {
+                          type: Mime.prototype.lookup(file.name),
+                          lastModified: file.lastModified,
+                        });
                       }
 
                       inputData.files.push({
