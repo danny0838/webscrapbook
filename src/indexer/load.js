@@ -1430,7 +1430,7 @@ const indexer = {
 
             // @TODO:
             // better handle content
-            // handle frames
+            // (mo space between inline nodes, line break between block nodes, etc.)
             const getElementTextRecursively = (elem) => {
               return Promise.resolve().then(() => {
                 let p = Promise.resolve();
