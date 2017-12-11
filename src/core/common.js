@@ -61,6 +61,8 @@ scrapbook.options = {
   "viewer.viewHtz": true,
   "viewer.viewMaff": true,
   "indexer.autoDownload": false,
+  "indexer.fulltextCache": true,
+  "indexer.fulltextCacheFrameAsPageContent": true,
 };
 
 scrapbook.isOptionsSynced = false;

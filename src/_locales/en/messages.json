@@ -90,6 +90,12 @@
   "IndexerPickFiles": {
     "message": "Pick ZIP files"
   },
+  "IndexerSearchTitle": {
+    "message": "$BOOK$ :: Search",
+    "placeholders": {
+      "book": {"content": "$1"}
+    }
+  },
   "IndexerSourceLinkTitle": {
     "message": "Source link"
   },
@@ -384,6 +390,12 @@
   },
   "OptionIndexerAutoDownloadTooltip": {
     "message": "The input folder must be configured ScrapBook Folder, or the files could be incorrectly overwritten."
+  },
+  "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
+    "message": "Cache frame content as main document content:"
+  },
+  "OptionIndexerFulltextCacheLabel": {
+    "message": "Update fulltext cache:"
   },
   "OptionPageTitle": {
     "message": "Options"

@@ -74,7 +74,6 @@ function onChangeFiles(e) {
 };
 
 const indexer = {
-  virtualBase: chrome.runtime.getURL("indexer/!/"),
   autoEraseSet: new Set(),
 
   /**
@@ -420,6 +419,7 @@ const indexer = {
         toc: {
           root: [],
         },
+        fulltext: {},
       };
 
       const zip = new JSZip();
@@ -464,6 +464,10 @@ const indexer = {
         return this.handleBadFavicons({scrapbookData, treeFiles, zip});
       }).then(() => {
         return this.generateFiles({scrapbookData, treeFiles, zip});
+      }).then(() => {
+        if (this.options["indexer.fulltextCache"]) {
+          return this.generateFulltextCache({scrapbookData, dataFiles, treeFiles, zip});
+        }
       }).then(() => {
         return this.checkSameAndBackup({scrapbookData, treeFiles, zip});
       }).then(() => {
@@ -1236,9 +1240,15 @@ const indexer = {
       file = new Blob([content], {type: "text/html"});
       scrapbook.zipAddFile(zip, 'tree/frame.html', file, true);
 
+      /* tree/search.html */
+      content = this.generateSearchFile(scrapbookData);
+      file = new Blob([content], {type: "text/html"});
+      scrapbook.zipAddFile(zip, 'tree/search.html', file, true);
+
       /* resource files */
       const resToInclude = {
         'tree/icon/toggle.png': chrome.runtime.getURL("resources/toggle.png"),
+        'tree/icon/search.png': chrome.runtime.getURL("resources/search.png"),
         'tree/icon/collapse.png': chrome.runtime.getURL("resources/collapse.png"),
         'tree/icon/expand.png': chrome.runtime.getURL("resources/expand.png"),
         'tree/icon/external.png': chrome.runtime.getURL("resources/external.png"),
@@ -1266,6 +1276,427 @@ const indexer = {
         });
       }
       return p;
+    });
+  },
+
+  /* Generate fulltext cache */
+  generateFulltextCache({scrapbookData, dataFiles, treeFiles, zip}) {
+    return Promise.resolve().then(() => {
+      this.log(`Generating fulltext cache...`);
+      let cacheLastModified = 0;
+
+      return Promise.resolve().then(() => {
+        /* Import tree/fulltext*.js */
+        let p = Promise.resolve();
+        for (let i = 0; ; i++) {
+          const path = `tree/fulltext${i || ""}.js`;
+          const file = treeFiles[path];
+          if (!file) { break; }
+
+          p = p.then(() => {
+            this.log(`Importing '${path}'...`);
+            return scrapbook.readFileAsText(file).then((text) => {
+              if (!/^(?:\/\*.*\*\/|[^(])+\(([\s\S]*)\)(?:\/\*.*\*\/|[\s;])*$/.test(text)) {
+                throw new Error(`Failed to retrieve JSON data.`);
+              }
+
+              const data = JSON.parse(RegExp.$1);
+              scrapbookData.fulltext = Object.assign(scrapbookData.fulltext, data);
+              cacheLastModified = Math.max(file.lastModified, cacheLastModified);
+            }).catch((ex) => {
+              this.error(`Error importing '${path}': ${ex.message}`);
+            });
+          });
+        }
+        return p;
+      }).then(() => {
+        /* Remove stale cache for nonexist items */
+        for (const id in scrapbookData.fulltext) {
+          if (!scrapbookData.meta[id]) {
+            delete(scrapbookData.fulltext[id]);
+            this.log(`Removed stale cache for '${id}'.`);
+          }
+        }
+      }).then(() => {
+        /* Build cache for items */
+        const noIndexTags = new Set([
+          "style", "script",
+          "frame", "iframe",
+          "embed", "object", "applet",
+          "audio", "video",
+          "canvas",
+          "noframes", "noscript",
+          "svg", "math",
+        ]);
+
+        const getIndexPaths = () => {
+          return Promise.resolve().then(() => {
+            if (index.endsWith('/index.html')) {
+              return ['index.html'];
+            } else if (index.endsWith('.maff')) {
+              itemZip = itemZip || new JSZip().loadAsync(dataFiles[index], {createFolders: true});
+              return itemZip.then((zip) => {
+                return scrapbook.getMaffIndexFiles(zip);
+              });
+            } else if (index.endsWith('.htz')) {
+              return ['index.html'];
+            }
+
+            return ['.'];
+          });
+        };
+
+        const getFile = (path) => {
+          return Promise.resolve().then(() => {
+            if (index.endsWith('/index.html')) {
+              const [base] = scrapbook.filepathParts(index);
+              return dataFiles[base + '/' + path];
+            } else if (index.endsWith('.html') ||
+                index.endsWith('.htm') ||
+                index.endsWith('.xhtml') ||
+                index.endsWith('.xht')) {
+              if (path === '.') {
+                return dataFiles[index];
+              }
+            } else if (index.endsWith('.htz') || index.endsWith('.maff')) {
+              const [base, filename] = scrapbook.filepathParts(path);
+              itemZip = itemZip || new JSZip().loadAsync(dataFiles[index], {createFolders: true});
+              return itemZip.then((zip) => {
+                const file = zip.file(path);
+                if (!file) { return file; }
+
+                return file.async("arraybuffer").then((ab) => {
+                  return new File([ab], filename, {type: Mime.prototype.lookup(filename)});
+                });
+              });
+            }
+          });
+        };
+
+        const getFulltextCache = (path) => {
+          return getFile(path).then((file) => {
+            return getFulltextCacheForFile(path, file);
+          });
+        };
+
+        const getFulltextCacheForFile = (path, file) => {
+          return Promise.resolve().then(() => {
+            if (!file) { return null; }
+
+            const mime = scrapbook.parseHeaderContentType(file.type).type;
+
+            if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
+              return getFulltextCacheHtml(path, file);
+            } else if (mime.startsWith("text/")) {
+              return getFulltextCacheTxt(path, file);
+            }
+          });
+        };
+
+        const getFulltextCacheHtml = (path, file) => {
+          return scrapbook.readFileAsDocument(file).then((doc) => {
+            if (!doc) { return null; }
+
+            const getRelativeFilePath = (url) => {
+              const base = getRelativeFilePath.base = getRelativeFilePath.base || 
+                  'file:///!/';
+              const ref = getRelativeFilePath.ref = getRelativeFilePath.ref || 
+                  new URL(path.replace(/[^/]+/g, m => encodeURIComponent(m)), base).href;
+              const [urlMain] = scrapbook.splitUrlByAnchor(url);
+              const target = new URL(urlMain, ref).href;
+              if (!target.startsWith(base)) { return null; }
+              if (target === ref) { return null; } // ignore referring self
+              return decodeURIComponent(target.slice(base.length));
+            };
+
+            // @TODO:
+            // better handle content
+            // handle frames
+            const getElementTextRecursively = (elem) => {
+              return Promise.resolve().then(() => {
+                let p = Promise.resolve();
+                Array.prototype.forEach.call(elem.childNodes, (child) => {
+                  p = p.then(() => {
+                    if (child.nodeType === 1) {
+                      const nodeName = child.nodeName.toLowerCase();
+                      if (["a", "area"].indexOf(nodeName) !== -1) {
+                        if (child.hasAttribute("href")) {
+                          const url = child.getAttribute("href");
+                          if (url.startsWith("data:")) {
+                            return addDataUriContent(url);
+                          }
+                          const target = getRelativeFilePath(url);
+                          if (target && !filesToUpdate.has(target)) { filesToUpdate.set(target, true); }
+                        }
+                      } else if (["iframe", "frame"].indexOf(nodeName) !== -1) {
+                        if (child.hasAttribute("src")) {
+                          const url = child.getAttribute("src");
+                          if (url.startsWith("data:")) {
+                            return addDataUriContent(url);
+                          }
+                          const target = getRelativeFilePath(url);
+                          if (target) {
+                            if (this.options["indexer.fulltextCacheFrameAsPageContent"]) {
+                              // Add frame content to current page content if the targeted
+                              // file hasn't been indexed.
+                              if (filesToUpdate.get(target) !== false) {
+                                filesToUpdate.set(target, false);
+                                return getFulltextCache(target).then((fulltext) => {
+                                  if (fulltext) { results.push(fulltext); }
+                                });
+                              }
+                            } else {
+                              if (!filesToUpdate.has(target)) { filesToUpdate.set(target, true); }
+                            }
+                          }
+                        }
+                      }
+                      if (!noIndexTags.has(nodeName)) {
+                        return getElementTextRecursively(child);
+                      }
+                    } else if (child.nodeType === 3) {
+                      results.push(child.nodeValue);
+                    }
+                  });
+                });
+                return p;
+              });
+            };
+
+            const addDataUriContent = (url) => {
+              return Promise.resolve().then(() => {
+                // special handling of singleHtmlJs generated data URI
+                if (/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(url)) {
+                  const resType = RegExp.$1;
+                  const resId = RegExp.$2;
+
+                  itemLoaderData = itemLoaderData || (() => {
+                    const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
+                    if (loader && /\([\n\r]+(.+)[\n\r]+\);$/.test(loader.textContent)) {
+                      return JSON.parse(RegExp.$1);
+                    }
+                    return [];
+                  })();
+
+                  url = `data:${resType};base64,${itemLoaderData[resId].d}`;
+                }
+
+                const file = scrapbook.dataUriToFile(url);
+                return getFulltextCacheForFile("", file).then((fulltext) => {
+                  if (fulltext) { results.push(fulltext); }
+                });
+              });
+            };
+
+            const results = [];
+
+            return Promise.resolve().then(() => {
+              // check for a potential meta refresh (mostly for file item)
+              let hasInstantRedirect = false;
+              let p = Promise.resolve();
+              for (const metaRefreshElem of doc.querySelectorAll('meta[http-equiv="refresh"][content]')) {
+                p = p.then(() => {
+                  const {time, url} = scrapbook.parseHeaderRefresh(metaRefreshElem.getAttribute("content"));
+                  if (time === 0) { hasInstantRedirect = true; }
+                  if (url.startsWith("data:")) {
+                    return addDataUriContent(url);
+                  }
+                  const target = getRelativeFilePath(url);
+                  if (target && !filesToUpdate.has(target)) { filesToUpdate.set(target, true); }                  
+                });
+              }
+              return p.then(() => {
+                return hasInstantRedirect;
+              });
+            }).then((hasInstantRedirect) => {
+              if (hasInstantRedirect) {
+                if (results.length) {
+                  return results.join(" ").replace(/\s+/g, " ");
+                }
+
+                return null;
+              }
+
+              return getElementTextRecursively(doc.body).then(() => {
+                return results.join(" ").replace(/\s+/g, " ");
+              });
+            });
+          });
+        };
+
+        const getFulltextCacheTxt = (path, file) => {
+          return scrapbook.readFileAsText(file, meta.charset || 'UTF-8').then((text = null) => {
+            if (!text) { return text; }
+
+            return text.replace(/\s+/g, " ");
+          });
+        };
+
+        let meta;
+        let index;
+        let itemZip;
+        let itemLoaderData;
+        let filesToUpdate;
+
+        let p = Promise.resolve();
+        for (const id in scrapbookData.meta) {
+          p = p.then(() => {
+            meta = scrapbookData.meta[id];
+            index = meta.index;
+
+            const file = index && dataFiles[index];
+
+            // no index file: remove cache
+            if (!file) {
+              if (scrapbookData.fulltext[id]) {
+                delete(scrapbookData.fulltext[id]);
+                this.log(`Removed stale cache for '${id}'.`);
+              }
+              return;
+            }
+
+            filesToUpdate = new Map();
+            itemZip = null;
+            itemLoaderData = null;
+
+            /* determine the files to be cached */
+            return Promise.resolve().then(() => {
+              // if no existed fulltext cache, rebuild as default
+              // (for index and referred files)
+              if (!scrapbookData.fulltext[id]) {
+                this.log(`Creating cache for '${id}'...`);
+
+                scrapbookData.fulltext[id] = {};
+                return getIndexPaths().then((filePaths) => {
+                  filePaths.forEach((filePath) => {
+                    filesToUpdate.set(filePath, true);
+                  });
+                });
+              }
+
+              // rebuild partial
+              // For folder: check index and all cached files, and rebuild updated ones
+              // For archive or single HTML: rebuild all entries if the archive file is changed
+              return Promise.resolve().then(() => {
+                // check update for index file / archive file
+                if (file.lastModified > cacheLastModified) {
+                  // updated: add to update list
+                  return getIndexPaths().then((filePaths) => {
+                    filePaths.forEach((filePath) => {
+                      filesToUpdate.set(filePath, true);
+                    });
+                  });
+                }
+              }).then(() => {
+                if (index.endsWith('/index.html')) {
+                  // check update for files that has a fulltext cache
+                  let p = Promise.resolve();
+                  for (const filePath in scrapbookData.fulltext[id]) {
+                    p = p.then(() => {
+                      return getFile(filePath).then((file) => {
+                        if (!file) {
+                          // removed: remove the cache
+                          delete(scrapbookData.fulltext[id][filePath]);
+                          filesToUpdate.set(filePath, true);
+                        } else if (file.lastModified > cacheLastModified) {
+                          // updated: add to update list
+                          filesToUpdate.set(filePath, true);
+                        }
+                      });
+                    });
+                  }
+                  return p;
+                }
+              }).then(() => {
+                if (!filesToUpdate.keys().next().done) {
+                  // at least one file to update
+                  this.log(`Updating cache for '${id}'...`);
+
+                  if (!index.endsWith('/index.html')) {
+                    scrapbookData.fulltext[id] = {};
+                  }
+                }
+              });
+            }).then(() => {
+              /* build cache for filesToUpdate Set */
+              const loop = () => {
+                return Promise.resolve().then(() => {
+                  const next = keys.next();
+                  if (next.done) { return; }
+
+                  const filePath = next.value;
+                  if (!filesToUpdate.get(filePath)) {
+                    delete(scrapbookData.fulltext[id][filePath]);
+                    return;
+                  }
+
+                  filesToUpdate.set(filePath, false);
+                  return getFulltextCache(filePath).then((fulltext = null) => {
+                    if (fulltext === null) {
+                      delete(scrapbookData.fulltext[id][filePath]);
+                    } else {
+                      scrapbookData.fulltext[id][filePath] = {
+                        content: fulltext || '',
+                      };
+                    }
+                    return loop();
+                  });
+                });
+              };
+
+              const keys = filesToUpdate.keys();
+              return loop();
+            });
+          }).catch((ex) => {
+            console.error(ex);
+            this.error(`Error generating cache for '${id}': ${ex.message}`);
+          });
+        }
+        return p;
+      }).then(() => {
+        /* Generate files */
+
+        /* tree/fulltext#.js */
+        // A javascript string >= 256 MiB (UTF-16 chars) causes an error
+        // in the browser. Split each js file at at around 128 MiB to
+        // prevent the issue.
+        const exportFile = (fulltext, i) => {
+          const content = this.generateFulltextFile(fulltext);
+          const file = new Blob([content], {type: "application/javascript"});
+          scrapbook.zipAddFile(zip, `tree/fulltext${i || ""}.js`, file, true);
+        };
+
+        const sizeThreshold = 128 * 1024 * 1024;
+        let i = 0;
+        let size = 0;
+        let fulltext = {};
+        for (const id in scrapbookData.fulltext) {
+          fulltext[id] = scrapbookData.fulltext[id];
+          for (const filePath in fulltext[id]) {
+            size += fulltext[id][filePath].content.length;
+          }
+          if (size >= sizeThreshold) {
+            exportFile(fulltext, i);
+            i += 1;
+            size = 0;
+            fulltext = {};
+          }
+        }
+        if (Object.keys(fulltext).length) {
+          exportFile(fulltext, i);
+          i += 1;
+        }
+
+        // fill an empty file for unused tree/fulltext#.js
+        for (; ; i++) {
+          const path = `tree/fulltext${i}.js`;
+          let file = treeFiles[path];
+          if (!file) { break; }
+
+          file = new Blob([""], {type: "application/javascript"});
+          scrapbook.zipAddFile(zip, path, file, true);
+        }
+      });
     });
   },
 
@@ -1542,6 +1973,13 @@ scrapbook.meta(${JSON.stringify(jsonData, null, 2)})`;
 scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
   },
 
+  generateFulltextFile(jsonData) {
+    return `/**
+ * This file is generated by Web ScrapBook and is not intended to be edited.
+ */
+scrapbook.fulltext(${JSON.stringify(jsonData, null, 1)})`;
+  },
+
   /**
    * The generated page ought to work on most browsers.
    *
@@ -1601,6 +2039,12 @@ body {
 
 #header > a {
   color: #666666;
+}
+
+#search img {
+  margin: 0;
+  width: 1.5em;
+  height: 1em;
 }
 
 #item-root {
@@ -1951,6 +2395,7 @@ ${loadTocJs()}
 <body>
 <div id="header">
 <a id="toggle-all" title="Expand all" href="#"><img src="icon/toggle.png">${scrapbookData.title || ""}</a>
+<a id="search" href="search.html" target="_self"><img src="icon/search.png" alt=""></a>
 </div>
 <script>scrapbook.init();</script>
 </body>
@@ -1980,6 +2425,853 @@ ${loadTocJs()}
 <frame name="nav" src="map.html">
 <frame name="main">
 </frameset>
+</html>
+`;
+  },
+
+  generateSearchFile(scrapbookData) {
+    return `<!DOCTYPE html>
+<!--
+  This file is generated by Web ScrapBook and is not intended to be edited.
+  Create search.css and/or search.js for customization.
+-->
+<html dir="${scrapbook.lang('@@bidi_dir')}" data-scrapbook-tree-page="search">
+<head>
+<meta charset="UTF-8">
+<title>${scrapbook.lang('IndexerSearchTitle', [scrapbookData.title || ""])}</title>
+<meta name="viewport" content="width=device-width">
+<style>
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-size: .8em;
+  line-height: 1.35em;
+}
+
+#searchForm {
+  display: flex;
+  flex-direction: row;
+  padding: .25em;
+}
+
+#keyword {
+  flex: auto;
+  min-width: 150px;
+}
+
+#helper {
+  width: 2em;
+}
+
+#result {
+  margin: 0;
+  margin-top: 1em;
+  padding: 0;
+}
+
+#support {
+  margin-top: 2em;
+  padding: .5em;
+  background-color: #FEE;
+  font-size: .85em;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  list-style-type: none;
+  margin: .2em;
+  padding-${scrapbook.lang('@@bidi_start_edge')}: 1em;
+}
+
+li > div {
+  white-space: nowrap;
+}
+
+a {
+  text-decoration: none;
+  color: #000000;
+}
+
+a:focus {
+  background-color: #6495ED;
+  text-decoration: underline;
+}
+
+a:active {
+  background-color: #FFB699;
+}
+
+a > img {
+  display: inline-block;
+  margin-left: .1em;
+  margin-right: .1em;
+  border: none;
+  width: 1.25em;
+  height: 1.25em;
+  vertical-align: middle;
+}
+
+a.scrapbook-toggle {
+  margin-${scrapbook.lang('@@bidi_start_edge')}: -1.45em;
+}
+
+a.scrapbook-external > img {
+  width: 1em;
+  height: 1em;
+  vertical-align: top;
+}
+
+.scrapbook-type-bookmark > div > a {
+  color: rgb(32,192,32);
+}
+
+.scrapbook-type-note > div > a {
+  color: rgb(80,0,32);
+}
+
+.scrapbook-type-site > div > a {
+  color: blue;
+}
+
+.scrapbook-type-separator > div > fieldset {
+  margin: 0;
+  border: none;
+  border-top: 1px solid #aaa;
+  padding: 0 0 0 1em;
+  text-indent: 0;
+}
+
+.scrapbook-type-separator > div > fieldset > legend {
+  padding: 0;
+}
+
+.scrapbook-marked > div > a {
+  font-weight: bold;
+}
+</style>
+<link rel="stylesheet" href="search.css">
+<script>
+const conf = {
+  scrapbooks: [
+    {name: "", path: "../"}
+  ],
+  allow_http: 0,  // whether to load rdf cache from the http? -1: deny, 0: ask; 1: allow
+  default_search: "-type:separator",  // the constant string to add before the input keyword
+  default_field: "tcc",  // the field to search for bare key terms
+  view_in_map_path: "tree/map.html",  // path (related to book) of the map page for "view in map"
+  view_in_map_title: "View in Map",  // title for "view in map"
+};
+
+const scrapbook = {
+  books: [],
+
+  data: null,
+
+  toc(data) {
+    this.data.toc = Object.assign(this.data.toc, data);
+  },
+
+  meta(data) {
+    this.data.meta = Object.assign(this.data.meta, data);
+  },
+
+  fulltext(data) {
+    this.data.fulltext = Object.assign(this.data.fulltext, data);
+  },
+
+  init() {
+    document.getElementById('searchForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      this.search();
+    });
+ 
+    document.getElementById('helper').addEventListener('change', (event) => {
+      event.preventDefault();
+      this.helperFill();
+    });
+
+    conf.scrapbooks.forEach((book) => {
+      scrapbook.books.push({
+        name: book.name,
+        path: book.path,
+        toc: {},
+        meta: {},
+        fulltext: {},
+      });
+    });
+
+    return this.loadBooks().then(() => {
+      document.getElementById('search').disabled = false;
+    });
+  },
+
+  loadBooks() {
+    let p = Promise.resolve();
+    scrapbook.books.forEach((book) => {
+      p = p.then(() => {
+        return this.loadBook(book);
+      }).catch((ex) => {
+        console.error(ex);
+        this.addMsg("Error: " + ex.message);
+      });
+    });
+    return p;
+  },
+
+  loadBook(book) {
+    return Promise.resolve().then(() => {
+      let base = this.resolveUrl(book.path, location.href);
+      if (!this.checkHttp(base)) {
+        this.addMsg("Rejected to load book from HTTP: " + base);
+        return;
+      }
+
+      const loadMeta = () => {
+        const loop = () => {
+          const url = this.resolveUrl("tree/meta" + (i || "") + ".js", base);
+          return this.loadScript(url).then(() => {
+            i += 1;
+            return loop();
+          }).catch((ex) => {
+            if (i === 0) { throw ex; }
+            console.log("Unable to load '" + url + "'");
+          });
+        };
+
+        let i = 0;
+        return loop();
+      };
+
+      const loadToc = () => {
+        const loop = () => {
+          const url = this.resolveUrl("tree/toc" + (i || "") + ".js", base);
+          return this.loadScript(url).then(() => {
+            i += 1;
+            return loop();
+          }).catch((ex) => {
+            if (i === 0) { throw ex; }
+            console.log("Unable to load '" + url + "'");
+          });
+        };
+
+        let i = 0;
+        return loop();
+      };
+
+      const loadFulltext = () => {
+        const loop = () => {
+          const url = this.resolveUrl("tree/fulltext" + (i || "") + ".js", base);
+          return this.loadScript(url).then(() => {
+            i += 1;
+            return loop();
+          }).catch((ex) => {
+            console.log("Unable to load '" + url + "'");
+          });
+        };
+
+        let i = 0;
+        return loop();
+      };
+
+      scrapbook.data = book;
+      return Promise.all([
+        loadMeta(),
+        loadToc(),
+        loadFulltext(),
+      ]);
+    });
+  },
+
+  loadScript(url) {
+    return new Promise((resolve, reject) => {
+      const elem = document.createElement("script");
+      document.getElementsByTagName("head")[0].appendChild(elem);
+      elem.onload = (event) => {
+        console.log("Loaded '" + url + "'");
+        resolve();
+      };
+      elem.onerror = (event) => {
+        elem.remove();
+        reject(new Error("Failed to load '" + url + "'"));
+      };
+      elem.src = url;
+    });
+  },
+
+  checkHttp(url) {
+    if (/^https?/.test(this.resolveUrl(url, location.href))) {
+      if (conf.allow_http === 0) {
+        if (confirm("Loading search database from the web could produce large network flow. Continue?")) {
+          conf.allow_http = 1;
+        } else {
+          conf.allow_http = -1;
+        }
+      }
+      if (conf.allow_http > 0) { return true; }
+      return false;
+    }
+    return true;
+  },
+
+  search() {
+    return Promise.resolve().then(() => {
+      this.clearResult();
+
+      // set query string
+      let queryStr = document.getElementById("keyword").value;
+      if (conf.default_search) {
+        queryStr = conf.default_search + " " + queryStr;
+      }
+
+      // parse query
+      const query = searchEngine.parseQuery(queryStr);
+      if (query.error.length) {
+        for (const err of query.error) {
+          this.addMsg("Error: " + err);
+        }
+        return;
+      }
+      console.log("Search:", query);
+
+      // search and get result
+      return searchEngine.search(query);
+    }).catch((ex) => {
+      console.error(ex);
+      this.addMsg("Error: " + ex.message);
+    });
+  },
+
+  showResults(results, book) {
+    const name = book.name ? "(" + book.name + ") " : "";
+    this.addMsg(name + "Found " + results.length + " results:");
+    for (const item of results) {
+      this.addResult(item, book);
+    }
+    this.addMsg("\\u00A0");
+  },
+
+  addResult(item, book) {
+    const {id, file, meta, fulltext} = item;
+
+    const li = document.createElement("li");
+    if (meta.type) {
+      li.className = "scrapbook-type-" + meta.type;
+    }
+    document.getElementById("result").appendChild(li);
+
+    const div = document.createElement("div");
+    li.appendChild(div);
+
+    {
+      let href;
+      if (meta.type !== "bookmark") {
+        if (meta.index) {
+          let subpath = (file && meta.index.endsWith('/index.html')) ? 
+              meta.index.replace(/[^/]*$/g, '') + file : 
+              meta.index;
+          subpath = (subpath || "").replace(/[^\/]+/g, m => encodeURIComponent(m));
+          if (subpath) {
+            href = book.path + "data/" + subpath;
+          }
+        }
+      } else {
+        href = meta.source;
+      }
+      const a = document.createElement("a");
+      if (href) { a.href = href; }
+      a.target = "main";
+      a.textContent = a.title = meta.title;
+      div.appendChild(a);
+
+      if (file && file !== "." && file !== "index.html") {
+        const span = document.createElement("span");
+        span.textContent = " (" + file + ")";
+        a.appendChild(span);
+      }
+
+      const icon = document.createElement('img');
+      if (meta.icon) {
+        icon.src = (meta.icon.indexOf(':') === -1) ? 
+            (book.path + 'data/' + meta.index).replace(/\\/[^\\/]*$/, '') + '/' + meta.icon : 
+            meta.icon;
+      } else {
+        icon.src = {
+          'folder': 'icon/fclose.png',
+          'note': 'icon/note.png',
+          'postit': 'icon/postit.png',
+        }[meta.type] || 'icon/item.png';
+      }
+      icon.alt = "";
+      a.insertBefore(icon, a.firstChild);
+    }
+
+    {
+      const a = document.createElement("a");
+      a.href = book.path + conf.view_in_map_path + "#item-" + id;
+      a.target = "_blank";
+      a.className = "scrapbook-external";
+      a.title = conf.view_in_map_title;
+      div.appendChild(a);
+
+      var img = document.createElement("img");
+      img.src = "icon/external.png";
+      img.alt = "";
+      a.appendChild(img);
+    }
+  },
+
+  clearResult() {
+    document.getElementById("result").innerHTML = "";
+  },
+
+  addMsg(msg) {
+    let wrapper = document.getElementById("result");
+    let result = document.createElement("li");
+    result.appendChild(document.createTextNode(msg));
+    wrapper.appendChild(result);
+  },
+
+  resolveUrl(url, base) {
+    try {
+      return new URL(url, base).href;
+    } catch(ex) {
+      // unable to resolve
+    }
+    return url;
+  },
+
+  escapeRegExp(str) {
+    return str.replace(/[-\\/\\\\^$*+?.|()[\\]{}]/g, "\\\\$&");
+  },
+
+  helperFill() {
+    let helper = document.getElementById("helper");
+    let keyword = document.getElementById("keyword");
+    keyword.value = keyword.value + (keyword.value === "" ? "" : " ") + helper.value;
+    helper.selectedIndex = 0;
+    keyword.focus();
+    keyword.setSelectionRange(keyword.value.length, keyword.value.length);
+  },
+};
+
+const searchEngine = {
+  parseQuery(queryStr) {
+    const query = {
+      error: [],
+      rules: {},
+      sorts: [],
+      root: null,
+      mc: false,
+      re: false,
+      default: conf.default_field,
+    };
+
+    const addRule = (name, type, value) => {
+      if (typeof query.rules[name] === "undefined") {
+        query.rules[name] = {"include": [], "exclude": []};
+      }
+      query.rules[name][type].push(value);
+    };
+
+    const addSort = (key, order) => {
+      switch (key) {
+        case "id": case "file":
+          query.sorts.push({key, order});
+          break;
+        case "content":
+          query.sorts.push({key: "fulltext", subkey: key, order});
+          break;
+        default:
+          query.sorts.push({key: "meta", subkey: key, order});
+          break;
+      }
+    };
+
+    const addError = (msg) => {
+      query.error.push(msg);
+    };
+
+    const parseStr = (term, exactMatch = false) => {
+      const flags = query.mc ? "m" : "im";
+      let regex = "";
+      if (query.re) {
+        try {
+          regex = new RegExp(term, flags);
+        } catch(ex) {
+          addError("Invalid RegExp: " + term);
+          return null;
+        }
+      } else {
+        let key = scrapbook.escapeRegExp(term);
+        if (exactMatch) { key = "^" + key + "$"; }
+        regex = new RegExp(key, flags);
+      }
+      return regex;
+    };
+
+    const parseDate = (term) => {
+      const match = term.match(/^(\\d{0,17})(?:-(\\d{0,17}))?$/);
+      if (!match) {
+        addError("Invalid date format: " + term);
+        return null;
+      }
+      const since = match[1] ? this.dateUtcToLocal(pad(match[1], 17)) : pad("", 17);
+      const until = match[2] ? this.dateUtcToLocal(pad(match[2], 17)) : pad("", 17, "9");
+      return [since, until];
+    };
+
+    const pad = (n, width, z) => {
+      z = z || "0";
+      n = n + "";
+      return n.length >= width ? n : n + new Array(width - n.length + 1).join(z);
+    };
+
+    queryStr.replace(/(-?[A-Za-z]+:|-)(?:"((?:""|[^"])*)"|([^"\\s]*))|(?:"((?:""|[^"])*)"|([^"\\s]+))/g, (match, cmd, qterm, term, qterm2, term2) => {
+      if (cmd) {
+        term = (qterm !== undefined) ? qterm.replace(/""/g, '"') : term;
+      } else {
+        term = (qterm2 !== undefined) ? qterm2.replace(/""/g, '"') : term2;
+      }
+
+      switch (cmd) {
+        case "mc:":
+          query.mc = true;
+          break;
+        case "-mc:":
+          query.mc = false;
+          break;
+        case "re:":
+          query.re = true;
+          break;
+        case "-re:":
+          query.re = false;
+          break;
+        case "root:":
+          query.root = term;
+          break;
+        case "-root:":
+          query.root = null;
+          break;
+        case "sort:":
+          addSort(term, 1);
+          break;
+        case "-sort:":
+          addSort(term, -1);
+          break;
+        case "type:":
+          addRule("type", "include", parseStr(term, true));
+          break;
+        case "-type:":
+          addRule("type", "exclude", parseStr(term, true));
+          break;
+        case "id:":
+          addRule("id", "include", parseStr(term, true));
+          break;
+        case "-id:":
+          addRule("id", "exclude", parseStr(term, true));
+          break;
+        case "file:":
+          addRule("file", "include", parseStr(term));
+          break;
+        case "-file:":
+          addRule("file", "exclude", parseStr(term));
+          break;
+        case "source:":
+          addRule("source", "include", parseStr(term));
+          break;
+        case "-source:":
+          addRule("source", "exclude", parseStr(term));
+          break;
+        case "tcc:":
+          addRule("tcc", "include", parseStr(term));
+          break;
+        case "-tcc:":
+          addRule("tcc", "exclude", parseStr(term));
+          break;
+        case "title:":
+          addRule("title", "include", parseStr(term));
+          break;
+        case "-title:":
+          addRule("title", "exclude", parseStr(term));
+          break;
+        case "comment:":
+          addRule("comment", "include", parseStr(term));
+          break;
+        case "-comment:":
+          addRule("comment", "exclude", parseStr(term));
+          break;
+        case "content:":
+          addRule("content", "include", parseStr(term));
+          break;
+        case "-content:":
+          addRule("content", "exclude", parseStr(term));
+          break;
+        case "create:":
+          addRule("create", "include", parseDate(term));
+          break;
+        case "-create:":
+          addRule("create", "exclude", parseDate(term));
+          break;
+        case "modify:":
+          addRule("modify", "include", parseDate(term));
+          break;
+        case "-modify:":
+          addRule("modify", "exclude", parseDate(term));
+          break;
+        case "-":
+          addRule(query["default"], "exclude", parseStr(term));
+          break;
+        default:
+          addRule(query["default"], "include", parseStr(term));
+          break;
+      }
+
+      return "";
+    });
+    return query;
+  },
+
+  search(query) {
+    let p = Promise.resolve();
+    scrapbook.books.forEach((book) => {
+      p = p.then(() => {
+        return this.searchBook(query, book).then((results) => {
+          scrapbook.showResults(results, book);
+        });
+      });
+    });
+    return p;
+  },
+
+  searchBook(query, book) {
+    return Promise.resolve().then(() => {
+      const results = [];
+
+      let idPool;
+      if (query.root) {
+        idPool = new Set();
+
+        const addIdRecursively = (id) => {
+          for (const refId of book.toc[id]) {
+            if (book.meta[refId] && !idPool.has(refId)) {
+              idPool.add(refId);
+              if (book.toc[refId]) {
+                addIdRecursively(refId);
+              }
+            }
+          }
+        };
+
+        if (book.meta[query.root] && book.toc[query.root]) {
+          addIdRecursively(query.root);
+        }
+      } else {
+        idPool = new Set(Object.keys(book.meta));
+      }
+
+      idPool.forEach((id) => {
+        let subfiles = book.fulltext[id] || {};
+        if (!Object.keys(subfiles).length) { subfiles[""] = {}; }
+
+        for (const file in subfiles) {
+          const item = {
+            id,
+            file,
+            meta: book.meta[id],
+            fulltext: subfiles[file],
+          };
+          if (this.matchItem(item, query)) {
+            results.push(item);
+          }
+        }
+      });
+
+      // sort results
+      for (const {key, subkey, order} of query.sorts) {
+        results.sort((a, b) => {
+          a = a[key]; if (subkey) { a = a[subkey]; } a = a || "";
+          b = b[key]; if (subkey) { b = b[subkey]; } b = b || "";
+          if (a > b) { return order; }
+          if (a < b) { return -order; }
+          return 0;
+        });
+      }
+
+      return results;
+    });
+  },
+
+  matchItem(item, query) {
+    if (!item.meta) {
+      return false;
+    }
+
+    for (const i in query.rules) {
+      if (!this["_match_" + i](query.rules[i], item)) { return false; }
+    }
+
+    return true;
+  },
+
+  _match_tcc(rule, item) {
+    return this.matchText(rule, [item.meta.title, item.meta.comment, item.fulltext.content].join("\\n"));
+  },
+
+  _match_content(rule, item) {
+    return this.matchText(rule, item.fulltext.content);
+  },
+
+  _match_id(rule, item) {
+    return this.matchText(rule, item.id);
+  },
+
+  _match_file(rule, item) {
+    return this.matchText(rule, item.file);
+  },
+
+  _match_title(rule, item) {
+    return this.matchText(rule, item.meta.title);
+  },
+
+  _match_comment(rule, item) {
+    return this.matchText(rule, item.meta.comment);
+  },
+
+  _match_source(rule, item) {
+    return this.matchText(rule, item.meta.source);
+  },
+
+  _match_type(rule, item) {
+    const text = item.meta.type;
+    
+    for (const key of rule.exclude) {
+      if (key.test(text)) {
+        return false;
+      }
+    }
+
+    // use "or" clause
+    if (!rule.include.length) { return true; }
+    for (const key of rule.include) {
+      if (key.test(text)) {
+        return true;
+      }
+    }
+    return false;
+  },
+
+  _match_create(rule, item) {
+    return this.matchDate(rule, item.meta.create);
+  },
+
+  _match_modify(rule, item) {
+    return this.matchDate(rule, item.meta.modify);
+  },
+
+  matchText(rule, text) {
+    text = text || "";
+
+    for (const key of rule.exclude) {
+      if (key.test(text)) {
+        return false;
+      }
+    }
+
+    for (const key of rule.include) {
+      if (!key.test(text)) {
+        return false;
+      }
+    }
+
+    return true;
+  },
+
+  matchDate(rule, date) {
+    if (!date) { return false; }
+
+    for (const key of rule.exclude) {
+      if (key[0] <= date && date <= key[1]) {
+        return false;
+      }
+    }
+
+    for (const key of rule.include) {
+      if (!(key[0] <= date && date <= key[1])) {
+        return false;
+      }
+    }
+
+    return true;
+  },
+
+  dateUtcToLocal(dateStr) {
+    if (/^(\\d{4})(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{3})$/.test(dateStr)) {
+      const dd = new Date(
+          parseInt(RegExp.$1, 10), Math.max(parseInt(RegExp.$2, 10), 1) - 1, Math.max(parseInt(RegExp.$3, 10), 1),
+          parseInt(RegExp.$4, 10), parseInt(RegExp.$5, 10), parseInt(RegExp.$6, 10), parseInt(RegExp.$7, 10)
+          );
+      return dd.getUTCFullYear() +
+          this.intToFixedStr(dd.getUTCMonth() + 1, 2) +
+          this.intToFixedStr(dd.getUTCDate(), 2) +
+          this.intToFixedStr(dd.getUTCHours(), 2) +
+          this.intToFixedStr(dd.getUTCMinutes(), 2) +
+          this.intToFixedStr(dd.getUTCSeconds(), 2) +
+          this.intToFixedStr(dd.getUTCMilliseconds(), 3);
+    }
+    return null;
+  },
+
+  intToFixedStr(number, width, padder) {
+    padder = padder || "0";
+    number = number.toString(10);
+    return number.length >= width ? number : new Array(width - number.length + 1).join(padder) + number;
+  },
+};
+</script>
+<script src="search.js"></script>
+</head>
+<body>
+<form id="searchForm">
+  <input id="keyword" type="text">
+  <select id="helper">
+    <option value="" selected="selected"></option>
+    <option value="id:">id:</option>
+    <option value="title:">title:</option>
+    <option value="comment:">comment:</option>
+    <option value="content:">content:</option>
+    <option value="tcc:">tcc:</option>
+    <option value="source:">source:</option>
+    <option value="type:">type:</option>
+    <option value="create:">create:</option>
+    <option value="modify:">modify:</option>
+    <option value="re:">re:</option>
+    <option value="mc:">mc:</option>
+    <option value="file:">file:</option>
+    <option value="sort:">sort:</option>
+    <option value="-sort:modify">Last Modified</option>
+    <option value="-sort:create">Last Created</option>
+    <option value="sort:title">Title Ascending</option>
+    <option value="-sort:title">Title Descending</option>
+    <option value="sort:id">ID Sort</option>
+  </select>
+  <input id="search" type="submit" value="go" disabled="disabled" autocomplete="off">
+</form>
+<div>
+<ul id="result"></ul>
+</div>
+<div id="support">
+Supported browsers: Chrome ≥ 49, Firefox ≥ 41, Edge ≥ 14, Safari ≥ 8, with JavaScript enabled.
+</div>
+<script>scrapbook.init();</script>
+</body>
 </html>
 `;
   },
