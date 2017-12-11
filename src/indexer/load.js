@@ -1505,11 +1505,13 @@ const indexer = {
                 p = p.then(() => {
                   const {time, url} = scrapbook.parseHeaderRefresh(metaRefreshElem.getAttribute("content"));
                   if (time === 0) { hasInstantRedirect = true; }
-                  if (url.startsWith("data:")) {
-                    return addDataUriContent(url);
+                  if (url) {
+                    if (url.startsWith("data:")) {
+                      return addDataUriContent(url);
+                    }
+                    const target = getRelativeFilePath(url);
+                    if (target && !filesToUpdate.has(target)) { filesToUpdate.set(target, true); }
                   }
-                  const target = getRelativeFilePath(url);
-                  if (target && !filesToUpdate.has(target)) { filesToUpdate.set(target, true); }                  
                 });
               }
               return p.then(() => {
