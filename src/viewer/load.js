@@ -307,6 +307,9 @@ const viewer = {
       });
     }).then((files) => {
       return this.loadFiles(files);
+    }).catch((ex) => {
+      console.error(ex);
+      this.error(`Unexpected error: ${ex.message}`);
     });
   },
 
