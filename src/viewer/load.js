@@ -255,11 +255,12 @@ const viewer = {
 
       if (!scrapbook.getOption("viewer.useFileSystemApi")) { return; }
 
-      // filesystem scheme never works in an incognito window,
-      // but sometimes the requestFileSystem call doesn't throw, 
-      // and an error occurs afterwards instead. Add a chesk
-      // to prevent such error.
-      return browser.tabs.getCurrent().then((tab) => {
+      // In Firefox < 58, browser.tabs is undefined when redirected to load.html
+      return browser.tabs && browser.tabs.getCurrent().then((tab) => {
+        // filesystem scheme never works in an incognito window,
+        // but sometimes the requestFileSystem call doesn't throw, 
+        // and an error occurs afterwards instead. Add a check
+        // to prevent such error.
         if (tab.incognito) { return; }
 
         return new Promise((resolve, reject) => {
