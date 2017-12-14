@@ -1453,7 +1453,7 @@ scrapbook.getMaffIndexFiles = function (zipObj) {
     // get the list of top-folders
     const topdirs = new Set();
     for (const inZipPath in zipObj.files) {
-      const depth = Array.prototype.filter.call(inZipPath, x => x === "/").length;
+      const depth = inZipPath.split("/").length - 1;
       if (depth === 1) {
         const dirname = inZipPath.replace(/\/.*$/, "");
         topdirs.add(dirname + '/');
