@@ -471,7 +471,7 @@ const indexer = {
       }).then(() => {
         return this.fixMetaToc({scrapbookData, dataFiles});
       }).then(() => {
-        return this.cacheFavicons({scrapbookData, treeFiles, zip});
+        return this.cacheFavicons({scrapbookData, dataFiles, treeFiles, zip});
       }).then(() => {
         return this.handleBadFavicons({scrapbookData, treeFiles, zip});
       }).then(() => {
@@ -626,7 +626,6 @@ const indexer = {
           const index = this.getIndexPath(dataFiles, id);
 
           let meta;
-          let zipDataDir;
           let importedIndexDat = false;
 
           return Promise.resolve().then(() => {
@@ -677,8 +676,6 @@ const indexer = {
                 return scrapbook.readFileAsDocument(dataFiles[index]);
               } else if (index.endsWith('.htz')) {
                 return new JSZip().loadAsync(dataFiles[index]).then((zip) => {
-                  zipDataDir = zip;
-
                   return zip.file("index.html").async("arraybuffer").then((ab) => {
                     const blob = new Blob([ab], {type: "text/html"});
                     return scrapbook.readFileAsDocument(blob);
@@ -689,8 +686,6 @@ const indexer = {
                 // support multiple entries in one maff file
                 return new JSZip().loadAsync(dataFiles[index], {createFolders: true}).then((zip) => {
                   const zipDir = zip.folder(Object.keys(zip.files)[0]);
-                  zipDataDir = zipDir;
-
                   const zipRdfFile = zipDir.file("index.rdf");
                   if (zipRdfFile) {
                     return zipRdfFile.async("arraybuffer").then((ab) => {
@@ -760,6 +755,20 @@ const indexer = {
                   html.getAttribute('data-scrapbook-create') : 
                   meta.create;
 
+              /* meta.icon */
+              {
+                let icon;
+                if (html.hasAttribute('data-scrapbook-icon')) {
+                  icon = html.getAttribute('data-scrapbook-icon');
+                } else {
+                  const favIconElem = doc.querySelector('link[rel~="icon"][href]');
+                  if (favIconElem) {
+                    icon = favIconElem.getAttribute('href');
+                  }
+                }
+                meta.icon = icon || meta.icon;
+              }
+
               /* meta.comment */
               meta.comment = html.hasAttribute('data-scrapbook-comment') ? 
                   html.getAttribute('data-scrapbook-comment') : 
@@ -779,59 +788,6 @@ const indexer = {
               meta.exported = html.hasAttribute('data-scrapbook-exported') ? 
                   html.getAttribute('data-scrapbook-exported') : 
                   meta.exported;
-
-              /* meta.icon */
-              return Promise.resolve().then(() => {
-                let icon;
-
-                if (html.hasAttribute('data-scrapbook-icon')) {
-                  icon = html.getAttribute('data-scrapbook-icon');
-                } else {
-                  const favIconElem = doc.querySelector('link[rel~="icon"][href]');
-                  if (favIconElem) {
-                    icon = favIconElem.getAttribute('href');
-                  }
-                }
-
-                // special handling if data is in zip
-                // return data URL for further caching
-                if (zipDataDir && icon) {
-                  return Promise.resolve().then(() => {
-                    const file = zipDataDir.file(icon);
-
-                    if (!file) {
-                      throw new Error(`'${icon}' does not exist.`);
-                    }
-
-                    return file.async('arraybuffer').then((ab) => {
-                      const mime = Mime.prototype.extension(icon);
-                      const blob = new Blob([ab], {type: mime});
-                      return scrapbook.readFileAsDataURL(blob);
-                    });
-                  }).then((dataUrl) => {
-                    this.log(`Retrieved favicon at '${icon}' for packed 'data/${index}' as '${scrapbook.crop(dataUrl, 256)}'`);
-                    return dataUrl;
-                  }).catch((ex) => {
-                    console.error(ex);
-                    this.error(`Unable to retrieve favicon at '${icon}' for packed 'data/${index}': ${ex.message}`);
-                  });
-                }
-
-                // special handling of singleHtmlJs generated data URI
-                if (/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(icon)) {
-                  const resType = RegExp.$1;
-                  const resId = RegExp.$2;
-                  const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-                  if (loader && /\([\n\r]+(.+)[\n\r]+\);$/.test(loader.textContent)) {
-                    const data = JSON.parse(RegExp.$1);
-                    icon = `data:${resType};base64,${data[resId].d}`;
-                  }
-                }
-
-                return icon;
-              }).then((icon) => {
-                meta.icon = icon || meta.icon;
-              });
             }).catch((ex) => {
               console.error(ex);
               this.error(`Error inspecting 'data/${index}': ${ex.message}`);
@@ -1019,7 +975,7 @@ const indexer = {
   },
 
   /* Generate cache for favicon */
-  cacheFavicons({scrapbookData, treeFiles, zip}) {
+  cacheFavicons({scrapbookData, dataFiles, treeFiles, zip}) {
     return Promise.resolve().then(() => {
       this.log(`Inspecting favicons...`);
       const tasks = [];
@@ -1028,73 +984,128 @@ const indexer = {
         tasks[tasks.length] = Promise.resolve().then(() => {
           let {index, icon: favIconUrl} = scrapbookData.meta[id];
           index = index || "";
-          if (!favIconUrl || favIconUrl.indexOf(':') === -1) { return favIconUrl; }
 
-          // cache the favicon if its not in relative path
-          const headers = {};
+          // the favIconUrl is ok
+          if (!favIconUrl || favIconUrl.startsWith('../')) { return; }
+
+          // allow relative favicon for folder item
+          if (index.endsWith('/index.html') && favIconUrl.indexOf(':') === -1) { return; }
 
           return Promise.resolve().then(() => {
-            const prevAccess = urlAccessMap.get(favIconUrl);
-            if (prevAccess) {
-              // this.log(`Using previuos access for '${favIconUrl}' for '${id}'.`);
-              return prevAccess;
-            }
+            const getShaFile = (data) => {
+              if (!data) { throw new Error(`Unable to fetch a file for this favicon URL.`); }
 
-            const p = Promise.resolve().then(() => {
-              if (favIconUrl.startsWith("data:")) {
-                return scrapbook.dataUriToFile(favIconUrl, false);
+              const {ab, mime, ext} = data;
+
+              // validate that we have a correct image mimetype
+              if (!mime.startsWith('image/') && mime !== 'application/octet-stream') {
+                throw new Error(`Invalid image mimetype '${mime}'.`);
               }
 
-              return scrapbook.xhr({
-                url: favIconUrl,
-                responseType: 'blob',
-                timeout: 5000,
-                onreadystatechange(xhr) {
-                  if (xhr.readyState !== 2) { return; }
+              // if no extension, generate one according to mime
+              if (!ext) { ext = Mime.prototype.extension(mime); }
 
-                  // get headers
-                  if (xhr.status !== 0) {
-                    const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-                    if (headerContentDisposition) {
-                      const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-                      // headers.isAttachment = (contentDisposition.type === "attachment");
-                      headers.filename = contentDisposition.parameters.filename;
-                    }
-                    const headerContentType = xhr.getResponseHeader("Content-Type");
-                    if (headerContentType) {
-                      const contentType = scrapbook.parseHeaderContentType(headerContentType);
-                      headers.contentType = contentType.type;
-                      // headers.charset = contentType.parameters.charset;
+              const sha = scrapbook.sha1(ab, 'ARRAYBUFFER');
+              return new File([ab], `${sha}${ext ? '.' + ext : ''}`, {type: mime});
+            };
+
+            // retrive absolute URL
+            if (favIconUrl.indexOf(':') !== -1) {
+              const prevAccess = urlAccessMap.get(favIconUrl);
+              if (prevAccess) {
+                // this.log(`Using previuos access for '${favIconUrl}' for '${id}'.`);
+                return prevAccess;
+              }
+
+              const p = Promise.resolve().then(() => {
+                if (favIconUrl.startsWith("data:")) {
+                  // special handling of singleHtmlJs generated data URI
+                  if (index.endsWith('.html') || index.endsWith('.htm') || 
+                      index.endsWith('.xhtml') || index.endsWith('.xht')) {
+                    if (/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(favIconUrl)) {
+                      const resType = RegExp.$1;
+                      const resId = RegExp.$2;
+
+                      return scrapbook.readFileAsDocument(dataFiles[index]).then((doc) => {
+                        if (!doc) { throw new Error(`Unable to load HTML document.`); }
+
+                        const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
+                        if (loader && /\([\n\r]+(.+)[\n\r]+\);$/.test(loader.textContent)) {
+                          const data = JSON.parse(RegExp.$1);
+                          const url = `data:${resType};base64,${data[resId].d}`;
+                          return scrapbook.dataUriToFile(url, false);
+                        }
+                      });
                     }
                   }
-                },
-              }).then((xhr) => {
-                // retrieve extension
-                let [, ext] = scrapbook.filenameParts(headers.filename || scrapbook.urlToFilename(xhr.responseURL));
-                const blob = xhr.response;
-                const mime = blob.type;
 
-                if (!mime.startsWith('image/') && mime !== 'application/octet-stream') {
-                  throw new Error(`Invalid image mimetype '${mime}'.`);
+                  return scrapbook.dataUriToFile(favIconUrl, false);
                 }
 
-                // if no extension, generate one according to mime
-                if (!ext) { ext = Mime.prototype.extension(mime); }
-                ext =  ext ? '.' + ext : '';
+                const headers = {};
+                return scrapbook.xhr({
+                  url: favIconUrl,
+                  responseType: 'blob',
+                  timeout: 5000,
+                  onreadystatechange(xhr) {
+                    if (xhr.readyState !== 2) { return; }
 
-                return scrapbook.readFileAsArrayBuffer(blob).then((ab) => {                  
-                  const sha = scrapbook.sha1(ab, 'ARRAYBUFFER');
-                  return new File([blob], `${sha}${ext}`, {type: blob.type});
+                    // get headers
+                    if (xhr.status !== 0) {
+                      const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+                      if (headerContentDisposition) {
+                        const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+                        // headers.isAttachment = (contentDisposition.type === "attachment");
+                        headers.filename = contentDisposition.parameters.filename;
+                      }
+                      const headerContentType = xhr.getResponseHeader("Content-Type");
+                      if (headerContentType) {
+                        const contentType = scrapbook.parseHeaderContentType(headerContentType);
+                        headers.contentType = contentType.type;
+                        // headers.charset = contentType.parameters.charset;
+                      }
+                    }
+                  },
+                }).then((xhr) => {
+                  const [, ext] = scrapbook.filenameParts(headers.filename || scrapbook.urlToFilename(xhr.responseURL));
+                  const blob = xhr.response;
+                  const mime = blob.type;
+
+                  return scrapbook.readFileAsArrayBuffer(blob).then((ab) => {
+                    return getShaFile({ab, mime, ext});
+                  });
+                }, (ex) => {
+                  throw new Error(`Unable to fetch URL: ${ex.message}`);
                 });
-              }, (ex) => {
-                throw new Error(`Unable to fetch URL: ${ex.message}`);
               });
-            });
-            urlAccessMap.set(favIconUrl, p);
-            return p;
+              urlAccessMap.set(favIconUrl, p);
+              return p;
+            } else if (index.endsWith('.htz') || index.endsWith('.maff')) {
+              return new JSZip().loadAsync(dataFiles[index], {createFolders: true}).then((zip) => {
+                if (index.endsWith('.maff')) {
+                  return zip.folder(Object.keys(zip.files)[0]);
+                }
+
+                return zip;
+              }).then((zipDir) => {
+                const zipFile = zipDir.file(favIconUrl);
+
+                if (!zipFile) {
+                  throw new Error(`'${favIconUrl}' does not exist.`);
+                }
+
+                const mime = Mime.prototype.lookup(zipFile.name);
+                const [, ext] = scrapbook.filenameParts(zipFile.name);
+
+                return zipFile.async('arraybuffer').then((ab) => {
+                  return getShaFile({ab, mime, ext});
+                });
+              });
+            }
           }).then((file) => {
             const path = `tree/favicon/${file.name}`;
 
+            // A non-empty existed file is a duplicate since favicon files are named using a checksum.
             if (!treeFiles[path] || treeFiles[path].size === 0) {
               scrapbook.zipAddFile(zip, path, file, false);
               this.log(`Saved favicon '${scrapbook.crop(favIconUrl, 256)}' for '${id}' at '${path}'.`);
@@ -1102,17 +1113,16 @@ const indexer = {
               this.log(`Use saved favicon for '${scrapbook.crop(favIconUrl, 256)}' for '${id}' at '${path}'.`);
             }
 
-            const url = `${index.indexOf('/') !== -1 ? '../' : ''}../${path}`;
-            return url;
+            const url = '../'.repeat(index.split('/').length) + path;
+            scrapbookData.meta[id].icon = url;
           }).catch((ex) => {
             console.error(ex);
             this.error(`Removed invalid favicon '${scrapbook.crop(favIconUrl, 256)}' for '${id}': ${ex.message}`);
+            scrapbookData.meta[id].icon = "";
           });
-        }).then((favIconUrl) => {
-          scrapbookData.meta[id].icon = favIconUrl || "";
         }).catch((ex) => {
           console.error(ex);
-          this.error(`Error inspecting favicon '${scrapbook.crop(favIconUrl, 256)}' for '${id}': ${ex.message}`);
+          this.error(`Error inspecting favicon for '${id}': ${ex.message}`);
         });
       }
       return Promise.all(tasks);
