@@ -995,7 +995,7 @@ const indexer = {
             const getShaFile = (data) => {
               if (!data) { throw new Error(`Unable to fetch a file for this favicon URL.`); }
 
-              const {ab, mime, ext} = data;
+              let {ab, mime, ext} = data;
 
               // validate that we have a correct image mimetype
               if (!mime.startsWith('image/') && mime !== 'application/octet-stream') {
