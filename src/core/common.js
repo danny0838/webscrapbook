@@ -1465,9 +1465,10 @@ scrapbook.getMaffIndexFiles = function (zipObj) {
     let p = Promise.resolve();
     topdirs.forEach((topdir) => {
       p = p.then(() => {
-        const indexRdfFile = topdir + 'index.rdf';
-        if (zipObj.files[indexRdfFile]) {
-          return zipObj.file(indexRdfFile).async('arraybuffer').then((ab) => {
+        const zipDir = zipObj.folder(topdir);
+        const zipRdfFile = zipDir.file('index.rdf');
+        if (zipRdfFile) {
+          return zipRdfFile.async('arraybuffer').then((ab) => {
             return new File([ab], 'index.rdf', {type: "application/rdf+xml"});
           }, (ex) => {
             throw new Error(`'index.rdf' cannot be loaded.`);
@@ -1488,19 +1489,18 @@ scrapbook.getMaffIndexFiles = function (zipObj) {
               throw new Error(`'index.rdf' specified index file '${meta.indexfilename}' is invalid.`);
             }
 
-            const indexFilename = topdir + (meta.indexfilename || '');
-            if (!zipObj.files[indexFilename]) {
+            const zipIndexFile = zipDir.file(meta.indexfilename);
+            if (!zipIndexFile) {
               throw new Error(`'index.rdf' specified index file '${meta.indexfilename}' not found.`);
             }
 
-            return indexFilename;
+            return zipIndexFile.name;
           }).catch((ex) => {
             throw ex;
           });
         }
 
-        const indexFiles = zipObj.folder(topdir).file(/^index[.][^./]+$/);
-
+        const indexFiles = zipDir.file(/^index[.][^./]+$/);
         if (indexFiles.length) {
           return indexFiles[0].name;
         }
