@@ -662,20 +662,16 @@ const indexer = {
 
             return Promise.resolve().then(() => {
               this.log(`Generating metadata entry from 'data/${index}'...`);
-              if (index.endsWith('/index.html') ||
-                  index.endsWith('.html') ||
-                  index.endsWith('.htm') ||
-                  index.endsWith('.xhtml') ||
-                  index.endsWith('.xht')) {
+              if (this.isHtmlFile(index)) {
                 return scrapbook.readFileAsDocument(dataFiles[index]);
-              } else if (index.endsWith('.htz')) {
+              } else if (this.isHtzFile(index)) {
                 return new JSZip().loadAsync(dataFiles[index]).then((zip) => {
                   return zip.file("index.html").async("arraybuffer").then((ab) => {
                     const blob = new Blob([ab], {type: "text/html"});
                     return scrapbook.readFileAsDocument(blob);
                   });
                 });
-              } else if (index.endsWith('.maff')) {
+              } else if (this.isMaffFile(index)) {
                 // @TODO:
                 // support multiple entries in one maff file
                 return new JSZip().loadAsync(dataFiles[index], {createFolders: true}).then((zip) => {
@@ -1071,9 +1067,9 @@ const indexer = {
               });
               urlAccessMap.set(favIconUrl, p);
               return p;
-            } else if (index.endsWith('.htz') || index.endsWith('.maff')) {
+            } else if (this.isHtzFile(index) || this.isMaffFile(index)) {
               return new JSZip().loadAsync(dataFiles[index], {createFolders: true}).then((zip) => {
-                if (index.endsWith('.maff')) {
+                if (this.isMaffFile(index)) {
                   return zip.folder(Object.keys(zip.files)[0]);
                 }
 
@@ -1349,12 +1345,12 @@ const indexer = {
           return Promise.resolve().then(() => {
             if (index.endsWith('/index.html')) {
               return ['index.html'];
-            } else if (index.endsWith('.maff')) {
+            } else if (this.isMaffFile(index)) {
               itemZip = itemZip || new JSZip().loadAsync(dataFiles[index], {createFolders: true});
               return itemZip.then((zip) => {
                 return scrapbook.getMaffIndexFiles(zip);
               });
-            } else if (index.endsWith('.htz')) {
+            } else if (this.isHtzFile(index)) {
               return ['index.html'];
             }
 
@@ -1367,14 +1363,11 @@ const indexer = {
             if (index.endsWith('/index.html')) {
               const [base] = scrapbook.filepathParts(index);
               return dataFiles[base + '/' + path];
-            } else if (index.endsWith('.html') ||
-                index.endsWith('.htm') ||
-                index.endsWith('.xhtml') ||
-                index.endsWith('.xht')) {
+            } else if (this.isHtmlFile(index)) {
               if (path === '.') {
                 return dataFiles[index];
               }
-            } else if (index.endsWith('.htz') || index.endsWith('.maff')) {
+            } else if (this.isHtzFile(index) || this.isMaffFile(index)) {
               const [base, filename] = scrapbook.filepathParts(path);
               itemZip = itemZip || new JSZip().loadAsync(dataFiles[index], {createFolders: true});
               return itemZip.then((zip) => {
@@ -1878,6 +1871,22 @@ const indexer = {
     if (dataFiles[index]) { return index; }
 
     return null;
+  },
+
+  isHtmlFile(path) {
+    const p = path.toLowerCase();
+    return p.endsWith('.html') || p.endsWith('.htm') || 
+        p.endsWith('.xhtml') || p.endsWith('.xht');
+  },
+
+  isHtzFile(path) {
+    const p = path.toLowerCase();
+    return p.endsWith('.htz');
+  },
+
+  isMaffFile(path) {
+    const p = path.toLowerCase();
+    return p.endsWith('.maff');
   },
 
   getDefaultMeta() {
