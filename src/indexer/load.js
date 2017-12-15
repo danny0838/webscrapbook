@@ -2232,12 +2232,12 @@ var scrapbook = {
       var a = document.createElement('a');
       a.appendChild(document.createTextNode(meta.title || id));
       if (meta.type !== 'bookmark') {
-        if (meta.index) { a.href = '../data/' + meta.index; }
+        if (meta.index) { a.href = '../data/' + scrapbook.escapeFilename(meta.index); }
       } else {
         if (meta.source) {
           a.href = meta.source;
         } else {
-          if (meta.index) { a.href = '../data/' + meta.index; }
+          if (meta.index) { a.href = '../data/' + scrapbook.escapeFilename(meta.index); }
         }
       }
       if (meta.comment) { a.title = meta.comment; }
@@ -2247,7 +2247,7 @@ var scrapbook = {
       var icon = document.createElement('img');
       if (meta.icon) {
         icon.src = (meta.icon.indexOf(':') === -1) ? 
-            ('../data/' + meta.index).replace(/[/][^/]+$/, '/') + meta.icon : 
+            ('../data/' + scrapbook.escapeFilename(meta.index)).replace(/[/][^/]+$/, '/') + meta.icon : 
             meta.icon;
       } else {
         icon.src = {
@@ -2424,6 +2424,10 @@ var scrapbook = {
     for (var i = 1, I = elems.length; i < I; i++) { // skip root
       scrapbook.toggleElem(elems[i], willOpen);
     }
+  },
+
+  escapeFilename: function (filename) {
+    return filename.replace(/[^/]+/g, function (m) { return encodeURIComponent(m); });
   }
 };
 </script>
@@ -2816,7 +2820,7 @@ const scrapbook = {
           let subpath = (file && meta.index.endsWith('/index.html')) ? 
               meta.index.replace(/[/][^/]+$/, '/') + file : 
               meta.index;
-          subpath = (subpath || "").replace(/[^/]+/g, m => encodeURIComponent(m));
+          subpath = this.escapeFilename(subpath || "");
           if (subpath) {
             href = book.path + "data/" + subpath;
           }
@@ -2839,7 +2843,7 @@ const scrapbook = {
       const icon = document.createElement('img');
       if (meta.icon) {
         icon.src = (meta.icon.indexOf(':') === -1) ? 
-            (book.path + 'data/' + meta.index).replace(/[/][^/]+$/, '/') + meta.icon : 
+            (book.path + 'data/' + this.escapeFilename(meta.index)).replace(/[/][^/]+$/, '/') + meta.icon : 
             meta.icon;
       } else {
         icon.src = {
@@ -2889,6 +2893,10 @@ const scrapbook = {
 
   escapeRegExp(str) {
     return str.replace(/[-/\\\\^$*+?.|()[\\]{}]/g, "\\\\$&");
+  },
+
+  escapeFilename(filename) {
+    return filename.replace(/[^/]+/g, m => encodeURIComponent(m));
   },
 
   helperFill() {
