@@ -1079,10 +1079,11 @@ const indexer = {
 
                 return zip;
               }).then((zipDir) => {
-                const zipFile = zipDir.file(favIconUrl);
+                const favIconPath = decodeURIComponent(favIconUrl);
+                const zipFile = zipDir.file(favIconPath);
 
                 if (!zipFile) {
-                  throw new Error(`'${favIconUrl}' does not exist.`);
+                  throw new Error(`'${favIconPath}' does not exist.`);
                 }
 
                 const mime = Mime.prototype.lookup(zipFile.name);
@@ -1104,7 +1105,7 @@ const indexer = {
               this.log(`Use saved favicon for '${scrapbook.crop(favIconUrl, 256)}' for '${id}' at '${path}'.`);
             }
 
-            const url = '../'.repeat(index.split('/').length) + path;
+            const url = '../'.repeat(index.split('/').length) + scrapbook.escapeFilename(path);
             scrapbookData.meta[id].icon = url;
           }).catch((ex) => {
             console.error(ex);
