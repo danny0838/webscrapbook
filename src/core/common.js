@@ -1479,8 +1479,13 @@ scrapbook.getMaffIndexFiles = function (zipObj) {
             }
 
             const meta = scrapbook.parseMaffRdfDocument(doc);
+
             if (!meta.indexfilename) {
               throw new Error(`'index.rdf' specifies no index file.`);
+            }
+
+            if (!/^index[.][^./]+$/.test(meta.indexfilename)) {
+              throw new Error(`'index.rdf' specified index file '${meta.indexfilename}' is invalid.`);
             }
 
             const indexFilename = topdir + (meta.indexfilename || '');
@@ -1494,17 +1499,11 @@ scrapbook.getMaffIndexFiles = function (zipObj) {
           });
         }
 
-        let indexFilename;
-        for (const inZipPath in zipObj.files) {
-          if (!inZipPath.startsWith(topdir)) { continue; }
+        const indexFiles = zipObj.folder(topdir).file(/^index[.][^./]+$/);
 
-          const [, filename] = scrapbook.filepathParts(inZipPath);
-          if (filename.startsWith("index.")) {
-            indexFilename = inZipPath;
-            break;
-          }
+        if (indexFiles.length) {
+          return indexFiles[0].name;
         }
-        return indexFilename;
       }).then((indexFilename) => {
         if (!indexFilename) { throw new Error(`'index.*' file not found.`); }
 
