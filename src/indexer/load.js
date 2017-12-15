@@ -1020,23 +1020,20 @@ const indexer = {
               const p = Promise.resolve().then(() => {
                 if (favIconUrl.startsWith("data:")) {
                   // special handling of singleHtmlJs generated data URI
-                  if (index.endsWith('.html') || index.endsWith('.htm') || 
-                      index.endsWith('.xhtml') || index.endsWith('.xht')) {
-                    if (/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(favIconUrl)) {
-                      const resType = RegExp.$1;
-                      const resId = RegExp.$2;
+                  if (/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(favIconUrl)) {
+                    const resType = RegExp.$1;
+                    const resId = RegExp.$2;
 
-                      return scrapbook.readFileAsDocument(dataFiles[index]).then((doc) => {
-                        if (!doc) { throw new Error(`Unable to load HTML document.`); }
+                    return scrapbook.readFileAsDocument(dataFiles[index]).then((doc) => {
+                      if (!doc) { throw new Error(`Unable to load HTML document from 'data/${index}'.`); }
 
-                        const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-                        if (loader && /\([\n\r]+(.+)[\n\r]+\);$/.test(loader.textContent)) {
-                          const data = JSON.parse(RegExp.$1);
-                          const url = `data:${resType};base64,${data[resId].d}`;
-                          return scrapbook.dataUriToFile(url, false);
-                        }
-                      });
-                    }
+                      const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
+                      if (loader && /\([\n\r]+(.+)[\n\r]+\);$/.test(loader.textContent)) {
+                        const data = JSON.parse(RegExp.$1);
+                        const url = `data:${resType};base64,${data[resId].d}`;
+                        return scrapbook.dataUriToFile(url, false);
+                      }
+                    });
                   }
 
                   return scrapbook.dataUriToFile(favIconUrl, false);
