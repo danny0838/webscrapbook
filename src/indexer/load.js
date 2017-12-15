@@ -1022,7 +1022,7 @@ const indexer = {
                   // special handling of singleHtmlJs generated data URI
                   if (index.endsWith('.html') || index.endsWith('.htm') || 
                       index.endsWith('.xhtml') || index.endsWith('.xht')) {
-                    if (/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(favIconUrl)) {
+                    if (/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(favIconUrl)) {
                       const resType = RegExp.$1;
                       const resId = RegExp.$2;
 
@@ -1497,7 +1497,7 @@ const indexer = {
             const addDataUriContent = (url) => {
               return Promise.resolve().then(() => {
                 // special handling of singleHtmlJs generated data URI
-                if (/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(url)) {
+                if (/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(url)) {
                   const resType = RegExp.$1;
                   const resId = RegExp.$2;
 
