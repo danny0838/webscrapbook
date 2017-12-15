@@ -978,8 +978,8 @@ const indexer = {
           // the favIconUrl is ok
           if (!favIconUrl || favIconUrl.startsWith('../')) { return; }
 
-          // allow relative favicon for folder item
-          if (index.endsWith('/index.html') && favIconUrl.indexOf(':') === -1) { return; }
+          // allow relative favicon if index is HTML
+          if (this.isHtmlFile(index) && favIconUrl.indexOf(':') === -1) { return; }
 
           return Promise.resolve().then(() => {
             const getShaFile = (data) => {
@@ -1360,13 +1360,14 @@ const indexer = {
 
         const getFile = (path) => {
           return Promise.resolve().then(() => {
-            if (index.endsWith('/index.html')) {
-              const [base] = scrapbook.filepathParts(index);
-              return dataFiles[base + '/' + path];
-            } else if (this.isHtmlFile(index)) {
+            if (this.isHtmlFile(index)) {
               if (path === '.') {
                 return dataFiles[index];
               }
+
+              let [base] = scrapbook.filepathParts(index);
+              base = base ? base + '/' : '';
+              return dataFiles[base + path];
             } else if (this.isHtzFile(index) || this.isMaffFile(index)) {
               const [base, filename] = scrapbook.filepathParts(path);
               itemZip = itemZip || new JSZip().loadAsync(dataFiles[index], {createFolders: true});
@@ -2827,9 +2828,10 @@ const scrapbook = {
       let href;
       if (meta.type !== "bookmark") {
         if (meta.index) {
-          let subpath = (file && meta.index.endsWith('/index.html')) ? 
-              meta.index.replace(/[/][^/]+$/, '/') + file : 
-              meta.index;
+          let subpath = 
+              (!file || file === '.' || this.isZipFile(meta.index)) ? 
+              meta.index : 
+              meta.index.replace(/[^/]+$/, '') + file;
           subpath = this.escapeFilename(subpath || "");
           if (subpath) {
             href = book.path + "data/" + subpath;
@@ -2899,6 +2901,11 @@ const scrapbook = {
       // unable to resolve
     }
     return url;
+  },
+
+  isZipFile(path) {
+    const p = path.toLowerCase();
+    return p.endsWith('.htz') || p.endsWith('.maff');
   },
 
   escapeRegExp(str) {
