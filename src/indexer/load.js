@@ -1882,12 +1882,6 @@ const indexer = {
     index = `${id}.htz`;
     if (dataFiles[index]) { return index; }
 
-    index = `${id}.mht`;
-    if (dataFiles[index]) { return index; }
-
-    index = `${id}.epub`;
-    if (dataFiles[index]) { return index; }
-
     return null;
   },
 
