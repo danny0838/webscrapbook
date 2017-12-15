@@ -2846,7 +2846,11 @@ const scrapbook = {
       a.textContent = a.title = meta.title;
       div.appendChild(a);
 
-      if (file && file !== "." && file !== "index.html") {
+      if (file && !(
+          file === "." || 
+          (this.isZipFile(meta.index) && file === "index.html") || 
+          (!this.isZipFile(meta.index) && file === meta.index.replace(/^.*[/]/, ''))
+          )) {
         const span = document.createElement("span");
         span.textContent = " (" + file + ")";
         a.appendChild(span);
