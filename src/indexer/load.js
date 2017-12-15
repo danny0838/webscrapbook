@@ -1343,9 +1343,7 @@ const indexer = {
 
         const getIndexPaths = () => {
           return Promise.resolve().then(() => {
-            if (index.endsWith('/index.html')) {
-              return ['index.html'];
-            } else if (this.isMaffFile(index)) {
+            if (this.isMaffFile(index)) {
               itemZip = itemZip || new JSZip().loadAsync(dataFiles[index], {createFolders: true});
               return itemZip.then((zip) => {
                 return scrapbook.getMaffIndexFiles(zip);
@@ -1354,7 +1352,7 @@ const indexer = {
               return ['index.html'];
             }
 
-            return ['.'];
+            return [scrapbook.filepathParts(index)[1]];
           });
         };
 
@@ -1607,10 +1605,18 @@ const indexer = {
                   });
                 }
               }).then(() => {
-                if (index.endsWith('/index.html')) {
+                if (this.isHtmlFile(index)) {
                   // check update for files that has a fulltext cache
                   let p = Promise.resolve();
-                  for (const filePath in scrapbookData.fulltext[id]) {
+                  for (let filePath in scrapbookData.fulltext[id]) {
+                    // replace deprecated filePath "."
+                    if (filePath === '.') {
+                      const filePathNew = scrapbook.filepathParts(index)[1];
+                      scrapbookData.fulltext[id][filePathNew] = scrapbookData.fulltext[id][filePath];
+                      delete(scrapbookData.fulltext[id][filePath]);
+                      filePath = filePathNew;
+                    }
+
                     p = p.then(() => {
                       return getFile(filePath).then((file) => {
                         if (!file) {
@@ -1631,7 +1637,7 @@ const indexer = {
                   // at least one file to update
                   this.log(`Updating cache for '${id}'...`);
 
-                  if (!index.endsWith('/index.html')) {
+                  if (!this.isHtmlFile(index)) {
                     scrapbookData.fulltext[id] = {};
                   }
                 }
