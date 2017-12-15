@@ -513,23 +513,17 @@ const indexer = {
           if (!/^urn:scrapbook:item(\d{14})$/.test(rid)) { return; }
 
           const id = elem.getAttributeNS(NS1, "id") || RegExp.$1;
-
-          const rdfMeta = {
-            id,
-            title: elem.getAttributeNS(NS1, "title"),
-            type: elem.getAttributeNS(NS1, "type"),
-            create: elem.getAttributeNS(NS1, "create"),
-            modify: elem.getAttributeNS(NS1, "modify"),
-            source: elem.getAttributeNS(NS1, "source"),
-            icon: elem.getAttributeNS(NS1, "icon"),
-            comment: elem.getAttributeNS(NS1, "comment"),
-            chars: elem.getAttributeNS(NS1, "chars"),
-            lock: elem.getAttributeNS(NS1, "lock"),
-          };
+          const meta = {id};
+          Array.prototype.forEach.call(elem.attributes, (attrElem) => {
+            if (attrElem.prefix === "NS1" && attrElem.nodeName !== "NS1:id") {
+              const attrName = attrElem.nodeName.slice(4);
+              meta[attrName] = elem.getAttributeNS(NS1, attrName);
+            }
+          });
 
           if (!scrapbookData.meta[id]) { scrapbookData.meta[id] = this.getDefaultMeta(); }
           scrapbookData.meta[id].index = this.getIndexPath(dataFiles, id) || undefined,
-          this.mergeLegacyMeta(scrapbookData.meta[id], rdfMeta);
+          this.mergeLegacyMeta(scrapbookData.meta[id], meta);
         };
 
         const parseSeqElem = (elem) => {
@@ -1887,6 +1881,7 @@ const indexer = {
 
   getDefaultMeta() {
     return {
+      id: undefined,
       index: undefined,
       title: undefined,
       type: undefined,
@@ -1895,6 +1890,11 @@ const indexer = {
       source: undefined,
       icon: undefined,
       comment: undefined,
+      charset: undefined,
+      marked: undefined,
+      locked: undefined,
+      folder: undefined,
+      exported: undefined,
     };
   },
 
@@ -1917,22 +1917,7 @@ const indexer = {
   mergeLegacyMeta(newMeta, legacyMeta) {
     const id = legacyMeta.id;
 
-    const meta = {
-      id,
-      title: legacyMeta.title,
-      type: legacyMeta.type,
-      create: legacyMeta.create ? scrapbook.dateToId(scrapbook.idToDateOld(legacyMeta.create)) : "",
-      modify: legacyMeta.modify ? scrapbook.dateToId(scrapbook.idToDateOld(legacyMeta.modify)) : "",
-      source: legacyMeta.source,
-      icon: legacyMeta.icon,
-      comment: legacyMeta.comment ? legacyMeta.comment.replace(/ __BR__ /g, '\n') : "",
-      folder: legacyMeta.folder,
-      exported: legacyMeta.exported ? scrapbook.dateToId(new Date(legacyMeta.exported)) : undefined,
-    };
-
-    /* meta.charset, meta.locked */
-    if (legacyMeta.chars) { meta.charset = legacyMeta.chars; }
-    if (legacyMeta.lock) { meta.locked = legacyMeta.lock; }
+    const meta = JSON.parse(JSON.stringify(legacyMeta));
 
     /* meta.type, meta.marked */
     meta.type = {
@@ -1946,15 +1931,45 @@ const indexer = {
       meta.marked = true;
     }
 
+    /* meta.create */
+    meta.create = meta.create ? scrapbook.dateToId(scrapbook.idToDateOld(meta.create)) : "";
+
+    /* meta.modify */
+    meta.modify = meta.modify ? scrapbook.dateToId(scrapbook.idToDateOld(meta.modify)) : "";
+
     /* meta.icon */
     const resProtocolBase = `resource://scrapbook/data/${id}/`;
     const resProtocolBase2 = `resource://scrapbook/icon/`;
+    meta.icon = meta.icon || "";
     if (meta.icon.startsWith(resProtocolBase)) {
       meta.icon = meta.icon.slice(resProtocolBase.length);
     } else if (meta.icon.startsWith(resProtocolBase2)) {
       meta.icon = `../../icon/${meta.icon.slice(resProtocolBase2.length)}`;
     } else if (meta.icon.startsWith('moz-icon://')) {
       meta.icon = "";
+    }
+
+    /* meta.comment */
+    meta.comment = meta.comment ? meta.comment.replace(/ __BR__ /g, '\n') : "";
+
+    /* meta.charset */
+    if (meta.chars) {
+      meta.charset = meta.chars;
+    }
+    delete(meta.chars);
+
+    /* meta.locked */
+    if (meta.lock) {
+      meta.locked = true;
+    }
+    delete(meta.lock);
+
+    /* meta.container */
+    delete(meta.container);
+
+    /* meta.exported */
+    if (meta.exported) {
+      meta.exported = scrapbook.dateToId(new Date(meta.exported));
     }
 
     newMeta = Object.assign(newMeta, meta);
