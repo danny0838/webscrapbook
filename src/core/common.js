@@ -661,7 +661,7 @@ scrapbook.unescapeHtml = function (str) {
 scrapbook.escapeRegExp = function (str) {
   // Escaping "-" allows the result to be inserted into a character class.
   // Escaping "/" allow the result to be used in a JS regex literal.
-  return str.replace(/[-\/\\^$*+?.|()[\]{}]/g, "\\$&");
+  return str.replace(/[-/\\^$*+?.|()[\]{}]/g, "\\$&");
 };
 
 scrapbook.escapeHtmlComment = function (str) {

@@ -453,7 +453,7 @@ const indexer = {
         }
 
         // map files in data/*
-        if (/^data\/(([^\/]+)(?:\/.+|[.][^.]+))$/.test(path)) {
+        if (/^data\/(([^/]+)(?:\/.+|[.][^.]+))$/.test(path)) {
           const {$1: path, $2: id} = RegExp;
           dataFiles[path] = file;
           dataDirIds.add(id);
@@ -2247,7 +2247,7 @@ var scrapbook = {
       var icon = document.createElement('img');
       if (meta.icon) {
         icon.src = (meta.icon.indexOf(':') === -1) ? 
-            ('../data/' + meta.index).replace(/\\/[^\\/]*$/, '') + '/' + meta.icon : 
+            ('../data/' + meta.index).replace(/[/][^/]+$/, '/') + meta.icon : 
             meta.icon;
       } else {
         icon.src = {
@@ -2814,9 +2814,9 @@ const scrapbook = {
       if (meta.type !== "bookmark") {
         if (meta.index) {
           let subpath = (file && meta.index.endsWith('/index.html')) ? 
-              meta.index.replace(/[^/]*$/g, '') + file : 
+              meta.index.replace(/[/][^/]+$/, '/') + file : 
               meta.index;
-          subpath = (subpath || "").replace(/[^\/]+/g, m => encodeURIComponent(m));
+          subpath = (subpath || "").replace(/[^/]+/g, m => encodeURIComponent(m));
           if (subpath) {
             href = book.path + "data/" + subpath;
           }
@@ -2839,7 +2839,7 @@ const scrapbook = {
       const icon = document.createElement('img');
       if (meta.icon) {
         icon.src = (meta.icon.indexOf(':') === -1) ? 
-            (book.path + 'data/' + meta.index).replace(/\\/[^\\/]*$/, '') + '/' + meta.icon : 
+            (book.path + 'data/' + meta.index).replace(/[/][^/]+$/, '/') + meta.icon : 
             meta.icon;
       } else {
         icon.src = {
@@ -2888,7 +2888,7 @@ const scrapbook = {
   },
 
   escapeRegExp(str) {
-    return str.replace(/[-\\/\\\\^$*+?.|()[\\]{}]/g, "\\\\$&");
+    return str.replace(/[-/\\\\^$*+?.|()[\\]{}]/g, "\\\\$&");
   },
 
   helperFill() {
