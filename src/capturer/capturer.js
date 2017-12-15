@@ -15,7 +15,7 @@ capturer.isContentScript = false;
 // missionId is fixed to this page, to identify the capture mission
 capturer.missionId = scrapbook.getUuid();
 
-capturer.defaultFilesSet = new Set(["index.rdf", "index.dat"]);
+capturer.defaultFilesSet = new Set(["index.rdf", "index.dat", "metadata"]);
 
 /**
  * @type {Map<string~timeId, {files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
