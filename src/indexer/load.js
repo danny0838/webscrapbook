@@ -2264,7 +2264,7 @@ var scrapbook = {
       var icon = document.createElement('img');
       if (meta.icon) {
         icon.src = (meta.icon.indexOf(':') === -1) ? 
-            ('../data/' + scrapbook.escapeFilename(meta.index)).replace(/[/][^/]+$/, '/') + meta.icon : 
+            ('../data/' + scrapbook.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon : 
             meta.icon;
       } else {
         icon.src = {
@@ -2865,7 +2865,7 @@ const scrapbook = {
       const icon = document.createElement('img');
       if (meta.icon) {
         icon.src = (meta.icon.indexOf(':') === -1) ? 
-            (book.path + 'data/' + this.escapeFilename(meta.index)).replace(/[/][^/]+$/, '/') + meta.icon : 
+            (book.path + 'data/' + this.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon : 
             meta.icon;
       } else {
         icon.src = {
