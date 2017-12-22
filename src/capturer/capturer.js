@@ -747,10 +747,14 @@ capturer.saveDocument = function (params) {
                 loadDocRes(document);
               };
 
+              const [cdataStart, cdataEnd] = (data.mime === "application/xhtml+xml") ? 
+                ['<!--//--><![CDATA[//><!--\n', '//--><!]]>'] :
+                ['', ''];
+
               const pageloaderScript = `
-<script data-scrapbook-elem="pageloader">(${scrapbook.compressJsFunc(pageloader)})(
+<script data-scrapbook-elem="pageloader">${cdataStart}(${scrapbook.compressJsFunc(pageloader)})(
 ${JSON.stringify(zipData)}
-);</script>
+);${cdataEnd}</script>
 `;
               let inserted = false;
               let content = data.content.replace(/<\/body>\s*<\/html>\s*$/i, (m) => {
