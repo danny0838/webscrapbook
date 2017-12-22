@@ -661,12 +661,12 @@ capturer.saveDocument = function (params) {
           if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
           const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
           const zipResMap = capturer.captureInfo.get(timeId).zipResMap = capturer.captureInfo.get(timeId).zipResMap || new Map();
-          const blob = new Blob([data.content], {type: data.mime});
-          scrapbook.zipAddFile(zip, filename, blob, true);
-          const zipResId = zipResMap.size;
-          zipResMap.set(filename, zipResId);
 
           if (!settings.frameIsMain) {
+            const blob = new Blob([data.content], {type: data.mime});
+            scrapbook.zipAddFile(zip, filename, blob, true);
+            const zipResId = zipResMap.size;
+            zipResMap.set(filename, zipResId);
             const url = `data:${blob.type};scrapbook-resource=${zipResId},${sourceUrlHash}`;
             return {timeId, sourceUrl, filename, url};
           } else {
