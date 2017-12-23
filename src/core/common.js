@@ -40,7 +40,7 @@ scrapbook.options = {
   "capture.object": "blank", // "save", "link", "blank", "remove"
   "capture.applet": "blank", // "save", "link", "blank", "remove"
   "capture.frame": "save", // "save", "link", "blank", "remove"
-  "capture.font": "save", // "save", "save-used", "link", "blank", "remove"
+  "capture.font": "save", // "save", "save-used", "link", "blank"
   "capture.style": "save", // "save", "link", "blank", "remove"
   "capture.styleInline": "save", // "save", "blank", "remove"
   "capture.rewriteCss": "url", // "none", "url"

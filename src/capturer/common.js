@@ -2202,7 +2202,7 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
           // do nothing
           break;
         case "blank":
-        case "remove":
+        case "remove": // deprecated
           dataUrl = "";
           break;
         case "save":
