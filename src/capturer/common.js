@@ -1702,7 +1702,7 @@ capturer.captureDocument = function (params) {
                 }
 
                 if (elem.hasAttribute("archive")) {
-                  captureRewriteUri(elem, "archive", "about:blank");
+                  captureRewriteUri(elem, "archive", null);
                 }
                 break;
               case "remove":
