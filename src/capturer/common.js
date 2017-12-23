@@ -1641,7 +1641,7 @@ capturer.captureDocument = function (params) {
             break;
           }
 
-          // media: embed
+          // media: object
           case "object": {
             if (elem.hasAttribute("data")) {
               elem.setAttribute("data", elem.data);
