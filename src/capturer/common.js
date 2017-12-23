@@ -1055,7 +1055,8 @@ capturer.captureDocument = function (params) {
                 case "link":
                   // do nothing
                   break;
-                case "remove":
+                case "blank":
+                case "remove": // deprecated
                   captureRewriteUri(elem, "background", null);
                   break;
                 case "save-used":
@@ -2247,7 +2248,8 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
         case "link":
           // do nothing
           break;
-        case "remove":
+        case "blank":
+        case "remove": // deprecated
           dataUrl = "";
           break;
         case "save-used":

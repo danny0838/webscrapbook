@@ -31,7 +31,7 @@ scrapbook.options = {
   "capture.saveFileAsHtml": false,
   "capture.saveDataUriAsFile": true,
   "capture.image": "save", // "save", "save-current", "link", "blank", "remove"
-  "capture.imageBackground": "save", // "save", "save-used", "link", "remove"
+  "capture.imageBackground": "save", // "save", "save-used", "link", "blank"
   "capture.favicon": "save", // "save", "link", "blank", "remove"
   "capture.canvas": "save", // "save", "blank", "remove"
   "capture.audio": "save", // "save", "save-current", "link", "blank", "remove"
