@@ -1190,12 +1190,12 @@ scrapbook.parseCssText = function (cssText, options = {}) {
           let u = scrapbook.unescapeCss(im2.slice(1, -1));
           let {url: rewrittenUrl, recordUrl} = rewriteImportUrl(u);
           let record = getRecordUrl(rewrittenUrl, recordUrl);
-          rewritten = record + 'url("' + scrapbook.escapeQuotes(rewrittenUrl) + '")';
+          rewritten = record + '"' + scrapbook.escapeQuotes(rewrittenUrl) + '"';
         } else if (im2.startsWith("'") && im2.endsWith("'")) {
           let u = scrapbook.unescapeCss(im2.slice(1, -1));
           let {url: rewrittenUrl, recordUrl} = rewriteImportUrl(u);
           let record = getRecordUrl(rewrittenUrl, recordUrl);
-          rewritten = record + 'url("' + scrapbook.escapeQuotes(rewrittenUrl) + '")';
+          rewritten = record + '"' + scrapbook.escapeQuotes(rewrittenUrl) + '"';
         } else {
           rewritten = parseUrl(im2, rewriteImportUrl);
         }
