@@ -1369,6 +1369,7 @@ capturer.captureDocument = function (params) {
                     const elemOrig = origNodeMap.get(elem);
 
                     if (elemOrig.currentSrc) {
+                      elem.setAttribute("src", elem.src);
                       captureRewriteUri(elem, "src", elemOrig.currentSrc);
                       captureRewriteUri(elem, "srcset", null);
                     }
