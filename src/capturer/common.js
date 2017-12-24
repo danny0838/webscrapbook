@@ -1298,11 +1298,10 @@ capturer.captureDocument = function (params) {
               case "save-current":
                 if (!isHeadless) {
                   if (elemOrig.currentSrc) {
-                    captureRewriteUri(elem, "src", elemOrig.currentSrc);
                     captureRewriteUri(elem, "srcset", null);
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
-                      url: elem.src,
+                      url: elemOrig.currentSrc,
                       refUrl,
                       settings,
                       options,
@@ -1430,13 +1429,12 @@ capturer.captureDocument = function (params) {
               case "save-current":
                 if (!isHeadless) {
                   if (elemOrig.currentSrc) {
-                    captureRewriteUri(elem, "src", elemOrig.currentSrc);
                     Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                       captureRemoveNode(elem, options["capture.recordSourceUri"]);
                     }, this);
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
-                      url: elem.src,
+                      url: elemOrig.currentSrc,
                       refUrl,
                       settings,
                       options,
@@ -1538,13 +1536,12 @@ capturer.captureDocument = function (params) {
                   }
 
                   if (elemOrig.currentSrc) {
-                    captureRewriteUri(elem, "src", elemOrig.currentSrc);
                     Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                       captureRemoveNode(elem, options["capture.recordSourceUri"]);
                     }, this);
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
-                      url: elem.src,
+                      url: elemOrig.currentSrc,
                       refUrl,
                       settings,
                       options,
