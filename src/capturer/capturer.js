@@ -667,7 +667,8 @@ capturer.saveDocument = function (params) {
             scrapbook.zipAddFile(zip, filename, blob, true);
             const zipResId = zipResMap.size;
             zipResMap.set(filename, zipResId);
-            const url = `data:${blob.type};scrapbook-resource=${zipResId},${sourceUrlHash}`;
+            const charset = data.charset ? ";charset=" + data.charset : "";
+            const url = `data:${blob.type}${charset};scrapbook-resource=${zipResId},${sourceUrlHash}`;
             return {timeId, sourceUrl, filename, url};
           } else {
             let targetDir;
