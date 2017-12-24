@@ -1184,7 +1184,7 @@ capturer.captureDocument = function (params) {
                 case "blank":
                 case "remove":
                 default:
-                  captureRewriteUri(elem, "href", "javascript:");
+                  captureRewriteAttr(elem, "href", "javascript:");
                   break;
               }
               break;
