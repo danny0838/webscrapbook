@@ -1278,6 +1278,10 @@ capturer.downloadBlob = function (params) {
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
         return scrapbook.readFileAsDataURL(blob).then((dataUri) => {
+          if (dataUri === "data:") {
+            // Chrome returns "data:" if the blob is zero byte. Add the mimetype.
+            dataUri = `data:${blob.type};base64,`;
+          }
           if (filename) {
             dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");
           }
