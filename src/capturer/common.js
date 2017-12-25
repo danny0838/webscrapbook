@@ -111,7 +111,8 @@ capturer.captureDocumentOrFile = function (params) {
 
     // if not HTML document, capture as file
     if (["text/html", "application/xhtml+xml"].indexOf(doc.contentType) === -1) {
-      if (!options["capture.saveFileAsHtml"]) {
+      // if it can be displayed as HTML, check saveFileAsHtml
+      if (!(doc.documentElement.nodeName.toLowerCase() === "html" && options["capture.saveFileAsHtml"])) {
         return capturer.invoke("captureFile", {
           url: doc.URL,
           refUrl,
