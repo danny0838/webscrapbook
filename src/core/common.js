@@ -1142,12 +1142,12 @@ scrapbook.parseCssText = function (cssText, options = {}) {
 
   const pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
   const pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
-  const pCmSp = "(?:" + "(?:" + pCm + "|" + pSp + ")" + "*" + ")"; // comment or space
-  const pChar = "(?:\\\\.|[^\\\\])"; // a char, or a escaped char sequence
-  const pStr = "(?:" + pChar + "*?" + ")"; // string
-  const pSStr = "(?:" + pCmSp + pStr + pCmSp + ")"; // spaced string
-  const pDQStr = "(?:" + '"' + pStr + '"' + ")"; // double quoted string
-  const pSQStr = "(?:" + "'" + pStr + "'" + ")"; // single quoted string
+  const pCmSp = "(?:(?:" + pCm + "|" + pSp + ")*)"; // comment or space
+  const pChar = "(?:\\\\.|[^\\\\\"'])"; // a non-quote char or an escaped char sequence
+  const pStr = "(?:" + pChar + "*?)"; // string
+  const pSStr = "(?:" + pCmSp + pStr + pCmSp + ")"; // comment-or-space enclosed string
+  const pDQStr = '(?:"' + pStr + '")'; // double quoted string
+  const pSQStr = "(?:'" + pStr + "')"; // single quoted string
   const pES = "(?:" + "(?:" + [pCm, pDQStr, pSQStr, pChar].join("|") + ")*?" + ")"; // embeded string
   const pUrl = "(?:" + "\\burl\\(" + pSp + "(?:" + [pDQStr, pSQStr, pSStr].join("|") + ")" + pSp + "\\)" + ")"; // URL
   const pUrl2 = "(" + "\\burl\\(" + pSp + ")(" + [pDQStr, pSQStr, pSStr].join("|") + ")(" + pSp + "\\)" + ")"; // URL; catch 3
