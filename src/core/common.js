@@ -1093,11 +1093,13 @@ scrapbook.parseCssFile = function (data, charset, rewriter) {
         charset = RegExp.$1;
       }
       if (charset) {
-        // Add BOM to make the browser read as UTF-8 despite @charset rule
         return scrapbook.readFileAsText(data, charset).then((text) => {
-          // The read text does not contain a BOM if the original file has.
-          // This added UTF-16 BOM will be converted to UTF-8 BOM automatically when creating blob.
-          return "\ufeff" + text;
+          // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
+          if (/^@charset "([^"]*)";/.test(text)) {
+            return "\ufeff" + text;
+          }
+
+          return text;
         });
       }
       return bytes;
