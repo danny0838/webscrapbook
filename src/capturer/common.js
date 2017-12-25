@@ -2204,6 +2204,7 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
         case "remove": // deprecated
           dataUrl = "";
           break;
+        case "save-used":
         case "save":
         default:
           if (usedCssFontUrl && !usedCssFontUrl[sourceUrl]) {
