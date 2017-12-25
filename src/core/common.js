@@ -1151,7 +1151,7 @@ scrapbook.parseCssText = function (cssText, options = {}) {
   const pES = "(?:" + "(?:" + [pCm, pDQStr, pSQStr, pChar].join("|") + ")*?" + ")"; // embeded string
   const pUrl = "(?:" + "\\burl\\(" + pSp + "(?:" + [pDQStr, pSQStr, pSStr].join("|") + ")" + pSp + "\\)" + ")"; // URL
   const pUrl2 = "(" + "\\burl\\(" + pSp + ")(" + [pDQStr, pSQStr, pSStr].join("|") + ")(" + pSp + "\\)" + ")"; // URL; catch 3
-  const pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")(" + pCmSp + ";" + ")"; // rule import; catch 3
+  const pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")"; // rule import; catch 2
   const pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // rule font-face; catch 1
 
   const getRecordUrl = function (url, recordUrl) {
@@ -1183,7 +1183,7 @@ scrapbook.parseCssText = function (cssText, options = {}) {
 
   const newCssText = cssText.replace(
     new RegExp([pCm, pRImport, pRFontFace, "("+pUrl+")"].join("|"), "gi"),
-    (m, im1, im2, im3, ff, u) => {
+    (m, im1, im2, ff, u) => {
       if (im2) {
         let rewritten;
         if (im2.startsWith('"') && im2.endsWith('"')) {
@@ -1199,7 +1199,7 @@ scrapbook.parseCssText = function (cssText, options = {}) {
         } else {
           rewritten = parseUrl(im2, rewriteImportUrl);
         }
-        return im1 + rewritten + im3;
+        return im1 + rewritten;
       } else if (ff) {
         return parseUrl(m, rewriteFontFaceUrl);
       } else if (u) {
