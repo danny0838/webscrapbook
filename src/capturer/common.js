@@ -1161,8 +1161,8 @@ capturer.captureDocument = function (params) {
                       options,
                     }).then(captureFrameCallback);
                   } else {
-                    console.warn(scrapbook.lang("WarnCaptureCyclic", [sourceUrl, targetUrl]));
-                    captureRewriteUri(frame, "src", `urn:scrapbook:download:cyclic:url:${frameSrc.src}`);
+                    console.warn(scrapbook.lang("WarnCaptureCircular", [sourceUrl, targetUrl]));
+                    captureRewriteUri(frame, "src", `urn:scrapbook:download:circular:url:${frameSrc.src}`);
                   }
                 }
                 break;
@@ -2133,7 +2133,7 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
     const url = capturer.resolveRelativeUrl(sourceUrl, refUrl);
 
     // url() or url(#foo), or path resolves to self,
-    // blank the URL and stop fetching to avoid an infinite cyclic loop
+    // blank the URL and stop fetching to avoid an infinite circular loop
     if (refUrl) {
       const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
       if (urlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
@@ -2276,8 +2276,8 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
               if (this.options["capture.saveAs"] === "singleHtml" || 
                   this.options["capture.saveAs"] === "singleHtmlJs") {
                 const sourceUrl = this.settings.recurseChain[this.settings.recurseChain.length - 1];
-                console.warn(scrapbook.lang("WarnCaptureCyclic", [sourceUrl, targetUrl]));
-                response.url = `urn:scrapbook:download:cyclic:filename:${response.url}`;
+                console.warn(scrapbook.lang("WarnCaptureCircular", [sourceUrl, targetUrl]));
+                response.url = `urn:scrapbook:download:circular:filename:${response.url}`;
               }
             }
 

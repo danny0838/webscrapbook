@@ -442,7 +442,7 @@
   "ViewerTitle": {
     "message": "檢視封存頁面"
   },
-  "WarnCaptureCyclic": {
+  "WarnCaptureCircular": {
     "message": "資源 '$SOURCE$' 循環參照至 '$TARGET$'，由於目前的擷取設定不支援循環參照，參照目標將轉向至空值。",
     "placeholders": {
       "source": {"content": "$1"},
