@@ -2128,141 +2128,98 @@ capturer.processCssText = function (cssText, refUrl, settings, options) {
   const downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
   const {usedCssFontUrl, usedCssImageUrl} = settings;
 
-  const rewritten = scrapbook.parseCssText(cssText, {
-    rewriteImportUrl(url) {
-      const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
+  const resolveCssUrl = (sourceUrl, refUrl) => {
+    const url = capturer.resolveRelativeUrl(sourceUrl, refUrl);
 
-      // sourceUrl cannot be resolved,
-      // probably because url is relative and refUrl is data: or blob:
-      if (sourceUrl.indexOf(':') === -1) {
+    // url() or url(#foo), or path resolves to self,
+    // blank the URL and stop fetching to avoid an infinite cyclic loop
+    if (refUrl) {
+      const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+      if (urlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
         return {
-          url: sourceUrl,
-          recordUrl: options["capture.recordSourceUri"] ? sourceUrl : "",
+          url: urlHash,
+          recordUrl: options["capture.recordSourceUri"] ? urlHash : "",
+          valid: false,
         };
       }
+    }
 
-      // url() or url(#foo), or path resolves to self
-      // do not fetch URL to avoid an infinite cyclic loop
-      if (refUrl) {
-        const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-        if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
-          return {
-            url: sourceUrlHash,
-            recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
-          };
-        }
-      }
+    return {
+      url,
+      recordUrl: options["capture.recordSourceUri"] ? url : "",
+      valid: true,
+    };
+  };
 
-      let dataUrl = sourceUrl;
-      let recordUrl = options["capture.recordSourceUri"] ? sourceUrl : "";
+  const rewritten = scrapbook.parseCssText(cssText, {
+    rewriteImportUrl(sourceUrl) {
+      let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
       switch (options["capture.style"]) {
         case "link":
           // do nothing
           break;
         case "blank":
         case "remove":
-          dataUrl = "";
+          url = "";
           break;
         case "save":
         default:
-          dataUrl = downloader.getUrlHash(dataUrl, "processCssFile");
+          if (valid) {
+            url = downloader.getUrlHash(url, "processCssFile");
+          }
           break;
       }
-      return {url: dataUrl, recordUrl};
+      return {url, recordUrl};
     },
-    rewriteFontFaceUrl(url) {
-      const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
-
-      // sourceUrl cannot be resolved,
-      // probably because url is relative and refUrl is data: or blob:
-      if (sourceUrl.indexOf(':') === -1) {
-        return {
-          url: sourceUrl,
-          recordUrl: options["capture.recordSourceUri"] ? sourceUrl : "",
-        };
-      }
-
-      // url() or url(#foo), or path resolves to self
-      // do not fetch URL to avoid an infinite cyclic loop
-      if (refUrl) {
-        const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-        if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
-          return {
-            url: sourceUrlHash,
-            recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
-          };
-        }
-      }
-
-      let dataUrl = sourceUrl;
-      let recordUrl = options["capture.recordSourceUri"] ? sourceUrl : "";
+    rewriteFontFaceUrl(sourceUrl) {
+      let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
       switch (options["capture.font"]) {
         case "link":
           // do nothing
           break;
         case "blank":
         case "remove": // deprecated
-          dataUrl = "";
+          url = "";
           break;
         case "save-used":
         case "save":
         default:
-          if (usedCssFontUrl && !usedCssFontUrl[sourceUrl]) {
-            dataUrl = "";
+          if (usedCssFontUrl && !usedCssFontUrl[url]) {
+            url = "";
             break;
           }
 
-          dataUrl = downloader.getUrlHash(dataUrl);
+          if (valid) {
+            url = downloader.getUrlHash(url);
+          }
           break;
       }
-      return {url: dataUrl, recordUrl};
+      return {url, recordUrl};
     },
-    rewriteBackgroundUrl(url) {
-      const sourceUrl = capturer.resolveRelativeUrl(url, refUrl);
-
-      // sourceUrl cannot be resolved,
-      // probably because url is relative and refUrl is data: or blob:
-      if (sourceUrl.indexOf(':') === -1) {
-        return {
-          url: sourceUrl,
-          recordUrl: options["capture.recordSourceUri"] ? sourceUrl : "",
-        };
-      }
-
-      // url() or url(#foo), or path resolves to self
-      // do not fetch URL to avoid an infinite cyclic loop
-      if (refUrl) {
-        const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-        if (sourceUrlMain === scrapbook.splitUrlByAnchor(refUrl)[0]) {
-          return {
-            url: sourceUrlHash,
-            recordUrl: options["capture.recordSourceUri"] ? sourceUrlHash : "",
-          };
-        }
-      }
-
-      let dataUrl = sourceUrl;
-      let recordUrl = options["capture.recordSourceUri"] ? sourceUrl : "";
+    rewriteBackgroundUrl(sourceUrl) {
+      let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
       switch (options["capture.imageBackground"]) {
         case "link":
           // do nothing
           break;
         case "blank":
         case "remove": // deprecated
-          dataUrl = "";
+          url = "";
           break;
         case "save-used":
         case "save":
         default:
-          if (usedCssImageUrl && !usedCssImageUrl[sourceUrl]) {
-            dataUrl = "";
+          if (usedCssImageUrl && !usedCssImageUrl[url]) {
+            url = "";
             break;
           }
 
-          dataUrl = downloader.getUrlHash(dataUrl);
+          if (valid) {
+            url = downloader.getUrlHash(url);
+          }
           break;
       }
-      return {url: dataUrl, recordUrl};
+      return {url, recordUrl};
     }
   });
 
