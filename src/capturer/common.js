@@ -1088,38 +1088,42 @@ capturer.captureDocument = function (params) {
           case "iframe": {
             const frame = elem;
             const frameSrc = origNodeMap.get(frame);
-            frame.setAttribute("src", frame.src);
-
-            // prevent overwriting src
-            if (frameSrc.contentWindow) {
-              captureRewriteAttr(frame, "srcdoc", null);
+            if (frame.hasAttribute("src")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(frame.getAttribute("src"), refUrl);
+              frame.setAttribute("src", rewriteUrl);
             }
 
             switch (options["capture.frame"]) {
               case "link":
                 // do nothing
+                // keep current (resolved) src and srcdoc
                 break;
               case "blank":
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The src attribute, if present, must be a valid non-empty URL.
                 captureRewriteUri(frame, "src", null);
+                captureRewriteAttr(frame, "srcdoc", null);
                 break;
               case "remove":
                 captureRemoveNode(frame);
                 return;
               case "save":
               default:
-                let captureFrameCallback = function (response) {
+                const captureFrameCallback = (response) => {
                   isDebug && console.debug("captureFrameCallback", response);
                   if (response) {
                     captureRewriteUri(frame, "src", response.url);
+
+                    // remove srcdoc to avoid overwriting src
+                    captureRewriteAttr(frame, "srcdoc", null);
                   } else {
+                    // Unable to capture the content document
                     captureRewriteUri(frame, "src", null);
                   }
                   return response;
                 };
 
-                let frameSettings = JSON.parse(JSON.stringify(settings));
+                const frameSettings = JSON.parse(JSON.stringify(settings));
                 frameSettings.frameIsMain = false;
 
                 let frameDoc;
@@ -1128,8 +1132,10 @@ capturer.captureDocument = function (params) {
                 } catch (ex) {
                   // console.debug(ex);
                 }
+
                 if (frameDoc) {
-                  // frame document accessible: capture the content document directly
+                  // frame document accessible:
+                  // capture the content document directly
                   tasks[tasks.length] = 
                   capturer.captureDocumentOrFile({
                     doc: frameDoc,
@@ -1137,39 +1143,77 @@ capturer.captureDocument = function (params) {
                     settings: frameSettings,
                     options,
                   }).then(captureFrameCallback);
-                } else if (frameSrc.contentWindow) {
-                  // frame document inaccessible: get the content document through a
-                  // messaging technique, and then capture it
-                  tasks[tasks.length] = 
-                  capturer.invoke("captureDocumentOrFile", {
+                  break;
+                }
+
+                // frame document inaccessible:
+                tasks[tasks.length] = Promise.resolve().then(() => {
+                  let frameWindow;
+                  try {
+                    frameWindow = frameSrc.contentWindow;
+                  } catch (ex) {
+                    // console.debug(ex);
+                  }
+                  if (!frameWindow) { return; }
+
+                  // frame window accessible:
+                  // capture the content document through messaging if viable
+                  // (could fail if it's data URL, sandboxed blob URL, etc.)
+                  return capturer.invoke("captureDocumentOrFile", {
                     refUrl,
                     settings: frameSettings,
                     options,
-                  }, {frameWindow: frameSrc.contentWindow}).then(captureFrameCallback);
-                } else {
-                  // frame window inaccessible: this happens when the document is headlessly captured,
-                  // use srcdoc or (headlessly) capture src
+                  }, {frameWindow});
+                }).then((response) => {
+                  if (response) { return captureFrameCallback(response); }
+
+                  // frame window accessible with special cases:
+                  // frame window inaccessible: (headless capture)
+
+                  // if the frame has srcdoc, use it
+                  // @FIXME: rewrite srcdoc content
                   if (frame.hasAttribute("srcdoc")) {
-                    captureRewriteUri(frame, "src", null);
-                    break;
+                    captureRewriteAttr(frame, "src", null);
+                    return;
                   }
 
-                  let sourceUrl = scrapbook.splitUrlByAnchor(refUrl)[0];
-                  let targetUrl = scrapbook.splitUrlByAnchor(frameSrc.src)[0];
+                  // if the frame src is not absolute,
+                  // skip further processing and keep current src
+                  // (point to self, or not resolvable)
+                  if (!scrapbook.isUrlAbsolute(frame.getAttribute("src"))) {
+                    return;
+                  }
+
+                  // otherwise, headlessly capture src
+                  // (take care of circular reference)
+                  const [sourceUrl] = scrapbook.splitUrlByAnchor(refUrl);
+                  const [targetUrl] = scrapbook.splitUrlByAnchor(frameSrc.src);
+                  frameSettings.isHeadless = true;
                   frameSettings.recurseChain.push(sourceUrl);
                   if (frameSettings.recurseChain.indexOf(targetUrl) === -1) {
-                    tasks[tasks.length] = 
-                    capturer.invoke("captureUrl", {
+                    let frameOptions = options;
+
+                    // special handling of data URL
+                    if (frameSrc.src.startsWith("data:") && 
+                        options["capture.saveAs"] !== "singleHtml" && 
+                        !options["capture.saveDataUriAsFile"]) {
+                      // Save frame document and inner URLs as data URL since data URL
+                      // is null origin and no relative URL is allowed in it.
+                      frameOptions = JSON.parse(JSON.stringify(options));
+                      frameOptions["capture.saveAs"] = "singleHtml";
+                    }
+
+                    return capturer.invoke("captureUrl", {
                       url: frameSrc.src,
                       refUrl,
                       settings: frameSettings,
-                      options,
+                      options: frameOptions,
                     }).then(captureFrameCallback);
                   } else {
                     console.warn(scrapbook.lang("WarnCaptureCircular", [sourceUrl, targetUrl]));
                     captureRewriteUri(frame, "src", `urn:scrapbook:download:circular:url:${frameSrc.src}`);
                   }
-                }
+                });
                 break;
             }
             break;
