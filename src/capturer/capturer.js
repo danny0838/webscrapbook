@@ -270,7 +270,9 @@ capturer.captureUrl = function (params) {
     // cannot assign "referer" header directly
     // the prefix will be removed by the onBeforeSendHeaders listener
     const requestHeaders = {};
-    if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
+    if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+      requestHeaders["X-WebScrapBook-Referer"] = refUrl;
+    }
 
     let accessPreviousRedirected;
     const accessCurrent = scrapbook.xhr({
@@ -296,7 +298,7 @@ capturer.captureUrl = function (params) {
         }
 
         // get headers
-        if (xhr.status !== 0) {
+        if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
           const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
           if (headerContentDisposition) {
             const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
@@ -393,7 +395,9 @@ capturer.captureBookmark = function (params) {
     // cannot assign "referer" header directly
     // the prefix will be removed by the onBeforeSendHeaders listener
     const requestHeaders = {};
-    if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
+    if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+      requestHeaders["X-WebScrapBook-Referer"] = refUrl;
+    }
 
     return Promise.resolve().then(() => {
       // get title and favIcon
@@ -1070,7 +1074,9 @@ capturer.downloadFile = function (params) {
       // cannot assign "referer" header directly
       // the prefix will be removed by the onBeforeSendHeaders listener
       const requestHeaders = {};
-      if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
+      if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+        requestHeaders["X-WebScrapBook-Referer"] = refUrl;
+      }
 
       let accessPreviousReturn;
       return scrapbook.xhr({
@@ -1104,7 +1110,7 @@ capturer.downloadFile = function (params) {
           }
 
           // get headers
-          if (xhr.status !== 0) {
+          if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
             const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
             if (headerContentDisposition) {
               const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
@@ -1208,7 +1214,7 @@ capturer.downLinkFetchHeader = function (params) {
         if (xhr.readyState !== 2) { return; }
 
         // get headers
-        if (xhr.status !== 0) {
+        if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
           const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
           if (headerContentDisposition) {
             const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
