@@ -275,91 +275,99 @@ capturer.captureUrl = function (params) {
     }
 
     let accessPreviousRedirected;
-    const accessCurrent = scrapbook.xhr({
-      url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
-      responseType: "document",
-      requestHeaders,
-      onreadystatechange(xhr) {
-        if (xhr.readyState !== 2) { return; }
+    const accessCurrent = Promise.resolve().then(() => {
+      // fail out if sourceUrl is relative,
+      // or it will be treated as relative to this extension page.
+      if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+        throw new Error(`URL not resolved.`);
+      }
 
-        // check for previous access if redirected
-        const [responseUrlMain] = scrapbook.splitUrlByAnchor(xhr.responseURL);
-        if (responseUrlMain !== sourceUrlMain) {
-          const accessTokenRedirected = capturer.getAccessToken(responseUrlMain, rewriteMethod);
-          accessPreviousRedirected = accessMap.get(accessTokenRedirected);
+      return scrapbook.xhr({
+        url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
+        responseType: "document",
+        requestHeaders,
+        onreadystatechange(xhr) {
+          if (xhr.readyState !== 2) { return; }
 
-          // use the previous access if found
-          if (accessPreviousRedirected) {
-            xhr.abort();
-            return;
+          // check for previous access if redirected
+          const [responseUrlMain] = scrapbook.splitUrlByAnchor(xhr.responseURL);
+          if (responseUrlMain !== sourceUrlMain) {
+            const accessTokenRedirected = capturer.getAccessToken(responseUrlMain, rewriteMethod);
+            accessPreviousRedirected = accessMap.get(accessTokenRedirected);
+
+            // use the previous access if found
+            if (accessPreviousRedirected) {
+              xhr.abort();
+              return;
+            }
+
+            accessMap.set(accessTokenRedirected, accessPreviousRedirected);
           }
 
-          accessMap.set(accessTokenRedirected, accessPreviousRedirected);
-        }
-
-        // get headers
-        if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-          const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-          if (headerContentDisposition) {
-            const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-            headers.isAttachment = (contentDisposition.type === "attachment");
-            headers.filename = contentDisposition.parameters.filename;
-          }
-          const headerContentType = xhr.getResponseHeader("Content-Type");
-          if (headerContentType) {
-            const contentType = scrapbook.parseHeaderContentType(headerContentType);
-            headers.contentType = contentType.type;
-            headers.charset = contentType.parameters.charset;
-          }
-        }
-
-        // generate a documentName if not specified
-        if (!params.settings.documentName) {
-          // use the filename if it has been defined by header Content-Disposition
-          let filename = headers.filename ||
-              sourceUrl.startsWith("data:") ?
-                  scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name :
-                  scrapbook.urlToFilename(sourceUrl);
-
-          let mime = headers.contentType || Mime.prototype.lookup(filename) || "text/html";
-          let fn = filename.toLowerCase();
-          if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
-            let exts = Mime.prototype.allExtensions(mime);
-            for (let i = 0, I = exts.length; i < I; i++) {
-              let ext = ("." + exts[i]).toLowerCase();
-              if (fn.endsWith(ext)) {
-                filename = filename.slice(0, -ext.length);
-                break;
-              }
+          // get headers
+          if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+            const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+            if (headerContentDisposition) {
+              const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+              headers.isAttachment = (contentDisposition.type === "attachment");
+              headers.filename = contentDisposition.parameters.filename;
+            }
+            const headerContentType = xhr.getResponseHeader("Content-Type");
+            if (headerContentType) {
+              const contentType = scrapbook.parseHeaderContentType(headerContentType);
+              headers.contentType = contentType.type;
+              headers.charset = contentType.parameters.charset;
             }
           }
 
-          params.settings.documentName = filename;
-        }
-      },
-    }).then((xhr) => {
-      // Request aborted, only when a previous access is found.
-      // Return that Promise.
-      if (!xhr) { return accessPreviousRedirected; }
+          // generate a documentName if not specified
+          if (!params.settings.documentName) {
+            // use the filename if it has been defined by header Content-Disposition
+            let filename = headers.filename ||
+                sourceUrl.startsWith("data:") ?
+                    scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name :
+                    scrapbook.urlToFilename(sourceUrl);
 
-      const doc = xhr.response;
-      if (doc) {
-        return capturer.captureDocumentOrFile({
-          doc,
-          refUrl,
-          title,
-          settings,
-          options,
-        });
-      } else {
-        return capturer.captureFile({
-          url: sourceUrl,
-          refUrl,
-          title,
-          settings: params.settings,
-          options: params.options,
-        });
-      }
+            let mime = headers.contentType || Mime.prototype.lookup(filename) || "text/html";
+            let fn = filename.toLowerCase();
+            if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
+              let exts = Mime.prototype.allExtensions(mime);
+              for (let i = 0, I = exts.length; i < I; i++) {
+                let ext = ("." + exts[i]).toLowerCase();
+                if (fn.endsWith(ext)) {
+                  filename = filename.slice(0, -ext.length);
+                  break;
+                }
+              }
+            }
+
+            params.settings.documentName = filename;
+          }
+        },
+      }).then((xhr) => {
+        // Request aborted, only when a previous access is found.
+        // Return that Promise.
+        if (!xhr) { return accessPreviousRedirected; }
+
+        const doc = xhr.response;
+        if (doc) {
+          return capturer.captureDocumentOrFile({
+            doc,
+            refUrl,
+            title,
+            settings,
+            options,
+          });
+        } else {
+          return capturer.captureFile({
+            url: sourceUrl,
+            refUrl,
+            title,
+            settings: params.settings,
+            options: params.options,
+          });
+        }
+      });
     }).catch((ex) => {
       console.warn(ex);
       capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
@@ -1014,6 +1022,12 @@ capturer.downloadFile = function (params) {
     }
 
     const accessCurrent = Promise.resolve().then(() => {
+      // fail out if sourceUrl is relative,
+      // or it will be treated as relative to this extension page.
+      if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+        throw new Error(`URL not resolved.`);
+      }
+
       // special management for data URI
       if (sourceUrlMain.startsWith("data:")) {
         /* save the data URI as file? */

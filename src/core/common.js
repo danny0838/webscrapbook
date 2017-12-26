@@ -743,6 +743,10 @@ scrapbook.arrayBufferToByteString = function (ab) {
  * String handling - URL and filename
  *******************************************************************/
 
+scrapbook.isUrlAbsolute = function (url) {
+  return /^[a-z][a-z0-9+.-]*:/i.test(url || "");
+};
+
 scrapbook.urlToFilename = function (url) {
   let name = url, pos;
   pos = name.indexOf("?");
