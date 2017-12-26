@@ -200,7 +200,7 @@
     "message": "Match URL file extension"
   },
   "OptionCaptureDownLinkUrlFilterDesc": {
-    "message": "URLs matching any of following rules are ruled out. Each following line is a regular expression (/<rule>/<flags>) or a URL. Lines starting with \"#\" are ignored."
+    "message": "Any URL (with the \"#\" part stripped) that matches any of the following rules is excluded. Each following line is a regular expression (/<rule>/<flags>) or a full URL (\"#\" part will be stripped). Lines starting with \"#\" are ignored."
   },
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "The following regular expressions in URL filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",

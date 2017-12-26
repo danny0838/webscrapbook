@@ -200,7 +200,7 @@
     "message": "比對網址副檔名"
   },
   "OptionCaptureDownLinkUrlFilterDesc": {
-    "message": "過濾掉網址符合以下規則的連結。以下每行為一個正規表述式（/<規則>/<修飾>）或 URL。以 \"#\" 開頭的行會被略過。"
+    "message": "過濾掉網址（去除 \"#\" 以後的部分）符合以下規則的超連結。以下每行為一個正規表述式（/<規則>/<修飾>）或完整網址（\"#\" 以後會被去除）。以 \"#\" 開頭的行會被略過。"
   },
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "以下網址過濾器的正規表述式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",
