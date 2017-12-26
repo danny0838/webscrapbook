@@ -2082,11 +2082,14 @@ capturer.downLinkUrlFilter = function (url, options) {
     })();
   }
 
-  return arguments.callee.filters.some(function (filter) {
+  // match the URL without hash
+  const matchUrl = scrapbook.splitUrlByAnchor(url)[0];
+  return arguments.callee.filters.some((filter) => {
+    // plain text rule must match full URL
     if (typeof filter === 'string') {
-      return filter === url;
+      return filter === matchUrl;
     }
-    return filter.test(url);
+    return filter.test(matchUrl);
   });
 };
 
