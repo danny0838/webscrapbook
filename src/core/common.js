@@ -446,53 +446,6 @@ scrapbook.validateFilename = function (filename, forceAscii) {
   return fn;
 };
 
-scrapbook.urlToFilename = function (url) {
-  let name = url, pos;
-  pos = name.indexOf("?");
-  if (pos !== -1) { name = name.substring(0, pos); }
-  pos = name.indexOf("#");
-  if (pos !== -1) { name = name.substring(0, pos); }
-  pos = name.lastIndexOf("/");
-  if (pos !== -1) { name = name.substring(pos + 1); }
-
-  // decode %xx%xx%xx only if it's correctly UTF-8 encoded
-  // @TODO: decode using a specified charset
-  try {
-    name = decodeURIComponent(name);
-  } catch (ex) {}
-  return name;
-};
-
-scrapbook.splitUrl = function (url) {
-  let name = url, search = "", hash = "", pos;
-  pos = name.indexOf("#");
-  if (pos !== -1) { hash = name.slice(pos); name = name.slice(0, pos); }
-  pos = name.indexOf("?");
-  if (pos !== -1) { search = name.slice(pos); name = name.slice(0, pos); }
-  return [name, search, hash];
-};
-
-scrapbook.splitUrlByAnchor = function (url) {
-  let [name, search, hash] = scrapbook.splitUrl(url);
-  return [name + search, hash];
-};
-
-scrapbook.filepathParts = function (filepath) {
-  let pos = Math.max(filepath.lastIndexOf("/"), filepath.lastIndexOf("\\"));
-  if (pos != -1) {
-    return [filepath.slice(0, pos), filepath.slice(pos + 1, filepath.length)];
-  }
-  return ["", filepath];
-};
-
-scrapbook.filenameParts = function (filename) {
-  let pos = filename.lastIndexOf(".");
-  if (pos != -1) {
-    return [filename.substring(0, pos), filename.substring(pos + 1, filename.length)];
-  }
-  return [filename, ""];
-};
-
 /**
  * Returns the ScrapBook ID from a given Date object
  *
@@ -783,6 +736,58 @@ scrapbook.arrayBufferToByteString = function (ab) {
     bstr += String.fromCharCode.apply(null, u8ar.subarray(i, i + CHUNK_SIZE));
   }
   return bstr;
+};
+
+
+/********************************************************************
+ * String handling - URL and filename
+ *******************************************************************/
+
+scrapbook.urlToFilename = function (url) {
+  let name = url, pos;
+  pos = name.indexOf("?");
+  if (pos !== -1) { name = name.substring(0, pos); }
+  pos = name.indexOf("#");
+  if (pos !== -1) { name = name.substring(0, pos); }
+  pos = name.lastIndexOf("/");
+  if (pos !== -1) { name = name.substring(pos + 1); }
+
+  // decode %xx%xx%xx only if it's correctly UTF-8 encoded
+  // @TODO: decode using a specified charset
+  try {
+    name = decodeURIComponent(name);
+  } catch (ex) {}
+  return name;
+};
+
+scrapbook.splitUrl = function (url) {
+  let name = url, search = "", hash = "", pos;
+  pos = name.indexOf("#");
+  if (pos !== -1) { hash = name.slice(pos); name = name.slice(0, pos); }
+  pos = name.indexOf("?");
+  if (pos !== -1) { search = name.slice(pos); name = name.slice(0, pos); }
+  return [name, search, hash];
+};
+
+scrapbook.splitUrlByAnchor = function (url) {
+  let [name, search, hash] = scrapbook.splitUrl(url);
+  return [name + search, hash];
+};
+
+scrapbook.filepathParts = function (filepath) {
+  let pos = Math.max(filepath.lastIndexOf("/"), filepath.lastIndexOf("\\"));
+  if (pos != -1) {
+    return [filepath.slice(0, pos), filepath.slice(pos + 1, filepath.length)];
+  }
+  return ["", filepath];
+};
+
+scrapbook.filenameParts = function (filename) {
+  let pos = filename.lastIndexOf(".");
+  if (pos != -1) {
+    return [filename.substring(0, pos), filename.substring(pos + 1, filename.length)];
+  }
+  return [filename, ""];
 };
 
 
