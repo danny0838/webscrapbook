@@ -979,7 +979,7 @@ const indexer = {
           if (!favIconUrl || favIconUrl.startsWith('../')) { return; }
 
           // allow relative favicon if index is HTML
-          if (this.isHtmlFile(index) && favIconUrl.indexOf(':') === -1) { return; }
+          if (this.isHtmlFile(index) && !scrapbook.isUrlAbsolute(favIconUrl)) { return; }
 
           return Promise.resolve().then(() => {
             const getShaFile = (data) => {
@@ -1000,7 +1000,7 @@ const indexer = {
             };
 
             // retrive absolute URL
-            if (favIconUrl.indexOf(':') !== -1) {
+            if (!scrapbook.isUrlAbsolute(favIconUrl)) {
               const prevAccess = urlAccessMap.get(favIconUrl);
               if (prevAccess) {
                 // this.log(`Using previuos access for '${favIconUrl}' for '${id}'.`);
@@ -2263,9 +2263,9 @@ var scrapbook = {
 
       var icon = document.createElement('img');
       if (meta.icon) {
-        icon.src = (meta.icon.indexOf(':') === -1) ? 
-            ('../data/' + scrapbook.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon : 
-            meta.icon;
+        icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || "") ? 
+            meta.icon : 
+            ('../data/' + scrapbook.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon;
       } else {
         icon.src = {
           'folder': 'icon/fclose.png',
@@ -2864,9 +2864,9 @@ const scrapbook = {
 
       const icon = document.createElement('img');
       if (meta.icon) {
-        icon.src = (meta.icon.indexOf(':') === -1) ? 
-            (book.path + 'data/' + this.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon : 
-            meta.icon;
+        icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || "") ? 
+            meta.icon : 
+            (book.path + 'data/' + this.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon;
       } else {
         icon.src = {
           'folder': 'icon/fclose.png',
