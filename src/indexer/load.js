@@ -672,8 +672,7 @@ const indexer = {
                   });
                 });
               } else if (this.isMaffFile(index)) {
-                // @TODO:
-                // support multiple entries in one maff file
+                // @TODO: support multiple entries in one maff file
                 return new JSZip().loadAsync(dataFiles[index], {createFolders: true}).then((zip) => {
                   const zipDir = zip.folder(Object.keys(zip.files)[0]);
                   const zipRdfFile = zipDir.file("index.rdf");
@@ -1424,9 +1423,8 @@ const indexer = {
               return decodeURIComponent(target.slice(base.length));
             };
 
-            // @TODO:
-            // better handle content
-            // (mo space between inline nodes, line break between block nodes, etc.)
+            // @TODO: better handle content
+            // (no space between inline nodes, line break between block nodes, etc.)
             const getElementTextRecursively = (elem) => {
               return Promise.resolve().then(() => {
                 let p = Promise.resolve();
@@ -1738,8 +1736,7 @@ const indexer = {
         const oldFile = treeFiles[path];
         if (!oldFile) { return; }
 
-        // @TODO:
-        // Maybe binary compare is better than sha compare?
+        // @TODO: Maybe binary compare is better than sha compare?
         let shaOld;
         p = p.then(() => {
           return scrapbook.readFileAsArrayBuffer(oldFile);

@@ -1196,8 +1196,7 @@ capturer.downloadFile = function (params) {
   });
 };
 
-// @TODO:
-// implement accessMap cache for same URL
+// @TODO: accessMap cache for same URL
 /**
  * @kind invokable
  * @param {Object} params

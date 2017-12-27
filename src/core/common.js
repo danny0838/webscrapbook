@@ -1427,8 +1427,7 @@ scrapbook.delay = function (ms) {
  * @require JSZip
  *******************************************************************/
 
-// @TODO:
-// fix the modification date of auto-generated folders
+// @TODO: fix the modification date of auto-generated folders
 scrapbook.zipAddFile = function (zipObj, filename, blob, isText, options = {}) {
   if (typeof isText === 'undefined' || isText === null) {
     isText = /^text\/|\b(?:xml|json|javascript)\b/.test(blob.type);

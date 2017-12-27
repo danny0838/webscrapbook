@@ -325,7 +325,7 @@ capturer.captureDocument = function (params) {
             return [3, 4, 8].includes(node.nodeType);
           };
 
-          // @TODO: it's not enough to preserve order of sparsely selected table cells
+          // @FIXME: handle sparsely selected table cells
           let iRange = 0, iRangeMax = selection.rangeCount, curRange;
           let caNode, scNode, ecNode, firstNode, lastNode, lastNodePrev;
           for (; iRange < iRangeMax; ++iRange) {
@@ -369,9 +369,8 @@ capturer.captureDocument = function (params) {
 
             // Add splitter.
             //
-            // @TODO:
-            // Perhaps a similar splitter should be added for any node type,
-            // but some tags like <td> require special care.
+            // @TODO: splitter for other node type?
+            // Some tags like <td> require special care.
             if (lastNodePrev && firstNode.parentNode === lastNodePrev.parentNode &&
                 isTextNode(lastNodePrev) && isTextNode(firstNode)) {
               clonedRefNode.appendChild(doc.createComment("scrapbook-capture-selected-splitter"));
@@ -482,7 +481,7 @@ capturer.captureDocument = function (params) {
       }
 
       // map used background images and fonts
-      // @TODO: nodes removed during capture process still have resources downloaded
+      // @FIXME: a node removed during capture process still have resource downloaded
       if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
         const usedCssFontUrl = {};
         const usedCssImageUrl = {};
@@ -598,7 +597,7 @@ capturer.captureDocument = function (params) {
         };
 
         const parseCss = function (css, refUrl) {
-          // @FIXME:
+          // @FIXME: cssRules not accessible for cross-origin CSS
           // In Firefox, CSS from a different domain throws a SecurityError when accessing .cssRules
           // In Chrome, CSS from a different domain gets .cssRules = null
           try {
@@ -681,8 +680,8 @@ capturer.captureDocument = function (params) {
               });
               break;
             }
-            // @TODO: this is only supported by Firefox and the API is unstable
-            // @TODO: check if this counter-style is really used
+            // @TODO: COUNTER_STYLE_RULE is only supported by Firefox
+            // and the API is unstable. Check if counter-style is really used
             case 11/* CSSRule.COUNTER_STYLE_RULE */: {
               if (!cssRule.symbols) { break; }
 
@@ -691,14 +690,15 @@ capturer.captureDocument = function (params) {
               });
               break;
             }
-            // @TODO: check supported or not
+            // @TODO: check SUPPORTS_RULE is supported or not
             case CSSRule.SUPPORTS_RULE: {
               if (!cssRule.cssRules) { break; }
 
               Array.prototype.forEach.call(cssRule.cssRules, (cssRule) => parseCssRule(cssRule, refUrl));
               break;
             }
-            // @TODO: this is only supported by Firefox (with -moz-) and the API is unstable
+            // @TODO: DOCUMENT_RULE is only supported by Firefox
+            // (with -moz-) and the API is unstable.
             case 13/* CSSRule.DOCUMENT_RULE */: {
               if (!cssRule.cssRules) { break; }
 
@@ -951,10 +951,7 @@ capturer.captureDocument = function (params) {
                   break;
               }
             } else if (rels.indexOf("preload") >= 0) {
-              // @TODO:
-              // We currently simply remove all preloads since it's too cumbersome
-              // to check whether to capture by options and "as" attr...
-              // Maybe we'll find a good way to deal with it in the future?
+              // @TODO: handle preloads according to its "as" attribute
               captureRewriteUri(elem, "href", null);
             }
             break;

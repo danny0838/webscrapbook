@@ -440,8 +440,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
 
 
-          // @FIXME:
-          // embed, objects, and applet don't work as in a regular web page.
+          // @FIXME: embed, objects, and applet don't work as in a regular web page.
           case "embed": {
             if (elem.hasAttribute("src")) {
               try {
