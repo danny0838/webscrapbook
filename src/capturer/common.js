@@ -242,11 +242,18 @@ capturer.captureDocument = function (params) {
       return captureRewriteAttr(elem, attr, value, record);
     };
 
-    const rewriteLocalLink = function (url) {
+    const rewriteLocalLink = function (relativeUrl, baseUrl, docUrl) {
+      let url = relativeUrl;
+      try {
+        url = new URL(relativeUrl, baseUrl).href;
+      } catch (ex) {}
+
       const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
 
       // This link targets the current page
-      if (urlMain === refUrl) {
+      if (urlMain === docUrl) {
+        // @TODO: for iframe whose URL is about:blank or about:srcdoc,
+        // this link should point to the main frame page rather than self
         if (urlHash === "" || urlHash === "#") {
           return urlHash;
         }
@@ -828,10 +835,10 @@ capturer.captureDocument = function (params) {
                 metaCharsetNode = elem;
                 captureRewriteAttr(elem, "content", "text/html; charset=UTF-8");
               } else if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
-                let metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+                const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
                 if (metaRefresh.url) {
-                  let url = capturer.resolveRelativeUrl(metaRefresh.url, refUrl);
-                  url = rewriteLocalLink(url);
+                  // meta refresh is relative to document URL rather than base URL
+                  const url = rewriteLocalLink(metaRefresh.url, docUrl, docUrl);
                   elem.setAttribute("content", metaRefresh.time + (url ? ";url=" + url : ""));
                 }
               }
@@ -1240,16 +1247,14 @@ capturer.captureDocument = function (params) {
               break;
             }
 
-            // normal anchor
-            url = capturer.resolveRelativeUrl(url, refUrl);
-
             // check local link and rewrite url
-            const urlLocal = rewriteLocalLink(url);
-            if (urlLocal !== url) {
-              elem.setAttribute("href", urlLocal);
+            url = rewriteLocalLink(url, refUrl, docUrl);
+            elem.setAttribute("href", url);
+
+            // skip further processing for non-absolute links
+            if (!scrapbook.isUrlAbsolute(url)) {
               break;
             }
-            elem.setAttribute("href", url);
 
             // check downLink
             if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
