@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<form>
+<div>
+<input type="radio" value="a">aaa
+<input type="radio" value="b">bbb
+<input type="radio" value="c" checked>ccc
+</div>
+<div>
+<input type="checkbox" value="A">AAA
+<input type="checkbox" value="B">BBB
+<input type="checkbox" value="C" checked>CCC
+</div>
+<div>
+<input type="text" placeholder="input name...">
+<input type="password" placeholder="input password...">
+<input type="file">
+</div>
+<div>
+<input type="datetime-local">
+<input type="date">
+<input type="month">
+<input type="week">
+<input type="time">
+</div>
+<div>
+<input type="number">
+<input type="tel">
+<input type="url">
+<input type="email">
+<input type="search">
+</div>
+<div>
+<input type="color">
+<input type="range">
+</div>
+<div>
+<textarea></textarea>
+</div>
+<div>
+<select>
+<option value="1">value: 1</option>
+<option value="2" selected>value: 2</option>
+</select>
+</div>
+<div>
+<input type="hidden">
+<input type="button" value="button">
+<input type="reset">
+<input type="submit">
+</div>
+</form>
+
+<script>
+document.querySelector('input[type="radio"]').checked = true;
+document.querySelector('input[type="checkbox"]').checked = true;
+document.querySelector('input[type="text"]').value = 'myname';
+document.querySelector('input[type="password"]').value = 'mypassword';
+document.querySelector('input[type="number"]').value = 3;
+document.querySelector('input[type="search"]').value = 'search input';
+document.querySelector('input[type="color"]').value = '#FF0000';
+document.querySelector('input[type="range"]').value = 75;
+document.querySelector('textarea').value = 'textarea input';
+document.querySelector('select').selectedIndex = 0;
+document.querySelector('input[type="hidden"]').value = "hidden";
+document.querySelector('input[type="reset"]').value = "reset";
+document.querySelector('input[type="submit"]').value = "submit";
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="Big5">
+<meta http-equiv="content-type" content="text/html; charset=Big5">
+<script src="integrity.js"
+        integrity="sha256-FDJ1FZczv9rCdgEzfJCWGhlAqb9kOUFZoNu99URFDlg="
+        crossorigin="anonymous"></script>
+</head>
+<body onload="console.log('load');">
+<div style="background-color: green;"></div>
+
+<iframe srcdoc="frame page content"></iframe>
+
+<a href="javascript:console.log('a');">javascript</a>
+
+<form>
+<input type="checkbox" value="A">AAA
+<input type="text">
+<textarea></textarea>
+<select>
+<option value="1">value: 1</option>
+</select>
+</form>
+
+<!-- form init -->
+<script>
+document.querySelector('input[type="checkbox"]').checked = true;
+document.querySelector('input[type="text"]').value = 'text';
+document.querySelector('textarea').value = 'textarea input';
+document.querySelector('select').selectedIndex = 0;
+</script>
+</body>
+</html>

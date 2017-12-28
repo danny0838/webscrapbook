@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+#internal_bg { background: url("red.bmp"); }
+</style>
+<style>
+@keyframes spin {
+  from { transform: rotate(0turn); background-image: url("red.bmp"); }
+  to { transform: rotate(1turn); background-image: url("green.bmp"); }
+}
+</style>
+<style>
+#neverused { background: url("neverused.bmp"); }
+</style>
+<style>
+@keyframes neverused {
+  from { transform: rotate(0turn); background-image: url("neverused.bmp"); }
+  to { transform: rotate(1turn); background-image: url("blue.bmp"); }
+}
+</style>
+<link rel="stylesheet" href="background.css">
+<link rel="stylesheet" href="neverused.css">
+</head>
+<body>
+<p id="internal_bg">internal background: url("red.bmp");</p>
+<p id="link_bg">link background: url("yellow.bmp");</p>
+
+<blockquote style="width: 40px; height: 40px; animation: spin 1s linear infinite;">spin</blockquote>
+</body>
+</html>

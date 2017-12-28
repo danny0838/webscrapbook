@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<!-- iframe, can resolve -->
+<script>
+var text = `\
+<img src="${new URL("red.bmp", location.href)}">
+<a href="${new URL("null.txt", location.href)}"></a>`;
+
+var elem = document.createElement("iframe");
+elem.src = `data:text/html,${encodeURIComponent(text)}`;
+document.body.appendChild(elem);
+</script>
+</body>
+</html>

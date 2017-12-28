@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<base href="" target="_blank">
+<link rel="shortcut icon" href="null.bmp">
+<style>
+@import url("null.css");
+@font-face { font-family: myFont; src: url("null.woff"); }
+p { background-image: url("null.bmp"); }
+</style>
+<link rel="stylesheet" href="null.css">
+<script>console.log('script text');</script>
+<script src="null.js"></script>
+<script src="null.js">console.log('script src');</script>
+</head>
+<body>
+<img src="null.bmp">
+
+<img srcset="null.bmp 1x, null.bmp 2x">
+
+<picture>
+  <source media="(min-width: 650px)" srcset="null.bmp">
+  <source media="(min-width: 465px)" srcset="null.bmp">
+  <img src="null.bmp">
+</picture>
+
+<input type="image" src="null.bmp">
+
+<canvas></canvas>
+
+<audio controls src="null.mp3"></audio>
+
+<audio controls>
+  <source src="null.ogg" type="audio/ogg">
+  <source src="null.mp3" type="audio/mpeg">
+</audio>
+
+<video controls src="null.mp4" poster="null.bmp"></video>
+
+<video controls>
+  <source src="null.webm" type="video/webm">
+  <source src="null.mp4" type="video/mp4">
+</video>
+
+<noscript>Your browser doesn't support JavaScript.</noscript>
+
+<embed src="null.swf">
+
+<object data="null.swf"></object>
+
+<applet
+  code="null.class"
+  archive="null.jar"
+  width="300"
+  height="300">
+  <param name="permissions" value="sandbox">
+</applet>
+
+<iframe></iframe>
+</body>
+</html>

@@ -1,0 +1,2 @@
+@charset "Big5";
+#test3::after { content: "¤¤¤å"; }

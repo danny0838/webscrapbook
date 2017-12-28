@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+blockquote::before { content: attr(id) " " attr(class) " "; }
+</style>
+<style>
+@import 'import/style1.css';
+</style>
+<style>
+@import "import/style2.css";
+</style>
+<style>
+@import url(import/style3.css);
+</style>
+<style>
+@import url('import/style4.css');
+</style>
+<style>
+@import url("import/style5.css");
+</style>
+<style>
+@import  " import/style6.css " ;
+</style>
+<style>
+@import "import/style7.css"/*c*/;
+</style>
+<style>
+@import/*c*/"import/style8.css";
+</style>
+<style>
+@import"import/style9.css";
+</style>
+<style>
+@import import/style10.css;
+</style>
+<style>
+@importurl("import/style11.css");
+</style>
+<style>
+@IMPORT "import/style12.css";
+</style>
+<style>
+@import "import/style13.css" screen;
+</style>
+<style>
+/* @import "import/style14.css"; */
+</style>
+<style>
+#test15::after { content: '@import "import/style15.css"'; }
+</style>
+</head>
+<body>
+<blockquote id="test1"></blockquote>
+<blockquote id="test2"></blockquote>
+<blockquote id="test3"></blockquote>
+<blockquote id="test4"></blockquote>
+<blockquote id="test5"></blockquote>
+<blockquote id="test6"></blockquote>
+<blockquote id="test7"></blockquote>
+<blockquote id="test8"></blockquote>
+<blockquote id="test9"></blockquote>
+<blockquote id="test10" class="noparse"></blockquote>
+<blockquote id="test11" class="noparse"></blockquote>
+<blockquote id="test12"></blockquote>
+<blockquote id="test13"></blockquote>
+<blockquote id="test14" class="noparse"></blockquote>
+<blockquote id="test15" class="noparse"></blockquote>
+</body>
+</html>

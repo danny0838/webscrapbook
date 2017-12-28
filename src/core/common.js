@@ -26,6 +26,7 @@ scrapbook.options = {
   "capture.scrapbookFolder": "WebScrapBook",
   "capture.saveAs": "zip", // "folder", "zip", "maff", "singleHtml", "singleHtmlJs"
   "capture.saveInScrapbook": false,
+  "capture.saveInMemory": false,
   "capture.saveAsciiFilename": false,
   "capture.saveBeyondSelection": false,
   "capture.saveFileAsHtml": false,

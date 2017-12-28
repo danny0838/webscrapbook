@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script>
+console.log('head');
+</script>
+<script src="script1.js"></script>
+<script src="script2.js">
+console.log('head +src');
+</script>
+</head>
+<body onload="console.log('load');">
+<script>
+console.log('body');
+</script>
+<a href="javascript:console.log('a');">javascript</a>
+<div onclick="console.log('click');">onclick</div>
+</body>
+<script>
+console.log('post-body');
+</script>
+</html>
+<script>
+console.log('post-html');
+</script>

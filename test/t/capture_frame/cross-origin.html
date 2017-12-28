@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test Capture Frame</title>
+</head>
+<body>
+<!--
+  Simulate that the frame pages are from another origin by using sandbox
+
+  Note:
+  Sandboxed frame pages are actually null origin and relative links in
+  it aren't resolved. But Web ScrapBook cannot tell this when it
+  captures a sandboxed page using content script, and links will be
+  resolved using the original URL.
+-->
+<iframe src="frames/frame1.html" sandbox="allow-scripts"></iframe>
+<iframe src="frames/frame2.xhtml" sandbox="allow-scripts"></iframe>
+<iframe src="frames/text.txt" sandbox="allow-scripts"></iframe>
+</body>
+</html>

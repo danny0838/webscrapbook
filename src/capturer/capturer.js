@@ -95,11 +95,12 @@ capturer.getUniqueFilename = function (timeId, filename) {
  *     - {integer} params.frameId
  *     - {boolean} params.saveBeyondSelection
  *     - {string} params.mode
+ *     - {string} params.options - preset options that overwrites default
  * @return {Promise}
  */
 capturer.captureTab = function (params) {
   return Promise.resolve().then(() => {
-    const {tab, frameId, saveBeyondSelection, mode} = params;
+    const {tab, frameId, saveBeyondSelection, mode, options} = params;
     const {id: tabId, url, title, favIconUrl} = tab;
 
     // redirect headless capture
@@ -110,7 +111,7 @@ capturer.captureTab = function (params) {
         return browser.webNavigation.getFrame({tabId, frameId});
       }).then((details) => {
         const {url, title, favIconUrl} = details;
-        return capturer.captureHeadless({url, title, favIconUrl, mode});
+        return capturer.captureHeadless({url, title, favIconUrl, mode, options});
       });
     }
 
@@ -125,7 +126,7 @@ capturer.captureTab = function (params) {
         recurseChain: [],
         favIconUrl,
       },
-      options: scrapbook.getOptions("capture"),
+      options: Object.assign(scrapbook.getOptions("capture"), options),
     };
 
     // save whole page beyond selection?
@@ -190,11 +191,12 @@ capturer.captureTab = function (params) {
  *     - {string} params.title
  *     - {string} params.favIconUrl
  *     - {string} params.mode
+ *     - {string} params.options - preset options that overwrites default
  * @return {Promise}
  */
 capturer.captureHeadless = function (params) {
   return Promise.resolve().then(() => {
-    const {url, refUrl, title, favIconUrl, mode} = params;
+    const {url, refUrl, title, favIconUrl, mode, options} = params;
 
     const source = `${url}`;
     const timeId = scrapbook.dateToId();
@@ -210,7 +212,7 @@ capturer.captureHeadless = function (params) {
         recurseChain: [],
         favIconUrl,
       },
-      options: scrapbook.getOptions("capture"),
+      options: Object.assign(scrapbook.getOptions("capture"), options),
     };
 
     return Promise.resolve().then(() => {
@@ -477,9 +479,16 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
         saveMethod = "saveBlobNaturally";
       }
 
+      const dataBlob = new Blob([html], {type: "text/html"});
+
+      // special handling (for unit test)
+      if (options["capture.saveInMemory"]) {
+        return capturer.saveBlobInMemory({blob: dataBlob});
+      }
+
       return capturer[saveMethod]({
         timeId,
-        blob: new Blob([html], {type: "text/html"}),
+        blob: dataBlob,
         directory: targetDir,
         filename,
         sourceUrl,
@@ -649,10 +658,17 @@ capturer.saveDocument = function (params) {
               saveMethod = "saveBlobNaturally";
             }
 
+            const dataBlob = new Blob([data.content], {type: data.mime});
+
+            // special handling (for unit test)
+            if (options["capture.saveInMemory"]) {
+              return capturer.saveBlobInMemory({blob: dataBlob});
+            }
+
             capturer.log(`Preparing download...`);
             return capturer[saveMethod]({
               timeId,
-              blob: new Blob([data.content], {type: data.mime}),
+              blob: dataBlob,
               directory: targetDir,
               filename,
               sourceUrl,
@@ -791,10 +807,17 @@ ${JSON.stringify(zipData)}
                 throw new Error(`Unable to find the end tag of HTML doc`);
               }
 
+              const dataBlob = new Blob([content], {type: data.mime});
+
+              // special handling (for unit test)
+              if (options["capture.saveInMemory"]) {
+                return capturer.saveBlobInMemory({blob: dataBlob});
+              }
+
               capturer.log(`Preparing download...`);
               return capturer[saveMethod]({
                 timeId,
-                blob: new Blob([content], {type: data.mime}),
+                blob: dataBlob,
                 directory: targetDir,
                 filename,
                 sourceUrl,
@@ -843,6 +866,11 @@ ${JSON.stringify(zipData)}
                 filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
                 filename += ".htz";
                 saveMethod = "saveBlobNaturally";
+              }
+
+              // special handling (for unit test)
+              if (options["capture.saveInMemory"]) {
+                return capturer.saveBlobInMemory({blob: zipBlob});
               }
 
               capturer.log(`Preparing download...`);
@@ -913,6 +941,11 @@ ${JSON.stringify(zipData)}
                 filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
                 filename += ".maff";
                 saveMethod = "saveBlobNaturally";
+              }
+
+              // special handling (for unit test)
+              if (options["capture.saveInMemory"]) {
+                return capturer.saveBlobInMemory({blob: zipBlob});
               }
 
               capturer.log(`Preparing download...`);
@@ -1428,6 +1461,29 @@ capturer.saveBlobNaturally = function (params) {
 
 /**
  * @param {Object} params
+ *     - {Blob} params.blob
+ * @return {Promise}
+ */
+capturer.saveBlobInMemory = function (params) {
+  return Promise.resolve().then(() => {
+    isDebug && console.debug("call: saveBlobInMemory", params);
+
+    const {blob} = params;
+
+    // In Firefox < 56 and Chromium,
+    // Blob cannot be stored in chrome.storage,
+    // fallback to byte string.
+    return scrapbook.readFileAsText(blob, false).then((text) => {
+      return {
+        type: blob.type,
+        data: text,
+      };
+    });
+  });
+};
+
+/**
+ * @param {Object} params
  *     - {string} params.timeId
  *     - {Blob} params.blob
  *     - {string} params.directory
@@ -1508,13 +1564,18 @@ capturer.saveUrl = function (params) {
  */
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  try {
-    if (message.args.settings.missionId !== capturer.missionId) {
+  if (message.openerTabId === capturer.openerTabId) {
+    // accept a command from the opener tab for once if no URL param specified
+    delete(capturer.openerTabId);
+  } else {
+    try {
+      if (message.args.settings.missionId !== capturer.missionId) {
+        return;
+      }
+    } catch (ex) {
+      // no entry of message.args.settings.missionId
       return;
     }
-  } catch (ex) {
-    // no entry of message.args.settings.missionId
-    return;
   }
 
   isDebug && console.debug(message.cmd, "receive", `[${sender.tab ? sender.tab.id : -1}]`, message.args);
@@ -1668,8 +1729,12 @@ document.addEventListener("DOMContentLoaded", function () {
         return hasError;
       });
     } else {
-      console.error(`Invalid capture parameters.`);
-      return true;
+      return browser.tabs.getCurrent().then((tab) => {
+        // allow receiving a command from the opener tab
+        capturer.openerTabId = tab.openerTabId;
+
+        return true;
+      });
     }
   }).then((hasError) => {
     if (hasError) { return; }

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test Capture Frame</title>
+</head>
+<body>
+<iframe src="frames/frame1.html" srcdoc="&lt;p&gt;srcdoc content&lt;/p&gt;
+&lt;img src=&quot;frames/red.bmp&quot;&gt;
+
+&lt;script&gt;
+document.querySelector('p').textContent = 'srcdoc content modified';
+&lt;/script&gt;"></iframe>
+</body>
+</html>

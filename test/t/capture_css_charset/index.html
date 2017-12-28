@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test CSS charset</title>
+<style>
+blockquote::before { content: attr(id) " " attr(data-result) " - "; }
+</style>
+<link rel="stylesheet" href="header_big5.py">
+<link rel="stylesheet" href="bom_utf16.css">
+<link rel="stylesheet" href="at_big5.css">
+<link rel="stylesheet" href="big5.css">
+<link rel="stylesheet" href="header_utf8_bom_utf8.py">
+<link rel="stylesheet" href="header_utf8_at_big5.py">
+<link rel="stylesheet" href="bom_utf16_at_big5.css">
+</head>
+<body>
+<blockquote id="test1">header Big5</blockquote>
+<blockquote id="test2">BOM UTF-16</blockquote>
+<blockquote id="test3">@charset "Big5"</blockquote>
+<blockquote id="test4" data-result="(UTF-8)">Big5 encoding</blockquote>
+<blockquote id="test5">header UTF-8 + BOM UTF-8</blockquote>
+<blockquote id="test6">header UTF-8 + @charset "Big5"</blockquote>
+<blockquote id="test7">BOM UTF-16 + @charset "Big5"</blockquote>
+</body>
+</html>

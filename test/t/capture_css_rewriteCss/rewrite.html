@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@import "ref/imported.css";
+@font-face { font-family: fontface; src: url(ref/sansation_light.woff); }
+#background { background: url(ref/green.bmp); }
+</style>
+</head>
+<body>
+<blockquote style="background: url(ref/green.bmp);">inline background</blockquote>
+
+<blockquote id="background">background</blockquote>
+
+<blockquote style="font-family: fontface;">@font-face</blockquote>
+
+<blockquote id="imported">@import</blockquote>
+</body>
+</html>

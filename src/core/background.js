@@ -156,3 +156,103 @@ chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
   });
   return {requestHeaders: details.requestHeaders};
 }, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, ["blocking", "requestHeaders"]);
+
+chrome.runtime.onConnectExternal.addListener((port) => {
+  port.onMessage.addListener((message, port) => {
+    return Promise.resolve().then(() => {
+      const {cmd, args} = message;
+      const openTab = (createProperties) => {
+        return browser.tabs.create(createProperties).then((tab) => {
+          return new Promise((resolve, reject) => {
+            const listener = (tabId, changeInfo, t) => {
+              if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
+              chrome.tabs.onUpdated.removeListener(listener);
+              chrome.tabs.onRemoved.removeListener(listener2);
+              resolve(t);
+            };
+            const listener2 = (tabId, removeInfo) => {
+              if (!(tabId === tab.id)) { return; }
+              chrome.tabs.onUpdated.removeListener(listener);
+              chrome.tabs.onRemoved.removeListener(listener2);
+              reject({message: `Tab removed before loading complete.`});
+            };
+            chrome.tabs.onUpdated.addListener(listener);
+            chrome.tabs.onRemoved.addListener(listener2);
+          });
+        });
+      };
+
+      switch (cmd) {
+        case "capture": {
+          const openerTabId = port.sender.tab.id;
+          return Promise.all([
+            openTab({
+              url: args.url,
+              active: false,
+              windowId: port.sender.tab.windowId,
+            }),
+            openTab({
+              url: chrome.runtime.getURL("capturer/capturer.html"),
+              active: false,
+              windowId: port.sender.tab.windowId,
+              openerTabId,
+            }),
+          ]).then(([pageTab, capturerTab]) => {
+            // wait for the capturer init to complete
+            // so that the message can be received
+            return scrapbook.delay(50).then(() => {
+              const {saveBeyondSelection, mode, options} = args;
+              return browser.runtime.sendMessage({
+                openerTabId,
+                cmd: "capturer.captureTab",
+                args: {
+                  tab: pageTab,
+                  frameId: 0,
+                  saveBeyondSelection,
+                  mode,
+                  options,
+                },
+              });
+            }).then((result) => {
+              return Promise.all([
+                browser.tabs.remove(pageTab.id),
+                browser.tabs.remove(capturerTab.id),
+              ]).then(() => {
+                return result;
+              });
+            });
+          });
+        }
+        case "captureHeadless": {
+          const openerTabId = port.sender.tab.id;
+          return openTab({
+            url: chrome.runtime.getURL("capturer/capturer.html"),
+            active: false,
+            windowId: port.sender.tab.windowId,
+            openerTabId,
+          }).then((capturerTab) => {
+            // wait for the capturer init to complete
+            // so that the message can be received
+            return scrapbook.delay(50).then(() => {
+              const {url, refUrl, title, favIconUrl, mode, options} = args;
+              return browser.runtime.sendMessage({
+                openerTabId,
+                cmd: "capturer.captureHeadless",
+                args: {url, refUrl, title, favIconUrl, mode, options},
+              });
+            }).then((result) => {
+              return browser.tabs.remove(capturerTab.id).then(() => {
+                return result;
+              });
+            });
+          });
+        }
+      }
+    }).then((result) => {
+      if (result.error) { throw result.error; }
+      port.postMessage({id: message.id, response: result});
+    }).catch((ex) => {
+      port.postMessage({id: message.id, error: {message: ex.message}});
+    });
+  });
+});

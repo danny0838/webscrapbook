@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+img, input { width: 60px; }
+</style>
+</head>
+<body>
+<div>Default width: 60px</div>
+
+<figure>
+<img src="red.bmp">
+&lt;img src="red.bmp"&gt;
+</figure>
+
+<figure>
+<img srcset="red.bmp">
+&lt;img srcset="red.bmp"&gt;
+</figure>
+
+<figure>
+<img src="red.bmp" srcset="green.bmp 2x, blue.bmp 3x, yellow.bmp 4x">
+&lt;img src="red.bmp" srcset="green.bmp 2x, blue.bmp 3x, yellow.bmp 4x"&gt;
+</figure>
+
+<figure>
+<img src="red.bmp" sizes="(max-width: 400px) 60px, 180px" srcset="green.bmp 120w, blue.bmp 180w, yellow.bmp 240w">
+&lt;img src="red.bmp" sizes="(max-width: 400px) 60px, 180px" srcset="green.bmp 120w, blue.bmp 180w, yellow.bmp 240w"&gt;
+</figure>
+
+<figure>
+<picture>
+  <source media="(min-width: 650px)" srcset="green.bmp">
+  <source media="(min-width: 465px)" srcset="blue.bmp">
+  <img src="red.bmp">
+</picture>
+&lt;picture&gt;
+  &lt;source media="(min-width: 650px)" srcset="green.bmp"&gt;
+  &lt;source media="(min-width: 465px)" srcset="blue.bmp"&gt;
+  &lt;img src="red.bmp"&gt;
+&lt;/picture&gt;
+</figure>
+
+<figure>
+<input type="image" src="red.bmp">
+&lt;input type="image" src="red.bmp"&gt;
+</figure>
+</body>
+</html>

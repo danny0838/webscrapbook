@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+blockquote { background: #CFC; }
+blockquote::before { content: attr(style) " " attr(class) " "; }
+</style>
+<style>
+@font-face { font-family: myFont1; src: url(sansation_light.woff); }
+</style>
+<style>
+@font-face { font-family: myFont2; src: url('sansation_light.woff'); }
+</style>
+<style>
+@font-face { font-family: myFont3; src: url("sansation_light.woff"); }
+</style>
+<style>
+@font-face{font-family:myFont4;src:url(sansation_light.woff);}
+</style>
+<style>
+@font-face { font-family : myFont5 ; src : url(  "  sansation_light.woff  "  )  ; }
+</style>
+<style>
+@font-face /*c*/{ font-family: myFont6; /*c*/src: /*c*/url("sansation_light.woff")/*c*/; /*c*/}
+</style>
+<style>
+@font-face { font-family: myFont7, myFont; src: url("sansation_light.woff"); }
+</style>
+</head>
+<body>
+<blockquote style="font-family: myFont1;"></blockquote>
+<blockquote style="font-family: myFont2;"></blockquote>
+<blockquote style="font-family: myFont3;"></blockquote>
+<blockquote style="font-family: myFont4;"></blockquote>
+<blockquote style="font-family: myFont5;"></blockquote>
+<blockquote style="font-family: myFont6;"></blockquote>
+<blockquote style="font-family: myFont7;" class="invalid"></blockquote>
+</body>
+</html>

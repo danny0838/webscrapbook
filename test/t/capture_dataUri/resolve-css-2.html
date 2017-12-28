@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<!-- CSS, can resolve -->
+<script>
+var text = `@import "${new URL("null.css", location.href)}";
+@font-face { font-family: myFont; src: url("${new URL("null.woff", location.href)}"); }
+p { background-image: url("${new URL("red.bmp", location.href)}"); }`;
+
+var elem = document.createElement("link");
+elem.rel = "stylesheet";
+elem.href = `data:text/css;charset=UTF-8,${encodeURIComponent(text)}`;
+document.querySelector("head").appendChild(elem);
+</script>
+</body>
+</html>

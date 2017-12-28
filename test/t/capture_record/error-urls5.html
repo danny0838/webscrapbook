@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@import url("ftp://example.com/nonexist.css");
+@font-face { font-family: myFont; src: url("ftp://example.com/nonexist.woff"); }
+p { background-image: url("ftp://example.com/nonexist.bmp"); }
+</style>
+<link rel="shortcut icon" href="ftp://example.com/nonexist.bmp">
+<link rel="stylesheet" href="ftp://example.com/nonexist.css">
+<script src="ftp://example.com/nonexist.js"></script>
+</head>
+<body>
+<img src="ftp://example.com/nonexist.bmp">
+
+<img srcset="ftp://example.com/nonexist.bmp 1x, ftp://example.com/nonexist.bmp 2x">
+
+<iframe src="ftp://example.com/nonexist.html"></iframe>
+
+<a href="ftp://example.com/nonexist.txt"></a>
+
+<a name="nodownlink" href="mailto:nonexist@example.com"></a>
+</body>
+</html>
