@@ -784,7 +784,7 @@ loadOptions.then(() => {
               urlObj.hash = hash;
               history.replaceState({}, null, urlObj.href);
             }
-          } else if (url.indexOf(':') !== -1) {
+          } else if (scrapbook.isUrlAbsolute(url)) {
             // external link
             e.preventDefault();
             e.stopPropagation();
