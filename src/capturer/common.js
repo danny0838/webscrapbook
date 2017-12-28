@@ -1428,7 +1428,7 @@ capturer.captureDocument = function (params) {
                   }, this);
 
                   Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                    captureRemoveNode(elem, options["capture.recordSourceUri"]);
+                    captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
                   }, this);
 
                   break;
@@ -1485,7 +1485,7 @@ capturer.captureDocument = function (params) {
                 if (!isHeadless) {
                   if (elemOrig.currentSrc) {
                     Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                      captureRemoveNode(elem, options["capture.recordSourceUri"]);
+                      captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
                     }, this);
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
@@ -1595,7 +1595,7 @@ capturer.captureDocument = function (params) {
 
                   if (elemOrig.currentSrc) {
                     Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                      captureRemoveNode(elem, options["capture.recordSourceUri"]);
+                      captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
                     }, this);
                     tasks[tasks.length] = 
                     capturer.invoke("downloadFile", {
