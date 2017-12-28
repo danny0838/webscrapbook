@@ -849,6 +849,8 @@ capturer.captureDocument = function (params) {
                 case "og:video:url":
                 case "og:video:secure_url":
                 case "og:url":
+                  // @TODO: relative to document URL or base URL?
+                  // @TODO: save the og resource?
                   let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("content"), refUrl);
                   elem.setAttribute("content", rewriteUrl);
                   break;
