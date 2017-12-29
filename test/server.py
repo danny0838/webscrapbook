@@ -23,10 +23,12 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
         return False
 
 def main():
+    # load config.json
     with open('config.json', 'r', encoding='UTF-8') as f:
         config = json.load(f)
         f.close()
 
+    # load config.local.json if exist
     try:
         with open('config.local.json', 'r', encoding='UTF-8') as f:
             config_local = json.load(f)
