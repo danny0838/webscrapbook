@@ -234,6 +234,26 @@ async function test_capture_html() {
   assert(loaderData[resId].d === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
 }
 
+// Check if singleHtmlJs can handle special DOM cases
+//
+// capturer.saveDocument
+async function test_capture_singleHtmlJs() {
+  /* post-body contents */
+  var options = {
+    "capture.saveAs": "singleHtmlJs",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_singleHtmlJs/post-body-tag.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  var loaderElem = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
+  assert(loaderElem);
+}
+
 // Check meta charset is correctly rewritten
 //
 // capturer.saveDocument
@@ -5659,6 +5679,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
 async function runTests() {
   await test(test_capture_html);
+  await test(test_capture_singleHtmlJs);
   await test(test_capture_metaCharset);
   await test(test_capture_xhtml);
   await test(test_capture_file);
