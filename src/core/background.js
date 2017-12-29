@@ -201,17 +201,10 @@ chrome.runtime.onConnectExternal.addListener((port) => {
             // wait for the capturer init to complete
             // so that the message can be received
             return scrapbook.delay(50).then(() => {
-              const {saveBeyondSelection, mode, options} = args;
               return browser.runtime.sendMessage({
                 openerTabId,
                 cmd: "capturer.captureTab",
-                args: {
-                  tab: pageTab,
-                  frameId: 0,
-                  saveBeyondSelection,
-                  mode,
-                  options,
-                },
+                args: Object.assign({tab: pageTab}, args),
               });
             }).then((result) => {
               return Promise.all([
@@ -234,11 +227,10 @@ chrome.runtime.onConnectExternal.addListener((port) => {
             // wait for the capturer init to complete
             // so that the message can be received
             return scrapbook.delay(50).then(() => {
-              const {url, refUrl, title, favIconUrl, mode, options} = args;
               return browser.runtime.sendMessage({
                 openerTabId,
                 cmd: "capturer.captureHeadless",
-                args: {url, refUrl, title, favIconUrl, mode, options},
+                args,
               });
             }).then((result) => {
               return browser.tabs.remove(capturerTab.id).then(() => {
