@@ -22,6 +22,8 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
             return True
         return False
 
+    http.server.SimpleHTTPRequestHandler.extensions_map[".md"] = "text/markdown"
+
 def main():
     # load config.json
     with open('config.json', 'r', encoding='UTF-8') as f:
