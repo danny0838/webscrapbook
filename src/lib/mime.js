@@ -5,37 +5,37 @@
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
  */
-function Mime() {}
+const Mime = {
+  /**
+   * Lookup a mime type based on extension
+   */
+  lookup(path, fallback) {
+    const ext = path.replace(/.*[\.\/\\]/, '').toLowerCase();
 
-/**
- * Lookup a mime type based on extension
- */
-Mime.prototype.lookup = function (path, fallback) {
-  const ext = path.replace(/.*[\.\/\\]/, '').toLowerCase();
+    return this.types[ext] || fallback || "application/octet-stream";
+  },
 
-  return this.types[ext] || fallback || "application/octet-stream";
-};
+  /**
+   * Return the first file extension associated with a mime type
+   */
+  extension(mimeType) {
+    const type = mimeType.match(/^\s*([^;\s]*)(?:;|\s|$)/)[1].toLowerCase();
+    if (this.db[type] && this.db[type].extensions) {
+      return this.db[type].extensions[0];
+    }
+    return null;
+  },
 
-/**
- * Return the first file extension associated with a mime type
- */
-Mime.prototype.extension = function (mimeType) {
-  const type = mimeType.match(/^\s*([^;\s]*)(?:;|\s|$)/)[1].toLowerCase();
-  if (this.db[type] && this.db[type].extensions) {
-    return this.db[type].extensions[0];
-  }
-  return null;
-};
-
-/**
- * Return the file extensions associated with a mime type
- */
-Mime.prototype.allExtensions = function (mimeType) {
-  const type = mimeType.match(/^\s*([^;\s]*)(?:;|\s|$)/)[1].toLowerCase();
-  if (this.db[type] && this.db[type].extensions) {
-    return JSON.parse(JSON.stringify(this.db[type].extensions));
-  }
-  return [];
+  /**
+   * Return the file extensions associated with a mime type
+   */
+  allExtensions(mimeType) {
+    const type = mimeType.match(/^\s*([^;\s]*)(?:;|\s|$)/)[1].toLowerCase();
+    if (this.db[type] && this.db[type].extensions) {
+      return JSON.parse(JSON.stringify(this.db[type].extensions));
+    }
+    return [];
+  },
 };
 
 /**
@@ -43,7 +43,7 @@ Mime.prototype.allExtensions = function (mimeType) {
  *
  * ref: https://github.com/jshttp/mime-db
  */
-Mime.prototype.db = {
+Mime.db = {
   "application/1d-interleaved-parityfec": {
     "source": "iana"
   },
@@ -6906,14 +6906,14 @@ Mime.prototype.db = {
   }
 };
 
-Mime.prototype.types = (() => {
+Mime.types = (() => {
   const table = {};
-  const db = Mime.prototype.db;
-  Object.keys(db).forEach((mime) => {
+  const db = Mime.db;
+  for (mime in db) {
     const exts = db[mime].extensions;
     exts && exts.forEach((ext) => {
       table[ext] = mime;
     });
-  });
+  }
   return table;
 })();

@@ -330,10 +330,10 @@ capturer.captureUrl = function (params) {
                     scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name :
                     scrapbook.urlToFilename(sourceUrl);
 
-            let mime = headers.contentType || Mime.prototype.lookup(filename) || "text/html";
+            let mime = headers.contentType || Mime.lookup(filename) || "text/html";
             let fn = filename.toLowerCase();
             if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
-              let exts = Mime.prototype.allExtensions(mime);
+              let exts = Mime.allExtensions(mime);
               for (let i = 0, I = exts.length; i < I; i++) {
                 let ext = ("." + exts[i]).toLowerCase();
                 if (fn.endsWith(ext)) {
@@ -1180,7 +1180,7 @@ capturer.downloadFile = function (params) {
           if (headers.contentType) {
             let [base, extension] = scrapbook.filenameParts(filename);
             if (!extension) {
-              extension = Mime.prototype.extension(headers.contentType);
+              extension = Mime.extension(headers.contentType);
               if (extension) {
                 filename = base + "." + extension;
               }
@@ -1292,13 +1292,13 @@ capturer.downLinkFetchHeader = function (params) {
         let [, ext] = scrapbook.filenameParts(headers.filename);
 
         if (!ext && headers.contentType) {
-          ext = Mime.prototype.extension(headers.contentType);
+          ext = Mime.extension(headers.contentType);
         }
 
         return ext;
       } else {
         if (headers.contentType) {
-          return Mime.prototype.extension(headers.contentType);
+          return Mime.extension(headers.contentType);
         }
 
         let filename = scrapbook.urlToFilename(sourceUrlMain);

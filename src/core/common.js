@@ -1032,7 +1032,7 @@ scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
     if (useFilename && parameters.filename) {
       filename = decodeURIComponent(parameters.filename);
     } else {
-      let ext = parameters.filename && scrapbook.filenameParts(parameters.filename)[1] || Mime.prototype.extension(mime);
+      let ext = parameters.filename && scrapbook.filenameParts(parameters.filename)[1] || Mime.extension(mime);
       ext = ext ? ("." + ext) : "";
       filename = scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
     }

@@ -166,7 +166,7 @@ const indexer = {
               inputData.files.push({
                 path,
                 file: new File([ab], filename, {
-                  type: Mime.prototype.lookup(filename),
+                  type: Mime.lookup(filename),
                   lastModified: scrapbook.zipFixModifiedTime(zipEntryObj.date),
                 }),
               });
@@ -361,7 +361,7 @@ const indexer = {
                       // https://bugzilla.mozilla.org/show_bug.cgi?id=1424689
                       if (scrapbook.isGecko) {
                         file = new File([file], file.name, {
-                          type: Mime.prototype.lookup(file.name),
+                          type: Mime.lookup(file.name),
                           lastModified: file.lastModified,
                         });
                       }
@@ -992,7 +992,7 @@ const indexer = {
               }
 
               // if no extension, generate one according to mime
-              if (!ext) { ext = Mime.prototype.extension(mime); }
+              if (!ext) { ext = Mime.extension(mime); }
 
               const sha = scrapbook.sha1(ab, 'ARRAYBUFFER');
               return new File([ab], `${sha}${ext ? '.' + ext : ''}`, {type: mime});
@@ -1081,7 +1081,7 @@ const indexer = {
                   throw new Error(`'${favIconPath}' does not exist.`);
                 }
 
-                const mime = Mime.prototype.lookup(zipFile.name);
+                const mime = Mime.lookup(zipFile.name);
                 const [, ext] = scrapbook.filenameParts(zipFile.name);
 
                 return zipFile.async('arraybuffer').then((ab) => {
@@ -1373,7 +1373,7 @@ const indexer = {
                 if (!file) { return file; }
 
                 return file.async("arraybuffer").then((ab) => {
-                  return new File([ab], filename, {type: Mime.prototype.lookup(filename)});
+                  return new File([ab], filename, {type: Mime.lookup(filename)});
                 });
               });
             }

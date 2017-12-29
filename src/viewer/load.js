@@ -299,7 +299,7 @@ const viewer = {
           } catch (ex) {}
         }
 
-        const file = new File([xhr.response], filename, {type: Mime.prototype.lookup(filename)});
+        const file = new File([xhr.response], filename, {type: Mime.lookup(filename)});
         this.autoLoading = true;
         return [file];
       }).catch((ex) => {
@@ -385,7 +385,7 @@ const viewer = {
             //     is very slow and unuseful.  We currently use the faster
             //     method.
             return zipObj.async("arraybuffer").then((ab) => {
-              const mime = Mime.prototype.lookup(inZipPath);
+              const mime = Mime.lookup(inZipPath);
 
               zipData.files[inZipPath] = {
                 dir: false,
