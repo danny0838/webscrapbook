@@ -58,7 +58,7 @@ if (chrome.contextMenus) {
       contexts: ["page"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return capturer.invokeCapture({target: tab.id, full: true});
+        return capturer.invokeCapture({target: `${tab.id}:0`, full: true});
       }
     });
     chrome.contextMenus.create({
