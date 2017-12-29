@@ -1564,7 +1564,7 @@ capturer.saveUrl = function (params) {
  */
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.openerTabId === capturer.openerTabId) {
+  if (!isNaN(capturer.openerTabId) && message.openerTabId === capturer.openerTabId) {
     // accept a command from the opener tab for once if no URL param specified
     delete(capturer.openerTabId);
   } else {
