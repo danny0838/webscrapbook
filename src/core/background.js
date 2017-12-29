@@ -182,9 +182,11 @@ chrome.runtime.onConnectExternal.addListener((port) => {
         });
       };
 
+      const missionId = scrapbook.getUuid();
+      const capturerUrl = chrome.runtime.getURL(`capturer/capturer.html?mid=${missionId}`);
+
       switch (cmd) {
         case "capture": {
-          const openerTabId = port.sender.tab.id;
           return Promise.all([
             openTab({
               url: args.url,
@@ -192,19 +194,17 @@ chrome.runtime.onConnectExternal.addListener((port) => {
               windowId: port.sender.tab.windowId,
             }),
             openTab({
-              url: chrome.runtime.getURL("capturer/capturer.html"),
+              url: capturerUrl,
               active: false,
               windowId: port.sender.tab.windowId,
-              openerTabId,
             }),
           ]).then(([pageTab, capturerTab]) => {
             // wait for the capturer init to complete
             // so that the message can be received
             return scrapbook.delay(50).then(() => {
               return browser.runtime.sendMessage({
-                openerTabId,
                 cmd: "capturer.captureTab",
-                args: Object.assign({tab: pageTab}, args),
+                args: Object.assign({tab: pageTab, settings: {missionId}}, args),
               });
             }).then((result) => {
               return Promise.all([
@@ -217,20 +217,17 @@ chrome.runtime.onConnectExternal.addListener((port) => {
           });
         }
         case "captureHeadless": {
-          const openerTabId = port.sender.tab.id;
           return openTab({
-            url: chrome.runtime.getURL("capturer/capturer.html"),
+            url: capturerUrl,
             active: false,
             windowId: port.sender.tab.windowId,
-            openerTabId,
           }).then((capturerTab) => {
             // wait for the capturer init to complete
             // so that the message can be received
             return scrapbook.delay(50).then(() => {
               return browser.runtime.sendMessage({
-                openerTabId,
                 cmd: "capturer.captureHeadless",
-                args,
+                args: Object.assign({settings: {missionId}}, args),
               });
             }).then((result) => {
               return browser.tabs.remove(capturerTab.id).then(() => {

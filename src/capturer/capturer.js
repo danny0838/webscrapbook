@@ -1564,18 +1564,13 @@ capturer.saveUrl = function (params) {
  */
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (!isNaN(capturer.openerTabId) && message.openerTabId === capturer.openerTabId) {
-    // accept a command from the opener tab for once if no URL param specified
-    delete(capturer.openerTabId);
-  } else {
-    try {
-      if (message.args.settings.missionId !== capturer.missionId) {
-        return;
-      }
-    } catch (ex) {
-      // no entry of message.args.settings.missionId
+  try {
+    if (message.args.settings.missionId !== capturer.missionId) {
       return;
     }
+  } catch (ex) {
+    // no entry of message.args.settings.missionId
+    return;
   }
 
   isDebug && console.debug(message.cmd, "receive", `[${sender.tab ? sender.tab.id : -1}]`, message.args);
@@ -1665,6 +1660,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }).then(() => {
     const urlObj = new URL(document.URL);
     const s = urlObj.searchParams;
+    const missionId = s.get('mid');
     const tabFrameList = s.has('t') ? s.get('t').split(',').map(x => {
       const [tabId, frameId] = x.split(':');
       return {
@@ -1679,7 +1675,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const mode = s.get('m') || undefined;
     const saveBeyondSelection = !!s.get('f');
 
-    if (tabFrameList) {
+    if (missionId) {
+      // use the missionId to receive further message
+      // and avoids auto-closing
+      capturer.missionId = missionId;
+
+      return true;
+    } else if (tabFrameList) {
       let hasError = false;
       let p = Promise.resolve();
       tabFrameList.forEach(({tabId, frameId}) => {
@@ -1732,12 +1734,9 @@ document.addEventListener("DOMContentLoaded", function () {
         return hasError;
       });
     } else {
-      return browser.tabs.getCurrent().then((tab) => {
-        // allow receiving a command from the opener tab
-        capturer.openerTabId = tab.openerTabId;
+      capturer.error(`Unexpected error: Parameters not supported.`);
 
-        return true;
-      });
+      return true;
     }
   }).then((hasError) => {
     if (hasError) { return; }
