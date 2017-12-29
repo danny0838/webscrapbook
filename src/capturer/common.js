@@ -1265,6 +1265,7 @@ capturer.captureDocument = function (params) {
                   capturer.invoke("downLinkFetchHeader", {
                     url,
                     refUrl,
+                    settings,
                   }).then((ext) => {
                     if (ext === null) { return null; }
                     if (!capturer.downLinkExtFilter(ext, options)) { return null; }
