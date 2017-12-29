@@ -1275,11 +1275,6 @@ capturer.downLinkFetchHeader = function (params) {
           }
         }
 
-        const responseURL = xhr.responseURL;
-        if (responseURL !== sourceUrlMain) {
-          prevAccessMap.set(responseURL, p);
-        }
-
         xhr.abort();
       },
     }).catch((ex) => {
