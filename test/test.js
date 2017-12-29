@@ -1282,6 +1282,99 @@ async function test_capture_selection() {
   assert(!zip.files["blue.bmp"]);
 }
 
+// When a headless capture (source, bookmark) is initialized from a
+// tab, the tab information (e.g. title and favicon) should be used.
+//
+// capturer.captureTab
+// capturer.captureHeadless
+async function test_capture_headless() {
+  /* from tab; source */
+  var blob = await capture({
+    url: `${localhost}/capture_headless/tab-info.html`,
+    mode: "source",
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector(`title`).textContent.trim() === `My Title`);
+  assert(doc.querySelector(`link[rel~="icon"]`).getAttribute('href') === `red.bmp`);
+  assert(zip.files["red.bmp"]);
+
+  /* from tab; bookmark */
+  var blob = await capture({
+    url: `${localhost}/capture_headless/tab-info.html`,
+    mode: "bookmark",
+    options: baseOptions,
+  });
+
+  var doc = await readFileAsDocument(blob);
+  assert(doc.querySelector(`title`).textContent.trim() === `My Title`);
+  assert(doc.querySelector(`link[rel~="icon"]`).getAttribute('href') === `${localhost}/capture_headless/red.bmp`);
+
+  /* from tab frame 0; source */
+  var blob = await capture({
+    url: `${localhost}/capture_headless/tab-info.html`,
+    frameId: 0,
+    mode: "source",
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector(`title`));
+  assert(!doc.querySelector(`link[rel~="icon"]`));
+  assert(!zip.files["red.bmp"]);
+
+  /* from tab frame 0; bookmark */
+  var blob = await capture({
+    url: `${localhost}/capture_headless/tab-info.html`,
+    frameId: 0,
+    mode: "bookmark",
+    options: baseOptions,
+  });
+
+  var doc = await readFileAsDocument(blob);
+  assert(!doc.querySelector(`title`));
+  assert(!doc.querySelector(`link[rel~="icon"]`));
+
+  /* from URL; source */
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless/tab-info.html`,
+    mode: "source",
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector(`title`));
+  assert(!doc.querySelector(`link[rel~="icon"]`));
+  assert(!zip.files["red.bmp"]);
+
+  /* from URL; bookmark */
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless/tab-info.html`,
+    mode: "bookmark",
+    options: baseOptions,
+  });
+
+  var doc = await readFileAsDocument(blob);
+  assert(!doc.querySelector(`title`));
+  assert(!doc.querySelector(`link[rel~="icon"]`));
+}
+
 // Check if captureBookmark works
 //
 // capturer.captureBookmark
@@ -5692,6 +5785,7 @@ async function runTests() {
   await test(test_capture_dataUri_resolve);
   await test(test_capture_dataUri_resolve2);
   await test(test_capture_selection);
+  await test(test_capture_headless);
   await test(test_capture_bookmark);
   await test(test_capture_frame);
   await test(test_capture_frame2);
