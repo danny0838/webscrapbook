@@ -107,7 +107,7 @@ capturer.captureTab = function (params) {
     // if frameId not provided, use current tab title and favIcon
     if (mode === "bookmark" || mode === "source") {
       return Promise.resolve().then(() => {
-        if (typeof frameId === "undefined") { return {url, title, favIconUrl}; }
+        if (isNaN(frameId)) { return {url, title, favIconUrl}; }
         return browser.webNavigation.getFrame({tabId, frameId});
       }).then((details) => {
         const {url, title, favIconUrl} = details;
@@ -1666,8 +1666,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const urlObj = new URL(document.URL);
     const s = urlObj.searchParams;
     const tabFrameList = s.has('t') ? s.get('t').split(',').map(x => {
-      const [tabId = -1, frameId] = x.split(':');
-      return {tabId: parseInt(tabId, 10), frameId: parseInt(frameId, 10) || 0};
+      const [tabId, frameId] = x.split(':');
+      return {
+        tabId: isNaN(tabId) ? -1 : parseInt(tabId, 10),
+        frameId: isNaN(frameId) ? undefined : parseInt(frameId, 10),
+      };
     }) : undefined;
     const urlTitleList = s.has('u') ? s.get('u').split(',').map(x => {
       const [url, ...titleParts] = x.split(' ');
