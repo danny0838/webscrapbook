@@ -3326,6 +3326,7 @@ const searchEngine = {
     <option value="re:">re:</option>
     <option value="mc:">mc:</option>
     <option value="file:">file:</option>
+    <option value="root:">root:</option>
     <option value="sort:">sort:</option>
     <option value="-sort:modify">Last Modified</option>
     <option value="-sort:create">Last Created</option>
