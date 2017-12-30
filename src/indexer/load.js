@@ -1265,8 +1265,8 @@ const indexer = {
       if (this.options["indexer.serverScripts"]) {
         resToInclude["server.py"] = chrome.runtime.getURL("resources/server.py");
 
-        if (!otherFiles["config.json"]) {
-          resToInclude["config.json"] = chrome.runtime.getURL("resources/config.json");
+        if (!otherFiles["config.ini"]) {
+          resToInclude["config.ini"] = chrome.runtime.getURL("resources/config.ini");
         }
       }
 

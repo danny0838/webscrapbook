@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-import json
+import configparser
 import webbrowser
 import http.server
 import re
@@ -13,10 +13,11 @@ from http import HTTPStatus
 # init global variables
 config = {
     "root": ".",
-    "port": 8080,
+    "port": "8080",
     "bind": "127.0.0.1",
     "host": "localhost",
-    "browse": "tree/frame.html"
+    "browse": "true",
+    "entry": "tree/frame.html"
     }
 
 class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -130,31 +131,31 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     http.server.SimpleHTTPRequestHandler.extensions_map[".maff"] = "application/x-maff"
 
 def loadServerConfig(path, encoding='UTF-8', **kwargs):
-    if os.path.isfile(path):
-        with open(path, 'r', encoding=encoding, **kwargs) as f:
-          c = json.load(f)
-          for key in c:
-              config[key] = c[key]
-          f.close()
+    if not os.path.isfile(path): return
+    cp = configparser.ConfigParser()
+    cp.read(path, encoding, **kwargs)
+    c = cp['Server']
+    for key in c:
+        config[key] = c[key]
 
 def main():
     # load config
-    loadServerConfig('config.json')
+    loadServerConfig('config.ini')
 
     # switch to the specified directory
     os.chdir(config['root'])
 
     # start the browser if "browse" is set to a string path
-    if type(config['browse']) is str:
+    if config['browse'].lower() in ['1', 'on', 'yes', 'true']:
         webbrowser.open('http://{host}{port}{path}'.format(
             host=config['host'],
-            port=':' + str(config['port']) if config['port'] != 80 else '',
-            path='/' + config['browse'] if config['browse'] else ''
+            port=':' + config['port'] if config['port'] != '80' else '',
+            path='/' + config['entry'] if config['entry'] else ''
             ))
 
     # start server
     http.server.test(HandlerClass=HTTPRequestHandler,
-                     port=config['port'], bind=config['bind'])
+                     port=int(config['port']), bind=config['bind'])
 
 if __name__ == '__main__':
     main()
