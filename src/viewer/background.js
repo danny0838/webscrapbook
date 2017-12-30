@@ -23,8 +23,8 @@ function redirectUrl(tabId, type, url, filename, mime) {
     // redirect
   } else if (mime === "application/x-maff" && scrapbook.getOption("viewer.viewMaff")) {
     // redirect
-  } else {
-    let pathname = (filename || url.pathname).toLowerCase();
+  } else if (mime === "application/octet-stream" || mime === "application/zip") {
+    const pathname = (filename || url.pathname).toLowerCase();
     if (pathname.endsWith(".htz") && scrapbook.getOption("viewer.viewHtz")) {
       // redirect
     } else if (pathname.endsWith(".maff") && scrapbook.getOption("viewer.viewMaff")) {
@@ -32,6 +32,8 @@ function redirectUrl(tabId, type, url, filename, mime) {
     } else {
       return; // no redirect
     }
+  } else {
+    return; // no redirect
   }
 
   let newUrl = new URL(chrome.runtime.getURL("viewer/load.html"));
@@ -91,28 +93,30 @@ chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
   // This event won't fire when visiting a file URL if
   // isAllowedFileSchemeAccess is false
   chrome.webRequest.onBeforeRequest.addListener(function (details) {
-    return redirectUrl(details.tabId, details.type, new URL(details.url));
+    return redirectUrl(details.tabId, details.type, new URL(details.url), null, "application/octet-stream");
   }, {urls: ["file://*"], types: ["main_frame", "sub_frame"]}, ["blocking"]);
 });
 
 chrome.webRequest.onHeadersReceived.addListener(function (details) {
-  let headers = details.responseHeaders;
-  for (let i in headers) {
+  const headers = details.responseHeaders;
+  let mime;
+  let filename;
+  for (const i in headers) {
     switch (headers[i].name.toLowerCase()) {
       case "content-type": {
-        let contentType = scrapbook.parseHeaderContentType(headers[i].value);
-        let mime = contentType.type;
-        return redirectUrl(details.tabId, details.type, new URL(details.url), null, mime);
+        const contentType = scrapbook.parseHeaderContentType(headers[i].value);
+        mime = contentType.type;
+        break;
       }
       case "content-disposition": {
-        let contentDisposition = scrapbook.parseHeaderContentDisposition(headers[i].value);
-        let filename = contentDisposition.parameters.filename;
-        return redirectUrl(details.tabId, details.type, new URL(details.url), filename);
+        const contentDisposition = scrapbook.parseHeaderContentDisposition(headers[i].value);
+        filename = contentDisposition.parameters.filename;
+        break;
       }
     }
   }
 
-  return redirectUrl(details.tabId, details.type, new URL(details.url));
+  return redirectUrl(details.tabId, details.type, new URL(details.url), filename, mime);
 }, {urls: ["http://*/*", "https://*/*"], types: ["main_frame", "sub_frame"]}, ["blocking", "responseHeaders"]);
 
 // clear viewer caches
