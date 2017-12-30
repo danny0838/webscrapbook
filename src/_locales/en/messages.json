@@ -397,6 +397,12 @@
   "OptionIndexerFulltextCacheLabel": {
     "message": "Update fulltext cache:"
   },
+  "OptionIndexerServerScripts": {
+    "message": "Generate server scripts [Experimental]:"
+  },
+  "OptionIndexerServerScriptsTooltip": {
+    "message": "The server scripts can host a local server to serve the site contents and to provide a better browsing experience, especially when data are saved as archive formats. Requires a Python 3.* installation on the system."
+  },
   "OptionPageTitle": {
     "message": "Options"
   },

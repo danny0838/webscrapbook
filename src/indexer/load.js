@@ -442,21 +442,14 @@ const indexer = {
       const treeFiles = {};
       const otherFiles = {};
       for (const {path, file} of inputData.files) {
-        // record legacy ScrapBook files
-        if (path === 'scrapbook.rdf') {
-          otherFiles[path] = file;
-        }
-
-        // record files in tree/*
         if (path.startsWith('tree/')) {
           treeFiles[path] = file;
-        }
-
-        // map files in data/*
-        if (/^data\/(([^/]+)(?:\/.+|[.][^.]+))$/.test(path)) {
+        } else if (/^data[/](([^/]+)(?:[/].+|[.][^.]+))$/.test(path)) {
           const {$1: path, $2: id} = RegExp;
           dataFiles[path] = file;
           dataDirIds.add(id);
+        } else {
+          otherFiles[path] = file;
         }
       }
 
@@ -475,13 +468,13 @@ const indexer = {
       }).then(() => {
         return this.handleBadFavicons({scrapbookData, treeFiles, zip});
       }).then(() => {
-        return this.generateFiles({scrapbookData, treeFiles, zip});
+        return this.generateFiles({scrapbookData, treeFiles, otherFiles, zip});
       }).then(() => {
         if (this.options["indexer.fulltextCache"]) {
           return this.generateFulltextCache({scrapbookData, dataFiles, treeFiles, zip});
         }
       }).then(() => {
-        return this.checkSameAndBackup({scrapbookData, treeFiles, zip});
+        return this.checkSameAndBackup({scrapbookData, treeFiles, otherFiles, zip});
       }).then(() => {
         return this.makeZipAndDownload({scrapbookData, zip});
       }).then(() => {
@@ -1146,7 +1139,7 @@ const indexer = {
   },
   
   /* Generate index pages, meta, toc, resource files, etc. */
-  generateFiles({scrapbookData, treeFiles, zip}) {
+  generateFiles({scrapbookData, treeFiles, otherFiles, zip}) {
     return Promise.resolve().then(() => {
       this.log(`Checking for created and updated files...`);
 
@@ -1267,6 +1260,15 @@ const indexer = {
         'tree/icon/note.png': chrome.runtime.getURL("resources/note.png"),  // ScrapBook X notex
         'tree/icon/postit.png': chrome.runtime.getURL("resources/postit.png"),  // ScrapBook X note
       };
+
+      /* server scripts */
+      if (this.options["indexer.serverScripts"]) {
+        resToInclude["server.py"] = chrome.runtime.getURL("resources/server.py");
+
+        if (!otherFiles["config.json"]) {
+          resToInclude["config.json"] = chrome.runtime.getURL("resources/config.json");
+        }
+      }
 
       let p = Promise.resolve();
       for (const path in resToInclude) {
@@ -1724,16 +1726,26 @@ const indexer = {
   },
 
   /* Remove same files and generate backup files */
-  checkSameAndBackup({scrapbookData, treeFiles, zip}) {
+  checkSameAndBackup({scrapbookData, treeFiles, otherFiles, zip}) {
     return Promise.resolve().then(() => {
       let p = Promise.resolve();
       zip.forEach((path, zipObj) => {
         if (zipObj.dir) { return; }
-        if (!path.startsWith('tree/')) { return; }
         if (path.startsWith('tree/cache/')) { return; }
 
-        const bakPath = 'tree.bak/' + path.slice('tree/'.length);
-        const oldFile = treeFiles[path];
+        let bakPath;
+        let oldFile;
+
+        if (path.startsWith('tree/')) {
+          bakPath = 'tree.bak/' + path.slice('tree/'.length);
+          oldFile = treeFiles[path];
+        } else if (path === 'server.py') {
+          bakPath = path + '.bak';
+          oldFile = otherFiles[path];
+        } else {
+          return;
+        }
+
         if (!oldFile) { return; }
 
         // @TODO: Maybe binary compare is better than sha compare?

@@ -64,6 +64,7 @@ scrapbook.options = {
   "indexer.autoDownload": false,
   "indexer.fulltextCache": true,
   "indexer.fulltextCacheFrameAsPageContent": true,
+  "indexer.serverScripts": false,
 };
 
 scrapbook.isOptionsSynced = false;

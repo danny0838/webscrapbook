@@ -1,0 +1,7 @@
+{
+  "root": ".",
+  "port": 8080,
+  "bind": "127.0.0.1",
+  "host": "localhost",
+  "browse": "tree/frame.html"
+}
