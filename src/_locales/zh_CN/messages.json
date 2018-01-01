@@ -401,7 +401,7 @@
     "message": "产生服务器脚本 [实验中]:"
   },
   "OptionIndexerServerScriptsTooltip": {
-    "message": "服务器脚本可架设临时服务器供本地存取站台，以提供更好的浏览体验，尤其当数据以封存格式保存时。系统需安装 Python 3.* 才能运作。"
+    "message": "服务器脚本可架设临时服务器供本地存取站台，以提供更好的浏览体验，尤其当数据以封存格式保存时。系统需安装 Python 3.5+ 才能运作。"
   },
   "OptionPageTitle": {
     "message": "选项设定"

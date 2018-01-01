@@ -401,7 +401,7 @@
     "message": "產生伺服器腳本 [實驗中]:"
   },
   "OptionIndexerServerScriptsTooltip": {
-    "message": "伺服器腳本可架設臨時伺服器供本機存取站台，以提供更好的瀏覽體驗，尤其當資料以封存格式儲存時。系統需安裝 Python 3.* 才能運作。"
+    "message": "伺服器腳本可架設臨時伺服器供本機存取站台，以提供更好的瀏覽體驗，尤其當資料以封存格式儲存時。系統需安裝 Python 3.5+ 才能運作。"
   },
   "OptionPageTitle": {
     "message": "選項設定"

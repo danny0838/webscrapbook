@@ -401,7 +401,7 @@
     "message": "Generate server scripts [Experimental]:"
   },
   "OptionIndexerServerScriptsTooltip": {
-    "message": "The server scripts can host a local server to serve the site contents and to provide a better browsing experience, especially when data are saved as archive formats. Requires Python 3.* be installed on the system."
+    "message": "The server scripts can host a local server to serve the site contents and to provide a better browsing experience, especially when data are saved as archive formats. Requires Python 3.5+ be installed on the system."
   },
   "OptionPageTitle": {
     "message": "Options"
