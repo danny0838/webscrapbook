@@ -992,7 +992,7 @@ const indexer = {
             };
 
             // retrive absolute URL
-            if (!scrapbook.isUrlAbsolute(favIconUrl)) {
+            if (scrapbook.isUrlAbsolute(favIconUrl)) {
               const prevAccess = urlAccessMap.get(favIconUrl);
               if (prevAccess) {
                 // this.log(`Using previuos access for '${favIconUrl}' for '${id}'.`);
