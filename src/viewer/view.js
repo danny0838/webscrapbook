@@ -37,6 +37,7 @@ const viewer = {
       [window, "sessionStorage"],
       [window, "XMLHttpRequest"],
       [window, "fetch"],
+      [window.URL, "createObjectURL"],
     ].forEach(([object, property]) => {
       if (typeof object[property] !== "undefined") {
         object[property] = undefined;

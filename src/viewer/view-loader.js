@@ -35,6 +35,7 @@
   sessionStorage,
   XMLHttpRequest,
   fetch,
+  URL,
 ) {
 ${scripts.join('\n')}
 })(
@@ -46,6 +47,14 @@ ${scripts.join('\n')}
   sessionStorage,
   XMLHttpRequest,
   fetch,
+  (() => {
+    const _createObjectURL = URL.createObjectURL;
+    return class f extends URL {
+      static createObjectURL() {
+        return _createObjectURL.apply(this, arguments);
+      }
+    };
+  })(),
 );`;
       const elem = document.createElement('script');
       const blob = new File([scripts], {type: 'application/javascript'});
