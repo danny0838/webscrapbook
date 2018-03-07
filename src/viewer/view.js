@@ -30,17 +30,17 @@ const viewer = {
   // frames serving the web page content.
   deApiScript: function () {
     [
-      "browser",
-      "chrome",
-      "indexedDB",
-      "localStorage",
-      "sessionStorage",
-      "XMLHttpRequest",
-      "fetch",
-    ].forEach((api) => {
-      if (typeof window[api] !== "undefined") {
-        window[api] = undefined;
-        delete(window[api]);
+      [window, "browser"],
+      [window, "chrome"],
+      [window, "indexedDB"],
+      [window, "localStorage"],
+      [window, "sessionStorage"],
+      [window, "XMLHttpRequest"],
+      [window, "fetch"],
+    ].forEach(([object, property]) => {
+      if (typeof object[property] !== "undefined") {
+        object[property] = undefined;
+        delete(object[property]);
       }
     });
   },
