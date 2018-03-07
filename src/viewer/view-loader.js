@@ -54,7 +54,7 @@ ${scripts.join('\n')}
       elem.src = url;
     });
   } else {
-    // script-src blob: is now allowed in CSP,
+    // script-src blob: is not allowed in CSP,
     // load them directly using <script>.
     // We don't need sandboxing in this case.
     const loadScripts = (urls) => {
