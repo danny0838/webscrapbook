@@ -6,7 +6,7 @@ Besides, a site indexer is also built in and can be used to generate a static si
 
 This extension is available for Chromium-based browsers (Google Chrome, Opera, Vivaldi, etc.), and Firefox for Desktop and Android.
 
-Download: [for Google Chrome](https://chrome.google.com/webstore/detail/web-scrapbook/oegnpmiddfljlloiklpkeelagaeejfai), [for Firefox](https://addons.mozilla.org/firefox/addon/web-scrapbook/)
+Download: [for Google Chrome](https://chrome.google.com/webstore/detail/web-scrapbook/oegnpmiddfljlloiklpkeelagaeejfai), [for Firefox](https://addons.mozilla.org/firefox/addon/web-scrapbook/) ([beta](https://danny0838.github.io/webscrapbook/files/firefox/latest.html))
 
 ## See also:
 
