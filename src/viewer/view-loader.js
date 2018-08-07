@@ -9,7 +9,25 @@
     chrome.runtime.getURL('viewer/view.js'),
   ];
 
-  if (true) {
+  const parseContentSecurityPolicy = function (policy) {
+    return policy.split(';').reduce((result, directive) => {
+      const trimmed = directive.trim();
+      if (!trimmed) { return result; }
+
+      const split = trimmed.split(/\s+/g);
+      const key = split.shift();
+
+      if (!result.hasOwnProperty(key)) {
+        result[key] = split;
+      }
+
+      return result;
+    }, {});
+  };
+
+  const csp = parseContentSecurityPolicy(chrome.runtime.getManifest()['content_security_policy'] || '');
+
+  if (csp['script-src'] && csp['script-src'].includes('blob:')) {
     // if script-src blob: is allowed in CSP
     const loadScripts = (urls) => {
       const tasks = urls.map((url) => {
