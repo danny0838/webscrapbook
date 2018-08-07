@@ -38,6 +38,25 @@
   URL,
 ) {
 ${scripts.join('\n')}
+
+/* sets the method in viewer/view.js */
+viewer.deApiScript = function () {
+  [
+    [window, "browser"],
+    [window, "chrome"],
+    [window, "indexedDB"],
+    [window, "localStorage"],
+    [window, "sessionStorage"],
+    [window, "XMLHttpRequest"],
+    [window, "fetch"],
+    [window.URL, "createObjectURL"],
+  ].forEach(([object, property]) => {
+    if (typeof object[property] !== "undefined") {
+      object[property] = undefined;
+      delete(object[property]);
+    }
+  });
+};
 })(
   window,
   typeof browser !== "undefined" && browser || undefined,

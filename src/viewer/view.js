@@ -28,28 +28,20 @@ const viewer = {
   //
   // We minimize the risk by removing privileged APIs from this page and all
   // frames serving the web page content.
-  deApiScript: function () {
-    [
-      [window, "browser"],
-      [window, "chrome"],
-      [window, "indexedDB"],
-      [window, "localStorage"],
-      [window, "sessionStorage"],
-      [window, "XMLHttpRequest"],
-      [window, "fetch"],
-      [window.URL, "createObjectURL"],
-    ].forEach(([object, property]) => {
-      if (typeof object[property] !== "undefined") {
-        object[property] = undefined;
-        delete(object[property]);
-      }
-    });
-  },
-  get deApiScriptUrl() {
-    const text = "(" + this.deApiScript.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")()";
-    const url = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
-    delete viewer.deApiScriptUrl;
-    return viewer.deApiScriptUrl = url;
+  insertDeApiScript: function (doc) {
+    if (!viewer.deApiScript) { return; }
+
+    const self = arguments.callee;
+    if (!self.deApiScriptUrl) {
+      const text = "(" + viewer.deApiScript.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")()";
+      const url = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
+      self.deApiScriptUrl = url;
+    }
+
+    const elem = doc.createElement("script");
+    elem.src = self.deApiScriptUrl;
+    const head = doc.querySelector("head");
+    head.insertBefore(elem, head.firstChild);
   },
   inZipFiles: new Map(),
   blobUrlToInZipPath: new Map(),
@@ -590,12 +582,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
       });
 
       // Remove privileged APIs to avoid a potential security risk.
-      {
-        const elem = doc.createElement("script");
-        elem.src = viewer.deApiScriptUrl;
-        const head = doc.querySelector("head");
-        head.insertBefore(elem, head.firstChild);
-      }
+      viewer.insertDeApiScript(doc);
 
       return Promise.all(tasks).then((results) => {
         const content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
@@ -875,7 +862,7 @@ loadOptions.then(() => {
       // An error happens if browser.* is called when window.chrome
       // is removed in Chrome, so defer the removal until extension
       // APIs are no more needed.
-      viewer.deApiScript();
+      if (viewer.deApiScript) { viewer.deApiScript(); }
     }).then(() => {
       return viewer.fetchPage({
         inZipPath: indexFile,
