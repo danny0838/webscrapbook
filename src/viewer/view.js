@@ -315,6 +315,13 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                   console.error(ex);
                 });
               }
+
+              // In Chromium, "blob:" is still allowed even if it's not set in the
+              // content_security_policy, and thus offensive scripts could run.
+              // Replace the src with a dummy URL so that scripts are never loaded.
+              if (elem.src.startsWith('blob:') && !viewer.hasCsp) {
+                elem.setAttribute("src", "blob:");
+              }
             } else {
               // Inline scripts are not allowed by extension CSP, convert them into
               // blob URLs as a shim.
