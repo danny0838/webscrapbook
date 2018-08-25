@@ -58,6 +58,7 @@
 ${scripts.join('\n')}
 
 /* sets the method in viewer/view.js */
+viewer.hasCsp = true;
 viewer.deApiScript = function () {
   [
     [window, "browser"],

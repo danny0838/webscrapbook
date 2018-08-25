@@ -301,7 +301,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
               // External scripts are not allowed by extension CSP, retrieve and 
               // convert them into blob URLs as a shim.
-              if (!elem.src.startsWith('blob:')) {
+              if (!elem.src.startsWith('blob:') && viewer.hasCsp) {
                 tasks[tasks.length] = 
                 scrapbook.xhr({
                   url: elem.src,
@@ -318,10 +318,12 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
             } else {
               // Inline scripts are not allowed by extension CSP, convert them into
               // blob URLs as a shim.
-              const text = elem.textContent;
-              if (text) {
-                elem.src = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
-                elem.textContent = "";
+              if (viewer.hasCsp) {
+                const text = elem.textContent;
+                if (text) {
+                  elem.src = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
+                  elem.textContent = "";
+                }
               }
             }
             break;
@@ -446,7 +448,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               // External resources are not allowed by extension CSP, retrieve and 
               // convert them into blob URLs as a shim.
               const url = elem.getAttribute("src");
-              if (!url.startsWith('blob:')) {
+              if (!url.startsWith('blob:') && viewer.hasCsp) {
                 tasks[tasks.length] = 
                 scrapbook.xhr({
                   url,
@@ -476,7 +478,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               // External resources are not allowed by extension CSP, retrieve and 
               // convert them into blob URLs as a shim.
               const url = elem.getAttribute("data");
-              if (!url.startsWith('blob:')) {
+              if (!url.startsWith('blob:') && viewer.hasCsp) {
                 tasks[tasks.length] = 
                 scrapbook.xhr({
                   url,
@@ -506,7 +508,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               // External resources are not allowed by extension CSP, retrieve and 
               // convert them into blob URLs as a shim.
               const url = elem.getAttribute("code");
-              if (!url.startsWith('blob:')) {
+              if (!url.startsWith('blob:') && viewer.hasCsp) {
                 tasks[tasks.length] = 
                 scrapbook.xhr({
                   url,
@@ -533,7 +535,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               // External resources are not allowed by extension CSP, retrieve and 
               // convert them into blob URLs as a shim.
               const url = elem.getAttribute("archive");
-              if (!url.startsWith('blob:')) {
+              if (!url.startsWith('blob:') && viewer.hasCsp) {
                 tasks[tasks.length] = 
                 scrapbook.xhr({
                   url,
@@ -582,7 +584,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
       });
 
       // Remove privileged APIs to avoid a potential security risk.
-      viewer.insertDeApiScript(doc);
+      if (viewer.hasCsp) { viewer.insertDeApiScript(doc); }
 
       return Promise.all(tasks).then((results) => {
         const content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
@@ -862,7 +864,7 @@ loadOptions.then(() => {
       // An error happens if browser.* is called when window.chrome
       // is removed in Chrome, so defer the removal until extension
       // APIs are no more needed.
-      if (viewer.deApiScript) { viewer.deApiScript(); }
+      if (viewer.hasCsp) { viewer.deApiScript(); }
     }).then(() => {
       return viewer.fetchPage({
         inZipPath: indexFile,
