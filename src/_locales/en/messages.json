@@ -1,4 +1,10 @@
 {
+  "CaptureFollowingTabs": {
+    "message": "Capture to the right"
+  },
+  "CaptureFollowingTabsTooltip": {
+    "message": "Capture the current tab and all tabs at it's right side."
+  },
   "CaptureFrame": {
     "message": "Capture frame"
   },
@@ -27,7 +33,7 @@
     "message": "Capture Page (source)"
   },
   "CaptureSelection": {
-    "message": "Capture selected area"
+    "message": "Capture selected range(s)"
   },
   "CaptureTab": {
     "message": "Capture tab"
@@ -35,11 +41,17 @@
   "CaptureTabBookmark": {
     "message": "Capture tab (bookmark)"
   },
+  "CaptureTabBookmarkTooltip": {
+    "message": "Capture current tab as a bookmark page, which redirects to the source page when navigated."
+  },
   "CaptureTabSource": {
     "message": "Capture tab (source)"
   },
-  "CaptureFollowingTabs": {
-    "message": "Capture following tabs"
+  "CaptureTabSourceTooltip": {
+    "message": "Capture the original status of the current page (before processed by scripts)."
+  },
+  "CaptureTabTooltip": {
+    "message": "Capture the current status of the current tab. Only the selected range(s) is captured if there's a selection."
   },
   "CapturerTitle": {
     "message": "Capture page"
