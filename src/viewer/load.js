@@ -246,6 +246,13 @@ const viewer = {
 
       // In Firefox < 58, browser.tabs is undefined when redirected to load.html
       return browser.tabs && browser.tabs.getCurrent().then((tab) => {
+        // In Chromium >= 68, top-frame navigation to filesystem URLs is blocked,
+        // making filesystem view useless.
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=811558
+        if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.major >= 68) {
+          return;
+        }
+
         // filesystem scheme never works in an incognito window,
         // but sometimes the requestFileSystem call doesn't throw, 
         // and an error occurs afterwards instead. Add a check
