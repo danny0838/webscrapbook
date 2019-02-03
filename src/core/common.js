@@ -10,11 +10,80 @@
 
 let isDebug = false;
 let scrapbook = {
-  get isGecko() {
-    let m = chrome.runtime.getManifest();
-    delete this.isGecko;
-    return this.isGecko = !!(m.applications && m.applications.gecko);
-  }
+  /**
+   * ref: source code of vAPI.webextFlavor of uBlock Origin
+   */
+  get userAgent() {
+    const ua = navigator.userAgent;
+    const manifest = chrome.runtime.getManifest();
+
+    const soup = new Set(['webext']);
+    const flavor = {
+      major: 0,
+      soup: soup,
+      is: (value) => soup.has(value),
+    };
+
+    const dispatch = function() {
+      window.dispatchEvent(new CustomEvent('browserInfoLoaded'));
+    };
+
+    // Whether this is a dev build.
+    if (/^\d+\.\d+\.\d+\D/.test(chrome.runtime.getManifest().version)) {
+      soup.add('devbuild');
+    }
+
+    if (/\bMobile\b/.test(ua)) {
+      soup.add('mobile');
+    }
+
+    // Asynchronous -- more accurate detection for Firefox
+    Promise.resolve().then(() => {
+      return browser.runtime.getBrowserInfo();
+    }).then((info) => {
+      flavor.major = parseInt(info.version, 10) || 0;
+      soup.add(info.vendor.toLowerCase());
+      soup.add(info.name.toLowerCase());
+      dispatch();
+    }, (ex) => {
+      // dummy event for potential listeners
+      dispatch();
+    }).catch((ex) => {
+      console.error(ex);
+    });
+
+    // Synchronous -- order of tests is important
+    let match;
+    if ((match = /\bFirefox\/(\d+)/.exec(ua)) !== null) {
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('mozilla').add('firefox');
+    } else if ((match = /\bEdge\/(\d+)/.exec(ua)) !== null) {
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('microsoft').add('edge');
+    } else if ((match = /\bOPR\/(\d+)/.exec(ua)) !== null) {
+      const reEx = /\bChrom(?:e|ium)\/([\d.]+)/;
+      if (reEx.test(ua)) { match = reEx.exec(ua); }
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('opera').add('chromium');
+    } else if ((match = /\bChromium\/(\d+)/.exec(ua)) !== null) {
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('chromium');
+    } else if ((match = /\bChrome\/(\d+)/.exec(ua)) !== null) {
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('google').add('chromium');
+    } else if ((match = /\bSafari\/(\d+)/.exec(ua)) !== null) {
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('apple').add('safari');
+    }
+
+    if (manifest.applications && manifest.applications.gecko) {
+      soup.add('gecko');
+    }
+
+    Object.defineProperty(this, 'userAgent', { value: flavor });
+    return flavor;
+  },
+
 };
 
 
@@ -157,7 +226,7 @@ scrapbook.cache = {
 
   get current() {
     if (this._current === 'auto') {
-      if (scrapbook.isGecko) {
+      if (scrapbook.userAgent.is('gecko')) {
         this.current = 'storage';
       } else {
         this.current = 'indexedDB';
@@ -532,10 +601,10 @@ scrapbook.getContentPagePattern = function () {
  * @param {boolean} isAllowedFileSchemeAccess - Optional for better accuracy.
  * @return {string} Whether the page url is allowed for content scripts.
  */
-scrapbook.isContentPage = function (url, isAllowedFileSchemeAccess = !scrapbook.isGecko) {
+scrapbook.isContentPage = function (url, isAllowedFileSchemeAccess = !scrapbook.userAgent.is('gecko')) {
   const filter = new RegExp(`^(?:https?${isAllowedFileSchemeAccess ? "|file" : ""}):`);
   if (!filter.test(url)) { return false; }
-  if (scrapbook.isGecko) {
+  if (scrapbook.userAgent.is('gecko')) {
     if (url.startsWith("https://addons.mozilla.org/")) { return false; }
   } else {
     if (url.startsWith("https://chrome.google.com/webstore/")) { return false; }

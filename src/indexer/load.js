@@ -359,7 +359,7 @@ const indexer = {
                       // when a FileSystemFileEntry read from a FileSystemDirectoryEntry
                       // calls file().
                       // https://bugzilla.mozilla.org/show_bug.cgi?id=1424689
-                      if (scrapbook.isGecko) {
+                      if (scrapbook.userAgent.is('gecko')) {
                         file = new File([file], file.name, {
                           type: Mime.lookup(file.name),
                           lastModified: file.lastModified,
@@ -1826,7 +1826,7 @@ const indexer = {
         /* Download the blob */
         const filename = `${scrapbookData.title}.zip`;
 
-        if (scrapbook.isGecko) {
+        if (scrapbook.userAgent.is('gecko')) {
           // Firefox has a bug that the screen turns unresponsive
           // when an addon page is redirected to a blob URL.
           // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419

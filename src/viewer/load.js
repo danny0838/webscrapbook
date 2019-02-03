@@ -5,17 +5,6 @@
  * @require {Object} scrapbook
  *******************************************************************/
 
-let _isFxBelow56;
-Promise.resolve().then(() => {
-  return browser.runtime.getBrowserInfo();
-}).then((info) => {
-  _isFxBelow56 =
-      (info.name === 'Firefox' || info.name === 'Fennec') &&
-      parseInt(info.version.match(/^(\d+)\./)[1], 10) < 56;
-}).catch((ex) => {
-  _isFxBelow56 = false;
-});
-
 /**
  * We usually get:
  *
@@ -213,7 +202,7 @@ const viewer = {
         // browser.tabs.create fails silently in Firefox private window.
         //
         // browser.tabs is undefined in a Firefox addon page in a frame.
-        if (scrapbook.isGecko) {
+        if (scrapbook.userAgent.is('gecko')) {
           return Promise.resolve().then(() => {
             return browser.tabs.getCurrent().then((tab) => {
               if (tab.incognito) { throw new Error('private window'); }
@@ -398,7 +387,7 @@ const viewer = {
               // fallback to byte string.
               if (scrapbook.cache.current === 'storage' &&
                   !viewer.filesystem &&
-                  (_isFxBelow56 || !scrapbook.isGecko)) {
+                  (scrapbook.userAgent.major < 56 || scrapbook.userAgent.is('chromium'))) {
                 data = scrapbook.arrayBufferToByteString(ab);
               } else {
                 data = new Blob([ab], {type: mime});

@@ -7,9 +7,6 @@
  * @require {Object} capturer
  *******************************************************************/
 
-let _isFxBelow52;
-let _isFxAndroid;
-
 capturer.isContentScript = false;
 
 // missionId is fixed to this page, to identify the capture mission
@@ -1405,7 +1402,7 @@ capturer.saveBlobNaturally = function (params) {
         onError: reject,
       });
 
-      if (scrapbook.isGecko) {
+      if (scrapbook.userAgent.is('gecko')) {
         // Firefox has a bug that the screen turns unresponsive
         // when an addon page is redirected to a blob URL.
         // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
@@ -1531,7 +1528,8 @@ capturer.saveUrl = function (params) {
 
     // Firefox < 52 gets an error if saveAs is defined
     // Firefox Android gets an error if saveAs = true
-    if (!_isFxBelow52 && !_isFxAndroid) {
+    if (!(scrapbook.userAgent.is('gecko') &&
+        (scrapbook.userAgent.major < 52 || scrapbook.userAgent.is('mobile')))) {
       downloadParams.saveAs = savePrompt;
     }
 
@@ -1596,7 +1594,7 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
   //
   // We wait until the user clicks save (or cancel in Chrome) to resolve
   // the Promise (and then the window may close).
-  if (scrapbook.isGecko) {
+  if (scrapbook.userAgent.is('gecko')) {
     downloadInfo.get(url).onComplete(scrapbook.filepathParts(filename)[1]);
   } else {
     downloadInfo.set(id, downloadInfo.get(url));
@@ -1643,16 +1641,6 @@ document.addEventListener("DOMContentLoaded", function () {
   capturer.downloader = document.getElementById('downloader');
 
   scrapbook.loadOptions().then(() => {
-    return Promise.resolve().then(() => {
-      return browser.runtime.getBrowserInfo();
-    }).then((info) => {
-      _isFxBelow52 = parseInt(info.version.match(/^(\d+)\./)[1], 10) < 52;
-      _isFxAndroid = (info.name === 'Fennec');
-    }).catch((ex) => {
-      _isFxBelow52 = false;
-      _isFxAndroid = false;
-    });
-  }).then(() => {
     const urlObj = new URL(document.URL);
     const s = urlObj.searchParams;
     const missionId = s.get('mid');

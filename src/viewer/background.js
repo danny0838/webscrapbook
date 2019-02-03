@@ -7,17 +7,6 @@
 
 (function (window, undefined) {
 
-let _isFxBelow56;
-Promise.resolve().then(() => {
-  return browser.runtime.getBrowserInfo();
-}).then((info) => {
-  _isFxBelow56 =
-      (info.name === 'Firefox' || info.name === 'Fennec') &&
-      parseInt(info.version.match(/^(\d+)\./)[1], 10) < 56;
-}).catch((ex) => {
-  _isFxBelow56 = false;
-});
-
 function redirectUrl(tabId, type, url, filename, mime) {
   if (mime === "application/html+zip" && scrapbook.getOption("viewer.viewHtz")) {
     // redirect
@@ -49,7 +38,7 @@ function redirectUrl(tabId, type, url, filename, mime) {
     //
     // Using data URI with meta or javascript refresh works but generates
     // an extra history entry.
-    if (_isFxBelow56) {
+    if (scrapbook.userAgent.major < 56) {
       chrome.tabs.update(tabId, {url: newUrl});
       return {cancel: true};
     }
@@ -62,7 +51,7 @@ function redirectUrl(tabId, type, url, filename, mime) {
     // Firefox < 56 does not allow redirecting a page to an extension page,
     // even if whom is listed in web_accessible_resources.  The redirect
     // fails silently without throwing.
-    if (!scrapbook.isGecko || _isFxBelow56) {
+    if (scrapbook.userAgent.is('chromium') || scrapbook.userAgent.major < 56) {
       const html = `<!DOCTYPE html>
 <html dir="${scrapbook.lang('@@bidi_dir')}">
 <head>
