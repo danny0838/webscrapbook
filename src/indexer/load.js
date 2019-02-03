@@ -3352,7 +3352,7 @@ const searchEngine = {
 <ul id="result"></ul>
 </div>
 <div id="support">
-Supported browsers: Chrome ≥ 49, Firefox ≥ 41, Edge ≥ 14, Safari ≥ 8, with JavaScript enabled.
+Supported browsers: Chromium ≥ 49, Firefox ≥ 41, Edge ≥ 14, Safari ≥ 8, with JavaScript enabled.
 </div>
 <script>scrapbook.init();</script>
 </body>
