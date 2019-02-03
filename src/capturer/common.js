@@ -599,7 +599,7 @@ capturer.captureDocument = function (params) {
         const parseCss = function (css, refUrl) {
           // @FIXME: cssRules not accessible for cross-origin CSS
           // In Firefox, CSS from a different domain throws a SecurityError when accessing .cssRules
-          // In Chrome, CSS from a different domain gets .cssRules = null
+          // In Chromium, CSS from a different domain gets .cssRules = null
           try {
             if (!css.cssRules) { throw new Error('CSS rules not accessible'); }
           } catch (ex) {

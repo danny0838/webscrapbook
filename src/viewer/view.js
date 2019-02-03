@@ -788,7 +788,7 @@ loadOptions.then(() => {
             location.href = url;
           } else {
             // a relative link targeting a non-existed file in the zip, e.g. 'nonexist.html'
-            // in Chrome, url.href is ''
+            // in Chromium, url.href is ''
             // in Firefox, url.href is raw 'nonexist.html'
             e.preventDefault();
             e.stopPropagation();
@@ -869,7 +869,7 @@ loadOptions.then(() => {
     }).then(() => {
       // remove privileged APIs in this page
       // An error happens if browser.* is called when window.chrome
-      // is removed in Chrome, so defer the removal until extension
+      // is removed in Chromium, so defer the removal until extension
       // APIs are no more needed.
       if (viewer.hasCsp) { viewer.deApiScript(); }
     }).then(() => {

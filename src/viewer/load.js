@@ -365,7 +365,7 @@ const viewer = {
       };
 
       // @TODO: JSZip.loadAsync cannot load a large zip file
-      //     (around 2GB, tested in Chrome)
+      //     (around 2GB, tested on Google Chrome)
       return new JSZip().loadAsync(zipFile).then((zip) => {
         let p = Promise.resolve();
         zip.forEach((inZipPath, zipObj) => {

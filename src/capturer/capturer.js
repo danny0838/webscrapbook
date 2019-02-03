@@ -153,7 +153,7 @@ capturer.captureTab = function (params) {
             }).then((result) => {
               return browser.tabs.executeScript(tabId, {frameId, file: "/capturer/content.js"});
             }).catch((ex) => {
-              // Chrome may be failed to inject content script to some pages due to unclear reason.
+              // Chromium may fail to inject content script to some pages due to unclear reason.
               // Record the error and pass.
               console.error(ex);
               const source = `[${tabId}:${frameId}] ${url}`;
@@ -1323,7 +1323,7 @@ capturer.downloadBlob = function (params) {
       case "singleHtml": {
         return scrapbook.readFileAsDataURL(blob).then((dataUri) => {
           if (dataUri === "data:") {
-            // Chrome returns "data:" if the blob is zero byte. Add the mimetype.
+            // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
             dataUri = `data:${blob.type};base64,`;
           }
           if (filename) {
@@ -1586,13 +1586,13 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
   const {id, url, filename} = downloadItem;
   if (!downloadInfo.has(url)) { return; }
 
-  // In Chrome, the onCreated is fired when the "Save as" prompt popups.
+  // In Chromium, the onCreated is fired when the "Save as" prompt popups.
   //
   // In Firefox, the onCreated is fired only when the user clicks
   // save in the "Save as" prompt, and no event if the user clicks
   // cancel.
   //
-  // We wait until the user clicks save (or cancel in Chrome) to resolve
+  // We wait until the user clicks save (or cancel in Chromium) to resolve
   // the Promise (and then the window may close).
   if (scrapbook.userAgent.is('gecko')) {
     downloadInfo.get(url).onComplete(scrapbook.filepathParts(filename)[1]);

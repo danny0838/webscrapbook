@@ -5,7 +5,7 @@
  * @public {Object} browser
  *******************************************************************/
 
-/* polyfill for browser API in Chrome */
+/* polyfill for browser API in Chromium */
 if (typeof browser === "undefined" && typeof chrome !== "undefined") {
   var browser = window.browser = {
     downloads: {

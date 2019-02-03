@@ -215,7 +215,7 @@ scrapbook.saveOptions = function () {
 /********************************************************************
  * Cache
  * 
- * Use indexedDB for Chrome since storing Blobs is not supported.
+ * Use indexedDB for Chromium since storing Blobs is not supported.
  * 
  * Use storage API for Firefox since storing Blobs is supported, and
  * indexedDB is not available for private windows.
