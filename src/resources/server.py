@@ -10,6 +10,7 @@ import urllib.parse
 from http import HTTPStatus
 from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
 import ssl
+import socketserver
 
 # init global variables
 config = {
@@ -24,6 +25,11 @@ config = {
     "browse": "true",
     "entry": "tree/frame.html"
     }
+
+class ThreadingHTTPServer(socketserver.ThreadingMixIn, HTTPServer):
+    """See Python 3.7 implementation of ThreadingHTTPServer in http/server.py
+    """
+    daemon_threads = True
 
 class HTTPRequestHandler(SimpleHTTPRequestHandler):
 
@@ -143,7 +149,7 @@ def load_server_config(path, encoding='UTF-8', **kwargs):
         config[key] = c[key]
 
 def start_server(HandlerClass=HTTPRequestHandler,
-            ServerClass=HTTPServer,
+            ServerClass=ThreadingHTTPServer,
             protocol="HTTP/1.0", host='localhost', port=8000, bind="",
             ssl_on=False, ssl_key=None, ssl_cert=None):
     HandlerClass.protocol_version = protocol
