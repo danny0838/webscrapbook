@@ -68,13 +68,15 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
             else:
                 return self.list_directory(path)
 
-        # hand sub-archive path
+        # handle sub-archive path
         for m in re.finditer(r'![/\\]', path, flags=re.I):
             p = path[:m.start(0)]
             if os.path.isfile(p):
                 try:
                     with zipfile.ZipFile(p) as zip:
                         s = path[m.end(0):].replace('\\', '/')
+
+                        # KeyError is raised if path s does not exist
                         info = zip.getinfo(s)
 
                         if info.is_dir():
@@ -106,7 +108,7 @@ class HTTPRequestHandler(SimpleHTTPRequestHandler):
                     for entry in zip.namelist():
                         if zip.getinfo(entry).is_dir():
                             subpath = entry + "index.html"
-                            break;
+                            break
 
             parts = urllib.parse.urlsplit(self.path)
             new_parts = (parts[0], parts[1], parts[2] + '!/' + subpath,
