@@ -2291,6 +2291,7 @@ var scrapbook = {
         srcLink.href = meta.source;
         srcLink.title = "${scrapbook.escapeQuotes(scrapbook.lang('IndexerSourceLinkTitle'))}";
         div.appendChild(srcLink);
+        srcLink.target = "_blank";
 
         var srcImg = document.createElement('img');
         srcImg.src = 'icon/external.png';
