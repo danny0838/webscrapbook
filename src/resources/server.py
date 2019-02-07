@@ -17,7 +17,7 @@ config = {
     "port": "8080",
     "bind": "127.0.0.1",
     "host": "localhost",
-    "protocol": "HTTP/1.1",
+    "protocol": "HTTP/1.0",
     "ssl_on": "false",
     "ssl_key": "",
     "ssl_cert": "",
