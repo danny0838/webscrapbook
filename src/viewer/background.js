@@ -12,7 +12,7 @@ function redirectUrl(tabId, type, url, filename, mime) {
     // redirect
   } else if (mime === "application/x-maff" && scrapbook.getOption("viewer.viewMaff")) {
     // redirect
-  } else if (mime === "application/octet-stream" || mime === "application/zip") {
+  } else if (mime === "application/octet-stream" || mime === "application/zip" || !mime) {
     const pathname = (filename || url.pathname).toLowerCase();
     if (pathname.endsWith(".htz") && scrapbook.getOption("viewer.viewHtz")) {
       // redirect
