@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return capturer.invokeCapture({target, mode});
         });
       } else {
-        generateActionButtonForTabs(document.getElementById("captureTabSource"), (tab) => {
+        generateActionButtonForTabs(document.getElementById("captureTabBookmark"), (tab) => {
           const target = tab.id;
           return capturer.invokeCapture({target, mode});
         });
