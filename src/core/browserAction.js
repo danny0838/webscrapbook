@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selector = document.createElement("div");
       base.parentNode.insertBefore(selector, base.nextSibling);
     }
-    capturer.getContentTabs().then((tabs) => {
+    return capturer.getContentTabs().then((tabs) => {
       tabs.forEach((tab) => {
         let elem = document.createElement("button");
         elem.classList.add("sub");
@@ -42,31 +42,39 @@ document.addEventListener('DOMContentLoaded', () => {
     a.remove();
   };
 
-  chrome.tabs.getCurrent((currentTab) => {
+  return browser.tabs.getCurrent().then((currentTab) => {
     // currentTab === undefined => browserAction.html is a prompt diaglog;
-    //     else browserAction.html is in a tab (or Firefox Android)
-    if (!currentTab) {
+    // otherwise browserAction.html is opened in a tab (e.g. Firefox Android)
+    const isPrompt = !currentTab;
+    
+    return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
+      const activeTab = tabs[0];
+
+      // Get a target tab whenever determinable.
+      // activeTab is the page where user clicks browserAction on Firefox for Android.
+      // activeTab === currentTab if the user visits browserAction page by visiting URL.
+      const targetTab = (isPrompt || activeTab && activeTab.id !== currentTab.id)  ? activeTab : undefined;
+
+      return {isPrompt, activeTab, targetTab};
+    });
+  }).then(({isPrompt, activeTab, targetTab}) => {
+    if (targetTab) {
       // disable capture options if active tab is not a valid content page
-      browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
-        let activeTab = tabs[0];
-        return browser.extension.isAllowedFileSchemeAccess().then((isAllowedFileSchemeAccess) => {
-          if (!scrapbook.isContentPage(activeTab.url, isAllowedFileSchemeAccess)) {
-            document.getElementById("captureTab").disabled = true;
-            document.getElementById("captureTabSource").disabled = true;
-            document.getElementById("captureTabBookmark").disabled = true;
-          }
-        });
+      browser.extension.isAllowedFileSchemeAccess().then((isAllowedFileSchemeAccess) => {
+        if (!scrapbook.isContentPage(targetTab.url, isAllowedFileSchemeAccess)) {
+          document.getElementById("captureTab").disabled = true;
+          document.getElementById("captureTabSource").disabled = true;
+          document.getElementById("captureTabBookmark").disabled = true;
+        }
       });
     }
 
     document.getElementById("captureTab").addEventListener('click', (event) => {
-      if (!currentTab) {
-        return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
-          const target = tabs[0].id;
-          return capturer.invokeCapture({target});
-        });
+      if (targetTab) {
+        const target = targetTab.id;
+        return capturer.invokeCapture({target});
       } else {
-        generateActionButtonForTabs(document.getElementById("captureTab"), (tab) => {
+        return generateActionButtonForTabs(document.getElementById("captureTab"), (tab) => {
           const target = tab.id;
           return capturer.invokeCapture({target});
         });
@@ -75,13 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById("captureTabSource").addEventListener('click', (event) => {
       const mode = 'source';
-      if (!currentTab) {
-        return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
-          const target = tabs[0].id;
-          return capturer.invokeCapture({target, mode});
-        });
+      if (targetTab) {
+        const target = targetTab.id;
+        return capturer.invokeCapture({target, mode});
       } else {
-        generateActionButtonForTabs(document.getElementById("captureTabSource"), (tab) => {
+        return generateActionButtonForTabs(document.getElementById("captureTabSource"), (tab) => {
           const target = tab.id;
           return capturer.invokeCapture({target, mode});
         });
@@ -90,13 +96,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById("captureTabBookmark").addEventListener('click', (event) => {
       const mode = 'bookmark';
-      if (!currentTab) {
-        return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
-          const target = tabs[0].id;
-          return capturer.invokeCapture({target, mode});
-        });
+      if (targetTab) {
+        const target = targetTab.id;
+        return capturer.invokeCapture({target, mode});
       } else {
-        generateActionButtonForTabs(document.getElementById("captureTabBookmark"), (tab) => {
+        return generateActionButtonForTabs(document.getElementById("captureTabBookmark"), (tab) => {
           const target = tab.id;
           return capturer.invokeCapture({target, mode});
         });
@@ -116,15 +120,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById("openViewer").addEventListener('click', (event) => {
-      visitLink(chrome.runtime.getURL("viewer/load.html"), (!currentTab ? '_blank' : ''));
+      visitLink(chrome.runtime.getURL("viewer/load.html"), (isPrompt ? '_blank' : ''));
     });
 
     document.getElementById("openIndexer").addEventListener('click', (event) => {
-      visitLink(chrome.runtime.getURL("indexer/load.html"), (!currentTab ? '_blank' : ''));
+      visitLink(chrome.runtime.getURL("indexer/load.html"), (isPrompt ? '_blank' : ''));
     });
 
     document.getElementById("openOptions").addEventListener('click', (event) => {
-      visitLink(chrome.runtime.getURL("core/options.html"), (!currentTab ? 'browseraction' : ''));
+      visitLink(chrome.runtime.getURL("core/options.html"), (isPrompt ? 'browseraction' : ''));
     });
   });
 });
