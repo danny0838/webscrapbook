@@ -1573,6 +1573,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (fn) {
       fn(message.args).then((response) => {
         sendResponse(response);
+      }).catch((ex) => {
+        const err = `Unexpected error: ${ex.message}`;
+        capturer.error(err);
       });
       return true; // async response
     }
