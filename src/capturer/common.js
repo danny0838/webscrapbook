@@ -639,7 +639,8 @@ capturer.captureDocument = function (params) {
             case CSSRule.FONT_FACE_RULE: {
               if (!cssRule.cssText) { break; }
 
-              const {fontFamily, src} = cssRule.style;
+              const fontFamily = cssRule.style.getPropertyValue('font-family');
+              const src = cssRule.style.getPropertyValue('src');
 
               if (!fontFamily || !src) { break; }
 
