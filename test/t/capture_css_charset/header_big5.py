@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: Big5 -*-
-print("Content-Type: text/css;charset=Big5")
-print("")
-print("""#test1::after { content: "¤¤¤å"; }""")
+import sys
+sys.stdout.buffer.write("""Content-Type: text/css;charset=Big5
+
+#test1::after { content: "ä¸­æ–‡"; }""".encode("Big5"))
