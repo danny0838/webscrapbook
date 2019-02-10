@@ -24,13 +24,13 @@
     "message": "Capture media"
   },
   "CapturePage": {
-    "message": "Capture Page"
+    "message": "Capture page"
   },
   "CapturePageBookmark": {
-    "message": "Capture Page (bookmark)"
+    "message": "Capture page (bookmark)"
   },
   "CapturePageSource": {
-    "message": "Capture Page (source)"
+    "message": "Capture page (source)"
   },
   "CaptureSelection": {
     "message": "Capture selected range(s)"
