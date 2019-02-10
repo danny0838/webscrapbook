@@ -1716,6 +1716,10 @@ document.addEventListener("DOMContentLoaded", function () {
       return p.then(() => {
         return hasError;
       });
+    } else if (!urlObj.search) {
+      capturer.error(`Nothing to capture.`);
+
+      return true;
     } else {
       capturer.error(`Unexpected error: Parameters not supported.`);
 
