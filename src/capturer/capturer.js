@@ -88,7 +88,7 @@ capturer.getUniqueFilename = function (timeId, filename) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {Tab} params.tab
+ *     - {integer} params.tabId
  *     - {integer} params.frameId
  *     - {boolean} params.saveBeyondSelection
  *     - {string} params.mode
@@ -97,80 +97,83 @@ capturer.getUniqueFilename = function (timeId, filename) {
  */
 capturer.captureTab = function (params) {
   return Promise.resolve().then(() => {
-    const {tab, frameId, saveBeyondSelection, mode, options} = params;
-    const {id: tabId, url, title, favIconUrl} = tab;
+    const {tabId, frameId, saveBeyondSelection, mode, options} = params;
 
-    // redirect headless capture
-    // if frameId not provided, use current tab title and favIcon
-    if (mode === "bookmark" || mode === "source") {
+    return browser.tabs.get(tabId).then((tab) => {
+      const {url, title, favIconUrl} = tab;
+
+      // redirect headless capture
+      // if frameId not provided, use current tab title and favIcon
+      if (mode === "bookmark" || mode === "source") {
+        return Promise.resolve().then(() => {
+          if (isNaN(frameId)) { return {url, title, favIconUrl}; }
+          return browser.webNavigation.getFrame({tabId, frameId});
+        }).then((details) => {
+          const {url, title, favIconUrl} = details;
+          return capturer.captureHeadless({url, title, favIconUrl, mode, options});
+        });
+      }
+
+      const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
+      const timeId = scrapbook.dateToId();
+      const message = {
+        settings: {
+          missionId: capturer.missionId,
+          timeId,
+          frameIsMain: true,
+          documentName: "index",
+          recurseChain: [],
+          favIconUrl,
+        },
+        options: Object.assign(scrapbook.getOptions("capture"), options),
+      };
+
+      // save whole page beyond selection?
+      message.options["capture.saveBeyondSelection"] = !!saveBeyondSelection;
+
       return Promise.resolve().then(() => {
-        if (isNaN(frameId)) { return {url, title, favIconUrl}; }
-        return browser.webNavigation.getFrame({tabId, frameId});
-      }).then((details) => {
-        const {url, title, favIconUrl} = details;
-        return capturer.captureHeadless({url, title, favIconUrl, mode, options});
-      });
-    }
+        // Simply detect the main frame and executeScript for allFrames doesn't
+        // work since it's possible that only partial frames have the content
+        // script loaded. E.g. the user ran this when the main frame hadn't been
+        // completed and some subframes hadn't been loaded.
+        isDebug && console.debug("(main) send", source, message);
+        capturer.log(`Capturing (document) ${source} ...`);
+        return browser.webNavigation.getAllFrames({tabId}).then((details) => {
+          const tasks = [];
+          details.forEach((detail) => {
+            const {frameId, url} = detail;
+            if (!scrapbook.isContentPage(url)) { return; }
 
-    const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
-    const timeId = scrapbook.dateToId();
-    const message = {
-      settings: {
-        missionId: capturer.missionId,
-        timeId,
-        frameIsMain: true,
-        documentName: "index",
-        recurseChain: [],
-        favIconUrl,
-      },
-      options: Object.assign(scrapbook.getOptions("capture"), options),
-    };
-
-    // save whole page beyond selection?
-    message.options["capture.saveBeyondSelection"] = !!saveBeyondSelection;
-
-    return Promise.resolve().then(() => {
-      // Simply detect the main frame and executeScript for allFrames doesn't
-      // work since it's possible that only partial frames have the content
-      // script loaded. E.g. the user ran this when the main frame hadn't been
-      // completed and some subframes hadn't been loaded.
-      isDebug && console.debug("(main) send", source, message);
-      capturer.log(`Capturing (document) ${source} ...`);
-      return browser.webNavigation.getAllFrames({tabId}).then((details) => {
-        const tasks = [];
-        details.forEach((detail) => {
-          const {frameId, url} = detail;
-          if (!scrapbook.isContentPage(url)) { return; }
-
-          // Send a test message to check whether content script is loaded.
-          // If no content script, we get an error saying connection cannot be established.
-          tasks[tasks.length] = capturer.invoke("isScriptLoaded", null, {tabId, frameId}).catch((ex) => {
-            isDebug && console.debug("inject content scripts", tabId, frameId, url);
-            return browser.tabs.executeScript(tabId, {frameId, file: "/core/polyfill.js"}).then((result) => {
-              return browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js"});
-            }).then((result) => {
-              return browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js"});
-            }).then((result) => {
-              return browser.tabs.executeScript(tabId, {frameId, file: "/capturer/content.js"});
-            }).catch((ex) => {
-              // Chromium may fail to inject content script to some pages due to unclear reason.
-              // Record the error and pass.
-              console.error(ex);
-              const source = `[${tabId}:${frameId}] ${url}`;
-              const err = scrapbook.lang("ErrorContentScriptExecute", [source, ex.message]);
-              capturer.error(err);
+            // Send a test message to check whether content script is loaded.
+            // If no content script, we get an error saying connection cannot be established.
+            tasks[tasks.length] = capturer.invoke("isScriptLoaded", null, {tabId, frameId}).catch((ex) => {
+              isDebug && console.debug("inject content scripts", tabId, frameId, url);
+              return browser.tabs.executeScript(tabId, {frameId, file: "/core/polyfill.js"}).then((result) => {
+                return browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js"});
+              }).then((result) => {
+                return browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js"});
+              }).then((result) => {
+                return browser.tabs.executeScript(tabId, {frameId, file: "/capturer/content.js"});
+              }).catch((ex) => {
+                // Chromium may fail to inject content script to some pages due to unclear reason.
+                // Record the error and pass.
+                console.error(ex);
+                const source = `[${tabId}:${frameId}] ${url}`;
+                const err = scrapbook.lang("ErrorContentScriptExecute", [source, ex.message]);
+                capturer.error(err);
+              });
             });
           });
+          return Promise.all(tasks);
+        }).then(() => {
+          return capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
         });
-        return Promise.all(tasks);
-      }).then(() => {
-        return capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
+      }).then((response) => {
+        isDebug && console.debug("(main) response", source, response);
+        capturer.captureInfo.delete(timeId);
+        if (response.error) { throw new Error(response.error.message); }
+        return response;
       });
-    }).then((response) => {
-      isDebug && console.debug("(main) response", source, response);
-      capturer.captureInfo.delete(timeId);
-      if (response.error) { throw new Error(response.error.message); }
-      return response;
     }).catch((ex) => {
       console.error(ex);
       const err = `Fatal error: ${ex.message}`;
@@ -1673,11 +1676,8 @@ document.addEventListener("DOMContentLoaded", function () {
       tabFrameList.forEach(({tabId, frameId}) => {
         const source = `[${tabId}:${frameId}]`;
         p = p.then(() => {
-          // throws if the tab has been closed
-          return browser.tabs.get(tabId);
-        }).then((tab) => {
           return capturer.captureTab({
-            tab,
+            tabId,
             frameId,
             saveBeyondSelection,
             mode,

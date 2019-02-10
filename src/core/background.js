@@ -204,7 +204,7 @@ chrome.runtime.onConnectExternal.addListener((port) => {
             return scrapbook.delay(50).then(() => {
               return browser.runtime.sendMessage({
                 cmd: "capturer.captureTab",
-                args: Object.assign({tab: pageTab, settings: {missionId}}, args),
+                args: Object.assign({tabId: pageTab.id, settings: {missionId}}, args),
               });
             }).then((result) => {
               return Promise.all([
