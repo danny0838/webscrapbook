@@ -156,7 +156,6 @@ capturer.captureDocument = function (params) {
     const tasks = [];
     let selection;
     let rootNode, headNode;
-    let favIconNode, favIconUrl;
 
     const origNodeMap = new Map();
     const clonedNodeMap = new Map();
@@ -775,33 +774,6 @@ capturer.captureDocument = function (params) {
         rootNode.setAttribute("data-scrapbook-create", timeId);
       }
 
-      // favicon: the tab favicon
-      if (settings.frameIsMain && settings.favIconUrl) {
-        switch (options["capture.favicon"]) {
-          case "link":
-            favIconUrl = settings.favIconUrl;
-            break;
-          case "blank":
-          case "remove":
-            // do nothing
-            break;
-          case "save":
-          default:
-            favIconUrl = "about:blank";  // temporary placeholder
-            tasks[tasks.length] = 
-            capturer.invoke("downloadFile", {
-              url: settings.favIconUrl,
-              refUrl,
-              settings,
-              options,
-            }).then((response) => {
-              favIconUrl = response.url;
-              return response;
-            });
-            break;
-        }
-      }
-
       // inspect nodes
       let metaCharsetNode;
       Array.prototype.forEach.call(rootNode.querySelectorAll("*"), (elem) => {
@@ -923,7 +895,6 @@ capturer.captureDocument = function (params) {
               break;
             } else if (rels.indexOf("icon") >= 0) {
               // favicon: the link element
-              if (!favIconNode) { favIconNode = elem; }
               switch (options["capture.favicon"]) {
                 case "link":
                   // do nothing
@@ -2026,23 +1997,8 @@ capturer.captureDocument = function (params) {
         }
       }
 
-      // create favicon node if none
-      if (favIconUrl && !favIconNode) {
-        let frag = doc.createDocumentFragment();
-        favIconNode = doc.createElement("link");
-        favIconNode.rel = "shortcut icon";
-        frag.appendChild(favIconNode);
-        frag.appendChild(doc.createTextNode("\n"));
-        headNode.appendChild(frag);
-      }
-
       return Promise.all(tasks);
     }).then((results) => {
-      // manage favicon
-      if (favIconUrl && favIconNode) {
-        favIconNode.href = favIconUrl;
-      }
-
       // save document
       let content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
       content = content.replace(/urn:scrapbook:text:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
