@@ -1,9 +1,6 @@
 {
-  "CaptureFollowingTabs": {
-    "message": "向右擷取"
-  },
-  "CaptureFollowingTabsTooltip": {
-    "message": "擷取目前分頁及右方的所有分頁。"
+  "CaptureAllTabs": {
+    "message": "擷取所有分頁"
   },
   "CaptureFrame": {
     "message": "擷取框架頁"
@@ -42,16 +39,16 @@
     "message": "擷取分頁 (書籤)"
   },
   "CaptureTabBookmarkTooltip": {
-    "message": "將目前分頁擷取為書籤網頁，瀏覽書籤網頁會導向至原始頁面。"
+    "message": "將選取的分頁擷取為書籤網頁，瀏覽書籤網頁會導向至原始頁面。"
   },
   "CaptureTabSource": {
     "message": "擷取分頁 (原貌)"
   },
   "CaptureTabSourceTooltip": {
-    "message": "擷取目前分頁的原始狀態（未經過腳本處理）。"
+    "message": "擷取選取的分頁的原始狀態（未經過腳本處理）。"
   },
   "CaptureTabTooltip": {
-    "message": "擷取目前分頁的目前狀態。若有選取內容則只擷取選取範圍。"
+    "message": "擷取選取的分頁的目前狀態。若分頁中有選取內容則只擷取選取範圍。"
   },
   "CapturerTitle": {
     "message": "擷取頁面"

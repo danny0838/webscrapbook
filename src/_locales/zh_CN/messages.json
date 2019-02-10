@@ -1,9 +1,6 @@
 {
-  "CaptureFollowingTabs": {
-    "message": "向右获取"
-  },
-  "CaptureFollowingTabsTooltip": {
-    "message": "获取目前分页及右方的所有分页。"
+  "CaptureAllTabs": {
+    "message": "获取所有分页"
   },
   "CaptureFrame": {
     "message": "获取框架"
@@ -42,16 +39,16 @@
     "message": "获取分页 (书签)"
   },
   "CaptureTabBookmarkTooltip": {
-    "message": "将目前分页获取为书签网页，浏览书签网页会导向至原始页面。"
+    "message": "将㧥择的分页获取为书签网页，浏览书签网页会导向至原始页面。"
   },
   "CaptureTabSource": {
     "message": "获取分页 (原样)"
   },
   "CaptureTabSourceTooltip": {
-    "message": "获取目前分页的原始状态（未经过脚本处理）。"
+    "message": "获取㧥择的分页的原始状态（未经过脚本处理）。"
   },
   "CaptureTabTooltip": {
-    "message": "获取目前分页的目前狀态。若有选择内容则只获取选择范围。"
+    "message": "获取㧥择的分页的目前狀态。若分页中有选择内容则只获取选择范围。"
   },
   "CapturerTitle": {
     "message": "获取页面"

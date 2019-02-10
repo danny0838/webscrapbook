@@ -1,9 +1,6 @@
 {
-  "CaptureFollowingTabs": {
-    "message": "Capture to the right"
-  },
-  "CaptureFollowingTabsTooltip": {
-    "message": "Capture the current tab and all tabs at it's right side."
+  "CaptureAllTabs": {
+    "message": "Capture all tabs"
   },
   "CaptureFrame": {
     "message": "Capture frame"
@@ -42,16 +39,16 @@
     "message": "Capture tab (bookmark)"
   },
   "CaptureTabBookmarkTooltip": {
-    "message": "Capture current tab as a bookmark page, which redirects to the source page when navigated."
+    "message": "Capture selected tabs as bookmark pages, which redirects to the source page when navigated."
   },
   "CaptureTabSource": {
     "message": "Capture tab (source)"
   },
   "CaptureTabSourceTooltip": {
-    "message": "Capture the original status of the current page (before processed by scripts)."
+    "message": "Capture the original content of the selected tabs (before processed by scripts)."
   },
   "CaptureTabTooltip": {
-    "message": "Capture the current status of the current tab. Only the selected range(s) is captured if there's a selection."
+    "message": "Capture the current status of the selected tabs. Only the selected range(s) is captured if there's a selection in the tab."
   },
   "CapturerTitle": {
     "message": "Capture page"
@@ -326,10 +323,10 @@
     "message": "Single HTML"
   },
   "OptionCaptureSaveAsSingleHtmlJsTooltip": {
-    "message": "Referenced resources are stored in the script and re-generated on loading. This has a better performance and a reduced size compared with data URL, but requires a modern browser with JavaScript enabled, such as: Chrome ≥ 20, Firefox ≥ 13, Edge, Safari ≥ 6, Opera ≥ 12.1, and IE ≥ 10. NOTE: This could introduce a conflict if scripts are saved."
+    "message": "Referenced resources are stored in the script and re-generated on loading. This has a better performance and a reduced size compared with data URL, but requires a modern browser with JavaScript enabled, such as: Chrome ??20, Firefox ??13, Edge, Safari ??6, Opera ??12.1, and IE ??10. NOTE: This could introduce a conflict if scripts are saved."
   },
   "OptionCaptureSaveAsSingleHtmlTooltip": {
-    "message": "Referenced resources are stored as data URL, which is supported by most browsers, such as Chrome, Firefox, Edge, Safari, Opera ≥ 7.2, and IE ≥ 8 (very limited in IE). NOTE: For some web pages, data URL can cause a severe drop of performance and bloat of file size."
+    "message": "Referenced resources are stored as data URL, which is supported by most browsers, such as Chrome, Firefox, Edge, Safari, Opera ??7.2, and IE ??8 (very limited in IE). NOTE: For some web pages, data URL can cause a severe drop of performance and bloat of file size."
   },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ package"

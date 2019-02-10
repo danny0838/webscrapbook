@@ -9,6 +9,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // load languages
   scrapbook.loadLanguages(document);
 
+  const getHighlightedTabs = function () {
+    return browser.tabs.query(
+      {highlighted: true, discarded: false, currentWindow: true}
+    ).then((tabs) => {
+      return capturer.getContentTabs().then((ct) => {
+        const ctSet = new Set(ct.map(t => t.id));
+        const target = tabs
+          .map(t => t.id)
+          .filter(t => ctSet.has(t))
+          .join(',');
+        return target;
+      });
+    });
+  };
+
   const generateActionButtonForTabs = function (base, action) {
     let selector = base.nextSibling;
     if (selector && selector.nodeType === 1) {
@@ -65,14 +80,16 @@ document.addEventListener('DOMContentLoaded', () => {
           document.getElementById("captureTab").disabled = true;
           document.getElementById("captureTabSource").disabled = true;
           document.getElementById("captureTabBookmark").disabled = true;
+          document.getElementById("captureAllTabs").disabled = true;
         }
       });
     }
 
     document.getElementById("captureTab").addEventListener('click', (event) => {
       if (targetTab) {
-        const target = targetTab.id;
-        return capturer.invokeCapture({target});
+        return getHighlightedTabs().then((target) => {
+          return capturer.invokeCapture({target});
+        });
       } else {
         return generateActionButtonForTabs(document.getElementById("captureTab"), (tab) => {
           const target = tab.id;
@@ -84,8 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("captureTabSource").addEventListener('click', (event) => {
       const mode = 'source';
       if (targetTab) {
-        const target = targetTab.id;
-        return capturer.invokeCapture({target, mode});
+        return getHighlightedTabs().then((target) => {
+          return capturer.invokeCapture({target, mode});
+        });
       } else {
         return generateActionButtonForTabs(document.getElementById("captureTabSource"), (tab) => {
           const target = tab.id;
@@ -97,8 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("captureTabBookmark").addEventListener('click', (event) => {
       const mode = 'bookmark';
       if (targetTab) {
-        const target = targetTab.id;
-        return capturer.invokeCapture({target, mode});
+        return getHighlightedTabs().then((target) => {
+          return capturer.invokeCapture({target, mode});
+        });
       } else {
         return generateActionButtonForTabs(document.getElementById("captureTabBookmark"), (tab) => {
           const target = tab.id;
@@ -107,15 +126,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    document.getElementById("captureFollowingTabs").addEventListener('click', (event) => {
-      return browser.tabs.query({active: true, currentWindow: true}).then((tabs) => {
-        const index = tabs[0].index;
-        return capturer.getContentTabs().then((tabs) => {
-          const target = tabs.filter(t => 
-            t.index >= index && !t.discarded
-          ).map(x => x.id).join(',');
-          return capturer.invokeCapture({target});
-        });
+    document.getElementById("captureAllTabs").addEventListener('click', (event) => {
+      return capturer.getContentTabs().then((tabs) => {
+        const target = tabs.map(t => t.id).join(',');
+        return capturer.invokeCapture({target});
       });
     });
 
