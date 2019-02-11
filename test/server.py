@@ -24,21 +24,23 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
 
 def main():
     # load config.json
-    with open('config.json', 'r', encoding='UTF-8') as f:
+    config_file = os.path.join(__file__, '..', 'config.json')
+    with open(config_file, 'r', encoding='UTF-8') as f:
         config = json.load(f)
         f.close()
 
     # load config.local.json if exist
     try:
-        with open('config.local.json', 'r', encoding='UTF-8') as f:
+        config_file = os.path.join(__file__, '..', 'config.local.json')
+        with open(config_file, 'r', encoding='UTF-8') as f:
             config_local = json.load(f)
-            for key in config_local: config[key] = config_local[key]
+            config = {**config, **config_local}
             f.close()
     except:
         pass
 
     # start server
-    os.chdir('t')
+    os.chdir(os.path.join(__file__, '..', 't'))
     http.server.test(HandlerClass=HTTPRequestHandler,
                      port=int(config['server_port']), bind='127.0.0.1')
 
