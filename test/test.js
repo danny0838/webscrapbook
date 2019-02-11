@@ -1523,7 +1523,7 @@ async function test_capture_frame2() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_frame/cross-origin.html`,
+    url: `${localhost}/capture_frame/cross-origin.py`,
     options: Object.assign({}, baseOptions, options),
   });
 

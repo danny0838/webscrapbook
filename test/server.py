@@ -2,6 +2,8 @@
 import os
 import json
 import http.server
+from threading import Thread
+import time
 
 class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
     """
@@ -40,8 +42,30 @@ def main():
 
     # start server
     os.chdir(os.path.join(__file__, '..', 't'))
-    http.server.test(HandlerClass=HTTPRequestHandler,
-                     port=int(config['server_port']), bind='127.0.0.1')
+
+    os.environ['wsb.config'] = json.dumps(config, ensure_ascii=False)
+
+    thread = Thread(target=http.server.test, kwargs={
+            'HandlerClass': HTTPRequestHandler,
+            'port': int(config['server_port']),
+            'bind': '127.0.0.1',
+            })
+    thread.daemon = True
+    thread.start()
+
+    thread = Thread(target=http.server.test, kwargs={
+            'HandlerClass': HTTPRequestHandler,
+            'port': int(config['server_port2']),
+            'bind': '127.0.0.1',
+            })
+    thread.daemon = True
+    thread.start()
+
+    try:
+        while True: time.sleep(100)
+    except (KeyboardInterrupt, SystemExit):
+        print('')
+        print('Keyboard interrupt received, exiting.')
 
 if __name__ == '__main__':
     main()
