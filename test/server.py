@@ -19,7 +19,6 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
             return True
         return False
 
-    http.server.BaseHTTPRequestHandler.protocol_version = "HTTP/1.1"
     http.server.SimpleHTTPRequestHandler.extensions_map[".md"] = "text/markdown"
 
 def main():
