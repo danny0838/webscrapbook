@@ -25,14 +25,14 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
 
 def main():
     # load config.json
-    config_file = os.path.join(__file__, '..', 'config.json')
+    config_file = os.path.join(os.path.dirname(__file__), 'config.json')
     with open(config_file, 'r', encoding='UTF-8') as f:
         config = json.load(f)
         f.close()
 
     # load config.local.json if exist
     try:
-        config_file = os.path.join(__file__, '..', 'config.local.json')
+        config_file = os.path.join(os.path.dirname(__file__), 'config.local.json')
         with open(config_file, 'r', encoding='UTF-8') as f:
             config_local = json.load(f)
             config = {**config, **config_local}
@@ -41,7 +41,7 @@ def main():
         pass
 
     # start server
-    os.chdir(os.path.join(__file__, '..', 't'))
+    os.chdir(os.path.join(os.path.dirname(__file__), 't'))
 
     os.environ['wsb.config'] = json.dumps(config, ensure_ascii=False)
 
