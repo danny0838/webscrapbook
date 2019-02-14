@@ -36,7 +36,6 @@
 
   "background": {
     "scripts": [
-      "core/polyfill.js",
       "core/common.js",
       "core/optionsAuto.js",
       "core/background.js",

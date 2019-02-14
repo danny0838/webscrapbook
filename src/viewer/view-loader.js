@@ -4,7 +4,7 @@
 
 (async function (window, undefined) {
   let scripts = [
-    chrome.runtime.getURL('core/polyfill.js'),
+    chrome.runtime.getURL('lib/browser-polyfill.js'),
     chrome.runtime.getURL('core/common.js'),
     chrome.runtime.getURL('viewer/view.js'),
   ];

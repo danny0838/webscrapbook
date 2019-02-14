@@ -35,7 +35,7 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "core/polyfill.js",
+      "lib/browser-polyfill.js",
       "core/common.js",
       "core/optionsAuto.js",
       "core/background.js",

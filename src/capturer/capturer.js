@@ -156,7 +156,7 @@ capturer.captureTab = async function (params) {
         .catch(async (ex) => {
           isDebug && console.debug("inject content scripts", tabId, frameId, url);
           try {
-            await browser.tabs.executeScript(tabId, {frameId, file: "/core/polyfill.js"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/lib/browser-polyfill.js"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/content.js"});
