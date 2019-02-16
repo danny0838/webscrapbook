@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "Web ScrapBook Test Suite",
-  "description": "Test suite for Web ScrapBook extension.",
+  "name": "WebScrapBook Test Suite",
+  "description": "Test suite for WebScrapBook extension.",
   "version": "0.1.0",
   "author": "Danny Lin",
 
@@ -21,6 +21,6 @@
   },
 
   "browser_action": {
-    "default_title": "Web ScrapBook Test Suite"
+    "default_title": "WebScrapBook Test Suite"
   }
 }

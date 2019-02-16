@@ -82,13 +82,13 @@
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
-    "message": "Web ScrapBook"
+    "message": "WebScrapBook"
   },
   "IndexerDesc": {
     "message": "Indexer only works when captured data are saved in the ScrapBook folder (default: <download folder>/<Scrapbook Folder>/data/). Move data to the folder if they are not there.\n\nAfter picking the ScrapBook folder, the indexing process will run, and a ZIP file is generated and becomes downloadable. Extract the contents to the original ScrapBook folder and open the generated ./tree/map.html or ./tree/frame.html to view the list of captured pages.\n\nFiles such as ./tree/meta.js and ./tree/toc.js, for metadata and table of contents (TOC) respectively, can be manually edited, as long as the data format is kept correct.\n\nAfter new pages are captured or metadata is edited, run this indexer repeatedly to add newly captured pages and to check for potential errors, and refresh ./tree/map.html or ./tree/frame.html to view the updated result.\n\nAdditional settings for the indexer can be configured in the options page."
   },
   "IndexerHeader": {
-    "message": "Pick directories or ZIP archive files of a Web ScrapBook folder, via dropping them into this window, or using the buttons below:"
+    "message": "Pick directories or ZIP archive files of a WebScrapBook folder, via dropping them into this window, or using the buttons below:"
   },
   "IndexerPickDir": {
     "message": "Pick a folder"
