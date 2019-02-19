@@ -5,8 +5,12 @@
  * @require {boolean} isDebug
  * @require {Object} scrapbook
  * @require {Object} capturer
+ * @public  {boolean} capturer.isContentScript
  *******************************************************************/
 
+((window, document, browser, chrome) => {
+
+// overwrite the value of common.js to define this is not a content script
 capturer.isContentScript = false;
 
 // missionId is fixed to this page, to identify the capture mission
@@ -1738,3 +1742,5 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+
+})(this, this.document, this.browser, this.chrome);

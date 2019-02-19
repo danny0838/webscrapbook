@@ -5,6 +5,8 @@
  * @require {Object} scrapbook
  *******************************************************************/
 
+((window, document, browser, chrome) => {
+
 scrapbook.loadOptionsAuto = scrapbook.loadOptions();
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -21,3 +23,5 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
     scrapbook.options[key] = changes[key].newValue;
   }
 });
+
+})(this, this.document, this.browser, this.chrome);

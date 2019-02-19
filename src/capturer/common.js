@@ -7,6 +7,8 @@
  * @public {Object} capturer
  *******************************************************************/
 
+((window, document, browser, chrome) => {
+
 const capturer = {
   isContentScript: true,
   get isNoscriptEscaped() {
@@ -2320,3 +2322,7 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
     });
   }
 };
+
+window.capturer = capturer;
+
+})(this, this.document, this.browser, this.chrome);

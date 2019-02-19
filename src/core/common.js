@@ -8,7 +8,8 @@
  * @public {Object} scrapbook
  *******************************************************************/
 
-let isDebug = false;
+((window, document, browser, chrome) => {
+
 let scrapbook = {
   /**
    * ref: source code of vAPI.webextFlavor of uBlock Origin
@@ -85,7 +86,6 @@ let scrapbook = {
   },
 
 };
-
 
 /********************************************************************
  * Options
@@ -1598,3 +1598,8 @@ scrapbook.getMaffIndexFiles = function (zipObj) {
     });
   });
 };
+
+window.isDebug = false;
+window.scrapbook = scrapbook;
+
+})(this, this.document, this.browser, this.chrome);

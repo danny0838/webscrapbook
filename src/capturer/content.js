@@ -7,6 +7,8 @@
  * @require {Object} capturer
  *******************************************************************/
 
+((window, document, browser, chrome) => {
+
 window.addEventListener("message", (event) => {
   const message = event.data;
   if (message.extension !== chrome.runtime.id) { return; }
@@ -45,3 +47,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
   }
 });
+
+})(this, this.document, this.browser, this.chrome);

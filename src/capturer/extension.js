@@ -4,8 +4,10 @@
  *
  * @require {boolean} isDebug
  * @require {Object} scrapbook
- * @require {Object} capturer
+ * @public {Object} capturer
  *******************************************************************/
+
+((window, document, browser, chrome) => {
 
 const capturer = {};
 
@@ -53,3 +55,7 @@ capturer.invokeCapture = function (params) {
     }
   });
 };
+
+window.capturer = capturer;
+
+})(this, this.document, this.browser, this.chrome);
