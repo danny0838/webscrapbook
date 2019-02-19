@@ -161,79 +161,19 @@ chrome.runtime.onConnectExternal.addListener((port) => {
   port.onMessage.addListener((message, port) => {
     return Promise.resolve().then(() => {
       const {cmd, args} = message;
-      const openTab = (createProperties) => {
-        return browser.tabs.create(createProperties).then((tab) => {
-          return new Promise((resolve, reject) => {
-            const listener = (tabId, changeInfo, t) => {
-              if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-              chrome.tabs.onUpdated.removeListener(listener);
-              chrome.tabs.onRemoved.removeListener(listener2);
-              resolve(t);
-            };
-            const listener2 = (tabId, removeInfo) => {
-              if (!(tabId === tab.id)) { return; }
-              chrome.tabs.onUpdated.removeListener(listener);
-              chrome.tabs.onRemoved.removeListener(listener2);
-              reject({message: `Tab removed before loading complete.`});
-            };
-            chrome.tabs.onUpdated.addListener(listener);
-            chrome.tabs.onRemoved.addListener(listener2);
-          });
-        });
-      };
-
-      const missionId = scrapbook.getUuid();
-      const capturerUrl = chrome.runtime.getURL(`capturer/capturer.html?mid=${missionId}`);
-
       switch (cmd) {
-        case "capture": {
-          return Promise.all([
-            openTab({
-              url: args.url,
-              active: false,
-              windowId: port.sender.tab.windowId,
-            }),
-            openTab({
-              url: capturerUrl,
-              active: false,
-              windowId: port.sender.tab.windowId,
-            }),
-          ]).then(([pageTab, capturerTab]) => {
-            // wait for the capturer init to complete
-            // so that the message can be received
-            return scrapbook.delay(50).then(() => {
-              return browser.runtime.sendMessage({
-                cmd: "capturer.captureTab",
-                args: Object.assign({tabId: pageTab.id, settings: {missionId}}, args),
-              });
-            }).then((result) => {
-              return Promise.all([
-                browser.tabs.remove(pageTab.id),
-                browser.tabs.remove(capturerTab.id),
-              ]).then(() => {
-                return result;
-              });
-            });
-          });
+        case "getBaseUrl": {
+          return {
+            url: chrome.runtime.getURL(""),
+          };
         }
-        case "captureHeadless": {
-          return openTab({
-            url: capturerUrl,
-            active: false,
-            windowId: port.sender.tab.windowId,
-          }).then((capturerTab) => {
-            // wait for the capturer init to complete
-            // so that the message can be received
-            return scrapbook.delay(50).then(() => {
-              return browser.runtime.sendMessage({
-                cmd: "capturer.captureHeadless",
-                args: Object.assign({settings: {missionId}}, args),
-              });
-            }).then((result) => {
-              return browser.tabs.remove(capturerTab.id).then(() => {
-                return result;
-              });
-            });
+        case "relayMessage": {
+          // Send message to all tabs of this extension, mainly the capturer
+          // tabs.  Only messages pass args.settings.missionId verification
+          // by the capturer will be executed.
+          return browser.runtime.sendMessage({
+            cmd: args.cmd,
+            args: args.args,
           });
         }
       }

@@ -1,6 +1,7 @@
 var config;
 var messagePort;
 var localhost;
+var wsbBaseUrl;
 var testTotal = 0;
 var testPass = 0;
 
@@ -23,17 +24,95 @@ async function init() {
 
   messagePort = chrome.runtime.connect(config["wsb_extension_id"], {name: config["wsb_message_port_name"]});
   localhost = `http://localhost${config["server_port"] === 80 ? "" : ":" + config["server_port"]}`;
+  wsbBaseUrl = `${(await invoke('getBaseUrl')).url}`;
   document.body.innerHTML = "";
 }
 
+async function delay(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function openTab(createProperties) {
+  const tab = await browser.tabs.create(createProperties);
+  return new Promise((resolve, reject) => {
+    const listener = (tabId, changeInfo, t) => {
+      if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
+      chrome.tabs.onUpdated.removeListener(listener);
+      chrome.tabs.onRemoved.removeListener(listener2);
+      resolve(t);
+    };
+    const listener2 = (tabId, removeInfo) => {
+      if (!(tabId === tab.id)) { return; }
+      chrome.tabs.onUpdated.removeListener(listener);
+      chrome.tabs.onRemoved.removeListener(listener2);
+      reject({message: `Tab removed before loading complete.`});
+    };
+    chrome.tabs.onUpdated.addListener(listener);
+    chrome.tabs.onRemoved.addListener(listener2);
+  });
+}
+
+/**
+ * @param {Object} params
+ *     - {string} params.url
+ *     - {Object} params.options
+ */
 async function capture(params) {
-  const result = await invoke('capture', params);
+  const id = getUuid();
+
+  const [pageTab, capturerTab] = await Promise.all([
+    openTab({
+      url: params.url,
+      active: false,
+    }),
+    openTab({
+      url: `${wsbBaseUrl}capturer/capturer.html?mid=${id}`,
+      active: false,
+    }),
+  ]);
+
+  // wait for the capturer init to complete
+  // so that the message can be received
+  await delay(50);
+
+  const result = await invoke('relayMessage', {
+    cmd: "capturer.captureTab",
+    args: Object.assign({tabId: pageTab.id, settings: {missionId: id}}, params),
+  });
+
+  await Promise.all([
+    browser.tabs.remove(pageTab.id),
+    browser.tabs.remove(capturerTab.id),
+  ]);
+
   const blob = new Blob([byteStringToArrayBuffer(result.data)], {type: result.type});
   return blob;
 }
 
+/**
+ * @param {Object} params
+ *     - {string} params.url
+ *     - {Object} params.options
+ */
 async function captureHeadless(params) {
-  const result = await invoke('captureHeadless', params);
+  const id = getUuid();
+
+  const capturerTab = await openTab({
+    url: `${wsbBaseUrl}capturer/capturer.html?mid=${id}`,
+    active: false,
+  });
+
+  // wait for the capturer init to complete
+  // so that the message can be received
+  await delay(50);
+
+  const result = await invoke('relayMessage', {
+    cmd: "capturer.captureHeadless",
+    args: Object.assign({settings: {missionId: id}}, params),
+  });
+
+  await browser.tabs.remove(capturerTab.id);
+
   const blob = new Blob([byteStringToArrayBuffer(result.data)], {type: result.type});
   return blob;
 }
