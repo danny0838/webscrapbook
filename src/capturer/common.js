@@ -2320,6 +2320,3 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
     });
   }
 };
-
-
-true; // return value of executeScript

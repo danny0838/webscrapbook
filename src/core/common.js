@@ -1598,6 +1598,3 @@ scrapbook.getMaffIndexFiles = function (zipObj) {
     });
   });
 };
-
-
-true; // return value of executeScript
