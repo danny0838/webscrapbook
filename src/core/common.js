@@ -164,7 +164,14 @@ scrapbook.getOptionStorage = function () {
   return p;
 };
 
+/**
+ * run scrapbook.loadOptions before calling this
+ */
 scrapbook.getOption = function (key, defaultValue) {
+  if (!scrapbook.isOptionsSynced) {
+    throw new Error('Options not synced yet.');
+  }
+
   let result = scrapbook.options[key];
   if (result === undefined) {
     result = defaultValue;
@@ -172,7 +179,14 @@ scrapbook.getOption = function (key, defaultValue) {
   return result;
 };
 
+/**
+ * run scrapbook.loadOptions before calling this
+ */
 scrapbook.getOptions = function (keyPrefix) {
+  if (!scrapbook.isOptionsSynced) {
+    throw new Error('Options not synced yet.');
+  }
+
   let result = {};
   let regex = new RegExp("^" + scrapbook.escapeRegExp(keyPrefix) + ".");
   for (let key in scrapbook.options) {
