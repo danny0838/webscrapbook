@@ -1723,16 +1723,18 @@ document.addEventListener("DOMContentLoaded", function () {
   }).then((hasError) => {
     if (hasError) { return; }
 
-    return scrapbook.delay(1000).then(() => {
-      if (chrome.windows) {
-        return browser.windows.getCurrent().then((win) => {
-          return browser.windows.remove(win.id);
-        });
-      } else {
-        return browser.tabs.getCurrent().then((tab) => {
-          return browser.tabs.remove(tab.id);
-        });
-      }
-    });
+    if (!isDebug) {
+      return scrapbook.delay(1000).then(() => {
+        if (chrome.windows) {
+          return browser.windows.getCurrent().then((win) => {
+            return browser.windows.remove(win.id);
+          });
+        } else {
+          return browser.tabs.getCurrent().then((tab) => {
+            return browser.tabs.remove(tab.id);
+          });
+        }
+      });
+    }
   });
 });
