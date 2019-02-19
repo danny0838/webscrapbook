@@ -3,9 +3,9 @@
  * Shared utilities for most scripts, including background scripts
  * and content scripts.
  *
+ * @require {Object} browser
  * @public {boolean} isDebug
  * @public {Object} scrapbook
- * @public {Object} browser
  *******************************************************************/
 
 let isDebug = false;
