@@ -1,6 +1,7 @@
 var config;
 var messagePort;
 var localhost;
+var localhost2;
 var wsbBaseUrl;
 var testTotal = 0;
 var testPass = 0;
@@ -22,8 +23,30 @@ async function init() {
   }
   config = Object.assign({}, config1, config2);
 
-  messagePort = chrome.runtime.connect(config["wsb_extension_id"], {name: config["wsb_message_port_name"]});
+  try {
+    messagePort = chrome.runtime.connect(config["wsb_extension_id"], {name: config["wsb_message_port_name"]});
+  } catch (ex) {
+    error(`Unable to connect to WebScrapBook extension. Make sure it's installed and its extension ID is correctly set in config.local.json.`);
+    throw ex;
+  }
+
   localhost = `http://localhost${config["server_port"] === 80 ? "" : ":" + config["server_port"]}`;
+  localhost2 = `http://localhost${config["server_port2"] === 80 ? "" : ":" + config["server_port2"]}`;
+
+  try {
+    await xhr({url: localhost, responseType: 'text'});
+  } catch (ex) {
+    error(`Unable to connect to local server "${localhost}". Make sure the server has been started and the port is not occupied by another application.`);
+    throw ex;
+  }
+
+  try {
+    await xhr({url: localhost2, responseType: 'text'});
+  } catch (ex) {
+    error(`Unable to connect to local server "${localhost2}". Make sure the server has been started and the port is not occupied by another application.`);
+    throw ex;
+  }
+
   wsbBaseUrl = `${(await invoke('getBaseUrl')).url}`;
 }
 
