@@ -1,5 +1,5 @@
-Automated unit tests
---------------------
+Unit tests
+----------
 
 ### System requirements
 
@@ -8,7 +8,7 @@ Automated unit tests
 
 ### Usage
 
-1. Install WebScrapBook extension (as a standard install or as a temporary extension).
+1. Install WebScrapBook extension (standard install or as a temporary extension).
 
 2. Copy `config.json` to `config.local.json` and edit it:
    * Make sure "wsb_extension_id" matches the extension ID of WebScrapBook.
@@ -18,12 +18,4 @@ Automated unit tests
 
 4. Install `WebScrapBook Test Suite` extension in this directory (as a temporary extension).
 
-5. Click on the browser action of the test suite extension. A tab will be opened and the test will start automatically.
-
-
-Manual unit tests
------------------
-
-Some unit tests are not yet automated and need to be done manually.
-
-1. Go through `t/viewer-*/`, and follow the instruction of `README.md` to run the tests.
+5. Click on the browser action of the test suite extension. A tab will be opened and the test will start automatically. Alternatively, right-click on the browser action for subgroup tests.

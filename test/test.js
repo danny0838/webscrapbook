@@ -5905,17 +5905,25 @@ async function runManualTests() {
  * Main flow
  */
 async function main() {
-  await init();
-  await log(`Starting automated tests...\n`);
-  await runTests();
-  await showTestResult();
-  log(`\n`);
+  const mode = new URL(location.href).searchParams.get('m');
 
-  testTotal = testPass = 0;
-  await log(`Starting manual tests...\n`);
-  await runManualTests();
-  await showTestResult();
-  log(`\n`);
+  await init();
+
+  if (mode == 1 || !mode) {
+    testTotal = testPass = 0;
+    await log(`Starting automated tests...\n`);
+    await runTests();
+    await showTestResult();
+    log(`\n`);
+  }
+
+  if (mode == 2 || !mode) {
+    testTotal = testPass = 0;
+    await log(`Starting manual tests...\n`);
+    await runManualTests();
+    await showTestResult();
+    log(`\n`);
+  }
 
   log(`Done.`);
 }
