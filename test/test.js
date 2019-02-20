@@ -5793,6 +5793,17 @@ async function test_viewer_interlink() {
   });
 }
 
+async function test_viewer_css_rules() {
+  return await openTestTab({
+    url: chrome.runtime.getURL('t/viewer-css-rules/index.html'),
+    active: true,
+  }, (message, port, resolve) => {
+    if (message.cmd == 'result') {
+      resolve(message.args.value);
+    }
+  });
+}
+
 async function test_viewer_metaRefresh() {
   return await openTestTab({
     url: chrome.runtime.getURL('t/viewer-metaRefresh/index.html'),
@@ -5897,6 +5908,7 @@ async function runTests() {
 async function runManualTests() {
   await test(test_viewer_validate);
   await test(test_viewer_interlink);
+  await test(test_viewer_css_rules);
   await test(test_viewer_metaRefresh);
   await test(test_viewer_archive_in_frame);
 }
