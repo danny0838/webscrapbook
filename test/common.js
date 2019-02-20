@@ -25,7 +25,6 @@ async function init() {
   messagePort = chrome.runtime.connect(config["wsb_extension_id"], {name: config["wsb_message_port_name"]});
   localhost = `http://localhost${config["server_port"] === 80 ? "" : ":" + config["server_port"]}`;
   wsbBaseUrl = `${(await invoke('getBaseUrl')).url}`;
-  document.body.innerHTML = "";
 }
 
 async function delay(ms) {
@@ -50,6 +49,39 @@ async function openTab(createProperties) {
     chrome.tabs.onUpdated.addListener(listener);
     chrome.tabs.onRemoved.addListener(listener2);
   });
+}
+
+/**
+ * Open a tab with connection for test.
+ *
+ * @param {func} handler - Return a boolean indicating the test pass or not.
+ */
+async function openTestTab(createProperties, handler) {
+  const tab = await openTab(createProperties);
+  const port = browser.tabs.connect(tab.id, {name: 'test'});
+  const result = await new Promise((resolve, reject) => {
+    const onMessage = (message, port) => {
+      handler(message, port, resolve);
+    };
+    const onDisconnect = (port) => {
+      reject(new Error('Port disconnected.'));
+    };
+    port.onMessage.addListener(onMessage);
+    port.onDisconnect.addListener(onDisconnect);
+    port.postMessage({
+      cmd: 'loadEnv',
+      args: {
+        config,
+        localhost,
+        wsbBaseUrl,
+      },
+    });
+  });
+  await browser.tabs.remove(tab.id);
+  if (!result) {
+    throw new Error('Manual test does not pass');
+  }
+  return true;
 }
 
 /**
@@ -241,18 +273,17 @@ async function showTestResult() {
   const reportMethod = (testPass === testTotal) ? log : error;
   reportMethod(`Tests pass/total: ${testPass}/${testTotal}`);
   log(`\n`);
-  log(`Done.`);
 }
 
 function log(msg) {
-  document.body.appendChild(document.createTextNode(msg));
+  document.getElementsByTagName('pre')[0].appendChild(document.createTextNode(msg));
 }
 
 function error(msg) {
   const elem = document.createElement('span');
   elem.classList.add('error');
   elem.textContent = msg;
-  document.body.appendChild(elem);
+  document.getElementsByTagName('pre')[0].appendChild(elem);
 }
 
 function assert(condition, message) {

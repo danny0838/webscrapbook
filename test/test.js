@@ -5771,6 +5771,50 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
   assert(doc.querySelector('a[name]').getAttribute('href') === `mailto:nonexist@example.com`);
 }
 
+async function test_viewer_validate() {
+  return await openTestTab({
+    url: chrome.runtime.getURL('t/viewer-validate/index.html'),
+    active: true,
+  }, (message, port, resolve) => {
+    if (message.cmd == 'result') {
+      resolve(message.args.value);
+    }
+  });
+}
+
+async function test_viewer_interlink() {
+  return await openTestTab({
+    url: chrome.runtime.getURL('t/viewer-interlink/index.html'),
+    active: true,
+  }, (message, port, resolve) => {
+    if (message.cmd == 'result') {
+      resolve(message.args.value);
+    }
+  });
+}
+
+async function test_viewer_metaRefresh() {
+  return await openTestTab({
+    url: chrome.runtime.getURL('t/viewer-metaRefresh/index.html'),
+    active: true,
+  }, (message, port, resolve) => {
+    if (message.cmd == 'result') {
+      resolve(message.args.value);
+    }
+  });
+}
+
+async function test_viewer_archive_in_frame() {
+  return await openTestTab({
+    url: chrome.runtime.getURL('t/viewer-archive-in-frame/index.html'),
+    active: true,
+  }, (message, port, resolve) => {
+    if (message.cmd == 'result') {
+      resolve(message.args.value);
+    }
+  });
+}
+
 async function runTests() {
   await test(test_capture_html);
   await test(test_capture_singleHtmlJs);
@@ -5850,13 +5894,30 @@ async function runTests() {
   await test(test_capture_record_errorUrls5);
 }
 
+async function runManualTests() {
+  await test(test_viewer_validate);
+  await test(test_viewer_interlink);
+  await test(test_viewer_metaRefresh);
+  await test(test_viewer_archive_in_frame);
+}
+
 /**
  * Main flow
  */
 async function main() {
   await init();
+  await log(`Starting automated tests...\n`);
   await runTests();
   await showTestResult();
+  log(`\n`);
+
+  testTotal = testPass = 0;
+  await log(`Starting manual tests...\n`);
+  await runManualTests();
+  await showTestResult();
+  log(`\n`);
+
+  log(`Done.`);
 }
 
 main();
