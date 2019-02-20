@@ -1,0 +1,38 @@
+@font-face {
+    font-family: myFontSubdirLink1;
+    src: url("mp.ttf");
+}
+
+@font-face {
+    font-family: myFontSubdirLink2;
+    src: url("../myFont.woff");
+}
+
+@font-face {
+    font-family: myFontSubdirLink3;
+    src: url("../subdir/mp.ttf");
+}
+
+#subdir_link_font1 {
+    font-family: myFontSubdirLink1;
+}
+
+#subdir_link_font2 {
+    font-family: myFontSubdirLink2;
+}
+
+#subdir_link_font3 {
+    font-family: myFontSubdirLink3;
+}
+
+#subdir_link_background1 {
+    background: url("bg.gif");
+}
+
+#subdir_link_background2 {
+    background: url("../bg.png");
+}
+
+#subdir_link_background3 {
+    background: url("../subdir/bg.gif");
+}

@@ -1,0 +1,5 @@
+@import 'import_link1.css';
+@import "import_link2.css";
+@import url(import_link3.css);
+@import url('import_link4.css');
+@import url("import_link5.css");

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test CSS rules</title>
+
+<style>
+#neverused { color: blue; background: url(neverused.png); }
+#internal_bg1 { background: url(bg.png); }
+#internal_bg2 { background: url('bg.png'); }
+#internal_bg3 { background: url("bg.png"); }
+</style>
+<link rel="stylesheet" href="bg1.css">
+<link rel="stylesheet" href="bg2.css">
+<link rel="stylesheet" href="bg3.css">
+
+<link rel="stylesheet" href="data:text/css;base64,I2RhdGF1cmkxIHsgY29sb3I6IHJlZDsgfQ==">
+<style>
+@import "data:text/css;base64,I2RhdGF1cmkyIHsgY29sb3I6IHJlZDsgfQ==";
+</style>
+<style>
+#datauri3 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAIAAACRXR/mAAACb0lEQVRYhc1Xy4rCMBRN7RQFRyi4cD8gCBV8rFz068WFK6ugUBDcu3AQdJgRqc4izm1MY3LzqONZxSSSw32c3uONkwt5PVSe/2Q7minvoGjF/cyaTI71aijcH3T2sFbTivvZ9rzQYjbqnvCX4S9JGsIfPUxtxf1sMvfxD+yuq6YXTZdVLWaDzj5JQ7oWRCvuZ+1o9ig88lNCyHRZNeBECAFOYlrb86IV9LbnBfAgTHlxp4+YSU4xKRbQoq+2gh79SdMHSeRODYAJ5FtxazL3CRmuRSX1tzNcG5PCQVHyXA3hC98Sd0kEEiwbWkZsMQmvuUUeLapP79lH8VK91vj6ORT3j/6mFfTKCGEercncbwW9JA2TNKzXGrA4+hvKgN2kCxtO8n68SyK8wT5Gm45tPeE1APfJEz5PJVfCTFby0InFhT1G3ZNEKWQqX2QwmftKlUdCyAkirVZ5rVNLwHChVnnu42Ov8hi4nyCcoMTplB3rdFHKGEjBDipCSARCTYvKLDKJWnMp14ys4KGSiOQ06Oyny6pZ7trRrOlFwAxV8njIRVKOdjQDgXBMyxX+wSdigKWF8ZwOgaWF8ZwYIIUmp2XvOTGckBJ4K3knnhPJDCM3t2g58ZxCEmZOOE+ivecswtgJY0veTCSNnbDAvjqEsRN+nsprOeGyVN7SCZcSLXsnrBctZD/aO+EbLSeek2PGLYiOE9ZLovE4peuE9ZIo95xCNmZO2EEnPhouiIUTLncMNHbCzx6a9SYIgI3ndAielo3nVAI/BlZ0X5J4TiXwTtg7fH8maag7ZAKnphftritJM5rBGycXV57TIV7Uvv4CRmfzewv67tIAAAAASUVORK5CYII="); }
+</style>
+<link rel="stylesheet" href="datauri.css">
+
+<style>
+@import 'import_style1.css';
+@import "import_style2.css";
+@import url(import_style3.css);
+@import url('import_style4.css');
+@import url("import_style5.css");
+</style>
+<link rel="stylesheet" href="import_link.css">
+
+<style>
+@import "import_chain1.css";
+</style>
+
+<style>
+@font-face {
+    font-family: myFont1;
+    src: url(myFont.woff);
+}
+
+@font-face {
+    font-family: myFont2;
+    src: url('myFont.woff');
+}
+
+@font-face {
+    font-family: myFont3;
+    src: url("myFont.woff");
+}
+
+@font-face {
+    font-family: neverused;
+    src: url("neverused.woff");
+}
+</style>
+<link rel="stylesheet" href="font_face.css">
+
+<link rel="stylesheet" href="subdir/link.css">
+<style>
+@import "subdir/import.css";
+</style>
+
+<link rel="stylesheet" href="subdir/link_media.css">
+<link rel="stylesheet" href="subdir/link_media_screen.css" media="screen">
+<link rel="stylesheet" href="subdir/link_media_print.css" media="print">
+<style>
+@import "subdir/import_media.css";
+</style>
+
+<link rel="stylesheet" href="charset.css">
+
+<style>#noscript1 { color: lime; }</style>
+<noscript>
+    <style>#noscript1 { color: red; }</style>
+</noscript>
+
+<style>
+@keyframes spin {
+  from { transform: rotate(0turn); background-image: url(anime.png) }
+  to { transform: rotate(1turn); }
+}
+</style>
+
+</head>
+<body>
+<h2>normal text</h2>
+<p>Below block should show an unstyled text, for comparison.</p>
+<blockquote>normal text</blockquote>
+
+
+
+<h2>background url test</h2>
+<p>Below blocks should show a background image.</p>
+
+<blockquote style="background: url(bg.png);">inline background: url(bg.png);</blockquote>
+<blockquote style="background: url('bg.png');">inline background: url('bg.png');</blockquote>
+<blockquote style='background: url("bg.png");'>inline background: url("bg.png");</blockquote>
+<blockquote style='background: url("dir/background.png");'>inline background: url("dir/background.png");</blockquote>
+
+<blockquote id="internal_bg1">internal background: url(bg.png);</blockquote>
+<blockquote id="internal_bg2">internal background: url('bg.png');</blockquote>
+<blockquote id="internal_bg3">internal background: url("bg.png");</blockquote>
+
+<blockquote id="link_bg1">link background: url(bg.png);</blockquote>
+<blockquote id="link_bg2">link background: url('bg.png');</blockquote>
+<blockquote id="link_bg3">link background: url("bg.png");</blockquote>
+
+<p>Below blocks should *NOT* show a background image.</p>
+<blockquote style="background: url('bg.png);">inline background: url('bg.png); => parsed as: background: url("bg.png);");</blockquote>
+<blockquote style='background: url("bg.png);'>inline background: url("bg.png); => parsed as: background: url("bg.png);");</blockquote>
+
+
+
+<h2>dataURI test</h2>
+<p>Below blocks should show red text.</p>
+<blockquote id="datauri1">link (data URI) color: red;</blockquote>
+<blockquote id="datauri2">style => @import (data URI) color: red;</blockquote>
+
+<p>Below blocks should show a background image.</p>
+<blockquote id="datauri3">style background: url(...);</blockquote>
+<blockquote id="datauri4">link background: url(...);</blockquote>
+
+
+
+<h2>@font-face url test</h2>
+<p>Below blocks should show a special font.</p>
+
+<blockquote style="font-family: myFont1">&lt;style> => @font-face { src: url(myFont.woff); }</blockquote>
+<blockquote style="font-family: myFont2">&lt;style> => @font-face { src: url('myFont.woff'); }</blockquote>
+<blockquote style="font-family: myFont3">&lt;style> => @font-face { src: url("myFont.woff"); }</blockquote>
+
+<blockquote style="font-family: myFont4">&lt;link> => @font-face { src: url(myFont.woff); }</blockquote>
+<blockquote style="font-family: myFont5">&lt;link> => @font-face { src: url('myFont.woff'); }</blockquote>
+<blockquote style="font-family: myFont6">&lt;link> => @font-face { src: url("myFont.woff"); }</blockquote>
+
+
+
+<h2>@import test</h2>
+<p>Below blocks should show red text.</p>
+
+<blockquote id="import_style1">&lt;style> => @import 'import_style1.css';</blockquote>
+<blockquote id="import_style2">&lt;style> => @import "import_style2.css";</blockquote>
+<blockquote id="import_style3">&lt;style> => @import url(import_style3.css);</blockquote>
+<blockquote id="import_style4">&lt;style> => @import url('import_style4.css');</blockquote>
+<blockquote id="import_style5">&lt;style> => @import url("import_style5.css");</blockquote>
+
+<blockquote id="import_link1">&lt;link> => @import 'import_link1.css';</blockquote>
+<blockquote id="import_link2">&lt;link> => @import "import_link2.css";</blockquote>
+<blockquote id="import_link3">&lt;link> => @import url(import_link3.css);</blockquote>
+<blockquote id="import_link4">&lt;link> => @import url('import_link4.css');</blockquote>
+<blockquote id="import_link5">&lt;link> => @import url("import_link5.css");</blockquote>
+
+<p>Below blocks should show a font.</p>
+
+<blockquote id="subdir_link_font1">&lt;link href="subdir/link.css"> => @font-face { src: url("mp.ttf"); }</blockquote>
+<blockquote id="subdir_link_font2">&lt;link href="subdir/link.css"> => @font-face { src: url("../myFont.wott"); }</blockquote>
+<blockquote id="subdir_link_font3">&lt;link href="subdir/link.css"> => @font-face { src: url("../subdir/mp.ttf"); }</blockquote>
+
+<blockquote id="subdir_import_font1">&lt;style> => @import "subdir/import.css"; => @font-face { src: url("mp.ttf"); }</blockquote>
+<blockquote id="subdir_import_font2">&lt;style> => @import "subdir/import.css"; => @font-face { src: url("../myFont.wott"); }</blockquote>
+<blockquote id="subdir_import_font3">&lt;style> => @import "subdir/import.css"; => @font-face { src: url("../subdir/mp.ttf"); }</blockquote>
+
+<p>Below blocks should show background image.</p>
+
+<blockquote id="subdir_link_background1">&lt;link href="subdir/link.css"> => background: url("bg.gif");</blockquote>
+<blockquote id="subdir_link_background2">&lt;link href="subdir/link.css"> => background: url("../bg.png");</blockquote>
+<blockquote id="subdir_link_background3">&lt;link href="subdir/link.css"> => background: url("../subdir/bg.gif");</blockquote>
+
+<blockquote id="subdir_import_background1">&lt;style> => @import "subdir/import.css"; => background: url("bg.gif");</blockquote>
+<blockquote id="subdir_import_background2">&lt;style> => @import "subdir/import.css"; => background: url("../bg.png");</blockquote>
+<blockquote id="subdir_import_background3">&lt;style> => @import "subdir/import.css"; => background: url("../subdir/bg.gif");</blockquote>
+
+<h2>Import chain test</h2>
+<p>Below block should show red.</p>
+<blockquote id="import_chain1">&lt;style> => @import import_chain1.css</blockquote>
+
+<p>Below block should show orange.</p>
+<blockquote id="import_chain2">import_chain1.css => @import import_chain2.css</blockquote>
+
+<p>Below block should show yellow.</p>
+<blockquote id="import_chain3">import_chain2.css => @import import_chain3.css</blockquote>
+
+<p>Below block should show green.</p>
+<blockquote id="import_chain4">import_chain3.css => @import import_chain4.css</blockquote>
+
+
+<h2>@media test</h2>
+
+<p>Below block should show a background image on screen and *NOT* for print.</p>
+<blockquote id="subdir_link_media_background1">&lt;link href="subdir/link_media.css"> => @media screen { background: url("../bg.png"); }</blockquote>
+
+<p>Below block should show a background image for print.</p>
+<blockquote id="subdir_link_media_background2">&lt;link href="subdir/link_media.css"> => @media print { background: url("../bg.png"); }</blockquote>
+
+<p>Below block should show a background image on screen and *NOT* for print.</p>
+<blockquote id="subdir_link_media_background3">&lt;link href="subdir/link_media_screen.css" media="screen"> => background: url("../bg.png");</blockquote>
+
+<p>Below block should show a background image for print.</p>
+<blockquote id="subdir_link_media_background4">&lt;link href="subdir/link_media_print.css" media="print"> => background: url("../bg.png");</blockquote>
+
+<p>Below block should show a background image on screen and *NOT* for print.</p>
+<blockquote id="subdir_import_media_background1">&lt;style> => @import "subdir/import_media.css"; => @media screen { background: url("../bg.png"); }</blockquote>
+
+<p>Below block should show a background image for print.</p>
+<blockquote id="subdir_import_media_background2">&lt;style> => @import "subdir/import_media.css"; => @media print { background: url("../bg.png"); }</blockquote>
+
+<h2>@charset test</h2>
+<p>Below block should show a "中文" after "test".</p>
+<blockquote id="charset1"><b>test</b></blockquote>
+
+<h2>noscript CSS test</h2>
+<p>Below block should shown green with script and red without script.</p>
+<blockquote id="noscript1">This is a test paragraph.</blockquote>
+
+<h2>unsupported style declaration test</h2>
+<p>Below block should has unsupported style declaration "-evernote-color: red".</p>
+<blockquote style="-evernote-color: red;">This is a test paragraph.</blockquote>
+
+<h2>keyframes test</h2>
+<p>Below block should show animation.</p>
+<blockquote style="animation: spin 1s linear infinite; width: 200px; height: 200px;">This is a test paragraph.</blockquote>
+
+</body>
+</html>

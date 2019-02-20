@@ -1,0 +1,14 @@
+@font-face {
+    font-family: myFont4;
+    src: url(myFont.woff);
+}
+
+@font-face {
+    font-family: myFont5;
+    src: url('myFont.woff');
+}
+
+@font-face {
+    font-family: myFont6;
+    src: url("myFont.woff");
+}

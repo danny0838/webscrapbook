@@ -1,0 +1,15 @@
+@media screen {
+
+    #subdir_import_media_background1 {
+        background: url("../bg.png");
+    }
+
+}
+
+@media print {
+
+    #subdir_import_media_background2 {
+        background: url("../bg.png");
+    }
+
+}

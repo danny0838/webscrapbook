@@ -1,0 +1,3 @@
+@charset "Big5";
+
+#charset1 b:after { content: "¤¤¤å"; }
