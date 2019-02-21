@@ -1160,13 +1160,52 @@ capturer.downloadFile = async function (params) {
           // use the filename if it has been defined by header Content-Disposition
           filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
 
-          // if no file extension, give one according to header Content-Type
+          // if header Content-Type (MIME) is defined:
+          // 1. If the file has no extension, assign one according to MIME,
+          //    except for certain MIMEs.
+          //    (For example, "application/octet-stream" can be anything,
+          //    and guessing a "bin" is meaningless.)
+          // 2. For several usual MIMEs, if the file extension doesn't match
+          //    MIME, append a matching extension to prevent the file be
+          //    assigned a bad MIME when served via HTTP, which could cause
+          //    the browser to reject it.  For example, a CSS file named 
+          //    "foo.php" may be served as "application/x-httpd-php", and
+          //    modern browsers would refuse loading the CSS).
+          //
+          // Basic MIMEs listed in MAFF spec should be included:
+          // http://maf.mozdev.org/maff-specification.html
           if (headers.contentType) {
+            const mime = headers.contentType;
             let [base, extension] = scrapbook.filenameParts(filename);
-            if (!extension) {
-              extension = Mime.extension(headers.contentType);
+            if ((!extension && ![
+                  "application/octet-stream",
+                ].includes(mime)) || ([
+                  "text/html",
+                  "text/xml",
+                  "text/css",
+                  "text/javascript",
+                  "application/javascript",
+                  "application/x-javascript",
+                  "text/ecmascript",
+                  "application/ecmascript",
+                  "image/bmp",
+                  "image/jpeg",
+                  "image/gif",
+                  "image/png",
+                  "image/svg+xml",
+                  "audio/wav",
+                  "audio/x-wav",
+                  "audio/mp3",
+                  "audio/ogg",
+                  "application/ogg",
+                  "audio/mpeg",
+                  "video/mp4",
+                  "video/webm",
+                  "video/ogg",
+                ].includes(mime) && !Mime.allExtensions(mime).includes(extension.toLowerCase()))) {
+              extension = Mime.extension(mime);
               if (extension) {
-                filename = base + "." + extension;
+                filename += "." + extension;
               }
             }
           }

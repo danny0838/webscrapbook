@@ -746,6 +746,46 @@ async function test_capture_header() {
   assert(b64 === "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 }
 
+// If filename by URL path or header doesn't match its MIME type,
+// a fixing extension should be appended.
+async function test_capture_header_mime() {
+  var blob = await capture({
+    url: `${localhost}/capture_header_mime/index.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('img')[0].getAttribute("src") === "image_bmp.py.bmp")
+  assert(zip.files["image_bmp.py.bmp"]);
+  assert(doc.querySelectorAll('img')[1].getAttribute("src") === "image_svg.py.svg")
+  assert(zip.files["image_svg.py.svg"]);
+
+  // extension validation should be case-insensitive
+  assert(doc.querySelectorAll('img')[2].getAttribute("src") === "image.SVG")
+  assert(zip.files["image.SVG"]);
+
+  // a well-known MIME may have a new-age extension not known yet, don't overfix
+  assert(doc.querySelectorAll('img')[3].getAttribute("src") === "newext.mp1")
+  assert(zip.files["newext.mp1"]);
+
+  // always attempt to fix for a file without extension
+  assert(doc.querySelectorAll('img')[4].getAttribute("src") === "noext.doc")
+  assert(zip.files["noext.doc"]);
+
+  // except for certain universal MIMEs, e.g. application/octet-stream
+  assert(doc.querySelectorAll('img')[5].getAttribute("src") === "noextoctet")
+  assert(zip.files["noextoctet"]);
+
+  assert(doc.querySelectorAll('link')[0].getAttribute("href") === "stylesheet.py.css")
+  assert(zip.files["stylesheet.py.css"]);
+  assert(doc.querySelectorAll('script')[0].getAttribute("src") === "script.py.js")
+  assert(zip.files["script.py.js"]);
+}
+
 // Check special chars handling for saved files and URLs pointing to them
 //
 // capturer.defaultFilesSet
@@ -2225,7 +2265,7 @@ async function test_capture_css_charset() {
 
   var zip = await new JSZip().loadAsync(blob);
 
-  var file = zip.file('header_big5.py');
+  var file = zip.file('header_big5.py.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
   assert(text === `#test1::after { content: "中文"; }`);
@@ -2250,13 +2290,13 @@ async function test_capture_css_charset() {
   assert(text === `#test4::after { content: "中文"; }`);
   assert(!await hasBomUtf8(blob));
 
-  var file = zip.file('header_utf8_bom_utf8.py');
+  var file = zip.file('header_utf8_bom_utf8.py.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
   assert(text === `#test5::after { content: "中文"; }`);
   assert(!await hasBomUtf8(blob));
 
-  var file = zip.file('header_utf8_at_big5.py');
+  var file = zip.file('header_utf8_at_big5.py.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
   assert(text === `@charset "Big5";
@@ -5834,6 +5874,7 @@ async function runTests() {
   await test(test_capture_file);
   await test(test_capture_file_charset);
   await test(test_capture_header);
+  await test(test_capture_header_mime);
   await test(test_capture_filename);
   await test(test_capture_saveAsciiFilename);
   await test(test_capture_saveFileAsHtml);
