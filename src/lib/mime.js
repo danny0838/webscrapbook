@@ -1,7 +1,7 @@
 /**
  * A JavaScript implementation for mimetype and file extension conversion
  *
- * Copyright Danny Lin 2017
+ * Copyright Danny Lin 2017-2019
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
  */
@@ -32,7 +32,7 @@ const Mime = {
   allExtensions(mimeType) {
     const type = mimeType.match(/^\s*([^;\s]*)(?:;|\s|$)/)[1].toLowerCase();
     if (this.db[type] && this.db[type].extensions) {
-      return JSON.parse(JSON.stringify(this.db[type].extensions));
+      return this.db[type].extensions.slice(0);
     }
     return [];
   },
