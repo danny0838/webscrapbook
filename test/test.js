@@ -807,7 +807,7 @@ async function test_capture_filename() {
   assert(zip.files["abcdef"]);
   assert(zip.files["index-1.rdf"]);
   assert(zip.files["index-1.dat"]);
-  assert(zip.files["metadata-1"]);
+  assert(zip.files["^metadata^-1"]);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -823,7 +823,7 @@ async function test_capture_filename() {
   assert(links[7].getAttribute('href') === "abcdef");
   assert(links[8].getAttribute('href') === "index-1.rdf");
   assert(links[9].getAttribute('href') === "index-1.dat");
-  assert(links[10].getAttribute('href') === "metadata-1");
+  assert(links[10].getAttribute('href') === "^metadata^-1");
 }
 
 // Check if option works

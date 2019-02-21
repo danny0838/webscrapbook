@@ -16,7 +16,10 @@ capturer.isContentScript = false;
 // missionId is fixed to this page, to identify the capture mission
 capturer.missionId = scrapbook.getUuid();
 
-capturer.defaultFilesSet = new Set(["index.rdf", "index.dat", "metadata"]);
+// index.dat is used in legacy ScrapBook
+// index.rdf and ^metadata^ are used in MAFF
+// http://maf.mozdev.org/maff-specification.html
+capturer.defaultFilesSet = new Set(["index.dat", "index.rdf", "^metadata^"]);
 
 /**
  * @type {Map<string~timeId, {files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
