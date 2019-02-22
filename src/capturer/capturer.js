@@ -99,91 +99,80 @@ capturer.getUniqueFilename = function (timeId, filename) {
  *     - {string} params.options - preset options that overwrites default
  * @return {Promise}
  */
-capturer.captureTab = function (params) {
-  return Promise.resolve().then(() => {
+capturer.captureTab = async function (params) {
+  try {
     const {tabId, frameId, saveBeyondSelection, mode, options} = params;
+    let {url, title} = await browser.tabs.get(tabId);
 
-    return browser.tabs.get(tabId).then((tab) => {
-      const {url, title} = tab;
-
-      // redirect headless capture
-      // if frameId not provided, use current tab title and favIcon
-      if (mode === "bookmark" || mode === "source") {
-        return Promise.resolve().then(() => {
-          if (isNaN(frameId)) { return {url, title}; }
-          return browser.webNavigation.getFrame({tabId, frameId});
-        }).then((details) => {
-          const {url, title} = details;
-          return capturer.captureHeadless({url, title, mode, options});
-        });
+    // redirect headless capture
+    // if frameId not provided, use current tab title and favIcon
+    if (mode === "bookmark" || mode === "source") {
+      if (!isNaN(frameId)) {
+        ({url, title} = await browser.webNavigation.getFrame({tabId, frameId}));
       }
+      return await capturer.captureHeadless({url, title, mode, options});
+    }
 
-      const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
-      const timeId = scrapbook.dateToId();
-      const message = {
-        settings: {
-          missionId: capturer.missionId,
-          timeId,
-          frameIsMain: true,
-          documentName: "index",
-          recurseChain: [],
-        },
-        options: Object.assign(scrapbook.getOptions("capture"), options),
-      };
+    const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
+    const timeId = scrapbook.dateToId();
+    const message = {
+      settings: {
+        missionId: capturer.missionId,
+        timeId,
+        frameIsMain: true,
+        documentName: "index",
+        recurseChain: [],
+      },
+      options: Object.assign(scrapbook.getOptions("capture"), options),
+    };
 
-      // save whole page beyond selection?
-      message.options["capture.saveBeyondSelection"] = !!saveBeyondSelection;
+    // save whole page beyond selection?
+    message.options["capture.saveBeyondSelection"] = !!saveBeyondSelection;
 
-      return Promise.resolve().then(() => {
-        // Simply detect the main frame and executeScript for allFrames doesn't
-        // work since it's possible that only partial frames have the content
-        // script loaded. E.g. the user ran this when the main frame hadn't been
-        // completed and some subframes hadn't been loaded.
-        isDebug && console.debug("(main) send", source, message);
-        capturer.log(`Capturing (document) ${source} ...`);
-        return browser.webNavigation.getAllFrames({tabId}).then((details) => {
-          const tasks = [];
-          details.forEach((detail) => {
-            const {frameId, url} = detail;
-            if (!scrapbook.isContentPage(url)) { return; }
+    // Simply detect the main frame and executeScript for allFrames doesn't
+    // work since it's possible that only partial frames have the content
+    // script loaded. E.g. the user ran this when the main frame hadn't been
+    // completed and some subframes hadn't been loaded.
+    isDebug && console.debug("(main) send", source, message);
+    capturer.log(`Capturing (document) ${source} ...`);
 
-            // Send a test message to check whether content script is loaded.
-            // If no content script, we get an error saying connection cannot be established.
-            tasks[tasks.length] = capturer.invoke("isScriptLoaded", null, {tabId, frameId}).catch((ex) => {
-              isDebug && console.debug("inject content scripts", tabId, frameId, url);
-              return browser.tabs.executeScript(tabId, {frameId, file: "/core/polyfill.js"}).then((result) => {
-                return browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js"});
-              }).then((result) => {
-                return browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js"});
-              }).then((result) => {
-                return browser.tabs.executeScript(tabId, {frameId, file: "/capturer/content.js"});
-              }).catch((ex) => {
-                // Chromium may fail to inject content script to some pages due to unclear reason.
-                // Record the error and pass.
-                console.error(ex);
-                const source = `[${tabId}:${frameId}] ${url}`;
-                const err = scrapbook.lang("ErrorContentScriptExecute", [source, ex.message]);
-                capturer.error(err);
-              });
-            });
-          });
-          return Promise.all(tasks);
-        }).then(() => {
-          return capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
+    const tasks = [];
+    (await browser.webNavigation.getAllFrames({tabId})).forEach(({frameId, url}) => {
+      if (!scrapbook.isContentPage(url)) { return; }
+
+      // Send a test message to check whether content script is loaded.
+      // If no content script, we get an error saying connection cannot be established.
+      tasks[tasks.length] = capturer.invoke("isScriptLoaded", null, {tabId, frameId})
+        .catch(async (ex) => {
+          isDebug && console.debug("inject content scripts", tabId, frameId, url);
+          try {
+            await browser.tabs.executeScript(tabId, {frameId, file: "/core/polyfill.js"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/content.js"});
+          } catch (ex) {
+            // Chromium may fail to inject content script to some pages due to unclear reason.
+            // Record the error and pass.
+            console.error(ex);
+            const source = `[${tabId}:${frameId}] ${url}`;
+            const err = scrapbook.lang("ErrorContentScriptExecute", [source, ex.message]);
+            capturer.error(err);
+          }
         });
-      }).then((response) => {
-        isDebug && console.debug("(main) response", source, response);
-        capturer.captureInfo.delete(timeId);
-        if (response.error) { throw new Error(response.error.message); }
-        return response;
-      });
-    }).catch((ex) => {
-      console.error(ex);
-      const err = `Fatal error: ${ex.message}`;
-      capturer.error(err);
-      return {error: {message: err}};
     });
-  });
+    await Promise.all(tasks);
+
+    const response = await capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
+    isDebug && console.debug("(main) response", source, response);
+    capturer.captureInfo.delete(timeId);
+    if (response.error) { throw new Error(response.error.message); }
+    return response;
+  } catch (ex) {
+    console.error(ex);
+    const err = `Fatal error: ${ex.message}`;
+    capturer.error(err);
+    return {error: {message: err}};
+  }
 };
 
 /**
@@ -196,8 +185,8 @@ capturer.captureTab = function (params) {
  *     - {string} params.options - preset options that overwrites default
  * @return {Promise}
  */
-capturer.captureHeadless = function (params) {
-  return Promise.resolve().then(() => {
+capturer.captureHeadless = async function (params) {
+  try {
     const {url, refUrl, title, mode, options} = params;
 
     const source = `${url}`;
@@ -216,28 +205,32 @@ capturer.captureHeadless = function (params) {
       options: Object.assign(scrapbook.getOptions("capture"), options),
     };
 
-    return Promise.resolve().then(() => {
-      isDebug && console.debug("(main) capture", source, message);
-      capturer.log(`Capturing (${mode}) ${source} ...`);
-      switch (mode) {
-        case "bookmark":
-          return capturer.captureBookmark(message);
-        case "source":
-        default:
-          return capturer.captureUrl(message);
+    isDebug && console.debug("(main) capture", source, message);
+    capturer.log(`Capturing (${mode}) ${source} ...`);
+
+    let response;
+    switch (mode) {
+      case "bookmark": {
+        response = await capturer.captureBookmark(message);
+        break;
       }
-    }).then((response) => {
-      isDebug && console.debug("(main) response", source, response);
-      capturer.captureInfo.delete(timeId);
-      if (response.error) { throw new Error(response.error.message); }
-      return response;
-    }).catch((ex) => {
-      console.error(ex);
-      const err = `Fatal error: ${ex.message}`;
-      capturer.error(err);
-      return {error: {message: err}};
-    });
-  });
+      case "source":
+      default: {
+        response = await capturer.captureUrl(message);
+        break;
+      }
+    }
+
+    isDebug && console.debug("(main) response", source, response);
+    capturer.captureInfo.delete(timeId);
+    if (response.error) { throw new Error(response.error.message); }
+    return response;
+  } catch(ex) {
+    console.error(ex);
+    const err = `Fatal error: ${ex.message}`;
+    capturer.error(err);
+    return {error: {message: err}};
+  }
 };
 
 /**
@@ -250,42 +243,42 @@ capturer.captureHeadless = function (params) {
  *     - {Object} params.options
  * @return {Promise}
  */
-capturer.captureUrl = function (params) {
-  return Promise.resolve().then(() => {
-    isDebug && console.debug("call: captureUrl", params);
+capturer.captureUrl = async function (params) {
+  isDebug && console.debug("call: captureUrl", params);
 
-    const {url: sourceUrl, refUrl, title, settings, options} = params;
-    const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
+  const {url: sourceUrl, refUrl, title, settings, options} = params;
+  const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const {timeId} = settings;
 
-    const headers = {};
+  const headers = {};
 
-    // init access check
-    if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-    const accessMap = capturer.captureInfo.get(timeId).accessMap = capturer.captureInfo.get(timeId).accessMap || new Map();
+  // init access check
+  if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+  const accessMap = capturer.captureInfo.get(timeId).accessMap = capturer.captureInfo.get(timeId).accessMap || new Map();
 
-    // check for previous access
-    const rewriteMethod = "captureUrl";
-    const accessToken = capturer.getAccessToken(sourceUrlMain, rewriteMethod);
-    const accessPrevious = accessMap.get(accessToken);
-    if (accessPrevious) { return accessPrevious; }
+  // check for previous access
+  const rewriteMethod = "captureUrl";
+  const accessToken = capturer.getAccessToken(sourceUrlMain, rewriteMethod);
+  const accessPrevious = accessMap.get(accessToken);
+  if (accessPrevious) { return accessPrevious; }
 
-    // cannot assign "referer" header directly
-    // the prefix will be removed by the onBeforeSendHeaders listener
-    const requestHeaders = {};
-    if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-      requestHeaders["X-WebScrapBook-Referer"] = refUrl;
-    }
+  // cannot assign "referer" header directly
+  // the prefix will be removed by the onBeforeSendHeaders listener
+  const requestHeaders = {};
+  if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+    requestHeaders["X-WebScrapBook-Referer"] = refUrl;
+  }
 
-    let accessPreviousRedirected;
-    const accessCurrent = Promise.resolve().then(() => {
+  let accessPreviousRedirected;
+  const accessCurrent = (async () => {
+    try {
       // fail out if sourceUrl is relative,
       // or it will be treated as relative to this extension page.
       if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
         throw new Error(`URL not resolved.`);
       }
 
-      return scrapbook.xhr({
+      const xhr = await scrapbook.xhr({
         url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
         responseType: "document",
         requestHeaders,
@@ -347,39 +340,39 @@ capturer.captureUrl = function (params) {
             params.settings.documentName = filename;
           }
         },
-      }).then((xhr) => {
-        // Request aborted, only when a previous access is found.
-        // Return that Promise.
-        if (!xhr) { return accessPreviousRedirected; }
-
-        const doc = xhr.response;
-        if (doc) {
-          return capturer.captureDocumentOrFile({
-            doc,
-            refUrl,
-            title,
-            settings,
-            options,
-          });
-        } else {
-          return capturer.captureFile({
-            url: sourceUrl,
-            refUrl,
-            title,
-            settings: params.settings,
-            options: params.options,
-          });
-        }
       });
-    }).catch((ex) => {
+
+      // Request aborted, only when a previous access is found.
+      // Return that Promise.
+      if (!xhr) { return accessPreviousRedirected; }
+
+      const doc = xhr.response;
+      if (doc) {
+        return await capturer.captureDocumentOrFile({
+          doc,
+          refUrl,
+          title,
+          settings,
+          options,
+        });
+      } else {
+        return await capturer.captureFile({
+          url: sourceUrl,
+          refUrl,
+          title,
+          settings: params.settings,
+          options: params.options,
+        });
+      }
+    } catch (ex) {
       console.warn(ex);
       capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
-    });
+    }
+  })();
 
-    accessMap.set(accessToken, accessCurrent);
-    return accessCurrent;
-  });
+  accessMap.set(accessToken, accessCurrent);
+  return accessCurrent;
 };
 
 /**
@@ -392,35 +385,34 @@ capturer.captureUrl = function (params) {
  *     - {Object} params.options
  * @return {Promise}
  */
-capturer.captureBookmark = function (params) {
-  return Promise.resolve().then(() => {
-    isDebug && console.debug("call: captureBookmark", params);
+capturer.captureBookmark = async function (params) {
+  isDebug && console.debug("call: captureBookmark", params);
 
-    const {url: sourceUrl, refUrl, settings, options} = params;
-    const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
+  const {url: sourceUrl, refUrl, settings, options} = params;
+  const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const {timeId} = settings;
 
-    let {title} = params;
-    let favIconUrl;
+  let {title} = params;
+  let favIconUrl;
 
-    // cannot assign "referer" header directly
-    // the prefix will be removed by the onBeforeSendHeaders listener
-    const requestHeaders = {};
-    if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-      requestHeaders["X-WebScrapBook-Referer"] = refUrl;
-    }
+  try {
+    // attempt to retrieve title and favicon from source page
+    try {
+      // cannot assign "referer" header directly
+      // the prefix will be removed by the onBeforeSendHeaders listener
+      const requestHeaders = {};
+      if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+        requestHeaders["X-WebScrapBook-Referer"] = refUrl;
+      }
 
-    return Promise.resolve().then(() => {
-      return scrapbook.xhr({
+      const doc = await scrapbook.xhr({
         url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
         responseType: "document",
         requestHeaders,
-      }).then((xhr) => {
-        return xhr.response;
-      }).then((doc) => {
-        // specified sourceUrl is not a document, maybe a malformed xhtml?
-        if (!doc) { return; }
+      }).response;
 
+      // specified sourceUrl may not be a document, maybe a malformed xhtml?
+      if (doc) {
         // use the document title if not provided
         if (!title) {
           title = doc.title;
@@ -434,10 +426,13 @@ capturer.captureBookmark = function (params) {
         if (elem) {
           favIconUrl = elem.href;
         }
-      }).catch((ex) => {
-        console.error(ex);
-      });
-    }).then(() => {
+      }
+    } catch (ex) {
+      console.error(ex);
+    }
+
+    let html;
+    {
       const meta = params.options["capture.recordDocumentMeta"] ? 
           ' data-scrapbook-source="' + scrapbook.escapeHtml(sourceUrl) + '"' + 
           ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
@@ -445,60 +440,59 @@ capturer.captureBookmark = function (params) {
           "";
       const titleElem = title ? `<title>${scrapbook.escapeHtml(title, false)}</title>\n` : "";
       const favIconElem = favIconUrl ? `<link rel="shortcut icon" href="${favIconUrl}">` : "";
-      const html = `<!DOCTYPE html>
-<html${meta}>
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(sourceUrl)}">
-${titleElem}${favIconElem}</head>
-<body>
-Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
-</body>
-</html>`;
-      return html;
-    }).then((html) => {
-      const ext = ".htm";
-      let targetDir;
-      let filename;
-      let savePrompt;
-      let saveMethod;
+      html = `<!DOCTYPE html>
+  <html${meta}>
+  <head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(sourceUrl)}">
+  ${titleElem}${favIconElem}</head>
+  <body>
+  Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
+  </body>
+  </html>`;
+    }
 
-      if (options["capture.saveInScrapbook"]) {
-        targetDir = options["capture.scrapbookFolder"] + "/data";
-        filename = timeId + ext;
-        savePrompt = false;
-        saveMethod = "saveBlob";
-      } else {
-        filename = (title ? title : scrapbook.urlToFilename(sourceUrl));
-        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-        if (!filename.endsWith(ext)) { filename += ext; }
-        saveMethod = "saveBlobNaturally";
-      }
+    const ext = ".htm";
+    let targetDir;
+    let filename;
+    let savePrompt;
+    let saveMethod;
 
-      const dataBlob = new Blob([html], {type: "text/html"});
+    if (options["capture.saveInScrapbook"]) {
+      targetDir = options["capture.scrapbookFolder"] + "/data";
+      filename = timeId + ext;
+      savePrompt = false;
+      saveMethod = "saveBlob";
+    } else {
+      filename = (title ? title : scrapbook.urlToFilename(sourceUrl));
+      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+      if (!filename.endsWith(ext)) { filename += ext; }
+      saveMethod = "saveBlobNaturally";
+    }
 
-      // special handling (for unit test)
-      if (options["capture.saveInMemory"]) {
-        return capturer.saveBlobInMemory({blob: dataBlob});
-      }
+    const dataBlob = new Blob([html], {type: "text/html"});
 
-      return capturer[saveMethod]({
-        timeId,
-        blob: dataBlob,
-        directory: targetDir,
-        filename,
-        sourceUrl,
-        autoErase: false,
-        savePrompt,
-      }).then((filename) => {
-        return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-      });
-    }).catch((ex) => {
-      console.warn(ex);
-      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+    // special handling (for unit test)
+    if (options["capture.saveInMemory"]) {
+      return await capturer.saveBlobInMemory({blob: dataBlob});
+    }
+
+    filename = await capturer[saveMethod]({
+      timeId,
+      blob: dataBlob,
+      directory: targetDir,
+      filename,
+      sourceUrl,
+      autoErase: false,
+      savePrompt,
     });
-  });
+
+    return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+  } catch (ex) {
+    console.warn(ex);
+    capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+    return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+  }
 };
 
 /**
@@ -512,34 +506,35 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
  *     - {Object} params.options
  * @return {Promise}
  */
-capturer.captureFile = function (params) {
-  return Promise.resolve().then(() => {
+capturer.captureFile = async function (params) {
+  try {
     isDebug && console.debug("call: captureFile", params);
 
     const {url: sourceUrl, refUrl, title, charset, settings, options} = params;
     const {timeId} = settings;
 
-    return capturer.downloadFile({
+    const response = await capturer.downloadFile({
       url: sourceUrl,
       refUrl,
       settings,
       options,
-    }).then((response) => {
-      if (settings.frameIsMain) {
-        // for the main frame, create a index.html that redirects to the file
-        const meta = params.options["capture.recordDocumentMeta"] ? 
-          ' data-scrapbook-source="' + scrapbook.escapeHtml(sourceUrl) + '"' + 
-          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
-          ' data-scrapbook-type="file"' + 
-          (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
-          "";
+    });
 
-        // do not generate link for singleHtml to avoid doubling the data URL
-        const anchor = (options["capture.saveAs"] === "singleHtml") ? 
-            `${scrapbook.escapeHtml(response.filename, false)}` : 
-            `<a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>`;
+    if (settings.frameIsMain) {
+      // for the main frame, create a index.html that redirects to the file
+      const meta = params.options["capture.recordDocumentMeta"] ? 
+        ' data-scrapbook-source="' + scrapbook.escapeHtml(sourceUrl) + '"' + 
+        ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
+        ' data-scrapbook-type="file"' + 
+        (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
+        "";
 
-        const html = `<!DOCTYPE html>
+      // do not generate link for singleHtml to avoid doubling the data URL
+      const anchor = (options["capture.saveAs"] === "singleHtml") ? 
+          `${scrapbook.escapeHtml(response.filename, false)}` : 
+          `<a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>`;
+
+      const html = `<!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
@@ -549,31 +544,30 @@ ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</h
 Redirecting to file ${anchor}
 </body>
 </html>`;
-        return capturer.saveDocument({
-          sourceUrl,
-          documentName: settings.documentName,
-          settings,
-          options,
-          data: {
-            title,
-            mime: "text/html",
-            content: html,
-          }
-        });
-      } else {
-        return {
-          timeId,
-          sourceUrl,
-          targetDir: response.targetDir,
-          filename: response.filename,
-          url: response.url,
-        };
-      }
-    });
-  }).catch((ex) => {
+      return await capturer.saveDocument({
+        sourceUrl,
+        documentName: settings.documentName,
+        settings,
+        options,
+        data: {
+          title,
+          mime: "text/html",
+          content: html,
+        }
+      });
+    } else {
+      return {
+        timeId,
+        sourceUrl,
+        targetDir: response.targetDir,
+        filename: response.filename,
+        url: response.url,
+      };
+    }
+  } catch (ex) {
     console.error(ex);
     return {error: {message: ex.message}};
-  });
+  }
 };
 
 /**
@@ -583,27 +577,25 @@ Redirecting to file ${anchor}
  *     - {Object} params.options
  * @return {Promise}
  */
-capturer.registerDocument = function (params) {
-  return Promise.resolve().then(() => {
-    isDebug && console.debug("call: registerDocument", params);
+capturer.registerDocument = async function (params) {
+  isDebug && console.debug("call: registerDocument", params);
 
-    const {settings, options} = params;
-    const {timeId, documentName} = settings;
+  const {settings, options} = params;
+  const {timeId, documentName} = settings;
 
-    if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-    const files = capturer.captureInfo.get(timeId).files = capturer.captureInfo.get(timeId).files || new Set(capturer.defaultFilesSet);
+  if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+  const files = capturer.captureInfo.get(timeId).files = capturer.captureInfo.get(timeId).files || new Set(capturer.defaultFilesSet);
 
-    let newDocumentName = documentName;
-    let newDocumentNameCI = newDocumentName.toLowerCase();
-    let count = 0;
-    while (files.has(newDocumentNameCI + ".html") || files.has(newDocumentNameCI + ".xhtml")) {
-      newDocumentName = documentName + "_" + (++count);
-      newDocumentNameCI = newDocumentName.toLowerCase();
-    }
-    files.add(newDocumentNameCI + ".html");
-    files.add(newDocumentNameCI + ".xhtml");
-    return {documentName: newDocumentName};
-  });
+  let newDocumentName = documentName;
+  let newDocumentNameCI = newDocumentName.toLowerCase();
+  let count = 0;
+  while (files.has(newDocumentNameCI + ".html") || files.has(newDocumentNameCI + ".xhtml")) {
+    newDocumentName = documentName + "_" + (++count);
+    newDocumentNameCI = newDocumentName.toLowerCase();
+  }
+  files.add(newDocumentNameCI + ".html");
+  files.add(newDocumentNameCI + ".xhtml");
+  return {documentName: newDocumentName};
 };
 
 /**
@@ -616,53 +608,202 @@ capturer.registerDocument = function (params) {
  *     - {Object} params.options
  * @return {Promise}
  */
-capturer.saveDocument = function (params) {
-  return Promise.resolve().then(() => {
-    isDebug && console.debug("call: saveDocument", params);
+capturer.saveDocument = async function (params) {
+  isDebug && console.debug("call: saveDocument", params);
 
-    const {data, documentName, sourceUrl, settings, options} = params;
-    const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
+  const {data, documentName, sourceUrl, settings, options} = params;
+  const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const {timeId} = settings;
 
-    return Promise.resolve().then(() => {
-      switch (options["capture.saveAs"]) {
-        case "singleHtml": {
-          if (!settings.frameIsMain) {
-            const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-            let filename = documentName + ext;
-            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+  try {
+    switch (options["capture.saveAs"]) {
+      case "singleHtml": {
+        if (!settings.frameIsMain) {
+          const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+          let filename = documentName + ext;
+          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
-            let dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
-            dataUri = dataUri.replace(";base64", ";filename=" + encodeURIComponent(filename) + ";base64");
-            return {timeId, sourceUrl, url: dataUri};
+          let dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
+          dataUri = dataUri.replace(";base64", ";filename=" + encodeURIComponent(filename) + ";base64");
+          return {timeId, sourceUrl, url: dataUri};
+        } else {
+          const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+          let targetDir;
+          let filename;
+          let savePrompt;
+          let saveMethod;
+
+          if (options["capture.saveInScrapbook"]) {
+            targetDir = options["capture.scrapbookFolder"] + "/data";
+            filename = timeId + ext;
+            savePrompt = false;
+            saveMethod = "saveBlob";
           } else {
-            const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-            let targetDir;
-            let filename;
-            let savePrompt;
-            let saveMethod;
+            filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+            if (!filename.endsWith(ext)) filename += ext;
+            saveMethod = "saveBlobNaturally";
+          }
 
-            if (options["capture.saveInScrapbook"]) {
-              targetDir = options["capture.scrapbookFolder"] + "/data";
-              filename = timeId + ext;
-              savePrompt = false;
-              saveMethod = "saveBlob";
-            } else {
-              filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-              if (!filename.endsWith(ext)) filename += ext;
-              saveMethod = "saveBlobNaturally";
+          const dataBlob = new Blob([data.content], {type: data.mime});
+
+          // special handling (for unit test)
+          if (options["capture.saveInMemory"]) {
+            return await capturer.saveBlobInMemory({blob: dataBlob});
+          }
+
+          capturer.log(`Preparing download...`);
+          return await capturer[saveMethod]({
+            timeId,
+            blob: dataBlob,
+            directory: targetDir,
+            filename,
+            sourceUrl,
+            autoErase: false,
+            savePrompt,
+          }).then((filename) => {
+            return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+          });
+        }
+        break;
+      }
+
+      case "singleHtmlJs": {
+        const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+        let filename = documentName + ext;
+        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+
+        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+        const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+        const zipResMap = capturer.captureInfo.get(timeId).zipResMap = capturer.captureInfo.get(timeId).zipResMap || new Map();
+
+        if (!settings.frameIsMain) {
+          const blob = new Blob([data.content], {type: data.mime});
+          scrapbook.zipAddFile(zip, filename, blob, true);
+          const zipResId = zipResMap.size;
+          zipResMap.set(filename, zipResId);
+          const charset = data.charset ? ";charset=" + data.charset : "";
+          const url = `data:${blob.type}${charset};scrapbook-resource=${zipResId},${sourceUrlHash}`;
+          return {timeId, sourceUrl, filename, url};
+        } else {
+          let targetDir;
+          let filename;
+          let savePrompt;
+          let saveMethod;
+
+          if (options["capture.saveInScrapbook"]) {
+            targetDir = options["capture.scrapbookFolder"] + "/data";
+            filename = timeId + ext;
+            savePrompt = false;
+            saveMethod = "saveBlob";
+          } else {
+            filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+            if (!filename.endsWith(ext)) filename += ext;
+            saveMethod = "saveBlobNaturally";
+          }
+
+          const zipData = [];
+          let p = Promise.resolve();
+          zip.forEach((path, entry) => {
+            p = p.then(() => {
+              return entry.async('base64');
+            }).then((data) => {
+              zipData[zipResMap.get(path)] = {p: path, d: data};
+            });
+          });
+          await p;
+
+          {
+            const pageloader = function (data) {
+              var bs2ab = function (bstr) {
+                var n = bstr.length, u8ar = new Uint8Array(n);
+                while (n--) { u8ar[n] = bstr.charCodeAt(n); }
+                return u8ar.buffer;
+              };
+
+              var getRes = function (i, t) {
+                if (getRes[i]) { return getRes[i]; }
+                var s = readRes(atob(data[i].d));
+                return getRes[i] = URL.createObjectURL(new Blob([bs2ab(s)], {type: t}));
+              };
+
+              var readRes = function (s) {
+                return s.replace(/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/g, function (m, t, i, h) {
+                  return getRes(i, t) + (h || '');
+                });
+              };
+
+              var loadRes = function (node) {
+                var o = node.nodeValue, n = readRes(o);
+                if (n !== o) { node.nodeValue = n; }
+              };
+
+              var loadDocRes = function (doc) {
+                var e = doc.getElementsByTagName('*');
+                for (var i = 0, I = e.length; i < I; i++) {
+                  if (['style'].indexOf(e[i].nodeName.toLowerCase()) !== -1) {
+                    var c = e[i].childNodes;
+                    for (var j = 0, J = c.length; j < J; j++) {
+                      if (c[j].nodeType === 3) { loadRes(c[j]); }
+                    }
+                  }
+                  var a = e[i].attributes;
+                  for (var j = 0, J = a.length; j < J; j++) {
+                    if (['href', 'src', 'srcset', 'style', 'background', 'content', 'poster', 'data', 'code', 'archive']
+                        .indexOf(a[j].nodeName) !== -1) {
+                      loadRes(a[j]);
+                    }
+                  }
+                }
+              };
+
+              var s = document.getElementsByTagName('script'); s = s[s.length - 1];
+              s.parentNode.removeChild(s);
+
+              loadDocRes(document);
+            };
+
+            const [cdataStart, cdataEnd] = (data.mime === "application/xhtml+xml") ? 
+              ['<!--//--><![CDATA[//><!--\n', '//--><!]]>'] :
+              ['', ''];
+
+            const pageloaderScript = `
+<script data-scrapbook-elem="pageloader">${cdataStart}(${scrapbook.compressJsFunc(pageloader)})(
+${JSON.stringify(zipData)}
+);${cdataEnd}</script>
+`;
+            let inserted = false;
+            let content = data.content.replace(/<\/body>\s*<\/html>\s*$/i, (m) => {
+              inserted = true;
+              return pageloaderScript + m;
+            });
+
+            if (!inserted) {
+              // fix broken html
+              // Failure of previous insertion is due to post-body contents.
+              // Such HTML doc won't validate, but in such cases we need
+              // to insert our pageloader after them.
+              content = data.content.replace(/<\/html>\s*$/i, (m) => {
+                inserted = true;
+                return pageloaderScript + m;
+              });
             }
 
-            const dataBlob = new Blob([data.content], {type: data.mime});
+            if (!inserted) {
+              // this is unexpected and should never happen
+              throw new Error(`Unable to find the end tag of HTML doc`);
+            }
+
+            const dataBlob = new Blob([content], {type: data.mime});
 
             // special handling (for unit test)
             if (options["capture.saveInMemory"]) {
-              return capturer.saveBlobInMemory({blob: dataBlob});
+              return await capturer.saveBlobInMemory({blob: dataBlob});
             }
 
             capturer.log(`Preparing download...`);
-            return capturer[saveMethod]({
+            return await capturer[saveMethod]({
               timeId,
               blob: dataBlob,
               directory: targetDir,
@@ -674,238 +815,88 @@ capturer.saveDocument = function (params) {
               return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
             });
           }
-          break;
         }
+        break;
+      }
 
-        case "singleHtmlJs": {
-          const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-          let filename = documentName + ext;
-          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+      case "zip": {
+        const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+        let filename = documentName + ext;
+        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
-          if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-          const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-          const zipResMap = capturer.captureInfo.get(timeId).zipResMap = capturer.captureInfo.get(timeId).zipResMap || new Map();
+        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+        const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+        scrapbook.zipAddFile(zip, filename, new Blob([data.content], {type: data.mime}), true);
 
-          if (!settings.frameIsMain) {
-            const blob = new Blob([data.content], {type: data.mime});
-            scrapbook.zipAddFile(zip, filename, blob, true);
-            const zipResId = zipResMap.size;
-            zipResMap.set(filename, zipResId);
-            const charset = data.charset ? ";charset=" + data.charset : "";
-            const url = `data:${blob.type}${charset};scrapbook-resource=${zipResId},${sourceUrlHash}`;
-            return {timeId, sourceUrl, filename, url};
-          } else {
-            let targetDir;
-            let filename;
-            let savePrompt;
-            let saveMethod;
-
-            if (options["capture.saveInScrapbook"]) {
-              targetDir = options["capture.scrapbookFolder"] + "/data";
-              filename = timeId + ext;
-              savePrompt = false;
-              saveMethod = "saveBlob";
-            } else {
-              filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-              if (!filename.endsWith(ext)) filename += ext;
-              saveMethod = "saveBlobNaturally";
-            }
-
-            const zipData = [];
-            let p = Promise.resolve();
-            zip.forEach((path, entry) => {
-              p = p.then(() => {
-                return entry.async('base64');
-              }).then((data) => {
-                zipData[zipResMap.get(path)] = {p: path, d: data};
-              });
-            });
-
-            return p.then(() => {
-              const pageloader = function (data) {
-                var bs2ab = function (bstr) {
-                  var n = bstr.length, u8ar = new Uint8Array(n);
-                  while (n--) { u8ar[n] = bstr.charCodeAt(n); }
-                  return u8ar.buffer;
-                };
-
-                var getRes = function (i, t) {
-                  if (getRes[i]) { return getRes[i]; }
-                  var s = readRes(atob(data[i].d));
-                  return getRes[i] = URL.createObjectURL(new Blob([bs2ab(s)], {type: t}));
-                };
-
-                var readRes = function (s) {
-                  return s.replace(/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/g, function (m, t, i, h) {
-                    return getRes(i, t) + (h || '');
-                  });
-                };
-
-                var loadRes = function (node) {
-                  var o = node.nodeValue, n = readRes(o);
-                  if (n !== o) { node.nodeValue = n; }
-                };
-
-                var loadDocRes = function (doc) {
-                  var e = doc.getElementsByTagName('*');
-                  for (var i = 0, I = e.length; i < I; i++) {
-                    if (['style'].indexOf(e[i].nodeName.toLowerCase()) !== -1) {
-                      var c = e[i].childNodes;
-                      for (var j = 0, J = c.length; j < J; j++) {
-                        if (c[j].nodeType === 3) { loadRes(c[j]); }
-                      }
-                    }
-                    var a = e[i].attributes;
-                    for (var j = 0, J = a.length; j < J; j++) {
-                      if (['href', 'src', 'srcset', 'style', 'background', 'content', 'poster', 'data', 'code', 'archive']
-                          .indexOf(a[j].nodeName) !== -1) {
-                        loadRes(a[j]);
-                      }
-                    }
-                  }
-                };
-
-                var s = document.getElementsByTagName('script'); s = s[s.length - 1];
-                s.parentNode.removeChild(s);
-
-                loadDocRes(document);
-              };
-
-              const [cdataStart, cdataEnd] = (data.mime === "application/xhtml+xml") ? 
-                ['<!--//--><![CDATA[//><!--\n', '//--><!]]>'] :
-                ['', ''];
-
-              const pageloaderScript = `
-<script data-scrapbook-elem="pageloader">${cdataStart}(${scrapbook.compressJsFunc(pageloader)})(
-${JSON.stringify(zipData)}
-);${cdataEnd}</script>
-`;
-              let inserted = false;
-              let content = data.content.replace(/<\/body>\s*<\/html>\s*$/i, (m) => {
-                inserted = true;
-                return pageloaderScript + m;
-              });
-
-              if (!inserted) {
-                // fix broken html
-                // Failure of previous insertion is due to post-body contents.
-                // Such HTML doc won't validate, but in such cases we need
-                // to insert our pageloader after them.
-                content = data.content.replace(/<\/html>\s*$/i, (m) => {
-                  inserted = true;
-                  return pageloaderScript + m;
-                });
-              }
-
-              if (!inserted) {
-                // this is unexpected and should never happen
-                throw new Error(`Unable to find the end tag of HTML doc`);
-              }
-
-              const dataBlob = new Blob([content], {type: data.mime});
-
-              // special handling (for unit test)
-              if (options["capture.saveInMemory"]) {
-                return capturer.saveBlobInMemory({blob: dataBlob});
-              }
-
-              capturer.log(`Preparing download...`);
-              return capturer[saveMethod]({
-                timeId,
-                blob: dataBlob,
-                directory: targetDir,
-                filename,
-                sourceUrl,
-                autoErase: false,
-                savePrompt,
-              }).then((filename) => {
-                return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-              });
-            });
+        if (!settings.frameIsMain) {
+          return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        } else {
+          // create index.html that redirects to index.xhtml
+          if (ext === ".xhtml") {
+            const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
+            scrapbook.zipAddFile(zip, "index.html", new Blob([html], {type: "text/html"}), true);
           }
-          break;
-        }
 
-        case "zip": {
-          const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-          let filename = documentName + ext;
-          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+          // generate and download the zip file
+          const zipBlob = await zip.generateAsync({type: "blob", mimeType: "application/html+zip"});
+          let targetDir;
+          let filename;
+          let savePrompt;
+          let saveMethod;
 
-          if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-          const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-          scrapbook.zipAddFile(zip, filename, new Blob([data.content], {type: data.mime}), true);
-
-          if (!settings.frameIsMain) {
-            return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+          if (options["capture.saveInScrapbook"]) {
+            targetDir = options["capture.scrapbookFolder"] + "/data";
+            filename = timeId + ".htz";
+            savePrompt = false;
+            saveMethod = "saveBlob";
           } else {
-            // create index.html that redirects to index.xhtml
-            if (ext === ".xhtml") {
-              const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
-              scrapbook.zipAddFile(zip, "index.html", new Blob([html], {type: "text/html"}), true);
-            }
-
-            // generate and download the zip file
-            return zip.generateAsync({type: "blob", mimeType: "application/html+zip"}).then((zipBlob) => {
-              let targetDir;
-              let filename;
-              let savePrompt;
-              let saveMethod;
-
-              if (options["capture.saveInScrapbook"]) {
-                targetDir = options["capture.scrapbookFolder"] + "/data";
-                filename = timeId + ".htz";
-                savePrompt = false;
-                saveMethod = "saveBlob";
-              } else {
-                filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-                filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-                filename += ".htz";
-                saveMethod = "saveBlobNaturally";
-              }
-
-              // special handling (for unit test)
-              if (options["capture.saveInMemory"]) {
-                return capturer.saveBlobInMemory({blob: zipBlob});
-              }
-
-              capturer.log(`Preparing download...`);
-              return capturer[saveMethod]({
-                timeId,
-                blob: zipBlob,
-                directory: targetDir,
-                filename,
-                sourceUrl,
-                autoErase: false,
-                savePrompt,
-              }).then((filename) => {
-                return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-              });
-            });
+            filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+            filename += ".htz";
+            saveMethod = "saveBlobNaturally";
           }
-          break;
+
+          // special handling (for unit test)
+          if (options["capture.saveInMemory"]) {
+            return await capturer.saveBlobInMemory({blob: zipBlob});
+          }
+
+          capturer.log(`Preparing download...`);
+          return await capturer[saveMethod]({
+            timeId,
+            blob: zipBlob,
+            directory: targetDir,
+            filename,
+            sourceUrl,
+            autoErase: false,
+            savePrompt,
+          }).then((filename) => {
+            return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+          });
         }
+        break;
+      }
 
-        case "maff": {
-          const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-          let filename = documentName + ext;
-          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+      case "maff": {
+        const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+        let filename = documentName + ext;
+        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
-          if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-          const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-          scrapbook.zipAddFile(zip, timeId + "/" + filename, new Blob([data.content], {type: data.mime}), true);
+        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+        const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+        scrapbook.zipAddFile(zip, timeId + "/" + filename, new Blob([data.content], {type: data.mime}), true);
 
-          if (!settings.frameIsMain) {
-            return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-          } else {
-            // create index.html that redirects to index.xhtml
-            if (ext === ".xhtml") {
-              const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
-              scrapbook.zipAddFile(zip, timeId + "/" + "index.html", new Blob([html], {type: "text/html"}), true);
-            }
+        if (!settings.frameIsMain) {
+          return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        } else {
+          // create index.html that redirects to index.xhtml
+          if (ext === ".xhtml") {
+            const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
+            scrapbook.zipAddFile(zip, timeId + "/" + "index.html", new Blob([html], {type: "text/html"}), true);
+          }
 
-            // generate index.rdf
-            const rdfContent = `<?xml version="1.0"?>
+          // generate index.rdf
+          const rdfContent = `<?xml version="1.0"?>
 <RDF:RDF xmlns:MAF="http://maf.mozdev.org/metadata/rdf#"
          xmlns:NC="http://home.netscape.com/NC-rdf#"
          xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -918,92 +909,91 @@ ${JSON.stringify(zipData)}
   </RDF:Description>
 </RDF:RDF>
 `;
-            scrapbook.zipAddFile(zip, timeId + "/" + "index.rdf", new Blob([rdfContent], {type: "application/rdf+xml"}), true);
+          scrapbook.zipAddFile(zip, timeId + "/" + "index.rdf", new Blob([rdfContent], {type: "application/rdf+xml"}), true);
 
-            // generate and download the zip file
-            return zip.generateAsync({type: "blob", mimeType: "application/x-maff"}).then((zipBlob) => {
-              let targetDir;
-              let filename;
-              let savePrompt;
-              let saveMethod;
+          // generate and download the zip file
+          {
+            const zipBlob = await zip.generateAsync({type: "blob", mimeType: "application/x-maff"});
+            let targetDir;
+            let filename;
+            let savePrompt;
+            let saveMethod;
 
-              if (options["capture.saveInScrapbook"]) {
-                targetDir = options["capture.scrapbookFolder"] + "/data";
-                filename = timeId + ".maff";
-                savePrompt = false;
-                saveMethod = "saveBlob";
-              } else {
-                filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-                filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-                filename += ".maff";
-                saveMethod = "saveBlobNaturally";
-              }
+            if (options["capture.saveInScrapbook"]) {
+              targetDir = options["capture.scrapbookFolder"] + "/data";
+              filename = timeId + ".maff";
+              savePrompt = false;
+              saveMethod = "saveBlob";
+            } else {
+              filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+              filename += ".maff";
+              saveMethod = "saveBlobNaturally";
+            }
 
-              // special handling (for unit test)
-              if (options["capture.saveInMemory"]) {
-                return capturer.saveBlobInMemory({blob: zipBlob});
-              }
+            // special handling (for unit test)
+            if (options["capture.saveInMemory"]) {
+              return await capturer.saveBlobInMemory({blob: zipBlob});
+            }
 
-              capturer.log(`Preparing download...`);
-              return capturer[saveMethod]({
-                timeId,
-                blob: zipBlob,
-                directory: targetDir,
-                filename,
-                sourceUrl,
-                autoErase: false,
-                savePrompt,
-              }).then((filename) => {
-                return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-              });
+            capturer.log(`Preparing download...`);
+            return await capturer[saveMethod]({
+              timeId,
+              blob: zipBlob,
+              directory: targetDir,
+              filename,
+              sourceUrl,
+              autoErase: false,
+              savePrompt,
+            }).then((filename) => {
+              return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
             });
           }
-          break;
         }
-
-        case "folder":
-        default: {
-          const targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
-          const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
-          let filename = documentName + ext;
-          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-
-          return capturer.saveBlob({
-            timeId,
-            blob: new Blob([data.content], {type: data.mime}),
-            directory: targetDir,
-            filename,
-            sourceUrl,
-            autoErase: !settings.frameIsMain || (ext === ".xhtml"),
-            savePrompt: false,
-          }).then((filename) => {
-            if (settings.frameIsMain && (ext === ".xhtml")) {
-              // create index.html that redirects to index.xhtml
-              const filename = "index.html";
-              const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
-              return capturer.saveBlob({
-                timeId,
-                blob: new Blob([html], {type: "text/html"}),
-                directory: targetDir,
-                filename,
-                sourceUrl,
-                autoErase: false,
-                savePrompt: false,
-              });
-            }
-            return filename;
-          }).then((filename) => {
-            return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-          });
-          break;
-        }
+        break;
       }
-    }).catch((ex) => {
-      console.warn(ex);
-      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
-    });
-  });
+
+      case "folder":
+      default: {
+        const targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
+        const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+        let filename = documentName + ext;
+        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+
+        filename = await capturer.saveBlob({
+          timeId,
+          blob: new Blob([data.content], {type: data.mime}),
+          directory: targetDir,
+          filename,
+          sourceUrl,
+          autoErase: !settings.frameIsMain || (ext === ".xhtml"),
+          savePrompt: false,
+        });
+
+        if (settings.frameIsMain && (ext === ".xhtml")) {
+          // create index.html that redirects to index.xhtml
+          const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
+          const blob = new Blob([html], {type: "text/html"});
+          await capturer.saveBlob({
+            timeId,
+            blob,
+            directory: targetDir,
+            filename: "index.html",
+            sourceUrl,
+            autoErase: false,
+            savePrompt: false,
+          });
+        }
+
+        return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        break;
+      }
+    }
+  } catch (ex) {
+    console.warn(ex);
+    capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+    return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+  }
 };
 
 /**
@@ -1016,41 +1006,41 @@ ${JSON.stringify(zipData)}
  *     - {Object} params.options
  * @return {Promise}
  */
-capturer.downloadFile = function (params) {
-  return Promise.resolve().then(() => {
-    isDebug && console.debug("call: downloadFile", params);
+capturer.downloadFile = async function (params) {
+  isDebug && console.debug("call: downloadFile", params);
 
-    const {url: sourceUrl, refUrl, rewriteMethod, settings, options} = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId, recurseChain} = settings;
+  const {url: sourceUrl, refUrl, rewriteMethod, settings, options} = params;
+  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const {timeId, recurseChain} = settings;
 
-    const headers = {};
-    let filename;
+  const headers = {};
+  let filename;
 
-    // init access check
-    if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-    const accessMap = capturer.captureInfo.get(timeId).accessMap = capturer.captureInfo.get(timeId).accessMap || new Map();
+  // init access check
+  if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+  const accessMap = capturer.captureInfo.get(timeId).accessMap = capturer.captureInfo.get(timeId).accessMap || new Map();
 
-    // check for previous access
-    const accessToken = capturer.getAccessToken(sourceUrlMain, rewriteMethod);
-    const accessPrevious = accessMap.get(accessToken);
-    if (accessPrevious) {
-      // Normally we wait until the file be downloaded, and possibly
-      // renamed, cancelled, or thrown error. However, if there is
-      // a circular reference, we have to return early to pervent a
-      // dead lock. This returned data could be incorrect if something
-      // unexpected happen to the accessPrevious.
-      if (recurseChain.indexOf(sourceUrlMain) !== -1) {
-        return {
-          filename: accessPrevious.filename,
-          url: scrapbook.escapeFilename(accessPrevious.filename) + sourceUrlHash,
-          isCircular: true,
-        };
-      }
-      return accessPrevious;
+  // check for previous access
+  const accessToken = capturer.getAccessToken(sourceUrlMain, rewriteMethod);
+  const accessPrevious = accessMap.get(accessToken);
+  if (accessPrevious) {
+    // Normally we wait until the file be downloaded, and possibly
+    // renamed, cancelled, or thrown error. However, if there is
+    // a circular reference, we have to return early to pervent a
+    // dead lock. This returned data could be incorrect if something
+    // unexpected happen to the accessPrevious.
+    if (recurseChain.indexOf(sourceUrlMain) !== -1) {
+      return {
+        filename: accessPrevious.filename,
+        url: scrapbook.escapeFilename(accessPrevious.filename) + sourceUrlHash,
+        isCircular: true,
+      };
     }
+    return accessPrevious;
+  }
 
-    const accessCurrent = Promise.resolve().then(() => {
+  const accessCurrent = (async () => {
+    try {
       // fail out if sourceUrl is relative,
       // or it will be treated as relative to this extension page.
       if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
@@ -1068,23 +1058,24 @@ capturer.downloadFile = function (params) {
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
           filename = capturer.getUniqueFilename(timeId, filename);
 
-          return Promise.resolve(capturer[rewriteMethod]).then((fn) => {
-            if (!fn) { return file; }
-            return fn({
+          let blob;
+          if (capturer[rewriteMethod]) {
+            blob = await capturer[rewriteMethod]({
               settings,
               options,
               data: file,
               charset: null,
               url: null,
             });
-          }).then((blob) => {
-            return capturer.downloadBlob({
-              settings,
-              options,
-              blob,
-              filename,
-              sourceUrl,
-            });
+          } else {
+            blob = file;
+          }
+          return await capturer.downloadBlob({
+            settings,
+            options,
+            blob,
+            filename,
+            sourceUrl,
           });
         }
 
@@ -1098,17 +1089,14 @@ capturer.downloadFile = function (params) {
           const innerOptions = JSON.parse(JSON.stringify(options));
           innerOptions["capture.saveAs"] = "singleHtml";
 
-          return capturer[rewriteMethod]({
+          const blob = await capturer[rewriteMethod]({
             settings,
             options: innerOptions,
             data: file,
             charset: null,
             url: null,
-          }).then((blob) => {
-            return scrapbook.readFileAsDataURL(blob);
-          }).then((dataURL) => {
-            return {url: dataURL};
           });
+          return {url: await scrapbook.readFileAsDataURL(blob)};
         }
 
         return {url: sourceUrl};
@@ -1122,7 +1110,7 @@ capturer.downloadFile = function (params) {
       }
 
       let accessPreviousReturn;
-      return scrapbook.xhr({
+      const xhr = await scrapbook.xhr({
         url: sourceUrl,
         responseType: "blob",
         requestHeaders,
@@ -1190,39 +1178,40 @@ capturer.downloadFile = function (params) {
           // we need this data for early return of circular referencing
           accessCurrent.filename = filename;
         },
-      }).then((xhr) => {
-        // Request aborted, only when a previous access is found.
-        // Return that Promise.
-        if (!xhr) { return accessPreviousReturn; }
-
-        return Promise.resolve(capturer[rewriteMethod]).then((fn) => {
-          if (!fn) { return xhr.response; }
-          return fn({
-            settings,
-            options,
-            data: xhr.response,
-            charset: headers.charset,
-            url: xhr.responseURL,
-          });
-        }).then((blob) => {
-          return capturer.downloadBlob({
-            settings,
-            options,
-            blob,
-            filename,
-            sourceUrl,
-          });
-        });
       });
-    }).catch((ex) => {
+
+      // Request aborted, only when a previous access is found.
+      // Return that Promise.
+      if (!xhr) { return accessPreviousReturn; }
+
+      let blob;
+      if (capturer[rewriteMethod]) {
+        blob = await capturer[rewriteMethod]({
+          settings,
+          options,
+          data: xhr.response,
+          charset: headers.charset,
+          url: xhr.responseURL,
+        });
+      } else {
+        blob = xhr.response;
+      }
+      return await capturer.downloadBlob({
+        settings,
+        options,
+        blob,
+        filename,
+        sourceUrl,
+      });
+    } catch (ex) {
       console.warn(ex);
       capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
-    });
+    }
+  })();
 
-    accessMap.set(accessToken, accessCurrent);
-    return accessCurrent;
-  });
+  accessMap.set(accessToken, accessCurrent);
+  return accessCurrent;
 };
 
 // @TODO: accessMap cache for same URL
@@ -1233,21 +1222,22 @@ capturer.downloadFile = function (params) {
  *     - {string} params.refUrl
  * @return {Promise}
  */
-capturer.downLinkFetchHeader = function (params) {
-  return Promise.resolve().then(() => {
-    isDebug && console.debug("call: downLinkFetchHeader", params);
+capturer.downLinkFetchHeader = async function (params) {
+  isDebug && console.debug("call: downLinkFetchHeader", params);
 
-    const {url: sourceUrl, refUrl} = params;
-    const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const {url: sourceUrl, refUrl} = params;
+  const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-    const headers = {};
+  const headers = {};
 
-    // cannot assign "referer" header directly
-    // the prefix will be removed by the onBeforeSendHeaders listener
-    const requestHeaders = {};
-    if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
+  // cannot assign "referer" header directly
+  // the prefix will be removed by the onBeforeSendHeaders listener
+  const requestHeaders = {};
+  if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
 
-    return scrapbook.xhr({
+  let xhr;
+  try {
+    xhr = await scrapbook.xhr({
       url: sourceUrlMain,
       responseType: 'blob',
       timeout: 8000,
@@ -1273,31 +1263,31 @@ capturer.downLinkFetchHeader = function (params) {
 
         xhr.abort();
       },
-    }).catch((ex) => {
-      // something wrong for the XMLHttpRequest
-      console.warn(ex);
-      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return null;
-    }).then(() => {
-      if (headers.filename) {
-        let [, ext] = scrapbook.filenameParts(headers.filename);
-
-        if (!ext && headers.contentType) {
-          ext = Mime.extension(headers.contentType);
-        }
-
-        return ext;
-      } else {
-        if (headers.contentType) {
-          return Mime.extension(headers.contentType);
-        }
-
-        let filename = scrapbook.urlToFilename(sourceUrlMain);
-        let [, ext] = scrapbook.filenameParts(filename);
-        return ext;
-      }
     });
-  });
+  } catch (ex) {
+    // something wrong for the XMLHttpRequest
+    console.warn(ex);
+    capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+    return null;
+  }
+
+  if (headers.filename) {
+    let [, ext] = scrapbook.filenameParts(headers.filename);
+
+    if (!ext && headers.contentType) {
+      ext = Mime.extension(headers.contentType);
+    }
+
+    return ext;
+  } else {
+    if (headers.contentType) {
+      return Mime.extension(headers.contentType);
+    }
+
+    let filename = scrapbook.urlToFilename(sourceUrlMain);
+    let [, ext] = scrapbook.filenameParts(filename);
+    return ext;
+  }
 };
 
 /**
@@ -1310,72 +1300,73 @@ capturer.downLinkFetchHeader = function (params) {
  *     - {Object} params.options
  * @return {Promise}
  */
-capturer.downloadBlob = function (params) {
-  return Promise.resolve().then(() => {
-    isDebug && console.debug("call: downloadBlob", params);
+capturer.downloadBlob = async function (params) {
+  isDebug && console.debug("call: downloadBlob", params);
 
-    const {blob, filename, sourceUrl, settings, options} = params;
-    const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
+  const {blob, filename, sourceUrl, settings, options} = params;
+  const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const {timeId} = settings;
 
-    switch (options["capture.saveAs"]) {
-      case "singleHtml": {
-        return scrapbook.readFileAsDataURL(blob).then((dataUri) => {
-          if (dataUri === "data:") {
-            // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
-            dataUri = `data:${blob.type};base64,`;
-          }
-          if (filename) {
-            dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");
-          }
-          return {filename, url: dataUri + sourceUrlHash};
-        });
+  switch (options["capture.saveAs"]) {
+    case "singleHtml": {
+      let dataUri = await scrapbook.readFileAsDataURL(blob);
+      if (dataUri === "data:") {
+        // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
+        dataUri = `data:${blob.type};base64,`;
       }
-
-      case "singleHtmlJs": {
-        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-        const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-        const zipResMap = capturer.captureInfo.get(timeId).zipResMap = capturer.captureInfo.get(timeId).zipResMap || new Map();
-        scrapbook.zipAddFile(zip, filename, blob);
-        const zipResId = zipResMap.size;
-        zipResMap.set(filename, zipResId);
-        const url = `data:${blob.type};scrapbook-resource=${zipResId},${sourceUrlHash}`;
-        return {filename, url};
+      if (filename) {
+        dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");
       }
-
-      case "zip": {
-        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-        const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-        scrapbook.zipAddFile(zip, filename, blob);
-        return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-      }
-
-      case "maff": {
-        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-        const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-        scrapbook.zipAddFile(zip, timeId + "/" + filename, blob);
-        return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-      }
-
-      case "folder":
-      default: {
-        // download the data
-        const targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
-
-        return capturer.saveBlob({
-          timeId,
-          blob,
-          directory: targetDir,
-          filename,
-          sourceUrl,
-          autoErase: true,
-          savePrompt: false,
-        }).then((filename) => {
-          return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-        });
-      }
+      return {filename, url: dataUri + sourceUrlHash};
     }
-  });
+
+    case "singleHtmlJs": {
+      if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+      const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+      const zipResMap = capturer.captureInfo.get(timeId).zipResMap = capturer.captureInfo.get(timeId).zipResMap || new Map();
+      scrapbook.zipAddFile(zip, filename, blob);
+      const zipResId = zipResMap.size;
+      zipResMap.set(filename, zipResId);
+      const url = `data:${blob.type};scrapbook-resource=${zipResId},${sourceUrlHash}`;
+      return {filename, url};
+    }
+
+    case "zip": {
+      if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+      const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+      scrapbook.zipAddFile(zip, filename, blob);
+      return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+    }
+
+    case "maff": {
+      if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+      const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+      scrapbook.zipAddFile(zip, timeId + "/" + filename, blob);
+      return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+    }
+
+    case "folder":
+    default: {
+      // download the data
+      const targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
+      const changedFilename = await capturer.saveBlob({
+        timeId,
+        blob,
+        directory: targetDir,
+        filename,
+        sourceUrl,
+        autoErase: true,
+        savePrompt: false,
+      });
+      return {
+        timeId,
+        sourceUrl,
+        targetDir,
+        filename: changedFilename,
+        url: scrapbook.escapeFilename(filename) + sourceUrlHash
+      };
+    }
+  }
 };
 
 /**
@@ -1386,67 +1377,65 @@ capturer.downloadBlob = function (params) {
  *     - {string} params.sourceUrl
  * @return {Promise}
  */
-capturer.saveBlobNaturally = function (params) {
-  return Promise.resolve().then(() => {
-    const {timeId, blob, filename, sourceUrl} = params;
+capturer.saveBlobNaturally = async function (params) {
+  const {timeId, blob, filename, sourceUrl} = params;
 
-    // Use the natural download attribute to generate a download.
-    return new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(blob);
+  // Use the natural download attribute to generate a download.
+  return await new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
 
-      capturer.downloadInfo.set(url, {
+    capturer.downloadInfo.set(url, {
+      timeId,
+      src: sourceUrl,
+      onComplete: resolve,
+      onError: reject,
+    });
+
+    if (scrapbook.userAgent.is('gecko')) {
+      // Firefox has a bug that the screen turns unresponsive
+      // when an addon page is redirected to a blob URL.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
+      //
+      // Workaround by creating the anchor in an iframe.
+      const iDoc = this.downloader.contentDocument;
+      const a = iDoc.createElement('a');
+      a.download = filename;
+      a.href = url;
+      iDoc.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      // In case the download still fails.
+      const file = new File([blob], filename, {type: "application/octet-stream"});
+      const url2 = URL.createObjectURL(file);
+
+      capturer.downloadInfo.set(url2, {
         timeId,
         src: sourceUrl,
         onComplete: resolve,
         onError: reject,
       });
 
-      if (scrapbook.userAgent.is('gecko')) {
-        // Firefox has a bug that the screen turns unresponsive
-        // when an addon page is redirected to a blob URL.
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
-        //
-        // Workaround by creating the anchor in an iframe.
-        const iDoc = this.downloader.contentDocument;
-        const a = iDoc.createElement('a');
-        a.download = filename;
-        a.href = url;
-        iDoc.body.appendChild(a);
-        a.click();
-        a.remove();
-
-        // In case the download still fails.
-        const file = new File([blob], filename, {type: "application/octet-stream"});
-        const url2 = URL.createObjectURL(file);
-
-        capturer.downloadInfo.set(url2, {
-          timeId,
-          src: sourceUrl,
-          onComplete: resolve,
-          onError: reject,
-        });
-
-        const elem = document.createElement('a');
-        elem.target = 'download';
-        elem.href = url2;
-        elem.textContent = `If the download doesn't start, click me.`;
-        capturer.logger.appendChild(elem);
-        capturer.log('');
-        return;
-      }
-
       const elem = document.createElement('a');
-      elem.download = filename;
-      elem.href = url;
+      elem.target = 'download';
+      elem.href = url2;
       elem.textContent = `If the download doesn't start, click me.`;
       capturer.logger.appendChild(elem);
-      elem.click();
       capturer.log('');
-    }).catch((ex) => {
-      // probably USER_CANCELLED
-      // treat as capture success and return the filename
-      return filename;
-    });
+      return;
+    }
+
+    const elem = document.createElement('a');
+    elem.download = filename;
+    elem.href = url;
+    elem.textContent = `If the download doesn't start, click me.`;
+    capturer.logger.appendChild(elem);
+    elem.click();
+    capturer.log('');
+  }).catch((ex) => {
+    // probably USER_CANCELLED
+    // treat as capture success and return the filename
+    return filename;
   });
 };
 
@@ -1455,22 +1444,19 @@ capturer.saveBlobNaturally = function (params) {
  *     - {Blob} params.blob
  * @return {Promise}
  */
-capturer.saveBlobInMemory = function (params) {
-  return Promise.resolve().then(() => {
-    isDebug && console.debug("call: saveBlobInMemory", params);
+capturer.saveBlobInMemory = async function (params) {
+  isDebug && console.debug("call: saveBlobInMemory", params);
 
-    const {blob} = params;
+  const {blob} = params;
 
-    // In Firefox < 56 and Chromium,
-    // Blob cannot be stored in chrome.storage,
-    // fallback to byte string.
-    return scrapbook.readFileAsText(blob, false).then((text) => {
-      return {
-        type: blob.type,
-        data: text,
-      };
-    });
-  });
+  // In Firefox < 56 and Chromium,
+  // Blob cannot be stored in chrome.storage,
+  // fallback to byte string.
+  const text = await scrapbook.readFileAsText(blob, false);
+  return {
+    type: blob.type,
+    data: text,
+  };
 };
 
 /**
@@ -1484,21 +1470,19 @@ capturer.saveBlobInMemory = function (params) {
  *     - {boolean} params.savePrompt
  * @return {Promise}
  */
-capturer.saveBlob = function (params) {
-  return Promise.resolve().then(() => {
-    isDebug && console.debug("call: saveBlob", params);
+capturer.saveBlob = async function (params) {
+  isDebug && console.debug("call: saveBlob", params);
 
-    const {timeId, blob, directory, filename, sourceUrl, autoErase, savePrompt} = params;
+  const {timeId, blob, directory, filename, sourceUrl, autoErase, savePrompt} = params;
 
-    return capturer.saveUrl({
-      timeId,
-      url: URL.createObjectURL(blob),
-      directory,
-      filename,
-      sourceUrl,
-      autoErase,
-      savePrompt,
-    });
+  return await capturer.saveUrl({
+    timeId,
+    url: URL.createObjectURL(blob),
+    directory,
+    filename,
+    sourceUrl,
+    autoErase,
+    savePrompt,
   });
 };
 
@@ -1513,26 +1497,26 @@ capturer.saveBlob = function (params) {
  *     - {boolean} params.savePrompt
  * @return {Promise}
  */
-capturer.saveUrl = function (params) {
-  return new Promise((resolve, reject) => {
-    isDebug && console.debug("call: saveUrl", params);
+capturer.saveUrl = async function (params) {
+  isDebug && console.debug("call: saveUrl", params);
 
-    const {timeId, url, directory, filename, sourceUrl, autoErase, savePrompt} = params;
+  const {timeId, url, directory, filename, sourceUrl, autoErase, savePrompt} = params;
 
-    const downloadParams = {
-      url,
-      filename: (directory ? directory + "/" : "") + filename,
-      conflictAction: "uniquify",
-    };
+  const downloadParams = {
+    url,
+    filename: (directory ? directory + "/" : "") + filename,
+    conflictAction: "uniquify",
+  };
 
-    // Firefox < 52 gets an error if saveAs is defined
-    // Firefox Android gets an error if saveAs = true
-    if (!(scrapbook.userAgent.is('gecko') &&
-        (scrapbook.userAgent.major < 52 || scrapbook.userAgent.is('mobile')))) {
-      downloadParams.saveAs = savePrompt;
-    }
+  // Firefox < 52 gets an error if saveAs is defined
+  // Firefox Android gets an error if saveAs = true
+  if (!(scrapbook.userAgent.is('gecko') &&
+      (scrapbook.userAgent.major < 52 || scrapbook.userAgent.is('mobile')))) {
+    downloadParams.saveAs = savePrompt;
+  }
 
-    isDebug && console.debug("download start", downloadParams);
+  isDebug && console.debug("download start", downloadParams);
+  return await new Promise((resolve, reject) => {
     chrome.downloads.download(downloadParams, (downloadId) => {
       isDebug && console.debug("download response", downloadId);
       if (downloadId) {
@@ -1604,143 +1588,132 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
   downloadInfo.delete(url);
 });
 
-chrome.downloads.onChanged.addListener((downloadDelta) => {
+chrome.downloads.onChanged.addListener(async (downloadDelta) => {
   isDebug && console.debug("downloads.onChanged", downloadDelta);
 
   const downloadId = downloadDelta.id, downloadInfo = capturer.downloadInfo;
   if (!downloadInfo.has(downloadId)) { return; }
 
-  let p;
-  if (downloadDelta.state && downloadDelta.state.current === "complete") {
-    p = browser.downloads.search({id: downloadId}).then((results) => {
+  let erase = true;
+  try {
+    if (downloadDelta.state && downloadDelta.state.current === "complete") {
+      const results = await browser.downloads.search({id: downloadId});
       const [dir, filename] = scrapbook.filepathParts(results[0].filename);
       downloadInfo.get(downloadId).onComplete(filename);
-    });
-  } else if (downloadDelta.error) {
-    p = Promise.resolve().then(() => {
+    } else if (downloadDelta.error) {
       downloadInfo.get(downloadId).onError(new Error(downloadDelta.error.current));
-    });
-  }
-  p && p.catch((ex) => {
-    console.error(ex);
-  }).then(() => {
-    // erase the download history of additional downloads (autoErase = true)
-    if (downloadInfo.get(downloadId).autoErase) {
-      return browser.downloads.erase({id: downloadId});
+    } else {
+      erase = false;
     }
-  }).then((erasedIds) => {
-    downloadInfo.delete(downloadId);
-  }).catch((ex) => {
+  } catch (ex) {
     console.error(ex);
-  });
+  }
+
+  if (erase) {
+    // erase the download history of additional downloads (autoErase = true)
+    try {
+      if (downloadInfo.get(downloadId).autoErase) {
+        const erasedIds = await browser.downloads.erase({id: downloadId});
+      }
+      downloadInfo.delete(downloadId);
+    } catch (ex) {
+      console.error(ex);
+    }
+  }
 });
 
 // init
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   scrapbook.loadLanguages(document);
 
   capturer.logger = document.getElementById('logger');
   capturer.downloader = document.getElementById('downloader');
 
-  scrapbook.loadOptions().then(() => {
-    const urlObj = new URL(document.URL);
-    const s = urlObj.searchParams;
-    const missionId = s.get('mid');
-    const tabFrameList = s.has('t') ? s.get('t').split(',').map(x => {
-      const [tabId, frameId] = x.split(':');
-      return {
-        tabId: isNaN(tabId) ? -1 : parseInt(tabId, 10),
-        frameId: isNaN(frameId) ? undefined : parseInt(frameId, 10),
-      };
-    }) : undefined;
-    const urlTitleList = s.has('u') ? s.get('u').split(',').map(x => {
-      const [url, ...titleParts] = x.split(' ');
-      return {url, title: titleParts.join(' ')};
-    }) : undefined;
-    const mode = s.get('m') || undefined;
-    const saveBeyondSelection = !!s.get('f');
+  await scrapbook.loadOptions();
 
-    if (missionId) {
-      // use the missionId to receive further message
-      // and avoids auto-closing
-      capturer.missionId = missionId;
+  const urlObj = new URL(document.URL);
+  const s = urlObj.searchParams;
+  const missionId = s.get('mid');
+  const tabFrameList = s.has('t') ? s.get('t').split(',').map(x => {
+    const [tabId, frameId] = x.split(':');
+    return {
+      tabId: isNaN(tabId) ? -1 : parseInt(tabId, 10),
+      frameId: isNaN(frameId) ? undefined : parseInt(frameId, 10),
+    };
+  }) : undefined;
+  const urlTitleList = s.has('u') ? s.get('u').split(',').map(x => {
+    const [url, ...titleParts] = x.split(' ');
+    return {url, title: titleParts.join(' ')};
+  }) : undefined;
+  const mode = s.get('m') || undefined;
+  const saveBeyondSelection = !!s.get('f');
 
-      return true;
-    } else if (tabFrameList) {
-      let hasError = false;
-      let p = Promise.resolve();
-      tabFrameList.forEach(({tabId, frameId}) => {
-        const source = `[${tabId}:${frameId}]`;
-        p = p.then(() => {
-          return capturer.captureTab({
-            tabId,
-            frameId,
-            saveBeyondSelection,
-            mode,
-          });
-        }).catch((ex) => {
-          const err = `Unexpected error: ${ex.message}`;
-          capturer.error(err);
-          return {error: {message: err}};
-        }).then((response) => {
-          if (response.error) { hasError = true; }
-          else { capturer.log(`Done.`); }
-          return scrapbook.delay(5);
+  let autoClose = true;
+  if (missionId) {
+    // use the missionId to receive further message
+    // and avoids auto-closing
+    capturer.missionId = missionId;
+
+    autoClose = false;
+  } else if (tabFrameList) {
+    for (const {tabId, frameId} of tabFrameList) {
+      const source = `[${tabId}:${frameId}]`;
+      let response;
+      try {
+        response = await capturer.captureTab({
+          tabId,
+          frameId,
+          saveBeyondSelection,
+          mode,
         });
-      });
-      return p.then(() => {
-        return hasError;
-      });
-    } else if (urlTitleList) {
-      let hasError = false;
-      let p = Promise.resolve();
-      urlTitleList.forEach(({url, title}) => {
-        const source = `${url}`;
-        p = p.then(() => {
-          return capturer.captureHeadless({
-            url,
-            title,
-            mode,
-          });
-        }).catch((ex) => {
-          const err = `Unexpected error: ${ex.message}`;
-          console.error(err);
-          return {error: {message: err}};
-        }).then((response) => {
-          if (response.error) { hasError = true; }
-          else { capturer.log(`Done.`); }
-          return scrapbook.delay(5);
-        });
-      });
-      return p.then(() => {
-        return hasError;
-      });
-    } else if (!urlObj.search) {
-      capturer.error(`Nothing to capture.`);
+      } catch (ex) {
+        const err = `Unexpected error: ${ex.message}`;
+        capturer.error(err);
+        response = {error: {message: err}};
+      }
 
-      return true;
+      if (response.error) { autoClose = false; }
+      else { capturer.log(`Done.`); }
+      await scrapbook.delay(5);
+    }
+  } else if (urlTitleList) {
+    for (const {url, title} of urlTitleList) {
+      const source = `${url}`;
+      let response;
+      try {
+        response = await capturer.captureHeadless({
+          url,
+          title,
+          mode,
+        });
+      } catch (ex) {
+        const err = `Unexpected error: ${ex.message}`;
+        console.error(err);
+        response = {error: {message: err}};
+      }
+
+      if (response.error) { autoClose = false; }
+      else { capturer.log(`Done.`); }
+      await scrapbook.delay(5);
+    }
+  } else if (!urlObj.search) {
+    capturer.error(`Nothing to capture.`);
+    autoClose = false;
+  } else {
+    capturer.error(`Unexpected error: Parameters not supported.`);
+    autoClose = false;
+  }
+
+  if (!isDebug && autoClose) {
+    await scrapbook.delay(1000);
+    if (chrome.windows) {
+      const win = await browser.windows.getCurrent();
+      return browser.windows.remove(win.id);
     } else {
-      capturer.error(`Unexpected error: Parameters not supported.`);
-
-      return true;
+      const tab = await browser.tabs.getCurrent();
+      return browser.tabs.remove(tab.id);
     }
-  }).then((hasError) => {
-    if (hasError) { return; }
-
-    if (!isDebug) {
-      return scrapbook.delay(1000).then(() => {
-        if (chrome.windows) {
-          return browser.windows.getCurrent().then((win) => {
-            return browser.windows.remove(win.id);
-          });
-        } else {
-          return browser.tabs.getCurrent().then((tab) => {
-            return browser.tabs.remove(tab.id);
-          });
-        }
-      });
-    }
-  });
+  }
 });
 
 })(this, this.document, this.browser, this.chrome);

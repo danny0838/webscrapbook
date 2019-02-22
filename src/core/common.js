@@ -39,19 +39,17 @@ let scrapbook = {
     }
 
     // Asynchronous -- more accurate detection for Firefox
-    Promise.resolve().then(() => {
-      return browser.runtime.getBrowserInfo();
-    }).then((info) => {
-      flavor.major = parseInt(info.version, 10) || 0;
-      soup.add(info.vendor.toLowerCase());
-      soup.add(info.name.toLowerCase());
-      dispatch();
-    }, (ex) => {
-      // dummy event for potential listeners
-      dispatch();
-    }).catch((ex) => {
-      console.error(ex);
-    });
+    (async () => {
+      try {
+        const info = await browser.runtime.getBrowserInfo();
+        flavor.major = parseInt(info.version, 10) || 0;
+        soup.add(info.vendor.toLowerCase());
+        soup.add(info.name.toLowerCase());
+      } catch (ex) {
+        // dummy event for potential listeners
+        dispatch();
+      }
+    })();
 
     // Synchronous -- order of tests is important
     let match;
@@ -154,14 +152,20 @@ scrapbook.isOptionsSynced = false;
  * disabled, and we get an inconsistent status if we simply shift configs
  * from storage.sync to storage.local.
  */
-scrapbook.getOptionStorage = function () {
-  let p = Promise.resolve().then(() => {
-    if (!browser.storage.sync) { return browser.storage.local; }
-    return browser.storage.sync.get({})
-      .then(() => (browser.storage.sync), (ex) => (browser.storage.local));
-  });
-  scrapbook.getOptionStorage = function () { return p; };
-  return p;
+scrapbook.getOptionStorage = async function () {
+  const storage = (async () => {
+    if (!browser.storage.sync) {
+      return browser.storage.local;
+    }
+    try {
+      await browser.storage.sync.get({});
+      return browser.storage.sync;
+    } catch (ex) {
+      return browser.storage.local;
+    }
+  })();
+  scrapbook.getOptionStorage = () => storage;
+  return storage;
 };
 
 /**
@@ -197,32 +201,28 @@ scrapbook.getOptions = function (keyPrefix) {
   return result;
 };
 
-scrapbook.setOption = function (key, value) {
-  return Promise.resolve().then(() => {
-    scrapbook.options[key] = value;
-    let pair = {key: value};
-    return scrapbook.getOptionStorage().then((storage) => {
-      return storage.set(pair);
-    });
-  });
+scrapbook.setOption = async function (key, value) {
+  scrapbook.options[key] = value;
+  const storage = await scrapbook.getOptionStorage();
+  return await storage.set({key: value});
 };
 
-scrapbook.loadOptions = function () {
-  return scrapbook.getOptionStorage().then((storage) => {
-    return storage.get(scrapbook.options);
-  }).then((items) => {
-    for (let i in items) {
-      scrapbook.options[i] = items[i];
-      scrapbook.isOptionsSynced = true;
-    }
-    return items;
-  });
+/**
+ * load all options and store in scrapbook.options for later usage
+ */
+scrapbook.loadOptions = async function () {
+  const storage = await scrapbook.getOptionStorage();
+  const items = await storage.get(scrapbook.options);
+  for (let i in items) {
+    scrapbook.options[i] = items[i];
+  }
+  scrapbook.isOptionsSynced = true;
+  return items;
 };
 
-scrapbook.saveOptions = function () {
-  return scrapbook.getOptionStorage().then((storage) => {
-    return storage.set(scrapbook.options);
-  });
+scrapbook.saveOptions = async function () {
+  const storage = await scrapbook.getOptionStorage();
+  return await storage.set(scrapbook.options);
 };
 
 
@@ -256,7 +256,7 @@ scrapbook.cache = {
   /**
    * @param {string|Object} key
    */
-  get(key, defaultValue) {
+  async get(key, defaultValue) {
     const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
     return this[this.current].get(keyStr, defaultValue);
   },
@@ -264,14 +264,14 @@ scrapbook.cache = {
   /**
    * @param {Object} filter - an object filter that each item key must match
    */
-  getAll(filter) {
+  async getAll(filter) {
     return this[this.current].getAll(filter);
   },
 
   /**
    * @param {string|Object} key
    */
-  set(key, value) {
+  async set(key, value) {
     const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
     return this[this.current].set(keyStr, value);
   },
@@ -279,7 +279,7 @@ scrapbook.cache = {
   /**
    * @param {string|Object|Array} keys - a key (string or Object) or an array of keys
    */
-  remove(keys) {
+  async remove(keys) {
     if (!Array.isArray(keys)) { keys = [keys]; }
     keys = keys.map((key) => {
       return (typeof key === "string") ? key : JSON.stringify(key);
@@ -288,74 +288,43 @@ scrapbook.cache = {
   },
 
   storage: {
-    get(key) {
-      return new Promise((resolve, reject) => {
-        chrome.storage.local.get(key, (items) => {
-          if (!chrome.runtime.lastError) {
-            resolve(items[key]);
-          } else {
-            reject(chrome.runtime.lastError);
-          }
-        });
-      });
+    async get(key) {
+      const items = await browser.storage.local.get(key);
+      return items[key];
     },
 
-    getAll(filter) {
-      return new Promise((resolve, reject) => {
-        chrome.storage.local.get(null, (items) => {
-          if (!chrome.runtime.lastError) {
-            for (let key in items) {
-              try {
-                let obj = JSON.parse(key);
-                for (let cond in filter) {
-                  if (obj[cond] !== filter[cond]) {
-                    throw new Error("filter not matched");
-                  }
-                }
-              } catch (ex) {
-                // invalid JSON format => meaning not a cache
-                // or does not match the filter
-                delete(items[key]);
-              }
+    async getAll(filter) {
+      const items = await browser.storage.local.get(null);
+      for (let key in items) {
+        try {
+          let obj = JSON.parse(key);
+          for (let cond in filter) {
+            if (obj[cond] !== filter[cond]) {
+              throw new Error("filter not matched");
             }
-            resolve(items);
-          } else {
-            reject(chrome.runtime.lastError);
           }
-        });
-      });
+        } catch (ex) {
+          // invalid JSON format => meaning not a cache
+          // or does not match the filter
+          delete(items[key]);
+        }
+      }
+      return items;
     },
 
-    set(key, value) {
-      return new Promise((resolve, reject) => {
-        let pair = {[key]: value};
-        chrome.storage.local.set(pair, () => {
-          if (!chrome.runtime.lastError) {
-            resolve();
-          } else {
-            reject(chrome.runtime.lastError);
-          }
-        });
-      });
+    async set(key, value) {
+      return await browser.storage.local.set({[key]: value});
     },
 
-    remove(keys) {
-      return new Promise((resolve, reject) => {
-        chrome.storage.local.remove(keys, () => {
-          if (!chrome.runtime.lastError) {
-            resolve();
-          } else {
-            reject(chrome.runtime.lastError);
-          }
-        });
-      });
+    async remove(keys) {
+      return await browser.storage.local.remove(keys);
     },
   },
 
   indexedDB: {
-    connect() {
-      let p = new Promise((resolve, reject) => {
-        let request = indexedDB.open("scrapbook", 2);
+    async connect() {
+      const p = new Promise((resolve, reject) => {
+        const request = indexedDB.open("scrapbook", 2);
         request.onupgradeneeded = (event) => {
           let db = event.target.result;
           if (event.oldVersion === 1) {
@@ -370,96 +339,94 @@ scrapbook.cache = {
           reject(event.target.error);
         };
       });
-      this.connect = function () {
-        return p;
-      };
+      this.connect = () => p;
       return p;
     },
 
-    get(key) {
-      return this.connect().then((db) => {
-        let transaction = db.transaction("cache", "readonly");
-        let objectStore = transaction.objectStore(["cache"]);
-        return new Promise((resolve, reject) => {
-          let request = objectStore.get(key);
-          request.onsuccess = function (event) {
-            let result = event.target.result;
-            resolve(result ? result.value : undefined);
-          };
-          request.onerror = function (event) {
-            reject(event.target.error);
-          };
-        });
+    async get(key) {
+      const db = await this.connect();
+      const transaction = db.transaction("cache", "readonly");
+      const objectStore = transaction.objectStore(["cache"]);
+
+      return await new Promise((resolve, reject) => {
+        const request = objectStore.get(key);
+        request.onsuccess = function (event) {
+          const result = event.target.result;
+          resolve(result ? result.value : undefined);
+        };
+        request.onerror = function (event) {
+          reject(event.target.error);
+        };
       });
     },
 
-    getAll(filter) {
-      return this.connect().then((db) => {
-        let transaction = db.transaction("cache", "readonly");
-        let objectStore = transaction.objectStore(["cache"]);
-        return new Promise((resolve, reject) => {
-          let request = objectStore.getAll();
-          request.onsuccess = function (event) {
-            let items = event.target.result;
-            let result = {};
-            for (let item of items) {
-              try {
-                let obj = JSON.parse(item.key);
-                for (let cond in filter) {
-                  if (obj[cond] !== filter[cond]) {
-                    throw new Error("filter not matched");
-                  }
+    async getAll(filter) {
+      const db = await this.connect();
+      const transaction = db.transaction("cache", "readonly");
+      const objectStore = transaction.objectStore(["cache"]);
+
+      return await new Promise((resolve, reject) => {
+        const request = objectStore.getAll();
+        request.onsuccess = function (event) {
+          const items = event.target.result;
+          const result = {};
+          for (let item of items) {
+            try {
+              let obj = JSON.parse(item.key);
+              for (let cond in filter) {
+                if (obj[cond] !== filter[cond]) {
+                  throw new Error("filter not matched");
                 }
-                result[item.key] = item.value;
-              } catch (ex) {
-                // invalid JSON format => meaning not a cache
-                // or does not match the filter
               }
+              result[item.key] = item.value;
+            } catch (ex) {
+              // invalid JSON format => meaning not a cache
+              // or does not match the filter
             }
-            resolve(result);
-          };
-          request.onerror = function (event) {
-            reject(event.target.error);
-          };
-        });
+          }
+          resolve(result);
+        };
+        request.onerror = function (event) {
+          reject(event.target.error);
+        };
       });
     },
 
-    set(key, value) {
-      return this.connect().then((db) => {
+    async set(key, value) {
+      const db = await this.connect();
+
+      return await new Promise((resolve, reject) => {
+        const transaction = db.transaction("cache", "readwrite");
+        const objectStore = transaction.objectStore(["cache"]);
+        const request = objectStore.add({key, value});
+        transaction.oncomplete = (event) => {
+          resolve();
+        };
+        transaction.onerror = (event) => {
+          reject(event.target.error);
+        };
+      });
+    },
+
+    async remove(keys) {
+      const db = await this.connect();
+
+      const transaction = db.transaction("cache", "readwrite");
+      const objectStore = transaction.objectStore(["cache"]);
+      const tasks = keys.map((key) => {
         return new Promise((resolve, reject) => {
-          let transaction = db.transaction("cache", "readwrite");
-          let objectStore = transaction.objectStore(["cache"]);
-          let request = objectStore.add({key, value});
-          transaction.oncomplete = (event) => {
+          const request = objectStore.delete(key);
+          request.onsuccess = function (event) {
             resolve();
           };
-          transaction.onerror = (event) => {
+          request.onerror = function (event) {
             reject(event.target.error);
           };
         });
       });
-    },
-
-    remove(keys) {
-      return this.connect().then((db) => {
-        let transaction = db.transaction("cache", "readwrite");
-        let objectStore = transaction.objectStore(["cache"]);
-        let tasks = keys.map((key) => {
-          return new Promise((resolve, reject) => {
-            let request = objectStore.delete(key);
-            request.onsuccess = function (event) {
-              resolve();
-            };
-            request.onerror = function (event) {
-              reject(event.target.error);
-            };
-          });
-        });
-        return Promise.all(tasks).catch((ex) => {
-          transaction.abort();
-          throw ex;
-        });
+      return await Promise.all(tasks).catch((ex) => {
+        transaction.abort();
+        throw ex;
       });
     },
   },
@@ -598,25 +565,24 @@ scrapbook.idToDateOld = function (id) {
 /**
  * @return {Promise} The rough match pattern for content pages.
  */
-scrapbook.getContentPagePattern = function () {
-  const p = browser.extension.isAllowedFileSchemeAccess().then((isAllowedAccess) => {
+scrapbook.getContentPagePattern = async function () {
+  const p = (async () => {
+    const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
     const urlMatch = ["http://*/*", "https://*/*"];
-    if (isAllowedAccess) { urlMatch.push("file://*"); }
+    if (allowFileAccess) { urlMatch.push("file://*"); }
     return urlMatch;
-  });
-  scrapbook.getContentPagePattern = function () {
-    return p;
-  };
+  })();
+  scrapbook.getContentPagePattern = () => p;
   return p;
 };
 
 /**
  * @param {string} url
- * @param {boolean} isAllowedFileSchemeAccess - Optional for better accuracy.
+ * @param {boolean} allowFileAccess - Optional for better accuracy.
  * @return {string} Whether the page url is allowed for content scripts.
  */
-scrapbook.isContentPage = function (url, isAllowedFileSchemeAccess = !scrapbook.userAgent.is('gecko')) {
-  const filter = new RegExp(`^(?:https?${isAllowedFileSchemeAccess ? "|file" : ""}):`);
+scrapbook.isContentPage = function (url, allowFileAccess = !scrapbook.userAgent.is('gecko')) {
+  const filter = new RegExp(`^(?:https?${allowFileAccess ? "|file" : ""}):`);
   if (!filter.test(url)) { return false; }
   if (scrapbook.userAgent.is('gecko')) {
     if (url.startsWith("https://addons.mozilla.org/")) { return false; }
@@ -1034,30 +1000,28 @@ scrapbook.compressJsFunc = function (func) {
  * @param {Blob} blob - The Blob of File object to be read.
  * @return {Promise}
  */
-scrapbook.readFileAsArrayBuffer = function (blob) {
-  return new Promise((resolve, reject) => {
+scrapbook.readFileAsArrayBuffer = async function (blob) {
+  const event = await new Promise((resolve, reject) => {
     let reader = new FileReader();
     reader.onload = resolve;
     reader.onerror = reject;
     reader.readAsArrayBuffer(blob);
-  }).then((event) => {
-    return event.target.result;
   });
+  return event.target.result;
 };
 
 /**
  * @param {Blob} blob - The Blob of File object to be read.
  * @return {Promise}
  */
-scrapbook.readFileAsDataURL = function (blob) {
-  return new Promise((resolve, reject) => {
+scrapbook.readFileAsDataURL = async function (blob) {
+  const event = await new Promise((resolve, reject) => {
     let reader = new FileReader();
     reader.onload = resolve;
     reader.onerror = reject;
     reader.readAsDataURL(blob);
-  }).then((event) => {
-    return event.target.result;
   });
+  return event.target.result;
 };
 
 /**
@@ -1065,33 +1029,30 @@ scrapbook.readFileAsDataURL = function (blob) {
  * @param {string|false} charset - Read as UTF-8 if undefined and as raw bytes if falsy.
  * @return {Promise}
  */
-scrapbook.readFileAsText = function (blob, charset = "UTF-8") {
+scrapbook.readFileAsText = async function (blob, charset = "UTF-8") {
   if (charset) {
-    return new Promise((resolve, reject) => {
+    const event = await new Promise((resolve, reject) => {
       let reader = new FileReader();
       reader.onload = resolve;
       reader.onerror = reject;
       reader.readAsText(blob, charset);
-    }).then((event) => {
-      return event.target.result;
     });
+    return event.target.result;
   }
-  return scrapbook.readFileAsArrayBuffer(blob).then((ab) => {
-    return scrapbook.arrayBufferToByteString(ab);
-  });
+  const ab = await scrapbook.readFileAsArrayBuffer(blob);
+  return scrapbook.arrayBufferToByteString(ab);
 };
 
 /**
  * @param {Blob} blob - The Blob of File object to be read.
  * @return {Promise}
  */
-scrapbook.readFileAsDocument = function (blob) {
-  return scrapbook.xhr({
+scrapbook.readFileAsDocument = async function (blob) {
+  const xhr = await scrapbook.xhr({
     url: URL.createObjectURL(blob),
     responseType: "document",
-  }).then((xhr) => {
-    return xhr.response;
   });
+  return xhr.response;
 };
 
 scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
@@ -1160,56 +1121,55 @@ scrapbook.doctypeToString = function (doctype) {
  * @param {Promise} rewriter - The Promise that rewrites the CSS text.
  * @return {Promise}
  */
-scrapbook.parseCssFile = function (data, charset, rewriter) {
-  return Promise.resolve().then(() => {
+scrapbook.parseCssFile = async function (data, charset, rewriter) {
+  const origText = await (async () => {
     if (charset) {
-      return scrapbook.readFileAsText(data, charset).then((text) => {
-        // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
-        if (/^@charset "([^"]*)";/.test(text)) {
-          return "\ufeff" + text;
-        }
+      const text = await scrapbook.readFileAsText(data, charset);
+      // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
+      if (/^@charset "([^"]*)";/.test(text)) {
+        return "\ufeff" + text;
+      }
 
-        return text;
-      });
+      return text;
     }
-    return scrapbook.readFileAsText(data, false).then((bytes) => {
-      if (bytes.startsWith("\xEF\xBB\xBF")) {
-        charset = "UTF-8";
-      } else if (bytes.startsWith("\xFE\xFF")) {
-        charset = "UTF-16BE";
-      } else if (bytes.startsWith("\xFF\xFE")) {
-        charset = "UTF-16LE";
-      } else if (bytes.startsWith("\x00\x00\xFE\xFF")) {
-        charset = "UTF-32BE";
-      } else if (bytes.startsWith("\x00\x00\xFF\xFE")) {
-        charset = "UTF-32LE";
-      } else if (/^@charset "([^"]*)";/.test(bytes)) {
-        charset = RegExp.$1;
-      }
-      if (charset) {
-        return scrapbook.readFileAsText(data, charset).then((text) => {
-          // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
-          if (/^@charset "([^"]*)";/.test(text)) {
-            return "\ufeff" + text;
-          }
 
-          return text;
-        });
-      }
-      return bytes;
-    });
-  }).then((origText) => {
-    return rewriter(origText);
-  }).then((rewrittenText) => {
-    let blob;
+    const bytes = await scrapbook.readFileAsText(data, false);
+    if (bytes.startsWith("\xEF\xBB\xBF")) {
+      charset = "UTF-8";
+    } else if (bytes.startsWith("\xFE\xFF")) {
+      charset = "UTF-16BE";
+    } else if (bytes.startsWith("\xFF\xFE")) {
+      charset = "UTF-16LE";
+    } else if (bytes.startsWith("\x00\x00\xFE\xFF")) {
+      charset = "UTF-32BE";
+    } else if (bytes.startsWith("\x00\x00\xFF\xFE")) {
+      charset = "UTF-32LE";
+    } else if (/^@charset "([^"]*)";/.test(bytes)) {
+      charset = RegExp.$1;
+    }
+
     if (charset) {
-      blob = new Blob([rewrittenText], {type: "text/css;charset=UTF-8"});
-    } else {
-      let ab = scrapbook.byteStringToArrayBuffer(rewrittenText);
-      blob = new Blob([ab], {type: "text/css"});
+      const text = await scrapbook.readFileAsText(data, charset);
+      // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
+      if (/^@charset "([^"]*)";/.test(text)) {
+        return "\ufeff" + text;
+      }
+
+      return text;
     }
-    return blob;
-  });
+    return bytes;
+  })();
+
+  const rewrittenText = await rewriter(origText);
+
+  let blob;
+  if (charset) {
+    blob = new Blob([rewrittenText], {type: "text/css;charset=UTF-8"});
+  } else {
+    let ab = scrapbook.byteStringToArrayBuffer(rewrittenText);
+    blob = new Blob([ab], {type: "text/css"});
+  }
+  return blob;
 };
 
 /**
@@ -1439,7 +1399,7 @@ scrapbook.httpStatusText = {
  *     - {Array} params.requestHeaders
  *     - {function} params.onreadystatechange
  */
-scrapbook.xhr = function (params = {}) {
+scrapbook.xhr = async function (params = {}) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
@@ -1499,7 +1459,7 @@ scrapbook.xhr = function (params = {}) {
 /**
  * @return {Promise}
  */
-scrapbook.delay = function (ms) {
+scrapbook.delay = async function (ms) {
   return new Promise((resolve, reject) => {
     setTimeout(resolve, ms);
   });
@@ -1543,74 +1503,62 @@ scrapbook.zipFixModifiedTime = function (dateInZip) {
   return new Date(dateInZip.valueOf() + dateInZip.getTimezoneOffset() * 60 * 1000);
 };
 
-scrapbook.getMaffIndexFiles = function (zipObj) {
-  return Promise.resolve().then(() => {
-    // get the list of top-folders
-    const topdirs = new Set();
-    for (const inZipPath in zipObj.files) {
-      const depth = inZipPath.split("/").length - 1;
-      if (depth === 1) {
-        const dirname = inZipPath.replace(/\/.*$/, "");
-        topdirs.add(dirname + '/');
-      }
+scrapbook.getMaffIndexFiles = async function (zipObj) {
+  // get the list of top-folders
+  const topdirs = new Set();
+  for (const inZipPath in zipObj.files) {
+    const depth = inZipPath.split("/").length - 1;
+    if (depth === 1) {
+      const dirname = inZipPath.replace(/\/.*$/, "");
+      topdirs.add(dirname + '/');
     }
+  }
 
-    // get index files in each topdir
-    const indexFiles = [];
-    let p = Promise.resolve();
-    topdirs.forEach((topdir) => {
-      p = p.then(() => {
-        const zipDir = zipObj.folder(topdir);
-        const zipRdfFile = zipDir.file('index.rdf');
-        if (zipRdfFile) {
-          return zipRdfFile.async('arraybuffer').then((ab) => {
-            return new File([ab], 'index.rdf', {type: "application/rdf+xml"});
-          }, (ex) => {
-            throw new Error(`'index.rdf' cannot be loaded.`);
-          }).then((file) => {
-            return scrapbook.readFileAsDocument(file);
-          }).then((doc) => {
-            if (!doc) {
-              throw new Error(`'index.rdf' is corrupted.`);
-            }
-
-            const meta = scrapbook.parseMaffRdfDocument(doc);
-
-            if (!meta.indexfilename) {
-              throw new Error(`'index.rdf' specifies no index file.`);
-            }
-
-            if (!/^index[.][^./]+$/.test(meta.indexfilename)) {
-              throw new Error(`'index.rdf' specified index file '${meta.indexfilename}' is invalid.`);
-            }
-
-            const zipIndexFile = zipDir.file(meta.indexfilename);
-            if (!zipIndexFile) {
-              throw new Error(`'index.rdf' specified index file '${meta.indexfilename}' not found.`);
-            }
-
-            return zipIndexFile.name;
-          }).catch((ex) => {
-            throw ex;
-          });
+  // get index files in each topdir
+  const indexFiles = [];
+  for (const topdir of topdirs) {
+    try {
+      const zipDir = zipObj.folder(topdir);
+      const zipRdfFile = zipDir.file('index.rdf');
+      if (zipRdfFile) {
+        let doc;
+        try {
+          const ab = await zipRdfFile.async('arraybuffer');
+          const file = new File([ab], 'index.rdf', {type: "application/rdf+xml"});
+          doc = await scrapbook.readFileAsDocument(file);
+        } catch (ex) {
+          throw new Error(`Unable to load 'index.rdf'.`);
         }
 
-        const indexFiles = zipDir.file(/^index[.][^./]+$/);
-        if (indexFiles.length) {
-          return indexFiles[0].name;
-        }
-      }).then((indexFilename) => {
-        if (!indexFilename) { throw new Error(`'index.*' file not found.`); }
+        const meta = scrapbook.parseMaffRdfDocument(doc);
 
-        indexFiles.push(indexFilename);
-      }).catch((ex) => {
-        throw new Error(`Unable to get index file in directory: '${topdir}': ${ex.message}`);
-      });
-    });
-    return p.then(() => {
-      return indexFiles;
-    });
-  });
+        if (!meta.indexfilename) {
+          throw new Error(`'index.rdf' specifies no index file.`);
+        }
+
+        if (!/^index[.][^./]+$/.test(meta.indexfilename)) {
+          throw new Error(`'index.rdf' specified index file '${meta.indexfilename}' is invalid.`);
+        }
+
+        const zipIndexFile = zipDir.file(meta.indexfilename);
+        if (!zipIndexFile) {
+          throw new Error(`'index.rdf' specified index file '${meta.indexfilename}' not found.`);
+        }
+
+        indexFiles.push(zipIndexFile.name);
+      } else {
+        const files = zipDir.file(/^index[.][^./]+$/);
+        if (files.length) {
+          indexFiles.push(files[0].name);
+        } else {
+          throw new Error(`'index.*' file not found.`);
+        }
+      }
+    } catch (ex) {
+      throw new Error(`Unable to get index file in directory: '${topdir}': ${ex.message}`);
+    }
+  }
+  return indexFiles;
 };
 
 window.isDebug = false;

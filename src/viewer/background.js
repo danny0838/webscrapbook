@@ -5,7 +5,7 @@
  * @require {Object} scrapbook
  *******************************************************************/
 
-(function (window, undefined) {
+(async function (window, undefined) {
 
 function redirectUrl(tabId, type, url, filename, mime) {
   if (mime === "application/html+zip" && scrapbook.getOption("viewer.viewHtz")) {
@@ -109,7 +109,9 @@ chrome.webRequest.onHeadersReceived.addListener(function (details) {
 }, {urls: ["http://*/*", "https://*/*"], types: ["main_frame", "sub_frame"]}, ["blocking", "responseHeaders"]);
 
 // clear viewer caches
-browser.tabs.query({}).then((tabs) => {
+{
+  const tabs = await browser.tabs.query({});
+
   /* build a set with the ids that are still being viewed */
   const usedIds = new Set();
   tabs.forEach((tab) => {
@@ -121,15 +123,14 @@ browser.tabs.query({}).then((tabs) => {
   });
 
   /* remove cache entry for all IDs that are not being viewed */
-  scrapbook.cache.getAll({table: "viewerCache"}).then((items) => {
-    for (const key in items) {
-      const keyData = JSON.parse(key);
-      if (usedIds.has(keyData.id)) {
-        delete(items[key]);
-      }
+  const items = await scrapbook.cache.getAll({table: "viewerCache"});
+  for (const key in items) {
+    const keyData = JSON.parse(key);
+    if (usedIds.has(keyData.id)) {
+      delete(items[key]);
     }
-    scrapbook.cache.remove(Object.keys(items));
-  });
-});
+  }
+  await scrapbook.cache.remove(Object.keys(items));
+}
 
 })(window, undefined);

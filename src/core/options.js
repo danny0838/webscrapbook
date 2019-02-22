@@ -9,12 +9,11 @@ const OPTION_PREFIX = "opt_";
 
 const defaultOptions = JSON.parse(JSON.stringify(scrapbook.options));
 
-function initDefaultOptions() {
-  scrapbook.loadOptions().then((options) => {
-    for (const id in options) {
-      setOptionToDocument(id, options[id]);
-    }
-  });
+async function initDefaultOptions() {
+  const options = await scrapbook.loadOptions();
+  for (const id in options) {
+    setOptionToDocument(id, options[id]);
+  }
 }
 
 function getOptionFromDocument(id) {
@@ -84,23 +83,21 @@ function exportOptions() {
   elem.remove();
 }
 
-function importOptions(file) {
+async function importOptions(file) {
   document.getElementById("import-input").value = null;
 
-  scrapbook.readFileAsText(file).then((text) => {
-    const data = JSON.parse(text);
+  try {
+    const data = JSON.parse(await scrapbook.readFileAsText(file));
     const options = Object.assign(scrapbook.options, data);
     scrapbook.options = options;
-    return scrapbook.saveOptions().then(() => {
-      for (const id in options) {
-        setOptionToDocument(id, options[id]);
-      }
-    });
-  }).then(() => {
+    await scrapbook.saveOptions();
+    for (const id in options) {
+      setOptionToDocument(id, options[id]);
+    }
     alert(scrapbook.lang("OptionsImportSuccess"));
-  }).catch((ex) => {
+  } catch (ex) {
     alert(scrapbook.lang("ErrorImportOptions", [ex.message]));
-  });
+  }
 }
 
 function checkRegexRules(rules) {
@@ -142,25 +139,27 @@ function checkRegexRules(rules) {
   return true;
 }
 
-function closeWindow() {
-  chrome.tabs.getCurrent((tab) => {
-    if (!tab) {
-      // options.html is a prompt diaglog
-      window.close();
-    } else if (tab.url.startsWith(chrome.runtime.getURL(""))) {
-      // options.html is in a tab (or Firefox Android)
-      // close the tab
-      chrome.tabs.remove(tab.id, () => {});
-    } else {
-      // options.html is embedded in about:addon in Firefox
-      // do not close the tab
-    }
-  });
+async function closeWindow() {
+  const tab = await browser.tabs.getCurrent();
+  if (!tab) {
+    // options.html is a prompt diaglog
+    window.close();
+  } else if (tab.url.startsWith(chrome.runtime.getURL(""))) {
+    // options.html is in a tab (or Firefox Android)
+    // close the tab
+    return await browser.tabs.remove(tab.id);
+  } else {
+    // options.html is embedded in about:addon in Firefox
+    // do not close the tab
+  }
 }
 
-window.addEventListener("DOMContentLoaded", (event) => {
+window.addEventListener("DOMContentLoaded", async (event) => {
   // load languages
   scrapbook.loadLanguages(document);
+
+  // load default options
+  await initDefaultOptions();
 
   // event handlers
   document.getElementById("opt_capture.scrapbookFolder").addEventListener("change", (event) => {
@@ -169,7 +168,7 @@ window.addEventListener("DOMContentLoaded", (event) => {
     elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
   });
 
-  document.getElementById("options").addEventListener("submit", (event) => {
+  document.getElementById("options").addEventListener("submit", async (event) => {
     event.preventDefault();
 
     // check for input regex rules
@@ -187,9 +186,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
         scrapbook.options[id] = value;
       }
     }
-    scrapbook.saveOptions().then(() => {
-      closeWindow();
-    });
+    await scrapbook.saveOptions();
+    return closeWindow();
   });
 
   document.getElementById("reset").addEventListener("click", (event) => {
@@ -207,12 +205,9 @@ window.addEventListener("DOMContentLoaded", (event) => {
     document.getElementById("import-input").click();
   });
 
-  document.getElementById("import-input").addEventListener("change", (event) => {
+  document.getElementById("import-input").addEventListener("change", async (event) => {
     event.preventDefault();
     const file = event.target.files[0];
-    importOptions(file);
+    return importOptions(file);
   });
-
-  // default options
-  initDefaultOptions();
 });

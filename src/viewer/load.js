@@ -48,7 +48,7 @@ function onDragLeave(e) {
   }
 };
 
-function onDrop(e) {
+async function onDrop(e) {
   e.preventDefault();
   viewer.dropmask.style.display = 'none';
 
@@ -58,26 +58,21 @@ function onDrop(e) {
   );
 
   const files = [];
-  return Promise.resolve().then(() => {
-    let p = Promise.resolve(false);
-    entries.forEach((entry) => {
-      if (!entry.isFile) { return; }
+  for (const entry of entries) {
+    if (!entry.isFile) { continue; }
 
-      p = p.then(() => {
-        return new Promise((resolve, reject) => {
-          entry.file(resolve, reject);
-        }).then((file) => {
-          files.push(file);
-        });
-      }).catch((ex) => {
-        // this should never happen
-        console.error(ex);
-      });
-    });
-    return p;
-  }).then(() => {
-    return viewer.loadFiles(files);
-  });
+    try {
+      const file = await new Promise((resolve, reject) => {
+        entry.file(resolve, reject);
+      });    
+      files.push(file);
+    } catch (ex) {
+      // this should never happen
+      console.error(ex);
+    }
+  }
+
+  return await viewer.loadFiles(files);
 };
 
 function onChangeFiles(e) {
@@ -90,69 +85,90 @@ function onChangeFiles(e) {
 
 const fileSystemHandler = {
   /**
-   * @return {Promise}
+   * Request from Filesystem API if available
+   *
+   * @TODO:
+   * Request a 5GB filesystem currently.
+   * Do we need larger space or make it configurable?
    */
-  getDir(dirEntry, path) {
+  async requestFileSystem(size = 5*1024*1024*1024 /* 5GB */) {
+    // In Chromium >= 68, top-frame navigation to filesystem URLs is blocked,
+    // making filesystem view useless.
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=811558
+    if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.major >= 68) {
+      return null;
+    }
+
+    // filesystem scheme never works in an incognito window,
+    // but sometimes the requestFileSystem call doesn't throw, 
+    // and an error occurs afterwards instead. Add a check
+    // to prevent such error.
+    if (browser.tabs && (await browser.tabs.getCurrent()).incognito) {
+      return null;
+    }
+
+    try {
+      return await new Promise((resolve, reject) => {
+        window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+        
+        window.requestFileSystem(window.TEMPORARY, size, resolve, reject);
+      });
+    } catch (ex) {
+      // error for filesystem API
+      // console.error(ex);
+    }
+    return null;
+  },
+
+  async getDir(dirEntry, path) {
     return new Promise((resolve, reject) => {
       dirEntry.getDirectory(path, {}, resolve, reject);
     });
   },
 
-  /**
-   * @return {Promise}
-   */
-  getFile(dirEntry, path) {
+  async getFile(dirEntry, path) {
     return new Promise((resolve, reject) => {
       dirEntry.getFile(path, {}, resolve, reject);
     });
   },
 
-  /**
-   * @return {Promise}
-   */
-  createDir(dirEntry, path) {
-    return Promise.resolve().then(() => {
-      let folders = Array.isArray(path) ? path : path.split("/");
-      // Throw out './' or '/' and move on to prevent something like '/foo/.//bar'.
-      folders = folders.filter(x => x && x !== '.');
+  async createDir(dirEntry, path) {
+    let dirParts = Array.isArray(path) ? path : path.split("/");
+    // Throw out './' or '/' and move on to prevent something like '/foo/.//bar'.
+    dirParts = dirParts.filter(x => x && x !== '.');
 
-      return fileSystemHandler.getDir(folders.join("/")).catch((ex) => {
-        const createDirInternal = function (dirEntry, folders) {
-          return new Promise((resolve, reject) => {
-            dirEntry.getDirectory(folders[0], {create: true}, resolve, reject);
-          }).then((dirEntry) => {
-            // Recursively add the new subfolder (if we still have another to create).
-            if (folders.length) {
-              return createDirInternal(dirEntry, folders.slice(1));
-            }
-            return dirEntry;
-          });
-        };
-        return createDirInternal(dirEntry, folders);
-      });
-    });
+    try {
+      return await fileSystemHandler.getDir(dirParts.join("/"));
+    } catch (ex) {
+      const createDirInternal = async function (dirEntry, dirParts) {
+        dirEntry = await new Promise((resolve, reject) => {
+          dirEntry.getDirectory(dirParts[0], {create: true}, resolve, reject);
+        });
+
+        // Recursively add the new subfolder (if we still have another to create).
+        if (dirParts.length) {
+          return await createDirInternal(dirEntry, dirParts.slice(1));
+        }
+        return dirEntry;
+      };
+      return createDirInternal(dirEntry, dirParts);
+    }
   },
 
-  /**
-   * @return {Promise}
-   */
-  createFile(dirEntry, path, fileBlob) {
-    return this.createDir(dirEntry, path.split("/").slice(0, -1)).then(() => {
-      return new Promise((resolve, reject) => {
-        dirEntry.getFile(path, {create: true}, resolve, reject);
-      });
-    }).then((fileEntry) => {
-      return new Promise((resolve, reject) => {
-        fileEntry.createWriter(resolve, reject);
-      });
-    }).then((fileWriter) => {
-      return new Promise((resolve, reject) => {
-        fileWriter.onwriteend = resolve;
-        fileWriter.onerror = reject;
-        fileWriter.write(fileBlob);
-      });
+  async createFile(dirEntry, path, fileBlob) {
+    await this.createDir(dirEntry, path.split("/").slice(0, -1));
+    const fileEntry = await new Promise((resolve, reject) => {
+      dirEntry.getFile(path, {create: true}, resolve, reject);
     });
-  }
+    const fileWriter = await new Promise((resolve, reject) => {
+      fileEntry.createWriter(resolve, reject);
+    });
+    return await new Promise((resolve, reject) => {
+      fileWriter.onwriteend = resolve;
+      fileWriter.onerror = reject;
+      fileWriter.write(fileBlob);
+    });
+  },
 };
 
 const viewer = {
@@ -190,173 +206,134 @@ const viewer = {
     logger.appendChild(span);
   },
 
-  openUrl(url, inNewTab = false) {
-    return Promise.resolve().then(() => {
-      if (inNewTab) {
-        // In Firefox, a window.open popup is blocked by default, and the 
-        // user has to manually add an exception to the popup blocker.
-        // Morever, a bug causes the notification not shown for the
-        // blocked popup.
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=1396745
-        //
-        // browser.tabs.create fails silently in Firefox private window.
-        //
-        // browser.tabs is undefined in a Firefox addon page in a frame.
-        if (scrapbook.userAgent.is('gecko')) {
-          return Promise.resolve().then(() => {
-            return browser.tabs.getCurrent().then((tab) => {
-              if (tab.incognito) { throw new Error('private window'); }
-              return browser.tabs.create({url, active: false});
-            });
-          }).catch((ex) => {
-            window.open(url);
-          });
+  async openUrl(url, inNewTab = false) {
+    if (inNewTab) {
+      // In Firefox, a window.open popup is blocked by default, and the 
+      // user has to manually add an exception to the popup blocker.
+      // Morever, a bug causes the notification not shown for the
+      // blocked popup.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1396745
+      //
+      // browser.tabs.create fails silently in Firefox private window.
+      //
+      // browser.tabs is undefined in a Firefox addon page in a frame.
+      if (scrapbook.userAgent.is('gecko')) {
+        try {
+          const tab = await browser.tabs.getCurrent();
+          if (tab.incognito) { throw new Error('private window'); }
+          return await browser.tabs.create({url, active: false});
+        } catch (ex) {
+          // pass
         }
-
-        window.open(url);
-        return;
       }
 
-      if (this.autoLoading) {
-        window.location.replace(url);
-      } else {
-        window.location.assign(url);
-      }
-    });
+      return window.open(url);
+    }
+
+    if (this.autoLoading) {
+      return window.location.replace(url);
+    }
+
+    return window.location.assign(url);
   },
 
-  openUrls(urls) {
+  async openUrls(urls) {
     // move main index file to the last
     urls.push(urls.shift());
 
-    let p = Promise.resolve();
-    urls.forEach((url, i) => {
-      p = p.then(() => {
-        return viewer.openUrl(url, i !== urls.length - 1);
-      });
-    });
-    return p;
+    let result;
+    for (let i = 0, I = urls.length; i < I; i++) {
+      result = await viewer.openUrl(urls[i], i !== urls.length - 1);
+    }
+    return result;
   },
 
-  start() {
-    return Promise.resolve().then(() => {
-      /* check and read filesystem API */
+  async start() {
+    try {
+      /* request Filesystem API by config */
+      if (scrapbook.getOption("viewer.useFileSystemApi")) {
+        viewer.filesystem = await fileSystemHandler.requestFileSystem();
+      }
 
-      if (!scrapbook.getOption("viewer.useFileSystemApi")) { return; }
-
-      // In Firefox < 58, browser.tabs is undefined when redirected to load.html
-      return browser.tabs && browser.tabs.getCurrent().then((tab) => {
-        // In Chromium >= 68, top-frame navigation to filesystem URLs is blocked,
-        // making filesystem view useless.
-        // https://bugs.chromium.org/p/chromium/issues/detail?id=811558
-        if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.major >= 68) {
-          return;
-        }
-
-        // filesystem scheme never works in an incognito window,
-        // but sometimes the requestFileSystem call doesn't throw, 
-        // and an error occurs afterwards instead. Add a check
-        // to prevent such error.
-        if (tab.incognito) { return; }
-
-        return new Promise((resolve, reject) => {
-          window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
-          // @TODO: Request a 5GB filesystem currently. Do we need larger space or make it configurable?
-          window.requestFileSystem(window.TEMPORARY, 5*1024*1024*1024, resolve, reject);
-        }).then((fs) => {
-          viewer.filesystem = fs;
-        });
-      }).catch((ex) => {
-        // error for filesystem API
-        // console.error(ex);
-      });
-    }).then(() => {
       /* process URL params */
-
+      const files = [];
       const zipSourceUrl = viewer.mainUrl.searchParams.get("src");
-      if (!zipSourceUrl) { return []; }
-
-      const zipSourceUrlObj = new URL(zipSourceUrl);
-      viewer.urlSearch = zipSourceUrlObj.search;
-      viewer.urlHash = viewer.mainUrl.hash;
-      let filename = scrapbook.urlToFilename(zipSourceUrl);
-
-      return scrapbook.xhr({
-        url: zipSourceUrl,
-        responseType: "blob",
-      }).then((xhr) => {
-        // if header Content-Disposition is defined, use it
-        // local request (status = 0) has no response header
-        if (xhr.status !== 0) {
-          try {
-            const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-            const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-            filename = contentDisposition.parameters.filename || filename;
-          } catch (ex) {}
-        }
-
-        const file = new File([xhr.response], filename, {type: Mime.lookup(filename)});
+      if (zipSourceUrl) {
         this.autoLoading = true;
-        return [file];
-      }).catch((ex) => {
-        this.error(`Unable to fetch specified ZIP file '${zipSourceUrl}'`);
-        return [];
-      });
-    }).then((files) => {
-      return this.loadFiles(files);
-    }).catch((ex) => {
+        const zipSourceUrlObj = new URL(zipSourceUrl);
+        viewer.urlSearch = zipSourceUrlObj.search;
+        viewer.urlHash = viewer.mainUrl.hash;
+        let filename = scrapbook.urlToFilename(zipSourceUrl);
+
+        try {
+          const xhr = await scrapbook.xhr({
+            url: zipSourceUrl,
+            responseType: "blob",
+          });
+
+          // if header Content-Disposition is defined, use it
+          // local request (status = 0) has no response header
+          if (xhr.status !== 0) {
+            try {
+              const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+              const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+              filename = contentDisposition.parameters.filename || filename;
+            } catch (ex) {
+              // error when parsing header
+            }
+          }
+
+          const file = new File([xhr.response], filename, {type: Mime.lookup(filename)});
+          files.push(file);
+        } catch (ex) {
+          this.error(`Unable to fetch specified ZIP file '${zipSourceUrl}'`);
+        }
+      }
+      return await this.loadFiles(files);
+    } catch (ex) {
       console.error(ex);
       this.error(`Unexpected error: ${ex.message}`);
-    });
+    }
   },
 
-  /**
-   * @return {Promise}
-   */
-  loadFiles(files) {
-    return Promise.resolve().then(() => {
-      this.pageList = [];
-      this.uninitEvents();
-      this.filesSelector.disabled = true;
-      this.loadmask.style.display = '';
-      this.logger.textContent = '';
-    }).then(() => {
-      let p = Promise.resolve();
-      files.sort((a, b) => {
-        if (a.name > b.name) { return 1; }
-        if (a.name < b.name) { return -1; }
-        return 0;
-      }).forEach((file) => {
-        p = p.then(() => {
-          return viewer.processZipFile(file);
-        }).catch((ex) => {
-          // this should never happen
-          console.error(ex);
-        });
-      });
-      return p;
-    }).then(() => {
-      if (this.pageList.length) {
-        this.log('Done.');
-        this.log('');
-        return this.openUrls(this.pageList);
-      } else {
-        this.autoLoading = false;
-        this.initEvents();
-        this.filesSelector.disabled = false;
-        this.filesSelector.value = null;
-        this.loadmask.style.display = 'none';
+  async loadFiles(files) {
+    this.pageList = [];
+    this.uninitEvents();
+    this.filesSelector.disabled = true;
+    this.loadmask.style.display = '';
+    this.logger.textContent = '';
+
+    files = files.sort((a, b) => {
+      if (a.name > b.name) { return 1; }
+      if (a.name < b.name) { return -1; }
+      return 0;
+    });
+
+    for (const file of files) {
+      try {
+        await viewer.processZipFile(file);
+      } catch (ex) {
+        // this should never happen
+        console.error(ex);
       }
-    });
+    }
+
+    if (this.pageList.length) {
+      this.log('Done.');
+      this.log('');
+      return await this.openUrls(this.pageList);
+    } else {
+      this.autoLoading = false;
+      this.initEvents();
+      this.filesSelector.disabled = false;
+      this.filesSelector.value = null;
+      this.loadmask.style.display = 'none';
+    }
   },
 
-  /**
-   * @return {Promise}
-   */
-  processZipFile(zipFile) {
-    return Promise.resolve().then(() => {
-      this.log(`Loading: '${zipFile.name}'...`);
-    }).then(() => {
+  async processZipFile(zipFile) {
+    this.log(`Loading: '${zipFile.name}'...`);
+    try {
       const uuid = scrapbook.getUuid();
       const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
       const zipData = {
@@ -364,139 +341,124 @@ const viewer = {
         files: {},
       };
 
-      // @TODO: JSZip.loadAsync cannot load a large zip file
-      //     (around 2GB, tested on Google Chrome)
-      return new JSZip().loadAsync(zipFile).then((zip) => {
-        let p = Promise.resolve();
-        zip.forEach((inZipPath, zipObj) => {
-          p = p.then(() => {
-            if (zipObj.dir) {
-              zipData.files[inZipPath] = {dir: true};
-              return;
-            }
-
-            // @TODO: reading a large file (about 400~500 MB) once into an
-            //     arraybuffer could consume too much memory and cause the
-            //     extension to shutdown.  Loading in chunks avoids this but
-            //     is very slow and unuseful.  We currently use the faster
-            //     method.
-            return zipObj.async("arraybuffer").then((ab) => {
-              const mime = Mime.lookup(inZipPath);
-
-              zipData.files[inZipPath] = {
-                dir: false,
-                type: mime,
-              };
-
-              let data;
-              // In Firefox < 56 and Chromium,
-              // Blob cannot be stored in chrome.storage,
-              // fallback to byte string.
-              if (scrapbook.cache.current === 'storage' &&
-                  !viewer.filesystem &&
-                  (scrapbook.userAgent.major < 56 || scrapbook.userAgent.is('chromium'))) {
-                data = scrapbook.arrayBufferToByteString(ab);
-              } else {
-                data = new Blob([ab], {type: mime});
-              }
-
-              /* Filesystem API view */
-              if (viewer.filesystem) {
-                return fileSystemHandler.createFile(viewer.filesystem.root, uuid + "/" + inZipPath, data);
-              }
-
-              /* In-memory view */
-              const key = {table: "viewerCache", id: uuid, path: inZipPath};
-              return scrapbook.cache.set(key, data);
-            });
-          });
-        });
-        return p.then(() => {
-          /* Filesystem API view */
-          if (viewer.filesystem) {
-            // do nothing
-            return;
-          }
-
-          /* In-memory view */
-          const key = {table: "viewerCache", id: uuid};
-          return scrapbook.cache.set(key, zipData.files);
-        }).then(() => {
-          return zip;
-        });
-      }).then((zip) => {
-        switch (type) {
-          case "maff": {
-            return scrapbook.getMaffIndexFiles(zip).catch((ex) => {
-              this.error(ex.message);
-              return [];
-            });
-          }
-          case "htz":
-          default: {
-            if (!zip.files["index.html"]) { return []; }
-
-            return ["index.html"];
-          }
-        }
-      }, (ex) => {
+      /* retrieve ans store zip entries */
+      let zip;
+      try {
+        zip = await (new JSZip().loadAsync(zipFile));
+      } catch (ex) {
         throw new Error(`ZIP file invalid or unsupported.`);
-      }).then((indexFiles) => {
-        if (!indexFiles.length) {
-          throw new Error(`No available page found.`);
+      }
+
+      for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
+        if (zipObj.dir) {
+          zipData.files[inZipPath] = {dir: true};
+          continue;
         }
 
-        /* Filesystem API view */
+        const mime = Mime.lookup(inZipPath);
+        zipData.files[inZipPath] = {
+          dir: false,
+          type: mime,
+        };
+
+        // @TODO: reading a large file (about 400~500 MB) once into an
+        //     arraybuffer could consume too much memory and cause the
+        //     extension to shutdown.  Loading in chunks avoids this but
+        //     is very slow and unuseful.  We currently use the faster
+        //     method.
+        const ab = await zipObj.async("arraybuffer");
+
+        let data;
+        // In Firefox < 56 and Chromium,
+        // Blob cannot be stored in chrome.storage,
+        // fallback to byte string.
+        if (scrapbook.cache.current === 'storage' &&
+            !viewer.filesystem &&
+            (scrapbook.userAgent.major < 56 || scrapbook.userAgent.is('chromium'))) {
+          data = scrapbook.arrayBufferToByteString(ab);
+        } else {
+          data = new Blob([ab], {type: mime});
+        }
+
         if (viewer.filesystem) {
-          const root = viewer.filesystem.root;
-          let p = Promise.resolve();
-          indexFiles.forEach((indexFile, i) => {
-            p = p.then(() => {
-              return fileSystemHandler.getFile(root, uuid + "/" + indexFile);
-            }).then((fileEntry) => {
-              const url = new URL(fileEntry.toURL());
-              url.search = viewer.urlSearch;
-              url.hash = viewer.urlHash;
-              this.pageList.push(url.href);
-            });
-          });
-          return p;
+          /* Filesystem API view */
+          await fileSystemHandler.createFile(viewer.filesystem.root, uuid + "/" + inZipPath, data);
+        } else {
+          /* In-memory view */
+          const key = {table: "viewerCache", id: uuid, path: inZipPath};
+          await scrapbook.cache.set(key, data);
         }
+      }
 
+      if (!viewer.filesystem) {
+        /* In-memory view */
+        const key = {table: "viewerCache", id: uuid};
+        await scrapbook.cache.set(key, zipData.files);
+      }
+
+      /* Retrieve indexFiles */
+      let indexFiles = [];
+      switch (type) {
+        case "maff": {
+          try {
+            indexFiles = await scrapbook.getMaffIndexFiles(zip);
+          } catch (ex) {
+            this.error(ex.message);
+          }
+        }
+        case "htz":
+        default: {
+          if (zip.files["index.html"]) {
+            indexFiles = ["index.html"];
+          }
+        }
+      }
+
+      if (!indexFiles.length) {
+        throw new Error(`No available page found.`);
+      }
+
+      /* convert indexFiles to this.pageList */
+      if (viewer.filesystem) {
+        /* Filesystem API view */
+        const root = viewer.filesystem.root;
+        for (const indexFile of indexFiles) {
+          const fileEntry = await fileSystemHandler.getFile(root, uuid + "/" + indexFile);
+          const url = new URL(fileEntry.toURL());
+          url.search = viewer.urlSearch;
+          url.hash = viewer.urlHash;
+          this.pageList.push(url.href);
+        }
+      } else {
         /* In-memory view */
         const url = new URL(chrome.runtime.getURL("viewer/view.html"));
         const s = url.searchParams;
         s.set("id", uuid);
         url.hash = viewer.urlHash;
 
-        let p = Promise.resolve();
-        indexFiles.forEach((indexFile, i) => {
-          p = p.then(() => {
-            const pos = indexFile.lastIndexOf('/');
+        for (const indexFile of indexFiles) {
+          const pos = indexFile.lastIndexOf('/');
 
-            // set dir filter
-            if (pos !== -1) {
-              s.set("d", indexFile.slice(0, pos));
-            } else {
-              s.delete("d");
-            }
+          // set dir filter
+          if (pos !== -1) {
+            s.set("d", indexFile.slice(0, pos));
+          } else {
+            s.delete("d");
+          }
 
-            s.set("p", indexFile);
-            this.pageList.push(url.href);
-          });
-        });
-        return p;
-      });
-    }).catch((ex) => {
+          s.set("p", indexFile);
+          this.pageList.push(url.href);
+        }
+      }
+    } catch (ex) {
       console.error(ex);
       this.error(`Unable to open archive: ${ex.message}`);
-    }).then(() => {
-      this.log('');
-    });
+    }
+    this.log('');
   },
 };
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   scrapbook.loadLanguages(document);
 
   // init common elements and events
@@ -505,7 +467,6 @@ document.addEventListener("DOMContentLoaded", function () {
   viewer.filesSelector = document.getElementById('files-selector');
   viewer.logger = document.getElementById('logger');
 
-  scrapbook.loadOptions().then(() => {
-    viewer.start();
-  });
+  await scrapbook.loadOptions();
+  await viewer.start();
 });
