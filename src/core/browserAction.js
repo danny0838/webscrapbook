@@ -9,15 +9,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   // load languages
   scrapbook.loadLanguages(document);
 
+  /**
+   * Query for highlighted ("selected") tabs
+   *
+   * query for {discarded:false} throws error in older Firefox (e.g. 52)
+   * query for {highlighted:true} doesn't get highlighted tabs in some Firefox version (e.g. 55)
+   * so we query for all tabs and filter them afterwards
+   */
   const getHighlightedTabs = async function () {
+    const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
     const tabs = await browser.tabs.query({
-      highlighted: true, discarded: false, currentWindow: true,
+      currentWindow: true,
     });
-    const ct = await capturer.getContentTabs();
-    const ctSet = new Set(ct.map(t => t.id));
     const target = tabs
+      .filter(t => (
+        scrapbook.isContentPage(t.url, allowFileAccess) &&
+        t.highlighted !== false && t.discarded !== true
+      ))
       .map(t => t.id)
-      .filter(t => ctSet.has(t))
       .join(',');
     return target;
   };
