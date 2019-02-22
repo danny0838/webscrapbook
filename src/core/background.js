@@ -48,37 +48,40 @@ chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
   return {requestHeaders: details.requestHeaders};
 }, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, ["blocking", "requestHeaders"]);
 
-chrome.runtime.onConnectExternal.addListener((port) => {
-  port.onMessage.addListener(async (message, port) => {
-    try {
-      const {cmd, args} = message;
-      let result;
-      switch (cmd) {
-        case "getBaseUrl": {
-          result = {
-            url: chrome.runtime.getURL(""),
-          };
-          break;
+if (chrome.runtime.onConnectExternal) {
+  // Available in Firefox >= 54.
+  chrome.runtime.onConnectExternal.addListener((port) => {
+    port.onMessage.addListener(async (message, port) => {
+      try {
+        const {cmd, args} = message;
+        let result;
+        switch (cmd) {
+          case "getBaseUrl": {
+            result = {
+              url: chrome.runtime.getURL(""),
+            };
+            break;
+          }
+          case "relayMessage": {
+            // Send message to all tabs of this extension, mainly the capturer
+            // tabs.  Only messages pass args.settings.missionId verification
+            // by the capturer will be executed.
+            result = await browser.runtime.sendMessage({
+              cmd: args.cmd,
+              args: args.args,
+            });
+            break;
+          }
         }
-        case "relayMessage": {
-          // Send message to all tabs of this extension, mainly the capturer
-          // tabs.  Only messages pass args.settings.missionId verification
-          // by the capturer will be executed.
-          result = await browser.runtime.sendMessage({
-            cmd: args.cmd,
-            args: args.args,
-          });
-          break;
-        }
-      }
 
-      if (result.error) { throw result.error; }
-      port.postMessage({id: message.id, response: result});
-    } catch (ex) {
-      port.postMessage({id: message.id, error: {message: ex.message}});
-    }
+        if (result.error) { throw result.error; }
+        port.postMessage({id: message.id, response: result});
+      } catch (ex) {
+        port.postMessage({id: message.id, error: {message: ex.message}});
+      }
+    });
   });
-});
+}
 
 async function initContextMenu() {
   const urlMatch = await scrapbook.getContentPagePattern();
