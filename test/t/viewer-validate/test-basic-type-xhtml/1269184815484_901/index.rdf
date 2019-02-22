@@ -3,10 +3,10 @@
          xmlns:NC="http://home.netscape.com/NC-rdf#"
          xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <RDF:Description RDF:about="urn:root">
-    <MAF:originalurl RDF:resource="http://example.com/"/>
-    <MAF:title RDF:resource="Example MAFF"/>
-    <MAF:archivetime RDF:resource="Mon, 25 Dec 2017 17:27:46 GMT"/>
-    <MAF:indexfilename RDF:resource="index.html"/>
+    <MAF:originalurl RDF:resource="file:///C:/My%20Documents/test-basic-type-xhtml.xhtml"/>
+    <MAF:title RDF:resource="MAFF test file"/>
+    <MAF:archivetime RDF:resource="Sun Mar 21 2010 16:10:34 GMT+0100 (ora solare Europa occidentale)"/>
+    <MAF:indexfilename RDF:resource="index.xhtml"/>
     <MAF:charset RDF:resource="UTF-8"/>
   </RDF:Description>
 </RDF:RDF>

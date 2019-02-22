@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<RDF:RDF xmlns:MAF="http://maf.mozdev.org/metadata/rdf#"
+         xmlns:NC="http://home.netscape.com/NC-rdf#"
+         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <RDF:Description RDF:about="urn:root">
+    <MAF:originalurl RDF:resource="file:///C:/My%20Documents/test-basic-type-html.html"/>
+    <MAF:title RDF:resource="MAFF test file"/>
+    <MAF:archivetime RDF:resource="Sun Mar 21 2010 16:10:08 GMT+0100 (ora solare Europa occidentale)"/>
+    <MAF:indexfilename RDF:resource="index.html"/>
+    <MAF:charset RDF:resource="ISO-8859-1"/>
+  </RDF:Description>
+</RDF:RDF>

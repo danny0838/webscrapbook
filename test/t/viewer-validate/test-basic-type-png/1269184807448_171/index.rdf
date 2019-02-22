@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<RDF:RDF xmlns:MAF="http://maf.mozdev.org/metadata/rdf#"
+         xmlns:NC="http://home.netscape.com/NC-rdf#"
+         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <RDF:Description RDF:about="urn:root">
+    <MAF:originalurl RDF:resource="file:///C:/My%20Documents/test-basic-type-png.png"/>
+    <MAF:title RDF:resource="test-basic-type-png.png (PNG Image, 20x6 pixels)"/>
+    <MAF:archivetime RDF:resource="Tue Apr 28 2009 17:46:38 GMT+0200 (ora legale Europa occidentale)"/>
+    <MAF:indexfilename RDF:resource="index.png"/>
+    <MAF:charset RDF:resource="ISO-8859-1"/>
+  </RDF:Description>
+</RDF:RDF>
