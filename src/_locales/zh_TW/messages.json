@@ -76,6 +76,9 @@
       "reason": {"content": "$1"}
     }
   },
+  "ErrorTabDiscarded": {
+    "message": "分頁已卸載，請重新載入再嘗試。"
+  },
   "ExtensionDescription": {
     "description": "Description of the extension as it's visible to the outside world",
     "message": "忠實地擷取網頁內容，提供多種儲存格式與客製化設定。"

@@ -76,6 +76,9 @@
       "reason": {"content": "$1"}
     }
   },
+  "ErrorTabDiscarded": {
+    "message": "Tab discarded. Reload it and try again."
+  },
   "ExtensionDescription": {
     "description": "Description of the extension as it's visible to the outside world",
     "message": "Captures the web page faithfully with highly customizable configurations."

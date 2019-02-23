@@ -105,7 +105,7 @@ capturer.getUniqueFilename = function (timeId, filename) {
 capturer.captureTab = async function (params) {
   try {
     const {tabId, frameId, saveBeyondSelection, mode, options} = params;
-    let {url, title} = await browser.tabs.get(tabId);
+    let {url, title, discarded} = await browser.tabs.get(tabId);
 
     // redirect headless capture
     // if frameId not provided, use current tab title and favIcon
@@ -138,6 +138,12 @@ capturer.captureTab = async function (params) {
     // completed and some subframes hadn't been loaded.
     isDebug && console.debug("(main) send", source, message);
     capturer.log(`Capturing (document) ${source} ...`);
+
+    // throw error for discarded tab
+    // note that tab.discarded is undefined in older Firefox version
+    if (discarded === true) {
+      throw new Error(scrapbook.lang("ErrorTabDiscarded"));
+    }
 
     const tasks = [];
     const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();

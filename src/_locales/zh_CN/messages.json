@@ -76,6 +76,9 @@
       "reason": {"content": "$1"}
     }
   },
+  "ErrorTabDiscarded": {
+    "message": "分页已卸载，请重新载入再嘗试。"
+  },
   "ExtensionDescription": {
     "description": "Description of the extension as it's visible to the outside world",
     "message": "忠实地获取网页内容，提供多种储存格式与客制化设定。"

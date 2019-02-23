@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   /**
    * Query for highlighted ("selected") tabs
    *
-   * query for {discarded:false} throws error in older Firefox (e.g. 52)
    * query for {highlighted:true} doesn't get highlighted tabs in some Firefox version (e.g. 55)
    * so we query for all tabs and filter them afterwards
    */
@@ -24,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const target = tabs
       .filter(t => (
         scrapbook.isContentPage(t.url, allowFileAccess) &&
-        t.highlighted !== false && t.discarded !== true
+        t.highlighted !== false
       ))
       .map(t => t.id)
       .join(',');
