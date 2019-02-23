@@ -48,7 +48,7 @@
     "message": "获取㧥择的分页的原始状态（未经过脚本处理）。"
   },
   "CaptureTabTooltip": {
-    "message": "获取㧥择的分页的目前狀态。若分页中有选择内容则只获取选择范围。"
+    "message": "获取㧥择的分页的当前狀态。若分页中有选择内容则只获取选择范围。"
   },
   "CapturerTitle": {
     "message": "获取页面"
@@ -81,17 +81,17 @@
   },
   "ExtensionDescription": {
     "description": "Description of the extension as it's visible to the outside world",
-    "message": "忠实地获取网页内容，提供多种储存格式与客制化设定。"
+    "message": "忠实地获取网页内容，提供多种保存格式与客制化设定。"
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
     "message": "网页剪贴簿"
   },
   "IndexerDesc": {
-    "message": "获取数据必须保存于剪贴簿中（默认为 <下载文件夹>/<剪贴簿文件夹>/data/ 根目录），索引器才能运作，如果没有则须手动搬移。\n\n指定剪贴簿文件夹后即会开始建立索引，完成后会产生一个 ZIP 压缩文件供下载，将其内容解压缩放入原剪贴簿文件夹，并开启 ./tree/map.html 或 ./tree/frame.html，即可检视产生的页面列表。\n\n产生的资料文件如 ./tree/meta.js 和 ./tree/toc.js，分别为各页面的元信息及目录表，可人工修改，只要保持数据格式正确即可。\n\n获取新页面或修改数据文件后可再次执行此索引器以加入新项目或检查潜在错误，再重新整理 ./tree/map.html 或 ./tree/frame.html 检视更新结果。\n\n索引器相关选项可到选项页面设定。"
+    "message": "获取数据必须保存于剪贴簿中（默认为 <默认下载文件夹>/<剪贴簿文件夹>/data/ 根目录），索引器才能运作，如果没有则须手动搬移。\n\n指定剪贴簿文件夹后即会开始建立索引，完成后会产生一个 ZIP 压缩文件供下载，将其内容解压缩放入原剪贴簿文件夹，并开启 ./tree/map.html 或 ./tree/frame.html，即可检视产生的页面列表。\n\n产生的数据文件如 ./tree/meta.js 和 ./tree/toc.js，分别为各页面的元信息及目录表，可人工修改，只要保持数据格式正确即可。\n\n获取新页面或修改数据文件后可再次执行此索引器以加入新项目或检查潜在错误，再重新整理 ./tree/map.html 或 ./tree/frame.html 检视更新结果。\n\n索引器相关选项可到选项页面设定。"
   },
   "IndexerHeader": {
-    "message": "选择网页剪贴簿文件夹或其 ZIP 压缩文件。你可以拖放它们至此视窗，或使用以下按钮："
+    "message": "选择网页剪贴簿文件夹或其 ZIP 压缩文件。你可以拖放它们至此窗口，或使用以下按钮："
   },
   "IndexerPickDir": {
     "message": "选择文件夹"
@@ -126,14 +126,17 @@
   "OptionCaptureAppletLabel": {
     "message": "APPLET 元素:"
   },
+  "OptionCaptureAppletTooltip": {
+    "message": "此选项决定 APPLET 元素的处理方式。APPLET 元素是用于嵌入 JAVA 程序，新浏览器大多已不再支援。注意：此元素在离线环境下可能无法正常运作，且可能造成安全风险。\n\n* 保存：将 APPLET 元素参照的文件保存至本地。\n\n* 链接：将 APPLET 元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将 APPLET 元素无效化。\n\n* 移除：将 APPLET 元素移除。注意这可能会影响网页排版。"
+  },
   "OptionCaptureAudioLabel": {
-    "message": "音讯:"
+    "message": "音频:"
+  },
+  "OptionCaptureAudioTooltip": {
+    "message": "此选项决定音频（AUDIO 元素）的处理方式。\n\n* 保存：将音频保存至本地。\n\n* 保存现用：将当前使用的音频保存至本地，忽略替代。这可以缩小容量，但在其他平台开启时可能因缺少替代音频而无法播放。\n\n* 链接：将音频元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将音频元素无效化。\n\n* 移除：将音频元素移除。注意这可能会影响网页排版。"
   },
   "OptionCaptureCanvasBlankLabel": {
     "message": "保存初始状态"
-  },
-  "OptionCaptureCanvasBlankTooltip": {
-    "message": "保存初始空白画布。保存脚本时建议使用此选项。"
   },
   "OptionCaptureCanvasLabel": {
     "message": "画布:"
@@ -141,23 +144,14 @@
   "OptionCaptureCanvasSaveLabel": {
     "message": "保存当前状态"
   },
-  "OptionCaptureCanvasSaveTooltip": {
-    "message": "产生初始化脚本记录当前画布状态并且在网页载入时重绘。注意：保存脚本时可能发生冲突。"
-  },
   "OptionCaptureCanvasTooltip": {
-    "message": "画布初始为空白状态而后由网页脚本动态绘制，不保存脚本时可选择“保存当前状态”，保存脚本时则建议选择“保存初始状态”以避免冲突。"
+    "message": "此选项决定画布（CANVAS 元素）的处理方式。画布初始为空白状态而后由网页脚本动态绘制。\n\n* 保存当前状态：产生初始化脚本并在网页载入时重绘。注意保存脚本时产生的脚本可能与之冲突。\n\n* 保存原始状态：保存空白画布。保存脚本时建议使用此选项，因为脚本通常会自行绘制画布。\n\n* 移除：将画布元素移除。"
   },
   "OptionCaptureCommonBlankLabel": {
     "message": "清空"
   },
-  "OptionCaptureCommonBlankTooltip": {
-    "message": "将元素保留在原始位置，但将链接或内容无效化。"
-  },
   "OptionCaptureCommonLinkLabel": {
     "message": "链接"
-  },
-  "OptionCaptureCommonLinkTooltip": {
-    "message": "将参照的链接改写为连往原始位址。注意这会导致日后浏览时持续触发网络传输及消耗网络流量。"
   },
   "OptionCaptureCommonSaveLabel": {
     "message": "保存"
@@ -165,20 +159,11 @@
   "OptionCaptureCommonSaveCurrentLabel": {
     "message": "保存现用"
   },
-  "OptionCaptureCommonSaveCurrentTooltip": {
-    "message": "只将目前参照的资源储存至本地。这可以缩小容量，但可能破坏跨平台相容性，且保存脚本时可能导致所需文件遗失。"
-  },
-  "OptionCaptureCommonSaveTooltip": {
-    "message": "将参照的资源保存至本地。"
-  },
   "OptionCaptureCommonSaveUsedLabel": {
     "message": "保存现用 [实验中]"
   },
   "OptionCaptureCommonRemoveLabel": {
     "message": "移除"
-  },
-  "OptionCaptureCommonRemoveTooltip": {
-    "message": "将元素移除。注意这可能会影响网页排版。"
   },
   "OptionCaptureDownLinkFilterErrorLine": {
     "message": "第 $LINE$ 行：$ERROR$",
@@ -200,16 +185,16 @@
     "message": "扩展名过滤器"
   },
   "OptionCaptureDownLinkModeHeaderLabel": {
-    "message": "比对 HTTP 标头及网址扩展名"
-  },
-  "OptionCaptureDownLinkModeHeaderTooltip": {
-    "message": "访问每个链接取得 HTTP 标头及精确的扩展名。注意：可能会因此访问到不适当的链接（例如登出网站），使用时应设置适当的网址过滤器以避免问题。"
+    "message": "匹配 HTTP 标头及网址扩展名"
   },
   "OptionCaptureDownLinkModeNoneLabel": {
     "message": "停用下载链接文件"
   },
+  "OptionCaptureDownLinkModeTooltip": {
+    "message": "决定是否下载 A 或 AREA 元素链接的文件。\n\n* 停用下载链接文件：不下载链接的文件。\n\n* 匹配网址扩展名：匹配网址的扩展名是否符合扩展名过滤器，效能较佳，但无法侦测动态网页产生的文件（例如 .php 页面输出 .doc 文件时，扩展名过滤器会匹配 php 而非 doc）。\n\n* 匹配 HTTP 标头及网址扩展名：走访每个链接取得 HTTP 标头及精确的扩展名（例如 .php 页面输出 .doc 文件时，扩展名过滤器会匹配 doc），但效能较差。注意：有些设计不良的网站会把关键指令做成链接，这可能导致走访不合适的链接（例如注销网站），此时可设定网址过滤器防止走访那些链接。"
+  },
   "OptionCaptureDownLinkModeUrlLabel": {
-    "message": "比对网址扩展名"
+    "message": "匹配网址扩展名"
   },
   "OptionCaptureDownLinkUrlFilterDesc": {
     "message": "过滤掉网址（去除 \"#\" 以后的部分）匹配以下规则的链接。以下每行为一个正则表达式（/<规则>/<修饰>）或完整网址（\"#\" 以后会被去除）。以 \"#\" 开头的行会被略过。"
@@ -226,14 +211,20 @@
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
   },
+  "OptionCaptureEmbedTooltip": {
+    "message": "此选项决定 EMBED 元素的处理方式。EMBED 元素通常用于嵌入互动程序或外挂物件。注意：此元素在离线环境下可能无法正常运作，且可能造成安全风险。\n\n* 保存：将 EMBED 元素参照的文件保存至本地。\n\n* 链接：将 EMBED 元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将 EMBED 元素无效化。\n\n* 移除：将 EMBED 元素移除。注意这可能会影响网页排版。"
+  },
   "OptionCaptureFaviconLabel": {
-    "message": "Favicon:"
+    "message": "最爱图示:"
+  },
+  "OptionCaptureFaviconTooltip": {
+    "message": "此选项决定最爱图示的处理方式。最爱图示（favicon）是网页在分页、书签、我的最爱中呈现的代表图示。\n\n* 保存：将最爱图示保存至本地。\n\n* 链接：将最爱图示改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将最爱图示元素无效化。\n\n* 移除：将最爱图示元素移除。"
   },
   "OptionCaptureFontLabel": {
     "message": "字体:"
   },
-  "OptionCaptureFontSaveUsedTooltip": {
-    "message": "只保存应用于目前网页的字体。这可以缩小容量，但保存脚本时可能导致所需文件遗失。\n\n* 由于同源政策的安全性限制，此功能目前只能正常运作于同网域的样式表。"
+  "OptionCaptureFontTooltip": {
+    "message": "此选项决定外部字体的处理方式。\n\n* 保存：将外部字体保存至本地。\n\n* 保存现用：只将网页元素引用过的外部字体保存至本地。这可以缩小容量。（由于同源政策的安全性限制，不同网域的样式表无法载入，其中的外部字体皆无法保存。）\n\n* 链接：将外部字体的样式定义改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将外部字体的样式定义清除。"
   },
   "OptionCaptureFormStatusLabel": {
     "message": "表单状态:"
@@ -247,20 +238,32 @@
   "OptionCaptureFrameLabel": {
     "message": "框架页:"
   },
+  "OptionCaptureFrameTooltip": {
+    "message": "此选项决定框架页（FRAME 及 IFRAME 元素）的处理方式。\n\n* 保存：将框架页保存至本地。\n\n* 链接：将框架页元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将框架页元素无效化。\n\n* 移除：将框架页元素移除。注意这可能会影响网页排版。"
+  },
   "OptionCaptureImageBackgroundLabel": {
     "message": "背景图片:"
   },
-  "OptionCaptureImageBackgroundSaveUsedTooltip": {
-    "message": "只保存应用于目前网页的背景图片。这可以缩小容量，但保存脚本时可能导致所需文件遗失。\n\n* 由于同源政策的安全性限制，此功能目前只能正常运作于同网域的样式表。"
+  "OptionCaptureImageBackgroundTooltip": {
+    "message": "此选项决定背景图片的处理方式。\n\n* 保存：将背景图片保存至本地。\n\n* 保存现用：只将网页元素引用过的背景图片保存至本地。这可以缩小容量。（由于同源政策的安全性限制，不同网域的样式表无法载入，其中的背景图片皆无法保存。）\n\n* 链接：将背景图片改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将背景图片的样式定义清除。"
   },
   "OptionCaptureImageLabel": {
     "message": "图片:"
   },
+  "OptionCaptureImageTooltip": {
+    "message": "此选项决定图片（IMG 元素）的处理方式。\n\n* 保存：将图片保存至本地。\n\n* 保存现用：将当前显示的图片保存至本地，忽略替代。这可以缩小容量，但在其他平台开启时可能因无法使用替代图片而影响呈现效果。\n\n* 链接：将图片元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将图片元素无效化。\n\n* 移除：将图片元素移除。注意这可能会影响网页排版。"
+  },
   "OptionCaptureNoscriptLabel": {
     "message": "NOSCRIPT 元素:"
   },
+  "OptionCaptureNoscriptTooltip": {
+    "message": "此选项决定 NOSCRIPT 元素的处理方式。此元素是用于在浏览器不支援或停用脚本时显示替代内容。\n\n* 保存：将 NOSCRIPT 元素按原貌保存。\n\n* 清空：将 NOSCRIPT 元素内容清空。\n\n* 移除：将 NOSCRIPT 元素移除。注意这可能会影响网页排版。"
+  },
   "OptionCaptureObjectLabel": {
     "message": "OBJECT 元素:"
+  },
+  "OptionCaptureObjectTooltip": {
+    "message": "此选项决定 OBJECT 元素的处理方式。OBJECT 元素通常用于嵌入多媒体或外挂程序。注意：此元素在离线环境下可能无法正常运作，且可能造成安全风险。\n\n* 保存：将 OBJECT 元素参照的文件保存至本地。\n\n* 链接：将 OBJECT 元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将 OBJECT 元素无效化。\n\n* 移除：将 OBJECT 元素移除。注意这可能会影响网页排版。"
   },
   "OptionCaptureRecordRewrittenAttrLabel": {
     "message": "记录改写的属性:"
@@ -304,20 +307,14 @@
   "OptionCaptureSaveAsFolderLabel": {
     "message": "文件夹"
   },
-  "OptionCaptureSaveAsFolderTooltip": {
-    "message": "产生一个文件夹并将网页及资源文件存入其中。（Chrome 建议关闭“下载前询问每个文件的保存位置”，否则会一直跳视窗）"
-  },
   "OptionCaptureSaveAsLabel": {
     "message": "保存获取数据为:"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "指定获取数据的保存方式。HTZ 及 MAFF 封存文件可用“检视封存网页”检视或以支援 ZIP 的程序解压缩后检视。"
+    "message": "指定保存网页及参照文件的格式。\n\n* 文件夹：建立一个文件夹并将网页及资源文件存入其中（一律视为勾选“将获取数据保存于剪贴簿中”）。Chromium 浏览器注意： 建议关闭“下载前询问每个文件的保存位置”，否则会跳出大量下载窗口。此外特定格式的文件会被内建筛选器自动封锁，用戶须个别选择“保留”才能下载。\n\n* HTZ 及 MAFF 封存文件：用 ZIP 算法将网页及资源文件打包，可用“检视封存网页”功能检视，或用支援 ZIP 的工具解压缩后检视。\n\n* 单一 HTML 文件：保存为一个 HTML 文件，资源文件以 data URL 嵌入，大部分浏览器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL  效能不佳且无法去重，网页重覆使用多媒体文件时，下载的文件可能会大幅膨胀。\n\n* 脚本化单一 HTML 文件：保存为一个 HTML 文件，资源文件保存于脚本并于开启时载入，相较于 data URL 可提升效能及缩小容量，但须使用较新且启用 JavaScript 的浏览器开启，例如 Chromium ≥ 20、Firefox ≥ 13、Edge > 0、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。"
   },
   "OptionCaptureSaveAsMaffLabel": {
     "message": "MAFF 封存文件"
-  },
-  "OptionCaptureSaveAsMaffTooltip": {
-    "message": "将网页及参照的资源以 ZIP 算法打包成 MAFF 封存文件。"
   },
   "OptionCaptureSaveAsSingleHtmlJsLabel": {
     "message": "脚本化单一 HTML 文件"
@@ -325,23 +322,14 @@
   "OptionCaptureSaveAsSingleHtmlLabel": {
     "message": "单一 HTML 文件"
   },
-  "OptionCaptureSaveAsSingleHtmlJsTooltip": {
-    "message": "将参照的资源保存於脚本并于开启时载入，相较于 data URL 可提升效能及缩小容量。须使用较新且启用 JavaScript 的浏览器读取，例如 Chrome ≥ 20、Firefox ≥ 13、Edge、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。注意：保存脚本时可能发生冲突。"
-  },
-  "OptionCaptureSaveAsSingleHtmlTooltip": {
-    "message": "将参照的资源以 data URL 内嵌。多数浏览器都能读取，例如 Chrome、Firefox、Edge、Safari、Opera ≥ 7.2、IE ≥ 8 (IE 限制很多)。注意：data URL 用于某些页面效能不佳且可能使文件大幅膨胀。"
-  },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ 封存文件"
-  },
-  "OptionCaptureSaveAsZipTooltip": {
-    "message": "将网页及参照资源以 ZIP 算法打包成 HTZ 封存文件。"
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
     "message": "将 data URL 保存为文件:"
   },
   "OptionCaptureSaveDataUriAsFileTooltip": {
-    "message": "会自动根据 data URL 数据的 MIME 类型及内容的 SHA-1 哈希值产生适当的文件名。"
+    "message": "会自动根据 data URL 数据的 MIME 类型及内容的 SHA-1 哈希值产生适当的文件名。原文件名会以特殊属性保存在 data URL 中。"
   },
   "OptionCaptureSaveFileAsHtmlLabel": {
     "message": "将文件保存为 HTML:"
@@ -353,31 +341,37 @@
     "message": "将获取数据保存于剪贴簿中:"
   },
   "OptionCaptureSaveInScrapbookTooltip": {
-    "message": "将获取的文件保存于 <下载文件夹>/<剪贴簿文件夹>/data/ 目录中。保存为文件夹时必定会保存于剪贴簿中。"
+    "message": "勾选时获取的文件会保存于 <默认下载文件夹>/<剪贴簿文件夹>/data/ 目录中，并以日期时间做为 ID 命名，以便将来建立索引。不勾选时文件会以网页标题命名，并保存至 <默认下载文件夹> 或由用戶指定保存路径，适合保存及分享单一网页。"
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "剪贴簿文件夹:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "勾选“将获取数据保存于剪贴簿中”时，获取的文件会保存于 <下载文件夹>/<剪贴簿文件夹>/data/ 目录中。如有需要，可建立符号链接指向其他文件夹。"
+    "message": "勾选“将获取数据保存于剪贴簿中”时，获取的文件会保存于 <默认下载文件夹>/<剪贴簿文件夹>/data/ 目录中。如有需要，可建立符号链接指向其他文件夹。"
   },
   "OptionCaptureScriptLabel": {
     "message": "脚本:"
   },
-  "OptionCaptureScriptLikeTooltip": {
-    "message": "这类物件在离线环境下或检视器中可能无法正常运作，且有潜在的安全风险。"
-  },
   "OptionCaptureScriptTooltip": {
-    "message": "决定所有页面脚本的处理，包括 SCRIPT 元素、javascript: 协定的链接、onclick 之类的动态属性等等。注意：保存的脚本在离线环境下或检视器中可能无法正常运作，且有潜在的安全风险。"
+    "message": "此选项决定所有网页脚本的处理，包括 SCRIPT 元素、javascript: 协定的链接、onclick 之类的动态属性等等。注意：脚本往往与环境相依，脱离原服务器环境及获取时对网页的某些改写都可能导致保存的脚本无法运作；此外基于安全性考量，脚本也无法在内建的封存网页检视器中执行。\n\n* 保存：将脚本保存至本地。\n\n* 链接：将脚本元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将脚本元素无效化。\n\n* 移除：将脚本元素移除。注意这可能会影响网页排版。"
   },
   "OptionCaptureStyleInlineLabel": {
     "message": "内联样式:"
   },
+  "OptionCaptureStyleInlineTooltip": {
+    "message": "此选项决定内联样式的处理方式。\n\n* 保存：保存内联样式。\n\n* 清空：将内联样式属性无效化。\n\n* 移除：将内联样式属性移除。"
+  },
   "OptionCaptureStyleLabel": {
     "message": "样式:"
   },
+  "OptionCaptureStyleTooltip": {
+    "message": "此选项决定外部样式表的处理方式。\n\n* 保存：将外部样式表保存至本地。\n\n* 链接：将外部样式表元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将外部样式表元素无效化。\n\n* 移除：将外部样式表元素移除。"
+  },
   "OptionCaptureVideoLabel": {
-    "message": "视讯:"
+    "message": "视频:"
+  },
+  "OptionCaptureVideoTooltip": {
+    "message": "此选项决定视频（VIDEO 元素）的处理方式。\n\n* 保存：将视频保存至本地。\n\n* 保存现用：将当前使用的视频保存至本地，忽略替代。这可以缩小容量，但在其他平台开启时可能因缺少替代视频而无法播放。\n\n* 链接：将视频元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将视频元素无效化。\n\n* 移除：将视频元素移除。注意这可能会影响网页排版。"
   },
   "OptionGroupCapture": {
     "message": "获取 - 内容"
@@ -452,7 +446,7 @@
     "message": "浏览器载入 MAFF 文件时，自动以检视器检视。在支援的浏览器勾选“允许訪問文件网址”即可用浏览器直接开启此类文件。"
   },
   "ViewerDesc": {
-    "message": "选择 HTZ 或 MAFF 封存文件以开启之。你可以拖放它们至此视窗，或使用以下按钮："
+    "message": "选择 HTZ 或 MAFF 封存文件以开启之。你可以拖放它们至此窗口，或使用以下按钮："
   },
   "ViewerPickFiles": {
     "message": "选择 ZIP 压缩文件"
@@ -461,7 +455,7 @@
     "message": "检视封存页面"
   },
   "WarnCaptureCircular": {
-    "message": "资源 '$SOURCE$' 循环参照至 '$TARGET$'，由于目前的获取设定不支援循环参照，参照目标将转向至空值。",
+    "message": "资源 '$SOURCE$' 循环参照至 '$TARGET$'，由于当前的获取设定不支援循环参照，参照目标将转向至空值。",
     "placeholders": {
       "source": {"content": "$1"},
       "target": {"content": "$2"}

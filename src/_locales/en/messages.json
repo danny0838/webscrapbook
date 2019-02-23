@@ -88,7 +88,7 @@
     "message": "WebScrapBook"
   },
   "IndexerDesc": {
-    "message": "Indexer only works when captured data are saved in the ScrapBook folder (default: <download folder>/<Scrapbook Folder>/data/). Move data to the folder if they are not there.\n\nAfter picking the ScrapBook folder, the indexing process will run, and a ZIP file is generated and becomes downloadable. Extract the contents to the original ScrapBook folder and open the generated ./tree/map.html or ./tree/frame.html to view the list of captured pages.\n\nFiles such as ./tree/meta.js and ./tree/toc.js, for metadata and table of contents (TOC) respectively, can be manually edited, as long as the data format is kept correct.\n\nAfter new pages are captured or metadata is edited, run this indexer repeatedly to add newly captured pages and to check for potential errors, and refresh ./tree/map.html or ./tree/frame.html to view the updated result.\n\nAdditional settings for the indexer can be configured in the options page."
+    "message": "Indexer only works when captured data are saved in the ScrapBook folder (default: <default download folder>/<Scrapbook Folder>/data/). Move data to the folder if they are not there.\n\nAfter picking the ScrapBook folder, the indexing process will run, and a ZIP file is generated and becomes downloadable. Extract the contents to the original ScrapBook folder and open the generated ./tree/map.html or ./tree/frame.html to view the list of captured pages.\n\nFiles such as ./tree/meta.js and ./tree/toc.js, for metadata and table of contents (TOC) respectively, can be manually edited, as long as the data format is kept correct.\n\nAfter new pages are captured or metadata is edited, run this indexer repeatedly to add newly captured pages and to check for potential errors, and refresh ./tree/map.html or ./tree/frame.html to view the updated result.\n\nAdditional settings for the indexer can be configured in the options page."
   },
   "IndexerHeader": {
     "message": "Pick directories or ZIP archive files of a WebScrapBook folder, via dropping them into this window, or using the buttons below:"
@@ -126,14 +126,17 @@
   "OptionCaptureAppletLabel": {
     "message": "APPLET:"
   },
+  "OptionCaptureAppletTooltip": {
+    "message": "Determines how APPLET elements, which are used to embed JAVA applets and are no more supported by most modern browsers, are handled. NOTE: These elements may not work in the offline environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the applet element.\n\n* Remove: Removes the applet element. Note that this could affect the web page layout."
+  },
   "OptionCaptureAudioLabel": {
     "message": "Audio:"
   },
+  "OptionCaptureAudioTooltip": {
+    "message": "Determines how audio elements are handled.\n\n* Save: Save the referenced audio resources to local.\n\n* Save current: Save the currently used audio resource to local and ignores alternatives. This reduces size but the audio may be unplayable due to lack of an alternative when browsing on another platform.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the audio element.\n\n* Remove: Removes the audio element. Note that this could affect the web page layout."
+  },
   "OptionCaptureCanvasBlankLabel": {
     "message": "Save initial status"
-  },
-  "OptionCaptureCanvasBlankTooltip": {
-    "message": "Save the initial blank canvas. This is recommended if scripts are saved."
   },
   "OptionCaptureCanvasLabel": {
     "message": "Canvases:"
@@ -141,23 +144,14 @@
   "OptionCaptureCanvasSaveLabel": {
     "message": "Save current status"
   },
-  "OptionCaptureCanvasSaveTooltip": {
-    "message": "Generate a initialization script that records the current canvas status and draw it when the saved web page is loaded. NOTE: This could introduce a conflict if scripts are saved."
-  },
   "OptionCaptureCanvasTooltip": {
-    "message": "Canvases are blank initially and drawn by web page scripts. \"Save current status\" can be used when scripts are not saved, and \"Save initial status\" is more recommended when scripts are saved."
+    "message": "Determines how canvas elements are handled. Canvases are blank initially and drawn by web page scripts.\n\n* Save current status: Generates a initialization script that records the current canvas status and draw it when the saved web page is loaded. Note that this could introduce a conflict if scripts are saved.\n\n* Save initial status: Saves a blank canvas. This is more recommanded when scripts are saved as they tend to draw the canvases on their own.\n\n* Remove: Removes the canvas element."
   },
   "OptionCaptureCommonBlankLabel": {
     "message": "Blank"
   },
-  "OptionCaptureCommonBlankTooltip": {
-    "message": "Keep the element but disable its link or content."
-  },
   "OptionCaptureCommonLinkLabel": {
     "message": "Link"
-  },
-  "OptionCaptureCommonLinkTooltip": {
-    "message": "Rewrite the referenced link to its source. Note that this will trigger a network flow when browsing the captured document in the future."
   },
   "OptionCaptureCommonSaveLabel": {
     "message": "Save"
@@ -165,20 +159,11 @@
   "OptionCaptureCommonSaveCurrentLabel": {
     "message": "Save current"
   },
-  "OptionCaptureCommonSaveCurrentTooltip": {
-    "message": "Save only the currently referenced resource to local. This reduces size but could break cross-platform compatibility and could cause a missing of required files if scripts are saved."
-  },
-  "OptionCaptureCommonSaveTooltip": {
-    "message": "Save the referenced resource to local."
-  },
   "OptionCaptureCommonSaveUsedLabel": {
     "message": "Save current [Experimental]"
   },
   "OptionCaptureCommonRemoveLabel": {
     "message": "Remove"
-  },
-  "OptionCaptureCommonRemoveTooltip": {
-    "message": "Remove the element. Note that this could affect the web page layout."
   },
   "OptionCaptureDownLinkFilterErrorLine": {
     "message": "Line $LINE$: $ERROR$",
@@ -202,11 +187,11 @@
   "OptionCaptureDownLinkModeHeaderLabel": {
     "message": "Match HTTP header and file extension"
   },
-  "OptionCaptureDownLinkModeHeaderTooltip": {
-    "message": "Visit every link to get the HTTP header and a precise file extension. NOTE: Inappropriate links (such as logging out a site) could be visited . Be sure to set an appropriate URL filter to avoid an unexpected result."
-  },
   "OptionCaptureDownLinkModeNoneLabel": {
     "message": "Disable download linked files"
+  },
+  "OptionCaptureDownLinkModeTooltip": {
+    "message": "Determines whether to download the target file of an A or AREA element.\n\n* Disable download linked files: Do not download the linked file.\n\n* Match URL file extension: Match the file extension from URL, which performs better but cannot detect dynamically generated files (e.g. when a .php page outputs a .doc file, the filter matches against php rather than doc).\n\n* Match HTTP header and file extension: Visit every link to get the HTTP header and the precise file extension (e.g. when a .php page outputs a .doc file, the filter matches against doc), but performs worse. NOTE: Certain sites are poorly designed and make certain essential commands plain hyperlink, which could cause inappropriate links (such as logging out a site) be visited, and the URL filter can be configured to avoid such unexpected result."
   },
   "OptionCaptureDownLinkModeUrlLabel": {
     "message": "Match URL file extension"
@@ -226,14 +211,20 @@
   "OptionCaptureEmbedLabel": {
     "message": "EMBED:"
   },
+  "OptionCaptureEmbedTooltip": {
+    "message": "Determines how embed elements, which are usually used to embed interactive applications or plugins. NOTE: These elements may not work in the offline environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the embed element.\n\n* Remove: Removes the embed element. Note that this could affect the web page layout."
+  },
   "OptionCaptureFaviconLabel": {
     "message": "Favicon:"
+  },
+  "OptionCaptureFaviconTooltip": {
+    "message": "Determines how favicons, which are shown in the tab, bookmarks or my favorites, are handled.\n\n* Save: Save the referenced favicon resources to local.\n\n* Link: Rewrite the favicon element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the favicon element.\n\n* Remove: Removes the favicon element."
   },
   "OptionCaptureFontLabel": {
     "message": "Fonts:"
   },
-  "OptionCaptureFontSaveUsedTooltip": {
-    "message": "Save only the fonts that is applied to the current web page. This reduces size but could cause a missing of required files if scripts are saved.\n\n* Due to the security restriction of same origin policy, this feature works only for stylesheets from the same domain currently."
+  "OptionCaptureFontTooltip": {
+    "message": "Determines how external fonts are handled.\n\n* Save: Save the referenced font resources to local.\n\n* Save current: Save only the fonts that are actually used by an element in the current web page. This reduces size. (Due to the security restriction of same origin policy, stylesheets from a different origin cannot be loaded and their external fonts cannot be saved.)\n\n* Link: Rewrite the stylesheet declaration to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clears the stylesheet declaration for an external font."
   },
   "OptionCaptureFormStatusLabel": {
     "message": "Form status:"
@@ -247,20 +238,32 @@
   "OptionCaptureFrameLabel": {
     "message": "Frames:"
   },
+  "OptionCaptureFrameTooltip": {
+    "message": "Determines how frames (FRAME and IFRAME elements) are handled.\n\n* Save: Save the frame pages to local.\n\n* Link: Rewrite frame elements to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the frame elements.\n\n* Remove: Removes the frame elements. Note that this could affect the web page layout."
+  },
   "OptionCaptureImageBackgroundLabel": {
     "message": "Background images:"
   },
-  "OptionCaptureImageBackgroundSaveUsedTooltip": {
-    "message": "Save only the background images that is applied to the current web page. This reduces size but could cause a missing of required files if scripts are saved.\n\n* Due to the security restriction of same origin policy, this feature works only for stylesheets from the same domain currently."
+  "OptionCaptureImageBackgroundTooltip": {
+    "message": "Determines how background images are handled.\n\n* Save: Save the referenced resources to local.\n\n* Save current: Save only the background images that are applied to an element in the current web page. This reduces size. (Due to the security restriction of same origin policy, stylesheets from a different origin cannot be loaded and their background images cannot be saved.)\n\n* Link: Rewrite the stylesheet declaration to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clear the stylesheet declaration of the background image."
   },
   "OptionCaptureImageLabel": {
     "message": "Images:"
   },
+  "OptionCaptureImageTooltip": {
+    "message": "Determines how images (IMG elements) are handled.\n\n* Save: Save the referenced image resources to local.\n\n* Save current: Save the currently used image resource to local and ignores alternatives. This reduces size but the image may not display well due to lack of an alternative when browsing on another platform.\n\n* Link: Rewrite the image element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the image element.\n\n* Remove: Removes the image element. Note that this could affect the web page layout."
+  },
   "OptionCaptureNoscriptLabel": {
     "message": "NOSCRIPT:"
   },
+  "OptionCaptureNoscriptTooltip": {
+    "message": "Determines how noscript elements, which are showed when the browser does not or has disabled support of scripts, are handled.\n\n* Save: Save the noscript element as-is.\n\n* Blank: Clears the noscript element.\n\n* Remove: Removes the noscript element. Note that this could affect the web page layout."
+  },
   "OptionCaptureObjectLabel": {
     "message": "OBJECT:"
+  },
+  "OptionCaptureObjectTooltip": {
+    "message": "Determines how object elements, which are usually used to include multimedia or plugins, are handled. NOTE: These elements may not work in the offline environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the object element.\n\n* Remove: Removes the object element. Note that this could affect the web page layout."
   },
   "OptionCaptureRecordRewrittenAttrLabel": {
     "message": "Record rewritten attributes:"
@@ -304,20 +307,14 @@
   "OptionCaptureSaveAsFolderLabel": {
     "message": "Folder"
   },
-  "OptionCaptureSaveAsFolderTooltip": {
-    "message": "Generate a folder and save the web page and resource files into it. (For Chrome, it's recommended that \"Ask where to save each file before downloading\" be unchecked to avoid tons of prompts.)"
-  },
   "OptionCaptureSaveAsLabel": {
     "message": "Save captured data as:"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "HTZ and MAFF files can be viewed via \"View archived page\" or via unzipping it."
+    "message": "Determines how the web page and referenced files are saved.\n\n* Folder: Generates a folder and save the web page and resource files into it (as if \"Save captured data in ScrapBook\" is checked). NOTE for Chromium: It's recommended that \"Ask where to save each file before downloading\" be unchecked to avoid tons of prompts. Additionally, several file formats would be blocked by a built-in filter, and the user has to select \"Keep\" one by one to download them.\n\n* HTZ or MAFF package: Packs web page and referenced resources in to a single file using ZIP algorithm. Such files can be viewed using the \"View archive page\" feature or by unzipping them.\n\n* Single HTML: Stores the referenced resource as data URL, which is supported by most browsers, such as Chromium > 0, Firefox > 0, Edge > 0, Safari > 0, Opera ≥ 7.2, and IE ≥ 8 (very limited in IE). NOTE: Data URLs are less performant and does not deduplicate, and thus a web page referencing a large resource for multiple times could lead to a bloat of file size.\n\n* Scripted single HTML: Stores referenced resources in the script and re-generate them on loading. This has better performance and reduced size compared with data URL, but requires a modern browser with JavaScript enabled, such as: Chromium ≥ 20, Firefox ≥ 13, Edge > 0, Safari ≥ 6, Opera ≥ 12.1, and IE ≥ 10."
   },
   "OptionCaptureSaveAsMaffLabel": {
     "message": "MAFF package"
-  },
-  "OptionCaptureSaveAsMaffTooltip": {
-    "message": "Web pages and their referenced resources are packed into a MAFF file using ZIP algorithm."
   },
   "OptionCaptureSaveAsSingleHtmlJsLabel": {
     "message": "Scripted single HTML"
@@ -325,23 +322,14 @@
   "OptionCaptureSaveAsSingleHtmlLabel": {
     "message": "Single HTML"
   },
-  "OptionCaptureSaveAsSingleHtmlJsTooltip": {
-    "message": "Referenced resources are stored in the script and re-generated on loading. This has a better performance and a reduced size compared with data URL, but requires a modern browser with JavaScript enabled, such as: Chrome ??20, Firefox ??13, Edge, Safari ??6, Opera ??12.1, and IE ??10. NOTE: This could introduce a conflict if scripts are saved."
-  },
-  "OptionCaptureSaveAsSingleHtmlTooltip": {
-    "message": "Referenced resources are stored as data URL, which is supported by most browsers, such as Chrome, Firefox, Edge, Safari, Opera ??7.2, and IE ??8 (very limited in IE). NOTE: For some web pages, data URL can cause a severe drop of performance and bloat of file size."
-  },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ package"
-  },
-  "OptionCaptureSaveAsZipTooltip": {
-    "message": "Web page and its referenced resources are packed into an HTZ file using ZIP algorithm."
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
     "message": "Save data URL as file:"
   },
   "OptionCaptureSaveDataUriAsFileTooltip": {
-    "message": "A filename will be auto-generated according to the MIME type and the SHA-1 hash of the content of the data URL."
+    "message": "A filename will be auto-generated according to the MIME type and the SHA-1 hash of the content of the data URL. The original filename will be stored in the data URL using a special attribute."
   },
   "OptionCaptureSaveFileAsHtmlLabel": {
     "message": "Save file as HTML:"
@@ -353,31 +341,37 @@
     "message": "Save captured data in ScrapBook:"
   },
   "OptionCaptureSaveInScrapbookTooltip": {
-    "message": "Captured files will be saved in <download folder>/<Scrapbook Folder>/data/ directory. Files are always saved in ScrapBook when saved as folder."
+    "message": "When checked, a captured web page will be saved in <default download folder>/<Scrapbook Folder>/data/ directory and be named using an ID made from the datetime for later indexing. When unchecked, the file is named after the web page title and is saved to the <default download folder> or a path specified by the user, and is more suitable for storing and sharing an indivisual web page."
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "Scrapbook Folder:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "Captured files will be saved in <download folder>/<Scrapbook Folder>/data/ directory when \"Save captured data in ScrapBook\" is checked. You can create a symbolic link targeting a desired directory if necessary."
+    "message": "Captured files will be saved in <default download folder>/<Scrapbook Folder>/data/ directory when \"Save captured data in ScrapBook\" is checked. You can create a symbolic link targeting a desired directory if necessary."
   },
   "OptionCaptureScriptLabel": {
     "message": "Scripts:"
   },
-  "OptionCaptureScriptLikeTooltip": {
-    "message": "Such saved objects may not work correctly in the offline context or in the viewer, and have a potential security risk."
-  },
   "OptionCaptureScriptTooltip": {
-    "message": "This determines how to handle all page scripts, including SCRIPT elements, links with javascript: protocol, and dynamic attributes such as onclick, etc. NOTE: Saved scripts may not work correctly in the offline context or in the viewer, and have a potential security risk."
+    "message": "Determines how all scripts— including SCRIPT elements, links with javascript: protocol, and dynamic attributes such as onclick, etc.— are handled.  NOTE: Scripts are sometimes context dependant, and thus the escaping of original server environment and/or certain rewrites of the web page during capturing could cause the saved scripts not to work. Additionally, scripts won't run in the built-in archive page viewer for security reasons.\n\n* Save: Save the referenced script resource to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the script element.\n\n* Remove: Removes the script element. Note that this could affect the web page layout."
   },
   "OptionCaptureStyleInlineLabel": {
     "message": "Inline styles:"
   },
+  "OptionCaptureStyleInlineTooltip": {
+    "message": "Determines how inline stylesheets are handled.\n\n* Save: Save inline stylesheets.\n\n* Blank: Clear the inline style attribute.\n\n* Remove: Removes the inline style attribute."
+  },
   "OptionCaptureStyleLabel": {
     "message": "Styles:"
   },
+  "OptionCaptureStyleTooltip": {
+    "message": "Determines how external stylesheets are handled.\n\n* Save: Save the referenced stylesheet resource to local.\n\n* Link: Rewrite the stylesheet element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the stylesheet element.\n\n* Remove: Removes the stylesheet element."
+  },
   "OptionCaptureVideoLabel": {
     "message": "Video:"
+  },
+  "OptionCaptureVideoTooltip": {
+    "message": "Determines how video elements are handled.\n\n* Save: Save the referenced video resource to local.\n\n* Save current: Save the currently used video resource to local and ignores alternatives. This reduces size but the video may be unplayable due to lack of an alternative when browsing on another platform.\n\n* Link: Rewrite the video element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the video element.\n\n* Remove: Removes the video element. Note that this could affect the web page layout."
   },
   "OptionGroupCapture": {
     "message": "Capture - content"

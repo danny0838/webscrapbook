@@ -88,7 +88,7 @@
     "message": "網頁剪貼簿"
   },
   "IndexerDesc": {
-    "message": "擷取資料必須儲存於剪貼簿中（預設為 <下載資料夾>/<剪貼簿資料夾>/data/ 根目錄），索引器才能運作，如果沒有則須手動搬移。\n\n指定剪貼簿資料夾後即會開始建立索引，完成後會產生一個 ZIP 壓縮檔供下載，將其內容解壓縮放入原剪貼簿資料夾，並開啟 ./tree/map.html 或 ./tree/frame.html，即可檢視產生的頁面列表。\n\n產生的資料檔案如 ./tree/meta.js 和 ./tree/toc.js，分別為各頁面的元資料及目錄表，可人工修改，只要保持資料格式正確即可。\n\n擷取新頁面或修改資料檔後可再次執行此索引器以加入新項目或檢查潛在錯誤，再重新整理 ./tree/map.html 或 ./tree/frame.html 檢視更新結果。\n\n索引器相關選項可到選項頁面設定。"
+    "message": "擷取資料必須儲存於剪貼簿中（<預設下載資料夾>/<剪貼簿資料夾>/data/ 根目錄），索引器才能運作，如果沒有則須手動搬移。\n\n指定剪貼簿資料夾後即會開始建立索引，完成後會產生一個 ZIP 壓縮檔供下載，將其內容解壓縮放入原剪貼簿資料夾，並開啟 ./tree/map.html 或 ./tree/frame.html，即可檢視產生的頁面列表。\n\n產生的資料檔案如 ./tree/meta.js 和 ./tree/toc.js，分別為各頁面的元資料及目錄表，可人工修改，只要保持資料格式正確即可。\n\n擷取新頁面或修改資料檔後可再次執行此索引器以加入新項目或檢查潛在錯誤，再重新整理 ./tree/map.html 或 ./tree/frame.html 檢視更新結果。\n\n索引器相關選項可到選項頁面設定。"
   },
   "IndexerHeader": {
     "message": "選擇網頁剪貼簿資料夾或其 ZIP 壓縮檔。你可以拖放它們至此視窗，或使用以下按鈕："
@@ -126,14 +126,17 @@
   "OptionCaptureAppletLabel": {
     "message": "APPLET 元素:"
   },
+  "OptionCaptureAppletTooltip": {
+    "message": "此選項決定 APPLET 元素的處理方式。APPLET 元素是用於嵌入 JAVA 程式，新瀏覽器大多已不再支援。注意：此元素在離線環境下可能無法正常運作，且可能造成安全風險。\n\n* 儲存：將 APPLET 元素參照的檔案儲存至本地。\n\n* 連結：將 APPLET 元素改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將 APPLET 元素無效化。\n\n* 移除：將 APPLET 元素移除。注意這可能會影響網頁排版。"
+  },
   "OptionCaptureAudioLabel": {
     "message": "音訊:"
   },
+  "OptionCaptureAudioTooltip": {
+    "message": "此選項決定音訊（AUDIO 元素）的處理方式。\n\n* 儲存：將音訊儲存至本地。\n\n* 儲存現用：將目前使用的音訊儲存至本地，忽略替代。這可以縮小容量，但在其他平台開啟時可能因缺少替代音訊而無法播放。\n\n* 連結：將音訊元素改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將音訊元素無效化。\n\n* 移除：將音訊元素移除。注意這可能會影響網頁排版。"
+  },
   "OptionCaptureCanvasBlankLabel": {
     "message": "儲存初始狀態"
-  },
-  "OptionCaptureCanvasBlankTooltip": {
-    "message": "儲存初始空白畫布。儲存腳本時建議使用此選項。"
   },
   "OptionCaptureCanvasLabel": {
     "message": "畫布:"
@@ -141,23 +144,14 @@
   "OptionCaptureCanvasSaveLabel": {
     "message": "儲存目前狀態"
   },
-  "OptionCaptureCanvasSaveTooltip": {
-    "message": "產生初始化腳本記錄目前畫布狀態並在網頁載入時重繪。注意：儲存腳本時可能發生衝突。"
-  },
   "OptionCaptureCanvasTooltip": {
-    "message": "畫布初始為空白狀態而後由網頁腳本動態繪製，不儲存腳本時可選擇「儲存目前狀態」，儲存腳本時則建議選擇「儲存初始狀態」以避免衝突。"
+    "message": "此選項決定畫布（CANVAS 元素）的處理方式。畫布初始為空白狀態而後由網頁腳本動態繪製。\n\n* 儲存目前狀態：產生初始化腳本並在網頁載入時重繪。注意儲存腳本時產生的腳本可能與之衝突。\n\n* 儲存原始狀態：儲存空白畫布。儲存腳本時建議使用此選項，因為腳本通常會自行繪製畫布。\n\n* 移除：將畫布元素移除。"
   },
   "OptionCaptureCommonBlankLabel": {
     "message": "清空"
   },
-  "OptionCaptureCommonBlankTooltip": {
-    "message": "將元素保留在原始位置，但將連結或內容無效化。"
-  },
   "OptionCaptureCommonLinkLabel": {
     "message": "連結"
-  },
-  "OptionCaptureCommonLinkTooltip": {
-    "message": "將參照的連結改寫為連往原始位址。注意這會導致日後瀏覽時持續觸發網路傳輸及消耗網路流量。"
   },
   "OptionCaptureCommonSaveLabel": {
     "message": "儲存"
@@ -165,20 +159,11 @@
   "OptionCaptureCommonSaveCurrentLabel": {
     "message": "儲存現用"
   },
-  "OptionCaptureCommonSaveCurrentTooltip": {
-    "message": "只將目前參照的資源儲存至本地。這可以縮小容量，但可能破壞跨平台相容性，且儲存腳本時可能導致所需檔案遺失。"
-  },
-  "OptionCaptureCommonSaveTooltip": {
-    "message": "將參照的資源儲存至本地。"
-  },
   "OptionCaptureCommonSaveUsedLabel": {
     "message": "儲存現用 [實驗中]"
   },
   "OptionCaptureCommonRemoveLabel": {
     "message": "移除"
-  },
-  "OptionCaptureCommonRemoveTooltip": {
-    "message": "將元素移除。注意這可能會影響網頁排版。"
   },
   "OptionCaptureDownLinkFilterErrorLine": {
     "message": "第 $LINE$ 行：$ERROR$",
@@ -202,11 +187,11 @@
   "OptionCaptureDownLinkModeHeaderLabel": {
     "message": "比對 HTTP 標頭及網址副檔名"
   },
-  "OptionCaptureDownLinkModeHeaderTooltip": {
-    "message": "走訪每個連結取得 HTTP 標頭及精確的副檔名。注意：可能會因此走訪到不適當的連結（例如登出網站），使用時應設定適當的網址過濾器以避免問題。"
-  },
   "OptionCaptureDownLinkModeNoneLabel": {
     "message": "停用下載連結檔案"
+  },
+  "OptionCaptureDownLinkModeTooltip": {
+    "message": "決定是否下載 A 或 AREA 元素連結的檔案。\n\n* 停用下載連結檔案：不下載連結的檔案。\n\n* 比對網址副檔名：比對網址的副檔名是否符合副檔名過濾器，效能較佳，但無法偵測動態網頁產生的檔案（例如 .php 頁面輸出 .doc 檔案時，副檔名過濾器會比對 php 而非 doc）。\n\n* 比對 HTTP 標頭及網址副檔名：走訪每個連結取得 HTTP 標頭及精確的副檔名（例如 .php 頁面輸出 .doc 檔案時，副檔名過濾器會比對 doc），但效能較差。注意：有些設計不良的網站會把關鍵指令做成超連結，這可能導致走訪到不適當的連結（例如登出網站），此時可設定網址過濾器防止走訪那些連結。"
   },
   "OptionCaptureDownLinkModeUrlLabel": {
     "message": "比對網址副檔名"
@@ -226,14 +211,20 @@
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
   },
+  "OptionCaptureEmbedTooltip": {
+    "message": "此選項決定 EMBED 元素的處理方式。EMBED 元素通常用於嵌入互動程式或外掛物件。注意：此元素在離線環境下可能無法正常運作，且可能造成安全風險。\n\n* 儲存：將 EMBED 元素參照的檔案儲存至本地。\n\n* 連結：將 EMBED 元素改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將 EMBED 元素無效化。\n\n* 移除：將 EMBED 元素移除。注意這可能會影響網頁排版。"
+  },
   "OptionCaptureFaviconLabel": {
-    "message": "Favicon:"
+    "message": "最愛圖示:"
+  },
+  "OptionCaptureFaviconTooltip": {
+    "message": "此選項決定最愛圖示的處理方式。最愛圖示（favicon）是網頁在分頁、書籤、我的最愛中呈現的代表圖示。\n\n* 儲存：將最愛圖示儲存至本地。\n\n* 連結：將最愛圖示改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將最愛圖示元素無效化。\n\n* 移除：將最愛圖示元素移除。"
   },
   "OptionCaptureFontLabel": {
     "message": "字體:"
   },
-  "OptionCaptureFontSaveUsedTooltip": {
-    "message": "只儲存套用於目前網頁的字體。這可以縮小容量，但儲存腳本時可能導致所需檔案遺失。\n\n* 由於同源政策的安全性限制，此功能目前只能正常運作於同網域的樣式表。"
+  "OptionCaptureFontTooltip": {
+    "message": "此選項決定外部字體的處理方式。\n\n* 儲存：將外部字體儲存至本地。\n\n* 儲存現用：只將網頁元素引用過的外部字體儲存至本地。這可以縮小容量。（由於同源政策的安全性限制，不同網域的樣式表無法載入，其中的外部字體皆無法儲存。）\n\n* 連結：將外部字體的樣式定義改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將外部字體的樣式定義清除。"
   },
   "OptionCaptureFormStatusLabel": {
     "message": "表單狀態:"
@@ -247,20 +238,32 @@
   "OptionCaptureFrameLabel": {
     "message": "框架頁:"
   },
+  "OptionCaptureFrameTooltip": {
+    "message": "此選項決定框架頁（FRAME 及 IFRAME 元素）的處理方式。\n\n* 儲存：將框架頁儲存至本地。\n\n* 連結：將框架頁元素改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將框架頁元素無效化。\n\n* 移除：將框架頁元素移除。注意這可能會影響網頁排版。"
+  },
   "OptionCaptureImageBackgroundLabel": {
     "message": "背景圖片:"
   },
-  "OptionCaptureImageBackgroundSaveUsedTooltip": {
-    "message": "只儲存套用於目前網頁的背景圖片。這可以縮小容量，但儲存腳本時可能導致所需檔案遺失。\n\n* 由於同源政策的安全性限制，此功能目前只能正常運作於同網域的樣式表。"
+  "OptionCaptureImageBackgroundTooltip": {
+    "message": "此選項決定背景圖片的處理方式。\n\n* 儲存：將背景圖片儲存至本地。\n\n* 儲存現用：只將網頁元素引用過的背景圖片儲存至本地。這可以縮小容量。（由於同源政策的安全性限制，不同網域的樣式表無法載入，其中的背景圖片皆無法儲存。）\n\n* 連結：將背景圖片改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將背景圖片的樣式定義清除。"
   },
   "OptionCaptureImageLabel": {
     "message": "圖片:"
   },
+  "OptionCaptureImageTooltip": {
+    "message": "此選項決定圖片（IMG 元素）的處理方式。\n\n* 儲存：將圖片儲存至本地。\n\n* 儲存現用：將目前顯示的圖片儲存至本地，忽略替代。這可以縮小容量，但在其他平台開啟時可能因無法使用替代圖片而影響呈現效果。\n\n* 連結：將圖片元素改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將圖片元素無效化。\n\n* 移除：將圖片元素移除。注意這可能會影響網頁排版。"
+  },
   "OptionCaptureNoscriptLabel": {
     "message": "NOSCRIPT 元素:"
   },
+  "OptionCaptureNoscriptTooltip": {
+    "message": "此選項決定 NOSCRIPT 元素的處理方式。此元素是用於在瀏覽器不支援或停用腳本時顯示替代內容。\n\n* 儲存：將 NOSCRIPT 元素按原貌儲存。\n\n* 清空：將 NOSCRIPT 元素內容清空。\n\n* 移除：將 NOSCRIPT 元素移除。注意這可能會影響網頁排版。"
+  },
   "OptionCaptureObjectLabel": {
     "message": "OBJECT 元素:"
+  },
+  "OptionCaptureObjectTooltip": {
+    "message": "此選項決定 OBJECT 元素的處理方式。OBJECT 元素通常用於嵌入多媒體或外掛程式。注意：此元素在離線環境下可能無法正常運作，且可能造成安全風險。\n\n* 儲存：將 OBJECT 元素參照的檔案儲存至本地。\n\n* 連結：將 OBJECT 元素改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將 OBJECT 元素無效化。\n\n* 移除：將 OBJECT 元素移除。注意這可能會影響網頁排版。"
   },
   "OptionCaptureRecordRewrittenAttrLabel": {
     "message": "記錄改寫的屬性:"
@@ -304,20 +307,14 @@
   "OptionCaptureSaveAsFolderLabel": {
     "message": "資料夾"
   },
-  "OptionCaptureSaveAsFolderTooltip": {
-    "message": "產生一個資料夾並將網頁及資源檔案存入其中。（Chrome 建議關閉「下載每個檔案前先詢問儲存位置」，否則會一直跳視窗）"
-  },
   "OptionCaptureSaveAsLabel": {
     "message": "儲存擷取資料為:"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "HTZ 及 MAFF 封存檔案可用「檢視封存網頁」檢視或以支援 ZIP 的程式解壓縮後檢視。"
+    "message": "指定儲存網頁及參照檔案的格式。\n\n* 資料夾：建立一個資料夾並將網頁及資源檔案存入其中（一律視為勾選「將擷取資料儲存於剪貼簿中」）。Chromium 瀏覽器注意： 建議關閉「下載每個檔案前先詢問儲存位置」，否則會跳出大量下載視窗。此外特定格式的檔案會被內建篩選器自動封鎖，使用者須個別選擇「保留」才能下載。\n\n* HTZ 及 MAFF 封存檔：用 ZIP 演算法將網頁及資源檔案打包，可用「檢視封存網頁」功能檢視，或用支援 ZIP 的工具解壓縮後檢視。\n\n* 單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案以 data URL 嵌入，大部分瀏覽器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL  效能不佳且無法去除重覆，網頁重覆使用多媒體檔案時，下載的檔案可能會大幅膨脹。\n\n* 腳本化單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案儲存於腳本並於開啟時載入，相較於 data URL 可提升效能及縮小容量，但須使用較新且啟用 JavaScript 的瀏覽器開啟，例如 Chromium ≥ 20、Firefox ≥ 13、Edge > 0、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。"
   },
   "OptionCaptureSaveAsMaffLabel": {
     "message": "MAFF 封存檔"
-  },
-  "OptionCaptureSaveAsMaffTooltip": {
-    "message": "將網頁及參照的資源以 ZIP 演算法打包成 MAFF 封存檔。"
   },
   "OptionCaptureSaveAsSingleHtmlJsLabel": {
     "message": "腳本化單一 HTML 檔案"
@@ -325,23 +322,14 @@
   "OptionCaptureSaveAsSingleHtmlLabel": {
     "message": "單一 HTML 檔案"
   },
-  "OptionCaptureSaveAsSingleHtmlJsTooltip": {
-    "message": "將參照的資源儲存於腳本並於開啟時載入，相較於 data URL 可提升效能及縮小容量。須使用較新且啟用 JavaScript 的瀏覽器讀取，例如 Chrome ≥ 20、Firefox ≥ 13、Edge、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。注意：儲存腳本時可能發生衝突。"
-  },
-  "OptionCaptureSaveAsSingleHtmlTooltip": {
-    "message": "將參照的資源以 data URL 內嵌。多數瀏覽器都能讀取，例如 Chrome、Firefox、Edge、Safari、Opera ≥ 7.2、以及 IE ≥ 8 (IE 限制很多)。注意：data URL 用於某些頁面效能不佳且可能使檔案大幅膨脹。"
-  },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ 封存檔"
-  },
-  "OptionCaptureSaveAsZipTooltip": {
-    "message": "將網頁及參照資源以 ZIP 演算法打包成 HTZ 封存檔。"
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
     "message": "將 data URL 儲存為檔案:"
   },
   "OptionCaptureSaveDataUriAsFileTooltip": {
-    "message": "會自動根據 data URL 資料的 MIME 類型及內容的 SHA-1 雜湊值產生適當的檔名。"
+    "message": "會自動根據 data URL 資料的 MIME 類型及內容的 SHA-1 雜湊值產生適當的檔名。原始檔名會以特殊屬性儲存在 data URL 中。"
   },
   "OptionCaptureSaveFileAsHtmlLabel": {
     "message": "將檔案儲存為 HTML:"
@@ -353,31 +341,37 @@
     "message": "將擷取資料儲存於剪貼簿中:"
   },
   "OptionCaptureSaveInScrapbookTooltip": {
-    "message": "將擷取的檔案儲存於 <下載資料夾>/<剪貼簿資料夾>/data/ 目錄中。儲存為資料夾時必定會儲存剪貼簿中。"
+    "message": "勾選時擷取的檔案會儲存於 <預設下載資料夾>/<剪貼簿資料夾>/data/ 目錄中，並以日期時間做為 ID 命名，以便將來建立索引。不勾選時檔案會以網頁標題命名，並儲存至 <預設下載資料夾> 或由使用者指定儲存路徑，適合儲存及分享單一網頁。"
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "剪貼簿資料夾:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "勾選「將擷取資料儲存於剪貼簿中」時，擷取的檔案會儲存於 <下載資料夾>/<剪貼簿資料夾>/data/ 目錄中。如有需要，可建立符號連結指向其他資料夾。"
+    "message": "勾選「將擷取資料儲存於剪貼簿中」時，擷取的檔案會儲存於 <預設下載資料夾>/<剪貼簿資料夾>/data/ 目錄中。如有需要，可建立符號連結指向其他資料夾。"
   },
   "OptionCaptureScriptLabel": {
     "message": "腳本:"
   },
-  "OptionCaptureScriptLikeTooltip": {
-    "message": "此類物件在離線環境下或檢視器中可能無法正常運作，且有潛在的安全風險。"
-  },
   "OptionCaptureScriptTooltip": {
-    "message": "決定所有網頁腳本的處理，包括 SCRIPT 元素、javascript: 協定的超連結、onclick 之類的動態屬性等等。注意：儲存的腳本在離線環境下或檢視器中可能無法正常運作，且有潛在的安全風險。"
+    "message": "此選項決定所有網頁腳本的處理，包括 SCRIPT 元素、javascript: 協定的超連結、onclick 之類的動態屬性等等。注意：腳本往往與環境相依，脫離原伺服器環境及擷取時對網頁的某些改寫都可能導致儲存的腳本無法運作；此外基於安全性考量，腳本也無法在內建的封存網頁檢視器中執行。\n\n* 儲存：將腳本儲存至本地。\n\n* 連結：將腳本元素改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將腳本元素無效化。\n\n* 移除：將腳本元素移除。注意這可能會影響網頁排版。"
   },
   "OptionCaptureStyleInlineLabel": {
     "message": "內聯樣式:"
   },
+  "OptionCaptureStyleInlineTooltip": {
+    "message": "此選項決定內聯樣式的處理方式。\n\n* 儲存：儲存內聯樣式。\n\n* 清空：將內聯樣式屬性無效化。\n\n* 移除：將內聯樣式屬性移除。"
+  },
   "OptionCaptureStyleLabel": {
     "message": "樣式:"
   },
+  "OptionCaptureStyleTooltip": {
+    "message": "此選項決定外部樣式表的處理方式。\n\n* 儲存：將外部樣式表儲存至本地。\n\n* 連結：將外部樣式表元素改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將外部樣式表元素無效化。\n\n* 移除：將外部樣式表元素移除。"
+  },
   "OptionCaptureVideoLabel": {
     "message": "視訊:"
+  },
+  "OptionCaptureVideoTooltip": {
+    "message": "此選項決定視訊（VIDEO 元素）的處理方式。\n\n* 儲存：將視訊儲存至本地。\n\n* 儲存現用：將目前使用的視訊儲存至本地，忽略替代。這可以縮小容量，但在其他平台開啟時可能因缺少替代視訊而無法播放。\n\n* 連結：將視訊元素改寫為連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將視訊元素無效化。\n\n* 移除：將視訊元素移除。注意這可能會影響網頁排版。"
   },
   "OptionGroupCapture": {
     "message": "擷取 - 內容"
