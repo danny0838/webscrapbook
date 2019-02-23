@@ -18,8 +18,6 @@ if (!chrome.browserAction) {
     const url = chrome.runtime.getURL("core/browserAction.html");
     chrome.tabs.create({url, active: true}, () => {});
   });
-} else if (chrome.browserAction.setBadgeBackgroundColor) {
-  chrome.browserAction.setBadgeBackgroundColor({color: [255, 51, 51, 204]});
 }
 
 /* context menus */
