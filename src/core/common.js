@@ -75,7 +75,7 @@ let scrapbook = {
       soup.add('apple').add('safari');
     }
 
-    if (manifest.applications && manifest.applications.gecko) {
+    if (manifest.browser_specific_settings && manifest.browser_specific_settings.gecko) {
       soup.add('gecko');
     }
 
