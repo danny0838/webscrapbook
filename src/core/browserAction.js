@@ -82,8 +82,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (targetTab) {
     // disable capture options if active tab is not a valid content page
-    const isAllowedFileSchemeAccess = await browser.extension.isAllowedFileSchemeAccess();
-    if (!scrapbook.isContentPage(targetTab.url, isAllowedFileSchemeAccess)) {
+    const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
+    if (!scrapbook.isContentPage(targetTab.url, allowFileAccess)) {
       document.getElementById("captureTab").disabled = true;
       document.getElementById("captureTabSource").disabled = true;
       document.getElementById("captureTabBookmark").disabled = true;

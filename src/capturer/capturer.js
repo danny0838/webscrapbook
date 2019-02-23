@@ -140,8 +140,9 @@ capturer.captureTab = async function (params) {
     capturer.log(`Capturing (document) ${source} ...`);
 
     const tasks = [];
+    const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
     (await browser.webNavigation.getAllFrames({tabId})).forEach(({frameId, url}) => {
-      if (!scrapbook.isContentPage(url)) { return; }
+      if (!scrapbook.isContentPage(url, allowFileAccess)) { return; }
 
       // Send a test message to check whether content script is loaded.
       // If no content script, we get an error saying connection cannot be established.

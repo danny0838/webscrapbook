@@ -18,8 +18,9 @@ capturer.getContentTabs = async function () {
   // scrapbook.getContentPagePattern() resolves to [] on Firefox Android 57
   // due to a bug of browser.tabs.query:
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1418737
+  const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
   const tabs = await browser.tabs.query({currentWindow: true, url: "<all_urls>"});
-  return tabs.filter((tab) => (scrapbook.isContentPage(tab.url)));
+  return tabs.filter((tab) => (scrapbook.isContentPage(tab.url, allowFileAccess)));
 };
 
 /**
