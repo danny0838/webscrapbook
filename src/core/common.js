@@ -1394,9 +1394,11 @@ scrapbook.httpStatusText = {
  *
  * @param {Object} params
  *     - {string} params.url
+ *     - {string} params.method
  *     - {string} params.responseType
  *     - {integer} params.timeout
  *     - {Array} params.requestHeaders
+ *     - {Object} params.formData
  *     - {function} params.onreadystatechange
  */
 scrapbook.xhr = async function (params = {}) {
@@ -1436,7 +1438,7 @@ scrapbook.xhr = async function (params = {}) {
     };
 
     xhr.responseType = params.responseType;
-    xhr.open("GET", params.url, true);
+    xhr.open(params.method || "GET", params.url, true);
 
     if (params.timeout) { xhr.timeout = params.timeout; }
 
@@ -1447,7 +1449,7 @@ scrapbook.xhr = async function (params = {}) {
       }
     }
 
-    xhr.send();
+    xhr.send(params.formData);
   });
 };
 
