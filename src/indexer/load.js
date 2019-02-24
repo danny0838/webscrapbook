@@ -2656,7 +2656,10 @@ const scrapbook = {
   },
 
   checkHttp(url) {
-    if (/^https?/.test(this.resolveUrl(url, location.href))) {
+    const targetUrl = this.resolveUrl(url, location.href);
+    const targetUrlObj = new URL(targetUrl);
+    if (['http:', 'https:'].indexOf(targetUrlObj.protocol) !== -1 &&
+        ['localhost', '127.0.0.1'].indexOf(targetUrlObj.hostname) === -1) {
       if (conf.allow_http === 0) {
         if (confirm("Loading search database from the web could produce large network flow. Continue?")) {
           conf.allow_http = 1;
