@@ -347,7 +347,7 @@
     "message": "剪貼簿資料夾:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "勾選「將擷取資料儲存於剪貼簿中」時，擷取的檔案會儲存於 <預設下載資料夾>/<剪貼簿資料夾>/data/ 目錄中。如有需要，可建立符號連結指向其他資料夾。"
+    "message": "指定儲存剪貼簿資料的頂層資料夾，為 <預設下載資料夾> 以下的路徑，例如「WebScrapBook」或「my/webscrapbook」。\n\n* 勾選「將擷取資料儲存於剪貼簿中」時，擷取的檔案會儲存於 <預設下載資料夾>/<剪貼簿資料夾>/data/ 目錄中。\n\n* 如有需要指定 <預設下載資料夾> 以外的資料夾，可在 <預設下載資料夾> 下建立軟連結（symblic 或 junction link）指向想要的資料夾，然後把此項設為該連結的路徑。"
   },
   "OptionCaptureScriptLabel": {
     "message": "腳本:"

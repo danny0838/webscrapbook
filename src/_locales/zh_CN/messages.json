@@ -347,7 +347,7 @@
     "message": "剪贴簿文件夹:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "勾选“将获取数据保存于剪贴簿中”时，获取的文件会保存于 <默认下载文件夹>/<剪贴簿文件夹>/data/ 目录中。如有需要，可建立符号链接指向其他文件夹。"
+    "message": "指定保存剪贴簿数据的顶层文件夹，为 <默认下载文件夹> 以下的路径，例如“WebScrapBook”或“my/webscrapbook”。\n\n* 勾选“将获取数据保存于剪贴簿中”时，获取的档案会保存于 <默认下载文件夹>/<剪贴簿文件夹>/data/ 目录中。\n\n* 如有需要指定 <默认下载文件夹> 以外的文件夹，可在 <默认下载文件夹> 下建立软链接（symblic 或 junction link）指向想要的文件夹，然后把此项设为该链接的路径。"
   },
   "OptionCaptureScriptLabel": {
     "message": "脚本:"

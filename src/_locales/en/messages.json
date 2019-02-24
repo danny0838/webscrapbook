@@ -344,10 +344,10 @@
     "message": "When checked, a captured web page will be saved in <default download folder>/<Scrapbook Folder>/data/ directory and be named using an ID made from the datetime for later indexing. When unchecked, the file is named after the web page title and is saved to the <default download folder> or a path specified by the user, and is more suitable for storing and sharing an indivisual web page."
   },
   "OptionCaptureScrapbookFolderLabel": {
-    "message": "Scrapbook Folder:"
+    "message": "ScrapBook Folder:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "Captured files will be saved in <default download folder>/<Scrapbook Folder>/data/ directory when \"Save captured data in ScrapBook\" is checked. You can create a symbolic link targeting a desired directory if necessary."
+    "message": "The top-level folder scrapbook data are saved in. This is a path under the <default download folder>, and can be \"WebScrapBook\", or \"my/webscrapbook\", etc.\n\n* Captured files are saved in <default download folder>/<ScrapBook Folder>/data/ directory when \"Save captured data in ScrapBook\" is checked.\n\n* To specify a folder beyond the <default download folder>, create a soft link (symbolic or junction) under <default download folder> and targets the desired folder, and set the this to be the path of the link."
   },
   "OptionCaptureScriptLabel": {
     "message": "Scripts:"
