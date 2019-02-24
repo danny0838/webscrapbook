@@ -266,25 +266,25 @@
     "message": "Determines how object elements, which are usually used to include multimedia or plugins, are handled. NOTE: These elements may not work in the offline environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the object element.\n\n* Remove: Removes the object element. Note that this could affect the web page layout."
   },
   "OptionCaptureRecordRewrittenAttrLabel": {
-    "message": "Record rewritten attributes:"
+    "message": "Record rewritten attributes"
   },
   "OptionCaptureRecordRewrittenAttrTooltip": {
     "message": "If an attribute is rewritten during the capture process, create a corresponding data-* attribute to record its original value."
   },
   "OptionCaptureRecordErrorUriLabel": {
-    "message": "Record error URL:"
+    "message": "Record error URL"
   },
   "OptionCaptureRecordErrorUriTooltip": {
     "message": "If connection to a URL failed during the capture process, record it as urn:scrapbook:*. If unchecked, link to the source address (which could still be unavailable and be an invalid connection)."
   },
   "OptionCaptureRecordRemovedNodeLabel": {
-    "message": "Record removed elements:"
+    "message": "Record removed elements"
   },
   "OptionCaptureRecordRemovedNodeTooltip": {
     "message": "If an element is removed during the capture process, create an HTML comment in place to record its original content."
   },
   "OptionCaptureRecordSourceUriLabel": {
-    "message": "Record source URL:"
+    "message": "Record source URL"
   },
   "OptionCaptureRecordSourceUriTooltip": {
     "message": "If a URL is rewritten during the capture process, create a data-* attribute or HTML comment to record its original address."
@@ -299,7 +299,7 @@
     "message": "Rewrite URL"
   },
   "OptionCaptureSaveAsciiFilenameLabel": {
-    "message": "Save ASCII filename:"
+    "message": "Save ASCII filename"
   },
   "OptionCaptureSaveAsciiFilenameTooltip": {
     "message": "The captured file will have non-ASCII chars in the filename encoded."
@@ -326,19 +326,19 @@
     "message": "HTZ package"
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
-    "message": "Save data URL as file:"
+    "message": "Save data URL as file"
   },
   "OptionCaptureSaveDataUriAsFileTooltip": {
     "message": "A filename will be auto-generated according to the MIME type and the SHA-1 hash of the content of the data URL. The original filename will be stored in the data URL using a special attribute."
   },
   "OptionCaptureSaveFileAsHtmlLabel": {
-    "message": "Save file as HTML:"
+    "message": "Save file as HTML"
   },
   "OptionCaptureSaveFileAsHtmlTooltip": {
     "message": "Save a browser-viewable non-HTML file as an HTML web page."
   },
   "OptionCaptureSaveInScrapbookLabel": {
-    "message": "Save captured data in ScrapBook:"
+    "message": "Save captured data in ScrapBook"
   },
   "OptionCaptureSaveInScrapbookTooltip": {
     "message": "When checked, a captured web page will be saved in <default download folder>/<Scrapbook Folder>/data/ directory and be named using an ID made from the datetime for later indexing. When unchecked, the file is named after the web page title and is saved to the <default download folder> or a path specified by the user, and is more suitable for storing and sharing an indivisual web page."
@@ -392,19 +392,19 @@
     "message": "Viewer"
   },
   "OptionIndexerAutoDownloadLabel": {
-    "message": "Auto download updated files:"
+    "message": "Auto download updated files"
   },
   "OptionIndexerAutoDownloadTooltip": {
     "message": "The input folder must be configured ScrapBook Folder, or the files could be incorrectly overwritten."
   },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
-    "message": "Cache frame content as main document content:"
+    "message": "Cache frame content as main document content"
   },
   "OptionIndexerFulltextCacheLabel": {
-    "message": "Update fulltext cache:"
+    "message": "Update fulltext cache"
   },
   "OptionIndexerServerScripts": {
-    "message": "Generate server scripts [Experimental]:"
+    "message": "Generate server scripts [Experimental]"
   },
   "OptionIndexerServerScriptsTooltip": {
     "message": "The server scripts can host a local server to serve the site contents and to provide a better browsing experience, especially when data are saved as archive formats. Requires Python 3.5+ be installed on the system."
@@ -428,19 +428,19 @@
     "message": "Reset"
   },
   "OptionViewerUseFileSystemApiLabel": {
-    "message": "Use Filesystem API:"
+    "message": "Use Filesystem API"
   },
   "OptionViewerUseFileSystemApiTooltip": {
     "message": "Use filesystem API to create a virtual filesystem and view the archive file when supported, to get a better performance and fidelity."
   },
   "OptionViewerViewHtzLabel": {
-    "message": "View HTZ file:"
+    "message": "View HTZ file"
   },
   "OptionViewerViewHtzTooltip": {
     "message": "When the browser loads an HTZ file, view it with the viewer. Check \"Allow access to file URLs\" in a supported browser to enable opening such files directly."
   },
   "OptionViewerViewMaffLabel": {
-    "message": "View MAFF file:"
+    "message": "View MAFF file"
   },
   "OptionViewerViewMaffTooltip": {
     "message": "When the browser loads a MAFF file, view it with the viewer. Check \"Allow access to file URLs\" in a supported browser to enable opening such files directly."

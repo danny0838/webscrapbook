@@ -266,25 +266,25 @@
     "message": "此选项决定 OBJECT 元素的处理方式。OBJECT 元素通常用于嵌入多媒体或外挂程序。注意：此元素在离线环境下可能无法正常运作，且可能造成安全风险。\n\n* 保存：将 OBJECT 元素参照的文件保存至本地。\n\n* 链接：将 OBJECT 元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将 OBJECT 元素无效化。\n\n* 移除：将 OBJECT 元素移除。注意这可能会影响网页排版。"
   },
   "OptionCaptureRecordRewrittenAttrLabel": {
-    "message": "记录改写的属性:"
+    "message": "记录改写的属性"
   },
   "OptionCaptureRecordRewrittenAttrTooltip": {
     "message": "获取网页时若有改写元素的属性，则建立对应的 data-* 属性记录原始值。"
   },
   "OptionCaptureRecordErrorUriLabel": {
-    "message": "记录错误的 URL:"
+    "message": "记录错误的 URL"
   },
   "OptionCaptureRecordErrorUriTooltip": {
     "message": "获取网页时若有 URL 无法顺利连上，会以 urn:scrapbook:* 的形式记录。若不勾选则会链接至原始位址（可能仍无法连上而导致无效连线）。"
   },
   "OptionCaptureRecordRemovedNodeLabel": {
-    "message": "记录移除的元素:"
+    "message": "记录移除的元素"
   },
   "OptionCaptureRecordRemovedNodeTooltip": {
     "message": "获取网页时若有移除元素，则在原位置建立 HTML 注解记录原始内容。"
   },
   "OptionCaptureRecordSourceUriLabel": {
-    "message": "记录原始的 URL:"
+    "message": "记录原始的 URL"
   },
   "OptionCaptureRecordSourceUriTooltip": {
     "message": "获取网页时若有改写链接，则建立 data-* 属性或 HTML 注解记录原始 URL 位址。"
@@ -299,7 +299,7 @@
     "message": "改写 URL"
   },
   "OptionCaptureSaveAsciiFilenameLabel": {
-    "message": "保存为 ASCII 文件名:"
+    "message": "保存为 ASCII 文件名"
   },
   "OptionCaptureSaveAsciiFilenameTooltip": {
     "message": "文件名中所有非 ASCII 字元会以编码形式保存。"
@@ -326,19 +326,19 @@
     "message": "HTZ 封存文件"
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
-    "message": "将 data URL 保存为文件:"
+    "message": "将 data URL 保存为文件"
   },
   "OptionCaptureSaveDataUriAsFileTooltip": {
     "message": "会自动根据 data URL 数据的 MIME 类型及内容的 SHA-1 哈希值产生适当的文件名。原文件名会以特殊属性保存在 data URL 中。"
   },
   "OptionCaptureSaveFileAsHtmlLabel": {
-    "message": "将文件保存为 HTML:"
+    "message": "将文件保存为 HTML"
   },
   "OptionCaptureSaveFileAsHtmlTooltip": {
     "message": "将浏览器能检视的非 HTML 文件保存为 HTML 网页。"
   },
   "OptionCaptureSaveInScrapbookLabel": {
-    "message": "将获取数据保存于剪贴簿中:"
+    "message": "将获取数据保存于剪贴簿中"
   },
   "OptionCaptureSaveInScrapbookTooltip": {
     "message": "勾选时获取的文件会保存于 <默认下载文件夹>/<剪贴簿文件夹>/data/ 目录中，并以日期时间做为 ID 命名，以便将来建立索引。不勾选时文件会以网页标题命名，并保存至 <默认下载文件夹> 或由用戶指定保存路径，适合保存及分享单一网页。"
@@ -392,19 +392,19 @@
     "message": "检视器"
   },
   "OptionIndexerAutoDownloadLabel": {
-    "message": "自动下载更新的索引文件:"
+    "message": "自动下载更新的索引文件"
   },
   "OptionIndexerAutoDownloadTooltip": {
     "message": "输入做站台索引的文件夹必须是设定的剪贴簿文件夹，否则可能造成错误覆盖及数据丟失。"
   },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
-    "message": "将框架页内容缓存为主页内容:"
+    "message": "将框架页内容缓存为主页内容"
   },
   "OptionIndexerFulltextCacheLabel": {
-    "message": "更新全文搜索缓存:"
+    "message": "更新全文搜索缓存"
   },
   "OptionIndexerServerScripts": {
-    "message": "产生服务器脚本 [实验中]:"
+    "message": "产生服务器脚本 [实验中]"
   },
   "OptionIndexerServerScriptsTooltip": {
     "message": "服务器脚本可架设临时服务器供本地存取站台，以提供更好的浏览体验，尤其当数据以封存格式保存时。系统需安装 Python 3.5+ 才能运作。"
@@ -428,19 +428,19 @@
     "message": "重设"
   },
   "OptionViewerUseFileSystemApiLabel": {
-    "message": "使用 Filesystem API:"
+    "message": "使用 Filesystem API"
   },
   "OptionViewerUseFileSystemApiTooltip": {
     "message": "在支援的浏览器上使用 filesystem API 建立虚拟文件系统检视封存文件，有较佳的效能及保真性。"
   },
   "OptionViewerViewHtzLabel": {
-    "message": "检视 HTZ 文件:"
+    "message": "检视 HTZ 文件"
   },
   "OptionViewerViewHtzTooltip": {
     "message": "浏览器载入 HTZ 文件时，自动以检视器检视。在支援的浏览器勾选“允许訪問文件网址”即可用浏览器直接开启此类文件。"
   },
   "OptionViewerViewMaffLabel": {
-    "message": "检视 MAFF:"
+    "message": "检视 MAFF"
   },
   "OptionViewerViewMaffTooltip": {
     "message": "浏览器载入 MAFF 文件时，自动以检视器检视。在支援的浏览器勾选“允许訪問文件网址”即可用浏览器直接开启此类文件。"
