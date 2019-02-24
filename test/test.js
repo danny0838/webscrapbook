@@ -2534,6 +2534,42 @@ async function test_capture_css_circular2() {
 body { color: red; }`);
 }
 
+// when CSS file is cross origin, the script cannot get CSS rules,
+// we fallback to capture all bg images and fonts
+async function test_capture_css_cross_origin() {
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.font": "save-used",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_cross_origin/cross_origin.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['yellow.bmp']);
+  assert(zip.files['sansation_light.woff']);
+  assert(zip.files['red.bmp']);
+  assert(zip.files['sansation_bold.woff']);
+
+  // same origin: only used bg images and fonts are saved
+  var cssFile = zip.file('style.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#bg { background: url("yellow.bmp"); }
+#neverused { background: url(""); }
+
+@font-face { font-family: bgFont1; src: url("sansation_light.woff"); }
+@font-face { font-family: neverusedFont1; src: url(""); }`);
+
+  // same origin: all bg images and fonts are saved
+  var cssFile = zip.file('style2.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#bg2 { background: url("red.bmp"); }
+#neverused2 { background: url("neverused.bmp"); }
+
+@font-face { font-family: bgFont2; src: url("sansation_bold.woff"); }
+@font-face { font-family: neverusedFont2; src: url("neverused.woff"); }`);
+}
+
 // Check if option works
 //
 // capture.image
@@ -5904,6 +5940,7 @@ async function runTests() {
   await test(test_capture_css_rewrite4);
   await test(test_capture_css_circular);
   await test(test_capture_css_circular2);
+  await test(test_capture_css_cross_origin);
   await test(test_capture_image);
   await test(test_capture_imageBackground);
   await test(test_capture_imageBackgroundUsed);

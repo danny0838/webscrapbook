@@ -224,7 +224,7 @@
     "message": "Fonts:"
   },
   "OptionCaptureFontTooltip": {
-    "message": "Determines how external fonts are handled.\n\n* Save: Save the referenced font resources to local.\n\n* Save current: Save only the fonts that are actually used by an element in the current web page. This reduces size. (Due to the security restriction of same origin policy, stylesheets from a different origin cannot be loaded and their external fonts cannot be saved.)\n\n* Link: Rewrite the stylesheet declaration to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clears the stylesheet declaration for an external font."
+    "message": "Determines how external fonts are handled.\n\n* Save: Save the referenced font resources to local.\n\n* Save current: Save only the fonts that are actually used by an element in the current web page. This reduces size. (Due to the security restriction of same origin policy, stylesheets from a different origin cannot be analysed and their external fonts will be all saved as a fallback.)\n\n* Link: Rewrite the stylesheet declaration to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clears the stylesheet declaration for an external font."
   },
   "OptionCaptureFormStatusLabel": {
     "message": "Form status:"
@@ -245,7 +245,7 @@
     "message": "Background images:"
   },
   "OptionCaptureImageBackgroundTooltip": {
-    "message": "Determines how background images are handled.\n\n* Save: Save the referenced resources to local.\n\n* Save current: Save only the background images that are applied to an element in the current web page. This reduces size. (Due to the security restriction of same origin policy, stylesheets from a different origin cannot be loaded and their background images cannot be saved.)\n\n* Link: Rewrite the stylesheet declaration to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clear the stylesheet declaration of the background image."
+    "message": "Determines how background images are handled.\n\n* Save: Save the referenced resources to local.\n\n* Save current: Save only the background images that are applied to an element in the current web page. This reduces size. (Due to the security restriction of same origin policy, stylesheets from a different origin cannot be analysed and their background images will be all saved as a fallback.)\n\n* Link: Rewrite the stylesheet declaration to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clear the stylesheet declaration of the background image."
   },
   "OptionCaptureImageLabel": {
     "message": "Images:"

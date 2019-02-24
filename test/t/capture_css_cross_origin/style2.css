@@ -1,0 +1,5 @@
+#bg2 { background: url("red.bmp"); }
+#neverused2 { background: url("neverused.bmp"); }
+
+@font-face { font-family: bgFont2; src: url("sansation_bold.woff"); }
+@font-face { font-family: neverusedFont2; src: url("neverused.woff"); }
