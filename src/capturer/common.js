@@ -800,20 +800,28 @@ capturer.captureDocument = async function (params) {
         }
 
         case "meta": {
-          // force UTF-8
+          // spaced attribute e.g. http-equiv=" refresh " doesn't take effect
           if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content")) {
             if (elem.getAttribute("http-equiv").toLowerCase() == "content-type") {
+              // force UTF-8
               metaCharsetNode = elem;
               captureRewriteAttr(elem, "content", "text/html; charset=UTF-8");
             } else if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
+              // rewrite meta refresh
               const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
               if (metaRefresh.url) {
                 // meta refresh is relative to document URL rather than base URL
                 const url = rewriteLocalLink(metaRefresh.url, docUrl, docUrl);
                 elem.setAttribute("content", metaRefresh.time + (url ? ";url=" + url : ""));
               }
+            } else if (elem.getAttribute("http-equiv").toLowerCase() == "content-security-policy") {
+              // content security policy could make resources not loaded when viewed offline
+              if (options["capture.removeIntegrity"]) {
+                captureRewriteAttr(elem, "http-equiv", null);
+              }
             }
           } else if (elem.hasAttribute("charset")) {
+            // force UTF-8
             metaCharsetNode = elem;
             captureRewriteAttr(elem, "charset", "UTF-8");
           } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
@@ -1975,9 +1983,10 @@ capturer.captureDocument = async function (params) {
       // handle integrity and crossorigin
       // We have to remove integrity check because we could modify the content
       // and they might not work correctly in the offline environment.
-      if ( options["capture.removeIntegrity"] ) {
+      if (options["capture.removeIntegrity"]) {
         captureRewriteAttr(elem, "integrity", null);
         captureRewriteAttr(elem, "crossorigin", null);
+        captureRewriteAttr(elem, "nonce", null); // this is meaningless as CSP is removed
       }
     }, this);
 

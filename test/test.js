@@ -4754,6 +4754,22 @@ async function test_capture_integrity() {
   assert(!script.hasAttribute('integrity'));
   assert(!script.hasAttribute('crossorigin'));
 
+  var blob = await capture({
+    url: `${localhost}/capture_integrity/nonce.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var meta = doc.querySelectorAll('meta')[1];
+  assert(!meta.hasAttribute('http-equiv'));
+  var link = doc.querySelector('link');
+  assert(!link.hasAttribute('nonce'));
+  var script = doc.querySelector('script');
+  assert(!script.hasAttribute('nonce'));
+
   /* -capture.removeIntegrity */
   var options = {
     "capture.removeIntegrity": false,
@@ -4773,6 +4789,22 @@ async function test_capture_integrity() {
   var script = doc.querySelector('script');
   assert(script.hasAttribute('integrity'));
   assert(script.hasAttribute('crossorigin'));
+
+  var blob = await capture({
+    url: `${localhost}/capture_integrity/nonce.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var meta = doc.querySelectorAll('meta')[1];
+  assert(meta.hasAttribute('http-equiv'));
+  var link = doc.querySelector('link');
+  assert(link.hasAttribute('nonce'));
+  var script = doc.querySelector('script');
+  assert(script.hasAttribute('nonce'));
 }
 
 // Check if option works
