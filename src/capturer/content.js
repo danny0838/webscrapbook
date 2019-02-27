@@ -11,20 +11,20 @@
 
 window.addEventListener("message", (event) => {
   const message = event.data;
-  if (message.extension !== chrome.runtime.id) { return; }
+  if (message.extension !== browser.runtime.id) { return; }
   isDebug && console.debug(message.cmd, "frame window receive", message.args);
 
   if (message.cmd.slice(0, 9) == "capturer.") {
     let fn = capturer[message.cmd.slice(9)];
     if (fn) {
       event.ports[0].postMessage({
-        extension: chrome.runtime.id,
+        extension: browser.runtime.id,
         uid: message.uid,
         cmd: message.cmd + ".start"
       });
       fn(message.args).then((response) => {
         event.ports[0].postMessage({
-          extension: chrome.runtime.id,
+          extension: browser.runtime.id,
           uid: message.uid,
           cmd: message.cmd + ".complete",
           response,
@@ -34,7 +34,7 @@ window.addEventListener("message", (event) => {
   }
 }, false);
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   isDebug && console.debug(message.cmd, "receive", message.args);
 
   if (message.cmd.slice(0, 9) == "capturer.") {

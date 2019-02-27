@@ -16,7 +16,7 @@ let scrapbook = {
    */
   get userAgent() {
     const ua = navigator.userAgent;
-    const manifest = chrome.runtime.getManifest();
+    const manifest = browser.runtime.getManifest();
 
     const soup = new Set(['webext']);
     const flavor = {
@@ -30,7 +30,7 @@ let scrapbook = {
     };
 
     // Whether this is a dev build.
-    if (/^\d+\.\d+\.\d+\D/.test(chrome.runtime.getManifest().version)) {
+    if (/^\d+\.\d+\.\d+\D/.test(browser.runtime.getManifest().version)) {
       soup.add('devbuild');
     }
 
@@ -137,13 +137,13 @@ scrapbook.options = {
 scrapbook.isOptionsSynced = false;
 
 /**
- * - Firefox < 52: chrome.storage.sync === undefined
+ * - Firefox < 52: browser.storage.sync === undefined
  *
  * - Firefox 52: webextensions.storage.sync.enabled is default to false,
- *   and chrome.storage.sync.*() gets an error.
+ *   and browser.storage.sync.*() gets an error.
  *
  * - Firefox >= 53: webextensions.storage.sync.enabled is default to true,
- *   and chrome.storage.sync.*() works.
+ *   and browser.storage.sync.*() works.
  *
  * An error would occur if the user manually sets 
  * webextensions.storage.sync.enabled to false without restarting Firefox.
@@ -438,7 +438,7 @@ scrapbook.cache = {
  *******************************************************************/
 
 scrapbook.lang = function (key, args) {
-  return chrome.i18n.getMessage(key, args) || "__MSG_" + key + "__";
+  return browser.i18n.getMessage(key, args) || "__MSG_" + key + "__";
 };
 
 scrapbook.loadLanguages = function (rootNode) {
@@ -489,7 +489,7 @@ scrapbook.validateFilename = function (filename, forceAscii) {
       .replace(/[:"?*\\/|]/g, "_")
       // bad chars on Windows, replace with adequate direction
       .replace(/[<]/g, "(").replace(/[>]/g, ")")
-      // "~" is not allowed by chrome.downloads
+      // "~" is not allowed by browser.downloads
       .replace(/[~]/g, "-");
   if (forceAscii) {
     fn = fn.replace(/[^\x00-\x7F]+/g, m => encodeURIComponent(m));

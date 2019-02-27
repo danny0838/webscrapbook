@@ -1201,24 +1201,24 @@ const indexer = {
 
     /* resource files */
     const resToInclude = {
-      'tree/icon/toggle.png': chrome.runtime.getURL("resources/toggle.png"),
-      'tree/icon/search.png': chrome.runtime.getURL("resources/search.png"),
-      'tree/icon/collapse.png': chrome.runtime.getURL("resources/collapse.png"),
-      'tree/icon/expand.png': chrome.runtime.getURL("resources/expand.png"),
-      'tree/icon/external.png': chrome.runtime.getURL("resources/external.png"),
-      'tree/icon/item.png': chrome.runtime.getURL("resources/item.png"),
-      'tree/icon/fclose.png': chrome.runtime.getURL("resources/fclose.png"),
-      'tree/icon/fopen.png': chrome.runtime.getURL("resources/fopen.png"),
-      'tree/icon/note.png': chrome.runtime.getURL("resources/note.png"),  // ScrapBook X notex
-      'tree/icon/postit.png': chrome.runtime.getURL("resources/postit.png"),  // ScrapBook X note
+      'tree/icon/toggle.png': browser.runtime.getURL("resources/toggle.png"),
+      'tree/icon/search.png': browser.runtime.getURL("resources/search.png"),
+      'tree/icon/collapse.png': browser.runtime.getURL("resources/collapse.png"),
+      'tree/icon/expand.png': browser.runtime.getURL("resources/expand.png"),
+      'tree/icon/external.png': browser.runtime.getURL("resources/external.png"),
+      'tree/icon/item.png': browser.runtime.getURL("resources/item.png"),
+      'tree/icon/fclose.png': browser.runtime.getURL("resources/fclose.png"),
+      'tree/icon/fopen.png': browser.runtime.getURL("resources/fopen.png"),
+      'tree/icon/note.png': browser.runtime.getURL("resources/note.png"),  // ScrapBook X notex
+      'tree/icon/postit.png': browser.runtime.getURL("resources/postit.png"),  // ScrapBook X note
     };
 
     /* server scripts */
     if (this.options["indexer.serverScripts"]) {
-      resToInclude["server.py"] = chrome.runtime.getURL("resources/server.py");
+      resToInclude["server.py"] = browser.runtime.getURL("resources/server.py");
 
       if (!otherFiles["config.ini"]) {
-        resToInclude["config.ini"] = chrome.runtime.getURL("resources/config.ini");
+        resToInclude["config.ini"] = browser.runtime.getURL("resources/config.ini");
       }
     }
 
@@ -3244,7 +3244,7 @@ Supported browsers: Chromium ≥ 49, Firefox ≥ 41, Edge ≥ 14, Safari ≥ 8, 
   },
 };
 
-chrome.downloads.onChanged.addListener(async (downloadDelta) => {
+browser.downloads.onChanged.addListener(async (downloadDelta) => {
   const downloadId = downloadDelta.id;
   if (!indexer.autoEraseSet.has(downloadId)) { return; }
 

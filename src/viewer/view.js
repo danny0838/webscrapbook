@@ -8,7 +8,7 @@
 const urlObj = new URL(document.URL);
 
 const viewerData = {
-  virtualBase: chrome.runtime.getURL("viewer/!/"),
+  virtualBase: browser.runtime.getURL("viewer/!/"),
   zipId: urlObj.searchParams.get('id'),
   dir: urlObj.searchParams.get('d'),
   indexFile: urlObj.searchParams.get('p'),

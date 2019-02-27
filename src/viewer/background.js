@@ -25,7 +25,7 @@ function redirectUrl(tabId, type, url, filename, mime) {
     return; // no redirect
   }
 
-  let newUrl = new URL(chrome.runtime.getURL("viewer/load.html"));
+  let newUrl = new URL(browser.runtime.getURL("viewer/load.html"));
   newUrl.hash = url.hash;
   url.hash = "";
   newUrl.search = "?src=" + encodeURIComponent(url.href);
@@ -39,7 +39,7 @@ function redirectUrl(tabId, type, url, filename, mime) {
     // Using data URI with meta or javascript refresh works but generates
     // an extra history entry.
     if (scrapbook.userAgent.major < 56) {
-      chrome.tabs.update(tabId, {url: newUrl});
+      browser.tabs.update(tabId, {url: newUrl});
       return {cancel: true};
     }
   } else { // sub_frame
@@ -58,7 +58,7 @@ function redirectUrl(tabId, type, url, filename, mime) {
 <meta charset="UTF-8">
 <style>
 a {
-  background: ${scrapbook.lang('@@bidi_start_edge')}/1em url("${scrapbook.escapeHtml(chrome.runtime.getURL("core/scrapbook_128.png"))}") no-repeat;
+  background: ${scrapbook.lang('@@bidi_start_edge')}/1em url("${scrapbook.escapeHtml(browser.runtime.getURL("core/scrapbook_128.png"))}") no-repeat;
   padding-${scrapbook.lang('@@bidi_start_edge')}: 1em;
 }
 </style>
@@ -76,17 +76,17 @@ a {
   return {redirectUrl: newUrl};
 }
 
-chrome.extension.isAllowedFileSchemeAccess((isAllowedAccess) => {
-  if (!isAllowedAccess) { return; }
+browser.extension.isAllowedFileSchemeAccess().then((allowFileAccess) => {
+  if (!allowFileAccess) { return; }
 
   // This event won't fire when visiting a file URL if
   // isAllowedFileSchemeAccess is false
-  chrome.webRequest.onBeforeRequest.addListener(function (details) {
+  browser.webRequest.onBeforeRequest.addListener(function (details) {
     return redirectUrl(details.tabId, details.type, new URL(details.url), null, "application/octet-stream");
   }, {urls: ["file://*"], types: ["main_frame", "sub_frame"]}, ["blocking"]);
 });
 
-chrome.webRequest.onHeadersReceived.addListener(function (details) {
+browser.webRequest.onHeadersReceived.addListener(function (details) {
   const headers = details.responseHeaders;
   let mime;
   let filename;
@@ -116,7 +116,7 @@ chrome.webRequest.onHeadersReceived.addListener(function (details) {
   const usedIds = new Set();
   tabs.forEach((tab) => {
     const u = new URL(tab.url);
-    if (u.href.startsWith(chrome.runtime.getURL("viewer/view.html") + '?')) {
+    if (u.href.startsWith(browser.runtime.getURL("viewer/view.html") + '?')) {
       const id = u.searchParams.get('id');
       if (id) { usedIds.add(id); }
     }

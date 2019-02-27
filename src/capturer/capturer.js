@@ -1499,7 +1499,7 @@ capturer.saveBlobInMemory = async function (params) {
   const {blob} = params;
 
   // In Firefox < 56 and Chromium,
-  // Blob cannot be stored in chrome.storage,
+  // Blob cannot be stored in browser.storage,
   // fallback to byte string.
   const text = await scrapbook.readFileAsText(blob, false);
   return {
@@ -1565,20 +1565,15 @@ capturer.saveUrl = async function (params) {
   }
 
   isDebug && console.debug("download start", downloadParams);
+  const downloadId = await browser.downloads.download(downloadParams);
+  isDebug && console.debug("download response", downloadId);
   return await new Promise((resolve, reject) => {
-    chrome.downloads.download(downloadParams, (downloadId) => {
-      isDebug && console.debug("download response", downloadId);
-      if (downloadId) {
-        capturer.downloadInfo.set(downloadId, {
-          timeId,
-          src: sourceUrl,
-          autoErase,
-          onComplete: resolve,
-          onError: reject,
-        });
-      } else {
-        reject(chrome.runtime.lastError);
-      }
+    capturer.downloadInfo.set(downloadId, {
+      timeId,
+      src: sourceUrl,
+      autoErase,
+      onComplete: resolve,
+      onError: reject,
     });
   });
 };
@@ -1588,7 +1583,7 @@ capturer.saveUrl = async function (params) {
  * Events handling
  */
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   try {
     if (message.args.settings.missionId !== capturer.missionId) {
       return;
@@ -1614,7 +1609,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-chrome.downloads.onCreated.addListener((downloadItem) => {
+browser.downloads.onCreated.addListener((downloadItem) => {
   isDebug && console.debug("downloads.onCreated", downloadItem);
 
   const downloadInfo = capturer.downloadInfo;
@@ -1637,7 +1632,7 @@ chrome.downloads.onCreated.addListener((downloadItem) => {
   downloadInfo.delete(url);
 });
 
-chrome.downloads.onChanged.addListener(async (downloadDelta) => {
+browser.downloads.onChanged.addListener(async (downloadDelta) => {
   isDebug && console.debug("downloads.onChanged", downloadDelta);
 
   const downloadId = downloadDelta.id, downloadInfo = capturer.downloadInfo;
@@ -1755,7 +1750,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   if (!isDebug && autoClose) {
     await scrapbook.delay(1000);
-    if (chrome.windows) {
+    if (browser.windows) {
       const win = await browser.windows.getCurrent();
       return browser.windows.remove(win.id);
     } else {

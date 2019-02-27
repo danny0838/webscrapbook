@@ -5,36 +5,36 @@
  *******************************************************************/
 
 /* browser action button and fallback */
-if (!chrome.browserAction) {
+if (!browser.browserAction) {
   // Firefox Android < 55: no browserAction
   // Fallback to pageAction.
   // Firefox Android ignores the tabId parameter and
   // shows the pageAction for all tabs
-  chrome.pageAction.show(0);
-} else if (!chrome.browserAction.getPopup) {
+  browser.pageAction.show(0);
+} else if (!browser.browserAction.getPopup) {
   // Firefox Android >= 55: only browserAction onClick
   // Open the browserAction page
-  chrome.browserAction.onClicked.addListener((tab) => {
-    const url = chrome.runtime.getURL("core/browserAction.html");
-    chrome.tabs.create({url, active: true}, () => {});
+  browser.browserAction.onClicked.addListener((tab) => {
+    const url = browser.runtime.getURL("core/browserAction.html");
+    browser.tabs.create({url, active: true}, () => {});
   });
 }
 
 /* context menus */
-if (chrome.contextMenus) {
+if (browser.contextMenus) {
   initContextMenu();
 }
 
-if (chrome.history) {
-  chrome.history.onVisited.addListener((result) => {
+if (browser.history) {
+  browser.history.onVisited.addListener((result) => {
     // suppress extension pages from generating a history entry
-    if (result.url.startsWith(chrome.runtime.getURL(""))) {
-      chrome.history.deleteUrl({url: result.url});
+    if (result.url.startsWith(browser.runtime.getURL(""))) {
+      browser.history.deleteUrl({url: result.url});
     }
   });
 }
 
-chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
+browser.webRequest.onBeforeSendHeaders.addListener((details) => {
   // Some headers (e.g. "referer") are not allowed to be set via
   // XMLHttpRequest.setRequestHeader directly.  Use a prefix and
   // modify it here to workaround.
@@ -46,9 +46,9 @@ chrome.webRequest.onBeforeSendHeaders.addListener((details) => {
   return {requestHeaders: details.requestHeaders};
 }, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, ["blocking", "requestHeaders"]);
 
-if (chrome.runtime.onConnectExternal) {
+if (browser.runtime.onConnectExternal) {
   // Available in Firefox >= 54.
-  chrome.runtime.onConnectExternal.addListener((port) => {
+  browser.runtime.onConnectExternal.addListener((port) => {
     port.onMessage.addListener(async (message, port) => {
       try {
         const {cmd, args} = message;
@@ -56,7 +56,7 @@ if (chrome.runtime.onConnectExternal) {
         switch (cmd) {
           case "getBaseUrl": {
             result = {
-              url: chrome.runtime.getURL(""),
+              url: browser.runtime.getURL(""),
             };
             break;
           }
@@ -85,7 +85,7 @@ async function initContextMenu() {
   const urlMatch = await scrapbook.getContentPagePattern();
 
   try {
-    chrome.contextMenus.create({
+    browser.contextMenus.create({
       title: scrapbook.lang("CaptureTab"),
       contexts: ["tab"],
       documentUrlPatterns: urlMatch,
@@ -93,7 +93,7 @@ async function initContextMenu() {
         return capturer.invokeCapture({target: tab.id});
       }
     });
-    chrome.contextMenus.create({
+    browser.contextMenus.create({
       title: scrapbook.lang("CaptureTabSource"),
       contexts: ["tab"],
       documentUrlPatterns: urlMatch,
@@ -101,7 +101,7 @@ async function initContextMenu() {
         return capturer.invokeCapture({target: tab.id, mode: "source"});
       }
     });
-    chrome.contextMenus.create({
+    browser.contextMenus.create({
       title: scrapbook.lang("CaptureTabBookmark"),
       contexts: ["tab"],
       documentUrlPatterns: urlMatch,
@@ -113,7 +113,7 @@ async function initContextMenu() {
     // Available only in Firefox >= 53. Otherwise ignore the error.
   }
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     title: scrapbook.lang("CapturePage"),
     contexts: ["page"],
     documentUrlPatterns: urlMatch,
@@ -122,7 +122,7 @@ async function initContextMenu() {
     }
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     title: scrapbook.lang("CapturePageSource"),
     contexts: ["page"],
     documentUrlPatterns: urlMatch,
@@ -131,7 +131,7 @@ async function initContextMenu() {
     }
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     title: scrapbook.lang("CapturePageBookmark"),
     contexts: ["page"],
     documentUrlPatterns: urlMatch,
@@ -140,7 +140,7 @@ async function initContextMenu() {
     }
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     title: scrapbook.lang("CaptureFrame"),
     contexts: ["frame"],
     documentUrlPatterns: urlMatch,
@@ -149,7 +149,7 @@ async function initContextMenu() {
     }
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     title: scrapbook.lang("CaptureFrameSource"),
     contexts: ["frame"],
     documentUrlPatterns: urlMatch,
@@ -158,7 +158,7 @@ async function initContextMenu() {
     }
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     title: scrapbook.lang("CaptureFrameBookmark"),
     contexts: ["frame"],
     documentUrlPatterns: urlMatch,
@@ -167,7 +167,7 @@ async function initContextMenu() {
     }
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     title: scrapbook.lang("CaptureSelection"),
     contexts: ["selection"],
     documentUrlPatterns: urlMatch,
@@ -176,7 +176,7 @@ async function initContextMenu() {
     }
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     title: scrapbook.lang("CaptureLinkSource"),
     contexts: ["link"],
     targetUrlPatterns: urlMatch,
@@ -185,7 +185,7 @@ async function initContextMenu() {
     }
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     title: scrapbook.lang("CaptureLinkBookmark"),
     contexts: ["link"],
     targetUrlPatterns: urlMatch,
@@ -194,7 +194,7 @@ async function initContextMenu() {
     }
   });
 
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     title: scrapbook.lang("CaptureMedia"),
     contexts: ["image", "audio", "video"],
     targetUrlPatterns: urlMatch,

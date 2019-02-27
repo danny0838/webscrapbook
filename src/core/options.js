@@ -144,7 +144,7 @@ async function closeWindow() {
   if (!tab) {
     // options.html is a prompt diaglog
     window.close();
-  } else if (tab.url.startsWith(chrome.runtime.getURL(""))) {
+  } else if (tab.url.startsWith(browser.runtime.getURL(""))) {
     // options.html is in a tab (or Firefox Android)
     // close the tab
     return await browser.tabs.remove(tab.id);
@@ -164,7 +164,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
   // event handlers
   document.getElementById("opt_capture.scrapbookFolder").addEventListener("change", (event) => {
     const elem = event.target;
-    // make sure it's a valid path for chrome.downloads.download
+    // make sure it's a valid path for browser.downloads.download
     elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
   });
 

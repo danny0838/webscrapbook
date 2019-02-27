@@ -4,9 +4,9 @@
 
 (async function (window, undefined) {
   let scripts = [
-    chrome.runtime.getURL('lib/browser-polyfill.js'),
-    chrome.runtime.getURL('core/common.js'),
-    chrome.runtime.getURL('viewer/view.js'),
+    browser.runtime.getURL('lib/browser-polyfill.js'),
+    browser.runtime.getURL('core/common.js'),
+    browser.runtime.getURL('viewer/view.js'),
   ];
 
   const parseContentSecurityPolicy = function (policy) {
@@ -25,7 +25,7 @@
     }, {});
   };
 
-  const csp = parseContentSecurityPolicy(chrome.runtime.getManifest()['content_security_policy'] || '');
+  const csp = parseContentSecurityPolicy(browser.runtime.getManifest()['content_security_policy'] || '');
 
   if (csp['script-src'] && csp['script-src'].includes('blob:')) {
     // if script-src blob: is allowed in CSP

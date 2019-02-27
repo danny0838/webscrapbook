@@ -52,10 +52,10 @@ capturer.invoke = async function (method, args, details = {}) {
       }, 1000);
 
       isDebug && console.debug(cmd, "send to frame", args);
-      frameWindow.postMessage({extension: chrome.runtime.id, uid, cmd, args}, "*", [channel.port2]);
+      frameWindow.postMessage({extension: browser.runtime.id, uid, cmd, args}, "*", [channel.port2]);
       channel.port1.onmessage = (event) => {
         const message = event.data;
-        if (message.extension !== chrome.runtime.id) { return; }
+        if (message.extension !== browser.runtime.id) { return; }
         if (message.uid !== uid) { return; }
         if (message.cmd === cmd + ".start") {
           clearTimeout(timeout);

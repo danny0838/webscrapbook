@@ -370,7 +370,7 @@ const viewer = {
 
         let data;
         // In Firefox < 56 and Chromium,
-        // Blob cannot be stored in chrome.storage,
+        // Blob cannot be stored in browser.storage,
         // fallback to byte string.
         if (scrapbook.cache.current === 'storage' &&
             !viewer.filesystem &&
@@ -431,7 +431,7 @@ const viewer = {
         }
       } else {
         /* In-memory view */
-        const url = new URL(chrome.runtime.getURL("viewer/view.html"));
+        const url = new URL(browser.runtime.getURL("viewer/view.html"));
         const s = url.searchParams;
         s.set("id", uuid);
         url.hash = viewer.urlHash;

@@ -31,13 +31,13 @@ capturer.getContentTabs = async function () {
 capturer.invokeCapture = async function (params) {
   const {target, url, mode, full} = params;
 
-  const urlObj = new URL(chrome.runtime.getURL("capturer/capturer.html"));
+  const urlObj = new URL(browser.runtime.getURL("capturer/capturer.html"));
   if (target) { urlObj.searchParams.set('t', target); }
   if (url) { urlObj.searchParams.set('u', url); }
   if (mode) { urlObj.searchParams.set('m', mode); }
   if (!!full) { urlObj.searchParams.set('f', 1); }
 
-  if (chrome.windows) {
+  if (browser.windows) {
     const win = await browser.windows.getCurrent();
     return await browser.windows.create({
       url: urlObj.href,

@@ -9,7 +9,7 @@
 
 scrapbook.loadOptionsAuto = scrapbook.loadOptions();
 
-chrome.storage.onChanged.addListener((changes, areaName) => {
+browser.storage.onChanged.addListener((changes, areaName) => {
   // Config keys are stored in storage.sync and fallbacks to storage.local;
   // cache keys are stored in storage.local and are valid JSON format.
   // We only update when a config key is changed.
