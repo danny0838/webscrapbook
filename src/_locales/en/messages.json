@@ -133,7 +133,7 @@
     "message": "Audio:"
   },
   "OptionCaptureAudioTooltip": {
-    "message": "Determines how audio elements are handled.\n\n* Save: Save the referenced audio resources to local.\n\n* Save current: Save the currently used audio resource to local and ignores alternatives. This reduces size but the audio may be unplayable due to lack of an alternative when browsing on another platform.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the audio element.\n\n* Remove: Removes the audio element. Note that this could affect the web page layout."
+    "message": "Determines how audio elements are handled.\n\n* Save: Save the referenced audio resources to local.\n\n* Save current: An audio element may provide multiple audio versions, one of which is selected by the browser according to supportability. This saves only the currently used audio version to local, which reduces size but the audio may be unplayable on another platform that does not support the version.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the audio element.\n\n* Remove: Removes the audio element. Note that this could affect the web page layout."
   },
   "OptionCaptureCanvasBlankLabel": {
     "message": "Save initial status"
@@ -179,7 +179,7 @@
     }
   },
   "OptionCaptureDownLinkExtFilterDesc": {
-    "message": "Download files whose full extension matches any of following rules. Each following line is a regular expression (/<rule>/<flags>) or a list of extensions separated with \",\" (case-insensitively). Lines starting with \"#\" are ignored."
+    "message": "Determines what to download according to file extension.\n\n* Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. jpg, jpeg) or a regular expression (e.g. /jpe?g/i).\n\n* The full extension is taken for matching. For example, .doc does not match rule docx.\n\n* Whichever matches a rule at any line are included for download.\n\n* A line starting with \"#\" is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkExtFilterTitle": {
     "message": "File extension filter"
@@ -191,13 +191,13 @@
     "message": "Disable download linked files"
   },
   "OptionCaptureDownLinkModeTooltip": {
-    "message": "Determines whether to download the target file of an A or AREA element.\n\n* Disable download linked files: Do not download the linked file.\n\n* Match URL file extension: Match the file extension from URL, which performs better but cannot detect dynamically generated files (e.g. when a .php page outputs a .doc file, the filter matches against php rather than doc).\n\n* Match HTTP header and file extension: Visit every link to get the HTTP header and the precise file extension (e.g. when a .php page outputs a .doc file, the filter matches against doc), but performs worse. NOTE: Certain sites are poorly designed and make certain essential commands plain hyperlink, which could cause inappropriate links (such as logging out a site) be visited, and the URL filter can be configured to avoid such unexpected result."
+    "message": "Determines whether and how to download the targeted resource of a link (an A or AREA element).\n\n* Disable download linked files: Do not download the linked resource.\n\n* Match URL file extension: Match the file extension of the URL. This performs better but cannot differenciate dynamically generated resource. For example, a URL whose extension is .php can output a resource of html, doc, pdf, or other type, but the filter always gets \"php\" in this mode.\n\n* Match HTTP header and file extension: Traverse every link to get the HTTP header and the precise extension of the output resource for matching. NOTE: Certain sites make interactive commands as plain hyperlink, which could be unexpectedly triggered during traversal (such as logging out the site). The URL filter can be configured to avoid such trigering."
   },
   "OptionCaptureDownLinkModeUrlLabel": {
     "message": "Match URL file extension"
   },
   "OptionCaptureDownLinkUrlFilterDesc": {
-    "message": "Any URL (with the \"#\" part stripped) that matches any of the following rules is excluded. Each following line is a regular expression (/<rule>/<flags>) or a full URL (\"#\" part will be stripped). Lines starting with \"#\" are ignored."
+    "message": "Determines what are forbidden for downloading according to full URL (with the \"#\" part stripped).\n\n* Each following line is a full URL (with \"#\" part stripped) or a regular expression (e.g. /[/=]logout\\b/i). \n\n* Whichever matches a rule at any line are forbidden from downloading.\n\n* A line starting with \"#\" is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "The following regular expressions in URL filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
@@ -251,7 +251,7 @@
     "message": "Images:"
   },
   "OptionCaptureImageTooltip": {
-    "message": "Determines how images (IMG elements) are handled.\n\n* Save: Save the referenced image resources to local.\n\n* Save current: Save the currently used image resource to local and ignores alternatives. This reduces size but the image may not display well due to lack of an alternative when browsing on another platform.\n\n* Link: Rewrite the image element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the image element.\n\n* Remove: Removes the image element. Note that this could affect the web page layout."
+    "message": "Determines how images (IMG or PICTURE elements) are handled.\n\n* Save: Save the referenced image resources to local.\n\n* Save current: An image element could contain multiple versions, one of which is selected by the browser according to viewport size and/or screen resolution. This saves only the currently used image version to local, which reduces size but the display effect on another platform might be suboptimal. If the captured page is not displayed (such as capturing source), all versions are still saved.\n\n* Link: Rewrite the image element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the image element.\n\n* Remove: Removes the image element. Note that this could affect the web page layout."
   },
   "OptionCaptureNoscriptLabel": {
     "message": "NOSCRIPT:"
@@ -371,7 +371,7 @@
     "message": "Video:"
   },
   "OptionCaptureVideoTooltip": {
-    "message": "Determines how video elements are handled.\n\n* Save: Save the referenced video resource to local.\n\n* Save current: Save the currently used video resource to local and ignores alternatives. This reduces size but the video may be unplayable due to lack of an alternative when browsing on another platform.\n\n* Link: Rewrite the video element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the video element.\n\n* Remove: Removes the video element. Note that this could affect the web page layout."
+    "message": "Determines how video elements are handled.\n\n* Save: Save the referenced video resource to local.\n\n* Save current: A video element may provide multiple video versions, one of which is selected by the browser according to supportability. This saves only the currently used video version to local, which reduces size but the video may be unplayable on another platform that does not support the version.\n\n* Link: Rewrite the video element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the video element.\n\n* Remove: Removes the video element. Note that this could affect the web page layout."
   },
   "OptionGroupCapture": {
     "message": "Capture - content"
