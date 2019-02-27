@@ -1976,9 +1976,9 @@ body {
 
 #header {
   margin-bottom: .75em;
-  border: 1px solid ThreeDShadow;
+  border: 1px solid #A0A0A0;
   padding: .125em .5em;
-  background-color: InfoBackground;
+  background-color: #FFFFE1;
 }
 
 #header > a {
