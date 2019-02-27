@@ -7,7 +7,7 @@
  * @require {Object} capturer
  *******************************************************************/
 
-((window, document, browser, chrome) => {
+((window, document, browser) => {
 
 window.addEventListener("message", (event) => {
   const message = event.data;
@@ -40,12 +40,9 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.cmd.slice(0, 9) == "capturer.") {
     let fn = capturer[message.cmd.slice(9)];
     if (fn) {
-      fn(message.args).then((response) => {
-        sendResponse(response);
-      });
-      return true; // async response
+      sendResponse(fn(message.args));
     }
   }
 });
 
-})(this, this.document, this.browser, this.chrome);
+})(this, this.document, this.browser);

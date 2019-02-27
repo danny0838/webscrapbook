@@ -8,7 +8,7 @@
  * @public  {boolean} capturer.isContentScript
  *******************************************************************/
 
-((window, document, browser, chrome) => {
+((window, document, browser) => {
 
 // overwrite the value of common.js to define this is not a content script
 capturer.isContentScript = false;
@@ -1598,13 +1598,10 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.cmd.slice(0, 9) == "capturer.") {
     const fn = capturer[message.cmd.slice(9)];
     if (fn) {
-      fn(message.args).then((response) => {
-        sendResponse(response);
-      }).catch((ex) => {
+      sendResponse(fn(message.args).catch((ex) => {
         const err = `Unexpected error: ${ex.message}`;
         capturer.error(err);
-      });
-      return true; // async response
+      }));
     }
   }
 });
@@ -1760,4 +1757,4 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 });
 
-})(this, this.document, this.browser, this.chrome);
+})(this, this.document, this.browser);

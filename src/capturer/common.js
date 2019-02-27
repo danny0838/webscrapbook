@@ -7,7 +7,7 @@
  * @public {Object} capturer
  *******************************************************************/
 
-((window, document, browser, chrome) => {
+((window, document, browser) => {
 
 const capturer = {
   isContentScript: true,
@@ -2333,4 +2333,4 @@ capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
 
 window.capturer = capturer;
 
-})(this, this.document, this.browser, this.chrome);
+})(this, this.document, this.browser);

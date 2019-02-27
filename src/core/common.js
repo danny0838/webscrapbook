@@ -8,7 +8,7 @@
  * @public {Object} scrapbook
  *******************************************************************/
 
-((window, document, browser, chrome) => {
+((window, document, browser) => {
 
 let scrapbook = {
   /**
@@ -1566,4 +1566,4 @@ scrapbook.getMaffIndexFiles = async function (zipObj) {
 window.isDebug = false;
 window.scrapbook = scrapbook;
 
-})(this, this.document, this.browser, this.chrome);
+})(this, this.document, this.browser);

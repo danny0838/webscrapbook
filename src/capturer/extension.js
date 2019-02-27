@@ -7,7 +7,7 @@
  * @public {Object} capturer
  *******************************************************************/
 
-((window, document, browser, chrome) => {
+((window, document, browser) => {
 
 const capturer = {};
 
@@ -55,4 +55,4 @@ capturer.invokeCapture = async function (params) {
 
 window.capturer = capturer;
 
-})(this, this.document, this.browser, this.chrome);
+})(this, this.document, this.browser);
