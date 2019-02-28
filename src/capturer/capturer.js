@@ -1745,7 +1745,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     autoClose = false;
   }
 
-  if (!isDebug && autoClose) {
+  if (!isDebug && autoClose && scrapbook.getOption("capture.autoCloseDialog")) {
     await scrapbook.delay(1000);
     if (browser.windows) {
       const win = await browser.windows.getCurrent();

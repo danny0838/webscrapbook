@@ -98,6 +98,7 @@ scrapbook.options = {
   "capture.saveBeyondSelection": false,
   "capture.saveFileAsHtml": false,
   "capture.saveDataUriAsFile": true,
+  "capture.autoCloseDialog": true,
   "capture.image": "save", // "save", "save-current", "link", "blank", "remove"
   "capture.imageBackground": "save", // "save", "save-used", "link", "blank"
   "capture.favicon": "save", // "save", "link", "blank", "remove"

@@ -135,6 +135,9 @@
   "OptionCaptureAudioTooltip": {
     "message": "Determines how audio elements are handled.\n\n* Save: Save the referenced audio resources to local.\n\n* Save current: An audio element may provide multiple audio versions, one of which is selected by the browser according to supportability. This saves only the currently used audio version to local, which reduces size but the audio may be unplayable on another platform that does not support the version.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the audio element.\n\n* Remove: Removes the audio element. Note that this could affect the web page layout."
   },
+  "OptionCaptureAutoCloseDialogLabel": {
+    "message": "Auto-close dialog when capture succeeded"
+  },
   "OptionCaptureCanvasBlankLabel": {
     "message": "Save initial status"
   },
