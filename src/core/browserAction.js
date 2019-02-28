@@ -52,13 +52,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   };
 
-  const visitLink = function (url, target = null) {
-    const a = visitLink.anchor = visitLink.anchor || document.createElement('a');
-    a.href = url;
-    if (target) { a.target = target; }
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+  const visitLink = async function (url, newTab) {
+    if (!newTab) {
+      return await browser.tabs.update({url});
+    } else {
+      return await browser.tabs.create({url});
+    }
   };
 
   const {isPrompt, activeTab, targetTab} = await (async () => {
@@ -140,15 +139,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     return await capturer.invokeCapture({target});
   });
 
-  document.getElementById("openViewer").addEventListener('click', (event) => {
-    visitLink(browser.runtime.getURL("viewer/load.html"), (targetTab ? '_blank' : ''));
+  document.getElementById("openViewer").addEventListener('click', async (event) => {
+    await visitLink(browser.runtime.getURL("viewer/load.html"), !!targetTab);
   });
 
-  document.getElementById("openIndexer").addEventListener('click', (event) => {
-    visitLink(browser.runtime.getURL("indexer/load.html"), (targetTab ? '_blank' : ''));
+  document.getElementById("openIndexer").addEventListener('click', async (event) => {
+    await visitLink(browser.runtime.getURL("indexer/load.html"), !!targetTab);
   });
 
-  document.getElementById("openOptions").addEventListener('click', (event) => {
-    visitLink(browser.runtime.getURL("core/options.html"), (targetTab ? '_blank' : ''));
+  document.getElementById("openOptions").addEventListener('click', async (event) => {
+    await visitLink(browser.runtime.getURL("core/options.html"), !!targetTab);
   });
 });
