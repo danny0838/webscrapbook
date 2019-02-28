@@ -1413,7 +1413,7 @@ scrapbook.xhr = async function (params = {}) {
     }
 
     xhr.onload = function (event) {
-      if (xhr.status == 200 || xhr.status == 0) {
+      if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 0) {
         // we only care about real loading success
         resolve(xhr);
       } else {
