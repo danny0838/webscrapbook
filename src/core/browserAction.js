@@ -141,14 +141,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   document.getElementById("openViewer").addEventListener('click', (event) => {
-    visitLink(browser.runtime.getURL("viewer/load.html"), (isPrompt ? '_blank' : ''));
+    visitLink(browser.runtime.getURL("viewer/load.html"), (targetTab ? '_blank' : ''));
   });
 
   document.getElementById("openIndexer").addEventListener('click', (event) => {
-    visitLink(browser.runtime.getURL("indexer/load.html"), (isPrompt ? '_blank' : ''));
+    visitLink(browser.runtime.getURL("indexer/load.html"), (targetTab ? '_blank' : ''));
   });
 
   document.getElementById("openOptions").addEventListener('click', (event) => {
-    visitLink(browser.runtime.getURL("core/options.html"), (isPrompt ? 'browseraction' : ''));
+    visitLink(browser.runtime.getURL("core/options.html"), (targetTab ? '_blank' : ''));
   });
 });
