@@ -215,7 +215,7 @@
     "message": "EMBED 元素:"
   },
   "OptionCaptureEmbedTooltip": {
-    "message": "此选项决定 EMBED 元素的处理方式。EMBED 元素多用于嵌入外挂程式，也可嵌入图片、多媒体、或框架页。注意：外挂程式脱离原伺服器环境可能无法正常运作，且可能造成安全风险。\n\n* 保存：将 EMBED 元素参照的文件保存至本地。\n\n* 链接：将 EMBED 元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将 EMBED 元素无效化。\n\n* 移除：将 EMBED 元素移除。注意这可能会影响网页排版。"
+    "message": "此选项决定 EMBED 元素的处理方式。EMBED 元素多用于嵌入外挂程式，也可嵌入图片、多媒体、或框架页。注意：外挂程式脱离原服务器环境可能无法正常运作，且可能造成安全风险。\n\n* 保存：将 EMBED 元素参照的文件保存至本地。\n\n* 链接：将 EMBED 元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将 EMBED 元素无效化。\n\n* 移除：将 EMBED 元素移除。注意这可能会影响网页排版。"
   },
   "OptionCaptureFaviconLabel": {
     "message": "最爱图示:"
@@ -350,7 +350,7 @@
     "message": "剪贴簿文件夹:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "指定保存剪贴簿数据的顶层文件夹，为 <默认下载文件夹> 以下的路径，例如“WebScrapBook”或“my/webscrapbook”。\n\n* 勾选“将获取数据保存于剪贴簿中”时，获取的档案会保存于 <默认下载文件夹>/<剪贴簿文件夹>/data/ 目录中。\n\n* 如有需要指定 <默认下载文件夹> 以外的文件夹，可在 <默认下载文件夹> 下建立软链接（symblic 或 junction link）指向想要的文件夹，然后把此项设为该链接的路径。"
+    "message": "指定保存剪贴簿数据的顶层文件夹，为 <默认下载文件夹> 以下的路径，例如“WebScrapBook”或“my/webscrapbook”。\n\n* 勾选“将获取数据保存于剪贴簿中”时，获取的文件会保存于 <默认下载文件夹>/<剪贴簿文件夹>/data/ 目录中。\n\n* 如有需要指定 <默认下载文件夹> 以外的文件夹，可在 <默认下载文件夹> 下建立软链接（symblic 或 junction link）指向想要的文件夹，然后把此项设为该链接的路径。"
   },
   "OptionCaptureScriptLabel": {
     "message": "脚本:"
