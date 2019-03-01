@@ -127,7 +127,7 @@
     "message": "APPLET:"
   },
   "OptionCaptureAppletTooltip": {
-    "message": "Determines how APPLET elements, which are used to embed JAVA applets and are no more supported by most modern browsers, are handled. NOTE: These elements may not work in the offline environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the applet element.\n\n* Remove: Removes the applet element. Note that this could affect the web page layout."
+    "message": "Determines how APPLET elements, which are used to embed JAVA applets and are no more supported by most modern browsers, are handled. NOTE: JAVA applets may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the applet element.\n\n* Remove: Removes the applet element. Note that this could affect the web page layout."
   },
   "OptionCaptureAudioLabel": {
     "message": "Audio:"
@@ -148,7 +148,7 @@
     "message": "Save current status"
   },
   "OptionCaptureCanvasTooltip": {
-    "message": "Determines how canvas elements are handled. Canvases are blank initially and drawn by web page scripts.\n\n* Save current status: Generates a initialization script that records the current canvas status and draw it when the saved web page is loaded. Note that this could introduce a conflict if scripts are saved.\n\n* Save initial status: Saves a blank canvas. This is more recommanded when scripts are saved as they tend to draw the canvases on their own.\n\n* Remove: Removes the canvas element."
+    "message": "Determines how canvas elements are handled. Canvases are blank initially and drawn by web page scripts.\n\n* Save current status: Generates an initialization script that records the current canvas status to redraw it when the saved web page is loaded. Note that the generated intialization script could introduce a conflict if scripts are saved.\n\n* Save initial status: Saves a blank canvas. This is more recommanded when scripts are saved as they tend to draw the canvases on their own.\n\n* Remove: Removes the canvas element."
   },
   "OptionCaptureCommonBlankLabel": {
     "message": "Blank"
@@ -215,7 +215,7 @@
     "message": "EMBED:"
   },
   "OptionCaptureEmbedTooltip": {
-    "message": "Determines how embed elements, which are usually used to embed interactive applications or plugins. NOTE: These elements may not work in the offline environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the embed element.\n\n* Remove: Removes the embed element. Note that this could affect the web page layout."
+    "message": "Determines how embed elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the embed element.\n\n* Remove: Removes the embed element. Note that this could affect the web page layout."
   },
   "OptionCaptureFaviconLabel": {
     "message": "Favicon:"
@@ -266,7 +266,7 @@
     "message": "OBJECT:"
   },
   "OptionCaptureObjectTooltip": {
-    "message": "Determines how object elements, which are usually used to include multimedia or plugins, are handled. NOTE: These elements may not work in the offline environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the object element.\n\n* Remove: Removes the object element. Note that this could affect the web page layout."
+    "message": "Determines how object elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the object element.\n\n* Remove: Removes the object element. Note that this could affect the web page layout."
   },
   "OptionCaptureRecordRewrittenAttrLabel": {
     "message": "Record rewritten attributes"
@@ -356,7 +356,7 @@
     "message": "Scripts:"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "Determines how all scripts— including SCRIPT elements, links with javascript: protocol, and dynamic attributes such as onclick, etc.— are handled.  NOTE: Scripts are sometimes context dependant, and thus the escaping of original server environment and/or certain rewrites of the web page during capturing could cause the saved scripts not to work. Additionally, scripts won't run in the built-in archive page viewer for security reasons.\n\n* Save: Save the referenced script resource to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the script element.\n\n* Remove: Removes the script element. Note that this could affect the web page layout."
+    "message": "Determines how all scripts—including SCRIPT elements, links with javascript: protocol, and dynamic attributes such as onclick, etc.—are handled. NOTE: Scripts are sometimes context dependant, and thus loss of original server environment and/or certain rewrittings of the web page during capturing could cause the saved scripts to not work. Additionally, scripts won't run in the archive page viewer for security reasons.\n\n* Save: Save the referenced script resource to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the script element.\n\n* Remove: Removes the script element. Note that this could affect the web page layout."
   },
   "OptionCaptureStyleInlineLabel": {
     "message": "Inline styles:"
