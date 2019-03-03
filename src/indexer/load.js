@@ -1680,7 +1680,7 @@ const indexer = {
       if (scrapbook.validateFilename(scrapbookData.title) === directory.replace(/^.*[\\\/]/, "")) {
         this.log(`Downloading files...`);
         for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
-          if (zipObj.dir) { return; }
+          if (zipObj.dir) { continue; }
 
           try {
             const blob = await zipObj.async("blob");
@@ -1695,6 +1695,7 @@ const indexer = {
             this.error(`Error downloading ${directory + "/" + inZipPath}: ${ex.message}`);
           }
         }
+        return;
       }
 
       this.error(`Picked folder does not match configured WebScrapBook folder. Download as zip...`);
