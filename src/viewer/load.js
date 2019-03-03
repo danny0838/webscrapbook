@@ -22,7 +22,7 @@
  *      https://bugzilla.mozilla.org/show_bug.cgi?id=1420590
  */
 function onDragEnter(e) {
-  viewer.dropmask.style.display = '';
+  viewer.dropmask.hidden = false;
   viewer.lastDropTarget = e.target;
 };
 
@@ -44,13 +44,13 @@ function onDragLeave(e) {
     shouldUnMask = true;
   }
   if (shouldUnMask) {
-    viewer.dropmask.style.display = 'none';
+    viewer.dropmask.hidden = true;
   }
 };
 
 async function onDrop(e) {
   e.preventDefault();
-  viewer.dropmask.style.display = 'none';
+  viewer.dropmask.hidden = true;
 
   const entries = Array.prototype.map.call(
     e.dataTransfer.items,
@@ -300,7 +300,7 @@ const viewer = {
     this.pageList = [];
     this.uninitEvents();
     this.filesSelector.disabled = true;
-    this.loadmask.style.display = '';
+    this.loadmask.hidden = false;
     this.logger.textContent = '';
 
     files = files.sort((a, b) => {
@@ -327,7 +327,7 @@ const viewer = {
       this.initEvents();
       this.filesSelector.disabled = false;
       this.filesSelector.value = null;
-      this.loadmask.style.display = 'none';
+      this.loadmask.hidden = true;
     }
   },
 

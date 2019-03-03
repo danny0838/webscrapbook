@@ -22,7 +22,7 @@
  *      https://bugzilla.mozilla.org/show_bug.cgi?id=1420590
  */
 function onDragEnter(e) {
-  indexer.dropmask.style.display = '';
+  indexer.dropmask.hidden = false;
   indexer.lastDropTarget = e.target;
 };
 
@@ -43,13 +43,13 @@ function onDragLeave(e) {
     shouldUnMask = true;
   }
   if (shouldUnMask) {
-    indexer.dropmask.style.display = 'none';
+    indexer.dropmask.hidden = true;
   }
 };
 
 function onDrop(e) {
   e.preventDefault();
-  indexer.dropmask.style.display = 'none';
+  indexer.dropmask.hidden = true;
   const entries = Array.prototype.map.call(
     e.dataTransfer.items,
     x => x.webkitGetAsEntry && x.webkitGetAsEntry()
@@ -3278,7 +3278,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       'mozdirectory' in indexer.dirSelector || 
       'directory' in indexer.dirSelector) {
     // directory selection supported
-    dirSelectorLabel.style.display = '';
+    dirSelectorLabel.hidden = false;
   }
-  filesSelectorLabel.style.display = '';
+  filesSelectorLabel.hidden = false;
 });
