@@ -1,0 +1,25 @@
+button {
+  display: block;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background: none;
+  padding: 1px 3px;
+  width: 100%;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+button:hover {
+  background-color: #aaaaaa;
+}
+
+button:active {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.sub {
+  color: blue;
+  text-decoration: underline;
+}

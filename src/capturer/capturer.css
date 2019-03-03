@@ -1,0 +1,27 @@
+body {
+  font-family: initial;
+  font-size: 12px;
+}
+
+#downloader {
+  /* display: none; causes child a.click() not work in Firefox */
+  visibility: hidden;
+  position: absolute;
+  border: none;
+  width: 0;
+  height: 0;
+}
+
+#logger {
+  white-space: pre;
+}
+
+.warn {
+  color: #f0ad4e;
+  font-weight: bold;
+}
+
+.error {
+  color: #d9534f;
+  font-weight: bold;
+}

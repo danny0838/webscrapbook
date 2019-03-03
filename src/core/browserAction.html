@@ -4,37 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
 <title>__MSG_ExtensionName__</title>
+<link rel="stylesheet" href="browserAction.css">
 <script src="../lib/browser-polyfill.js"></script>
 <script src="common.js"></script>
 <script src="../capturer/extension.js"></script>
 <script src="browserAction.js"></script>
-<style>
-button {
-  display: block;
-  cursor: pointer;
-  outline: none;
-  border: none;
-  background: none;
-  padding: 1px 3px;
-  width: 100%;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-button:hover {
-  background-color: #aaaaaa;
-}
-
-button:active {
-  background-color: #000000;
-  color: #FFFFFF;
-}
-
-.sub {
-  color: blue;
-  text-decoration: underline;
-}
-</style>
 </head>
 <body>
 <button id="captureTab" title="__MSG_CaptureTabTooltip__">__MSG_CaptureTab__</button>

@@ -1,0 +1,72 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+}
+
+#dropmask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 100000;
+  background-color: SkyBlue;
+  opacity: 0.7;
+}
+
+#loadmask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100001;
+  margin: auto;
+  width: 64px;
+  height: 64px;
+  border: 8px solid #666;
+  border-radius: 40px;
+  border-color: #666 transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0turn); }
+  to { transform: rotate(1turn); }
+}
+
+#panel {
+  padding: .5em 1em;
+  background-color: grey;
+  color: white;
+  text-align: center;
+}
+
+#panel div {
+  margin-bottom: 0.5em;
+  font-size: 1.25em;
+  line-height: 1.5em;
+}
+
+#panel label {
+  display: inline-block;
+  margin: 0 .2em;
+  padding: .4em 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #47A4A5;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+#logger {
+  padding: .5em;
+  white-space: pre;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
