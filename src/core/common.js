@@ -1459,9 +1459,6 @@ scrapbook.xhr = async function (params = {}) {
  * Promise utilities
  *******************************************************************/
 
-/**
- * @return {Promise}
- */
 scrapbook.delay = async function (ms) {
   return new Promise((resolve, reject) => {
     setTimeout(resolve, ms);
