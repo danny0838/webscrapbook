@@ -34,13 +34,13 @@ window.addEventListener("message", (event) => {
   }
 }, false);
 
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((message, sender) => {
   isDebug && console.debug(message.cmd, "receive", message.args);
 
   if (message.cmd.slice(0, 9) == "capturer.") {
     let fn = capturer[message.cmd.slice(9)];
     if (fn) {
-      sendResponse(fn(message.args));
+      return fn(message.args);
     }
   }
 });

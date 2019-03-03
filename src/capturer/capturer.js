@@ -1583,7 +1583,7 @@ capturer.saveUrl = async function (params) {
  * Events handling
  */
 
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((message, sender) => {
   try {
     if (message.args.settings.missionId !== capturer.missionId) {
       return;
@@ -1598,10 +1598,10 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.cmd.slice(0, 9) == "capturer.") {
     const fn = capturer[message.cmd.slice(9)];
     if (fn) {
-      sendResponse(fn(message.args).catch((ex) => {
+      return fn(message.args).catch((ex) => {
         const err = `Unexpected error: ${ex.message}`;
         capturer.error(err);
-      }));
+      });
     }
   }
 });
