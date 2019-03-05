@@ -1962,7 +1962,7 @@ scrapbook.fulltext(${JSON.stringify(jsonData, null, 1)})`;
 <base target="main">
 <meta charset="UTF-8">
 <title>${scrapbookData.title || ""}</title>
-<meta name="viewport" content="width=device-width">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 html {
   height: 100%;
@@ -2389,7 +2389,7 @@ ${loadTocJs()}
 <head>
 <meta charset="UTF-8">
 <title>${scrapbook.lang('IndexerSearchTitle', [scrapbookData.title || ""])}</title>
-<meta name="viewport" content="width=device-width">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 html {
   height: 100%;
