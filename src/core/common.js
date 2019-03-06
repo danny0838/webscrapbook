@@ -205,7 +205,7 @@ scrapbook.getOptions = function (keyPrefix) {
 scrapbook.setOption = async function (key, value) {
   scrapbook.options[key] = value;
   const storage = await scrapbook.getOptionStorage();
-  return await storage.set({key: value});
+  return await storage.set({[key]: value});
 };
 
 /**
