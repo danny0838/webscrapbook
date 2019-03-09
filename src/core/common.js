@@ -585,11 +585,6 @@ scrapbook.getContentPagePattern = async function () {
 scrapbook.isContentPage = function (url, allowFileAccess = !scrapbook.userAgent.is('gecko')) {
   const filter = new RegExp(`^(?:https?${allowFileAccess ? "|file" : ""}):`);
   if (!filter.test(url)) { return false; }
-  if (scrapbook.userAgent.is('gecko')) {
-    if (url.startsWith("https://addons.mozilla.org/")) { return false; }
-  } else {
-    if (url.startsWith("https://chrome.google.com/webstore/")) { return false; }
-  }
   return true;
 };
 
