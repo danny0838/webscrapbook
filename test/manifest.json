@@ -7,7 +7,7 @@
 
   "minimum_chrome_version": "55",
 
-  "applications": {
+  "browser_specific_settings": {
     "gecko": {
       "id": "webscrapbooktestsuite@danny0838.addons.mozilla.org",
       "strict_min_version": "52.0"
