@@ -156,7 +156,6 @@ capturer.captureDocument = async function (params) {
     const origNodeMap = new Map();
     const clonedNodeMap = new Map();
     const specialContentMap = new Map();
-    const cssMap = new Map();
 
     // Map cloned nodes and the original for later reference
     // since cloned nodes may lose some information,
@@ -592,8 +591,6 @@ capturer.captureDocument = async function (params) {
       };
 
       const parseCss = function (css, refUrl) {
-        cssMap.set(css.ownerNode, css);
-
         // @FIXME: cssRules not accessible for cross-origin CSS
         // In Firefox, CSS from a different domain throws a SecurityError when accessing .cssRules
         // In Chromium, CSS from a different domain gets .cssRules = null
@@ -874,7 +871,7 @@ capturer.captureDocument = async function (params) {
                     // if CSS not accessible, save all bg images and fonts
                     let cssSettings = settings;
                     try {
-                      if (!cssMap.get(origNodeMap.get(elem)).cssRules) { throw new Error('CSS rules not accessible'); }
+                      if (!origNodeMap.get(elem).sheet.cssRules) { throw new Error('CSS rules not accessible'); }
                     } catch (ex) {
                       cssSettings = Object.assign({}, settings);
                       delete cssSettings.usedCssFontUrl;
