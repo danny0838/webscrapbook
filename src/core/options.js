@@ -100,7 +100,22 @@ async function importOptions(file) {
   }
 }
 
-function checkRegexRules(rules) {
+async function closeWindow() {
+  const tab = await browser.tabs.getCurrent();
+  if (!tab) {
+    // options.html is a prompt diaglog
+    window.close();
+  } else if (tab.url.startsWith(browser.runtime.getURL(""))) {
+    // options.html is in a tab (or Firefox Android)
+    // close the tab
+    return await browser.tabs.remove(tab.id);
+  } else {
+    // options.html is embedded in about:addon in Firefox
+    // do not close the tab
+  }
+}
+
+function verifyDownLinkFilters(rules) {
   const checkRule = (rules) => {
     rules.split(/(?:\n|\r\n?)/).forEach(function (srcLine, index) {
       if (srcLine.charAt(0) === "#") { return; }
@@ -139,21 +154,6 @@ function checkRegexRules(rules) {
   return true;
 }
 
-async function closeWindow() {
-  const tab = await browser.tabs.getCurrent();
-  if (!tab) {
-    // options.html is a prompt diaglog
-    window.close();
-  } else if (tab.url.startsWith(browser.runtime.getURL(""))) {
-    // options.html is in a tab (or Firefox Android)
-    // close the tab
-    return await browser.tabs.remove(tab.id);
-  } else {
-    // options.html is embedded in about:addon in Firefox
-    // do not close the tab
-  }
-}
-
 window.addEventListener("DOMContentLoaded", async (event) => {
   // load languages
   scrapbook.loadLanguages(document);
@@ -171,11 +171,12 @@ window.addEventListener("DOMContentLoaded", async (event) => {
   document.getElementById("options").addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    // check for input regex rules
-    if (!checkRegexRules()) {
+    // verify the form
+    if (!verifyDownLinkFilters()) {
       return;
     }
-    
+
+    // save options
     for (const id in scrapbook.options) {
       // Overwrite only keys with a defined value so that
       // keys not listed in the options page are not nullified.
