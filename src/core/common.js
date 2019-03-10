@@ -90,9 +90,9 @@ let scrapbook = {
  *******************************************************************/
 
 scrapbook.options = {
+  "capture.saveTo": "file", // "folder", "file"
   "capture.scrapbookFolder": "WebScrapBook",
   "capture.saveAs": "zip", // "folder", "zip", "maff", "singleHtml", "singleHtmlJs"
-  "capture.saveInScrapbook": false,
   "capture.saveInMemory": false,
   "capture.saveAsciiFilename": false,
   "capture.saveBeyondSelection": false,

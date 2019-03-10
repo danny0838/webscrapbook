@@ -15,6 +15,14 @@
   <fieldset>
     <legend>__MSG_OptionGroupSave__</legend>
     <p>
+      <label for="opt_capture.saveTo">__MSG_OptionCaptureSaveToLabel__</label>
+      <select id="opt_capture.saveTo">
+        <option value="folder">__MSG_OptionCaptureSaveToFolderLabel__</option>
+        <option value="file">__MSG_OptionCaptureSaveToFileLabel__</option>
+      </select>
+      <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveToTooltip__"></a>
+    </p>
+    <p id="captureSaveToFolderDetails" hidden>
       <label for="opt_capture.scrapbookFolder">__MSG_OptionCaptureScrapbookFolderLabel__</label>
       <input type="text" id="opt_capture.scrapbookFolder" value="WebScrapBook" placeholder="WebScrapBook">
       <a href="javascript:" data-tooltip="__MSG_OptionCaptureScrapbookFolderTooltip__"></a>
@@ -29,11 +37,6 @@
         <option value="singleHtmlJs">__MSG_OptionCaptureSaveAsSingleHtmlJsLabel__</option>
       </select>
       <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveAsTooltip__"></a>
-    </p>
-    <p>
-      <input type="checkbox" id="opt_capture.saveInScrapbook">
-      <label for="opt_capture.saveInScrapbook">__MSG_OptionCaptureSaveInScrapbookLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveInScrapbookTooltip__"></a>
     </p>
     <p>
       <input type="checkbox" id="opt_capture.saveAsciiFilename">

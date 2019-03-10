@@ -468,16 +468,21 @@ capturer.captureBookmark = async function (params) {
     let savePrompt;
     let saveMethod;
 
-    if (options["capture.saveInScrapbook"]) {
-      targetDir = options["capture.scrapbookFolder"] + "/data";
-      filename = timeId + ext;
-      savePrompt = false;
-      saveMethod = "saveBlob";
-    } else {
-      filename = (title ? title : scrapbook.urlToFilename(sourceUrl));
-      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-      if (!filename.endsWith(ext)) { filename += ext; }
-      saveMethod = "saveBlobNaturally";
+    switch (options["capture.saveTo"]) {
+      case 'file': {
+        filename = (title ? title : scrapbook.urlToFilename(sourceUrl));
+        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        if (!filename.endsWith(ext)) { filename += ext; }
+        saveMethod = "saveBlobNaturally";
+        break;
+      }
+      default: {
+        targetDir = options["capture.scrapbookFolder"] + "/data";
+        filename = timeId + ext;
+        savePrompt = false;
+        saveMethod = "saveBlob";
+        break;
+      }
     }
 
     const dataBlob = new Blob([html], {type: "text/html"});
@@ -643,16 +648,21 @@ capturer.saveDocument = async function (params) {
           let savePrompt;
           let saveMethod;
 
-          if (options["capture.saveInScrapbook"]) {
-            targetDir = options["capture.scrapbookFolder"] + "/data";
-            filename = timeId + ext;
-            savePrompt = false;
-            saveMethod = "saveBlob";
-          } else {
-            filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-            if (!filename.endsWith(ext)) filename += ext;
-            saveMethod = "saveBlobNaturally";
+          switch (options["capture.saveTo"]) {
+            case 'file': {
+              filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+              if (!filename.endsWith(ext)) filename += ext;
+              saveMethod = "saveBlobNaturally";
+              break;
+            }
+            default: {
+              targetDir = options["capture.scrapbookFolder"] + "/data";
+              filename = timeId + ext;
+              savePrompt = false;
+              saveMethod = "saveBlob";
+              break;
+            }
           }
 
           const dataBlob = new Blob([data.content], {type: data.mime});
@@ -701,16 +711,21 @@ capturer.saveDocument = async function (params) {
           let savePrompt;
           let saveMethod;
 
-          if (options["capture.saveInScrapbook"]) {
-            targetDir = options["capture.scrapbookFolder"] + "/data";
-            filename = timeId + ext;
-            savePrompt = false;
-            saveMethod = "saveBlob";
-          } else {
-            filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-            if (!filename.endsWith(ext)) filename += ext;
-            saveMethod = "saveBlobNaturally";
+          switch (options["capture.saveTo"]) {
+            case 'file': {
+              filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+              if (!filename.endsWith(ext)) filename += ext;
+              saveMethod = "saveBlobNaturally";
+              break;
+            }
+            default: {
+              targetDir = options["capture.scrapbookFolder"] + "/data";
+              filename = timeId + ext;
+              savePrompt = false;
+              saveMethod = "saveBlob";
+              break;
+            }
           }
 
           const zipData = [];
@@ -854,16 +869,21 @@ ${JSON.stringify(zipData)}
           let savePrompt;
           let saveMethod;
 
-          if (options["capture.saveInScrapbook"]) {
-            targetDir = options["capture.scrapbookFolder"] + "/data";
-            filename = timeId + ".htz";
-            savePrompt = false;
-            saveMethod = "saveBlob";
-          } else {
-            filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-            filename += ".htz";
-            saveMethod = "saveBlobNaturally";
+          switch (options["capture.saveTo"]) {
+            case 'file': {
+              filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
+              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+              filename += ".htz";
+              saveMethod = "saveBlobNaturally";
+              break;
+            }
+            default: {
+              targetDir = options["capture.scrapbookFolder"] + "/data";
+              filename = timeId + ".htz";
+              savePrompt = false;
+              saveMethod = "saveBlob";
+              break;
+            }
           }
 
           // special handling (for unit test)
@@ -929,16 +949,21 @@ ${JSON.stringify(zipData)}
             let savePrompt;
             let saveMethod;
 
-            if (options["capture.saveInScrapbook"]) {
-              targetDir = options["capture.scrapbookFolder"] + "/data";
-              filename = timeId + ".maff";
-              savePrompt = false;
-              saveMethod = "saveBlob";
-            } else {
+            switch (options["capture.saveTo"]) {
+              case 'file': {
               filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
               filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
               filename += ".maff";
               saveMethod = "saveBlobNaturally";
+                break;
+              }
+              default: {
+              targetDir = options["capture.scrapbookFolder"] + "/data";
+              filename = timeId + ".maff";
+              savePrompt = false;
+              saveMethod = "saveBlob";
+                break;
+              }
             }
 
             // special handling (for unit test)
