@@ -154,12 +154,23 @@ function verifyDownLinkFilters(rules) {
   return true;
 }
 
+function refreshForm() {
+  renewCaptureDownLinkDetails(); 
+}
+
+function renewCaptureDownLinkDetails() {
+  const mode = document.getElementById("opt_capture.downLink.mode").value;
+  const elem = document.getElementById('captureDownLinkDetails');
+  elem.hidden = mode === 'none';
+}
+
 window.addEventListener("DOMContentLoaded", async (event) => {
   // load languages
   scrapbook.loadLanguages(document);
 
   // load default options
   await initDefaultOptions();
+  refreshForm();
 
   // event handlers
   document.getElementById("opt_capture.scrapbookFolder").addEventListener("change", (event) => {
@@ -167,6 +178,8 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     // make sure it's a valid path for browser.downloads.download
     elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
   });
+
+  document.getElementById("opt_capture.downLink.mode").addEventListener("change", renewCaptureDownLinkDetails);
 
   document.getElementById("options").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -194,6 +207,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
   document.getElementById("reset").addEventListener("click", (event) => {
     event.preventDefault();
     resetOptions();
+    refreshForm();
   });
 
   document.getElementById("export").addEventListener("click", (event) => {
@@ -209,6 +223,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
   document.getElementById("import-input").addEventListener("change", async (event) => {
     event.preventDefault();
     const file = event.target.files[0];
-    return importOptions(file);
+    await importOptions(file);
+    refreshForm();
   });
 });
