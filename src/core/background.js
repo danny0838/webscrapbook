@@ -181,7 +181,7 @@ async function initContextMenu() {
     contexts: ["link"],
     targetUrlPatterns: urlMatch,
     onclick: (info, tab) => {
-      return capturer.invokeCapture({url: info.linkUrl});
+      return capturer.invokeCapture({url: info.linkUrl, mode: "source"});
     }
   });
 
