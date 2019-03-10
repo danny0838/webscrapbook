@@ -415,11 +415,11 @@ capturer.captureBookmark = async function (params) {
         requestHeaders["X-WebScrapBook-Referer"] = refUrl;
       }
 
-      const doc = await scrapbook.xhr({
+      const doc = (await scrapbook.xhr({
         url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
         responseType: "document",
         requestHeaders,
-      }).response;
+      })).response;
 
       // specified sourceUrl may not be a document, maybe a malformed xhtml?
       if (doc) {
