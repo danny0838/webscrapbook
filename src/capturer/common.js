@@ -168,10 +168,8 @@ capturer.captureDocument = async function (params) {
 
       // recursively clone descendant nodes
       if (deep) {
-        const childs = node.childNodes;
-        const len = childs.length;
-        for (let i = 0; i < len; i++) {
-          const newChildNode = cloneNodeMapping(node.childNodes[i], true);
+        for (const childNode of node.childNodes) {
+          const newChildNode = cloneNodeMapping(childNode, true);
           newNode.appendChild(newChildNode);
         }
       }

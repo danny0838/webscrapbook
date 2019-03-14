@@ -802,15 +802,10 @@ capturer.saveDocument = async function (params) {
           }
 
           const zipData = [];
-          let p = Promise.resolve();
-          zip.forEach((path, entry) => {
-            p = p.then(() => {
-              return entry.async('base64');
-            }).then((data) => {
-              zipData[zipResMap.get(path)] = {p: path, d: data};
-            });
-          });
-          await p;
+          for (const [path, entry] of Object.entries(zip.files)) {
+            const data = await entry.async('base64');
+            zipData[zipResMap.get(path)] = {p: path, d: data};
+          }
 
           {
             const pageloader = function (data) {
