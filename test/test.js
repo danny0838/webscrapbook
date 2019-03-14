@@ -3,6 +3,7 @@
  */
 const baseOptions = {
   "capture.saveInMemory": true,
+  "capture.saveTo": "folder",
   "capture.saveAs": "zip",
   "capture.saveAsciiFilename": false,
   "capture.saveBeyondSelection": false,

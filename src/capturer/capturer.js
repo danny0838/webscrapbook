@@ -615,7 +615,9 @@ Redirecting to file ${anchor}
           content: html,
         }
       }).then((response) => {
-        response.type = "file";
+        if (!options["capture.saveInMemory"]) {
+          response.type = "file";
+        }
         return response;
       });
     } else {
