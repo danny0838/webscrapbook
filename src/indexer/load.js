@@ -1084,7 +1084,7 @@ const indexer = {
                 const blob = xhr.response;
                 const mime = blob.type;
 
-                const ab = scrapbook.readFileAsArrayBuffer(blob);
+                const ab = await scrapbook.readFileAsArrayBuffer(blob);
                 return getShaFile({ab, mime, ext});
               })();
               urlAccessMap.set(favIconUrl, p);
