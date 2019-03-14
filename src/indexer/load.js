@@ -73,6 +73,11 @@ function onChangeFiles(e) {
   indexer.loadInputFiles(files);
 };
 
+function onChangeLoadServer(e) {
+  e.preventDefault();
+  indexer.loadServerFiles();
+}
+
 const indexer = {
   autoEraseSet: new Set(),
 
@@ -97,6 +102,7 @@ const indexer = {
     window.addEventListener("drop", onDrop, false);
     this.dirSelector.addEventListener("change", onChangeDir, false);
     this.filesSelector.addEventListener("change", onChangeFiles, false);
+    this.loadServerLabel.addEventListener("click", onChangeLoadServer, false);
   },
 
   uninitEvents() {
@@ -106,6 +112,7 @@ const indexer = {
     window.removeEventListener("drop", onDrop, false);
     this.dirSelector.removeEventListener("change", onChangeDir, false);
     this.filesSelector.removeEventListener("change", onChangeFiles, false);
+    this.loadServerLabel.removeEventListener("click", onChangeLoadServer, false);
   },
 
   start() {
@@ -115,6 +122,7 @@ const indexer = {
     this.logger.textContent = '';
     this.logger.className = '';
     this.options = Object.assign({}, scrapbook.options);
+    this.serverData = {};
   },
 
   end() {
@@ -389,6 +397,73 @@ const indexer = {
 
       if (!hasValidEntry) {
         throw new Error(`At least one directory or zip file must be provided.`);
+      }
+    } catch (ex) {
+      console.error(ex);
+      this.error(`Unexpected error: ${ex.message}`);
+    }
+
+    await this.end();
+  },
+
+  async loadServerFiles() {
+    try {
+      await this.start();
+
+      if (!scrapbook.hasServer()) {
+        this.error(`Backend server is not configured.`);
+        return;
+      }
+
+      this.serverData.isIndexingServer = true;
+      await server.init();
+
+      for (const book of Object.values(server.books)) {
+        const loadEntry = async (book, path, type = 'dir') => {
+          const target = book.topUrl + scrapbook.escapeFilename(path);
+          try {
+            if (type === 'dir') {
+              const json = await server.request({
+                url: target + '/?a=list&f=json',
+                method: 'GET',
+              }).then(r => r.json());
+              for (const entry of json.data) {
+                await loadEntry(book, path + '/' + entry.name, entry.type);
+              }
+            } else {
+              const response = await server.request({
+                url: target + '?a=source',
+                method: 'GET',
+              });
+              const filename = path.split('/').pop();
+              const lm = response.headers.get('last-modified');
+              const lastModified = lm ? new Date(lm).valueOf() : Date.now();
+              const file = new File([await response.blob()], filename, {
+                type: Mime.lookup(filename),
+                lastModified,
+              });
+              inputData.files.push({
+                path,
+                file,
+              });
+            }
+          } catch (ex) {
+            this.error(`Unable to load "${target}": ${ex.message}`);
+          }
+        };
+
+        const inputData = {
+          name: book.name,
+          files: [],
+        };
+
+        this.serverData.book = book;
+
+        this.log(`Got book '${book.name}' at '${book.topUrl}'.`);
+        this.log(`Inspecting files...`);
+        await loadEntry(book, 'data');
+        await loadEntry(book, 'tree');
+        await this.import(inputData);
       }
     } catch (ex) {
       console.error(ex);
@@ -838,20 +913,21 @@ const indexer = {
     this.log(`Inspecting TOC...`);
     const referredIds = new Set();
     const titleIdMap = new Map();
+    const specialItems = new Set(['root', 'hidden', 'recycle']);
     for (const id in scrapbookData.toc) {
-      if (!scrapbookData.meta[id] && id !== 'root' && id !== 'hidden') {
+      if (!scrapbookData.meta[id] && !specialItems.has(id)) {
         delete(scrapbookData.toc[id]);
         this.error(`Removed TOC entry '${id}': Missing metadata entry.`);
         continue;
       }
 
       scrapbookData.toc[id] = scrapbookData.toc[id].filter((refId) => {
-        if (!scrapbookData.meta[refId]) {
-          this.error(`Removed TOC reference '${refId}' from '${id}': Missing metadata entry.`);
+        if (specialItems.has(refId)) {
+          this.error(`Removed TOC reference '${refId}' from '${id}': Invalid entry.`);
           return false;
         }
-        if (refId === 'root' || refId === 'hidden') {
-          this.error(`Removed TOC reference '${refId}' from '${id}': Invalid entry.`);
+        if (!scrapbookData.meta[refId]) {
+          this.error(`Removed TOC reference '${refId}' from '${id}': Missing metadata entry.`);
           return false;
         }
         referredIds.add(refId);
@@ -859,7 +935,7 @@ const indexer = {
         return true;
       });
 
-      if (!scrapbookData.toc[id].length && id !== 'root' && id !== 'hidden') {
+      if (!scrapbookData.toc[id].length && id !== 'root') {
         delete(scrapbookData.toc[id]);
         this.error(`Removed empty TOC entry '${id}'.`);
       }
@@ -1673,8 +1749,35 @@ const indexer = {
       return;
     }
 
+    // server
+    if (this.serverData.isIndexingServer) {
+      this.log(`Uploading changed files to server...`);
+      const book = this.serverData.book;
+      for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
+        if (zipObj.dir) { continue; }
+
+        const file = new File(
+          [await zipObj.async('blob')],
+          inZipPath.split('/').pop(),
+          {type: "application/octet-stream"}
+        );
+        const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
+
+        const formData = new FormData();
+        formData.append('token', await server.acquireToken());
+        formData.append('upload', file);
+
+        await server.request({
+          url: target + '?a=upload&f=json',
+          method: 'POST',
+          body: formData,
+        });
+      }
+      return;
+    }
+
     // auto download
-    if (this.options["indexer.autoDownload"]) {
+    if (this.options["indexer.autoDownload"] && !scrapbook.hasServer()) {
       const directory = scrapbook.getOption("capture.scrapbookFolder");
 
       if (scrapbook.validateFilename(scrapbookData.title) === directory.replace(/^.*[\\\/]/, "")) {
@@ -3263,6 +3366,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   indexer.downloader = document.getElementById('downloader');
   indexer.dirSelector = document.getElementById('dir-selector');
   indexer.filesSelector = document.getElementById('files-selector');
+  indexer.loadServerLabel = document.getElementById('load-server-label');
   indexer.logger = document.getElementById('logger');
 
   const dirSelectorLabel = document.getElementById('dir-selector-label');
@@ -3282,4 +3386,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     dirSelectorLabel.hidden = false;
   }
   filesSelectorLabel.hidden = false;
+  if (scrapbook.hasServer()) {
+    indexer.loadServerLabel.hidden = false;
+  }
 });

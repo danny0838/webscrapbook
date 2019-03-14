@@ -93,6 +93,9 @@
   "IndexerHeader": {
     "message": "選擇網頁剪貼簿資料夾或其 ZIP 壓縮檔。你可以拖放它們至此視窗，或使用以下按鈕："
   },
+  "IndexerLoadServer": {
+    "message": "載入伺服器"
+  },
   "IndexerPickDir": {
     "message": "選擇資料夾"
   },
@@ -119,6 +122,9 @@
   },
   "OpenOptions": {
     "message": "選項"
+  },
+  "OpenScrapBook": {
+    "message": "開啟剪貼簿"
   },
   "OpenViewer": {
     "message": "檢視封存網頁"
@@ -349,8 +355,11 @@
   "OptionCaptureSaveToLabel": {
     "message": "儲存擷取資料至:"
   },
+  "OptionCaptureSaveToServerLabel": {
+    "message": "後端伺服器"
+  },
   "OptionCaptureSaveToTooltip": {
-    "message": "指定管理儲存資料的方式。\n\n* 剪貼簿資料夾：將擷取頁面儲存於 <預設下載資料夾>/<剪貼簿資料夾>/data/ 目錄中，並以目前日期時間做為 ID 命名，以便將來建立索引。\n\n* 獨立檔案：將擷取頁面儲存成檔案，以網頁標題命名，並儲存至 <預設下載資料夾> 或由使用者指定儲存路徑，適合儲存及分享個別網頁。"
+    "message": "指定管理儲存資料的方式。\n\n* 後端伺服器：將擷取頁面儲存於後端伺服器設定的剪貼簿資料目錄，並以目前日期時間做為 ID 命名，以便將來建立索引。\n\n* 剪貼簿資料夾：將擷取頁面儲存於剪貼簿資料夾（<預設下載資料夾>/<剪貼簿資料夾>/data/），並以目前日期時間做為 ID 命名，以便將來建立索引。\n\n* 獨立檔案：將擷取頁面儲存成檔案，以網頁標題命名，並儲存至 <預設下載資料夾> 或由使用者指定儲存路徑，適合儲存及分享個別網頁。"
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "剪貼簿資料夾:"
@@ -397,6 +406,9 @@
   "OptionGroupSave": {
     "message": "擷取 - 儲存"
   },
+  "OptionGroupServer": {
+    "message": "後端伺服器"
+  },
   "OptionGroupViewer": {
     "message": "檢視器"
   },
@@ -420,6 +432,18 @@
   },
   "OptionPageTitle": {
     "message": "選項設定"
+  },
+  "OptionServerPasswordLabel": {
+    "message": "密碼:"
+  },
+  "OptionServerUrlLabel": {
+    "message": "網址:"
+  },
+  "OptionServerUrlTooltip": {
+    "message": "後端伺服器程式的根目錄，例如「http://localhost:8080/」或「https://example.com/wsb/」。\n\n* 後端伺服器可用 Python 的 webscrapbook 套件（相容版本：0.1.*）架設，安裝細節參見 https://pypi.org/project/webscrapbook/。"
+  },
+  "OptionServerUserLabel": {
+    "message": "使用者:"
   },
   "OptionsExportLabel": {
     "message": "匯出"
@@ -468,6 +492,152 @@
     "placeholders": {
       "source": {"content": "$1"},
       "target": {"content": "$2"}
+    }
+  },
+
+  "OK": {
+    "message": "確定"
+  },
+  "Cancel": {
+    "message": "取消"
+  },
+
+  "ScrapBookMainTitle": {
+    "message": "$BOOK$ | $APP$",
+    "placeholders": {
+      "app": {"content": "$1"},
+      "book": {"content": "$2"}
+    }
+  },
+  "ScrapBookMainNewFolderName": {
+    "description": "Default name of a new folder",
+    "message": "新資料夾"
+  },
+  "ScrapBookMainNewNoteName": {
+    "description": "Default name of a new note",
+    "message": "新筆記"
+  },
+  "ScrapBookMainBookRefresh": {
+    "message": "<重新整理>"
+  },
+  "ScrapBookMainCommandIndex": {
+    "message": "檢視主頁"
+  },
+  "ScrapBookMainCommandExec": {
+    "message": "用預設程式開啟"
+  },
+  "ScrapBookMainCommandExecBook": {
+    "message": "檢視主目錄"
+  },
+  "ScrapBookMainCommandBrowse": {
+    "message": "在檔案管理員檢視"
+  },
+  "ScrapBookMainCommandSource": {
+    "message": "開啟原始網址"
+  },
+  "ScrapBookMainCommandMeta": {
+    "message": "元資料"
+  },
+  "ScrapBookMainCommandCreatefolder": {
+    "message": "新增資料夾"
+  },
+  "ScrapBookMainCommandCreateSeparator": {
+    "message": "新增分隔線"
+  },
+  "ScrapBookMainCommandCreateNote": {
+    "message": "新增筆記"
+  },
+  "ScrapBookMainCommandEdit": {
+    "message": "編輯"
+  },
+  "ScrapBookMainCommandEditx": {
+    "message": "編輯頁面"
+  },
+  "ScrapBookMainCommandUpload": {
+    "message": "上傳檔案"
+  },
+  "ScrapBookMainCommandMoveUp": {
+    "message": "上移"
+  },
+  "ScrapBookMainCommandMoveDown": {
+    "message": "下移"
+  },
+  "ScrapBookMainCommandMoveTo": {
+    "message": "移動至"
+  },
+  "ScrapBookMainCommandDelete": {
+    "message": "刪除"
+  },
+  "ScrapBookMainCommandMetaDialogId": {
+    "message": "ID:"
+  },
+  "ScrapBookMainCommandMetaDialogTitle": {
+    "message": "標題:"
+  },
+  "ScrapBookMainCommandMetaDialogIndex": {
+    "message": "索引檔:"
+  },
+  "ScrapBookMainCommandMetaDialogSource": {
+    "message": "來源:"
+  },
+  "ScrapBookMainCommandMetaDialogIcon": {
+    "message": "圖示:"
+  },
+  "ScrapBookMainCommandMetaDialogType": {
+    "message": "類型:"
+  },
+  "ScrapBookMainCommandMetaDialogCreate": {
+    "message": "建立時間:"
+  },
+  "ScrapBookMainCommandMetaDialogModify": {
+    "message": "修改時間:"
+  },
+  "ScrapBookMainCommandMetaDialogComment": {
+    "message": "註解:"
+  },
+  "ScrapBookMainCommandCreateNoteDialogTitle": {
+    "message": "新筆記的格式:"
+  },
+  "ScrapBookMainCommandMoveDialogTitle": {
+    "message": "移動到這個 ID 的項目下:"
+  },
+  "ScrapBookMainErrorServerNotConfigured": {
+    "message": "未設定後端伺服器。"
+  },
+  "ScrapBookMainErrorServerInit": {
+    "message": "後端伺服器初始化錯誤: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorBookNotExist": {
+    "message": "剪貼簿 $NAME$ 不存在，重設為預設剪貼簿",
+    "placeholders": {
+      "name": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorLoadBooks": {
+    "message": "無法載入剪貼簿: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorLoadToc": {
+    "message": "無法載入目錄表: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorLoadMeta": {
+    "message": "無法載入元資料: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorInitTree": {
+    "message": "無法初始化目錄樹: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
     }
   }
 }

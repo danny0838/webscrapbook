@@ -139,6 +139,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     return await capturer.invokeCapture({target});
   });
 
+  document.getElementById("openScrapBook").addEventListener('click', async (event) => {
+    const url = browser.runtime.getURL("scrapbook/main.html");
+
+    if (browser.sidebarAction) {
+      // MDN: You can only call this function from inside the handler for a user action.
+      await browser.sidebarAction.open();
+    } else if (browser.windows) {
+      const sideWindows = (await browser.windows.getAll({
+        windowTypes: ['popup'],
+        populate: true,
+      })).filter(w => w.tabs[0].url.startsWith(url));
+      const left = 0;
+      const top = 0;
+      const width = Math.max(Math.floor(window.screen.availWidth / 5 - 1), 200);
+      const height = window.screen.availHeight - 1;
+
+      if (sideWindows.length) {
+        await browser.windows.update(sideWindows[0].id, {
+          left,
+          top,
+          width,
+          height,
+          focused: true,
+          drawAttention: true,
+        });
+      } else {
+        await browser.windows.create({
+          url,
+          left,
+          top,
+          width,
+          height,
+          focused: true,
+          type: 'popup',
+        });
+      }
+    } else {
+      // Firefox Android does not support windows
+      await visitLink(url, !!targetTab);
+    }
+  });
+
   document.getElementById("openViewer").addEventListener('click', async (event) => {
     await visitLink(browser.runtime.getURL("viewer/load.html"), !!targetTab);
   });
@@ -150,4 +192,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById("openOptions").addEventListener('click', async (event) => {
     await visitLink(browser.runtime.getURL("core/options.html"), !!targetTab);
   });
+
+  /**
+   * Asynchronous tasks
+   */
+  if (!scrapbook.isOptionsSynced) {
+    await scrapbook.loadOptions();
+  }
+
+  // allow this only when server is configured
+  if (scrapbook.hasServer()) {
+    document.getElementById("openScrapBook").disabled = false;
+  }
 });

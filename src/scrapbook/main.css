@@ -1,0 +1,218 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+#wrapper {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+/* toolbar */
+#toolbar {
+  flex: 0 1 auto;
+  border-bottom: 2px ridge #CCCCCC;
+}
+
+#toolbar fieldset {
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+#toolbar select {
+  margin: 3px;
+}
+
+#book {
+  float: __MSG_@@bidi_start_edge__;
+  max-width: 10em;
+}
+
+#book option:first-child {
+  font-weight: bold;
+}
+
+#command {
+  float: __MSG_@@bidi_end_edge__;
+  width: 2.8em;
+}
+
+/* logger */
+#logger {
+  flex: 0 1 auto;
+  max-height: 200px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+#logger .warn {
+  color: #f0ad4e;
+  font-weight: bold;
+}
+
+#logger .error {
+  color: #d9534f;
+  font-weight: bold;
+}
+
+/* dialog*/
+#dialog-mask {
+  position: fixed;
+  z-index: 10000;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(32, 32, 32, 0.6);
+}
+
+#dialog-wrapper {
+  position: relative;
+  top: 5%;
+  margin: auto;
+  width: 80%;
+  max-height: 85%;
+  padding: 12px;
+  background-color: #fcfcfc;
+  overflow: auto;
+}
+
+#dialog-wrapper dl {
+  box-sizing: border-box;
+  margin: 0;
+  width: 100%;
+}
+
+#dialog-wrapper dl > div > dt {
+  margin: 3px;
+  font-weight: bold;
+}
+
+#dialog-wrapper dl > div > dd {
+  margin: 3px;
+}
+
+#dialog-wrapper label {
+  white-space: nowrap;
+}
+
+#dialog-wrapper input[type="text"],
+#dialog-wrapper textarea {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+#dialog-wrapper input[type="text"]:read-only {
+  background-color: #DDD;
+}
+
+#dialog-wrapper .buttons {
+  float: __MSG_@@bidi_end_edge__;
+  margin-top: 1em;
+  padding: 3px;
+}
+
+#dialog-wrapper form.meta [name="comment"] {
+  height: 20vh;
+  min-height: 80px;
+}
+
+#dialog-wrapper form.meta dl > div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: stretch;
+}
+
+#dialog-wrapper form.meta dl > div > dt {
+  flex: 1 0 6em;
+}
+
+#dialog-wrapper form.meta dl > div > dd {
+  flex: 999 1 14em;
+}
+
+/* tree */
+#items {
+  flex: 1 1 auto;
+  overflow: auto;
+  position: relative;
+  font-size: 12px;
+  line-height: 1.35em;
+  font-family: sans-serif;
+}
+
+#item-root {
+  padding: 0;
+  padding-__MSG_@@bidi_start_edge__: 1.65em;
+}
+
+#item-root ul {
+  margin: 0;
+  padding: 0;
+}
+
+#item-root li {
+  list-style-type: none;
+  margin: .2em 0;
+  padding-__MSG_@@bidi_start_edge__: .85em;
+}
+
+#item-root li > div {
+  margin-__MSG_@@bidi_start_edge__: -.85em;
+  white-space: nowrap;
+}
+
+#item-root a {
+  text-decoration: none;
+  color: #000000;
+}
+
+#item-root a > img {
+  display: inline-block;
+  margin-left: .1em;
+  margin-right: .1em;
+  border: none;
+  width: 1.25em;
+  height: 1.25em;
+  vertical-align: middle;
+}
+
+#item-root a.toggle {
+  position: absolute;
+  margin-__MSG_@@bidi_start_edge__: -1.45em;
+}
+
+#item-root [data-type="bookmark"] > div > a {
+  color: rgb(32,192,32);
+}
+
+#item-root [data-type="note"] > div > a {
+  color: rgb(80,0,32);
+}
+
+#item-root [data-type="site"] > div > a {
+  color: blue;
+}
+
+#item-root [data-type="separator"] > div > fieldset {
+  margin: 0;
+  border: none;
+  border-top: 1px solid #aaa;
+  padding: 0 0 0 1em;
+  text-indent: 0;
+}
+
+#item-root [data-type="separator"] > div > fieldset > legend {
+  padding: 0;
+}
+
+#item-root [data-marked] > div > a {
+  font-weight: bold;
+}
+
+#item-root .highlight {
+  background-color: #CCCCFF;
+}

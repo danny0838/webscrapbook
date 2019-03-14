@@ -90,7 +90,11 @@ let scrapbook = {
  *******************************************************************/
 
 scrapbook.options = {
-  "capture.saveTo": "file", // "folder", "file"
+  "server.url": "",
+  "server.user": "",
+  "server.password": "",
+  "server.scrapbook": "",
+  "capture.saveTo": "file", // "server", "folder", "file"
   "capture.scrapbookFolder": "WebScrapBook",
   "capture.saveAs": "zip", // "folder", "zip", "maff", "singleHtml", "singleHtmlJs"
   "capture.saveInMemory": false,
@@ -1390,12 +1394,15 @@ scrapbook.httpStatusText = {
  *
  * @param {Object} params
  *     - {string} params.url
+ *     - {string} params.user
+ *     - {string} params.password
  *     - {string} params.method
  *     - {string} params.responseType
  *     - {integer} params.timeout
- *     - {Array} params.requestHeaders
+ *     - {Object} params.requestHeaders
  *     - {Object} params.formData
  *     - {function} params.onreadystatechange
+ *     - {boolean} params.onload - resolve with xhr object for custom handler
  */
 scrapbook.xhr = async function (params = {}) {
   return new Promise((resolve, reject) => {
@@ -1408,6 +1415,9 @@ scrapbook.xhr = async function (params = {}) {
     }
 
     xhr.onload = function (event) {
+      if (params.onload) {
+        resolve(xhr);
+      }
       if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 0) {
         // we only care about real loading success
         resolve(xhr);
@@ -1434,7 +1444,7 @@ scrapbook.xhr = async function (params = {}) {
     };
 
     xhr.responseType = params.responseType;
-    xhr.open(params.method || "GET", params.url, true);
+    xhr.open(params.method || "GET", params.url, true, params.user, params.password);
 
     if (params.timeout) { xhr.timeout = params.timeout; }
 
@@ -1447,6 +1457,19 @@ scrapbook.xhr = async function (params = {}) {
 
     xhr.send(params.formData);
   });
+};
+
+/**
+ * Check for whether a server backend is set
+ */
+scrapbook.hasServer = function () {
+  const url = scrapbook.getOption("server.url");
+  try {
+    const urlObj = new URL(url);
+    return ['http:', 'https:'].includes(urlObj.protocol);
+  } catch (ex) {
+    return false;
+  }
 };
 
 

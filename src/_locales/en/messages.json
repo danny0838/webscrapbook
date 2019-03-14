@@ -93,6 +93,9 @@
   "IndexerHeader": {
     "message": "Pick directories or ZIP archive files of a WebScrapBook folder, via dropping them into this window, or using the buttons below:"
   },
+  "IndexerLoadServer": {
+    "message": "Load from server"
+  },
   "IndexerPickDir": {
     "message": "Pick a folder"
   },
@@ -119,6 +122,9 @@
   },
   "OpenOptions": {
     "message": "Options"
+  },
+  "OpenScrapBook": {
+    "message": "Open ScrapBook"
   },
   "OpenViewer": {
     "message": "View archived page"
@@ -349,14 +355,17 @@
   "OptionCaptureSaveToLabel": {
     "message": "Save captured data to:"
   },
+  "OptionCaptureSaveToServerLabel": {
+    "message": "Backend server"
+  },
   "OptionCaptureSaveToTooltip": {
-    "message": "Determines how captured data files are managed.\n\n* Scrapbook folder: a captured web page is saved in <default download folder>/<scrapbook Folder>/data/ directory and named after an ID made from the current date and time for later indexing.\n\n* Individual file: a captured web page is saved as a file named after it's title and is saved to the <default download folder> or a path specified by the user. This is more suitable for storing and sharing an individual web page."
+    "message": "Determines how captured data files are managed.\n\n* Backend server: a captured web page is saved in the configured book and data directory in the backend server, and named after an ID made of the current date and time for later indexing.\n\n* Scrapbook folder: a captured web page is saved in the scrapbook folder (<default download folder>/<scrapbook Folder>/data/ or the configured data directory of the backend server) and named after an ID made of the current date and time for later indexing.\n\n* Individual file: a captured web page is saved as a file named after it's title and is saved to the <default download folder> or a path specified by the user. This is more suitable for storing and sharing an individual web page."
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "Scrapbook folder:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "The top-level folder scrapbook data are saved in. This is a path under the <default download folder> in the form of \"WebScrapBook\" or \"my/webscrapbook\", etc.\n\n* To specify a folder beyond the <default download folder>, create a soft link (symbolic or junction) targeting the desired folder under <default download folder>, and set this to the path of the link."
+    "message": "The top-level folder scrapbook data are saved in. This is a path under the <default download folder>, and can be \"WebScrapBook\", or \"my/webscrapbook\", etc.\n\n* To specify a folder beyond the <default download folder>, create a soft link (symbolic or junction) under <default download folder> and targets the desired folder, and set the this to be the path of the link."
   },
   "OptionCaptureScriptLabel": {
     "message": "Scripts:"
@@ -397,6 +406,9 @@
   "OptionGroupSave": {
     "message": "Capture - saving"
   },
+  "OptionGroupServer": {
+    "message": "Backend server"
+  },
   "OptionGroupViewer": {
     "message": "Viewer"
   },
@@ -420,6 +432,18 @@
   },
   "OptionPageTitle": {
     "message": "Options"
+  },
+  "OptionServerPasswordLabel": {
+    "message": "Password:"
+  },
+  "OptionServerUrlLabel": {
+    "message": "Address:"
+  },
+  "OptionServerUrlTooltip": {
+    "message": "The root path of the backend server application, such as “http://localhost:8080/” or “https://example.com/wsb/”.\n\n* The backend server can be hosted using webscrapbook package (compatible: 0.1.*) of Python. See https://pypi.org/project/webscrapbook/ for further details."
+  },
+  "OptionServerUserLabel": {
+    "message": "User:"
   },
   "OptionsExportLabel": {
     "message": "Export"
@@ -468,6 +492,152 @@
     "placeholders": {
       "source": {"content": "$1"},
       "target": {"content": "$2"}
+    }
+  },
+
+  "OK": {
+    "message": "OK"
+  },
+  "Cancel": {
+    "message": "Cancel"
+  },
+
+  "ScrapBookMainTitle": {
+    "message": "$BOOK$ | $APP$",
+    "placeholders": {
+      "app": {"content": "$1"},
+      "book": {"content": "$2"}
+    }
+  },
+  "ScrapBookMainNewFolderName": {
+    "description": "Default name of a new folder",
+    "message": "New Folder"
+  },
+  "ScrapBookMainNewNoteName": {
+    "description": "Default name of a new note",
+    "message": "New Note"
+  },
+  "ScrapBookMainBookRefresh": {
+    "message": "<Refresh>"
+  },
+  "ScrapBookMainCommandIndex": {
+    "message": "View index page"
+  },
+  "ScrapBookMainCommandExec": {
+    "message": "Open locally"
+  },
+  "ScrapBookMainCommandExecBook": {
+    "message": "View directory locally"
+  },
+  "ScrapBookMainCommandBrowse": {
+    "message": "Browse locally"
+  },
+  "ScrapBookMainCommandSource": {
+    "message": "View source"
+  },
+  "ScrapBookMainCommandMeta": {
+    "message": "Metadata"
+  },
+  "ScrapBookMainCommandCreatefolder": {
+    "message": "New folder"
+  },
+  "ScrapBookMainCommandCreateSeparator": {
+    "message": "New separator"
+  },
+  "ScrapBookMainCommandCreateNote": {
+    "message": "New Note"
+  },
+  "ScrapBookMainCommandEdit": {
+    "message": "Edit"
+  },
+  "ScrapBookMainCommandEditx": {
+    "message": "Edit page"
+  },
+  "ScrapBookMainCommandUpload": {
+    "message": "Upload"
+  },
+  "ScrapBookMainCommandMoveUp": {
+    "message": "Move up"
+  },
+  "ScrapBookMainCommandMoveDown": {
+    "message": "Move down"
+  },
+  "ScrapBookMainCommandMoveTo": {
+    "message": "Move to"
+  },
+  "ScrapBookMainCommandDelete": {
+    "message": "Delete"
+  },
+  "ScrapBookMainCommandMetaDialogId": {
+    "message": "ID:"
+  },
+  "ScrapBookMainCommandMetaDialogTitle": {
+    "message": "Title:"
+  },
+  "ScrapBookMainCommandMetaDialogIndex": {
+    "message": "Index:"
+  },
+  "ScrapBookMainCommandMetaDialogSource": {
+    "message": "Source:"
+  },
+  "ScrapBookMainCommandMetaDialogIcon": {
+    "message": "Icon:"
+  },
+  "ScrapBookMainCommandMetaDialogType": {
+    "message": "Type:"
+  },
+  "ScrapBookMainCommandMetaDialogCreate": {
+    "message": "Create:"
+  },
+  "ScrapBookMainCommandMetaDialogModify": {
+    "message": "Modify:"
+  },
+  "ScrapBookMainCommandMetaDialogComment": {
+    "message": "Comment:"
+  },
+  "ScrapBookMainCommandCreateNoteDialogTitle": {
+    "message": "Format of the new note:"
+  },
+  "ScrapBookMainCommandMoveDialogTitle": {
+    "message": "Move into the item of this ID:"
+  },
+  "ScrapBookMainErrorServerNotConfigured": {
+    "message": "Backend server is not configured."
+  },
+  "ScrapBookMainErrorServerInit": {
+    "message": "Backend initilization error: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorBookNotExist": {
+    "message": "Scrapbook $NAME$ does not exist. Reset to default scrapbook.",
+    "placeholders": {
+      "name": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorLoadBooks": {
+    "message": "Unable to load scrapbooks: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorLoadToc": {
+    "message": "Unable to load table of contents: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorLoadMeta": {
+    "message": "Unable to load metadata: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorInitTree": {
+    "message": "Unable to init tree: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
     }
   }
 }

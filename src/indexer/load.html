@@ -10,12 +10,14 @@
 <script src="../lib/sha_dev.js"></script>
 <script src="../lib/browser-polyfill.js"></script>
 <script src="../core/common.js"></script>
+<script src="../scrapbook/server.js"></script>
 <script src="../core/optionsAuto.js"></script>
 <script src="load.js"></script>
 </head>
 <body>
 <div id="panel">
 <div>__MSG_IndexerHeader__</div>
+<label id="load-server-label" hidden>__MSG_IndexerLoadServer__</label>
 <label id="dir-selector-label" for="dir-selector" title="__MSG_IndexerPickDirTooltip__" hidden>__MSG_IndexerPickDir__</label>
 <input type="file" id="dir-selector" webkitdirectory directory hidden>
 <label id="files-selector-label" for="files-selector" hidden>__MSG_IndexerPickFiles__</label>

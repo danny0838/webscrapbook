@@ -92,6 +92,24 @@ capturer.getUniqueFilename = function (timeId, filename) {
   return newFilename;
 };
 
+capturer.addItemToServer = async function (data) {
+  const book = server.books[server.bookId];
+  await book.loadMeta();
+  await book.loadToc();
+  await book.addItem({
+    item: {
+      id: data.timeId,
+      index: (data.targetDir ? data.targetDir + '/' : '') + data.filename,
+      title: data.title,
+      type: data.type || "",
+      create: data.timeId,
+      source: data.sourceUrl,
+    },
+  });
+  await book.saveMeta();
+  await book.saveToc();
+};
+
 /**
  * @kind invokable
  * @param {Object} params
@@ -176,6 +194,11 @@ capturer.captureTab = async function (params) {
     isDebug && console.debug("(main) response", source, response);
     capturer.captureInfo.delete(timeId);
     if (response.error) { throw new Error(response.error.message); }
+
+    if (message.options["capture.saveTo"] === "server") {
+      await capturer.addItemToServer(response);
+    }
+
     return response;
   } catch (ex) {
     console.error(ex);
@@ -234,6 +257,11 @@ capturer.captureHeadless = async function (params) {
     isDebug && console.debug("(main) response", source, response);
     capturer.captureInfo.delete(timeId);
     if (response.error) { throw new Error(response.error.message); }
+
+    if (message.options["capture.saveTo"] === "server") {
+      await capturer.addItemToServer(response);
+    }
+
     return response;
   } catch(ex) {
     console.error(ex);
@@ -468,12 +496,19 @@ capturer.captureBookmark = async function (params) {
     let savePrompt;
     let saveMethod;
 
+    title = title || scrapbook.urlToFilename(sourceUrl);
     switch (options["capture.saveTo"]) {
       case 'file': {
-        filename = (title ? title : scrapbook.urlToFilename(sourceUrl));
-        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        filename = scrapbook.validateFilename(title, options["capture.saveAsciiFilename"]);
         if (!filename.endsWith(ext)) { filename += ext; }
         saveMethod = "saveBlobNaturally";
+        break;
+      }
+      case 'server': {
+        targetDir = "";
+        filename = timeId + ext;
+        savePrompt = false;
+        saveMethod = "saveToServer";
         break;
       }
       default: {
@@ -500,9 +535,19 @@ capturer.captureBookmark = async function (params) {
       sourceUrl,
       autoErase: false,
       savePrompt,
+      settings,
+      options,
     });
 
-    return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+    return {
+      timeId,
+      title,
+      type: "bookmark",
+      sourceUrl,
+      targetDir,
+      filename,
+      url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+    };
   } catch (ex) {
     console.warn(ex);
     capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
@@ -569,6 +614,9 @@ Redirecting to file ${anchor}
           mime: "text/html",
           content: html,
         }
+      }).then((response) => {
+        response.type = "file";
+        return response;
       });
     } else {
       return {
@@ -631,6 +679,7 @@ capturer.saveDocument = async function (params) {
   const {timeId} = settings;
 
   try {
+    const title = data.title || scrapbook.urlToFilename(sourceUrl);
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
         if (!settings.frameIsMain) {
@@ -650,10 +699,16 @@ capturer.saveDocument = async function (params) {
 
           switch (options["capture.saveTo"]) {
             case 'file': {
-              filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+              filename = scrapbook.validateFilename(title, options["capture.saveAsciiFilename"]);
               if (!filename.endsWith(ext)) filename += ext;
               saveMethod = "saveBlobNaturally";
+              break;
+            }
+            case 'server': {
+              targetDir = "";
+              filename = timeId + ext;
+              savePrompt = false;
+              saveMethod = "saveToServer";
               break;
             }
             default: {
@@ -681,8 +736,18 @@ capturer.saveDocument = async function (params) {
             sourceUrl,
             autoErase: false,
             savePrompt,
+            settings,
+            options,
           }).then((filename) => {
-            return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+            return {
+              timeId,
+              title,
+              type: "",
+              sourceUrl,
+              targetDir,
+              filename,
+              url: scrapbook.escapeFilename(filename) + sourceUrlHash
+            };
           });
         }
         break;
@@ -713,10 +778,16 @@ capturer.saveDocument = async function (params) {
 
           switch (options["capture.saveTo"]) {
             case 'file': {
-              filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+              filename = scrapbook.validateFilename(title, options["capture.saveAsciiFilename"]);
               if (!filename.endsWith(ext)) filename += ext;
               saveMethod = "saveBlobNaturally";
+              break;
+            }
+            case 'server': {
+              targetDir = "";
+              filename = timeId + ext;
+              savePrompt = false;
+              saveMethod = "saveToServer";
               break;
             }
             default: {
@@ -836,8 +907,18 @@ ${JSON.stringify(zipData)}
               sourceUrl,
               autoErase: false,
               savePrompt,
+              settings,
+              options,
             }).then((filename) => {
-              return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+              return {
+                timeId,
+                title,
+                type: "",
+                sourceUrl,
+                targetDir,
+                filename,
+                url: scrapbook.escapeFilename(filename) + sourceUrlHash
+              };
             });
           }
         }
@@ -871,10 +952,16 @@ ${JSON.stringify(zipData)}
 
           switch (options["capture.saveTo"]) {
             case 'file': {
-              filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+              filename = scrapbook.validateFilename(title, options["capture.saveAsciiFilename"]);
               filename += ".htz";
               saveMethod = "saveBlobNaturally";
+              break;
+            }
+            case 'server': {
+              targetDir = "";
+              filename = timeId + ".htz";
+              savePrompt = false;
+              saveMethod = "saveToServer";
               break;
             }
             default: {
@@ -900,8 +987,18 @@ ${JSON.stringify(zipData)}
             sourceUrl,
             autoErase: false,
             savePrompt,
+            settings,
+            options,
           }).then((filename) => {
-            return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+            return {
+              timeId,
+              title,
+              type: "",
+              sourceUrl,
+              targetDir,
+              filename,
+              url: scrapbook.escapeFilename(filename) + sourceUrlHash
+            };
           });
         }
         break;
@@ -951,10 +1048,16 @@ ${JSON.stringify(zipData)}
 
             switch (options["capture.saveTo"]) {
               case 'file': {
-              filename = (data.title ? data.title : scrapbook.urlToFilename(sourceUrl));
-              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+              filename = scrapbook.validateFilename(title, options["capture.saveAsciiFilename"]);
               filename += ".maff";
               saveMethod = "saveBlobNaturally";
+                break;
+              }
+              case 'server': {
+                targetDir = "";
+                filename = timeId + ".maff";
+                savePrompt = false;
+                saveMethod = "saveToServer";
                 break;
               }
               default: {
@@ -980,8 +1083,18 @@ ${JSON.stringify(zipData)}
               sourceUrl,
               autoErase: false,
               savePrompt,
+              settings,
+              options,
             }).then((filename) => {
-              return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+              return {
+                timeId,
+                title,
+                type: "",
+                sourceUrl,
+                targetDir,
+                filename,
+                url: scrapbook.escapeFilename(filename) + sourceUrlHash
+              };
             });
           }
         }
@@ -990,37 +1103,65 @@ ${JSON.stringify(zipData)}
 
       case "folder":
       default: {
-        const targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
         const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+        let targetDir;
         let filename = documentName + ext;
+        let savePrompt = false;
+        let saveMethod;
+
+        switch (options["capture.saveTo"]) {
+          case 'server': {
+            targetDir = timeId;
+            saveMethod = "saveToServer";
+            break;
+          }
+          default: { // folder, file
+            targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
+            saveMethod = "saveBlob";
+            break;
+          }
+        }
+
         filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
-        filename = await capturer.saveBlob({
+        filename = await capturer[saveMethod]({
           timeId,
           blob: new Blob([data.content], {type: data.mime}),
           directory: targetDir,
           filename,
           sourceUrl,
           autoErase: !settings.frameIsMain || (ext === ".xhtml"),
-          savePrompt: false,
+          savePrompt,
+          settings,
+          options,
         });
 
         if (settings.frameIsMain && (ext === ".xhtml")) {
           // create index.html that redirects to index.xhtml
           const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
           const blob = new Blob([html], {type: "text/html"});
-          await capturer.saveBlob({
+          await capturer[saveMethod]({
             timeId,
             blob,
             directory: targetDir,
             filename: "index.html",
             sourceUrl,
             autoErase: false,
-            savePrompt: false,
+            savePrompt,
+            settings,
+            options,
           });
         }
 
-        return {timeId, sourceUrl, targetDir, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        return {
+          timeId,
+          title,
+          type: "",
+          sourceUrl,
+          targetDir,
+          filename,
+          url: scrapbook.escapeFilename(filename) + sourceUrlHash
+        };
         break;
       }
     }
@@ -1422,8 +1563,23 @@ capturer.downloadBlob = async function (params) {
     case "folder":
     default: {
       // download the data
-      const targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
-      const changedFilename = await capturer.saveBlob({
+      let targetDir;
+      let saveMethod;
+
+      switch (options["capture.saveTo"]) {
+        case 'server': {
+          targetDir = timeId;
+          saveMethod = "saveToServer";
+          break;
+        }
+        default: { // folder, file
+          targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
+          saveMethod = "saveBlob";
+          break;
+        }
+      }
+
+      const changedFilename = await capturer[saveMethod]({
         timeId,
         blob,
         directory: targetDir,
@@ -1431,6 +1587,8 @@ capturer.downloadBlob = async function (params) {
         sourceUrl,
         autoErase: true,
         savePrompt: false,
+        settings,
+        options,
       });
       return {
         timeId,
@@ -1601,6 +1759,43 @@ capturer.saveUrl = async function (params) {
       onError: reject,
     });
   });
+};
+
+/**
+ * @param {Object} params
+ *     - {string} params.timeId
+ *     - {string} params.blob
+ *     - {string} params.directory - URL of the server
+ *     - {string} params.filename
+ *     - {string} params.sourceUrl
+ *     - {Object} params.options
+ * @return {Promise}
+ */
+capturer.saveToServer = async function (params) {
+  isDebug && console.debug("call: saveToServer", params);
+
+  const {timeId, blob, directory, filename, sourceUrl, options} = params;
+  await server.init();
+
+  const target = server.books[server.bookId].dataUrl +
+      (directory ? directory + '/' : '') +
+      filename;
+
+  const formData = new FormData();
+  formData.append('token', await server.acquireToken());
+  formData.append('upload', blob);
+
+  try {
+    await server.request({
+      url: target + '?a=upload&f=json',
+      method: "POST",
+      body: formData,
+    });
+  } catch (ex) {
+    throw new Error(`Unable to upload to backend server: ${ex.message}`);
+  }
+
+  return filename;
 };
 
 

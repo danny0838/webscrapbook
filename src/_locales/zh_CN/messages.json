@@ -93,6 +93,9 @@
   "IndexerHeader": {
     "message": "选择网页剪贴簿文件夹或其 ZIP 压缩文件。你可以拖放它们至此窗口，或使用以下按钮："
   },
+  "IndexerLoadServer": {
+    "message": "载入服务器"
+  },
   "IndexerPickDir": {
     "message": "选择文件夹"
   },
@@ -119,6 +122,9 @@
   },
   "OpenOptions": {
     "message": "选项"
+  },
+  "OpenScrapBook": {
+    "message": "打开剪贴簿"
   },
   "OpenViewer": {
     "message": "检视封存网页"
@@ -349,8 +355,11 @@
   "OptionCaptureSaveToLabel": {
     "message": "保存获取数据至:"
   },
+  "OptionCaptureSaveToServerLabel": {
+    "message": "后端服务器"
+  },
   "OptionCaptureSaveToTooltip": {
-    "message": "指定管理保存数据的方式。\n\n* 剪贴簿文件夹：将获取页面保存于 <默认下载文件夹>/<剪贴簿文件夹>/data/ 目录中，并以当前日期时间做为 ID 命名，以便将来建立索引。\n\n* 独立文件：将获取页面保存成文件，以网页标题命名，并保存至 <默认下载文件夹> 或由用户指定保存路径，适合保存及分享个别网页。"
+    "message": "指定管理保存数据的方式。\n\n* 后端服务器：将获取页面保存于后端服务器设定的剪贴簿数据目录，并以当前日期时间做为 ID 命名，以便将来建立索引。\n\n* 剪贴簿文件夹：将获取页面保存于剪贴簿文件夹（<默认下载文件夹>/<剪贴簿文件夹>/data/），并以当前日期时间做为 ID 命名，以便将来建立索引。\n\n* 独立文件：将获取页面保存成文件，以网页标题命名，并保存至 <默认下载文件夹> 或由用户指定保存路径，适合保存及分享个别网页。"
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "剪贴簿文件夹:"
@@ -397,6 +406,9 @@
   "OptionGroupSave": {
     "message": "获取 - 保存"
   },
+  "OptionGroupServer": {
+    "message": "后端服务器"
+  },
   "OptionGroupViewer": {
     "message": "检视器"
   },
@@ -420,6 +432,18 @@
   },
   "OptionPageTitle": {
     "message": "选项设定"
+  },
+  "OptionServerPasswordLabel": {
+    "message": "密码:"
+  },
+  "OptionServerUrlLabel": {
+    "message": "网址:"
+  },
+  "OptionServerUrlTooltip": {
+    "message": "后端服务器程序的根目录，例如“http://localhost:8080/”或“https://example.com/wsb/”。\n\n* 后端服务器可用 Python 的 webscrapbook 套件（相容版本：0.1.*）架设，安装细节参见 https://pypi.org/project/webscrapbook/。"
+  },
+  "OptionServerUserLabel": {
+    "message": "用户:"
   },
   "OptionsExportLabel": {
     "message": "导出"
@@ -468,6 +492,152 @@
     "placeholders": {
       "source": {"content": "$1"},
       "target": {"content": "$2"}
+    }
+  },
+
+  "OK": {
+    "message": "确定"
+  },
+  "Cancel": {
+    "message": "取消"
+  },
+
+  "ScrapBookMainTitle": {
+    "message": "$BOOK$ | $APP$",
+    "placeholders": {
+      "app": {"content": "$1"},
+      "book": {"content": "$2"}
+    }
+  },
+  "ScrapBookMainNewFolderName": {
+    "description": "Default name of a new folder",
+    "message": "新文件夹"
+  },
+  "ScrapBookMainNewNoteName": {
+    "description": "Default name of a new note",
+    "message": "新笔记"
+  },
+  "ScrapBookMainBookRefresh": {
+    "message": "<刷新>"
+  },
+  "ScrapBookMainCommandIndex": {
+    "message": "检视主页"
+  },
+  "ScrapBookMainCommandExec": {
+    "message": "用默认程序开启"
+  },
+  "ScrapBookMainCommandExecBook": {
+    "message": "检视主目录"
+  },
+  "ScrapBookMainCommandBrowse": {
+    "message": "在文件管理员检视"
+  },
+  "ScrapBookMainCommandSource": {
+    "message": "开启原始网址"
+  },
+  "ScrapBookMainCommandMeta": {
+    "message": "元数据"
+  },
+  "ScrapBookMainCommandCreatefolder": {
+    "message": "添加文件夹"
+  },
+  "ScrapBookMainCommandCreateSeparator": {
+    "message": "添加分隔线"
+  },
+  "ScrapBookMainCommandCreateNote": {
+    "message": "添加笔记"
+  },
+  "ScrapBookMainCommandEdit": {
+    "message": "编辑"
+  },
+  "ScrapBookMainCommandEditx": {
+    "message": "编辑页面"
+  },
+  "ScrapBookMainCommandUpload": {
+    "message": "上载文件"
+  },
+  "ScrapBookMainCommandMoveUp": {
+    "message": "上移"
+  },
+  "ScrapBookMainCommandMoveDown": {
+    "message": "下移"
+  },
+  "ScrapBookMainCommandMoveTo": {
+    "message": "移动至"
+  },
+  "ScrapBookMainCommandDelete": {
+    "message": "删除"
+  },
+  "ScrapBookMainCommandMetaDialogId": {
+    "message": "ID:"
+  },
+  "ScrapBookMainCommandMetaDialogTitle": {
+    "message": "标题:"
+  },
+  "ScrapBookMainCommandMetaDialogIndex": {
+    "message": "索引文件:"
+  },
+  "ScrapBookMainCommandMetaDialogSource": {
+    "message": "来源:"
+  },
+  "ScrapBookMainCommandMetaDialogIcon": {
+    "message": "图示:"
+  },
+  "ScrapBookMainCommandMetaDialogType": {
+    "message": "类型:"
+  },
+  "ScrapBookMainCommandMetaDialogCreate": {
+    "message": "建立时间:"
+  },
+  "ScrapBookMainCommandMetaDialogModify": {
+    "message": "修改时间:"
+  },
+  "ScrapBookMainCommandMetaDialogComment": {
+    "message": "注解:"
+  },
+  "ScrapBookMainCommandCreateNoteDialogTitle": {
+    "message": "新笔记的格式:"
+  },
+  "ScrapBookMainCommandMoveDialogTitle": {
+    "message": "移动到这个 ID 的项目下:"
+  },
+  "ScrapBookMainErrorServerNotConfigured": {
+    "message": "未设定后端服务器。"
+  },
+  "ScrapBookMainErrorServerInit": {
+    "message": "后端服务器初始化错误: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorBookNotExist": {
+    "message": "剪贴簿 $NAME$ 不存在，重设为默认剪贴簿",
+    "placeholders": {
+      "name": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorLoadBooks": {
+    "message": "无法载入剪贴簿: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorLoadToc": {
+    "message": "无法载入目录表: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorLoadMeta": {
+    "message": "无法载入元数据: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
+    }
+  },
+  "ScrapBookMainErrorInitTree": {
+    "message": "无法初始化目录树: $REASON$",
+    "placeholders": {
+      "reason": {"content": "$1"}
     }
   }
 }

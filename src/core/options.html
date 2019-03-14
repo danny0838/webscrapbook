@@ -13,10 +13,27 @@
 <form id="options">
 <div id="optionsWrapper">
   <fieldset>
+    <legend>__MSG_OptionGroupServer__</legend>
+    <p>
+      <label for="opt_server.url">__MSG_OptionServerUrlLabel__</label>
+      <input type="url" id="opt_server.url" autocomplete="url">
+      <a href="javascript:" data-tooltip="__MSG_OptionServerUrlTooltip__"></a>
+    </p>
+    <p>
+      <label for="opt_server.user">__MSG_OptionServerUserLabel__</label>
+      <input type="text" id="opt_server.user" autocomplete="username">
+    </p>
+    <p>
+      <label for="opt_server.password">__MSG_OptionServerPasswordLabel__</label>
+      <input type="password" id="opt_server.password" autocomplete="new-password">
+    </p>
+  </fieldset>
+  <fieldset>
     <legend>__MSG_OptionGroupSave__</legend>
     <p>
       <label for="opt_capture.saveTo">__MSG_OptionCaptureSaveToLabel__</label>
       <select id="opt_capture.saveTo">
+        <option value="server">__MSG_OptionCaptureSaveToServerLabel__</option>
         <option value="folder">__MSG_OptionCaptureSaveToFolderLabel__</option>
         <option value="file">__MSG_OptionCaptureSaveToFileLabel__</option>
       </select>
@@ -24,7 +41,7 @@
     </p>
     <p id="captureSaveToFolderDetails" hidden>
       <label for="opt_capture.scrapbookFolder">__MSG_OptionCaptureScrapbookFolderLabel__</label>
-      <input type="text" id="opt_capture.scrapbookFolder" value="WebScrapBook" placeholder="WebScrapBook">
+      <input type="text" id="opt_capture.scrapbookFolder" value="WebScrapBook" placeholder="WebScrapBook" autocomplete="off">
       <a href="javascript:" data-tooltip="__MSG_OptionCaptureScrapbookFolderTooltip__"></a>
     </p>
     <p>
