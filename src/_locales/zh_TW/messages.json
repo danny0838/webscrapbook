@@ -412,12 +412,6 @@
   "OptionGroupViewer": {
     "message": "檢視器"
   },
-  "OptionIndexerAutoDownloadLabel": {
-    "message": "自動下載更新的索引檔案"
-  },
-  "OptionIndexerAutoDownloadTooltip": {
-    "message": "輸入做站台索引的資料夾必須是設定的剪貼簿資料夾，否則可能造成錯誤覆蓋及資料流失。"
-  },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
     "message": "將框架頁內容快取為主頁內容"
   },

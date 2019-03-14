@@ -79,8 +79,6 @@ function onChangeLoadServer(e) {
 }
 
 const indexer = {
-  autoEraseSet: new Set(),
-
   /**
    * UI related methods
    */
@@ -1767,34 +1765,6 @@ const indexer = {
       return;
     }
 
-    // auto download
-    if (this.options["indexer.autoDownload"] && !scrapbook.hasServer()) {
-      const directory = scrapbook.getOption("capture.scrapbookFolder");
-
-      if (scrapbook.validateFilename(scrapbookData.title) === directory.replace(/^.*[\\\/]/, "")) {
-        this.log(`Downloading files...`);
-        for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
-          if (zipObj.dir) { continue; }
-
-          try {
-            const blob = await zipObj.async("blob");
-            const downloadId = await browser.downloads.download({
-              url: URL.createObjectURL(blob),
-              filename: directory + "/" + inZipPath,
-              conflictAction: "overwrite",
-              saveAs: false,
-            });
-            this.autoEraseSet.add(downloadId);
-          } catch (ex) {
-            this.error(`Error downloading ${directory + "/" + inZipPath}: ${ex.message}`);
-          }
-        }
-        return;
-      }
-
-      this.error(`Picked folder does not match configured WebScrapBook folder. Download as zip...`);
-    }
-
     // download zip
     this.log(`Generating zip file...`);
     const blob = await zip.generateAsync({type: "blob"});
@@ -3338,16 +3308,6 @@ Supported browsers: Chromium ≥ 49, Firefox ≥ 41, Edge ≥ 14, Safari ≥ 8, 
 `;
   },
 };
-
-browser.downloads.onChanged.addListener(async (downloadDelta) => {
-  const downloadId = downloadDelta.id;
-  if (!indexer.autoEraseSet.has(downloadId)) { return; }
-
-  if ((downloadDelta.state && downloadDelta.state.current === "complete") || 
-      downloadDelta.error) {
-    return await browser.downloads.erase({id: downloadDelta.id});
-  }
-});
 
 document.addEventListener("DOMContentLoaded", async function () {
   scrapbook.loadLanguages(document);

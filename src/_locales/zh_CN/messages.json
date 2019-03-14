@@ -412,12 +412,6 @@
   "OptionGroupViewer": {
     "message": "检视器"
   },
-  "OptionIndexerAutoDownloadLabel": {
-    "message": "自动下载更新的索引文件"
-  },
-  "OptionIndexerAutoDownloadTooltip": {
-    "message": "输入做站台索引的文件夹必须是设定的剪贴簿文件夹，否则可能造成错误覆盖及数据丟失。"
-  },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
     "message": "将框架页内容缓存为主页内容"
   },

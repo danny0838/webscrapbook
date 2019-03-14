@@ -412,12 +412,6 @@
   "OptionGroupViewer": {
     "message": "Viewer"
   },
-  "OptionIndexerAutoDownloadLabel": {
-    "message": "Auto download updated files"
-  },
-  "OptionIndexerAutoDownloadTooltip": {
-    "message": "The input folder must be configured ScrapBook Folder, or the files could be incorrectly overwritten."
-  },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
     "message": "Cache frame content as main document content"
   },

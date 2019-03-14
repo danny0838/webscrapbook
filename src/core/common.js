@@ -133,7 +133,6 @@ scrapbook.options = {
   "viewer.useFileSystemApi": false,
   "viewer.viewHtz": true,
   "viewer.viewMaff": true,
-  "indexer.autoDownload": false,
   "indexer.fulltextCache": true,
   "indexer.fulltextCacheFrameAsPageContent": true,
 };
