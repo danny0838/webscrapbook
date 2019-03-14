@@ -1289,15 +1289,6 @@ const indexer = {
       'tree/icon/postit.png': browser.runtime.getURL("resources/postit.png"),  // ScrapBook X note
     };
 
-    /* server scripts */
-    if (this.options["indexer.serverScripts"]) {
-      resToInclude["server.py"] = browser.runtime.getURL("resources/server.py");
-
-      if (!otherFiles["config.ini"]) {
-        resToInclude["config.ini"] = browser.runtime.getURL("resources/config.ini");
-      }
-    }
-
     for (const path in resToInclude) {
       if (treeFiles[path]) { continue; }
 
