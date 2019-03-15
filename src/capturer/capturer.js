@@ -93,17 +93,101 @@ capturer.getUniqueFilename = function (timeId, filename) {
 };
 
 capturer.addItemToServer = async function (data) {
+  const getShaFile = (data) => {
+    if (!data) { throw new Error(`Unable to fetch a file for this favicon URL.`); }
+
+    let {ab, mime, ext} = data;
+
+    // validate that we have a correct image mimetype
+    if (!mime.startsWith('image/') && mime !== 'application/octet-stream') {
+      throw new Error(`Invalid image mimetype '${mime}'.`);
+    }
+
+    // if no extension, generate one according to mime
+    if (!ext) { ext = Mime.extension(mime); }
+
+    const sha = scrapbook.sha1(ab, 'ARRAYBUFFER');
+    return new File([ab], `${sha}${ext ? '.' + ext : ''}`, {type: mime});
+  };
+
+  const getFavIcon = async (favIconUrl) => {
+    if (favIconUrl.startsWith("data:")) {
+      return scrapbook.dataUriToFile(favIconUrl, false);
+    }
+
+    const headers = {};
+    const xhr = await scrapbook.xhr({
+      url: favIconUrl,
+      responseType: 'blob',
+      timeout: 5000,
+      onreadystatechange(xhr) {
+        if (xhr.readyState !== 2) { return; }
+        if (xhr.status === 0) { return; }
+
+        // get headers
+        const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+        if (headerContentDisposition) {
+          const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+          headers.filename = contentDisposition.parameters.filename;
+        }
+      },
+    });
+
+    const [, ext] = scrapbook.filenameParts(headers.filename || scrapbook.urlToFilename(xhr.responseURL));
+    const blob = xhr.response;
+    const mime = blob.type;
+
+    const ab = await scrapbook.readFileAsArrayBuffer(blob);
+    return getShaFile({ab, mime, ext});
+  };
+
   const book = server.books[server.bookId];
+  const index = (data.targetDir ? data.targetDir + '/' : '') + data.filename;
+  let icon = data.favIconUrl;
+  
+  // cache favicon
+  if (scrapbook.isUrlAbsolute(icon)) {
+    try {
+      const base = book.dataUrl + index;
+      const file = await getFavIcon(icon);
+      const target = book.treeUrl + 'favicon/' + file.name;
+
+      // save image if it doesn't exist
+      const json = await server.request({
+        url: target + '?f=json',
+        method: "GET",
+      }).then(r => r.json());
+
+      if (json.data.type === null) {
+        const formData = new FormData();
+        formData.append('token', await server.acquireToken());
+        formData.append('upload', file);
+
+        await server.request({
+          url: target + '?a=upload&f=json',
+          method: "POST",
+          body: formData,
+        });
+      }
+
+      icon = scrapbook.getRelativeUrl(target, base);
+    } catch (ex) {
+      console.warn(ex);
+      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [icon, ex.message]));
+    }
+  }
+
   await book.loadMeta();
   await book.loadToc();
   await book.addItem({
     item: {
       id: data.timeId,
-      index: (data.targetDir ? data.targetDir + '/' : '') + data.filename,
+      index,
       title: data.title,
       type: data.type || "",
       create: data.timeId,
       source: data.sourceUrl,
+      icon,
     },
   });
   await book.saveMeta();
@@ -547,6 +631,7 @@ capturer.captureBookmark = async function (params) {
       targetDir,
       filename,
       url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+      favIconUrl,
     };
   } catch (ex) {
     console.warn(ex);
@@ -666,7 +751,12 @@ capturer.registerDocument = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {{mime: string, charset: string, content: string, title: string}} params.data
+ *     - {Object} params.data
+ *         - {string} params.data.mime
+ *         - {string} params.data.charset
+ *         - {string} params.data.content
+ *         - {string} params.data.title
+ *         - {string} params.data.favIconUrl
  *     - {string} params.documentName
  *     - {string} params.sourceUrl
  *     - {Object} params.settings
@@ -748,7 +838,8 @@ capturer.saveDocument = async function (params) {
               sourceUrl,
               targetDir,
               filename,
-              url: scrapbook.escapeFilename(filename) + sourceUrlHash
+              url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+              favIconUrl: data.favIconUrl,
             };
           });
         }
@@ -914,7 +1005,8 @@ ${JSON.stringify(zipData)}
                 sourceUrl,
                 targetDir,
                 filename,
-                url: scrapbook.escapeFilename(filename) + sourceUrlHash
+                url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+                favIconUrl: data.favIconUrl,
               };
             });
           }
@@ -994,7 +1086,8 @@ ${JSON.stringify(zipData)}
               sourceUrl,
               targetDir,
               filename,
-              url: scrapbook.escapeFilename(filename) + sourceUrlHash
+              url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+              favIconUrl: data.favIconUrl,
             };
           });
         }
@@ -1090,7 +1183,8 @@ ${JSON.stringify(zipData)}
                 sourceUrl,
                 targetDir,
                 filename,
-                url: scrapbook.escapeFilename(filename) + sourceUrlHash
+                url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+                favIconUrl: data.favIconUrl,
               };
             });
           }
@@ -1157,7 +1251,8 @@ ${JSON.stringify(zipData)}
           sourceUrl,
           targetDir,
           filename,
-          url: scrapbook.escapeFilename(filename) + sourceUrlHash
+          url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+          favIconUrl: data.favIconUrl,
         };
         break;
       }

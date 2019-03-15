@@ -796,6 +796,49 @@ scrapbook.isUrlAbsolute = function (url) {
   return /^[a-z][a-z0-9+.-]*:/i.test(url || "");
 };
 
+scrapbook.getRelativeUrl = function (targetUrl, baseUrl) {
+  const targetUrlObj = new URL(targetUrl);
+  const baseUrlObj = new URL(baseUrl);
+
+  // absolute
+  if (targetUrlObj.protocol !== baseUrlObj.protocol) {
+    return targetUrl;
+  }
+
+  // protocol-relative
+  if (targetUrlObj.host !== baseUrlObj.host) {
+    return '//' + targetUrlObj.host + targetUrlObj.pathname + targetUrlObj.search + targetUrlObj.hash;
+  }
+
+  if (targetUrlObj.pathname !== baseUrlObj.pathname) {
+    const targetPathParts = targetUrlObj.pathname.split('/');
+    const basePathParts = baseUrlObj.pathname.split('/');
+
+    let commonIndex;
+    basePathParts.every((v, i) => {
+      if (v === targetPathParts[i]) {
+        commonIndex = i;
+        return true;
+      }
+      return false;
+    });
+
+    let pathname = '../'.repeat(basePathParts.length - commonIndex - 2);
+    pathname += targetPathParts.slice(commonIndex + 1).join('/');
+    return pathname + targetUrlObj.search + targetUrlObj.hash;
+  }
+
+  if (targetUrlObj.search !== baseUrlObj.search) {
+    return targetUrlObj.search + targetUrlObj.hash;
+  }
+
+  if (targetUrlObj.hash !== baseUrlObj.hash) {
+    return targetUrlObj.hash;
+  }
+
+  return '';
+};
+
 scrapbook.urlToFilename = function (url) {
   let name = url, pos;
   pos = name.indexOf("?");

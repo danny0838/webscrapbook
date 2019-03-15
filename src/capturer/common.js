@@ -770,6 +770,7 @@ capturer.captureDocument = async function (params) {
 
     // inspect nodes
     let metaCharsetNode;
+    let favIconUrl;
     Array.prototype.forEach.call(rootNode.querySelectorAll("*"), (elem) => {
       // skip elements that are already removed from the DOM tree
       if (!elem.parentNode) { return; }
@@ -909,15 +910,23 @@ capturer.captureDocument = async function (params) {
             // favicon: the link element
             switch (options["capture.favicon"]) {
               case "link":
-                // do nothing
+                if (typeof favIconUrl === 'undefined') {
+                  favIconUrl = rewriteUrl;
+                }
                 break;
               case "blank":
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // If the href attribute is absent, then the element does not define a link.
                 captureRewriteUri(elem, "href", null);
+                if (typeof favIconUrl === 'undefined') {
+                  favIconUrl = "";
+                }
                 break;
               case "remove":
                 captureRemoveNode(elem);
+                if (typeof favIconUrl === 'undefined') {
+                  favIconUrl = "";
+                }
                 return;
               case "save":
               default:
@@ -929,6 +938,13 @@ capturer.captureDocument = async function (params) {
                   options,
                 }).then((response) => {
                   captureRewriteUri(elem, "href", response.url);
+                  if (typeof favIconUrl === 'undefined') {
+                    if (options["capture.saveAs"] === 'folder') {
+                      favIconUrl = response.url;
+                    } else {
+                      favIconUrl = rewriteUrl;
+                    }
+                  }
                   return response;
                 });
                 break;
@@ -2029,6 +2045,7 @@ capturer.captureDocument = async function (params) {
         charset: "UTF-8",
         content,
         title: title || doc.title,
+        favIconUrl,
       }
     });
   } catch(ex) {
