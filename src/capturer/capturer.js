@@ -141,6 +141,7 @@ capturer.addItemToServer = async function (data) {
     return getShaFile({ab, mime, ext});
   };
 
+  await server.init();
   const book = server.books[server.bookId];
   const index = (data.targetDir ? data.targetDir + '/' : '') + data.filename;
   let icon = data.favIconUrl;
@@ -553,6 +554,20 @@ capturer.captureBookmark = async function (params) {
       console.error(ex);
     }
 
+    // save to meta and TOC only
+    if (options["capture.saveTo"] === 'server') {
+      return {
+        timeId,
+        title,
+        type: "bookmark",
+        sourceUrl,
+        targetDir: '',
+        filename: '',
+        url: '',
+        favIconUrl,
+      };
+    }
+
     let html;
     {
       const meta = params.options["capture.recordDocumentMeta"] ? 
@@ -589,6 +604,7 @@ capturer.captureBookmark = async function (params) {
         break;
       }
       case 'server': {
+        // deprecated; normally we won't get here
         targetDir = "";
         filename = timeId + ext;
         savePrompt = false;
