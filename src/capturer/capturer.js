@@ -623,7 +623,7 @@ capturer.captureBookmark = async function (params) {
     const dataBlob = new Blob([html], {type: "text/html"});
 
     // special handling (for unit test)
-    if (options["capture.saveInMemory"]) {
+    if (options["capture.saveTo"] === 'memory') {
       return await capturer.saveBlobInMemory({blob: dataBlob});
     }
 
@@ -716,9 +716,12 @@ Redirecting to file ${anchor}
           content: html,
         }
       }).then((response) => {
-        if (!options["capture.saveInMemory"]) {
-          response.type = "file";
+        // special handling
+        if (options["capture.saveTo"] === 'memory') {
+          return response;
         }
+
+        response.type = "file";
         return response;
       });
     } else {
@@ -831,7 +834,7 @@ capturer.saveDocument = async function (params) {
           const dataBlob = new Blob([data.content], {type: data.mime});
 
           // special handling (for unit test)
-          if (options["capture.saveInMemory"]) {
+          if (options["capture.saveTo"] === 'memory') {
             return await capturer.saveBlobInMemory({blob: dataBlob});
           }
 
@@ -998,7 +1001,7 @@ ${JSON.stringify(zipData)}
             const dataBlob = new Blob([content], {type: data.mime});
 
             // special handling (for unit test)
-            if (options["capture.saveInMemory"]) {
+            if (options["capture.saveTo"] === 'memory') {
               return await capturer.saveBlobInMemory({blob: dataBlob});
             }
 
@@ -1079,7 +1082,7 @@ ${JSON.stringify(zipData)}
           }
 
           // special handling (for unit test)
-          if (options["capture.saveInMemory"]) {
+          if (options["capture.saveTo"] === 'memory') {
             return await capturer.saveBlobInMemory({blob: zipBlob});
           }
 
@@ -1176,7 +1179,7 @@ ${JSON.stringify(zipData)}
             }
 
             // special handling (for unit test)
-            if (options["capture.saveInMemory"]) {
+            if (options["capture.saveTo"] === 'memory') {
               return await capturer.saveBlobInMemory({blob: zipBlob});
             }
 
@@ -1222,7 +1225,7 @@ ${JSON.stringify(zipData)}
             saveMethod = "saveToServer";
             break;
           }
-          default: { // folder, file
+          default: { // folder, file, memory
             targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
             saveMethod = "saveBlob";
             break;

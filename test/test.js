@@ -2,8 +2,7 @@
  * Configs
  */
 const baseOptions = {
-  "capture.saveInMemory": true,
-  "capture.saveTo": "folder",
+  "capture.saveTo": "memory",
   "capture.saveAs": "zip",
   "capture.saveAsciiFilename": false,
   "capture.saveBeyondSelection": false,
