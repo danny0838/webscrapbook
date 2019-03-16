@@ -506,27 +506,31 @@ const scrapbookUi = {
       x => x.parentNode.parentNode
     );
 
+    const isRecycle = this.rootId === 'recycle';
+
     switch (selectedItemElems.length) {
       case 0: {
-        cmdElem.querySelector('option[value="index"]').hidden = false;
-        cmdElem.querySelector('option[value="exec_book"]').hidden = false;
+        cmdElem.querySelector('option[value="index"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="exec_book"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="open"]').hidden = true;
         cmdElem.querySelector('option[value="opentab"]').hidden = true;
         cmdElem.querySelector('option[value="exec"]').hidden = true;
         cmdElem.querySelector('option[value="browse"]').hidden = true;
         cmdElem.querySelector('option[value="source"]').hidden = true;
-        cmdElem.querySelector('option[value="manage"]').hidden = false;
+        cmdElem.querySelector('option[value="manage"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="meta"]').hidden = true;
-        cmdElem.querySelector('option[value="mkfolder"]').hidden = false;
-        cmdElem.querySelector('option[value="mksep"]').hidden = false;
-        cmdElem.querySelector('option[value="mknote"]').hidden = false;
-        cmdElem.querySelector('option[value="upload"]').hidden = false;
+        cmdElem.querySelector('option[value="mkfolder"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="mksep"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="mknote"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="upload"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="edit"]').hidden = true;
         cmdElem.querySelector('option[value="editx"]').hidden = true;
         cmdElem.querySelector('option[value="move_up"]').hidden = true;
         cmdElem.querySelector('option[value="move_down"]').hidden = true;
         cmdElem.querySelector('option[value="move_into"]').hidden = true;
+        cmdElem.querySelector('option[value="recycle"]').hidden = true;
         cmdElem.querySelector('option[value="delete"]').hidden = true;
+        cmdElem.querySelector('option[value="view_recycle"]').hidden = !(!isRecycle);
         break;
       }
 
@@ -542,16 +546,18 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="source"]').hidden = !(item.source);
         cmdElem.querySelector('option[value="manage"]').hidden = !(item.type === 'folder' || this.book.toc[item.id]);
         cmdElem.querySelector('option[value="meta"]').hidden = false;
-        cmdElem.querySelector('option[value="mkfolder"]').hidden = false;
-        cmdElem.querySelector('option[value="mksep"]').hidden = false;
-        cmdElem.querySelector('option[value="mknote"]').hidden = false;
-        cmdElem.querySelector('option[value="upload"]').hidden = false;
-        cmdElem.querySelector('option[value="edit"]').hidden = !(['', 'note'].includes(item.type) && item.index);
-        cmdElem.querySelector('option[value="editx"]').hidden = !(['', 'note'].includes(item.type) && isHtml);
-        cmdElem.querySelector('option[value="move_up"]').hidden = false;
-        cmdElem.querySelector('option[value="move_down"]').hidden = false;
+        cmdElem.querySelector('option[value="mkfolder"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="mksep"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="mknote"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="upload"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="edit"]').hidden = !(!isRecycle && ['', 'note'].includes(item.type) && item.index);
+        cmdElem.querySelector('option[value="editx"]').hidden = !(!isRecycle && ['', 'note'].includes(item.type) && isHtml);
+        cmdElem.querySelector('option[value="move_up"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="move_down"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="move_into"]').hidden = false;
-        cmdElem.querySelector('option[value="delete"]').hidden = false;
+        cmdElem.querySelector('option[value="recycle"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="delete"]').hidden = !(isRecycle);
+        cmdElem.querySelector('option[value="view_recycle"]').hidden = true;
         break;
       }
 
@@ -574,7 +580,9 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="move_up"]').hidden = true;
         cmdElem.querySelector('option[value="move_down"]').hidden = true;
         cmdElem.querySelector('option[value="move_into"]').hidden = false;
-        cmdElem.querySelector('option[value="delete"]').hidden = false;
+        cmdElem.querySelector('option[value="recycle"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="delete"]').hidden = !(isRecycle);
+        cmdElem.querySelector('option[value="view_recycle"]').hidden = true;
         break;
       }
     }
@@ -1259,6 +1267,43 @@ const scrapbookUi = {
     }
   },
 
+  async cmd_recycle(selectedItemElems) {
+    if (!selectedItemElems.length) { return; }
+
+    for (const itemElem of selectedItemElems) {
+      const itemId = itemElem.getAttribute('data-id');
+
+      const parentItemElem = itemElem.parentNode.parentNode;
+      const parentItemId = parentItemElem.getAttribute('data-id');
+      const siblingItems = parentItemElem.container.children;
+      const index = Array.prototype.indexOf.call(siblingItems, itemElem);
+
+      // the operated item element is missing due to an unexpected reason
+      if (index === -1) { continue; }
+
+      // remove this and descendant items from Book
+      this.book.recycleItemTree({
+        id: itemId,
+        parentId: parentItemId,
+        index,
+      });
+
+      // save TOC
+      await this.book.saveToc();
+
+      // update DOM
+      Array.prototype.filter.call(
+        document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+        x => x.getAttribute('data-id') === parentItemId
+      ).forEach((parentElem) => {
+        if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
+        const itemElem = parentElem.container.children[index];
+        itemElem.remove();
+        this.itemReduceContainer(parentElem);
+      });
+    }
+  },
+
   async cmd_delete(selectedItemElems) {
     if (!selectedItemElems.length) { return; }
 
@@ -1322,6 +1367,20 @@ const scrapbookUi = {
           this.warn(`Unable to delete '${removedItem.index}': ${ex.message}`);
         }
       }
+    }
+  },
+
+  async cmd_view_recycle(selectedItemElems) {
+    const urlObj = new URL(location.href);
+    const currentMode = urlObj.searchParams.get('mode');
+    urlObj.searchParams.set('id', this.bookId);
+    urlObj.searchParams.set('mode', 'manage');
+    urlObj.searchParams.set('root', 'recycle');
+    const target = urlObj.href;
+    if (currentMode === 'manage') {
+      location.assign(target);
+    } else {
+      await this.openModalWindow(target);
     }
   },
 };

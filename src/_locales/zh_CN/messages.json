@@ -562,8 +562,14 @@
   "ScrapBookMainCommandMoveTo": {
     "message": "移动至"
   },
+  "ScrapBookMainCommandRecycle": {
+    "message": "移除"
+  },
   "ScrapBookMainCommandDelete": {
     "message": "删除"
+  },
+  "ScrapBookMainCommandViewRecycle": {
+    "message": "检视回收筒"
   },
   "ScrapBookMainCommandMetaDialogId": {
     "message": "ID:"

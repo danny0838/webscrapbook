@@ -562,8 +562,14 @@
   "ScrapBookMainCommandMoveTo": {
     "message": "Move to"
   },
+  "ScrapBookMainCommandRecycle": {
+    "message": "Remove"
+  },
   "ScrapBookMainCommandDelete": {
     "message": "Delete"
+  },
+  "ScrapBookMainCommandViewRecycle": {
+    "message": "View recycle bin"
   },
   "ScrapBookMainCommandMetaDialogId": {
     "message": "ID:"
