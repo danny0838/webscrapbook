@@ -528,9 +528,9 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="index"]').hidden = true;
         cmdElem.querySelector('option[value="open"]').hidden = true;
         cmdElem.querySelector('option[value="opentab"]').hidden = false;
-        cmdElem.querySelector('option[value="exec"]').hidden = true;
+        cmdElem.querySelector('option[value="exec"]').hidden = false;
         cmdElem.querySelector('option[value="browse"]').hidden = true;
-        cmdElem.querySelector('option[value="source"]').hidden = true;
+        cmdElem.querySelector('option[value="source"]').hidden = false;
         cmdElem.querySelector('option[value="meta"]').hidden = true;
         cmdElem.querySelector('option[value="mkfolder"]').hidden = true;
         cmdElem.querySelector('option[value="mksep"]').hidden = true;
@@ -649,13 +649,19 @@ const scrapbookUi = {
   },
 
   async cmd_exec(selectedItemElems) {
-    let target;
     if (!selectedItemElems.length) {
-      target = this.book.topUrl;
-    } else {
-      const id = selectedItemElems[0].getAttribute('data-id');
+      const target = this.book.topUrl;
+      await server.request({
+        url: target + '?a=exec&f=json',
+        method: "GET",
+      });
+      return;
+    }
+
+    for (const elem of selectedItemElems) {
+      const id = elem.getAttribute('data-id');
       const item = this.book.meta[id];
-      target = this.book.dataUrl + item.index;
+      const target = this.book.dataUrl + item.index;
 
       if (target.endsWith('.html')) {
         const redirectedTarget = await this.getMetaRefreshTarget(target);
@@ -663,12 +669,12 @@ const scrapbookUi = {
           target = redirectedTarget;
         }
       }
-    }
 
-    await server.request({
-      url: target + '?a=exec&f=json',
-      method: "GET",
-    });
+      await server.request({
+        url: target + '?a=exec&f=json',
+        method: "GET",
+      });
+    }
   },
 
   async cmd_browse(selectedItemElems) {
@@ -693,12 +699,15 @@ const scrapbookUi = {
   },
 
   async cmd_source(selectedItemElems) {
-    if (!selectedItemElems.length) { return; }
-
-    const id = selectedItemElems[0].getAttribute('data-id');
-    const item = this.book.meta[id];
-    const target = item.source;
-    await this.openLink(target);
+    const inNewTab = selectedItemElems.length > 1;
+    for (const elem of selectedItemElems) {
+      const id = elem.getAttribute('data-id');
+      const item = this.book.meta[id];
+      if (item.source) {
+        const target = item.source;
+        await this.openLink(target, inNewTab);
+      }
+    }
   },
 
   async cmd_meta(selectedItemElems) {
