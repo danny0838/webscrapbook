@@ -480,9 +480,10 @@ const scrapbookUi = {
     switch (selectedItemElems.length) {
       case 0: {
         cmdElem.querySelector('option[value="index"]').hidden = false;
+        cmdElem.querySelector('option[value="exec_book"]').hidden = false;
         cmdElem.querySelector('option[value="open"]').hidden = true;
         cmdElem.querySelector('option[value="opentab"]').hidden = true;
-        cmdElem.querySelector('option[value="exec"]').hidden = false;
+        cmdElem.querySelector('option[value="exec"]').hidden = true;
         cmdElem.querySelector('option[value="browse"]').hidden = true;
         cmdElem.querySelector('option[value="source"]').hidden = true;
         cmdElem.querySelector('option[value="meta"]').hidden = true;
@@ -496,7 +497,6 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="move_down"]').hidden = true;
         cmdElem.querySelector('option[value="move_into"]').hidden = true;
         cmdElem.querySelector('option[value="delete"]').hidden = true;
-        cmdElem.querySelector('option[value="exec"]').textContent = scrapbook.lang('ScrapBookMainCommandExecBook');
         break;
       }
 
@@ -504,6 +504,7 @@ const scrapbookUi = {
         const item = this.book.meta[selectedItemElems[0].getAttribute('data-id')];
         const isHtml = /\.(?:html?|xht(?:ml)?)$/.test(item.index);
         cmdElem.querySelector('option[value="index"]').hidden = true;
+        cmdElem.querySelector('option[value="exec_book"]').hidden = true;
         cmdElem.querySelector('option[value="open"]').hidden = ['folder', 'separator'].includes(item.type);
         cmdElem.querySelector('option[value="opentab"]').hidden = ['folder', 'separator'].includes(item.type);
         cmdElem.querySelector('option[value="exec"]').hidden = !(item.type === 'file' && item.index);
@@ -520,12 +521,12 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="move_down"]').hidden = false;
         cmdElem.querySelector('option[value="move_into"]').hidden = false;
         cmdElem.querySelector('option[value="delete"]').hidden = false;
-        cmdElem.querySelector('option[value="exec"]').textContent = scrapbook.lang('ScrapBookMainCommandExec');
         break;
       }
 
       default: {
         cmdElem.querySelector('option[value="index"]').hidden = true;
+        cmdElem.querySelector('option[value="exec_book"]').hidden = true;
         cmdElem.querySelector('option[value="open"]').hidden = true;
         cmdElem.querySelector('option[value="opentab"]').hidden = false;
         cmdElem.querySelector('option[value="exec"]').hidden = false;
@@ -596,6 +597,14 @@ const scrapbookUi = {
     await this.openLink(this.book.indexUrl);
   },
 
+  async cmd_exec_book(selectedItemElems) {
+    const target = this.book.topUrl;
+    await server.request({
+      url: target + '?a=exec&f=json',
+      method: "GET",
+    });
+  },
+
   async cmd_open(selectedItemElems) {
     const id = selectedItemElems[0].getAttribute('data-id');
     const item = this.book.meta[id];
@@ -649,15 +658,6 @@ const scrapbookUi = {
   },
 
   async cmd_exec(selectedItemElems) {
-    if (!selectedItemElems.length) {
-      const target = this.book.topUrl;
-      await server.request({
-        url: target + '?a=exec&f=json',
-        method: "GET",
-      });
-      return;
-    }
-
     for (const elem of selectedItemElems) {
       const id = elem.getAttribute('data-id');
       const item = this.book.meta[id];
