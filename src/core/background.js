@@ -199,7 +199,7 @@ async function initContextMenu() {
     contexts: ["image", "audio", "video"],
     targetUrlPatterns: urlMatch,
     onclick: (info, tab) => {
-      return capturer.invokeCapture({url: info.srcUrl});
+      return capturer.invokeCapture({url: info.srcUrl, mode: "source"});
     }
   });
 }
