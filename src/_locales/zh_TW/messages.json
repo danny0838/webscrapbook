@@ -490,13 +490,6 @@
     "message": "取消"
   },
 
-  "ScrapBookMainTitle": {
-    "message": "$BOOK$ | $APP$",
-    "placeholders": {
-      "app": {"content": "$1"},
-      "book": {"content": "$2"}
-    }
-  },
   "ScrapBookMainNewFolderName": {
     "description": "Default name of a new folder",
     "message": "新資料夾"

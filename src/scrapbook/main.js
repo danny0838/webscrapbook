@@ -106,9 +106,6 @@ const scrapbookUi = {
         await scrapbook.setOption("server.scrapbook", bookId);
       }
 
-      // document title
-      document.title = scrapbook.lang('ScrapBookMainTitle', [server.config.app.name, book.name]);
-
       // init book select
       const wrapper = document.getElementById('book');
 
@@ -176,6 +173,9 @@ const scrapbookUi = {
 
     // init params
     this.mode = urlParams.get('mode') || this.mode;
+
+    // document title
+    document.title = this.book.name + (rootId !== 'root' ? ' :: ' + rootId : '') + ' | ' + server.config.app.name;
 
     // enable UI
     this.enableToolbar(true);
