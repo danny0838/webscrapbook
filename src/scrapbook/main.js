@@ -464,7 +464,9 @@ const scrapbookUi = {
       // select book
       const bookId = event.target.value;
       await scrapbook.setOption("server.scrapbook", bookId);
-      location.reload();
+      const urlObj = new URL(location.href);
+      urlObj.searchParams.set('id', bookId);
+      location.assign(urlObj.href);
     }
     this.enableToolbar(true);
   },
