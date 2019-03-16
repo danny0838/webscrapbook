@@ -480,6 +480,8 @@ const scrapbookUi = {
     switch (selectedItemElems.length) {
       case 0: {
         cmdElem.querySelector('option[value="index"]').hidden = false;
+        cmdElem.querySelector('option[value="open"]').hidden = true;
+        cmdElem.querySelector('option[value="opentab"]').hidden = true;
         cmdElem.querySelector('option[value="exec"]').hidden = false;
         cmdElem.querySelector('option[value="browse"]').hidden = true;
         cmdElem.querySelector('option[value="source"]').hidden = true;
@@ -502,6 +504,8 @@ const scrapbookUi = {
         const item = this.book.meta[selectedItemElems[0].getAttribute('data-id')];
         const isHtml = /\.(?:html?|xht(?:ml)?)$/.test(item.index);
         cmdElem.querySelector('option[value="index"]').hidden = true;
+        cmdElem.querySelector('option[value="open"]').hidden = ['folder', 'separator'].includes(item.type);
+        cmdElem.querySelector('option[value="opentab"]').hidden = ['folder', 'separator'].includes(item.type);
         cmdElem.querySelector('option[value="exec"]').hidden = !(item.type === 'file' && item.index);
         cmdElem.querySelector('option[value="browse"]').hidden = !(item.index);
         cmdElem.querySelector('option[value="source"]').hidden = !(item.source);
@@ -522,6 +526,8 @@ const scrapbookUi = {
 
       default: {
         cmdElem.querySelector('option[value="index"]').hidden = true;
+        cmdElem.querySelector('option[value="open"]').hidden = true;
+        cmdElem.querySelector('option[value="opentab"]').hidden = false;
         cmdElem.querySelector('option[value="exec"]').hidden = true;
         cmdElem.querySelector('option[value="browse"]').hidden = true;
         cmdElem.querySelector('option[value="source"]').hidden = true;
@@ -587,7 +593,59 @@ const scrapbookUi = {
   },
 
   async cmd_index(selectedItemElems) {
-    this.openLink(this.book.indexUrl);
+    await this.openLink(this.book.indexUrl);
+  },
+
+  async cmd_open(selectedItemElems) {
+    const id = selectedItemElems[0].getAttribute('data-id');
+    const item = this.book.meta[id];
+    switch (item.type) {
+      case 'folder':
+      case 'separator': {
+        break;
+      }
+      case 'bookmark': {
+        if (item.source) {
+          await this.openLink(item.source);
+        }
+        break;
+      }
+      case 'file':
+      default: {
+        if (item.index) {
+          const target = this.book.dataUrl + item.index;
+          await this.openLink(target);
+        }
+        break;
+      }
+    }
+  },
+
+  async cmd_opentab(selectedItemElems) {
+    for (const elem of selectedItemElems) {
+      const id = elem.getAttribute('data-id');
+      const item = this.book.meta[id];
+      switch (item.type) {
+        case 'folder':
+        case 'separator': {
+          break;
+        }
+        case 'bookmark': {
+          if (item.source) {
+            await this.openLink(item.source, true);
+          }
+          break;
+        }
+        case 'file':
+        default: {
+          if (item.index) {
+            const target = this.book.dataUrl + item.index;
+            await this.openLink(target, true);
+          }
+          break;
+        }
+      }
+    }
   },
 
   async cmd_exec(selectedItemElems) {

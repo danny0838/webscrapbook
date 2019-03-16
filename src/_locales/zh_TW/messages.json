@@ -511,6 +511,12 @@
   "ScrapBookMainCommandIndex": {
     "message": "檢視主頁"
   },
+  "ScrapBookMainCommandOpen": {
+    "message": "開啟"
+  },
+  "ScrapBookMainCommandOpenTab": {
+    "message": "開啟於新分頁"
+  },
   "ScrapBookMainCommandExec": {
     "message": "用預設程式開啟"
   },

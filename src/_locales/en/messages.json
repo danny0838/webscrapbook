@@ -511,6 +511,12 @@
   "ScrapBookMainCommandIndex": {
     "message": "View index page"
   },
+  "ScrapBookMainCommandOpen": {
+    "message": "Open"
+  },
+  "ScrapBookMainCommandOpenTab": {
+    "message": "Open in new tab"
+  },
   "ScrapBookMainCommandExec": {
     "message": "Open locally"
   },
