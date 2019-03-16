@@ -529,6 +529,9 @@
   "ScrapBookMainCommandSource": {
     "message": "开启原始网址"
   },
+  "ScrapBookMainCommandManage": {
+    "message": "管理"
+  },
   "ScrapBookMainCommandMeta": {
     "message": "元数据"
   },

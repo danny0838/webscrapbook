@@ -187,6 +187,7 @@ class Book {
     this.name = server.config.book[bookId].name;
     this.server = server;
     this.config = server.config.book[bookId];
+    this.specialItems = new Set(['root', 'hidden', 'recycle']);
 
     if (!this.config) {
       throw new Error(`unknown scrapbook: ${bookId}`);

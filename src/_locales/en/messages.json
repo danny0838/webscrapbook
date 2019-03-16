@@ -529,6 +529,9 @@
   "ScrapBookMainCommandSource": {
     "message": "View source"
   },
+  "ScrapBookMainCommandManage": {
+    "message": "Manage"
+  },
   "ScrapBookMainCommandMeta": {
     "message": "Metadata"
   },

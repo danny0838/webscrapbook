@@ -9,6 +9,7 @@ const scrapbookUi = {
   lastHighlightElem: null,
   bookId: null,
   book: null,
+  rootId: 'root',
   mode: 'normal',
 
   log(msg) {
@@ -93,8 +94,8 @@ const scrapbookUi = {
     document.getElementById('command').querySelector('option[value="browse"]').disabled = !server.config.app.is_local;
 
     // load current scrapbook and scrapbooks list
+    const urlParams = new URL(location.href).searchParams;
     try {
-      const urlParams = new URL(location.href).searchParams;
       let bookId = this.bookId = urlParams.has('id') ? urlParams.get('id') : server.bookId;
       let book = this.book = server.books[bookId];
 
@@ -148,15 +149,24 @@ const scrapbookUi = {
     }
 
     // init tree
+    const rootId = this.rootId = urlParams.get('root') || this.rootId;
     try {
+      if (!this.book.meta[rootId] && !this.book.specialItems.has(rootId)) {
+        throw new Error(`specified root item "${rootId}" does not exist.`);
+      }
+
       const rootElem = document.getElementById('item-root');
+      rootElem.setAttribute('data-id', rootId);
+
       rootElem.container = document.createElement('ul');
       rootElem.container.classList.add('container');
       rootElem.container.setAttribute('data-loaded', '');
       rootElem.appendChild(rootElem.container);
 
-      for (const id of this.book.toc.root) {
-        this.addItem(id, rootElem);
+      if (this.book.toc[rootId]) {
+        for (const id of this.book.toc[rootId]) {
+          this.addItem(id, rootElem);
+        }
       }
     } catch (ex) {
       console.error(ex);
@@ -165,11 +175,23 @@ const scrapbookUi = {
     }
 
     // init params
-    const params = new URL(location.href).searchParams;
-    this.mode = params.get('mode');
+    this.mode = urlParams.get('mode') || this.mode;
 
     // enable UI
     this.enableToolbar(true);
+  },
+
+  async openModalWindow(url) {
+    if (browser.windows) {
+      await browser.windows.create({
+        url,
+        type: 'popup',
+      });
+    } else {
+      await browser.tabs.create({
+        url,
+      });
+    }
   },
 
   async openLink(url, newTab) {
@@ -277,7 +299,9 @@ const scrapbookUi = {
     if (!elem.container) { return; }
     if (elem.container.hasAttribute('data-loaded') && !elem.container.hasChildNodes()) {
       // remove toggle
-      elem.firstChild.firstChild.remove();
+      if (elem.toggle && elem.toggle.parentNode) {
+        elem.toggle.remove();
+      }
 
       // remove container
       elem.container.remove();
@@ -364,8 +388,10 @@ const scrapbookUi = {
 
     // load child nodes if not loaded yet
     if (willOpen && !container.hasAttribute('data-loaded'))  {
-      for (const id of this.book.toc[elem.getAttribute('data-id')]) {
-        this.addItem(id, elem);
+      if (this.book.toc[elem.getAttribute('data-id')]) {
+        for (const id of this.book.toc[elem.getAttribute('data-id')]) {
+          this.addItem(id, elem);
+        }
       }
       container.setAttribute('data-loaded', '');
     }
@@ -466,6 +492,7 @@ const scrapbookUi = {
       await scrapbook.setOption("server.scrapbook", bookId);
       const urlObj = new URL(location.href);
       urlObj.searchParams.set('id', bookId);
+      urlObj.searchParams.delete('root');
       location.assign(urlObj.href);
     }
     this.enableToolbar(true);
@@ -488,6 +515,7 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="exec"]').hidden = true;
         cmdElem.querySelector('option[value="browse"]').hidden = true;
         cmdElem.querySelector('option[value="source"]').hidden = true;
+        cmdElem.querySelector('option[value="manage"]').hidden = false;
         cmdElem.querySelector('option[value="meta"]').hidden = true;
         cmdElem.querySelector('option[value="mkfolder"]').hidden = false;
         cmdElem.querySelector('option[value="mksep"]').hidden = false;
@@ -512,6 +540,7 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="exec"]').hidden = !(item.type === 'file' && item.index);
         cmdElem.querySelector('option[value="browse"]').hidden = !(item.index);
         cmdElem.querySelector('option[value="source"]').hidden = !(item.source);
+        cmdElem.querySelector('option[value="manage"]').hidden = !(item.type === 'folder' || this.book.toc[item.id]);
         cmdElem.querySelector('option[value="meta"]').hidden = false;
         cmdElem.querySelector('option[value="mkfolder"]').hidden = false;
         cmdElem.querySelector('option[value="mksep"]').hidden = false;
@@ -534,6 +563,7 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="exec"]').hidden = false;
         cmdElem.querySelector('option[value="browse"]').hidden = true;
         cmdElem.querySelector('option[value="source"]').hidden = false;
+        cmdElem.querySelector('option[value="manage"]').hidden = true;
         cmdElem.querySelector('option[value="meta"]').hidden = true;
         cmdElem.querySelector('option[value="mkfolder"]').hidden = true;
         cmdElem.querySelector('option[value="mksep"]').hidden = true;
@@ -712,6 +742,21 @@ const scrapbookUi = {
     }
   },
 
+  async cmd_manage(selectedItemElems) {
+    const id = selectedItemElems.length ? selectedItemElems[0].getAttribute('data-id') : 'root';
+    const urlObj = new URL(location.href);
+    const currentMode = urlObj.searchParams.get('mode');
+    urlObj.searchParams.set('id', this.bookId);
+    urlObj.searchParams.set('mode', 'manage');
+    urlObj.searchParams.set('root', id);
+    const target = urlObj.href;
+    if (currentMode === 'manage') {
+      location.assign(target);
+    } else {
+      await this.openModalWindow(target);
+    }
+  },
+
   async cmd_meta(selectedItemElems) {
     if (!selectedItemElems.length) { return; }
 
@@ -791,7 +836,7 @@ const scrapbookUi = {
   },
 
   async cmd_mkfolder(selectedItemElems) {
-    let parentItemId = 'root';
+    let parentItemId = this.rootId;
     let index = Infinity;
 
     if (selectedItemElems.length) {
@@ -833,7 +878,7 @@ const scrapbookUi = {
   },
 
   async cmd_mksep(selectedItemElems) {
-    let parentItemId = 'root';
+    let parentItemId = this.rootId;
     let index = Infinity;
 
     if (selectedItemElems.length) {
@@ -873,7 +918,7 @@ const scrapbookUi = {
   },
 
   async cmd_mknote(selectedItemElems) {
-    let parentItemId = 'root';
+    let parentItemId = this.rootId;
     let index = Infinity;
 
     if (selectedItemElems.length) {
@@ -989,7 +1034,7 @@ const scrapbookUi = {
   },
 
   async cmd_upload(selectedItemElems, detail) {
-    let parentItemId = 'root';
+    let parentItemId = this.rootId;
     let index = Infinity;
 
     if (selectedItemElems.length) {
