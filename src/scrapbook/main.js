@@ -209,6 +209,13 @@ const scrapbookUi = {
           populate: true,
           windowTypes: ['normal'],
         });
+        if (win.type !== 'normal') {
+          // Firefox deprecates windowTypes argument and may get a last focused
+          // window of a bad type. Attempt to get another window instead.
+          win = (await browser.windows.getAll({
+            populate: true,
+          })).find(x => x.type === 'normal');
+        }
         if (!win) {
           throw new Error('no last-focused window');
         }
