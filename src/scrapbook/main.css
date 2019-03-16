@@ -47,6 +47,7 @@ body {
   max-height: 200px;
   overflow: auto;
   white-space: pre-wrap;
+  padding: 3px;
 }
 
 #logger .warn {
