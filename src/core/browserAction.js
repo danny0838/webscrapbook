@@ -161,7 +161,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           top,
           width,
           height,
-          focused: true,
           drawAttention: true,
         });
       } else {
@@ -171,7 +170,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           top,
           width,
           height,
-          focused: true,
           type: 'popup',
         });
       }
