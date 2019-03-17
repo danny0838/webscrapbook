@@ -30,7 +30,7 @@ const scrapbookUi = {
     document.getElementById("logger").appendChild(span);
   },
 
-  enableToolbar(willEnable) {
+  enableUi(willEnable) {
     document.getElementById('command').disabled = !willEnable;
   },
 
@@ -178,7 +178,7 @@ const scrapbookUi = {
     document.title = this.book.name + (rootId !== 'root' ? ' :: ' + rootId : '') + ' | ' + server.config.app.name;
 
     // enable UI
-    this.enableToolbar(true);
+    this.enableUi(true);
   },
 
   async openModalWindow(url) {
@@ -489,7 +489,7 @@ const scrapbookUi = {
   },
 
   async onBookChange(event) {
-    this.enableToolbar(false);
+    this.enableUi(false);
     if (event.target.selectedIndex === 0) {
       // refresh
       location.reload();
@@ -502,7 +502,7 @@ const scrapbookUi = {
       urlObj.searchParams.delete('root');
       location.assign(urlObj.href);
     }
-    this.enableToolbar(true);
+    this.enableUi(true);
   },
 
   async onCommandFocus(event) {
@@ -625,7 +625,7 @@ const scrapbookUi = {
       x => x.parentNode.parentNode
     );
 
-    this.enableToolbar(false);
+    this.enableUi(false);
 
     try {
       await this['cmd_' + command](selectedItemElems, event.detail);
@@ -637,7 +637,7 @@ const scrapbookUi = {
       return;
     }
 
-    this.enableToolbar(true);
+    this.enableUi(true);
   },
 
   async cmd_index(selectedItemElems) {
