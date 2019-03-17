@@ -618,18 +618,6 @@
       "reason": {"content": "$1"}
     }
   },
-  "ScrapBookMainErrorLoadToc": {
-    "message": "无法载入目录表: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorLoadMeta": {
-    "message": "无法载入元数据: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
   "ScrapBookMainErrorInitTree": {
     "message": "无法初始化目录树: $REASON$",
     "placeholders": {

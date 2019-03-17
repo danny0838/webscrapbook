@@ -618,18 +618,6 @@
       "reason": {"content": "$1"}
     }
   },
-  "ScrapBookMainErrorLoadToc": {
-    "message": "無法載入目錄表: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorLoadMeta": {
-    "message": "無法載入元資料: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
   "ScrapBookMainErrorInitTree": {
     "message": "無法初始化目錄樹: $REASON$",
     "placeholders": {

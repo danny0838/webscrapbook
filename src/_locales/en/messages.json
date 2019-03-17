@@ -618,18 +618,6 @@
       "reason": {"content": "$1"}
     }
   },
-  "ScrapBookMainErrorLoadToc": {
-    "message": "Unable to load table of contents: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorLoadMeta": {
-    "message": "Unable to load metadata: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
   "ScrapBookMainErrorInitTree": {
     "message": "Unable to init tree: $REASON$",
     "placeholders": {

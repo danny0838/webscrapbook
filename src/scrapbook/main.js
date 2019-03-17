@@ -68,10 +68,6 @@ const scrapbookUi = {
   },
   
   async init() {
-    // UI reset
-    document.getElementById("logger").innerHTML = "";
-    document.getElementById('item-root').innerHTML = "";
-
     // load config
     await scrapbook.loadOptions();
 
@@ -89,12 +85,12 @@ const scrapbookUi = {
       return;
     }
 
-    // init for local commands
-    document.getElementById('command').querySelector('option[value="exec"]').disabled = !server.config.app.is_local;
-    document.getElementById('command').querySelector('option[value="browse"]').disabled = !server.config.app.is_local;
+    // load URL params
+    const urlParams = new URL(location.href).searchParams;
+    this.rootId = urlParams.get('root') || this.rootId;
+    this.mode = urlParams.get('mode') || this.mode;
 
     // load current scrapbook and scrapbooks list
-    const urlParams = new URL(location.href).searchParams;
     try {
       let bookId = this.bookId = urlParams.has('id') ? urlParams.get('id') : server.bookId;
       let book = this.book = server.books[bookId];
@@ -128,56 +124,43 @@ const scrapbookUi = {
       return;
     }
 
-    // load index
-    try {
-      await this.book.loadToc();
-    } catch (ex) {
-      console.error(ex);
-      this.error(scrapbook.lang('ScrapBookMainErrorLoadToc', [ex.message]));
-      return;
-    }
+    // init UI
+    document.title = this.book.name + (this.rootId !== 'root' ? ' :: ' + this.rootId : '') + ' | ' + server.config.app.name;
+
+    const cmdElem = document.getElementById('command');
+    cmdElem.querySelector('option[value="exec"]').disabled = !server.config.app.is_local;
+    cmdElem.querySelector('option[value="browse"]').disabled = !server.config.app.is_local;
+
+    const rootElem = document.getElementById('item-root');
+    rootElem.container = document.createElement('ul');
+    rootElem.container.classList.add('container');
+    rootElem.appendChild(rootElem.container);
+    
+    await this.refresh();
+  },
+
+  async refresh() {
+    this.enableUi(false);
 
     try {
-      await this.book.loadMeta();
-    } catch (ex) {
-      console.error(ex);
-      this.error(scrapbook.lang('ScrapBookMainErrorLoadMeta', [ex.message]));
-      return;
-    }
+      await this.book.loadTreeFiles(true);
+      await this.book.loadToc(true);
+      await this.book.loadMeta(true);
 
-    // init tree
-    const rootId = this.rootId = urlParams.get('root') || this.rootId;
-    try {
+      const rootId = this.rootId;
       if (!this.book.meta[rootId] && !this.book.specialItems.has(rootId)) {
         throw new Error(`specified root item "${rootId}" does not exist.`);
       }
 
       const rootElem = document.getElementById('item-root');
       rootElem.setAttribute('data-id', rootId);
-
-      rootElem.container = document.createElement('ul');
-      rootElem.container.classList.add('container');
-      rootElem.container.setAttribute('data-loaded', '');
-      rootElem.appendChild(rootElem.container);
-
-      if (this.book.toc[rootId]) {
-        for (const id of this.book.toc[rootId]) {
-          this.addItem(id, rootElem);
-        }
-      }
+      this.toggleItem(rootElem, true);
     } catch (ex) {
       console.error(ex);
       this.error(scrapbook.lang('ScrapBookMainErrorInitTree', [ex.message]));
       return;
     }
 
-    // init params
-    this.mode = urlParams.get('mode') || this.mode;
-
-    // document title
-    document.title = this.book.name + (rootId !== 'root' ? ' :: ' + rootId : '') + ' | ' + server.config.app.name;
-
-    // enable UI
     this.enableUi(true);
   },
 
