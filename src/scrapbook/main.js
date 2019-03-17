@@ -985,8 +985,9 @@ const scrapbookUi = {
     let action;
     switch (type) {
       case 'html': {
-        const filename = newItem.index = newItem.id + '.html';
-        target = this.book.dataUrl + encodeURIComponent(filename);
+        const filename = 'index.html';
+        newItem.index = newItem.id + '/' + filename;
+        target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
         const content = `<!DOCTYPE html>
 <html>
 <head>
@@ -1002,8 +1003,9 @@ const scrapbookUi = {
       }
 
       case 'markdown': {
-        const filename = newItem.index = newItem.id + '.md';
-        target = this.book.dataUrl + encodeURIComponent(filename);
+        const filename = 'index.md';
+        newItem.index = newItem.id + '/' + filename;
+        target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
         file = new File([], filename, {type: 'text/markdown'});
         action = 'edit';
         break;
@@ -1011,7 +1013,7 @@ const scrapbookUi = {
 
       case 'txt': {
         const filename = newItem.index = newItem.id + '.txt';
-        target = this.book.dataUrl + encodeURIComponent(filename);
+        target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
         file = new File([], filename, {type: 'text/plain'});
         action = 'edit';
         break;
