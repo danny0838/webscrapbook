@@ -1067,19 +1067,50 @@ const scrapbookUi = {
           parentId: parentItemId,
           index,
         });
+        newItem.index = newItem.id + '/index.html';
 
-        const ext = scrapbook.filenameParts(file.name)[1];
-        const filename = newItem.index = newItem.id + (ext ? '.' + ext : '');
-        const target = this.book.dataUrl + encodeURIComponent(filename);
-        const formData = new FormData();
-        formData.append('token', await server.acquireToken());
-        formData.append('upload', file);
+        let filename = file.name;
+        if (filename === 'index.html') { filename = 'index-1.html'; }
+        filename = scrapbook.validateFilename(filename, scrapbook.getOption("capture.saveAsciiFilename"));
 
-        await server.request({
-          url: target + '?a=upload&f=json',
-          method: "POST",
-          body: formData,
-        });
+        // upload file
+        {
+          const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/' + filename);
+          const formData = new FormData();
+          formData.append('token', await server.acquireToken());
+          formData.append('upload', file);
+          await server.request({
+            url: target + '?a=upload&f=json',
+            method: "POST",
+            body: formData,
+          });
+        }
+
+        // upload index.html
+        {
+          const title = newItem.title;
+          const url = scrapbook.escapeFilename(filename);
+          const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(url)}">
+${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
+<body>
+Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtml(filename, false)}</a>
+</body>
+</html>`;
+          const file = new File([html], 'index.html', {type: 'text/html'});
+          const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
+          const formData = new FormData();
+          formData.append('token', await server.acquireToken());
+          formData.append('upload', file);
+          await server.request({
+            url: target + '?a=upload&f=json',
+            method: "POST",
+            body: formData,
+          });
+        }
 
         // update DOM
         Array.prototype.filter.call(
