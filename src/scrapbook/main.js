@@ -669,7 +669,7 @@ const scrapbookUi = {
       case 'file':
       default: {
         if (item.index) {
-          const target = this.book.dataUrl + item.index;
+          const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
           await this.openLink(target);
         }
         break;
@@ -695,7 +695,7 @@ const scrapbookUi = {
         case 'file':
         default: {
           if (item.index) {
-            const target = this.book.dataUrl + item.index;
+            const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
             await this.openLink(target, true);
           }
           break;
@@ -708,7 +708,7 @@ const scrapbookUi = {
     for (const elem of selectedItemElems) {
       const id = elem.getAttribute('data-id');
       const item = this.book.meta[id];
-      const target = this.book.dataUrl + item.index;
+      const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
 
       if (target.endsWith('.html')) {
         const redirectedTarget = await this.getMetaRefreshTarget(target);
@@ -730,7 +730,7 @@ const scrapbookUi = {
     let target;
     const id = selectedItemElems[0].getAttribute('data-id');
     const item = this.book.meta[id];
-    target = this.book.dataUrl + item.index;
+    target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
 
     if (target.endsWith('.html')) {
       const redirectedTarget = await this.getMetaRefreshTarget(target);
@@ -1115,7 +1115,7 @@ const scrapbookUi = {
 
     const id = selectedItemElems[0].getAttribute('data-id');
     const item = this.book.meta[id];
-    const target = this.book.dataUrl + item.index;
+    const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
     await this.openLink(target + '?a=edit');
   },
 
@@ -1124,7 +1124,7 @@ const scrapbookUi = {
 
     const id = selectedItemElems[0].getAttribute('data-id');
     const item = this.book.meta[id];
-    const target = this.book.dataUrl + item.index;
+    const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
     await this.openLink(target + '?a=editx');
   },
 
