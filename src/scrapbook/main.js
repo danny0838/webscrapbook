@@ -1310,7 +1310,7 @@ const scrapbookUi = {
 
     const removeDataFiles = async (itemIndexFile) => {
       if (!itemIndexFile) { return; }
-      const index = itemIndexFile.replace(/\/index.html$/, '');
+      const index = itemIndexFile.replace(/\/index.[^.]+$/, '');
       const target = this.book.dataUrl + scrapbook.escapeFilename(index);
 
       const formData = new FormData();
