@@ -92,7 +92,17 @@ capturer.getUniqueFilename = function (timeId, filename) {
   return newFilename;
 };
 
-capturer.addItemToServer = async function (data) {
+/**
+ * @kind invokable
+ * @param {Object} params
+ *     - {string} params.timeId
+ *     - {string} params.title
+ *     - {string} params.type
+ *     - {string} params.sourceUrl
+ *     - {string} params.favIconUrl
+ *     - {string} params.charset
+ */
+capturer.addItemToServer = async function (params) {
   const getShaFile = (data) => {
     if (!data) { throw new Error(`Unable to fetch a file for this favicon URL.`); }
 
@@ -143,8 +153,8 @@ capturer.addItemToServer = async function (data) {
 
   await server.init();
   const book = server.books[server.bookId];
-  const index = (data.targetDir ? data.targetDir + '/' : '') + data.filename;
-  let icon = data.favIconUrl;
+  const index = (params.targetDir ? params.targetDir + '/' : '') + params.filename;
+  let icon = params.favIconUrl;
   
   // cache favicon
   if (scrapbook.isUrlAbsolute(icon)) {
@@ -182,13 +192,14 @@ capturer.addItemToServer = async function (data) {
   await book.loadToc();
   await book.addItem({
     item: {
-      id: data.timeId,
+      id: params.timeId,
       index,
-      title: data.title,
-      type: data.type || "",
-      create: data.timeId,
-      source: data.sourceUrl,
+      title: params.title,
+      type: params.type || "",
+      create: params.timeId,
+      source: params.sourceUrl,
       icon,
+      charset: params.charset,
     },
   });
   await book.saveMeta();
@@ -720,8 +731,10 @@ Redirecting to file ${anchor}
           return response;
         }
 
-        response.type = "file";
-        return response;
+        return Object.assign(response, {
+          type: "file",
+          charset: charset || undefined,
+        });
       });
     } else {
       return {
