@@ -585,6 +585,9 @@
   "ScrapBookMainCommandMetaDialogType": {
     "message": "類型:"
   },
+  "ScrapBookMainCommandMetaDialogCharset": {
+    "message": "字集:"
+  },
   "ScrapBookMainCommandMetaDialogCreate": {
     "message": "建立時間:"
   },

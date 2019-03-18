@@ -585,6 +585,9 @@
   "ScrapBookMainCommandMetaDialogType": {
     "message": "Type:"
   },
+  "ScrapBookMainCommandMetaDialogCharset": {
+    "message": "Charset:"
+  },
   "ScrapBookMainCommandMetaDialogCreate": {
     "message": "Create:"
   },

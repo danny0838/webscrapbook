@@ -782,6 +782,7 @@ const scrapbookUi = {
     dialog.querySelector('[name="source"]').value = item.source || "";
     dialog.querySelector('[name="icon"]').value = item.icon || "";
     dialog.querySelector('[name="type"]').value = item.type || "";
+    dialog.querySelector('[name="charset"]').value = item.charset || "";
     dialog.querySelector('[name="create"]').value = item.create ? scrapbook.idToDate(item.create).toLocaleString() : "";
     dialog.querySelector('[name="modify"]').value = item.modify ? scrapbook.idToDate(item.modify).toLocaleString() : "";
     dialog.querySelector('[name="comment"]').value = item.comment || "";
@@ -808,6 +809,7 @@ const scrapbookUi = {
       index: dialog.querySelector('[name="index"]').value,
       source: dialog.querySelector('[name="source"]').value,
       icon: dialog.querySelector('[name="icon"]').value,
+      charset: dialog.querySelector('[name="charset"]').value,
       comment: dialog.querySelector('[name="comment"]').value,
     };
     const newItem = this.book.addItem({
