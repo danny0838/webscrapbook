@@ -825,7 +825,7 @@ const scrapbookUi = {
 
     // update DOM
     Array.prototype.filter.call(
-      document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+      document.getElementById('items').querySelectorAll('[data-id]'),
       x => x.getAttribute('data-id') === id
     ).forEach((itemElem) => {
       const parentItemElem = itemElem.parentNode.parentNode;
@@ -873,7 +873,7 @@ const scrapbookUi = {
 
     // update DOM
     Array.prototype.filter.call(
-      document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+      document.getElementById('items').querySelectorAll('[data-id]'),
       x => x.getAttribute('data-id') === parentItemId
     ).forEach((parentElem) => {
       if (!(parentElem.parentNode)) { return; }
@@ -913,7 +913,7 @@ const scrapbookUi = {
 
     // update DOM
     Array.prototype.filter.call(
-      document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+      document.getElementById('items').querySelectorAll('[data-id]'),
       x => x.getAttribute('data-id') === parentItemId
     ).forEach((parentElem) => {
       if (!(parentElem.parentNode)) { return; }
@@ -1020,7 +1020,7 @@ const scrapbookUi = {
 
     // update DOM
     Array.prototype.filter.call(
-      document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+      document.getElementById('items').querySelectorAll('[data-id]'),
       x => x.getAttribute('data-id') === parentItemId
     ).forEach((parentElem) => {
       if (!(parentElem.parentNode)) { return; }
@@ -1105,7 +1105,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
         // update DOM
         Array.prototype.filter.call(
-          document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+          document.getElementById('items').querySelectorAll('[data-id]'),
           x => x.getAttribute('data-id') === parentItemId
         ).forEach((parentElem) => {
           if (!(parentElem.parentNode)) { return; }
@@ -1172,7 +1172,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
     // update DOM
     Array.prototype.filter.call(
-      document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+      document.getElementById('items').querySelectorAll('[data-id]'),
       x => x.getAttribute('data-id') === parentItemId
     ).forEach((parentElem) => {
       if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
@@ -1209,7 +1209,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
     // update DOM
     Array.prototype.filter.call(
-      document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+      document.getElementById('items').querySelectorAll('[data-id]'),
       x => x.getAttribute('data-id') === parentItemId
     ).forEach((parentElem) => {
       if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
@@ -1269,7 +1269,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
       // update DOM
       Array.prototype.filter.call(
-        document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+        document.getElementById('items').querySelectorAll('[data-id]'),
         x => x.getAttribute('data-id') === parentItemId
       ).forEach((parentElem) => {
         if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
@@ -1279,7 +1279,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       });
 
       Array.prototype.filter.call(
-        document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+        document.getElementById('items').querySelectorAll('[data-id]'),
         x => x.getAttribute('data-id') === targetId
       ).forEach((parentElem) => {
         if (!(parentElem.parentNode)) { return; }
@@ -1316,7 +1316,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
       // update DOM
       Array.prototype.filter.call(
-        document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+        document.getElementById('items').querySelectorAll('[data-id]'),
         x => x.getAttribute('data-id') === parentItemId
       ).forEach((parentElem) => {
         if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
@@ -1371,7 +1371,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
       // update DOM
       Array.prototype.filter.call(
-        document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
+        document.getElementById('items').querySelectorAll('[data-id]'),
         x => x.getAttribute('data-id') === parentItemId
       ).forEach((parentElem) => {
         if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
