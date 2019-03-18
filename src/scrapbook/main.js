@@ -1010,14 +1010,6 @@ const scrapbookUi = {
         action = 'edit';
         break;
       }
-
-      case 'txt': {
-        const filename = newItem.index = newItem.id + '.txt';
-        target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
-        file = new File([], filename, {type: 'text/plain'});
-        action = 'edit';
-        break;
-      }
     }
 
     // save meta and TOC
