@@ -483,6 +483,7 @@ capturer.captureUrl = async function (params) {
           url: sourceUrl,
           refUrl,
           title,
+          charset: headers.charset,
           settings: params.settings,
           options: params.options,
         });
