@@ -1421,7 +1421,7 @@ async function test_capture_headless() {
 // capturer.captureBookmark
 async function test_capture_bookmark() {
   var blob = await capture({
-    url: `${localhost}/capture_html/index.html`,
+    url: `${localhost}/capture_bookmark/index.html`,
     mode: "bookmark",
     options: baseOptions,
   });
@@ -1429,12 +1429,13 @@ async function test_capture_bookmark() {
   var doc = await readFileAsDocument(blob);
 
   var html = doc.documentElement;
-  assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_html/index.html`);
+  assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_bookmark/index.html`);
   assert(/^\d{17}$/.test(html.getAttribute('data-scrapbook-create')));
   assert(html.getAttribute('data-scrapbook-type') === 'bookmark');
 
-  assert(doc.querySelector(`meta[http-equiv="refresh"][content="0;url=${localhost}/capture_html/index.html"]`));
-  assert(doc.querySelector(`a[href="${localhost}/capture_html/index.html"]`));
+  assert(doc.querySelector(`meta[http-equiv="refresh"][content="0;url=${localhost}/capture_bookmark/index.html"]`));
+  assert(doc.querySelector(`a[href="${localhost}/capture_bookmark/index.html"]`));
+  assert(doc.querySelector(`link[rel="shortcut icon"][href="data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"]`));
 }
 
 // Check frame capture if same origin

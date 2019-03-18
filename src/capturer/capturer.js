@@ -566,6 +566,27 @@ capturer.captureBookmark = async function (params) {
       console.error(ex);
     }
 
+    // fetch favicon as data URL
+    if (favIconUrl && !favIconUrl.startsWith('data:')) {
+      try {
+        // cannot assign "referer" header directly
+        // the prefix will be removed by the onBeforeSendHeaders listener
+        const requestHeaders = {};
+        if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+          requestHeaders["X-WebScrapBook-Referer"] = refUrl;
+        }
+
+        const xhr = await scrapbook.xhr({
+          url: scrapbook.splitUrlByAnchor(favIconUrl)[0],
+          responseType: "blob",
+          requestHeaders,
+        });
+        favIconUrl = await scrapbook.readFileAsDataURL(xhr.response);
+      } catch (ex) {
+        console.error(ex);
+      }
+    }
+
     // save to meta and TOC only
     if (options["capture.saveTo"] === 'server') {
       return {
