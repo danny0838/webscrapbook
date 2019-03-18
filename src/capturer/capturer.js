@@ -577,7 +577,7 @@ capturer.captureBookmark = async function (params) {
           ' data-scrapbook-type="bookmark"' : 
           "";
       const titleElem = title ? `<title>${scrapbook.escapeHtml(title, false)}</title>\n` : "";
-      const favIconElem = favIconUrl ? `<link rel="shortcut icon" href="${favIconUrl}">` : "";
+      const favIconElem = favIconUrl ? `<link rel="shortcut icon" href="${scrapbook.escapeHtml(favIconUrl)}">\n` : "";
       html = `<!DOCTYPE html>
 <html${meta}>
 <head>
