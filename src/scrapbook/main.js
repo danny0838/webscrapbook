@@ -1205,7 +1205,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       currentParentId: parentItemId,
       currentIndex: index,
       targetParentId: parentItemId,
-      targetIndex: index + 1,
+      targetIndex: index + 2,
     });
     await this.book.saveToc();
 
