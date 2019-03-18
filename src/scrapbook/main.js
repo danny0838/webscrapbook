@@ -824,22 +824,20 @@ const scrapbookUi = {
     await this.book.saveMeta();
 
     // update DOM
-    const parentItemElem = itemElem.parentNode.parentNode;
-    const parentItemId = parentItemElem.getAttribute('data-id');
-    const siblingItems = parentItemElem.container.children;
-    const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-
-    // the operated item element is missing due to an unexpected reason
-    if (index === -1) { return; }
-
     Array.prototype.filter.call(
       document.getElementById('items').querySelectorAll('li[data-id], #item-root'),
-      x => x.getAttribute('data-id') === parentItemId
-    ).forEach((parentElem) => {
-      if (!(parentElem.parentNode)) { return; }
-      if (!parentElem.container.hasAttribute('data-loaded')) { return; }
-      parentElem.container.children[index].remove();
-      this.addItem(id, parentElem, index);
+      x => x.getAttribute('data-id') === id
+    ).forEach((itemElem) => {
+      const parentItemElem = itemElem.parentNode.parentNode;
+      const parentItemId = parentItemElem.getAttribute('data-id');
+      const siblingItems = parentItemElem.container.children;
+      const index = Array.prototype.indexOf.call(siblingItems, itemElem);
+
+      // the operated item element is missing due to an unexpected reason
+      if (index === -1) { return; }
+
+      parentItemElem.container.children[index].remove();
+      this.addItem(id, parentItemElem, index);
     });
   },
 
