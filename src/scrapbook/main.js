@@ -45,12 +45,21 @@ const scrapbookUi = {
     wrapper.innerHTML = '';
     wrapper.appendChild(elem);
 
+    const onKeyDown = (event) => {
+      if (event.code === 'Escape' &&
+          !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
+        event.preventDefault();
+        elem.dispatchEvent(new Event('dialogClick'));
+      }
+    };
+
     const onClick = (event) => {
       if (event.target === mask) {
         elem.dispatchEvent(new Event('dialogClick'));
       }
     };
 
+    window.addEventListener('keydown', onKeyDown, true);
     mask.addEventListener('click', onClick);
     mask.hidden = false;
 
@@ -61,6 +70,7 @@ const scrapbookUi = {
       elem.dispatchEvent(new Event('dialogShow'));
     });
 
+    window.removeEventListener('keydown', onKeyDown);
     mask.removeEventListener('click', onClick);
     mask.hidden = true;
 
