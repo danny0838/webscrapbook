@@ -182,6 +182,7 @@ function renewCaptureDownLinkDetails() {
 window.addEventListener("DOMContentLoaded", async (event) => {
   // load languages
   scrapbook.loadLanguages(document);
+  document.getElementById("optionServerUrlTooltip").setAttribute('data-tooltip', scrapbook.lang('OptionServerUrlTooltip', [scrapbook.backendMinVersion]));
 
   // load default options
   await initDefaultOptions();
