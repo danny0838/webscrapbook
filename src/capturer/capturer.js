@@ -579,15 +579,15 @@ capturer.captureBookmark = async function (params) {
       const titleElem = title ? `<title>${scrapbook.escapeHtml(title, false)}</title>\n` : "";
       const favIconElem = favIconUrl ? `<link rel="shortcut icon" href="${favIconUrl}">` : "";
       html = `<!DOCTYPE html>
-  <html${meta}>
-  <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(sourceUrl)}">
-  ${titleElem}${favIconElem}</head>
-  <body>
-  Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
-  </body>
-  </html>`;
+<html${meta}>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(sourceUrl)}">
+${titleElem}${favIconElem}</head>
+<body>
+Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
+</body>
+</html>`;
     }
 
     const blob = new Blob([html], {type: "text/html"});
