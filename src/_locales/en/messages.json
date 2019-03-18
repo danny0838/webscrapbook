@@ -626,5 +626,8 @@
     "placeholders": {
       "reason": {"content": "$1"}
     }
+  },
+  "ScrapBookMainErrorServerTreeChanged": {
+    "message": "Tree data in the server has been changed. Refresh the page and try again."
   }
 }

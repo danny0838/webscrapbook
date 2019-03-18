@@ -187,6 +187,7 @@ class Book {
     this.name = server.config.book[bookId].name;
     this.server = server;
     this.config = server.config.book[bookId];
+    this.treeLastModified = 0;
     this.specialItems = new Set(['root', 'hidden', 'recycle']);
 
     if (!this.config) {
@@ -229,6 +230,10 @@ class Book {
   }
 
   /**
+   * Load tree file list.
+   *
+   * - Also update this.treeLastModified.
+   *
    * @return {Map}
    */
   async loadTreeFiles(refresh = false) {
@@ -236,12 +241,15 @@ class Book {
       return this.treeFiles;
     }
 
-    const data = await this.server.request({
+    const response = await this.server.request({
       url: this.treeUrl + '?a=list&f=json',
       method: "GET",
-    }).then(r => r.json()).then(r => r.data);
+    });
+    this.treeLastModified = Math.max(this.treeLastModified, new Date(response.headers.get('Last-Modified')));
 
+    const data = (await response.json()).data;
     return this.treeFiles = data.reduce((data, item) => {
+      this.treeLastModified = Math.max(this.treeLastModified, parseInt(item.last_modified) * 1000);
       data.set(item.name, item);
       return data;
     }, new Map());
@@ -317,6 +325,9 @@ class Book {
     return this.toc = Object.assign.apply(this, objList);
   }
 
+  /**
+   * Also update this.treeLastModified afterwards.
+   */
   async saveMeta() {
     const exportFile = async (meta, i) => {
       const content = this.generateMetaFile(meta);
@@ -333,6 +344,13 @@ class Book {
         body: formData,
       });
     };
+
+    // verify that tree files has not been changed since last loaded
+    const treeLastModified = this.treeLastModified;
+    const treeFiles = await this.loadTreeFiles(true);
+    if (this.treeLastModified > treeLastModified) {
+      throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+    }
 
     // A javascript string >= 256 MiB (UTF-16 chars) causes an error
     // in the browser. Split each js file at around 256 K items to
@@ -361,7 +379,6 @@ class Book {
     }
 
     // remove stale meta files
-    const treeFiles = await this.loadTreeFiles(true);
     for (; ; i++) {
       const path = `meta${i}.js`;
       if (!treeFiles.has(path)) { break; }
@@ -377,8 +394,14 @@ class Book {
         body: formData,
       });
     }
+
+    // update this.treeLastModified
+    await this.loadTreeFiles(true);
   }
 
+  /**
+   * Also update this.treeLastModified afterwards.
+   */
   async saveToc() {
     const exportFile = async (toc, i) => {
       const content = this.generateTocFile(toc);
@@ -395,6 +418,13 @@ class Book {
         body: formData,
       });
     };
+
+    // verify that tree files has not been changed since last loaded
+    const treeLastModified = this.treeLastModified;
+    const treeFiles = await this.loadTreeFiles(true);
+    if (this.treeLastModified > treeLastModified) {
+      throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+    }
 
     // A javascript string >= 256 MiB (UTF-16 chars) causes an error
     // in the browser. Split each js file at around 4 M entries to
@@ -422,7 +452,6 @@ class Book {
     }
 
     // remove stale toc files
-    const treeFiles = await this.loadTreeFiles(true);
     for (; ; i++) {
       const path = `toc${i}.js`;
       if (!treeFiles.has(path)) { break; }
@@ -438,6 +467,9 @@ class Book {
         body: formData,
       });
     }
+
+    // update this.treeLastModified
+    await this.loadTreeFiles(true);
   }
 
   generateMetaFile(jsonData) {

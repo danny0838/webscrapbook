@@ -626,5 +626,8 @@
     "placeholders": {
       "reason": {"content": "$1"}
     }
+  },
+  "ScrapBookMainErrorServerTreeChanged": {
+    "message": "伺服器的目錄樹資料已變更，請重新整理此頁面再嘗試。"
   }
 }
