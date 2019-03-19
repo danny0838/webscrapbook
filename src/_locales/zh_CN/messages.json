@@ -340,9 +340,6 @@
   "OptionCaptureSaveFileAsHtmlTooltip": {
     "message": "将浏览器能检视的非 HTML 文件保存为 HTML 网页。"
   },
-  "OptionCaptureSaveToFileLabel": {
-    "message": "独立文件"
-  },
   "OptionCaptureSaveToFolderLabel": {
     "message": "剪贴簿文件夹"
   },
@@ -353,7 +350,7 @@
     "message": "后端服务器"
   },
   "OptionCaptureSaveToTooltip": {
-    "message": "指定管理保存数据的方式。\n\n* 后端服务器：将获取页面保存于后端服务器设定的剪贴簿数据目录，并以当前日期时间做为 ID 命名，以便将来建立索引。\n\n* 剪贴簿文件夹：将获取页面保存于剪贴簿文件夹（<默认下载文件夹>/<剪贴簿文件夹>/data/），并以当前日期时间做为 ID 命名，以便将来建立索引。\n\n* 独立文件：将获取页面保存成文件，以网页标题命名，并保存至 <默认下载文件夹> 或由用户指定保存路径，适合保存及分享个别网页。"
+    "message": "指定管理保存数据的方式。\n\n* 后端服务器：将获取页面保存于后端服务器设定的剪贴簿数据目录。\n\n* 剪贴簿文件夹：将获取页面保存于 <默认下载文件夹> 下的剪贴簿文件夹。"
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "剪贴簿文件夹:"

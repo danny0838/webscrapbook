@@ -340,9 +340,6 @@
   "OptionCaptureSaveFileAsHtmlTooltip": {
     "message": "將瀏覽器能檢視的非 HTML 檔案儲存為 HTML 網頁。"
   },
-  "OptionCaptureSaveToFileLabel": {
-    "message": "獨立檔案"
-  },
   "OptionCaptureSaveToFolderLabel": {
     "message": "剪貼簿資料夾"
   },
@@ -353,7 +350,7 @@
     "message": "後端伺服器"
   },
   "OptionCaptureSaveToTooltip": {
-    "message": "指定管理儲存資料的方式。\n\n* 後端伺服器：將擷取頁面儲存於後端伺服器設定的剪貼簿資料目錄，並以目前日期時間做為 ID 命名，以便將來建立索引。\n\n* 剪貼簿資料夾：將擷取頁面儲存於剪貼簿資料夾（<預設下載資料夾>/<剪貼簿資料夾>/data/），並以目前日期時間做為 ID 命名，以便將來建立索引。\n\n* 獨立檔案：將擷取頁面儲存成檔案，以網頁標題命名，並儲存至 <預設下載資料夾> 或由使用者指定儲存路徑，適合儲存及分享個別網頁。"
+    "message": "指定管理儲存資料的方式。\n\n* 後端伺服器：將擷取頁面儲存於後端伺服器設定的剪貼簿資料目錄。\n\n* 剪貼簿資料夾：將擷取頁面儲存於 <預設下載資料夾> 下的剪貼簿資料夾。"
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "剪貼簿資料夾:"

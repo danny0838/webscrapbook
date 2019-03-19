@@ -163,14 +163,6 @@ function renewCaptureSaveToDetails() {
   const mode = document.getElementById("opt_capture.saveTo").value;
 
   document.getElementById('captureSaveToFolderDetails').hidden = mode !== 'folder';
-
-  {
-    const elem = document.getElementById('opt_capture.saveAs');
-    elem.querySelector('[value="folder"]').disabled = mode === 'file';
-    if (elem.value === 'folder' && mode === 'file') {
-      elem.value = 'zip';
-    }
-  }
 }
 
 function renewCaptureDownLinkDetails() {

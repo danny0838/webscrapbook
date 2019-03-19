@@ -709,12 +709,6 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
         // special handling (for unit test)
         return await capturer.saveBlobInMemory({blob});
       }
-      case 'file': {
-        filename = scrapbook.validateFilename(title, options["capture.saveAsciiFilename"]);
-        if (!filename.endsWith(ext)) { filename += ext; }
-        saveMethod = "saveBlobNaturally";
-        break;
-      }
       case 'server': {
         // deprecated; normally we won't get here
         targetDir = "";
@@ -723,6 +717,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
         saveMethod = "saveToServer";
         break;
       }
+      case 'folder':
       default: {
         targetDir = options["capture.scrapbookFolder"] + "/data";
         filename = timeId + ext;
@@ -921,12 +916,6 @@ capturer.saveDocument = async function (params) {
               // special handling (for unit test)
               return await capturer.saveBlobInMemory({blob});
             }
-            case 'file': {
-              filename = scrapbook.validateFilename(title, options["capture.saveAsciiFilename"]);
-              if (!filename.endsWith(ext)) filename += ext;
-              saveMethod = "saveBlobNaturally";
-              break;
-            }
             case 'server': {
               targetDir = "";
               filename = timeId + ext;
@@ -934,6 +923,7 @@ capturer.saveDocument = async function (params) {
               saveMethod = "saveToServer";
               break;
             }
+            case 'folder':
             default: {
               targetDir = options["capture.scrapbookFolder"] + "/data";
               filename = timeId + ext;
@@ -1089,12 +1079,6 @@ ${JSON.stringify(zipData)}
               // special handling (for unit test)
               return await capturer.saveBlobInMemory({blob});
             }
-            case 'file': {
-              filename = scrapbook.validateFilename(title, options["capture.saveAsciiFilename"]);
-              if (!filename.endsWith(ext)) filename += ext;
-              saveMethod = "saveBlobNaturally";
-              break;
-            }
             case 'server': {
               targetDir = "";
               filename = timeId + ext;
@@ -1102,6 +1086,7 @@ ${JSON.stringify(zipData)}
               saveMethod = "saveToServer";
               break;
             }
+            case 'folder':
             default: {
               targetDir = options["capture.scrapbookFolder"] + "/data";
               filename = timeId + ext;
@@ -1168,12 +1153,6 @@ ${JSON.stringify(zipData)}
               // special handling (for unit test)
               return await capturer.saveBlobInMemory({blob});
             }
-            case 'file': {
-              filename = scrapbook.validateFilename(title, options["capture.saveAsciiFilename"]);
-              filename += ".htz";
-              saveMethod = "saveBlobNaturally";
-              break;
-            }
             case 'server': {
               targetDir = "";
               filename = timeId + ".htz";
@@ -1181,6 +1160,7 @@ ${JSON.stringify(zipData)}
               saveMethod = "saveToServer";
               break;
             }
+            case 'folder':
             default: {
               targetDir = options["capture.scrapbookFolder"] + "/data";
               filename = timeId + ".htz";
@@ -1265,12 +1245,6 @@ ${JSON.stringify(zipData)}
               // special handling (for unit test)
               return await capturer.saveBlobInMemory({blob});
             }
-            case 'file': {
-              filename = scrapbook.validateFilename(title, options["capture.saveAsciiFilename"]);
-              filename += ".maff";
-              saveMethod = "saveBlobNaturally";
-              break;
-            }
             case 'server': {
               targetDir = "";
               filename = timeId + ".maff";
@@ -1278,6 +1252,7 @@ ${JSON.stringify(zipData)}
               saveMethod = "saveToServer";
               break;
             }
+            case 'folder':
             default: {
               targetDir = options["capture.scrapbookFolder"] + "/data";
               filename = timeId + ".maff";
@@ -1328,7 +1303,9 @@ ${JSON.stringify(zipData)}
             saveMethod = "saveToServer";
             break;
           }
-          default: { // folder, file, memory
+          case 'folder':
+          case 'memory':
+          default: {
             targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
             saveMethod = "saveBlob";
             break;
@@ -1791,7 +1768,9 @@ capturer.downloadBlob = async function (params) {
           saveMethod = "saveToServer";
           break;
         }
-        default: { // folder, file
+        case 'folder':
+        case 'memory': // fallback
+        default: {
           targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
           saveMethod = "saveBlob";
           break;
@@ -1818,76 +1797,6 @@ capturer.downloadBlob = async function (params) {
       };
     }
   }
-};
-
-/**
- * @param {Object} params
- *     - {string} params.timeId
- *     - {Blob} params.blob
- *     - {string} params.filename
- *     - {string} params.sourceUrl
- * @return {Promise}
- */
-capturer.saveBlobNaturally = async function (params) {
-  const {timeId, blob, filename, sourceUrl} = params;
-
-  // Use the natural download attribute to generate a download.
-  return await new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(blob);
-
-    capturer.downloadInfo.set(url, {
-      timeId,
-      src: sourceUrl,
-      onComplete: resolve,
-      onError: reject,
-    });
-
-    if (scrapbook.userAgent.is('gecko')) {
-      // Firefox has a bug that the screen turns unresponsive
-      // when an addon page is redirected to a blob URL.
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
-      //
-      // Workaround by creating the anchor in an iframe.
-      const iDoc = this.downloader.contentDocument;
-      const a = iDoc.createElement('a');
-      a.download = filename;
-      a.href = url;
-      iDoc.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      // In case the download still fails.
-      const file = new File([blob], filename, {type: "application/octet-stream"});
-      const url2 = URL.createObjectURL(file);
-
-      capturer.downloadInfo.set(url2, {
-        timeId,
-        src: sourceUrl,
-        onComplete: resolve,
-        onError: reject,
-      });
-
-      const elem = document.createElement('a');
-      elem.target = 'download';
-      elem.href = url2;
-      elem.textContent = `If the download doesn't start, click me.`;
-      capturer.logger.appendChild(elem);
-      capturer.log('');
-      return;
-    }
-
-    const elem = document.createElement('a');
-    elem.download = filename;
-    elem.href = url;
-    elem.textContent = `If the download doesn't start, click me.`;
-    capturer.logger.appendChild(elem);
-    elem.click();
-    capturer.log('');
-  }).catch((ex) => {
-    // probably USER_CANCELLED
-    // treat as capture success and return the filename
-    return filename;
-  });
 };
 
 /**
@@ -2135,7 +2044,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   scrapbook.loadLanguages(document);
 
   capturer.logger = document.getElementById('logger');
-  capturer.downloader = document.getElementById('downloader');
 
   await scrapbook.loadOptions();
 
