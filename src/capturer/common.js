@@ -930,6 +930,11 @@ capturer.captureDocument = async function (params) {
                 return;
               case "save":
               default:
+                let useFavIcon = false;
+                if (typeof favIconUrl === 'undefined') {
+                  favIconUrl = "about:blank"; // placeholder
+                  useFavIcon = true;
+                }
                 tasks[tasks.length] = 
                 capturer.invoke("downloadFile", {
                   url: elem.getAttribute("href"),
@@ -938,7 +943,7 @@ capturer.captureDocument = async function (params) {
                   options,
                 }).then((response) => {
                   captureRewriteUri(elem, "href", response.url);
-                  if (typeof favIconUrl === 'undefined') {
+                  if (useFavIcon) {
                     if (options["capture.saveAs"] === 'folder') {
                       favIconUrl = response.url;
                     } else {
@@ -2023,6 +2028,47 @@ capturer.captureDocument = async function (params) {
         frag.appendChild(titleElem);
         frag.appendChild(doc.createTextNode("\n"));
         headNode.appendChild(frag);
+      }
+    }
+
+    // handle tab favicon
+    //
+    // 1. Use DOM favicon if presented.
+    // 2. Use tab favicon (assume it comes from favicon.ico).
+    if (!favIconUrl) {
+      if (settings.frameIsMain && settings.favIconUrl) {
+        switch (options["capture.favicon"]) {
+          case "link": {
+            favIconUrl = settings.favIconUrl;
+            break;
+          }
+          case "blank":
+          case "remove": {
+            // do nothing
+            break;
+          }
+          case "save":
+          default: {
+            const response = await capturer.invoke("downloadFile", {
+              url: settings.favIconUrl,
+              refUrl,
+              settings,
+              options,
+            });
+            favIconUrl = response.url;
+            break;
+          }
+        }
+
+        if (favIconUrl) {
+          let frag = doc.createDocumentFragment();
+          favIconNode = doc.createElement("link");
+          favIconNode.rel = "shortcut icon";
+          favIconNode.href = favIconUrl;
+          frag.appendChild(favIconNode);
+          frag.appendChild(doc.createTextNode("\n"));
+          headNode.appendChild(frag);
+        }
       }
     }
 

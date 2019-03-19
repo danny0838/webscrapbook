@@ -1323,7 +1323,7 @@ async function test_capture_selection() {
 }
 
 // When a headless capture (source, bookmark) is initialized from a
-// tab, the tab information (e.g. title) should be used.
+// tab, the tab information (e.g. title and favicon) should be used.
 //
 // capturer.captureTab
 // capturer.captureHeadless
@@ -1342,8 +1342,19 @@ async function test_capture_headless() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelector(`title`).textContent.trim() === `My Title`);
-  assert(!doc.querySelector(`link[rel~="icon"]`));
-  assert(!zip.files["red.bmp"]);
+
+  var faviconElem = doc.querySelector(`link[rel~="icon"]`);
+  assert(faviconElem);
+  if (faviconElem.getAttribute('href') === `red.bmp`) {
+    // Chromium: tab.favIconUrl is source URL
+    assert(faviconElem.getAttribute('href') === `red.bmp`);
+    assert(zip.files["red.bmp"]);
+  } else {
+    // Firefox: tab.favIconUrl is data URL
+    assert(faviconElem.getAttribute('href') === "ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp");
+    assert(!zip.files["red.bmp"]);
+    assert(zip.files["ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp"]);
+  }
 
   /* from tab; bookmark */
   var blob = await capture({
@@ -1354,8 +1365,7 @@ async function test_capture_headless() {
 
   var doc = await readFileAsDocument(blob);
   assert(doc.querySelector(`title`).textContent.trim() === `My Title`);
-  assert(!doc.querySelector(`link[rel~="icon"]`));
-  assert(!zip.files["red.bmp"]);
+  assert(doc.querySelector(`link[rel~="icon"]`).getAttribute('href') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 
   /* from tab frame 0; source */
   var blob = await capture({

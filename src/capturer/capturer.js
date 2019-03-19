@@ -219,15 +219,15 @@ capturer.addItemToServer = async function (params) {
 capturer.captureTab = async function (params) {
   try {
     const {tabId, frameId, saveBeyondSelection, mode, options} = params;
-    let {url, title, discarded} = await browser.tabs.get(tabId);
+    let {url, title, favIconUrl, discarded} = await browser.tabs.get(tabId);
 
     // redirect headless capture
     // if frameId not provided, use current tab title and favIcon
     if (mode === "bookmark" || mode === "source") {
       if (!isNaN(frameId)) {
-        ({url, title} = await browser.webNavigation.getFrame({tabId, frameId}));
+        ({url, title, favIconUrl} = await browser.webNavigation.getFrame({tabId, frameId}));
       }
-      return await capturer.captureHeadless({url, title, mode, options});
+      return await capturer.captureHeadless({url, title, favIconUrl, mode, options});
     }
 
     const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
@@ -239,6 +239,7 @@ capturer.captureTab = async function (params) {
         frameIsMain: true,
         documentName: "index",
         recurseChain: [],
+        favIconUrl,
       },
       options: Object.assign(scrapbook.getOptions("capture"), options),
     };
@@ -310,13 +311,14 @@ capturer.captureTab = async function (params) {
  *     - {string} params.url
  *     - {string} params.refUrl
  *     - {string} params.title
+ *     - {string} params.favIconUrl
  *     - {string} params.mode
  *     - {string} params.options - preset options that overwrites default
  * @return {Promise}
  */
 capturer.captureHeadless = async function (params) {
   try {
-    const {url, refUrl, title, mode, options} = params;
+    const {url, refUrl, title, favIconUrl, mode, options} = params;
 
     const source = `${url}`;
     const timeId = scrapbook.dateToId();
@@ -330,6 +332,7 @@ capturer.captureHeadless = async function (params) {
         frameIsMain: true,
         documentName: "index",
         recurseChain: [],
+        favIconUrl,
       },
       options: Object.assign(scrapbook.getOptions("capture"), options),
     };
@@ -528,7 +531,7 @@ capturer.captureBookmark = async function (params) {
   const {timeId} = settings;
 
   let {title} = params;
-  let favIconUrl;
+  let {favIconUrl} = settings;
 
   try {
     // attempt to retrieve title and favicon from source page
@@ -553,13 +556,15 @@ capturer.captureBookmark = async function (params) {
           title = doc.title;
         }
 
-        // use the document favIcon
-        // "rel" is matched case-insensitively
-        // The "~=" selector checks for "icon" separated by space,
-        // not including "-icon" or "_icon".
-        let elem = doc.querySelector('link[rel~="icon"][href]');
-        if (elem) {
-          favIconUrl = elem.href;
+        // use the document favIcon if not provided
+        if (!favIconUrl) {
+          // "rel" is matched case-insensitively
+          // The "~=" selector checks for "icon" separated by space,
+          // not including "-icon" or "_icon".
+          let elem = doc.querySelector('link[rel~="icon"][href]');
+          if (elem) {
+            favIconUrl = elem.href;
+          }
         }
       }
     } catch (ex) {
