@@ -4820,6 +4820,75 @@ async function test_capture_integrity() {
 
 // Check if option works
 //
+// capture.requestReferrer
+async function test_capture_referrer() {
+  /* capture.requestReferrer = auto */
+  var options = {
+    "capture.requestReferrer": "auto",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer/index.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var file = zip.file('referrer.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer/index.py`);
+  var file = zip.file('referrer2.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  /* capture.requestReferrer = all */
+  var options = {
+    "capture.requestReferrer": "all",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer/index.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var file = zip.file('referrer.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer/index.py`);
+  var file = zip.file('referrer2.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer/index.py`);
+
+  /* capture.requestReferrer = origin */
+  var options = {
+    "capture.requestReferrer": "origin",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer/index.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var file = zip.file('referrer.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+  var file = zip.file('referrer2.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  /* capture.requestReferrer = none */
+  var options = {
+    "capture.requestReferrer": "none",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer/index.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var file = zip.file('referrer.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === "");
+  var file = zip.file('referrer2.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === "");
+}
+
+// Check if option works
+//
 // capture.recordDocumentMeta
 // capturer.captureDocument
 // capturer.captureFile
@@ -6011,6 +6080,7 @@ async function runTests() {
   await test(test_capture_metaRefresh2);
   await test(test_capture_metaRefresh3);
   await test(test_capture_integrity);
+  await test(test_capture_referrer);
   await test(test_capture_record_meta);
   await test(test_capture_record_nodes);
   await test(test_capture_record_nodes2);

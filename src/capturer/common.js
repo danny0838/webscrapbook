@@ -1269,6 +1269,7 @@ capturer.captureDocument = async function (params) {
                 capturer.invoke("downLinkFetchHeader", {
                   url,
                   refUrl,
+                  options,
                   settings,
                 }).then((ext) => {
                   if (ext === null) { return null; }

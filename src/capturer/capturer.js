@@ -93,6 +93,64 @@ capturer.getUniqueFilename = function (timeId, filename) {
 };
 
 /**
+ * @param {Object} params
+ *     - {string} params.headers
+ *     - {string} params.refUrl
+ *     - {string} params.targetUrl
+ *     - {string} params.options
+ */
+capturer.setReferrer = function (params) {
+  const {
+    headers,
+    refUrl,
+    targetUrl,
+    options = {},
+  } = params;
+
+  if (!refUrl) { return; }
+  if (!refUrl.startsWith('http:') && !refUrl.startsWith('https:')) { return; }
+  if (refUrl.startsWith('https:') && (!targetUrl || !targetUrl.startsWith('https:'))) { return; }
+
+  // cannot assign "referer" header directly
+  // the prefix will be removed by the onBeforeSendHeaders listener
+  let referrer;
+  let mode = options["capture.requestReferrer"];
+
+  if (mode === "auto") {
+    const u = new URL(refUrl);
+    const t = new URL(targetUrl);
+    if (u.origin !== t.origin) {
+      mode = "origin";
+    } else {
+      mode = "all";
+    }
+  }
+
+  switch (mode) {
+    case "none": {
+      // no referrer
+      break;
+    }
+    case "all": {
+      referrer = scrapbook.splitUrlByAnchor(refUrl)[0];
+      break;
+    }
+    case "origin":
+    default: {
+      const u = new URL(refUrl);
+      u.pathname = "/";
+      u.search = u.hash = "";
+      referrer = u.href;
+      break;
+    }
+  }
+
+  if (referrer) {
+    headers["X-WebScrapBook-Referer"] = referrer;
+  }
+};
+
+/**
  * @kind invokable
  * @param {Object} params
  *     - {string} params.timeId
@@ -399,13 +457,6 @@ capturer.captureUrl = async function (params) {
   const accessPrevious = accessMap.get(accessToken);
   if (accessPrevious) { return accessPrevious; }
 
-  // cannot assign "referer" header directly
-  // the prefix will be removed by the onBeforeSendHeaders listener
-  const requestHeaders = {};
-  if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-    requestHeaders["X-WebScrapBook-Referer"] = refUrl;
-  }
-
   let accessPreviousRedirected;
   const accessCurrent = (async () => {
     try {
@@ -415,8 +466,17 @@ capturer.captureUrl = async function (params) {
         throw new Error(`URL not resolved.`);
       }
 
+      const url = sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl;
+      const requestHeaders = {};
+      capturer.setReferrer({
+        headers: requestHeaders,
+        refUrl,
+        targetUrl: url,
+        options,
+      });
+
       const xhr = await scrapbook.xhr({
-        url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
+        url,
         responseType: "document",
         requestHeaders,
         onreadystatechange(xhr) {
@@ -537,15 +597,17 @@ capturer.captureBookmark = async function (params) {
     // attempt to retrieve title and favicon from source page
     if (!title || !favIconUrl) {
       try {
-        // cannot assign "referer" header directly
-        // the prefix will be removed by the onBeforeSendHeaders listener
+        const url = sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl;
         const requestHeaders = {};
-        if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-          requestHeaders["X-WebScrapBook-Referer"] = refUrl;
-        }
+        capturer.setReferrer({
+          headers: requestHeaders,
+          refUrl,
+          targetUrl: url,
+          options,
+        });
 
         const doc = (await scrapbook.xhr({
-          url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
+          url,
           responseType: "document",
           requestHeaders,
         })).response;
@@ -576,15 +638,17 @@ capturer.captureBookmark = async function (params) {
     // fetch favicon as data URL
     if (favIconUrl && !favIconUrl.startsWith('data:')) {
       try {
-        // cannot assign "referer" header directly
-        // the prefix will be removed by the onBeforeSendHeaders listener
+        const url = scrapbook.splitUrlByAnchor(favIconUrl)[0];
         const requestHeaders = {};
-        if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-          requestHeaders["X-WebScrapBook-Referer"] = refUrl;
-        }
+        capturer.setReferrer({
+          headers: requestHeaders,
+          refUrl: sourceUrl,
+          targetUrl: url,
+          options,
+        });
 
         const xhr = await scrapbook.xhr({
-          url: scrapbook.splitUrlByAnchor(favIconUrl)[0],
+          url,
           responseType: "blob",
           requestHeaders,
         });
@@ -1425,12 +1489,13 @@ capturer.downloadFile = async function (params) {
         return {url: sourceUrl};
       }
 
-      // cannot assign "referer" header directly
-      // the prefix will be removed by the onBeforeSendHeaders listener
       const requestHeaders = {};
-      if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-        requestHeaders["X-WebScrapBook-Referer"] = refUrl;
-      }
+      capturer.setReferrer({
+        headers: requestHeaders,
+        refUrl,
+        targetUrl: sourceUrl,
+        options,
+      });
 
       let accessPreviousReturn;
       const xhr = await scrapbook.xhr({
@@ -1582,20 +1647,24 @@ capturer.downloadFile = async function (params) {
  * @param {Object} params
  *     - {string} params.url
  *     - {string} params.refUrl
+ *     - {string} params.options
  * @return {Promise}
  */
 capturer.downLinkFetchHeader = async function (params) {
   isDebug && console.debug("call: downLinkFetchHeader", params);
 
-  const {url: sourceUrl, refUrl} = params;
+  const {url: sourceUrl, refUrl, options} = params;
   const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
 
   const headers = {};
 
-  // cannot assign "referer" header directly
-  // the prefix will be removed by the onBeforeSendHeaders listener
   const requestHeaders = {};
-  if (refUrl) { requestHeaders["X-WebScrapBook-Referer"] = refUrl; }
+  capturer.setReferrer({
+    headers: requestHeaders,
+    refUrl,
+    targetUrl: sourceUrlMain,
+    options,
+  });
 
   let xhr;
   try {
