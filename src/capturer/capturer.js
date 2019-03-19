@@ -535,40 +535,42 @@ capturer.captureBookmark = async function (params) {
 
   try {
     // attempt to retrieve title and favicon from source page
-    try {
-      // cannot assign "referer" header directly
-      // the prefix will be removed by the onBeforeSendHeaders listener
-      const requestHeaders = {};
-      if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-        requestHeaders["X-WebScrapBook-Referer"] = refUrl;
-      }
-
-      const doc = (await scrapbook.xhr({
-        url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
-        responseType: "document",
-        requestHeaders,
-      })).response;
-
-      // specified sourceUrl may not be a document, maybe a malformed xhtml?
-      if (doc) {
-        // use the document title if not provided
-        if (!title) {
-          title = doc.title;
+    if (!title || !favIconUrl) {
+      try {
+        // cannot assign "referer" header directly
+        // the prefix will be removed by the onBeforeSendHeaders listener
+        const requestHeaders = {};
+        if (refUrl && sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+          requestHeaders["X-WebScrapBook-Referer"] = refUrl;
         }
 
-        // use the document favIcon if not provided
-        if (!favIconUrl) {
-          // "rel" is matched case-insensitively
-          // The "~=" selector checks for "icon" separated by space,
-          // not including "-icon" or "_icon".
-          let elem = doc.querySelector('link[rel~="icon"][href]');
-          if (elem) {
-            favIconUrl = elem.href;
+        const doc = (await scrapbook.xhr({
+          url: sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl,
+          responseType: "document",
+          requestHeaders,
+        })).response;
+
+        // specified sourceUrl may not be a document, maybe a malformed xhtml?
+        if (doc) {
+          // use the document title if not provided
+          if (!title) {
+            title = doc.title;
+          }
+
+          // use the document favIcon if not provided
+          if (!favIconUrl) {
+            // "rel" is matched case-insensitively
+            // The "~=" selector checks for "icon" separated by space,
+            // not including "-icon" or "_icon".
+            let elem = doc.querySelector('link[rel~="icon"][href]');
+            if (elem) {
+              favIconUrl = elem.href;
+            }
           }
         }
+      } catch (ex) {
+        console.error(ex);
       }
-    } catch (ex) {
-      console.error(ex);
     }
 
     // fetch favicon as data URL
