@@ -135,7 +135,7 @@ class Server {
           throw new Error('Unable to connect to backend server.');
         }
 
-        if (!(xhr.status >= 200 && xhr.status <= 206 &&
+        if (!(xhr.status >= 200 && xhr.status < 300 &&
             xhr.response && xhr.response.data)) {
           throw new Error('The server does not support WebScrapBook protocol.');
         }
