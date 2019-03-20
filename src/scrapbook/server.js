@@ -100,6 +100,11 @@ class Server {
         return null;
       }
 
+      // record configs
+      this._user = scrapbook.getOption("server.user");
+      this._password = scrapbook.getOption("server.password");
+      this._bookId = scrapbook.getOption("server.scrapbook");
+
       let rootUrlObj;
       try {
         rootUrlObj = new URL(scrapbook.getOption("server.url"));
@@ -157,11 +162,6 @@ class Server {
           this._books[bookId] = new Book(bookId, this);
         }
       }
-
-      // record other configs
-      this._user = scrapbook.getOption("server.user");
-      this._password = scrapbook.getOption("server.password");
-      this._bookId = scrapbook.getOption("server.scrapbook");
     }
   }
 
