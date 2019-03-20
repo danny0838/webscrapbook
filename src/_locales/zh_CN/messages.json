@@ -262,12 +262,6 @@
   "OptionCaptureImageTooltip": {
     "message": "此选项决定图片（IMG 或 PICTURE 元素）的处理方式。\n\n* 保存：将图片保存至本地。\n\n* 保存现用：有些图片元素含有多个版本并由浏览器根据屏幕大小、分辨率选用，此选项只把当前显示的版本保存至本地，这可以缩小容量，但在其他平台的呈现效果可能不佳。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有版本。\n\n* 链接：将图片元素改写为连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将图片元素无效化。\n\n* 移除：将图片元素移除。注意这可能会影响网页排版。"
   },
-  "OptionCaptureNoscriptLabel": {
-    "message": "NOSCRIPT 元素:"
-  },
-  "OptionCaptureNoscriptTooltip": {
-    "message": "此选项决定 NOSCRIPT 元素的处理方式。此元素是用于在浏览器不支持或停用脚本时显示替代内容。\n\n* 保存：将 NOSCRIPT 元素按原貌保存。\n\n* 清空：将 NOSCRIPT 元素内容清空。\n\n* 移除：将 NOSCRIPT 元素移除。注意这可能会影响网页排版。"
-  },
   "OptionCaptureObjectLabel": {
     "message": "OBJECT 元素:"
   },

@@ -262,12 +262,6 @@
   "OptionCaptureImageTooltip": {
     "message": "Determines how images (IMG or PICTURE elements) are handled.\n\n* Save: Save the referenced image resources to local.\n\n* Save current: An image element could contain multiple versions, one of which is selected by the browser according to viewport size and/or screen resolution. This saves only the currently used image version to local, which reduces size but the display effect on another platform might be suboptimal. If the captured page is not displayed (such as capturing source), all versions are still saved.\n\n* Link: Rewrite the image element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the image element.\n\n* Remove: Removes the image element. Note that this could affect the web page layout."
   },
-  "OptionCaptureNoscriptLabel": {
-    "message": "NOSCRIPT:"
-  },
-  "OptionCaptureNoscriptTooltip": {
-    "message": "Determines how noscript elements, which are showed when the browser does not or has disabled support of scripts, are handled.\n\n* Save: Save the noscript element as-is.\n\n* Blank: Clears the noscript element.\n\n* Remove: Removes the noscript element. Note that this could affect the web page layout."
-  },
   "OptionCaptureObjectLabel": {
     "message": "OBJECT:"
   },
