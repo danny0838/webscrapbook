@@ -138,7 +138,7 @@ const scrapbookUi = {
     document.title = this.book.name + (this.rootId !== 'root' ? ' :: ' + this.rootId : '') + ' | ' + server.config.app.name;
 
     const cmdElem = document.getElementById('command');
-    cmdElem.querySelector('option[value="exec"]').disabled = !server.config.app.is_local;
+    cmdElem.querySelector('option[value="exec_book"]').disabled = !server.config.app.is_local;
     cmdElem.querySelector('option[value="browse"]').disabled = !server.config.app.is_local;
 
     const rootElem = document.getElementById('item-root');
