@@ -1963,6 +1963,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
     const fn = capturer[message.cmd.slice(9)];
     if (fn) {
       return fn(message.args).catch((ex) => {
+        console.error(ex);
         const err = `Unexpected error: ${ex.message}`;
         capturer.error(err);
       });
@@ -2072,6 +2073,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           mode,
         });
       } catch (ex) {
+        console.error(ex);
         const err = `Unexpected error: ${ex.message}`;
         capturer.error(err);
         response = {error: {message: err}};
@@ -2092,6 +2094,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           mode,
         });
       } catch (ex) {
+        console.error(ex);
         const err = `Unexpected error: ${ex.message}`;
         console.error(err);
         response = {error: {message: err}};
