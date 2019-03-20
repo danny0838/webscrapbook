@@ -401,7 +401,7 @@
     "message": "索引器"
   },
   "OptionGroupMetadata": {
-    "message": "获取 - 元信息"
+    "message": "获取 - 元数据"
   },
   "OptionGroupSave": {
     "message": "获取 - 保存"

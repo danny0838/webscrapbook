@@ -401,7 +401,7 @@
     "message": "索引器"
   },
   "OptionGroupMetadata": {
-    "message": "擷取 - 後設資訊"
+    "message": "擷取 - 元資料"
   },
   "OptionGroupSave": {
     "message": "擷取 - 儲存"
