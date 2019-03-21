@@ -165,6 +165,12 @@ function renewCaptureSaveToDetails() {
   document.getElementById('captureSaveToFolderDetails').hidden = mode !== 'folder';
 }
 
+function verifySavePath(event) {
+    const elem = event.target;
+  // make sure it's a valid path for browser.downloads.download
+  elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
+}
+
 function renewCaptureDownLinkDetails() {
   const mode = document.getElementById("opt_capture.downLink.mode").value;
   const elem = document.getElementById('captureDownLinkDetails');
@@ -183,11 +189,9 @@ window.addEventListener("DOMContentLoaded", async (event) => {
   // event handlers
   document.getElementById("opt_capture.saveTo").addEventListener("change", renewCaptureSaveToDetails);
 
-  document.getElementById("opt_capture.scrapbookFolder").addEventListener("change", (event) => {
-    const elem = event.target;
-    // make sure it's a valid path for browser.downloads.download
-    elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
-  });
+  document.getElementById("opt_capture.scrapbookFolder").addEventListener("change", verifySavePath);
+
+  document.getElementById("opt_capture.saveFilename").addEventListener("change", verifySavePath);
 
   document.getElementById("opt_capture.downLink.mode").addEventListener("change", renewCaptureDownLinkDetails);
 

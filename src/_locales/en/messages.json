@@ -340,6 +340,12 @@
   "OptionCaptureSaveFileAsHtmlTooltip": {
     "message": "Save a browser-viewable non-HTML file as an HTML web page."
   },
+  "OptionCaptureSaveFilenameLabel": {
+    "message": "Filename to save:"
+  },
+  "OptionCaptureSaveFilenameTooltip": {
+    "message": "Determines the filename (excluding the extension) when saving a capture. Following template syntaxes are available:\n* %% - a literal \"%\".\n* %ID% - the unique identifier of the capture, e.g. \"20190301124533216\".\n* %ID_0% - the unique identifier using legacy ScrapBook format, e.g. \"20190301204533\".\n* %UUID% - generates a random UUID, e.g. \"941e4674-d6c7-4709-9703-a1b4359286c6\".\n* %TITLE% - page title, or the last URL segment.\n* %HOST% - domain name of the source, e.g. \"example.com\".\n* %PAGE% - the last URL segment, with extension removed.\n* %FILE% - the last URL segment.\n* %DATE% - current date, in YYYY-MM-DD format.\n* %TIME% - current time, in HH-MM-SS format.\n* %YEAR% - current year, in YYYY format.\n* %MONTH% - current month, in MM format。\n* %DAY% - current date in the month, in DD format.\n* %HOURS% - current hours, in HH format.\n* %MINUTES% - current minutes, in MM format.\n* %SECONDS% - current seconds, in SS format.\n* \"_UTC\" can be appended to date/time parameters to use UTC time, e.g.  %TIME_UTC%, %HOURS_UTC%.\n* A slash \"/\" can be used to specify a subfolder, e.g. \"%YEAR%/%MONTH%/%TITLE%\"."
+  },
   "OptionCaptureSaveToFolderLabel": {
     "message": "Scrapbook folder"
   },

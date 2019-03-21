@@ -96,6 +96,92 @@ capturer.getUniqueFilename = function (timeId, filename) {
 };
 
 /**
+ * Get a unique (deduplicated) filename for downloading
+ *
+ * @param {Object} params
+ *     - {string} params.filename - may contain directory
+ *     - {boolean} params.isFile
+ *     - {string} params.options
+ * @return {string} The deduplicated filename.
+ */
+capturer.getAvailableFilename = async function (params) {
+  isDebug && console.debug("call: getAvailableFilename", params);
+
+  const {filename, isFile, options} = params;
+
+  const [dir, base] = scrapbook.filepathParts(filename);
+  const [basename, ext] = isFile ? scrapbook.filenameParts(base) : [base, ""];
+
+  let isFilenameTaken;
+  switch (options["capture.saveTo"]) {
+    case "server": {
+      await server.init();
+      const prefix = server.books[server.bookId].dataUrl +
+          scrapbook.escapeFilename(dir ? dir + '/' : '');
+      isFilenameTaken = async (path) => {
+        const target = prefix + scrapbook.escapeFilename(path);
+        const info = await server.request({
+          url: target + '?f=json',
+          method: "GET",
+        }).then(r => r.json()).then(r => r.data);
+        return info.type !== null;
+      };
+      break;
+    }
+    case "folder": {
+      const blob = new Blob([], {type: "text/plain"});
+      const url = URL.createObjectURL(blob);
+      const prefix = options["capture.scrapbookFolder"] + "/data/" +
+          (dir ? dir + '/' : '');
+      isFilenameTaken = async (path) => {
+        const id = await browser.downloads.download({
+          url,
+          filename: prefix + path,
+          conflictAction: "uniquify",
+          saveAs: false,
+        });
+        const newFilename = await new Promise((resolve, reject) => {
+          const onChanged = async (delta) => {
+            if (delta.id !== id) { return; }
+            if (delta.filename) {
+              // Chromium: an event with filename change is triggered before download
+              const filename = delta.filename.current;
+              browser.downloads.onChanged.removeListener(onChanged);
+              await browser.downloads.erase({id});
+              resolve(filename);
+            } else if (delta.state && delta.state.current === "complete") {
+              browser.downloads.onChanged.removeListener(onChanged);
+              const items = await browser.downloads.search({id});
+              const item = items[0];
+              const filename = item.filename;
+              if (item.exists) { await browser.downloads.removeFile(id); }
+              await browser.downloads.erase({id});
+              resolve(filename);
+            } else if (delta.error) {
+              browser.downloads.onChanged.removeListener(onChanged);
+              await browser.downloads.erase({id});
+              reject(new Error(`Download interruped: ${delta.error.current}.`));
+            }
+          };
+          browser.downloads.onChanged.addListener(onChanged);
+        });
+        return scrapbook.filepathParts(newFilename)[1] !== path;
+      };
+      break;
+    }
+    default: {
+      return scrapbook.filepathParts(filename)[1];
+    }
+  }
+
+  let index = 0, path = base;
+  while (await isFilenameTaken(path)) {
+    path = basename + '(' + (++index) + ')' + (ext ? '.' + ext : '');
+  }
+  return path;
+};
+
+/**
  * @param {Object} params
  *     - {string} params.headers
  *     - {string} params.refUrl
@@ -698,6 +784,15 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
 
     const blob = new Blob([html], {type: "text/html"});
     const ext = ".htm";
+
+    settings.filename = await capturer.getSaveFilename({
+      title: title || scrapbook.filenameParts(scrapbook.urlToFilename(sourceUrl))[0] || "untitled",
+      sourceUrl,
+      isFolder: false,
+      settings,
+      options,
+    });
+
     let targetDir;
     let filename;
     let savePrompt;
@@ -711,16 +806,14 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       }
       case 'server': {
         // deprecated; normally we won't get here
-        targetDir = "";
-        filename = timeId + ext;
+        [targetDir, filename] = scrapbook.filepathParts(settings.filename + ext);
         savePrompt = false;
         saveMethod = "saveToServer";
         break;
       }
       case 'folder':
       default: {
-        targetDir = options["capture.scrapbookFolder"] + "/data";
-        filename = timeId + ext;
+        [targetDir, filename] = scrapbook.filepathParts(options["capture.scrapbookFolder"] + "/data/" + settings.filename + ext);
         savePrompt = false;
         saveMethod = "saveBlob";
         break;
@@ -773,6 +866,16 @@ capturer.captureFile = async function (params) {
 
     const {url: sourceUrl, refUrl, title, charset, settings, options} = params;
     const {timeId} = settings;
+
+    if (settings.frameIsMain) {
+      settings.filename = await capturer.getSaveFilename({
+        title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
+        sourceUrl,
+        isFolder: options["capture.saveAs"] === "folder",
+        settings,
+        options,
+      });
+    }
 
     const response = await capturer.downloadFile({
       url: sourceUrl,
@@ -917,16 +1020,14 @@ capturer.saveDocument = async function (params) {
               return await capturer.saveBlobInMemory({blob});
             }
             case 'server': {
-              targetDir = "";
-              filename = timeId + ext;
+              [targetDir, filename] = scrapbook.filepathParts(settings.filename + ext);
               savePrompt = false;
               saveMethod = "saveToServer";
               break;
             }
             case 'folder':
             default: {
-              targetDir = options["capture.scrapbookFolder"] + "/data";
-              filename = timeId + ext;
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.scrapbookFolder"] + "/data/" + settings.filename + ext);
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -1080,16 +1181,14 @@ ${JSON.stringify(zipData)}
               return await capturer.saveBlobInMemory({blob});
             }
             case 'server': {
-              targetDir = "";
-              filename = timeId + ext;
+              [targetDir, filename] = scrapbook.filepathParts(settings.filename + ext);
               savePrompt = false;
               saveMethod = "saveToServer";
               break;
             }
             case 'folder':
             default: {
-              targetDir = options["capture.scrapbookFolder"] + "/data";
-              filename = timeId + ext;
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.scrapbookFolder"] + "/data/" + settings.filename + ext);
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -1154,16 +1253,14 @@ ${JSON.stringify(zipData)}
               return await capturer.saveBlobInMemory({blob});
             }
             case 'server': {
-              targetDir = "";
-              filename = timeId + ".htz";
+              [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".htz");
               savePrompt = false;
               saveMethod = "saveToServer";
               break;
             }
             case 'folder':
             default: {
-              targetDir = options["capture.scrapbookFolder"] + "/data";
-              filename = timeId + ".htz";
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.scrapbookFolder"] + "/data/" + settings.filename + ".htz");
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -1246,16 +1343,14 @@ ${JSON.stringify(zipData)}
               return await capturer.saveBlobInMemory({blob});
             }
             case 'server': {
-              targetDir = "";
-              filename = timeId + ".maff";
+              [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".maff");
               savePrompt = false;
               saveMethod = "saveToServer";
               break;
             }
             case 'folder':
             default: {
-              targetDir = options["capture.scrapbookFolder"] + "/data";
-              filename = timeId + ".maff";
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.scrapbookFolder"] + "/data/" + settings.filename + ".maff");
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -1299,14 +1394,14 @@ ${JSON.stringify(zipData)}
 
         switch (options["capture.saveTo"]) {
           case 'server': {
-            targetDir = timeId;
+            targetDir = settings.filename;
             saveMethod = "saveToServer";
             break;
           }
           case 'folder':
           case 'memory':
           default: {
-            targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
+            targetDir = options["capture.scrapbookFolder"] + "/data/" + settings.filename;
             saveMethod = "saveBlob";
             break;
           }
@@ -1764,14 +1859,14 @@ capturer.downloadBlob = async function (params) {
 
       switch (options["capture.saveTo"]) {
         case 'server': {
-          targetDir = timeId;
+          targetDir = settings.filename;
           saveMethod = "saveToServer";
           break;
         }
         case 'folder':
         case 'memory': // fallback
         default: {
-          targetDir = options["capture.scrapbookFolder"] + "/data/" + timeId;
+          targetDir = options["capture.scrapbookFolder"] + "/data/" + settings.filename;
           saveMethod = "saveBlob";
           break;
         }
@@ -1901,10 +1996,14 @@ capturer.saveToServer = async function (params) {
 
   const {timeId, blob, directory, filename, sourceUrl, options} = params;
   await server.init();
+  let newFilename = await capturer.getAvailableFilename({
+    filename: (directory ? directory + '/' : '') + filename,
+    isFile: true,
+    options,
+  });
 
   const target = server.books[server.bookId].dataUrl +
-      (directory ? directory + '/' : '') +
-      filename;
+    scrapbook.escapeFilename((directory ? directory + '/' : '') + newFilename);
 
   const formData = new FormData();
   formData.append('token', await server.acquireToken());
@@ -1920,7 +2019,7 @@ capturer.saveToServer = async function (params) {
     throw new Error(`Unable to upload to backend server: ${ex.message}`);
   }
 
-  return filename;
+  return newFilename;
 };
 
 

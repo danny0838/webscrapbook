@@ -149,6 +149,17 @@ capturer.captureDocument = async function (params) {
 
     const [docUrl] = scrapbook.splitUrlByAnchor(doc.URL);
     const [refUrl] = scrapbook.splitUrlByAnchor(doc.baseURI);
+
+    if (settings.frameIsMain) {
+      settings.filename = await capturer.getSaveFilename({
+        title: title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
+        sourceUrl: docUrl,
+        isFolder: options["capture.saveAs"] === "folder",
+        settings,
+        options,
+      });
+    }
+
     const tasks = [];
     let selection;
     let rootNode, headNode;
@@ -2099,6 +2110,145 @@ capturer.captureDocument = async function (params) {
     console.error(ex);
     return {error: {message: ex.message}};
   }
+};
+
+/**
+ * Format the filename to save.
+ *
+ * @param {Object} params
+ *     - {string} params.title
+ *     - {string} params.sourceUrl
+ *     - {boolean} params.isFolder
+ *     - {Object} params.settings
+ *     - {Object} params.options
+ * @return {string} The formatted filename.
+ */
+capturer.getSaveFilename = async function (params) {
+  const {title, sourceUrl, isFolder, settings, options} = params;
+
+  const time = scrapbook.idToDate(settings.timeId);
+  const u = new URL(sourceUrl);
+
+  const tidy = (filename) => {
+    let fn = filename;
+    fn = scrapbook.validateFilename(fn, options["capture.saveAsciiFilename"]);
+    fn = scrapbook.crop(fn, 120, 200); // see capturer.getUniqueFilename for limitation details
+    return fn;
+  };
+
+  let filename = options["capture.saveFilename"].replace(/%([^%]*)%/g, (_, key) => {
+    switch (key.toUpperCase()) {
+      case "": {
+        // escape "%" with "%%"
+        return "%";
+      }
+      case "ID": {
+        return settings.timeId;
+      }
+      case "ID_0": {
+        return scrapbook.dateToIdOld(scrapbook.idToDate(settings.timeId));
+      }
+      case "UUID": {
+        return scrapbook.getUuid();
+      }
+      case "TITLE": {
+        return tidy(title);
+      }
+      case "HOST": {
+        return tidy(u.host);
+      }
+      case "PAGE": {
+        return tidy(scrapbook.filenameParts(scrapbook.urlToFilename(sourceUrl))[0]);
+      }
+      case "FILE": {
+        return tidy(scrapbook.urlToFilename(sourceUrl));
+      }
+      case "DATE": {
+        return [
+          time.getFullYear(),
+          scrapbook.intToFixedStr(time.getMonth() + 1, 2),
+          scrapbook.intToFixedStr(time.getDate(), 2),
+        ].join('-');
+      }
+      case "DATE_UTC": {
+        return [
+          time.getUTCFullYear(),
+          scrapbook.intToFixedStr(time.getUTCMonth() + 1, 2),
+          scrapbook.intToFixedStr(time.getUTCDate(), 2),
+        ].join('-');
+      }
+      case "TIME": {
+        return [
+          scrapbook.intToFixedStr(time.getHours(), 2),
+          scrapbook.intToFixedStr(time.getMinutes(), 2),
+          scrapbook.intToFixedStr(time.getSeconds(), 2),
+        ].join('-');
+      }
+      case "TIME_UTC": {
+        return [
+          scrapbook.intToFixedStr(time.getUTCHours(), 2),
+          scrapbook.intToFixedStr(time.getUTCMinutes(), 2),
+          scrapbook.intToFixedStr(time.getUTCSeconds(), 2),
+        ].join('-');
+      }
+      case "YEAR": {
+        return time.getFullYear();
+      }
+      case "YEAR_UTC": {
+        return time.getUTCFullYear();
+      }
+      case "MONTH": {
+        return scrapbook.intToFixedStr(time.getMonth() + 1, 2);
+      }
+      case "MONTH_UTC": {
+        return scrapbook.intToFixedStr(time.getUTCMonth() + 1, 2);
+      }
+      case "DAY": {
+        return scrapbook.intToFixedStr(time.getDate(), 2);
+      }
+      case "DAY_UTC": {
+        return scrapbook.intToFixedStr(time.getUTCDate(), 2);
+      }
+      case "HOURS": {
+        return scrapbook.intToFixedStr(time.getHours(), 2);
+      }
+      case "HOURS_UTC": {
+        return scrapbook.intToFixedStr(time.getUTCHours(), 2);
+      }
+      case "MINUTES": {
+        return scrapbook.intToFixedStr(time.getMinutes(), 2);
+      }
+      case "MINUTES_UTC": {
+        return scrapbook.intToFixedStr(time.getUTCMinutes(), 2);
+      }
+      case "SECONDS": {
+        return scrapbook.intToFixedStr(time.getSeconds(), 2);
+      }
+      case "SECONDS_UTC": {
+        return scrapbook.intToFixedStr(time.getUTCSeconds(), 2);
+      }
+      default: {
+        return _;
+      }
+    }
+  });
+
+  filename = filename
+    .split('/')
+    .map(x => scrapbook.validateFilename(x, options["capture.saveAsciiFilename"]))
+    .join('/');
+
+  if (isFolder) {
+    const newFilename = await capturer.invoke("getAvailableFilename", {
+      filename,
+      settings,
+      options,
+    });
+    const dir = scrapbook.filepathParts(filename)[0];
+    filename = (dir ? dir + '/' : '') + newFilename;
+  }
+
+  return filename;
 };
 
 capturer.resolveRelativeUrl = function (relativeUrl, baseUrl) {
