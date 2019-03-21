@@ -97,7 +97,7 @@ scrapbook.options = {
   "server.password": "",
   "server.scrapbook": "",
   "capture.saveTo": "folder", // "server", "folder", "memory"
-  "capture.scrapbookFolder": "WebScrapBook",
+  "capture.saveFolder": "WebScrapBook/data",
   "capture.saveAs": "folder", // "folder", "zip", "maff", "singleHtml", "singleHtmlJs"
   "capture.saveFilename": "%ID%",
   "capture.saveAsciiFilename": false,

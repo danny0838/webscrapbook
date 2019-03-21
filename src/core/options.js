@@ -166,9 +166,14 @@ function renewCaptureSaveToDetails() {
 }
 
 function verifySavePath(event) {
-    const elem = event.target;
-  // make sure it's a valid path for browser.downloads.download
-  elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
+  const elem = event.target;
+  if (elem.value) {
+    // make sure it's a valid path for browser.downloads.download
+    elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
+  } else {
+    // reset value to placeholder
+    elem.value = elem.placeholder;
+  }
 }
 
 function renewCaptureDownLinkDetails() {
@@ -189,7 +194,7 @@ window.addEventListener("DOMContentLoaded", async (event) => {
   // event handlers
   document.getElementById("opt_capture.saveTo").addEventListener("change", renewCaptureSaveToDetails);
 
-  document.getElementById("opt_capture.scrapbookFolder").addEventListener("change", verifySavePath);
+  document.getElementById("opt_capture.saveFolder").addEventListener("change", verifySavePath);
 
   document.getElementById("opt_capture.saveFilename").addEventListener("change", verifySavePath);
 

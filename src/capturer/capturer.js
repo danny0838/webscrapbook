@@ -131,8 +131,7 @@ capturer.getAvailableFilename = async function (params) {
     case "folder": {
       const blob = new Blob([], {type: "text/plain"});
       const url = URL.createObjectURL(blob);
-      const prefix = options["capture.scrapbookFolder"] + "/data/" +
-          (dir ? dir + '/' : '');
+      const prefix = options["capture.saveFolder"] + "/" + (dir ? dir + '/' : '');
       isFilenameTaken = async (path) => {
         const id = await browser.downloads.download({
           url,
@@ -813,7 +812,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       }
       case 'folder':
       default: {
-        [targetDir, filename] = scrapbook.filepathParts(options["capture.scrapbookFolder"] + "/data/" + settings.filename + ext);
+        [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ext);
         savePrompt = false;
         saveMethod = "saveBlob";
         break;
@@ -1027,7 +1026,7 @@ capturer.saveDocument = async function (params) {
             }
             case 'folder':
             default: {
-              [targetDir, filename] = scrapbook.filepathParts(options["capture.scrapbookFolder"] + "/data/" + settings.filename + ext);
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ext);
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -1188,7 +1187,7 @@ ${JSON.stringify(zipData)}
             }
             case 'folder':
             default: {
-              [targetDir, filename] = scrapbook.filepathParts(options["capture.scrapbookFolder"] + "/data/" + settings.filename + ext);
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ext);
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -1260,7 +1259,7 @@ ${JSON.stringify(zipData)}
             }
             case 'folder':
             default: {
-              [targetDir, filename] = scrapbook.filepathParts(options["capture.scrapbookFolder"] + "/data/" + settings.filename + ".htz");
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ".htz");
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -1350,7 +1349,7 @@ ${JSON.stringify(zipData)}
             }
             case 'folder':
             default: {
-              [targetDir, filename] = scrapbook.filepathParts(options["capture.scrapbookFolder"] + "/data/" + settings.filename + ".maff");
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ".maff");
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -1401,7 +1400,7 @@ ${JSON.stringify(zipData)}
           case 'folder':
           case 'memory':
           default: {
-            targetDir = options["capture.scrapbookFolder"] + "/data/" + settings.filename;
+            targetDir = options["capture.saveFolder"] + "/" + settings.filename;
             saveMethod = "saveBlob";
             break;
           }
@@ -1866,7 +1865,7 @@ capturer.downloadBlob = async function (params) {
         case 'folder':
         case 'memory': // fallback
         default: {
-          targetDir = options["capture.scrapbookFolder"] + "/data/" + settings.filename;
+          targetDir = options["capture.saveFolder"] + "/" + settings.filename;
           saveMethod = "saveBlob";
           break;
         }

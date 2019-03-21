@@ -362,7 +362,7 @@
     "message": "剪贴簿文件夹:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "指定保存剪贴簿数据的顶层文件夹，为 <默认下载文件夹> 以下的路径，例如“WebScrapBook”或“my/webscrapbook”。\n\n* 如有需要指定 <默认下载文件夹> 以外的文件夹，可在 <默认下载文件夹> 下建立软链接（symblic 或 junction link）指向想要的文件夹，然后把此项设为该链接的路径。"
+    "message": "指定保存剪贴簿数据的顶层文件夹，为 <默认下载文件夹> 以下的路径，例如“WebScrapBook/data”。\n\n* 浏览器扩展被限制只能下载文件到 <默认下载文件夹> ，如有需要可在 <默认下载文件夹> 下建立符号链接（或 Windows 系统的目录连接）指向想要的文件夹。\n\n* 注意：为向下相容，索引器只支持对含有“data”子文件夹的剪贴簿文件夹建立索引。若使用其他数据架构，须搭配后端服务器才能使用索引器。"
   },
   "OptionCaptureScriptLabel": {
     "message": "脚本:"

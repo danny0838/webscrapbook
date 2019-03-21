@@ -362,7 +362,7 @@
     "message": "剪貼簿資料夾:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "指定儲存剪貼簿資料的頂層資料夾，為 <預設下載資料夾> 以下的路徑，例如「WebScrapBook」或「my/webscrapbook」。\n\n* 如有需要指定 <預設下載資料夾> 以外的資料夾，可在 <預設下載資料夾> 下建立軟連結（symblic 或 junction link）指向想要的資料夾，然後把此項設為該連結的路徑。"
+    "message": "指定儲存剪貼簿資料的頂層資料夾，為 <預設下載資料夾> 以下的路徑，例如「WebScrapBook/data」。\n\n* 瀏覽器擴充套件被限制只能下載檔案到 <預設下載資料夾>，如有需要可在 <預設下載資料夾> 下建立符號連結（或 Windows 系統的目錄連接）指向想要的資料夾。\n\n* 注意：為向下相容，索引器只支援對含有「data」子資料夾的剪貼簿資料夾建立索引。若使用其他資料架構，須搭配後端伺服器才能使用索引器。"
   },
   "OptionCaptureScriptLabel": {
     "message": "腳本:"

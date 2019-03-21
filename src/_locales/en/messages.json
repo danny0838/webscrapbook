@@ -362,7 +362,7 @@
     "message": "Scrapbook folder:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "The top-level folder scrapbook data are saved in. This is a path under the <default download folder>, and can be \"WebScrapBook\", or \"my/webscrapbook\", etc.\n\n* To specify a folder beyond the <default download folder>, create a soft link (symbolic or junction) under <default download folder> and targets the desired folder, and set the this to be the path of the link."
+    "message": "The top-level folder scrapbook data are saved in. This is a path under the <default download folder>, such as \"WebScrapBook/data\".\n\n* Browser extensions are restricted to download only to the <default download folder>. To specify a folder beyond it, create a symbolic link (or junction point in Windows) targeting to the desired folder under <default download folder>.\n\n* NOTE: The indexer supports generating index only for a scrapbook folder with \"data\" subfolder, for downward compatibility. A backend server is required to run the indexer if other data schema is used."
   },
   "OptionCaptureScriptLabel": {
     "message": "Scripts:"
