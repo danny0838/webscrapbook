@@ -66,8 +66,8 @@ capturer.getAccessToken = function (url, method) {
  * Prevent filename conflict. Appends a number if the given filename is used.
  *
  * Filename and path limitation:
- * - Windows API: filepath limited to 260 UTF-16 chars
- * - ext4: filename limited to 255 UTF-8 bytes
+ * - Windows API: fullpath < 260 (UTF-16) chars; filename <= 255 (UTF-16) chars
+ * - Ext4: filename <= 255 (UTF-8) bytes; fullpath <= 4096 (UTF-8) bytes
  *
  * @param {string} timeId
  * @param {string} filename - A validated filename (via scrapbook.validateFilename).

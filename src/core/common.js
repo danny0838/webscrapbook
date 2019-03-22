@@ -535,9 +535,9 @@ scrapbook.idToDate = function (id) {
 };
 
 /**
- * Returns the ScrapBook ID from a given Date object
+ * Returns the legacy ScrapBook ID from a given Date object
  *
- * @deprecated Used by older ScrapBook 1.x, may get inaccurate if used across different timezone
+ * @deprecated Used by legacy ScrapBook. Inaccurate when used across timezone. Same seconds issue.
  * @param {Date|undefined} date - Given day, or now if undefined
  * @return {string} the ScrapBook ID
  */
@@ -552,7 +552,7 @@ scrapbook.dateToIdOld = function (date) {
 };
 
 /**
- * @deprecated Used by older ScrapBook 1.x, may get inaccurate if used across different timezone
+ * @deprecated See scrapbook.dateToIdOld for details.
  * @param {Date} id - Given ScrapBook ID
  */
 scrapbook.idToDateOld = function (id) {
@@ -626,27 +626,66 @@ scrapbook.crop = function (str, charLimit, byteLimit, ellipsis = '...') {
   return str;
 };
 
+/**
+ * Revised from Jeff Ward and folk's version.
+ *
+ * @link http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript/21963136#21963136
+ */
 scrapbook.getUuid = function () {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    let r = Math.random()*16|0, v = (c == 'x') ? r : (r&0x3|0x8);
-    return v.toString(16);
-  });
+  const lut = Array(256).fill().map((_, i) => (i < 16 ? '0' : '') + (i).toString(16));
+  const formatUuid = ([d0, d1, d2, d3]) =>
+    lut[d0       & 0xff]        + lut[d0 >>  8 & 0xff] + lut[d0 >> 16 & 0xff] + lut[d0 >> 24 & 0xff] + '-' +
+    lut[d1       & 0xff]        + lut[d1 >>  8 & 0xff] + '-' +
+    lut[d1 >> 16 & 0x0f | 0x40] + lut[d1 >> 24 & 0xff] + '-' +
+    lut[d2       & 0x3f | 0x80] + lut[d2 >>  8 & 0xff] + '-' +
+    lut[d2 >> 16 & 0xff]        + lut[d2 >> 24 & 0xff] +
+    lut[d3       & 0xff]        + lut[d3 >>  8 & 0xff] +
+    lut[d3 >> 16 & 0xff]        + lut[d3 >> 24 & 0xff];
+
+  const getRandomValuesFunc = window.crypto && window.crypto.getRandomValues ?
+    () => {
+      const dvals = new Uint32Array(4);
+      window.crypto.getRandomValues(dvals);
+      return dvals;
+    } :
+    () => ([
+      Math.random() * 0x100000000 >>> 0,
+      Math.random() * 0x100000000 >>> 0,
+      Math.random() * 0x100000000 >>> 0,
+      Math.random() * 0x100000000 >>> 0,
+    ]);
+
+  const uuid = () => formatUuid(getRandomValuesFunc());
+  scrapbook.getUuid = uuid;
+  return uuid();
 };
 
 scrapbook.escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
-  let list = {
+  const regex = /[&<>"']| (?= )/g;
+  const fn = m => map[m];
+  const map = {
     "&": "&amp;",
     "<": "&lt;",
-    ">": "&gt;",
-    '"': (noDoubleQuotes ? '"' : "&quot;"),
-    "'": (singleQuotes ? "&#39;" : "'"),
-    " ": (spaces ? "&nbsp;" : " ")
+    ">": "&gt;"
   };
-  return str.replace(/[&<>"']| (?= )/g, m => list[m]);
+  const escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
+    map['"'] = noDoubleQuotes ? '"' : "&quot;";
+    map["'"] = singleQuotes ? "&#39;" : "'";
+    map[" "] = spaces ? "&nbsp;" : " ";
+    return str.replace(regex, fn);
+  };
+  scrapbook.escapeHtml = escapeHtml;
+  return escapeHtml(str, noDoubleQuotes, singleQuotes, spaces);
 };
 
 scrapbook.unescapeHtml = function (str) {
-  let list = {
+  const regex = /&(?:(?:amp|lt|gt|quot|apos|nbsp)|#(?:(\d+)|x([0-9A-Fa-f]+)));/g;
+  const fn = (entity, dec, hex) => {
+    if (dec) { return String.fromCharCode(parseInt(dec, 10)); }
+    if (hex) { return String.fromCharCode(parseInt(hex, 16)); }
+    return map[entity];
+  };
+  const map = {
     "&amp;": "&",
     "&lt;": "<",
     "&gt;" : ">",
@@ -654,50 +693,76 @@ scrapbook.unescapeHtml = function (str) {
     "&apos;" : "'",
     "&nbsp;" : " "
   };
-  return str.replace(/&(?:amp|lt|gt|quot|apos|nbsp);|&#(?:(\d+)|x([0-9A-Fa-f]+));/g, (entity, dec, hex) => {
-    if (dec) return String.fromCharCode(parseInt(dec, 10));
-    if (hex) return String.fromCharCode(parseInt(hex, 16));
-    return list[entity];
-  });
+  const unescapeHtml = function (str) {
+    return str.replace(regex, fn);
+  };
+  scrapbook.unescapeHtml = unescapeHtml;
+  return unescapeHtml(str);
 };
 
 scrapbook.escapeRegExp = function (str) {
   // Escaping "-" allows the result to be inserted into a character class.
   // Escaping "/" allow the result to be used in a JS regex literal.
-  return str.replace(/[-/\\^$*+?.|()[\]{}]/g, "\\$&");
+  const regex = /[-/\\^$*+?.|()[\]{}]/g;
+  const escapeRegExp = function (str) {
+    return str.replace(regex, "\\$&");
+  };
+  scrapbook.escapeRegExp = escapeRegExp;
+  return escapeRegExp(str);
 };
 
 scrapbook.escapeHtmlComment = function (str) {
-  return str.replace(/-([\u200B]*)-/g, "-\u200B$1-");
+  const regex = /-([\u200B]*)-/g;
+  const escapeHtmlComment = function (str) {
+    return str.replace(regex, "-\u200B$1-");
+  };
+  scrapbook.escapeHtmlComment = escapeHtmlComment;
+  return escapeHtmlComment(str);
 };
 
 scrapbook.escapeQuotes = function (str) {
-  return str.replace(/[\\"]/g, "\\$&");
+  const regex = /[\\"]/g;
+  const escapeQuotes = function (str) {
+    return str.replace(regex, "\\$&");
+  };
+  scrapbook.escapeQuotes = escapeQuotes;
+  return escapeQuotes(str);
 };
 
 scrapbook.unescapeQuotes = function (str) {
-  return str.replace(/\\(.)/g, "$1");
+  const regex = /\\(.)/g;
+  const unescapeQuotes = function (str) {
+    return str.replace(regex, "$1");
+  };
+  scrapbook.unescapeQuotes = unescapeQuotes;
+  return unescapeQuotes(str);
 };
 
 scrapbook.escapeCssComment = function (str) {
-  return str.replace(/\*\//g, "*\u200B/");
+  const regex = /\*\//g;
+  const escapeCssComment = function (str) {
+    return str.replace(regex, "*\u200B/");
+  };
+  scrapbook.escapeCssComment = escapeCssComment;
+  return escapeCssComment(str);
 };
 
 scrapbook.unescapeCss = function (str) {
-  let that = arguments.callee;
-  if (!that.replaceRegex) {
-    that.replaceRegex = /\\([0-9A-Fa-f]{1,6}) ?|\\(.)/g;
-    that.getCodes = function (n) {
-      if (n < 0x10000) return [n];
-      n -= 0x10000;
-      return [0xD800+(n>>10), 0xDC00+(n&0x3FF)];
-    };
-    that.replaceFunc = function (m, u, c) {
-      if (c) return c;
-      if (u) return String.fromCharCode.apply(null, that.getCodes(parseInt(u, 16)));
-    };
-  }
-  return str.replace(that.replaceRegex, that.replaceFunc);
+  const replaceRegex = /\\(?:([0-9A-Fa-f]{1,6}) ?|(.))/g;
+  const getCodes = function (n) {
+    if (n < 0x10000) return [n];
+    n -= 0x10000;
+    return [0xD800+(n>>10), 0xDC00+(n&0x3FF)];
+  };
+  const replaceFunc = function (m, u, c) {
+    if (c) { return c; }
+    if (u) { return String.fromCharCode.apply(null, getCodes(parseInt(u, 16))); }
+  };
+  const unescapeCss = function (str) {
+    return str.replace(replaceRegex, replaceFunc);
+  };
+  scrapbook.unescapeCss = unescapeCss;
+  return unescapeCss(str);
 };
 
 /**
@@ -705,7 +770,13 @@ scrapbook.unescapeCss = function (str) {
  * causes a "Malformed URI sequence" error on decodeURIComponent.
  */
 scrapbook.decodeURIComponent = function (uri) {
-  return uri.replace(/(%[0-9A-F]{2})+/gi, m => decodeURIComponent(m));
+  const regex = /(%[0-9A-F]{2})+/gi;
+  const fn = m => decodeURIComponent(m);
+  const decode = function (uri) {
+    return uri.replace(regex, fn);
+  };
+  scrapbook.decodeURIComponent = decode;
+  return decode(uri);
 };
 
 scrapbook.stringToDataUri = function (str, mime, charset) {
@@ -794,7 +865,12 @@ scrapbook.arrayBufferToByteString = function (ab) {
  *******************************************************************/
 
 scrapbook.isUrlAbsolute = function (url) {
-  return /^[a-z][a-z0-9+.-]*:/i.test(url || "");
+  const regex = /^[a-z][a-z0-9+.-]*:/i;
+  const isUrlAbsolute = function (url) {
+    return regex.test(url || "");
+  };
+  scrapbook.isUrlAbsolute = isUrlAbsolute;
+  return isUrlAbsolute(url);
 };
 
 scrapbook.getRelativeUrl = function (targetUrl, baseUrl) {
@@ -898,33 +974,41 @@ scrapbook.filenameParts = function (filename) {
  * @return {{contentType: string, charset: string}}
  */
 scrapbook.parseHeaderContentType = function (string) {
-  let result = {type: undefined, parameters: {}};
+  const regexFields = /^(.*?)(?=;|$)/i;
+  const regexDoubleQuotedField = /;((?:"(?:\\.|[^"])*(?:"|$)|[^"])*?)(?=;|$)/i;
+  const regexKeyValue = /\s*(.*?)\s*=\s*("(?:\\.|[^"])*"|[^"]*?)\s*$/i;
+  const regexDoubleQuotedValue = /^"(.*?)"$/;
+  const parseHeaderContentType = function (string) {
+    const result = {type: undefined, parameters: {}};
 
-  if (typeof string !== 'string') {
-    return result;
-  }
+    if (typeof string !== 'string') {
+      return result;
+    }
 
-  if (/^(.*?)(?=;|$)/i.test(string)) {
-    string = RegExp.rightContext;
-    result.type = RegExp.$1.trim();
-    while (/;((?:"(?:\\.|[^"])*(?:"|$)|[^"])*?)(?=;|$)/i.test(string)) {
+    if (regexFields.test(string)) {
       string = RegExp.rightContext;
-      let parameter = RegExp.$1;
-      if (/\s*(.*?)\s*=\s*("(?:\\.|[^"])*"|[^"]*?)\s*$/i.test(parameter)) {
-        let field = RegExp.$1;
-        let value = RegExp.$2;
+      result.type = RegExp.$1.trim();
+      while (regexDoubleQuotedField.test(string)) {
+        string = RegExp.rightContext;
+        let parameter = RegExp.$1;
+        if (regexKeyValue.test(parameter)) {
+          let field = RegExp.$1;
+          let value = RegExp.$2;
 
-        // manage double quoted value
-        if (/^"(.*?)"$/.test(value)) {
-          value = scrapbook.unescapeQuotes(RegExp.$1);
+          // manage double quoted value
+          if (regexDoubleQuotedValue.test(value)) {
+            value = scrapbook.unescapeQuotes(RegExp.$1);
+          }
+
+          result.parameters[field] = value;
         }
-
-        result.parameters[field] = value;
       }
     }
-  }
 
-  return result;
+    return result;
+  };
+  scrapbook.parseHeaderContentType = parseHeaderContentType;
+  return parseHeaderContentType(string);
 };
 
 /**
@@ -936,52 +1020,62 @@ scrapbook.parseHeaderContentType = function (string) {
  * @return {{type: ('inline'|'attachment'), parameters: {[filename: string]}}}
  */
 scrapbook.parseHeaderContentDisposition = function (string) {
-  let result = {type: undefined, parameters: {}};
+  const regexFields = /^(.*?)(?=;|$)/i;
+  const regexDoubleQuotedField = /;((?:"(?:\\.|[^"])*(?:"|$)|[^"])*?)(?=;|$)/i;
+  const regexKeyValue = /\s*(.*?)\s*=\s*("(?:\\.|[^"])*"|[^"]*?)\s*$/i;
+  const regexDoubleQuotedValue = /^"(.*?)"$/;
+  const regexExtField = /^(.*)\*$/;
+  const regexExtValue = /^(.*?)'(.*?)'(.*?)$/;
+  const parseHeaderContentDisposition = function (string) {
+    const result = {type: undefined, parameters: {}};
 
-  if (typeof string !== 'string') {
-    return result;
-  }
+    if (typeof string !== 'string') {
+      return result;
+    }
 
-  if (/^(.*?)(?=;|$)/i.test(string)) {
-    string = RegExp.rightContext;
-    result.type = RegExp.$1.trim();
-    while (/;((?:"(?:\\.|[^"])*(?:"|$)|[^"])*?)(?=;|$)/i.test(string)) {
+    if (regexFields.test(string)) {
       string = RegExp.rightContext;
-      let parameter = RegExp.$1;
-      if (/\s*(.*?)\s*=\s*("(?:\\.|[^"])*"|[^"]*?)\s*$/i.test(parameter)) {
-        let field = RegExp.$1;
-        let value = RegExp.$2;
+      result.type = RegExp.$1.trim();
+      while (regexDoubleQuotedField.test(string)) {
+        string = RegExp.rightContext;
+        let parameter = RegExp.$1;
+        if (regexKeyValue.test(parameter)) {
+          let field = RegExp.$1;
+          let value = RegExp.$2;
 
-        // manage double quoted value
-        if (/^"(.*?)"$/.test(value)) {
-          value = scrapbook.unescapeQuotes(RegExp.$1);
-        }
+          // manage double quoted value
+          if (regexDoubleQuotedValue.test(value)) {
+            value = scrapbook.unescapeQuotes(RegExp.$1);
+          }
 
-        if (/^(.*)\*$/.test(field)) {
-          // the field uses an ext-value
-          field = RegExp.$1;
-          if (/^(.*?)'(.*?)'(.*?)$/.test(value)) {
-            let charset = RegExp.$1.toLowerCase(), lang = RegExp.$2.toLowerCase(), valueEncoded = RegExp.$3;
-            switch (charset) {
-              case 'iso-8859-1':
-                value = decodeURIComponent(valueEncoded).replace(/[^\x20-\x7e\xa0-\xff]/g, "?");
-                break;
-              case 'utf-8':
-                value = decodeURIComponent(valueEncoded);
-                break;
-              default:
-                console.error('Unsupported charset in the extended field of header content-disposition: ' + charset);
-                break;
+          if (regexExtField.test(field)) {
+            // the field uses an ext-value
+            field = RegExp.$1;
+            if (regexExtValue.test(value)) {
+              let charset = RegExp.$1.toLowerCase(), lang = RegExp.$2.toLowerCase(), valueEncoded = RegExp.$3;
+              switch (charset) {
+                case 'iso-8859-1':
+                  value = decodeURIComponent(valueEncoded).replace(/[^\x20-\x7e\xa0-\xff]/g, "?");
+                  break;
+                case 'utf-8':
+                  value = decodeURIComponent(valueEncoded);
+                  break;
+                default:
+                  console.error('Unsupported charset in the extended field of header content-disposition: ' + charset);
+                  break;
+              }
             }
           }
-        }
 
-        result.parameters[field] = value;
+          result.parameters[field] = value;
+        }
       }
     }
-  }
 
-  return result;
+    return result;
+  };
+  scrapbook.parseHeaderContentDisposition = parseHeaderContentDisposition;
+  return parseHeaderContentDisposition(string);
 };
 
 /**
@@ -992,28 +1086,35 @@ scrapbook.parseHeaderContentDisposition = function (string) {
  * @return {{time: string, url: string}}
  */
 scrapbook.parseHeaderRefresh = function (string) {
-  let result = {time: undefined, url: undefined};
+  const regexFields = /^\s*(.*?)(?=[;,]|$)/i;
+  const regexFieldValue = /^[;,]\s*url\s*=\s*((["'])?.*)$/i;
+  const regexEscape = /[\t\n\r]+/g;
+  const parseHeaderRefresh = function (string) {
+    const result = {time: undefined, url: undefined};
 
-  if (typeof string !== 'string') {
-    return result;
-  }
-
-  if (/^\s*(.*?)(?=[;,]|$)/i.test(string)) {
-    result.time = parseInt(RegExp.$1);
-    string = RegExp.rightContext;
-    if (/^[;,]\s*url\s*=\s*((["'])?.*)$/i.test(string)) {
-      let url = RegExp.$1;
-      let quote = RegExp.$2;
-      if (quote) {
-        let pos = url.indexOf(quote, 1);
-        if (pos !== -1) { url = url.slice(1, pos); }
-      }
-      url = url.trim().replace(/[\t\n\r]+/g, "");
-      result.url = url;
+    if (typeof string !== 'string') {
+      return result;
     }
-  }
 
-  return result;
+    if (regexFields.test(string)) {
+      result.time = parseInt(RegExp.$1);
+      string = RegExp.rightContext;
+      if (regexFieldValue.test(string)) {
+        let url = RegExp.$1;
+        let quote = RegExp.$2;
+        if (quote) {
+          let pos = url.indexOf(quote, 1);
+          if (pos !== -1) { url = url.slice(1, pos); }
+        }
+        url = url.trim().replace(regexEscape, "");
+        result.url = url;
+      }
+    }
+
+    return result;
+  };
+  scrapbook.parseHeaderRefresh = parseHeaderRefresh;
+  return parseHeaderRefresh(string);
 };
 
 
@@ -1027,10 +1128,17 @@ scrapbook.parseHeaderRefresh = function (string) {
  * Note: this does not handle comments inside a string
  */
 scrapbook.compressJsFunc = function (func) {
-  return func.toString()
-    .replace(/\/\/.*$/mg, '')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(?!\w\s+\w)(.)\s+/g, "$1");
+  const regexComment1 = /\/\/.*$/mg;
+  const regexComment2 = /\/\*[\s\S]*?\*\//g;
+  const regexCompress = /(?!\w\s+\w)(.)\s+/g;
+  const compressJsFunc = function (func) {
+    return func.toString()
+      .replace(regexComment1, '')
+      .replace(regexComment2, '')
+      .replace(regexCompress, "$1");
+  };
+  scrapbook.compressJsFunc = compressJsFunc;
+  return compressJsFunc(func);
 };
 
 
@@ -1098,36 +1206,42 @@ scrapbook.readFileAsDocument = async function (blob) {
 };
 
 scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
-  if (/^data:([^,]*?)(;base64)?,(.*?)$/i.test(dataUri)) {
-    const mediatype = RegExp.$1;
-    const base64 = !!RegExp.$2;
-    const data = RegExp.$3;
+  const regexFields = /^data:([^,]*?)(;base64)?,(.*?)$/i;
+  const regexFieldValue = /^(.*?)=(.*?)$/;
+  const dataUriToFile = function (dataUri, useFilename = true) {
+    if (regexFields.test(dataUri)) {
+      const mediatype = RegExp.$1;
+      const base64 = !!RegExp.$2;
+      const data = RegExp.$3;
 
-    const parts = mediatype.split(";");
-    const mime = parts.shift();
-    const parameters = {};
-    parts.forEach((part) => {
-      if (/^(.*?)=(.*?)$/.test(part)) {
-        parameters[RegExp.$1.toLowerCase()] = RegExp.$2;
+      const parts = mediatype.split(";");
+      const mime = parts.shift();
+      const parameters = {};
+      parts.forEach((part) => {
+        if (regexFieldValue.test(part)) {
+          parameters[RegExp.$1.toLowerCase()] = RegExp.$2;
+        }
+      });
+
+      const bstr = base64 ? atob(data) : unescape(data);
+      const ab = scrapbook.byteStringToArrayBuffer(bstr);
+
+      let filename;
+      if (useFilename && parameters.filename) {
+        filename = decodeURIComponent(parameters.filename);
+      } else {
+        let ext = parameters.filename && scrapbook.filenameParts(parameters.filename)[1] || Mime.extension(mime);
+        ext = ext ? ("." + ext) : "";
+        filename = scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
       }
-    });
 
-    const bstr = base64 ? atob(data) : unescape(data);
-    const ab = scrapbook.byteStringToArrayBuffer(bstr);
-
-    let filename;
-    if (useFilename && parameters.filename) {
-      filename = decodeURIComponent(parameters.filename);
-    } else {
-      let ext = parameters.filename && scrapbook.filenameParts(parameters.filename)[1] || Mime.extension(mime);
-      ext = ext ? ("." + ext) : "";
-      filename = scrapbook.sha1(ab, "ARRAYBUFFER") + ext;
+      const file = new File([ab], filename, {type: mediatype});
+      return file;
     }
-
-    const file = new File([ab], filename, {type: mediatype});
-    return file;
-  }
-  return null;
+    return null;
+  };
+  scrapbook.dataUriToFile = dataUriToFile;
+  return dataUriToFile(dataUri, useFilename);
 };
 
 
@@ -1164,54 +1278,59 @@ scrapbook.doctypeToString = function (doctype) {
  * @return {Promise}
  */
 scrapbook.parseCssFile = async function (data, charset, rewriter) {
-  const origText = await (async () => {
-    if (charset) {
-      const text = await scrapbook.readFileAsText(data, charset);
-      // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
-      if (/^@charset "([^"]*)";/.test(text)) {
-        return "\ufeff" + text;
+  const regexAtCharset = /^@charset "([^"]*)";/;
+  const parseCssFile = async function (data, charset, rewriter) {
+    const origText = await (async () => {
+      if (charset) {
+        const text = await scrapbook.readFileAsText(data, charset);
+        // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
+        if (regexAtCharset.test(text)) {
+          return "\ufeff" + text;
+        }
+
+        return text;
       }
 
-      return text;
-    }
-
-    const bytes = await scrapbook.readFileAsText(data, false);
-    if (bytes.startsWith("\xEF\xBB\xBF")) {
-      charset = "UTF-8";
-    } else if (bytes.startsWith("\xFE\xFF")) {
-      charset = "UTF-16BE";
-    } else if (bytes.startsWith("\xFF\xFE")) {
-      charset = "UTF-16LE";
-    } else if (bytes.startsWith("\x00\x00\xFE\xFF")) {
-      charset = "UTF-32BE";
-    } else if (bytes.startsWith("\x00\x00\xFF\xFE")) {
-      charset = "UTF-32LE";
-    } else if (/^@charset "([^"]*)";/.test(bytes)) {
-      charset = RegExp.$1;
-    }
-
-    if (charset) {
-      const text = await scrapbook.readFileAsText(data, charset);
-      // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
-      if (/^@charset "([^"]*)";/.test(text)) {
-        return "\ufeff" + text;
+      const bytes = await scrapbook.readFileAsText(data, false);
+      if (bytes.startsWith("\xEF\xBB\xBF")) {
+        charset = "UTF-8";
+      } else if (bytes.startsWith("\xFE\xFF")) {
+        charset = "UTF-16BE";
+      } else if (bytes.startsWith("\xFF\xFE")) {
+        charset = "UTF-16LE";
+      } else if (bytes.startsWith("\x00\x00\xFE\xFF")) {
+        charset = "UTF-32BE";
+      } else if (bytes.startsWith("\x00\x00\xFF\xFE")) {
+        charset = "UTF-32LE";
+      } else if (regexAtCharset.test(bytes)) {
+        charset = RegExp.$1;
       }
 
-      return text;
+      if (charset) {
+        const text = await scrapbook.readFileAsText(data, charset);
+        // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
+        if (regexAtCharset.test(text)) {
+          return "\ufeff" + text;
+        }
+
+        return text;
+      }
+      return bytes;
+    })();
+
+    const rewrittenText = await rewriter(origText);
+
+    let blob;
+    if (charset) {
+      blob = new Blob([rewrittenText], {type: "text/css;charset=UTF-8"});
+    } else {
+      let ab = scrapbook.byteStringToArrayBuffer(rewrittenText);
+      blob = new Blob([ab], {type: "text/css"});
     }
-    return bytes;
-  })();
-
-  const rewrittenText = await rewriter(origText);
-
-  let blob;
-  if (charset) {
-    blob = new Blob([rewrittenText], {type: "text/css;charset=UTF-8"});
-  } else {
-    let ab = scrapbook.byteStringToArrayBuffer(rewrittenText);
-    blob = new Blob([ab], {type: "text/css"});
-  }
-  return blob;
+    return blob;
+  };
+  scrapbook.parseCssFile = parseCssFile;
+  return await parseCssFile(data, charset, rewriter);
 };
 
 /**
@@ -1235,9 +1354,7 @@ scrapbook.parseCssFile = async function (data, charset, rewriter) {
  *     - {parseCssTextRewriteFunc} rewriteFontFaceUrl
  *     - {parseCssTextRewriteFunc} rewriteBackgroundUrl
  */
-scrapbook.parseCssText = function (cssText, options = {}) {
-  const {rewriteImportUrl, rewriteFontFaceUrl, rewriteBackgroundUrl} = options;
-
+scrapbook.parseCssText = function (cssText, options) {
   const pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
   const pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
   const pCmSp = "(?:(?:" + pCm + "|" + pSp + ")*)"; // comment or space
@@ -1279,34 +1396,37 @@ scrapbook.parseCssText = function (cssText, options = {}) {
     });
   };
 
-  const newCssText = cssText.replace(
-    new RegExp([pCm, pRImport, pRFontFace, "("+pUrl+")"].join("|"), "gi"),
-    (m, im1, im2, ff, u) => {
-      if (im2) {
-        let rewritten;
-        if (im2.startsWith('"') && im2.endsWith('"')) {
-          let u = scrapbook.unescapeCss(im2.slice(1, -1));
-          let {url: rewrittenUrl, recordUrl} = rewriteImportUrl(u);
-          let record = getRecordUrl(rewrittenUrl, recordUrl);
-          rewritten = record + '"' + scrapbook.escapeQuotes(rewrittenUrl) + '"';
-        } else if (im2.startsWith("'") && im2.endsWith("'")) {
-          let u = scrapbook.unescapeCss(im2.slice(1, -1));
-          let {url: rewrittenUrl, recordUrl} = rewriteImportUrl(u);
-          let record = getRecordUrl(rewrittenUrl, recordUrl);
-          rewritten = record + '"' + scrapbook.escapeQuotes(rewrittenUrl) + '"';
-        } else {
-          rewritten = parseUrl(im2, rewriteImportUrl);
+  const parseCssText = function (cssText, options = {}) {
+    const {rewriteImportUrl, rewriteFontFaceUrl, rewriteBackgroundUrl} = options;
+    return cssText.replace(
+      new RegExp([pCm, pRImport, pRFontFace, "("+pUrl+")"].join("|"), "gi"),
+      (m, im1, im2, ff, u) => {
+        if (im2) {
+          let rewritten;
+          if (im2.startsWith('"') && im2.endsWith('"')) {
+            let u = scrapbook.unescapeCss(im2.slice(1, -1));
+            let {url: rewrittenUrl, recordUrl} = rewriteImportUrl(u);
+            let record = getRecordUrl(rewrittenUrl, recordUrl);
+            rewritten = record + '"' + scrapbook.escapeQuotes(rewrittenUrl) + '"';
+          } else if (im2.startsWith("'") && im2.endsWith("'")) {
+            let u = scrapbook.unescapeCss(im2.slice(1, -1));
+            let {url: rewrittenUrl, recordUrl} = rewriteImportUrl(u);
+            let record = getRecordUrl(rewrittenUrl, recordUrl);
+            rewritten = record + '"' + scrapbook.escapeQuotes(rewrittenUrl) + '"';
+          } else {
+            rewritten = parseUrl(im2, rewriteImportUrl);
+          }
+          return im1 + rewritten;
+        } else if (ff) {
+          return parseUrl(m, rewriteFontFaceUrl);
+        } else if (u) {
+          return parseUrl(m, rewriteBackgroundUrl);
         }
-        return im1 + rewritten;
-      } else if (ff) {
-        return parseUrl(m, rewriteFontFaceUrl);
-      } else if (u) {
-        return parseUrl(m, rewriteBackgroundUrl);
-      }
-      return m;
-    });
-
-  return newCssText;
+        return m;
+      });
+  };
+  scrapbook.parseCssText = parseCssText;
+  return parseCssText(cssText, options);
 };
 
 /**
@@ -1322,33 +1442,42 @@ scrapbook.parseCssText = function (cssText, options = {}) {
  * @param {parseSrcsetRewriteFunc} rewriteFunc
  */
 scrapbook.parseSrcset = function (srcset, rewriteFunc) {
-  return srcset.replace(/(\s*)([^ ,][^ ]*[^ ,])(\s*(?: [^ ,]+)?\s*(?:,|$))/g, (m, m1, m2, m3) => {
-    return m1 + rewriteFunc(m2) + m3;
-  });
+  const regex = /(\s*)([^ ,][^ ]*[^ ,])(\s*(?: [^ ,]+)?\s*(?:,|$))/g;
+  const parseSrcset = function (srcset, rewriteFunc) {
+    return srcset.replace(regex, (m, m1, m2, m3) => {
+      return m1 + rewriteFunc(m2) + m3;
+    });
+  };
+  scrapbook.parseSrcset = parseSrcset;
+  return parseSrcset(srcset, rewriteFunc);
 };
 
 scrapbook.parseMaffRdfDocument = function (doc) {
   const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
   const MAF = "http://maf.mozdev.org/metadata/rdf#";
-  const result = {};
-  let elem;
+  const parseMaffRdfDocument = function (doc) {
+    const result = {};
+    let elem;
 
-  elem = doc.getElementsByTagNameNS(MAF, "originalurl")[0];
-  if (elem) { result.originalurl = elem.getAttributeNS(RDF, "resource"); }
+    elem = doc.getElementsByTagNameNS(MAF, "originalurl")[0];
+    if (elem) { result.originalurl = elem.getAttributeNS(RDF, "resource"); }
 
-  elem = doc.getElementsByTagNameNS(MAF, "title")[0];
-  if (elem) { result.title = elem.getAttributeNS(RDF, "resource"); }
+    elem = doc.getElementsByTagNameNS(MAF, "title")[0];
+    if (elem) { result.title = elem.getAttributeNS(RDF, "resource"); }
 
-  elem = doc.getElementsByTagNameNS(MAF, "archivetime")[0];
-  if (elem) { result.archivetime = elem.getAttributeNS(RDF, "resource"); }
+    elem = doc.getElementsByTagNameNS(MAF, "archivetime")[0];
+    if (elem) { result.archivetime = elem.getAttributeNS(RDF, "resource"); }
 
-  elem = doc.getElementsByTagNameNS(MAF, "indexfilename")[0];
-  if (elem) { result.indexfilename = elem.getAttributeNS(RDF, "resource"); }
+    elem = doc.getElementsByTagNameNS(MAF, "indexfilename")[0];
+    if (elem) { result.indexfilename = elem.getAttributeNS(RDF, "resource"); }
 
-  elem = doc.getElementsByTagNameNS(MAF, "charset")[0];
-  if (elem) { result.charset = elem.getAttributeNS(RDF, "resource"); }
+    elem = doc.getElementsByTagNameNS(MAF, "charset")[0];
+    if (elem) { result.charset = elem.getAttributeNS(RDF, "resource"); }
 
-  return result;
+    return result;
+  };
+  scrapbook.parseMaffRdfDocument = parseMaffRdfDocument;
+  return parseMaffRdfDocument(doc);
 };
 
 
