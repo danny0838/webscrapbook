@@ -11,19 +11,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /**
    * Query for highlighted ("selected") tabs
-   *
-   * query for {highlighted:true} doesn't get highlighted tabs in some Firefox version (e.g. 55)
-   * so we query for all tabs and filter them afterwards
    */
   const getHighlightedTabs = async function () {
     const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
+    // Querying for {highlighted:true} doesn't get highlighted tabs in some
+    // Firefox version (e.g. 55), so we query for all tabs and filter them
+    // afterwards.
     const tabs = await browser.tabs.query({
       currentWindow: true,
     });
     const target = tabs
       .filter(t => (
         scrapbook.isContentPage(t.url, allowFileAccess) &&
-        t.highlighted !== false
+        // Select active and highlighted tabs.
+        //
+        // Normally active tabs are always highlighted, but in some browsers
+        // (e.g. Opera 58) Tab.highlighted = false, so check for active tabs
+        // explictly as a fallback.
+        //
+        // Firefox for Android < 54 does not support Tab.highlighted. Treat
+        // undefined as true.
+        (t.active || t.highlighted !== false)
       ))
       .map(t => t.id)
       .join(',');
