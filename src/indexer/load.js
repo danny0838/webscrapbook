@@ -220,66 +220,15 @@ const indexer = {
 
       this.log(`Got directory '${inputData.name}'.`);
 
-      // We cannot get the exact path since File.webkitRelativePath
-      // returns only the common ancestor of the child, but at least
-      // we can detect and fix some common cases with heuristics.
-      // Below [] marks the common ancestor folder of input files.
-      let isRightDir = false;
-      let isWrongDir = false;
-      let newCut = cut;
-      let newBase = '';
-
       let hasDataDir = false;
       for (const file of files) {
         let path = file.webkitRelativePath;
-
-        if (!isRightDir && !isWrongDir) {
-          if (/^[^/]+[/]data[/]/.test(path)) {
-            // [WSB]/data/...
-            isRightDir = true;
-          } else if (/^[^/]+[/]tree[/]/.test(path)) {
-            // [WSB]/tree/...
-            isRightDir = true;
-          } else if (/^data[/]\d{17}[/.]/.test(path)) {
-            // WSB/[data]/...
-            isWrongDir = true;
-            newCut = 0;
-            this.log(`Common ancestor directory name seems incorrect. Adjust as it were WSB/[data]/...`);
-          } else if (/^data[/]/.test(path)) {
-            // Assume it's:
-            // WSB/[data]/custom_content
-            isWrongDir = true;
-            newCut = 0;
-            this.log(`Common ancestor directory name seems incorrect. Adjust as it were WSB/[data]/...`);
-          } else if (/^tree[/]/.test(path)) {
-            // WSB/[tree]/...
-            isWrongDir = true;
-            newCut = 0;
-            this.log(`Common ancestor directory name seems incorrect. Adjust as it were WSB/[tree]/...`);
-          } else if (/^\d{17}[/]/.test(path)) {
-            // WSB/data/[...]/...
-            isWrongDir = true;
-            newCut = 0;
-            newBase = 'data/';
-            this.log(`Common ancestor directory name seems incorrect. Adjust as it were WSB/data/[...]`);
-          }
-        }
-
         path = path.slice(cut);
         if (path.startsWith('data/')) { hasDataDir = true; }
         inputData.files.push({
           path,
           file,
         });
-      }
-
-      if (isWrongDir) {
-        hasDataDir = false;
-        for (f of inputData.files) {
-          const path = newBase + f.file.webkitRelativePath.slice(newCut);
-          if (path.startsWith('data/')) { hasDataDir = true; }
-          f.path = path;
-        }
       }
 
       if (hasDataDir) {
@@ -3326,11 +3275,17 @@ document.addEventListener("DOMContentLoaded", async function () {
   indexer.initEvents();
 
   // enable UI
-  // adjust GUI for mobile
-  if ('webkitdirectory' in indexer.dirSelector || 
-      'mozdirectory' in indexer.dirSelector || 
-      'directory' in indexer.dirSelector) {
-    // directory selection supported
+  if (
+    // Check for "webkitdirectory" attribute and not "directory" etc. as it is
+    // implemented by major browsers and is the ongoing standard of File and
+    // Directory Entries API.
+    // https://wicg.github.io/entries-api/#dom-htmlinputelement-webkitdirectory
+    'webkitdirectory' in indexer.dirSelector &&
+    // Hide directory selector in Chromium < 72 as its webkitRelativePath for
+    // selected files are bad. (Use drag-and-drop instead)
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=124187
+    !(scrapbook.userAgent.is('chromium') && scrapbook.userAgent.major < 72)
+  ) {
     dirSelectorLabel.hidden = false;
   }
   filesSelectorLabel.hidden = false;
