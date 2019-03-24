@@ -37,8 +37,11 @@ body {
   line-height: 1.5em;
 }
 
-#panel label {
+#panel label:not([hidden]) {
   display: inline-block;
+}
+
+#panel label {
   margin: 0 .2em;
   padding: .4em 1em;
   border: 1px solid #ccc;
