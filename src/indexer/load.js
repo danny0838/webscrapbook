@@ -1694,9 +1694,6 @@ const indexer = {
       if (path.startsWith('tree/')) {
         bakPath = 'tree.bak/' + path.slice('tree/'.length);
         oldFile = treeFiles[path];
-      } else if (path === 'server.py') {
-        bakPath = path + '.bak';
-        oldFile = otherFiles[path];
       } else {
         continue;
       }
