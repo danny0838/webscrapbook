@@ -57,7 +57,7 @@ if (browser.runtime.onConnectExternal) {
   browser.runtime.onConnectExternal.addListener((port) => {
     port.onMessage.addListener(async (message, port) => {
       try {
-        const {cmd, args} = message;
+        const {id, cmd, args} = message;
         let result;
         switch (cmd) {
           case "getBaseUrl": {
@@ -79,9 +79,9 @@ if (browser.runtime.onConnectExternal) {
         }
 
         if (result.error) { throw result.error; }
-        port.postMessage({id: message.id, response: result});
+        port.postMessage({id, response: result});
       } catch (ex) {
-        port.postMessage({id: message.id, error: {message: ex.message}});
+        port.postMessage({id, error: {message: ex.message}});
       }
     });
   });

@@ -5961,7 +5961,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 
 async function test_viewer_validate() {
   return await openTestTab({
-    url: chrome.runtime.getURL('t/viewer-validate/index.html'),
+    url: browser.runtime.getURL('t/viewer-validate/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -5972,7 +5972,7 @@ async function test_viewer_validate() {
 
 async function test_viewer_interlink() {
   return await openTestTab({
-    url: chrome.runtime.getURL('t/viewer-interlink/index.html'),
+    url: browser.runtime.getURL('t/viewer-interlink/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -5983,7 +5983,7 @@ async function test_viewer_interlink() {
 
 async function test_viewer_css_rules() {
   return await openTestTab({
-    url: chrome.runtime.getURL('t/viewer-css-rules/index.html'),
+    url: browser.runtime.getURL('t/viewer-css-rules/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -5994,7 +5994,7 @@ async function test_viewer_css_rules() {
 
 async function test_viewer_metaRefresh() {
   return await openTestTab({
-    url: chrome.runtime.getURL('t/viewer-metaRefresh/index.html'),
+    url: browser.runtime.getURL('t/viewer-metaRefresh/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -6005,7 +6005,7 @@ async function test_viewer_metaRefresh() {
 
 async function test_viewer_archive_in_frame() {
   return await openTestTab({
-    url: chrome.runtime.getURL('t/viewer-archive-in-frame/index.html'),
+    url: browser.runtime.getURL('t/viewer-archive-in-frame/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {

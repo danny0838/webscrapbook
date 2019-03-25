@@ -10,13 +10,13 @@ async function init() {
   let config1;
   let config2;
   try {
-    const url = chrome.runtime.getURL('config.json');
+    const url = browser.runtime.getURL('config.json');
     config1 = JSON.parse((await xhr({url, responseType: 'text'})).response); 
   } catch (ex) {
     // pass
   }
   try {
-    const url = chrome.runtime.getURL('config.local.json');
+    const url = browser.runtime.getURL('config.local.json');
     config2 = JSON.parse((await xhr({url, responseType: 'text'})).response); 
   } catch (ex) {
     // pass
@@ -40,7 +40,7 @@ async function init() {
     throw ex;
   }
 
-  messagePort = chrome.runtime.connect(config["wsb_extension_id"], {name: config["wsb_message_port_name"]});
+  messagePort = browser.runtime.connect(config["wsb_extension_id"], {name: config["wsb_message_port_name"]});
 
   try {
     wsbBaseUrl = `${(await invoke('getBaseUrl')).url}`;
@@ -59,18 +59,18 @@ async function openTab(createProperties) {
   return new Promise((resolve, reject) => {
     const listener = (tabId, changeInfo, t) => {
       if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-      chrome.tabs.onUpdated.removeListener(listener);
-      chrome.tabs.onRemoved.removeListener(listener2);
+      browser.tabs.onUpdated.removeListener(listener);
+      browser.tabs.onRemoved.removeListener(listener2);
       resolve(t);
     };
     const listener2 = (tabId, removeInfo) => {
       if (!(tabId === tab.id)) { return; }
-      chrome.tabs.onUpdated.removeListener(listener);
-      chrome.tabs.onRemoved.removeListener(listener2);
+      browser.tabs.onUpdated.removeListener(listener);
+      browser.tabs.onRemoved.removeListener(listener2);
       reject({message: `Tab removed before loading complete.`});
     };
-    chrome.tabs.onUpdated.addListener(listener);
-    chrome.tabs.onRemoved.addListener(listener2);
+    browser.tabs.onUpdated.addListener(listener);
+    browser.tabs.onRemoved.addListener(listener2);
   });
 }
 
