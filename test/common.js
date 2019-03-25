@@ -23,13 +23,6 @@ async function init() {
   }
   config = Object.assign({}, config1, config2);
 
-  try {
-    messagePort = chrome.runtime.connect(config["wsb_extension_id"], {name: config["wsb_message_port_name"]});
-  } catch (ex) {
-    error(`Unable to connect to WebScrapBook extension. Make sure it's installed and its extension ID is correctly set in config.local.json.`);
-    throw ex;
-  }
-
   localhost = `http://localhost${config["server_port"] === 80 ? "" : ":" + config["server_port"]}`;
   localhost2 = `http://localhost${config["server_port2"] === 80 ? "" : ":" + config["server_port2"]}`;
 
@@ -47,7 +40,14 @@ async function init() {
     throw ex;
   }
 
-  wsbBaseUrl = `${(await invoke('getBaseUrl')).url}`;
+  messagePort = chrome.runtime.connect(config["wsb_extension_id"], {name: config["wsb_message_port_name"]});
+
+  try {
+    wsbBaseUrl = `${(await invoke('getBaseUrl')).url}`;
+  } catch (ex) {
+    error(`Unable to invoke WebScrapBook extension. Make sure it's installed and its extension ID is correctly set in config.local.json.`);
+    throw ex;
+  }
 }
 
 async function delay(ms) {
@@ -173,20 +173,31 @@ async function captureHeadless(params) {
 }
 
 async function invoke(cmd, args) {
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     const id = getUuid();
     const message = {id, cmd, args};
     const listener = (message, port) => {
       if (message.id !== id) { return; }
-      port.onMessage.removeListener(listener);
       if (message.error) {
         reject(message.error);
       } else {
         resolve(message.response);
       }
+      port.onMessage.removeListener(listener);
+      port.onDisconnect.removeListener(listener2);
     };
-    messagePort.onMessage.addListener(listener);
-    messagePort.postMessage(message);
+    const listener2 = (port) => {
+      reject(new Error(`Disconnected with WebScrapBook extension.`));
+      port.onMessage.removeListener(listener);
+      port.onDisconnect.removeListener(listener2);
+    };
+    try {
+      messagePort.onMessage.addListener(listener);
+      messagePort.onDisconnect.addListener(listener2);
+      messagePort.postMessage(message);
+    } catch (ex) {
+      reject(ex);
+    }
   });
 }
 
