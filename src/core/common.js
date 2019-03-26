@@ -874,8 +874,15 @@ scrapbook.isUrlAbsolute = function (url) {
 };
 
 scrapbook.getRelativeUrl = function (targetUrl, baseUrl) {
-  const targetUrlObj = new URL(targetUrl);
-  const baseUrlObj = new URL(baseUrl);
+  let targetUrlObj;
+  let baseUrlObj;
+  if (!scrapbook.isUrlAbsolute(targetUrl) && !scrapbook.isUrlAbsolute(baseUrl)) {
+    targetUrlObj = new URL('file:///' + targetUrl);
+    baseUrlObj = new URL('file:///' + baseUrl);
+  } else {
+    targetUrlObj = new URL(targetUrl);
+    baseUrlObj = new URL(baseUrl);
+  }
 
   // absolute
   if (targetUrlObj.protocol !== baseUrlObj.protocol) {
