@@ -120,6 +120,8 @@ const indexer = {
     this.logger.textContent = '';
     this.logger.className = '';
     this.options = Object.assign({}, scrapbook.options);
+    this.dataDir = 'data/';
+    this.treeDir = 'tree/';
     this.serverData = {};
   },
 
@@ -167,7 +169,7 @@ const indexer = {
         const ab = await zipEntryObj.async('arraybuffer');
         const path = inZipPath.slice(cut);
         const filename = inZipPath.replace(/^.*[/]/, '');
-        if (path.startsWith('data/')) { hasDataDir = true; }
+        if (path.startsWith(this.dataDir)) { hasDataDir = true; }
         inputData.files.push({
           path,
           file: new File([ab], filename, {
@@ -224,7 +226,7 @@ const indexer = {
       for (const file of files) {
         let path = file.webkitRelativePath;
         path = path.slice(cut);
-        if (path.startsWith('data/')) { hasDataDir = true; }
+        if (path.startsWith(this.dataDir)) { hasDataDir = true; }
         inputData.files.push({
           path,
           file,
@@ -295,7 +297,7 @@ const indexer = {
                 });
 
                 const path = entry.fullPath.slice(cut);
-                if (path.startsWith('data/')) { hasDataDir = true; }
+                if (path.startsWith(this.dataDir)) { hasDataDir = true; }
 
                 // Fix a Firefox bug that the returned File type is always ""
                 // when a FileSystemFileEntry read from a FileSystemDirectoryEntry
@@ -375,7 +377,7 @@ const indexer = {
                 method: 'GET',
               }).then(r => r.json());
               for (const entry of json.data) {
-                await loadEntry(book, path + '/' + entry.name, entry.type);
+                await loadEntry(book, (path ? path + '/' : '') + entry.name, entry.type);
               }
             } else {
               const response = await server.request({
@@ -405,11 +407,12 @@ const indexer = {
         };
 
         this.serverData.book = book;
+        this.dataDir = book.dataUrl.slice(book.topUrl.length);
+        this.treeDir = book.treeUrl.slice(book.topUrl.length);
 
         this.log(`Got book '${book.name}' at '${book.topUrl}'.`);
         this.log(`Inspecting files...`);
-        await loadEntry(book, 'data');
-        await loadEntry(book, 'tree');
+        await loadEntry(book, '');
 
         this.log(`Found ${inputData.files.length} files.`);
         await this.import(inputData);
@@ -446,12 +449,15 @@ const indexer = {
       const treeFiles = {};
       const otherFiles = {};
       for (const {path, file} of inputData.files) {
-        if (path.startsWith('tree/')) {
+        if (path.startsWith(this.treeDir)) {
           treeFiles[path] = file;
-        } else if (/^data[/](([^/]+)(?:[/].+|[.][^.]+))$/.test(path)) {
-          const {$1: path, $2: id} = RegExp;
-          dataFiles[path] = file;
-          dataDirIds.add(id);
+        } else if (path.startsWith(this.dataDir)) {
+          const subpath = path.slice(this.dataDir.length);
+          dataFiles[subpath] = file;
+          if (/^([^/]+)(?:[/].+|[.][^.]+)$/.test(path)) {
+            const id = RegExp.$1;
+            dataDirIds.add(id);
+          }
         } else {
           otherFiles[path] = file;
         }
@@ -542,7 +548,7 @@ const indexer = {
   /* Import tree/meta*.js */
   async importMetaJs({scrapbookData, treeFiles}) {
     for (let i = 0; ; i++) {
-      const path = `tree/meta${i || ""}.js`;
+      const path = `${this.treeDir}meta${i || ""}.js`;
       const file = treeFiles[path];
       if (!file) { break; }
 
@@ -568,7 +574,7 @@ const indexer = {
   /* Import tree/toc*.js */
   async importTocJs({scrapbookData, treeFiles}) {
     for (let i = 0; ; i++) {
-      const path = `tree/toc${i || ""}.js`;
+      const path = `${this.treeDir}toc${i || ""}.js`;
       const file = treeFiles[path];
       if (!file) { break; }
 
@@ -607,7 +613,7 @@ const indexer = {
         const indexDatFile = dataFiles[indexDatPath];
         if (!indexDatFile) { return; }
 
-        this.log(`Found 'data/${indexDatPath}' for legacy ScrapBook. Importing...`);
+        this.log(`Found '${this.dataDir}${indexDatPath}' for legacy ScrapBook. Importing...`);
         try {
           const text = await scrapbook.readFileAsText(indexDatFile);
           const indexDatMeta = this.parseIndexDat(text);
@@ -618,7 +624,7 @@ const indexer = {
           importedIndexDat = true;
         } catch (ex) {
           console.error(ex);
-          this.error(`Error importing 'data/${indexDatPath}': ${ex.message}`);
+          this.error(`Error importing '${this.dataDir}${indexDatPath}': ${ex.message}`);
         }
       })();
 
@@ -642,7 +648,7 @@ const indexer = {
 
         try {
           const doc = await (async () => {
-            this.log(`Generating metadata entry from 'data/${index}'...`);
+            this.log(`Generating metadata entry from '${this.dataDir}${index}'...`);
             if (this.isHtmlFile(index)) {
               return await scrapbook.readFileAsDocument(dataFiles[index]);
             } else if (this.isHtzFile(index)) {
@@ -691,7 +697,7 @@ const indexer = {
           })();
 
           await (async () => {
-            if (!doc) { throw new Error(`Unable to load index file 'data/${index}'`); }
+            if (!doc) { throw new Error(`Unable to load index file '${this.dataDir}${index}'`); }
 
             /* Merge information from html document to meta */
             const html = doc.documentElement;
@@ -757,7 +763,7 @@ const indexer = {
           })();
         } catch (ex) {
           console.error(ex);
-          this.error(`Error inspecting 'data/${index}': ${ex.message}`);
+          this.error(`Error inspecting '${this.dataDir}${index}': ${ex.message}`);
         }
       })();
     }
@@ -987,7 +993,7 @@ const indexer = {
                     const resId = RegExp.$2;
 
                     const doc = await scrapbook.readFileAsDocument(dataFiles[index]);
-                    if (!doc) { throw new Error(`Unable to load HTML document from 'data/${index}'.`); }
+                    if (!doc) { throw new Error(`Unable to load HTML document from '${this.dataDir}${index}'.`); }
 
                     const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
                     if (loader && /\([\n\r]+(.+)[\n\r]+\);(?:\/\/.*|\/\*.*?\*\/)*$/.test(loader.textContent)) {
@@ -1065,7 +1071,7 @@ const indexer = {
             }
           })();
 
-          const path = `tree/favicon/${file.name}`;
+          const path = `${this.treeDir}favicon/${file.name}`;
 
           // A non-empty existed file is a duplicate since favicon files are named using a checksum.
           if (!treeFiles[path] || treeFiles[path].size === 0) {
@@ -1131,7 +1137,7 @@ const indexer = {
       const exportFile = (meta, i) => {
         const content = this.generateMetaFile(meta);
         const file = new Blob([content], {type: "application/javascript"});
-        scrapbook.zipAddFile(zip, `tree/meta${i || ""}.js`, file, true);
+        scrapbook.zipAddFile(zip, `${this.treeDir}meta${i || ""}.js`, file, true);
       };
 
       const sizeThreshold = 256 * 1024;
@@ -1157,7 +1163,7 @@ const indexer = {
 
       // fill an empty file for unused tree/meta#.js
       for (; ; i++) {
-        const path = `tree/meta${i}.js`;
+        const path = `${this.treeDir}meta${i}.js`;
         let file = treeFiles[path];
         if (!file) { break; }
 
@@ -1174,7 +1180,7 @@ const indexer = {
       const exportFile = (toc, i) => {
         const content = this.generateTocFile(toc);
         const file = new Blob([content], {type: "application/javascript"});
-        scrapbook.zipAddFile(zip, `tree/toc${i || ""}.js`, file, true);
+        scrapbook.zipAddFile(zip, `${this.treeDir}toc${i || ""}.js`, file, true);
       };
 
       const sizeThreshold = 4 * 1024 * 1024;
@@ -1200,7 +1206,7 @@ const indexer = {
 
       // fill an empty file for unused tree/toc#.js
       for (; ; i++) {
-        const path = `tree/toc${i}.js`;
+        const path = `${this.treeDir}toc${i}.js`;
         let file = treeFiles[path];
         if (!file) { break; }
 
@@ -1212,30 +1218,30 @@ const indexer = {
     /* tree/map.html */
     content = this.generateMapFile(scrapbookData, metaFiles, tocFiles);
     file = new Blob([content], {type: "text/html"});
-    scrapbook.zipAddFile(zip, 'tree/map.html', file, true);
+    scrapbook.zipAddFile(zip, `${this.treeDir}map.html`, file, true);
 
     /* tree/frame.html */
     content = this.generateFrameFile(scrapbookData);
     file = new Blob([content], {type: "text/html"});
-    scrapbook.zipAddFile(zip, 'tree/frame.html', file, true);
+    scrapbook.zipAddFile(zip, `${this.treeDir}frame.html`, file, true);
 
     /* tree/search.html */
     content = this.generateSearchFile(scrapbookData);
     file = new Blob([content], {type: "text/html"});
-    scrapbook.zipAddFile(zip, 'tree/search.html', file, true);
+    scrapbook.zipAddFile(zip, `${this.treeDir}search.html`, file, true);
 
     /* resource files */
     const resToInclude = {
-      'tree/icon/toggle.png': browser.runtime.getURL("resources/toggle.png"),
-      'tree/icon/search.png': browser.runtime.getURL("resources/search.png"),
-      'tree/icon/collapse.png': browser.runtime.getURL("resources/collapse.png"),
-      'tree/icon/expand.png': browser.runtime.getURL("resources/expand.png"),
-      'tree/icon/external.png': browser.runtime.getURL("resources/external.png"),
-      'tree/icon/item.png': browser.runtime.getURL("resources/item.png"),
-      'tree/icon/fclose.png': browser.runtime.getURL("resources/fclose.png"),
-      'tree/icon/fopen.png': browser.runtime.getURL("resources/fopen.png"),
-      'tree/icon/note.png': browser.runtime.getURL("resources/note.png"),  // ScrapBook X notex
-      'tree/icon/postit.png': browser.runtime.getURL("resources/postit.png"),  // ScrapBook X note
+      [this.treeDir + "icon/toggle.png"]: browser.runtime.getURL("resources/toggle.png"),
+      [this.treeDir + "icon/search.png"]: browser.runtime.getURL("resources/search.png"),
+      [this.treeDir + "icon/collapse.png"]: browser.runtime.getURL("resources/collapse.png"),
+      [this.treeDir + "icon/expand.png"]: browser.runtime.getURL("resources/expand.png"),
+      [this.treeDir + "icon/external.png"]: browser.runtime.getURL("resources/external.png"),
+      [this.treeDir + "icon/item.png"]: browser.runtime.getURL("resources/item.png"),
+      [this.treeDir + "icon/fclose.png"]: browser.runtime.getURL("resources/fclose.png"),
+      [this.treeDir + "icon/fopen.png"]: browser.runtime.getURL("resources/fopen.png"),
+      [this.treeDir + "icon/note.png"]: browser.runtime.getURL("resources/note.png"),  // ScrapBook X notex
+      [this.treeDir + "icon/postit.png"]: browser.runtime.getURL("resources/postit.png"),  // ScrapBook X note
     };
 
     for (const path in resToInclude) {
@@ -1261,7 +1267,7 @@ const indexer = {
 
     /* Import tree/fulltext*.js */
     for (let i = 0; ; i++) {
-      const path = `tree/fulltext${i || ""}.js`;
+      const path = `${this.treeDir}fulltext${i || ""}.js`;
       const file = treeFiles[path];
       if (!file) { break; }
 
@@ -1597,7 +1603,7 @@ const indexer = {
       const exportFile = (fulltext, i) => {
         const content = this.generateFulltextFile(fulltext);
         const file = new Blob([content], {type: "application/javascript"});
-        scrapbook.zipAddFile(zip, `tree/fulltext${i || ""}.js`, file, true);
+        scrapbook.zipAddFile(zip, `${this.treeDir}fulltext${i || ""}.js`, file, true);
       };
 
       const sizeThreshold = 128 * 1024 * 1024;
@@ -1623,7 +1629,7 @@ const indexer = {
 
       // fill an empty file for unused tree/fulltext#.js
       for (; ; i++) {
-        const path = `tree/fulltext${i}.js`;
+        const path = `${this.treeDir}fulltext${i}.js`;
         let file = treeFiles[path];
         if (!file) { break; }
 
@@ -1637,13 +1643,13 @@ const indexer = {
   async checkSameAndBackup({scrapbookData, treeFiles, otherFiles, zip}) {
     for (const [path, zipObj] of Object.entries(zip.files)) {
       if (zipObj.dir) { continue; }
-      if (path.startsWith('tree/cache/')) { continue; }
+      if (path.startsWith(`${this.treeDir}cache/`)) { continue; }
 
       let bakPath;
       let oldFile;
 
-      if (path.startsWith('tree/')) {
-        bakPath = 'tree.bak/' + path.slice('tree/'.length);
+      if (path.startsWith(this.treeDir)) {
+        bakPath = this.treeDir.slice(0, -1) + '.bak/' + path.slice(this.treeDir.length);
         oldFile = treeFiles[path];
       } else {
         continue;
@@ -2095,6 +2101,10 @@ a > img {
 <link rel="stylesheet" href="map.css">
 <script>
 var scrapbook = {
+  conf: {
+    dataDir: "${scrapbook.getRelativeUrl(this.dataDir, this.treeDir)}"
+  },
+
   data: {
     title: document.title,
     toc: {},
@@ -2150,12 +2160,12 @@ var scrapbook = {
       var a = document.createElement('a');
       a.appendChild(document.createTextNode(meta.title || id));
       if (meta.type !== 'bookmark') {
-        if (meta.index) { a.href = '../data/' + scrapbook.escapeFilename(meta.index); }
+        if (meta.index) { a.href = scrapbook.conf.dataDir + scrapbook.escapeFilename(meta.index); }
       } else {
         if (meta.source) {
           a.href = meta.source;
         } else {
-          if (meta.index) { a.href = '../data/' + scrapbook.escapeFilename(meta.index); }
+          if (meta.index) { a.href = scrapbook.conf.dataDir + scrapbook.escapeFilename(meta.index); }
         }
       }
       if (meta.comment) { a.title = meta.comment; }
@@ -2166,7 +2176,7 @@ var scrapbook = {
       if (meta.icon) {
         icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || "") ? 
             meta.icon : 
-            ('../data/' + scrapbook.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon;
+            (scrapbook.conf.dataDir + scrapbook.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon;
       } else {
         icon.src = {
           'folder': 'icon/fclose.png',
@@ -2523,12 +2533,12 @@ a.scrapbook-external > img {
 <script>
 const conf = {
   scrapbooks: [
-    {name: "", path: "../"}
+    {name: "", path: "${scrapbook.getRelativeUrl('', this.treeDir)}", dataDir: "${this.dataDir}", treeDir: "${this.treeDir}"}
   ],
   allow_http: 0,  // whether to load rdf cache from the http? -1: deny, 0: ask; 1: allow
   default_search: "-type:separator",  // the constant string to add before the input keyword
   default_field: "tcc",  // the field to search for bare key terms
-  view_in_map_path: "tree/map.html",  // path (related to book) of the map page for "view in map"
+  view_in_map_path: "map.html",  // path (related to treeDir) of the map page for "view in map"
   view_in_map_title: "View in Map",  // title for "view in map"
 };
 
@@ -2560,15 +2570,13 @@ const scrapbook = {
       this.helperFill();
     });
 
-    conf.scrapbooks.forEach((book) => {
-      scrapbook.books.push({
-        name: book.name,
-        path: book.path,
+    scrapbook.books = conf.scrapbooks.map(
+      book => Object.assign({}, book, {
         toc: {},
         meta: {},
         fulltext: {},
-      });
-    });
+      })
+    );
 
     return this.loadBooks().then(() => {
       document.getElementById('search').disabled = false;
@@ -2598,7 +2606,7 @@ const scrapbook = {
 
       const loadMeta = () => {
         const loop = () => {
-          const url = this.resolveUrl("tree/meta" + (i || "") + ".js", base);
+          const url = this.resolveUrl(book.treeDir + "meta" + (i || "") + ".js", base);
           return this.loadScript(url).then(() => {
             i += 1;
             return loop();
@@ -2614,7 +2622,7 @@ const scrapbook = {
 
       const loadToc = () => {
         const loop = () => {
-          const url = this.resolveUrl("tree/toc" + (i || "") + ".js", base);
+          const url = this.resolveUrl(book.treeDir + "toc" + (i || "") + ".js", base);
           return this.loadScript(url).then(() => {
             i += 1;
             return loop();
@@ -2630,7 +2638,7 @@ const scrapbook = {
 
       const loadFulltext = () => {
         const loop = () => {
-          const url = this.resolveUrl("tree/fulltext" + (i || "") + ".js", base);
+          const url = this.resolveUrl(book.treeDir + "fulltext" + (i || "") + ".js", base);
           return this.loadScript(url).then(() => {
             i += 1;
             return loop();
@@ -2745,7 +2753,7 @@ const scrapbook = {
               meta.index.replace(/[^/]+$/, '') + file;
           subpath = this.escapeFilename(subpath || "");
           if (subpath) {
-            href = book.path + "data/" + subpath;
+            href = book.path + book.dataDir + subpath;
           }
         }
       } else {
@@ -2771,7 +2779,7 @@ const scrapbook = {
       if (meta.icon) {
         icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || "") ? 
             meta.icon : 
-            (book.path + 'data/' + this.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon;
+            (book.path + book.dataDir + this.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon;
       } else {
         icon.src = {
           'folder': 'icon/fclose.png',
@@ -2785,7 +2793,7 @@ const scrapbook = {
 
     {
       const a = document.createElement("a");
-      a.href = book.path + conf.view_in_map_path + "#item-" + id;
+      a.href = book.path + book.treeDir + conf.view_in_map_path + "#item-" + id;
       a.target = "_blank";
       a.className = "scrapbook-external";
       a.title = conf.view_in_map_title;
