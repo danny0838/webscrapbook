@@ -454,12 +454,22 @@ const indexer = {
         } else if (path.startsWith(this.dataDir)) {
           const subpath = path.slice(this.dataDir.length);
           dataFiles[subpath] = file;
-          if (/^([^/]+)(?:[/].+|[.][^.]+)$/.test(path)) {
-            const id = RegExp.$1;
-            dataDirIds.add(id);
+
+          // treat */index.html as an item
+          const [dir, base] = scrapbook.filepathParts(subpath);
+          if (dir && base === 'index.html') {
+            dataDirIds.add(dir);
           }
         } else {
           otherFiles[path] = file;
+        }
+      }
+
+      // add <dir>/* if <dir> is not an item
+      for (const subpath in dataFiles) {
+        const [dir, base] = scrapbook.filepathParts(subpath);
+        if (!dataDirIds.has(dir)) {
+          dataDirIds.add(scrapbook.filenameParts(subpath)[0]);
         }
       }
 
