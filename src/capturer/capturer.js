@@ -13,6 +13,9 @@
 // overwrite the value of common.js to define this is not a content script
 capturer.isContentScript = false;
 
+// whether the capturer is ready to receive an external command
+capturer.ready = false;
+
 // missionId is fixed to this page, to identify the capture mission
 capturer.missionId = scrapbook.getUuid();
 
@@ -2040,6 +2043,36 @@ browser.runtime.onMessage.addListener((message, sender) => {
   }
 });
 
+if (browser.runtime.onConnectExternal) {
+  // Available in Firefox >= 54.
+  browser.runtime.onConnectExternal.addListener((port) => {
+    const onCapturerReady = () => {
+      if (port.name !== capturer.missionId) {
+        return;
+      }
+      const onMessage = async (message) => {
+        if (message.cmd.slice(0, 9) == "capturer.") {
+          const fn = capturer[message.cmd.slice(9)];
+          if (fn) {
+            const response = await fn(message.args);
+            port.postMessage({
+              cmd: 'captureResponse',
+              args: response,
+            });
+          }
+        }
+      };
+      port.onMessage.addListener(onMessage);
+      port.postMessage({cmd: 'capturerReady', args: {}});
+    };
+    if (capturer.ready) {
+      onCapturerReady();
+    } else {
+      document.addEventListener("capturerReady", onCapturerReady);
+    }
+  });
+}
+
 browser.downloads.onCreated.addListener((downloadItem) => {
   isDebug && console.debug("downloads.onCreated", downloadItem);
 
@@ -2199,6 +2232,12 @@ document.addEventListener("DOMContentLoaded", async function () {
       return browser.tabs.remove(tab.id);
     }
   }
+  
+  document.dispatchEvent(new CustomEvent('capturerReady'));
+});
+
+document.addEventListener("capturerReady", function (event) {
+  capturer.ready = true;
 });
 
 })(this, this.document, this.browser);

@@ -52,38 +52,26 @@ if (browser.history) {
   }, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, extraInfoSpec);
 }
 
-if (browser.runtime.onConnectExternal) {
+if (browser.runtime.onMessageExternal) {
   // Available in Firefox >= 54.
-  browser.runtime.onConnectExternal.addListener((port) => {
-    port.onMessage.addListener(async (message, port) => {
-      try {
-        const {id, cmd, args} = message;
-        let result;
-        switch (cmd) {
-          case "getBaseUrl": {
-            result = {
-              url: browser.runtime.getURL(""),
-            };
-            break;
-          }
-          case "relayMessage": {
-            // Send message to all tabs of this extension, mainly the capturer
-            // tabs.  Only messages pass args.settings.missionId verification
-            // by the capturer will be executed.
-            result = await browser.runtime.sendMessage({
-              cmd: args.cmd,
-              args: args.args,
-            });
-            break;
-          }
+  browser.runtime.onMessageExternal.addListener(async (message, sender, sendResponse) => {
+    try {
+      const {cmd, args} = message;
+      let result;
+      switch (cmd) {
+        case "getBaseUrl": {
+          result = {
+            url: browser.runtime.getURL(""),
+          };
+          break;
         }
-
-        if (result.error) { throw result.error; }
-        port.postMessage({id, response: result});
-      } catch (ex) {
-        port.postMessage({id, error: {message: ex.message}});
       }
-    });
+
+      if (result.error) { throw result.error; }
+      return result;
+    } catch (ex) {
+      return {error: {message: ex.message}};
+    }
   });
 }
 

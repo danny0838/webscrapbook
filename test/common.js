@@ -1,5 +1,4 @@
 var config;
-var messagePort;
 var localhost;
 var localhost2;
 var wsbBaseUrl;
@@ -40,10 +39,9 @@ async function init() {
     throw ex;
   }
 
-  messagePort = browser.runtime.connect(config["wsb_extension_id"], {name: config["wsb_message_port_name"]});
-
   try {
-    wsbBaseUrl = `${(await invoke('getBaseUrl')).url}`;
+    const response = await browser.runtime.sendMessage(config["wsb_extension_id"], {cmd: 'getBaseUrl'});
+    wsbBaseUrl = response.url;
   } catch (ex) {
     error(`Unable to invoke WebScrapBook extension. Make sure it's installed and its extension ID is correctly set in config.local.json.`);
     throw ex;
@@ -126,13 +124,50 @@ async function capture(params) {
     }),
   ]);
 
-  // wait for the capturer init to complete
-  // so that the message can be received
-  await delay(50);
+  const result = await new Promise(async (resolve, reject) => {
+    const port = browser.runtime.connect(config["wsb_extension_id"], {name: id});
+    const onDisconnect = () => {
+      reject(new Error(`Page tab disconnected.`));
+    };
+    port.onDisconnect.addListener(onDisconnect);
 
-  const result = await invoke('relayMessage', {
-    cmd: "capturer.captureTab",
-    args: Object.assign({tabId: pageTab.id, settings: {missionId: id}}, params),
+    try {
+      await new Promise((resolve, reject) => {
+        const onMessage = (message) => {
+          if (message.cmd === 'capturerReady') {
+            port.onMessage.removeListener(onMessage);
+            resolve();
+          }
+        };
+        port.onMessage.addListener(onMessage);
+      });
+
+      const response = await new Promise((resolve, reject) => {
+        const onMessage = (message) => {
+          if (message.cmd === 'captureResponse') {
+            port.onMessage.removeListener(onMessage);
+            const response = message.args;
+            if (response.error) {
+              reject(response.error);
+            } else {
+              resolve(response);
+            }
+          }
+        };
+        port.onMessage.addListener(onMessage);
+        port.postMessage({
+          cmd: "capturer.captureTab",
+          args: Object.assign({tabId: pageTab.id}, params),
+        });
+      });
+
+      resolve(response);
+    } catch (ex) {
+      reject(ex);
+    }
+
+    port.onDisconnect.removeListener(onDisconnect);
+    port.disconnect();
   });
 
   await Promise.all([
@@ -157,48 +192,56 @@ async function captureHeadless(params) {
     active: false,
   });
 
-  // wait for the capturer init to complete
-  // so that the message can be received
-  await delay(50);
+  const result = await new Promise(async (resolve, reject) => {
+    const port = browser.runtime.connect(config["wsb_extension_id"], {name: id});
+    const onDisconnect = () => {
+      reject(new Error(`Page tab disconnected.`));
+    };
+    port.onDisconnect.addListener(onDisconnect);
 
-  const result = await invoke('relayMessage', {
-    cmd: "capturer.captureHeadless",
-    args: Object.assign({settings: {missionId: id}}, params),
+    try {
+      await new Promise((resolve, reject) => {
+        const onMessage = (message) => {
+          if (message.cmd === 'capturerReady') {
+            port.onMessage.removeListener(onMessage);
+            resolve();
+          }
+        };
+        port.onMessage.addListener(onMessage);
+      });
+
+      const response = await new Promise((resolve, reject) => {
+        const onMessage = (message) => {
+          if (message.cmd === 'captureResponse') {
+            port.onMessage.removeListener(onMessage);
+            const response = message.args;
+            if (response.error) {
+              reject(response.error);
+            } else {
+              resolve(response);
+            }
+          }
+        };
+        port.onMessage.addListener(onMessage);
+        port.postMessage({
+          cmd: "capturer.captureHeadless",
+          args: params,
+        });
+      });
+
+      resolve(response);
+    } catch (ex) {
+      reject(ex);
+    }
+
+    port.onDisconnect.removeListener(onDisconnect);
+    port.disconnect();
   });
 
   await browser.tabs.remove(capturerTab.id);
 
   const blob = new Blob([byteStringToArrayBuffer(result.data)], {type: result.type});
   return blob;
-}
-
-async function invoke(cmd, args) {
-  return await new Promise((resolve, reject) => {
-    const id = getUuid();
-    const message = {id, cmd, args};
-    const listener = (message, port) => {
-      if (message.id !== id) { return; }
-      if (message.error) {
-        reject(message.error);
-      } else {
-        resolve(message.response);
-      }
-      port.onMessage.removeListener(listener);
-      port.onDisconnect.removeListener(listener2);
-    };
-    const listener2 = (port) => {
-      reject(new Error(`Disconnected with WebScrapBook extension.`));
-      port.onMessage.removeListener(listener);
-      port.onDisconnect.removeListener(listener2);
-    };
-    try {
-      messagePort.onMessage.addListener(listener);
-      messagePort.onDisconnect.addListener(listener2);
-      messagePort.postMessage(message);
-    } catch (ex) {
-      reject(ex);
-    }
-  });
 }
 
 function readFileAsArrayBuffer(blob) {
