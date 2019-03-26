@@ -1860,7 +1860,7 @@ const indexer = {
     if (meta.icon.startsWith(resProtocolBase)) {
       meta.icon = meta.icon.slice(resProtocolBase.length);
     } else if (meta.icon.startsWith(resProtocolBase2)) {
-      meta.icon = `../../icon/${meta.icon.slice(resProtocolBase2.length)}`;
+      meta.icon = scrapbook.getRelativeUrl(meta.icon, "resource://scrapbook/data/" + (newMeta.index || "").replace(/[/][^/]+$/, '/'));
     } else if (meta.icon.startsWith('moz-icon://')) {
       meta.icon = "";
     }
