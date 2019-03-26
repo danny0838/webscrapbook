@@ -3276,11 +3276,10 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // enable UI
   if (
-    // Check for "webkitdirectory" attribute and not "directory" etc. as it is
-    // implemented by major browsers and is the ongoing standard of File and
-    // Directory Entries API.
+    // Check for "webkitdirectory" attribute only as it is implemented by major
+    // browsers and is the ongoing standard of File and Directory Entries API.
     // https://wicg.github.io/entries-api/#dom-htmlinputelement-webkitdirectory
-    'webkitdirectory' in indexer.dirSelector &&
+    indexer.dirSelector.webkitdirectory &&
     // Hide directory selector in Chromium < 72 as its webkitRelativePath for
     // selected files are bad. (Use drag-and-drop instead)
     // https://bugs.chromium.org/p/chromium/issues/detail?id=124187
