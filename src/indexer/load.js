@@ -656,9 +656,16 @@ const indexer = {
           return;
         }
 
+        this.log(`Generating metadata entry from '${this.dataDir}${index}'...`);
+
+        // import *.md as note
+        if (this.isMarkdownFile(index)) {
+          meta.type = "note";
+          return;
+        }
+
         try {
           const doc = await (async () => {
-            this.log(`Generating metadata entry from '${this.dataDir}${index}'...`);
             if (this.isHtmlFile(index)) {
               return await scrapbook.readFileAsDocument(dataFiles[index]);
             } else if (this.isHtzFile(index)) {
@@ -1788,6 +1795,9 @@ const indexer = {
     index = `${id}.xht`;
     if (dataFiles[index]) { return index; }
 
+    index = `${id}.md`;
+    if (dataFiles[index]) { return index; }
+
     index = `${id}.maff`;
     if (dataFiles[index]) { return index; }
 
@@ -1811,6 +1821,11 @@ const indexer = {
   isMaffFile(path) {
     const p = path.toLowerCase();
     return p.endsWith('.maff');
+  },
+
+  isMarkdownFile(path) {
+    const p = path.toLowerCase();
+    return p.endsWith('.md');
   },
 
   getDefaultMeta() {
