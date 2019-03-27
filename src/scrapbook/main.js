@@ -985,7 +985,7 @@ const scrapbookUi = {
         newItem.index = newItem.id + '/' + filename;
         target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
         const content = `<!DOCTYPE html>
-<html>
+<html data-scrapbook-type="note">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
