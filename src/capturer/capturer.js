@@ -2108,29 +2108,55 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   const urlObj = new URL(document.URL);
   const s = urlObj.searchParams;
-  const missionId = s.get('mid');
-  const tabFrameList = s.has('t') ? s.get('t').split(',').map(x => {
-    const [tabId, frameId] = x.split(':');
-    return {
-      tabId: isNaN(tabId) ? -1 : parseInt(tabId, 10),
-      frameId: isNaN(frameId) ? undefined : parseInt(frameId, 10),
-    };
-  }) : undefined;
-  const urlTitleList = s.has('u') ? s.get('u').split(',').map(x => {
-    const [url, ...titleParts] = x.split(' ');
-    return {url, title: titleParts.join(' ')};
-  }) : undefined;
-  const mode = s.get('m') || undefined;
-  const saveBeyondSelection = !!s.get('f');
 
   let autoClose = true;
-  if (missionId) {
+  if (!urlObj.search) {
+    capturer.error(`Nothing to capture.`);
+    autoClose = false;
+  } else if (s.has('mid')) {
     // use the missionId to receive further message
     // and avoids auto-closing
-    capturer.missionId = missionId;
+    capturer.missionId = s.get('mid');
 
     autoClose = false;
-  } else if (tabFrameList) {
+  } else if (s.has('u')) {
+    const urlTitleList = s.get('u').split(',').map(x => {
+      const [url, ...titleParts] = x.split(' ');
+      return {url, title: titleParts.join(' ')};
+    });
+    const mode = s.get('m') || undefined;
+
+    for (const {url, title} of urlTitleList) {
+      const source = `${url}`;
+      let response;
+      try {
+        response = await capturer.captureHeadless({
+          url,
+          title,
+          mode,
+        });
+      } catch (ex) {
+        console.error(ex);
+        const err = `Unexpected error: ${ex.message}`;
+        console.error(err);
+        response = {error: {message: err}};
+      }
+
+      if (response.error) { autoClose = false; }
+      else { capturer.log(`Done.`); }
+      await scrapbook.delay(5);
+    }
+  } else if (s.has('t')) {
+    const tabFrameList = s.get('t').split(',').map(x => {
+      const [tabId, frameId] = x.split(':');
+      return {
+        tabId: isNaN(tabId) ? -1 : parseInt(tabId, 10),
+        frameId: isNaN(frameId) ? undefined : parseInt(frameId, 10),
+      };
+    });
+    const mode = s.get('m') || undefined;
+    const saveBeyondSelection = !!s.get('f');
+    
     for (const {tabId, frameId} of tabFrameList) {
       const source = `[${tabId}:${frameId}]`;
       let response;
@@ -2152,30 +2178,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       else { capturer.log(`Done.`); }
       await scrapbook.delay(5);
     }
-  } else if (urlTitleList) {
-    for (const {url, title} of urlTitleList) {
-      const source = `${url}`;
-      let response;
-      try {
-        response = await capturer.captureHeadless({
-          url,
-          title,
-          mode,
-        });
-      } catch (ex) {
-        console.error(ex);
-        const err = `Unexpected error: ${ex.message}`;
-        console.error(err);
-        response = {error: {message: err}};
-      }
-
-      if (response.error) { autoClose = false; }
-      else { capturer.log(`Done.`); }
-      await scrapbook.delay(5);
-    }
-  } else if (!urlObj.search) {
-    capturer.error(`Nothing to capture.`);
-    autoClose = false;
   } else {
     capturer.error(`Unexpected error: Parameters not supported.`);
     autoClose = false;
