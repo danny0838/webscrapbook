@@ -29,13 +29,23 @@ capturer.getContentTabs = async function () {
  * @return {Promise}
  */
 capturer.invokeCapture = async function (params) {
-  const {target, url, mode, full} = params;
+  const {
+    target, full,
+    url, title, refUrl, favIconUrl,
+    mode,
+  } = params;
 
   const urlObj = new URL(browser.runtime.getURL("capturer/capturer.html"));
-  if (target) { urlObj.searchParams.set('t', target); }
-  if (url) { urlObj.searchParams.set('u', url); }
+  if (target) {
+    urlObj.searchParams.set('t', target);
+    if (full) { urlObj.searchParams.set('f', 1); }
+  } else if (url) {
+    urlObj.searchParams.set('u', url);
+    if (title) { urlObj.searchParams.set('t', title); }
+    if (refUrl) { urlObj.searchParams.set('r', refUrl); }
+    if (favIconUrl) { urlObj.searchParams.set('f', favIconUrl); }
+  }
   if (mode) { urlObj.searchParams.set('m', mode); }
-  if (!!full) { urlObj.searchParams.set('f', 1); }
 
   if (browser.windows) {
     const win = await browser.windows.getCurrent();
