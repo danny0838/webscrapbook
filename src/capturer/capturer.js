@@ -282,7 +282,7 @@ capturer.captureTab = async function (params) {
     // redirect headless capture
     // if frameId not provided, use current tab title and favIcon
     if (mode === "bookmark" || mode === "source") {
-      if (!isNaN(frameId)) {
+      if (typeof frameId === "number") {
         ({url, title, favIconUrl} = await browser.webNavigation.getFrame({tabId, frameId}));
       }
       return await capturer.captureHeadless({url, title, favIconUrl, mode, options});
@@ -2148,11 +2148,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   } else if (s.has('t')) {
     const tabFrameList = s.get('t').split(',').map(x => {
-      const [tabId, frameId] = x.split(':');
-      return {
-        tabId: isNaN(tabId) ? -1 : parseInt(tabId, 10),
-        frameId: isNaN(frameId) ? undefined : parseInt(frameId, 10),
-      };
+      let [tabId, frameId] = x.split(':');
+      tabId = parseInt(tabId, 10);
+      if (isNaN(tabId)) { tabId = -1; }
+      frameId = parseInt(frameId, 10);
+      if (isNaN(frameId)) { frameId = undefined; }
+      return {tabId, frameId};
     });
     const mode = s.get('m') || undefined;
     const saveBeyondSelection = !!s.get('f');
