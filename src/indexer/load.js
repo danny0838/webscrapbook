@@ -410,6 +410,8 @@ const indexer = {
         this.log(`Inspecting files...`);
         await loadEntry(book, 'data');
         await loadEntry(book, 'tree');
+
+        this.log(`Found ${inputData.files.length} files.`);
         await this.import(inputData);
       }
     } catch (ex) {
