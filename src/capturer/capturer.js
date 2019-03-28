@@ -2120,19 +2120,24 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     autoClose = false;
   } else if (s.has('u')) {
-    const urlTitleList = s.get('u').split(',').map(x => {
-      const [url, ...titleParts] = x.split(' ');
-      return {url, title: titleParts.join(' ')};
-    });
+    const urls = s.getAll('u');
+    const refUrls = s.getAll('r');
+    const titles = s.getAll('t');
+    const favIconUrls = s.getAll('f');
     const mode = s.get('m') || undefined;
 
-    for (const {url, title} of urlTitleList) {
-      const source = `${url}`;
+    for (let i = 0, I = urls.length; i < I; i++) {
+      const url = urls[i];
+      const refUrl = refUrls[i];
+      const title = titles[i];
+      const favIconUrl = favIconUrls[i];
       let response;
       try {
         response = await capturer.captureHeadless({
           url,
+          refUrl,
           title,
+          favIconUrl,
           mode,
         });
       } catch (ex) {
