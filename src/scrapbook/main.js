@@ -592,6 +592,9 @@ const scrapbookUi = {
     const command = event.target.value;
     event.target.value = '';
 
+    // blur the select element so that next select triggers onblur event
+    event.target.blur();
+
     switch (command) {
       case 'upload': {
         const elem = document.getElementById('upload-file-selector');
