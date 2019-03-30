@@ -29,19 +29,21 @@ const viewer = {
   // We minimize the risk by removing privileged APIs from this page and all
   // frames serving the web page content.
   insertDeApiScript: function (doc) {
-    if (!viewer.deApiScript) { return; }
-
-    const self = arguments.callee;
-    if (!self.deApiScriptUrl) {
+    let deApiScriptUrl;
+    {
       const text = "(" + viewer.deApiScript.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")()";
       const url = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
-      self.deApiScriptUrl = url;
+      deApiScriptUrl = url;
     }
-
-    const elem = doc.createElement("script");
-    elem.src = self.deApiScriptUrl;
-    const head = doc.querySelector("head");
-    head.insertBefore(elem, head.firstChild);
+    const insertDeApiScript = function (doc) {
+      if (!viewer.deApiScript) { return; }
+      const elem = doc.createElement("script");
+      elem.src = deApiScriptUrl;
+      const head = doc.querySelector("head");
+      head.insertBefore(elem, head.firstChild);
+    };
+    viewer.insertDeApiScript = insertDeApiScript;
+    return insertDeApiScript(doc);
   },
   inZipFiles: new Map(),
   blobUrlToInZipPath: new Map(),
