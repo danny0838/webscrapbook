@@ -314,7 +314,7 @@
     "message": "保存获取数据为:"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "指定保存网页及参照文件的格式。\n\n* 文件夹：建立一个文件夹并将网页及资源文件存入其中。Chromium 浏览器注意： 建议关闭“下载前询问每个文件的保存位置”，否则会跳出大量下载窗口。此外特定格式的文件会被内建筛选器自动封锁，用戶须个别选择“保留”才能下载。\n\n* HTZ 及 MAFF 封存文件：用 ZIP 算法将网页及资源文件打包，可用“检视封存网页”功能检视，或用支持 ZIP 的工具解压缩后检视。\n\n* 单一 HTML 文件：保存为一个 HTML 文件，资源文件以 data URL 嵌入，大部分浏览器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL  效能不佳且无法去重，网页重覆使用多媒体文件时，下载的文件可能会大幅膨胀。\n\n* 脚本化单一 HTML 文件：保存为一个 HTML 文件，资源文件保存于脚本并于开启时载入，相较于 data URL 可提升效能及缩小容量，但须使用较新且启用 JavaScript 的浏览器开启，例如 Chromium ≥ 20、Firefox ≥ 13、Edge > 0、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。"
+    "message": "指定保存网页及参照文件的格式。\n\n* 文件夹：建立一个文件夹并将网页及资源文件存入其中。Chromium 系浏览器注意： 保存获取数据至剪贴簿文件夹时，建议浏览器设定不勾选“下载前询问每个文件的保存位置”，以免获取时跳出大量窗口；特定格式的文件（如 .js）会被浏览器封锁，须逐个选择“保留”才能下载。\n\n* HTZ 及 MAFF 封存文件：用 ZIP 算法将网页及资源文件打包，可用“检视封存网页”功能检视，或用支持 ZIP 的工具解压缩后检视。\n\n* 单一 HTML 文件：保存为一个 HTML 文件，资源文件以 data URL 嵌入，大部分浏览器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL  效能不佳且无法去重，网页重覆使用多媒体文件时，下载的文件可能会大幅膨胀。\n\n* 脚本化单一 HTML 文件：保存为一个 HTML 文件，资源文件保存于脚本并于开启时载入，相较于 data URL 可提升效能及缩小容量，但须使用较新且启用 JavaScript 的浏览器开启，例如 Chromium ≥ 20、Firefox ≥ 13、Edge > 0、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。"
   },
   "OptionCaptureSaveAsMaffLabel": {
     "message": "MAFF 封存文件"

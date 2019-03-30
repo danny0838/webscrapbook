@@ -314,7 +314,7 @@
     "message": "儲存擷取資料為:"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "指定儲存網頁及參照檔案的格式。\n\n* 資料夾：建立一個資料夾並將網頁及資源檔案存入其中。Chromium 瀏覽器注意： 建議關閉「下載每個檔案前先詢問儲存位置」，否則會跳出大量下載視窗。此外特定格式的檔案會被內建篩選器自動封鎖，使用者須個別選擇「保留」才能下載。\n\n* HTZ 及 MAFF 封存檔：用 ZIP 演算法將網頁及資源檔案打包，可用「檢視封存網頁」功能檢視，或用支援 ZIP 的工具解壓縮後檢視。\n\n* 單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案以 data URL 嵌入，大部分瀏覽器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL  效能不佳且無法去除重覆，網頁重覆使用多媒體檔案時，下載的檔案可能會大幅膨脹。\n\n* 腳本化單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案儲存於腳本並於開啟時載入，相較於 data URL 可提升效能及縮小容量，但須使用較新且啟用 JavaScript 的瀏覽器開啟，例如 Chromium ≥ 20、Firefox ≥ 13、Edge > 0、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。"
+    "message": "指定儲存網頁及參照檔案的格式。\n\n* 資料夾：建立一個資料夾並將網頁及資源檔案存入其中。Chromium 系瀏覽器注意： 儲存擷取資料至剪貼簿資料夾時，建議瀏覽器設定取消勾選「下載每個檔案前先詢問儲存位置」，以免擷取時跳出大量下載視窗；特定格式的檔案（如 .js）會被瀏覽器封鎖，須逐個選擇「保留」才能下載。\n\n* HTZ 及 MAFF 封存檔：用 ZIP 演算法將網頁及資源檔案打包，可用「檢視封存網頁」功能檢視，或用支援 ZIP 的工具解壓縮後檢視。\n\n* 單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案以 data URL 嵌入，大部分瀏覽器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL  效能不佳且無法去除重覆，網頁重覆使用多媒體檔案時，下載的檔案可能會大幅膨脹。\n\n* 腳本化單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案儲存於腳本並於開啟時載入，相較於 data URL 可提升效能及縮小容量，但須使用較新且啟用 JavaScript 的瀏覽器開啟，例如 Chromium ≥ 20、Firefox ≥ 13、Edge > 0、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。"
   },
   "OptionCaptureSaveAsMaffLabel": {
     "message": "MAFF 封存檔"
