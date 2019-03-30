@@ -1,0 +1,5 @@
+/* reset injected stylesheets in Chromium extension pages */
+body {
+  font-size: initial;
+  font-family: initial;
+}

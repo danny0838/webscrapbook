@@ -587,6 +587,15 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
     // Remove privileged APIs to avoid a potential security risk.
     if (viewer.hasCsp) { viewer.insertDeApiScript(doc); }
 
+    // Reset CSS for Chromium
+    {
+      const elem = doc.createElement("link");
+      elem.rel = "stylesheet";
+      elem.href = browser.runtime.getURL("core/reset.css");
+      const head = doc.querySelector("head");
+      head.insertBefore(elem, head.firstChild);
+    }
+
     await Promise.all(tasks);
 
     const content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
