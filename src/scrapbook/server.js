@@ -84,8 +84,8 @@ class Server {
         const statusText = response.status + (response.statusText ? " " + response.statusText : "");
         throw new Error(statusText);
       }
-      if (json.error && json.error.message) {
-        throw new Error(json.error.message);
+      if (json.error) {
+        throw json.error;
       }
     }
     return response;
@@ -245,13 +245,39 @@ class Book {
       return this.treeFiles;
     }
 
-    const response = await this.server.request({
-      url: this.treeUrl + '?a=list&f=json',
-      method: "GET",
-    });
+    let response, data;
+    try {
+      response = await this.server.request({
+        url: this.treeUrl + '?a=list&f=json',
+        method: "GET",
+      });
+      data = (await response.json()).data;
+    } catch (ex) {
+      console.warn(ex)
+      if (ex.status === 400) {
+        // tree folder not exist, create one
+        const formData = new FormData();
+        formData.append('token', await this.server.acquireToken());
+
+        await this.server.request({
+          url: this.treeUrl + '?a=mkdir&f=json',
+          method: "POST",
+          body: formData,
+        });
+
+        // load again
+        response = await this.server.request({
+          url: this.treeUrl + '?a=list&f=json',
+          method: "GET",
+        });
+        data = (await response.json()).data;
+      } else {
+        throw new Error(ex.message);
+      }
+    }
+
     this.treeLastModified = Math.max(this.treeLastModified, new Date(response.headers.get('Last-Modified')));
 
-    const data = (await response.json()).data;
     return this.treeFiles = data.reduce((data, item) => {
       this.treeLastModified = Math.max(this.treeLastModified, parseInt(item.last_modified) * 1000);
       data.set(item.name, item);
