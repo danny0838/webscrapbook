@@ -276,13 +276,15 @@ class Book {
       }
     }
 
-    this.treeLastModified = Math.max(this.treeLastModified, new Date(response.headers.get('Last-Modified')));
-
-    return this.treeFiles = data.reduce((data, item) => {
-      this.treeLastModified = Math.max(this.treeLastModified, parseInt(item.last_modified) * 1000);
+    let treeLastModified = Math.max(this.treeLastModified, new Date(response.headers.get('Last-Modified')));
+    let treeFiles = data.reduce((data, item) => {
+      treeLastModified = Math.max(treeLastModified, parseInt(item.last_modified) * 1000);
       data.set(item.name, item);
       return data;
     }, new Map());
+
+    this.treeLastModified = treeLastModified;
+    return this.treeFiles = treeFiles;
   }
 
   async loadMeta(refresh = false) {
