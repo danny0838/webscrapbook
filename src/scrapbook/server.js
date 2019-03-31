@@ -253,7 +253,6 @@ class Book {
       });
       data = (await response.json()).data;
     } catch (ex) {
-      console.warn(ex)
       if (ex.status === 400) {
         // tree folder not exist, create one
         const formData = new FormData();
