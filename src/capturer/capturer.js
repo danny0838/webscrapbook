@@ -393,19 +393,20 @@ capturer.captureTab = async function (params) {
     // save whole page beyond selection?
     message.options["capture.saveBeyondSelection"] = !!saveBeyondSelection;
 
-    // Simply detect the main frame and executeScript for allFrames doesn't
-    // work since it's possible that only partial frames have the content
-    // script loaded. E.g. the user ran this when the main frame hadn't been
-    // completed and some subframes hadn't been loaded.
     isDebug && console.debug("(main) send", source, message);
     capturer.log(`Capturing (document) ${source} ...`);
 
-    // throw error for discarded tab
+    // throw error for a discarded tab
     // note that tab.discarded is undefined in older Firefox version
     if (discarded === true) {
       throw new Error(scrapbook.lang("ErrorTabDiscarded"));
     }
 
+    // Simply run executeScript for allFrames by checking for nonexistence of
+    // the content script in the main frame has a potential leak causing only
+    // partial frames have the content script loaded. E.g. the user ran this
+    // when some subframes haven't been exist. As a result, we have to check
+    // existence of content script for every frame and inject on demand.
     const tasks = [];
     const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
     (await browser.webNavigation.getAllFrames({tabId})).forEach(({frameId, url}) => {
