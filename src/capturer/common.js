@@ -38,7 +38,7 @@ capturer.invoke = async function (method, args, details = {}) {
       isDebug && console.debug(cmd, "response from content script", `[${tabId}:${frameId}]`, response);
       return response;
     } else {
-      return capturer[method](args);
+      return await capturer[method](args);
     }
   } else if (frameWindow) {
     // to frame
@@ -77,7 +77,7 @@ capturer.invoke = async function (method, args, details = {}) {
       isDebug && console.debug(cmd, "response from capturer page", response);
       return response;
     } else {
-      return capturer[method](args);
+      return await capturer[method](args);
     }
   }
 };
