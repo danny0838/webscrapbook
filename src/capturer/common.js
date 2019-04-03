@@ -141,10 +141,6 @@ capturer.captureDocument = async function (params) {
     let {documentName} = settings;
     let {contentType: mime, documentElement: htmlNode} = doc;
 
-    if (!isHeadless && doc.readyState !== "complete") {
-      throw new Error(scrapbook.lang("ErrorDocumentNotReady"));
-    }
-
     const [docUrl] = scrapbook.splitUrlByAnchor(doc.URL);
     const [refUrl] = scrapbook.splitUrlByAnchor(doc.baseURI);
 

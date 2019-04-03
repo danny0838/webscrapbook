@@ -418,10 +418,10 @@ capturer.captureTab = async function (params) {
         .catch(async (ex) => {
           isDebug && console.debug("inject content scripts", tabId, frameId, url);
           try {
-            await browser.tabs.executeScript(tabId, {frameId, file: "/lib/browser-polyfill.js"});
-            await browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js"});
-            await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js"});
-            await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/content.js"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/lib/browser-polyfill.js", runAt: "document_start"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js", runAt: "document_start"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js", runAt: "document_start"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/content.js", runAt: "document_start"});
           } catch (ex) {
             // Chromium may fail to inject content script to some pages due to unclear reason.
             // Record the error and pass.

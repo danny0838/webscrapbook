@@ -60,9 +60,6 @@
       "reason": {"content": "$2"}
     }
   },
-  "ErrorDocumentNotReady": {
-    "message": "Document not loaded completely. Please wait for a while and try again."
-  },
   "ErrorFileDownloadError": {
     "message": "Error downloading file ($URL$): $REASON$",
     "placeholders": {

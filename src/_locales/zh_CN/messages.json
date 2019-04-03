@@ -60,9 +60,6 @@
       "reason": {"content": "$2"}
     }
   },
-  "ErrorDocumentNotReady": {
-    "message": "页面未完全载入，请稍候再尝试。"
-  },
   "ErrorFileDownloadError": {
     "message": "下载文件错误 ($URL$): $REASON$",
     "placeholders": {
