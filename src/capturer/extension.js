@@ -12,7 +12,7 @@
 const capturer = {};
 
 /**
- * @return {Promise}
+ * @return {Promise<Array>}
  */
 capturer.getContentTabs = async function () {
   // scrapbook.getContentPagePattern() resolves to [] on Firefox Android 57
@@ -26,7 +26,7 @@ capturer.getContentTabs = async function () {
 /**
  * @param {string} target - a list of tabId and frameId
  * @param {string} url - a list of URL and title
- * @return {Promise}
+ * @return {Promise<(Window|Tab)>}
  */
 capturer.invokeCapture = async function (params) {
   const {

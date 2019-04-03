@@ -569,7 +569,8 @@ scrapbook.idToDateOld = function (id) {
 };
 
 /**
- * @return {Promise} The rough match pattern for content pages.
+ * @async
+ * @return {Promise<Array>} The match pattern for content pages.
  */
 scrapbook.getContentPagePattern = async function () {
   const p = (async () => {
@@ -1157,7 +1158,7 @@ scrapbook.compressJsFunc = function (func) {
 
 /**
  * @param {Blob} blob - The Blob of File object to be read.
- * @return {Promise}
+ * @return {Promise<ArrayBuffer>}
  */
 scrapbook.readFileAsArrayBuffer = async function (blob) {
   const event = await new Promise((resolve, reject) => {
@@ -1171,7 +1172,7 @@ scrapbook.readFileAsArrayBuffer = async function (blob) {
 
 /**
  * @param {Blob} blob - The Blob of File object to be read.
- * @return {Promise}
+ * @return {Promise<string>}
  */
 scrapbook.readFileAsDataURL = async function (blob) {
   const event = await new Promise((resolve, reject) => {
@@ -1186,7 +1187,7 @@ scrapbook.readFileAsDataURL = async function (blob) {
 /**
  * @param {Blob} blob - The Blob of File object to be read.
  * @param {string|false} charset - Read as UTF-8 if undefined and as raw bytes if falsy.
- * @return {Promise}
+ * @return {Promise<string>}
  */
 scrapbook.readFileAsText = async function (blob, charset = "UTF-8") {
   if (charset) {
@@ -1204,7 +1205,7 @@ scrapbook.readFileAsText = async function (blob, charset = "UTF-8") {
 
 /**
  * @param {Blob} blob - The Blob of File object to be read.
- * @return {Promise}
+ * @return {Promise<Document>}
  */
 scrapbook.readFileAsDocument = async function (blob) {
   const xhr = await scrapbook.xhr({
@@ -1281,10 +1282,10 @@ scrapbook.doctypeToString = function (doctype) {
  * We don't follow case 4 and save the CSS file as byte string so that
  * the user could fix the encoding manually.
  *
- * @param {Blob} data
+ * @param {Blob} data - The CSS file blob.
  * @param {string} charset
  * @param {Promise} rewriter - The Promise that rewrites the CSS text.
- * @return {Promise}
+ * @return {Promise<Blob>} The rewritten CSS file blob.
  */
 scrapbook.parseCssFile = async function (data, charset, rewriter) {
   const regexAtCharset = /^@charset "([^"]*)";/;

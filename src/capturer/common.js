@@ -22,8 +22,6 @@ const capturer = {
 
 /**
  * Invoke an invokable capturer method from another script
- *
- * @return {Promise}
  */
 capturer.invoke = async function (method, args, details = {}) {
   const {tabId = -1, frameId = 0, frameWindow = null} = details;
@@ -83,9 +81,9 @@ capturer.invoke = async function (method, args, details = {}) {
 };
 
 /**
+ * Return true to confirm that content script is loaded.
+ *
  * @kind invokable
- * @param {Object} params
- * @return {Promise}
  */
 capturer.isScriptLoaded = async function (params) {
   return true;
@@ -99,7 +97,7 @@ capturer.isScriptLoaded = async function (params) {
  *     - {string} params.title
  *     - {Object} params.settings
  *     - {Object} params.options
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.captureDocumentOrFile = async function (params) {
   isDebug && console.debug("call: captureDocumentOrFile");
@@ -132,7 +130,7 @@ capturer.captureDocumentOrFile = async function (params) {
  *     - {string} params.title
  *     - {Object} params.settings
  *     - {Object} params.options
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.captureDocument = async function (params) {
   try {
@@ -2344,7 +2342,9 @@ capturer.downLinkUrlFilter = function (url, options) {
 };
 
 /**
- * @return {Promise}
+ * Rewrite srcset attribute.
+ *
+ * @return {Promise<string>}
  */
 capturer.processSrcsetText = async function (text, refUrl, settings, options) {
   const downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
@@ -2359,6 +2359,8 @@ capturer.processSrcsetText = async function (text, refUrl, settings, options) {
 
 /**
  * Rewrite a downloaded CSS file
+ *
+ * @return {Object}
  */
 capturer.processCssFile = async function (params) {
   const {data, charset, url: refUrl, settings, options} = params;
@@ -2371,7 +2373,7 @@ capturer.processCssFile = async function (params) {
 /**
  * process the CSS text of whole <style> or a CSS file
  *
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.processCssText = async function (cssText, refUrl, settings, options) {
   const downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);

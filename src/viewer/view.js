@@ -98,7 +98,7 @@ const viewer = {
    *     - {Blob} params.data
    *     - {string} params.charset
    *     - {string} params.url
-   * @return {Promise}
+   * @return {Promise<Object>}
    */
 
   /**
@@ -106,7 +106,7 @@ const viewer = {
    *     - {string} params.inZipPath
    *     - {fetchFileRewriteFunc} params.rewriteFunc
    *     - {Array} params.recurseChain
-   * @return {Promise}
+   * @return {Promise<string>} The object URL of the file.
    */
   async fetchFile(params) {
     const {inZipPath, rewriteFunc, recurseChain} = params;
@@ -135,7 +135,7 @@ const viewer = {
    *     - {string} params.inZipPath
    *     - {string} params.url
    *     - {Array} params.recurseChain
-   * @return {Promise}
+   * @return {Promise<string>} The URL of the page.
    */
   async fetchPage(params) {
     const {inZipPath, url, recurseChain} = params;
@@ -174,7 +174,7 @@ const viewer = {
    *     - {Document} params.doc
    *     - {string} params.inZipPath
    *     - {Array} params.recurseChain
-   * @return {Promise}
+   * @return {Promise<Blob>}
    */
   async parseDocument(params) {
     const {doc, inZipPath, recurseChain} = params;

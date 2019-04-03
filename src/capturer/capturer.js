@@ -360,7 +360,7 @@ capturer.addItemToServer = async function (params) {
  *     - {boolean} params.saveBeyondSelection
  *     - {string} params.mode
  *     - {string} params.options - preset options that overwrites default
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.captureTab = async function (params) {
   try {
@@ -461,7 +461,7 @@ capturer.captureTab = async function (params) {
  *     - {string} params.favIconUrl
  *     - {string} params.mode
  *     - {string} params.options - preset options that overwrites default
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.captureHeadless = async function (params) {
   try {
@@ -525,7 +525,7 @@ capturer.captureHeadless = async function (params) {
  *     - {string} params.title
  *     - {Object} params.settings
  *     - {Object} params.options
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.captureUrl = async function (params) {
   isDebug && console.debug("call: captureUrl", params);
@@ -670,7 +670,7 @@ capturer.captureUrl = async function (params) {
  *     - {string} params.title
  *     - {Object} params.settings
  *     - {Object} params.options
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.captureBookmark = async function (params) {
   isDebug && console.debug("call: captureBookmark", params);
@@ -858,7 +858,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
  *     - {string} params.charset
  *     - {Object} params.settings
  *     - {Object} params.options
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.captureFile = async function (params) {
   try {
@@ -949,7 +949,7 @@ Redirecting to file ${anchor}
  * @param {Object} params
  *     - {Object} params.settings
  *     - {Object} params.options
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.registerDocument = async function (params) {
   isDebug && console.debug("call: registerDocument", params);
@@ -985,7 +985,7 @@ capturer.registerDocument = async function (params) {
  *     - {string} params.sourceUrl
  *     - {Object} params.settings
  *     - {Object} params.options
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.saveDocument = async function (params) {
   isDebug && console.debug("call: saveDocument", params);
@@ -1466,7 +1466,7 @@ ${JSON.stringify(zipData)}
  *     - {string} params.rewriteMethod
  *     - {Object} params.settings
  *     - {Object} params.options
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.downloadFile = async function (params) {
   isDebug && console.debug("call: downloadFile", params);
@@ -1723,7 +1723,7 @@ capturer.downloadFile = async function (params) {
  *     - {string} params.url
  *     - {string} params.refUrl
  *     - {string} params.options
- * @return {Promise}
+ * @return {string} File extension of the URL.
  */
 capturer.downLinkFetchHeader = async function (params) {
   isDebug && console.debug("call: downLinkFetchHeader", params);
@@ -1804,7 +1804,7 @@ capturer.downLinkFetchHeader = async function (params) {
  *     - {string} params.sourceUrl
  *     - {Object} params.settings
  *     - {Object} params.options
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.downloadBlob = async function (params) {
   isDebug && console.debug("call: downloadBlob", params);
@@ -1897,7 +1897,7 @@ capturer.downloadBlob = async function (params) {
 /**
  * @param {Object} params
  *     - {Blob} params.blob
- * @return {Promise}
+ * @return {Promise<Object>}
  */
 capturer.saveBlobInMemory = async function (params) {
   isDebug && console.debug("call: saveBlobInMemory", params);
@@ -1920,7 +1920,7 @@ capturer.saveBlobInMemory = async function (params) {
  *     - {string} params.sourceUrl
  *     - {boolean} params.autoErase
  *     - {boolean} params.savePrompt
- * @return {Promise}
+ * @return {Promise<string>} Filename of the saved blob.
  */
 capturer.saveBlob = async function (params) {
   isDebug && console.debug("call: saveBlob", params);
@@ -1947,7 +1947,7 @@ capturer.saveBlob = async function (params) {
  *     - {string} params.sourceUrl
  *     - {boolean} params.autoErase
  *     - {boolean} params.savePrompt
- * @return {Promise}
+ * @return {Promise<string>} Filename of the saved URL.
  */
 capturer.saveUrl = async function (params) {
   isDebug && console.debug("call: saveUrl", params);
@@ -1989,7 +1989,7 @@ capturer.saveUrl = async function (params) {
  *     - {string} params.filename
  *     - {string} params.sourceUrl
  *     - {Object} params.options
- * @return {Promise}
+ * @return {Promise<string>} Filename of the saved blob.
  */
 capturer.saveToServer = async function (params) {
   isDebug && console.debug("call: saveToServer", params);
