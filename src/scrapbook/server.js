@@ -183,6 +183,38 @@ class Server {
       throw new Error(`Unable to acquire access token: ${ex.message}`);
     }
   }
+
+  async lockTree(params = {}) {
+    const {timeout, stale_threshold} = params;
+
+    const formData = new FormData();
+    formData.append('token', await this.acquireToken());
+    formData.append('name', 'tree.lock');
+    if (timeout !== undefined) {
+      formData.append('chkt', timeout);
+    }
+    if (stale_threshold !== undefined) {
+      formData.append('chks', stale_threshold);
+    }
+
+    await this.request({
+      url: this._serverRoot + '?a=lock&f=json',
+      method: "POST",
+      body: formData,
+    });
+  }
+
+  async unlockTree() {
+    const formData = new FormData();
+    formData.append('token', await this.acquireToken());
+    formData.append('name', 'tree.lock');
+
+    await this.request({
+      url: this._serverRoot + '?a=unlock&f=json',
+      method: "POST",
+      body: formData,
+    });
+  }
 }
 
 class Book {
@@ -356,11 +388,23 @@ class Book {
     return this.toc = Object.assign.apply(this, objList);
   }
 
+  async lockTree(...args) {
+    await this.server.lockTree(...args);
+  }
+
+  async unlockTree(...args) {
+    await this.server.unlockTree(...args);
+  }
+
   /**
    * Validate this.treeLastModified and update it afterwards.
    */
   async saveTreeFiles(params = {}) {
-    const {meta = false, toc = false} = params;
+    const {meta = false, toc = false, useLock = true} = params;
+
+    if (useLock) {
+      await this.lockTree();
+    }
 
     // verify that tree files has not been changed since last loaded
     const treeLastModified = this.treeLastModified;
@@ -379,6 +423,10 @@ class Book {
 
     // update this.treeLastModified
     await this.loadTreeFiles(true);
+
+    if (useLock) {
+      await this.unlockTree();
+    }
   }
 
   /**

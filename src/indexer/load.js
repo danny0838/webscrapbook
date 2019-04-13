@@ -1713,6 +1713,8 @@ const indexer = {
     if (this.serverData.isIndexingServer) {
       this.log(`Uploading changed files to server...`);
       const book = this.serverData.book;
+
+      await server.lockTree();
       for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
         if (zipObj.dir) { continue; }
 
@@ -1733,6 +1735,8 @@ const indexer = {
           body: formData,
         });
       }
+      await server.unlockTree();
+
       return;
     }
 

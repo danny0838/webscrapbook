@@ -334,6 +334,8 @@ capturer.addItemToServer = async function (params) {
     }
   }
 
+  // lock tree before loading to avoid a conflict due to parallel captures
+  await book.lockTree({timeout: 60});
   await book.loadTreeFiles(true);
   await book.loadMeta(true);
   await book.loadToc(true);
@@ -349,7 +351,8 @@ capturer.addItemToServer = async function (params) {
       charset: params.charset,
     },
   });
-  await book.saveTreeFiles({meta: true, toc: true});
+  await book.saveTreeFiles({meta: true, toc: true, useLock: false});
+  await book.unlockTree();
 };
 
 /**
