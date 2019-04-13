@@ -11,7 +11,7 @@
 ((window, document, browser) => {
 
 let scrapbook = {
-  backendMinVersion: '0.3.*',
+  backendMinVersion: '0.6.*',
 
   /**
    * ref: source code of vAPI.webextFlavor of uBlock Origin

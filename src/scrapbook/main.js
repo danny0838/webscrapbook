@@ -1030,7 +1030,7 @@ const scrapbookUi = {
     formData.append('upload', file);
 
     await server.request({
-      url: target + '?a=upload&f=json',
+      url: target + '?a=save&f=json',
       method: "POST",
       body: formData,
     });
@@ -1088,7 +1088,7 @@ const scrapbookUi = {
           formData.append('token', await server.acquireToken());
           formData.append('upload', file);
           await server.request({
-            url: target + '?a=upload&f=json',
+            url: target + '?a=save&f=json',
             method: "POST",
             body: formData,
           });
@@ -1114,7 +1114,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
           formData.append('token', await server.acquireToken());
           formData.append('upload', file);
           await server.request({
-            url: target + '?a=upload&f=json',
+            url: target + '?a=save&f=json',
             method: "POST",
             body: formData,
           });

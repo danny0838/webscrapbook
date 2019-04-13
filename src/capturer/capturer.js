@@ -321,7 +321,7 @@ capturer.addItemToServer = async function (params) {
         formData.append('upload', file);
 
         await server.request({
-          url: target + '?a=upload&f=json',
+          url: target + '?a=save&f=json',
           method: "POST",
           body: formData,
         });
@@ -2011,7 +2011,7 @@ capturer.saveToServer = async function (params) {
 
   try {
     await server.request({
-      url: target + '?a=upload&f=json',
+      url: target + '?a=save&f=json',
       method: "POST",
       body: formData,
     });

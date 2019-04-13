@@ -1728,7 +1728,7 @@ const indexer = {
         formData.append('upload', file);
 
         await server.request({
-          url: target + '?a=upload&f=json',
+          url: target + '?a=save&f=json',
           method: 'POST',
           body: formData,
         });

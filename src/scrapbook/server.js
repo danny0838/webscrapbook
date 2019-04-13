@@ -370,7 +370,7 @@ class Book {
       formData.append('upload', file);
 
       await this.server.request({
-        url: target + '?a=upload&f=json',
+        url: target + '?a=save&f=json',
         method: "POST",
         body: formData,
       });
@@ -444,7 +444,7 @@ class Book {
       formData.append('upload', file);
 
       await this.server.request({
-        url: target + '?a=upload&f=json',
+        url: target + '?a=save&f=json',
         method: "POST",
         body: formData,
       });
