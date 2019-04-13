@@ -357,7 +357,32 @@ class Book {
   }
 
   /**
-   * Also update this.treeLastModified afterwards.
+   * Validate this.treeLastModified and update it afterwards.
+   */
+  async saveTreeFiles(params = {}) {
+    const {meta = false, toc = false} = params;
+
+    // verify that tree files has not been changed since last loaded
+    const treeLastModified = this.treeLastModified;
+    const treeFiles = await this.loadTreeFiles(true);
+    if (this.treeLastModified > treeLastModified) {
+      throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+    }
+
+    // save requested tree files
+    if (meta) {
+      await this.saveMeta();
+    }
+    if (toc) {
+      await this.saveToc();
+    }
+
+    // update this.treeLastModified
+    await this.loadTreeFiles(true);
+  }
+
+  /**
+   * This API does not validate. Use saveTreeFiles for safety.
    */
   async saveMeta() {
     const exportFile = async (meta, i) => {
@@ -376,12 +401,7 @@ class Book {
       });
     };
 
-    // verify that tree files has not been changed since last loaded
-    const treeLastModified = this.treeLastModified;
-    const treeFiles = await this.loadTreeFiles(true);
-    if (this.treeLastModified > treeLastModified) {
-      throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
-    }
+    const treeFiles = await this.loadTreeFiles();
 
     // A javascript string >= 256 MiB (UTF-16 chars) causes an error
     // in the browser. Split each js file at around 256 K items to
@@ -425,13 +445,10 @@ class Book {
         body: formData,
       });
     }
-
-    // update this.treeLastModified
-    await this.loadTreeFiles(true);
   }
 
   /**
-   * Also update this.treeLastModified afterwards.
+   * This API does not validate. Use saveTreeFiles for safety.
    */
   async saveToc() {
     const exportFile = async (toc, i) => {
@@ -450,12 +467,7 @@ class Book {
       });
     };
 
-    // verify that tree files has not been changed since last loaded
-    const treeLastModified = this.treeLastModified;
-    const treeFiles = await this.loadTreeFiles(true);
-    if (this.treeLastModified > treeLastModified) {
-      throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
-    }
+    const treeFiles = await this.loadTreeFiles();
 
     // A javascript string >= 256 MiB (UTF-16 chars) causes an error
     // in the browser. Split each js file at around 4 M entries to
@@ -498,9 +510,6 @@ class Book {
         body: formData,
       });
     }
-
-    // update this.treeLastModified
-    await this.loadTreeFiles(true);
   }
 
   generateMetaFile(jsonData) {

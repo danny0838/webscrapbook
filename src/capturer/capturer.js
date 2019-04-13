@@ -349,8 +349,7 @@ capturer.addItemToServer = async function (params) {
       charset: params.charset,
     },
   });
-  await book.saveMeta();
-  await book.saveToc();
+  await book.saveTreeFiles({meta: true, toc: true});
 };
 
 /**

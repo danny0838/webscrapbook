@@ -838,7 +838,7 @@ const scrapbookUi = {
     }
 
     // save meta
-    await this.book.saveMeta();
+    await this.book.saveTreeFiles({meta: true});
 
     // update DOM
     Array.prototype.filter.call(
@@ -882,11 +882,8 @@ const scrapbookUi = {
       index,
     });
 
-    // save meta
-    await this.book.saveMeta();
-
-    // save TOC
-    await this.book.saveToc();
+    // save meta and TOC
+    await this.book.saveTreeFiles({meta: true, toc: true});
 
     // update DOM
     Array.prototype.filter.call(
@@ -925,8 +922,7 @@ const scrapbookUi = {
     });
 
     // save meta and TOC
-    await this.book.saveMeta();
-    await this.book.saveToc();
+    await this.book.saveTreeFiles({meta: true, toc: true});
 
     // update DOM
     Array.prototype.filter.call(
@@ -1021,8 +1017,7 @@ const scrapbookUi = {
     }
 
     // save meta and TOC
-    await this.book.saveMeta();
-    await this.book.saveToc();
+    await this.book.saveTreeFiles({meta: true, toc: true});
 
     // save data files
     const formData = new FormData();
@@ -1139,8 +1134,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     }
 
     // save meta and TOC
-    await this.book.saveMeta();
-    await this.book.saveToc();
+    await this.book.saveTreeFiles({meta: true, toc: true});
   },
 
   async cmd_edit(selectedItemElems) {
@@ -1380,10 +1374,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         index,
       });
 
-      // save TOC and meta
-      await this.book.saveToc();
+      // save meta and TOC
       if (removedItems.size > 0) {
-        await this.book.saveMeta();
+        await this.book.saveTreeFiles({meta: true, toc: true});
+      } else {
+        await this.book.saveTreeFiles({toc: true});
       }
 
       // update DOM
