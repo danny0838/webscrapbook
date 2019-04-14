@@ -451,7 +451,7 @@ const indexer = {
       for (const {path, file} of inputData.files) {
         if (path.startsWith(this.treeDir)) {
           treeFiles[path] = file;
-        } else if (path.startsWith(this.dataDir)) {
+        } else if (path.startsWith(this.dataDir) && !path.startsWith(server.config.WSB_DIR + '/')) {
           const subpath = path.slice(this.dataDir.length);
           dataFiles[subpath] = file;
 
