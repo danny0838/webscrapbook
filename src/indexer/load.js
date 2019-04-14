@@ -123,9 +123,14 @@ const indexer = {
     this.dataDir = 'data/';
     this.treeDir = 'tree/';
     this.serverData = {};
+    this.startTime = Date.now();
   },
 
   end() {
+    let t = ((Date.now() - this.startTime) / 1000).toFixed(3);
+    this.log(`Time spent: ${t} seconds.`);
+    this.log('');
+
     this.dirSelector.disabled = false;
     this.dirSelector.value = null;
     this.filesSelector.disabled = false;
