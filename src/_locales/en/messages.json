@@ -105,14 +105,26 @@
   "IndexerTitle": {
     "message": "Generate site index"
   },
+  "IndexerTreeSearchLinkTitle": {
+    "message": "Search"
+  },
+  "IndexerTreeSearchStart": {
+    "message": "go"
+  },
   "IndexerTreeSearchTitle": {
     "message": "$BOOK$ :: Search",
     "placeholders": {
       "book": {"content": "$1"}
     }
   },
+  "IndexerTreeSearchViewInMap": {
+    "message": "View in map"
+  },
   "IndexerTreeSourceLinkTitle": {
     "message": "Source link"
+  },
+  "IndexerTreeToggleAll": {
+    "message": "Toggle all"
   },
   "OpenIndexer": {
     "message": "Generate site index"

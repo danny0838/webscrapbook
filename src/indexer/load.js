@@ -179,6 +179,7 @@ const indexer = {
     this.options = Object.assign({}, scrapbook.options);
     this.dataDir = 'data/';
     this.treeDir = 'tree/';
+    this.indexPage = 'map.html';
     this.serverData = {};
     this.startTime = Date.now();
   },
@@ -464,6 +465,7 @@ const indexer = {
         this.serverData.book = book;
         this.dataDir = book.dataUrl.slice(book.topUrl.length);
         this.treeDir = book.treeUrl.slice(book.topUrl.length);
+        this.indexPage = book.indexUrl.slice(book.treeUrl.length);
 
         this.log(`Got book '${book.name}' at '${book.topUrl}'.`);
         this.log(`Inspecting files...`);
@@ -2186,7 +2188,8 @@ a > img {
 <script>
 var scrapbook = {
   conf: {
-    dataDir: "${scrapbook.getRelativeUrl(this.dataDir, this.treeDir)}"
+    dataDir: "${scrapbook.getRelativeUrl(this.dataDir, this.treeDir)}",
+    viewSourceTitle: "${scrapbook.escapeQuotes(scrapbook.lang('IndexerTreeSourceLinkTitle'))}"
   },
 
   data: {
@@ -2275,7 +2278,7 @@ var scrapbook = {
         var srcLink = document.createElement('a');
         srcLink.className = 'scrapbook-external';
         srcLink.href = meta.source;
-        srcLink.title = "${scrapbook.escapeQuotes(scrapbook.lang('IndexerTreeSourceLinkTitle'))}";
+        srcLink.title = scrapbook.conf.viewSourceTitle;
         div.appendChild(srcLink);
         srcLink.target = "_blank";
 
@@ -2450,8 +2453,8 @@ ${loadTocJs()}
 </head>
 <body>
 <div id="header">
-<a id="toggle-all" title="Expand all" href="#"><img src="icon/toggle.png">${scrapbookData.title || ""}</a>
-<a id="search" href="search.html" target="_self"><img src="icon/search.png" alt=""></a>
+<a id="toggle-all" title="${scrapbook.escapeHtml(scrapbook.lang('IndexerTreeToggleAll'))}" href="#"><img src="icon/toggle.png">${scrapbookData.title || ""}</a>
+<a id="search" href="search.html" target="_self" title="${scrapbook.escapeHtml(scrapbook.lang('IndexerTreeSearchLinkTitle'))}"><img src="icon/search.png" alt=""></a>
 </div>
 <script>scrapbook.init();</script>
 </body>
@@ -2494,7 +2497,7 @@ ${loadTocJs()}
 <html dir="${scrapbook.lang('@@bidi_dir')}" data-scrapbook-tree-page="search">
 <head>
 <meta charset="UTF-8">
-<title>${scrapbook.lang('IndexerTreeSearchTitle', [scrapbookData.title || ""])}</title>
+<title>${scrapbook.escapeHtml(scrapbook.lang('IndexerTreeSearchTitle', [scrapbookData.title || ""]), true)}</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 html {
@@ -2622,8 +2625,8 @@ const conf = {
   allowHttp: 0,  // whether to load rdf cache from the http? -1: deny, 0: ask; 1: allow
   defaultSearch: "-type:separator",  // the constant string to add before the input keyword
   defaultField: "tcc",  // the field to search for bare key terms
-  viewInMapPath: "map.html",  // path (related to treeDir) of the map page for "view in map"
-  viewInMapTitle: "View in Map",  // title for "view in map"
+  viewInMapPath: "${scrapbook.escapeQuotes(this.indexPage)}",  // path (related to treeDir) of the map page for "view in map"
+  viewInMapTitle: "${scrapbook.escapeQuotes(scrapbook.lang('IndexerTreeSearchViewInMap'))}",  // title for "view in map"
 };
 
 const scrapbook = {
@@ -3334,7 +3337,7 @@ const searchEngine = {
     <option value="-sort:title">Title Descending</option>
     <option value="sort:id">ID Sort</option>
   </select>
-  <input id="search" type="submit" value="go" disabled="disabled" autocomplete="off">
+  <input id="search" type="submit" value="${scrapbook.escapeHtml(scrapbook.lang('IndexerTreeSearchStart'))}" disabled autocomplete="off">
 </form>
 <div>
 <ul id="result"></ul>

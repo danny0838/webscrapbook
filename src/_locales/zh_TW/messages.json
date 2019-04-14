@@ -105,14 +105,26 @@
   "IndexerTitle": {
     "message": "建立站台索引"
   },
+  "IndexerTreeSearchLinkTitle": {
+    "message": "搜尋"
+  },
+  "IndexerTreeSearchStart": {
+    "message": "查"
+  },
   "IndexerTreeSearchTitle": {
     "message": "$BOOK$ :: 搜尋",
     "placeholders": {
       "book": {"content": "$1"}
     }
   },
+  "IndexerTreeSearchViewInMap": {
+    "message": "在索引頁中檢視"
+  },
   "IndexerTreeSourceLinkTitle": {
     "message": "來源連結"
+  },
+  "IndexerTreeToggleAll": {
+    "message": "全部展開或收合"
   },
   "OpenIndexer": {
     "message": "建立站台索引"

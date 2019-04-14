@@ -105,14 +105,26 @@
   "IndexerTitle": {
     "message": "创建网站索引"
   },
+  "IndexerTreeSearchLinkTitle": {
+    "message": "搜索"
+  },
+  "IndexerTreeSearchStart": {
+    "message": "查"
+  },
   "IndexerTreeSearchTitle": {
     "message": "$BOOK$ :: 搜索",
     "placeholders": {
       "book": {"content": "$1"}
     }
   },
+  "IndexerTreeSearchViewInMap": {
+    "message": "在索引页中检视"
+  },
   "IndexerTreeSourceLinkTitle": {
     "message": "来源链接"
+  },
+  "IndexerTreeToggleAll": {
+    "message": "全部展开或收合"
   },
   "OpenIndexer": {
     "message": "创建网站索引"
