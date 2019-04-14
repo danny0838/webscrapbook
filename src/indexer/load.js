@@ -2619,11 +2619,11 @@ const conf = {
   scrapbooks: [
     {name: "", path: "${scrapbook.getRelativeUrl('', this.treeDir)}", dataDir: "${this.dataDir}", treeDir: "${this.treeDir}"}
   ],
-  allow_http: 0,  // whether to load rdf cache from the http? -1: deny, 0: ask; 1: allow
-  default_search: "-type:separator",  // the constant string to add before the input keyword
-  default_field: "tcc",  // the field to search for bare key terms
-  view_in_map_path: "map.html",  // path (related to treeDir) of the map page for "view in map"
-  view_in_map_title: "View in Map",  // title for "view in map"
+  allowHttp: 0,  // whether to load rdf cache from the http? -1: deny, 0: ask; 1: allow
+  defaultSearch: "-type:separator",  // the constant string to add before the input keyword
+  defaultField: "tcc",  // the field to search for bare key terms
+  viewInMapPath: "map.html",  // path (related to treeDir) of the map page for "view in map"
+  viewInMapTitle: "View in Map",  // title for "view in map"
 };
 
 const scrapbook = {
@@ -2765,14 +2765,14 @@ const scrapbook = {
     const targetUrlObj = new URL(targetUrl);
     if (['http:', 'https:'].indexOf(targetUrlObj.protocol) !== -1 &&
         ['localhost', '127.0.0.1'].indexOf(targetUrlObj.hostname) === -1) {
-      if (conf.allow_http === 0) {
+      if (conf.allowHttp === 0) {
         if (confirm("Loading search database from the web could produce large network flow. Continue?")) {
-          conf.allow_http = 1;
+          conf.allowHttp = 1;
         } else {
-          conf.allow_http = -1;
+          conf.allowHttp = -1;
         }
       }
-      if (conf.allow_http > 0) { return true; }
+      if (conf.allowHttp > 0) { return true; }
       return false;
     }
     return true;
@@ -2784,8 +2784,8 @@ const scrapbook = {
 
       // set query string
       let queryStr = document.getElementById("keyword").value;
-      if (conf.default_search) {
-        queryStr = conf.default_search + " " + queryStr;
+      if (conf.defaultSearch) {
+        queryStr = conf.defaultSearch + " " + queryStr;
       }
 
       // parse query
@@ -2877,10 +2877,10 @@ const scrapbook = {
 
     {
       const a = document.createElement("a");
-      a.href = book.path + book.treeDir + conf.view_in_map_path + "#item-" + id;
+      a.href = book.path + book.treeDir + conf.viewInMapPath + "#item-" + id;
       a.target = "_blank";
       a.className = "scrapbook-external";
-      a.title = conf.view_in_map_title;
+      a.title = conf.viewInMapTitle;
       div.appendChild(a);
 
       var img = document.createElement("img");
@@ -2942,7 +2942,7 @@ const searchEngine = {
       root: null,
       mc: false,
       re: false,
-      default: conf.default_field,
+      default: conf.defaultField,
     };
 
     const addRule = (name, type, value) => {
