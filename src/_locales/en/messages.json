@@ -102,17 +102,17 @@
   "IndexerPickFiles": {
     "message": "Pick ZIP files"
   },
-  "IndexerSearchTitle": {
+  "IndexerTitle": {
+    "message": "Generate site index"
+  },
+  "IndexerTreeSearchTitle": {
     "message": "$BOOK$ :: Search",
     "placeholders": {
       "book": {"content": "$1"}
     }
   },
-  "IndexerSourceLinkTitle": {
+  "IndexerTreeSourceLinkTitle": {
     "message": "Source link"
-  },
-  "IndexerTitle": {
-    "message": "Generate site index"
   },
   "OpenIndexer": {
     "message": "Generate site index"

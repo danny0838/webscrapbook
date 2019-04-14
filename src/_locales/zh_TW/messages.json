@@ -102,17 +102,17 @@
   "IndexerPickFiles": {
     "message": "選擇 ZIP 壓縮檔"
   },
-  "IndexerSearchTitle": {
+  "IndexerTitle": {
+    "message": "建立站台索引"
+  },
+  "IndexerTreeSearchTitle": {
     "message": "$BOOK$ :: 搜尋",
     "placeholders": {
       "book": {"content": "$1"}
     }
   },
-  "IndexerSourceLinkTitle": {
+  "IndexerTreeSourceLinkTitle": {
     "message": "來源連結"
-  },
-  "IndexerTitle": {
-    "message": "建立站台索引"
   },
   "OpenIndexer": {
     "message": "建立站台索引"

@@ -2275,7 +2275,7 @@ var scrapbook = {
         var srcLink = document.createElement('a');
         srcLink.className = 'scrapbook-external';
         srcLink.href = meta.source;
-        srcLink.title = "${scrapbook.escapeQuotes(scrapbook.lang('IndexerSourceLinkTitle'))}";
+        srcLink.title = "${scrapbook.escapeQuotes(scrapbook.lang('IndexerTreeSourceLinkTitle'))}";
         div.appendChild(srcLink);
         srcLink.target = "_blank";
 
@@ -2494,7 +2494,7 @@ ${loadTocJs()}
 <html dir="${scrapbook.lang('@@bidi_dir')}" data-scrapbook-tree-page="search">
 <head>
 <meta charset="UTF-8">
-<title>${scrapbook.lang('IndexerSearchTitle', [scrapbookData.title || ""])}</title>
+<title>${scrapbook.lang('IndexerTreeSearchTitle', [scrapbookData.title || ""])}</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 html {
