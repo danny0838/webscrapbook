@@ -78,6 +78,63 @@ function onChangeLoadServer(e) {
   indexer.loadServerFiles();
 }
 
+class RemoteFile {
+  constructor(url, name) {
+    this.url = url;
+    this.name = name;
+  }
+
+  async load() {
+    const response = await server.request({
+      url: this.url,
+      method: 'GET',
+    });
+    const filename = this.name;
+    const lm = response.headers.get('last-modified');
+    const lastModified = lm ? new Date(lm).valueOf() : Date.now();
+    return new File([await response.blob()], filename, {
+      type: Mime.lookup(filename),
+      lastModified,
+    });
+  }
+}
+
+class FileMapper {
+  constructor() {
+    this._map = new Map();
+  }
+
+  async get(filename) {
+    let file = this._map.get(filename);
+    if (file instanceof RemoteFile) {
+      file = await file.load();
+      this._map.set(filename, file);
+    }
+    return file;
+  }
+
+  async set(filename, file) {
+    this._map.set(filename, file);
+    return this;
+  }
+
+  async delete(filename) {
+    return this._map.delete(filename);
+  }
+
+  size() {
+    return this._map.size;
+  }
+
+  has(filename) {
+    return this._map.has(filename);
+  }
+
+  keys() {
+    return this._map.keys();
+  }
+}
+
 const indexer = {
   /**
    * UI related methods
@@ -385,17 +442,10 @@ const indexer = {
                 await loadEntry(book, (path ? path + '/' : '') + entry.name, entry.type);
               }
             } else {
-              const response = await server.request({
-                url: target + '?a=source',
-                method: 'GET',
-              });
-              const filename = path.split('/').pop();
-              const lm = response.headers.get('last-modified');
-              const lastModified = lm ? new Date(lm).valueOf() : Date.now();
-              const file = new File([await response.blob()], filename, {
-                type: Mime.lookup(filename),
-                lastModified,
-              });
+              const file = new RemoteFile(
+                target + '?a=source',
+                scrapbook.filepathParts(path)[1],
+              );
               inputData.files.push({
                 path,
                 file,
@@ -450,15 +500,15 @@ const indexer = {
 
       // collect files meaningful for ScrapBook
       const dataDirIds = new Set();
-      const dataFiles = {};
-      const treeFiles = {};
-      const otherFiles = {};
+      const dataFiles = new FileMapper();
+      const treeFiles = new FileMapper();
+      const otherFiles = new FileMapper();
       for (const {path, file} of inputData.files) {
         if (path.startsWith(this.treeDir)) {
-          treeFiles[path] = file;
+          await treeFiles.set(path, file);
         } else if (path.startsWith(this.dataDir) && !path.startsWith(server.config.WSB_DIR + '/')) {
           const subpath = path.slice(this.dataDir.length);
-          dataFiles[subpath] = file;
+          await dataFiles.set(subpath, file);
 
           // treat */index.html as an item
           const [dir, base] = scrapbook.filepathParts(subpath);
@@ -466,12 +516,12 @@ const indexer = {
             dataDirIds.add(dir);
           }
         } else {
-          otherFiles[path] = file;
+          await otherFiles.set(path, file);
         }
       }
 
       // add <dir>/* if <dir> is not an item
-      for (const subpath in dataFiles) {
+      for (const subpath of dataFiles.keys()) {
         const [dir, base] = scrapbook.filepathParts(subpath);
         if (!dataDirIds.has(dir)) {
           dataDirIds.add(scrapbook.filenameParts(subpath)[0]);
@@ -507,7 +557,7 @@ const indexer = {
   async importLegacyRdf({scrapbookData, dataFiles, otherFiles}) {
     try {
       const path = `scrapbook.rdf`;
-      const file = otherFiles[path];
+      const file = await otherFiles.get(path);
       if (!file) { return; }
 
       this.log(`Found 'scrapbook.rdf' for legacy ScrapBook. Importing...`);
@@ -564,7 +614,7 @@ const indexer = {
   async importMetaJs({scrapbookData, treeFiles}) {
     for (let i = 0; ; i++) {
       const path = `${this.treeDir}meta${i || ""}.js`;
-      const file = treeFiles[path];
+      const file = await treeFiles.get(path);
       if (!file) { break; }
 
       this.log(`Importing '${path}'...`);
@@ -590,7 +640,7 @@ const indexer = {
   async importTocJs({scrapbookData, treeFiles}) {
     for (let i = 0; ; i++) {
       const path = `${this.treeDir}toc${i || ""}.js`;
-      const file = treeFiles[path];
+      const file = await treeFiles.get(path);
       if (!file) { break; }
 
       this.log(`Importing '${path}'...`);
@@ -625,7 +675,7 @@ const indexer = {
         if (!(!index || index.endsWith('/index.html'))) { return; }
 
         const indexDatPath = `${id}/index.dat`;
-        const indexDatFile = dataFiles[indexDatPath];
+        const indexDatFile = await dataFiles.get(indexDatPath);
         if (!indexDatFile) { return; }
 
         this.log(`Found '${this.dataDir}${indexDatPath}' for legacy ScrapBook. Importing...`);
@@ -653,7 +703,7 @@ const indexer = {
 
         /* meta.modify */
         // update using last modified time of the index file
-        const fileModify = scrapbook.dateToId(new Date(dataFiles[index].lastModified));
+        const fileModify = scrapbook.dateToId(new Date((await dataFiles.get(index)).lastModified));
         if (fileModify > meta.modify) { meta.modify = fileModify; }
 
         // skip importing index file if index.dat has been imported
@@ -672,15 +722,15 @@ const indexer = {
         try {
           const doc = await (async () => {
             if (this.isHtmlFile(index)) {
-              return await scrapbook.readFileAsDocument(dataFiles[index]);
+              return await scrapbook.readFileAsDocument(await dataFiles.get(index));
             } else if (this.isHtzFile(index)) {
-              const zip = await new JSZip().loadAsync(dataFiles[index]);
+              const zip = await new JSZip().loadAsync(await dataFiles.get(index));
               const ab = await zip.file("index.html").async("arraybuffer");
               const blob = new Blob([ab], {type: "text/html"});
               return await scrapbook.readFileAsDocument(blob);
             } else if (this.isMaffFile(index)) {
               // @TODO: support multiple entries in one maff file
-              const zip = await new JSZip().loadAsync(dataFiles[index], {createFolders: true});
+              const zip = await new JSZip().loadAsync(await dataFiles.get(index), {createFolders: true});
               const zipDir = zip.folder(Object.keys(zip.files)[0]);
               const zipRdfFile = zipDir.file("index.rdf");
               if (zipRdfFile) {
@@ -843,7 +893,7 @@ const indexer = {
       // remove stale items
       // fix missing index file
       if (!['folder', 'separator', 'bookmark'].includes(meta.type)) {
-        if (!meta.index || !dataFiles[meta.index]) {
+        if (!meta.index || !(await dataFiles.get(meta.index))) {
           const index = this.getIndexPath(dataFiles, id);
           if (index) {
             meta.index = index;
@@ -1014,7 +1064,7 @@ const indexer = {
                     const resType = RegExp.$1;
                     const resId = RegExp.$2;
 
-                    const doc = await scrapbook.readFileAsDocument(dataFiles[index]);
+                    const doc = await scrapbook.readFileAsDocument(await dataFiles.get(index));
                     if (!doc) { throw new Error(`Unable to load HTML document from '${this.dataDir}${index}'.`); }
 
                     const loader = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
@@ -1069,7 +1119,7 @@ const indexer = {
               urlAccessMap.set(favIconUrl, p);
               return p;
             } else if (this.isHtzFile(index) || this.isMaffFile(index)) {
-              const zip = await new JSZip().loadAsync(dataFiles[index], {createFolders: true});
+              const zip = await new JSZip().loadAsync(await dataFiles.get(index), {createFolders: true});
 
               let zipDir;
               if (this.isMaffFile(index)) {
@@ -1096,7 +1146,7 @@ const indexer = {
           const path = `${this.treeDir}favicon/${file.name}`;
 
           // A non-empty existed file is a duplicate since favicon files are named using a checksum.
-          if (!treeFiles[path] || treeFiles[path].size === 0) {
+          if (!treeFiles.has(path) || (await treeFiles.get(path)).size === 0) {
             scrapbook.zipAddFile(zip, path, file, false);
             this.log(`Saved favicon '${scrapbook.crop(favIconUrl, 256)}' for '${id}' at '${path}'.`);
           } else {
@@ -1125,13 +1175,13 @@ const indexer = {
         let path = RegExp.$1;
         referedFavIcons.add(path);
 
-      if (!treeFiles[path] && !zip.files[path]) {
+      if (!treeFiles.has(path) && !zip.files[path]) {
           this.error(`Missing favicon: '${path}' (used by '${id}')`);
         }
       }
     }
 
-    for (const path in treeFiles) {
+    for (const path of treeFiles.keys()) {
       if (/^tree[/]favicon[/]/.test(path)) {
         if (!referedFavIcons.has(path)) {
           this.error(`Unused favicon: '${path}'`);
@@ -1186,7 +1236,7 @@ const indexer = {
       // fill an empty file for unused tree/meta#.js
       for (; ; i++) {
         const path = `${this.treeDir}meta${i}.js`;
-        let file = treeFiles[path];
+        let file = await treeFiles.get(path);
         if (!file) { break; }
 
         file = new Blob([""], {type: "application/javascript"});
@@ -1229,7 +1279,7 @@ const indexer = {
       // fill an empty file for unused tree/toc#.js
       for (; ; i++) {
         const path = `${this.treeDir}toc${i}.js`;
-        let file = treeFiles[path];
+        let file = await treeFiles.get(path);
         if (!file) { break; }
 
         file = new Blob([""], {type: "application/javascript"});
@@ -1267,7 +1317,7 @@ const indexer = {
     };
 
     for (const path in resToInclude) {
-      if (treeFiles[path]) { continue; }
+      if (treeFiles.has(path)) { continue; }
 
       try {
         const xhr = await scrapbook.xhr({
@@ -1290,7 +1340,7 @@ const indexer = {
     /* Import tree/fulltext*.js */
     for (let i = 0; ; i++) {
       const path = `${this.treeDir}fulltext${i || ""}.js`;
-      const file = treeFiles[path];
+      const file = await treeFiles.get(path);
       if (!file) { break; }
 
       this.log(`Importing '${path}'...`);
@@ -1332,7 +1382,7 @@ const indexer = {
 
       const getIndexPaths = async () => {
         if (this.isMaffFile(index)) {
-          itemZip = itemZip || await new JSZip().loadAsync(dataFiles[index], {createFolders: true});
+          itemZip = itemZip || await new JSZip().loadAsync(await dataFiles.get(index), {createFolders: true});
           return await scrapbook.getMaffIndexFiles(itemZip);
         } else if (this.isHtzFile(index)) {
           return ['index.html'];
@@ -1344,15 +1394,15 @@ const indexer = {
       const getFile = async (path) => {
         if (this.isHtmlFile(index)) {
           if (path === '.') {
-            return dataFiles[index];
+            return await dataFiles.get(index);
           }
 
           let [base] = scrapbook.filepathParts(index);
           base = base ? base + '/' : '';
-          return dataFiles[base + path];
+          return await dataFiles.get(base + path);
         } else if (this.isHtzFile(index) || this.isMaffFile(index)) {
           const [base, filename] = scrapbook.filepathParts(path);
-          itemZip = itemZip || await new JSZip().loadAsync(dataFiles[index], {createFolders: true});
+          itemZip = itemZip || await new JSZip().loadAsync(await dataFiles.get(index), {createFolders: true});
 
           const file = itemZip.file(path);
           if (!file) { return file; }
@@ -1518,7 +1568,7 @@ const indexer = {
         try {
           index = meta.index;
 
-          const file = index && dataFiles[index];
+          const file = index && await dataFiles.get(index);
 
           // no index file: remove cache
           if (!file) {
@@ -1652,7 +1702,7 @@ const indexer = {
       // fill an empty file for unused tree/fulltext#.js
       for (; ; i++) {
         const path = `${this.treeDir}fulltext${i}.js`;
-        let file = treeFiles[path];
+        let file = await treeFiles.get(path);
         if (!file) { break; }
 
         file = new Blob([""], {type: "application/javascript"});
@@ -1672,7 +1722,7 @@ const indexer = {
 
       if (path.startsWith(this.treeDir)) {
         bakPath = this.treeDir.slice(0, -1) + '.bak/' + path.slice(this.treeDir.length);
-        oldFile = treeFiles[path];
+        oldFile = await treeFiles.get(path);
       } else {
         continue;
       }
@@ -1790,28 +1840,28 @@ const indexer = {
     let index;
 
     index = `${id}/index.html`;
-    if (dataFiles[index]) { return index; }
+    if (dataFiles.has(index)) { return index; }
 
     index = `${id}.html`;
-    if (dataFiles[index]) { return index; }
+    if (dataFiles.has(index)) { return index; }
 
     index = `${id}.htm`;
-    if (dataFiles[index]) { return index; }
+    if (dataFiles.has(index)) { return index; }
 
     index = `${id}.xhtml`;
-    if (dataFiles[index]) { return index; }
+    if (dataFiles.has(index)) { return index; }
 
     index = `${id}.xht`;
-    if (dataFiles[index]) { return index; }
+    if (dataFiles.has(index)) { return index; }
 
     index = `${id}.md`;
-    if (dataFiles[index]) { return index; }
+    if (dataFiles.has(index)) { return index; }
 
     index = `${id}.maff`;
-    if (dataFiles[index]) { return index; }
+    if (dataFiles.has(index)) { return index; }
 
     index = `${id}.htz`;
-    if (dataFiles[index]) { return index; }
+    if (dataFiles.has(index)) { return index; }
 
     return null;
   },
