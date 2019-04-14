@@ -334,8 +334,9 @@ capturer.addItemToServer = async function (params) {
     }
   }
 
-  await book.loadMeta();
-  await book.loadToc();
+  await book.loadTreeFiles(true);
+  await book.loadMeta(true);
+  await book.loadToc(true);
   await book.addItem({
     item: {
       id: params.timeId,
