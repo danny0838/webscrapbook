@@ -1556,8 +1556,9 @@ const indexer = {
       let itemLoaderData;
       let filesToUpdate;
 
-      for (const [id, meta] of Object.entries(scrapbookData.meta)) {
+      for (const id in scrapbookData.meta) {
         try {
+          meta = scrapbookData.meta[id];
           index = meta.index;
 
           const file = index && dataFiles.get(index);
