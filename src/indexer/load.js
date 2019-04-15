@@ -1362,7 +1362,7 @@ const indexer = {
         "embed", "object", "applet",
         "audio", "video",
         "canvas",
-        "noframes", "noscript",
+        "noframes", "noscript", "noembed",
         "parsererror",
         "svg", "math",
       ]);
