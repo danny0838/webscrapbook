@@ -155,6 +155,7 @@ const indexer = {
     this.logger.textContent = '';
     this.logger.className = '';
     this.options = Object.assign({}, scrapbook.options);
+    this.wsbDir = null;
     this.dataDir = 'data/';
     this.treeDir = 'tree/';
     this.indexPage = 'map.html';
@@ -448,6 +449,7 @@ const indexer = {
         };
 
         this.serverData.book = book;
+        this.wsbDir = server.config.WSB_DIR + '/';
         this.dataDir = book.dataUrl.slice(book.topUrl.length);
         this.treeDir = book.treeUrl.slice(book.topUrl.length);
         this.indexPage = book.indexUrl.slice(book.treeUrl.length);
@@ -493,7 +495,7 @@ const indexer = {
       for (const {path, file} of inputData.files) {
         if (path.startsWith(this.treeDir)) {
           treeFiles.set(path, file);
-        } else if (path.startsWith(this.dataDir) && !path.startsWith(server.config.WSB_DIR + '/')) {
+        } else if (path.startsWith(this.dataDir) && (this.wsbDir === null || !path.startsWith(this.wsbDir))) {
           const subpath = path.slice(this.dataDir.length);
           dataFiles.set(subpath, file);
 
