@@ -1366,6 +1366,8 @@ const indexer = {
         "parsererror",
         "svg", "math",
       ]);
+      const noMetaRefreshTags = [...noIndexTags];
+      noMetaRefreshTags.shift(); // remove "head"
 
       const getIndexPaths = async () => {
         if (this.isMaffFile(index)) {
@@ -1514,6 +1516,9 @@ const indexer = {
         // check for a potential meta refresh (mostly for file item)
         let hasInstantRedirect = false;
         for (const metaRefreshElem of doc.querySelectorAll('meta[http-equiv="refresh"][content]')) {
+          // skip if metaRefreshElem is in a non-index tag
+          if (noMetaRefreshTags.some(t => metaRefreshElem.closest(t))) { continue; }
+
           const {time, url} = scrapbook.parseHeaderRefresh(metaRefreshElem.getAttribute("content"));
           if (time === 0) { hasInstantRedirect = true; }
           if (url) {
