@@ -333,7 +333,7 @@ const indexer = {
                   continue;
                 }
 
-                const file = await new Promise((resolve, reject) => {
+                let file = await new Promise((resolve, reject) => {
                   entry.file(resolve, reject);
                 });
 
