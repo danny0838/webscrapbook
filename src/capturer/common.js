@@ -2041,7 +2041,7 @@ capturer.captureDocument = async function (params) {
     //
     // 1. Use DOM favicon if presented.
     // 2. Use tab favicon (assume it comes from favicon.ico).
-    if (!favIconUrl) {
+    if (typeof favIconUrl === 'undefined') {
       if (settings.frameIsMain && settings.favIconUrl) {
         switch (options["capture.favicon"]) {
           case "link": {
