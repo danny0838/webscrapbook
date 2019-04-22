@@ -937,7 +937,7 @@ capturer.captureDocument = async function (params) {
               default:
                 let useFavIcon = false;
                 if (typeof favIconUrl === 'undefined') {
-                  favIconUrl = "about:blank"; // placeholder
+                  favIconUrl = rewriteUrl;
                   useFavIcon = true;
                 }
                 tasks[tasks.length] = 
@@ -951,8 +951,6 @@ capturer.captureDocument = async function (params) {
                   if (useFavIcon) {
                     if (options["capture.saveAs"] === 'folder') {
                       favIconUrl = response.url;
-                    } else {
-                      favIconUrl = rewriteUrl;
                     }
                   }
                   return response;
@@ -2038,46 +2036,51 @@ capturer.captureDocument = async function (params) {
     }
 
     // handle tab favicon
-    //
     // 1. Use DOM favicon if presented.
-    // 2. Use tab favicon (assume it comes from favicon.ico).
+    // 2. Use tab favicon (from favicon.ico or browser extension).
+    // Prefer DOM favicon since tab favicon is data URL in Firefox, and results
+    // in an extra downloading of possibly duplicated image, which is not
+    // desired.
     if (typeof favIconUrl === 'undefined') {
       if (settings.frameIsMain && settings.favIconUrl) {
-        switch (options["capture.favicon"]) {
-          case "link": {
-            favIconUrl = settings.favIconUrl;
-            break;
+        tasks[tasks.length] = (async () => {
+          switch (options["capture.favicon"]) {
+            case "link": {
+              favIconUrl = settings.favIconUrl;
+              break;
+            }
+            case "blank":
+            case "remove": {
+              // do nothing
+              break;
+            }
+            case "save":
+            default: {
+              const response = await capturer.invoke("downloadFile", {
+                url: settings.favIconUrl,
+                refUrl,
+                settings,
+                options,
+              });
+              favIconUrl = response.url;
+              break;
+            }
           }
-          case "blank":
-          case "remove": {
-            // do nothing
-            break;
-          }
-          case "save":
-          default: {
-            const response = await capturer.invoke("downloadFile", {
-              url: settings.favIconUrl,
-              refUrl,
-              settings,
-              options,
-            });
-            favIconUrl = response.url;
-            break;
-          }
-        }
 
-        if (favIconUrl) {
-          let frag = doc.createDocumentFragment();
-          favIconNode = doc.createElement("link");
-          favIconNode.rel = "shortcut icon";
-          favIconNode.href = favIconUrl;
-          frag.appendChild(favIconNode);
-          frag.appendChild(doc.createTextNode("\n"));
-          headNode.appendChild(frag);
-        }
+          if (favIconUrl) {
+            let frag = doc.createDocumentFragment();
+            favIconNode = doc.createElement("link");
+            favIconNode.rel = "shortcut icon";
+            favIconNode.href = favIconUrl;
+            frag.appendChild(favIconNode);
+            frag.appendChild(doc.createTextNode("\n"));
+            headNode.appendChild(frag);
+          }
+        })();
       }
     }
 
+    // wait for all async downloading tasks to complete
     await Promise.all(tasks);
 
     // save document
