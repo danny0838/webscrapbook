@@ -158,8 +158,8 @@ capturer.captureDocument = async function (params) {
     let selection;
     let rootNode, headNode;
 
-    const origNodeMap = new Map();
-    const clonedNodeMap = new Map();
+    const origNodeMap = new WeakMap();
+    const clonedNodeMap = new WeakMap();
     const specialContentMap = new Map();
 
     // Map cloned nodes and the original for later reference
