@@ -3117,7 +3117,7 @@ async function test_capture_imageBackground_used() {
   assert(zip.files['link-keyframes.bmp']);
   assert(zip.files['import-keyframes.bmp']);
   assert(!zip.files['neverused.bmp']);
-  assert(zip.files['removed.bmp']);  // @FIXME: images used only by removed elements should not be saved
+  assert(!zip.files['removed.bmp']);
   assert(!zip.files['deleted-internal.bmp']);  // @FIXME: dynamically deleted rule should be respected
   assert(!zip.files['inserted-internal.bmp']);
   assert(!zip.files['deleted-link.bmp']);  // @FIXME: dynamically deleted rule should be respected
@@ -3140,11 +3140,11 @@ async function test_capture_imageBackground_used() {
   from { transform: rotate(0turn); background-image: url(""); }
   to { transform: rotate(1turn); }
 }`);
-  assert(styleElems[6].textContent.trim() === `#removed-internal { background: url("removed.bmp"); }`);  // @FIXME: images used only by removed elements should not be saved
+  assert(styleElems[6].textContent.trim() === `#removed-internal { background: url(""); }`);
   assert(styleElems[7].textContent.trim() === `@keyframes removed {
-  from { transform: rotate(0turn); background-image: url("removed.bmp"); }
+  from { transform: rotate(0turn); background-image: url(""); }
   to { transform: rotate(1turn); }
-}`);  // @FIXME: images used only by removed elements should not be saved
+}`);
   assert(styleElems[8].textContent.trim() === `#deleted-internal { background: url(""); }`);  // @FIXME: dynamically deleted rule should be respected
 
   var cssFile = zip.file('link.css');
@@ -3810,7 +3810,7 @@ async function test_capture_font_used() {
   assert(zip.files['internal.woff']);
   assert(zip.files['internal-keyframes.woff']);
   assert(!zip.files['neverused.woff']);
-  assert(zip.files['removed.woff']);  // @FIXME: fonts used only by removed elements should not be saved
+  assert(!zip.files['removed.woff']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3820,8 +3820,8 @@ async function test_capture_font_used() {
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
   assert(styleElems[1].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
   assert(styleElems[3].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
-  assert(styleElems[6].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);  // @FIXME: fonts used only by removed elements should not be saved
-  assert(styleElems[7].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);  // @FIXME: fonts used only by removed elements should not be saved
+  assert(styleElems[6].textContent.trim() === `@font-face { font-family: removed-internal; src: url(""); }`);
+  assert(styleElems[7].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url(""); }`);
 
   /* capture.font = save-used (headless) */
   // the result is same as save

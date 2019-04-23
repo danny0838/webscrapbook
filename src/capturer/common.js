@@ -477,26 +477,18 @@ capturer.captureDocument = async function (params) {
       }
     }
 
-    // map used background images and fonts
-    // @FIXME: a node removed during capture process still have resource downloaded
-    if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
-      const {usedCssFontUrl, usedCssImageUrl} = capturer.parseDocumentCss(doc, rootNode, refUrl);
-      
-      // expose filter to settings
-      if (options["capture.imageBackground"] === "save-used") {
-        settings.usedCssImageUrl = usedCssImageUrl;
-      }
-      if (options["capture.font"] === "save-used") {
-        settings.usedCssFontUrl = usedCssFontUrl;
-      }
-    }
-
     // record source URL
     if (options["capture.recordDocumentMeta"]) {
       const url = docUrl.startsWith("data:") ? "data:" : docUrl;
       rootNode.setAttribute("data-scrapbook-source", url);
       rootNode.setAttribute("data-scrapbook-create", timeId);
     }
+
+    // a promise resolved after nodes are inspected and initiates async tasks
+    let halterResolve;
+    const halter = new Promise((resolve, rejiect) => {
+      halterResolve = resolve;
+    });
 
     // inspect nodes
     let metaCharsetNode;
@@ -597,37 +589,36 @@ capturer.captureDocument = async function (params) {
               default:
                 switch (options["capture.rewriteCss"]) {
                   case "url":
-                    // if CSS not accessible, save all bg images and fonts
-                    let cssSettings = settings;
-                    try {
-                      if (!origNodeMap.get(elem).sheet.cssRules) { throw new Error('CSS rules not accessible'); }
-                    } catch (ex) {
-                      cssSettings = Object.assign({}, settings);
-                      delete cssSettings.usedCssFontUrl;
-                      delete cssSettings.usedCssImageUrl;
-                    }
-
-                    tasks[tasks.length] = 
-                    capturer.invoke("downloadFile", {
-                      url: elem.getAttribute("href"),
-                      refUrl,
-                      rewriteMethod: "processCssFile",
-                      settings: cssSettings,
-                      options,
-                    }).then((response) => {
+                    tasks[tasks.length] = halter.then(async () => {
+                      // if CSS not accessible, save all bg images and fonts
+                      let cssSettings = settings;
+                      try {
+                        if (!origNodeMap.get(elem).sheet.cssRules) { throw new Error('CSS rules not accessible'); }
+                      } catch (ex) {
+                        cssSettings = Object.assign({}, settings);
+                        delete cssSettings.usedCssFontUrl;
+                        delete cssSettings.usedCssImageUrl;
+                      }
+                      const response = await capturer.invoke("downloadFile", {
+                        url: elem.getAttribute("href"),
+                        refUrl,
+                        rewriteMethod: "processCssFile",
+                        settings: cssSettings,
+                        options,
+                      });
                       captureRewriteUri(elem, "href", response.url);
                       return response;
                     });
                     break;
                   case "none":
                   default:
-                    tasks[tasks.length] = 
-                    capturer.invoke("downloadFile", {
-                      url: elem.getAttribute("href"),
-                      refUrl,
-                      settings,
-                      options,
-                    }).then((response) => {
+                    tasks[tasks.length] = halter.then(async () => {
+                      const response = await capturer.invoke("downloadFile", {
+                        url: elem.getAttribute("href"),
+                        refUrl,
+                        settings,
+                        options,
+                      });
                       captureRewriteUri(elem, "href", response.url);
                       return response;
                     });
@@ -665,13 +656,13 @@ capturer.captureDocument = async function (params) {
                   favIconUrl = rewriteUrl;
                   useFavIcon = true;
                 }
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("href"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("href"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "href", response.url);
                   if (useFavIcon) {
                     if (options["capture.saveAs"] === 'folder') {
@@ -703,8 +694,8 @@ capturer.captureDocument = async function (params) {
             default:
               switch (options["capture.rewriteCss"]) {
                 case "url":
-                  tasks[tasks.length] = 
-                  capturer.processCssText(elem.textContent, refUrl, settings, options).then((response) => {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.processCssText(elem.textContent, refUrl, settings, options);
                     elem.textContent = response;
                     return response;
                   });
@@ -746,13 +737,13 @@ capturer.captureDocument = async function (params) {
             case "save":
             default:
               if (elem.hasAttribute("src")) {
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("src"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("src"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "src", response.url);
                   return response;
                 });
@@ -804,13 +795,13 @@ capturer.captureDocument = async function (params) {
               case "save-used":
               case "save":
               default:
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: rewriteUrl,
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: rewriteUrl,
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "background", response.url);
                   return response;
                 });
@@ -872,18 +863,20 @@ capturer.captureDocument = async function (params) {
               if (frameDoc) {
                 // frame document accessible:
                 // capture the content document directly
-                tasks[tasks.length] = 
-                capturer.captureDocumentOrFile({
-                  doc: frameDoc,
-                  refUrl,
-                  settings: frameSettings,
-                  options,
-                }).then(captureFrameCallback);
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.captureDocumentOrFile({
+                    doc: frameDoc,
+                    refUrl,
+                    settings: frameSettings,
+                    options,
+                  });
+                  return captureFrameCallback(response);
+                });
                 break;
               }
 
               // frame document inaccessible:
-              tasks[tasks.length] = Promise.resolve().then(() => {
+              tasks[tasks.length] = halter.then(() => {
                 let frameWindow;
                 try {
                   frameWindow = frameSrc.contentWindow;
@@ -993,25 +986,24 @@ capturer.captureDocument = async function (params) {
                   break;
                 }
 
-                tasks[tasks.length] = 
-                capturer.invoke("downLinkFetchHeader", {
-                  url,
-                  refUrl,
-                  options,
-                  settings,
-                }).then((ext) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const ext = await capturer.invoke("downLinkFetchHeader", {
+                    url,
+                    refUrl,
+                    options,
+                    settings,
+                  });
                   if (ext === null) { return null; }
                   if (!capturer.downLinkExtFilter(ext, options)) { return null; }
 
-                  return capturer.invoke("downloadFile", {
+                  const response = await capturer.invoke("downloadFile", {
                     url,
                     refUrl,
                     settings,
                     options,
-                  }).then((response) => {
-                    captureRewriteUri(elem, "href", response.url);
-                    return response;
                   });
+                  captureRewriteUri(elem, "href", response.url);
+                  return response;
                 });
                 break;
               }
@@ -1024,13 +1016,13 @@ capturer.captureDocument = async function (params) {
                 const [, ext] = scrapbook.filenameParts(filename);
                 if (!capturer.downLinkExtFilter(ext, options)) { break; }
 
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url,
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url,
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "href", response.url);
                   return response;
                 });
@@ -1086,13 +1078,13 @@ capturer.captureDocument = async function (params) {
               if (!isHeadless) {
                 if (elemOrig.currentSrc) {
                   captureRewriteUri(elem, "srcset", null);
-                  tasks[tasks.length] = 
-                  capturer.invoke("downloadFile", {
-                    url: elemOrig.currentSrc,
-                    refUrl,
-                    settings,
-                    options,
-                  }).then((response) => {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elemOrig.currentSrc,
+                      refUrl,
+                      settings,
+                      options,
+                    });
                     captureRewriteUri(elem, "src", response.url);
                     return response;
                   });
@@ -1103,21 +1095,21 @@ capturer.captureDocument = async function (params) {
             case "save":
             default:
               if (elem.hasAttribute("src")) {
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("src"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("src"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "src", response.url);
                   return response;
                 });
               }
 
               if (elem.hasAttribute("srcset")) {
-                tasks[tasks.length] = 
-                capturer.processSrcsetText(elem.getAttribute("srcset"), refUrl, settings, options).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.processSrcsetText(elem.getAttribute("srcset"), refUrl, settings, options);
                   captureRewriteUri(elem, "srcset", response);
                   return response;
                 });
@@ -1171,8 +1163,8 @@ capturer.captureDocument = async function (params) {
             case "save":
             default:
               Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                tasks[tasks.length] = 
-                capturer.processSrcsetText(elem.getAttribute("srcset"), refUrl, settings, options).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.processSrcsetText(elem.getAttribute("srcset"), refUrl, settings, options)
                   captureRewriteUri(elem, "srcset", response);
                   return response;
                 });
@@ -1221,13 +1213,13 @@ capturer.captureDocument = async function (params) {
                   Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                     captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
                   }, this);
-                  tasks[tasks.length] = 
-                  capturer.invoke("downloadFile", {
-                    url: elemOrig.currentSrc,
-                    refUrl,
-                    settings,
-                    options,
-                  }).then((response) => {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elemOrig.currentSrc,
+                      refUrl,
+                      settings,
+                      options,
+                    });
                     captureRewriteUri(elem, "src", response.url);
                     return response;
                   });
@@ -1238,26 +1230,26 @@ capturer.captureDocument = async function (params) {
             case "save":
             default:
               if (elem.hasAttribute("src")) {
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("src"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("src"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "src", response.url);
                   return response;
                 });
               }
 
               Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("src"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("src"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "src", response.url);
                   return response;
                 });
@@ -1315,13 +1307,13 @@ capturer.captureDocument = async function (params) {
             case "save-current":
               if (!isHeadless) {
                 if (elem.hasAttribute("poster")) {
-                  tasks[tasks.length] = 
-                  capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("poster"),
-                    refUrl,
-                    settings,
-                    options,
-                  }).then((response) => {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elem.getAttribute("poster"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
                     captureRewriteUri(elem, "poster", response.url);
                     return response;
                   });
@@ -1331,13 +1323,13 @@ capturer.captureDocument = async function (params) {
                   Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                     captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
                   }, this);
-                  tasks[tasks.length] = 
-                  capturer.invoke("downloadFile", {
-                    url: elemOrig.currentSrc,
-                    refUrl,
-                    settings,
-                    options,
-                  }).then((response) => {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elemOrig.currentSrc,
+                      refUrl,
+                      settings,
+                      options,
+                    })
                     captureRewriteUri(elem, "src", response.url);
                     return response;
                   });
@@ -1349,39 +1341,39 @@ capturer.captureDocument = async function (params) {
             case "save":
             default:
               if (elem.hasAttribute("poster")) {
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("poster"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("poster"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "poster", response.url);
                   return response;
                 });
               }
 
               if (elem.hasAttribute("src")) {
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("src"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("src"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "src", response.url);
                   return response;
                 });
               }
 
               Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("src"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("src"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "src", response.url);
                   return response;
                 });
@@ -1416,13 +1408,13 @@ capturer.captureDocument = async function (params) {
             case "save":
             default:
               if (elem.hasAttribute("src")) {
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("src"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("src"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "src", response.url);
                   return response;
                 });
@@ -1456,13 +1448,13 @@ capturer.captureDocument = async function (params) {
             case "save":
             default:
               if (elem.hasAttribute("data")) {
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("data"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("data"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "data", response.url);
                   return response;
                 });
@@ -1503,26 +1495,26 @@ capturer.captureDocument = async function (params) {
             case "save":
             default:
               if (elem.hasAttribute("code")) {
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("code"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("code"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "code", response.url);
                   return response;
                 });
               }
 
               if (elem.hasAttribute("archive")) {
-                tasks[tasks.length] = 
-                capturer.invoke("downloadFile", {
-                  url: elem.getAttribute("archive"),
-                  refUrl,
-                  settings,
-                  options,
-                }).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.invoke("downloadFile", {
+                    url: elem.getAttribute("archive"),
+                    refUrl,
+                    settings,
+                    options,
+                  });
                   captureRewriteUri(elem, "archive", response.url);
                   return response;
                 });
@@ -1597,13 +1589,13 @@ capturer.captureDocument = async function (params) {
                   // srcset and currentSrc are not supported, do the same as save
                 case "save":
                 default:
-                  tasks[tasks.length] = 
-                  capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("src"),
-                    refUrl,
-                    settings,
-                    options,
-                  }).then((response) => {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elem.getAttribute("src"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
                     captureRewriteUri(elem, "src", response.url);
                     return response;
                   });
@@ -1694,8 +1686,8 @@ capturer.captureDocument = async function (params) {
           default:
             switch (options["capture.rewriteCss"]) {
               case "url":
-                tasks[tasks.length] = 
-                capturer.processCssText(elem.getAttribute("style"), refUrl, settings, options).then((response) => {
+                tasks[tasks.length] = halter.then(async () => {
+                  const response = await capturer.processCssText(elem.getAttribute("style"), refUrl, settings, options);
                   elem.setAttribute("style", response);
                   return response;
                 });
@@ -1804,6 +1796,22 @@ capturer.captureDocument = async function (params) {
         })();
       }
     }
+
+    // map used background images and fonts
+    if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
+      const {usedCssFontUrl, usedCssImageUrl} = capturer.parseDocumentCss(doc, rootNode, refUrl);
+      
+      // expose filter to settings
+      if (options["capture.imageBackground"] === "save-used") {
+        settings.usedCssImageUrl = usedCssImageUrl;
+      }
+      if (options["capture.font"] === "save-used") {
+        settings.usedCssFontUrl = usedCssFontUrl;
+      }
+    }
+
+    // resolve the halter
+    halterResolve();
 
     // wait for all async downloading tasks to complete
     await Promise.all(tasks);
