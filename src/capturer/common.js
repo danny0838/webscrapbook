@@ -708,7 +708,7 @@ capturer.captureDocument = async function (params) {
 
       // We pass only elemental css text, which should not contain any at-rule
       const parseCssText = function (cssText, refUrl, callback = x => x) {
-        scrapbook.parseCssText(cssText, {
+        scrapbook.rewriteCssText(cssText, {
           rewriteImportUrl(url) { return {url}; },
           rewriteFontFaceUrl(url) { return {url}; },
           rewriteBackgroundUrl(url) {
@@ -2394,7 +2394,7 @@ capturer.processCssText = async function (cssText, refUrl, settings, options) {
     };
   };
 
-  const rewritten = scrapbook.parseCssText(cssText, {
+  const rewritten = scrapbook.rewriteCssText(cssText, {
     rewriteImportUrl(sourceUrl) {
       let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
       switch (options["capture.style"]) {

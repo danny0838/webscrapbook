@@ -1354,7 +1354,7 @@ scrapbook.parseCssFile = async function (data, charset, rewriter) {
 /**
  * The function that rewrites each URL into a new URL.
  *
- * @callback parseCssTextRewriteFunc
+ * @callback rewriteCssTextRewriter
  * @param {string} url
  * @return {{url: string, recordUrl: string}}
  */
@@ -1368,11 +1368,11 @@ scrapbook.parseCssFile = async function (data, charset, rewriter) {
  *
  * @param {string} cssText
  * @param {Object} options
- *     - {parseCssTextRewriteFunc} rewriteImportUrl
- *     - {parseCssTextRewriteFunc} rewriteFontFaceUrl
- *     - {parseCssTextRewriteFunc} rewriteBackgroundUrl
+ *     - {rewriteCssTextRewriter} rewriteImportUrl
+ *     - {rewriteCssTextRewriter} rewriteFontFaceUrl
+ *     - {rewriteCssTextRewriter} rewriteBackgroundUrl
  */
-scrapbook.parseCssText = function (cssText, options) {
+scrapbook.rewriteCssText = function (cssText, options) {
   const pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
   const pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
   const pCmSp = "(?:(?:" + pCm + "|" + pSp + ")*)"; // comment or space
@@ -1414,7 +1414,7 @@ scrapbook.parseCssText = function (cssText, options) {
     });
   };
 
-  const parseCssText = function (cssText, options = {}) {
+  const rewriteCssText = function (cssText, options = {}) {
     const {rewriteImportUrl, rewriteFontFaceUrl, rewriteBackgroundUrl} = options;
     return cssText.replace(
       new RegExp([pCm, pRImport, pRFontFace, "("+pUrl+")"].join("|"), "gi"),
@@ -1443,8 +1443,8 @@ scrapbook.parseCssText = function (cssText, options) {
         return m;
       });
   };
-  scrapbook.parseCssText = parseCssText;
-  return parseCssText(cssText, options);
+  scrapbook.rewriteCssText = rewriteCssText;
+  return rewriteCssText(cssText, options);
 };
 
 /**

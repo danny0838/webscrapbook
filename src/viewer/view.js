@@ -613,7 +613,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
   async processCssText(cssText, refUrl, recurseChain) {
     const fetcher = new ComplexUrlFetcher(refUrl, recurseChain);
 
-    const rewritten = scrapbook.parseCssText(cssText, {
+    const rewritten = scrapbook.rewriteCssText(cssText, {
       rewriteImportUrl(url) {
         return {url: fetcher.getUrlHash(url, viewer.processCssFile)};
       },
