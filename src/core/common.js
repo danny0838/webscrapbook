@@ -1269,6 +1269,70 @@ scrapbook.doctypeToString = function (doctype) {
 };
 
 /**
+ * Read charset and text of a CSS file.
+ *
+ * Browser normally determine the charset of a CSS file via:
+ * 1. HTTP header content-type
+ * 2. Unicode BOM in the CSS file
+ * 3. @charset rule in the CSS file
+ * 4. assume it's UTF-8
+ *
+ * We save the CSS file as UTF-8 for better compatibility.
+ * For case 3, UTF-8 BOM is prepended to inactivate the @charset rule.
+ * We don't follow case 4 and read the CSS file as byte string so that
+ * the user has a chance to correct the encoding manually.
+ *
+ * @param {Blob} data - The CSS file blob.
+ * @param {string} charset - Charset of the CSS file blob.
+ * @return {{text: string, charset: string|null}}
+ */
+scrapbook.parseCssFile = async function (data, charset) {
+  const regexAtCharset = /^@charset "([^"]*)";/;
+  const parseCssFile = async function (data, charset) {
+    if (charset) {
+      let text = await scrapbook.readFileAsText(data, charset);
+
+      // Add a BOM to inactivate the @charset rule
+      if (regexAtCharset.test(text)) {
+        text = "\ufeff" + text;
+      }
+
+      return {text, charset};
+    }
+
+    const bytes = await scrapbook.readFileAsText(data, false);
+    if (bytes.startsWith("\xEF\xBB\xBF")) {
+      charset = "UTF-8";
+    } else if (bytes.startsWith("\xFE\xFF")) {
+      charset = "UTF-16BE";
+    } else if (bytes.startsWith("\xFF\xFE")) {
+      charset = "UTF-16LE";
+    } else if (bytes.startsWith("\x00\x00\xFE\xFF")) {
+      charset = "UTF-32BE";
+    } else if (bytes.startsWith("\x00\x00\xFF\xFE")) {
+      charset = "UTF-32LE";
+    } else if (regexAtCharset.test(bytes)) {
+      charset = RegExp.$1;
+    }
+
+    if (charset) {
+      let text = await scrapbook.readFileAsText(data, charset);
+
+      // Add a BOM to inactivate the @charset rule
+      if (regexAtCharset.test(text)) {
+        text = "\ufeff" + text;
+      }
+
+      return {text, charset};
+    }
+
+    return {text: bytes, charset: null};
+  };
+  scrapbook.parseCssFile = parseCssFile;
+  return await parseCssFile(data, charset);
+};
+
+/**
  * The function that rewrites the CSS text.
  *
  * @callback rewriteCssFileRewriter
@@ -1279,76 +1343,24 @@ scrapbook.doctypeToString = function (doctype) {
 /**
  * Process a CSS file and rewrite it
  *
- * Browser normally determine the charset of a CSS file via:
- * 1. HTTP header content-type
- * 2. Unicode BOM in the CSS file
- * 3. @charset rule in the CSS file
- * 4. assume it's UTF-8
- *
- * We save the CSS file as UTF-8 for better compatibility.
- * For case 3, a UTF-8 BOM is prepended to suppress the @charset rule.
- * We don't follow case 4 and save the CSS file as byte string so that
- * the user could fix the encoding manually.
- *
  * @param {Blob} data - The CSS file blob.
- * @param {string} charset
+ * @param {string} charset - Charset of the CSS file blob.
  * @param {rewriteCssFileRewriter} rewriter
  * @return {Promise<Blob>} The rewritten CSS file blob.
  */
 scrapbook.rewriteCssFile = async function (data, charset, rewriter) {
-  const regexAtCharset = /^@charset "([^"]*)";/;
-  const rewriteCssFile = async function (data, charset, rewriter) {
-    const origText = await (async () => {
-      if (charset) {
-        const text = await scrapbook.readFileAsText(data, charset);
-        // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
-        if (regexAtCharset.test(text)) {
-          return "\ufeff" + text;
-        }
+  const {text: cssText, charset: cssCharset} = await scrapbook.parseCssFile(data, charset);
 
-        return text;
-      }
+  const rewrittenText = await rewriter(cssText);
 
-      const bytes = await scrapbook.readFileAsText(data, false);
-      if (bytes.startsWith("\xEF\xBB\xBF")) {
-        charset = "UTF-8";
-      } else if (bytes.startsWith("\xFE\xFF")) {
-        charset = "UTF-16BE";
-      } else if (bytes.startsWith("\xFF\xFE")) {
-        charset = "UTF-16LE";
-      } else if (bytes.startsWith("\x00\x00\xFE\xFF")) {
-        charset = "UTF-32BE";
-      } else if (bytes.startsWith("\x00\x00\xFF\xFE")) {
-        charset = "UTF-32LE";
-      } else if (regexAtCharset.test(bytes)) {
-        charset = RegExp.$1;
-      }
-
-      if (charset) {
-        const text = await scrapbook.readFileAsText(data, charset);
-        // Add a BOM to invalidate the @charset rule sine we'll save as UTF-8
-        if (regexAtCharset.test(text)) {
-          return "\ufeff" + text;
-        }
-
-        return text;
-      }
-      return bytes;
-    })();
-
-    const rewrittenText = await rewriter(origText);
-
-    let blob;
-    if (charset) {
-      blob = new Blob([rewrittenText], {type: "text/css;charset=UTF-8"});
-    } else {
-      let ab = scrapbook.byteStringToArrayBuffer(rewrittenText);
-      blob = new Blob([ab], {type: "text/css"});
-    }
-    return blob;
-  };
-  scrapbook.rewriteCssFile = rewriteCssFile;
-  return await rewriteCssFile(data, charset, rewriter);
+  let blob;
+  if (cssCharset) {
+    blob = new Blob([rewrittenText], {type: "text/css;charset=UTF-8"});
+  } else {
+    let ab = scrapbook.byteStringToArrayBuffer(rewrittenText);
+    blob = new Blob([ab], {type: "text/css"});
+  }
+  return blob;
 };
 
 /**
