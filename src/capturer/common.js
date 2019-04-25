@@ -2364,7 +2364,7 @@ capturer.processSrcsetText = async function (text, refUrl, settings, options) {
 capturer.processCssFile = async function (params) {
   const {data, charset, url: refUrl, settings, options} = params;
 
-  return await scrapbook.parseCssFile(data, charset, async (cssText) => {
+  return await scrapbook.rewriteCssFile(data, charset, async (cssText) => {
     return await capturer.processCssText(cssText, refUrl, settings, options);
   });
 };

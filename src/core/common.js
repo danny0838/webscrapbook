@@ -1271,7 +1271,7 @@ scrapbook.doctypeToString = function (doctype) {
 /**
  * The function that rewrites the CSS text.
  *
- * @callback parseCssFileRewriter
+ * @callback rewriteCssFileRewriter
  * @param {string} cssText - The CSS text to rewrite.
  * @return {string|Promise<string>} The rewritten CSS text.
  */
@@ -1292,12 +1292,12 @@ scrapbook.doctypeToString = function (doctype) {
  *
  * @param {Blob} data - The CSS file blob.
  * @param {string} charset
- * @param {parseCssFileRewriter} rewriter
+ * @param {rewriteCssFileRewriter} rewriter
  * @return {Promise<Blob>} The rewritten CSS file blob.
  */
-scrapbook.parseCssFile = async function (data, charset, rewriter) {
+scrapbook.rewriteCssFile = async function (data, charset, rewriter) {
   const regexAtCharset = /^@charset "([^"]*)";/;
-  const parseCssFile = async function (data, charset, rewriter) {
+  const rewriteCssFile = async function (data, charset, rewriter) {
     const origText = await (async () => {
       if (charset) {
         const text = await scrapbook.readFileAsText(data, charset);
@@ -1347,8 +1347,8 @@ scrapbook.parseCssFile = async function (data, charset, rewriter) {
     }
     return blob;
   };
-  scrapbook.parseCssFile = parseCssFile;
-  return await parseCssFile(data, charset, rewriter);
+  scrapbook.rewriteCssFile = rewriteCssFile;
+  return await rewriteCssFile(data, charset, rewriter);
 };
 
 /**

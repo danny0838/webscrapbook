@@ -605,7 +605,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
   async processCssFile(params) {
     const {data, charset, url: refUrl, recurseChain} = params;
 
-    return await scrapbook.parseCssFile(data, charset, async (text) => {
+    return await scrapbook.rewriteCssFile(data, charset, async (text) => {
       return await viewer.processCssText(text, refUrl, recurseChain);
     });
   },
