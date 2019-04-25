@@ -590,20 +590,11 @@ capturer.captureDocument = async function (params) {
                 switch (options["capture.rewriteCss"]) {
                   case "url":
                     tasks[tasks.length] = halter.then(async () => {
-                      // if CSS not accessible, save all bg images and fonts
-                      let cssSettings = settings;
-                      try {
-                        if (!origNodeMap.get(elem).sheet.cssRules) { throw new Error('CSS rules not accessible'); }
-                      } catch (ex) {
-                        cssSettings = Object.assign({}, settings);
-                        delete cssSettings.usedCssFontUrl;
-                        delete cssSettings.usedCssImageUrl;
-                      }
                       const response = await capturer.invoke("downloadFile", {
                         url: elem.getAttribute("href"),
                         refUrl,
                         rewriteMethod: "processCssFile",
-                        settings: cssSettings,
+                        settings,
                         options,
                       });
                       captureRewriteUri(elem, "href", response.url);
@@ -1799,7 +1790,20 @@ capturer.captureDocument = async function (params) {
 
     // map used background images and fonts
     if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
-      const {usedCssFontUrl, usedCssImageUrl} = capturer.parseDocumentCss(doc, rootNode, refUrl);
+      const {usedCssFontUrl, usedCssImageUrl} = await capturer.parseDocumentCss(
+        doc,
+        rootNode,
+        refUrl,
+        async (url, refUrl) => {
+          const response = await capturer.invoke("fetchCss", {
+            url,
+            refUrl,
+            settings,
+            options,
+          });
+          return response.error ? null : response.text;
+        },
+      );
       
       // expose filter to settings
       if (options["capture.imageBackground"] === "save-used") {
@@ -2204,20 +2208,31 @@ capturer.processCssText = async function (cssText, refUrl, settings, options) {
 };
 
 /**
+ * The function to retrieve text content of a remote stylesheet.
+ *
+ * @callback parseDocumentCssRetrieveFunc
+ * @param {string} url
+ * @param {string} refUrl
+ * @return {string} CSS text
+ */
+
+/**
  * Parse DOM stylesheets and get used CSS URLs by decendants of rootNode.
  *
  * @param {HTMLDocument} doc
  * @param {HTMLElement} rootNode
  * @param {string} refUrl
+ * @param {parseDocumentCssRetrieveFunc} retrieveFunc
  * @return {{usedCssFontUrl: Object, usedCssImageUrl: Object}}
  */
-capturer.parseDocumentCss = function (doc, rootNode, refUrl) {
+capturer.parseDocumentCss = async function (doc, rootNode, refUrl, retrieveFunc) {
   if (!rootNode) { rootNode = doc.documentElement; }
   if (!refUrl) { refUrl = doc.URL; }
 
   const usedCssFontUrl = {};
   const usedCssImageUrl = {};
 
+  // @TODO: Consider unicode-range when checking whether a font resource is loaded.
   const fontFamilyMapper = {
     list: {},
 
@@ -2328,28 +2343,59 @@ capturer.parseDocumentCss = function (doc, rootNode, refUrl) {
     return false;
   };
 
-  const parseCss = function (css, refUrl) {
-    // @FIXME: cssRules not accessible for cross-origin CSS
-    // In Firefox, CSS from a different domain throws a SecurityError when accessing .cssRules
-    // In Chromium, CSS from a different domain gets .cssRules = null
+  const parseCss = async function (css, refUrl) {
     try {
-      if (!css.cssRules) { throw new Error('CSS rules not accessible'); }
+      if (css.disabled) { return; }
     } catch (ex) {
+      // @TODO: better support for HTTP Link header
+      // HTTP Link header is currently not widely supported by browsers.
+      // Firefox 67 supports it but CSSOM access is restricted and throws when
+      // attempting to access a property like cssRules. Skip parsing this css
+      // in such case.
       return;
     }
 
-    if (css.disabled) { return; }
+    // If the CSS is loaded from a different domain, CSSStyleSheet.cssRules throws an error.
+    // (in some older browsers, CSSStyleSheet.cssRules gets null instead)
+    // We retrieve the CSS rules via reading from source CSS text as a workaround.
+    let rules;
+    try {
+      rules = css.cssRules;
+      if (!rules) { throw new Error('CSS rules not accessible'); }
+    } catch (ex) {
+      if (retrieveFunc) {
+        const cssText = await retrieveFunc(css.href, refUrl);
+        if (cssText) {
+          // @FIXME: In Firefox, an error is thrown when accessing cssRules of
+          // an inserted @import rule.
+          // @TODO: Find another way to get cssRules without injecting cssText
+          // into DOM, which might trigger a DOM change event in the source
+          // page.
+          const styleElem = doc.createElement('style');
+          styleElem.textContent = cssText;
+          doc.head.appendChild(styleElem);
+          rules = styleElem.sheet.cssRules;
+          styleElem.remove();
+        }
+      }
+    }
 
-    Array.prototype.forEach.call(css.cssRules, (cssRule) => parseCssRule(cssRule, css.href || refUrl));
+    if (!rules) { return; }
+
+    for (const rule of rules) {
+      await parseCssRule(rule, css.href || refUrl);
+    }
   };
 
-  const parseCssRule = function (cssRule, refUrl) {
+  const parseCssRule = async function (cssRule, refUrl) {
     switch (cssRule.type) {
       case CSSRule.STYLE_RULE: {
         // this CSS rule applies to no node in the captured area
         if (!verifySelector(rootNode, cssRule.selectorText)) { break; }
 
+        // @TODO: mark font families as used only if unicode-range matches
         fontFamilyMapper.use(cssRule.style.fontFamily);
+
         animationMapper.use(cssRule.style.animationName);
 
         parseCssText(cssRule.cssText, refUrl, (url) => {
@@ -2360,13 +2406,15 @@ capturer.parseDocumentCss = function (doc, rootNode, refUrl) {
       case CSSRule.IMPORT_RULE: {
         if (!cssRule.styleSheet) { break; }
 
-        parseCss(cssRule.styleSheet, refUrl);
+        await parseCss(cssRule.styleSheet, refUrl);
         break;
       }
       case CSSRule.MEDIA_RULE: {
         if (!cssRule.cssRules) { break; }
 
-        Array.prototype.forEach.call(cssRule.cssRules, (cssRule) => parseCssRule(cssRule, refUrl));
+        for (const rule of cssRule.cssRules) {
+          await parseCssRule(rule, refUrl);
+        }
         break;
       }
       case CSSRule.FONT_FACE_RULE: {
@@ -2387,7 +2435,9 @@ capturer.parseDocumentCss = function (doc, rootNode, refUrl) {
       case CSSRule.PAGE_RULE: {
         if (!cssRule.cssText) { break; }
 
+        // @TODO: mark font families as used only if unicode-range matches
         fontFamilyMapper.use(cssRule.style.fontFamily);
+
         animationMapper.use(cssRule.style.animationName);
 
         parseCssText(cssRule.cssText, refUrl, (url) => {
@@ -2400,7 +2450,9 @@ capturer.parseDocumentCss = function (doc, rootNode, refUrl) {
 
         animationMapper.get(cssRule.name);
 
-        Array.prototype.forEach.call(cssRule.cssRules, (cssRule) => parseCssRule(cssRule, refUrl));
+        for (const rule of cssRule.cssRules) {
+          await parseCssRule(rule, refUrl);
+        }
         break;
       }
       case CSSRule.KEYFRAME_RULE: {
@@ -2427,7 +2479,9 @@ capturer.parseDocumentCss = function (doc, rootNode, refUrl) {
       case CSSRule.SUPPORTS_RULE: {
         if (!cssRule.cssRules) { break; }
 
-        Array.prototype.forEach.call(cssRule.cssRules, (cssRule) => parseCssRule(cssRule, refUrl));
+        for (const rule of cssRule.cssRules) {
+          await parseCssRule(rule, refUrl);
+        }
         break;
       }
       // @TODO: DOCUMENT_RULE is only supported by Firefox
@@ -2435,7 +2489,9 @@ capturer.parseDocumentCss = function (doc, rootNode, refUrl) {
       case 13/* CSSRule.DOCUMENT_RULE */: {
         if (!cssRule.cssRules) { break; }
 
-        Array.prototype.forEach.call(cssRule.cssRules, (cssRule) => parseCssRule(cssRule, refUrl));
+        for (const rule of cssRule.cssRules) {
+          await parseCssRule(rule, refUrl);
+        }
         break;
       }
     }
@@ -2454,39 +2510,41 @@ capturer.parseDocumentCss = function (doc, rootNode, refUrl) {
     });
   };
 
-  Array.prototype.forEach.call(doc.styleSheets, (css) => parseCss(css, refUrl));
+  for (const css of doc.styleSheets) {
+    await parseCss(css, refUrl);
+  }
 
-  Array.prototype.forEach.call(rootNode.querySelectorAll("*"), (elem) => {
+  for (const elem of rootNode.querySelectorAll("*")) {
     const {style} = elem;
 
     fontFamilyMapper.use(style.fontFamily);
     animationMapper.use(style.animationName);
 
-    for (let i of style) {
+    for (const i of style) {
       parseCssText(style.getPropertyValue(i), refUrl, (url) => {
         usedCssImageUrl[url] = true;
       });
     }
-  });
+  }
 
   // collect used animation and their used font family and background images
-  for (let name in animationMapper.list) {
+  for (const name in animationMapper.list) {
     const f = animationMapper.list[name];
     if (f.used) {
-      for (let url of f.urls) {
+      for (const url of f.urls) {
         usedCssImageUrl[url] = true;
       }
-      for (let fontFamily of f.fontFamilies) {
+      for (const fontFamily of f.fontFamilies) {
         fontFamilyMapper.use(fontFamily);
       }
     }
   }
 
   // collect used font families
-  for (let fontFamily in fontFamilyMapper.list) {
+  for (const fontFamily in fontFamilyMapper.list) {
     const f = fontFamilyMapper.list[fontFamily];
     if (f.used) {
-      for (let url of f.urls) {
+      for (const url of f.urls) {
         usedCssFontUrl[url] = true;
       }
     }

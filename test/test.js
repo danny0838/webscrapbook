@@ -2661,8 +2661,9 @@ body { color: red; }`);
 }
 
 /**
- * When CSS file is cross origin, the script cannot get CSS rules,
- * we fallback to capture all bg images and fonts.
+ * When the origin of a CSS file is different from the source document,
+ * the script cannot read its CSS rules directly and a workaround is required.
+ * Check if it works: only used bg images and fonts are saved.
  */
 async function test_capture_css_cross_origin() {
   var options = {
@@ -2679,7 +2680,7 @@ async function test_capture_css_cross_origin() {
   assert(zip.files['bg2.bmp']);
   assert(zip.files['font2.woff']);
 
-  // same origin: only used bg images and fonts are saved
+  // same origin
   var cssFile = zip.file('style.css');
   var text = await readFileAsText(await cssFile.async('blob'));
   assert(text.trim() === `#bg1 { background: url("bg1.bmp"); }
@@ -2688,14 +2689,14 @@ async function test_capture_css_cross_origin() {
 @font-face { font-family: bgFont1; src: url("font1.woff"); }
 @font-face { font-family: neverusedFont1; src: url(""); }`);
 
-  // cross origin: all bg images and fonts are saved
+  // cross origin
   var cssFile = zip.file('style2.css');
   var text = await readFileAsText(await cssFile.async('blob'));
   assert(text.trim() === `#bg2 { background: url("bg2.bmp"); }
-#neverused2 { background: url("neverused.bmp"); }
+#neverused2 { background: url(""); }
 
 @font-face { font-family: bgFont2; src: url("font2.woff"); }
-@font-face { font-family: neverusedFont2; src: url("neverused.woff"); }`);
+@font-face { font-family: neverusedFont2; src: url(""); }`);
 }
 
 /**

@@ -1799,6 +1799,58 @@ capturer.downLinkFetchHeader = async function (params) {
   }
 };
 
+// @TODO: accessMap cache for same URL
+/**
+ * @kind invokable
+ * @param {Object} params
+ *     - {string} params.url
+ *     - {string} params.refUrl
+ *     - {string} params.settings
+ *     - {string} params.options
+ * @return {string} File extension of the URL.
+ */
+capturer.fetchCss = async function (params) {
+  isDebug && console.debug("call: fetchCss", params);
+
+  const {url: sourceUrl, refUrl, settings, options} = params;
+  const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
+
+  const requestHeaders = {};
+  capturer.setReferrer({
+    headers: requestHeaders,
+    refUrl,
+    targetUrl: sourceUrlMain,
+    options,
+  });
+
+  try {
+    const headers = {};
+    const xhr = await scrapbook.xhr({
+      url: sourceUrlMain,
+      responseType: 'blob',
+      requestHeaders,
+      onreadystatechange(xhr) {
+        if (xhr.readyState !== 2) { return; }
+
+        // get headers
+        if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+          const headerContentType = xhr.getResponseHeader("Content-Type");
+          if (headerContentType) {
+            const contentType = scrapbook.parseHeaderContentType(headerContentType);
+            headers.contentType = contentType.type;
+            headers.charset = contentType.parameters.charset;
+          }
+        }
+      },
+    });
+
+    return await scrapbook.parseCssFile(xhr.response, headers.charset);
+  } catch (ex) {
+    // something wrong for the XMLHttpRequest
+    return {error: {message: ex.message}};
+  }
+};
+
 /**
  * @kind invokable
  * @param {Object} params
