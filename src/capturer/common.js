@@ -1332,7 +1332,7 @@ capturer.captureDocument = async function (params) {
 
           if (elem.hasAttribute("srcset")) {
             elem.setAttribute("srcset",
-              scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
+              scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
                 return capturer.resolveRelativeUrl(url, refUrl);
               })
             );
@@ -1406,7 +1406,7 @@ capturer.captureDocument = async function (params) {
         case "picture": {
           Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
             elem.setAttribute("srcset",
-              scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
+              scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
                 return capturer.resolveRelativeUrl(url, refUrl);
               })
             );
@@ -2348,7 +2348,7 @@ capturer.downLinkUrlFilter = function (url, options) {
 capturer.processSrcsetText = async function (text, refUrl, settings, options) {
   const downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
 
-  const rewritten = scrapbook.parseSrcset(text, (url) => {
+  const rewritten = scrapbook.rewriteSrcset(text, (url) => {
     return downloader.getUrlHash(url);
   });
 

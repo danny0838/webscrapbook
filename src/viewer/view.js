@@ -396,7 +396,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
           if (elem.hasAttribute("srcset")) {
             elem.setAttribute("srcset",
-              scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
+              scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
                 return rewriteUrl(url, refUrl);
               })
             );
@@ -427,7 +427,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
           if (elem.hasAttribute("srcset")) {
             elem.setAttribute("srcset",
-              scrapbook.parseSrcset(elem.getAttribute("srcset"), (url) => {
+              scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
                 return rewriteUrl(url, refUrl);
               })
             );

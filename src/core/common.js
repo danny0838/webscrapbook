@@ -1450,24 +1450,24 @@ scrapbook.parseCssText = function (cssText, options) {
 /**
  * The function that rewrites each URL into a new URL.
  *
- * @callback parseSrcsetRewriteFunc
+ * @callback rewriteSrcsetRewriter
  * @param {string} url
  * @return {string} The rewritten URL.
  */
 
 /**
  * @param {string} srcset
- * @param {parseSrcsetRewriteFunc} rewriteFunc
+ * @param {rewriteSrcsetRewriter} rewriter
  */
-scrapbook.parseSrcset = function (srcset, rewriteFunc) {
+scrapbook.rewriteSrcset = function (srcset, rewriter) {
   const regex = /(\s*)([^ ,][^ ]*[^ ,])(\s*(?: [^ ,]+)?\s*(?:,|$))/g;
-  const parseSrcset = function (srcset, rewriteFunc) {
+  const rewriteSrcset = function (srcset, rewriter) {
     return srcset.replace(regex, (m, m1, m2, m3) => {
-      return m1 + rewriteFunc(m2) + m3;
+      return m1 + rewriter(m2) + m3;
     });
   };
-  scrapbook.parseSrcset = parseSrcset;
-  return parseSrcset(srcset, rewriteFunc);
+  scrapbook.rewriteSrcset = rewriteSrcset;
+  return rewriteSrcset(srcset, rewriter);
 };
 
 scrapbook.parseMaffRdfDocument = function (doc) {
