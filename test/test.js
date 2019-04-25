@@ -2571,7 +2571,7 @@ async function test_capture_css_cross_origin() {
 @font-face { font-family: bgFont1; src: url("sansation_light.woff"); }
 @font-face { font-family: neverusedFont1; src: url(""); }`);
 
-  // same origin: all bg images and fonts are saved
+  // cross origin: all bg images and fonts are saved
   var cssFile = zip.file('style2.css');
   var text = await readFileAsText(await cssFile.async('blob'));
   assert(text.trim() === `#bg2 { background: url("red.bmp"); }

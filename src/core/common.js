@@ -1269,6 +1269,14 @@ scrapbook.doctypeToString = function (doctype) {
 };
 
 /**
+ * The function that rewrites the CSS text.
+ *
+ * @callback parseCssFileRewriter
+ * @param {string} cssText - The CSS text to rewrite.
+ * @return {string|Promise<string>} The rewritten CSS text.
+ */
+
+/**
  * Process a CSS file and rewrite it
  *
  * Browser normally determine the charset of a CSS file via:
@@ -1284,7 +1292,7 @@ scrapbook.doctypeToString = function (doctype) {
  *
  * @param {Blob} data - The CSS file blob.
  * @param {string} charset
- * @param {Promise} rewriter - The Promise that rewrites the CSS text.
+ * @param {parseCssFileRewriter} rewriter
  * @return {Promise<Blob>} The rewritten CSS file blob.
  */
 scrapbook.parseCssFile = async function (data, charset, rewriter) {
@@ -1348,7 +1356,7 @@ scrapbook.parseCssFile = async function (data, charset, rewriter) {
  *
  * @callback parseCssTextRewriteFunc
  * @param {string} url
- * @return {{url: string, recordUrl: string}} newUrl
+ * @return {{url: string, recordUrl: string}}
  */
 
 /**
@@ -1444,7 +1452,7 @@ scrapbook.parseCssText = function (cssText, options) {
  *
  * @callback parseSrcsetRewriteFunc
  * @param {string} url
- * @return {string} newUrl
+ * @return {string} The rewritten URL.
  */
 
 /**
