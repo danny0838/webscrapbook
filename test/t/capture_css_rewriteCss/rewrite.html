@@ -6,15 +6,36 @@
 @import "ref/imported.css";
 @font-face { font-family: fontface; src: url(ref/sansation_light.woff); }
 #background { background: url(ref/green.bmp); }
+
+/* unsupported rules */
+#unsupported {
+  *background: url(ref/unsupported-1.bmp); /* IE7 */
+  _background: url(ref/unsupported-2.bmp); /* IE6 */
+  -o-background: url(ref/unsupported-3.bmp); /* vandor prefix */
+  unknown: url(ref/unsupported-4.bmp); /* unknown */
+}
+
+/* dynamic rules */
+#deleted { background: url(ref/deleted.bmp); }
 </style>
 </head>
 <body>
+<h2>Basic rewrite</h2>
 <blockquote style="background: url(ref/green.bmp);">inline background</blockquote>
-
 <blockquote id="background">background</blockquote>
-
 <blockquote style="font-family: fontface;">@font-face</blockquote>
-
 <blockquote id="imported">@import</blockquote>
+
+<h2>Unsupported rules</h2>
+<blockquote id="unsupported">unsupported</blockquote>
+
+<h2>Dynamic rules</h2>
+<blockquote id="inserted">inserted</blockquote>
+<blockquote id="deleted">deleted</blockquote>
 </body>
+<script>
+var css = document.styleSheets[0];
+css.deleteRule(css.cssRules.length - 1);
+css.insertRule('#inserted { background: url(ref/inserted.bmp); }', css.cssRules.length);
+</script>
 </html>

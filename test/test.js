@@ -2171,6 +2171,12 @@ async function test_capture_css_rewriteCss() {
   assert(zip.files["imported.css"]);
   assert(zip.files["sansation_light.woff"]);
   assert(zip.files["green.bmp"]);
+  assert(zip.files["unsupported-1.bmp"]);
+  assert(zip.files["unsupported-2.bmp"]);
+  assert(zip.files["unsupported-3.bmp"]);
+  assert(zip.files["unsupported-4.bmp"]);
+  assert(!zip.files["inserted.bmp"]);
+  assert(zip.files["deleted.bmp"]);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2179,7 +2185,18 @@ async function test_capture_css_rewriteCss() {
   assert(doc.querySelector('style').textContent.trim() === `\
 @import "imported.css";
 @font-face { font-family: fontface; src: url("sansation_light.woff"); }
-#background { background: url("green.bmp"); }`);
+#background { background: url("green.bmp"); }
+
+/* unsupported rules */
+#unsupported {
+  *background: url("unsupported-1.bmp"); /* IE7 */
+  _background: url("unsupported-2.bmp"); /* IE6 */
+  -o-background: url("unsupported-3.bmp"); /* vandor prefix */
+  unknown: url("unsupported-4.bmp"); /* unknown */
+}
+
+/* dynamic rules */
+#deleted { background: url("deleted.bmp"); }`);
 
   assert(doc.querySelector('blockquote').getAttribute('style') === `background: url("green.bmp");`);
 
@@ -2203,7 +2220,18 @@ async function test_capture_css_rewriteCss() {
   assert(doc.querySelector('style').textContent.trim() === `\
 @import "ref/imported.css";
 @font-face { font-family: fontface; src: url(ref/sansation_light.woff); }
-#background { background: url(ref/green.bmp); }`);
+#background { background: url(ref/green.bmp); }
+
+/* unsupported rules */
+#unsupported {
+  *background: url(ref/unsupported-1.bmp); /* IE7 */
+  _background: url(ref/unsupported-2.bmp); /* IE6 */
+  -o-background: url(ref/unsupported-3.bmp); /* vandor prefix */
+  unknown: url(ref/unsupported-4.bmp); /* unknown */
+}
+
+/* dynamic rules */
+#deleted { background: url(ref/deleted.bmp); }`);
 
   assert(doc.querySelector('blockquote').getAttribute('style') === `background: url(ref/green.bmp);`);
 }
