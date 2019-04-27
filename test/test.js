@@ -44,12 +44,14 @@ const MAF = "http://maf.mozdev.org/metadata/rdf#";
  * Tests
  */
 
-// Check html saving structure in various formats
-// Check if saveAs option works
-//
-// capture.saveAs
-// capturer.saveDocument
-// capturer.downloadBlob
+/**
+ * Check html saving structure in various formats
+ * Check if saveAs option works
+ *
+ * capture.saveAs
+ * capturer.saveDocument
+ * capturer.downloadBlob
+ */
 async function test_capture_html() {
   /* htz */
   var options = {
@@ -234,9 +236,11 @@ async function test_capture_html() {
   assert(loaderData[resId].d === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
 }
 
-// Check if singleHtmlJs can handle special DOM cases
-//
-// capturer.saveDocument
+/**
+ * Check if singleHtmlJs can handle special DOM cases
+ *
+ * capturer.saveDocument
+ */
 async function test_capture_singleHtmlJs() {
   /* post-body contents */
   var options = {
@@ -254,9 +258,11 @@ async function test_capture_singleHtmlJs() {
   assert(loaderElem);
 }
 
-// Check meta charset is correctly rewritten
-//
-// capturer.saveDocument
+/**
+ * Check meta charset is correctly rewritten
+ *
+ * capturer.saveDocument
+ */
 async function test_capture_metaCharset() {
   /* meta new */
   var blob = await capture({
@@ -322,12 +328,14 @@ async function test_capture_metaCharset() {
   assert(imgElem.getAttribute('src') === `圖片.bmp`);
 }
 
-// Check xhtml saving structure in various formats
-// Check if saveAs option works
-//
-// capture.saveAs
-// capturer.saveDocument
-// capturer.downloadBlob
+/**
+ * Check xhtml saving structure in various formats
+ * Check if saveAs option works
+ *
+ * capture.saveAs
+ * capturer.saveDocument
+ * capturer.downloadBlob
+ */
 async function test_capture_xhtml() {
   /* htz */
   var options = {
@@ -523,10 +531,12 @@ async function test_capture_xhtml() {
   assert(loaderData[resId].d === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
 }
 
-// Check file saving structure in various formats
-// Check if saveAs option works
-//
-// capturer.captureFile
+/**
+ * Check file saving structure in various formats
+ * Check if saveAs option works
+ *
+ * capturer.captureFile
+ */
 async function test_capture_file() {
   /* htz */
   var options = {
@@ -647,9 +657,11 @@ async function test_capture_file() {
   assert(loaderData[0].d === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 }
 
-// Check plain text file encoding is correctly recorded
-//
-// capturer.captureFile
+/**
+ * Check plain text file encoding is correctly recorded
+ *
+ * capturer.captureFile
+ */
 async function test_capture_file_charset() {
   var options = {
     "capture.saveAs": "maff",
@@ -715,10 +727,12 @@ async function test_capture_file_charset() {
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
 }
 
-// Check saved filename is correctly determined by HTTP header
-// (filename, filename with encoding, or content-type)
-//
-// Check plain text file encoding is correctly recorded
+/**
+ * Check saved filename is correctly determined by HTTP header
+ * (filename, filename with encoding, or content-type)
+ *
+ * Check plain text file encoding is correctly recorded
+ */
 async function test_capture_header() {
   var blob = await capture({
     url: `${localhost}/capture_header/index.html`,
@@ -746,8 +760,10 @@ async function test_capture_header() {
   assert(b64 === "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 }
 
-// If filename by URL path or header doesn't match its MIME type,
-// a fixing extension should be appended.
+/**
+ * If filename by URL path or header doesn't match its MIME type,
+ * a fixing extension should be appended.
+ */
 async function test_capture_header_mime() {
   var blob = await capture({
     url: `${localhost}/capture_header_mime/index.html`,
@@ -786,10 +802,12 @@ async function test_capture_header_mime() {
   assert(zip.files["script.py.js"]);
 }
 
-// Check special chars handling for saved files and URLs pointing to them
-//
-// capturer.defaultFilesSet
-// scrapbook.validateFilename
+/**
+ * Check special chars handling for saved files and URLs pointing to them
+ *
+ * capturer.defaultFilesSet
+ * scrapbook.validateFilename
+ */
 async function test_capture_filename() {
   var blob = await capture({
     url: `${localhost}/capture_filename/index.html`,
@@ -826,10 +844,12 @@ async function test_capture_filename() {
   assert(links[10].getAttribute('href') === "^metadata^-1");
 }
 
-// Check if option works
-//
-// capture.saveAsciiFilename
-// capture.saveDataUriAsFile
+/**
+ * Check if option works
+ *
+ * capture.saveAsciiFilename
+ * capture.saveDataUriAsFile
+ */
 async function test_capture_saveAsciiFilename() {
   /* -saveAsciiFilename */
   var options = {
@@ -886,9 +906,11 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
   assert(doc.querySelector('img[srcset]').getAttribute('srcset') === "123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580.bmp 1x, 123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580-2.bmp 2x");
 }
 
-// Check if option works
-//
-// capture.saveFileAsHtml
+/**
+ * Check if option works
+ *
+ * capture.saveFileAsHtml
+ */
 async function test_capture_saveFileAsHtml() {
   var options = {
     "capture.saveFileAsHtml": true,
@@ -945,9 +967,11 @@ async function test_capture_saveFileAsHtml() {
   assert(preElem.textContent.trim() === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
 }
 
-// Check if option works
-//
-// capture.saveDataUriAsFile
+/**
+ * Check if option works
+ *
+ * capture.saveDataUriAsFile
+ */
 async function test_capture_dataUri() {
   /* -saveDataUriAsFile */
   var options = {
@@ -1018,11 +1042,13 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
   assert(doc.querySelector('img[srcset]').getAttribute('srcset') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA 1x, data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA 2x");
 }
 
-// Check URL resolution in a data URL CSS
-//
-// capture.saveDataUriAsFile
-// capturer.downloadFile
-// capturer.processCssText
+/**
+ * Check URL resolution in a data URL CSS
+ *
+ * capture.saveDataUriAsFile
+ * capturer.downloadFile
+ * capturer.processCssText
+ */
 async function test_capture_dataUri_resolve() {
   var options = {
     "capture.style": "save",
@@ -1127,10 +1153,12 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
 p { background-image: url("red.bmp"); }`);
 }
 
-// Check URL resolution in a data URL frame
-//
-// capture.saveDataUriAsFile
-// capturer.captureDocument
+/**
+ * Check URL resolution in a data URL frame
+ *
+ * capture.saveDataUriAsFile
+ * capturer.captureDocument
+ */
 async function test_capture_dataUri_resolve2() {
   var options = {
     "capture.frame": "save",
@@ -1274,9 +1302,11 @@ async function test_capture_dataUri_resolve2() {
   assert(frameDoc.querySelector('a[href="null.txt"]'));
 }
 
-// Check if capture selection works
-//
-// capturer.captureDocument
+/**
+ * Check if capture selection works
+ *
+ * capturer.captureDocument
+ */
 async function test_capture_selection() {
   var blob = await capture({
     url: `${localhost}/capture_selection/index.html`,
@@ -1322,11 +1352,13 @@ async function test_capture_selection() {
   assert(!zip.files["blue.bmp"]);
 }
 
-// When a headless capture (source, bookmark) is initialized from a
-// tab, the tab information (e.g. title and favicon) should be used.
-//
-// capturer.captureTab
-// capturer.captureHeadless
+/**
+ * When a headless capture (source, bookmark) is initialized from a
+ * tab, the tab information (e.g. title and favicon) should be used.
+ *
+ * capturer.captureTab
+ * capturer.captureHeadless
+ */
 async function test_capture_headless() {
   /* from tab; source */
   var blob = await capture({
@@ -1426,9 +1458,11 @@ async function test_capture_headless() {
   assert(!doc.querySelector(`link[rel~="icon"]`));
 }
 
-// Check if captureBookmark works
-//
-// capturer.captureBookmark
+/**
+ * Check if captureBookmark works
+ *
+ * capturer.captureBookmark
+ */
 async function test_capture_bookmark() {
   var blob = await capture({
     url: `${localhost}/capture_bookmark/index.html`,
@@ -1448,9 +1482,11 @@ async function test_capture_bookmark() {
   assert(doc.querySelector(`link[rel="shortcut icon"][href="data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"]`));
 }
 
-// Check frame capture if same origin
-//
-// capture.frame
+/**
+ * Check frame capture if same origin
+ *
+ * capture.frame
+ */
 async function test_capture_frame() {
   /* capture.frame = save */
   var options = {
@@ -1562,9 +1598,11 @@ async function test_capture_frame() {
   assert(doc.querySelectorAll('iframe').length === 0);
 }
 
-// Check frame capture if cross origin
-//
-// capture.frame
+/**
+ * Check frame capture if cross origin
+ *
+ * capture.frame
+ */
 async function test_capture_frame2() {
   /* capture.frame = save */
   // Capture the frame content via content script and messaging.
@@ -1625,9 +1663,11 @@ async function test_capture_frame2() {
   // same as same origin
 }
 
-// Check frame capture if srcdoc
-//
-// capture.frame
+/**
+ * Check frame capture if srcdoc
+ *
+ * capture.frame
+ */
 async function test_capture_frame3() {
   /* capture.frame = save */
   // srcdoc should be removed
@@ -1716,9 +1756,11 @@ document.querySelector('p').textContent = 'srcdoc content modified';
   // same as same origin
 }
 
-// Check headless frame save if same origin
-//
-// capture.frame
+/**
+ * Check headless frame save if same origin
+ *
+ * capture.frame
+ */
 async function test_capture_frame_headless() {
   /* capture.frame = save */
   // frame contents are source (not modified by scripts) due to headless capture
@@ -1765,9 +1807,11 @@ async function test_capture_frame_headless() {
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
 }
 
-// Check headless frame save if srcdoc
-//
-// capture.frame
+/**
+ * Check headless frame save if srcdoc
+ *
+ * capture.frame
+ */
 async function test_capture_frame_headless2() {
   /* capture.frame = save */
   // keep original srcdoc and remove src
@@ -1800,9 +1844,11 @@ document.querySelector('p').textContent = 'srcdoc content modified';
 </script>`);
 }
 
-// Check headless frame capture if point to self
-//
-// capture.frame
+/**
+ * Check headless frame capture if point to self
+ *
+ * capture.frame
+ */
 async function test_capture_frame_headless3() {
   /* capture.frame = save */
   var options = {
@@ -1826,9 +1872,11 @@ async function test_capture_frame_headless3() {
   assert(frames[2].getAttribute('src') === "#123");
 }
 
-// Check if circular frame referencing is handled correctly
-//
-// capture.frame
+/**
+ * Check if circular frame referencing is handled correctly
+ *
+ * capture.frame
+ */
 async function test_capture_frame_circular() {
   /* capture.frame = save */
   // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
@@ -1863,9 +1911,11 @@ async function test_capture_frame_circular() {
   assert(frame.src === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular/index.html`);
 }
 
-// Check if self-pointing circular frame referencing is handled correctly
-//
-// capture.frame
+/**
+ * Check if self-pointing circular frame referencing is handled correctly
+ *
+ * capture.frame
+ */
 async function test_capture_frame_circular2() {
   /* capture.frame = save */
   // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
@@ -1888,9 +1938,11 @@ async function test_capture_frame_circular2() {
   assert(frame.src === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular2/index.html`);
 }
 
-// Check data URI output for frame capture
-//
-// capture.frame
+/**
+ * Check data URI output for frame capture
+ *
+ * capture.frame
+ */
 async function test_capture_frame_dataUri() {
   /* singleHtml */
   // data URI charset should be UTF-8
@@ -1953,10 +2005,12 @@ async function test_capture_frame_dataUri() {
   assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
 }
 
-// Check if option works
-//
-// capture.style
-// capturer.captureDocument
+/**
+ * Check if option works
+ *
+ * capture.style
+ * capturer.captureDocument
+ */
 async function test_capture_css_style() {
   /* capture.style = save */
   var options = {
@@ -2039,10 +2093,12 @@ async function test_capture_css_style() {
   assert(!doc.querySelector('link'));
 }
 
-// Check if option works
-//
-// capture.styleInline
-// capturer.captureDocument
+/**
+ * Check if option works
+ *
+ * capture.styleInline
+ * capturer.captureDocument
+ */
 async function test_capture_css_styleInline() {
   var options = {
     "capture.style": "remove",
@@ -2094,10 +2150,12 @@ async function test_capture_css_styleInline() {
   assert(!doc.querySelector('blockquote').getAttribute('style'));
 }
 
-// Check if option works
-//
-// capture.rewriteCss
-// capturer.processCssText
+/**
+ * Check if option works
+ *
+ * capture.rewriteCss
+ * capturer.processCssText
+ */
 async function test_capture_css_rewriteCss() {
   /* capture.rewriteCss = save */
   var options = {
@@ -2150,9 +2208,11 @@ async function test_capture_css_rewriteCss() {
   assert(doc.querySelector('blockquote').getAttribute('style') === `background: url(ref/green.bmp);`);
 }
 
-// Check CSS syntax parsing
-//
-// scrapbook.parseCssText
+/**
+ * Check CSS syntax parsing
+ *
+ * scrapbook.parseCssText
+ */
 async function test_capture_css_syntax() {
   /* background */
   var options = {
@@ -2257,9 +2317,11 @@ async function test_capture_css_syntax() {
   // assert(css[15].textContent.trim() === `#test15::after { content: '@import "import/style15.css"'; }`);
 }
 
-// Check encoding detection for an external or imported CSS
-//
-// scrapbook.parseCssFile
+/**
+ * Check encoding detection for an external or imported CSS
+ *
+ * scrapbook.parseCssFile
+ */
 async function test_capture_css_charset() {
   const hasBomUtf8 = async function (blob) {
     var u8ar = new Uint8Array(await readFileAsArrayBuffer(blob));
@@ -2322,10 +2384,12 @@ async function test_capture_css_charset() {
   assert(await hasBomUtf8(blob));
 }
 
-// Check whether linked and imported CSS are all rewritten
-// based to the CSS file (rather than the web page)
-//
-// inline and internal CSS are checked in test_capture_css_rewriteCss
+/**
+ * Check whether linked and imported CSS are all rewritten
+ * based to the CSS file (rather than the web page)
+ *
+ * inline and internal CSS are checked in test_capture_css_rewriteCss
+ */
 async function test_capture_css_rewrite() {
   var options = {
     "capture.imageBackground": "link",
@@ -2349,7 +2413,9 @@ async function test_capture_css_rewrite() {
   assert(text === `#link { background: url("${localhost}/capture_css_rewrite/yellow.bmp"); }`);
 }
 
-// Check if base is set to another directory
+/**
+ * Check if base is set to another directory
+ */
 async function test_capture_css_rewrite2() {
   var options = {
     "capture.imageBackground": "link",
@@ -2373,8 +2439,10 @@ async function test_capture_css_rewrite2() {
   assert(text === `#link { background: url("${localhost}/capture_css_rewrite2/link/yellow.bmp"); }`);
 }
 
-// Check for "" and hash URL
-// They should be ignored and no file is retrieved
+/**
+ * Check for "" and hash URL
+ * They should be ignored and no file is retrieved
+ */
 async function test_capture_css_rewrite3() {
   var blob = await capture({
     url: `${localhost}/capture_css_rewrite3/index.html`,
@@ -2393,8 +2461,10 @@ async function test_capture_css_rewrite3() {
 #invalid2 { background-image: url("#123"); }`);
 }
 
-// Check for a URL pointing to main page (a bad case)
-// It will be regarded as a CSS file: be fetched, parsed, and saved.
+/**
+ * Check for a URL pointing to main page (a bad case)
+ * It will be regarded as a CSS file: be fetched, parsed, and saved.
+ */
 async function test_capture_css_rewrite4() {
   var blob = await capture({
     url: `${localhost}/capture_css_rewrite4/index.html`,
@@ -2411,7 +2481,9 @@ async function test_capture_css_rewrite4() {
   assert(doc.querySelector('style').textContent.trim() === `#bad1 { background-image: url("index-1.html"); }`);
 }
 
-// Check if circular CSS referencing is handled correctly
+/**
+ * Check if circular CSS referencing is handled correctly
+ */
 async function test_capture_css_circular() {
   /* htz */
   // keep original inter-referencing between downloaded files
@@ -2522,7 +2594,9 @@ body { color: blue; }`);
 body { color: blue; }`);
 }
 
-// Check if self-pointing circular CSS referencing is handled correctly
+/**
+ * Check if self-pointing circular CSS referencing is handled correctly
+ */
 async function test_capture_css_circular2() {
   /* singleHtml */
   // rewrite a circular referencing with urn:scrapbook:download:circular:filename:...
@@ -2545,8 +2619,10 @@ async function test_capture_css_circular2() {
 body { color: red; }`);
 }
 
-// when CSS file is cross origin, the script cannot get CSS rules,
-// we fallback to capture all bg images and fonts
+/**
+ * When CSS file is cross origin, the script cannot get CSS rules,
+ * we fallback to capture all bg images and fonts.
+ */
 async function test_capture_css_cross_origin() {
   var options = {
     "capture.imageBackground": "save-used",
@@ -2581,9 +2657,11 @@ async function test_capture_css_cross_origin() {
 @font-face { font-family: neverusedFont2; src: url("neverused.woff"); }`);
 }
 
-// Check if option works
-//
-// capture.image
+/**
+ * Check if option works
+ *
+ * capture.image
+ */
 async function test_capture_image() {
   /* capture.image = save */
   var options = {
@@ -2775,9 +2853,11 @@ async function test_capture_image() {
   assert(doc.querySelectorAll('input').length === 0);
 }
 
-// Check if option works
-//
-// capture.imageBackground
+/**
+ * Check if option works
+ *
+ * capture.imageBackground
+ */
 async function test_capture_imageBackground() {
   /* capture.imageBackground = save */
   var options = {
@@ -2906,10 +2986,12 @@ async function test_capture_imageBackground() {
   assert(!tdElem.hasAttribute('background'));
 }
 
-// Check if used background images in the CSS are detected correctly
-// Check if option works
-//
-// capture.imageBackground
+/**
+ * Check if used background images in the CSS are detected correctly
+ * Check if option works
+ *
+ * capture.imageBackground
+ */
 async function test_capture_imageBackgroundUsed() {
   /* capture.imageBackground = save */
   var options = {
@@ -3039,9 +3121,11 @@ async function test_capture_imageBackgroundUsed() {
   assert(text.trim() === `#neverused2 { background: url("neverused.bmp"); }`);
 }
 
-// Check if option works
-//
-// capture.favicon
+/**
+ * Check if option works
+ *
+ * capture.favicon
+ */
 async function test_capture_favicon() {
   /* capture.favicon = save */
   var options = {
@@ -3120,9 +3204,11 @@ async function test_capture_favicon() {
   assert(!iconElem);
 }
 
-// Check if option works
-//
-// capture.canvas
+/**
+ * Check if option works
+ *
+ * capture.canvas
+ */
 async function test_capture_canvas() {
   /* capture.canvas = save */
   var options = {
@@ -3185,9 +3271,11 @@ async function test_capture_canvas() {
   assert(!canvasElem);
 }
 
-// Check if option works
-//
-// capture.audio
+/**
+ * Check if option works
+ *
+ * capture.audio
+ */
 async function test_capture_audio() {
   // Use headless for most test cases since loading audio in the browser is slow.
 
@@ -3327,9 +3415,11 @@ async function test_capture_audio() {
   assert(sourceElems.length === 0);
 }
 
-// Check if option works
-//
-// capture.video
+/**
+ * Check if option works
+ *
+ * capture.video
+ */
 async function test_capture_video() {
   // Use headless for most test cases since loading video in the browser is slow.
 
@@ -3474,10 +3564,12 @@ async function test_capture_video() {
   assert(sourceElems.length === 0);
 }
 
-// Check if option works
-// Check if used fonts in the CSS are detected correctly
-//
-// capture.font
+/**
+ * Check if option works
+ * Check if used fonts in the CSS are detected correctly
+ *
+ * capture.font
+ */
 async function test_capture_font() {
   /* capture.font = save */
   var options = {
@@ -3592,9 +3684,11 @@ async function test_capture_font() {
   assert(styleElems[2].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
 }
 
-// Check if option works
-//
-// capture.script
+/**
+ * Check if option works
+ *
+ * capture.script
+ */
 async function test_capture_script() {
   /* capture.script = save */
   var options = {
@@ -3712,9 +3806,11 @@ async function test_capture_script() {
   assert(!div.hasAttribute('onclick'));
 }
 
-// Check if option works
-//
-// capture.noscript
+/**
+ * Check if option works
+ *
+ * capture.noscript
+ */
 async function test_capture_noscript() {
   /* capture.noscript = save */
   var options = {
@@ -3772,9 +3868,11 @@ body { background-color: red; }
   assert(noscripts.length === 0);
 }
 
-// Check if option works
-//
-// capture.embed
+/**
+ * Check if option works
+ *
+ * capture.embed
+ */
 async function test_capture_embed() {
   /* capture.embed = save */
   var options = {
@@ -3849,9 +3947,11 @@ async function test_capture_embed() {
   assert(!embed);
 }
 
-// Check if option works
-//
-// capture.object
+/**
+ * Check if option works
+ *
+ * capture.object
+ */
 async function test_capture_object() {
   /* capture.object = save */
   var options = {
@@ -3926,9 +4026,11 @@ async function test_capture_object() {
   assert(!object);
 }
 
-// Check if option works
-//
-// capture.applet
+/**
+ * Check if option works
+ *
+ * capture.applet
+ */
 async function test_capture_applet() {
   /* capture.applet = save */
   var options = {
@@ -4008,9 +4110,11 @@ async function test_capture_applet() {
   assert(!applet);
 }
 
-// Check if option works
-//
-// capture.base
+/**
+ * Check if option works
+ *
+ * capture.base
+ */
 async function test_capture_base() {
   /* capture.base = save */
   var options = {
@@ -4066,9 +4170,11 @@ async function test_capture_base() {
   assert(!base);
 }
 
-// Check if option works
-//
-// capture.formStatus
+/**
+ * Check if option works
+ *
+ * capture.formStatus
+ */
 async function test_capture_formStatus() {
   /* capture.formStatus = keep */
   var options = {
@@ -4123,14 +4229,16 @@ async function test_capture_formStatus() {
   assert(doc.querySelectorAll('option')[1].hasAttribute('selected'));
 }
 
-// Check if the URL for general saved resource is rewritten correctly
-// when base is set to another directory.
-//
-// We take image for instance, and other resources should work same
-// since they share same implementation.
-//
-// capturer.resolveRelativeUrl
-// capturer.captureDocument
+/**
+ * Check if the URL for general saved resource is rewritten correctly
+ * when base is set to another directory.
+ *
+ * We take image for instance, and other resources should work same
+ * since they share same implementation.
+ *
+ * capturer.resolveRelativeUrl
+ * capturer.captureDocument
+ */
 async function test_capture_rewrite() {
   var blob = await capture({
     url: `${localhost}/capture_rewrite/index.html`,
@@ -4149,11 +4257,13 @@ async function test_capture_rewrite() {
   assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `green.bmp 1x, yellow.bmp 2x`);
 }
 
-// Check for "", hash, search,
-// and URL pointing to main html page (a bad case)
-//
-// capturer.resolveRelativeUrl
-// capturer.captureDocument
+/**
+ * Check for "", hash, search,
+ * and URL pointing to main html page (a bad case)
+ *
+ * capturer.resolveRelativeUrl
+ * capturer.captureDocument
+ */
 async function test_capture_rewrite2() {
   var blob = await capture({
     url: `${localhost}/capture_rewrite2/index.html`,
@@ -4175,9 +4285,11 @@ async function test_capture_rewrite2() {
   assert(/^index-\d+\.html$/i.test(imgs[3].getAttribute('src'))); // html page saved as img
 }
 
-// Check if the URL in an anchor (link) is rewritten correctly
-//
-// capturer.captureDocument
+/**
+ * Check if the URL in an anchor (link) is rewritten correctly
+ *
+ * capturer.captureDocument
+ */
 async function test_capture_anchor() {
   var blob = await capture({
     url: `${localhost}/capture_anchor/index.html`,
@@ -4213,10 +4325,12 @@ async function test_capture_anchor() {
   assert(anchors[19].getAttribute('href') === `http://example.com/?id=123`);
 }
 
-// Check local selection
-// a hash URL pointing to a not captured part of self page should be resolved to original page
-//
-// capturer.captureDocument
+/**
+ * Check local selection
+ * a hash URL pointing to a not captured part of self page should be resolved to original page
+ *
+ * capturer.captureDocument
+ */
 async function test_capture_anchor2() {
   /* hash link target not captured */
   var blob = await capture({
@@ -4263,9 +4377,11 @@ async function test_capture_anchor2() {
   assert(anchors[7].getAttribute('href') === `#target_name`);
 }
 
-// Check when base is set to another page
-//
-// capturer.captureDocument
+/**
+ * Check when base is set to another page
+ *
+ * capturer.captureDocument
+ */
 async function test_capture_anchor3() {
   var blob = await capture({
     url: `${localhost}/capture_anchor/index3.html`,
@@ -4290,9 +4406,11 @@ async function test_capture_anchor3() {
   assert(anchors[8].getAttribute('href') === `http://example.com/`); // slight changed from http://example.com
 }
 
-// Check if option works
-//
-// capture.downLink
+/**
+ * Check if option works
+ *
+ * capture.downLink
+ */
 async function test_capture_downLink() {
   /* header */
   var options = {
@@ -4380,9 +4498,11 @@ async function test_capture_downLink() {
   assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink/mime.py`);
 }
 
-// Check extFilter syntax
-//
-// capture.downLink.extFilter
+/**
+ * Check extFilter syntax
+ *
+ * capture.downLink.extFilter
+ */
 async function test_capture_downLink2() {
   // a rule each line
   // match URL (*.py) but download using resolved filename using header (*.txt)
@@ -4549,9 +4669,11 @@ async function test_capture_downLink2() {
   assert(Object.keys(zip.files).length === 1);
 }
 
-// Check urlFilter syntax
-//
-// capture.downLink.urlFilter
+/**
+ * Check urlFilter syntax
+ *
+ * capture.downLink.urlFilter
+ */
 async function test_capture_downLink3() {
   // a rule each line
   // plain text rule
@@ -4628,9 +4750,11 @@ ${localhost}/capture_downLink/file.css`,
   assert(Object.keys(zip.files).length === 4);
 }
 
-// Check if the URL in a meta refresh is rewritten correctly
-//
-// capturer.captureDocument
+/**
+ * Check if the URL in a meta refresh is rewritten correctly
+ *
+ * capturer.captureDocument
+ */
 async function test_capture_metaRefresh() {
   var blob = await capture({
     url: `${localhost}/capture_metaRefresh/delayed.html`,
@@ -4662,10 +4786,12 @@ async function test_capture_metaRefresh() {
   assert(mrs[15].getAttribute('content') === `15;url=http://example.com/?id=123`);
 }
 
-// Check local selection
-// a meta refresh URL pointing to a not captured part of self page should be resolved to original page
-//
-// capturer.captureDocument
+/**
+ * Check local selection
+ * a meta refresh URL pointing to a not captured part of self page should be resolved to original page
+ *
+ * capturer.captureDocument
+ */
 async function test_capture_metaRefresh2() {
   /* refresh link target not captured */
   var blob = await capture({
@@ -4712,9 +4838,11 @@ async function test_capture_metaRefresh2() {
   assert(mrs[7].getAttribute('content') === `15;url=http://example.com/`);
 }
 
-// Check when base is set to another page
-//
-// capturer.captureDocument
+/**
+ * Check when base is set to another page
+ *
+ * capturer.captureDocument
+ */
 async function test_capture_metaRefresh3() {
   var blob = await capture({
     url: `${localhost}/capture_metaRefresh/delayed3.html`,
@@ -4741,9 +4869,11 @@ async function test_capture_metaRefresh3() {
   assert(mrs[10].getAttribute('content') === `15;url=http://example.com/`);
 }
 
-// Check if option works
-//
-// capture.removeIntegrity
+/**
+ * Check if option works
+ *
+ * capture.removeIntegrity
+ */
 async function test_capture_integrity() {
   /* +capture.removeIntegrity */
   var options = {
@@ -4818,9 +4948,11 @@ async function test_capture_integrity() {
   assert(script.hasAttribute('nonce'));
 }
 
-// Check if option works
-//
-// capture.requestReferrer
+/**
+ * Check if option works
+ *
+ * capture.requestReferrer
+ */
 async function test_capture_referrer() {
   /* capture.requestReferrer = auto */
   var options = {
@@ -4887,12 +5019,14 @@ async function test_capture_referrer() {
   assert(text === "");
 }
 
-// Check if option works
-//
-// capture.recordDocumentMeta
-// capturer.captureDocument
-// capturer.captureFile
-// capturer.captureBookmark
+/**
+ * Check if option works
+ *
+ * capture.recordDocumentMeta
+ * capturer.captureDocument
+ * capturer.captureFile
+ * capturer.captureBookmark
+ */
 async function test_capture_record_meta() {
   /* html; +capture.recordDocumentMeta */
   var options = {
@@ -4999,10 +5133,12 @@ async function test_capture_record_meta() {
   assert(!html.hasAttribute('data-scrapbook-type'));
 }
 
-// Check if option works
-//
-// capture.recordRemovedNode
-// capturer.captureDocument
+/**
+ * Check if option works
+ *
+ * capture.recordRemovedNode
+ * capturer.captureDocument
+ */
 async function test_capture_record_nodes() {
   var options = {
     "capture.image": "remove",
@@ -5187,13 +5323,15 @@ async function test_capture_record_nodes() {
   ).test(body.innerHTML));
 }
 
-// Check handling of removal of source nodes in picture, audio, and video
-// The removed source nodes should be recorded when 
-// either recordRemovedNode or recordSourceUri is set.
-//
-// capture.recordRemovedNode
-// capture.recordSourceUri
-// capturer.captureDocument
+/**
+ * Check handling of removal of source nodes in picture, audio, and video
+ * The removed source nodes should be recorded when 
+ * either recordRemovedNode or recordSourceUri is set.
+ *
+ * capture.recordRemovedNode
+ * capture.recordSourceUri
+ * capturer.captureDocument
+ */
 async function test_capture_record_nodes2() {
   var options = {
     "capture.image": "save-current",
@@ -5280,10 +5418,12 @@ async function test_capture_record_nodes2() {
   ).test(doc.querySelector('video').innerHTML));
 }
 
-// Check if option works
-//
-// capture.recordRewrittenAttr
-// capturer.captureDocument
+/**
+ * Check if option works
+ *
+ * capture.recordRewrittenAttr
+ * capturer.captureDocument
+ */
 async function test_capture_record_attrs() {
   var options = {
     "capture.frame": "save",
@@ -5347,11 +5487,13 @@ async function test_capture_record_attrs() {
   assert(!doc.querySelector('select option').hasAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`));
 }
 
-// Check if option works: save cases
-//
-// capture.recordSourceUri
-// capturer.captureDocument
-// capturer.processCssText
+/**
+ * Check if option works: save cases
+ *
+ * capture.recordSourceUri
+ * capturer.captureDocument
+ * capturer.processCssText
+ */
 async function test_capture_record_urls() {
   var options = {
     "capture.image": "save",
@@ -5466,12 +5608,14 @@ p { background-image: url("null.bmp"); }`);
   assert(doc.querySelector('div').getAttribute('style') === `background: url("null.bmp");`);
 }
 
-// Check if option works: blank cases
-// (save styles to save CSS and check image background and font)
-//
-// capture.recordSourceUri
-// capturer.captureDocument
-// capturer.processCssText
+/**
+ * Check if option works: blank cases
+ * (save styles to save CSS and check image background and font)
+ *
+ * capture.recordSourceUri
+ * capturer.captureDocument
+ * capturer.processCssText
+ */
 async function test_capture_record_urls2() {
   var options = {
     "capture.image": "blank",
@@ -5577,12 +5721,14 @@ p { background-image: url(""); }`);
   assert(doc.querySelector('div').getAttribute('style') === `background: url("");`);
 }
 
-// Check if option works: save-current cases
-// (and blank style)
-//
-// capture.recordSourceUri
-// capturer.captureDocument
-// capturer.processCssText
+/**
+ * Check if option works: save-current cases
+ * (and blank style)
+ *
+ * capture.recordSourceUri
+ * capturer.captureDocument
+ * capturer.processCssText
+ */
 async function test_capture_record_urls3() {
   var options = {
     "capture.image": "save-current",
@@ -5647,11 +5793,13 @@ async function test_capture_record_urls3() {
   assert(!doc.querySelectorAll('video')[1].hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
 }
 
-// Check if option works: for base
-//
-// capture.recordSourceUri
-// capturer.captureDocument
-// capturer.processCssText
+/**
+ * Check if option works: for base
+ *
+ * capture.recordSourceUri
+ * capturer.captureDocument
+ * capturer.processCssText
+ */
 async function test_capture_record_urls4() {
   var options = {
     "capture.recordSourceUri": true,
@@ -5688,13 +5836,15 @@ async function test_capture_record_urls4() {
   assert(doc.querySelector('base').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `${localhost}/capture_record/null.html`);
 }
 
-// Check if option works: for normal URL
-//
-// capture.recordErrorUri
-// capturer.captureDocument
-// capturer.downloadFile
-// capturer.captureUrl
-// capturer.captureBookmark
+/**
+ * Check if option works: for normal URL
+ *
+ * capture.recordErrorUri
+ * capturer.captureDocument
+ * capturer.downloadFile
+ * capturer.captureUrl
+ * capturer.captureBookmark
+ */
 async function test_capture_record_errorUrls() {
   var options = {
     "capture.image": "save",
@@ -5761,14 +5911,16 @@ p { background-image: url("${localhost}/capture_record/nonexist.bmp"); }`);
   assert(doc.querySelector('a[name]').getAttribute('href') === `${localhost}/capture_record/nonexist.css`);
 }
 
-// Test for "" URL:
-// Don't generate error URL for non-absolute URLs.
-//
-// capture.recordErrorUri
-// capturer.captureDocument
-// capturer.downloadFile
-// capturer.captureUrl
-// capturer.captureBookmark
+/**
+ * Test for "" URL:
+ * Don't generate error URL for non-absolute URLs.
+ *
+ * capture.recordErrorUri
+ * capturer.captureDocument
+ * capturer.downloadFile
+ * capturer.captureUrl
+ * capturer.captureBookmark
+ */
 async function test_capture_record_errorUrls2() {
   var options = {
     "capture.image": "save",
@@ -5809,14 +5961,16 @@ p { background-image: url(""); }`);
   assert(doc.querySelector('a').getAttribute('href') === ``);
 }
 
-// Test for hash URL:
-// Don't generate error URL for non-absolute URLs.
-//
-// capture.recordErrorUri
-// capturer.captureDocument
-// capturer.downloadFile
-// capturer.captureUrl
-// capturer.captureBookmark
+/**
+ * Test for hash URL:
+ * Don't generate error URL for non-absolute URLs.
+ *
+ * capture.recordErrorUri
+ * capturer.captureDocument
+ * capturer.downloadFile
+ * capturer.captureUrl
+ * capturer.captureBookmark
+ */
 async function test_capture_record_errorUrls3() {
   var options = {
     "capture.image": "save",
@@ -5857,14 +6011,16 @@ p { background-image: url("#123"); }`);
   assert(doc.querySelector('a').getAttribute('href') === `#123`);
 }
 
-// Test for non-resolvable URL:
-// Don't generate error URL for non-absolute URLs.
-//
-// capture.recordErrorUri
-// capturer.captureDocument
-// capturer.downloadFile
-// capturer.captureUrl
-// capturer.captureBookmark
+/**
+ * Test for non-resolvable URL:
+ * Don't generate error URL for non-absolute URLs.
+ *
+ * capture.recordErrorUri
+ * capturer.captureDocument
+ * capturer.downloadFile
+ * capturer.captureUrl
+ * capturer.captureBookmark
+ */
 async function test_capture_record_errorUrls4() {
   var options = {
     "capture.image": "save",
@@ -5910,14 +6066,16 @@ p { background-image: url("nonexist.bmp"); }`);
   assert(doc.querySelector('a[name]').getAttribute('href') === `nonexist.css`);
 }
 
-// Test for other protocol URL:
-// Don't generate error URL if the protocol is not http, https, or file
-//
-// capture.recordErrorUri
-// capturer.captureDocument
-// capturer.downloadFile
-// capturer.captureUrl
-// capturer.captureBookmark
+/**
+ * Test for other protocol URL:
+ * Don't generate error URL if the protocol is not http, https, or file
+ *
+ * capture.recordErrorUri
+ * capturer.captureDocument
+ * capturer.downloadFile
+ * capturer.captureUrl
+ * capturer.captureBookmark
+ */
 async function test_capture_record_errorUrls5() {
   var options = {
     "capture.image": "save",
