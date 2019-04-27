@@ -27,6 +27,15 @@ blockquote::before { content: attr(style) " " attr(class) " "; }
 <style>
 @font-face { font-family: myFont7, myFont; src: url("sansation_light.woff"); }
 </style>
+<style>
+@font-face { font-family: "myFont8"; src: url("sansation_light.woff"); }
+</style>
+<style>
+@font-face { font-family: "my font 9"; src: url("sansation_light.woff"); }
+</style>
+<style>
+@font-face { font-family: 'my font 10'; src: url("sansation_light.woff"); }
+</style>
 </head>
 <body>
 <blockquote style="font-family: myFont1;"></blockquote>
@@ -36,5 +45,8 @@ blockquote::before { content: attr(style) " " attr(class) " "; }
 <blockquote style="font-family: myFont5;"></blockquote>
 <blockquote style="font-family: myFont6;"></blockquote>
 <blockquote style="font-family: myFont7;" class="invalid"></blockquote>
+<blockquote style="font-family: myFont8;"></blockquote>
+<blockquote style="font-family: 'my font 9';"></blockquote>
+<blockquote style="font-family: &quot;my font 10&quot;;"></blockquote>
 </body>
 </html>

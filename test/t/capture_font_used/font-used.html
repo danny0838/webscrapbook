@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@font-face { font-family: myFont1; src: url("font1.woff"); }
+</style>
+<style>
+@font-face { font-family: myFont2; src: url("font2.woff"); }
+</style>
+<style>
+@font-face { font-family: neverused; src: url("neverused.woff"); }
+</style>
+<style>
+@keyframes spin {
+  from { transform: rotate(0turn); font-family: myFont2; }
+  to { transform: rotate(1turn); }
+}
+</style>
+<style>
+#neverused { font-family: neverused; }
+</style>
+<style>
+@keyframes neverused {
+  from { transform: rotate(0turn); font-family: neverused; }
+  to { transform: rotate(1turn); }
+}
+</style>
+</head>
+<body>
+<p style="font-family: myFont1;">font-family: myFont1;</p>
+
+<blockquote style="width: 40px; height: 40px; animation: spin 1s linear infinite;">myFont2</blockquote>
+</body>
+</html>

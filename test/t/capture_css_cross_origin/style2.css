@@ -1,5 +1,5 @@
-#bg2 { background: url("red.bmp"); }
+#bg2 { background: url("bg2.bmp"); }
 #neverused2 { background: url("neverused.bmp"); }
 
-@font-face { font-family: bgFont2; src: url("sansation_bold.woff"); }
-@font-face { font-family: neverusedFont2; src: url("neverused.woff"); }
+@font-face { font-family: bgFont2; src: url("font2.py"); }
+@font-face { font-family: neverusedFont2; src: url("neverused.py"); }

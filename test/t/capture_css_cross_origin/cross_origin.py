@@ -11,12 +11,13 @@ sys.stdout.buffer.write("""Content-Type: text/html
 <html>
 <head>
 <meta charset="UTF-8">
+<title>Test cross-origin resources</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="//localhost{port}/capture_css_cross_origin/style2.css">
 </head>
 <body>
-<p id="bg">link background: url("yellow.bmp");</p>
-<p id="bg2">link background: url("red.bmp");</p>
+<p id="bg1">link background: url("bg1.bmp");</p>
+<p id="bg2">link background: url("bg2.bmp");</p>
 <p style="font-family: bgFont1">bgFont1</p>
 <p style="font-family: bgFont2">bgFont2</p>
 </body>

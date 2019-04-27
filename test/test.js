@@ -2281,6 +2281,12 @@ async function test_capture_css_syntax() {
       `@font-face /*c*/{ font-family: myFont6; /*c*/src: /*c*/url("${localhost}/capture_css_syntax/sansation_light.woff")/*c*/; /*c*/}`);
   assert(css[7].textContent.trim() ===
       `@font-face { font-family: myFont7, myFont; src: url("${localhost}/capture_css_syntax/sansation_light.woff"); }`);
+  assert(css[8].textContent.trim() ===
+      `@font-face { font-family: "myFont8"; src: url("${localhost}/capture_css_syntax/sansation_light.woff"); }`);
+  assert(css[9].textContent.trim() ===
+      `@font-face { font-family: "my font 9"; src: url("${localhost}/capture_css_syntax/sansation_light.woff"); }`);
+  assert(css[10].textContent.trim() ===
+      `@font-face { font-family: 'my font 10'; src: url("${localhost}/capture_css_syntax/sansation_light.woff"); }`);
 
   /* import */
   var options = {
@@ -2396,25 +2402,32 @@ async function test_capture_css_rewrite() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewrite/index.html`,
+    url: `${localhost}/capture_css_rewrite/index.py`,
     options: Object.assign({}, baseOptions, options),
   });
 
   var zip = await new JSZip().loadAsync(blob);
 
-  var file = zip.file('import.css');
-  var blob = new Blob([await file.async('blob')], {type: "text/css"});
-  var text = (await readFileAsText(blob)).trim();
-  assert(text === `#import { background: url("${localhost}/capture_css_rewrite/yellow.bmp"); }`);
+  // @TODO: HTTP Link header is supported by Firefox 66 but not by Chromium 73
+  //        and WebScrapBook currently.
+  // var file = zip.file('header.css');
+  // var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  // var text = (await readFileAsText(blob)).trim();
+  // assert(text === `#header { background: url("${localhost}/capture_css_rewrite/green.bmp"); }`);
 
   var file = zip.file('link.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
-  assert(text === `#link { background: url("${localhost}/capture_css_rewrite/yellow.bmp"); }`);
+  assert(text === `#link { background: url("${localhost}/capture_css_rewrite/green.bmp"); }`);
+
+  var file = zip.file('import.css');
+  var blob = new Blob([await file.async('blob')], {type: "text/css"});
+  var text = (await readFileAsText(blob)).trim();
+  assert(text === `#import { background: url("${localhost}/capture_css_rewrite/green.bmp"); }`);
 }
 
 /**
- * Check if base is set to another directory
+ * Check if URL is resolved correctly when base is set to another directory
  */
 async function test_capture_css_rewrite2() {
   var options = {
@@ -2633,27 +2646,27 @@ async function test_capture_css_cross_origin() {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['yellow.bmp']);
-  assert(zip.files['sansation_light.woff']);
-  assert(zip.files['red.bmp']);
-  assert(zip.files['sansation_bold.woff']);
+  assert(zip.files['bg1.bmp']);
+  assert(zip.files['font1.woff']);
+  assert(zip.files['bg2.bmp']);
+  assert(zip.files['font2.woff']);
 
   // same origin: only used bg images and fonts are saved
   var cssFile = zip.file('style.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#bg { background: url("yellow.bmp"); }
+  assert(text.trim() === `#bg1 { background: url("bg1.bmp"); }
 #neverused { background: url(""); }
 
-@font-face { font-family: bgFont1; src: url("sansation_light.woff"); }
+@font-face { font-family: bgFont1; src: url("font1.woff"); }
 @font-face { font-family: neverusedFont1; src: url(""); }`);
 
   // cross origin: all bg images and fonts are saved
   var cssFile = zip.file('style2.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#bg2 { background: url("red.bmp"); }
+  assert(text.trim() === `#bg2 { background: url("bg2.bmp"); }
 #neverused2 { background: url("neverused.bmp"); }
 
-@font-face { font-family: bgFont2; src: url("sansation_bold.woff"); }
+@font-face { font-family: bgFont2; src: url("font2.woff"); }
 @font-face { font-family: neverusedFont2; src: url("neverused.woff"); }`);
 }
 
@@ -2864,11 +2877,13 @@ async function test_capture_imageBackground() {
     "capture.imageBackground": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image/background.html`,
+    url: `${localhost}/capture_imageBackground/background.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['link.css']);
+  assert(zip.files['import.css']);
   assert(zip.files['red.bmp']);
   assert(zip.files['green.bmp']);
   assert(zip.files['blue.bmp']);
@@ -2877,9 +2892,6 @@ async function test_capture_imageBackground() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-
-  var pElem = doc.querySelector('p');
-  assert(pElem.getAttribute('style') === `background: url("yellow.bmp");`);
 
   var bodyElem = doc.body;
   assert(bodyElem.getAttribute('background') === `green.bmp`);
@@ -2891,17 +2903,36 @@ async function test_capture_imageBackground() {
   assert(thElem.getAttribute('background') === `blue.bmp`);
   var tdElem = trElems[1].querySelector('td');
   assert(tdElem.getAttribute('background') === `yellow.bmp`);
+
+  var bqElem = doc.querySelectorAll('blockquote')[0];
+  assert(bqElem.getAttribute('style') === `background: url("yellow.bmp");`);
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#link { background: url("yellow.bmp"); }`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#import { background: url("yellow.bmp"); }`);
+
+  var cssElem = doc.querySelectorAll('style')[2];
+  assert(cssElem.textContent.trim() === `@keyframes spin {
+  from { transform: rotate(0turn); background-image: url("yellow.bmp"); }
+  to { transform: rotate(1turn); }
+}`);
 
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image/background.html`,
+    url: `${localhost}/capture_imageBackground/background.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['link.css']);
+  assert(zip.files['import.css']);
   assert(zip.files['red.bmp']);
   assert(zip.files['green.bmp']);
   assert(zip.files['blue.bmp']);
@@ -2910,9 +2941,6 @@ async function test_capture_imageBackground() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-
-  var pElem = doc.querySelector('p');
-  assert(pElem.getAttribute('style') === `background: url("yellow.bmp");`);
 
   var bodyElem = doc.body;
   assert(bodyElem.getAttribute('background') === `green.bmp`);
@@ -2925,54 +2953,82 @@ async function test_capture_imageBackground() {
   var tdElem = trElems[1].querySelector('td');
   assert(tdElem.getAttribute('background') === `yellow.bmp`);
 
+  var bqElem = doc.querySelectorAll('blockquote')[0];
+  assert(bqElem.getAttribute('style') === `background: url("yellow.bmp");`);
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#link { background: url("yellow.bmp"); }`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#import { background: url("yellow.bmp"); }`);
+
+  var cssElem = doc.querySelectorAll('style')[2];
+  assert(cssElem.textContent.trim() === `@keyframes spin {
+  from { transform: rotate(0turn); background-image: url("yellow.bmp"); }
+  to { transform: rotate(1turn); }
+}`);
+
   /* capture.imageBackground = link */
   var options = {
     "capture.imageBackground": "link",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image/background.html`,
+    url: `${localhost}/capture_imageBackground/background.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(Object.keys(zip.files).length === 1);
+  assert(Object.keys(zip.files).length === 3);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  var pElem = doc.querySelector('p');
-  assert(pElem.getAttribute('style') === `background: url("${localhost}/capture_image/yellow.bmp");`);
-
   var bodyElem = doc.body;
-  assert(bodyElem.getAttribute('background') === `${localhost}/capture_image/green.bmp`);
+  assert(bodyElem.getAttribute('background') === `${localhost}/capture_imageBackground/green.bmp`);
   var tableElem = doc.querySelector('table');
-  assert(tableElem.getAttribute('background') === `${localhost}/capture_image/red.bmp`);
+  assert(tableElem.getAttribute('background') === `${localhost}/capture_imageBackground/red.bmp`);
   var trElems = tableElem.querySelectorAll('tr');
-  assert(trElems[0].getAttribute('background') === `${localhost}/capture_image/green.bmp`);
+  assert(trElems[0].getAttribute('background') === `${localhost}/capture_imageBackground/green.bmp`);
   var thElem = trElems[1].querySelector('th');
-  assert(thElem.getAttribute('background') === `${localhost}/capture_image/blue.bmp`);
+  assert(thElem.getAttribute('background') === `${localhost}/capture_imageBackground/blue.bmp`);
   var tdElem = trElems[1].querySelector('td');
-  assert(tdElem.getAttribute('background') === `${localhost}/capture_image/yellow.bmp`);
+  assert(tdElem.getAttribute('background') === `${localhost}/capture_imageBackground/yellow.bmp`);
+
+  var bqElem = doc.querySelectorAll('blockquote')[0];
+  assert(bqElem.getAttribute('style') === `background: url("${localhost}/capture_imageBackground/yellow.bmp");`);
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#link { background: url("${localhost}/capture_imageBackground/yellow.bmp"); }`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#import { background: url("${localhost}/capture_imageBackground/yellow.bmp"); }`);
+
+  var cssElem = doc.querySelectorAll('style')[2];
+  assert(cssElem.textContent.trim() === `@keyframes spin {
+  from { transform: rotate(0turn); background-image: url("${localhost}/capture_imageBackground/yellow.bmp"); }
+  to { transform: rotate(1turn); }
+}`);
 
   /* capture.imageBackground = blank */
   var options = {
     "capture.imageBackground": "blank",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image/background.html`,
+    url: `${localhost}/capture_imageBackground/background.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(Object.keys(zip.files).length === 1);
+  assert(Object.keys(zip.files).length === 3);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-
-  var pElem = doc.querySelector('p');
-  assert(pElem.getAttribute('style') === `background: url("");`);
 
   var bodyElem = doc.body;
   assert(!bodyElem.hasAttribute('background'));
@@ -2984,63 +3040,37 @@ async function test_capture_imageBackground() {
   assert(!thElem.hasAttribute('background'));
   var tdElem = trElems[1].querySelector('td');
   assert(!tdElem.hasAttribute('background'));
+
+  var bqElem = doc.querySelectorAll('blockquote')[0];
+  assert(bqElem.getAttribute('style') === `background: url("");`);
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#link { background: url(""); }`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#import { background: url(""); }`);
+
+  var cssElem = doc.querySelectorAll('style')[2];
+  assert(cssElem.textContent.trim() === `@keyframes spin {
+  from { transform: rotate(0turn); background-image: url(""); }
+  to { transform: rotate(1turn); }
+}`);
 }
 
 /**
- * Check if used background images in the CSS are detected correctly
- * Check if option works
+ * Check if used background images in the CSS are mapped correctly
  *
  * capture.imageBackground
  */
 async function test_capture_imageBackgroundUsed() {
-  /* capture.imageBackground = save */
-  var options = {
-    "capture.imageBackground": "save",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_image/background-used.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['background.css']);
-  assert(zip.files['neverused.css']);
-  assert(zip.files['red.bmp']);
-  assert(zip.files['green.bmp']);
-  assert(zip.files['yellow.bmp']);
-  assert(zip.files['blue.bmp']);
-  assert(zip.files['neverused.bmp']);
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[0].textContent.trim() === `#internal_bg { background: url("red.bmp"); }`);
-  assert(styleElems[1].textContent.trim() === `@keyframes spin {
-  from { transform: rotate(0turn); background-image: url("red.bmp"); }
-  to { transform: rotate(1turn); background-image: url("green.bmp"); }
-}`);
-  assert(styleElems[2].textContent.trim() === `#neverused { background: url("neverused.bmp"); }`);
-  assert(styleElems[3].textContent.trim() === `@keyframes neverused {
-  from { transform: rotate(0turn); background-image: url("neverused.bmp"); }
-  to { transform: rotate(1turn); background-image: url("blue.bmp"); }
-}`);
-
-  var cssFile = zip.file('background.css');
-  var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#link_bg { background: url("yellow.bmp"); }`);
-
-  var cssFile = zip.file('neverused.css');
-  var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#neverused2 { background: url("neverused.bmp"); }`);
-
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image/background-used.html`,
+    url: `${localhost}/capture_imageBackground_used/background-used.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3083,7 +3113,7 @@ async function test_capture_imageBackgroundUsed() {
     "capture.imageBackground": "save-used",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_image/background-used.html`,
+    url: `${localhost}/capture_imageBackground_used/background-used.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3566,7 +3596,6 @@ async function test_capture_video() {
 
 /**
  * Check if option works
- * Check if used fonts in the CSS are detected correctly
  *
  * capture.font
  */
@@ -3582,8 +3611,6 @@ async function test_capture_font() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['sansation_light.woff']);
-  assert(zip.files['sansation_bold.woff']);
-  assert(zip.files['neverused.woff']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3591,8 +3618,6 @@ async function test_capture_font() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: myFont; src: url("sansation_light.woff"); }`);
-  assert(styleElems[1].textContent.trim() === `@font-face { font-family: myFont2; src: url("sansation_bold.woff"); font-weight: bold; }`);
-  assert(styleElems[2].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
 
   /* capture.font = save-used */
   var options = {
@@ -3605,8 +3630,6 @@ async function test_capture_font() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['sansation_light.woff']);
-  assert(zip.files['sansation_bold.woff']);
-  assert(!zip.files['neverused.woff']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3614,32 +3637,6 @@ async function test_capture_font() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: myFont; src: url("sansation_light.woff"); }`);
-  assert(styleElems[1].textContent.trim() === `@font-face { font-family: myFont2; src: url("sansation_bold.woff"); font-weight: bold; }`);
-  assert(styleElems[2].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
-
-  /* capture.font = save-used (headless) */
-  // the result is same as save
-  var options = {
-    "capture.font": "save-used",
-  };
-  var blob = await captureHeadless({
-    url: `${localhost}/capture_font/font.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['sansation_light.woff']);
-  assert(zip.files['sansation_bold.woff']);
-  assert(zip.files['neverused.woff']);
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[0].textContent.trim() === `@font-face { font-family: myFont; src: url("sansation_light.woff"); }`);
-  assert(styleElems[1].textContent.trim() === `@font-face { font-family: myFont2; src: url("sansation_bold.woff"); font-weight: bold; }`);
-  assert(styleElems[2].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
 
   /* capture.font = link */
   var options = {
@@ -3659,8 +3656,6 @@ async function test_capture_font() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: myFont; src: url("${localhost}/capture_font/sansation_light.woff"); }`);
-  assert(styleElems[1].textContent.trim() === `@font-face { font-family: myFont2; src: url("${localhost}/capture_font/sansation_bold.woff"); font-weight: bold; }`);
-  assert(styleElems[2].textContent.trim() === `@font-face { font-family: neverused; src: url("${localhost}/capture_font/neverused.woff"); }`);
 
   /* capture.font = blank */
   var options = {
@@ -3680,8 +3675,60 @@ async function test_capture_font() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: myFont; src: url(""); }`);
-  assert(styleElems[1].textContent.trim() === `@font-face { font-family: myFont2; src: url(""); font-weight: bold; }`);
+}
+
+/**
+ * Check if used fonts in the CSS are mapped correctly
+ *
+ * capture.font = "save-used"
+ */
+async function test_capture_font_used() {
+  /* capture.font = save-used */
+  var options = {
+    "capture.font": "save-used",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_font_used/font-used.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['font1.woff']);
+  assert(zip.files['font2.woff']);
+  assert(!zip.files['neverused.woff']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[0].textContent.trim() === `@font-face { font-family: myFont1; src: url("font1.woff"); }`);
+  assert(styleElems[1].textContent.trim() === `@font-face { font-family: myFont2; src: url("font2.woff"); }`);
   assert(styleElems[2].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
+
+  /* capture.font = save-used (headless) */
+  // the result is same as save
+  var options = {
+    "capture.font": "save-used",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_font_used/font-used.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['font1.woff']);
+  assert(zip.files['font2.woff']);
+  assert(zip.files['neverused.woff']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[0].textContent.trim() === `@font-face { font-family: myFont1; src: url("font1.woff"); }`);
+  assert(styleElems[1].textContent.trim() === `@font-face { font-family: myFont2; src: url("font2.woff"); }`);
+  assert(styleElems[2].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
 }
 
 /**
@@ -6219,6 +6266,7 @@ async function runTests() {
   await test(test_capture_audio);
   await test(test_capture_video);
   await test(test_capture_font);
+  await test(test_capture_font_used);
   await test(test_capture_script);
   await test(test_capture_noscript);
   await test(test_capture_embed);

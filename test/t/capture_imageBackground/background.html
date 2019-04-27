@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test background image</title>
+<style>
+#internal { background: url("yellow.bmp"); }
+</style>
+<link rel="stylesheet" href="link.css">
+<style>
+@import "import.css";
+</style>
+<style>
+@keyframes spin {
+  from { transform: rotate(0turn); background-image: url("yellow.bmp"); }
+  to { transform: rotate(1turn); }
+}
+</style>
+</head>
+<!-- background attribute -->
+<body background="green.bmp">
+<table background="red.bmp">
+  <tr background="green.bmp">
+    <th>th (green)</th>
+    <td>td (green)</td>
+    <td>td (green)</td>
+  </tr>
+  <tr>
+    <th background="blue.bmp">th (blue)</th>
+    <td background="yellow.bmp">td (yellow)</td>
+    <td>td (red)</td>
+  </tr>
+</table>
+
+<!-- background style -->
+<blockquote style='background: url("yellow.bmp");'>inline bg (yellow)</blockquote>
+<blockquote id="internal">internal bg (yellow)</blockquote>
+<blockquote id="link">link bg (yellow)</blockquote>
+<blockquote id="import">import bg (yellow)</blockquote>
+
+<!-- background style in @keyframes -->
+<blockquote style="width: 60px; height: 60px; animation: spin 1s linear infinite;">spin (yellow)</blockquote>
+</body>
+</html>
