@@ -2355,31 +2355,34 @@ capturer.parseDocumentCss = async function (doc, rootNode, refUrl, retrieveFunc)
       return;
     }
 
-    // If the CSS is loaded from a different domain, CSSStyleSheet.cssRules throws an error.
-    // (in some older browsers, CSSStyleSheet.cssRules gets null instead)
-    // We retrieve the CSS rules via reading from source CSS text as a workaround.
+    // Retrieve CSS rules from source CSS text rather than css.cssRules,
+    // which may have been modified by page scripts via
+    // CSSStyleSheet.insertRule or so.
     let rules;
-    try {
-      rules = css.cssRules;
-      if (!rules) { throw new Error('CSS rules not accessible'); }
-    } catch (ex) {
-      if (retrieveFunc) {
-        const cssText = await retrieveFunc(css.href, refUrl);
-        if (cssText) {
-          // @FIXME: In Firefox, an error is thrown when accessing cssRules of
-          // an inserted @import rule.
-          // @TODO: Find another way to get cssRules without injecting cssText
-          // into DOM, which might trigger a DOM change event in the source
-          // page.
-          const styleElem = doc.createElement('style');
-          styleElem.textContent = cssText;
-          doc.head.appendChild(styleElem);
-          rules = styleElem.sheet.cssRules;
-          styleElem.remove();
+    {
+      let cssText;
+      if (css.href) {
+        // <link> or @import
+        if (retrieveFunc) {
+          cssText = await retrieveFunc(css.href, refUrl);
         }
+      } else {
+        // <style>
+        cssText = css.ownerNode.textContent;
+      }
+      if (cssText) {
+        // @FIXME: In Firefox, an error is thrown when accessing cssRules of
+        // an inserted @import rule.
+        // @TODO: Find another way to get cssRules without injecting cssText
+        // into DOM, which might trigger a DOM change event in the source
+        // page.
+        const styleElem = doc.createElement('style');
+        styleElem.textContent = cssText;
+        doc.head.appendChild(styleElem);
+        rules = styleElem.sheet.cssRules;
+        styleElem.remove();
       }
     }
-
     if (!rules) { return; }
 
     for (const rule of rules) {

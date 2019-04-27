@@ -3119,11 +3119,11 @@ async function test_capture_imageBackground_used() {
   assert(zip.files['import-keyframes.bmp']);
   assert(!zip.files['neverused.bmp']);
   assert(!zip.files['removed.bmp']);
-  assert(!zip.files['deleted-internal.bmp']);  // @FIXME: dynamically deleted rule should be respected
+  assert(zip.files['deleted-internal.bmp']);
   assert(!zip.files['inserted-internal.bmp']);
-  assert(!zip.files['deleted-link.bmp']);  // @FIXME: dynamically deleted rule should be respected
+  assert(zip.files['deleted-link.bmp']);
   assert(!zip.files['inserted-link.bmp']);
-  assert(!zip.files['deleted-import.bmp']);  // @FIXME: dynamically deleted rule should be respected
+  assert(zip.files['deleted-import.bmp']);
   assert(!zip.files['inserted-import.bmp']);
 
   var indexFile = zip.file('index.html');
@@ -3146,7 +3146,7 @@ async function test_capture_imageBackground_used() {
   from { transform: rotate(0turn); background-image: url(""); }
   to { transform: rotate(1turn); }
 }`);
-  assert(styleElems[8].textContent.trim() === `#deleted-internal { background: url(""); }`);  // @FIXME: dynamically deleted rule should be respected
+  assert(styleElems[8].textContent.trim() === `#deleted-internal { background: url("deleted-internal.bmp"); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
@@ -3172,11 +3172,11 @@ async function test_capture_imageBackground_used() {
 
   var cssFile = zip.file('link-dynamic.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#deleted-link { background: url(""); }`);  // @FIXME: dynamically deleted rule should be respected
+  assert(text.trim() === `#deleted-link { background: url("deleted-link.bmp"); }`);
 
   var cssFile = zip.file('import-dynamic.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#deleted-import { background: url(""); }`);  // @FIXME: dynamically deleted rule should be respected
+  assert(text.trim() === `#deleted-import { background: url("deleted-import.bmp"); }`);
 
   /* capture.imageBackground = save-used (headless) */
   // the result is same as save
