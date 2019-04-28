@@ -1790,20 +1790,13 @@ capturer.captureDocument = async function (params) {
 
     // map used background images and fonts
     if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
-      const {usedCssFontUrl, usedCssImageUrl} = await capturer.parseDocumentCss(
+      const {usedCssFontUrl, usedCssImageUrl} = await capturer.parseDocumentCss({
         doc,
         rootNode,
         refUrl,
-        async (url, refUrl) => {
-          const response = await capturer.invoke("fetchCss", {
-            url,
-            refUrl,
-            settings,
-            options,
-          });
-          return response.error ? null : response.text;
-        },
-      );
+        settings,
+        options,
+      });
       
       // expose filter to settings
       if (options["capture.imageBackground"] === "save-used") {
@@ -2208,24 +2201,19 @@ capturer.processCssText = async function (cssText, refUrl, settings, options) {
 };
 
 /**
- * The function to retrieve text content of a remote stylesheet.
- *
- * @callback parseDocumentCssRetrieveFunc
- * @param {string} url
- * @param {string} refUrl
- * @return {string} CSS text
- */
-
-/**
  * Parse DOM stylesheets and get used CSS URLs by decendants of rootNode.
  *
- * @param {HTMLDocument} doc
- * @param {HTMLElement} rootNode
- * @param {string} refUrl
- * @param {parseDocumentCssRetrieveFunc} retrieveFunc
+ * @param {Object} params
+ *     - {HTMLDocument} doc
+ *     - {HTMLElement} rootNode
+ *     - {string} refUrl
+ *     - {Object} params.settings
+ *     - {Object} params.options
  * @return {{usedCssFontUrl: Object, usedCssImageUrl: Object}}
  */
-capturer.parseDocumentCss = async function (doc, rootNode, refUrl, retrieveFunc) {
+capturer.parseDocumentCss = async function (params) {
+  const {doc, rootNode, refUrl, settings, options} = params;
+
   if (!rootNode) { rootNode = doc.documentElement; }
   if (!refUrl) { refUrl = doc.URL; }
 
@@ -2343,6 +2331,16 @@ capturer.parseDocumentCss = async function (doc, rootNode, refUrl, retrieveFunc)
     return false;
   };
 
+  const fetchCssText = async (url, refUrl) => {
+    const response = await capturer.invoke("fetchCss", {
+      url,
+      refUrl,
+      settings,
+      options,
+    });
+    return response.error ? null : response.text;
+  };
+
   const parseCss = async function (css, refUrl) {
     try {
       if (css.disabled) { return; }
@@ -2363,9 +2361,7 @@ capturer.parseDocumentCss = async function (doc, rootNode, refUrl, retrieveFunc)
       let cssText;
       if (css.href) {
         // <link> or @import
-        if (retrieveFunc) {
-          cssText = await retrieveFunc(css.href, refUrl);
-        }
+        cssText = await fetchCssText(css.href, refUrl);
       } else {
         // <style>
         cssText = css.ownerNode.textContent;
