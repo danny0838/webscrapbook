@@ -510,7 +510,6 @@ const scrapbookUi = {
 
     switch (selectedItemElems.length) {
       case 0: {
-        cmdElem.querySelector('option[value="separator1"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="index"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="exec_book"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="open"]').hidden = true;
@@ -519,12 +518,12 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="browse"]').hidden = true;
         cmdElem.querySelector('option[value="source"]').hidden = true;
         cmdElem.querySelector('option[value="manage"]').hidden = !(!isRecycle);
-        cmdElem.querySelector('option[value="separator2"]').hidden = !(!isRecycle);
+
         cmdElem.querySelector('option[value="mkfolder"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="mksep"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="mknote"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="upload"]').hidden = !(!isRecycle);
-        cmdElem.querySelector('option[value="separator3"]').hidden = !(!isRecycle);
+
         cmdElem.querySelector('option[value="edit"]').hidden = true;
         cmdElem.querySelector('option[value="editx"]').hidden = true;
         cmdElem.querySelector('option[value="move_up"]').hidden = true;
@@ -532,7 +531,7 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="move_into"]').hidden = true;
         cmdElem.querySelector('option[value="recycle"]').hidden = true;
         cmdElem.querySelector('option[value="delete"]').hidden = true;
-        cmdElem.querySelector('option[value="separator4"]').hidden = true;
+
         cmdElem.querySelector('option[value="meta"]').hidden = true;
         cmdElem.querySelector('option[value="view_recycle"]').hidden = !(!isRecycle);
         break;
@@ -541,7 +540,7 @@ const scrapbookUi = {
       case 1: {
         const item = this.book.meta[selectedItemElems[0].getAttribute('data-id')];
         const isHtml = /\.(?:html?|xht(?:ml)?)$/.test(item.index);
-        cmdElem.querySelector('option[value="separator1"]').hidden = false;
+
         cmdElem.querySelector('option[value="index"]').hidden = true;
         cmdElem.querySelector('option[value="exec_book"]').hidden = true;
         cmdElem.querySelector('option[value="open"]').hidden = ['folder', 'separator'].includes(item.type);
@@ -550,12 +549,12 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="browse"]').hidden = !(item.index);
         cmdElem.querySelector('option[value="source"]').hidden = !(item.source);
         cmdElem.querySelector('option[value="manage"]').hidden = !(item.type === 'folder' || this.book.toc[item.id]);
-        cmdElem.querySelector('option[value="separator2"]').hidden = false;
+
         cmdElem.querySelector('option[value="mkfolder"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="mksep"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="mknote"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="upload"]').hidden = !(!isRecycle);
-        cmdElem.querySelector('option[value="separator3"]').hidden = !(!isRecycle);
+
         cmdElem.querySelector('option[value="edit"]').hidden = !(!isRecycle && ['', 'note'].includes(item.type) && item.index);
         cmdElem.querySelector('option[value="editx"]').hidden = !(!isRecycle && ['', 'note'].includes(item.type) && isHtml);
         cmdElem.querySelector('option[value="move_up"]').hidden = !(!isRecycle);
@@ -563,14 +562,13 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="move_into"]').hidden = false;
         cmdElem.querySelector('option[value="recycle"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="delete"]').hidden = !(isRecycle);
-        cmdElem.querySelector('option[value="separator4"]').hidden = false;
+
         cmdElem.querySelector('option[value="meta"]').hidden = false;
         cmdElem.querySelector('option[value="view_recycle"]').hidden = true;
         break;
       }
 
       default: {
-        cmdElem.querySelector('option[value="separator1"]').hidden = false;
         cmdElem.querySelector('option[value="index"]').hidden = true;
         cmdElem.querySelector('option[value="exec_book"]').hidden = true;
         cmdElem.querySelector('option[value="open"]').hidden = true;
@@ -579,12 +577,12 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="browse"]').hidden = true;
         cmdElem.querySelector('option[value="source"]').hidden = false;
         cmdElem.querySelector('option[value="manage"]').hidden = true;
-        cmdElem.querySelector('option[value="separator2"]').hidden = false;
+
         cmdElem.querySelector('option[value="mkfolder"]').hidden = true;
         cmdElem.querySelector('option[value="mksep"]').hidden = true;
         cmdElem.querySelector('option[value="mknote"]').hidden = true;
         cmdElem.querySelector('option[value="upload"]').hidden = true;
-        cmdElem.querySelector('option[value="separator3"]').hidden = true;
+
         cmdElem.querySelector('option[value="edit"]').hidden = true;
         cmdElem.querySelector('option[value="editx"]').hidden = true;
         cmdElem.querySelector('option[value="move_up"]').hidden = true;
@@ -592,10 +590,29 @@ const scrapbookUi = {
         cmdElem.querySelector('option[value="move_into"]').hidden = false;
         cmdElem.querySelector('option[value="recycle"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="delete"]').hidden = !(isRecycle);
-        cmdElem.querySelector('option[value="separator4"]').hidden = true;
+
         cmdElem.querySelector('option[value="meta"]').hidden = true;
         cmdElem.querySelector('option[value="view_recycle"]').hidden = true;
         break;
+      }
+    }
+
+    // show/hide each separator if there are shown items around it
+    let hasShownItem = false;
+    let lastSep = null;
+    for (const elem of cmdElem.querySelectorAll('option')) {
+      if (elem.value === 'separator') {
+        elem.hidden = true;
+        if (hasShownItem) { lastSep = elem; }
+        hasShownItem = false;
+      } else {
+        if (!elem.hidden) {
+          hasShownItem = true;
+          if (lastSep) {
+            lastSep.hidden = false;
+            lastSep = null;
+          }
+        }
       }
     }
   },
