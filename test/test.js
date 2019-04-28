@@ -3092,9 +3092,11 @@ async function test_capture_imageBackground() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackgroundUsed() {
+async function test_capture_imageBackground_used() {
   /* capture.imageBackground = save-used */
   var options = {
+    "capture.rewriteCss": "url",
+    "capture.video": "remove",
     "capture.imageBackground": "save-used",
   };
   var blob = await capture({
@@ -3103,41 +3105,83 @@ async function test_capture_imageBackgroundUsed() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['background.css']);
-  assert(zip.files['neverused.css']);
-  assert(zip.files['red.bmp']);
-  assert(zip.files['green.bmp']);
-  assert(zip.files['yellow.bmp']);
-  assert(!zip.files['blue.bmp']);
+  assert(zip.files['link.css']);
+  assert(zip.files['import.css']);
+  assert(zip.files['inline.bmp']);
+  assert(zip.files['internal.bmp']);
+  assert(zip.files['link.bmp']);
+  assert(zip.files['import.bmp']);
+  assert(zip.files['link-keyframes.css']);
+  assert(zip.files['import-keyframes.css']);
+  assert(zip.files['internal-keyframes.bmp']);
+  assert(zip.files['link-keyframes.bmp']);
+  assert(zip.files['import-keyframes.bmp']);
   assert(!zip.files['neverused.bmp']);
+  assert(zip.files['removed.bmp']);  // @FIXME: images used only by removed elements should not be saved
+  assert(!zip.files['deleted-internal.bmp']);  // @FIXME: dynamically deleted rule should be respected
+  assert(!zip.files['inserted-internal.bmp']);
+  assert(!zip.files['deleted-link.bmp']);  // @FIXME: dynamically deleted rule should be respected
+  assert(!zip.files['inserted-link.bmp']);
+  assert(!zip.files['deleted-import.bmp']);  // @FIXME: dynamically deleted rule should be respected
+  assert(!zip.files['inserted-import.bmp']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
   var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[0].textContent.trim() === `#internal_bg { background: url("red.bmp"); }`);
-  assert(styleElems[1].textContent.trim() === `@keyframes spin {
-  from { transform: rotate(0turn); background-image: url("red.bmp"); }
-  to { transform: rotate(1turn); background-image: url("green.bmp"); }
+  assert(styleElems[0].textContent.trim() === `#internal { background: url("internal.bmp"); }`);
+  assert(styleElems[2].textContent.trim() === `@keyframes internal {
+  from { transform: rotate(0turn); background-image: url("internal-keyframes.bmp"); }
+  to { transform: rotate(1turn); }
 }`);
-  assert(styleElems[2].textContent.trim() === `#neverused { background: url(""); }`);
-  assert(styleElems[3].textContent.trim() === `@keyframes neverused {
+  assert(styleElems[4].textContent.trim() === `#neverused { background: url(""); }`);
+  assert(styleElems[5].textContent.trim() === `@keyframes neverused {
   from { transform: rotate(0turn); background-image: url(""); }
-  to { transform: rotate(1turn); background-image: url(""); }
+  to { transform: rotate(1turn); }
+}`);
+  assert(styleElems[6].textContent.trim() === `#removed-internal { background: url("removed.bmp"); }`);  // @FIXME: images used only by removed elements should not be saved
+  assert(styleElems[7].textContent.trim() === `@keyframes removed {
+  from { transform: rotate(0turn); background-image: url("removed.bmp"); }
+  to { transform: rotate(1turn); }
+}`);  // @FIXME: images used only by removed elements should not be saved
+  assert(styleElems[8].textContent.trim() === `#deleted-internal { background: url(""); }`);  // @FIXME: dynamically deleted rule should be respected
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#link { background: url("link.bmp"); }`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#import { background: url("import.bmp"); }`);
+
+  var cssFile = zip.file('link-keyframes.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `@keyframes link {
+  from { transform: rotate(0turn); background-image: url("link-keyframes.bmp"); }
+  to { transform: rotate(1turn); }
 }`);
 
-  var cssFile = zip.file('background.css');
+  var cssFile = zip.file('import-keyframes.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#link_bg { background: url("yellow.bmp"); }`);
+  assert(text.trim() === `@keyframes import {
+  from { transform: rotate(0turn); background-image: url("import-keyframes.bmp"); }
+  to { transform: rotate(1turn); }
+}`);
 
-  var cssFile = zip.file('neverused.css');
+  var cssFile = zip.file('link-dynamic.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#neverused2 { background: url(""); }`);
+  assert(text.trim() === `#deleted-link { background: url(""); }`);  // @FIXME: dynamically deleted rule should be respected
+
+  var cssFile = zip.file('import-dynamic.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#deleted-import { background: url(""); }`);  // @FIXME: dynamically deleted rule should be respected
 
   /* capture.imageBackground = save-used (headless) */
   // the result is same as save
   var options = {
+    "capture.rewriteCss": "url",
+    "capture.video": "remove",
     "capture.imageBackground": "save-used",
   };
   var blob = await captureHeadless({
@@ -3146,37 +3190,77 @@ async function test_capture_imageBackgroundUsed() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['background.css']);
-  assert(zip.files['neverused.css']);
-  assert(zip.files['red.bmp']);
-  assert(zip.files['green.bmp']);
-  assert(zip.files['yellow.bmp']);
-  assert(zip.files['blue.bmp']);
+  assert(zip.files['link.css']);
+  assert(zip.files['import.css']);
+  assert(zip.files['inline.bmp']);
+  assert(zip.files['internal.bmp']);
+  assert(zip.files['link.bmp']);
+  assert(zip.files['import.bmp']);
+  assert(zip.files['link-keyframes.css']);
+  assert(zip.files['import-keyframes.css']);
+  assert(zip.files['internal-keyframes.bmp']);
+  assert(zip.files['link-keyframes.bmp']);
+  assert(zip.files['import-keyframes.bmp']);
   assert(zip.files['neverused.bmp']);
+  assert(zip.files['removed.bmp']);
+  assert(zip.files['deleted-internal.bmp']);
+  assert(!zip.files['inserted-internal.bmp']);
+  assert(zip.files['deleted-link.bmp']);
+  assert(!zip.files['inserted-link.bmp']);
+  assert(zip.files['deleted-import.bmp']);
+  assert(!zip.files['inserted-import.bmp']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
   var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[0].textContent.trim() === `#internal_bg { background: url("red.bmp"); }`);
-  assert(styleElems[1].textContent.trim() === `@keyframes spin {
-  from { transform: rotate(0turn); background-image: url("red.bmp"); }
-  to { transform: rotate(1turn); background-image: url("green.bmp"); }
+  assert(styleElems[0].textContent.trim() === `#internal { background: url("internal.bmp"); }`);
+  assert(styleElems[2].textContent.trim() === `@keyframes internal {
+  from { transform: rotate(0turn); background-image: url("internal-keyframes.bmp"); }
+  to { transform: rotate(1turn); }
 }`);
-  assert(styleElems[2].textContent.trim() === `#neverused { background: url("neverused.bmp"); }`);
-  assert(styleElems[3].textContent.trim() === `@keyframes neverused {
+  assert(styleElems[4].textContent.trim() === `#neverused { background: url("neverused.bmp"); }`);
+  assert(styleElems[5].textContent.trim() === `@keyframes neverused {
   from { transform: rotate(0turn); background-image: url("neverused.bmp"); }
-  to { transform: rotate(1turn); background-image: url("blue.bmp"); }
+  to { transform: rotate(1turn); }
+}`);
+  assert(styleElems[6].textContent.trim() === `#removed-internal { background: url("removed.bmp"); }`);
+  assert(styleElems[7].textContent.trim() === `@keyframes removed {
+  from { transform: rotate(0turn); background-image: url("removed.bmp"); }
+  to { transform: rotate(1turn); }
+}`);
+  assert(styleElems[8].textContent.trim() === `#deleted-internal { background: url("deleted-internal.bmp"); }`);
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#link { background: url("link.bmp"); }`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#import { background: url("import.bmp"); }`);
+
+  var cssFile = zip.file('link-keyframes.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `@keyframes link {
+  from { transform: rotate(0turn); background-image: url("link-keyframes.bmp"); }
+  to { transform: rotate(1turn); }
 }`);
 
-  var cssFile = zip.file('background.css');
+  var cssFile = zip.file('import-keyframes.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#link_bg { background: url("yellow.bmp"); }`);
+  assert(text.trim() === `@keyframes import {
+  from { transform: rotate(0turn); background-image: url("import-keyframes.bmp"); }
+  to { transform: rotate(1turn); }
+}`);
 
-  var cssFile = zip.file('neverused.css');
+  var cssFile = zip.file('link-dynamic.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#neverused2 { background: url("neverused.bmp"); }`);
+  assert(text.trim() === `#deleted-link { background: url("deleted-link.bmp"); }`);
+
+  var cssFile = zip.file('import-dynamic.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#deleted-import { background: url("deleted-import.bmp"); }`);
 }
 
 /**
@@ -3713,6 +3797,8 @@ async function test_capture_font() {
 async function test_capture_font_used() {
   /* capture.font = save-used */
   var options = {
+    "capture.rewriteCss": "url",
+    "capture.video": "remove",
     "capture.font": "save-used",
   };
   var blob = await capture({
@@ -3721,22 +3807,27 @@ async function test_capture_font_used() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['font1.woff']);
-  assert(zip.files['font2.woff']);
+  assert(zip.files['internal.woff']);
+  assert(zip.files['internal-keyframes.woff']);
   assert(!zip.files['neverused.woff']);
+  assert(zip.files['removed.woff']);  // @FIXME: fonts used only by removed elements should not be saved
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
   var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[0].textContent.trim() === `@font-face { font-family: myFont1; src: url("font1.woff"); }`);
-  assert(styleElems[1].textContent.trim() === `@font-face { font-family: myFont2; src: url("font2.woff"); }`);
-  assert(styleElems[2].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
+  assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
+  assert(styleElems[1].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
+  assert(styleElems[3].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
+  assert(styleElems[6].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);  // @FIXME: fonts used only by removed elements should not be saved
+  assert(styleElems[7].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);  // @FIXME: fonts used only by removed elements should not be saved
 
   /* capture.font = save-used (headless) */
   // the result is same as save
   var options = {
+    "capture.rewriteCss": "url",
+    "capture.video": "remove",
     "capture.font": "save-used",
   };
   var blob = await captureHeadless({
@@ -3745,18 +3836,21 @@ async function test_capture_font_used() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['font1.woff']);
-  assert(zip.files['font2.woff']);
+  assert(zip.files['internal.woff']);
+  assert(zip.files['internal-keyframes.woff']);
   assert(zip.files['neverused.woff']);
+  assert(zip.files['removed.woff']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
   var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[0].textContent.trim() === `@font-face { font-family: myFont1; src: url("font1.woff"); }`);
-  assert(styleElems[1].textContent.trim() === `@font-face { font-family: myFont2; src: url("font2.woff"); }`);
-  assert(styleElems[2].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
+  assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
+  assert(styleElems[1].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
+  assert(styleElems[3].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
+  assert(styleElems[6].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);
+  assert(styleElems[7].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);
 }
 
 /**
@@ -6288,7 +6382,7 @@ async function runTests() {
   await test(test_capture_css_cross_origin);
   await test(test_capture_image);
   await test(test_capture_imageBackground);
-  await test(test_capture_imageBackgroundUsed);
+  await test(test_capture_imageBackground_used);
   await test(test_capture_favicon);
   await test(test_capture_canvas);
   await test(test_capture_audio);

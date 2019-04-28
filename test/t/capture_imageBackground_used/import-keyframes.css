@@ -1,0 +1,4 @@
+@keyframes import {
+  from { transform: rotate(0turn); background-image: url("import-keyframes.bmp"); }
+  to { transform: rotate(1turn); }
+}

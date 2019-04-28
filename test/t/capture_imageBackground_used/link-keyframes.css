@@ -1,0 +1,4 @@
+@keyframes link {
+  from { transform: rotate(0turn); background-image: url("link-keyframes.bmp"); }
+  to { transform: rotate(1turn); }
+}

@@ -2,20 +2,27 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<title>Test used fonts</title>
+
+<!-- Basic -->
 <style>
-@font-face { font-family: myFont1; src: url("font1.woff"); }
+@font-face { font-family: internal; src: url("internal.woff"); }
+</style>
+
+<!-- @keyframes -->
+<style>
+@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }
 </style>
 <style>
-@font-face { font-family: myFont2; src: url("font2.woff"); }
-</style>
-<style>
-@font-face { font-family: neverused; src: url("neverused.woff"); }
-</style>
-<style>
-@keyframes spin {
-  from { transform: rotate(0turn); font-family: myFont2; }
+@keyframes internal {
+  from { transform: rotate(0turn); font-family: internal-keyframes; }
   to { transform: rotate(1turn); }
 }
+</style>
+
+<!-- neverused -->
+<style>
+@font-face { font-family: neverused; src: url("neverused.woff"); }
 </style>
 <style>
 #neverused { font-family: neverused; }
@@ -26,10 +33,32 @@
   to { transform: rotate(1turn); }
 }
 </style>
+
+<!-- removed elements -->
+<style>
+@font-face { font-family: removed-internal; src: url("removed.woff"); }
+</style>
+<style>
+@font-face { font-family: removed-keyframes; src: url("removed.woff"); }
+</style>
+<style>
+@keyframes removed {
+  from { transform: rotate(0turn); font-family: removed-keyframes; }
+  to { transform: rotate(1turn); }
+}
+</style>
+
 </head>
 <body>
-<p style="font-family: myFont1;">font-family: myFont1;</p>
+<h2>Basic</h2>
+<blockquote style="font-family: internal;">internal</blockquote>
 
-<blockquote style="width: 40px; height: 40px; animation: spin 1s linear infinite;">myFont2</blockquote>
+<h2>@keyframes</h2>
+<blockquote style="width: 60px; height: 60px; animation: internal 1s linear infinite;">internal</blockquote>
+
+<h2>Removed elements</h2>
+<video id="removed-internal" style="font-family: removed;">removed</video>
+<video id="removed-keyframes" style="width: 60px; height: 60px; animation: removed 1s linear infinite;">removed</video>
+
 </body>
 </html>
