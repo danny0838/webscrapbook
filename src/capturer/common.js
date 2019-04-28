@@ -1794,6 +1794,7 @@ capturer.captureDocument = async function (params) {
         doc,
         rootNode,
         refUrl,
+        fromSource: false,
         settings,
         options,
       });
@@ -2207,12 +2208,13 @@ capturer.processCssText = async function (cssText, refUrl, settings, options) {
  *     - {HTMLDocument} doc
  *     - {HTMLElement} rootNode
  *     - {string} refUrl
+ *     - {boolean} fromSource - read CSS from source text instead
  *     - {Object} params.settings
  *     - {Object} params.options
  * @return {{usedCssFontUrl: Object, usedCssImageUrl: Object}}
  */
 capturer.parseDocumentCss = async function (params) {
-  const {doc, rootNode, refUrl, settings, options} = params;
+  const {doc, rootNode, refUrl, fromSource, settings, options} = params;
 
   if (!rootNode) { rootNode = doc.documentElement; }
   if (!refUrl) { refUrl = doc.URL; }
@@ -2369,16 +2371,23 @@ capturer.parseDocumentCss = async function (params) {
       return;
     }
 
-    // Retrieve CSS rules from source CSS text rather than css.cssRules,
-    // which may have been modified by page scripts via
-    // CSSStyleSheet.insertRule or so.
     let rules;
-    if (css.href) {
-      // <link> or @import
-      rules = await fetchCssRules({url: css.href, refUrl});
+    if (fromSource) {
+      try {
+        rules = css.cssRules;
+        if (!rules) { throw new Error('cssRules not accessible.'); }
+      } catch (ex) {
+        // cssRules not accessible, possibly a cross-domain CSS.
+        rules = await fetchCssRules({url: css.href, refUrl});
+      }
     } else {
-      // <style>
-      rules = await fetchCssRules({text: css.ownerNode.textContent});
+      if (css.href) {
+        // <link> or @import
+        rules = await fetchCssRules({url: css.href, refUrl});
+      } else {
+        // <style>
+        rules = await fetchCssRules({text: css.ownerNode.textContent});
+      }
     }
     if (!rules) { return; }
 
@@ -2404,13 +2413,19 @@ capturer.parseDocumentCss = async function (params) {
         break;
       }
       case CSSRule.IMPORT_RULE: {
-        if (!cssRule.href) { break; }
+        if (fromSource) {
+          if (!cssRule.styleSheet) { break; }
 
-        const url = capturer.resolveRelativeUrl(cssRule.href, refUrl);
-        const rules = await fetchCssRules({url, refUrl});
-        if (!rules) { break; }
-        for (const rule of rules) {
-          await parseCssRule(rule, url);
+          await parseCss(cssRule.styleSheet, refUrl);
+        } else {
+          if (!cssRule.href) { break; }
+
+          const url = capturer.resolveRelativeUrl(cssRule.href, refUrl);
+          const rules = await fetchCssRules({url, refUrl});
+          if (!rules) { break; }
+          for (const rule of rules) {
+            await parseCssRule(rule, url);
+          }
         }
         break;
       }
