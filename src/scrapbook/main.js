@@ -333,6 +333,7 @@ const scrapbookUi = {
     if (meta.type !== 'separator') {
       var a = document.createElement('a');
       a.appendChild(document.createTextNode(meta.title || id));
+      a.title = meta.title || id;
       if (meta.type !== 'bookmark') {
         if (meta.index) { a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index); }
       } else {
@@ -342,7 +343,6 @@ const scrapbookUi = {
           if (meta.index) { a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index); }
         }
       }
-      if (meta.comment) { a.title = meta.comment; }
       if (meta.type === 'folder') { a.onclick = this.onClickFolder.bind(this); }
       div.appendChild(a);
 
