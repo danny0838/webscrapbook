@@ -1068,10 +1068,11 @@ capturer.captureDocument = async function (params) {
             case "save-current":
               if (!isHeadless) {
                 if (elemOrig.currentSrc) {
+                  const url = elemOrig.currentSrc;
                   captureRewriteUri(elem, "srcset", null);
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await capturer.invoke("downloadFile", {
-                      url: elemOrig.currentSrc,
+                      url,
                       refUrl,
                       settings,
                       options,
@@ -1201,12 +1202,13 @@ capturer.captureDocument = async function (params) {
             case "save-current":
               if (!isHeadless) {
                 if (elemOrig.currentSrc) {
+                  const url = elemOrig.currentSrc;
                   Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                     captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
                   }, this);
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await capturer.invoke("downloadFile", {
-                      url: elemOrig.currentSrc,
+                      url,
                       refUrl,
                       settings,
                       options,
@@ -1311,12 +1313,13 @@ capturer.captureDocument = async function (params) {
                 }
 
                 if (elemOrig.currentSrc) {
+                  const url = elemOrig.currentSrc;
                   Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                     captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
                   }, this);
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await capturer.invoke("downloadFile", {
-                      url: elemOrig.currentSrc,
+                      url,
                       refUrl,
                       settings,
                       options,
