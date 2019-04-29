@@ -523,7 +523,7 @@
     "message": "用默认程序开启"
   },
   "ScrapBookMainCommandExecBook": {
-    "message": "检视主目录"
+    "message": "在文件管理员检视主目录"
   },
   "ScrapBookMainCommandBrowse": {
     "message": "在文件管理员检视"

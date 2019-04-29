@@ -523,7 +523,7 @@
     "message": "Open locally"
   },
   "ScrapBookMainCommandExecBook": {
-    "message": "View directory locally"
+    "message": "View root directory locally"
   },
   "ScrapBookMainCommandBrowse": {
     "message": "Browse locally"
