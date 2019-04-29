@@ -511,6 +511,7 @@ const scrapbookUi = {
     switch (selectedItemElems.length) {
       case 0: {
         cmdElem.querySelector('option[value="index"]').hidden = !(!isRecycle);
+        cmdElem.querySelector('option[value="search"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="exec_book"]').hidden = !(!isRecycle);
         cmdElem.querySelector('option[value="open"]').hidden = true;
         cmdElem.querySelector('option[value="opentab"]').hidden = true;
@@ -542,6 +543,7 @@ const scrapbookUi = {
         const isHtml = /\.(?:html?|xht(?:ml)?)$/.test(item.index);
 
         cmdElem.querySelector('option[value="index"]').hidden = true;
+        cmdElem.querySelector('option[value="search"]').hidden = true;
         cmdElem.querySelector('option[value="exec_book"]').hidden = true;
         cmdElem.querySelector('option[value="open"]').hidden = ['folder', 'separator'].includes(item.type);
         cmdElem.querySelector('option[value="opentab"]').hidden = ['folder', 'separator'].includes(item.type);
@@ -570,6 +572,7 @@ const scrapbookUi = {
 
       default: {
         cmdElem.querySelector('option[value="index"]').hidden = true;
+        cmdElem.querySelector('option[value="search"]').hidden = true;
         cmdElem.querySelector('option[value="exec_book"]').hidden = true;
         cmdElem.querySelector('option[value="open"]').hidden = true;
         cmdElem.querySelector('option[value="opentab"]').hidden = false;
@@ -667,6 +670,10 @@ const scrapbookUi = {
 
   async cmd_index(selectedItemElems) {
     await this.openLink(this.book.indexUrl);
+  },
+
+  async cmd_search(selectedItemElems) {
+    await this.openLink(this.book.treeUrl + 'search.html');
   },
 
   async cmd_exec_book(selectedItemElems) {

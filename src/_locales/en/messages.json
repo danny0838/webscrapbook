@@ -513,6 +513,9 @@
   "ScrapBookMainCommandIndex": {
     "message": "View index page"
   },
+  "ScrapBookMainCommandSearch": {
+    "message": "Search"
+  },
   "ScrapBookMainCommandOpen": {
     "message": "Open"
   },

@@ -513,6 +513,9 @@
   "ScrapBookMainCommandIndex": {
     "message": "檢視主頁"
   },
+  "ScrapBookMainCommandSearch": {
+    "message": "搜尋"
+  },
   "ScrapBookMainCommandOpen": {
     "message": "開啟"
   },
