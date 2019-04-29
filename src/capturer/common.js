@@ -2331,14 +2331,30 @@ capturer.parseDocumentCss = async function (params) {
     return false;
   };
 
-  const fetchCssText = async (url, refUrl) => {
-    const response = await capturer.invoke("fetchCss", {
-      url,
-      refUrl,
-      settings,
-      options,
-    });
-    return response.error ? null : response.text;
+  const fetchCssRules = async (params) => {
+    let {text, url, refUrl} = params;
+
+    if (!text && url) {
+      const response = await capturer.invoke("fetchCss", {
+        url,
+        refUrl,
+        settings,
+        options,
+      });
+      text = response.error ? null : response.text;
+    }
+
+    const d = doc.implementation.createHTMLDocument('');
+    const styleElem = d.createElement('style');
+    styleElem.textContent = text;
+    d.head.appendChild(styleElem);
+
+    // In Firefox, an error is thrown when accessing cssRules right after
+    // insertion of a stylesheet containing an @import rule. A delay is
+    // required to prevent the error.
+    await scrapbook.delay(0);
+
+    return styleElem.sheet.cssRules;
   };
 
   const parseCss = async function (css, refUrl) {
@@ -2357,27 +2373,12 @@ capturer.parseDocumentCss = async function (params) {
     // which may have been modified by page scripts via
     // CSSStyleSheet.insertRule or so.
     let rules;
-    {
-      let cssText;
-      if (css.href) {
-        // <link> or @import
-        cssText = await fetchCssText(css.href, refUrl);
-      } else {
-        // <style>
-        cssText = css.ownerNode.textContent;
-      }
-      if (cssText) {
-        // @FIXME: In Firefox, an error is thrown when accessing cssRules of
-        // an inserted @import rule.
-        // @TODO: Find another way to get cssRules without injecting cssText
-        // into DOM, which might trigger a DOM change event in the source
-        // page.
-        const styleElem = doc.createElement('style');
-        styleElem.textContent = cssText;
-        doc.head.appendChild(styleElem);
-        rules = styleElem.sheet.cssRules;
-        styleElem.remove();
-      }
+    if (css.href) {
+      // <link> or @import
+      rules = await fetchCssRules({url: css.href, refUrl});
+    } else {
+      // <style>
+      rules = await fetchCssRules({text: css.ownerNode.textContent});
     }
     if (!rules) { return; }
 
@@ -2403,9 +2404,14 @@ capturer.parseDocumentCss = async function (params) {
         break;
       }
       case CSSRule.IMPORT_RULE: {
-        if (!cssRule.styleSheet) { break; }
+        if (!cssRule.href) { break; }
 
-        await parseCss(cssRule.styleSheet, refUrl);
+        const url = capturer.resolveRelativeUrl(cssRule.href, refUrl);
+        const rules = await fetchCssRules({url, refUrl});
+        if (!rules) { break; }
+        for (const rule of rules) {
+          await parseCssRule(rule, url);
+        }
         break;
       }
       case CSSRule.MEDIA_RULE: {
