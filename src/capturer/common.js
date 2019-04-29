@@ -2397,9 +2397,9 @@ capturer.parseDocumentCss = async function (doc, rootNode, refUrl, retrieveFunc)
         if (!verifySelector(rootNode, cssRule.selectorText)) { break; }
 
         // @TODO: mark font families as used only if unicode-range matches
-        fontFamilyMapper.use(cssRule.style.fontFamily);
+        fontFamilyMapper.use(cssRule.style.getPropertyValue('font-family'));
 
-        animationMapper.use(cssRule.style.animationName);
+        animationMapper.use(cssRule.style.getPropertyValue('animation-name'));
 
         parseCssText(cssRule.cssText, refUrl, (url) => {
           usedCssImageUrl[url] = true;
@@ -2439,9 +2439,9 @@ capturer.parseDocumentCss = async function (doc, rootNode, refUrl, retrieveFunc)
         if (!cssRule.cssText) { break; }
 
         // @TODO: mark font families as used only if unicode-range matches
-        fontFamilyMapper.use(cssRule.style.fontFamily);
+        fontFamilyMapper.use(cssRule.style.getPropertyValue('font-family'));
 
-        animationMapper.use(cssRule.style.animationName);
+        animationMapper.use(cssRule.style.getPropertyValue('animation-name'));
 
         parseCssText(cssRule.cssText, refUrl, (url) => {
           usedCssImageUrl[url] = true;
@@ -2461,7 +2461,7 @@ capturer.parseDocumentCss = async function (doc, rootNode, refUrl, retrieveFunc)
       case CSSRule.KEYFRAME_RULE: {
         if (!cssRule.cssText) { break; }
 
-        animationMapper.addfontFamily(cssRule.parentRule.name, cssRule.style.fontFamily);
+        animationMapper.addfontFamily(cssRule.parentRule.name, cssRule.style.getPropertyValue('font-family'));
 
         parseCssText(cssRule.cssText, refUrl, (url) => {
           animationMapper.addUrl(cssRule.parentRule.name, url);
@@ -2520,8 +2520,8 @@ capturer.parseDocumentCss = async function (doc, rootNode, refUrl, retrieveFunc)
   for (const elem of rootNode.querySelectorAll("*")) {
     const {style} = elem;
 
-    fontFamilyMapper.use(style.fontFamily);
-    animationMapper.use(style.animationName);
+    fontFamilyMapper.use(style.getPropertyValue('font-family'));
+    animationMapper.use(style.getPropertyValue('animation-name'));
 
     for (const i of style) {
       parseCssText(style.getPropertyValue(i), refUrl, (url) => {
