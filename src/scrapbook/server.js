@@ -410,6 +410,7 @@ class Book {
     const treeLastModified = this.treeLastModified;
     const treeFiles = await this.loadTreeFiles(true);
     if (this.treeLastModified > treeLastModified) {
+      await this.unlockTree();
       throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
     }
 
