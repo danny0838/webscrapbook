@@ -2612,7 +2612,7 @@ const conf = {
   scrapbooks: [
     {name: "", path: "${scrapbook.getRelativeUrl('', this.treeDir)}", dataDir: "${this.dataDir}", treeDir: "${this.treeDir}"}
   ],
-  allowHttp: 0,  // whether to load rdf cache from the http? -1: deny, 0: ask; 1: allow
+  allowHttp: 0,  // whether to load js cache from HTTP(S)? -1: deny, 0: ask; 1: allow
   defaultSearch: "-type:folder -type:separator",  // the constant string to add before the input keyword
   defaultField: "tcc",  // the field to search for bare key terms
   viewInMapPath: "${scrapbook.escapeQuotes(this.indexPage)}",  // path (related to treeDir) of the map page for "view in map"
