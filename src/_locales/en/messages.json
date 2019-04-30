@@ -163,7 +163,7 @@
     "message": "Save current status"
   },
   "OptionCaptureCanvasTooltip": {
-    "message": "Determines how canvas elements are handled. Canvases are blank initially and drawn by web page scripts.\n\n* Save current status: Generates an initialization script that records the current canvas status to redraw it when the saved web page is loaded. Note that the generated intialization script could introduce a conflict if scripts are saved.\n\n* Save initial status: Saves a blank canvas. This is more recommanded when scripts are saved as they tend to draw the canvases on their own.\n\n* Remove: Removes the canvas element."
+    "message": "Determines how canvas elements are handled. Canvases are blank initially and drawn by web page scripts.\n\n* Save current status: Generate an initialization script that records the current canvas status to redraw it when the saved web page is loaded. NOTE: The current status of a canvas drawn using certain techniques cannot be recorded faithfully.\n\n* Save initial status: Save a blank canvas.\n\n* Remove: Removes the canvas element."
   },
   "OptionCaptureCommonBlankLabel": {
     "message": "Blank"
@@ -377,7 +377,7 @@
     "message": "Scripts:"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "Determines how all scripts—including SCRIPT elements, links with javascript: protocol, and dynamic attributes such as onclick, etc.—are handled. NOTE: Scripts are sometimes context dependant, and thus loss of original server environment and/or certain rewrittings of the web page during capturing could cause the saved scripts to not work. Additionally, scripts won't run in the archive page viewer for security reasons.\n\n* Save: Save the referenced script resource to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the script element.\n\n* Remove: Removes the script element. Note that this could affect the web page layout."
+    "message": "Determines how all scripts—including SCRIPT elements, links with javascript: protocol, and dynamic attributes such as onclick, etc.—are handled.\n\n* Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Additionally, scripts don't run in the archive page viewer for security reasons. It is generally recommended to set capture options to \"save\" and \"canvas\" option to \"save initial status\" to avoid a conflict to and an error of the script.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the script element.\n\n* Remove: Removes the script element. Note that this could affect the web page layout."
   },
   "OptionCaptureStyleInlineLabel": {
     "message": "Inline styles:"
