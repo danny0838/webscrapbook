@@ -142,13 +142,13 @@
     "message": "APPLET:"
   },
   "OptionCaptureAppletTooltip": {
-    "message": "Determines how APPLET elements, which are used to embed JAVA applets and are no more supported by most modern browsers, are handled. NOTE: JAVA applets may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the applet element.\n\n* Remove: Removes the applet element. Note that this could affect the web page layout."
+    "message": "This determines how APPLET elements, which are used to embed JAVA applets and are no more supported by most modern browsers, are handled. NOTE: JAVA applets may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Link the APPLET element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the APPLET element.\n\n* Remove: Remove the APPLET element. Note that this could affect the web page layout."
   },
   "OptionCaptureAudioLabel": {
     "message": "Audio:"
   },
   "OptionCaptureAudioTooltip": {
-    "message": "Determines how audio elements are handled.\n\n* Save: Save the referenced audio resources to local.\n\n* Save current: Save the playing audio resource to local and ignore alternatives for other browsers. This considerably reduces size but the audio may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all audio resources are saved.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the audio element.\n\n* Remove: Removes the audio element. Note that this could affect the web page layout."
+    "message": "This determines how audio elements are handled.\n\n* Save: Save the referenced audio resources to local.\n\n* Save current: Save the playing audio resource to local and ignore alternatives for other browsers. This considerably reduces size but the audio may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all audio resources are saved.\n\n* Link: Link the audio to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the audio.\n\n* Remove: Remove the audio element. Note that this could affect the web page layout."
   },
   "OptionCaptureAutoCloseDialogLabel": {
     "message": "Auto-close dialog when capture succeeded"
@@ -163,7 +163,7 @@
     "message": "Save current status"
   },
   "OptionCaptureCanvasTooltip": {
-    "message": "Determines how canvas elements are handled. Canvases are blank initially and drawn by web page scripts.\n\n* Save current status: Generate an initialization script that records the current canvas status to redraw it when the saved web page is loaded. NOTE: The current status of a canvas drawn using certain techniques cannot be recorded faithfully.\n\n* Save initial status: Save a blank canvas.\n\n* Remove: Removes the canvas element."
+    "message": "This determines how canvas elements are handled. Canvases are blank initially and drawn by web page scripts.\n\n* Save current status: Generate an initialization script that records the current canvas status to redraw it when the saved web page is loaded. NOTE: The current status of a canvas drawn using certain techniques cannot be recorded faithfully.\n\n* Save initial status: Save a blank canvas.\n\n* Remove: Remove the canvas element."
   },
   "OptionCaptureCommonBlankLabel": {
     "message": "Blank"
@@ -197,7 +197,7 @@
     }
   },
   "OptionCaptureDownLinkExtFilterDesc": {
-    "message": "Determines what to download according to file extension.\n\n* Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. jpg, jpeg) or a regular expression (e.g. /jpe?g/i).\n\n* The full extension is taken for matching. For example, .doc does not match rule docx.\n\n* Whichever matches a rule at any line are included for download.\n\n* A line starting with \"#\" is regarded as a comment and will be ignored during execution."
+    "message": "This determines what to download according to file extension.\n\n* Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. jpg, jpeg) or a regular expression (e.g. /jpe?g/i).\n\n* The full extension is taken for matching. For example, .doc does not match rule docx.\n\n* Whichever matches a rule at any line are included for download.\n\n* A line starting with \"#\" is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkExtFilterTitle": {
     "message": "File extension filter"
@@ -209,13 +209,13 @@
     "message": "Disable download linked files"
   },
   "OptionCaptureDownLinkModeTooltip": {
-    "message": "Determines whether and how to download the targeted resource of a link (an A or AREA element).\n\n* Disable download linked files: Do not download the linked resource.\n\n* Match URL file extension: Match the file extension of the URL. This performs better but cannot differenciate dynamically generated resource. For example, a URL whose extension is .php can output a resource of html, doc, pdf, or other type, but the filter always gets \"php\" in this mode.\n\n* Match HTTP header and file extension: Traverse every link to get the HTTP header and the precise extension of the output resource for matching. NOTE: Certain sites make interactive commands as plain hyperlink, which could be unexpectedly triggered during traversal (such as logging out the site). The URL filter can be configured to avoid such trigering."
+    "message": "This determines whether and how to download the targeted resource of a link (an A or AREA element).\n\n* Disable download linked files: Do not download the linked resource.\n\n* Match URL file extension: Match the file extension of the URL. This performs better but cannot differenciate dynamically generated resource. For example, a URL whose extension is .php can output a resource of html, doc, pdf, or other type, but the filter always gets \"php\" in this mode.\n\n* Match HTTP header and file extension: Traverse every link to get the HTTP header and the precise extension of the output resource for matching. NOTE: Certain sites make interactive commands as plain hyperlink, which could be unexpectedly triggered during traversal (such as logging out the site). The URL filter can be configured to avoid such trigering."
   },
   "OptionCaptureDownLinkModeUrlLabel": {
     "message": "Match URL file extension"
   },
   "OptionCaptureDownLinkUrlFilterDesc": {
-    "message": "Determines what are forbidden for downloading according to full URL (with the \"#\" part stripped).\n\n* Each following line is a full URL (with \"#\" part stripped) or a regular expression (e.g. /[/=]logout\\b/i). \n\n* Whichever matches a rule at any line are forbidden from downloading.\n\n* A line starting with \"#\" is regarded as a comment and will be ignored during execution."
+    "message": "This determines what are forbidden for downloading according to full URL (with the \"#\" part stripped).\n\n* Each following line is a full URL (with \"#\" part stripped) or a regular expression (e.g. /[/=]logout\\b/i). \n\n* Whichever matches a rule at any line are forbidden from downloading.\n\n* A line starting with \"#\" is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "The following regular expressions in URL filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
@@ -230,13 +230,13 @@
     "message": "EMBED:"
   },
   "OptionCaptureEmbedTooltip": {
-    "message": "Determines how embed elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the embed element.\n\n* Remove: Removes the embed element. Note that this could affect the web page layout."
+    "message": "This determines how EMBED elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Link the EMBED element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the EMBED element.\n\n* Remove: Remove the EMBED element. Note that this could affect the web page layout."
   },
   "OptionCaptureFaviconLabel": {
     "message": "Favicon:"
   },
   "OptionCaptureFaviconTooltip": {
-    "message": "Determines how favicons, which are shown in the tab, bookmarks or my favorites, are handled.\n\n* Save: Save the referenced favicon resources to local.\n\n* Link: Rewrite the favicon element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the favicon element.\n\n* Remove: Removes the favicon element."
+    "message": "This determines how favicons, which are shown in the tab, bookmarks or my favorites, are handled.\n\n* Save: Save the referenced favicon resources to local.\n\n* Link: Link the favicon to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the favicon.\n\n* Remove: Remove the favicon element."
   },
   "OptionCaptureFontLabel": {
     "message": "Fonts:"
@@ -257,25 +257,25 @@
     "message": "Frames:"
   },
   "OptionCaptureFrameTooltip": {
-    "message": "Determines how frames (FRAME and IFRAME elements) are handled.\n\n* Save: Save the frame pages to local.\n\n* Link: Rewrite frame elements to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the frame elements.\n\n* Remove: Removes the frame elements. Note that this could affect the web page layout."
+    "message": "This determines how frames (FRAME and IFRAME elements) are handled.\n\n* Save: Save the frame pages to local.\n\n* Link: Link the frame to its source URL. Note that a network flow will be triggered when browsing the captured document in the future. NOTE: Due to the restriction of SOP, ths font cannot be loaded by the captured page unless CORS has been properly configured by its source server.\n\n* Blank: Disable the frame elements.\n\n* Remove: Remove the frame. Note that this could affect the web page layout."
   },
   "OptionCaptureImageBackgroundLabel": {
-    "message": "Background images:"
+    "message": "Style images:"
   },
   "OptionCaptureImageBackgroundTooltip": {
-    "message": "This determines how background images are handled.\n\n* Save: Save all background images to local.\n\n* Save used: Save only the background images used by elements in the captured web page area. If the captured page is not displayed (such as capture source), all background images are still saved.\n\n* Link: Link the background image to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clear background images from the stylesheets."
+    "message": "This determines how style images (images of background, cursor, list-item, etc., used by the stylesheet, and the background attribute of an element in old HTML standard) are handled.\n\n* Save: Save all style images to local.\n\n* Save used: Save only the style images used by elements in the captured web page area. If the captured page is not displayed (such as capture source), all style images are still saved.\n\n* Link: Link the style image to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clear style images from the stylesheets."
   },
   "OptionCaptureImageLabel": {
     "message": "Images:"
   },
   "OptionCaptureImageTooltip": {
-    "message": "Determines how images (IMG or PICTURE elements) are handled.\n\n* Save: Save the referenced image resources to local.\n\n* Save current: Save the displayed image resource to local and ignore alternatives for another screen viewport or resolution. This considerably reduces size but the display effect may be worse in another situation. If the captured page is not displayed in the browser (such as capture source), all images are saved.\n\n* Link: Rewrite the image element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the image element.\n\n* Remove: Removes the image element. Note that this could affect the web page layout."
+    "message": "This determines how images (IMG, PICTURE, and some INPUT elements) are handled.\n\n* Save: Save the referenced image resources to local.\n\n* Save current: Save the displayed image resource to local and ignore alternatives for another screen viewport or resolution. This considerably reduces size but the display effect may be worse in another situation. If the captured page is not displayed in the browser (such as capture source), all images are saved.\n\n* Link: Link the image to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the image.\n\n* Remove: Remove the image element. Note that this could affect the web page layout."
   },
   "OptionCaptureObjectLabel": {
     "message": "OBJECT:"
   },
   "OptionCaptureObjectTooltip": {
-    "message": "Determines how object elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the object element.\n\n* Remove: Removes the object element. Note that this could affect the web page layout."
+    "message": "This determines how OBJECT elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Link the OBJECT element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the OBJECT element.\n\n* Remove: Remove the OBJECT element. Note that this could affect the web page layout."
   },
   "OptionCaptureRecordRewrittenAttrLabel": {
     "message": "Record rewritten attributes"
@@ -323,7 +323,7 @@
     "message": "Save captured data as:"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "Determines how the web page and referenced files are saved.\n\n* Folder: Generates a folder and save the web page and resource files into it. NOTE for Chromium: When saving captured data to scrapbook folder, it's recommended that \"Ask where to save each file before downloading\" be unchecked to avoid massive prompts for a capture; additionally, several file formats (.js for example) are blocked by the browser, and the user has to select \"Keep\" for each of them to download them.\n\n* HTZ or MAFF package: Packs web page and referenced resources in to a single file using ZIP algorithm. Such files can be viewed using the \"View archive page\" feature or by unzipping them.\n\n* Single HTML: Stores the referenced resource as data URL, which is supported by most browsers, such as Chromium > 0, Firefox > 0, Edge > 0, Safari > 0, Opera ≥ 7.2, and IE ≥ 8 (very limited in IE). NOTE: Data URLs are less performant and does not deduplicate, and thus a web page referencing a large resource for multiple times could lead to a bloat of file size.\n\n* Scripted single HTML: Stores referenced resources in the script and re-generate them on loading. This has better performance and reduced size compared with data URL, but requires a modern browser with JavaScript enabled, such as: Chromium ≥ 20, Firefox ≥ 13, Edge > 0, Safari ≥ 6, Opera ≥ 12.1, and IE ≥ 10."
+    "message": "This determines how the web page and referenced files are saved.\n\n* Folder: Generates a folder and save the web page and resource files into it. NOTE for Chromium: When saving captured data to scrapbook folder, it's recommended that \"Ask where to save each file before downloading\" be unchecked to avoid massive prompts for a capture; additionally, several file formats (.js for example) are blocked by the browser, and the user has to select \"Keep\" for each of them to download them.\n\n* HTZ or MAFF package: Packs web page and referenced resources in to a single file using ZIP algorithm. Such files can be viewed using the \"View archive page\" feature or by unzipping them.\n\n* Single HTML: Stores the referenced resource as data URL, which is supported by most browsers, such as Chromium > 0, Firefox > 0, Edge > 0, Safari > 0, Opera ≥ 7.2, and IE ≥ 8 (very limited in IE). NOTE: Data URLs are less performant and does not deduplicate, and thus a web page referencing a large resource for multiple times could lead to a bloat of file size.\n\n* Scripted single HTML: Stores referenced resources in the script and re-generate them on loading. This has better performance and reduced size compared with data URL, but requires a modern browser with JavaScript enabled, such as: Chromium ≥ 20, Firefox ≥ 13, Edge > 0, Safari ≥ 6, Opera ≥ 12.1, and IE ≥ 10."
   },
   "OptionCaptureSaveAsMaffLabel": {
     "message": "MAFF package"
@@ -353,7 +353,7 @@
     "message": "Filename to save:"
   },
   "OptionCaptureSaveFilenameTooltip": {
-    "message": "Determines the filename (excluding the extension) when saving a capture. Following template syntaxes are available:\n* %% - a literal \"%\".\n* %ID% - the unique identifier of the capture, e.g. \"20190301124533216\".\n* %ID_0% - the unique identifier using legacy ScrapBook format, e.g. \"20190301204533\".\n* %UUID% - generates a random UUID, e.g. \"941e4674-d6c7-4709-9703-a1b4359286c6\".\n* %TITLE% - page title, or the last URL segment.\n* %HOST% - domain name of the source, e.g. \"example.com\".\n* %PAGE% - the last URL segment, with extension removed.\n* %FILE% - the last URL segment.\n* %DATE% - current date, in YYYY-MM-DD format.\n* %TIME% - current time, in HH-MM-SS format.\n* %YEAR% - current year, in YYYY format.\n* %MONTH% - current month, in MM format。\n* %DAY% - current date in the month, in DD format.\n* %HOURS% - current hours, in HH format.\n* %MINUTES% - current minutes, in MM format.\n* %SECONDS% - current seconds, in SS format.\n* \"_UTC\" can be appended to date/time parameters to use UTC time, e.g.  %TIME_UTC%, %HOURS_UTC%.\n* A slash \"/\" can be used to specify a subfolder, e.g. \"%YEAR%/%MONTH%/%TITLE%\"."
+    "message": "This determines the filename (excluding the extension) when saving a capture. Following template syntaxes are available:\n* %% - a literal \"%\".\n* %ID% - the unique identifier of the capture, e.g. \"20190301124533216\".\n* %ID_0% - the unique identifier using legacy ScrapBook format, e.g. \"20190301204533\".\n* %UUID% - generates a random UUID, e.g. \"941e4674-d6c7-4709-9703-a1b4359286c6\".\n* %TITLE% - page title, or the last URL segment.\n* %HOST% - domain name of the source, e.g. \"example.com\".\n* %PAGE% - the last URL segment, with extension removed.\n* %FILE% - the last URL segment.\n* %DATE% - current date, in YYYY-MM-DD format.\n* %TIME% - current time, in HH-MM-SS format.\n* %YEAR% - current year, in YYYY format.\n* %MONTH% - current month, in MM format。\n* %DAY% - current date in the month, in DD format.\n* %HOURS% - current hours, in HH format.\n* %MINUTES% - current minutes, in MM format.\n* %SECONDS% - current seconds, in SS format.\n* \"_UTC\" can be appended to date/time parameters to use UTC time, e.g.  %TIME_UTC%, %HOURS_UTC%.\n* A slash \"/\" can be used to specify a subfolder, e.g. \"%YEAR%/%MONTH%/%TITLE%\"."
   },
   "OptionCaptureSaveToFolderLabel": {
     "message": "Scrapbook folder"
@@ -365,7 +365,7 @@
     "message": "Backend server"
   },
   "OptionCaptureSaveToTooltip": {
-    "message": "Determines how captured data files are managed.\n\n* Backend server: a captured web page is saved in the configured data directory of a book in the backend server.\n\n* Scrapbook folder: a captured web page is saved in the scrapbook folder under the <default download folder>."
+    "message": "This determines how captured data files are managed.\n\n* Backend server: a captured web page is saved in the configured data directory of a book in the backend server.\n\n* Scrapbook folder: a captured web page is saved in the scrapbook folder under the <default download folder>."
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "Scrapbook folder:"
@@ -377,25 +377,25 @@
     "message": "Scripts:"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "Determines how all scripts—including SCRIPT elements, links with javascript: protocol, and dynamic attributes such as onclick, etc.—are handled.\n\n* Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Additionally, scripts don't run in the archive page viewer for security reasons. It is generally recommended to set capture options to \"save\" and \"canvas\" option to \"save initial status\" to avoid a conflict to and an error of the script.\n\n* Link: Rewrite the element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the script element.\n\n* Remove: Removes the script element. Note that this could affect the web page layout."
+    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n* Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Additionally, scripts don't run in the archive page viewer for security reasons. It is generally recommended to set capture options to \"save\" and \"canvas\" option to \"save initial status\" to avoid a conflict to and an error of the script.\n\n* Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the script.\n\n* Remove: Remove the script element. Note that this could affect the web page layout."
   },
   "OptionCaptureStyleInlineLabel": {
     "message": "Inline styles:"
   },
   "OptionCaptureStyleInlineTooltip": {
-    "message": "Determines how inline stylesheets are handled.\n\n* Save: Save inline stylesheets.\n\n* Blank: Clear the inline style attribute.\n\n* Remove: Removes the inline style attribute."
+    "message": "This determines how inline stylesheets are handled.\n\n* Save: Save inline stylesheets.\n\n* Blank: Clear the inline style attribute.\n\n* Remove: Remove the inline style attribute."
   },
   "OptionCaptureStyleLabel": {
     "message": "Styles:"
   },
   "OptionCaptureStyleTooltip": {
-    "message": "Determines how external stylesheets are handled.\n\n* Save: Save the referenced stylesheet resource to local.\n\n* Link: Rewrite the stylesheet element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the stylesheet element.\n\n* Remove: Removes the stylesheet element."
+    "message": "This determines how external stylesheets are handled.\n\n* Save: Save the referenced stylesheet resource to local.\n\n* Link: Link the stylesheet to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the stylesheet.\n\n* Remove: Remove the stylesheet element."
   },
   "OptionCaptureVideoLabel": {
     "message": "Video:"
   },
   "OptionCaptureVideoTooltip": {
-    "message": "Determines how video elements are handled.\n\n* Save: Save the referenced video resource to local.\n\n* Save current: Save the playing video resource to local and ignore alternatives for other browsers. This considerably reduces size but the video may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all video resources are saved.\n\n* Link: Rewrite the video element to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disables the video element.\n\n* Remove: Removes the video element. Note that this could affect the web page layout."
+    "message": "This determines how video elements are handled.\n\n* Save: Save the referenced video resource to local.\n\n* Save current: Save the playing video resource to local and ignore alternatives for other browsers. This considerably reduces size but the video may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all video resources are saved.\n\n* Link: Link the video to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the video.\n\n* Remove: Remove the video element. Note that this could affect the web page layout."
   },
   "OptionGroupCapture": {
     "message": "Capture - content"
