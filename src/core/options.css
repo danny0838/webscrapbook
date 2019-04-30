@@ -1,8 +1,6 @@
 a[data-tooltip] {
-  position: relative;
   display: inline-block;
   color: inherit;
-  font-family: inherit;
   text-decoration: inherit;
   width: 1em;
   height: 1em;
@@ -11,36 +9,12 @@ a[data-tooltip] {
   cursor: help;
 }
 
-a[data-tooltip]:focus::before {
-  content: attr(data-tooltip);
-  position: absolute;
-  z-index: 10000;
-  display: block;
-  white-space: pre-wrap;
-  __MSG_@@bidi_start_edge__: 0;
-  top: 100%;
-  margin-top: 1em;
-  margin-__MSG_@@bidi_start_edge__: -2em;
-  width: 60vw;
-  min-width: 300px;
+a[data-tooltip] + div {
+  margin: 0.5em;
   border-radius: 0.5em;
   padding: 0.5em;
   background-color: #CCCCEE;
-}
-
-a[data-tooltip]:focus::after {
-  content: "";
-  position: absolute;
-  z-index: 10000;
-  width: 0;
-  height: 0;
-  __MSG_@@bidi_start_edge__: 50%;
-  top: 100%;
-  margin-top: 0;
-  margin-__MSG_@@bidi_start_edge__: -0.5em;
-  border-width: 0.5em;
-  border-style: solid;
-  border-color: transparent transparent #CCCCEE transparent;
+  white-space: pre-wrap;
 }
 
 #actionsWrapper {

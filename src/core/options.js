@@ -182,6 +182,23 @@ function renewCaptureDownLinkDetails() {
   elem.hidden = mode === 'none';
 }
 
+function onToggleTooltip(elem) {
+  if (!onToggleTooltip.tooltipMap) {
+    onToggleTooltip.tooltipMap = new WeakMap();
+  }
+  const tooltipMap = onToggleTooltip.tooltipMap;
+
+  let tooltip = tooltipMap.get(elem);
+  if (tooltip) {
+    tooltip.remove();
+    tooltipMap.set(elem, null);
+  } else {
+    tooltip = elem.parentNode.insertBefore(document.createElement("div"), elem.nextSibling);
+    tooltip.textContent = elem.getAttribute("data-tooltip");
+    tooltipMap.set(elem, tooltip);
+  }
+}
+
 window.addEventListener("DOMContentLoaded", async (event) => {
   // load languages
   scrapbook.loadLanguages(document);
@@ -245,4 +262,12 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     await importOptions(file);
     refreshForm();
   });
+
+  for (const elem of document.querySelectorAll('a[data-tooltip]')) {
+    elem.addEventListener("click", (event) => {
+      event.preventDefault();
+      const elem = event.currentTarget;
+      onToggleTooltip(elem);
+    });
+  }
 });
