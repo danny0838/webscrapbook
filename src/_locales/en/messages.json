@@ -242,7 +242,7 @@
     "message": "Fonts:"
   },
   "OptionCaptureFontTooltip": {
-    "message": "Determines how external fonts are handled.\n\n* Save: Save the referenced font resources to local.\n\n* Save used: Save only the fonts that are actually used by an element in the current web page. This reduces size.\n\n* Link: Rewrite the stylesheet declaration to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clears the stylesheet declaration for an external font."
+    "message": "This determines how fonts are handled.\n\n* Save: Save all fonts to local.\n\n* Save used: Save only the fonts used by elements in the captured web page area. If the captured page is not displayed (such as capture source), all fonts are still saved.\n\n* Link: Link the font to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clear fonts from the stylesheets."
   },
   "OptionCaptureFormStatusLabel": {
     "message": "Form status:"
@@ -263,7 +263,7 @@
     "message": "Background images:"
   },
   "OptionCaptureImageBackgroundTooltip": {
-    "message": "Determines how background images are handled.\n\n* Save: Save the referenced resources to local.\n\n* Save used: Save only the background images that are applied to an element in the current web page. This reduces size.\n\n* Link: Rewrite the stylesheet declaration to link to source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clear the stylesheet declaration of the background image."
+    "message": "This determines how background images are handled.\n\n* Save: Save all background images to local.\n\n* Save used: Save only the background images used by elements in the captured web page area. If the captured page is not displayed (such as capture source), all background images are still saved.\n\n* Link: Link the background image to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clear background images from the stylesheets."
   },
   "OptionCaptureImageLabel": {
     "message": "Images:"
