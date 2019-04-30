@@ -139,13 +139,13 @@
     "message": "View archived page"
   },
   "OptionCaptureAppletLabel": {
-    "message": "APPLET:"
+    "message": "APPLETs:"
   },
   "OptionCaptureAppletTooltip": {
     "message": "This determines how APPLET elements, which are used to embed JAVA applets and are no more supported by most modern browsers, are handled. NOTE: JAVA applets may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Link the APPLET element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the APPLET element.\n\n* Remove: Remove the APPLET element. Note that this could affect the web page layout."
   },
   "OptionCaptureAudioLabel": {
-    "message": "Audio:"
+    "message": "Audios:"
   },
   "OptionCaptureAudioTooltip": {
     "message": "This determines how audio elements are handled.\n\n* Save: Save the referenced audio resources to local.\n\n* Save current: Save the playing audio resource to local and ignore alternatives for other browsers. This considerably reduces size but the audio may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all audio resources are saved.\n\n* Link: Link the audio to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the audio.\n\n* Remove: Remove the audio element. Note that this could affect the web page layout."
@@ -227,7 +227,7 @@
     "message": "URL filter"
   },
   "OptionCaptureEmbedLabel": {
-    "message": "EMBED:"
+    "message": "EMBEDs:"
   },
   "OptionCaptureEmbedTooltip": {
     "message": "This determines how EMBED elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Link the EMBED element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the EMBED element.\n\n* Remove: Remove the EMBED element. Note that this could affect the web page layout."
@@ -272,7 +272,7 @@
     "message": "This determines how images (IMG, PICTURE, and some INPUT elements) are handled.\n\n* Save: Save the referenced image resources to local.\n\n* Save current: Save the displayed image resource to local and ignore alternatives for another screen viewport or resolution. This considerably reduces size but the display effect may be worse in another situation. If the captured page is not displayed in the browser (such as capture source), all images are saved.\n\n* Link: Link the image to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the image.\n\n* Remove: Remove the image element. Note that this could affect the web page layout."
   },
   "OptionCaptureObjectLabel": {
-    "message": "OBJECT:"
+    "message": "OBJECTs:"
   },
   "OptionCaptureObjectTooltip": {
     "message": "This determines how OBJECT elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Link the OBJECT element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the OBJECT element.\n\n* Remove: Remove the OBJECT element. Note that this could affect the web page layout."
@@ -302,7 +302,7 @@
     "message": "If a URL is rewritten during the capture process, create a data-* attribute or HTML comment to record its original address."
   },
   "OptionCaptureRewriteCssLabel": {
-    "message": "Rewrite CSS:"
+    "message": "Rewrite styles:"
   },
   "OptionCaptureRewriteCssNoneLabel": {
     "message": "No rewrite"
@@ -386,7 +386,7 @@
     "message": "This determines how stylesheets (including external – some LINK elements – and internal – STYLE elements) are handled.\n\n* Save: Save the referenced external stylesheet resource to local.\n\n* Link: Link the external stylesheet to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the stylesheet.\n\n* Remove: Remove the stylesheet element."
   },
   "OptionCaptureVideoLabel": {
-    "message": "Video:"
+    "message": "Videos:"
   },
   "OptionCaptureVideoTooltip": {
     "message": "This determines how video elements are handled.\n\n* Save: Save the referenced video resource to local.\n\n* Save current: Save the playing video resource to local and ignore alternatives for other browsers. This considerably reduces size but the video may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all video resources are saved.\n\n* Link: Link the video to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the video.\n\n* Remove: Remove the video element. Note that this could affect the web page layout."
