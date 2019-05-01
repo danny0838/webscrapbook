@@ -1394,8 +1394,8 @@ scrapbook.rewriteCssText = function (cssText, options) {
   const pDQStr = '(?:"(?:\\\\.|[^\\\\"])*")'; // double quoted string
   const pSQStr = "(?:'(?:\\\\.|[^\\\\'])*')"; // single quoted string
   const pES = "(?:" + "(?:" + [pCm, pDQStr, pSQStr, pChar].join("|") + ")*?" + ")"; // embeded string
-  const pUrl = "(?:" + "\\burl\\(" + pSp + "(?:" + [pDQStr, pSQStr, pSStr].join("|") + ")" + pSp + "\\)" + ")"; // URL
-  const pUrl2 = "(" + "\\burl\\(" + pSp + ")(" + [pDQStr, pSQStr, pSStr].join("|") + ")(" + pSp + "\\)" + ")"; // URL; catch 3
+  const pUrl = "(?:" + "\\burl\\(" + pSp + "(?:" + [pDQStr, pSQStr, pStr].join("|") + ")" + pSp + "\\)" + ")"; // URL
+  const pUrl2 = "(" + "\\burl\\(" + pSp + ")(" + [pDQStr, pSQStr, pStr].join("|") + ")(" + pSp + "\\)" + ")"; // URL; catch 3
   const pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")"; // rule import; catch 2
   const pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // rule font-face; catch 1
 
