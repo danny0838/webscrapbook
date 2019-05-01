@@ -2274,8 +2274,8 @@ async function test_capture_css_syntax() {
   assert(css[12].textContent.trim() === `#test12 { background: URL("${localhost}/capture_css_syntax/green.bmp"); }`);
   assert(css[13].textContent.trim() === `#test13 { background: Url("${localhost}/capture_css_syntax/green.bmp"); }`);
   assert(css[14].textContent.trim() === `#test14 { /*background: url("green.bmp");*/ }`);
-  // assert(css[15].textContent.trim() === `#test15::after { content: "url(green.bmp);"; }`);
-  assert(css[16].textContent.trim() === `#test16 { background: url("${localhost}/capture_css_syntax/He's%20file.bmp"); }`);
+  assert(css[15].textContent.trim() === `#test15 { background: url("${localhost}/capture_css_syntax/foo'bar.bmp"); }`);
+  assert(css[16].textContent.trim() === `#test16 { background: url("${localhost}/capture_css_syntax/foo'bar.bmp"); }`);
 
   /* font */
   var options = {

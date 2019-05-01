@@ -48,10 +48,10 @@ blockquote::before { content: attr(id) " " attr(class) " "; }
 #test14 { /*background: url("green.bmp");*/ }
 </style>
 <style>
-#test15::after { content: "url(green.bmp);"; }
+#test15 { background: url("foo'bar.bmp"); }
 </style>
 <style>
-#test16 { background: url('He\'s file.bmp'); }
+#test16 { background: url('foo\'bar.bmp'); }
 </style>
 </head>
 <body>
@@ -69,7 +69,7 @@ blockquote::before { content: attr(id) " " attr(class) " "; }
 <blockquote id="test12"></blockquote>
 <blockquote id="test13"></blockquote>
 <blockquote id="test14" class="noparse"></blockquote>
-<blockquote id="test15" class="noparse"></blockquote>
-<blockquote id="test16" class="invisible"></blockquote>
+<blockquote id="test15"></blockquote>
+<blockquote id="test16"></blockquote>
 </body>
 </html>
