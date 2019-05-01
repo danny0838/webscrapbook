@@ -1191,7 +1191,7 @@ capturer.captureDocument = async function (params) {
 
               // HTML 5.1 2nd Edition / W3C Recommendation:
               // The src attribute must be present and be a valid non-empty URL.
-              Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
+              Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
                 captureRewriteUri(elem, "src", "about:blank");
               }, this);
 
@@ -1217,6 +1217,20 @@ capturer.captureDocument = async function (params) {
                     return response;
                   });
                 }
+
+                Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elem.getAttribute("src"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
+                    captureRewriteUri(elem, "src", response.url);
+                    return response;
+                  });
+                }, this);
+
                 break;
               }
               // Headless capture doesn't support currentSrc, fallback to "save".
@@ -1235,7 +1249,7 @@ capturer.captureDocument = async function (params) {
                 });
               }
 
-              Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
+              Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
                 tasks[tasks.length] = halter.then(async () => {
                   const response = await capturer.invoke("downloadFile", {
                     url: elem.getAttribute("src"),
@@ -1289,7 +1303,7 @@ capturer.captureDocument = async function (params) {
 
               // HTML 5.1 2nd Edition / W3C Recommendation:
               // The src attribute must be present and be a valid non-empty URL.
-              Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
+              Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
                 captureRewriteUri(elem, "src", "about:blank");
               }, this);
 
@@ -1329,6 +1343,19 @@ capturer.captureDocument = async function (params) {
                   });
                 }
 
+                Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elem.getAttribute("src"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
+                    captureRewriteUri(elem, "src", response.url);
+                    return response;
+                  });
+                }, this);
+
                 break;
               }
               // Headless capture doesn't support currentSrc, fallback to "save".
@@ -1360,7 +1387,7 @@ capturer.captureDocument = async function (params) {
                 });
               }
 
-              Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
+              Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
                 tasks[tasks.length] = halter.then(async () => {
                   const response = await capturer.invoke("downloadFile", {
                     url: elem.getAttribute("src"),

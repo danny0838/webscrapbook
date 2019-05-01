@@ -3437,6 +3437,8 @@ async function test_capture_audio() {
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['horse.ogg']);
   assert(zip.files['horse.mp3']);
+  assert(zip.files['horse_en.vtt']);
+  assert(zip.files['horse_zh.vtt']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3447,6 +3449,9 @@ async function test_capture_audio() {
   var sourceElems = audioElems[1].querySelectorAll('source');
   assert(sourceElems[0].getAttribute('src') === `horse.ogg`);
   assert(sourceElems[1].getAttribute('src') === `horse.mp3`);
+  var trackElems = audioElems[1].querySelectorAll('track');
+  assert(trackElems[0].getAttribute('src') === `horse_en.vtt`);
+  assert(trackElems[1].getAttribute('src') === `horse_zh.vtt`);
 
   /* capture.audio = save-current */
   var options = {
@@ -3459,6 +3464,8 @@ async function test_capture_audio() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(Object.keys(zip.files).length > 1);
+  assert(zip.files['horse_en.vtt']);
+  assert(zip.files['horse_zh.vtt']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3470,6 +3477,9 @@ async function test_capture_audio() {
       || audioElems[1].getAttribute('src') === `horse.mp3`);
   var sourceElems = audioElems[1].querySelectorAll('source');
   assert(sourceElems.length === 0);
+  var trackElems = audioElems[1].querySelectorAll('track');
+  assert(trackElems[0].getAttribute('src') === `horse_en.vtt`);
+  assert(trackElems[1].getAttribute('src') === `horse_zh.vtt`);
 
   /* capture.audio = save-current (headless) */
   // the result is same as save
@@ -3484,6 +3494,8 @@ async function test_capture_audio() {
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['horse.ogg']);
   assert(zip.files['horse.mp3']);
+  assert(zip.files['horse_en.vtt']);
+  assert(zip.files['horse_zh.vtt']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3494,6 +3506,9 @@ async function test_capture_audio() {
   var sourceElems = audioElems[1].querySelectorAll('source');
   assert(sourceElems[0].getAttribute('src') === `horse.ogg`);
   assert(sourceElems[1].getAttribute('src') === `horse.mp3`);
+  var trackElems = audioElems[1].querySelectorAll('track');
+  assert(trackElems[0].getAttribute('src') === `horse_en.vtt`);
+  assert(trackElems[1].getAttribute('src') === `horse_zh.vtt`);
 
   /* capture.audio = link (headless) */
   var options = {
@@ -3516,6 +3531,9 @@ async function test_capture_audio() {
   var sourceElems = audioElems[1].querySelectorAll('source');
   assert(sourceElems[0].getAttribute('src') === `${localhost}/capture_audio/horse.ogg`);
   assert(sourceElems[1].getAttribute('src') === `${localhost}/capture_audio/horse.mp3`);
+  var trackElems = audioElems[1].querySelectorAll('track');
+  assert(trackElems[0].getAttribute('src') === `${localhost}/capture_audio/horse_en.vtt`);
+  assert(trackElems[1].getAttribute('src') === `${localhost}/capture_audio/horse_zh.vtt`);
 
   /* capture.audio = blank (headless) */
   var options = {
@@ -3538,6 +3556,9 @@ async function test_capture_audio() {
   var sourceElems = audioElems[1].querySelectorAll('source');
   assert(sourceElems[0].getAttribute('src') === `about:blank`);
   assert(sourceElems[1].getAttribute('src') === `about:blank`);
+  var trackElems = audioElems[1].querySelectorAll('track');
+  assert(trackElems[0].getAttribute('src') === `about:blank`);
+  assert(trackElems[1].getAttribute('src') === `about:blank`);
 
   /* capture.audio = remove (headless) */
   var options = {
@@ -3559,6 +3580,8 @@ async function test_capture_audio() {
   assert(audioElems.length === 0);
   var sourceElems = doc.querySelectorAll('source');
   assert(sourceElems.length === 0);
+  var trackElems = doc.querySelectorAll('track');
+  assert(trackElems.length === 0);
 }
 
 /**
@@ -3581,6 +3604,8 @@ async function test_capture_video() {
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['small.mp4']);
   assert(zip.files['small.webm']);
+  assert(zip.files['small_en.vtt']);
+  assert(zip.files['small_zh.vtt']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3592,6 +3617,9 @@ async function test_capture_video() {
   var sourceElems = videoElems[1].querySelectorAll('source');
   assert(sourceElems[0].getAttribute('src') === `small.webm`);
   assert(sourceElems[1].getAttribute('src') === `small.mp4`);
+  var trackElems = videoElems[1].querySelectorAll('track');
+  assert(trackElems[0].getAttribute('src') === `small_en.vtt`);
+  assert(trackElems[1].getAttribute('src') === `small_zh.vtt`);
 
   /* capture.video = save-current */
   var options = {
@@ -3604,6 +3632,8 @@ async function test_capture_video() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(Object.keys(zip.files).length > 1);
+  assert(zip.files['small_en.vtt']);
+  assert(zip.files['small_zh.vtt']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3616,6 +3646,9 @@ async function test_capture_video() {
       || videoElems[1].getAttribute('src') === `small.webm`);
   var sourceElems = videoElems[1].querySelectorAll('source');
   assert(sourceElems.length === 0);
+  var trackElems = videoElems[1].querySelectorAll('track');
+  assert(trackElems[0].getAttribute('src') === `small_en.vtt`);
+  assert(trackElems[1].getAttribute('src') === `small_zh.vtt`);
 
   /* capture.video = save-current (headless) */
   // the result is same as save
@@ -3630,6 +3663,8 @@ async function test_capture_video() {
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['small.mp4']);
   assert(zip.files['small.webm']);
+  assert(zip.files['small_en.vtt']);
+  assert(zip.files['small_zh.vtt']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3641,6 +3676,9 @@ async function test_capture_video() {
   var sourceElems = videoElems[1].querySelectorAll('source');
   assert(sourceElems[0].getAttribute('src') === `small.webm`);
   assert(sourceElems[1].getAttribute('src') === `small.mp4`);
+  var trackElems = videoElems[1].querySelectorAll('track');
+  assert(trackElems[0].getAttribute('src') === `small_en.vtt`);
+  assert(trackElems[1].getAttribute('src') === `small_zh.vtt`);
 
   /* capture.video = link (headless) */
   var options = {
@@ -3664,6 +3702,9 @@ async function test_capture_video() {
   var sourceElems = videoElems[1].querySelectorAll('source');
   assert(sourceElems[0].getAttribute('src') === `${localhost}/capture_video/small.webm`);
   assert(sourceElems[1].getAttribute('src') === `${localhost}/capture_video/small.mp4`);
+  var trackElems = videoElems[1].querySelectorAll('track');
+  assert(trackElems[0].getAttribute('src') === `${localhost}/capture_video/small_en.vtt`);
+  assert(trackElems[1].getAttribute('src') === `${localhost}/capture_video/small_zh.vtt`);
 
   /* capture.video = blank (headless) */
   var options = {
@@ -3687,6 +3728,9 @@ async function test_capture_video() {
   var sourceElems = videoElems[1].querySelectorAll('source');
   assert(sourceElems[0].getAttribute('src') === `about:blank`);
   assert(sourceElems[1].getAttribute('src') === `about:blank`);
+  var trackElems = videoElems[1].querySelectorAll('track');
+  assert(trackElems[0].getAttribute('src') === `about:blank`);
+  assert(trackElems[1].getAttribute('src') === `about:blank`);
 
   /* capture.video = remove (headless) */
   var options = {
@@ -3708,6 +3752,8 @@ async function test_capture_video() {
   assert(videoElems.length === 0);
   var sourceElems = doc.querySelectorAll('source');
   assert(sourceElems.length === 0);
+  var trackElems = doc.querySelectorAll('track');
+  assert(trackElems.length === 0);
 }
 
 /**

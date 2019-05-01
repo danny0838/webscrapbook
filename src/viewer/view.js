@@ -435,6 +435,13 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           break;
         }
 
+        case "track": {
+          if (elem.hasAttribute("src")) {
+            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+          }
+          break;
+        }
+
 
         // @FIXME: embed, objects, and applet don't work as in a regular web page.
         case "embed": {
