@@ -6,7 +6,8 @@
 @import "ref/imported.css";
 @font-face { font-family: fontface; src: url(ref/sansation_light.woff); }
 #background { background: url(ref/green.bmp); }
-
+</style>
+<style>
 /* unsupported rules */
 #unsupported {
   *background: url(ref/unsupported-1.bmp); /* IE7 */
@@ -14,7 +15,8 @@
   -o-background: url(ref/unsupported-3.bmp); /* vandor prefix */
   unknown: url(ref/unsupported-4.bmp); /* unknown */
 }
-
+</style>
+<style>
 /* dynamic rules */
 #deleted { background: url(ref/deleted.bmp); }
 </style>
@@ -34,7 +36,7 @@
 <blockquote id="deleted">deleted</blockquote>
 </body>
 <script>
-var css = document.styleSheets[0];
+var css = document.styleSheets[2];
 css.deleteRule(css.cssRules.length - 1);
 css.insertRule('#inserted { background: url(ref/inserted.bmp); }', css.cssRules.length);
 </script>

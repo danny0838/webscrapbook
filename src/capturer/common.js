@@ -710,7 +710,51 @@ capturer.captureDocument = async function (params) {
               switch (options["capture.rewriteCss"]) {
                 case "url":
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.processCssText(elem.textContent, refUrl, settings, options);
+                    let cssText = elem.textContent;
+
+                    // Capture dynamic stylesheet content instead if the
+                    // stylesheet has been dynamically modified.
+                    //
+                    // @FIXME: Do so for external and imported stylesheets.
+                    const origElem = origNodeMap.get(elem);
+                    if (origElem && origElem.sheet) {
+                      const getRulesFromCssText = async (cssText) => {
+                        const d = document.implementation.createHTMLDocument('');
+                        const styleElem = d.createElement('style');
+                        styleElem.textContent = cssText;
+                        d.head.appendChild(styleElem);
+
+                        // In Firefox, an error is thrown when accessing cssRules right after
+                        // insertion of a stylesheet containing an @import rule. A delay is
+                        // required to prevent the error.
+                        await scrapbook.delay(0);
+
+                        return styleElem.sheet.cssRules;
+                      };
+
+                      let cssRulesCssom;
+                      try {
+                        cssRulesCssom = origElem.sheet.cssRules;
+                        if (!cssRulesCssom) { throw new Error('cssRules not accessible.'); }
+                      } catch (ex) {
+                        // cssRules not accessible, do nothing
+                      }
+                      if (cssRulesCssom) {
+                        const cssRulesSource = await getRulesFromCssText(cssText);
+                        if (cssRulesSource.length !== cssRulesCssom.length ||
+                            !Array.prototype.every.call(
+                              cssRulesSource,
+                              (cssRule, i) => (cssRule.cssText === cssRulesCssom[i].cssText),
+                            )) {
+                          cssText = Array.prototype.map.call(
+                            cssRulesCssom,
+                            cssRule => cssRule.cssText,
+                          ).join("\n");
+                        }
+                      }
+                    }
+
+                    const response = await capturer.processCssText(cssText, refUrl, settings, options);
                     elem.textContent = response;
                     return response;
                   });
@@ -1853,7 +1897,7 @@ capturer.captureDocument = async function (params) {
         doc,
         rootNode,
         refUrl,
-        fromSource: true,
+        fromSource: false,
         settings,
         options,
       });

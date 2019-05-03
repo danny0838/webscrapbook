@@ -2175,28 +2175,27 @@ async function test_capture_css_rewriteCss() {
   assert(zip.files["unsupported-2.bmp"]);
   assert(zip.files["unsupported-3.bmp"]);
   assert(zip.files["unsupported-4.bmp"]);
-  assert(!zip.files["inserted.bmp"]);
-  assert(zip.files["deleted.bmp"]);
+  assert(zip.files["inserted.bmp"]);
+  assert(!zip.files["deleted.bmp"]);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('style').textContent.trim() === `\
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[0].textContent.trim() === `\
 @import "imported.css";
 @font-face { font-family: fontface; src: url("sansation_light.woff"); }
-#background { background: url("green.bmp"); }
-
+#background { background: url("green.bmp"); }`);
+  assert(styleElems[1].textContent.trim() === `\
 /* unsupported rules */
 #unsupported {
   *background: url("unsupported-1.bmp"); /* IE7 */
   _background: url("unsupported-2.bmp"); /* IE6 */
   -o-background: url("unsupported-3.bmp"); /* vandor prefix */
   unknown: url("unsupported-4.bmp"); /* unknown */
-}
-
-/* dynamic rules */
-#deleted { background: url("deleted.bmp"); }`);
+}`);
+  assert(styleElems[2].textContent.trim() === `#inserted { background: url("inserted.bmp"); }`);
 
   assert(doc.querySelector('blockquote').getAttribute('style') === `background: url("green.bmp");`);
 
@@ -2217,19 +2216,20 @@ async function test_capture_css_rewriteCss() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('style').textContent.trim() === `\
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[0].textContent.trim() === `\
 @import "ref/imported.css";
 @font-face { font-family: fontface; src: url(ref/sansation_light.woff); }
-#background { background: url(ref/green.bmp); }
-
+#background { background: url(ref/green.bmp); }`);
+  assert(styleElems[1].textContent.trim() === `\
 /* unsupported rules */
 #unsupported {
   *background: url(ref/unsupported-1.bmp); /* IE7 */
   _background: url(ref/unsupported-2.bmp); /* IE6 */
   -o-background: url(ref/unsupported-3.bmp); /* vandor prefix */
   unknown: url(ref/unsupported-4.bmp); /* unknown */
-}
-
+}`);
+  assert(styleElems[2].textContent.trim() === `\
 /* dynamic rules */
 #deleted { background: url(ref/deleted.bmp); }`);
 
@@ -3122,12 +3122,12 @@ async function test_capture_imageBackground_used() {
   assert(zip.files['import-keyframes.bmp']);
   assert(!zip.files['neverused.bmp']);
   assert(!zip.files['removed.bmp']);
-  assert(zip.files['deleted-internal.bmp']);
-  assert(!zip.files['inserted-internal.bmp']);
-  assert(zip.files['deleted-link.bmp']);
-  assert(!zip.files['inserted-link.bmp']);
-  assert(zip.files['deleted-import.bmp']);
-  assert(!zip.files['inserted-import.bmp']);
+  assert(!zip.files['deleted-internal.bmp']);
+  assert(zip.files['inserted-internal.bmp']);
+  assert(!zip.files['deleted-link.bmp']);
+  assert(!zip.files['inserted-link.bmp']);  // @FIXME
+  assert(!zip.files['deleted-import.bmp']);
+  assert(!zip.files['inserted-import.bmp']);  // @FIXME
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3149,7 +3149,7 @@ async function test_capture_imageBackground_used() {
   from { transform: rotate(0turn); background-image: url(""); }
   to { transform: rotate(1turn); }
 }`);
-  assert(styleElems[8].textContent.trim() === `#deleted-internal { background: url("deleted-internal.bmp"); }`);
+  assert(styleElems[8].textContent.trim() === `#inserted-internal { background: url("inserted-internal.bmp"); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
@@ -3175,11 +3175,11 @@ async function test_capture_imageBackground_used() {
 
   var cssFile = zip.file('link-dynamic.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#deleted-link { background: url("deleted-link.bmp"); }`);
+  assert(text.trim() === `#deleted-link { background: url(""); }`);  // @FIXME
 
   var cssFile = zip.file('import-dynamic.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#deleted-import { background: url("deleted-import.bmp"); }`);
+  assert(text.trim() === `#deleted-import { background: url(""); }`);  // @FIXME
 
   /* capture.imageBackground = save-used (headless) */
   // the result is same as save
