@@ -1733,7 +1733,10 @@ capturer.captureDocument = async function (params) {
 
     // force title if a preset title is given
     if (title) {
-      let titleElem = rootNode.querySelector('title');
+      let titleElem = Array.prototype.find.call(
+        rootNode.querySelectorAll('title'),
+        x => !x.closest('svg'),
+      );
       if (titleElem) {
         titleElem.textContent = title;
       } else {
