@@ -1797,7 +1797,7 @@ capturer.captureDocument = async function (params) {
         doc,
         rootNode,
         refUrl,
-        fromSource: false,
+        fromSource: true,
         settings,
         options,
       });
@@ -2376,20 +2376,20 @@ capturer.parseDocumentCss = async function (params) {
 
     let rules;
     if (fromSource) {
-      try {
-        rules = css.cssRules;
-        if (!rules) { throw new Error('cssRules not accessible.'); }
-      } catch (ex) {
-        // cssRules not accessible, possibly a cross-domain CSS.
-        rules = await fetchCssRules({url: css.href, refUrl});
-      }
-    } else {
       if (css.href) {
         // <link> or @import
         rules = await fetchCssRules({url: css.href, refUrl});
       } else {
         // <style>
         rules = await fetchCssRules({text: css.ownerNode.textContent});
+      }
+    } else {
+      try {
+        rules = css.cssRules;
+        if (!rules) { throw new Error('cssRules not accessible.'); }
+      } catch (ex) {
+        // cssRules not accessible, possibly a cross-domain CSS.
+        rules = await fetchCssRules({url: css.href, refUrl});
       }
     }
     if (!rules) { return; }
@@ -2417,10 +2417,6 @@ capturer.parseDocumentCss = async function (params) {
       }
       case CSSRule.IMPORT_RULE: {
         if (fromSource) {
-          if (!cssRule.styleSheet) { break; }
-
-          await parseCss(cssRule.styleSheet, refUrl);
-        } else {
           if (!cssRule.href) { break; }
 
           const url = capturer.resolveRelativeUrl(cssRule.href, refUrl);
@@ -2429,6 +2425,10 @@ capturer.parseDocumentCss = async function (params) {
           for (const rule of rules) {
             await parseCssRule(rule, url);
           }
+        } else {
+          if (!cssRule.styleSheet) { break; }
+
+          await parseCss(cssRule.styleSheet, refUrl);
         }
         break;
       }
