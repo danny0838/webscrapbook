@@ -2082,13 +2082,14 @@ capturer.saveToServer = async function (params) {
  * Events handling
  */
 
+/**
+ * @param {Object} message
+ *     - {string} message.id
+ *     - {string} message.cmd
+ *     - {Object} message.args
+ */
 browser.runtime.onMessage.addListener((message, sender) => {
-  try {
-    if (message.args.settings.missionId !== capturer.missionId) {
-      return;
-    }
-  } catch (ex) {
-    // no entry of message.args.settings.missionId
+  if (message.id !== capturer.missionId) {
     return;
   }
 

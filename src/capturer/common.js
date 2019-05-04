@@ -21,10 +21,27 @@ const capturer = {
 };
 
 /**
- * Invoke an invokable capturer method from another script
+ * Invoke an invokable capturer method from another script.
+ *
+ * - To invoke a background script method from the background script, provide
+ *   nothing.
+ * - To invoke a background script method from a content script, provide
+ *   details.missionId or args.settings.missionId.
+ * - To invoke a content script method from the background script, provide
+ *   details.tabId and optionally details.frameId.
+ * - To invoke a content script method in a frame from a content script,
+ *   provide details.frameWindow.
+ *
+ * @param {string} method - The capturer method to invoke.
+ * @param {string} args - The arguments to pass to the capturer method.
+ * @param {string} details - Data to determine invocation behavior.
+ *     - {string} details.tabId
+ *     - {string} details.frameId
+ *     - {Window} details.frameWindow
+ * @return {Promise<Object>}
  */
 capturer.invoke = async function (method, args, details = {}) {
-  const {tabId = -1, frameId = 0, frameWindow = null} = details;
+  const {tabId = -1, frameId = 0, frameWindow, missionId} = details;
   if (tabId !== -1) {
     // to content script (or content script call self)
     if (!capturer.isContentScript) {
@@ -67,8 +84,15 @@ capturer.invoke = async function (method, args, details = {}) {
   } else {
     // to capturer.html page (or capturer.html call self)
     if (capturer.isContentScript) {
+      let id;
+      try {
+        id = details.missionId || args.settings.missionId;
+        if (!id) { throw new Error(`unknown missionId`); }
+      } catch (ex) {
+        throw new Error(`missionId is required to invoke from a content script.`);
+      }
       const cmd = "capturer." + method;
-      const message = {cmd, args};
+      const message = {id, cmd, args};
 
       isDebug && console.debug(cmd, "send to capturer page", args);
       const response = await browser.runtime.sendMessage(message);
