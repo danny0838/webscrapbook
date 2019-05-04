@@ -1,12 +1,12 @@
-/********************************************************************
+/******************************************************************************
  *
- * Script for load.html
+ * Background script of the main capturer (capturer.html).
  *
  * @require {boolean} isDebug
  * @require {Object} scrapbook
  * @require {Object} capturer
- * @public  {boolean} capturer.isContentScript
- *******************************************************************/
+ * @override {boolean} capturer.isContentScript
+ *****************************************************************************/
 
 ((window, document, browser) => {
 

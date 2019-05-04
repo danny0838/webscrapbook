@@ -1,11 +1,11 @@
-/********************************************************************
+/******************************************************************************
  *
- * The content script for capture functionality
+ * Content script for capture functionality.
  *
  * @require {boolean} isDebug
  * @require {Object} scrapbook
  * @require {Object} capturer
- *******************************************************************/
+ *****************************************************************************/
 
 ((window, document, browser) => {
 

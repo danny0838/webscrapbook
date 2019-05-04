@@ -1,11 +1,11 @@
-/********************************************************************
+/******************************************************************************
  *
- * The common script for capture functionality
+ * Common capture utilities shared among background and content scripts.
  *
  * @require {boolean} isDebug
  * @require {Object} scrapbook
  * @public {Object} capturer
- *******************************************************************/
+ *****************************************************************************/
 
 ((window, document, browser) => {
 
@@ -2235,7 +2235,14 @@ capturer.processCssText = async function (cssText, refUrl, settings, options) {
 };
 
 /**
- * Parse DOM stylesheets and get used CSS URLs by decendants of rootNode.
+ * Parse document stylesheets and collect used resource URLs by decendants of
+ * rootNode.
+ *
+ * - Don't consider unicode-range, as checking all related text nodes is
+ *   not performant.
+ * - Don't consider cross-domain (invalid) fonts. Even if we check status of 
+ *   Document.fonts, we can hardly be sure that "loading" will become
+ *  "loaded" or "error".
  *
  * @param {Object} params
  *     - {HTMLDocument} doc
@@ -2255,7 +2262,6 @@ capturer.parseDocumentCss = async function (params) {
   const usedCssFontUrl = {};
   const usedCssImageUrl = {};
 
-  // @TODO: Consider unicode-range when checking whether a font resource is loaded.
   const fontFamilyMapper = {
     list: {},
 
@@ -2435,7 +2441,6 @@ capturer.parseDocumentCss = async function (params) {
         // this CSS rule applies to no node in the captured area
         if (!verifySelector(rootNode, cssRule.selectorText)) { break; }
 
-        // @TODO: mark font families as used only if unicode-range matches
         fontFamilyMapper.use(cssRule.style.getPropertyValue('font-family'));
 
         animationMapper.use(cssRule.style.getPropertyValue('animation-name'));
@@ -2488,7 +2493,6 @@ capturer.parseDocumentCss = async function (params) {
       case CSSRule.PAGE_RULE: {
         if (!cssRule.cssText) { break; }
 
-        // @TODO: mark font families as used only if unicode-range matches
         fontFamilyMapper.use(cssRule.style.getPropertyValue('font-family'));
 
         animationMapper.use(cssRule.style.getPropertyValue('animation-name'));
@@ -2607,12 +2611,13 @@ capturer.parseDocumentCss = async function (params) {
 };
 
 
-/********************************************************************
+/******************************************************************************
  * A class that manages a text containing multiple URLs to be
  * downloaded and rewritten
  *
  * @class ComplexUrlDownloader
- *******************************************************************/
+ *****************************************************************************/
+
 capturer.ComplexUrlDownloader = class ComplexUrlDownloader {
   constructor(settings, options, refUrl) {
     this.urlHash = {};
