@@ -53,19 +53,6 @@ capturer.error = function (msg) {
 };
 
 /**
- * Gets a unique token for an access,
- * to be used in capturer.captureInfo.get(timeId).accessMap
- *
- * @param {string} method - The rewrite method name of how the URL is used
- *     (i.e. as embedded file, as stylesheet, or as (headless) document).
- */
-capturer.getAccessToken = function (url, method) {
-  let token = scrapbook.splitUrlByAnchor(url)[0] + "\t" + (method || "");
-  token = scrapbook.sha1(token, "TEXT");
-  return token;
-};
-
-/**
  * Prevent filename conflict. Appends a number if the given filename is used.
  *
  * Filename and path limitation:
@@ -181,61 +168,247 @@ capturer.getAvailableFilename = async function (params) {
 };
 
 /**
+ * Attempt to access a resource from the web and returns the result.
+ *
+ * An algorithm to prevent duplicated requests is implemented.
+ *
  * @param {Object} params
- *     - {string} params.headers
- *     - {string} params.refUrl
- *     - {string} params.targetUrl
- *     - {string} params.options
+ *     - {string} params.url
+ *     - {string} params.role
+ *     - {string} params.responseType
+ *     - {integer} params.timeout
+ *     - {Objet} params.hooks
+ *     - {Objet} params.settings
+ *     - {Objet} params.options
  */
-capturer.setReferrer = function (params) {
-  const {
-    headers,
-    refUrl,
-    targetUrl,
-    options = {},
-  } = params;
+capturer.access = async function (params) {
+  /**
+   * Get a unique token for an access.
+   */
+  const getAccessToken = function (url, role) {
+    let token = [scrapbook.splitUrlByAnchor(url)[0], role || "blob"].join("\t");
+    token = scrapbook.sha1(token, "TEXT");
+    return token;
+  };
 
-  if (!refUrl) { return; }
-  if (!refUrl.startsWith('http:') && !refUrl.startsWith('https:')) { return; }
-  if (refUrl.startsWith('https:') && (!targetUrl || !targetUrl.startsWith('https:'))) { return; }
+  /**
+   * @param {Object} params
+   *     - {Object} params.headers
+   *     - {string} params.refUrl
+   *     - {string} params.targetUrl
+   *     - {Object} params.options
+   */
+  const setReferrer = function (params) {
+    const {
+      headers,
+      refUrl,
+      targetUrl,
+      options = {},
+    } = params;
 
-  // cannot assign "referer" header directly
-  // the prefix will be removed by the onBeforeSendHeaders listener
-  let referrer;
-  let mode = options["capture.requestReferrer"];
+    if (!refUrl) { return; }
+    if (!refUrl.startsWith('http:') && !refUrl.startsWith('https:')) { return; }
+    if (refUrl.startsWith('https:') && (!targetUrl || !targetUrl.startsWith('https:'))) { return; }
 
-  if (mode === "auto") {
-    const u = new URL(refUrl);
-    const t = new URL(targetUrl);
-    if (u.origin !== t.origin) {
-      mode = "origin";
-    } else {
-      mode = "all";
-    }
-  }
+    // cannot assign "referer" header directly
+    // the prefix will be removed by the onBeforeSendHeaders listener
+    let referrer;
+    let mode = options["capture.requestReferrer"];
 
-  switch (mode) {
-    case "none": {
-      // no referrer
-      break;
-    }
-    case "all": {
-      referrer = scrapbook.splitUrlByAnchor(refUrl)[0];
-      break;
-    }
-    case "origin":
-    default: {
+    if (mode === "auto") {
       const u = new URL(refUrl);
-      u.pathname = "/";
-      u.search = u.hash = "";
-      referrer = u.href;
-      break;
+      const t = new URL(targetUrl);
+      if (u.origin !== t.origin) {
+        mode = "origin";
+      } else {
+        mode = "all";
+      }
     }
-  }
 
-  if (referrer) {
-    headers["X-WebScrapBook-Referer"] = referrer;
-  }
+    switch (mode) {
+      case "none": {
+        // no referrer
+        break;
+      }
+      case "all": {
+        referrer = scrapbook.splitUrlByAnchor(refUrl)[0];
+        break;
+      }
+      case "origin":
+      default: {
+        const u = new URL(refUrl);
+        u.pathname = "/";
+        u.search = u.hash = "";
+        referrer = u.href;
+        break;
+      }
+    }
+
+    if (referrer) {
+      headers["X-WebScrapBook-Referer"] = referrer;
+    }
+    return headers;
+  };
+  
+  const access = async function (params) {
+    isDebug && console.debug("call: access", params);
+
+    const {role, url: sourceUrl, refUrl, responseType = 'blob', timeout, hooks = {}, settings, options} = params;
+    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+
+    const {timeId} = settings;
+    if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
+    const accessMap = capturer.captureInfo.get(timeId).accessMap = capturer.captureInfo.get(timeId).accessMap || new Map();
+    const accessToken = getAccessToken(sourceUrlMain, role);
+
+    let urlHash = sourceUrlHash;
+
+    // check for previous access
+    {
+      const accessPrevious = accessMap.get(accessToken);
+
+      if (accessPrevious) {
+        let response;
+        if (hooks.duplicate) {
+          response = await hooks.duplicate({
+            access: accessPrevious,
+            url: sourceUrlMain,
+            hash: sourceUrlHash,
+          });
+        } else {
+          response = await accessPrevious;
+        }
+        return response;
+      }
+    }
+
+    const accessCurrent = (async () => {
+      let response;
+      try {
+        if (hooks.preRequest) {
+          const response = await hooks.preRequest({
+            url: sourceUrlMain,
+            hash: sourceUrlHash,
+          });
+          if (typeof response !== "undefined") {
+            return response;
+          }
+        }
+
+        const requestHeaders = setReferrer({
+          headers: {},
+          refUrl,
+          targetUrl: sourceUrlMain,
+          options,
+        });
+
+        let isDuplicateAbort = false;
+        let headers = {};
+        const xhr = await scrapbook.xhr({
+          url: sourceUrlMain,
+          responseType,
+          requestHeaders,
+          timeout,
+          onreadystatechange(xhr) {
+            if (xhr.readyState !== 2) { return; }
+
+            // check for previous access if redirected
+            const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
+            if (responseUrlMain !== sourceUrlMain) {
+              urlHash = responseUrlHash;
+
+              const responseAccessToken = getAccessToken(responseUrlMain, role);
+              const responseAccessPrevious = accessMap.get(responseAccessToken);
+              if (responseAccessPrevious) {
+                isDuplicateAbort = true;
+                if (hooks.duplicate) {
+                  response = hooks.duplicate({
+                    access: responseAccessPrevious,
+                    url: responseUrlMain,
+                    hash: urlHash,
+                  });
+                } else {
+                  response = responseAccessPrevious;
+                }
+                xhr.abort();
+                return;
+              }
+
+              accessMap.set(responseAccessToken, accessCurrent);
+            }
+
+            // get headers
+            if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+              if (hooks.preHeaders) {
+                hooks.preHeaders({
+                  access: accessCurrent,
+                  xhr,
+                  hash: urlHash,
+                  headers,
+                });
+              } else {
+                if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+                  const headerContentType = xhr.getResponseHeader("Content-Type");
+                  if (headerContentType) {
+                    const contentType = scrapbook.parseHeaderContentType(headerContentType);
+                    headers.contentType = contentType.type;
+                    headers.charset = contentType.parameters.charset;
+                  }
+                  const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+                  if (headerContentDisposition) {
+                    const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+                    headers.isAttachment = (contentDisposition.type === "attachment");
+                    headers.filename = contentDisposition.parameters.filename;
+                  }
+                }
+              }
+              if (hooks.postHeaders) {
+                hooks.postHeaders({
+                  access: accessCurrent,
+                  xhr,
+                  hash: urlHash,
+                  headers,
+                });
+              }
+            }
+          },
+        });
+
+        // This xhr is resolved to undefined when aborted.
+        if (!xhr && isDuplicateAbort) {
+          return response;
+        }
+
+        response = {
+          access: accessCurrent,
+          xhr,
+          hash: urlHash,
+          headers,
+        };
+
+        if (hooks.response) {
+          response = await hooks.response(response);
+        }
+      } catch (ex) {
+        // something wrong with the XMLHttpRequest
+        if (hooks.error) {
+          response = await hooks.error({
+            ex,
+            access: accessCurrent,
+          });
+        } else {
+          throw ex;
+        }
+      }
+      return response;
+    })();
+
+    accessMap.set(accessToken, accessCurrent);
+    return accessCurrent;
+  };
+
+  capturer.access = access;
+  return await access(params);
 };
 
 /**
@@ -535,90 +708,38 @@ capturer.captureUrl = async function (params) {
 
   const {url: sourceUrl, refUrl, title, settings, options} = params;
   const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
-  const {timeId} = settings;
 
-  const headers = {};
-
-  // init access check
-  if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-  const accessMap = capturer.captureInfo.get(timeId).accessMap = capturer.captureInfo.get(timeId).accessMap || new Map();
-
-  // check for previous access
-  const rewriteMethod = "captureUrl";
-  const accessToken = capturer.getAccessToken(sourceUrlMain, rewriteMethod);
-  const accessPrevious = accessMap.get(accessToken);
-  if (accessPrevious) { return accessPrevious; }
-
-  let accessPreviousRedirected;
-  const accessCurrent = (async () => {
-    try {
-      // fail out if sourceUrl is relative,
-      // or it will be treated as relative to this extension page.
-      if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
-        throw new Error(`URL not resolved.`);
-      }
-
-      const url = sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl;
-      const requestHeaders = {};
-      capturer.setReferrer({
-        headers: requestHeaders,
-        refUrl,
-        targetUrl: url,
-        options,
-      });
-
-      const xhr = await scrapbook.xhr({
-        url,
-        responseType: "document",
-        requestHeaders,
-        onreadystatechange(xhr) {
-          if (xhr.readyState !== 2) { return; }
-
-          // check for previous access if redirected
-          const [responseUrlMain] = scrapbook.splitUrlByAnchor(xhr.responseURL);
-          if (responseUrlMain !== sourceUrlMain) {
-            const accessTokenRedirected = capturer.getAccessToken(responseUrlMain, rewriteMethod);
-            accessPreviousRedirected = accessMap.get(accessTokenRedirected);
-
-            // use the previous access if found
-            if (accessPreviousRedirected) {
-              xhr.abort();
-              return;
-            }
-
-            accessMap.set(accessTokenRedirected, accessPreviousRedirected);
+  try {
+    return await capturer.access({
+      url: sourceUrl,
+      refUrl,
+      role: "captureUrl",
+      responseType: "document",
+      settings,
+      options,
+      hooks: {
+        async preRequest({url, hash}) {
+          // fail out if sourceUrl is relative,
+          // or it will be treated as relative to this extension page.
+          if (!scrapbook.isUrlAbsolute(url)) {
+            throw new Error(`Requires an absolute URL.`);
           }
+        },
 
-          // get headers
-          if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-            const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-            if (headerContentDisposition) {
-              const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-              headers.isAttachment = (contentDisposition.type === "attachment");
-              headers.filename = contentDisposition.parameters.filename;
-            }
-            const headerContentType = xhr.getResponseHeader("Content-Type");
-            if (headerContentType) {
-              const contentType = scrapbook.parseHeaderContentType(headerContentType);
-              headers.contentType = contentType.type;
-              headers.charset = contentType.parameters.charset;
-            }
-          }
-
+        async response({xhr, headers}) {
           // generate a documentName if not specified
-          if (!params.settings.documentName) {
+          if (!settings.documentName) {
             // use the filename if it has been defined by header Content-Disposition
             let filename = headers.filename ||
-                sourceUrl.startsWith("data:") ?
-                    scrapbook.dataUriToFile(scrapbook.splitUrlByAnchor(sourceUrl)[0]).name :
-                    scrapbook.urlToFilename(sourceUrl);
+                sourceUrlMain.startsWith("data:") ?
+                    scrapbook.dataUriToFile(sourceUrlMain).name :
+                    scrapbook.urlToFilename(sourceUrlMain);
 
-            let mime = headers.contentType || Mime.lookup(filename) || "text/html";
-            let fn = filename.toLowerCase();
-            if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
-              let exts = Mime.allExtensions(mime);
-              for (let i = 0, I = exts.length; i < I; i++) {
-                let ext = ("." + exts[i]).toLowerCase();
+            const mime = headers.contentType || Mime.lookup(filename) || "text/html";
+            if (!["text/html", "application/xhtml+xml"].includes(mime)) {
+              const fn = filename.toLowerCase();
+              for (let ext of Mime.allExtensions(mime)) {
+                ext = "." + ext.toLowerCase();
                 if (fn.endsWith(ext)) {
                   filename = filename.slice(0, -ext.length);
                   break;
@@ -626,43 +747,36 @@ capturer.captureUrl = async function (params) {
               }
             }
 
-            params.settings.documentName = filename;
+            settings.documentName = filename;
+          }
+
+          const doc = xhr.response;
+          if (doc) {
+            return await capturer.captureDocumentOrFile({
+              doc,
+              refUrl,
+              title,
+              settings,
+              options,
+            });
+          } else {
+            return await capturer.captureFile({
+              url: sourceUrl,
+              refUrl,
+              title,
+              charset: headers.charset,
+              settings,
+              options,
+            });
           }
         },
-      });
-
-      // Request aborted, only when a previous access is found.
-      // Return that Promise.
-      if (!xhr) { return accessPreviousRedirected; }
-
-      const doc = xhr.response;
-      if (doc) {
-        return await capturer.captureDocumentOrFile({
-          doc,
-          refUrl,
-          title,
-          settings,
-          options,
-        });
-      } else {
-        return await capturer.captureFile({
-          url: sourceUrl,
-          refUrl,
-          title,
-          charset: headers.charset,
-          settings: params.settings,
-          options: params.options,
-        });
-      }
-    } catch (ex) {
-      console.warn(ex);
-      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
-    }
-  })();
-
-  accessMap.set(accessToken, accessCurrent);
-  return accessCurrent;
+      },
+    });
+  } catch (ex) {
+    console.warn(ex);
+    capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+    return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+  }
 };
 
 /**
@@ -689,20 +803,16 @@ capturer.captureBookmark = async function (params) {
     // attempt to retrieve title and favicon from source page
     if (!title || !favIconUrl) {
       try {
-        const url = sourceUrl.startsWith("data:") ? scrapbook.splitUrlByAnchor(sourceUrl)[0] : sourceUrl;
-        const requestHeaders = {};
-        capturer.setReferrer({
-          headers: requestHeaders,
+        const {xhr} = await capturer.access({
+          url: sourceUrl,
           refUrl,
-          targetUrl: url,
+          role: "captureBookmark.document",
+          responseType: "document",
+          settings,
           options,
         });
 
-        const doc = (await scrapbook.xhr({
-          url,
-          responseType: "document",
-          requestHeaders,
-        })).response;
+        const doc = xhr.response;
 
         // specified sourceUrl may not be a document, maybe a malformed xhtml?
         if (doc) {
@@ -730,19 +840,12 @@ capturer.captureBookmark = async function (params) {
     // fetch favicon as data URL
     if (favIconUrl && !favIconUrl.startsWith('data:')) {
       try {
-        const url = scrapbook.splitUrlByAnchor(favIconUrl)[0];
-        const requestHeaders = {};
-        capturer.setReferrer({
-          headers: requestHeaders,
+        const {xhr} = await capturer.access({
+          url: favIconUrl,
           refUrl: sourceUrl,
-          targetUrl: url,
+          role: "captureBookmark.favicon",
+          settings,
           options,
-        });
-
-        const xhr = await scrapbook.xhr({
-          url,
-          responseType: "blob",
-          requestHeaders,
         });
         favIconUrl = await scrapbook.readFileAsDataURL(xhr.response);
       } catch (ex) {
@@ -1500,252 +1603,204 @@ ${JSON.stringify(zipData)}
 capturer.downloadFile = async function (params) {
   isDebug && console.debug("call: downloadFile", params);
 
-  const {url: sourceUrl, refUrl, rewriteMethod, settings, options} = params;
-  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-  const {timeId, recurseChain} = settings;
+  const MIMES_NO_EXT_NO_MATCH = [
+    "application/octet-stream",
+  ];
 
-  const headers = {};
-  let filename;
+  const MIMES_NEED_MATCH = [
+    "text/html",
+    "text/xml",
+    "text/css",
+    "text/javascript",
+    "application/javascript",
+    "application/x-javascript",
+    "text/ecmascript",
+    "application/ecmascript",
+    "image/bmp",
+    "image/jpeg",
+    "image/gif",
+    "image/png",
+    "image/svg+xml",
+    "audio/wav",
+    "audio/x-wav",
+    "audio/mp3",
+    "audio/ogg",
+    "application/ogg",
+    "audio/mpeg",
+    "video/mp4",
+    "video/webm",
+    "video/ogg",
+  ];
 
-  // init access check
-  if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-  const accessMap = capturer.captureInfo.get(timeId).accessMap = capturer.captureInfo.get(timeId).accessMap || new Map();
+  const MAP_ACCESS_DATA = new WeakMap();
 
-  // check for previous access
-  const accessToken = capturer.getAccessToken(sourceUrlMain, rewriteMethod);
-  const accessPrevious = accessMap.get(accessToken);
-  if (accessPrevious) {
-    // Normally we wait until the file be downloaded, and possibly
-    // renamed, cancelled, or thrown error. However, if there is
-    // a circular reference, we have to return early to pervent a
-    // dead lock. This returned data could be incorrect if something
-    // unexpected happen to the accessPrevious.
-    if (recurseChain.indexOf(sourceUrlMain) !== -1) {
-      return {
-        filename: accessPrevious.filename,
-        url: scrapbook.escapeFilename(accessPrevious.filename) + sourceUrlHash,
-        isCircular: true,
-      };
-    }
-    return accessPrevious;
-  }
+  const downloadFile = async (params) => {
+    const {url: sourceUrl, refUrl, rewriteMethod, settings, options} = params;
+    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const {timeId, recurseChain} = settings;
 
-  const accessCurrent = (async () => {
     try {
-      // fail out if sourceUrl is relative,
-      // or it will be treated as relative to this extension page.
-      if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
-        throw new Error(`URL not resolved.`);
-      }
-
-      // special management for data URI
-      if (sourceUrlMain.startsWith("data:")) {
-        /* save the data URI as file? */
-        if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
-          const file = scrapbook.dataUriToFile(sourceUrlMain);
-          if (!file) { throw new Error("Malformed data URL."); }
-
-          filename = file.name;
-          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          filename = capturer.getUniqueFilename(timeId, filename);
-
-          let blob;
-          if (capturer[rewriteMethod]) {
-            blob = await capturer[rewriteMethod]({
-              settings,
-              options,
-              data: file,
-              charset: null,
-              url: null,
-            });
-          } else {
-            blob = file;
-          }
-          return await capturer.downloadBlob({
-            settings,
-            options,
-            blob,
-            filename,
-            sourceUrl,
-          });
-        }
-
-        /* rewrite content of the data URI? */
-        if (rewriteMethod && capturer[rewriteMethod]) {
-          const file = scrapbook.dataUriToFile(sourceUrlMain);
-          if (!file) { throw new Error("Malformed data URL."); }
-
-          // Save inner URLs as data URL since data URL is null origin
-          // and no relative URLs are allowed in it.
-          const innerOptions = JSON.parse(JSON.stringify(options));
-          innerOptions["capture.saveAs"] = "singleHtml";
-
-          const blob = await capturer[rewriteMethod]({
-            settings,
-            options: innerOptions,
-            data: file,
-            charset: null,
-            url: null,
-          });
-          return {url: await scrapbook.readFileAsDataURL(blob)};
-        }
-
-        return {url: sourceUrl};
-      }
-
-      const requestHeaders = {};
-      capturer.setReferrer({
-        headers: requestHeaders,
-        refUrl,
-        targetUrl: sourceUrl,
-        options,
-      });
-
-      let accessPreviousReturn;
-      const xhr = await scrapbook.xhr({
+      return await capturer.access({
         url: sourceUrl,
-        responseType: "blob",
-        requestHeaders,
-        onreadystatechange(xhr) {
-          if (xhr.readyState !== 2) { return; }
-
-          // check for previous access if redirected
-          const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
-
-          if (responseUrlMain !== sourceUrlMain) {
-            const accessToken = capturer.getAccessToken(responseUrlMain, rewriteMethod);
-            const accessPrevious = accessMap.get(accessToken);
-            if (accessPrevious) {
-              xhr.abort();
-
-              // See accessPrevious check above in this method
-              if (recurseChain.indexOf(responseUrlMain) !== -1) {
-                return accessPreviousReturn = {
-                  filename: accessPrevious.filename,
-                  url: scrapbook.escapeFilename(accessPrevious.filename) + responseUrlHash,
-                  isCircular: true,
-                };
-              }
-              return accessPreviousReturn = accessPrevious;
-            }
-
-            accessMap.set(accessToken, accessPrevious);
-          }
-
-          // get headers
-          if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-            const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-            if (headerContentDisposition) {
-              const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-              headers.isAttachment = (contentDisposition.type === "attachment");
-              headers.filename = contentDisposition.parameters.filename;
-            }
-            const headerContentType = xhr.getResponseHeader("Content-Type");
-            if (headerContentType) {
-              const contentType = scrapbook.parseHeaderContentType(headerContentType);
-              headers.contentType = contentType.type;
-              headers.charset = contentType.parameters.charset;
-            }
-          }
-
-          // determine the filename
-          // use the filename if it has been defined by header Content-Disposition
-          filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
-
-          // if header Content-Type (MIME) is defined:
-          // 1. If the file has no extension, assign one according to MIME,
-          //    except for certain MIMEs.
-          //    (For example, "application/octet-stream" can be anything,
-          //    and guessing a "bin" is meaningless.)
-          // 2. For several usual MIMEs, if the file extension doesn't match
-          //    MIME, append a matching extension to prevent the file be
-          //    assigned a bad MIME when served via HTTP, which could cause
-          //    the browser to reject it.  For example, a CSS file named 
-          //    "foo.php" may be served as "application/x-httpd-php", and
-          //    modern browsers would refuse loading the CSS).
-          //
-          // Basic MIMEs listed in MAFF spec should be included:
-          // http://maf.mozdev.org/maff-specification.html
-          if (headers.contentType) {
-            const mime = headers.contentType;
-            let [base, extension] = scrapbook.filenameParts(filename);
-            if ((!extension && ![
-                  "application/octet-stream",
-                ].includes(mime)) || ([
-                  "text/html",
-                  "text/xml",
-                  "text/css",
-                  "text/javascript",
-                  "application/javascript",
-                  "application/x-javascript",
-                  "text/ecmascript",
-                  "application/ecmascript",
-                  "image/bmp",
-                  "image/jpeg",
-                  "image/gif",
-                  "image/png",
-                  "image/svg+xml",
-                  "audio/wav",
-                  "audio/x-wav",
-                  "audio/mp3",
-                  "audio/ogg",
-                  "application/ogg",
-                  "audio/mpeg",
-                  "video/mp4",
-                  "video/webm",
-                  "video/ogg",
-                ].includes(mime) && !Mime.allExtensions(mime).includes(extension.toLowerCase()))) {
-              extension = Mime.extension(mime);
-              if (extension) {
-                filename += "." + extension;
-              }
-            }
-          }
-
-          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          filename = capturer.getUniqueFilename(timeId, filename);
-
-          // record the currently available filename
-          // we need this data for early return of circular referencing
-          accessCurrent.filename = filename;
-        },
-      });
-
-      // Request aborted, only when a previous access is found.
-      // Return that Promise.
-      if (!xhr) { return accessPreviousReturn; }
-
-      let blob;
-      if (capturer[rewriteMethod]) {
-        blob = await capturer[rewriteMethod]({
-          settings,
-          options,
-          data: xhr.response,
-          charset: headers.charset,
-          url: xhr.responseURL,
-        });
-      } else {
-        blob = xhr.response;
-      }
-      return await capturer.downloadBlob({
+        refUrl,
+        role: "downloadFile",
         settings,
         options,
-        blob,
-        filename,
-        sourceUrl,
+        hooks: {
+          async preRequest({url, hash}) {
+            // fail out if sourceUrl is relative,
+            // or it will be treated as relative to this extension page.
+            if (!scrapbook.isUrlAbsolute(url)) {
+              throw new Error(`Requires an absolute URL.`);
+            }
+
+            // special management for data URI
+            if (url.startsWith("data:")) {
+              /* save data URI as file? */
+              if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
+                const file = scrapbook.dataUriToFile(url);
+                if (!file) { throw new Error("Malformed data URL."); }
+
+                let filename = file.name;
+                filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+                filename = capturer.getUniqueFilename(timeId, filename);
+
+                let blob;
+                if (capturer[rewriteMethod]) {
+                  blob = await capturer[rewriteMethod]({
+                    settings,
+                    options,
+                    data: file,
+                    charset: null,
+                    url: null,
+                  });
+                } else {
+                  blob = file;
+                }
+                return await capturer.downloadBlob({
+                  settings,
+                  options,
+                  blob,
+                  filename,
+                  sourceUrl,
+                });
+              }
+
+              /* rewrite content of the data URI? */
+              if (rewriteMethod && capturer[rewriteMethod]) {
+                const file = scrapbook.dataUriToFile(url);
+                if (!file) { throw new Error("Malformed data URL."); }
+
+                // Save inner URLs as data URL since data URL is null origin
+                // and no relative URLs are allowed in it.
+                const innerOptions = JSON.parse(JSON.stringify(options));
+                innerOptions["capture.saveAs"] = "singleHtml";
+
+                const blob = await capturer[rewriteMethod]({
+                  settings,
+                  options: innerOptions,
+                  data: file,
+                  charset: null,
+                  url: null,
+                });
+                return {url: await scrapbook.readFileAsDataURL(blob)};
+              }
+
+              return {url: sourceUrl};
+            }
+          },
+
+          postHeaders({access, headers}) {
+            // determine the filename
+            // use the filename if it has been defined by header Content-Disposition
+            let filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
+
+            // if header Content-Type (MIME) is defined:
+            // 1. If the file has no extension, assign one according to MIME,
+            //    except for certain MIMEs.
+            //    (For example, "application/octet-stream" can be anything,
+            //    and guessing a "bin" is meaningless.)
+            // 2. For several usual MIMEs, if the file extension doesn't match
+            //    MIME, append a matching extension to prevent the file be
+            //    assigned a bad MIME when served via HTTP, which could cause
+            //    the browser to reject it.  For example, a CSS file named 
+            //    "foo.php" may be served as "application/x-httpd-php", and
+            //    modern browsers would refuse loading the CSS).
+            //
+            // Basic MIMEs listed in MAFF spec should be included:
+            // http://maf.mozdev.org/maff-specification.html
+            if (headers.contentType) {
+              const mime = headers.contentType;
+              let [base, ext] = scrapbook.filenameParts(filename);
+              if ((!ext && !MIMES_NO_EXT_NO_MATCH.includes(mime)) || 
+                  (MIMES_NEED_MATCH.includes(mime) && !Mime.allExtensions(mime).includes(ext.toLowerCase()))) {
+                ext = Mime.extension(mime);
+                if (ext) {
+                  filename += "." + ext;
+                }
+              }
+            }
+
+            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+            filename = capturer.getUniqueFilename(timeId, filename);
+
+            // record the currently available filename
+            // we need this data for early return of circular referencing
+            MAP_ACCESS_DATA.set(access, {filename});
+          },
+
+          async response({access, xhr, hash, headers}) {
+            let blob;
+            if (capturer[rewriteMethod]) {
+              blob = await capturer[rewriteMethod]({
+                settings,
+                options,
+                data: xhr.response,
+                charset: headers.charset,
+                url: xhr.responseURL,
+              });
+            } else {
+              blob = xhr.response;
+            }
+            return await capturer.downloadBlob({
+              settings,
+              options,
+              blob,
+              filename: MAP_ACCESS_DATA.get(access).filename,
+              sourceUrl,
+            });
+          },
+
+          async duplicate({access, url, hash}) {
+            // Normally we wait until the file be downloaded, and possibly
+            // renamed, cancelled, or thrown error. However, if there is
+            // a circular reference, we have to return early to pervent a
+            // dead lock. This returned data could be incorrect if something
+            // unexpected happen to the access.
+            if (recurseChain.indexOf(sourceUrlMain) !== -1) {
+              const filename = MAP_ACCESS_DATA.get(access).filename;
+              return {
+                filename,
+                url: scrapbook.escapeFilename(filename) + hash,
+                isCircular: true,
+              };
+            }
+
+            return await access;
+          },
+        },
       });
     } catch (ex) {
       console.warn(ex);
       capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     }
-  })();
+  };
 
-  accessMap.set(accessToken, accessCurrent);
-  return accessCurrent;
+  capturer.downloadFile = downloadFile;
+  return await downloadFile(params);
 };
 
-// @TODO: accessMap cache for same URL
 /**
  * @kind invokable
  * @param {Object} params
@@ -1757,75 +1812,48 @@ capturer.downloadFile = async function (params) {
 capturer.downLinkFetchHeader = async function (params) {
   isDebug && console.debug("call: downLinkFetchHeader", params);
 
-  const {url: sourceUrl, refUrl, options} = params;
-  const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const {url: sourceUrl, refUrl, settings, options} = params;
 
-  const headers = {};
-
-  const requestHeaders = {};
-  capturer.setReferrer({
-    headers: requestHeaders,
-    refUrl,
-    targetUrl: sourceUrlMain,
-    options,
-  });
-
-  let xhr;
   try {
-    xhr = await scrapbook.xhr({
-      url: sourceUrlMain,
-      responseType: 'blob',
+    return await capturer.access({
+      url: sourceUrl,
+      refUrl,
+      role: "downLinkFetchHeader",
+      responseType: "blob",
       timeout: 8000,
-      requestHeaders,
-      onreadystatechange(xhr) {
-        if (xhr.readyState !== 2) { return; }
+      settings,
+      options,
+      hooks: {
+        postHeaders({xhr}) {
+          xhr.abort();
+        },
 
-        // get headers
-        if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-          const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-          if (headerContentDisposition) {
-            const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-            headers.isAttachment = (contentDisposition.type === "attachment");
-            headers.filename = contentDisposition.parameters.filename;
-          }
-          const headerContentType = xhr.getResponseHeader("Content-Type");
-          if (headerContentType) {
-            const contentType = scrapbook.parseHeaderContentType(headerContentType);
-            headers.contentType = contentType.type;
-            headers.charset = contentType.parameters.charset;
-          }
-        }
+        async response({xhr, headers}) {
+          if (headers.filename) {
+            let [, ext] = scrapbook.filenameParts(headers.filename);
 
-        xhr.abort();
+            if (!ext && headers.contentType) {
+              ext = Mime.extension(headers.contentType);
+            }
+
+            return ext;
+          } else if (headers.contentType) {
+            return Mime.extension(headers.contentType);
+          } else {
+            const filename = scrapbook.urlToFilename(sourceUrl);
+            const [, ext] = scrapbook.filenameParts(filename);
+            return ext;
+          }
+        },
       },
     });
   } catch (ex) {
-    // something wrong for the XMLHttpRequest
     console.warn(ex);
     capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
     return null;
   }
-
-  if (headers.filename) {
-    let [, ext] = scrapbook.filenameParts(headers.filename);
-
-    if (!ext && headers.contentType) {
-      ext = Mime.extension(headers.contentType);
-    }
-
-    return ext;
-  } else {
-    if (headers.contentType) {
-      return Mime.extension(headers.contentType);
-    }
-
-    let filename = scrapbook.urlToFilename(sourceUrlMain);
-    let [, ext] = scrapbook.filenameParts(filename);
-    return ext;
-  }
 };
 
-// @TODO: accessMap cache for same URL
 /**
  * @kind invokable
  * @param {Object} params
@@ -1839,38 +1867,20 @@ capturer.fetchCss = async function (params) {
   isDebug && console.debug("call: fetchCss", params);
 
   const {url: sourceUrl, refUrl, settings, options} = params;
-  const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
-
-  const requestHeaders = {};
-  capturer.setReferrer({
-    headers: requestHeaders,
-    refUrl,
-    targetUrl: sourceUrlMain,
-    options,
-  });
 
   try {
-    const headers = {};
-    const xhr = await scrapbook.xhr({
-      url: sourceUrlMain,
-      responseType: 'blob',
-      requestHeaders,
-      onreadystatechange(xhr) {
-        if (xhr.readyState !== 2) { return; }
-
-        // get headers
-        if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-          const headerContentType = xhr.getResponseHeader("Content-Type");
-          if (headerContentType) {
-            const contentType = scrapbook.parseHeaderContentType(headerContentType);
-            headers.contentType = contentType.type;
-            headers.charset = contentType.parameters.charset;
-          }
+    return await capturer.access({
+      url: sourceUrl,
+      refUrl,
+      role: "fetchCss",
+      settings,
+      options,
+      hooks: {
+        async response({xhr, headers}) {
+          return await scrapbook.parseCssFile(xhr.response, headers.charset);
         }
       },
     });
-
-    return await scrapbook.parseCssFile(xhr.response, headers.charset);
   } catch (ex) {
     // something wrong for the XMLHttpRequest
     return {error: {message: ex.message}};
