@@ -867,6 +867,8 @@ capturer.captureDocument = async function (params) {
 
               const frameSettings = JSON.parse(JSON.stringify(settings));
               frameSettings.frameIsMain = false;
+              delete frameSettings.usedCssFontUrl;
+              delete frameSettings.usedCssImageUrl;
 
               let frameDoc;
               try {
