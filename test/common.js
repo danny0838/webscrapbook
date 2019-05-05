@@ -144,7 +144,7 @@ async function capture(params) {
 
       const response = await new Promise((resolve, reject) => {
         const onMessage = (message) => {
-          if (message.cmd === 'captureResponse') {
+          if (message.cmd === 'capturerResponse') {
             port.onMessage.removeListener(onMessage);
             const response = message.args;
             if (response.error) {
@@ -212,7 +212,7 @@ async function captureHeadless(params) {
 
       const response = await new Promise((resolve, reject) => {
         const onMessage = (message) => {
-          if (message.cmd === 'captureResponse') {
+          if (message.cmd === 'capturerResponse') {
             port.onMessage.removeListener(onMessage);
             const response = message.args;
             if (response.error) {

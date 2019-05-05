@@ -2107,22 +2107,29 @@ browser.runtime.onMessage.addListener((message, sender) => {
   }
 });
 
-if (browser.runtime.onConnectExternal) {
-  // Available in Firefox >= 54.
-  browser.runtime.onConnectExternal.addListener((port) => {
+{
+  const listener = (port) => {
     const onCapturerReady = () => {
       if (port.name !== capturer.missionId) {
         return;
       }
       const onMessage = async (message) => {
+        isDebug && console.debug(message.cmd, "receive", port.sender, message.args);
+
         if (message.cmd.slice(0, 9) == "capturer.") {
           const fn = capturer[message.cmd.slice(9)];
           if (fn) {
-            const response = await fn(message.args);
-            port.postMessage({
-              cmd: 'captureResponse',
-              args: response,
-            });
+            try {
+              const response = await fn(message.args);
+              port.postMessage({
+                cmd: 'capturerResponse',
+                args: response,
+              });
+            } catch (ex) {
+              console.error(ex);
+              const err = `Unexpected error: ${ex.message}`;
+              capturer.error(err);
+            }
           }
         }
       };
@@ -2134,7 +2141,14 @@ if (browser.runtime.onConnectExternal) {
     } else {
       document.addEventListener("capturerReady", onCapturerReady);
     }
-  });
+  };
+
+  browser.runtime.onConnect.addListener(listener);
+
+  if (browser.runtime.onConnectExternal) {
+    // Available in Firefox >= 54.
+    browser.runtime.onConnectExternal.addListener(listener);
+  }
 }
 
 browser.downloads.onCreated.addListener((downloadItem) => {
