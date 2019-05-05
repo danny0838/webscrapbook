@@ -355,6 +355,9 @@
   "OptionCaptureSaveFilenameTooltip": {
     "message": "指定获取数据的保存文件名（不含扩展名），可用以下模版语法带入参数：\n* %% - 带入“%”符号。\n* %ID% - 获取数据的唯一识别码，如“20190301124533216”。\n* %ID_0% - 传统 ScrapBook 格式的识别码，如“20190301204533”。\n* %UUID% - 产生一个乱数 UUID，如“941e4674-d6c7-4709-9703-a1b4359286c6”。\n* %TITLE% - 页面标题，若无页面标题，会取网址最后一节作为标题。\n* %HOST% - 数据来源网域，如“example.com”。\n* %PAGE% - 网址最后一节，并去除扩展名。\n* %FILE% - 网址最后一节。\n* %DATE% - 现在日期，格式为 YYYY-MM-DD。\n* %TIME% - 现在时间，格式为 HH-MM-SS。\n* %YEAR% - 现在年份，格式为 YYYY。\n* %MONTH% - 现在月份，格式为 MM。\n* %DAY% - 现在月份中的日数，格式为 DD。\n* %HOURS% - 现在小时数，格式为 HH。\n* %MINUTES% - 现在分钟数，格式为 MM。\n* %SECONDS% - 现在秒数，格式为 SS。\n* 时间参数皆可在后面加上“_UTC”使用世界协调时间，例如 %TIME_UTC%、%HOURS_UTC%。\n* 可用斜线“/”指定子文件夹，例如“%YEAR%/%MONTH%/%TITLE%”。"
   },
+  "OptionCaptureSaveToFileLabel": {
+    "message": "文件"
+  },
   "OptionCaptureSaveToFolderLabel": {
     "message": "剪贴簿文件夹"
   },
@@ -365,7 +368,7 @@
     "message": "后端服务器"
   },
   "OptionCaptureSaveToTooltip": {
-    "message": "指定管理保存数据的方式。\n\n* 后端服务器：将获取页面保存于后端服务器设定的剪贴簿数据目录。\n\n* 剪贴簿文件夹：将获取页面保存于 <默认下载文件夹> 下的剪贴簿文件夹。"
+    "message": "指定管理保存数据的方式。\n\n* 后端服务器：将获取页面保存于后端服务器设定的剪贴簿数据目录。\n\n* 剪贴簿文件夹：将获取页面保存于 <默认下载文件夹> 下的剪贴簿文件夹。\n\n* 文件：将获取页面保存成文件。"
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "剪贴簿文件夹:"

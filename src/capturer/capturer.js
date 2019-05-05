@@ -807,6 +807,11 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
         // special handling (for unit test)
         return await capturer.saveBlobInMemory({blob});
       }
+      case 'file': {
+        filename = settings.filename + ext;
+        saveMethod = "saveBlobNaturally";
+        break;
+      }
       case 'server': {
         // deprecated; normally we won't get here
         [targetDir, filename] = scrapbook.filepathParts(settings.filename + ext);
@@ -1022,6 +1027,11 @@ capturer.saveDocument = async function (params) {
               // special handling (for unit test)
               return await capturer.saveBlobInMemory({blob});
             }
+            case 'file': {
+              filename = settings.filename + ext;
+              saveMethod = "saveBlobNaturally";
+              break;
+            }
             case 'server': {
               [targetDir, filename] = scrapbook.filepathParts(settings.filename + ext);
               savePrompt = false;
@@ -1183,6 +1193,11 @@ ${JSON.stringify(zipData)}
               // special handling (for unit test)
               return await capturer.saveBlobInMemory({blob});
             }
+            case 'file': {
+              filename = settings.filename + ext;
+              saveMethod = "saveBlobNaturally";
+              break;
+            }
             case 'server': {
               [targetDir, filename] = scrapbook.filepathParts(settings.filename + ext);
               savePrompt = false;
@@ -1254,6 +1269,11 @@ ${JSON.stringify(zipData)}
             case 'memory': {
               // special handling (for unit test)
               return await capturer.saveBlobInMemory({blob});
+            }
+            case 'file': {
+              filename = settings.filename + ".htz";
+              saveMethod = "saveBlobNaturally";
+              break;
             }
             case 'server': {
               [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".htz");
@@ -1345,6 +1365,11 @@ ${JSON.stringify(zipData)}
               // special handling (for unit test)
               return await capturer.saveBlobInMemory({blob});
             }
+            case 'file': {
+              filename = settings.filename + ".maff";
+              saveMethod = "saveBlobNaturally";
+              break;
+            }
             case 'server': {
               [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".maff");
               savePrompt = false;
@@ -1402,7 +1427,8 @@ ${JSON.stringify(zipData)}
             break;
           }
           case 'folder':
-          case 'memory':
+          case 'file': // fallback
+          case 'memory': // fallback
           default: {
             targetDir = options["capture.saveFolder"] + "/" + settings.filename;
             saveMethod = "saveBlob";
@@ -1950,9 +1976,81 @@ capturer.downloadBlob = async function (params) {
 };
 
 /**
+ * Download a blob in a way like default browser "save as".
+ *
+ * @param {Object} params
+ *     - {string} params.timeId
+ *     - {Blob} params.blob
+ *     - {string} params.filename
+ *     - {string} params.sourceUrl
+ * @return {Promise<Object>}
+ */
+capturer.saveBlobNaturally = async function (params) {
+  const {timeId, blob, filename, sourceUrl} = params;
+
+  // Use the natural download attribute to generate a download.
+  return await new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+
+    capturer.downloadInfo.set(url, {
+      timeId,
+      src: sourceUrl,
+      onComplete: resolve,
+      onError: reject,
+    });
+
+    if (scrapbook.userAgent.is('gecko')) {
+      // Firefox has a bug that the screen turns unresponsive
+      // when an addon page is redirected to a blob URL.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
+      //
+      // Workaround by creating the anchor in an iframe.
+      const iDoc = this.downloader.contentDocument;
+      const a = iDoc.createElement('a');
+      a.download = filename;
+      a.href = url;
+      iDoc.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      // In case the download still fails.
+      const file = new File([blob], filename, {type: "application/octet-stream"});
+      const url2 = URL.createObjectURL(file);
+
+      capturer.downloadInfo.set(url2, {
+        timeId,
+        src: sourceUrl,
+        onComplete: resolve,
+        onError: reject,
+      });
+
+      const elem = document.createElement('a');
+      elem.target = 'download';
+      elem.href = url2;
+      elem.textContent = `If the download doesn't start, click me.`;
+      capturer.logger.appendChild(elem);
+      capturer.log('');
+      return;
+    }
+
+    const elem = document.createElement('a');
+    elem.download = filename;
+    elem.href = url;
+    elem.textContent = `If the download doesn't start, click me.`;
+    capturer.logger.appendChild(elem);
+    elem.click();
+    capturer.log('');
+  }).catch((ex) => {
+    // probably USER_CANCELLED
+    // treat as capture success and return the filename
+    return filename;
+  });
+};
+
+/**
  * @param {Object} params
  *     - {Blob} params.blob
- * @return {Promise<Object>}
+ * @return {Promise}
  */
 capturer.saveBlobInMemory = async function (params) {
   isDebug && console.debug("call: saveBlobInMemory", params);
@@ -2213,6 +2311,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   scrapbook.loadLanguages(document);
 
   capturer.logger = document.getElementById('logger');
+  capturer.downloader = document.getElementById('downloader');
 
   await scrapbook.loadOptions();
 
