@@ -1463,18 +1463,45 @@ scrapbook.rewriteCssText = function (cssText, options) {
  *
  * @callback rewriteSrcsetRewriter
  * @param {string} url
- * @return {string} The rewritten URL.
+ * @return {string|Promise<string>} The rewritten URL.
  */
 
 /**
  * @param {string} srcset
  * @param {rewriteSrcsetRewriter} rewriter
+ * @return {string|Promise<string>} The rewritten URL.
  */
 scrapbook.rewriteSrcset = function (srcset, rewriter) {
-  const regex = /(\s*)([^ ,][^ ]*[^ ,])(\s*(?: [^ ,]+)?\s*(?:,|$))/g;
+  const KEY_PREFIX = "urn:scrapbook:str:";
+  const REGEX_SRCSET = /(\s*)([^ ,][^ ]*[^ ,])(\s*(?: [^ ,]+)?\s*(?:,|$))/g;
+  const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
+
   const rewriteSrcset = function (srcset, rewriter) {
-    return srcset.replace(regex, (m, m1, m2, m3) => {
-      return m1 + rewriter(m2) + m3;
+    let mapUrlPromise;
+    const response = srcset.replace(REGEX_SRCSET, (m, m1, m2, m3) => {
+      let replacement = rewriter(m2);
+      if (scrapbook.isPromise(replacement)) {
+        if (!mapUrlPromise) { mapUrlPromise = new Map(); }
+        const key = scrapbook.getUuid();
+        mapUrlPromise.set(key, replacement.then(r => {
+          mapUrlPromise.set(key, r);
+        }));
+        replacement = KEY_PREFIX + key;
+      }
+      return m1 + replacement + m3;
+    });
+
+    if (!mapUrlPromise) {
+      return response;
+    }
+
+    return Promise.all(Array.from(mapUrlPromise.values())).then(() => {
+      return response.replace(REGEX_UUID, (match, key) => {
+        if (mapUrlPromise.has(key)) {
+          return mapUrlPromise.get(key);
+        }
+        return match;
+      });
     });
   };
   scrapbook.rewriteSrcset = rewriteSrcset;
@@ -1681,6 +1708,10 @@ scrapbook.delay = async function (ms) {
   return new Promise((resolve, reject) => {
     setTimeout(resolve, ms);
   });
+};
+
+scrapbook.isPromise = function (object) {
+  return object && typeof object.then === 'function';
 };
 
 

@@ -1166,7 +1166,14 @@ capturer.captureDocument = async function (params) {
 
               if (elem.hasAttribute("srcset")) {
                 tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.processSrcsetText(elem.getAttribute("srcset"), refUrl, settings, options);
+                  const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
+                    return (await capturer.invoke("downloadFile", {
+                      url,
+                      refUrl,
+                      settings,
+                      options,
+                    })).url;
+                  });
                   captureRewriteUri(elem, "srcset", response);
                   return response;
                 });
@@ -1221,7 +1228,14 @@ capturer.captureDocument = async function (params) {
             default:
               Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
                 tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.processSrcsetText(elem.getAttribute("srcset"), refUrl, settings, options)
+                  const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
+                    return (await capturer.invoke("downloadFile", {
+                      url,
+                      refUrl,
+                      settings,
+                      options,
+                    })).url;
+                  });
                   captureRewriteUri(elem, "srcset", response);
                   return response;
                 });
@@ -2166,22 +2180,6 @@ capturer.downLinkUrlFilter = function (url, options) {
     }
     return filter.test(matchUrl);
   });
-};
-
-/**
- * Rewrite srcset attribute.
- *
- * @return {Promise<string>}
- */
-capturer.processSrcsetText = async function (text, refUrl, settings, options) {
-  const downloader = new capturer.ComplexUrlDownloader(settings, options, refUrl);
-
-  const rewritten = scrapbook.rewriteSrcset(text, (url) => {
-    return downloader.getUrlHash(url);
-  });
-
-  await downloader.startDownloads();
-  return downloader.finalRewrite(rewritten);
 };
 
 /**
