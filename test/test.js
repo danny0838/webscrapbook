@@ -3858,6 +3858,10 @@ async function test_capture_font_used() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['internal.woff']);
+  assert(zip.files['link.woff']);
+  assert(zip.files['import.woff']);
+  assert(zip.files['internal-ranged1.woff']);
+  assert(zip.files['internal-ranged2.woff']);
   assert(zip.files['internal-keyframes.woff']);
   assert(!zip.files['neverused.woff']);
   assert(!zip.files['removed.woff']);
@@ -3868,10 +3872,21 @@ async function test_capture_font_used() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
-  assert(styleElems[1].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
-  assert(styleElems[3].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
-  assert(styleElems[6].textContent.trim() === `@font-face { font-family: removed-internal; src: url(""); }`);
-  assert(styleElems[7].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url(""); }`);
+  assert(styleElems[2].textContent.trim() === `\
+@font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
+@font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
+  assert(styleElems[3].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
+  assert(styleElems[5].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
+  assert(styleElems[8].textContent.trim() === `@font-face { font-family: removed-internal; src: url(""); }`);
+  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url(""); }`);
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `@font-face { font-family: link; src: url("link.woff"); }`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `@font-face { font-family: import; src: url("import.woff"); }`);
 
   /* capture.font = save-used (headless) */
   // the result is same as save
@@ -3887,6 +3902,10 @@ async function test_capture_font_used() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['internal.woff']);
+  assert(zip.files['link.woff']);
+  assert(zip.files['import.woff']);
+  assert(zip.files['internal-ranged1.woff']);
+  assert(zip.files['internal-ranged2.woff']);
   assert(zip.files['internal-keyframes.woff']);
   assert(zip.files['neverused.woff']);
   assert(zip.files['removed.woff']);
@@ -3897,10 +3916,21 @@ async function test_capture_font_used() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
-  assert(styleElems[1].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
-  assert(styleElems[3].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
-  assert(styleElems[6].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);
-  assert(styleElems[7].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);
+  assert(styleElems[2].textContent.trim() === `\
+@font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
+@font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
+  assert(styleElems[3].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
+  assert(styleElems[5].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
+  assert(styleElems[8].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);
+  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `@font-face { font-family: link; src: url("link.woff"); }`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `@font-face { font-family: import; src: url("import.woff"); }`);
 }
 
 /**

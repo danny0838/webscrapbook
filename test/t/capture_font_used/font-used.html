@@ -8,6 +8,16 @@
 <style>
 @font-face { font-family: internal; src: url("internal.woff"); }
 </style>
+<link rel="stylesheet" href="link.css">
+<style>
+@import "import.css";
+</style>
+
+<!-- Unicode-range -->
+<style>
+@font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
+@font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }
+</style>
 
 <!-- @keyframes -->
 <style>
@@ -52,13 +62,17 @@
 <body>
 <h2>Basic</h2>
 <blockquote style="font-family: internal;">internal</blockquote>
+<blockquote style="font-family: link;">link</blockquote>
+<blockquote style="font-family: import;">import</blockquote>
+
+<h2>Unicode range</h2>
+<blockquote style="font-family: internal-ranged;">internal-ranged</blockquote>
 
 <h2>@keyframes</h2>
-<blockquote style="width: 60px; height: 60px; animation: internal 1s linear infinite;">internal</blockquote>
+<blockquote style="width: 60px; height: 60px; animation: internal 1s linear infinite;">internal-keyframes</blockquote>
 
 <h2>Removed elements</h2>
-<video id="removed-internal" style="font-family: removed;">removed</video>
-<video id="removed-keyframes" style="width: 60px; height: 60px; animation: removed 1s linear infinite;">removed</video>
-
+<video id="removed-internal" style="font-family: removed;">removed-internal</video>
+<video id="removed-keyframes" style="width: 60px; height: 60px; animation: removed 1s linear infinite;">removed-keyframes</video>
 </body>
 </html>
