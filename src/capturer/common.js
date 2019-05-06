@@ -190,7 +190,7 @@ capturer.captureDocument = async function (params) {
     // since cloned nodes may lose some information,
     // e.g. cloned iframes has no content, cloned canvas has no image,
     // and cloned form elements has no current status.
-    const cloneNodeMapping = function (node, deep = false) {
+    const cloneNodeMapping = (node, deep = false) => {
       const newNode = node.cloneNode(false);
       origNodeMap.set(newNode, node);
       clonedNodeMap.set(node, newNode);
@@ -207,7 +207,7 @@ capturer.captureDocument = async function (params) {
     };
 
     // remove the specified node, record it if option set
-    const captureRemoveNode = function (elem, record = options["capture.recordRemovedNode"]) {
+    const captureRemoveNode = (elem, record = options["capture.recordRemovedNode"]) => {
       if (!elem.parentNode) { return; }
 
       if (record) {
@@ -219,7 +219,7 @@ capturer.captureDocument = async function (params) {
     };
 
     // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
-    const captureRewriteAttr = function (elem, attr, value, record = options["capture.recordRewrittenAttr"]) {
+    const captureRewriteAttr = (elem, attr, value, record = options["capture.recordRewrittenAttr"]) => {
       if (elem.hasAttribute(attr)) {
         const oldValue = elem.getAttribute(attr);
         if (oldValue === value) { return; }
@@ -247,7 +247,7 @@ capturer.captureDocument = async function (params) {
     };
 
     // rewrite (or remove if value is null/undefined) the textContent, record it if option set
-    const captureRewriteTextContent = function (elem, value, record = options["capture.recordRewrittenAttr"]) {
+    const captureRewriteTextContent = (elem, value, record = options["capture.recordRewrittenAttr"]) => {
       const oldValue = elem.textContent;
       if (oldValue === value) { return; }
 
@@ -260,11 +260,11 @@ capturer.captureDocument = async function (params) {
     };
 
     // similar to captureRewriteAttr, but use option capture.recordSourceUri
-    const captureRewriteUri = function (elem, attr, value, record = options["capture.recordSourceUri"]) {
+    const captureRewriteUri = (elem, attr, value, record = options["capture.recordSourceUri"]) => {
       return captureRewriteAttr(elem, attr, value, record);
     };
 
-    const rewriteLocalLink = function (relativeUrl, baseUrl, docUrl) {
+    const rewriteLocalLink = (relativeUrl, baseUrl, docUrl) => {
       let url = relativeUrl;
       try {
         url = new URL(relativeUrl, baseUrl).href;
@@ -298,7 +298,7 @@ capturer.captureDocument = async function (params) {
       return url;
     };
 
-    const getCanvasDataScript = function (canvas) {
+    const getCanvasDataScript = (canvas) => {
       const data = canvas.toDataURL();
       const dataScript = function (data) {
         var s = document.getElementsByTagName("script"),
@@ -317,15 +317,15 @@ capturer.captureDocument = async function (params) {
       options,
     })).documentName;
 
-    // construct the node list
+    // construct the cloned node tree
     selection = doc.getSelection();
     {
       if (selection && selection.isCollapsed) { selection = null; }
       if (selection && options["capture.saveBeyondSelection"]) { selection = null; }
 
-      // clone selected nodes
+      // capture selection: clone selected ranges
       if (selection) {
-        const cloneNodeAndAncestors = function (node) {
+        const cloneNodeAndAncestors = (node) => {
           const nodeChain = [];
           let tmpNode = node;
 
@@ -342,7 +342,7 @@ capturer.captureDocument = async function (params) {
         };
 
         // #text, CDATA, COMMENT
-        const isTextNode = function (node) {
+        const isTextNode = (node) => {
           return [3, 4, 8].includes(node.nodeType);
         };
 
@@ -465,7 +465,7 @@ capturer.captureDocument = async function (params) {
         }
       }
 
-      // clone all nodes
+      // not capture selection: clone all nodes
       if (!selection) {
         rootNode = cloneNodeMapping(htmlNode, true);
         headNode = rootNode.querySelector("head");
@@ -509,9 +509,9 @@ capturer.captureDocument = async function (params) {
     }
 
     // a promise resolved after nodes are inspected and initiates async tasks
-    let halterResolve;
+    let resolveHalter;
     const halter = new Promise((resolve, rejiect) => {
-      halterResolve = resolve;
+      resolveHalter = resolve;
     });
 
     // inspect nodes
@@ -1588,9 +1588,9 @@ capturer.captureDocument = async function (params) {
               if (isHeadless) { break; }
 
               try {
-                let scriptText = getCanvasDataScript(canvasOrig);
+                const scriptText = getCanvasDataScript(canvasOrig);
                 if (scriptText) {
-                  let canvasScript = doc.createElement("script");
+                  const canvasScript = doc.createElement("script");
                   canvasScript.textContent = scriptText;
                   elem.parentNode.insertBefore(canvasScript, elem.nextSibling);
                 }
@@ -1835,8 +1835,8 @@ capturer.captureDocument = async function (params) {
           }
 
           if (favIconUrl) {
-            let frag = doc.createDocumentFragment();
-            favIconNode = doc.createElement("link");
+            const frag = doc.createDocumentFragment();
+            const favIconNode = doc.createElement("link");
             favIconNode.rel = "shortcut icon";
             favIconNode.href = favIconUrl;
             frag.appendChild(favIconNode);
@@ -1868,7 +1868,7 @@ capturer.captureDocument = async function (params) {
     }
 
     // resolve the halter
-    halterResolve();
+    resolveHalter();
 
     // wait for all async downloading tasks to complete
     await Promise.all(tasks);
@@ -2064,7 +2064,7 @@ capturer.downLinkExtFilter = function (ext, options) {
   // use cached filter regex if not changed
   if (arguments.callee._filter !== options["capture.downLink.extFilter"]) {
     arguments.callee._filter = options["capture.downLink.extFilter"];
-    arguments.callee.filters = (function () {
+    arguments.callee.filters = (() => {
       const ret = [];
       options["capture.downLink.extFilter"].split(/[\r\n]/).forEach((line) => {
         if (line.charAt(0) === "#") { return; }
@@ -2098,7 +2098,7 @@ capturer.downLinkUrlFilter = function (url, options) {
   // use the cache if the filter is not changed
   if (arguments.callee._filter !== options["capture.downLink.urlFilter"]) {
     arguments.callee._filter = options["capture.downLink.urlFilter"];
-    arguments.callee.filters = (function () {
+    arguments.callee.filters = (() => {
       const ret = [];
       options["capture.downLink.urlFilter"].split(/[\r\n]/).forEach((line) => {
         if (line.charAt(0) === "#") { return; }
