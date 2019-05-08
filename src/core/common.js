@@ -1779,6 +1779,26 @@ scrapbook.getMaffIndexFiles = async function (zipObj) {
   return indexFiles;
 };
 
+
+/******************************************************************************
+ * Classes
+ *****************************************************************************/
+
+scrapbook.ProxyMap = class ProxyMap extends Map {
+  constructor(fn) {
+    super();
+    this.defaultFunc = fn;
+  }
+
+  get(key) {
+    if (!super.has(key)) {
+      super.set(key, this.defaultFunc.call(this, key));
+    }
+    return super.get(key);
+  }
+};
+
+
 window.isDebug = false;
 window.scrapbook = scrapbook;
 

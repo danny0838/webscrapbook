@@ -19,15 +19,19 @@ capturer.ready = false;
 // missionId is fixed to this page, to identify the capture mission
 capturer.missionId = scrapbook.getUuid();
 
-// index.dat is used in legacy ScrapBook
-// index.rdf and ^metadata^ are used in MAFF
-// http://maf.mozdev.org/maff-specification.html
-capturer.defaultFilesSet = new Set(["index.dat", "index.rdf", "^metadata^"]);
-
 /**
- * @type {Map<string~timeId, {files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
+ * @type {ProxyMap<string~timeId, {files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
  */
-capturer.captureInfo = new Map();
+capturer.captureInfo = new scrapbook.ProxyMap(() => ({
+  // index.dat is used in legacy ScrapBook
+  // index.rdf and ^metadata^ are used in MAFF
+  // http://maf.mozdev.org/maff-specification.html
+  files: new Set(["index.dat", "index.rdf", "^metadata^"]),
+
+  accessMap: new Map(),
+  zip: new JSZip(),
+  zipResMap: new Map(),
+}));
 
 /**
  * @type {Map<string~urlOrDownloadId, {timeId: string, src: string, autoErase: boolean, onComplete: function, onError: function}>}
@@ -64,8 +68,7 @@ capturer.error = function (msg) {
  * @return {string} The uniquified filename.
  */
 capturer.getUniqueFilename = function (timeId, filename) {
-  if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-  const files = capturer.captureInfo.get(timeId).files = capturer.captureInfo.get(timeId).files || new Set(capturer.defaultFilesSet);
+  const files = capturer.captureInfo.get(timeId).files;
 
   let newFilename = filename || "untitled";
   let [newFilenameBase, newFilenameExt] = scrapbook.filenameParts(newFilename);
@@ -261,8 +264,7 @@ capturer.access = async function (params) {
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     const {timeId} = settings;
-    if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-    const accessMap = capturer.captureInfo.get(timeId).accessMap = capturer.captureInfo.get(timeId).accessMap || new Map();
+    const accessMap = capturer.captureInfo.get(timeId).accessMap;
     const accessToken = getAccessToken(sourceUrlMain, role);
 
     let urlHash = sourceUrlHash;
@@ -1077,8 +1079,7 @@ capturer.registerDocument = async function (params) {
   const {settings, options} = params;
   const {timeId, documentName} = settings;
 
-  if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-  const files = capturer.captureInfo.get(timeId).files = capturer.captureInfo.get(timeId).files || new Set(capturer.defaultFilesSet);
+  const files = capturer.captureInfo.get(timeId).files;
 
   let newDocumentName = documentName;
   let newDocumentNameCI = newDocumentName.toLowerCase();
@@ -1191,9 +1192,8 @@ capturer.saveDocument = async function (params) {
         let filename = documentName + ext;
         filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
-        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-        const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-        const zipResMap = capturer.captureInfo.get(timeId).zipResMap = capturer.captureInfo.get(timeId).zipResMap || new Map();
+        const zip = capturer.captureInfo.get(timeId).zip;
+        const zipResMap = capturer.captureInfo.get(timeId).zipResMap;
 
         if (!settings.frameIsMain) {
           const blob = new Blob([data.content], {type: data.mime});
@@ -1357,8 +1357,7 @@ ${JSON.stringify(zipData)}
         let filename = documentName + ext;
         filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
-        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-        const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+        const zip = capturer.captureInfo.get(timeId).zip;
         scrapbook.zipAddFile(zip, filename, new Blob([data.content], {type: data.mime}), true);
 
         if (!settings.frameIsMain) {
@@ -1434,8 +1433,7 @@ ${JSON.stringify(zipData)}
         let filename = documentName + ext;
         filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
-        if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-        const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+        const zip = capturer.captureInfo.get(timeId).zip;
         scrapbook.zipAddFile(zip, timeId + "/" + filename, new Blob([data.content], {type: data.mime}), true);
 
         if (!settings.frameIsMain) {
@@ -1931,9 +1929,8 @@ capturer.downloadBlob = async function (params) {
     }
 
     case "singleHtmlJs": {
-      if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-      const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
-      const zipResMap = capturer.captureInfo.get(timeId).zipResMap = capturer.captureInfo.get(timeId).zipResMap || new Map();
+      const zip = capturer.captureInfo.get(timeId).zip;
+      const zipResMap = capturer.captureInfo.get(timeId).zipResMap;
       scrapbook.zipAddFile(zip, filename, blob);
       const zipResId = zipResMap.size;
       zipResMap.set(filename, zipResId);
@@ -1942,15 +1939,13 @@ capturer.downloadBlob = async function (params) {
     }
 
     case "zip": {
-      if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-      const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+      const zip = capturer.captureInfo.get(timeId).zip;
       scrapbook.zipAddFile(zip, filename, blob);
       return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
     }
 
     case "maff": {
-      if (!capturer.captureInfo.has(timeId)) { capturer.captureInfo.set(timeId, {}); }
-      const zip = capturer.captureInfo.get(timeId).zip = capturer.captureInfo.get(timeId).zip || new JSZip();
+      const zip = capturer.captureInfo.get(timeId).zip;
       scrapbook.zipAddFile(zip, timeId + "/" + filename, blob);
       return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
     }
