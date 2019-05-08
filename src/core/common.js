@@ -1367,7 +1367,7 @@ scrapbook.rewriteCssFile = async function (data, charset, rewriter) {
  *
  * @callback rewriteCssTextRewriter
  * @param {string} url
- * @return {{url: string, recordUrl: string}}
+ * @return {{url: string, recordUrl: string}|Promise<{url: string, recordUrl: string}>}
  */
 
 /**
@@ -1384,6 +1384,9 @@ scrapbook.rewriteCssFile = async function (data, charset, rewriter) {
  *     - {rewriteCssTextRewriter} rewriteBackgroundUrl
  */
 scrapbook.rewriteCssText = function (cssText, options) {
+  const KEY_PREFIX = "urn:scrapbook:str:";
+  const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
+
   const pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
   const pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
   const pCmSp = "(?:(?:" + pCm + "|" + pSp + ")*)"; // comment or space
@@ -1398,50 +1401,62 @@ scrapbook.rewriteCssText = function (cssText, options) {
   const pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")"; // rule import; catch 2
   const pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // rule font-face; catch 1
 
-  const getRecordUrl = function (url, recordUrl) {
-    if (!recordUrl) { return ""; }
-    if (url === recordUrl) { return ""; }
-    return '/*scrapbook-orig-url="' + scrapbook.escapeCssComment(recordUrl) + '"*/';
-  };
-
-  const parseUrl = function (text, callback) {
-    return text.replace(new RegExp(pUrl2, "gi"), (m, pre, url, post) => {
-      let rewritten;
-      if (url.startsWith('"') && url.endsWith('"')) {
-        let u = scrapbook.unescapeCss(url.slice(1, -1));
-        rewritten = callback(u);
-      } else if (url.startsWith("'") && url.endsWith("'")) {
-        let u = scrapbook.unescapeCss(url.slice(1, -1));
-        rewritten = callback(u);
-      } else {
-        let u = scrapbook.unescapeCss(url.trim());
-        rewritten = callback(u);
-      }
-
-      let {url: rewrittenUrl, recordUrl} = rewritten;
-      let record = getRecordUrl(rewrittenUrl, recordUrl);
-
-      return record + pre + '"' + scrapbook.escapeQuotes(rewrittenUrl) + '"' + post;
-    });
-  };
-
   const rewriteCssText = function (cssText, options = {}) {
+    let mapUrlPromise;
+
+    const handleRewrittenData = function (data, prefix, postfix) {
+      const {url, recordUrl} = data;
+      let record;
+      if (!recordUrl || url === recordUrl) {
+        record = "";
+      } else {
+        record = '/*scrapbook-orig-url="' + scrapbook.escapeCssComment(recordUrl) + '"*/';
+      }
+      return record + prefix + '"' + scrapbook.escapeQuotes(url) + '"' + postfix;
+    };
+
+    const handleRewritten = function (data, prefix, postfix) {
+      if (scrapbook.isPromise(data)) {
+        if (!mapUrlPromise) { mapUrlPromise = new Map(); }
+        const key = scrapbook.getUuid();
+        mapUrlPromise.set(key, data.then(r => {
+          mapUrlPromise.set(key, handleRewrittenData(r, prefix, postfix));
+        }));
+        return KEY_PREFIX + key;
+      }
+      return handleRewrittenData(data, prefix, postfix);
+    };
+
+    const parseUrl = (text, callback) => {
+      return text.replace(new RegExp(pUrl2, "gi"), (m, pre, url, post) => {
+        let rewritten;
+        if (url.startsWith('"') && url.endsWith('"')) {
+          let u = scrapbook.unescapeCss(url.slice(1, -1));
+          rewritten = callback(u);
+        } else if (url.startsWith("'") && url.endsWith("'")) {
+          let u = scrapbook.unescapeCss(url.slice(1, -1));
+          rewritten = callback(u);
+        } else {
+          let u = scrapbook.unescapeCss(url.trim());
+          rewritten = callback(u);
+        }
+
+        return handleRewritten(rewritten, pre, post);
+      });
+    };
+    
     const {rewriteImportUrl, rewriteFontFaceUrl, rewriteBackgroundUrl} = options;
-    return cssText.replace(
+    const response = cssText.replace(
       new RegExp([pCm, pRImport, pRFontFace, "("+pUrl+")"].join("|"), "gi"),
       (m, im1, im2, ff, u) => {
         if (im2) {
           let rewritten;
           if (im2.startsWith('"') && im2.endsWith('"')) {
-            let u = scrapbook.unescapeCss(im2.slice(1, -1));
-            let {url: rewrittenUrl, recordUrl} = rewriteImportUrl(u);
-            let record = getRecordUrl(rewrittenUrl, recordUrl);
-            rewritten = record + '"' + scrapbook.escapeQuotes(rewrittenUrl) + '"';
+            const u = scrapbook.unescapeCss(im2.slice(1, -1));
+            rewritten = handleRewritten(rewriteImportUrl(u), '', '');
           } else if (im2.startsWith("'") && im2.endsWith("'")) {
             let u = scrapbook.unescapeCss(im2.slice(1, -1));
-            let {url: rewrittenUrl, recordUrl} = rewriteImportUrl(u);
-            let record = getRecordUrl(rewrittenUrl, recordUrl);
-            rewritten = record + '"' + scrapbook.escapeQuotes(rewrittenUrl) + '"';
+            rewritten = handleRewritten(rewriteImportUrl(u), '', '');
           } else {
             rewritten = parseUrl(im2, rewriteImportUrl);
           }
@@ -1453,6 +1468,19 @@ scrapbook.rewriteCssText = function (cssText, options) {
         }
         return m;
       });
+
+    if (!mapUrlPromise) {
+      return response;
+    }
+
+    return Promise.all(Array.from(mapUrlPromise.values())).then(() => {
+      return response.replace(REGEX_UUID, (match, key) => {
+        if (mapUrlPromise.has(key)) {
+          return mapUrlPromise.get(key);
+        }
+        return match;
+      });
+    });
   };
   scrapbook.rewriteCssText = rewriteCssText;
   return rewriteCssText(cssText, options);
