@@ -116,7 +116,11 @@ capturer.getAvailableFilename = async function (params) {
       break;
     }
     case "folder": {
-      const blob = new Blob([], {type: "text/plain"});
+      // Firefox < 65 has a bug that a zero-sized file is never found by
+      // browser.downloads.search. Fill the probe file with a null byte to work
+      // around.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1503760
+      const blob = new Blob(['\x00'], {type: "application/octet-stream"});
       const url = URL.createObjectURL(blob);
       const prefix = options["capture.saveFolder"] + "/" + (dir ? dir + '/' : '');
       isFilenameTaken = async (path) => {
