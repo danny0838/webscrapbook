@@ -30,9 +30,9 @@ capturer.defaultFilesSet = new Set(["index.dat", "index.rdf", "^metadata^"]);
 capturer.captureInfo = new Map();
 
 /**
- * @type {Map<string~downloadId, {timeId: string, src: string, autoErase: boolean, onComplete: function, onError: function}>}
+ * @type {Map<string~urlOrDownloadId, {timeId: string, src: string, autoErase: boolean, onComplete: function, onError: function}>}
  */
-capturer.downloadInfo = new Map();
+capturer.downloadHooks = new Map();
 
 capturer.log = function (msg) {
   capturer.logger.appendChild(document.createTextNode(msg + '\n'));
@@ -2002,7 +2002,7 @@ capturer.saveBlobNaturally = async function (params) {
   return await new Promise((resolve, reject) => {
     const url = URL.createObjectURL(blob);
 
-    capturer.downloadInfo.set(url, {
+    capturer.downloadHooks.set(url, {
       timeId,
       src: sourceUrl,
       onComplete: resolve,
@@ -2027,7 +2027,7 @@ capturer.saveBlobNaturally = async function (params) {
       const file = new File([blob], filename, {type: "application/octet-stream"});
       const url2 = URL.createObjectURL(file);
 
-      capturer.downloadInfo.set(url2, {
+      capturer.downloadHooks.set(url2, {
         timeId,
         src: sourceUrl,
         onComplete: resolve,
@@ -2135,7 +2135,7 @@ capturer.saveUrl = async function (params) {
   const downloadId = await browser.downloads.download(downloadParams);
   isDebug && console.debug("download response", downloadId);
   return await new Promise((resolve, reject) => {
-    capturer.downloadInfo.set(downloadId, {
+    capturer.downloadHooks.set(downloadId, {
       timeId,
       src: sourceUrl,
       autoErase,
@@ -2263,9 +2263,9 @@ browser.runtime.onMessage.addListener((message, sender) => {
 browser.downloads.onCreated.addListener((downloadItem) => {
   isDebug && console.debug("downloads.onCreated", downloadItem);
 
-  const downloadInfo = capturer.downloadInfo;
+  const downloadHooks = capturer.downloadHooks;
   const {id, url, filename} = downloadItem;
-  if (!downloadInfo.has(url)) { return; }
+  if (!downloadHooks.has(url)) { return; }
 
   // In Chromium, the onCreated is fired when the "Save as" prompt popups.
   //
@@ -2276,37 +2276,37 @@ browser.downloads.onCreated.addListener((downloadItem) => {
   // We wait until the user clicks save (or cancel in Chromium) to resolve
   // the Promise (and then the window may close).
   if (scrapbook.userAgent.is('gecko')) {
-    downloadInfo.get(url).onComplete(scrapbook.filepathParts(filename)[1]);
+    downloadHooks.get(url).onComplete(scrapbook.filepathParts(filename)[1]);
   } else {
-    downloadInfo.set(id, downloadInfo.get(url));
+    downloadHooks.set(id, downloadHooks.get(url));
   }
-  downloadInfo.delete(url);
+  downloadHooks.delete(url);
 });
 
 browser.downloads.onChanged.addListener(async (downloadDelta) => {
   isDebug && console.debug("downloads.onChanged", downloadDelta);
 
-  const downloadId = downloadDelta.id, downloadInfo = capturer.downloadInfo;
-  if (!downloadInfo.has(downloadId)) { return; }
+  const downloadId = downloadDelta.id, downloadHooks = capturer.downloadHooks;
+  if (!downloadHooks.has(downloadId)) { return; }
 
   try {
     let erase = true;
     if (downloadDelta.state && downloadDelta.state.current === "complete") {
       const results = await browser.downloads.search({id: downloadId});
       const [dir, filename] = scrapbook.filepathParts(results[0].filename);
-      downloadInfo.get(downloadId).onComplete(filename);
+      downloadHooks.get(downloadId).onComplete(filename);
     } else if (downloadDelta.error) {
-      downloadInfo.get(downloadId).onError(new Error(downloadDelta.error.current));
+      downloadHooks.get(downloadId).onError(new Error(downloadDelta.error.current));
     } else {
       erase = false;
     }
 
     if (erase) {
       // erase the download history of additional downloads (if autoErase = true)
-      if (downloadInfo.get(downloadId).autoErase) {
+      if (downloadHooks.get(downloadId).autoErase) {
         const erasedIds = await browser.downloads.erase({id: downloadId});
       }
-      downloadInfo.delete(downloadId);
+      downloadHooks.delete(downloadId);
     }
   } catch (ex) {
     console.error(ex);
