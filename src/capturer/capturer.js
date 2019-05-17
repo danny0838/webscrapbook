@@ -2121,13 +2121,14 @@ capturer.saveUrl = async function (params) {
     url,
     filename: (directory ? directory + "/" : "") + filename,
     conflictAction: "uniquify",
+    saveAs: savePrompt,
   };
 
   // Firefox < 52 gets an error if saveAs is defined
   // Firefox Android gets an error if saveAs = true
-  if (!(scrapbook.userAgent.is('gecko') &&
-      (scrapbook.userAgent.major < 52 || scrapbook.userAgent.is('mobile')))) {
-    downloadParams.saveAs = savePrompt;
+  if (scrapbook.userAgent.is('gecko') &&
+      (scrapbook.userAgent.major < 52 || scrapbook.userAgent.is('mobile'))) {
+    delete downloadParams.saveAs;
   }
 
   isDebug && console.debug("download start", downloadParams);
