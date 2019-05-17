@@ -2293,8 +2293,8 @@ browser.downloads.onChanged.addListener(async (downloadDelta) => {
   const downloadId = downloadDelta.id, downloadHooks = capturer.downloadHooks;
   if (!downloadHooks.has(downloadId)) { return; }
 
+  let erase = true;
   try {
-    let erase = true;
     if (downloadDelta.state && downloadDelta.state.current === "complete") {
       const results = await browser.downloads.search({id: downloadId});
       const [dir, filename] = scrapbook.filepathParts(results[0].filename);
@@ -2304,16 +2304,20 @@ browser.downloads.onChanged.addListener(async (downloadDelta) => {
     } else {
       erase = false;
     }
+  } catch (ex) {
+    console.error(ex);
+  }
 
-    if (erase) {
-      // erase the download history of additional downloads (if autoErase = true)
+  if (erase) {
+    // erase the download history of additional downloads (autoErase = true)
+    try {
       if (downloadHooks.get(downloadId).autoErase) {
         const erasedIds = await browser.downloads.erase({id: downloadId});
       }
       downloadHooks.delete(downloadId);
+    } catch (ex) {
+      console.error(ex);
     }
-  } catch (ex) {
-    console.error(ex);
   }
 });
 
