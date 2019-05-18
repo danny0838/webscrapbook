@@ -723,6 +723,11 @@ capturer.captureUrl = async function (params) {
       options,
       hooks: {
         async preRequest({url, hash}) {
+          // fail out if sourceUrl is empty.
+          if (!url) {
+            throw new Error(`Source URL is empty.`);
+          }
+
           // fail out if sourceUrl is relative,
           // or it will be treated as relative to this extension page.
           if (!scrapbook.isUrlAbsolute(url)) {
@@ -1652,6 +1657,11 @@ capturer.downloadFile = async function (params) {
         options,
         hooks: {
           async preRequest({url, hash}) {
+            // fail out if sourceUrl is empty.
+            if (!url) {
+              throw new Error(`Source URL is empty.`);
+            }
+
             // fail out if sourceUrl is relative,
             // or it will be treated as relative to this extension page.
             if (!scrapbook.isUrlAbsolute(url)) {
