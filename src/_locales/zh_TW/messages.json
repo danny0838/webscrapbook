@@ -431,7 +431,7 @@
     "message": "網址:"
   },
   "OptionServerUrlTooltip": {
-    "message": "後端伺服器程式的根目錄，例如「http://localhost:8080/」或「https://example.com/wsb/」。\n\n* 後端伺服器可用 Python 的 webscrapbook 套件（相容版本：$BACKEND_VERSION$）架設，安裝細節參見 https://pypi.org/project/webscrapbook/。",
+    "message": "後端伺服器程式的根目錄，例如「http://localhost:8080/」或「https://example.com/wsb/」。\n\n* 後端伺服器可用 PyWebScrapBook 套件（相容版本：$BACKEND_VERSION$）架設，安裝細節參見 https://pypi.org/project/webscrapbook/。",
     "placeholders": {
       "backend_version": {"content": "$1"}
     }

@@ -431,7 +431,7 @@
     "message": "Address:"
   },
   "OptionServerUrlTooltip": {
-    "message": "The root path of the backend server application, such as “http://localhost:8080/” or “https://example.com/wsb/”.\n\n* The backend server can be hosted using webscrapbook package (compatible: $BACKEND_VERSION$) of Python. See https://pypi.org/project/webscrapbook/ for further details.",
+    "message": "The root path of the backend server application, such as “http://localhost:8080/” or “https://example.com/wsb/”.\n\n* The backend server can be hosted using PyWebScrapBook (compatible: $BACKEND_VERSION$). See https://pypi.org/project/webscrapbook/ for further details.",
     "placeholders": {
       "backend_version": {"content": "$1"}
     }
