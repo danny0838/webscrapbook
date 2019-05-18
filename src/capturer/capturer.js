@@ -1925,7 +1925,7 @@ capturer.downloadBlob = async function (params) {
         dataUri = `data:${blob.type};base64,`;
       }
       if (filename) {
-        dataUri = dataUri.replace(";", ";filename=" + encodeURIComponent(filename) + ";");
+        dataUri = dataUri.replace(";base64,", ";filename=" + encodeURIComponent(filename) + ";base64,");
       }
       return {filename, url: dataUri + sourceUrlHash};
     }
