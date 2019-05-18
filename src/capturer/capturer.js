@@ -1902,7 +1902,6 @@ capturer.fetchCss = async function (params) {
 };
 
 /**
- * @kind invokable
  * @param {Object} params
  *     - {Blob} params.blob
  *     - {string} params.filename - validated and unique
@@ -1993,7 +1992,7 @@ capturer.downloadBlob = async function (params) {
         sourceUrl,
         targetDir,
         filename: changedFilename,
-        url: scrapbook.escapeFilename(filename) + sourceUrlHash
+        url: scrapbook.escapeFilename(filename) + sourceUrlHash,
       };
     }
   }

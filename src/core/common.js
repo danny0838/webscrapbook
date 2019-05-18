@@ -980,7 +980,7 @@ scrapbook.filenameParts = function (filename) {
 /**
  * Parse Content-Type string from the HTTP Header
  *
- * @return {{contentType: string, charset: string}}
+ * @return {{type: string, parameters: {[charset: string]}}}
  */
 scrapbook.parseHeaderContentType = function (string) {
   const regexFields = /^(.*?)(?=;|$)/i;

@@ -2157,7 +2157,7 @@ async function test_capture_css_styleInline() {
  * capturer.processCssText
  */
 async function test_capture_css_rewriteCss() {
-  /* capture.rewriteCss = save */
+  /* capture.rewriteCss = url */
   var options = {
     "capture.rewriteCss": "url",
   };
