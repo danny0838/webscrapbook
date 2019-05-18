@@ -135,6 +135,9 @@
   "OpenScrapBook": {
     "message": "Open ScrapBook"
   },
+  "OpenScrapBookTooltip": {
+    "message": "Run a backend server and configure the options properly to get it work."
+  },
   "OpenViewer": {
     "message": "View archived page"
   },

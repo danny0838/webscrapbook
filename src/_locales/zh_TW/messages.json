@@ -135,6 +135,9 @@
   "OpenScrapBook": {
     "message": "開啟剪貼簿"
   },
+  "OpenScrapBookTooltip": {
+    "message": "本功能需要架設後端伺服器並做好相關設定才能運作。"
+  },
   "OpenViewer": {
     "message": "檢視封存網頁"
   },
