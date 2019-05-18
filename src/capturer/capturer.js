@@ -366,14 +366,14 @@ capturer.access = async function (params) {
                   }
                 }
               }
-              if (hooks.postHeaders) {
-                hooks.postHeaders({
-                  access: accessCurrent,
-                  xhr,
-                  hash: urlHash,
-                  headers,
-                });
-              }
+            }
+            if (hooks.postHeaders) {
+              hooks.postHeaders({
+                access: accessCurrent,
+                xhr,
+                hash: urlHash,
+                headers,
+              });
             }
           },
         });
