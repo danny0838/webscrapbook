@@ -2425,17 +2425,6 @@ capturer.parseDocumentCss = async function (params) {
   };
 
   const parseCss = async function (css, refUrl) {
-    try {
-      if (css.disabled) { return; }
-    } catch (ex) {
-      // @TODO: better support for HTTP Link header
-      // HTTP Link header is currently not widely supported by browsers.
-      // Firefox 67 supports it but CSSOM access is restricted and throws when
-      // attempting to access a property like cssRules. Skip parsing this css
-      // in such case.
-      return;
-    }
-
     let rules;
     if (fromSource) {
       if (css.href) {
