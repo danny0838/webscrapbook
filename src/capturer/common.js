@@ -2355,23 +2355,10 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     return false;
   }
 
-  async fetchCssRules(params) {
-    const {settings, options} = this;
-    let {text, url, refUrl} = params;
-
-    if (!text && url) {
-      const response = await capturer.invoke("fetchCss", {
-        url,
-        refUrl,
-        settings,
-        options,
-      });
-      text = response.error ? null : response.text;
-    }
-
+  async getRulesFromCssText(cssText) {
     const d = document.implementation.createHTMLDocument('');
     const styleElem = d.createElement('style');
-    styleElem.textContent = text;
+    styleElem.textContent = cssText;
     d.head.appendChild(styleElem);
 
     // In Firefox, an error is thrown when accessing cssRules right after
@@ -2382,20 +2369,32 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     return styleElem.sheet.cssRules;
   }
 
-  async parseCss(css, refUrl, callback) {
-    let rules;
+  async getRulesFromCss({css, refUrl, crossOrigin = true, errorWithNull = false}) {
+    let rules = null;
     try {
       rules = css.cssRules;
       if (!rules) { throw new Error('cssRules not accessible.'); }
     } catch (ex) {
       // cssRules not accessible, probably a cross-domain CSS.
-      rules = await this.fetchCssRules({url: css.href, refUrl});
+      if (crossOrigin) {
+        const {settings, options} = this;
+        const response = await capturer.invoke("fetchCss", {
+          url: css.href,
+          refUrl,
+          settings,
+          options,
+        });
+        if (!response.error) {
+          rules = await this.getRulesFromCssText(response.text);
+        }
+      }
     }
-    if (!rules) { return; }
 
-    for (const rule of rules) {
-      await callback(rule, css.href || refUrl);
+    if (!rules && !errorWithNull) {
+      return [];
     }
+
+    return rules;
   }
 
   /**
@@ -2494,7 +2493,11 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
         case CSSRule.IMPORT_RULE: {
           if (!cssRule.styleSheet) { break; }
 
-          await this.parseCss(cssRule.styleSheet, refUrl, parseCssRule);
+          const css = cssRule.styleSheet;
+          const rules = await this.getRulesFromCss({css, refUrl});
+          for (const rule of rules) {
+            await parseCssRule(rule, css.href || refUrl);
+          }
           break;
         }
         case CSSRule.MEDIA_RULE: {
@@ -2598,7 +2601,10 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     };
 
     for (const css of doc.styleSheets) {
-      await this.parseCss(css, refUrl, parseCssRule);
+      const rules = await this.getRulesFromCss({css, refUrl});
+      for (const rule of rules) {
+        await parseCssRule(rule, css.href || refUrl);
+      }
     }
 
     for (const elem of rootNode.querySelectorAll("*")) {
