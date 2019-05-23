@@ -2356,6 +2356,12 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
   }
 
   async getRulesFromCssText(cssText) {
+    // In Chromium, BOM causes returned cssRules be empty.
+    // Remove it to prevent the issue.
+    if (cssText[0] === '\uFEFF') {
+      cssText = cssText.slice(1);
+    }
+
     const d = document.implementation.createHTMLDocument('');
     const styleElem = d.createElement('style');
     styleElem.textContent = cssText;
