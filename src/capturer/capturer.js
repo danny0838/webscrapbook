@@ -1987,7 +1987,7 @@ capturer.downloadBlob = async function (params) {
         sourceUrl,
         targetDir,
         filename: changedFilename,
-        url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+        url: scrapbook.escapeFilename(changedFilename) + sourceUrlHash,
       };
     }
   }
