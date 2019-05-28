@@ -1642,8 +1642,6 @@ capturer.downloadFile = async function (params) {
     "video/ogg",
   ];
 
-  const MAP_ACCESS_DATA = new WeakMap();
-
   const downloadFile = async (params) => {
     const {url: sourceUrl, refUrl, rewriteMethod, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
@@ -1761,7 +1759,7 @@ capturer.downloadFile = async function (params) {
 
             // record the currently available filename
             // we need this data for early return of circular referencing
-            MAP_ACCESS_DATA.set(access, {filename});
+            access.filename = filename;
           },
 
           async response({access, xhr, hash, headers}) {
@@ -1781,7 +1779,7 @@ capturer.downloadFile = async function (params) {
               settings,
               options,
               blob,
-              filename: MAP_ACCESS_DATA.get(access).filename,
+              filename: access.filename,
               sourceUrl,
             });
           },
@@ -1793,7 +1791,7 @@ capturer.downloadFile = async function (params) {
             // dead lock. This returned data could be incorrect if something
             // unexpected happen to the access.
             if (recurseChain.includes(sourceUrlMain)) {
-              const filename = MAP_ACCESS_DATA.get(access).filename;
+              const filename = access.filename;
               return {
                 filename,
                 url: scrapbook.escapeFilename(filename) + hash,
