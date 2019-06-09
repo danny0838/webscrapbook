@@ -246,7 +246,7 @@ capturer.captureDocument = async function (params) {
       }
     };
 
-    // rewrite (or remove if value is null/undefined) the textContent, record it if option set
+    // rewrite the textContent, record it if option set
     const captureRewriteTextContent = (elem, value, record = options["capture.recordRewrittenAttr"]) => {
       const oldValue = elem.textContent;
       if (oldValue === value) { return; }

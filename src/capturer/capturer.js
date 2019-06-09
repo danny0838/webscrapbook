@@ -1873,7 +1873,7 @@ capturer.downLinkFetchHeader = async function (params) {
  *     - {string} params.refUrl
  *     - {string} params.settings
  *     - {string} params.options
- * @return {string} File extension of the URL.
+ * @return {Promise<Object>}
  */
 capturer.fetchCss = async function (params) {
   isDebug && console.debug("call: fetchCss", params);
