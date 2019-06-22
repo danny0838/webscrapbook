@@ -1611,7 +1611,6 @@ ${JSON.stringify(zipData)}
  * @param {Object} params
  *     - {string} params.url
  *     - {string} params.refUrl
- *     - {string} params.rewriteMethod
  *     - {Object} params.settings
  *     - {Object} params.options
  * @return {Promise<Object>}
@@ -1649,7 +1648,7 @@ capturer.downloadFile = async function (params) {
   ];
 
   const downloadFile = async (params) => {
-    const {url: sourceUrl, refUrl, rewriteMethod, settings, options} = params;
+    const {url: sourceUrl, refUrl, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId, recurseChain} = settings;
 
@@ -1684,45 +1683,13 @@ capturer.downloadFile = async function (params) {
                 filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
                 filename = capturer.getUniqueFilename(timeId, filename);
 
-                let blob;
-                if (capturer[rewriteMethod]) {
-                  blob = await capturer[rewriteMethod]({
-                    settings,
-                    options,
-                    data: file,
-                    charset: null,
-                    url: null,
-                  });
-                } else {
-                  blob = file;
-                }
                 return await capturer.downloadBlob({
                   settings,
                   options,
-                  blob,
+                  blob: file,
                   filename,
                   sourceUrl,
                 });
-              }
-
-              /* rewrite content of the data URI? */
-              if (rewriteMethod && capturer[rewriteMethod]) {
-                const file = scrapbook.dataUriToFile(url);
-                if (!file) { throw new Error("Malformed data URL."); }
-
-                // Save inner URLs as data URL since data URL is null origin
-                // and no relative URLs are allowed in it.
-                const innerOptions = JSON.parse(JSON.stringify(options));
-                innerOptions["capture.saveAs"] = "singleHtml";
-
-                const blob = await capturer[rewriteMethod]({
-                  settings,
-                  options: innerOptions,
-                  data: file,
-                  charset: null,
-                  url: null,
-                });
-                return {url: await scrapbook.readFileAsDataURL(blob)};
               }
 
               return {url: sourceUrl};
@@ -1769,22 +1736,10 @@ capturer.downloadFile = async function (params) {
           },
 
           async response({access, xhr, hash, headers}) {
-            let blob;
-            if (capturer[rewriteMethod]) {
-              blob = await capturer[rewriteMethod]({
-                settings,
-                options,
-                data: xhr.response,
-                charset: headers.charset,
-                url: xhr.responseURL,
-              });
-            } else {
-              blob = xhr.response;
-            }
             return await capturer.downloadBlob({
               settings,
               options,
-              blob,
+              blob: xhr.response,
               filename: access.filename,
               sourceUrl,
             });
