@@ -1730,6 +1730,7 @@ capturer.captureDocument = async function (params) {
                   const response = await cssHandler.rewriteCssText({
                     cssText: elem.getAttribute("style"),
                     refUrl,
+                    isInline: true,
                   });
                   elem.setAttribute("style", response);
                   return response;
@@ -2479,10 +2480,11 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
    * @param {string} cssText - the CSS text to rewrite.
    * @param {string} refUrl - the reference URL for URL resolve.
    * @param {CSSStyleSheet} refCss - the reference CSS (for imported CSS).
+   * @param {boolean} isInline - whether cssText is inline.
    * @param {Object} settings
    * @param {Object} options
    */
-  async rewriteCssText({cssText, refUrl, refCss = null, settings = this.settings, options = this.options}) {
+  async rewriteCssText({cssText, refUrl, refCss = null, isInline = false, settings = this.settings, options = this.options}) {
     settings = JSON.parse(JSON.stringify(settings));
     settings.recurseChain.push(scrapbook.splitUrlByAnchor(refUrl)[0]);
     const {usedCssFontUrl, usedCssImageUrl} = settings;
@@ -2608,9 +2610,11 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
           return {url, recordUrl};
         };
 
+        const rewriteDummy = (x) => ({url: x, recordUrl: ''});
+
         return await scrapbook.rewriteCssText(cssText, {
-          rewriteImportUrl,
-          rewriteFontFaceUrl,
+          rewriteImportUrl: !isInline ? rewriteImportUrl : rewriteDummy,
+          rewriteFontFaceUrl: !isInline ? rewriteFontFaceUrl : rewriteDummy,
           rewriteBackgroundUrl,
         });
       }

@@ -2113,6 +2113,9 @@ async function test_capture_css_styleInline() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["green.bmp"]);
+  assert(!zip.files["font.woff"]);
+  assert(!zip.files["import.css"]);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2128,6 +2131,7 @@ async function test_capture_css_styleInline() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(Object.keys(zip.files).length === 1);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2143,6 +2147,7 @@ async function test_capture_css_styleInline() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(Object.keys(zip.files).length === 1);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
