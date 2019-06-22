@@ -2108,7 +2108,7 @@ async function test_capture_css_styleInline() {
   options["capture.styleInline"] = "save";
 
   var blob = await capture({
-    url: `${localhost}/capture_css_style/style.html`,
+    url: `${localhost}/capture_css_styleInline/styleInline.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -2123,7 +2123,7 @@ async function test_capture_css_styleInline() {
   options["capture.styleInline"] = "blank";
 
   var blob = await capture({
-    url: `${localhost}/capture_css_style/style.html`,
+    url: `${localhost}/capture_css_styleInline/styleInline.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -2138,7 +2138,7 @@ async function test_capture_css_styleInline() {
   options["capture.styleInline"] = "remove";
 
   var blob = await capture({
-    url: `${localhost}/capture_css_style/style.html`,
+    url: `${localhost}/capture_css_styleInline/styleInline.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
