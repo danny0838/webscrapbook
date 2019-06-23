@@ -288,11 +288,14 @@ capturer.access = async function (params) {
       }
     }
 
-    const accessCurrent = (async () => {
+    const deferred = new scrapbook.Deferred();
+    const accessCurrent = deferred.promise;
+    (async () => {
       let response;
       try {
         if (hooks.preRequest) {
           const response = await hooks.preRequest({
+            access: accessCurrent,
             url: sourceUrlMain,
             hash: sourceUrlHash,
           });
@@ -407,7 +410,7 @@ capturer.access = async function (params) {
         }
       }
       return response;
-    })();
+    })().then(deferred.resolve, deferred.reject);
 
     accessMap.set(accessToken, accessCurrent);
     return accessCurrent;
