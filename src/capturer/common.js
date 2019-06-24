@@ -508,11 +508,8 @@ capturer.captureDocument = async function (params) {
       rootNode.setAttribute("data-scrapbook-create", timeId);
     }
 
-    // a promise resolved after nodes are inspected and initiates async tasks
-    let resolveHalter;
-    const halter = new Promise((resolve, rejiect) => {
-      resolveHalter = resolve;
-    });
+    // this is resolved after nodes are inspected and initiates async tasks
+    const halter = new scrapbook.Deferred();
 
     // inspect nodes
     let metaCharsetNode;
@@ -1909,7 +1906,7 @@ capturer.captureDocument = async function (params) {
     }
 
     // resolve the halter
-    resolveHalter();
+    halter.resolve();
 
     // wait for all async downloading tasks to complete
     await Promise.all(tasks);

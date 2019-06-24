@@ -1798,6 +1798,17 @@ scrapbook.ProxyMap = class ProxyMap extends Map {
   }
 };
 
+scrapbook.Deferred = class Deferred {
+  constructor() {
+    let p = this.promise = new Promise((resolve, reject) => {
+        this.resolve = resolve;
+        this.reject = reject;
+    });
+    this.then = this.promise.then.bind(p);
+    this.catch = this.promise.catch.bind(p);    
+  }
+};
+
 
 window.isDebug = false;
 window.scrapbook = scrapbook;
