@@ -149,7 +149,7 @@ const viewer = {
       inZipPath: inZipPath,
       rewriteFunc: async (params) => {
         const {data, charset, recurseChain} = params;
-        if (["text/html", "application/xhtml+xml"].indexOf(data.type) !== -1) {
+        if (["text/html", "application/xhtml+xml"].includes(data.type)) {
           try {
             const doc = await scrapbook.readFileAsDocument(data);
             if (!doc) { throw new Error("document cannot be loaded"); }
@@ -201,7 +201,7 @@ const viewer = {
               const [sourcePage] = scrapbook.splitUrlByAnchor(refUrl);
               const [targetPage, targetPageHash] = scrapbook.splitUrlByAnchor(info.virtualUrl || info.url);
               if (targetPage !== sourcePage) {
-                if (recurseChain.indexOf(targetPage) !== -1) {
+                if (recurseChain.includes(targetPage)) {
                   // console.warn("Resource '" + sourcePage + "' has a circular reference to '" + targetPage + "'.");
                   elem.setAttribute("content", metaRefresh.time + ";url=about:blank");
                   break;
@@ -261,7 +261,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           if (elem.hasAttribute("href")) {
             // elem.rel == "" if "rel" attribute not defined
             const rels = elem.rel.toLowerCase().split(/[ \t\r\n\v\f]+/);
-            if (rels.indexOf("stylesheet") >= 0) {
+            if (rels.includes("stylesheet")) {
               const info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
               tasks[tasks.length] = 
               viewer.fetchFile({
@@ -350,7 +350,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
             const info = viewer.parseUrl(elem.getAttribute("src"), refUrl);
             if (info.inZip) {
               const targetUrl = viewer.inZipPathToUrl(info.inZipPath);
-              if (frameRecurseChain.indexOf(targetUrl) !== -1) {
+              if (frameRecurseChain.includes(targetUrl)) {
                 // console.warn("Resource '" + refUrl + "' has a circular reference to '" + targetUrl + "'.");
                 elem.setAttribute("src", "about:blank");
                 break;
@@ -666,7 +666,7 @@ class ComplexUrlFetcher {
 
       if (info.inZip) {
         const targetUrl = viewer.inZipPathToUrl(info.inZipPath);
-        if (this.recurseChain.indexOf(scrapbook.splitUrlByAnchor(targetUrl)[0]) !== -1) {
+        if (this.recurseChain.includes(scrapbook.splitUrlByAnchor(targetUrl)[0])) {
           // console.warn("Resource '" + sourceUrl + "' has a circular reference to '" + targetUrl + "'.");
           return "about:blank";
         }
@@ -793,7 +793,7 @@ async function init() {
           e.stopPropagation();
 
           const f = viewer.inZipFiles.get(inZipPath);
-          if (["text/html", "application/xhtml+xml"].indexOf(f.file.type) !== -1) {
+          if (["text/html", "application/xhtml+xml"].includes(f.file.type)) {
             const fetchedUrl = await viewer.fetchPage({
               inZipPath,
               url,

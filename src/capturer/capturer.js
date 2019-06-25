@@ -1789,7 +1789,7 @@ capturer.downloadFile = async function (params) {
             // a circular reference, we have to return early to pervent a
             // dead lock. This returned data could be incorrect if something
             // unexpected happen to the access.
-            if (recurseChain.indexOf(sourceUrlMain) !== -1) {
+            if (recurseChain.includes(sourceUrlMain)) {
               const filename = MAP_ACCESS_DATA.get(access).filename;
               return {
                 filename,

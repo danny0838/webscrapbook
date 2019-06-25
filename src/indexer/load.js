@@ -970,7 +970,7 @@ const indexer = {
       let parentId = 'root';
       metas[id].folder.split(/[\t\n\r\v\f]+/).forEach((folder) => {
         let folderId = titleIdMap.get(folder);
-        if (!(metas[folderId] && toc[parentId].indexOf(folderId) !== -1)) {
+        if (!(metas[folderId] && toc[parentId].includes(folderId))) {
           folderId = this.generateFolder(folder, metas);
           toc[parentId].push(folderId);
           titleIdMap.set(folder, folderId);
@@ -1411,7 +1411,7 @@ const indexer = {
 
         const mime = scrapbook.parseHeaderContentType(file.type).type;
 
-        if (["text/html", "application/xhtml+xml"].indexOf(mime) !== -1) {
+        if (["text/html", "application/xhtml+xml"].includes(mime)) {
           return await getFulltextCacheHtml(path, file);
         } else if (mime.startsWith("text/")) {
           return await getFulltextCacheTxt(path, file);
@@ -1447,7 +1447,7 @@ const indexer = {
           for (const child of elem.childNodes) {
             if (child.nodeType === 1) {
               const nodeName = child.nodeName.toLowerCase();
-              if (["a", "area"].indexOf(nodeName) !== -1) {
+              if (["a", "area"].includes(nodeName)) {
                 if (child.hasAttribute("href")) {
                   const url = child.getAttribute("href");
                   if (url.startsWith("data:")) {
@@ -1457,7 +1457,7 @@ const indexer = {
                     if (target && !filesToUpdate.has(target)) { filesToUpdate.set(target, true); }
                   }
                 }
-              } else if (["iframe", "frame"].indexOf(nodeName) !== -1) {
+              } else if (["iframe", "frame"].includes(nodeName)) {
                 if (child.hasAttribute("src")) {
                   const url = child.getAttribute("src");
                   if (url.startsWith("data:")) {

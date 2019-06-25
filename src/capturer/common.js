@@ -129,7 +129,7 @@ capturer.captureDocumentOrFile = async function (params) {
   const {doc = document, refUrl, title, settings, options} = params;
 
   // if not HTML document, capture as file
-  if (["text/html", "application/xhtml+xml"].indexOf(doc.contentType) === -1) {
+  if (!["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
     // if it can be displayed as HTML, check saveFileAsHtml
     if (!(doc.documentElement.nodeName.toLowerCase() === "html" && options["capture.saveFileAsHtml"])) {
       return await capturer.invoke("captureFile", {
@@ -595,7 +595,7 @@ capturer.captureDocument = async function (params) {
 
           // elem.rel == "" if "rel" attribute not defined
           const rels = elem.rel.toLowerCase().split(/[ \t\r\n\v\f]+/);
-          if (rels.indexOf("stylesheet") >= 0) {
+          if (rels.includes("stylesheet")) {
             // styles: link element
             switch (options["capture.style"]) {
               case "link":
@@ -642,7 +642,7 @@ capturer.captureDocument = async function (params) {
                 break;
             }
             break;
-          } else if (rels.indexOf("icon") >= 0) {
+          } else if (rels.includes("icon")) {
             // favicon: the link element
             switch (options["capture.favicon"]) {
               case "link":
@@ -688,7 +688,7 @@ capturer.captureDocument = async function (params) {
                 });
                 break;
             }
-          } else if (rels.indexOf("preload") >= 0) {
+          } else if (rels.includes("preload")) {
             // @TODO: handle preloads according to its "as" attribute
             captureRewriteUri(elem, "href", null);
           }
@@ -980,7 +980,7 @@ capturer.captureDocument = async function (params) {
                 const [targetUrl] = scrapbook.splitUrlByAnchor(frameSrc.src);
                 frameSettings.isHeadless = true;
                 frameSettings.recurseChain.push(sourceUrl);
-                if (frameSettings.recurseChain.indexOf(targetUrl) === -1) {
+                if (!frameSettings.recurseChain.includes(targetUrl)) {
                   let frameOptions = options;
 
                   // special handling of data URL
