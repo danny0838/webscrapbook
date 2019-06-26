@@ -611,34 +611,16 @@ capturer.captureDocument = async function (params) {
                 return;
               case "save":
               default:
-                switch (options["capture.rewriteCss"]) {
-                  case "url":
-                    tasks[tasks.length] = halter.then(async () => {
-                      const response = await capturer.invoke("downloadFile", {
-                        url: elem.getAttribute("href"),
-                        refUrl,
-                        rewriteMethod: "processCssFile",
-                        settings,
-                        options,
-                      });
+                tasks[tasks.length] = halter.then(async () => {
+                  await cssHandler.rewriteCss({
+                    elem,
+                    refUrl,
+                    settings,
+                    callback: (elem, response) => {
                       captureRewriteUri(elem, "href", response.url);
-                      return response;
-                    });
-                    break;
-                  case "none":
-                  default:
-                    tasks[tasks.length] = halter.then(async () => {
-                      const response = await capturer.invoke("downloadFile", {
-                        url: elem.getAttribute("href"),
-                        refUrl,
-                        settings,
-                        options,
-                      });
-                      captureRewriteUri(elem, "href", response.url);
-                      return response;
-                    });
-                    break;
-                }
+                    },
+                  });
+                });
                 break;
             }
             break;
@@ -707,63 +689,16 @@ capturer.captureDocument = async function (params) {
             case "save":
             case "link":
             default:
-              switch (options["capture.rewriteCss"]) {
-                case "url":
-                  tasks[tasks.length] = halter.then(async () => {
-                    let cssText = elem.textContent;
-
-                    // Capture dynamic stylesheet content instead if the
-                    // stylesheet has been dynamically modified.
-                    //
-                    // @FIXME: Do so for external and imported stylesheets.
-                    const origElem = origNodeMap.get(elem);
-                    if (origElem && origElem.sheet) {
-                      const getRulesFromCssText = async (cssText) => {
-                        const d = document.implementation.createHTMLDocument('');
-                        const styleElem = d.createElement('style');
-                        styleElem.textContent = cssText;
-                        d.head.appendChild(styleElem);
-
-                        // In Firefox, an error is thrown when accessing cssRules right after
-                        // insertion of a stylesheet containing an @import rule. A delay is
-                        // required to prevent the error.
-                        await scrapbook.delay(0);
-
-                        return styleElem.sheet.cssRules;
-                      };
-
-                      let cssRulesCssom;
-                      try {
-                        cssRulesCssom = origElem.sheet.cssRules;
-                        if (!cssRulesCssom) { throw new Error('cssRules not accessible.'); }
-                      } catch (ex) {
-                        // cssRules not accessible, do nothing
-                      }
-                      if (cssRulesCssom) {
-                        const cssRulesSource = await getRulesFromCssText(cssText);
-                        if (cssRulesSource.length !== cssRulesCssom.length ||
-                            !Array.prototype.every.call(
-                              cssRulesSource,
-                              (cssRule, i) => (cssRule.cssText === cssRulesCssom[i].cssText),
-                            )) {
-                          cssText = Array.prototype.map.call(
-                            cssRulesCssom,
-                            cssRule => cssRule.cssText,
-                          ).join("\n");
-                        }
-                      }
-                    }
-
-                    const response = await capturer.processCssText(cssText, refUrl, settings, options);
-                    elem.textContent = response;
-                    return response;
-                  });
-                  break;
-                case "none":
-                default:
-                  // do nothing
-                  break;
-              }
+              tasks[tasks.length] = halter.then(async () => {
+                await cssHandler.rewriteCss({
+                  elem,
+                  refUrl,
+                  settings,
+                  callback: (elem, response) => {
+                    elem.textContent = response.cssText;
+                  },
+                });
+              });
               break;
           }
           break;
@@ -1792,7 +1727,10 @@ capturer.captureDocument = async function (params) {
             switch (options["capture.rewriteCss"]) {
               case "url":
                 tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.processCssText(elem.getAttribute("style"), refUrl, settings, options);
+                  const response = await cssHandler.rewriteCssText({
+                    cssText: elem.getAttribute("style"),
+                    refUrl,
+                  });
                   elem.setAttribute("style", response);
                   return response;
                 });
@@ -2646,6 +2584,356 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     }
 
     return {usedCssFontUrl, usedCssImageUrl};
+  }
+
+
+  /**
+   * Rewrite a given CSS Text.
+   *
+   * @param {string} cssText - the CSS text to rewrite.
+   * @param {string} refUrl - the reference URL for URL resolve.
+   * @param {CSSStyleSheet} refCss - the reference CSS (for imported CSS).
+   * @param {Object} settings
+   * @param {Object} options
+   */
+  async rewriteCssText({cssText, refUrl, refCss = null, settings = this.settings, options = this.options}) {
+    settings = JSON.parse(JSON.stringify(settings));
+    settings.recurseChain.push(scrapbook.splitUrlByAnchor(refUrl)[0]);
+    const {usedCssFontUrl, usedCssImageUrl} = settings;
+
+    const resolveCssUrl = (sourceUrl, refUrl) => {
+      const url = capturer.resolveRelativeUrl(sourceUrl, refUrl);
+      let valid = true;
+
+      // do not fetch if the URL is not resolved
+      if (!scrapbook.isUrlAbsolute(url)) {
+        valid = false;
+      }
+
+      return {
+        url,
+        recordUrl: options["capture.recordSourceUri"] ? url : "",
+        valid,
+      };
+    };
+
+    const downloadFileInCss = async (url) => {
+      const response = await capturer.invoke("downloadFile", {
+        url,
+        refUrl,
+        settings,
+        options,
+      });
+      if (response.isCircular) {
+        if (["singleHtml", "singleHtmlJs"].includes(options["capture.saveAs"])) {
+          console.warn(scrapbook.lang("WarnCaptureCircular", [refUrl, url]));
+          response.url = `urn:scrapbook:download:circular:filename:${response.url}`;
+        }
+      }
+      return response.url;
+    };
+
+    const importRules = [];
+    let importRuleIdx = 0;
+    if (refCss) {
+      const rules = await this.getRulesFromCss({css: refCss});
+      for (const rule of rules) {
+        if (rule.type === 3) {
+          importRules.push(rule);
+        }
+      }
+    }
+
+    switch (options["capture.rewriteCss"]) {
+      case "url": {
+        const rewriteImportUrl = async (sourceUrl) => {
+          let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
+          switch (options["capture.style"]) {
+            case "link":
+              // do nothing
+              break;
+            case "blank":
+            case "remove":
+              url = "";
+              break;
+            case "save":
+            default:
+              if (valid) {
+                const rule = importRules[importRuleIdx++];
+                await this.rewriteCss({
+                  url,
+                  refCss: rule && rule.styleSheet,
+                  refUrl,
+                  settings,
+                  options,
+                  callback: (elem, response) => {
+                    url = response.url;
+                  },
+                });
+              }
+              break;
+          }
+          return {url, recordUrl};
+        };
+
+        const rewriteFontFaceUrl = async (sourceUrl) => {
+          let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
+          switch (options["capture.font"]) {
+            case "link":
+              // do nothing
+              break;
+            case "blank":
+            case "remove": // deprecated
+              url = "";
+              break;
+            case "save-used":
+            case "save":
+            default:
+              if (usedCssFontUrl && !usedCssFontUrl[url]) {
+                url = "";
+                break;
+              }
+
+              if (valid) {
+                url = await downloadFileInCss(url);
+              }
+              break;
+          }
+          return {url, recordUrl};
+        };
+
+        const rewriteBackgroundUrl = async (sourceUrl) => {
+          let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
+          switch (options["capture.imageBackground"]) {
+            case "link":
+              // do nothing
+              break;
+            case "blank":
+            case "remove": // deprecated
+              url = "";
+              break;
+            case "save-used":
+            case "save":
+            default:
+              if (usedCssImageUrl && !usedCssImageUrl[url]) {
+                url = "";
+                break;
+              }
+
+              if (valid) {
+                url = await downloadFileInCss(url);
+              }
+              break;
+          }
+          return {url, recordUrl};
+        };
+
+        return await scrapbook.rewriteCssText(cssText, {
+          rewriteImportUrl,
+          rewriteFontFaceUrl,
+          rewriteBackgroundUrl,
+        });
+      }
+      case "none":
+      default: {
+        return cssText;
+      }
+    }
+  }
+
+  /**
+   * Rewrite an internal, external, or imported CSS.
+   *
+   * - Pass {elem, callback} for internal or external CSS.
+   * - Pass {url, refCss, callback} for imported CSS.
+   *
+   * @param {HTMLElement} elem - the elem to have CSS rewritten.
+   * @param {string} url - the source URL of the imported CSS.
+   * @param {string} refCss - the reference CSS of the imported CSS.
+   * @param {string} refUrl - the reference URL for URL resolve.
+   * @param {Function} callback
+   * @param {Object} settings
+   * @param {Object} options
+   */
+  async rewriteCss({elem, url, refCss, refUrl, callback, settings = this.settings, options = this.options}) {
+    const {origNodeMap} = this;
+
+    let sourceUrl;
+    let fetchResult;
+    let cssText = "";
+    let charset;
+    let newFilename;
+    let isCircular = false;
+
+    if (!elem || elem.nodeName.toLowerCase() == 'link') {
+      // imported or external CSS
+      if (!elem) {
+        // imported CSS
+        sourceUrl = url;
+      } else {
+        // external CSS
+        const origElem = origNodeMap.get(elem);
+        refCss = origElem && origElem.sheet;
+        sourceUrl = elem.getAttribute("href");
+      }
+
+      const response = await capturer.invoke("fetchCss", {
+        url: sourceUrl,
+        refUrl,
+        settings,
+        options,
+      });
+
+      if (response.error) {
+        await callback(elem, response);
+        return;
+      }
+
+      isCircular = settings.recurseChain.includes(scrapbook.splitUrlByAnchor(sourceUrl)[0]);
+      fetchResult = response;
+      cssText = response.text;
+      charset = response.charset;
+    } else {
+      // internal CSS
+      const origElem = origNodeMap.get(elem);
+      refCss = origElem && origElem.sheet;
+      cssText = elem.textContent;
+      charset = "UTF-8";
+    }
+
+    // Capture dynamic stylesheet content instead if the stylesheet has been
+    // dynamically modified.
+    let isDynamicCss = false;
+
+    // Ignore refCss if sourceUrl is circularly referenced, as we cannot get
+    // original cssRules from CSSOM and cannot determine whether it's dynamic
+    // reliably.
+    //
+    // If style1.css => style2.css => style3.css => style1.css
+    // - Chromium: styleSheet of StyleSheet "style3.css" is null
+    // - Firefox: cssRules of the circularly referenced StyleSheet "style1.css"
+    //            is empty, but can be modified by scripts.
+    if (refCss && !isCircular) {
+      let cssRulesCssom = await this.getRulesFromCss({
+        css: refCss,
+        refUrl,
+        crossOrigin: false,
+        errorWithNull: true,
+      });
+      if (cssRulesCssom) {
+        // scrapbook.utf8ToUnicode throws an error if cssText contains a UTF-8 invalid char
+        const cssTextUnicode = charset ? cssText : await scrapbook.readFileAsText(new Blob([scrapbook.byteStringToArrayBuffer(cssText)]));
+
+        const cssRulesSource = await this.getRulesFromCssText(cssTextUnicode);
+
+        if (cssRulesSource.length !== cssRulesCssom.length ||
+            !Array.prototype.every.call(
+              cssRulesSource,
+              (cssRule, i) => (cssRule.cssText === cssRulesCssom[i].cssText),
+            )) {
+          isDynamicCss = true;
+          charset = "UTF-8";
+          cssText = Array.prototype.map.call(
+            cssRulesCssom,
+            cssRule => cssRule.cssText,
+          ).join("\n");
+        }
+      }
+    }
+
+    // register the filename to save (for imported or external CSS)
+    if (!elem || elem.nodeName.toLowerCase() == 'link') {
+      if (!fetchResult.url.startsWith("data:")) {
+        let response = await capturer.invoke("registerFile", {
+          filename: fetchResult.filename,
+          sourceUrl,
+          accessId: isDynamicCss ? null : fetchResult.accessId,
+          settings,
+          options,
+        });
+
+        // handle duplicated accesses
+        if (response.isDuplicate) {
+          if (isCircular) {
+            if (["singleHtml", "singleHtmlJs"].includes(options["capture.saveAs"])) {
+              const target = sourceUrl;
+              const source = settings.recurseChain[settings.recurseChain.length - 1];
+              console.warn(scrapbook.lang("WarnCaptureCircular", [source, target]));
+              response.url = `urn:scrapbook:download:circular:filename:${response.url}`;
+            }
+
+            await callback(elem, response);
+            return;
+          }
+
+          response = await capturer.invoke("getAccessResult", {
+            sourceUrl,
+            accessId: fetchResult.accessId,
+            settings,
+            options,
+          });
+          await callback(elem, response);
+          return;
+        }
+
+        newFilename = response.filename;
+      } else {
+        // Save inner URLs as data URL since data URL is null origin
+        // and no relative URLs are allowed in it.
+        options = JSON.parse(JSON.stringify(options));
+        options["capture.saveAs"] = "singleHtml";
+      }
+    }
+
+    // do the rewriting according to options
+    const cssTextRewritten = await this.rewriteCssText({
+      cssText,
+      refUrl: sourceUrl || refUrl,
+      refCss,
+      settings,
+      options,
+    });
+
+    // save result back
+    if (!elem || elem.nodeName.toLowerCase() == 'link') {
+      // imported or external CSS
+      const bytes = charset ? scrapbook.unicodeToUtf8(cssTextRewritten) : cssTextRewritten;
+      const mime = "text/css" + (charset ? ";charset=UTF-8" : "");
+
+      // special management for data URI
+      if (fetchResult.url.startsWith("data:")) {
+        const [, hash] = scrapbook.splitUrlByAnchor(fetchResult.url);
+        const ab = scrapbook.byteStringToArrayBuffer(bytes);
+        const blob = new Blob([ab], {type: mime});
+
+        let dataUri = await scrapbook.readFileAsDataURL(blob);
+        if (dataUri === "data:") {
+          // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
+          dataUri = `data:${blob.type};base64,`;
+        }
+
+        const response = {url: dataUri + hash};
+        await callback(elem, response);
+        return;
+      }
+
+      const response = await capturer.invoke("downloadBytes", {
+        bytes,
+        mime,
+        filename: newFilename,
+        sourceUrl,
+        accessId: isDynamicCss ? null : fetchResult.accessId,
+        settings,
+        options,
+      });
+      await callback(elem, response);
+    } else {
+      // internal CSS
+      const response = {
+        cssText: cssTextRewritten,
+      };
+      await callback(elem, response);
+    }
   }
 };
 

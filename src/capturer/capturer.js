@@ -413,6 +413,12 @@ capturer.access = async function (params) {
     })().then(deferred.resolve, deferred.reject);
 
     accessMap.set(accessToken, accessCurrent);
+
+    do {
+      accessCurrent.id = scrapbook.getUuid();
+    } while (accessMap.has(accessCurrent.id));
+    accessMap.set(accessCurrent.id, accessCurrent);
+
     return accessCurrent;
   };
 
@@ -1880,8 +1886,10 @@ capturer.fetchCss = async function (params) {
   isDebug && console.debug("call: fetchCss", params);
 
   const {url: sourceUrl, refUrl, settings, options} = params;
+  const {timeId} = settings;
 
   try {
+    let filename;
     return await capturer.access({
       url: sourceUrl,
       refUrl,
@@ -1889,15 +1897,184 @@ capturer.fetchCss = async function (params) {
       settings,
       options,
       hooks: {
-        async response({xhr, headers}) {
-          return await scrapbook.parseCssFile(xhr.response, headers.charset);
-        }
+        async preRequest({access, url, hash}) {
+          // fail out if sourceUrl is empty.
+          if (!url) {
+            throw new Error(`Source URL is empty.`);
+          }
+
+          // fail out if sourceUrl is relative,
+          // or it will be treated as relative to this extension page.
+          if (!scrapbook.isUrlAbsolute(url)) {
+            throw new Error(`Requires an absolute URL.`);
+          }
+
+          // special management for data URI
+          if (url.startsWith("data:")) {
+            const file = scrapbook.dataUriToFile(url);
+            if (!file) { throw new Error("Malformed data URL."); }
+
+            let filename;
+
+            // save data URI as file?
+            if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
+              filename = file.name;
+              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+              url = scrapbook.escapeFilename(filename) + hash;
+            } else {
+              url += hash;
+            }
+
+            const {parameters: {fileCharset}} = scrapbook.parseHeaderContentType(file.type);
+            const {text, charset} = await scrapbook.parseCssFile(file, fileCharset);
+            return {
+              accessId: access.id,
+              text,
+              charset,
+              filename,
+              url,
+            };
+          }
+        },
+
+        postHeaders({access, headers}) {
+          // determine the filename
+          filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
+          if (scrapbook.filenameParts(filename)[1].toLowerCase() !== 'css') {
+            filename += ".css";
+          }
+
+          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        },
+        async response({xhr, hash, headers, access}) {
+          const {text, charset} = await scrapbook.parseCssFile(xhr.response, headers.charset);
+          return {
+            accessId: access.id,
+            text,
+            charset,
+            filename,
+            url: scrapbook.escapeFilename(filename) + hash,
+          };
+        },
+        async duplicate({access, url, hash}) {
+          const response = await access;
+          return Object.assign({}, response, {
+            url: scrapbook.splitUrlByAnchor(response.url)[0] + hash,
+            isDuplicate: true,
+          });
+        },
       },
     });
   } catch (ex) {
     // something wrong for the XMLHttpRequest
-    return {error: {message: ex.message}};
+    console.warn(ex);
+    capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+    return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
   }
+};
+
+/**
+ * @kind invokable
+ *     - {string} params.filename - validated, not uniquified
+ *     - {string} params.sourceUrl
+ *     - {string} params.accessId - ID of the bound access
+ *     - {Object} params.settings
+ *     - {Object} params.options
+ * @return {Promise<Object>}
+ */
+capturer.registerFile = async function (params) {
+  isDebug && console.debug("call: registerFile", params);
+
+  const {filename, sourceUrl, accessId, settings, options} = params;
+  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const {timeId} = settings;
+
+  // obtain a unique filename for each boundAccess
+  // (if no boundAccess, always obtain one)
+  let newFilename;
+  const boundAccess = capturer.captureInfo.get(timeId).accessMap.get(accessId);
+  if (boundAccess) {
+    newFilename = boundAccess.newFilename;
+  }
+
+  if (!newFilename) {
+    newFilename = capturer.getUniqueFilename(timeId, filename);
+
+    if (boundAccess) {
+      boundAccess.newFilename = newFilename;
+      boundAccess.deferred = new scrapbook.Deferred();
+    }
+
+    return {
+      filename: newFilename,
+      url: scrapbook.escapeFilename(newFilename) + sourceUrlHash,
+    };
+  }
+
+  return {
+    filename: newFilename,
+    url: scrapbook.escapeFilename(newFilename) + sourceUrlHash,
+    isDuplicate: true,
+  };
+};
+
+/**
+ * @kind invokable
+ * @param {Object} params
+ *     - {string} params.bytes - as byte string
+ *     - {string} params.mime - may include parameters like charset
+ *     - {string} params.filename - validated and unique
+ *     - {string} params.sourceUrl
+ *     - {string} params.accessId - ID of the bound access
+ *     - {Object} params.settings
+ *     - {Object} params.options
+ * @return {Promise<Object>}
+ */
+capturer.downloadBytes = async function (params) {
+  isDebug && console.debug("call: downloadBytes", params);
+
+  const {bytes, mime, filename, sourceUrl, accessId, settings, options} = params;
+  const {timeId} = settings;
+
+  const ab = scrapbook.byteStringToArrayBuffer(bytes);
+  const blob = new Blob([ab], {type: mime});
+  const access = capturer.downloadBlob({
+    blob,
+    filename,
+    sourceUrl,
+    settings,
+    options,
+  });
+
+  const boundAccess = capturer.captureInfo.get(timeId).accessMap.get(accessId);
+  if (boundAccess) {
+    access.then(boundAccess.deferred.resolve, boundAccess.deferred.reject);
+  }
+
+  return await access;
+};
+
+/**
+ * @kind invokable
+ * @param {Object} params
+ *     - {string} params.sourceUrl
+ *     - {string} params.accessId - ID of the bound access
+ *     - {Object} params.settings
+ *     - {Object} params.options
+ * @return {Promise<Object>}
+ */
+capturer.getAccessResult = async function (params) {
+  isDebug && console.debug("call: getAccessResult", params);
+
+  const {sourceUrl, accessId, settings, options} = params;
+  const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const {timeId} = settings;
+
+  const boundAccess = capturer.captureInfo.get(timeId).accessMap.get(accessId);
+  const response = await boundAccess.deferred.promise;
+  return Object.assign({}, response, {
+    url: scrapbook.splitUrlByAnchor(response.url)[0] + sourceUrlHash,
+  });
 };
 
 /**

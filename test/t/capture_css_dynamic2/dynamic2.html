@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test dynamic CSS</title>
+<style>
+blockquote::after { content: "#" attr(id); }
+</style>
+<link rel="stylesheet" href="link.css">
+<link rel="stylesheet" href="link.css#123">
+<link rel="stylesheet" href="link.css#abc">
+<link rel="stylesheet" href="link.css#def">
+<style>
+@import "import.css";
+@import "import.css#123";
+@import "import.css#abc";
+@import "import.css#def";
+</style>
+</head>
+<body>
+<blockquote id="link-deleted"></blockquote>
+<blockquote id="link-inserted"></blockquote>
+<blockquote id="import-deleted"></blockquote>
+<blockquote id="import-inserted"></blockquote>
+</body>
+<script>
+var css = document.styleSheets[3];
+css.deleteRule(css.cssRules.length - 1);
+css.insertRule('#link-inserted { background: url("link-inserted.bmp"); }', css.cssRules.length);
+
+var css = document.styleSheets[4];
+css.deleteRule(css.cssRules.length - 1);
+css.insertRule('#link-inserted { background: url("link-inserted.bmp"); }', css.cssRules.length);
+
+var css = document.styleSheets[5].cssRules[2].styleSheet;
+css.deleteRule(css.cssRules.length - 1);
+css.insertRule('#import-inserted { background: url("import-inserted.bmp"); }', css.cssRules.length);
+
+var css = document.styleSheets[5].cssRules[3].styleSheet;
+css.deleteRule(css.cssRules.length - 1);
+css.insertRule('#import-inserted { background: url("import-inserted.bmp"); }', css.cssRules.length);
+</script>
+</html>

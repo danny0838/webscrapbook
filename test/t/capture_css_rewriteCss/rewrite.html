@@ -16,10 +16,6 @@
   unknown: url(ref/unsupported-4.bmp); /* unknown */
 }
 </style>
-<style>
-/* dynamic rules */
-#deleted { background: url(ref/deleted.bmp); }
-</style>
 </head>
 <body>
 <h2>Basic rewrite</h2>
@@ -30,14 +26,5 @@
 
 <h2>Unsupported rules</h2>
 <blockquote id="unsupported">unsupported</blockquote>
-
-<h2>Dynamic rules</h2>
-<blockquote id="inserted">inserted</blockquote>
-<blockquote id="deleted">deleted</blockquote>
 </body>
-<script>
-var css = document.styleSheets[2];
-css.deleteRule(css.cssRules.length - 1);
-css.insertRule('#inserted { background: url(ref/inserted.bmp); }', css.cssRules.length);
-</script>
 </html>

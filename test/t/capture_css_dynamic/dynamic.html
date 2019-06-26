@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test dynamic CSS</title>
+<style>
+blockquote::after { content: "#" attr(id); }
+</style>
+<style>
+#internal-deleted { background-image: url("internal-deleted.bmp"); }
+</style>
+<link rel="stylesheet" href="link.css">
+<style>
+@import "import.css";
+</style>
+</head>
+<body>
+<blockquote id="internal-deleted"></blockquote>
+<blockquote id="internal-inserted"></blockquote>
+<blockquote id="link-deleted"></blockquote>
+<blockquote id="link-inserted"></blockquote>
+<blockquote id="import-deleted"></blockquote>
+<blockquote id="import-inserted"></blockquote>
+</body>
+<script>
+var css = document.styleSheets[1];
+css.deleteRule(css.cssRules.length - 1);
+css.insertRule('#internal-inserted { background-image: url("internal-inserted.bmp"); }', css.cssRules.length);
+
+var css = document.styleSheets[2];
+css.deleteRule(css.cssRules.length - 1);
+css.insertRule('#link-inserted { background-image: url("link-inserted.bmp"); }', css.cssRules.length);
+
+var css = document.styleSheets[3].cssRules[0].styleSheet;
+css.deleteRule(css.cssRules.length - 1);
+css.insertRule('#import-inserted { background-image: url("import-inserted.bmp"); }', css.cssRules.length);
+</script>
+</html>

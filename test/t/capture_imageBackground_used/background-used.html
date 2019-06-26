@@ -47,15 +47,6 @@
 }
 </style>
 
-<!-- dynamic style rules -->
-<style>
-#deleted-internal { background: url("deleted-internal.bmp"); }
-</style>
-<link rel="stylesheet" href="link-dynamic.css">
-<style>
-@import "import-dynamic.css";
-</style>
-
 </head>
 <body>
 <h2>Basic</h2>
@@ -72,26 +63,5 @@
 <h2>Removed elements</h2>
 <video id="removed-internal" style="width: 60px; height: 60px;">removed internal</video>
 <video id="removed-keyframes" style="width: 60px; height: 60px; animation: removed 1s linear infinite;">removed keyframes</video>
-
-<h2>Dynamic style rules</h2>
-<blockquote id="deleted-internal">deleted internal</blockquote>
-<blockquote id="inserted-internal">inserted internal</blockquote>
-<blockquote id="deleted-link">deleted link</blockquote>
-<blockquote id="inserted-link">inserted link</blockquote>
-<blockquote id="deleted-import">deleted import</blockquote>
-<blockquote id="inserted-import">inserted import</blockquote>
 </body>
-<script>
-var css = document.styleSheets[10];
-css.deleteRule(css.cssRules.length - 1);
-css.insertRule('#inserted-internal { background: url("inserted-internal.bmp"); }', css.cssRules.length);
-
-var css = document.styleSheets[11];
-css.deleteRule(css.cssRules.length - 1);
-css.insertRule('#inserted-link { background: url("inserted-link.bmp"); }', css.cssRules.length);
-
-var css = document.styleSheets[12].cssRules[0].styleSheet;
-css.deleteRule(css.cssRules.length - 1);
-css.insertRule('#inserted-import { background: url("inserted-import.bmp"); }', css.cssRules.length);
-</script>
 </html>

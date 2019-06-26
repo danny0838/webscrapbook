@@ -2175,8 +2175,6 @@ async function test_capture_css_rewriteCss() {
   assert(zip.files["unsupported-2.bmp"]);
   assert(zip.files["unsupported-3.bmp"]);
   assert(zip.files["unsupported-4.bmp"]);
-  assert(zip.files["inserted.bmp"]);
-  assert(!zip.files["deleted.bmp"]);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2195,7 +2193,6 @@ async function test_capture_css_rewriteCss() {
   -o-background: url("unsupported-3.bmp"); /* vandor prefix */
   unknown: url("unsupported-4.bmp"); /* unknown */
 }`);
-  assert(styleElems[2].textContent.trim() === `#inserted { background: url("inserted.bmp"); }`);
 
   assert(doc.querySelector('blockquote').getAttribute('style') === `background: url("green.bmp");`);
 
@@ -2229,9 +2226,6 @@ async function test_capture_css_rewriteCss() {
   -o-background: url(ref/unsupported-3.bmp); /* vandor prefix */
   unknown: url(ref/unsupported-4.bmp); /* unknown */
 }`);
-  assert(styleElems[2].textContent.trim() === `\
-/* dynamic rules */
-#deleted { background: url(ref/deleted.bmp); }`);
 
   assert(doc.querySelector('blockquote').getAttribute('style') === `background: url(ref/green.bmp);`);
 }
@@ -2703,6 +2697,141 @@ async function test_capture_css_cross_origin() {
 }
 
 /**
+ * Check if dynamic stylesheets are handled correctly.
+ *
+ * capturer.DocumentCssHandler
+ */
+async function test_capture_css_dynamic() {
+  /* save */
+  var options = {
+    "capture.imageBackground": "save",
+    "capture.font": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_dynamic/dynamic.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['link.css']);
+  assert(zip.files['import.css']);
+  assert(!zip.files['internal-deleted.bmp']);
+  assert(zip.files['internal-inserted.bmp']);
+  assert(!zip.files['link-deleted.bmp']);
+  assert(zip.files['link-inserted.bmp']);
+  assert(!zip.files['import-deleted.bmp']);
+  assert(zip.files['import-inserted.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[1].textContent.trim() === `#internal-inserted { background-image: url("internal-inserted.bmp"); }`);
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#link-inserted { background-image: url("link-inserted.bmp"); }`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#import-inserted { background-image: url("import-inserted.bmp"); }`);
+
+  /* save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.font": "save-used",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_dynamic/dynamic.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['link.css']);
+  assert(zip.files['import.css']);
+  assert(!zip.files['internal-deleted.bmp']);
+  assert(zip.files['internal-inserted.bmp']);
+  assert(!zip.files['link-deleted.bmp']);
+  assert(zip.files['link-inserted.bmp']);
+  assert(!zip.files['import-deleted.bmp']);
+  assert(zip.files['import-inserted.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[1].textContent.trim() === `#internal-inserted { background-image: url("internal-inserted.bmp"); }`);
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#link-inserted { background-image: url("link-inserted.bmp"); }`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `#import-inserted { background-image: url("import-inserted.bmp"); }`);
+}
+
+/**
+ * Check if dynamic stylesheets rename are handled correctly.
+ *
+ * capturer.DocumentCssHandler
+ */
+async function test_capture_css_dynamic2() {
+  var options = {
+    "capture.imageBackground": "save",
+    "capture.font": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_css_dynamic2/dynamic2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['link.css']);
+  assert(zip.files['link-1.css']);
+  assert(zip.files['link-2.css']);
+  assert(zip.files['link-deleted.bmp']);
+  assert(zip.files['link-inserted.bmp']);
+  assert(zip.files['import.css']);
+  assert(zip.files['import-1.css']);
+  assert(zip.files['import-2.css']);
+  assert(zip.files['import-deleted.bmp']);
+  assert(zip.files['import-inserted.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var linkElems = doc.querySelectorAll('link[rel~="stylesheet"]');
+  var linkNames = Array.prototype.map.call(linkElems, (elem) => {
+    return elem.getAttribute('href').split('#');
+  });
+
+  assert(linkNames[0][0] === linkNames[1][0]);
+  assert(linkNames[0][0] !== linkNames[2][0]);
+  assert(linkNames[0][0] !== linkNames[3][0]);
+  assert(linkNames[2][0] !== linkNames[3][0]);
+
+  assert(linkNames[0][1] === undefined);
+  assert(linkNames[1][1] === '123');
+  assert(linkNames[2][1] === 'abc');
+  assert(linkNames[3][1] === 'def');
+
+  var importNames = doc.querySelectorAll('style')[1].textContent.trim().split('\n').map((url) => {
+    return url.match(/@import "([^"]*)"/)[1].split('#');
+  });
+
+  assert(importNames[0][0] === importNames[1][0]);
+  assert(importNames[0][0] !== importNames[2][0]);
+  assert(importNames[0][0] !== importNames[3][0]);
+  assert(importNames[2][0] !== importNames[3][0]);
+
+  assert(importNames[0][1] === undefined);
+  assert(importNames[1][1] === '123');
+  assert(importNames[2][1] === 'abc');
+  assert(importNames[3][1] === 'def');
+}
+
+/**
  * Check if option works
  *
  * capture.image
@@ -3122,12 +3251,6 @@ async function test_capture_imageBackground_used() {
   assert(zip.files['import-keyframes.bmp']);
   assert(!zip.files['neverused.bmp']);
   assert(!zip.files['removed.bmp']);
-  assert(!zip.files['deleted-internal.bmp']);
-  assert(zip.files['inserted-internal.bmp']);
-  assert(!zip.files['deleted-link.bmp']);
-  assert(!zip.files['inserted-link.bmp']);  // @FIXME
-  assert(!zip.files['deleted-import.bmp']);
-  assert(!zip.files['inserted-import.bmp']);  // @FIXME
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3149,7 +3272,6 @@ async function test_capture_imageBackground_used() {
   from { transform: rotate(0turn); background-image: url(""); }
   to { transform: rotate(1turn); }
 }`);
-  assert(styleElems[8].textContent.trim() === `#inserted-internal { background: url("inserted-internal.bmp"); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
@@ -3172,14 +3294,6 @@ async function test_capture_imageBackground_used() {
   from { transform: rotate(0turn); background-image: url("import-keyframes.bmp"); }
   to { transform: rotate(1turn); }
 }`);
-
-  var cssFile = zip.file('link-dynamic.css');
-  var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#deleted-link { background: url(""); }`);  // @FIXME
-
-  var cssFile = zip.file('import-dynamic.css');
-  var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#deleted-import { background: url(""); }`);  // @FIXME
 
   /* capture.imageBackground = save-used (headless) */
   // the result is same as save
@@ -3207,12 +3321,6 @@ async function test_capture_imageBackground_used() {
   assert(zip.files['import-keyframes.bmp']);
   assert(zip.files['neverused.bmp']);
   assert(zip.files['removed.bmp']);
-  assert(zip.files['deleted-internal.bmp']);
-  assert(!zip.files['inserted-internal.bmp']);
-  assert(zip.files['deleted-link.bmp']);
-  assert(!zip.files['inserted-link.bmp']);
-  assert(zip.files['deleted-import.bmp']);
-  assert(!zip.files['inserted-import.bmp']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3234,7 +3342,6 @@ async function test_capture_imageBackground_used() {
   from { transform: rotate(0turn); background-image: url("removed.bmp"); }
   to { transform: rotate(1turn); }
 }`);
-  assert(styleElems[8].textContent.trim() === `#deleted-internal { background: url("deleted-internal.bmp"); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
@@ -3257,14 +3364,6 @@ async function test_capture_imageBackground_used() {
   from { transform: rotate(0turn); background-image: url("import-keyframes.bmp"); }
   to { transform: rotate(1turn); }
 }`);
-
-  var cssFile = zip.file('link-dynamic.css');
-  var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#deleted-link { background: url("deleted-link.bmp"); }`);
-
-  var cssFile = zip.file('import-dynamic.css');
-  var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#deleted-import { background: url("deleted-import.bmp"); }`);
 }
 
 /**
@@ -6460,6 +6559,8 @@ async function runTests() {
   await test(test_capture_css_circular);
   await test(test_capture_css_circular2);
   await test(test_capture_css_cross_origin);
+  await test(test_capture_css_dynamic);
+  await test(test_capture_css_dynamic2);
   await test(test_capture_image);
   await test(test_capture_imageBackground);
   await test(test_capture_imageBackground_used);
