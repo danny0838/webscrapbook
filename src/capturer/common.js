@@ -2510,12 +2510,6 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
         settings,
         options,
       });
-      if (response.isCircular) {
-        if (["singleHtml", "singleHtmlJs"].includes(options["capture.saveAs"])) {
-          console.warn(scrapbook.lang("WarnCaptureCircular", [refUrl, url]));
-          response.url = `urn:scrapbook:download:circular:filename:${response.url}`;
-        }
-      }
       return response.url;
     };
 

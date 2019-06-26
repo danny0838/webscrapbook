@@ -1746,20 +1746,6 @@ capturer.downloadFile = async function (params) {
           },
 
           async duplicate({access, url, hash}) {
-            // Normally we wait until the file be downloaded, and possibly
-            // renamed, cancelled, or thrown error. However, if there is
-            // a circular reference, we have to return early to pervent a
-            // dead lock. This returned data could be incorrect if something
-            // unexpected happen to the access.
-            if (recurseChain.includes(sourceUrlMain)) {
-              const filename = access.filename;
-              return {
-                filename,
-                url: scrapbook.escapeFilename(filename) + hash,
-                isCircular: true,
-              };
-            }
-
             return await access;
           },
         },
