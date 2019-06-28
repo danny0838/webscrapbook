@@ -593,9 +593,7 @@ capturer.captureDocument = async function (params) {
           const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), refUrl);
           elem.setAttribute("href", rewriteUrl);
 
-          // elem.rel == "" if "rel" attribute not defined
-          const rels = elem.rel.toLowerCase().split(/[ \t\r\n\v\f]+/);
-          if (rels.includes("stylesheet")) {
+          if (elem.matches('[rel~="stylesheet"]')) {
             // styles: link element
             switch (options["capture.style"]) {
               case "link":
@@ -642,7 +640,7 @@ capturer.captureDocument = async function (params) {
                 break;
             }
             break;
-          } else if (rels.includes("icon")) {
+          } else if (elem.matches('[rel~="icon"]')) {
             // favicon: the link element
             switch (options["capture.favicon"]) {
               case "link":
@@ -688,7 +686,7 @@ capturer.captureDocument = async function (params) {
                 });
                 break;
             }
-          } else if (rels.includes("preload")) {
+          } else if (elem.matches('[rel~="preload"]')) {
             // @TODO: handle preloads according to its "as" attribute
             captureRewriteUri(elem, "href", null);
           }

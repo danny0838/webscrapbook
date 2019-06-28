@@ -259,9 +259,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
         case "link": {
           if (elem.hasAttribute("href")) {
-            // elem.rel == "" if "rel" attribute not defined
-            const rels = elem.rel.toLowerCase().split(/[ \t\r\n\v\f]+/);
-            if (rels.includes("stylesheet")) {
+            if (elem.matches('[rel~="stylesheet"]')) {
               const info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
               tasks[tasks.length] = 
               viewer.fetchFile({
