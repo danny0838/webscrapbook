@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<!-- changed by scripts -->
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test alternative stylesheets</title>
+<link rel="stylesheet" href="persistent.css">
+<link rel="stylesheet" title="Default" href="default.css">
+<link rel="stylesheet" title="Default" href="default2.css">
+<link rel="stylesheet alternate" title="Alternative" href="alternative.css">
+<link rel="stylesheet alternate" title="Alternative" href="alternative2.css">
+<style>
+#internal { background: yellow; }
+</style>
+</head>
+<body>
+<blockquote id="persistent">persistent</blockquote>
+<blockquote id="default">default</blockquote>
+<blockquote id="default2">default2</blockquote>
+<blockquote id="alternative">alternative</blockquote>
+<blockquote id="alternative2">alternative2</blockquote>
+<blockquote id="internal">internal</blockquote>
+</body>
+<script>
+document.styleSheets[2].disabled = true;
+document.styleSheets[3].disabled = false;
+</script>
+</html>

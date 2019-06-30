@@ -2156,6 +2156,146 @@ async function test_capture_css_styleInline() {
 }
 
 /**
+ * Check if alternative/disabled stylesheets are handled correctly
+ *
+ * capture.style
+ * capturer.captureDocument
+ */
+async function test_capture_css_disabled() {
+  var options = {
+    "capture.style": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_disabled/index1.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
+  assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
+  assert(styleElems[1].matches('[href="default.css"][title]:not([rel~="alternate"])'));
+  assert(styleElems[2].matches('[href="default2.css"][title]:not([rel~="alternate"])'));
+  assert(styleElems[3].matches('[href="alternative.css"][title][rel~="alternate"]'));
+  assert(styleElems[4].matches('[href="alternative2.css"][title][rel~="alternate"]'));
+  var styleElem = doc.querySelector('style');
+  assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
+  assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
+
+  assert(zip.files["persistent.css"]);
+  assert(zip.files["default.css"]);
+  assert(zip.files["default2.css"]);
+  assert(zip.files["alternative.css"]);
+  assert(zip.files["alternative2.css"]);
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_disabled/index2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  if (userAgent.is('chromium')) {
+    // Chromium: browser pick of alternative CSS is not supported
+    var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
+    assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
+    assert(styleElems[1].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+    assert(styleElems[2].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+    assert(styleElems[3].matches('[href="alternative.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
+    assert(styleElems[4].matches('[href="alternative2.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
+    var styleElem = doc.querySelector('style');
+    assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
+    assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
+
+    assert(zip.files["persistent.css"]);
+    assert(!zip.files["default.css"]);
+    assert(!zip.files["default2.css"]);
+    assert(zip.files["alternative.css"]);
+    assert(zip.files["alternative2.css"]);
+  } else {
+    var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
+    assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
+    assert(styleElems[1].matches('[href="default.css"][title]:not([rel~="alternate"])'));
+    assert(styleElems[2].matches('[href="default2.css"][title]:not([rel~="alternate"])'));
+    assert(styleElems[3].matches('[href="alternative.css"][title][rel~="alternate"]'));
+    assert(styleElems[4].matches('[href="alternative2.css"][title][rel~="alternate"]'));
+    var styleElem = doc.querySelector('style');
+    assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
+    assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
+
+    assert(zip.files["persistent.css"]);
+    assert(zip.files["default.css"]);
+    assert(zip.files["default2.css"]);
+    assert(zip.files["alternative.css"]);
+    assert(zip.files["alternative2.css"]);
+  }
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_disabled/index3.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  if (userAgent.is('chromium')) {
+    // Chromium: browser pick of alternative CSS is not supported
+    var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
+    assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
+    assert(styleElems[1].matches('[href="default.css"]:not([title]):not([rel~="alternate"])'));
+    assert(styleElems[2].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+    assert(styleElems[3].matches('[href="alternative.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
+    assert(styleElems[4].matches('[href="alternative2.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
+    var styleElem = doc.querySelector('style');
+    assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
+    assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
+
+    assert(zip.files["persistent.css"]);
+    assert(zip.files["default.css"]);
+    assert(!zip.files["default2.css"]);
+    assert(zip.files["alternative.css"]);
+    assert(zip.files["alternative2.css"]);
+  } else {
+    var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
+    assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
+    assert(styleElems[1].matches('[href="default.css"]:not([title]):not([rel~="alternate"])'));
+    assert(styleElems[2].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+    assert(styleElems[3].matches('[href="alternative.css"]:not([title]):not([rel~="alternate"])'));
+    assert(styleElems[4].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+    var styleElem = doc.querySelector('style');
+    assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
+    assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
+
+    assert(zip.files["persistent.css"]);
+    assert(zip.files["default.css"]);
+    assert(!zip.files["default2.css"]);
+    assert(zip.files["alternative.css"]);
+    assert(!zip.files["alternative2.css"]);
+  }
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_disabled/index4.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElem = doc.querySelector('link[rel~="stylesheet"]');
+  assert(styleElem.matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+  var styleElem = doc.querySelector('style');
+  assert(styleElem.matches('[data-scrapbook-css-disabled]'));
+  assert(styleElem.textContent.trim() === ``);
+
+  assert(!zip.files["persistent.css"]);
+}
+
+/**
  * Check if option works
  *
  * capture.rewriteCss
@@ -6554,6 +6694,7 @@ async function runTests() {
   await test(test_capture_frame_dataUri);
   await test(test_capture_css_style);
   await test(test_capture_css_styleInline);
+  await test(test_capture_css_disabled);
   await test(test_capture_css_rewriteCss);
   await test(test_capture_css_syntax);
   await test(test_capture_css_charset);

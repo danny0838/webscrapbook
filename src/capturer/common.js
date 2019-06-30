@@ -597,9 +597,45 @@ capturer.captureDocument = async function (params) {
 
           if (elem.matches('[rel~="stylesheet"]')) {
             // styles: link element
+            let disableCss = false;
+            const css = cssHandler.getElemCss(elem);
+            if (css) {
+              if (css.title) {
+                if (!cssHandler.isBrowserPick) {
+                  captureRewriteAttr(elem, "title", null);
+
+                  // Chromium has a bug that alternative stylesheets has disabled = false,
+                  // but actually not enabled and cannot be enabled.
+                  // https://bugs.chromium.org/p/chromium/issues/detail?id=965554
+                  if (!scrapbook.userAgent.is("chromium")) {
+                    // In Firefox, stylesheets with [rel~="alternate"]:not([title]) is
+                    // disabled initially. Remove "alternate" to get it work.
+                    if (elem.matches('[rel~="alternate"]')) {
+                      const rel = Array.prototype.filter.call(
+                        elem.relList, x => x.toLowerCase() !== "alternate",
+                      ).join(" ");
+                      captureRewriteAttr(elem, "rel", rel);
+                    }
+                  }
+
+                  if (css.disabled) {
+                    disableCss = true;
+                  }
+                }
+              } else {
+                if (css.disabled) {
+                  disableCss = true;
+                }
+              }
+            }
+
             switch (options["capture.style"]) {
               case "link":
-                // do nothing
+                if (disableCss) {
+                  captureRewriteAttr(elem, "href", null);
+                  elem.setAttribute("data-scrapbook-css-disabled", "");
+                  break;
+                }
                 break;
               case "blank":
                 // HTML 5.1 2nd Edition / W3C Recommendation:
@@ -611,6 +647,12 @@ capturer.captureDocument = async function (params) {
                 return;
               case "save":
               default:
+                if (disableCss) {
+                  captureRewriteAttr(elem, "href", null);
+                  elem.setAttribute("data-scrapbook-css-disabled", "");
+                  break;
+                }
+
                 tasks[tasks.length] = halter.then(async () => {
                   await cssHandler.rewriteCss({
                     elem,
@@ -679,6 +721,23 @@ capturer.captureDocument = async function (params) {
 
         // styles: style element
         case "style": {
+          let disableCss = false;
+          const css = cssHandler.getElemCss(elem);
+          if (css) {
+            if (css.title) {
+              if (!cssHandler.isBrowserPick) {
+                captureRewriteAttr(elem, "title", null);
+                if (css.disabled) {
+                  disableCss = true;
+                }
+              }
+            } else {
+              if (css.disabled) {
+                disableCss = true;
+              }
+            }
+          }
+
           switch (options["capture.style"]) {
             case "blank":
               captureRewriteTextContent(elem, "");
@@ -689,6 +748,11 @@ capturer.captureDocument = async function (params) {
             case "save":
             case "link":
             default:
+              if (disableCss) {
+                captureRewriteTextContent(elem, "");
+                elem.setAttribute("data-scrapbook-css-disabled", "");
+                break;
+              }
               tasks[tasks.length] = halter.then(async () => {
                 await cssHandler.rewriteCss({
                   elem,
@@ -2138,6 +2202,73 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     this.options = options;
   }
 
+  /**
+   * Check whether the current status of document stylesheets can be resulted
+   * from normal browser pick mechanism.
+   *
+   * CSS status:
+   * 1. Persistent (no rel="alternate", no non-empty title)
+   * 2. Preferred (no rel="alternate", has non-empty title)
+   * 3. Alternate (has rel="alternate", has non-empty title)
+   */
+  get isBrowserPick() {
+    const result = (() => {
+      if (!this.doc.styleSheets) {
+        return true;
+      }
+
+      const groups = new Map();
+
+      Array.prototype.forEach.call(this.doc.styleSheets, (css) => {
+        // ignore imported CSS
+        if (!css.ownerNode) {
+          return;
+        }
+
+        const title = css.title && css.title.trim();
+
+        // ignore persistent CSS
+        if (!title) {
+          return;
+        }
+
+        // preferred or alternate
+        if (!groups.has(title)) {
+          groups.set(title, []);
+        }
+        groups.get(title).push(css);
+      });
+
+      const arr = Array.from(groups.values());
+
+      // For a browser not supporting alternative stylesheets, the disabled
+      // property of every stylesheet is false.
+      // Chromium has a bug that the disabled property of every alternative
+      // stylesheet is false, causing the same result:
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=965554
+      if (scrapbook.userAgent.is('chromium')) {
+        return arr.every(r => r.every(x => !x.disabled));
+      }
+
+      if (arr.length === 0) {
+        // no non-persistent stylesheets
+        return true;
+      }
+
+      return (
+        // exactly one group has all stylesheets enabled
+        arr.filter(r => r.every(x => !x.disabled)).length === 1 &&
+        // and others has all stylesheets disabled
+        arr.filter(r => r.every(x => !!x.disabled)).length === arr.length - 1
+      );
+    })();
+
+    // cache the result
+    Object.defineProperty(this, 'isBrowserPick', {value: result});
+
+    return result;
+  }
+
   verifySelector(root, selectorText) {
     try {
       if (root.querySelector(selectorText)) { return true; }
@@ -2178,6 +2309,12 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     } catch (ex) {}
 
     return false;
+  }
+
+  getElemCss(elem) {
+    const {origNodeMap} = this;
+    const origElem = origNodeMap.get(elem);
+    return origElem && origElem.sheet;
   }
 
   async getRulesFromCssText(cssText) {
@@ -2640,8 +2777,6 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
    * @param {Object} options
    */
   async rewriteCss({elem, url, refCss, refUrl, callback, settings = this.settings, options = this.options}) {
-    const {origNodeMap} = this;
-
     let sourceUrl;
     let fetchResult;
     let cssText = "";
@@ -2656,8 +2791,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
         sourceUrl = url;
       } else {
         // external CSS
-        const origElem = origNodeMap.get(elem);
-        refCss = origElem && origElem.sheet;
+        refCss = this.getElemCss(elem);
         sourceUrl = elem.getAttribute("href");
       }
 
@@ -2679,8 +2813,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
       charset = response.charset;
     } else {
       // internal CSS
-      const origElem = origNodeMap.get(elem);
-      refCss = origElem && origElem.sheet;
+      refCss = this.getElemCss(elem);
       cssText = elem.textContent;
       charset = "UTF-8";
     }

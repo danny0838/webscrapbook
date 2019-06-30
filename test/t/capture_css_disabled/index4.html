@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<!-- changed by scripts (persistent) -->
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test alternative stylesheets</title>
+<link rel="stylesheet" href="persistent.css">
+<style>#internal { background: yellow; }</style>
+<style>@import "import.css";</style>
+</head>
+<body>
+<blockquote id="persistent">persistent</blockquote>
+<blockquote id="internal">internal</blockquote>
+<blockquote id="import">import</blockquote>
+</body>
+<script>
+document.styleSheets[0].disabled = true;
+document.styleSheets[1].disabled = true;
+
+// disabling an imported stylesheet has no effect
+document.styleSheets[2].cssRules[0].styleSheet.disabled = true;
+</script>
+</html>
