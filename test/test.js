@@ -1377,7 +1377,7 @@ async function test_capture_headless() {
 
   var faviconElem = doc.querySelector(`link[rel~="icon"]`);
   assert(faviconElem);
-  if (faviconElem.getAttribute('href') === `red.bmp`) {
+  if (userAgent.is('chromium')) {
     // Chromium: tab.favIconUrl is source URL
     assert(faviconElem.getAttribute('href') === `red.bmp`);
     assert(zip.files["red.bmp"]);

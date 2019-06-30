@@ -5,6 +5,50 @@ var wsbBaseUrl;
 var testTotal = 0;
 var testPass = 0;
 
+var userAgent = (() => {
+    const ua = navigator.userAgent;
+    const soup = new Set(['webext']);
+    const flavor = {
+      major: 0,
+      soup: soup,
+      is: (value) => soup.has(value),
+    };
+
+    // Whether this is a dev build.
+    if (/^\d+\.\d+\.\d+\D/.test(browser.runtime.getManifest().version)) {
+      soup.add('devbuild');
+    }
+
+    if (/\bMobile\b/.test(ua)) {
+      soup.add('mobile');
+    }
+
+    // Synchronous -- order of tests is important
+    let match;
+    if ((match = /\bFirefox\/(\d+)/.exec(ua)) !== null) {
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('mozilla').add('firefox');
+    } else if ((match = /\bEdge\/(\d+)/.exec(ua)) !== null) {
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('microsoft').add('edge');
+    } else if ((match = /\bOPR\/(\d+)/.exec(ua)) !== null) {
+      const reEx = /\bChrom(?:e|ium)\/([\d.]+)/;
+      if (reEx.test(ua)) { match = reEx.exec(ua); }
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('opera').add('chromium');
+    } else if ((match = /\bChromium\/(\d+)/.exec(ua)) !== null) {
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('chromium');
+    } else if ((match = /\bChrome\/(\d+)/.exec(ua)) !== null) {
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('google').add('chromium');
+    } else if ((match = /\bSafari\/(\d+)/.exec(ua)) !== null) {
+      flavor.major = parseInt(match[1], 10) || 0;
+      soup.add('apple').add('safari');
+    }
+    return flavor;
+})();
+
 async function init() {
   let config1;
   let config2;
