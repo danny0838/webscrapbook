@@ -328,6 +328,8 @@ const scrapbookUi = {
 
     var div = document.createElement('div');
     div.addEventListener('click', this.onClickItem.bind(this));
+    div.addEventListener('mousedown', this.onMiddleClickItem.bind(this));
+    div.addEventListener('contextmenu', this.onClickItem.bind(this));
     elem.appendChild(div);
 
     if (meta.type !== 'separator') {
@@ -440,6 +442,11 @@ const scrapbookUi = {
   onClickItem(event) {
     const itemElem = event.currentTarget.parentNode;
     this.highlightItem(itemElem);
+  },
+
+  onMiddleClickItem(event) {
+    if (event.button !== 1) { return; }
+    this.onClickItem(event);
   },
 
   onClickFolder(event) {
