@@ -281,7 +281,7 @@ const scrapbookUi = {
     const toggle = elem.toggle = document.createElement('a');
     toggle.href = '#';
     toggle.className = 'toggle';
-    toggle.onclick = this.onClickToggle.bind(this);
+    toggle.addEventListener('click', this.onClickToggle.bind(this));
     div.insertBefore(toggle, div.firstChild);
 
     const toggleImg = document.createElement('img');
@@ -327,7 +327,7 @@ const scrapbookUi = {
     }
 
     var div = document.createElement('div');
-    div.onclick = this.onClickItem.bind(this);
+    div.addEventListener('click', this.onClickItem.bind(this));
     elem.appendChild(div);
 
     if (meta.type !== 'separator') {
@@ -343,7 +343,7 @@ const scrapbookUi = {
           if (meta.index) { a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index); }
         }
       }
-      if (meta.type === 'folder') { a.onclick = this.onClickFolder.bind(this); }
+      if (meta.type === 'folder') { a.addEventListener('onclick', this.onClickFolder.bind(this)); }
       div.appendChild(a);
 
       var icon = document.createElement('img');
