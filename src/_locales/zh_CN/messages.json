@@ -612,6 +612,9 @@
   "ScrapBookMainCommandMoveDialogTitle": {
     "message": "移动到这个 ID 的项目下:"
   },
+  "ScrapBookMainCommandMoveDialogIndex": {
+    "message": "位置 (从 0 开始，空白则移至最后):"
+  },
   "ScrapBookMainErrorServerNotConfigured": {
     "message": "未设定后端服务器。"
   },

@@ -1494,6 +1494,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     if (!selectedItemElems.length) { return; }
 
     let targetId;
+    let targetIndex;
     {
       const frag = document.importNode(document.getElementById('tpl-move-into').content, true);
       const dialog = frag.children[0];
@@ -1508,11 +1509,13 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       }
 
       targetId = dialog.querySelector('[name="id"]').value;
+      targetIndex = parseInt(dialog.querySelector('[name="index"]').value, 10);
+      targetIndex = isNaN(targetIndex) ? Infinity : Math.max(targetIndex, 0);
     }
 
     if (!(targetId && (this.book.meta[targetId] || targetId === 'root'))) { return; }
 
-    await this.moveItems(selectedItemElems, targetId, Infinity);
+    await this.moveItems(selectedItemElems, targetId, targetIndex);
   },
 
   async cmd_recycle(selectedItemElems) {

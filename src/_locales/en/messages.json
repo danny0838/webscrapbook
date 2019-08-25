@@ -612,6 +612,9 @@
   "ScrapBookMainCommandMoveDialogTitle": {
     "message": "Move into the item of this ID:"
   },
+  "ScrapBookMainCommandMoveDialogIndex": {
+    "message": "Position (start from 0, empty for last):"
+  },
   "ScrapBookMainErrorServerNotConfigured": {
     "message": "Backend server is not configured."
   },
