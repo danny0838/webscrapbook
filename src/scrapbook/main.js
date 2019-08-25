@@ -571,7 +571,7 @@ const scrapbookUi = {
       selectedItemElems.map(x => x.getAttribute('data-id')).join('\n')
     );
 
-    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.effectAllowed = 'all';
     event.target.classList.add('dragged');
     this.lastDraggedElem = selectedItemElems;
   },
@@ -609,6 +609,13 @@ const scrapbookUi = {
       wrapper.classList.add('below');
     } else {
       wrapper.classList.add('within');
+    }
+
+    // determine the drop effect according to modifiers
+    if (event.ctrlKey) {
+      event.dataTransfer.dropEffect = 'link';
+    } else {
+      event.dataTransfer.dropEffect = 'move';
     }
 
     // prevent default to allow drop
@@ -686,7 +693,11 @@ const scrapbookUi = {
     this.enableUi(false);
 
     try {
-      await this.moveItems(selectedItemElems, targetId, targetIndex);
+      if (event.ctrlKey) {
+        await this.linkItems(selectedItemElems, targetId, targetIndex);
+      } else {
+        await this.moveItems(selectedItemElems, targetId, targetIndex);
+      }
     } catch (ex) {
       console.error(ex);
       this.error(ex.message);
