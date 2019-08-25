@@ -439,6 +439,56 @@ const scrapbookUi = {
     }
   },
 
+  async moveItems(sourceItemElems, targetId, targetIndex) {
+    for (const itemElem of sourceItemElems) {
+      const itemId = itemElem.getAttribute('data-id');
+
+      // forbid moving self to a decendant as it will become non-reachagble
+      if (this.book.getReachableItems(itemId).has(targetId)) { continue; }
+
+      const parentItemElem = itemElem.parentNode.parentNode;
+      const parentItemId = parentItemElem.getAttribute('data-id');
+      const siblingItems = parentItemElem.container.children;
+      const index = Array.prototype.indexOf.call(siblingItems, itemElem);
+
+      // the operated item element is missing due to an unexpected reason
+      if (index === -1) { continue; }
+
+      // update TOC
+      const newIndex = this.book.moveItem({
+        id: itemId,
+        currentParentId: parentItemId,
+        currentIndex: index,
+        targetParentId: targetId,
+        targetIndex,
+      });
+      await this.book.saveToc();
+
+      // update DOM
+      Array.prototype.filter.call(
+        document.getElementById('items').querySelectorAll('[data-id]'),
+        x => x.getAttribute('data-id') === parentItemId
+      ).forEach((parentElem) => {
+        if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
+        const itemElem = parentElem.container.children[index];
+        itemElem.remove();
+        this.itemReduceContainer(parentElem);
+      });
+
+      Array.prototype.filter.call(
+        document.getElementById('items').querySelectorAll('[data-id]'),
+        x => x.getAttribute('data-id') === targetId
+      ).forEach((parentElem) => {
+        if (!(parentElem.parentNode)) { return; }
+        this.itemMakeContainer(parentElem);
+        if (!parentElem.container.hasAttribute('data-loaded')) { return; }
+        this.addItem(itemId, parentElem, newIndex);
+      });
+
+      targetIndex = newIndex + 1;
+    }
+  },
+
   onClickItem(event) {
     const itemElem = event.currentTarget.parentNode;
     this.highlightItem(itemElem);
@@ -1203,7 +1253,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     if (!(index > 0)) { return; }
 
     // update TOC
-    const newItem = this.book.moveItem({
+    const newIndex = this.book.moveItem({
       id: itemId,
       currentParentId: parentItemId,
       currentIndex: index,
@@ -1240,7 +1290,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     if (!(index < siblingItems.length - 1)) { return; }
 
     // update TOC
-    const newItem = this.book.moveItem({
+    const newIndex = this.book.moveItem({
       id: itemId,
       currentParentId: parentItemId,
       currentIndex: index,
@@ -1286,50 +1336,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
     if (!(targetId && (this.book.meta[targetId] || targetId === 'root'))) { return; }
 
-    for (const itemElem of selectedItemElems) {
-      const itemId = itemElem.getAttribute('data-id');
-
-      // forbid moving self to a decendant as it will become non-reachagble
-      if (this.book.getReachableItems(itemId).has(targetId)) { continue; }
-
-      const parentItemElem = itemElem.parentNode.parentNode;
-      const parentItemId = parentItemElem.getAttribute('data-id');
-      const siblingItems = parentItemElem.container.children;
-      const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-
-      // the operated item element is missing due to an unexpected reason
-      if (index === -1) { continue; }
-
-      // update TOC
-      const newItem = this.book.moveItem({
-        id: itemId,
-        currentParentId: parentItemId,
-        currentIndex: index,
-        targetParentId: targetId,
-      });
-      await this.book.saveToc();
-
-      // update DOM
-      Array.prototype.filter.call(
-        document.getElementById('items').querySelectorAll('[data-id]'),
-        x => x.getAttribute('data-id') === parentItemId
-      ).forEach((parentElem) => {
-        if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
-        const itemElem = parentElem.container.children[index];
-        itemElem.remove();
-        this.itemReduceContainer(parentElem);
-      });
-
-      Array.prototype.filter.call(
-        document.getElementById('items').querySelectorAll('[data-id]'),
-        x => x.getAttribute('data-id') === targetId
-      ).forEach((parentElem) => {
-        if (!(parentElem.parentNode)) { return; }
-        this.itemMakeContainer(parentElem);
-        if (!parentElem.container.hasAttribute('data-loaded')) { return; }
-        this.addItem(itemId, parentElem);
-      });
-    }
+    await this.moveItems(selectedItemElems, targetId, Infinity);
   },
 
   async cmd_recycle(selectedItemElems) {

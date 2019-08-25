@@ -734,6 +734,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
    *     - {integer} params.currentIndex
    *     - {integer} params.targetParentId
    *     - {integer} params.targetIndex - Infinity to insert to last
+   * @return {integer} the real insertion index
    */
   moveItem(params) {
     let {
@@ -762,6 +763,11 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
       this.toc[targetParentId] = [];
     }
     this.toc[targetParentId].splice(targetIndex, 0, id);
+
+    if (!isFinite(targetIndex)) {
+      targetIndex = this.toc[targetParentId].length - 1;
+    }
+    return targetIndex;
   }
 
   /**
