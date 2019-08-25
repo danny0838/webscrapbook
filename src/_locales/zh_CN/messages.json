@@ -615,6 +615,15 @@
   "ScrapBookMainCommandMoveDialogIndex": {
     "message": "位置 (从 0 开始，空白则移至最后):"
   },
+  "ScrapBookMainCommandMoveDialogMode": {
+    "message": "模式:"
+  },
+  "ScrapBookMainCommandMoveDialogModeMove": {
+    "message": "移动"
+  },
+  "ScrapBookMainCommandMoveDialogModeLink": {
+    "message": "链接"
+  },
   "ScrapBookMainErrorServerNotConfigured": {
     "message": "未设定后端服务器。"
   },

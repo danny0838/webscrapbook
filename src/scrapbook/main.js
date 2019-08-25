@@ -520,6 +520,36 @@ const scrapbookUi = {
     await this.book.saveTreeFiles({toc: true});
   },
 
+  async linkItems(sourceItemElems, targetId, targetIndex) {
+    for (const itemElem of sourceItemElems) {
+      const itemId = itemElem.getAttribute('data-id');
+
+      // update TOC
+      const newIndex = this.book.moveItem({
+        id: itemId,
+        currentParentId: null,
+        targetParentId: targetId,
+        targetIndex,
+      });
+
+      // update DOM
+      Array.prototype.filter.call(
+        document.getElementById('items').querySelectorAll('[data-id]'),
+        x => x.getAttribute('data-id') === targetId
+      ).forEach((parentElem) => {
+        if (!(parentElem.parentNode)) { return; }
+        this.itemMakeContainer(parentElem);
+        if (!parentElem.container.hasAttribute('data-loaded')) { return; }
+        this.addItem(itemId, parentElem, newIndex);
+      });
+
+      targetIndex = newIndex + 1;
+    }
+
+    // upload changes to server
+    await this.book.saveTreeFiles({toc: true});
+  },
+
   onItemDragStart(event) {
     if (document.getElementById('command').disabled) {
       event.dataTransfer.effectAllowed = 'none';
@@ -1495,6 +1525,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
     let targetId;
     let targetIndex;
+    let mode;
     {
       const frag = document.importNode(document.getElementById('tpl-move-into').content, true);
       const dialog = frag.children[0];
@@ -1511,11 +1542,22 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       targetId = dialog.querySelector('[name="id"]').value;
       targetIndex = parseInt(dialog.querySelector('[name="index"]').value, 10);
       targetIndex = isNaN(targetIndex) ? Infinity : Math.max(targetIndex, 0);
+      mode = dialog['mode'].value;
     }
 
     if (!(targetId && (this.book.meta[targetId] || targetId === 'root'))) { return; }
 
-    await this.moveItems(selectedItemElems, targetId, targetIndex);
+    switch (mode) {
+      case "link": {
+        await this.linkItems(selectedItemElems, targetId, targetIndex);
+        break;
+      }
+      case "move":
+      default: {
+        await this.moveItems(selectedItemElems, targetId, targetIndex);
+        break;
+      }
+    }
   },
 
   async cmd_recycle(selectedItemElems) {

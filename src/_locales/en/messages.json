@@ -615,6 +615,15 @@
   "ScrapBookMainCommandMoveDialogIndex": {
     "message": "Position (start from 0, empty for last):"
   },
+  "ScrapBookMainCommandMoveDialogMode": {
+    "message": "Mode:"
+  },
+  "ScrapBookMainCommandMoveDialogModeMove": {
+    "message": "Move"
+  },
+  "ScrapBookMainCommandMoveDialogModeLink": {
+    "message": "Link"
+  },
   "ScrapBookMainErrorServerNotConfigured": {
     "message": "Backend server is not configured."
   },
