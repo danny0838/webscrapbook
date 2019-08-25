@@ -470,7 +470,6 @@ const scrapbookUi = {
         targetParentId: targetId,
         targetIndex,
       });
-      await this.book.saveTreeFiles({toc: true});
 
       // update DOM
       Array.prototype.filter.call(
@@ -495,6 +494,9 @@ const scrapbookUi = {
 
       targetIndex = newIndex + 1;
     }
+
+    // upload changes to server
+    await this.book.saveTreeFiles({toc: true});
   },
 
   onItemDragStart(event) {
@@ -1416,7 +1418,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       targetParentId: parentItemId,
       targetIndex: index - 1,
     });
-    await this.book.saveTreeFiles({toc: true});
 
     // update DOM
     Array.prototype.filter.call(
@@ -1427,6 +1428,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       const itemElem = parentElem.container.children[index];
       itemElem.parentNode.insertBefore(itemElem, itemElem.previousSibling);
     });
+
+    // upload changes to server
+    await this.book.saveTreeFiles({toc: true});
   },
 
   async cmd_move_down(selectedItemElems) {
@@ -1453,7 +1457,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       targetParentId: parentItemId,
       targetIndex: index + 2,
     });
-    await this.book.saveTreeFiles({toc: true});
 
     // update DOM
     Array.prototype.filter.call(
@@ -1464,6 +1467,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       const itemElem = parentElem.container.children[index];
       itemElem.parentNode.insertBefore(itemElem, itemElem.nextSibling.nextSibling);
     });
+
+    // upload changes to server
+    await this.book.saveTreeFiles({toc: true});
   },
 
   async cmd_move_into(selectedItemElems) {
@@ -1516,9 +1522,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         index,
       });
 
-      // save TOC
-      await this.book.saveTreeFiles({toc: true});
-
       // update DOM
       Array.prototype.filter.call(
         document.getElementById('items').querySelectorAll('[data-id]'),
@@ -1530,6 +1533,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         this.itemReduceContainer(parentElem);
       });
     }
+
+    // upload changes to server
+    await this.book.saveTreeFiles({toc: true});
   },
 
   async cmd_delete(selectedItemElems) {
@@ -1550,6 +1556,16 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       });
     };
 
+    // acquire a lock
+    await this.book.lockTree();
+
+    // validate if we can modify the tree
+    if (!await this.book.validateTree()) {
+      await this.book.unlockTree();
+      throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+    }
+
+    let hasRemovedItems = false;
     for (const itemElem of selectedItemElems) {
       const itemId = itemElem.getAttribute('data-id');
 
@@ -1567,13 +1583,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         parentId: parentItemId,
         index,
       });
-
-      // save meta and TOC
-      if (removedItems.size > 0) {
-        await this.book.saveTreeFiles({meta: true, toc: true});
-      } else {
-        await this.book.saveTreeFiles({toc: true});
-      }
+      if (removedItems.size > 0) { hasRemovedItems = true; }
 
       // update DOM
       Array.prototype.filter.call(
@@ -1597,6 +1607,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         }
       }
     }
+
+    // upload changes to server
+    await this.book.saveTreeFiles({meta: hasRemovedItems, toc: true, useLock: false});
+
+    // release the lock
+    await this.book.unlockTree();
   },
 
   async cmd_view_recycle(selectedItemElems) {

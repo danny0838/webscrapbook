@@ -397,6 +397,18 @@ class Book {
   }
 
   /**
+   * Validate that tree files has not been changed since last loaded
+   */
+  async validateTree() {
+    const treeLastModified = this.treeLastModified;
+    const treeFiles = await this.loadTreeFiles(true);
+    if (this.treeLastModified > treeLastModified) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Validate this.treeLastModified and update it afterwards.
    */
   async saveTreeFiles(params = {}) {
@@ -404,14 +416,12 @@ class Book {
 
     if (useLock) {
       await this.lockTree();
-    }
 
-    // verify that tree files has not been changed since last loaded
-    const treeLastModified = this.treeLastModified;
-    const treeFiles = await this.loadTreeFiles(true);
-    if (this.treeLastModified > treeLastModified) {
-      await this.unlockTree();
-      throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+      // validate tree
+      if (!await this.validateTree()) {
+        await this.unlockTree();
+        throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+      }
     }
 
     // save requested tree files
