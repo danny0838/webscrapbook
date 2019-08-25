@@ -2682,8 +2682,9 @@ const scrapbook = {
       }
 
       const loadMeta = () => {
+        const ts = Date.now();
         const loop = () => {
-          const url = this.resolveUrl(book.treeDir + "meta" + (i || "") + ".js", base);
+          const url = this.resolveUrl(book.treeDir + "meta" + (i || "") + ".js?ts=" + ts, base);
           return this.loadScript(url).then(() => {
             i += 1;
             return loop();
@@ -2698,8 +2699,9 @@ const scrapbook = {
       };
 
       const loadToc = () => {
+        const ts = Date.now();
         const loop = () => {
-          const url = this.resolveUrl(book.treeDir + "toc" + (i || "") + ".js", base);
+          const url = this.resolveUrl(book.treeDir + "toc" + (i || "") + ".js?ts=" + ts, base);
           return this.loadScript(url).then(() => {
             i += 1;
             return loop();
@@ -2714,8 +2716,9 @@ const scrapbook = {
       };
 
       const loadFulltext = () => {
+        const ts = Date.now();
         const loop = () => {
-          const url = this.resolveUrl(book.treeDir + "fulltext" + (i || "") + ".js", base);
+          const url = this.resolveUrl(book.treeDir + "fulltext" + (i || "") + ".js?ts=" + ts, base);
           return this.loadScript(url).then(() => {
             i += 1;
             return loop();
