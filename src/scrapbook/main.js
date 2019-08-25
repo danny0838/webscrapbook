@@ -470,7 +470,7 @@ const scrapbookUi = {
         targetParentId: targetId,
         targetIndex,
       });
-      await this.book.saveToc();
+      await this.book.saveTreeFiles({toc: true});
 
       // update DOM
       Array.prototype.filter.call(
@@ -498,6 +498,11 @@ const scrapbookUi = {
   },
 
   onItemDragStart(event) {
+    if (document.getElementById('command').disabled) {
+      event.dataTransfer.effectAllowed = 'none';
+      return;
+    }
+
     const selectedItemElems = Array.prototype.map.call(
       document.querySelectorAll('#item-root .highlight'),
       x => x.parentNode.parentNode
@@ -624,7 +629,20 @@ const scrapbookUi = {
 
     if (!(targetId && (this.book.meta[targetId] || targetId === 'root'))) { return; }
 
-    await this.moveItems(selectedItemElems, targetId, targetIndex);
+
+    this.enableUi(false);
+
+    try {
+      await this.moveItems(selectedItemElems, targetId, targetIndex);
+    } catch (ex) {
+      console.error(ex);
+      this.error(ex.message);
+      // when any error happens, the UI is possibility in an inconsistent status.
+      // lock the UI to avoid further manipulation and damage.
+      return;
+    }
+
+    this.enableUi(true);
   },
 
   onClickItem(event) {
@@ -1398,7 +1416,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       targetParentId: parentItemId,
       targetIndex: index - 1,
     });
-    await this.book.saveToc();
+    await this.book.saveTreeFiles({toc: true});
 
     // update DOM
     Array.prototype.filter.call(
@@ -1435,7 +1453,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       targetParentId: parentItemId,
       targetIndex: index + 2,
     });
-    await this.book.saveToc();
+    await this.book.saveTreeFiles({toc: true});
 
     // update DOM
     Array.prototype.filter.call(
@@ -1499,7 +1517,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       });
 
       // save TOC
-      await this.book.saveToc();
+      await this.book.saveTreeFiles({toc: true});
 
       // update DOM
       Array.prototype.filter.call(
