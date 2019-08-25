@@ -1871,10 +1871,11 @@ capturer.captureDocument = async function (params) {
     // desired.
     if (typeof favIconUrl === 'undefined') {
       if (settings.frameIsMain && settings.favIconUrl) {
+        let icon;
         tasks[tasks.length] = (async () => {
           switch (options["capture.favicon"]) {
             case "link": {
-              favIconUrl = settings.favIconUrl;
+              icon = favIconUrl = settings.favIconUrl;
               break;
             }
             case "blank":
@@ -1884,22 +1885,26 @@ capturer.captureDocument = async function (params) {
             }
             case "save":
             default: {
+              icon = favIconUrl = settings.favIconUrl;
               const response = await capturer.invoke("downloadFile", {
                 url: settings.favIconUrl,
                 refUrl,
                 settings,
                 options,
               });
-              favIconUrl = response.url;
+              icon = response.url;
+              if (options["capture.saveAs"] === 'folder') {
+                favIconUrl = icon;
+              }
               break;
             }
           }
 
-          if (favIconUrl) {
+          if (icon) {
             const frag = doc.createDocumentFragment();
             const favIconNode = doc.createElement("link");
             favIconNode.rel = "shortcut icon";
-            favIconNode.href = favIconUrl;
+            favIconNode.href = icon;
             frag.appendChild(favIconNode);
             frag.appendChild(doc.createTextNode("\n"));
             headNode.appendChild(frag);
