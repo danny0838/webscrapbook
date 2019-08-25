@@ -37,42 +37,59 @@ const scrapbookUi = {
 
   /**
    * @param {HTMLElement} elem - the element to be inserted to the dialog.
-   *     - Dispatch 'dialogClick' event on elem to resolve the Promise with value.
+   *     - Dispatch 'dialogSubmit' event on elem to resolve the Promise with value.
    *     - Listen to 'dialogShow' event for elem to handle initialization.
    */
   async showDialog(elem) {
     const mask = document.getElementById('dialog-mask');
     const wrapper = document.getElementById('dialog-wrapper');
-    wrapper.innerHTML = '';
-    wrapper.appendChild(elem);
+    const cancelElem = elem.querySelector('.buttons input[type="button"]')
 
-    const onKeyDown = (event) => {
+    const onKeyEscape = (event) => {
       if (event.code === 'Escape' &&
           !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
         event.preventDefault();
-        elem.dispatchEvent(new Event('dialogClick'));
+        elem.dispatchEvent(new CustomEvent('dialogSubmit'), {detail: null});
       }
     };
 
-    const onClick = (event) => {
+    const onMaskClick = (event) => {
       if (event.target === mask) {
-        elem.dispatchEvent(new Event('dialogClick'));
+        elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: null}));
       }
     };
 
-    window.addEventListener('keydown', onKeyDown, true);
-    mask.addEventListener('click', onClick);
+    const onSubmit = (event) => {
+      event.preventDefault();
+      elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: true}));
+    };
+
+    const onCancel = (event) => {
+      event.preventDefault();
+      elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: null}));
+    };
+
+    window.addEventListener('keydown', onKeyEscape, true);
+    mask.addEventListener('click', onMaskClick);
+    elem.addEventListener('submit', onSubmit);
+    cancelElem.addEventListener('click', onCancel);
+
+    wrapper.innerHTML = '';
+    wrapper.appendChild(elem);
     mask.hidden = false;
 
     const result = await new Promise((resolve, reject) => {
-      elem.addEventListener('dialogClick', (event) => {
+      elem.addEventListener('dialogSubmit', (event) => {
        resolve(event.detail); 
       });
-      elem.dispatchEvent(new Event('dialogShow'));
+      elem.dispatchEvent(new CustomEvent('dialogShow', {detail: null}));
     });
 
-    window.removeEventListener('keydown', onKeyDown);
-    mask.removeEventListener('click', onClick);
+    window.removeEventListener('keydown', onKeyEscape);
+    mask.removeEventListener('click', onMaskClick);
+    elem.removeEventListener('submit', onSubmit);
+    cancelElem.removeEventListener('submit', onCancel);
+
     mask.hidden = true;
 
     return result;
@@ -1045,22 +1062,13 @@ const scrapbookUi = {
     dialog.querySelector('[name="modify"]').value = item.modify ? scrapbook.idToDate(item.modify).toLocaleString() : "";
     dialog.querySelector('[name="comment"]').value = item.comment || "";
 
-    dialog.addEventListener('submit', (event) => {
-      event.preventDefault();
-      dialog.dispatchEvent(new CustomEvent('dialogClick', {detail: true}));
-    });
     dialog.addEventListener('dialogShow', (event) => {
-      event.preventDefault();
       dialog.querySelector('[name="title"]').focus();
     });
-    dialog.querySelector('.buttons input[type="button"]').addEventListener('click', (event) => {
-      event.preventDefault();
-      dialog.dispatchEvent(new CustomEvent('dialogClick', {detail: null}));
-    });
 
-    const modify = await this.showDialog(dialog);
-
-    if (!modify) { return; }
+    if (!await this.showDialog(dialog)) {
+      return;
+    }
 
     const dialogData = {
       title: dialog.querySelector('[name="title"]').value,
@@ -1198,23 +1206,17 @@ const scrapbookUi = {
       const frag = document.importNode(document.getElementById('tpl-mknote').content, true);
       const dialog = frag.children[0];
       scrapbook.loadLanguages(dialog);
-      const input = dialog.querySelector('input');
-      dialog.addEventListener('submit', (event) => {
-        event.preventDefault();
-        dialog.dispatchEvent(new CustomEvent('dialogClick', {detail: dialog['format'].value}));
-      });
-      dialog.addEventListener('dialogShow', (event) => {
-        event.preventDefault();
-        input.focus();
-      });
-      dialog.querySelector('.buttons input[type="button"]').addEventListener('click', (event) => {
-        event.preventDefault();
-        dialog.dispatchEvent(new CustomEvent('dialogClick', {detail: null}));
-      });
-      type = await this.showDialog(dialog);
-    }
 
-    if (!type) { return; }
+      dialog.addEventListener('dialogShow', (event) => {
+        dialog.querySelector('[name="format"]').focus();
+      });
+
+      if (!await this.showDialog(dialog)) {
+        return;
+      }
+
+      type = dialog['format'].value;
+    }
 
     // create new item
     const newItem = this.book.addItem({
@@ -1496,20 +1498,16 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       const frag = document.importNode(document.getElementById('tpl-move-into').content, true);
       const dialog = frag.children[0];
       scrapbook.loadLanguages(dialog);
-      const input = dialog.querySelector('input');
-      dialog.addEventListener('submit', (event) => {
-        event.preventDefault();
-        dialog.dispatchEvent(new CustomEvent('dialogClick', {detail: input.value}));
-      });
+
       dialog.addEventListener('dialogShow', (event) => {
-        event.preventDefault();
-        input.focus();
+        dialog.querySelector('[name="id"]').focus();
       });
-      dialog.querySelector('.buttons input[type="button"]').addEventListener('click', (event) => {
-        event.preventDefault();
-        dialog.dispatchEvent(new CustomEvent('dialogClick', {detail: null}));
-      });
-      targetId = await this.showDialog(dialog);
+      
+      if (!await this.showDialog(dialog)) {
+        return;
+      }
+
+      targetId = dialog.querySelector('[name="id"]').value;
     }
 
     if (!(targetId && (this.book.meta[targetId] || targetId === 'root'))) { return; }
