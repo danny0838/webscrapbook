@@ -1302,6 +1302,15 @@ const scrapbookUi = {
       index = Array.prototype.indexOf.call(siblingItems, itemElem);
     }
 
+    // acquire a lock
+    await this.book.lockTree();
+
+    // validate if we can modify the tree
+    if (!await this.book.validateTree()) {
+      await this.book.unlockTree();
+      throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+    }
+
     for (const file of detail.files) {
       try {
         // create new item
@@ -1377,7 +1386,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     }
 
     // save meta and TOC
-    await this.book.saveTreeFiles({meta: true, toc: true});
+    await this.book.saveTreeFiles({meta: true, toc: true, useLock: false});
+
+    // release the lock
+    await this.book.unlockTree();
   },
 
   async cmd_edit(selectedItemElems) {
