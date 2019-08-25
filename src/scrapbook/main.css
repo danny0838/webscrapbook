@@ -164,6 +164,8 @@ body {
 #item-root li > div {
   margin-__MSG_@@bidi_start_edge__: -.85em;
   white-space: nowrap;
+  padding-top: 1px;
+  padding-bottom: 1px;
 }
 
 #item-root a {
@@ -216,4 +218,24 @@ body {
 
 #item-root .highlight {
   background-color: #CCCCFF;
+}
+
+#item-root .dragged {
+  opacity: 0.5;
+}
+
+#item-root .dragover.above {
+  border-top: 2px dashed red;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+#item-root .dragover.below {
+  border-bottom: 2px dashed red;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+#item-root .dragover.within {
+  outline: 2px dashed red;
 }

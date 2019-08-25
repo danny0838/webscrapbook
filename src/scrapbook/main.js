@@ -6,6 +6,7 @@
  *****************************************************************************/
 
 const scrapbookUi = {
+  lastDraggedElem: null,
   lastHighlightElem: null,
   bookId: null,
   book: null,
@@ -327,9 +328,16 @@ const scrapbookUi = {
     }
 
     var div = document.createElement('div');
+    div.setAttribute('draggable', true);
     div.addEventListener('click', this.onClickItem.bind(this));
     div.addEventListener('mousedown', this.onMiddleClickItem.bind(this));
     div.addEventListener('contextmenu', this.onClickItem.bind(this));
+    div.addEventListener('dragstart', this.onItemDragStart.bind(this));
+    div.addEventListener('dragend', this.onItemDragEnd.bind(this));
+    div.addEventListener('dragenter', this.onItemDragEnter.bind(this));
+    div.addEventListener('dragover', this.onItemDragOver.bind(this));
+    div.addEventListener('dragleave', this.onItemDragLeave.bind(this));
+    div.addEventListener('drop', this.onItemDrop.bind(this));
     elem.appendChild(div);
 
     if (meta.type !== 'separator') {
@@ -487,6 +495,136 @@ const scrapbookUi = {
 
       targetIndex = newIndex + 1;
     }
+  },
+
+  onItemDragStart(event) {
+    const selectedItemElems = Array.prototype.map.call(
+      document.querySelectorAll('#item-root .highlight'),
+      x => x.parentNode.parentNode
+    );
+    if (!selectedItemElems.length) {
+      event.dataTransfer.effectAllowed = 'none';
+      return;
+    }
+
+    // Firefox requires at least one data to get dragging work
+    event.dataTransfer.setData(
+      'text/plain',
+      selectedItemElems.map(x => x.getAttribute('data-id')).join('\n')
+    );
+
+    event.dataTransfer.effectAllowed = 'move';
+    event.target.classList.add('dragged');
+    this.lastDraggedElem = selectedItemElems;
+  },
+
+  onItemDragEnd(event) {
+    if (!this.lastDraggedElem) { return; }
+
+    event.target.classList.remove('dragged');
+    this.lastDraggedElem = null;
+  },
+
+  onItemDragEnter(event) {
+    if (!this.lastDraggedElem) { return; }
+
+    const wrapper = event.currentTarget;
+    if (!wrapper.classList.contains('dragover')) {
+      wrapper.classList.add('dragover');
+    }
+  },
+
+  onItemDragOver(event) {
+    if (!this.lastDraggedElem) { return; }
+
+    const wrapper = event.currentTarget;
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
+
+    wrapper.classList.remove('above');
+    wrapper.classList.remove('below');
+    wrapper.classList.remove('within');
+
+    if (pos < 1/3) {
+      wrapper.classList.add('above');
+    } else if (pos > 2/3) {
+      wrapper.classList.add('below');
+    } else {
+      wrapper.classList.add('within');
+    }
+
+    // prevent default to allow drop
+    event.preventDefault();
+  },
+
+  onItemDragLeave(event) {
+    if (!this.lastDraggedElem) { return; }
+
+    const wrapper = event.currentTarget;
+    let enteredElem = event.relatedTarget;
+
+    // In Firefox the relatedTarget could be a text node
+    if (enteredElem && enteredElem.nodeType !== 1) {
+      enteredElem = enteredElem.parentElement;
+    }
+
+    if (!enteredElem || (enteredElem !== wrapper && enteredElem.closest('.dragover') !== wrapper)) {
+      wrapper.classList.remove('dragover');
+      wrapper.classList.remove('above');
+      wrapper.classList.remove('below');
+      wrapper.classList.remove('within');
+    }
+  },
+
+  async onItemDrop(event) {
+    if (!this.lastDraggedElem) { return; }
+
+    // prevent default navigation effect
+    event.preventDefault();
+
+    const wrapper = event.currentTarget;
+    wrapper.classList.remove('dragover');
+    wrapper.classList.remove('above');
+    wrapper.classList.remove('below');
+    wrapper.classList.remove('within');
+
+    const selectedItemElems = Array.prototype.map.call(
+      document.querySelectorAll('#item-root .highlight'),
+      x => x.parentNode.parentNode
+    );
+    if (!selectedItemElems.length) { return; }
+
+    let targetId;
+    let targetIndex;
+    {
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
+      const itemElem = wrapper.parentNode;
+
+      if (pos < 1/3) {
+        // above
+        const parentItemElem = itemElem.parentNode.parentNode;
+        const siblingItems = parentItemElem.container.children;
+        const index = Array.prototype.indexOf.call(siblingItems, itemElem);
+        targetId = parentItemElem.getAttribute('data-id');
+        targetIndex = index;
+      } else if (pos > 2/3) {
+        // below
+        const parentItemElem = itemElem.parentNode.parentNode;
+        const siblingItems = parentItemElem.container.children;
+        const index = Array.prototype.indexOf.call(siblingItems, itemElem);
+        targetId = parentItemElem.getAttribute('data-id');
+        targetIndex = index + 1;
+      } else {
+        // within
+        targetId = itemElem.getAttribute('data-id');
+        targetIndex = Infinity;
+      }
+    }
+
+    if (!(targetId && (this.book.meta[targetId] || targetId === 'root'))) { return; }
+
+    await this.moveItems(selectedItemElems, targetId, targetIndex);
   },
 
   onClickItem(event) {
