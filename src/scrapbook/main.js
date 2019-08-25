@@ -448,7 +448,11 @@ const scrapbookUi = {
   },
 
   async moveItems(sourceItemElems, targetId, targetIndex) {
-    for (const itemElem of sourceItemElems) {
+    // Reverse the order to always move an item before its parent so that
+    // its parent is in the DOM and gets children updated correctly.
+    const itemElems = [...sourceItemElems].reverse();
+
+    for (const itemElem of itemElems) {
       const itemId = itemElem.getAttribute('data-id');
 
       // forbid moving self to a decendant as it will become non-reachagble
@@ -492,7 +496,7 @@ const scrapbookUi = {
         this.addItem(itemId, parentElem, newIndex);
       });
 
-      targetIndex = newIndex + 1;
+      targetIndex = newIndex;
     }
 
     // upload changes to server
@@ -1504,7 +1508,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
   async cmd_recycle(selectedItemElems) {
     if (!selectedItemElems.length) { return; }
 
-    for (const itemElem of selectedItemElems) {
+    // Reverse the order to always move an item before its parent so that
+    // its parent is in the DOM and gets children updated correctly.
+    const itemElems = [...selectedItemElems].reverse();
+
+    let targetIndex = Infinity;
+    for (const itemElem of itemElems) {
       const itemId = itemElem.getAttribute('data-id');
 
       const parentItemElem = itemElem.parentNode.parentNode;
@@ -1516,10 +1525,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       if (index === -1) { continue; }
 
       // remove this and descendant items from Book
-      this.book.recycleItemTree({
+      const newIndex = this.book.recycleItemTree({
         id: itemId,
-        parentId: parentItemId,
-        index,
+        currentParentId: parentItemId,
+        currentIndex: index,
+        targetIndex,
       });
 
       // update DOM
@@ -1532,6 +1542,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         itemElem.remove();
         this.itemReduceContainer(parentElem);
       });
+
+      targetIndex = newIndex;
     }
 
     // upload changes to server
@@ -1565,8 +1577,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
     }
 
+    // Reverse the order to always move an item before its parent so that
+    // its parent is in the DOM and gets children updated correctly.
+    const itemElems = [...selectedItemElems].reverse();
+
     let hasRemovedItems = false;
-    for (const itemElem of selectedItemElems) {
+    for (const itemElem of itemElems) {
       const itemId = itemElem.getAttribute('data-id');
 
       const parentItemElem = itemElem.parentNode.parentNode;

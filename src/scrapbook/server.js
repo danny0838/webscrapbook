@@ -694,27 +694,31 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
   }
 
   /**
-   * Remove an item from Book tree and put it to 'recycle' if no reference.
+   * Remove an item from Book tree and put it to recycle bin if not referenced.
    *
    * @param {Object} params
    *     - {string} params.id
-   *     - {string} params.parentId - null to not removed from certain parent
+   *     - {string} params.currentParentId - null to not removed from certain parent
    *         (useful for checking stale items)
-   *     - {integer} params.index
-   * @return {Set} an empty set (to mimic removeItemTree)
+   *     - {integer} params.currentIndex
+   *     - {string} params.targetParentId - ID of the recycle bin item
+   *     - {integer} params.targetIndex - Infinity to insert to last
+   * @return {integer} the real insertion index
    */
   recycleItemTree(params) {
     let {
       id,
-      parentId,
-      index,
+      currentParentId,
+      currentIndex,
+      targetParentId = 'recycle',
+      targetIndex = Infinity,
     } = params;
 
     // remove from parent TOC
-    if (parentId && this.toc[parentId]) {
-      this.toc[parentId].splice(index, 1);
-      if (!this.toc[parentId].length) {
-        delete this.toc[parentId];
+    if (currentParentId && this.toc[currentParentId]) {
+      this.toc[currentParentId].splice(currentIndex, 1);
+      if (!this.toc[currentParentId].length) {
+        delete this.toc[currentParentId];
       }
     }
 
@@ -722,17 +726,21 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
     const curItems = new Set();
     this.getReachableItems('root', curItems);
     this.getReachableItems('hidden', curItems);
-    this.getReachableItems('recycle', curItems);
+    this.getReachableItems(targetParentId, curItems);
 
-    // add item to 'recycle' if no longer referenced
+    // add item to targetParentId if no longer referenced
     if (!curItems.has(id)) {
-      if (!this.toc['recycle']) {
-        this.toc['recycle'] = [];
+      if (!this.toc[targetParentId]) {
+        this.toc[targetParentId] = [];
       }
-      this.toc['recycle'].push(id);
+      this.toc[targetParentId].splice(targetIndex, 0, id);
+
+      if (!isFinite(targetIndex)) {
+        targetIndex = this.toc[targetParentId].length - 1;
+      }
     }
 
-    return new Set();
+    return targetIndex;
   }
 
   /**
