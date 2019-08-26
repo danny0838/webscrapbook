@@ -556,6 +556,10 @@ const scrapbookUi = {
       x => x.parentNode
     );
 
+    Array.prototype.forEach.call(selectedItemElems, (elem) => {
+      elem.classList.add('dragged');
+    });
+
     // Firefox requires at least one data to get dragging work
     event.dataTransfer.setData(
       'text/plain',
@@ -563,14 +567,15 @@ const scrapbookUi = {
     );
 
     event.dataTransfer.effectAllowed = 'all';
-    event.target.classList.add('dragged');
     this.lastDraggedElem = selectedItemElems;
   },
 
   onItemDragEnd(event) {
     if (!this.lastDraggedElem) { return; }
 
-    event.target.classList.remove('dragged');
+    Array.prototype.forEach.call(this.lastDraggedElem, (elem) => {
+      elem.classList.remove('dragged');
+    });
     this.lastDraggedElem = null;
   },
 
