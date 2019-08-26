@@ -53,12 +53,6 @@ const scrapbookUi = {
       }
     };
 
-    const onMaskClick = (event) => {
-      if (event.target === mask) {
-        elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: null}));
-      }
-    };
-
     const onSubmit = (event) => {
       event.preventDefault();
       elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: true}));
@@ -70,7 +64,6 @@ const scrapbookUi = {
     };
 
     window.addEventListener('keydown', onKeyEscape, true);
-    mask.addEventListener('click', onMaskClick);
     elem.addEventListener('submit', onSubmit);
     cancelElem.addEventListener('click', onCancel);
 
@@ -86,7 +79,6 @@ const scrapbookUi = {
     });
 
     window.removeEventListener('keydown', onKeyEscape);
-    mask.removeEventListener('click', onMaskClick);
     elem.removeEventListener('submit', onSubmit);
     cancelElem.removeEventListener('submit', onCancel);
 
