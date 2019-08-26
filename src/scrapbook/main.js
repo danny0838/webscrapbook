@@ -608,7 +608,7 @@ const scrapbookUi = {
     }
 
     // determine the drop effect according to modifiers
-    if (event.ctrlKey) {
+    if (event.ctrlKey && this.rootId !== 'recycle') {
       event.dataTransfer.dropEffect = 'link';
     } else {
       event.dataTransfer.dropEffect = 'move';
@@ -688,7 +688,7 @@ const scrapbookUi = {
     this.enableUi(false);
 
     try {
-      if (event.ctrlKey) {
+      if (event.ctrlKey && this.rootId !== 'recycle') {
         await this.linkItems(selectedItemElems, targetId, targetIndex);
       } else {
         await this.moveItems(selectedItemElems, targetId, targetIndex);
@@ -1536,6 +1536,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       const frag = document.importNode(document.getElementById('tpl-move-into').content, true);
       const dialog = frag.children[0];
       scrapbook.loadLanguages(dialog);
+
+      // disable link mode for recycling bin
+      if (this.rootId === 'recycle') {
+        dialog.querySelector('[name="mode"][value="link"]').disabled = true;
+      }
 
       dialog.addEventListener('dialogShow', (event) => {
         dialog.querySelector('[name="id"]').focus();
