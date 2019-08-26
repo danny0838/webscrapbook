@@ -228,17 +228,17 @@ body {
 }
 
 #item-root .dragover.above {
-  border-top: 2px dashed red;
+  border-top: 2px solid #3399FF;
   padding-top: 0;
   padding-bottom: 0;
 }
 
 #item-root .dragover.below {
-  border-bottom: 2px dashed red;
+  border-bottom: 2px solid #3399FF;
   padding-top: 0;
   padding-bottom: 0;
 }
 
 #item-root .dragover.within {
-  outline: 2px dashed red;
+  outline: 2px dashed #3399FF;
 }
