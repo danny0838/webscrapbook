@@ -549,14 +549,12 @@ const scrapbookUi = {
       return;
     }
 
+    this.highlightItem(event.currentTarget.parentNode, true);
+
     const selectedItemElems = Array.prototype.map.call(
       document.querySelectorAll('#item-root .highlight'),
       x => x.parentNode
     );
-    if (!selectedItemElems.length) {
-      event.dataTransfer.effectAllowed = 'none';
-      return;
-    }
 
     // Firefox requires at least one data to get dragging work
     event.dataTransfer.setData(
