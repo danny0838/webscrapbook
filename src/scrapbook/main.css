@@ -165,8 +165,8 @@ body {
 #item-root li > div {
   margin-__MSG_@@bidi_start_edge__: -.85em;
   white-space: nowrap;
-  padding-top: 1px;
-  padding-bottom: 1px;
+  border-radius: 2px;
+  padding: 1px;
 }
 
 #item-root a {
@@ -218,7 +218,9 @@ body {
 }
 
 #item-root .highlight {
-  background-color: #CCCCFF;
+  border: 1px solid #7DA2CE;
+  padding: 0;
+  background: linear-gradient(#EBF4FD, #C4DDFC);
 }
 
 #item-root .dragged {

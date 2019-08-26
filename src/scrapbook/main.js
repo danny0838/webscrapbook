@@ -430,10 +430,7 @@ const scrapbookUi = {
   },
 
   getHighlightElem(itemElem) {
-    let elem = itemElem.firstChild.firstChild;
-    if (elem.classList.contains('toggle')) {
-      elem = elem.nextSibling;
-    }
+    let elem = itemElem.firstChild;
     return elem;
   },
 
@@ -554,7 +551,7 @@ const scrapbookUi = {
 
     const selectedItemElems = Array.prototype.map.call(
       document.querySelectorAll('#item-root .highlight'),
-      x => x.parentNode.parentNode
+      x => x.parentNode
     );
     if (!selectedItemElems.length) {
       event.dataTransfer.effectAllowed = 'none';
@@ -651,7 +648,7 @@ const scrapbookUi = {
 
     const selectedItemElems = Array.prototype.map.call(
       document.querySelectorAll('#item-root .highlight'),
-      x => x.parentNode.parentNode
+      x => x.parentNode
     );
     if (!selectedItemElems.length) { return; }
 
@@ -775,7 +772,7 @@ const scrapbookUi = {
 
     const selectedItemElems = Array.prototype.map.call(
       document.querySelectorAll('#item-root .highlight'),
-      x => x.parentNode.parentNode
+      x => x.parentNode
     );
 
     const isRecycle = this.rootId === 'recycle';
@@ -922,7 +919,7 @@ const scrapbookUi = {
     const command = event.detail.cmd;
     const selectedItemElems = Array.prototype.map.call(
       document.querySelectorAll('#item-root .highlight'),
-      x => x.parentNode.parentNode
+      x => x.parentNode
     );
 
     this.enableUi(false);
