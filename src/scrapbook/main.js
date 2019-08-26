@@ -283,6 +283,10 @@ const scrapbookUi = {
     return target;
   },
 
+  itemIsValidTarget(itemId) {
+    return itemId && (!!this.book.meta[itemId] || this.book.specialItems.has(itemId));
+  },
+
   itemMakeContainer(elem) {
     if (elem.container) { return; }
 
@@ -679,8 +683,7 @@ const scrapbookUi = {
       }
     }
 
-    if (!(targetId && (this.book.meta[targetId] || targetId === 'root'))) { return; }
-
+    if (!this.itemIsValidTarget(targetId)) { return; }
 
     this.enableUi(false);
 
@@ -1548,7 +1551,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       mode = dialog['mode'].value;
     }
 
-    if (!(targetId && (this.book.meta[targetId] || targetId === 'root'))) { return; }
+    if (!this.itemIsValidTarget(targetId)) { return; }
 
     switch (mode) {
       case "link": {
