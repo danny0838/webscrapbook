@@ -2350,15 +2350,19 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     } catch (ex) {
       // cssRules not accessible, probably a cross-domain CSS.
       if (crossOrigin) {
-        const {settings, options} = this;
-        const response = await capturer.invoke("fetchCss", {
-          url: css.href,
-          refUrl,
-          settings,
-          options,
-        });
-        if (!response.error) {
-          rules = await this.getRulesFromCssText(response.text);
+        if (css.ownerNode && css.ownerNode.nodeName.toLowerCase() === 'style') {
+          rules = await this.getRulesFromCssText(css.ownerNode.textContent);
+        } else {
+          const {settings, options} = this;
+          const response = await capturer.invoke("fetchCss", {
+            url: css.href,
+            refUrl,
+            settings,
+            options,
+          });
+          if (!response.error) {
+            rules = await this.getRulesFromCssText(response.text);
+          }
         }
       }
     }
