@@ -1616,8 +1616,6 @@ ${JSON.stringify(zipData)}
  * @return {Promise<Object>}
  */
 capturer.downloadFile = async function (params) {
-  isDebug && console.debug("call: downloadFile", params);
-
   const MIMES_NO_EXT_NO_MATCH = [
     "application/octet-stream",
   ];
@@ -1648,6 +1646,8 @@ capturer.downloadFile = async function (params) {
   ];
 
   const downloadFile = async (params) => {
+    isDebug && console.debug("call: downloadFile", params);
+
     const {url: sourceUrl, refUrl, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId, recurseChain} = settings;
