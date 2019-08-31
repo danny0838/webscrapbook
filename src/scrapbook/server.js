@@ -474,7 +474,7 @@ class Book {
     for (const id in this.meta) {
       meta[id] = Object.assign({}, this.meta[id]);
       delete meta[id].id;
-      size += 1 + meta[id].length;
+      size += 1;
 
       if (size >= sizeThreshold) {
         await exportFile(meta, i);
