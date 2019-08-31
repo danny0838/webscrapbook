@@ -544,7 +544,7 @@ const scrapbookUi = {
   },
 
   onItemDragStart(event) {
-    if (document.getElementById('command').disabled) {
+    if (document.querySelector('#command option[value="move_drag"]').closest(':disabled')) {
       event.dataTransfer.effectAllowed = 'none';
       return;
     }
