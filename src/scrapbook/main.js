@@ -446,6 +446,7 @@ const scrapbookUi = {
 
     container.hidden = !willOpen;
 
+    // toggle the twisty
     // root item container's previousSibling is undefined
     if (container.previousSibling) {
       container.previousSibling.firstChild.firstChild.src = willOpen ?
@@ -654,7 +655,7 @@ const scrapbookUi = {
       enteredElem = enteredElem.parentElement;
     }
 
-    if (!enteredElem || (enteredElem !== wrapper && enteredElem.closest('.dragover') !== wrapper)) {
+    if (!enteredElem || enteredElem.closest('.dragover') !== wrapper) {
       wrapper.classList.remove('dragover');
       wrapper.classList.remove('above');
       wrapper.classList.remove('below');
@@ -754,11 +755,7 @@ const scrapbookUi = {
   },
 
   async onClickAnchor(event) {
-    const selector = 'a[href]:not(.toggle)';
-    let elem = event.target;
-    if (!elem.matches(selector)) {
-      elem = elem.closest(selector);
-    }
+    const elem = event.target.closest('a[href]:not(.toggle)');
     if (!elem) {
       return;
     }
