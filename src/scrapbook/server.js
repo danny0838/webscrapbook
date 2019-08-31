@@ -469,7 +469,7 @@ class Book {
     const files = [];
 
     let i = 0;
-    let size = 0;
+    let size = 1;
     let meta = {};
     for (const id in this.meta) {
       meta[id] = Object.assign({}, this.meta[id]);
@@ -483,7 +483,7 @@ class Book {
         meta = {};
       }
     }
-    if (Object.keys(meta).length) {
+    if (size) {
       await exportFile(meta, i);
       i += 1;
     }
@@ -535,7 +535,7 @@ class Book {
     const files = [];
 
     let i = 0;
-    let size = 0;
+    let size = 1;
     let toc = {};
     for (const id in this.toc) {
       toc[id] = this.toc[id];
@@ -548,7 +548,7 @@ class Book {
         toc = {};
       }
     }
-    if (Object.keys(toc).length) {
+    if (size) {
       await exportFile(toc, i);
       i += 1;
     }

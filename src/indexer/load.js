@@ -1203,7 +1203,7 @@ const indexer = {
 
       const sizeThreshold = 256 * 1024;
       let i = 0;
-      let size = 0;
+      let size = 1;
       let meta = {};
       for (const id in scrapbookData.meta) {
         meta[id] = scrapbookData.meta[id];
@@ -1216,7 +1216,7 @@ const indexer = {
           meta = {};
         }
       }
-      if (Object.keys(meta).length) {
+      if (size) {
         exportFile(meta, i);
         i += 1;
       }
@@ -1245,7 +1245,7 @@ const indexer = {
 
       const sizeThreshold = 4 * 1024 * 1024;
       let i = 0;
-      let size = 0;
+      let size = 1;
       let toc = {};
       for (const id in scrapbookData.toc) {
         toc[id] = scrapbookData.toc[id];
@@ -1258,7 +1258,7 @@ const indexer = {
           toc = {};
         }
       }
-      if (Object.keys(toc).length) {
+      if (size) {
         exportFile(toc, i);
         i += 1;
       }
@@ -1673,7 +1673,7 @@ const indexer = {
 
       const sizeThreshold = 128 * 1024 * 1024;
       let i = 0;
-      let size = 0;
+      let size = 1;
       let fulltext = {};
       for (const id in scrapbookData.fulltext) {
         fulltext[id] = scrapbookData.fulltext[id];
@@ -1687,7 +1687,7 @@ const indexer = {
           fulltext = {};
         }
       }
-      if (Object.keys(fulltext).length) {
+      if (size) {
         exportFile(fulltext, i);
         i += 1;
       }
