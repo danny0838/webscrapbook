@@ -199,6 +199,7 @@ const scrapbookUi = {
         const rootElem = document.getElementById('item-root');
         rootElem.setAttribute('data-id', rootId);
         this.toggleItem(rootElem, true);
+        await this.loadViewStatus();
       } catch (ex) {
         console.error(ex);
         this.error(scrapbook.lang('ScrapBookMainErrorInitTree', [ex.message]));
@@ -207,6 +208,90 @@ const scrapbookUi = {
     }
 
     this.enableUi(true);
+  },
+
+  getViewStatusKey() {
+    return `scrapbook.view["${this.bookId}"]`;
+  },
+
+  async saveViewStatus() {
+    const getXpathPos = (elem) => {
+      const id = elem.getAttribute('data-id');
+      let cur = elem, i = 0;
+      while (cur) {
+        if (cur.getAttribute('data-id') === id) { i++; }
+        cur = cur.previousElementSibling;
+      }
+      return i;
+    };
+
+    const getXpaths = (elem, map) => {
+      const path = [];
+      let cur = elem;
+      while (cur && cur.closest('#items')) {
+        path.unshift(`*[@data-id="${cur.getAttribute('data-id')}"][${getXpathPos(cur)}]`);
+        cur = cur.parentElement.parentElement;
+      }
+
+      for (let i = 0, I = path.length; i < I; ++i) {
+        const subpath = path.slice(0, i + 1);
+        const sel = './' + subpath.join('/ul/');
+        if (!map.has(sel)) {
+          map.set(sel, i === I - 1);
+        }
+      }
+    };
+
+    const saveViewStatus = async () => {
+      const itemsElem = document.getElementById('items');
+      const selects = {};
+      const map = new Map();
+      Array.prototype.forEach.call(
+        itemsElem.querySelectorAll('ul.container:not([hidden])'),
+        x => getXpaths(x.parentElement, map)
+      );
+      for (const [k, v] of map.entries()) {
+        selects[k] = v;
+      }
+
+      const key = this.getViewStatusKey();
+      const data = {
+        time: Date.now(),
+        selects,
+      };
+
+      if (this.mode === 'normal') {
+        await browser.storage.local.set({[key]: data});
+      } else {
+        sessionStorage.setItem(key, JSON.stringify(data));
+      }
+    };
+    this.saveViewStatus = saveViewStatus;
+    return await saveViewStatus();
+  },
+
+  async loadViewStatus() {
+    try {
+      const key = this.getViewStatusKey();
+      let data;
+
+      if (this.mode === 'normal') {
+        data = (await browser.storage.local.get(key))[key];
+      } else {
+        data = JSON.parse(sessionStorage.getItem(key));
+      }
+
+      if (!data) { return; }
+
+      const itemsElem = document.getElementById('items');
+      for (const [xpath, willOpen] of Object.entries(data.selects)) {
+        const elem = document.evaluate(xpath, itemsElem).iterateNext();
+        if (!elem) { continue; }
+        if (willOpen) { this.toggleItem(elem, true); }
+      }
+    } catch (ex) {
+      console.error(ex);
+    }
   },
 
   async openModalWindow(url) {
@@ -752,6 +837,7 @@ const scrapbookUi = {
     const itemElem = event.currentTarget.parentNode.parentNode;
     this.highlightItem(itemElem);
     this.toggleItem(itemElem);
+    this.saveViewStatus();
   },
 
   async onClickAnchor(event) {
@@ -960,6 +1046,8 @@ const scrapbookUi = {
     }
 
     this.enableUi(true);
+
+    await this.saveViewStatus();
   },
 
   async cmd_index(selectedItemElems) {
