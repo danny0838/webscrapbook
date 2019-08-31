@@ -148,8 +148,31 @@ const scrapbookUi = {
     document.title = this.book.name + (this.rootId !== 'root' ? ' :: ' + this.rootId : '') + ' | ' + server.config.app.name;
 
     const cmdElem = document.getElementById('command');
-    cmdElem.querySelector('option[value="exec_book"]').disabled = !server.config.app.is_local;
-    cmdElem.querySelector('option[value="browse"]').disabled = !server.config.app.is_local;
+    cmdElem.querySelector('option[value="search"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="exec_book"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
+    cmdElem.querySelector('option[value="open"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="opentab"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="exec"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="browse"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
+    cmdElem.querySelector('option[value="source"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="manage"]').disabled = !!this.book.config.no_tree;
+
+    cmdElem.querySelector('option[value="mkfolder"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="mksep"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="mknote"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="upload"]').disabled = !!this.book.config.no_tree;
+
+    cmdElem.querySelector('option[value="edit"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="editx"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="move_up"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="move_down"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="move_into"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="move_drag"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="recycle"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="delete"]').disabled = !!this.book.config.no_tree;
+
+    cmdElem.querySelector('option[value="meta"]').disabled = !!this.book.config.no_tree;
+    cmdElem.querySelector('option[value="view_recycle"]').disabled = !!this.book.config.no_tree;
 
     const rootElem = document.getElementById('item-root');
     rootElem.container = document.createElement('ul');
@@ -162,23 +185,25 @@ const scrapbookUi = {
   async refresh() {
     this.enableUi(false);
 
-    try {
-      await this.book.loadTreeFiles(true);
-      await this.book.loadToc(true);
-      await this.book.loadMeta(true);
+    if (!this.book.config.no_tree) {
+      try {
+        await this.book.loadTreeFiles(true);
+        await this.book.loadToc(true);
+        await this.book.loadMeta(true);
 
-      const rootId = this.rootId;
-      if (!this.book.meta[rootId] && !this.book.specialItems.has(rootId)) {
-        throw new Error(`specified root item "${rootId}" does not exist.`);
+        const rootId = this.rootId;
+        if (!this.book.meta[rootId] && !this.book.specialItems.has(rootId)) {
+          throw new Error(`specified root item "${rootId}" does not exist.`);
+        }
+
+        const rootElem = document.getElementById('item-root');
+        rootElem.setAttribute('data-id', rootId);
+        this.toggleItem(rootElem, true);
+      } catch (ex) {
+        console.error(ex);
+        this.error(scrapbook.lang('ScrapBookMainErrorInitTree', [ex.message]));
+        return;
       }
-
-      const rootElem = document.getElementById('item-root');
-      rootElem.setAttribute('data-id', rootId);
-      this.toggleItem(rootElem, true);
-    } catch (ex) {
-      console.error(ex);
-      this.error(scrapbook.lang('ScrapBookMainErrorInitTree', [ex.message]));
-      return;
     }
 
     this.enableUi(true);

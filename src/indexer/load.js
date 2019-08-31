@@ -443,6 +443,11 @@ const indexer = {
           }
         };
 
+        if (!!book.config.no_tree) {
+          this.log(`Skip no-tree book '${book.name}' at '${book.topUrl}'.`);
+          continue;
+        }
+
         const inputData = {
           name: book.name,
           files: [],

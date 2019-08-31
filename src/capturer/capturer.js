@@ -487,6 +487,10 @@ capturer.addItemToServer = async function (params) {
 
   await server.init();
   const book = server.books[server.bookId];
+  if (!!book.config.no_tree) {
+    return;
+  }
+
   const index = (params.targetDir ? params.targetDir + '/' : '') + params.filename;
   let icon = params.favIconUrl;
   
@@ -875,16 +879,20 @@ capturer.captureBookmark = async function (params) {
 
     // save to meta and TOC only
     if (options["capture.saveTo"] === 'server') {
-      return {
-        timeId,
-        title,
-        type: "bookmark",
-        sourceUrl,
-        targetDir: '',
-        filename: '',
-        url: '',
-        favIconUrl,
-      };
+      await server.init();
+      const book = server.books[server.bookId];
+      if (!book.config.no_tree) {
+        return {
+          timeId,
+          title,
+          type: "bookmark",
+          sourceUrl,
+          targetDir: '',
+          filename: '',
+          url: '',
+          favIconUrl,
+        };
+      }
     }
 
     let html;
