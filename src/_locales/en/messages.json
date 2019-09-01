@@ -1,4 +1,7 @@
 {
+  "Cancel": {
+    "message": "Cancel"
+  },
   "CaptureAllTabs": {
     "message": "Capture all tabs"
   },
@@ -56,21 +59,31 @@
   "ErrorContentScriptExecute": {
     "message": "Unable to execute content script ($SOURCE$): $REASON$",
     "placeholders": {
-      "source": {"content": "$1"},
-      "reason": {"content": "$2"}
+      "source": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
+      }
     }
   },
   "ErrorFileDownloadError": {
     "message": "Error downloading file ($URL$): $REASON$",
     "placeholders": {
-      "url": {"content": "$1"},
-      "reason": {"content": "$2"}
+      "url": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
+      }
     }
   },
   "ErrorImportOptions": {
     "message": "Error on importing options: $REASON$",
     "placeholders": {
-      "reason": {"content": "$1"}
+      "reason": {
+        "content": "$1"
+      }
     }
   },
   "ErrorTabDiscarded": {
@@ -114,7 +127,9 @@
   "IndexerTreeSearchTitle": {
     "message": "$BOOK$ :: Search",
     "placeholders": {
-      "book": {"content": "$1"}
+      "book": {
+        "content": "$1"
+      }
     }
   },
   "IndexerTreeSearchViewInMap": {
@@ -125,6 +140,9 @@
   },
   "IndexerTreeToggleAll": {
     "message": "Toggle all"
+  },
+  "OK": {
+    "message": "OK"
   },
   "OpenIndexer": {
     "message": "Generate site index"
@@ -174,36 +192,42 @@
   "OptionCaptureCommonLinkLabel": {
     "message": "Link"
   },
-  "OptionCaptureCommonSaveLabel": {
-    "message": "Save"
+  "OptionCaptureCommonRemoveLabel": {
+    "message": "Remove"
   },
   "OptionCaptureCommonSaveCurrentLabel": {
     "message": "Save current"
   },
+  "OptionCaptureCommonSaveLabel": {
+    "message": "Save"
+  },
   "OptionCaptureCommonSaveUsedLabel": {
     "message": "Save used"
-  },
-  "OptionCaptureCommonRemoveLabel": {
-    "message": "Remove"
-  },
-  "OptionCaptureDownLinkFilterErrorLine": {
-    "message": "Line $LINE$: $ERROR$",
-    "placeholders": {
-      "line": {"content": "$1"},
-      "error": {"content": "$2"}
-    }
-  },
-  "OptionCaptureDownLinkExtFilterError": {
-    "message": "The following regular expressions in file extension filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
-    "placeholders": {
-      "lines": {"content": "$1"}
-    }
   },
   "OptionCaptureDownLinkExtFilterDesc": {
     "message": "This determines what to download according to file extension.\n\n* Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. jpg, jpeg) or a regular expression (e.g. /jpe?g/i).\n\n* The full extension is taken for matching. For example, .doc does not match rule docx.\n\n* Whichever matches a rule at any line are included for download.\n\n* A line starting with \"#\" is regarded as a comment and will be ignored during execution."
   },
+  "OptionCaptureDownLinkExtFilterError": {
+    "message": "The following regular expressions in file extension filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
+    "placeholders": {
+      "lines": {
+        "content": "$1"
+      }
+    }
+  },
   "OptionCaptureDownLinkExtFilterTitle": {
     "message": "File extension filter"
+  },
+  "OptionCaptureDownLinkFilterErrorLine": {
+    "message": "Line $LINE$: $ERROR$",
+    "placeholders": {
+      "line": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
   },
   "OptionCaptureDownLinkModeHeaderLabel": {
     "message": "Match HTTP header and file extension"
@@ -223,7 +247,9 @@
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "The following regular expressions in URL filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
     "placeholders": {
-      "lines": {"content": "$1"}
+      "lines": {
+        "content": "$1"
+      }
     }
   },
   "OptionCaptureDownLinkUrlFilterTitle": {
@@ -247,11 +273,11 @@
   "OptionCaptureFontTooltip": {
     "message": "This determines how fonts are handled.\n\n* Save: Save all fonts to local.\n\n* Save used: Save only the fonts used by elements in the captured web page area. If the captured page is not displayed (such as capture source), all fonts are still saved.\n\n* Link: Link the font to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Clear fonts from the stylesheets."
   },
-  "OptionCaptureFormStatusLabel": {
-    "message": "Form status:"
-  },
   "OptionCaptureFormStatusKeepLabel": {
     "message": "Keep"
+  },
+  "OptionCaptureFormStatusLabel": {
+    "message": "Form status:"
   },
   "OptionCaptureFormStatusResetLabel": {
     "message": "Reset"
@@ -280,12 +306,6 @@
   "OptionCaptureObjectTooltip": {
     "message": "This determines how OBJECT elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Link the OBJECT element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the OBJECT element.\n\n* Remove: Remove the OBJECT element. Note that this could affect the web page layout."
   },
-  "OptionCaptureRecordRewrittenAttrLabel": {
-    "message": "Record rewritten attributes"
-  },
-  "OptionCaptureRecordRewrittenAttrTooltip": {
-    "message": "If an attribute is rewritten during the capture process, create a corresponding data-* attribute to record its original value."
-  },
   "OptionCaptureRecordErrorUriLabel": {
     "message": "Record error URL"
   },
@@ -297,6 +317,12 @@
   },
   "OptionCaptureRecordRemovedNodeTooltip": {
     "message": "If an element is removed during the capture process, create an HTML comment in place to record its original content."
+  },
+  "OptionCaptureRecordRewrittenAttrLabel": {
+    "message": "Record rewritten attributes"
+  },
+  "OptionCaptureRecordRewrittenAttrTooltip": {
+    "message": "If an attribute is rewritten during the capture process, create a corresponding data-* attribute to record its original value."
   },
   "OptionCaptureRecordSourceUriLabel": {
     "message": "Record source URL"
@@ -313,20 +339,11 @@
   "OptionCaptureRewriteUrlLabel": {
     "message": "Rewrite URL"
   },
-  "OptionCaptureSaveAsciiFilenameLabel": {
-    "message": "Save ASCII filename"
-  },
-  "OptionCaptureSaveAsciiFilenameTooltip": {
-    "message": "The captured file will have non-ASCII chars in the filename encoded."
-  },
   "OptionCaptureSaveAsFolderLabel": {
     "message": "Folder"
   },
   "OptionCaptureSaveAsLabel": {
     "message": "Save captured data as:"
-  },
-  "OptionCaptureSaveAsTooltip": {
-    "message": "This determines how the web page and referenced files are saved.\n\n* Folder: Generates a folder and save the web page and resource files into it. NOTE for Chromium: When saving captured data to scrapbook folder, it's recommended that \"Ask where to save each file before downloading\" be unchecked to avoid massive prompts for a capture; additionally, several file formats (.js for example) are blocked by the browser, and the user has to select \"Keep\" for each of them to download them.\n\n* HTZ or MAFF package: Packs web page and referenced resources in to a single file using ZIP algorithm. Such files can be viewed using the \"View archive page\" feature or by unzipping them.\n\n* Single HTML: Stores the referenced resource as data URL, which is supported by most browsers, such as Chromium > 0, Firefox > 0, Edge > 0, Safari > 0, Opera ≥ 7.2, and IE ≥ 8 (very limited in IE). NOTE: Data URLs are less performant and does not deduplicate, and thus a web page referencing a large resource for multiple times could lead to a bloat of file size.\n\n* Scripted single HTML: Stores referenced resources in the script and re-generate them on loading. This has better performance and reduced size compared with data URL, but requires a modern browser with JavaScript enabled, such as: Chromium ≥ 20, Firefox ≥ 13, Edge > 0, Safari ≥ 6, Opera ≥ 12.1, and IE ≥ 10."
   },
   "OptionCaptureSaveAsMaffLabel": {
     "message": "MAFF package"
@@ -337,8 +354,17 @@
   "OptionCaptureSaveAsSingleHtmlLabel": {
     "message": "Single HTML"
   },
+  "OptionCaptureSaveAsTooltip": {
+    "message": "This determines how the web page and referenced files are saved.\n\n* Folder: Generates a folder and save the web page and resource files into it. NOTE for Chromium: When saving captured data to scrapbook folder, it's recommended that \"Ask where to save each file before downloading\" be unchecked to avoid massive prompts for a capture; additionally, several file formats (.js for example) are blocked by the browser, and the user has to select \"Keep\" for each of them to download them.\n\n* HTZ or MAFF package: Packs web page and referenced resources in to a single file using ZIP algorithm. Such files can be viewed using the \"View archive page\" feature or by unzipping them.\n\n* Single HTML: Stores the referenced resource as data URL, which is supported by most browsers, such as Chromium > 0, Firefox > 0, Edge > 0, Safari > 0, Opera ≥ 7.2, and IE ≥ 8 (very limited in IE). NOTE: Data URLs are less performant and does not deduplicate, and thus a web page referencing a large resource for multiple times could lead to a bloat of file size.\n\n* Scripted single HTML: Stores referenced resources in the script and re-generate them on loading. This has better performance and reduced size compared with data URL, but requires a modern browser with JavaScript enabled, such as: Chromium ≥ 20, Firefox ≥ 13, Edge > 0, Safari ≥ 6, Opera ≥ 12.1, and IE ≥ 10."
+  },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ package"
+  },
+  "OptionCaptureSaveAsciiFilenameLabel": {
+    "message": "Save ASCII filename"
+  },
+  "OptionCaptureSaveAsciiFilenameTooltip": {
+    "message": "The captured file will have non-ASCII chars in the filename encoded."
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
     "message": "Save data URL as file"
@@ -436,26 +462,13 @@
   "OptionServerUrlTooltip": {
     "message": "The root path of the backend server application, such as “http://localhost:8080/” or “https://example.com/wsb/”.\n\n* The backend server can be hosted using PyWebScrapBook (compatible: $BACKEND_VERSION$). See https://pypi.org/project/webscrapbook/ for further details.",
     "placeholders": {
-      "backend_version": {"content": "$1"}
+      "backend_version": {
+        "content": "$1"
+      }
     }
   },
   "OptionServerUserLabel": {
     "message": "User:"
-  },
-  "OptionsExportLabel": {
-    "message": "Export"
-  },
-  "OptionsImportLabel": {
-    "message": "Import"
-  },
-  "OptionsImportSuccess": {
-    "message": "Successfully imported options."
-  },
-  "OptionsSaveLabel": {
-    "message": "Save"
-  },
-  "OptionsResetLabel": {
-    "message": "Reset"
   },
   "OptionViewerUseFileSystemApiLabel": {
     "message": "Use Filesystem API"
@@ -475,6 +488,184 @@
   "OptionViewerViewMaffTooltip": {
     "message": "When the browser loads a MAFF file, view it with the viewer. Check \"Allow access to file URLs\" in a supported browser to enable opening such files directly."
   },
+  "OptionsExportLabel": {
+    "message": "Export"
+  },
+  "OptionsImportLabel": {
+    "message": "Import"
+  },
+  "OptionsImportSuccess": {
+    "message": "Successfully imported options."
+  },
+  "OptionsResetLabel": {
+    "message": "Reset"
+  },
+  "OptionsSaveLabel": {
+    "message": "Save"
+  },
+  "ScrapBookMainBookRefresh": {
+    "message": "<Refresh>"
+  },
+  "ScrapBookMainCommandBrowse": {
+    "message": "Browse locally"
+  },
+  "ScrapBookMainCommandCreateNote": {
+    "message": "New Note"
+  },
+  "ScrapBookMainCommandCreateNoteDialogTitle": {
+    "message": "Format of the new note:"
+  },
+  "ScrapBookMainCommandCreateSeparator": {
+    "message": "New separator"
+  },
+  "ScrapBookMainCommandCreatefolder": {
+    "message": "New folder"
+  },
+  "ScrapBookMainCommandDelete": {
+    "message": "Delete"
+  },
+  "ScrapBookMainCommandEdit": {
+    "message": "Edit"
+  },
+  "ScrapBookMainCommandEditx": {
+    "message": "Edit page"
+  },
+  "ScrapBookMainCommandExec": {
+    "message": "Open locally"
+  },
+  "ScrapBookMainCommandExecBook": {
+    "message": "View root directory locally"
+  },
+  "ScrapBookMainCommandIndex": {
+    "message": "View index page"
+  },
+  "ScrapBookMainCommandManage": {
+    "message": "Manage"
+  },
+  "ScrapBookMainCommandMeta": {
+    "message": "Metadata"
+  },
+  "ScrapBookMainCommandMetaDialogCharset": {
+    "message": "Charset:"
+  },
+  "ScrapBookMainCommandMetaDialogComment": {
+    "message": "Comment:"
+  },
+  "ScrapBookMainCommandMetaDialogCreate": {
+    "message": "Create:"
+  },
+  "ScrapBookMainCommandMetaDialogIcon": {
+    "message": "Icon:"
+  },
+  "ScrapBookMainCommandMetaDialogId": {
+    "message": "ID:"
+  },
+  "ScrapBookMainCommandMetaDialogIndex": {
+    "message": "Index:"
+  },
+  "ScrapBookMainCommandMetaDialogModify": {
+    "message": "Modify:"
+  },
+  "ScrapBookMainCommandMetaDialogSource": {
+    "message": "Source:"
+  },
+  "ScrapBookMainCommandMetaDialogTitle": {
+    "message": "Title:"
+  },
+  "ScrapBookMainCommandMetaDialogType": {
+    "message": "Type:"
+  },
+  "ScrapBookMainCommandMoveDialogIndex": {
+    "message": "Position (start from 0, empty for last):"
+  },
+  "ScrapBookMainCommandMoveDialogMode": {
+    "message": "Mode:"
+  },
+  "ScrapBookMainCommandMoveDialogModeLink": {
+    "message": "Link"
+  },
+  "ScrapBookMainCommandMoveDialogModeMove": {
+    "message": "Move"
+  },
+  "ScrapBookMainCommandMoveDialogTitle": {
+    "message": "Move into the item of this ID:"
+  },
+  "ScrapBookMainCommandMoveDown": {
+    "message": "Move down"
+  },
+  "ScrapBookMainCommandMoveTo": {
+    "message": "Move to"
+  },
+  "ScrapBookMainCommandMoveUp": {
+    "message": "Move up"
+  },
+  "ScrapBookMainCommandOpen": {
+    "message": "Open"
+  },
+  "ScrapBookMainCommandOpenTab": {
+    "message": "Open in new tab"
+  },
+  "ScrapBookMainCommandRecycle": {
+    "message": "Remove"
+  },
+  "ScrapBookMainCommandSearch": {
+    "message": "Search"
+  },
+  "ScrapBookMainCommandSource": {
+    "message": "View source"
+  },
+  "ScrapBookMainCommandUpload": {
+    "message": "Upload"
+  },
+  "ScrapBookMainCommandViewRecycle": {
+    "message": "View recycle bin"
+  },
+  "ScrapBookMainErrorBookNotExist": {
+    "message": "Scrapbook $NAME$ does not exist. Reset to default scrapbook.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorInitTree": {
+    "message": "Unable to init tree: $REASON$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorLoadBooks": {
+    "message": "Unable to load scrapbooks: $REASON$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorServerInit": {
+    "message": "Backend initilization error: $REASON$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorServerNotConfigured": {
+    "message": "Backend server is not configured."
+  },
+  "ScrapBookMainErrorServerTreeChanged": {
+    "message": "Tree data in the server has been changed. Refresh the page and try again."
+  },
+  "ScrapBookMainNewFolderName": {
+    "description": "Default name of a new folder",
+    "message": "New Folder"
+  },
+  "ScrapBookMainNewNoteName": {
+    "description": "Default name of a new note",
+    "message": "New Note"
+  },
   "ViewerDesc": {
     "message": "Pick HTZ or MAFF archive files to open, via dropping them into this window, or using the buttons below:"
   },
@@ -487,171 +678,12 @@
   "WarnCaptureCircular": {
     "message": "Resource '$SOURCE$' has a circular reference to '$TARGET$', which will be blanked because current capture configuration does not support circular reference.",
     "placeholders": {
-      "source": {"content": "$1"},
-      "target": {"content": "$2"}
+      "source": {
+        "content": "$1"
+      },
+      "target": {
+        "content": "$2"
+      }
     }
-  },
-
-  "OK": {
-    "message": "OK"
-  },
-  "Cancel": {
-    "message": "Cancel"
-  },
-
-  "ScrapBookMainNewFolderName": {
-    "description": "Default name of a new folder",
-    "message": "New Folder"
-  },
-  "ScrapBookMainNewNoteName": {
-    "description": "Default name of a new note",
-    "message": "New Note"
-  },
-  "ScrapBookMainBookRefresh": {
-    "message": "<Refresh>"
-  },
-  "ScrapBookMainCommandIndex": {
-    "message": "View index page"
-  },
-  "ScrapBookMainCommandSearch": {
-    "message": "Search"
-  },
-  "ScrapBookMainCommandOpen": {
-    "message": "Open"
-  },
-  "ScrapBookMainCommandOpenTab": {
-    "message": "Open in new tab"
-  },
-  "ScrapBookMainCommandExec": {
-    "message": "Open locally"
-  },
-  "ScrapBookMainCommandExecBook": {
-    "message": "View root directory locally"
-  },
-  "ScrapBookMainCommandBrowse": {
-    "message": "Browse locally"
-  },
-  "ScrapBookMainCommandSource": {
-    "message": "View source"
-  },
-  "ScrapBookMainCommandManage": {
-    "message": "Manage"
-  },
-  "ScrapBookMainCommandMeta": {
-    "message": "Metadata"
-  },
-  "ScrapBookMainCommandCreatefolder": {
-    "message": "New folder"
-  },
-  "ScrapBookMainCommandCreateSeparator": {
-    "message": "New separator"
-  },
-  "ScrapBookMainCommandCreateNote": {
-    "message": "New Note"
-  },
-  "ScrapBookMainCommandEdit": {
-    "message": "Edit"
-  },
-  "ScrapBookMainCommandEditx": {
-    "message": "Edit page"
-  },
-  "ScrapBookMainCommandUpload": {
-    "message": "Upload"
-  },
-  "ScrapBookMainCommandMoveUp": {
-    "message": "Move up"
-  },
-  "ScrapBookMainCommandMoveDown": {
-    "message": "Move down"
-  },
-  "ScrapBookMainCommandMoveTo": {
-    "message": "Move to"
-  },
-  "ScrapBookMainCommandRecycle": {
-    "message": "Remove"
-  },
-  "ScrapBookMainCommandDelete": {
-    "message": "Delete"
-  },
-  "ScrapBookMainCommandViewRecycle": {
-    "message": "View recycle bin"
-  },
-  "ScrapBookMainCommandMetaDialogId": {
-    "message": "ID:"
-  },
-  "ScrapBookMainCommandMetaDialogTitle": {
-    "message": "Title:"
-  },
-  "ScrapBookMainCommandMetaDialogIndex": {
-    "message": "Index:"
-  },
-  "ScrapBookMainCommandMetaDialogSource": {
-    "message": "Source:"
-  },
-  "ScrapBookMainCommandMetaDialogIcon": {
-    "message": "Icon:"
-  },
-  "ScrapBookMainCommandMetaDialogType": {
-    "message": "Type:"
-  },
-  "ScrapBookMainCommandMetaDialogCharset": {
-    "message": "Charset:"
-  },
-  "ScrapBookMainCommandMetaDialogCreate": {
-    "message": "Create:"
-  },
-  "ScrapBookMainCommandMetaDialogModify": {
-    "message": "Modify:"
-  },
-  "ScrapBookMainCommandMetaDialogComment": {
-    "message": "Comment:"
-  },
-  "ScrapBookMainCommandCreateNoteDialogTitle": {
-    "message": "Format of the new note:"
-  },
-  "ScrapBookMainCommandMoveDialogTitle": {
-    "message": "Move into the item of this ID:"
-  },
-  "ScrapBookMainCommandMoveDialogIndex": {
-    "message": "Position (start from 0, empty for last):"
-  },
-  "ScrapBookMainCommandMoveDialogMode": {
-    "message": "Mode:"
-  },
-  "ScrapBookMainCommandMoveDialogModeMove": {
-    "message": "Move"
-  },
-  "ScrapBookMainCommandMoveDialogModeLink": {
-    "message": "Link"
-  },
-  "ScrapBookMainErrorServerNotConfigured": {
-    "message": "Backend server is not configured."
-  },
-  "ScrapBookMainErrorServerInit": {
-    "message": "Backend initilization error: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorBookNotExist": {
-    "message": "Scrapbook $NAME$ does not exist. Reset to default scrapbook.",
-    "placeholders": {
-      "name": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorLoadBooks": {
-    "message": "Unable to load scrapbooks: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorInitTree": {
-    "message": "Unable to init tree: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorServerTreeChanged": {
-    "message": "Tree data in the server has been changed. Refresh the page and try again."
   }
 }

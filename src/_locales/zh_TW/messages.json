@@ -1,4 +1,7 @@
 {
+  "Cancel": {
+    "message": "取消"
+  },
   "CaptureAllTabs": {
     "message": "擷取所有分頁"
   },
@@ -56,21 +59,31 @@
   "ErrorContentScriptExecute": {
     "message": "無法執行內容處理腳本 ($SOURCE$): $REASON$",
     "placeholders": {
-      "source": {"content": "$1"},
-      "reason": {"content": "$2"}
+      "source": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
+      }
     }
   },
   "ErrorFileDownloadError": {
     "message": "下載檔案錯誤 ($URL$): $REASON$",
     "placeholders": {
-      "url": {"content": "$1"},
-      "reason": {"content": "$2"}
+      "url": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
+      }
     }
   },
   "ErrorImportOptions": {
     "message": "匯入選項失敗: $REASON$",
     "placeholders": {
-      "reason": {"content": "$1"}
+      "reason": {
+        "content": "$1"
+      }
     }
   },
   "ErrorTabDiscarded": {
@@ -114,7 +127,9 @@
   "IndexerTreeSearchTitle": {
     "message": "$BOOK$ :: 搜尋",
     "placeholders": {
-      "book": {"content": "$1"}
+      "book": {
+        "content": "$1"
+      }
     }
   },
   "IndexerTreeSearchViewInMap": {
@@ -125,6 +140,9 @@
   },
   "IndexerTreeToggleAll": {
     "message": "全部展開或收合"
+  },
+  "OK": {
+    "message": "確定"
   },
   "OpenIndexer": {
     "message": "建立站台索引"
@@ -174,36 +192,42 @@
   "OptionCaptureCommonLinkLabel": {
     "message": "連結"
   },
-  "OptionCaptureCommonSaveLabel": {
-    "message": "儲存"
+  "OptionCaptureCommonRemoveLabel": {
+    "message": "移除"
   },
   "OptionCaptureCommonSaveCurrentLabel": {
     "message": "儲存現用"
   },
+  "OptionCaptureCommonSaveLabel": {
+    "message": "儲存"
+  },
   "OptionCaptureCommonSaveUsedLabel": {
     "message": "儲存使用"
-  },
-  "OptionCaptureCommonRemoveLabel": {
-    "message": "移除"
-  },
-  "OptionCaptureDownLinkFilterErrorLine": {
-    "message": "第 $LINE$ 行：$ERROR$",
-    "placeholders": {
-      "line": {"content": "$1"},
-      "error": {"content": "$2"}
-    }
-  },
-  "OptionCaptureDownLinkExtFilterError": {
-    "message": "以下副檔名過濾器的正規表示式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",
-    "placeholders": {
-      "lines": {"content": "$1"}
-    }
   },
   "OptionCaptureDownLinkExtFilterDesc": {
     "message": "此過濾器根據副檔名篩選要下載的連結。\n\n* 以下每行為一個以 \",\" 分隔的副檔名列表（不分大小寫，可含空白，如 jpg, jpeg）或一個正規表示式（如 /jpe?g/i）。\n\n* 取全副檔名比對，例如 .doc 不視為符合規則 docx。\n\n* 符合任何一行的規則即列入下載。\n\n* 以 \"#\" 開頭的行皆視為註解，執行時會略過。"
   },
+  "OptionCaptureDownLinkExtFilterError": {
+    "message": "以下副檔名過濾器的正規表示式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",
+    "placeholders": {
+      "lines": {
+        "content": "$1"
+      }
+    }
+  },
   "OptionCaptureDownLinkExtFilterTitle": {
     "message": "副檔名過濾器"
+  },
+  "OptionCaptureDownLinkFilterErrorLine": {
+    "message": "第 $LINE$ 行：$ERROR$",
+    "placeholders": {
+      "line": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
   },
   "OptionCaptureDownLinkModeHeaderLabel": {
     "message": "比對 HTTP 標頭及網址副檔名"
@@ -223,7 +247,9 @@
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "以下網址過濾器的正規表示式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",
     "placeholders": {
-      "lines": {"content": "$1"}
+      "lines": {
+        "content": "$1"
+      }
     }
   },
   "OptionCaptureDownLinkUrlFilterTitle": {
@@ -247,11 +273,11 @@
   "OptionCaptureFontTooltip": {
     "message": "此選項決定字體的處理方式。\n\n* 儲存：將所有字體儲存至本地。\n\n* 儲存使用：只將擷取區域的網頁元素使用的字體儲存至本地。若擷取的頁面並未顯示於瀏覽器（例如擷取原貌），則仍儲存所有字體。\n\n* 連結：將字體連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。注意：跨網域載入字體受同源政策限制，若字體來自未設定跨來源資源共享（CORS）的伺服器，擷取的頁面將無法載入。\n\n* 清空：將字體從樣式表中清除。"
   },
-  "OptionCaptureFormStatusLabel": {
-    "message": "表單狀態:"
-  },
   "OptionCaptureFormStatusKeepLabel": {
     "message": "保留"
+  },
+  "OptionCaptureFormStatusLabel": {
+    "message": "表單狀態:"
   },
   "OptionCaptureFormStatusResetLabel": {
     "message": "重設"
@@ -280,12 +306,6 @@
   "OptionCaptureObjectTooltip": {
     "message": "此選項決定 OBJECT 元素的處理方式。OBJECT 元素多用於嵌入外掛程式，也可嵌入圖片、多媒體、或框架頁。注意：外掛程式脫離原伺服器環境可能無法正常運作，且可能造成安全風險。\n\n* 儲存：將 OBJECT 元素參照的檔案儲存至本地。\n\n* 連結：將 OBJECT 元素連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將 OBJECT 元素無效化。\n\n* 移除：將 OBJECT 元素移除。注意這可能會影響網頁排版。"
   },
-  "OptionCaptureRecordRewrittenAttrLabel": {
-    "message": "記錄改寫的屬性"
-  },
-  "OptionCaptureRecordRewrittenAttrTooltip": {
-    "message": "擷取網頁時若有改寫元素的屬性，則建立對應的 data-* 屬性記錄原始值。"
-  },
   "OptionCaptureRecordErrorUriLabel": {
     "message": "記錄錯誤的 URL"
   },
@@ -297,6 +317,12 @@
   },
   "OptionCaptureRecordRemovedNodeTooltip": {
     "message": "擷取網頁時若有移除元素，則在原位置建立 HTML 註解記錄原始內容。"
+  },
+  "OptionCaptureRecordRewrittenAttrLabel": {
+    "message": "記錄改寫的屬性"
+  },
+  "OptionCaptureRecordRewrittenAttrTooltip": {
+    "message": "擷取網頁時若有改寫元素的屬性，則建立對應的 data-* 屬性記錄原始值。"
   },
   "OptionCaptureRecordSourceUriLabel": {
     "message": "記錄原始的 URL"
@@ -313,20 +339,11 @@
   "OptionCaptureRewriteUrlLabel": {
     "message": "改寫 URL"
   },
-  "OptionCaptureSaveAsciiFilenameLabel": {
-    "message": "儲存為 ASCII 檔名"
-  },
-  "OptionCaptureSaveAsciiFilenameTooltip": {
-    "message": "檔名中所有非 ASCII 字元會以編碼形式儲存。"
-  },
   "OptionCaptureSaveAsFolderLabel": {
     "message": "資料夾"
   },
   "OptionCaptureSaveAsLabel": {
     "message": "儲存擷取資料為:"
-  },
-  "OptionCaptureSaveAsTooltip": {
-    "message": "指定儲存網頁及參照檔案的格式。\n\n* 資料夾：建立一個資料夾並將網頁及資源檔案存入其中。Chromium 系瀏覽器注意： 儲存擷取資料至剪貼簿資料夾時，建議瀏覽器設定取消勾選「下載每個檔案前先詢問儲存位置」，以免擷取時跳出大量下載視窗；特定格式的檔案（如 .js）會被瀏覽器封鎖，須逐個選擇「保留」才能下載。\n\n* HTZ 及 MAFF 封存檔：用 ZIP 演算法將網頁及資源檔案打包，可用「檢視封存網頁」功能檢視，或用支援 ZIP 的工具解壓縮後檢視。\n\n* 單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案以 data URL 嵌入，大部分瀏覽器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL  效能不佳且無法去除重覆，網頁重覆使用多媒體檔案時，下載的檔案可能會大幅膨脹。\n\n* 腳本化單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案儲存於腳本並於開啟時載入，相較於 data URL 可提升效能及縮小容量，但須使用較新且啟用 JavaScript 的瀏覽器開啟，例如 Chromium ≥ 20、Firefox ≥ 13、Edge > 0、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。"
   },
   "OptionCaptureSaveAsMaffLabel": {
     "message": "MAFF 封存檔"
@@ -337,8 +354,17 @@
   "OptionCaptureSaveAsSingleHtmlLabel": {
     "message": "單一 HTML 檔案"
   },
+  "OptionCaptureSaveAsTooltip": {
+    "message": "指定儲存網頁及參照檔案的格式。\n\n* 資料夾：建立一個資料夾並將網頁及資源檔案存入其中。Chromium 系瀏覽器注意： 儲存擷取資料至剪貼簿資料夾時，建議瀏覽器設定取消勾選「下載每個檔案前先詢問儲存位置」，以免擷取時跳出大量下載視窗；特定格式的檔案（如 .js）會被瀏覽器封鎖，須逐個選擇「保留」才能下載。\n\n* HTZ 及 MAFF 封存檔：用 ZIP 演算法將網頁及資源檔案打包，可用「檢視封存網頁」功能檢視，或用支援 ZIP 的工具解壓縮後檢視。\n\n* 單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案以 data URL 嵌入，大部分瀏覽器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL  效能不佳且無法去除重覆，網頁重覆使用多媒體檔案時，下載的檔案可能會大幅膨脹。\n\n* 腳本化單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案儲存於腳本並於開啟時載入，相較於 data URL 可提升效能及縮小容量，但須使用較新且啟用 JavaScript 的瀏覽器開啟，例如 Chromium ≥ 20、Firefox ≥ 13、Edge > 0、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。"
+  },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ 封存檔"
+  },
+  "OptionCaptureSaveAsciiFilenameLabel": {
+    "message": "儲存為 ASCII 檔名"
+  },
+  "OptionCaptureSaveAsciiFilenameTooltip": {
+    "message": "檔名中所有非 ASCII 字元會以編碼形式儲存。"
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
     "message": "將 data URL 儲存為檔案"
@@ -436,26 +462,13 @@
   "OptionServerUrlTooltip": {
     "message": "後端伺服器程式的根目錄，例如「http://localhost:8080/」或「https://example.com/wsb/」。\n\n* 後端伺服器可用 PyWebScrapBook 套件（相容版本：$BACKEND_VERSION$）架設，安裝細節參見 https://pypi.org/project/webscrapbook/。",
     "placeholders": {
-      "backend_version": {"content": "$1"}
+      "backend_version": {
+        "content": "$1"
+      }
     }
   },
   "OptionServerUserLabel": {
     "message": "使用者:"
-  },
-  "OptionsExportLabel": {
-    "message": "匯出"
-  },
-  "OptionsImportLabel": {
-    "message": "匯入"
-  },
-  "OptionsImportSuccess": {
-    "message": "匯入選項成功"
-  },
-  "OptionsSaveLabel": {
-    "message": "儲存"
-  },
-  "OptionsResetLabel": {
-    "message": "重設"
   },
   "OptionViewerUseFileSystemApiLabel": {
     "message": "使用 Filesystem API"
@@ -475,6 +488,184 @@
   "OptionViewerViewMaffTooltip": {
     "message": "瀏覽器載入 MAFF 檔案時，自動以檢視器檢視。在支援的瀏覽器勾選「允許存取檔案網址」即可用瀏覽器直接開啟此類檔案。"
   },
+  "OptionsExportLabel": {
+    "message": "匯出"
+  },
+  "OptionsImportLabel": {
+    "message": "匯入"
+  },
+  "OptionsImportSuccess": {
+    "message": "匯入選項成功"
+  },
+  "OptionsResetLabel": {
+    "message": "重設"
+  },
+  "OptionsSaveLabel": {
+    "message": "儲存"
+  },
+  "ScrapBookMainBookRefresh": {
+    "message": "<重新整理>"
+  },
+  "ScrapBookMainCommandBrowse": {
+    "message": "在檔案管理員檢視"
+  },
+  "ScrapBookMainCommandCreateNote": {
+    "message": "新增筆記"
+  },
+  "ScrapBookMainCommandCreateNoteDialogTitle": {
+    "message": "新筆記的格式:"
+  },
+  "ScrapBookMainCommandCreateSeparator": {
+    "message": "新增分隔線"
+  },
+  "ScrapBookMainCommandCreatefolder": {
+    "message": "新增資料夾"
+  },
+  "ScrapBookMainCommandDelete": {
+    "message": "刪除"
+  },
+  "ScrapBookMainCommandEdit": {
+    "message": "編輯"
+  },
+  "ScrapBookMainCommandEditx": {
+    "message": "編輯頁面"
+  },
+  "ScrapBookMainCommandExec": {
+    "message": "用預設程式開啟"
+  },
+  "ScrapBookMainCommandExecBook": {
+    "message": "在檔案管理員檢視主目錄"
+  },
+  "ScrapBookMainCommandIndex": {
+    "message": "檢視主頁"
+  },
+  "ScrapBookMainCommandManage": {
+    "message": "管理"
+  },
+  "ScrapBookMainCommandMeta": {
+    "message": "元資料"
+  },
+  "ScrapBookMainCommandMetaDialogCharset": {
+    "message": "字集:"
+  },
+  "ScrapBookMainCommandMetaDialogComment": {
+    "message": "註解:"
+  },
+  "ScrapBookMainCommandMetaDialogCreate": {
+    "message": "建立時間:"
+  },
+  "ScrapBookMainCommandMetaDialogIcon": {
+    "message": "圖示:"
+  },
+  "ScrapBookMainCommandMetaDialogId": {
+    "message": "ID:"
+  },
+  "ScrapBookMainCommandMetaDialogIndex": {
+    "message": "索引檔:"
+  },
+  "ScrapBookMainCommandMetaDialogModify": {
+    "message": "修改時間:"
+  },
+  "ScrapBookMainCommandMetaDialogSource": {
+    "message": "來源:"
+  },
+  "ScrapBookMainCommandMetaDialogTitle": {
+    "message": "標題:"
+  },
+  "ScrapBookMainCommandMetaDialogType": {
+    "message": "類型:"
+  },
+  "ScrapBookMainCommandMoveDialogIndex": {
+    "message": "位置 (從 0 開始，空白則移至最後):"
+  },
+  "ScrapBookMainCommandMoveDialogMode": {
+    "message": "模式:"
+  },
+  "ScrapBookMainCommandMoveDialogModeLink": {
+    "message": "連結"
+  },
+  "ScrapBookMainCommandMoveDialogModeMove": {
+    "message": "移動"
+  },
+  "ScrapBookMainCommandMoveDialogTitle": {
+    "message": "移動到這個 ID 的項目下:"
+  },
+  "ScrapBookMainCommandMoveDown": {
+    "message": "下移"
+  },
+  "ScrapBookMainCommandMoveTo": {
+    "message": "移動至"
+  },
+  "ScrapBookMainCommandMoveUp": {
+    "message": "上移"
+  },
+  "ScrapBookMainCommandOpen": {
+    "message": "開啟"
+  },
+  "ScrapBookMainCommandOpenTab": {
+    "message": "開啟於新分頁"
+  },
+  "ScrapBookMainCommandRecycle": {
+    "message": "移除"
+  },
+  "ScrapBookMainCommandSearch": {
+    "message": "搜尋"
+  },
+  "ScrapBookMainCommandSource": {
+    "message": "開啟原始網址"
+  },
+  "ScrapBookMainCommandUpload": {
+    "message": "上傳檔案"
+  },
+  "ScrapBookMainCommandViewRecycle": {
+    "message": "檢視回收筒"
+  },
+  "ScrapBookMainErrorBookNotExist": {
+    "message": "剪貼簿 $NAME$ 不存在，重設為預設剪貼簿",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorInitTree": {
+    "message": "無法初始化目錄樹: $REASON$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorLoadBooks": {
+    "message": "無法載入剪貼簿: $REASON$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorServerInit": {
+    "message": "後端伺服器初始化錯誤: $REASON$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorServerNotConfigured": {
+    "message": "未設定後端伺服器。"
+  },
+  "ScrapBookMainErrorServerTreeChanged": {
+    "message": "伺服器的目錄樹資料已變更，請重新整理此頁面再嘗試。"
+  },
+  "ScrapBookMainNewFolderName": {
+    "description": "Default name of a new folder",
+    "message": "新資料夾"
+  },
+  "ScrapBookMainNewNoteName": {
+    "description": "Default name of a new note",
+    "message": "新筆記"
+  },
   "ViewerDesc": {
     "message": "選擇 HTZ 或 MAFF 封存檔以開啟之。你可以拖放它們至此視窗，或使用以下按鈕："
   },
@@ -487,171 +678,12 @@
   "WarnCaptureCircular": {
     "message": "資源 '$SOURCE$' 循環參照至 '$TARGET$'，由於目前的擷取設定不支援循環參照，參照目標將轉向至空值。",
     "placeholders": {
-      "source": {"content": "$1"},
-      "target": {"content": "$2"}
+      "source": {
+        "content": "$1"
+      },
+      "target": {
+        "content": "$2"
+      }
     }
-  },
-
-  "OK": {
-    "message": "確定"
-  },
-  "Cancel": {
-    "message": "取消"
-  },
-
-  "ScrapBookMainNewFolderName": {
-    "description": "Default name of a new folder",
-    "message": "新資料夾"
-  },
-  "ScrapBookMainNewNoteName": {
-    "description": "Default name of a new note",
-    "message": "新筆記"
-  },
-  "ScrapBookMainBookRefresh": {
-    "message": "<重新整理>"
-  },
-  "ScrapBookMainCommandIndex": {
-    "message": "檢視主頁"
-  },
-  "ScrapBookMainCommandSearch": {
-    "message": "搜尋"
-  },
-  "ScrapBookMainCommandOpen": {
-    "message": "開啟"
-  },
-  "ScrapBookMainCommandOpenTab": {
-    "message": "開啟於新分頁"
-  },
-  "ScrapBookMainCommandExec": {
-    "message": "用預設程式開啟"
-  },
-  "ScrapBookMainCommandExecBook": {
-    "message": "在檔案管理員檢視主目錄"
-  },
-  "ScrapBookMainCommandBrowse": {
-    "message": "在檔案管理員檢視"
-  },
-  "ScrapBookMainCommandSource": {
-    "message": "開啟原始網址"
-  },
-  "ScrapBookMainCommandManage": {
-    "message": "管理"
-  },
-  "ScrapBookMainCommandMeta": {
-    "message": "元資料"
-  },
-  "ScrapBookMainCommandCreatefolder": {
-    "message": "新增資料夾"
-  },
-  "ScrapBookMainCommandCreateSeparator": {
-    "message": "新增分隔線"
-  },
-  "ScrapBookMainCommandCreateNote": {
-    "message": "新增筆記"
-  },
-  "ScrapBookMainCommandEdit": {
-    "message": "編輯"
-  },
-  "ScrapBookMainCommandEditx": {
-    "message": "編輯頁面"
-  },
-  "ScrapBookMainCommandUpload": {
-    "message": "上傳檔案"
-  },
-  "ScrapBookMainCommandMoveUp": {
-    "message": "上移"
-  },
-  "ScrapBookMainCommandMoveDown": {
-    "message": "下移"
-  },
-  "ScrapBookMainCommandMoveTo": {
-    "message": "移動至"
-  },
-  "ScrapBookMainCommandRecycle": {
-    "message": "移除"
-  },
-  "ScrapBookMainCommandDelete": {
-    "message": "刪除"
-  },
-  "ScrapBookMainCommandViewRecycle": {
-    "message": "檢視回收筒"
-  },
-  "ScrapBookMainCommandMetaDialogId": {
-    "message": "ID:"
-  },
-  "ScrapBookMainCommandMetaDialogTitle": {
-    "message": "標題:"
-  },
-  "ScrapBookMainCommandMetaDialogIndex": {
-    "message": "索引檔:"
-  },
-  "ScrapBookMainCommandMetaDialogSource": {
-    "message": "來源:"
-  },
-  "ScrapBookMainCommandMetaDialogIcon": {
-    "message": "圖示:"
-  },
-  "ScrapBookMainCommandMetaDialogType": {
-    "message": "類型:"
-  },
-  "ScrapBookMainCommandMetaDialogCharset": {
-    "message": "字集:"
-  },
-  "ScrapBookMainCommandMetaDialogCreate": {
-    "message": "建立時間:"
-  },
-  "ScrapBookMainCommandMetaDialogModify": {
-    "message": "修改時間:"
-  },
-  "ScrapBookMainCommandMetaDialogComment": {
-    "message": "註解:"
-  },
-  "ScrapBookMainCommandCreateNoteDialogTitle": {
-    "message": "新筆記的格式:"
-  },
-  "ScrapBookMainCommandMoveDialogTitle": {
-    "message": "移動到這個 ID 的項目下:"
-  },
-  "ScrapBookMainCommandMoveDialogIndex": {
-    "message": "位置 (從 0 開始，空白則移至最後):"
-  },
-  "ScrapBookMainCommandMoveDialogMode": {
-    "message": "模式:"
-  },
-  "ScrapBookMainCommandMoveDialogModeMove": {
-    "message": "移動"
-  },
-  "ScrapBookMainCommandMoveDialogModeLink": {
-    "message": "連結"
-  },
-  "ScrapBookMainErrorServerNotConfigured": {
-    "message": "未設定後端伺服器。"
-  },
-  "ScrapBookMainErrorServerInit": {
-    "message": "後端伺服器初始化錯誤: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorBookNotExist": {
-    "message": "剪貼簿 $NAME$ 不存在，重設為預設剪貼簿",
-    "placeholders": {
-      "name": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorLoadBooks": {
-    "message": "無法載入剪貼簿: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorInitTree": {
-    "message": "無法初始化目錄樹: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorServerTreeChanged": {
-    "message": "伺服器的目錄樹資料已變更，請重新整理此頁面再嘗試。"
   }
 }

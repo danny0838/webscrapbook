@@ -1,4 +1,7 @@
 {
+  "Cancel": {
+    "message": "取消"
+  },
   "CaptureAllTabs": {
     "message": "获取所有分页"
   },
@@ -56,21 +59,31 @@
   "ErrorContentScriptExecute": {
     "message": "无法执行内容处理脚本 ($SOURCE$): $REASON$",
     "placeholders": {
-      "source": {"content": "$1"},
-      "reason": {"content": "$2"}
+      "source": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
+      }
     }
   },
   "ErrorFileDownloadError": {
     "message": "下载文件错误 ($URL$): $REASON$",
     "placeholders": {
-      "url": {"content": "$1"},
-      "reason": {"content": "$2"}
+      "url": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
+      }
     }
   },
   "ErrorImportOptions": {
     "message": "导入选项失败: $REASON$",
     "placeholders": {
-      "reason": {"content": "$1"}
+      "reason": {
+        "content": "$1"
+      }
     }
   },
   "ErrorTabDiscarded": {
@@ -114,7 +127,9 @@
   "IndexerTreeSearchTitle": {
     "message": "$BOOK$ :: 搜索",
     "placeholders": {
-      "book": {"content": "$1"}
+      "book": {
+        "content": "$1"
+      }
     }
   },
   "IndexerTreeSearchViewInMap": {
@@ -125,6 +140,9 @@
   },
   "IndexerTreeToggleAll": {
     "message": "全部展开或收合"
+  },
+  "OK": {
+    "message": "确定"
   },
   "OpenIndexer": {
     "message": "创建网站索引"
@@ -174,36 +192,42 @@
   "OptionCaptureCommonLinkLabel": {
     "message": "链接"
   },
-  "OptionCaptureCommonSaveLabel": {
-    "message": "保存"
+  "OptionCaptureCommonRemoveLabel": {
+    "message": "移除"
   },
   "OptionCaptureCommonSaveCurrentLabel": {
     "message": "保存现用"
   },
+  "OptionCaptureCommonSaveLabel": {
+    "message": "保存"
+  },
   "OptionCaptureCommonSaveUsedLabel": {
     "message": "保存使用"
-  },
-  "OptionCaptureCommonRemoveLabel": {
-    "message": "移除"
-  },
-  "OptionCaptureDownLinkFilterErrorLine": {
-    "message": "第 $LINE$ 行：$ERROR$",
-    "placeholders": {
-      "line": {"content": "$1"},
-      "error": {"content": "$2"}
-    }
-  },
-  "OptionCaptureDownLinkExtFilterError": {
-    "message": "以下扩展名过滤器的正则表达式语法有误，执行时会忽略它们，要停下来修正吗？\n\n$LINES$",
-    "placeholders": {
-      "lines": {"content": "$1"}
-    }
   },
   "OptionCaptureDownLinkExtFilterDesc": {
     "message": "此过滤器根据扩展名筛选要下载的链接。\n\n* 以下每行为一个以 \",\" 分隔的扩展名列表（不分大小写，可含空白，如 jpg, jpeg）或一个正则表达式（如 /jpe?g/i）。取全扩展名比对，例如 ~.doc 不视为符合規则 docx。\n\n* 符合任何一行的規则即列入下载。\n\n* 以 \"#\" 开头的行皆视为注解，执行时会略过。"
   },
+  "OptionCaptureDownLinkExtFilterError": {
+    "message": "以下扩展名过滤器的正则表达式语法有误，执行时会忽略它们，要停下来修正吗？\n\n$LINES$",
+    "placeholders": {
+      "lines": {
+        "content": "$1"
+      }
+    }
+  },
   "OptionCaptureDownLinkExtFilterTitle": {
     "message": "扩展名过滤器"
+  },
+  "OptionCaptureDownLinkFilterErrorLine": {
+    "message": "第 $LINE$ 行：$ERROR$",
+    "placeholders": {
+      "line": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
   },
   "OptionCaptureDownLinkModeHeaderLabel": {
     "message": "匹配 HTTP 标头及网址扩展名"
@@ -223,7 +247,9 @@
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "以下网址过滤器的正则表达式语法有误，执行时会忽略它们，要停下来修正吗？\n\n$LINES$",
     "placeholders": {
-      "lines": {"content": "$1"}
+      "lines": {
+        "content": "$1"
+      }
     }
   },
   "OptionCaptureDownLinkUrlFilterTitle": {
@@ -247,11 +273,11 @@
   "OptionCaptureFontTooltip": {
     "message": "此选项决定字体的处理方式。\n\n* 保存：将所有字体保存至本地。\n\n* 保存使用：只将获取区域的网页元素使用的字体保存至本地。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有字体。\n\n* 链接：将字体连往原始位址。注意这会导致浏览获取页面时触发网路传输。注意：跨网域载入字体受同源政策限制，若字体来自未设定跨来源资源共享（CORS）的伺服器，获取的页面将无法载入。\n\n* 清空：将字体从样式表中清除。"
   },
-  "OptionCaptureFormStatusLabel": {
-    "message": "表单状态:"
-  },
   "OptionCaptureFormStatusKeepLabel": {
     "message": "保留"
+  },
+  "OptionCaptureFormStatusLabel": {
+    "message": "表单状态:"
   },
   "OptionCaptureFormStatusResetLabel": {
     "message": "重置"
@@ -280,12 +306,6 @@
   "OptionCaptureObjectTooltip": {
     "message": "此选项决定 OBJECT 元素的处理方式。OBJECT 元素多用于嵌入外挂程式，也可嵌入图片、多媒体、或框架页。注意：外挂程式脱离原服务器环境可能无法正常运作，且可能造成安全风险。\n\n* 保存：将 OBJECT 元素参照的文件保存至本地。\n\n* 链接：将 OBJECT 元素连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将 OBJECT 元素无效化。\n\n* 移除：将 OBJECT 元素移除。注意这可能会影响网页排版。"
   },
-  "OptionCaptureRecordRewrittenAttrLabel": {
-    "message": "记录改写的属性"
-  },
-  "OptionCaptureRecordRewrittenAttrTooltip": {
-    "message": "获取网页时若有改写元素的属性，则建立对应的 data-* 属性记录原始值。"
-  },
   "OptionCaptureRecordErrorUriLabel": {
     "message": "记录错误的 URL"
   },
@@ -297,6 +317,12 @@
   },
   "OptionCaptureRecordRemovedNodeTooltip": {
     "message": "获取网页时若有移除元素，则在原位置建立 HTML 注解记录原始内容。"
+  },
+  "OptionCaptureRecordRewrittenAttrLabel": {
+    "message": "记录改写的属性"
+  },
+  "OptionCaptureRecordRewrittenAttrTooltip": {
+    "message": "获取网页时若有改写元素的属性，则建立对应的 data-* 属性记录原始值。"
   },
   "OptionCaptureRecordSourceUriLabel": {
     "message": "记录原始的 URL"
@@ -313,20 +339,11 @@
   "OptionCaptureRewriteUrlLabel": {
     "message": "改写 URL"
   },
-  "OptionCaptureSaveAsciiFilenameLabel": {
-    "message": "保存为 ASCII 文件名"
-  },
-  "OptionCaptureSaveAsciiFilenameTooltip": {
-    "message": "文件名中所有非 ASCII 字元会以编码形式保存。"
-  },
   "OptionCaptureSaveAsFolderLabel": {
     "message": "文件夹"
   },
   "OptionCaptureSaveAsLabel": {
     "message": "保存获取数据为:"
-  },
-  "OptionCaptureSaveAsTooltip": {
-    "message": "指定保存网页及参照文件的格式。\n\n* 文件夹：建立一个文件夹并将网页及资源文件存入其中。Chromium 系浏览器注意： 保存获取数据至剪贴簿文件夹时，建议浏览器设定不勾选“下载前询问每个文件的保存位置”，以免获取时跳出大量窗口；特定格式的文件（如 .js）会被浏览器封锁，须逐个选择“保留”才能下载。\n\n* HTZ 及 MAFF 封存文件：用 ZIP 算法将网页及资源文件打包，可用“检视封存网页”功能检视，或用支持 ZIP 的工具解压缩后检视。\n\n* 单一 HTML 文件：保存为一个 HTML 文件，资源文件以 data URL 嵌入，大部分浏览器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL  效能不佳且无法去重，网页重覆使用多媒体文件时，下载的文件可能会大幅膨胀。\n\n* 脚本化单一 HTML 文件：保存为一个 HTML 文件，资源文件保存于脚本并于开启时载入，相较于 data URL 可提升效能及缩小容量，但须使用较新且启用 JavaScript 的浏览器开启，例如 Chromium ≥ 20、Firefox ≥ 13、Edge > 0、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。"
   },
   "OptionCaptureSaveAsMaffLabel": {
     "message": "MAFF 封存文件"
@@ -337,8 +354,17 @@
   "OptionCaptureSaveAsSingleHtmlLabel": {
     "message": "单一 HTML 文件"
   },
+  "OptionCaptureSaveAsTooltip": {
+    "message": "指定保存网页及参照文件的格式。\n\n* 文件夹：建立一个文件夹并将网页及资源文件存入其中。Chromium 系浏览器注意： 保存获取数据至剪贴簿文件夹时，建议浏览器设定不勾选“下载前询问每个文件的保存位置”，以免获取时跳出大量窗口；特定格式的文件（如 .js）会被浏览器封锁，须逐个选择“保留”才能下载。\n\n* HTZ 及 MAFF 封存文件：用 ZIP 算法将网页及资源文件打包，可用“检视封存网页”功能检视，或用支持 ZIP 的工具解压缩后检视。\n\n* 单一 HTML 文件：保存为一个 HTML 文件，资源文件以 data URL 嵌入，大部分浏览器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL  效能不佳且无法去重，网页重覆使用多媒体文件时，下载的文件可能会大幅膨胀。\n\n* 脚本化单一 HTML 文件：保存为一个 HTML 文件，资源文件保存于脚本并于开启时载入，相较于 data URL 可提升效能及缩小容量，但须使用较新且启用 JavaScript 的浏览器开启，例如 Chromium ≥ 20、Firefox ≥ 13、Edge > 0、Safari ≥ 6、Opera ≥ 12.1、IE ≥ 10。"
+  },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ 封存文件"
+  },
+  "OptionCaptureSaveAsciiFilenameLabel": {
+    "message": "保存为 ASCII 文件名"
+  },
+  "OptionCaptureSaveAsciiFilenameTooltip": {
+    "message": "文件名中所有非 ASCII 字元会以编码形式保存。"
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
     "message": "将 data URL 保存为文件"
@@ -436,26 +462,13 @@
   "OptionServerUrlTooltip": {
     "message": "后端服务器程序的根目录，例如“http://localhost:8080/”或“https://example.com/wsb/”。\n\n* 后端服务器可用 PyWebScrapBook 套件（相容版本：$BACKEND_VERSION$）架设，安装细节参见 https://pypi.org/project/webscrapbook/。",
     "placeholders": {
-      "backend_version": {"content": "$1"}
+      "backend_version": {
+        "content": "$1"
+      }
     }
   },
   "OptionServerUserLabel": {
     "message": "用户:"
-  },
-  "OptionsExportLabel": {
-    "message": "导出"
-  },
-  "OptionsImportLabel": {
-    "message": "导入"
-  },
-  "OptionsImportSuccess": {
-    "message": "导入选项成功"
-  },
-  "OptionsSaveLabel": {
-    "message": "保存"
-  },
-  "OptionsResetLabel": {
-    "message": "重设"
   },
   "OptionViewerUseFileSystemApiLabel": {
     "message": "使用 Filesystem API"
@@ -475,6 +488,184 @@
   "OptionViewerViewMaffTooltip": {
     "message": "浏览器载入 MAFF 文件时，自动以检视器检视。在支持的浏览器勾选“允许訪問文件网址”即可用浏览器直接开启此类文件。"
   },
+  "OptionsExportLabel": {
+    "message": "导出"
+  },
+  "OptionsImportLabel": {
+    "message": "导入"
+  },
+  "OptionsImportSuccess": {
+    "message": "导入选项成功"
+  },
+  "OptionsResetLabel": {
+    "message": "重设"
+  },
+  "OptionsSaveLabel": {
+    "message": "保存"
+  },
+  "ScrapBookMainBookRefresh": {
+    "message": "<刷新>"
+  },
+  "ScrapBookMainCommandBrowse": {
+    "message": "在文件管理员检视"
+  },
+  "ScrapBookMainCommandCreateNote": {
+    "message": "添加笔记"
+  },
+  "ScrapBookMainCommandCreateNoteDialogTitle": {
+    "message": "新笔记的格式:"
+  },
+  "ScrapBookMainCommandCreateSeparator": {
+    "message": "添加分隔线"
+  },
+  "ScrapBookMainCommandCreatefolder": {
+    "message": "添加文件夹"
+  },
+  "ScrapBookMainCommandDelete": {
+    "message": "删除"
+  },
+  "ScrapBookMainCommandEdit": {
+    "message": "编辑"
+  },
+  "ScrapBookMainCommandEditx": {
+    "message": "编辑页面"
+  },
+  "ScrapBookMainCommandExec": {
+    "message": "用默认程序开启"
+  },
+  "ScrapBookMainCommandExecBook": {
+    "message": "在文件管理员检视主目录"
+  },
+  "ScrapBookMainCommandIndex": {
+    "message": "检视主页"
+  },
+  "ScrapBookMainCommandManage": {
+    "message": "管理"
+  },
+  "ScrapBookMainCommandMeta": {
+    "message": "元数据"
+  },
+  "ScrapBookMainCommandMetaDialogCharset": {
+    "message": "字符集:"
+  },
+  "ScrapBookMainCommandMetaDialogComment": {
+    "message": "注解:"
+  },
+  "ScrapBookMainCommandMetaDialogCreate": {
+    "message": "建立时间:"
+  },
+  "ScrapBookMainCommandMetaDialogIcon": {
+    "message": "图示:"
+  },
+  "ScrapBookMainCommandMetaDialogId": {
+    "message": "ID:"
+  },
+  "ScrapBookMainCommandMetaDialogIndex": {
+    "message": "索引文件:"
+  },
+  "ScrapBookMainCommandMetaDialogModify": {
+    "message": "修改时间:"
+  },
+  "ScrapBookMainCommandMetaDialogSource": {
+    "message": "来源:"
+  },
+  "ScrapBookMainCommandMetaDialogTitle": {
+    "message": "标题:"
+  },
+  "ScrapBookMainCommandMetaDialogType": {
+    "message": "类型:"
+  },
+  "ScrapBookMainCommandMoveDialogIndex": {
+    "message": "位置 (从 0 开始，空白则移至最后):"
+  },
+  "ScrapBookMainCommandMoveDialogMode": {
+    "message": "模式:"
+  },
+  "ScrapBookMainCommandMoveDialogModeLink": {
+    "message": "链接"
+  },
+  "ScrapBookMainCommandMoveDialogModeMove": {
+    "message": "移动"
+  },
+  "ScrapBookMainCommandMoveDialogTitle": {
+    "message": "移动到这个 ID 的项目下:"
+  },
+  "ScrapBookMainCommandMoveDown": {
+    "message": "下移"
+  },
+  "ScrapBookMainCommandMoveTo": {
+    "message": "移动至"
+  },
+  "ScrapBookMainCommandMoveUp": {
+    "message": "上移"
+  },
+  "ScrapBookMainCommandOpen": {
+    "message": "开启"
+  },
+  "ScrapBookMainCommandOpenTab": {
+    "message": "开启在新分页"
+  },
+  "ScrapBookMainCommandRecycle": {
+    "message": "移除"
+  },
+  "ScrapBookMainCommandSearch": {
+    "message": "搜索"
+  },
+  "ScrapBookMainCommandSource": {
+    "message": "开启原始网址"
+  },
+  "ScrapBookMainCommandUpload": {
+    "message": "上载文件"
+  },
+  "ScrapBookMainCommandViewRecycle": {
+    "message": "检视回收筒"
+  },
+  "ScrapBookMainErrorBookNotExist": {
+    "message": "剪贴簿 $NAME$ 不存在，重设为默认剪贴簿",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorInitTree": {
+    "message": "无法初始化目录树: $REASON$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorLoadBooks": {
+    "message": "无法载入剪贴簿: $REASON$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorServerInit": {
+    "message": "后端服务器初始化错误: $REASON$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "ScrapBookMainErrorServerNotConfigured": {
+    "message": "未设定后端服务器。"
+  },
+  "ScrapBookMainErrorServerTreeChanged": {
+    "message": "服务器的目录树数据已变更，请刷新此页面再嘗试。"
+  },
+  "ScrapBookMainNewFolderName": {
+    "description": "Default name of a new folder",
+    "message": "新文件夹"
+  },
+  "ScrapBookMainNewNoteName": {
+    "description": "Default name of a new note",
+    "message": "新笔记"
+  },
   "ViewerDesc": {
     "message": "选择 HTZ 或 MAFF 封存文件以开启之。你可以拖放它们至此窗口，或使用以下按钮："
   },
@@ -487,171 +678,12 @@
   "WarnCaptureCircular": {
     "message": "资源 '$SOURCE$' 循环参照至 '$TARGET$'，由于当前的获取设定不支持循环参照，参照目标将转向至空值。",
     "placeholders": {
-      "source": {"content": "$1"},
-      "target": {"content": "$2"}
+      "source": {
+        "content": "$1"
+      },
+      "target": {
+        "content": "$2"
+      }
     }
-  },
-
-  "OK": {
-    "message": "确定"
-  },
-  "Cancel": {
-    "message": "取消"
-  },
-
-  "ScrapBookMainNewFolderName": {
-    "description": "Default name of a new folder",
-    "message": "新文件夹"
-  },
-  "ScrapBookMainNewNoteName": {
-    "description": "Default name of a new note",
-    "message": "新笔记"
-  },
-  "ScrapBookMainBookRefresh": {
-    "message": "<刷新>"
-  },
-  "ScrapBookMainCommandIndex": {
-    "message": "检视主页"
-  },
-  "ScrapBookMainCommandSearch": {
-    "message": "搜索"
-  },
-  "ScrapBookMainCommandOpen": {
-    "message": "开启"
-  },
-  "ScrapBookMainCommandOpenTab": {
-    "message": "开启在新分页"
-  },
-  "ScrapBookMainCommandExec": {
-    "message": "用默认程序开启"
-  },
-  "ScrapBookMainCommandExecBook": {
-    "message": "在文件管理员检视主目录"
-  },
-  "ScrapBookMainCommandBrowse": {
-    "message": "在文件管理员检视"
-  },
-  "ScrapBookMainCommandSource": {
-    "message": "开启原始网址"
-  },
-  "ScrapBookMainCommandManage": {
-    "message": "管理"
-  },
-  "ScrapBookMainCommandMeta": {
-    "message": "元数据"
-  },
-  "ScrapBookMainCommandCreatefolder": {
-    "message": "添加文件夹"
-  },
-  "ScrapBookMainCommandCreateSeparator": {
-    "message": "添加分隔线"
-  },
-  "ScrapBookMainCommandCreateNote": {
-    "message": "添加笔记"
-  },
-  "ScrapBookMainCommandEdit": {
-    "message": "编辑"
-  },
-  "ScrapBookMainCommandEditx": {
-    "message": "编辑页面"
-  },
-  "ScrapBookMainCommandUpload": {
-    "message": "上载文件"
-  },
-  "ScrapBookMainCommandMoveUp": {
-    "message": "上移"
-  },
-  "ScrapBookMainCommandMoveDown": {
-    "message": "下移"
-  },
-  "ScrapBookMainCommandMoveTo": {
-    "message": "移动至"
-  },
-  "ScrapBookMainCommandRecycle": {
-    "message": "移除"
-  },
-  "ScrapBookMainCommandDelete": {
-    "message": "删除"
-  },
-  "ScrapBookMainCommandViewRecycle": {
-    "message": "检视回收筒"
-  },
-  "ScrapBookMainCommandMetaDialogId": {
-    "message": "ID:"
-  },
-  "ScrapBookMainCommandMetaDialogTitle": {
-    "message": "标题:"
-  },
-  "ScrapBookMainCommandMetaDialogIndex": {
-    "message": "索引文件:"
-  },
-  "ScrapBookMainCommandMetaDialogSource": {
-    "message": "来源:"
-  },
-  "ScrapBookMainCommandMetaDialogIcon": {
-    "message": "图示:"
-  },
-  "ScrapBookMainCommandMetaDialogType": {
-    "message": "类型:"
-  },
-  "ScrapBookMainCommandMetaDialogCharset": {
-    "message": "字符集:"
-  },
-  "ScrapBookMainCommandMetaDialogCreate": {
-    "message": "建立时间:"
-  },
-  "ScrapBookMainCommandMetaDialogModify": {
-    "message": "修改时间:"
-  },
-  "ScrapBookMainCommandMetaDialogComment": {
-    "message": "注解:"
-  },
-  "ScrapBookMainCommandCreateNoteDialogTitle": {
-    "message": "新笔记的格式:"
-  },
-  "ScrapBookMainCommandMoveDialogTitle": {
-    "message": "移动到这个 ID 的项目下:"
-  },
-  "ScrapBookMainCommandMoveDialogIndex": {
-    "message": "位置 (从 0 开始，空白则移至最后):"
-  },
-  "ScrapBookMainCommandMoveDialogMode": {
-    "message": "模式:"
-  },
-  "ScrapBookMainCommandMoveDialogModeMove": {
-    "message": "移动"
-  },
-  "ScrapBookMainCommandMoveDialogModeLink": {
-    "message": "链接"
-  },
-  "ScrapBookMainErrorServerNotConfigured": {
-    "message": "未设定后端服务器。"
-  },
-  "ScrapBookMainErrorServerInit": {
-    "message": "后端服务器初始化错误: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorBookNotExist": {
-    "message": "剪贴簿 $NAME$ 不存在，重设为默认剪贴簿",
-    "placeholders": {
-      "name": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorLoadBooks": {
-    "message": "无法载入剪贴簿: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorInitTree": {
-    "message": "无法初始化目录树: $REASON$",
-    "placeholders": {
-      "reason": {"content": "$1"}
-    }
-  },
-  "ScrapBookMainErrorServerTreeChanged": {
-    "message": "服务器的目录树数据已变更，请刷新此页面再嘗试。"
   }
 }
