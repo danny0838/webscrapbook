@@ -38,17 +38,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     return target;
   };
 
-  const generateActionButtonForTabs = async function (base, action) {
-    let selector = base.nextSibling;
-    if (selector && selector.nodeType === 1) {
+  const generateActionButtonForTabs = async function (baseElem, action) {
+    let selector = baseElem.nextSibling;
+    if (selector && selector.className === "selector") {
       while (selector.firstChild) { selector.firstChild.remove(); }
     } else {
       selector = document.createElement("div");
-      base.parentNode.insertBefore(selector, base.nextSibling);
+      selector.className = "selector";
+      baseElem.parentNode.insertBefore(selector, baseElem.nextSibling);
     }
     (await capturer.getContentTabs()).forEach((tab) => {
       const elem = document.createElement("button");
-      elem.classList.add("sub");
+      elem.className = "sub";
       elem.textContent = (tab.index + 1) + ": " + tab.title;
       elem.addEventListener('click', (event) => {
         event.preventDefault;
@@ -58,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       selector.appendChild(elem);
     });
+    return selector;
   };
 
   const visitLink = async function (url, newTab) {
@@ -102,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const target = await getHighlightedTabs();
       return await capturer.invokeCapture({target});
     } else {
-      const tab = await generateActionButtonForTabs(
+      await generateActionButtonForTabs(
         document.getElementById("captureTab"),
         async (tab) => {
           const target = tab.id;
@@ -117,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const target = await getHighlightedTabs();
       return await capturer.invokeCapture({target, mode});
     } else {
-      const tab = await generateActionButtonForTabs(
+      await generateActionButtonForTabs(
         document.getElementById("captureTabSource"),
         async (tab) => {
           const target = tab.id;
@@ -132,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const target = await getHighlightedTabs();
       return await capturer.invokeCapture({target, mode});
     } else {
-      const tab = await generateActionButtonForTabs(
+      await generateActionButtonForTabs(
         document.getElementById("captureTabBookmark"),
         async (tab) => {
           const target = tab.id;
