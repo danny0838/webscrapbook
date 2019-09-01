@@ -991,7 +991,7 @@ async function test_capture_dataUri() {
 
   assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === "data:text/css;base64,Ym9keXtmb250LXNpemU6MjBweDt9");
   assert(doc.querySelector('style').textContent.trim() === `@import url("data:text/css;base64,Ym9keXtmb250LXNpemU6MjBweDt9");
-@font-face { font-family: myFont; src: url("data:application/font-woff;base64,"); }
+@font-face { font-family: myFont; src: url("data:font/woff;base64,"); }
 p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
   assert(doc.querySelector('img').getAttribute('src') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
   assert(doc.querySelector('img[srcset]').getAttribute('srcset') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA 1x, data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA 2x");
@@ -1036,7 +1036,7 @@ p { background-image: url("ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp"); }`);
   var doc = await readFileAsDocument(blob);
   assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === "data:text/css;base64,Ym9keXtmb250LXNpemU6MjBweDt9");
   assert(doc.querySelector('style').textContent.trim() === `@import url("data:text/css;base64,Ym9keXtmb250LXNpemU6MjBweDt9");
-@font-face { font-family: myFont; src: url("data:application/font-woff;base64,"); }
+@font-face { font-family: myFont; src: url("data:font/woff;base64,"); }
 p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
   assert(doc.querySelector('img').getAttribute('src') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
   assert(doc.querySelector('img[srcset]').getAttribute('srcset') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA 1x, data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA 2x");
