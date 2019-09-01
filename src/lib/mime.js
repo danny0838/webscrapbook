@@ -41,6 +41,7 @@ const Mime = {
 /**
  * Map from mimetype to extension
  *
+ * Adopted from mime-db 1.32.0
  * ref: https://github.com/jshttp/mime-db
  */
 Mime.db = {
@@ -475,9 +476,6 @@ Mime.db = {
   },
   "application/hjson": {
     "extensions": ["hjson"]
-  },
-  "application/html+zip": {
-    "extensions": ["htz"]
   },
   "application/http": {
     "source": "iana"
@@ -4809,9 +4807,6 @@ Mime.db = {
     "source": "apache",
     "extensions": ["lzh","lha"]
   },
-  "application/x-maff": {
-    "extensions": ["maff"]
-  },
   "application/x-makeself": {
     "source": "nginx",
     "extensions": ["run"]
@@ -7096,6 +7091,18 @@ Mime.db = {
     "compressible": true
   }
 };
+
+/**
+ * Extended MIME types
+ */
+Object.assign(Mime.db, {
+  "application/html+zip": {
+    "extensions": ["htz"]
+  },
+  "application/x-maff": {
+    "extensions": ["maff"]
+  }
+});
 
 Mime.types = (() => {
   const table = {};
