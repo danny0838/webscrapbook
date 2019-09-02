@@ -5,7 +5,7 @@
  * @require {Object} scrapbook
  *****************************************************************************/
 
-(async function (window, undefined) {
+(async (window, document, browser) => {
 
 function redirectUrl(tabId, type, url, filename, mime) {
   if (mime === "application/html+zip" && scrapbook.getOption("viewer.viewHtz")) {
@@ -133,4 +133,4 @@ browser.webRequest.onHeadersReceived.addListener(function (details) {
   await scrapbook.cache.remove(Object.keys(items));
 }
 
-})(window, undefined);
+})(this, this.document, this.browser);

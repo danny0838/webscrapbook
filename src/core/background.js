@@ -16,7 +16,7 @@ if (!browser.browserAction) {
   // Open the browserAction page
   browser.browserAction.onClicked.addListener((tab) => {
     const url = browser.runtime.getURL("core/browserAction.html");
-    browser.tabs.create({url, active: true}, () => {});
+    browser.tabs.create({url, active: true});
   });
 }
 

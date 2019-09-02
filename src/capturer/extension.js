@@ -26,6 +26,7 @@ capturer.getContentTabs = async function () {
 /**
  * @param {string} target - a list of tabId and frameId
  * @param {string} url - a list of URL and title
+ * @param {string} mode
  * @return {Promise<(Window|Tab)>}
  */
 capturer.invokeCapture = async function (params) {

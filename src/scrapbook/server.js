@@ -4,6 +4,7 @@
  *
  * @require {Object} scrapbook
  * @public {Class} Server
+ * @public {Object} server
  *****************************************************************************/
 
 ((window, document, browser) => {

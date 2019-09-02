@@ -4,6 +4,7 @@
  *
  * @require {boolean} isDebug
  * @require {Object} scrapbook
+ * @require {Object} server
  * @require {Object} capturer
  * @override {boolean} capturer.isContentScript
  *****************************************************************************/

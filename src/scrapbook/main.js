@@ -3,6 +3,7 @@
  * Script for main.html
  *
  * @require {Object} scrapbook
+ * @require {Object} server
  *****************************************************************************/
 
 const scrapbookUi = {
