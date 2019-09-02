@@ -1453,88 +1453,92 @@ const scrapbookUi = {
     // acquire a lock
     await this.book.lockTree();
 
-    // validate if we can modify the tree
-    if (!await this.book.validateTree()) {
-      await this.book.unlockTree();
-      throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
-    }
-
-    for (const file of detail.files) {
-      try {
-        // create new item
-        const newItem = this.book.addItem({
-          item: {
-            "title": file.name,
-            "type": "file",
-          },
-          parentId: parentItemId,
-          index,
-        });
-        newItem.index = newItem.id + '/index.html';
-
-        let filename = file.name;
-        if (filename === 'index.html') { filename = 'index-1.html'; }
-        filename = scrapbook.validateFilename(filename, scrapbook.getOption("capture.saveAsciiFilename"));
-
-        // upload file
-        {
-          const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/' + filename);
-          const formData = new FormData();
-          formData.append('token', await server.acquireToken());
-          formData.append('upload', file);
-          await server.request({
-            url: target + '?a=save&f=json',
-            method: "POST",
-            body: formData,
-          });
-        }
-
-        // upload index.html
-        {
-          const title = newItem.title;
-          const url = scrapbook.escapeFilename(filename);
-          const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(url)}">
-${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
-<body>
-Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtml(filename, false)}</a>
-</body>
-</html>`;
-          const file = new File([html], 'index.html', {type: 'text/html'});
-          const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
-          const formData = new FormData();
-          formData.append('token', await server.acquireToken());
-          formData.append('upload', file);
-          await server.request({
-            url: target + '?a=save&f=json',
-            method: "POST",
-            body: formData,
-          });
-        }
-
-        // update DOM
-        Array.prototype.filter.call(
-          document.getElementById('items').querySelectorAll('[data-id]'),
-          x => x.getAttribute('data-id') === parentItemId
-        ).forEach((parentElem) => {
-          if (!(parentElem.parentNode)) { return; }
-          this.itemMakeContainer(parentElem);
-          if (!parentElem.container.hasAttribute('data-loaded')) { return; }
-          this.addItem(newItem.id, parentElem, index + 1);
-        });
-
-        index++;
-      } catch (ex) {
-        console.error(ex);
-        this.warn(`Unable to upload '${file.name}': ${ex.message}`);
+    try {
+      // validate if we can modify the tree
+      if (!await this.book.validateTree()) {
+        throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
       }
-    }
 
-    // save meta and TOC
-    await this.book.saveTreeFiles({meta: true, toc: true, useLock: false});
+      for (const file of detail.files) {
+        try {
+          // create new item
+          const newItem = this.book.addItem({
+            item: {
+              "title": file.name,
+              "type": "file",
+            },
+            parentId: parentItemId,
+            index,
+          });
+          newItem.index = newItem.id + '/index.html';
+
+          let filename = file.name;
+          if (filename === 'index.html') { filename = 'index-1.html'; }
+          filename = scrapbook.validateFilename(filename, scrapbook.getOption("capture.saveAsciiFilename"));
+
+          // upload file
+          {
+            const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/' + filename);
+            const formData = new FormData();
+            formData.append('token', await server.acquireToken());
+            formData.append('upload', file);
+            await server.request({
+              url: target + '?a=save&f=json',
+              method: "POST",
+              body: formData,
+            });
+          }
+
+          // upload index.html
+          {
+            const title = newItem.title;
+            const url = scrapbook.escapeFilename(filename);
+            const html = `<!DOCTYPE html>
+  <html>
+  <head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(url)}">
+  ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
+  <body>
+  Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtml(filename, false)}</a>
+  </body>
+  </html>`;
+            const file = new File([html], 'index.html', {type: 'text/html'});
+            const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
+            const formData = new FormData();
+            formData.append('token', await server.acquireToken());
+            formData.append('upload', file);
+            await server.request({
+              url: target + '?a=save&f=json',
+              method: "POST",
+              body: formData,
+            });
+          }
+
+          // update DOM
+          Array.prototype.filter.call(
+            document.getElementById('items').querySelectorAll('[data-id]'),
+            x => x.getAttribute('data-id') === parentItemId
+          ).forEach((parentElem) => {
+            if (!(parentElem.parentNode)) { return; }
+            this.itemMakeContainer(parentElem);
+            if (!parentElem.container.hasAttribute('data-loaded')) { return; }
+            this.addItem(newItem.id, parentElem, index + 1);
+          });
+
+          index++;
+        } catch (ex) {
+          console.error(ex);
+          this.warn(`Unable to upload '${file.name}': ${ex.message}`);
+        }
+      }
+
+      // save meta and TOC
+      await this.book.saveTreeFiles({meta: true, toc: true, useLock: false});
+    } catch (ex) {
+      await this.book.unlockTree();
+      throw ex;
+    }
 
     // release the lock
     await this.book.unlockTree();
@@ -1747,61 +1751,65 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     // acquire a lock
     await this.book.lockTree();
 
-    // validate if we can modify the tree
-    if (!await this.book.validateTree()) {
-      await this.book.unlockTree();
-      throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
-    }
+    try {
+      // validate if we can modify the tree
+      if (!await this.book.validateTree()) {
+        throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+      }
 
-    // Reverse the order to always move an item before its parent so that
-    // its parent is in the DOM and gets children updated correctly.
-    const itemElems = [...selectedItemElems].reverse();
+      // Reverse the order to always move an item before its parent so that
+      // its parent is in the DOM and gets children updated correctly.
+      const itemElems = [...selectedItemElems].reverse();
 
-    let hasRemovedItems = false;
-    for (const itemElem of itemElems) {
-      const itemId = itemElem.getAttribute('data-id');
+      let hasRemovedItems = false;
+      for (const itemElem of itemElems) {
+        const itemId = itemElem.getAttribute('data-id');
 
-      const parentItemElem = itemElem.parentNode.parentNode;
-      const parentItemId = parentItemElem.getAttribute('data-id');
-      const siblingItems = parentItemElem.container.children;
-      const index = Array.prototype.indexOf.call(siblingItems, itemElem);
+        const parentItemElem = itemElem.parentNode.parentNode;
+        const parentItemId = parentItemElem.getAttribute('data-id');
+        const siblingItems = parentItemElem.container.children;
+        const index = Array.prototype.indexOf.call(siblingItems, itemElem);
 
-      // the operated item element is missing due to an unexpected reason
-      if (index === -1) { continue; }
+        // the operated item element is missing due to an unexpected reason
+        if (index === -1) { continue; }
 
-      // remove this and descendant items from Book
-      const removedItems = this.book.removeItemTree({
-        id: itemId,
-        parentId: parentItemId,
-        index,
-      });
-      if (removedItems.size > 0) { hasRemovedItems = true; }
+        // remove this and descendant items from Book
+        const removedItems = this.book.removeItemTree({
+          id: itemId,
+          parentId: parentItemId,
+          index,
+        });
+        if (removedItems.size > 0) { hasRemovedItems = true; }
 
-      // update DOM
-      Array.prototype.filter.call(
-        document.getElementById('items').querySelectorAll('[data-id]'),
-        x => x.getAttribute('data-id') === parentItemId
-      ).forEach((parentElem) => {
-        if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
-        const itemElem = parentElem.container.children[index];
-        itemElem.remove();
-        this.itemReduceContainer(parentElem);
-      });
+        // update DOM
+        Array.prototype.filter.call(
+          document.getElementById('items').querySelectorAll('[data-id]'),
+          x => x.getAttribute('data-id') === parentItemId
+        ).forEach((parentElem) => {
+          if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
+          const itemElem = parentElem.container.children[index];
+          itemElem.remove();
+          this.itemReduceContainer(parentElem);
+        });
 
-      // remove data files
-      for (const removedItem of removedItems) {
-        if (!removedItem.index) { continue; }
-        try {
-          await removeDataFiles(removedItem.index);
-        } catch (ex) {
-          console.error(ex);
-          this.warn(`Unable to delete '${removedItem.index}': ${ex.message}`);
+        // remove data files
+        for (const removedItem of removedItems) {
+          if (!removedItem.index) { continue; }
+          try {
+            await removeDataFiles(removedItem.index);
+          } catch (ex) {
+            console.error(ex);
+            this.warn(`Unable to delete '${removedItem.index}': ${ex.message}`);
+          }
         }
       }
-    }
 
-    // upload changes to server
-    await this.book.saveTreeFiles({meta: hasRemovedItems, toc: true, useLock: false});
+      // upload changes to server
+      await this.book.saveTreeFiles({meta: hasRemovedItems, toc: true, useLock: false});
+    } catch (ex) {
+      await this.book.unlockTree();
+      throw ex;
+    }
 
     // release the lock
     await this.book.unlockTree();
