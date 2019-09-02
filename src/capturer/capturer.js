@@ -598,37 +598,13 @@ capturer.captureTab = async function (params) {
       throw new Error(scrapbook.lang("ErrorTabDiscarded"));
     }
 
-    // Simply run executeScript for allFrames by checking for nonexistence of
-    // the content script in the main frame has a potential leak causing only
-    // partial frames have the content script loaded. E.g. the user ran this
-    // when some subframes haven't been exist. As a result, we have to check
-    // existence of content script for every frame and inject on demand.
-    const tasks = [];
-    const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-    (await browser.webNavigation.getAllFrames({tabId})).forEach(({frameId, url}) => {
-      if (!scrapbook.isContentPage(url, allowFileAccess)) { return; }
-
-      // Send a test message to check whether content script is loaded.
-      // If no content script, we get an error saying connection cannot be established.
-      tasks[tasks.length] = capturer.invoke("isScriptLoaded", null, {tabId, frameId})
-        .catch(async (ex) => {
-          isDebug && console.debug("inject content scripts", tabId, frameId, url);
-          try {
-            await browser.tabs.executeScript(tabId, {frameId, file: "/lib/browser-polyfill.js", runAt: "document_start"});
-            await browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js", runAt: "document_start"});
-            await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js", runAt: "document_start"});
-            await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/content.js", runAt: "document_start"});
-          } catch (ex) {
-            // Chromium may fail to inject content script to some pages due to unclear reason.
-            // Record the error and pass.
-            console.error(ex);
-            const source = `[${tabId}:${frameId}] ${url}`;
-            const err = scrapbook.lang("ErrorContentScriptExecute", [source, ex.message]);
-            capturer.error(err);
-          }
-        });
+    (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
+      if (error) {
+        const source = `[${tabId}:${frameId}] ${url}`;
+        const err = scrapbook.lang("ErrorContentScriptExecute", [source, error]);
+        capturer.error(err);
+      }
     });
-    await Promise.all(tasks);
 
     const response = await capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
     isDebug && console.debug("(main) response", source, response);
@@ -2327,29 +2303,14 @@ capturer.saveToServer = async function (params) {
  * Events handling
  */
 
-/**
- * @param {Object} message
- *     - {string} message.id
- *     - {string} message.cmd
- *     - {Object} message.args
- */
-browser.runtime.onMessage.addListener((message, sender) => {
-  if (message.id !== capturer.missionId) {
-    return;
-  }
-
-  isDebug && console.debug(message.cmd, "receive", `[${sender.tab ? sender.tab.id : -1}]`, message.args);
-
-  if (message.cmd.slice(0, 9) == "capturer.") {
-    const fn = capturer[message.cmd.slice(9)];
-    if (fn) {
-      return fn(message.args).catch((ex) => {
-        console.error(ex);
-        const err = `Unexpected error: ${ex.message}`;
-        capturer.error(err);
-      });
-    }
-  }
+scrapbook.addMessageListener((message, sender) => {
+  if (!message.cmd.startsWith("capturer.")) { return false; }
+  if (message.id !== capturer.missionId) { return false; }
+  return true;
+}, (ex) => {
+  console.error(ex);
+  const err = `Unexpected error: ${ex.message}`;
+  capturer.error(err);
 });
 
 {
@@ -2359,23 +2320,23 @@ browser.runtime.onMessage.addListener((message, sender) => {
         return;
       }
       const onMessage = async (message) => {
-        isDebug && console.debug(message.cmd, "receive", port.sender, message.args);
+        const {cmd, args} = message;
+        const [mainCmd, subCmd] = cmd.split(".");
+        if (mainCmd !== "capturer") { return; }
+        isDebug && console.debug(cmd, "receive", port.sender, args);
 
-        if (message.cmd.slice(0, 9) == "capturer.") {
-          const fn = capturer[message.cmd.slice(9)];
-          if (fn) {
-            try {
-              const response = await fn(message.args);
-              port.postMessage({
-                cmd: 'capturerResponse',
-                args: response,
-              });
-            } catch (ex) {
-              console.error(ex);
-              const err = `Unexpected error: ${ex.message}`;
-              capturer.error(err);
-            }
-          }
+        if (!capturer[subCmd]) { return; }
+
+        try {
+          const response = await capturer[subCmd](args);
+          port.postMessage({
+            cmd: 'capturerResponse',
+            args: response,
+          });
+        } catch (ex) {
+          console.error(ex);
+          const err = `Unexpected error: ${ex.message}`;
+          capturer.error(err);
         }
       };
       port.onMessage.addListener(onMessage);

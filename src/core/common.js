@@ -462,6 +462,141 @@ scrapbook.loadLanguages = function (rootNode) {
 
 
 /******************************************************************************
+ * ScrapBook messaging
+ *****************************************************************************/
+
+/**
+ * Init content scripts in the specified tab.
+ *
+ * @param {integer} tabId - The tab's ID to init content script.
+ * @return {Promise<Object>}
+ */
+scrapbook.initContentScripts = async function (tabId) {
+  // Simply run executeScript for allFrames by checking for nonexistence of
+  // the content script in the main frame has a potential leak causing only
+  // partial frames have the content script loaded. E.g. the user ran this
+  // when some subframes haven't been exist. As a result, we have to check
+  // existence of content script for every frame and inject on demand.
+  const tasks = [];
+  const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
+  (await browser.webNavigation.getAllFrames({tabId})).forEach(({frameId, url}) => {
+    if (!scrapbook.isContentPage(url, allowFileAccess)) { return; }
+
+    // Send a test message to check whether content script is loaded.
+    // If no content script, we get an error saying connection cannot be established.
+    tasks.push(
+      browser.tabs.sendMessage(tabId, {cmd: "core.isScriptLoaded"}, {frameId})
+        .catch(async (ex) => {
+          isDebug && console.debug("inject content scripts", tabId, frameId, url);
+          try {
+            await browser.tabs.executeScript(tabId, {frameId, file: "/lib/browser-polyfill.js", runAt: "document_start"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js", runAt: "document_start"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/core/content.js", runAt: "document_start"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js", runAt: "document_start"});
+          } catch (ex) {
+            // Chromium may fail to inject content script to some pages due to unclear reason.
+            // Record the error and pass.
+            console.error(ex);
+            return ex.message;
+          }
+        })
+        .then((response) => {
+          const result = {
+            tabId,
+            frameId,
+            url,
+            injected: true,
+          };
+          if (response === true) {
+            result.injected = false;
+          } else if (typeof response === "string") {
+            result.injected = false;
+            result.error = response;
+          }
+          return result;
+        })
+    );
+  });
+  return await Promise.all(tasks);
+};
+
+/**
+ * Invoke an invokable command in the extension script.
+ *
+ * @param {Object} params
+ *     - {string} params.id
+ *     - {string} params.cmd
+ *     - {Object} params.args
+ * @return {Promise<Object>}
+ */
+scrapbook.invokeExtensionScript = async function (params) {
+  const {id, cmd, args} = params;
+
+  isDebug && console.debug(cmd, "send to extension page", args);
+  const response = await browser.runtime.sendMessage({id, cmd, args});
+  isDebug && console.debug(cmd, "response from extension page", response);
+  return response;
+};
+
+/**
+ * Invoke an invokable command in the content script.
+ *
+ * @param {Object} params
+ *     - {integer} params.tabId
+ *     - {integer} params.frameId
+ *     - {string} params.cmd
+ *     - {Object} params.args
+ * @return {Promise<Object>}
+ */
+scrapbook.invokeContentScript = async function (params) {
+  const {tabId, frameId, cmd, args} = params;
+
+  isDebug && console.debug(cmd, "send to content script", `[${tabId}:${frameId}]`, args);
+  const response = await browser.tabs.sendMessage(tabId, {cmd, args}, {frameId});
+  isDebug && console.debug(cmd, "response from content script", `[${tabId}:${frameId}]`, response);
+  return response;
+};
+
+/**
+ * Invoke an invokable command in a frame.
+ *
+ * @param {Object} params
+ *     - {integer} params.frameWindow
+ *     - {string} params.cmd
+ *     - {Object} params.args
+ * @return {Promise<Object>}
+ */
+scrapbook.invokeFrameScript = async function (params) {
+  const {frameWindow, cmd, args} = params;
+
+  const extension = browser.runtime.id;
+  const uid = scrapbook.dateToId();
+  return await new Promise((resolve, reject) => {
+    const channel = new MessageChannel();
+    const timeout = setTimeout(() => {
+      resolve(undefined);
+      delete channel;
+    }, 1000);
+
+    isDebug && console.debug(cmd, "send to frame", args);
+    frameWindow.postMessage({extension, uid, cmd, args}, "*", [channel.port2]);
+    channel.port1.onmessage = (event) => {
+      const message = event.data;
+      if (message.extension !== extension) { return; }
+      if (message.uid !== uid) { return; }
+      if (message.cmd === cmd + ".start") {
+        clearTimeout(timeout);
+      } else if (message.cmd === cmd + ".complete") {
+        isDebug && console.debug(cmd, "response from frame", message.response);
+        resolve(message.response);
+        delete channel;
+      }
+    };
+  });
+};
+
+
+/******************************************************************************
  * ScrapBook related path/file/string/etc handling
  *****************************************************************************/
 
@@ -565,21 +700,6 @@ scrapbook.idToDateOld = function (id) {
         );
   }
   return dd;
-};
-
-/**
- * @async
- * @return {Promise<Array>} The match pattern for content pages.
- */
-scrapbook.getContentPagePattern = async function () {
-  const p = (async () => {
-    const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-    const urlMatch = ["http://*/*", "https://*/*"];
-    if (allowFileAccess) { urlMatch.push("file:///*"); }
-    return urlMatch;
-  })();
-  scrapbook.getContentPagePattern = () => p;
-  return p;
 };
 
 /**

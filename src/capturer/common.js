@@ -46,41 +46,14 @@ capturer.invoke = async function (method, args, details = {}) {
     // to content script (or content script call self)
     if (!capturer.isContentScript) {
       const cmd = "capturer." + method;
-      const message = {cmd, args};
-
-      isDebug && console.debug(cmd, "send to content script", `[${tabId}:${frameId}]`, args);
-      const response = await browser.tabs.sendMessage(tabId, message, {frameId});
-      isDebug && console.debug(cmd, "response from content script", `[${tabId}:${frameId}]`, response);
-      return response;
+      return await scrapbook.invokeContentScript({tabId, frameId, cmd, args});
     } else {
       return await capturer[method](args);
     }
   } else if (frameWindow) {
     // to frame
-    return await new Promise((resolve, reject) => {
-      const cmd = "capturer." + method;
-      const uid = scrapbook.dateToId();
-      const channel = new MessageChannel();
-      const timeout = setTimeout(() => {
-        resolve(undefined);
-        delete channel;
-      }, 1000);
-
-      isDebug && console.debug(cmd, "send to frame", args);
-      frameWindow.postMessage({extension: browser.runtime.id, uid, cmd, args}, "*", [channel.port2]);
-      channel.port1.onmessage = (event) => {
-        const message = event.data;
-        if (message.extension !== browser.runtime.id) { return; }
-        if (message.uid !== uid) { return; }
-        if (message.cmd === cmd + ".start") {
-          clearTimeout(timeout);
-        } else if (message.cmd === cmd + ".complete") {
-          isDebug && console.debug(cmd, "response from frame", message.response);
-          resolve(message.response);
-          delete channel;
-        }
-      };
-    });
+    const cmd = "capturer." + method;
+    return await scrapbook.invokeFrameScript({frameWindow, cmd, args});
   } else {
     // to capturer.html page (or capturer.html call self)
     if (capturer.isContentScript) {
@@ -92,25 +65,11 @@ capturer.invoke = async function (method, args, details = {}) {
         throw new Error(`missionId is required to invoke from a content script.`);
       }
       const cmd = "capturer." + method;
-      const message = {id, cmd, args};
-
-      isDebug && console.debug(cmd, "send to capturer page", args);
-      const response = await browser.runtime.sendMessage(message);
-      isDebug && console.debug(cmd, "response from capturer page", response);
-      return response;
+      return await scrapbook.invokeExtensionScript({id, cmd, args});
     } else {
       return await capturer[method](args);
     }
   }
-};
-
-/**
- * Return true to confirm that content script is loaded.
- *
- * @kind invokable
- */
-capturer.isScriptLoaded = async function (params) {
-  return true;
 };
 
 /**

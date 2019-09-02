@@ -38,6 +38,7 @@
       "lib/browser-polyfill.js",
       "core/common.js",
       "core/optionsAuto.js",
+      "core/extension.js",
       "core/background.js",
       "capturer/background.js",
       "capturer/extension.js",
