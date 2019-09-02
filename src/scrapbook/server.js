@@ -223,7 +223,7 @@ class Book {
     this.name = server.config.book[bookId].name;
     this.server = server;
     this.config = server.config.book[bookId];
-    this.treeLastModified = 0;
+    this.treeLastModified = Infinity;
     this.specialItems = new Set(['root', 'hidden', 'recycle']);
 
     if (!this.config) {
@@ -307,7 +307,7 @@ class Book {
       }
     }
 
-    let treeLastModified = Math.max(this.treeLastModified, new Date(response.headers.get('Last-Modified')));
+    let treeLastModified = new Date(response.headers.get('Last-Modified')).valueOf();
     let treeFiles = data.reduce((data, item) => {
       treeLastModified = Math.max(treeLastModified, parseInt(item.last_modified) * 1000);
       data.set(item.name, item);
