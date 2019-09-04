@@ -56,6 +56,12 @@
   "CapturerTitle": {
     "message": "擷取頁面"
   },
+  "EditConfirmScriptedDocument": {
+    "message": "此頁面含有腳本，實際內容可能已變更，重新儲存可能造成不可逆的資訊遺失。要繼續編輯嗎？"
+  },
+  "EditTab": {
+    "message": "編輯分頁"
+  },
   "ErrorContentScriptExecute": {
     "message": "無法執行內容處理腳本 ($SOURCE$): $REASON$",
     "placeholders": {
@@ -83,6 +89,53 @@
     "placeholders": {
       "reason": {
         "content": "$1"
+      }
+    }
+  },
+  "ErrorLocateNotFound": {
+    "message": "找不到本頁面所屬的剪貼簿項目。"
+  },
+  "ErrorLocateSidebarNotOpened": {
+    "message": "剪貼簿尚未開啟，無法執行定位。"
+  },
+  "ErrorSaveBookNoTree": {
+    "message": "剪貼簿停用了資料樹功能。"
+  },
+  "ErrorSaveNonHtml": {
+    "message": "無法儲存非 HTML 檔案 ($URL$)。",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSaveNonUTF8": {
+    "message": "無法儲存非 UTF-8 編碼的檔案 ($URL$)。",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSaveNotUnderDataDir": {
+    "message": "無法儲存非資料目錄下的檔案 ($URL$)。",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSaveUnknownItem": {
+    "message": "找不到此頁面的所屬項目。"
+  },
+  "ErrorSaveUploadFailure": {
+    "message": "無法上傳至後端伺服器 ($SOURCE$): $REASON$",
+    "placeholders": {
+      "source": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
       }
     }
   },

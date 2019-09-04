@@ -41,6 +41,7 @@
       "core/extension.js",
       "core/background.js",
       "capturer/background.js",
+      "editor/background.js",
       "viewer/background.js"
     ]
   },
@@ -91,6 +92,12 @@
     },
     "captureTabBookmark": {
       "description": "__MSG_CaptureTabBookmark__"
+    },
+    "editTab": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+E"
+      },
+      "description": "__MSG_EditTab__"
     }
   }
 }

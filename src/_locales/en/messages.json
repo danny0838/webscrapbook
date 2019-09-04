@@ -56,6 +56,18 @@
   "CapturerTitle": {
     "message": "Capture page"
   },
+  "ErrorLocateSidebarNotOpened": {
+    "message": "Unable to locate as no scrapbook is opened."
+  },
+  "ErrorLocateNotFound": {
+    "message": "Unable to find a matching scrapbook item of this page."
+  },
+  "EditConfirmScriptedDocument": {
+    "message": "This page is scripted, its content may have been changed and save it again may cause irreversible data loss. Continue to edit?"
+  },
+  "EditTab": {
+    "message": "Edit tab"
+  },
   "ErrorContentScriptExecute": {
     "message": "Unable to execute content script ($SOURCE$): $REASON$",
     "placeholders": {
@@ -83,6 +95,47 @@
     "placeholders": {
       "reason": {
         "content": "$1"
+      }
+    }
+  },
+  "ErrorSaveBookNoTree": {
+    "message": "The scrapbook disabled tree feature."
+  },
+  "ErrorSaveNonHtml": {
+    "message": "Unable to save a non-HTML file ($URL$).",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSaveNonUTF8": {
+    "message": "Unable to save a file with non-UTF-8 encoding ($URL$).",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSaveNotUnderDataDir": {
+    "message": "Unable to save a file beyond data directory ($URL$).",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSaveUnknownItem": {
+    "message": "Unable to find item of this page."
+  },
+  "ErrorSaveUploadFailure": {
+    "message": "Unable to upload to backend server ($SOURCE$): $REASON$",
+    "placeholders": {
+      "source": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
       }
     }
   },

@@ -493,6 +493,7 @@ scrapbook.initContentScripts = async function (tabId) {
             await browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/core/content.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js", runAt: "document_start"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/editor/content.js", runAt: "document_start"});
           } catch (ex) {
             // Chromium may fail to inject content script to some pages due to unclear reason.
             // Record the error and pass.
@@ -1666,6 +1667,25 @@ scrapbook.rewriteSrcset = function (srcset, rewriter) {
   };
   scrapbook.rewriteSrcset = rewriteSrcset;
   return rewriteSrcset(srcset, rewriter);
+};
+
+/**
+ * Get all accessible descendant frames.
+ */
+scrapbook.flattenFrames = function (doc) {
+  let result = [doc];
+  for (const frameElem of doc.querySelectorAll('frame[src], iframe[src]')) {
+    let doc;
+    try {
+      doc = frameElem.contentDocument;
+      if (!doc) { throw new Error('contentDocument is null'); }
+    } catch (ex) {
+      // failed to get frame document, prabably cross-origin
+      continue;
+    }
+    result = result.concat(scrapbook.flattenFrames(doc));
+  }
+  return result;
 };
 
 scrapbook.parseMaffRdfDocument = function (doc) {

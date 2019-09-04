@@ -810,6 +810,53 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
     _addDecendingItems(id);
     return set;
   }
+
+  async findItemFromUrl(url) {
+    await this.loadTreeFiles();
+    await this.loadMeta();
+
+    const u = scrapbook.splitUrl(url)[0];
+    for (const [id, item] of Object.entries(this.meta)) {
+      if (!item.index) { continue; }
+      const indexUrl = new URL(this.dataUrl + scrapbook.escapeFilename(item.index).replace(/\/index.[^.]+$/, '/')).href;
+
+      if (indexUrl.endsWith('/')) {
+        if (u.startsWith(indexUrl)) {
+          return item;
+        }
+      } else {
+        if (u === indexUrl) {
+          return item;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  findItemPaths(id, rootId) {
+    const tracePath = (path) => {
+      const parent = this.toc[path[path.length - 1].id];
+      if (!parent) { return; }
+
+      for (let i = 0, I = parent.length; i < I; ++i) {
+        const child = parent[i];
+        if (path.some(x => x.id === child)) { continue; }
+
+        path.push({id: child, pos: i});
+        if (child === id) {
+          result.push(path.slice());
+        } else {
+          tracePath(path);
+        }
+        path.pop();
+      }
+    };
+    
+    const result = [];
+    tracePath([{id: rootId, pos: 1}]);
+    return result;
+  }
 }
 
 window.Server = Server;

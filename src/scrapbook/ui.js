@@ -1078,6 +1078,46 @@ const scrapbookUi = {
     }
   },
 
+  /**
+   * @kind invokable
+   */
+  async locate({url, root = 'root'}) {
+    if (this.mode !== 'normal') { return null; }
+
+    const item = await this.book.findItemFromUrl(url);
+    if (!item) { return null; }
+
+    const paths = this.book.findItemPaths(item.id, this.rootId);
+    if (!paths.length) { return null; }
+
+    // Attempt to find a match from currently visible items; othwise lookup in
+    // the whole tree.
+    let curElem;
+    for (const elem of document.getElementById('item-root').querySelectorAll(`[data-id="${scrapbook.escapeQuotes(item.id)}"]`)) {
+      if (elem.offsetParent) {
+        curElem = elem;
+        break;
+      }
+    }
+
+    if (!curElem) {
+      curElem = document.getElementById('item-root');
+      for (let i = 1, I = paths[0].length; i < I; ++i) {
+        const {pos} = paths[0][i];
+        this.toggleItem(curElem, true);
+        console.warn(curElem, curElem.children);
+        curElem = curElem.container.children[pos];
+      }
+    }
+
+    // locate the item element
+    curElem.scrollIntoView();
+    this.highlightItem(curElem, true);
+    this.saveViewStatus();
+
+    return item;
+  },
+
   async openModalWindow(url) {
     if (browser.windows) {
       await browser.windows.create({
@@ -1834,6 +1874,11 @@ const scrapbookUi = {
     await this.saveViewStatus();
   },
 };
+
+scrapbook.addMessageListener((message, sender) => {
+  if (!message.cmd.startsWith("scrapbookUi.")) { return false; }
+  return true;
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
   scrapbook.loadLanguages(document);

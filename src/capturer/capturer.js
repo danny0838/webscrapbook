@@ -590,12 +590,35 @@ capturer.captureTab = async function (params) {
     message.options["capture.saveBeyondSelection"] = !!saveBeyondSelection;
 
     isDebug && console.debug("(main) send", source, message);
-    capturer.log(`Capturing (document) ${source} ...`);
+    if (mode === 'save') {
+      capturer.log(`Saving (document) ${source} ...`);
+    } else {
+      capturer.log(`Capturing (document) ${source} ...`);
+    }
 
     // throw error for a discarded tab
     // note that tab.discarded is undefined in older Firefox version
     if (discarded === true) {
       throw new Error(scrapbook.lang("ErrorTabDiscarded"));
+    }
+
+    if (mode === 'save') {
+      // Load server config and verify whether we can actually save the page.
+      await server.init();
+      const book = server.books[server.bookId];
+
+      if (!!book.config.no_tree) {
+        throw new Error(scrapbook.lang("ErrorSaveBookNoTree"));
+      }
+
+      if (!url.startsWith(book.dataUrl)) {
+        throw new Error(scrapbook.lang("ErrorSaveNotUnderDataDir", [url]));
+      }
+
+      const mime = Mime.lookup(scrapbook.urlToFilename(url));
+      if (!["text/html", "application/xhtml+xml"].includes(mime)) {
+        throw new Error(scrapbook.lang("ErrorSaveNonHtml", [url]));
+      }
     }
 
     (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
@@ -605,6 +628,80 @@ capturer.captureTab = async function (params) {
         capturer.error(err);
       }
     });
+
+    if (mode === 'save') {
+      const response = await capturer.invoke("retrieveDocumentContent", message, {tabId, frameId});
+      isDebug && console.debug("(main) response", source, response);
+
+      const book = server.books[server.bookId];
+      const modify = scrapbook.dateToId();
+
+      // acquire a lock
+      await book.lockTree();
+
+      try {
+        // validate if we can modify the tree
+        if (!await book.validateTree()) {
+          throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+        }
+
+        for (const [url, data] of Object.entries(response)) {
+          const target = scrapbook.splitUrl(url)[0];
+
+          // only save files under dataDir
+          if (!url.startsWith(book.dataUrl)) {
+            capturer.warn(scrapbook.lang("ErrorSaveNotUnderDataDir", [target]));
+            continue;
+          }
+
+          // forbid non-UTF-8 for data safety
+          if (data.charset !== "UTF-8") {
+            capturer.warn(scrapbook.lang("ErrorSaveNonUTF8", [target]));
+            continue;
+          }
+
+          try {
+            const file = new File([data.content], scrapbook.urlToFilename(url), {type: "text/html"});
+
+            const formData = new FormData();
+            formData.append('token', await server.acquireToken());
+            formData.append('upload', file);
+
+            await server.request({
+              url: target + '?a=save&f=json',
+              method: "POST",
+              body: formData,
+            });
+            capturer.log(`Updated ${target}`);
+          } catch (ex) {
+            capturer.error(scrapbook.lang("ErrorSaveUploadFailure", [target, ex.message]));
+          }
+        }
+
+        // update item
+        const item = await book.findItemFromUrl(url);
+        if (item) {
+          item.modify = modify;
+          book.meta[item.id] = item;
+          await book.saveMeta();
+        } else {
+          capturer.warn(scrapbook.lang("ErrorSaveUnknownItem"));
+        }
+      } catch (ex) {
+        await book.unlockTree();
+        throw ex;
+      }
+
+      // release the lock
+      await book.unlockTree();
+
+      return {
+        timeId,
+        title,
+        sourceUrl: url,
+        favIconUrl,
+      };
+    }
 
     const response = await capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
     isDebug && console.debug("(main) response", source, response);

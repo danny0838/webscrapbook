@@ -483,6 +483,12 @@ capturer.captureDocument = async function (params) {
       if (!elem.parentNode) { return; }
 
       switch (elem.nodeName.toLowerCase()) {
+        case "web-scrapbook": {
+          // webscrapbook toolbar should not be included
+          elem.remove();
+          break;
+        }
+
         case "base": {
           if (!elem.hasAttribute("href")) { break; }
           elem.setAttribute("href", elem.href);
@@ -1915,6 +1921,53 @@ capturer.captureDocument = async function (params) {
     console.error(ex);
     return {error: {message: ex.message}};
   }
+};
+
+
+/**
+ * @kind invokable
+ * @param {Object} params
+ *     - {Document} params.doc
+ *     - {Object} params.settings
+ *     - {Object} params.options
+ * @return {Promise<Object>}
+ */
+capturer.retrieveDocumentContent = async function (params) {
+  isDebug && console.debug("call: retrieveDocumentContent");
+
+  const {doc = document, settings, options} = params;
+
+  const data = {};
+  Array.prototype.forEach.call(scrapbook.flattenFrames(doc), (doc) => {
+    const url = scrapbook.splitUrl(doc.URL)[0];
+    if (url in data) { return; }
+
+    // skip non-HTML documents
+    if (!["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+      return;
+    }
+
+    // tweak the content before saving
+    const rootNode = doc.documentElement.cloneNode(true);
+
+    // remove webscrapbook toolbar
+    Array.prototype.forEach.call(rootNode.querySelectorAll("web-scrapbook"), elem => { elem.remove(); });
+
+    let content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
+
+    // Firefox >= 56 can pass a Blob via browser.runtime.sendMessage. Use it to
+    // improve performance and avoid the messaging size limit.
+    if (scrapbook.userAgent.major > 56 && scrapbook.userAgent.is('gecko')) {
+      content = new Blob([content], {type: "text/html"});
+    }
+
+    data[url] = {
+      content,
+      charset: doc.characterSet,
+      mime: doc.contentType,
+    };
+  });
+  return data;
 };
 
 /**

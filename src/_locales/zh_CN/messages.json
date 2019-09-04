@@ -56,6 +56,18 @@
   "CapturerTitle": {
     "message": "获取页面"
   },
+  "ErrorLocateSidebarNotOpened": {
+    "message": "剪贴簿尚未开启，无法执行定位。"
+  },
+  "ErrorLocateNotFound": {
+    "message": "找不到本页面所属的剪贴簿项目。"
+  },
+  "EditConfirmScriptedDocument": {
+    "message": "此页面含有脚本，实际内容可能已变更，重新储存可能造成不可逆的资讯遗失。要继续编辑吗？"
+  },
+  "EditTab": {
+    "message": "编辑分页"
+  },
   "ErrorContentScriptExecute": {
     "message": "无法执行内容处理脚本 ($SOURCE$): $REASON$",
     "placeholders": {
@@ -83,6 +95,47 @@
     "placeholders": {
       "reason": {
         "content": "$1"
+      }
+    }
+  },
+  "ErrorSaveBookNoTree": {
+    "message": "剪贴簿停用了数据树功能。"
+  },
+  "ErrorSaveNonHtml": {
+    "message": "无法保存非 HTML 文件 ($URL$)。",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSaveNonUTF8": {
+    "message": "无法保存非 UTF-8 编码的文件 ($URL$)。",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSaveNotUnderDataDir": {
+    "message": "无法保存非数据目录下的文件 ($URL$)。",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSaveUnknownItem": {
+    "message": "找不到此页面的所属项目。"
+  },
+  "ErrorSaveUploadFailure": {
+    "message": "无法上传至后端服务器 ($SOURCE$): $REASON$",
+    "placeholders": {
+      "source": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
       }
     }
   },

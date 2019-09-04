@@ -10,6 +10,10 @@ button {
   white-space: nowrap;
 }
 
+button[hidden] {
+  display: none;
+}
+
 button:hover {
   background-color: #aaaaaa;
 }

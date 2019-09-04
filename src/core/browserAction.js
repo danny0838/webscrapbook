@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById("captureTabSource").disabled = true;
       document.getElementById("captureTabBookmark").disabled = true;
       document.getElementById("captureAllTabs").disabled = true;
+      document.getElementById("editTab").disabled = true;
     }
   }
 
@@ -119,6 +120,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     return await scrapbook.invokeCapture({
       target: tabs.map(t => t.id).join(','),
     });
+  });
+
+  document.getElementById("editTab").addEventListener('click', async (event) => {
+    if (targetTab) {
+      return await scrapbook.editTab({
+        tabId: targetTab.id,
+        force: true,
+      });
+    } else {
+      // This won't happen as editTab is unhidden only when targetTab exists.
+    }
   });
 
   document.getElementById("openScrapBook").addEventListener('click', async (event) => {

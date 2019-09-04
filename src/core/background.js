@@ -46,6 +46,14 @@ const background = {
         mode: "bookmark",
       });
     },
+
+    async editTab() {
+      const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0];
+      return await scrapbook.editTab({
+        tabId: tab.id,
+        force: true,
+      });
+    },
   },
 };
 
@@ -65,6 +73,103 @@ if (!browser.browserAction) {
   });
 }
 
+/**
+ * Attempt to locate an item in the sidebar.
+ *
+ * @kind invokable
+ * @return {Object|null|false} - the located item; null: no item located;
+ *      false: no sidebar opened.
+ */
+background.locateCurrentTab = async function (params, sender) {
+  const cmd = 'scrapbookUi.locate';
+  const args = {
+    url: sender.url,
+  };
+  const sidebarUrl = browser.runtime.getURL("scrapbook/sidebar.html");
+
+  if (browser.sidebarAction) {
+    // Unfortunately we cannot force open the sidebar from a user gesture
+    // in a content page if it's closed.
+    if (!await browser.sidebarAction.isOpen({})) {
+      return false;
+    }
+
+    return await scrapbook.invokeExtensionScript({cmd, args});
+  } else if (browser.windows) {
+    const sidebarWindow = (await browser.windows.getAll({
+      windowTypes: ['popup'],
+      populate: true,
+    })).filter(w => scrapbook.splitUrl(w.tabs[0].url)[0] === sidebarUrl)[0];
+
+    if (!sidebarWindow) {
+      return false;
+    }
+
+    const tabId = sidebarWindow.tabs[0].id;
+    const result = await scrapbook.invokeContentScript({tabId, frameId: 0, cmd, args});
+
+    if (result) {
+      await browser.windows.update(sidebarWindow.id, {drawAttention: true});
+    }
+
+    return result;
+  } else {
+    // Firefox Android does not support windows
+    const sidebarTab = (await browser.tabs.query({}))
+        .filter(t => scrapbook.splitUrl(t.url)[0] === sidebarUrl)[0];
+
+    if (!sidebarTab) {
+      return false;
+    }
+
+    const tabId = sidebarTab.id;
+    const result = await scrapbook.invokeContentScript({tabId, frameId: 0, cmd, args});
+
+    if (result) {
+      await browser.tabs.update(tabId, {active: true});
+    }
+
+    return result;
+  }
+};
+
+/**
+ * @kind invokable
+ */
+background.saveCurrentTab = async function (params, sender) {
+  const target = sender.tab.id;
+  const mode = 'save';
+  return await scrapbook.invokeCapture({target, mode});
+};
+
+/**
+ * @kind invokable
+ */
+background.captureCurrentTab = async function (params, sender) {
+  const target = sender.tab.id;
+  return await scrapbook.invokeCapture({target});
+};
+
+/**
+ * @kind invokable
+ */
+background.toggleDocumentEditable = async function (params, sender) {
+  const {designMode} = params;
+  const tabId = sender.tab.id;
+
+  const tasks = Array.prototype.map.call(
+    await scrapbook.initContentScripts(tabId),
+    async ({tabId, frameId, injected}) => {
+      return await browser.tabs.executeScript(tabId, {
+        frameId,
+        code: `document.designMode = "${designMode}";`,
+        runAt: "document_start",
+      });
+    });
+  return Promise.all(tasks);
+};
+
+/* commands */
 if (browser.commands) {
   browser.commands.onCommand.addListener((cmd) => {
     return background.commands[cmd]();
