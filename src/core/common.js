@@ -767,6 +767,18 @@ scrapbook.unescapeCss = function (str) {
   return unescapeCss(str);
 };
 
+scrapbook.escapeXpath = function (str) {
+  const reQuotes = /"/g;
+  const reTail = /,""\)$/;
+  const escapeXpath = (str) => {
+    if (!str.includes('"')) { return `"${str}"`; }
+    const splitedQuotes = str.replace(reQuotes, `",'"',"`);
+    return `concat("${splitedQuotes}")`.replace(reTail, ")");
+  };
+  scrapbook.escapeXpath = escapeXpath;
+  return escapeXpath(str);
+};
+
 /**
  * A URL containing standalone "%"s, e.g. "http://example.com/50%",
  * causes a "Malformed URI sequence" error on decodeURIComponent.

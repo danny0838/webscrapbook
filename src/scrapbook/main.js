@@ -228,8 +228,8 @@ const scrapbookUi = {
     const getXpaths = (elem, map) => {
       const path = [];
       let cur = elem;
-      while (cur && cur.closest('#items')) {
-        path.unshift(`*[@data-id="${cur.getAttribute('data-id')}"][${getXpathPos(cur)}]`);
+      while (cur && cur.closest('#item-root')) {
+        path.unshift(`*[@data-id=${scrapbook.escapeXpath(cur.getAttribute('data-id'))}][${getXpathPos(cur)}]`);
         cur = cur.parentElement.parentElement;
       }
 
