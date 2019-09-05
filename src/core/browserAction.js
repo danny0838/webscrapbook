@@ -156,17 +156,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       // MDN: You can only call this function from inside the handler for a user action.
       await browser.sidebarAction.open();
     } else if (browser.windows) {
-      const sideWindows = (await browser.windows.getAll({
+      const currentWindow = await browser.windows.getCurrent({windowTypes: ['normal']});
+
+      const sideWindow = (await browser.windows.getAll({
         windowTypes: ['popup'],
         populate: true,
-      })).filter(w => w.tabs[0].url.startsWith(url));
+      })).filter(w => w.tabs[0].url.startsWith(url))[0];
+
+      // calculate the desired position of the main and sidebar windows
+      const screenWidth = window.screen.availWidth;
+      const screenHeight = window.screen.availHeight;
       const left = 0;
       const top = 0;
-      const width = Math.max(Math.floor(window.screen.availWidth / 5 - 1), 200);
-      const height = window.screen.availHeight - 1;
+      const width = Math.max(Math.floor(screenWidth / 5 - 1), 200);
+      const height = screenHeight - 1;
+      const mainLeft = Math.max(width + 1, currentWindow.left);
+      const mainTop = Math.max(0, currentWindow.top);
+      const mainWidth = Math.min(screenWidth - width - 1, currentWindow.width);
+      const mainHeight = Math.min(screenHeight - 1, currentWindow.height);
 
-      if (sideWindows.length) {
-        await browser.windows.update(sideWindows[0].id, {
+      if (sideWindow) {
+        await browser.windows.update(sideWindow.id, {
           left,
           top,
           width,
@@ -183,6 +193,14 @@ document.addEventListener('DOMContentLoaded', async () => {
           type: 'popup',
         });
       }
+
+      const axis = {};
+      if (mainLeft !== currentWindow.left) { axis.left = mainLeft; }
+      if (mainTop !== currentWindow.top) { axis.top = mainTop; }
+      if (mainWidth !== currentWindow.width) { axis.width = mainWidth; }
+      if (mainHeight !== currentWindow.height) { axis.height = mainHeight; }
+
+      await browser.windows.update(currentWindow.id, axis);
     } else {
       // Firefox Android does not support windows
       await visitLink(url, !!targetTab);
