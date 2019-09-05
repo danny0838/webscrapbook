@@ -39,6 +39,7 @@
       "core/common.js",
       "core/optionsAuto.js",
       "core/background.js",
+      "capturer/background.js",
       "capturer/extension.js",
       "viewer/background.js"
     ]
