@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html dir="__MSG_@@bidi_dir__">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__MSG_ExtensionName__</title>
+<base target="webscrapbook">
+<link rel="stylesheet" href="ui.css">
+<script src="../lib/browser-polyfill.js"></script>
+<script src="../core/common.js"></script>
+<script src="server.js"></script>
+<script src="ui.js"></script>
+</head>
+<body>
+<div id="dialog-mask" hidden>
+  <div id="dialog-wrapper"></div>
+</div>
+<div id="wrapper">
+  <form id="toolbar">
+    <select id="book" autocomplete="off">
+      <option>__MSG_ScrapBookMainBookRefresh__</option>
+      <option selected></option>
+    </select>
+    <select id="command" disabled autocomplete="off">
+      <option value="" selected>...</option>
+      <option value="separator" hidden disabled>————————</option>
+      <option value="index" hidden>__MSG_ScrapBookMainCommandIndex__</option>
+      <option value="search" hidden>__MSG_ScrapBookMainCommandSearch__</option>
+      <option value="exec_book" hidden>__MSG_ScrapBookMainCommandExecBook__</option>
+      <option value="open" hidden>__MSG_ScrapBookMainCommandOpen__</option>
+      <option value="opentab" hidden>__MSG_ScrapBookMainCommandOpenTab__</option>
+      <option value="exec" hidden disabled>__MSG_ScrapBookMainCommandExec__</option>
+      <option value="browse" hidden disabled>__MSG_ScrapBookMainCommandBrowse__</option>
+      <option value="source" hidden>__MSG_ScrapBookMainCommandSource__</option>
+      <option value="manage" hidden>__MSG_ScrapBookMainCommandManage__...</option>
+      <option value="separator" hidden disabled>————————</option>
+      <option value="mkfolder" hidden>__MSG_ScrapBookMainCommandCreatefolder__</option>
+      <option value="mksep" hidden>__MSG_ScrapBookMainCommandCreateSeparator__</option>
+      <option value="mknote" hidden>__MSG_ScrapBookMainCommandCreateNote__...</option>
+      <option value="upload" hidden>__MSG_ScrapBookMainCommandUpload__...</option>
+      <option value="separator" hidden disabled>————————</option>
+      <option value="edit" hidden>__MSG_ScrapBookMainCommandEdit__</option>
+      <option value="editx" hidden>__MSG_ScrapBookMainCommandEditx__</option>
+      <option value="move_up" hidden>__MSG_ScrapBookMainCommandMoveUp__</option>
+      <option value="move_down" hidden>__MSG_ScrapBookMainCommandMoveDown__</option>
+      <option value="move_into" hidden>__MSG_ScrapBookMainCommandMoveTo__...</option>
+      <option value="move_drag" hidden></option>
+      <option value="recycle" hidden>__MSG_ScrapBookMainCommandRecycle__</option>
+      <option value="delete" hidden>__MSG_ScrapBookMainCommandDelete__</option>
+      <option value="separator" hidden disabled>————————</option>
+      <option value="meta" hidden>__MSG_ScrapBookMainCommandMeta__...</option>
+      <option value="view_recycle" hidden>__MSG_ScrapBookMainCommandViewRecycle__...</option>
+    </select>
+    <input type="file" id="upload-file-selector" multiple hidden>
+  </form>
+  <div id="logger"></div>
+  <div id="items">
+    <div id="item-root" data-id="root"></div>
+  </div>
+</div>
+
+<template id="tpl-meta">
+<form class="meta">
+  <dl>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMetaDialogId__</dt>
+      <dd><input type="text" name="id" readonly></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMetaDialogCreate__</dt>
+      <dd><input type="text" name="create" readonly></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMetaDialogModify__</dt>
+      <dd><input type="text" name="modify" readonly></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMetaDialogType__</dt>
+      <dd><input type="text" name="type" readonly></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMetaDialogTitle__</dt>
+      <dd><input type="text" name="title"></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMetaDialogIndex__</dt>
+      <dd><input type="text" name="index"></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMetaDialogSource__</dt>
+      <dd><input type="text" name="source" autocomplete="url"></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMetaDialogIcon__</dt>
+      <dd><input type="text" name="icon"></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMetaDialogCharset__</dt>
+      <dd><input type="text" name="charset"></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMetaDialogComment__</dt>
+      <dd><textarea name="comment"></textarea></dd>
+    </div>
+  </dl>
+  <div class="buttons">
+    <input type="submit" value="__MSG_OK__">
+    <input type="button" value="__MSG_Cancel__">
+  </div>
+</form>
+</template>
+
+<template id="tpl-mknote">
+<form>
+  <dl>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandCreateNoteDialogTitle__</dt>
+      <dd>
+        <label><input type="radio" name="format" value="html" checked><span>HTML</span></label>
+        <label><input type="radio" name="format" value="markdown"><span>Markdown</span></label>
+      </dd>
+    </div>
+  </dl>
+  <div class="buttons">
+    <input type="submit" value="__MSG_OK__">
+    <input type="button" value="__MSG_Cancel__">
+  </div>
+</form>
+</template>
+
+<template id="tpl-move-into">
+<form>
+  <dl>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMoveDialogTitle__</dt>
+      <dd><input type="text" name="id" value="root"></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMoveDialogIndex__</dt>
+      <dd><input type="number" name="index" min="0" value=""></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookMainCommandMoveDialogMode__</dt>
+      <dd>
+        <label><input type="radio" name="mode" value="move" checked><span>__MSG_ScrapBookMainCommandMoveDialogModeMove__</span></label>
+        <label><input type="radio" name="mode" value="link"><span>__MSG_ScrapBookMainCommandMoveDialogModeLink__</span></label>
+      </dd>
+    </div>
+  </dl>
+  <div class="buttons">
+    <input type="submit" value="__MSG_OK__">
+    <input type="button" value="__MSG_Cancel__">
+  </div>
+</form>
+</template>
+
+</body>
+</html>

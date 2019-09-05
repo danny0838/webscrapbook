@@ -1,10 +1,13 @@
 /******************************************************************************
  *
- * Script for main.html
+ * UI controller for scrapbooks, such as sidebar.html and manage.html.
  *
  * @require {Object} scrapbook
  * @require {Object} server
+ * @public {Object} scrapbookUi
  *****************************************************************************/
+
+((window, document, browser) => {
 
 const scrapbookUi = {
   lastDraggedElem: null,
@@ -109,7 +112,6 @@ const scrapbookUi = {
     // load URL params
     const urlParams = new URL(location.href).searchParams;
     this.rootId = urlParams.get('root') || this.rootId;
-    this.mode = urlParams.get('mode') || this.mode;
 
     // load current scrapbook and scrapbooks list
     try {
@@ -1174,13 +1176,11 @@ const scrapbookUi = {
 
   async cmd_manage(selectedItemElems) {
     const id = selectedItemElems.length ? selectedItemElems[0].getAttribute('data-id') : 'root';
-    const urlObj = new URL(location.href);
-    const currentMode = urlObj.searchParams.get('mode');
+    const urlObj = new URL(browser.runtime.getURL("scrapbook/manage.html"));
     urlObj.searchParams.set('id', this.bookId);
-    urlObj.searchParams.set('mode', 'manage');
     urlObj.searchParams.set('root', id);
     const target = urlObj.href;
-    if (currentMode === 'manage') {
+    if (this.mode === 'manage') {
       location.assign(target);
     } else {
       await this.openModalWindow(target);
@@ -1817,13 +1817,11 @@ const scrapbookUi = {
   },
 
   async cmd_view_recycle(selectedItemElems) {
-    const urlObj = new URL(location.href);
-    const currentMode = urlObj.searchParams.get('mode');
+    const urlObj = new URL(browser.runtime.getURL("scrapbook/manage.html"));
     urlObj.searchParams.set('id', this.bookId);
-    urlObj.searchParams.set('mode', 'manage');
     urlObj.searchParams.set('root', 'recycle');
     const target = urlObj.href;
-    if (currentMode === 'manage') {
+    if (this.mode === 'manage') {
       location.assign(target);
     } else {
       await this.openModalWindow(target);
@@ -1859,3 +1857,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await scrapbookUi.init();
 });
+
+
+window.scrapbookUi = scrapbookUi;
+
+})(this, this.document, this.browser);

@@ -74,7 +74,7 @@
 
   "sidebar_action": {
     "default_title": "__MSG_ExtensionName__",
-    "default_panel": "scrapbook/main.html",
+    "default_panel": "scrapbook/sidebar.html",
     "default_icon":  {
       "32": "core/scrapbook_32.png",
       "128": "core/scrapbook_128.png"

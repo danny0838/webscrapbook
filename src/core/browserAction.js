@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   document.getElementById("openScrapBook").addEventListener('click', async (event) => {
-    const url = browser.runtime.getURL("scrapbook/main.html");
+    const url = browser.runtime.getURL("scrapbook/sidebar.html");
 
     if (browser.sidebarAction) {
       // MDN: You can only call this function from inside the handler for a user action.
