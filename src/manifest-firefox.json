@@ -41,7 +41,6 @@
       "core/extension.js",
       "core/background.js",
       "capturer/background.js",
-      "capturer/extension.js",
       "viewer/background.js"
     ]
   },
@@ -82,5 +81,35 @@
       "128": "core/scrapbook_128.png"
     },
     "open_at_install": false
+  },
+
+  "commands": {
+    "openScrapBook": {
+      "suggested_key": {
+        "default": "Alt+K"
+      },
+      "description": "__MSG_OpenScrapBook__"
+    },
+    "openOptions": {
+      "description": "__MSG_OpenOptions__"
+    },
+    "openViewer": {
+      "suggested_key": {
+        "default": "Alt+V"
+      },
+      "description": "__MSG_OpenViewer__"
+    },
+    "captureTab": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K"
+      },
+      "description": "__MSG_CaptureTab__"
+    },
+    "captureTabSource": {
+      "description": "__MSG_CaptureTabSource__"
+    },
+    "captureTabBookmark": {
+      "description": "__MSG_CaptureTabBookmark__"
+    }
   }
 }

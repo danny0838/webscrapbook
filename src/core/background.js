@@ -6,6 +6,49 @@
 
 ((window, document, browser) => {
 
+const background = {
+  commands: {
+    async openScrapBook() {
+      return await scrapbook.openScrapBook({});
+    },
+
+    async openOptions() {
+      return await scrapbook.visitLink({
+        url: browser.runtime.getURL("core/options.html"),
+        newTab: true,
+        singleton: true,
+      });
+    },
+
+    async openViewer() {
+      return await scrapbook.visitLink({
+        url: browser.runtime.getURL("viewer/load.html"),
+        newTab: true,
+      });
+    },
+
+    async captureTab() {
+      return await scrapbook.invokeCapture({
+        target: await scrapbook.getHighlightedTabs(),
+      });
+    },
+
+    async captureTabSource() {
+      return await scrapbook.invokeCapture({
+        target: await scrapbook.getHighlightedTabs(),
+        mode: "source",
+      });
+    },
+
+    async captureTabBookmark() {
+      return await scrapbook.invokeCapture({
+        target: await scrapbook.getHighlightedTabs(),
+        mode: "bookmark",
+      });
+    },
+  },
+};
+
 /* browser action button and fallback */
 if (!browser.browserAction) {
   // Firefox Android < 55: no browserAction
@@ -19,6 +62,12 @@ if (!browser.browserAction) {
   browser.browserAction.onClicked.addListener((tab) => {
     const url = browser.runtime.getURL("core/browserAction.html");
     browser.tabs.create({url, active: true});
+  });
+}
+
+if (browser.commands) {
+  browser.commands.onCommand.addListener((cmd) => {
+    return background.commands[cmd]();
   });
 }
 
@@ -48,6 +97,11 @@ if (browser.history) {
     return {requestHeaders: details.requestHeaders};
   }, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, extraInfoSpec);
 }
+
+scrapbook.addMessageListener((message, sender) => {
+  if (!message.cmd.startsWith("background.")) { return false; }
+  return true;
+});
 
 if (browser.runtime.onMessageExternal) {
   // Available in Firefox >= 54.
