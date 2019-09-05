@@ -503,124 +503,124 @@
   "OptionsSaveLabel": {
     "message": "儲存"
   },
-  "ScrapBookMainBookRefresh": {
+  "ScrapBookBookRefresh": {
     "message": "<重新整理>"
   },
-  "ScrapBookMainCommandBrowse": {
+  "ScrapBookCommandBrowse": {
     "message": "在檔案管理員檢視"
   },
-  "ScrapBookMainCommandCreateNote": {
+  "ScrapBookCommandCreateNote": {
     "message": "新增筆記"
   },
-  "ScrapBookMainCommandCreateNoteDialogTitle": {
+  "ScrapBookCommandCreateNoteDialogTitle": {
     "message": "新筆記的格式:"
   },
-  "ScrapBookMainCommandCreateSeparator": {
+  "ScrapBookCommandCreateSeparator": {
     "message": "新增分隔線"
   },
-  "ScrapBookMainCommandCreatefolder": {
+  "ScrapBookCommandCreatefolder": {
     "message": "新增資料夾"
   },
-  "ScrapBookMainCommandDelete": {
+  "ScrapBookCommandDelete": {
     "message": "刪除"
   },
-  "ScrapBookMainCommandEdit": {
+  "ScrapBookCommandEdit": {
     "message": "編輯"
   },
-  "ScrapBookMainCommandEditx": {
+  "ScrapBookCommandEditx": {
     "message": "編輯頁面"
   },
-  "ScrapBookMainCommandExec": {
+  "ScrapBookCommandExec": {
     "message": "用預設程式開啟"
   },
-  "ScrapBookMainCommandExecBook": {
+  "ScrapBookCommandExecBook": {
     "message": "在檔案管理員檢視主目錄"
   },
-  "ScrapBookMainCommandIndex": {
+  "ScrapBookCommandIndex": {
     "message": "檢視主頁"
   },
-  "ScrapBookMainCommandManage": {
+  "ScrapBookCommandManage": {
     "message": "管理"
   },
-  "ScrapBookMainCommandMeta": {
+  "ScrapBookCommandMeta": {
     "message": "元資料"
   },
-  "ScrapBookMainCommandMetaDialogCharset": {
+  "ScrapBookCommandMetaDialogCharset": {
     "message": "字集:"
   },
-  "ScrapBookMainCommandMetaDialogComment": {
+  "ScrapBookCommandMetaDialogComment": {
     "message": "註解:"
   },
-  "ScrapBookMainCommandMetaDialogCreate": {
+  "ScrapBookCommandMetaDialogCreate": {
     "message": "建立時間:"
   },
-  "ScrapBookMainCommandMetaDialogIcon": {
+  "ScrapBookCommandMetaDialogIcon": {
     "message": "圖示:"
   },
-  "ScrapBookMainCommandMetaDialogId": {
+  "ScrapBookCommandMetaDialogId": {
     "message": "ID:"
   },
-  "ScrapBookMainCommandMetaDialogIndex": {
+  "ScrapBookCommandMetaDialogIndex": {
     "message": "索引檔:"
   },
-  "ScrapBookMainCommandMetaDialogModify": {
+  "ScrapBookCommandMetaDialogModify": {
     "message": "修改時間:"
   },
-  "ScrapBookMainCommandMetaDialogSource": {
+  "ScrapBookCommandMetaDialogSource": {
     "message": "來源:"
   },
-  "ScrapBookMainCommandMetaDialogTitle": {
+  "ScrapBookCommandMetaDialogTitle": {
     "message": "標題:"
   },
-  "ScrapBookMainCommandMetaDialogType": {
+  "ScrapBookCommandMetaDialogType": {
     "message": "類型:"
   },
-  "ScrapBookMainCommandMoveDialogIndex": {
+  "ScrapBookCommandMoveDialogIndex": {
     "message": "位置 (從 0 開始，空白則移至最後):"
   },
-  "ScrapBookMainCommandMoveDialogMode": {
+  "ScrapBookCommandMoveDialogMode": {
     "message": "模式:"
   },
-  "ScrapBookMainCommandMoveDialogModeLink": {
+  "ScrapBookCommandMoveDialogModeLink": {
     "message": "連結"
   },
-  "ScrapBookMainCommandMoveDialogModeMove": {
+  "ScrapBookCommandMoveDialogModeMove": {
     "message": "移動"
   },
-  "ScrapBookMainCommandMoveDialogTitle": {
+  "ScrapBookCommandMoveDialogTitle": {
     "message": "移動到這個 ID 的項目下:"
   },
-  "ScrapBookMainCommandMoveDown": {
+  "ScrapBookCommandMoveDown": {
     "message": "下移"
   },
-  "ScrapBookMainCommandMoveTo": {
+  "ScrapBookCommandMoveTo": {
     "message": "移動至"
   },
-  "ScrapBookMainCommandMoveUp": {
+  "ScrapBookCommandMoveUp": {
     "message": "上移"
   },
-  "ScrapBookMainCommandOpen": {
+  "ScrapBookCommandOpen": {
     "message": "開啟"
   },
-  "ScrapBookMainCommandOpenTab": {
+  "ScrapBookCommandOpenTab": {
     "message": "開啟於新分頁"
   },
-  "ScrapBookMainCommandRecycle": {
+  "ScrapBookCommandRecycle": {
     "message": "移除"
   },
-  "ScrapBookMainCommandSearch": {
+  "ScrapBookCommandSearch": {
     "message": "搜尋"
   },
-  "ScrapBookMainCommandSource": {
+  "ScrapBookCommandSource": {
     "message": "開啟原始網址"
   },
-  "ScrapBookMainCommandUpload": {
+  "ScrapBookCommandUpload": {
     "message": "上傳檔案"
   },
-  "ScrapBookMainCommandViewRecycle": {
+  "ScrapBookCommandViewRecycle": {
     "message": "檢視回收筒"
   },
-  "ScrapBookMainErrorBookNotExist": {
+  "ScrapBookErrorBookNotExist": {
     "message": "剪貼簿 $NAME$ 不存在，重設為預設剪貼簿",
     "placeholders": {
       "name": {
@@ -628,7 +628,7 @@
       }
     }
   },
-  "ScrapBookMainErrorInitTree": {
+  "ScrapBookErrorInitTree": {
     "message": "無法初始化目錄樹: $REASON$",
     "placeholders": {
       "reason": {
@@ -636,7 +636,7 @@
       }
     }
   },
-  "ScrapBookMainErrorLoadBooks": {
+  "ScrapBookErrorLoadBooks": {
     "message": "無法載入剪貼簿: $REASON$",
     "placeholders": {
       "reason": {
@@ -644,7 +644,7 @@
       }
     }
   },
-  "ScrapBookMainErrorServerInit": {
+  "ScrapBookErrorServerInit": {
     "message": "後端伺服器初始化錯誤: $REASON$",
     "placeholders": {
       "reason": {
@@ -652,17 +652,17 @@
       }
     }
   },
-  "ScrapBookMainErrorServerNotConfigured": {
+  "ScrapBookErrorServerNotConfigured": {
     "message": "未設定後端伺服器。"
   },
-  "ScrapBookMainErrorServerTreeChanged": {
+  "ScrapBookErrorServerTreeChanged": {
     "message": "伺服器的目錄樹資料已變更，請重新整理此頁面再嘗試。"
   },
-  "ScrapBookMainNewFolderName": {
+  "ScrapBookNewFolderName": {
     "description": "Default name of a new folder",
     "message": "新資料夾"
   },
-  "ScrapBookMainNewNoteName": {
+  "ScrapBookNewNoteName": {
     "description": "Default name of a new note",
     "message": "新筆記"
   },

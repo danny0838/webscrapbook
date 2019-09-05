@@ -96,7 +96,7 @@ const scrapbookUi = {
     await scrapbook.loadOptions();
 
     if (!scrapbook.hasServer()) {
-      this.error(scrapbook.lang('ScrapBookMainErrorServerNotConfigured'));
+      this.error(scrapbook.lang('ScrapBookErrorServerNotConfigured'));
       return;
     }
 
@@ -105,7 +105,7 @@ const scrapbookUi = {
       await server.init();
     } catch (ex) {
       console.error(ex);
-      this.error(scrapbook.lang('ScrapBookMainErrorServerInit', [ex.message]));
+      this.error(scrapbook.lang('ScrapBookErrorServerInit', [ex.message]));
       return;
     }
 
@@ -119,7 +119,7 @@ const scrapbookUi = {
       let book = this.book = server.books[bookId];
 
       if (!book) {
-        this.warn(scrapbook.lang('ScrapBookMainErrorBookNotExist', [bookId]));
+        this.warn(scrapbook.lang('ScrapBookErrorBookNotExist', [bookId]));
         bookId = this.bookId = '';
         book = this.book = server.books[bookId];
         await scrapbook.setOption("server.scrapbook", bookId);
@@ -143,7 +143,7 @@ const scrapbookUi = {
       wrapper.value = bookId;
     } catch (ex) {
       console.error(ex);
-      this.error(scrapbook.lang('ScrapBookMainErrorLoadBooks', [ex.message]));
+      this.error(scrapbook.lang('ScrapBookErrorLoadBooks', [ex.message]));
       return;
     }
 
@@ -205,7 +205,7 @@ const scrapbookUi = {
         await this.loadViewStatus();
       } catch (ex) {
         console.error(ex);
-        this.error(scrapbook.lang('ScrapBookMainErrorInitTree', [ex.message]));
+        this.error(scrapbook.lang('ScrapBookErrorInitTree', [ex.message]));
         return;
       }
     }
@@ -1273,7 +1273,7 @@ const scrapbookUi = {
     // create new item
     const newItem = this.book.addItem({
       item: {
-        "title": scrapbook.lang('ScrapBookMainNewFolderName'),
+        "title": scrapbook.lang('ScrapBookNewFolderName'),
         "type": "folder",
       },
       parentId: parentItemId,
@@ -1368,7 +1368,7 @@ const scrapbookUi = {
     // create new item
     const newItem = this.book.addItem({
       item: {
-        "title": scrapbook.lang('ScrapBookMainNewNoteName'),
+        "title": scrapbook.lang('ScrapBookNewNoteName'),
         "type": "note",
       },
       parentId: parentItemId,
@@ -1457,7 +1457,7 @@ const scrapbookUi = {
     try {
       // validate if we can modify the tree
       if (!await this.book.validateTree()) {
-        throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+        throw new Error(scrapbook.lang('ScrapBookErrorServerTreeChanged'));
       }
 
       for (const file of detail.files) {
@@ -1755,7 +1755,7 @@ const scrapbookUi = {
     try {
       // validate if we can modify the tree
       if (!await this.book.validateTree()) {
-        throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+        throw new Error(scrapbook.lang('ScrapBookErrorServerTreeChanged'));
       }
 
       // Reverse the order to always move an item before its parent so that

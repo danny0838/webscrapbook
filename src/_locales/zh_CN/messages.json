@@ -503,124 +503,124 @@
   "OptionsSaveLabel": {
     "message": "保存"
   },
-  "ScrapBookMainBookRefresh": {
+  "ScrapBookBookRefresh": {
     "message": "<刷新>"
   },
-  "ScrapBookMainCommandBrowse": {
+  "ScrapBookCommandBrowse": {
     "message": "在文件管理员检视"
   },
-  "ScrapBookMainCommandCreateNote": {
+  "ScrapBookCommandCreateNote": {
     "message": "添加笔记"
   },
-  "ScrapBookMainCommandCreateNoteDialogTitle": {
+  "ScrapBookCommandCreateNoteDialogTitle": {
     "message": "新笔记的格式:"
   },
-  "ScrapBookMainCommandCreateSeparator": {
+  "ScrapBookCommandCreateSeparator": {
     "message": "添加分隔线"
   },
-  "ScrapBookMainCommandCreatefolder": {
+  "ScrapBookCommandCreatefolder": {
     "message": "添加文件夹"
   },
-  "ScrapBookMainCommandDelete": {
+  "ScrapBookCommandDelete": {
     "message": "删除"
   },
-  "ScrapBookMainCommandEdit": {
+  "ScrapBookCommandEdit": {
     "message": "编辑"
   },
-  "ScrapBookMainCommandEditx": {
+  "ScrapBookCommandEditx": {
     "message": "编辑页面"
   },
-  "ScrapBookMainCommandExec": {
+  "ScrapBookCommandExec": {
     "message": "用默认程序开启"
   },
-  "ScrapBookMainCommandExecBook": {
+  "ScrapBookCommandExecBook": {
     "message": "在文件管理员检视主目录"
   },
-  "ScrapBookMainCommandIndex": {
+  "ScrapBookCommandIndex": {
     "message": "检视主页"
   },
-  "ScrapBookMainCommandManage": {
+  "ScrapBookCommandManage": {
     "message": "管理"
   },
-  "ScrapBookMainCommandMeta": {
+  "ScrapBookCommandMeta": {
     "message": "元数据"
   },
-  "ScrapBookMainCommandMetaDialogCharset": {
+  "ScrapBookCommandMetaDialogCharset": {
     "message": "字符集:"
   },
-  "ScrapBookMainCommandMetaDialogComment": {
+  "ScrapBookCommandMetaDialogComment": {
     "message": "注解:"
   },
-  "ScrapBookMainCommandMetaDialogCreate": {
+  "ScrapBookCommandMetaDialogCreate": {
     "message": "建立时间:"
   },
-  "ScrapBookMainCommandMetaDialogIcon": {
+  "ScrapBookCommandMetaDialogIcon": {
     "message": "图示:"
   },
-  "ScrapBookMainCommandMetaDialogId": {
+  "ScrapBookCommandMetaDialogId": {
     "message": "ID:"
   },
-  "ScrapBookMainCommandMetaDialogIndex": {
+  "ScrapBookCommandMetaDialogIndex": {
     "message": "索引文件:"
   },
-  "ScrapBookMainCommandMetaDialogModify": {
+  "ScrapBookCommandMetaDialogModify": {
     "message": "修改时间:"
   },
-  "ScrapBookMainCommandMetaDialogSource": {
+  "ScrapBookCommandMetaDialogSource": {
     "message": "来源:"
   },
-  "ScrapBookMainCommandMetaDialogTitle": {
+  "ScrapBookCommandMetaDialogTitle": {
     "message": "标题:"
   },
-  "ScrapBookMainCommandMetaDialogType": {
+  "ScrapBookCommandMetaDialogType": {
     "message": "类型:"
   },
-  "ScrapBookMainCommandMoveDialogIndex": {
+  "ScrapBookCommandMoveDialogIndex": {
     "message": "位置 (从 0 开始，空白则移至最后):"
   },
-  "ScrapBookMainCommandMoveDialogMode": {
+  "ScrapBookCommandMoveDialogMode": {
     "message": "模式:"
   },
-  "ScrapBookMainCommandMoveDialogModeLink": {
+  "ScrapBookCommandMoveDialogModeLink": {
     "message": "链接"
   },
-  "ScrapBookMainCommandMoveDialogModeMove": {
+  "ScrapBookCommandMoveDialogModeMove": {
     "message": "移动"
   },
-  "ScrapBookMainCommandMoveDialogTitle": {
+  "ScrapBookCommandMoveDialogTitle": {
     "message": "移动到这个 ID 的项目下:"
   },
-  "ScrapBookMainCommandMoveDown": {
+  "ScrapBookCommandMoveDown": {
     "message": "下移"
   },
-  "ScrapBookMainCommandMoveTo": {
+  "ScrapBookCommandMoveTo": {
     "message": "移动至"
   },
-  "ScrapBookMainCommandMoveUp": {
+  "ScrapBookCommandMoveUp": {
     "message": "上移"
   },
-  "ScrapBookMainCommandOpen": {
+  "ScrapBookCommandOpen": {
     "message": "开启"
   },
-  "ScrapBookMainCommandOpenTab": {
+  "ScrapBookCommandOpenTab": {
     "message": "开启在新分页"
   },
-  "ScrapBookMainCommandRecycle": {
+  "ScrapBookCommandRecycle": {
     "message": "移除"
   },
-  "ScrapBookMainCommandSearch": {
+  "ScrapBookCommandSearch": {
     "message": "搜索"
   },
-  "ScrapBookMainCommandSource": {
+  "ScrapBookCommandSource": {
     "message": "开启原始网址"
   },
-  "ScrapBookMainCommandUpload": {
+  "ScrapBookCommandUpload": {
     "message": "上载文件"
   },
-  "ScrapBookMainCommandViewRecycle": {
+  "ScrapBookCommandViewRecycle": {
     "message": "检视回收筒"
   },
-  "ScrapBookMainErrorBookNotExist": {
+  "ScrapBookErrorBookNotExist": {
     "message": "剪贴簿 $NAME$ 不存在，重设为默认剪贴簿",
     "placeholders": {
       "name": {
@@ -628,7 +628,7 @@
       }
     }
   },
-  "ScrapBookMainErrorInitTree": {
+  "ScrapBookErrorInitTree": {
     "message": "无法初始化目录树: $REASON$",
     "placeholders": {
       "reason": {
@@ -636,7 +636,7 @@
       }
     }
   },
-  "ScrapBookMainErrorLoadBooks": {
+  "ScrapBookErrorLoadBooks": {
     "message": "无法载入剪贴簿: $REASON$",
     "placeholders": {
       "reason": {
@@ -644,7 +644,7 @@
       }
     }
   },
-  "ScrapBookMainErrorServerInit": {
+  "ScrapBookErrorServerInit": {
     "message": "后端服务器初始化错误: $REASON$",
     "placeholders": {
       "reason": {
@@ -652,17 +652,17 @@
       }
     }
   },
-  "ScrapBookMainErrorServerNotConfigured": {
+  "ScrapBookErrorServerNotConfigured": {
     "message": "未设定后端服务器。"
   },
-  "ScrapBookMainErrorServerTreeChanged": {
+  "ScrapBookErrorServerTreeChanged": {
     "message": "服务器的目录树数据已变更，请刷新此页面再嘗试。"
   },
-  "ScrapBookMainNewFolderName": {
+  "ScrapBookNewFolderName": {
     "description": "Default name of a new folder",
     "message": "新文件夹"
   },
-  "ScrapBookMainNewNoteName": {
+  "ScrapBookNewNoteName": {
     "description": "Default name of a new note",
     "message": "新笔记"
   },

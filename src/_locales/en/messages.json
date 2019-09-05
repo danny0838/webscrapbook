@@ -503,124 +503,124 @@
   "OptionsSaveLabel": {
     "message": "Save"
   },
-  "ScrapBookMainBookRefresh": {
+  "ScrapBookBookRefresh": {
     "message": "<Refresh>"
   },
-  "ScrapBookMainCommandBrowse": {
+  "ScrapBookCommandBrowse": {
     "message": "Browse locally"
   },
-  "ScrapBookMainCommandCreateNote": {
+  "ScrapBookCommandCreateNote": {
     "message": "New Note"
   },
-  "ScrapBookMainCommandCreateNoteDialogTitle": {
+  "ScrapBookCommandCreateNoteDialogTitle": {
     "message": "Format of the new note:"
   },
-  "ScrapBookMainCommandCreateSeparator": {
+  "ScrapBookCommandCreateSeparator": {
     "message": "New separator"
   },
-  "ScrapBookMainCommandCreatefolder": {
+  "ScrapBookCommandCreatefolder": {
     "message": "New folder"
   },
-  "ScrapBookMainCommandDelete": {
+  "ScrapBookCommandDelete": {
     "message": "Delete"
   },
-  "ScrapBookMainCommandEdit": {
+  "ScrapBookCommandEdit": {
     "message": "Edit"
   },
-  "ScrapBookMainCommandEditx": {
+  "ScrapBookCommandEditx": {
     "message": "Edit page"
   },
-  "ScrapBookMainCommandExec": {
+  "ScrapBookCommandExec": {
     "message": "Open locally"
   },
-  "ScrapBookMainCommandExecBook": {
+  "ScrapBookCommandExecBook": {
     "message": "View root directory locally"
   },
-  "ScrapBookMainCommandIndex": {
+  "ScrapBookCommandIndex": {
     "message": "View index page"
   },
-  "ScrapBookMainCommandManage": {
+  "ScrapBookCommandManage": {
     "message": "Manage"
   },
-  "ScrapBookMainCommandMeta": {
+  "ScrapBookCommandMeta": {
     "message": "Metadata"
   },
-  "ScrapBookMainCommandMetaDialogCharset": {
+  "ScrapBookCommandMetaDialogCharset": {
     "message": "Charset:"
   },
-  "ScrapBookMainCommandMetaDialogComment": {
+  "ScrapBookCommandMetaDialogComment": {
     "message": "Comment:"
   },
-  "ScrapBookMainCommandMetaDialogCreate": {
+  "ScrapBookCommandMetaDialogCreate": {
     "message": "Create:"
   },
-  "ScrapBookMainCommandMetaDialogIcon": {
+  "ScrapBookCommandMetaDialogIcon": {
     "message": "Icon:"
   },
-  "ScrapBookMainCommandMetaDialogId": {
+  "ScrapBookCommandMetaDialogId": {
     "message": "ID:"
   },
-  "ScrapBookMainCommandMetaDialogIndex": {
+  "ScrapBookCommandMetaDialogIndex": {
     "message": "Index:"
   },
-  "ScrapBookMainCommandMetaDialogModify": {
+  "ScrapBookCommandMetaDialogModify": {
     "message": "Modify:"
   },
-  "ScrapBookMainCommandMetaDialogSource": {
+  "ScrapBookCommandMetaDialogSource": {
     "message": "Source:"
   },
-  "ScrapBookMainCommandMetaDialogTitle": {
+  "ScrapBookCommandMetaDialogTitle": {
     "message": "Title:"
   },
-  "ScrapBookMainCommandMetaDialogType": {
+  "ScrapBookCommandMetaDialogType": {
     "message": "Type:"
   },
-  "ScrapBookMainCommandMoveDialogIndex": {
+  "ScrapBookCommandMoveDialogIndex": {
     "message": "Position (start from 0, empty for last):"
   },
-  "ScrapBookMainCommandMoveDialogMode": {
+  "ScrapBookCommandMoveDialogMode": {
     "message": "Mode:"
   },
-  "ScrapBookMainCommandMoveDialogModeLink": {
+  "ScrapBookCommandMoveDialogModeLink": {
     "message": "Link"
   },
-  "ScrapBookMainCommandMoveDialogModeMove": {
+  "ScrapBookCommandMoveDialogModeMove": {
     "message": "Move"
   },
-  "ScrapBookMainCommandMoveDialogTitle": {
+  "ScrapBookCommandMoveDialogTitle": {
     "message": "Move into the item of this ID:"
   },
-  "ScrapBookMainCommandMoveDown": {
+  "ScrapBookCommandMoveDown": {
     "message": "Move down"
   },
-  "ScrapBookMainCommandMoveTo": {
+  "ScrapBookCommandMoveTo": {
     "message": "Move to"
   },
-  "ScrapBookMainCommandMoveUp": {
+  "ScrapBookCommandMoveUp": {
     "message": "Move up"
   },
-  "ScrapBookMainCommandOpen": {
+  "ScrapBookCommandOpen": {
     "message": "Open"
   },
-  "ScrapBookMainCommandOpenTab": {
+  "ScrapBookCommandOpenTab": {
     "message": "Open in new tab"
   },
-  "ScrapBookMainCommandRecycle": {
+  "ScrapBookCommandRecycle": {
     "message": "Remove"
   },
-  "ScrapBookMainCommandSearch": {
+  "ScrapBookCommandSearch": {
     "message": "Search"
   },
-  "ScrapBookMainCommandSource": {
+  "ScrapBookCommandSource": {
     "message": "View source"
   },
-  "ScrapBookMainCommandUpload": {
+  "ScrapBookCommandUpload": {
     "message": "Upload"
   },
-  "ScrapBookMainCommandViewRecycle": {
+  "ScrapBookCommandViewRecycle": {
     "message": "View recycle bin"
   },
-  "ScrapBookMainErrorBookNotExist": {
+  "ScrapBookErrorBookNotExist": {
     "message": "Scrapbook $NAME$ does not exist. Reset to default scrapbook.",
     "placeholders": {
       "name": {
@@ -628,7 +628,7 @@
       }
     }
   },
-  "ScrapBookMainErrorInitTree": {
+  "ScrapBookErrorInitTree": {
     "message": "Unable to init tree: $REASON$",
     "placeholders": {
       "reason": {
@@ -636,7 +636,7 @@
       }
     }
   },
-  "ScrapBookMainErrorLoadBooks": {
+  "ScrapBookErrorLoadBooks": {
     "message": "Unable to load scrapbooks: $REASON$",
     "placeholders": {
       "reason": {
@@ -644,7 +644,7 @@
       }
     }
   },
-  "ScrapBookMainErrorServerInit": {
+  "ScrapBookErrorServerInit": {
     "message": "Backend initilization error: $REASON$",
     "placeholders": {
       "reason": {
@@ -652,17 +652,17 @@
       }
     }
   },
-  "ScrapBookMainErrorServerNotConfigured": {
+  "ScrapBookErrorServerNotConfigured": {
     "message": "Backend server is not configured."
   },
-  "ScrapBookMainErrorServerTreeChanged": {
+  "ScrapBookErrorServerTreeChanged": {
     "message": "Tree data in the server has been changed. Refresh the page and try again."
   },
-  "ScrapBookMainNewFolderName": {
+  "ScrapBookNewFolderName": {
     "description": "Default name of a new folder",
     "message": "New Folder"
   },
-  "ScrapBookMainNewNoteName": {
+  "ScrapBookNewNoteName": {
     "description": "Default name of a new note",
     "message": "New Note"
   },

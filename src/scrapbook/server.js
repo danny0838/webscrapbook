@@ -421,7 +421,7 @@ class Book {
       // validate tree
       if (!await this.validateTree()) {
         await this.unlockTree();
-        throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
+        throw new Error(scrapbook.lang('ScrapBookErrorServerTreeChanged'));
       }
     }
 
