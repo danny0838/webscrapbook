@@ -575,7 +575,7 @@ scrapbook.getContentPagePattern = async function () {
   const p = (async () => {
     const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
     const urlMatch = ["http://*/*", "https://*/*"];
-    if (allowFileAccess) { urlMatch.push("file://*"); }
+    if (allowFileAccess) { urlMatch.push("file:///*"); }
     return urlMatch;
   })();
   scrapbook.getContentPagePattern = () => p;
