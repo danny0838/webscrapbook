@@ -1523,6 +1523,14 @@ const scrapbookUi = {
     if (!wrapper.classList.contains('dragover')) {
       wrapper.classList.add('dragover');
     }
+
+    let cur = wrapper.parentNode;
+    while (cur && cur.closest('#items')) {
+      if (!cur.classList.contains('dragover-within')) {
+        cur.classList.add('dragover-within');
+      }
+      cur = cur.parentNode.parentNode;
+    }
   },
 
   onItemDragOver(event) {
@@ -1571,6 +1579,12 @@ const scrapbookUi = {
       wrapper.classList.remove('above');
       wrapper.classList.remove('below');
       wrapper.classList.remove('within');
+
+      let cur = wrapper.parentNode;
+      while (cur && cur.closest('#items')) {
+        cur.classList.remove('dragover-within');
+        cur = cur.parentNode.parentNode;
+      }
     }
   },
 
@@ -1585,6 +1599,12 @@ const scrapbookUi = {
     wrapper.classList.remove('above');
     wrapper.classList.remove('below');
     wrapper.classList.remove('within');
+
+    let cur = wrapper.parentNode;
+    while (cur && cur.closest('#items')) {
+      cur.classList.remove('dragover-within');
+      cur = cur.parentNode.parentNode;
+    }
 
     const selectedItemElems = Array.prototype.map.call(
       document.querySelectorAll('#item-root .highlight'),

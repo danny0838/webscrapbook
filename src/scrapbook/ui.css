@@ -247,6 +247,10 @@ body {
   opacity: 0.5;
 }
 
+#items .dragover-within {
+  opacity: unset;
+}
+
 #items .dragover::before {
   z-index: -1;
 }
