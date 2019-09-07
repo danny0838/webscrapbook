@@ -1323,7 +1323,9 @@ const scrapbookUi = {
       div.appendChild(line);
 
       var legend = document.createElement('legend');
-      legend.appendChild(document.createTextNode('\xA0' + (meta.title || '') + '\xA0'));
+      if (meta.title) {
+        legend.appendChild(document.createTextNode('\xA0' + meta.title + '\xA0'));
+      }
       line.appendChild(legend);
     }
 
