@@ -9,6 +9,8 @@
 ((window, document, browser) => {
 
 const editor = {
+  element: null,
+  internalElement: null,
   inScrapBook: false,
   isScripted: false,
 };
@@ -16,21 +18,23 @@ const editor = {
 /**
  * @kind invokable
  */
-editor.init = async function ({toggle, force = false}) {
-  let wrapper = document.querySelector("web-scrapbook");
+editor.init = async function ({willOpen, force = false}) {
+  let wrapper = editor.element = editor.element || document.querySelector("web-scrapbook");
 
-  if (typeof toggle === "undefined") {
-    toggle = !wrapper;
+  if (typeof willOpen === "undefined") {
+    willOpen = !(wrapper && wrapper.parentNode);
   }
 
-  if (!toggle) {
-    if (wrapper) {
-      wrapper.remove();
+  if (!willOpen) {
+    return editor.close();
+  }
+
+  if (wrapper) {
+    if (!wrapper.parentNode) {
+      document.documentElement.appendChild(wrapper);
     }
     return;
   }
-
-  if (wrapper) { return; }
 
   // do not load the toolbar for non-HTML document (unless forced)
   if (!force && !["text/html", "application/xhtml+xml"].includes(document.contentType)) {
@@ -44,7 +48,7 @@ editor.init = async function ({toggle, force = false}) {
   editor.inScrapBook = document.URL.startsWith(scrapbook.getOption("server.url"));
 
   // generate toolbar content
-  wrapper = document.documentElement.appendChild(document.createElement("web-scrapbook"));
+  editor.element = wrapper = document.documentElement.appendChild(document.createElement("web-scrapbook"));
   wrapper.style = `
 all: initial !important;
 position: fixed !important;
@@ -81,6 +85,7 @@ height: 100% !important;
 
     iwrapper = body;
   }
+  editor.internalElement = iwrapper;
 
   const style = iwrapper.appendChild(document.createElement("style"));
   style.textContent = `
@@ -147,59 +152,86 @@ height: 100% !important;
   locate.id = "toolbar-locate";
   locate.textContent = 'locate';
   locate.addEventListener("click", async (event) => {
-    const response = await scrapbook.invokeExtensionScript({
-      cmd: "background.locateCurrentTab",
-    });
-    if (response === false) {
-      alert(scrapbook.lang("ErrorLocateSidebarNotOpened"));
-    } else if (response === null) {
-      alert(scrapbook.lang("ErrorLocateNotFound"));
-    }
+    editor.locate();
   });
   locate.disabled = locate.hidden = !editor.inScrapBook;
 
   const edit = toolbar.appendChild(document.createElement("button"));
   edit.id = "toolbar-edit";
   edit.textContent = 'edit';
-  edit.addEventListener("click", async (event) => {
-    const willEditable = !edit.hasAttribute("checked");
-    willEditable ? edit.setAttribute("checked", "") : edit.removeAttribute("checked");
-    await scrapbook.invokeExtensionScript({
-      cmd: "background.toggleDocumentEditable",
-      args: {designMode: willEditable ? "on" : "off"},
-    });
+  edit.addEventListener("click", (event) => {
+    editor.edit();
   });
 
   const save = toolbar.appendChild(document.createElement("button"));
   save.id = "toolbar-save";
   save.textContent = 'save';
-  save.addEventListener("click", async (event) => {
-    if (editor.inScrapBook) {
-      if (editor.isScripted) {
-        if (!confirm(scrapbook.lang("EditConfirmScriptedDocument"))) {
-          return;
-        }
-      }
-
-      await scrapbook.invokeExtensionScript({
-        cmd: "background.saveCurrentTab",
-      });
-    } else {
-      await scrapbook.invokeExtensionScript({
-        cmd: "background.captureCurrentTab",
-      });
-    }
+  save.addEventListener("click", (event) => {
+    editor.save();
   });
 
   const close = toolbar.appendChild(document.createElement("a"));
   close.id = "toolbar-close";
   close.href = "javascript:";
   close.addEventListener("click", (event) => {
-    const wrapper = document.querySelector("web-scrapbook");
-    if (wrapper) {
-      wrapper.remove();
-    }
+    editor.close();
   });
+};
+
+editor.locate = async function () {
+  const response = await scrapbook.invokeExtensionScript({
+    cmd: "background.locateCurrentTab",
+  });
+  if (response === false) {
+    alert(scrapbook.lang("ErrorLocateSidebarNotOpened"));
+  } else if (response === null) {
+    alert(scrapbook.lang("ErrorLocateNotFound"));
+  }
+  return response;
+};
+
+editor.edit = async function (willEditable) {
+  if (!editor.element && editor.element.parentNode) { return; }
+
+  const editElem = editor.internalElement.getElementById("toolbar-edit");
+
+  if (typeof willEditable === "undefined") {
+    willEditable = !editElem.hasAttribute("checked");
+  }
+
+  willEditable ? editElem.setAttribute("checked", "") : editElem.removeAttribute("checked");
+
+  return await scrapbook.invokeExtensionScript({
+    cmd: "background.toggleDocumentEditable",
+    args: {designMode: willEditable ? "on" : "off"},
+  });
+};
+
+editor.save = async function () {
+  if (!editor.element && editor.element.parentNode) { return; }
+
+  if (editor.inScrapBook) {
+    // prompt a confirm if this page is scripted
+    if (editor.isScripted) {
+      if (!confirm(scrapbook.lang("EditConfirmScriptedDocument"))) {
+        return;
+      }
+    }
+
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.saveCurrentTab",
+    });
+  } else {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.captureCurrentTab",
+    });
+  }
+};
+
+editor.close = async function () {
+  if (!editor.element && editor.element.parentNode) { return; }
+
+  editor.element.remove();
 };
 
 editor.isDocumentScripted = function (doc) {
