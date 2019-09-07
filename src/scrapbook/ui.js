@@ -1696,12 +1696,14 @@ const scrapbookUi = {
 
     if (this.mode !== 'manage') {
       if (browser.windows) {
-        // for desktop browsers, open link in the same tab of the main window
-        event.preventDefault();
-        await scrapbookUi.openLink(elem.href);
+        if (!event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey) {
+          // for desktop browsers, open link in the same tab of the main window
+          event.preventDefault();
+          await scrapbookUi.openLink(elem.href);
+        }
       } else {
         // for Firefox Android (browser.windows not supported)
-        // use default action to open in another tab
+        // use default action to open in the "webscrapbook" tab
       }
     } else {
       // do not open link on click in manage mode
