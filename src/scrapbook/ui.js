@@ -1555,8 +1555,10 @@ const scrapbookUi = {
     // determine the drop effect according to modifiers
     if (event.ctrlKey && this.rootId !== 'recycle') {
       event.dataTransfer.dropEffect = 'link';
+      document.getElementById('items').classList.remove('moving');
     } else {
       event.dataTransfer.dropEffect = 'move';
+      document.getElementById('items').classList.add('moving');
     }
 
     // prevent default to allow drop

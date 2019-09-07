@@ -243,11 +243,11 @@ body {
   background: linear-gradient(#EBF4FD, #C4DDFC);
 }
 
-#items .dragged {
+#items.moving .dragged {
   opacity: 0.5;
 }
 
-#items .dragover-within {
+#items.moving .dragover-within {
   opacity: unset;
 }
 
