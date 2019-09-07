@@ -231,6 +231,7 @@ editor.save = async function () {
 editor.close = async function () {
   if (!editor.element && editor.element.parentNode) { return; }
 
+  await editor.edit(false);
   editor.element.remove();
 };
 
