@@ -181,6 +181,11 @@ body {
   content: "";
 }
 
+#items li > div:hover::before {
+  border: 1px solid rgba(125, 162, 206, 0.3);
+  background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.3));
+}
+
 #items a {
   position: relative;
   z-index: 1;
@@ -238,35 +243,35 @@ body {
   font-weight: bold;
 }
 
-#items .highlight::before {
-  border: 1px solid #7DA2CE;
-  background: linear-gradient(#EBF4FD, #C4DDFC);
+#items li > div.highlight::before {
+  border: 1px solid rgba(125, 162, 206, 1);
+  background: linear-gradient(rgba(235, 244, 253, 1), rgba(196, 221, 252, 1));
 }
 
-#items.moving .dragged {
+#items.moving li.dragged {
   opacity: 0.5;
 }
 
-#items.moving .dragover-within {
+#items.moving li.dragover-within {
   opacity: unset;
 }
 
-#items .dragover::before {
+#items li > div.dragover::before {
   z-index: -1;
 }
 
-#items .dragover.above {
+#items li > div.dragover.above {
   border-top: 2px solid #3399FF;
   padding-top: 0;
   padding-bottom: 0;
 }
 
-#items .dragover.below {
+#items li > div.dragover.below {
   border-bottom: 2px solid #3399FF;
   padding-top: 0;
   padding-bottom: 0;
 }
 
-#items .dragover.within {
+#items li > div.dragover.within {
   outline: 2px dashed #3399FF;
 }
