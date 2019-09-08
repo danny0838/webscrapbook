@@ -1371,7 +1371,7 @@ const scrapbookUi = {
     return elem;
   },
 
-  highlightItem(itemElem, willHighlight) {
+  highlightItem(itemElem, willHighlight, rangedSelection = false) {
     if (typeof willHighlight === "undefined") {
       willHighlight = !this.getHighlightElem(itemElem).classList.contains("highlight");
     }
@@ -1381,14 +1381,70 @@ const scrapbookUi = {
         if (this.lastHighlightElem) {
           this.getHighlightElem(this.lastHighlightElem).classList.remove("highlight");
         }
+        this.getHighlightElem(itemElem).classList.add("highlight");
         this.lastHighlightElem = itemElem;
+      } else {
+        if (!rangedSelection) {
+          this.getHighlightElem(itemElem).classList.add("highlight");
+          this.lastHighlightElem = itemElem;
+        } else {
+          const nodeIterator = document.createNodeIterator(
+            document.getElementById('item-root'),
+            NodeFilter.SHOW_ELEMENT
+          );
+          let node, start = false, endItem;
+          while (node = nodeIterator.nextNode()) {
+            if (node.matches('li[data-id]')) {
+              if (!start) {
+                if (node === itemElem) {
+                  start = true;
+                  endItem = this.lastHighlightElem && this.lastHighlightElem.closest("#items") ? this.lastHighlightElem : itemElem;
+                } else if (node === this.lastHighlightElem) {
+                  start = true;
+                  endItem = itemElem;
+                }
+              }
+              if (start) {
+                this.getHighlightElem(node).classList.add("highlight");
+                if (node === endItem) { break; }
+              }
+            }
+          }
+          this.lastHighlightElem = itemElem;
+        }
       }
-      this.getHighlightElem(itemElem).classList.add("highlight");
     } else {
-      this.getHighlightElem(itemElem).classList.remove("highlight");
       if (this.mode !== 'manage') {
-        if (this.lastHighlightElem === itemElem) {
-          this.lastHighlightElem = null;
+        this.getHighlightElem(itemElem).classList.remove("highlight");
+        this.lastHighlightElem = null;
+      } else {
+        if (!rangedSelection) {
+          this.getHighlightElem(itemElem).classList.remove("highlight");
+          this.lastHighlightElem = itemElem;
+        } else {
+          const nodeIterator = document.createNodeIterator(
+            document.getElementById('item-root'),
+            NodeFilter.SHOW_ELEMENT
+          );
+          let node, start = false, endItem;
+          while (node = nodeIterator.nextNode()) {
+            if (node.matches('li[data-id]')) {
+              if (!start) {
+                if (node === itemElem) {
+                  start = true;
+                  endItem = this.lastHighlightElem && this.lastHighlightElem.closest("#items") ? this.lastHighlightElem : itemElem;
+                } else if (node === this.lastHighlightElem) {
+                  start = true;
+                  endItem = itemElem;
+                }
+              }
+              if (start) {
+                this.getHighlightElem(node).classList.remove("highlight");
+                if (node === endItem) { break; }
+              }
+            }
+          }
+          this.lastHighlightElem = itemElem;
         }
       }
     }
@@ -1665,7 +1721,7 @@ const scrapbookUi = {
 
   onClickItem(event) {
     const itemElem = event.currentTarget.parentNode;
-    this.highlightItem(itemElem);
+    this.highlightItem(itemElem, void 0, event.shiftKey);
   },
 
   onMiddleClickItem(event) {
