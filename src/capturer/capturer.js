@@ -1207,11 +1207,17 @@ capturer.saveDocument = async function (params) {
   const {timeId} = settings;
 
   try {
+    const mapMimeExt = (mime) => {
+      if (mime === "application/xhtml+xml") { return "xhtml"; }
+      if (mime === "image/svg+xml") { return "svg"; }
+      return "html";
+    };
+
     const title = data.title || scrapbook.urlToFilename(sourceUrl);
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
         if (!settings.frameIsMain) {
-          const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+          const ext = "." + mapMimeExt(data.mime);
           let filename = documentName + ext;
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
@@ -1220,7 +1226,7 @@ capturer.saveDocument = async function (params) {
           return {timeId, sourceUrl, url: dataUri};
         } else {
           const blob = new Blob([data.content], {type: data.mime});
-          const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+          const ext = "." + mapMimeExt(data.mime);
           let targetDir;
           let filename;
           let savePrompt;
@@ -1279,7 +1285,7 @@ capturer.saveDocument = async function (params) {
       }
 
       case "singleHtmlJs": {
-        const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+        const ext = "." + mapMimeExt(data.mime);
         let filename = documentName + ext;
         filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
@@ -1316,7 +1322,7 @@ capturer.saveDocument = async function (params) {
               };
 
               var readRes = function (s) {
-                return s.replace(/\bdata:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/g, function (m, t, i, h) {
+                return s.replace(/\bdata:([^,\s]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/g, function (m, t, i, h) {
                   return getRes(i, t) + (h || '');
                 });
               };
@@ -1337,7 +1343,7 @@ capturer.saveDocument = async function (params) {
                   }
                   var a = e[i].attributes;
                   for (var j = 0, J = a.length; j < J; j++) {
-                    if (['href', 'src', 'srcset', 'style', 'background', 'content', 'poster', 'data', 'code', 'archive']
+                    if (['href', 'src', 'srcset', 'style', 'background', 'content', 'poster', 'data', 'code', 'archive', 'xlink:href']
                         .indexOf(a[j].nodeName) !== -1) {
                       loadRes(a[j]);
                     }
@@ -1351,7 +1357,7 @@ capturer.saveDocument = async function (params) {
               loadDocRes(document);
             };
 
-            const [cdataStart, cdataEnd] = (data.mime === "application/xhtml+xml") ? 
+            const [cdataStart, cdataEnd] = ["application/xhtml+xml", "image/svg+xml"].includes(data.mime) ? 
               ['<!--//--><![CDATA[//><!--\n', '//--><!]]>'] :
               ['', ''];
 
@@ -1360,26 +1366,36 @@ capturer.saveDocument = async function (params) {
 ${JSON.stringify(zipData)}
 );${cdataEnd}</script>
 `;
-            let inserted = false;
-            let content = data.content.replace(/<\/body>\s*<\/html>\s*$/i, (m) => {
-              inserted = true;
-              return pageloaderScript + m;
-            });
 
-            if (!inserted) {
-              // fix broken html
-              // Failure of previous insertion is due to post-body contents.
-              // Such HTML doc won't validate, but in such cases we need
-              // to insert our pageloader after them.
-              content = data.content.replace(/<\/html>\s*$/i, (m) => {
+            let inserted = false;
+            let content;
+
+            if (data.mime === "image/svg+xml") {
+              content = data.content.replace(/<\/svg>\s*$/i, (m) => {
                 inserted = true;
                 return pageloaderScript + m;
               });
+            } else {
+              content = data.content.replace(/<\/body>\s*<\/html>\s*$/i, (m) => {
+                inserted = true;
+                return pageloaderScript + m;
+              });
+
+              if (!inserted) {
+                // fix broken html
+                // Failure of previous insertion is due to post-body contents.
+                // Such HTML doc won't validate, but in such cases we need
+                // to insert our pageloader after them.
+                content = data.content.replace(/<\/html>\s*$/i, (m) => {
+                  inserted = true;
+                  return pageloaderScript + m;
+                });
+              }
             }
 
             if (!inserted) {
               // this is unexpected and should never happen
-              throw new Error(`Unable to find the end tag of HTML doc`);
+              throw new Error(`Unable to find the end tag of the document.`);
             }
 
             return content;
@@ -1444,7 +1460,7 @@ ${JSON.stringify(zipData)}
       }
 
       case "zip": {
-        const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+        const ext = "." + mapMimeExt(data.mime);
         let filename = documentName + ext;
         filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
@@ -1454,9 +1470,9 @@ ${JSON.stringify(zipData)}
         if (!settings.frameIsMain) {
           return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
         } else {
-          // create index.html that redirects to index.xhtml
-          if (ext === ".xhtml") {
-            const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
+          // create index.html that redirects to index.xhtml|.svg
+          if (ext !== ".html") {
+            const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index${ext}">`;
             scrapbook.zipAddFile(zip, "index.html", new Blob([html], {type: "text/html"}), true);
           }
 
@@ -1520,7 +1536,7 @@ ${JSON.stringify(zipData)}
       }
 
       case "maff": {
-        const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+        const ext = "." + mapMimeExt(data.mime);
         let filename = documentName + ext;
         filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
@@ -1531,9 +1547,9 @@ ${JSON.stringify(zipData)}
           return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
         } else {
           {
-            // create index.html that redirects to index.xhtml
-            if (ext === ".xhtml") {
-              const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
+            // create index.html that redirects to index.xhtml|.svg
+            if (ext !== ".html") {
+              const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index${ext}">`;
               scrapbook.zipAddFile(zip, timeId + "/" + "index.html", new Blob([html], {type: "text/html"}), true);
             }
 
@@ -1615,7 +1631,7 @@ ${JSON.stringify(zipData)}
 
       case "folder":
       default: {
-        const ext = "." + ((data.mime === "application/xhtml+xml") ? "xhtml" : "html");
+        const ext = "." + mapMimeExt(data.mime);
         let targetDir;
         let filename = documentName + ext;
         let savePrompt = false;
@@ -1645,15 +1661,15 @@ ${JSON.stringify(zipData)}
           directory: targetDir,
           filename,
           sourceUrl,
-          autoErase: !settings.frameIsMain || (ext === ".xhtml"),
+          autoErase: !settings.frameIsMain || (ext !== ".html"),
           savePrompt,
           settings,
           options,
         });
 
-        if (settings.frameIsMain && (ext === ".xhtml")) {
+        if (settings.frameIsMain && (ext !== ".html")) {
           // create index.html that redirects to index.xhtml
-          const html = '<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.xhtml">';
+          const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index${ext}">`;
           const blob = new Blob([html], {type: "text/html"});
           await capturer[saveMethod]({
             timeId,

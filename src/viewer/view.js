@@ -149,7 +149,7 @@ const viewer = {
       inZipPath: inZipPath,
       rewriteFunc: async (params) => {
         const {data, charset, recurseChain} = params;
-        if (["text/html", "application/xhtml+xml"].includes(data.type)) {
+        if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(data.type)) {
           try {
             const doc = await scrapbook.readFileAsDocument(data);
             if (!doc) { throw new Error("document cannot be loaded"); }
@@ -191,36 +191,67 @@ const viewer = {
       // skip elements that are already removed from the DOM tree
       if (!elem.parentNode) { return; }
 
-      switch (elem.nodeName.toLowerCase()) {
-        case "meta": {
-          if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content") &&
-              elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
-            const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
-            if (metaRefresh.url) {
-              const info = viewer.parseUrl(metaRefresh.url, refUrl);
-              const [sourcePage] = scrapbook.splitUrlByAnchor(refUrl);
-              const [targetPage, targetPageHash] = scrapbook.splitUrlByAnchor(info.virtualUrl || info.url);
-              if (targetPage !== sourcePage) {
-                if (recurseChain.includes(targetPage)) {
-                  // console.warn("Resource '" + sourcePage + "' has a circular reference to '" + targetPage + "'.");
-                  elem.setAttribute("content", metaRefresh.time + ";url=about:blank");
-                  break;
-                }
-                if (info.inZip) {
-                  const metaRecurseChain = JSON.parse(JSON.stringify(recurseChain));
-                  metaRecurseChain.push(refUrl);
-                  tasks[tasks.length] = 
-                  viewer.fetchPage({
-                    inZipPath: info.inZipPath,
-                    url: info.url,
-                    recurseChain: metaRecurseChain,
-                  }).then((fetchedUrl) => {
-                    const url = fetchedUrl || info.url;
-                    elem.setAttribute("content", metaRefresh.time + ";url=" + url);
-                    return url;
-                  });
-                } else {
-                  const content = `<!DOCTYPE html>
+      if (elem.closest("svg")) {
+        // href and xlink:href in SVG elements
+        if (elem.hasAttribute("href")) {
+          const info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
+          if (info.inZip) {
+            if (info.inZipPath !== inZipPath) {
+              elem.setAttribute("href", info.url);
+            } else {
+              // link to self
+              elem.setAttribute("href", info.hash || "#");
+            }
+          } else {
+            // link target is not in the zip
+            elem.setAttribute("href", info.url);
+          }
+        }
+        if (elem.hasAttribute("xlink:href")) {
+          const info = viewer.parseUrl(elem.getAttribute("xlink:href"), refUrl);
+          if (info.inZip) {
+            if (info.inZipPath !== inZipPath) {
+              elem.setAttribute("xlink:href", info.url);
+            } else {
+              // link to self
+              elem.setAttribute("xlink:href", info.hash || "#");
+            }
+          } else {
+            // link target is not in the zip
+            elem.setAttribute("xlink:href", info.url);
+          }
+        }
+      } else {
+        switch (elem.nodeName.toLowerCase()) {
+          case "meta": {
+            if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content") &&
+                elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
+              const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+              if (metaRefresh.url) {
+                const info = viewer.parseUrl(metaRefresh.url, refUrl);
+                const [sourcePage] = scrapbook.splitUrlByAnchor(refUrl);
+                const [targetPage, targetPageHash] = scrapbook.splitUrlByAnchor(info.virtualUrl || info.url);
+                if (targetPage !== sourcePage) {
+                  if (recurseChain.includes(targetPage)) {
+                    // console.warn("Resource '" + sourcePage + "' has a circular reference to '" + targetPage + "'.");
+                    elem.setAttribute("content", metaRefresh.time + ";url=about:blank");
+                    break;
+                  }
+                  if (info.inZip) {
+                    const metaRecurseChain = JSON.parse(JSON.stringify(recurseChain));
+                    metaRecurseChain.push(refUrl);
+                    tasks[tasks.length] = 
+                    viewer.fetchPage({
+                      inZipPath: info.inZipPath,
+                      url: info.url,
+                      recurseChain: metaRecurseChain,
+                    }).then((fetchedUrl) => {
+                      const url = fetchedUrl || info.url;
+                      elem.setAttribute("content", metaRefresh.time + ";url=" + url);
+                      return url;
+                    });
+                  } else {
+                    const content = `<!DOCTYPE html>
 <html ${viewer.metaRefreshIdentifier}="1">
 <head>
 <meta charset="UTF-8">
@@ -231,369 +262,370 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 </body>
 </html>
 `;
-                  const url = URL.createObjectURL(new Blob([content], {type: "text/html"})) + targetPageHash;
-                  elem.setAttribute("content", metaRefresh.time + ";url=" + url);
+                    const url = URL.createObjectURL(new Blob([content], {type: "text/html"})) + targetPageHash;
+                    elem.setAttribute("content", metaRefresh.time + ";url=" + url);
+                  }
+                } else {
+                  elem.setAttribute("content", metaRefresh.time + (targetPageHash ? ";url=" + targetPageHash : ""));
                 }
-              } else {
-                elem.setAttribute("content", metaRefresh.time + (targetPageHash ? ";url=" + targetPageHash : ""));
+              }
+            } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
+              switch (elem.getAttribute("property").toLowerCase()) {
+                case "og:image":
+                case "og:image:url":
+                case "og:image:secure_url":
+                case "og:audio":
+                case "og:audio:url":
+                case "og:audio:secure_url":
+                case "og:video":
+                case "og:video:url":
+                case "og:video:secure_url":
+                case "og:url":
+                  elem.setAttribute("content", rewriteUrl(elem.getAttribute("content"), refUrl));
+                  break;
               }
             }
-          } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
-            switch (elem.getAttribute("property").toLowerCase()) {
-              case "og:image":
-              case "og:image:url":
-              case "og:image:secure_url":
-              case "og:audio":
-              case "og:audio:url":
-              case "og:audio:secure_url":
-              case "og:video":
-              case "og:video:url":
-              case "og:video:secure_url":
-              case "og:url":
-                elem.setAttribute("content", rewriteUrl(elem.getAttribute("content"), refUrl));
-                break;
-            }
+            break;
           }
-          break;
-        }
 
-        case "link": {
-          if (elem.hasAttribute("href")) {
-            if (elem.matches('[rel~="stylesheet"]')) {
-              const info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
+          case "link": {
+            if (elem.hasAttribute("href")) {
+              if (elem.matches('[rel~="stylesheet"]')) {
+                const info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
+                tasks[tasks.length] = 
+                viewer.fetchFile({
+                  inZipPath: info.inZipPath,
+                  rewriteFunc: viewer.processCssFile,
+                  recurseChain: [refUrl],
+                }).then((fetchedUrl) => {
+                  const url = fetchedUrl || info.url;
+                  elem.setAttribute("href", url);
+                  return url;
+                });
+              } else {
+                elem.setAttribute("href", rewriteUrl(elem.getAttribute("href")));
+              }
+            }
+            break;
+          }
+
+          case "style": {
+            tasks[tasks.length] = 
+            viewer.processCssText(elem.textContent, refUrl, recurseChain).then((response) => {
+              elem.textContent = response;
+              return response;
+            });
+            break;
+          }
+
+          case "script": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+
+              // External scripts are not allowed by extension CSP, retrieve and 
+              // convert them into blob URLs as a shim.
+              if (!elem.src.startsWith('blob:') && viewer.hasCsp) {
+                tasks[tasks.length] = 
+                scrapbook.xhr({
+                  url: elem.src,
+                  responseType: 'blob',
+                }).then((xhr) => {
+                  return xhr.response;
+                }).then((blob) => {
+                  if (!blob) { return; }
+                  elem.src = URL.createObjectURL(blob); 
+                }).catch((ex) => {
+                  console.error(ex);
+                });
+              }
+
+              // In Chromium, "blob:" is still allowed even if it's not set in the
+              // content_security_policy, and thus offensive scripts could run.
+              // Replace the src with a dummy URL so that scripts are never loaded.
+              if (elem.src.startsWith('blob:') && !viewer.hasCsp) {
+                elem.setAttribute("src", "blob:");
+              }
+            } else {
+              // Inline scripts are not allowed by extension CSP, convert them into
+              // blob URLs as a shim.
+              if (viewer.hasCsp) {
+                const text = elem.textContent;
+                if (text) {
+                  elem.src = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
+                  elem.textContent = "";
+                }
+              }
+            }
+            break;
+          }
+
+          case "body":
+          case "table":
+          case "tr":
+          case "th":
+          case "td": {
+            // deprecated: background attribute (deprecated since HTML5)
+            if (elem.hasAttribute("background")) {
+              elem.setAttribute("background", rewriteUrl(elem.getAttribute("background"), refUrl));
+            }
+            break;
+          }
+
+          case "frame":
+          case "iframe": {
+            if (elem.hasAttribute("src")) {
+              const frameRecurseChain = JSON.parse(JSON.stringify(recurseChain));
+              frameRecurseChain.push(refUrl);
+              const info = viewer.parseUrl(elem.getAttribute("src"), refUrl);
+              if (info.inZip) {
+                const targetUrl = viewer.inZipPathToUrl(info.inZipPath);
+                if (frameRecurseChain.includes(targetUrl)) {
+                  // console.warn("Resource '" + refUrl + "' has a circular reference to '" + targetUrl + "'.");
+                  elem.setAttribute("src", "about:blank");
+                  break;
+                }
+              }
+
               tasks[tasks.length] = 
-              viewer.fetchFile({
+              viewer.fetchPage({
                 inZipPath: info.inZipPath,
-                rewriteFunc: viewer.processCssFile,
-                recurseChain: [refUrl],
+                url: info.url,
+                recurseChain: frameRecurseChain,
               }).then((fetchedUrl) => {
                 const url = fetchedUrl || info.url;
-                elem.setAttribute("href", url);
+                elem.setAttribute("src", url);
                 return url;
               });
-            } else {
-              elem.setAttribute("href", rewriteUrl(elem.getAttribute("href")));
             }
+            break;
           }
-          break;
+
+          case "a":
+          case "area": {
+            if (elem.hasAttribute("href")) {
+              const info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
+              if (info.inZip) {
+                if (info.inZipPath !== inZipPath) {
+                  elem.setAttribute("href", info.url);
+                } else {
+                  // link to self
+                  elem.setAttribute("href", info.hash || "#");
+                }
+              } else {
+                // link target is not in the zip
+                elem.setAttribute("href", info.url);
+              }
+            }
+            break;
+          }
+
+          case "img": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            }
+            if (elem.hasAttribute("srcset")) {
+              elem.setAttribute("srcset",
+                scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
+                  return rewriteUrl(url, refUrl);
+                })
+              );
+            }
+            break;
+          }
+
+          case "audio": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            }
+            break;
+          }
+
+          case "video": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            }
+            if (elem.hasAttribute("poster")) {
+              elem.setAttribute("poster", rewriteUrl(elem.getAttribute("poster"), refUrl));
+            }
+            break;
+          }
+
+          case "source": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            }
+            if (elem.hasAttribute("srcset")) {
+              elem.setAttribute("srcset",
+                scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
+                  return rewriteUrl(url, refUrl);
+                })
+              );
+            }
+            break;
+          }
+
+          case "track": {
+            if (elem.hasAttribute("src")) {
+              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+            }
+            break;
+          }
+
+
+          // @FIXME: embed, objects, and applet don't work as in a regular web page.
+          case "embed": {
+            if (elem.hasAttribute("src")) {
+              try {
+                elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+              } catch (ex) {
+                // In Firefox < 53, an error could be thrown here.
+                // The modification still take effect, though.
+              }
+
+              // External resources are not allowed by extension CSP, retrieve and 
+              // convert them into blob URLs as a shim.
+              const url = elem.getAttribute("src");
+              if (!url.startsWith('blob:') && viewer.hasCsp) {
+                tasks[tasks.length] = 
+                scrapbook.xhr({
+                  url,
+                  responseType: 'blob',
+                }).then((xhr) => {
+                  return xhr.response;
+                }).then((blob) => {
+                  if (!blob) { return; }
+                  elem.setAttribute("src", URL.createObjectURL(blob));
+                }).catch((ex) => {
+                  console.error(ex);
+                });
+              }
+            }
+            break;
+          }
+
+          case "object": {
+            if (elem.hasAttribute("data")) {
+              try {
+                elem.setAttribute("data", rewriteUrl(elem.getAttribute("data"), refUrl));
+              } catch (ex) {
+                // In Firefox < 53, an error could be thrown here.
+                // The modification still take effect, though.
+              }
+
+              // External resources are not allowed by extension CSP, retrieve and 
+              // convert them into blob URLs as a shim.
+              const url = elem.getAttribute("data");
+              if (!url.startsWith('blob:') && viewer.hasCsp) {
+                tasks[tasks.length] = 
+                scrapbook.xhr({
+                  url,
+                  responseType: 'blob',
+                }).then((xhr) => {
+                  return xhr.response;
+                }).then((blob) => {
+                  if (!blob) { return; }
+                  elem.setAttribute("data", URL.createObjectURL(blob));
+                }).catch((ex) => {
+                  console.error(ex);
+                });
+              }
+            }
+            break;
+          }
+
+          case "applet": {
+            if (elem.hasAttribute("code")) {
+              try {
+                elem.setAttribute("code", rewriteUrl(elem.getAttribute("code"), refUrl));
+              } catch (ex) {
+                // In Firefox < 53, an error could be thrown here.
+                // The modification still take effect, though.
+              }
+
+              // External resources are not allowed by extension CSP, retrieve and 
+              // convert them into blob URLs as a shim.
+              const url = elem.getAttribute("code");
+              if (!url.startsWith('blob:') && viewer.hasCsp) {
+                tasks[tasks.length] = 
+                scrapbook.xhr({
+                  url,
+                  responseType: 'blob',
+                }).then((xhr) => {
+                  return xhr.response;
+                }).then((blob) => {
+                  if (!blob) { return; }
+                  elem.setAttribute("code", URL.createObjectURL(blob));
+                }).catch((ex) => {
+                  console.error(ex);
+                });
+              }
+            }
+
+            if (elem.hasAttribute("archive")) {
+              try {
+                elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive"), refUrl));
+              } catch (ex) {
+                // In Firefox < 53, an error could be thrown here.
+                // The modification still take effect, though.
+              }
+
+              // External resources are not allowed by extension CSP, retrieve and 
+              // convert them into blob URLs as a shim.
+              const url = elem.getAttribute("archive");
+              if (!url.startsWith('blob:') && viewer.hasCsp) {
+                tasks[tasks.length] = 
+                scrapbook.xhr({
+                  url,
+                  responseType: 'blob',
+                }).then((xhr) => {
+                  return xhr.response;
+                }).then((blob) => {
+                  if (!blob) { return; }
+                  elem.setAttribute("archive", URL.createObjectURL(blob));
+                }).catch((ex) => {
+                  console.error(ex);
+                });
+              }
+            }
+            break;
+          }
+
+          case "form": {
+            if ( elem.hasAttribute("action") ) {
+              elem.setAttribute("action", rewriteUrl(elem.getAttribute("action"), refUrl));
+            }
+            break;
+          }
+
+          case "input": {
+            switch (elem.type.toLowerCase()) {
+              // images: input
+              case "image":
+                if (elem.hasAttribute("src")) {
+                  elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
+                }
+                break;
+            }
+            break;
+          }
         }
 
-        case "style": {
+        // styles: style attribute
+        if (elem.hasAttribute("style")) {
           tasks[tasks.length] = 
-          viewer.processCssText(elem.textContent, refUrl, recurseChain).then((response) => {
-            elem.textContent = response;
+          viewer.processCssText(elem.getAttribute("style"), refUrl, recurseChain).then((response) => {
+            elem.setAttribute("style", response);
             return response;
           });
-          break;
         }
-
-        case "script": {
-          if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
-
-            // External scripts are not allowed by extension CSP, retrieve and 
-            // convert them into blob URLs as a shim.
-            if (!elem.src.startsWith('blob:') && viewer.hasCsp) {
-              tasks[tasks.length] = 
-              scrapbook.xhr({
-                url: elem.src,
-                responseType: 'blob',
-              }).then((xhr) => {
-                return xhr.response;
-              }).then((blob) => {
-                if (!blob) { return; }
-                elem.src = URL.createObjectURL(blob); 
-              }).catch((ex) => {
-                console.error(ex);
-              });
-            }
-
-            // In Chromium, "blob:" is still allowed even if it's not set in the
-            // content_security_policy, and thus offensive scripts could run.
-            // Replace the src with a dummy URL so that scripts are never loaded.
-            if (elem.src.startsWith('blob:') && !viewer.hasCsp) {
-              elem.setAttribute("src", "blob:");
-            }
-          } else {
-            // Inline scripts are not allowed by extension CSP, convert them into
-            // blob URLs as a shim.
-            if (viewer.hasCsp) {
-              const text = elem.textContent;
-              if (text) {
-                elem.src = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
-                elem.textContent = "";
-              }
-            }
-          }
-          break;
-        }
-
-        case "body":
-        case "table":
-        case "tr":
-        case "th":
-        case "td": {
-          // deprecated: background attribute (deprecated since HTML5)
-          if (elem.hasAttribute("background")) {
-            elem.setAttribute("background", rewriteUrl(elem.getAttribute("background"), refUrl));
-          }
-          break;
-        }
-
-        case "frame":
-        case "iframe": {
-          if (elem.hasAttribute("src")) {
-            const frameRecurseChain = JSON.parse(JSON.stringify(recurseChain));
-            frameRecurseChain.push(refUrl);
-            const info = viewer.parseUrl(elem.getAttribute("src"), refUrl);
-            if (info.inZip) {
-              const targetUrl = viewer.inZipPathToUrl(info.inZipPath);
-              if (frameRecurseChain.includes(targetUrl)) {
-                // console.warn("Resource '" + refUrl + "' has a circular reference to '" + targetUrl + "'.");
-                elem.setAttribute("src", "about:blank");
-                break;
-              }
-            }
-
-            tasks[tasks.length] = 
-            viewer.fetchPage({
-              inZipPath: info.inZipPath,
-              url: info.url,
-              recurseChain: frameRecurseChain,
-            }).then((fetchedUrl) => {
-              const url = fetchedUrl || info.url;
-              elem.setAttribute("src", url);
-              return url;
-            });
-          }
-          break;
-        }
-
-        case "a":
-        case "area": {
-          if (elem.hasAttribute("href")) {
-            const info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
-            if (info.inZip) {
-              if (info.inZipPath !== inZipPath) {
-                elem.setAttribute("href", info.url);
-              } else {
-                // link to self
-                elem.setAttribute("href", info.hash || "#");
-              }
-            } else {
-              // link target is not in the zip
-              elem.setAttribute("href", info.url);
-            }
-          }
-          break;
-        }
-
-        case "img": {
-          if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
-          }
-          if (elem.hasAttribute("srcset")) {
-            elem.setAttribute("srcset",
-              scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
-                return rewriteUrl(url, refUrl);
-              })
-            );
-          }
-          break;
-        }
-
-        case "audio": {
-          if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
-          }
-          break;
-        }
-
-        case "video": {
-          if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
-          }
-          if (elem.hasAttribute("poster")) {
-            elem.setAttribute("poster", rewriteUrl(elem.getAttribute("poster"), refUrl));
-          }
-          break;
-        }
-
-        case "source": {
-          if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
-          }
-          if (elem.hasAttribute("srcset")) {
-            elem.setAttribute("srcset",
-              scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
-                return rewriteUrl(url, refUrl);
-              })
-            );
-          }
-          break;
-        }
-
-        case "track": {
-          if (elem.hasAttribute("src")) {
-            elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
-          }
-          break;
-        }
-
-
-        // @FIXME: embed, objects, and applet don't work as in a regular web page.
-        case "embed": {
-          if (elem.hasAttribute("src")) {
-            try {
-              elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
-            } catch (ex) {
-              // In Firefox < 53, an error could be thrown here.
-              // The modification still take effect, though.
-            }
-
-            // External resources are not allowed by extension CSP, retrieve and 
-            // convert them into blob URLs as a shim.
-            const url = elem.getAttribute("src");
-            if (!url.startsWith('blob:') && viewer.hasCsp) {
-              tasks[tasks.length] = 
-              scrapbook.xhr({
-                url,
-                responseType: 'blob',
-              }).then((xhr) => {
-                return xhr.response;
-              }).then((blob) => {
-                if (!blob) { return; }
-                elem.setAttribute("src", URL.createObjectURL(blob));
-              }).catch((ex) => {
-                console.error(ex);
-              });
-            }
-          }
-          break;
-        }
-
-        case "object": {
-          if (elem.hasAttribute("data")) {
-            try {
-              elem.setAttribute("data", rewriteUrl(elem.getAttribute("data"), refUrl));
-            } catch (ex) {
-              // In Firefox < 53, an error could be thrown here.
-              // The modification still take effect, though.
-            }
-
-            // External resources are not allowed by extension CSP, retrieve and 
-            // convert them into blob URLs as a shim.
-            const url = elem.getAttribute("data");
-            if (!url.startsWith('blob:') && viewer.hasCsp) {
-              tasks[tasks.length] = 
-              scrapbook.xhr({
-                url,
-                responseType: 'blob',
-              }).then((xhr) => {
-                return xhr.response;
-              }).then((blob) => {
-                if (!blob) { return; }
-                elem.setAttribute("data", URL.createObjectURL(blob));
-              }).catch((ex) => {
-                console.error(ex);
-              });
-            }
-          }
-          break;
-        }
-
-        case "applet": {
-          if (elem.hasAttribute("code")) {
-            try {
-              elem.setAttribute("code", rewriteUrl(elem.getAttribute("code"), refUrl));
-            } catch (ex) {
-              // In Firefox < 53, an error could be thrown here.
-              // The modification still take effect, though.
-            }
-
-            // External resources are not allowed by extension CSP, retrieve and 
-            // convert them into blob URLs as a shim.
-            const url = elem.getAttribute("code");
-            if (!url.startsWith('blob:') && viewer.hasCsp) {
-              tasks[tasks.length] = 
-              scrapbook.xhr({
-                url,
-                responseType: 'blob',
-              }).then((xhr) => {
-                return xhr.response;
-              }).then((blob) => {
-                if (!blob) { return; }
-                elem.setAttribute("code", URL.createObjectURL(blob));
-              }).catch((ex) => {
-                console.error(ex);
-              });
-            }
-          }
-
-          if (elem.hasAttribute("archive")) {
-            try {
-              elem.setAttribute("archive", rewriteUrl(elem.getAttribute("archive"), refUrl));
-            } catch (ex) {
-              // In Firefox < 53, an error could be thrown here.
-              // The modification still take effect, though.
-            }
-
-            // External resources are not allowed by extension CSP, retrieve and 
-            // convert them into blob URLs as a shim.
-            const url = elem.getAttribute("archive");
-            if (!url.startsWith('blob:') && viewer.hasCsp) {
-              tasks[tasks.length] = 
-              scrapbook.xhr({
-                url,
-                responseType: 'blob',
-              }).then((xhr) => {
-                return xhr.response;
-              }).then((blob) => {
-                if (!blob) { return; }
-                elem.setAttribute("archive", URL.createObjectURL(blob));
-              }).catch((ex) => {
-                console.error(ex);
-              });
-            }
-          }
-          break;
-        }
-
-        case "form": {
-          if ( elem.hasAttribute("action") ) {
-            elem.setAttribute("action", rewriteUrl(elem.getAttribute("action"), refUrl));
-          }
-          break;
-        }
-
-        case "input": {
-          switch (elem.type.toLowerCase()) {
-            // images: input
-            case "image":
-              if (elem.hasAttribute("src")) {
-                elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
-              }
-              break;
-          }
-          break;
-        }
-      }
-
-      // styles: style attribute
-      if (elem.hasAttribute("style")) {
-        tasks[tasks.length] = 
-        viewer.processCssText(elem.getAttribute("style"), refUrl, recurseChain).then((response) => {
-          elem.setAttribute("style", response);
-          return response;
-        });
       }
     });
 
-    // Remove privileged APIs to avoid a potential security risk.
-    if (viewer.hasCsp) { viewer.insertDeApiScript(doc); }
+    if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+      // Remove privileged APIs to avoid a potential security risk.
+      if (viewer.hasCsp) { viewer.insertDeApiScript(doc); }
 
-    // Reset CSS for Chromium
-    {
+      // Reset CSS for Chromium
       const elem = doc.createElement("link");
       elem.rel = "stylesheet";
       elem.href = browser.runtime.getURL("core/reset.css");

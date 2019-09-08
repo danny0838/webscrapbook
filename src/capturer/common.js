@@ -87,8 +87,8 @@ capturer.captureDocumentOrFile = async function (params) {
 
   const {doc = document, refUrl, title, settings, options} = params;
 
-  // if not HTML document, capture as file
-  if (!["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+  // if not HTML|SVG document, capture as file
+  if (!["text/html", "application/xhtml+xml", "image/svg+xml"].includes(doc.contentType)) {
     // if it can be displayed as HTML, check saveFileAsHtml
     if (!(doc.documentElement.nodeName.toLowerCase() === "html" && options["capture.saveFileAsHtml"])) {
       return await capturer.invoke("captureFile", {
@@ -179,6 +179,8 @@ capturer.captureDocument = async function (params) {
 
     // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
     const captureRewriteAttr = (elem, attr, value, record = options["capture.recordRewrittenAttr"]) => {
+      let [ns, att] = scrapbook.splitXmlAttribute(attr);
+
       if (elem.hasAttribute(attr)) {
         const oldValue = elem.getAttribute(attr);
         if (oldValue === value) { return; }
@@ -190,7 +192,7 @@ capturer.captureDocument = async function (params) {
         }
 
         if (record) {
-          const recordAttr = `data-scrapbook-orig-attr-${attr}-${timeId}`;
+          const recordAttr = `${ns ? ns + ":" : ""}data-scrapbook-orig-attr-${att}-${timeId}`;
           if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, oldValue); }
         }
       } else {
@@ -199,7 +201,7 @@ capturer.captureDocument = async function (params) {
         elem.setAttribute(attr, value);
 
         if (record) {
-          const recordAttr = `data-scrapbook-orig-null-attr-${attr}-${timeId}`;
+          const recordAttr = `${ns ? ns + ":" : ""}data-scrapbook-orig-null-attr-${att}-${timeId}`;
           if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, ""); }
         }
       }
@@ -255,6 +257,137 @@ capturer.captureDocument = async function (params) {
       }
 
       return url;
+    };
+
+    const rewriteAnchor = (elem, attr) => {
+      if (!elem.hasAttribute(attr)) { return; }
+
+      let url = elem.getAttribute(attr);
+
+      // scripts: script-like anchors
+      if (url.toLowerCase().startsWith("javascript:")) {
+        switch (options["capture.script"]) {
+          case "save":
+          case "link":
+            // do nothing
+            break;
+          case "blank":
+          case "remove":
+          default:
+            captureRewriteAttr(elem, attr, "javascript:");
+            break;
+        }
+        return;
+      }
+
+      // check local link and rewrite url
+      url = rewriteLocalLink(url, refUrl, docUrl);
+      elem.setAttribute(attr, url);
+
+      // skip further processing for non-absolute links
+      if (!scrapbook.isUrlAbsolute(url)) {
+        return;
+      }
+
+      // check downLink
+      if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
+        switch (options["capture.downLink.mode"]) {
+          case "header": {
+            if (capturer.downLinkUrlFilter(url, options)) {
+              break;
+            }
+
+            tasks[tasks.length] = halter.then(async () => {
+              const ext = await capturer.invoke("downLinkFetchHeader", {
+                url,
+                refUrl,
+                options,
+                settings,
+              });
+              if (ext === null) { return null; }
+              if (!capturer.downLinkExtFilter(ext, options)) { return null; }
+
+              const response = await capturer.invoke("downloadFile", {
+                url,
+                refUrl,
+                settings,
+                options,
+              });
+              captureRewriteUri(elem, attr, response.url);
+              return response;
+            });
+            break;
+          }
+          case "url": {
+            if (capturer.downLinkUrlFilter(url, options)) {
+              break;
+            }
+
+            const filename = scrapbook.urlToFilename(url);
+            const [, ext] = scrapbook.filenameParts(filename);
+            if (!capturer.downLinkExtFilter(ext, options)) { break; }
+
+            tasks[tasks.length] = halter.then(async () => {
+              const response = await capturer.invoke("downloadFile", {
+                url,
+                refUrl,
+                settings,
+                options,
+              });
+              captureRewriteUri(elem, attr, response.url);
+              return response;
+            });
+            break;
+          }
+          case "none":
+          default: {
+            break;
+          }
+        }
+      }
+    };
+
+    const rewriteSvgHref = (elem, attr) => {
+      if (!elem.hasAttribute(attr)) { return; }
+
+      let url = elem.getAttribute(attr);
+
+      // check local link and rewrite url
+      url = rewriteLocalLink(url, refUrl, docUrl);
+      elem.setAttribute(attr, url);
+
+      switch (options["capture.image"]) {
+        case "link":
+          // do nothing
+          break;
+        case "blank":
+          if (elem.hasAttribute(attr)) {
+            captureRewriteUri(elem, attr, null);
+          }
+          break;
+        case "remove":
+          captureRemoveNode(elem);
+          return;
+        case "save-current":
+        case "save":
+        default:
+          // skip further processing for non-absolute links
+          if (!scrapbook.isUrlAbsolute(url)) {
+            break;
+          }
+
+          tasks[tasks.length] = halter.then(async () => {
+            const response = await capturer.invoke("downloadFile", {
+              url,
+              refUrl,
+              settings,
+              options,
+            });
+            captureRewriteUri(elem, attr, response.url);
+            return response;
+          });
+          break;
+      }
     };
 
     const getCanvasDataScript = (canvas) => {
@@ -322,10 +455,13 @@ capturer.captureDocument = async function (params) {
           // For the first range, clone html and head.
           if (iRange === 0) {
             rootNode = cloneNodeMapping(htmlNode, false);
-            headNode = doc.querySelector("head");
-            headNode = headNode ? cloneNodeMapping(headNode, true) : doc.createElement("head");
-            rootNode.appendChild(headNode);
-            rootNode.appendChild(doc.createTextNode("\n"));
+
+            if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+              headNode = doc.querySelector("head");
+              headNode = headNode ? cloneNodeMapping(headNode, true) : doc.createElement("head");
+              rootNode.appendChild(headNode);
+              rootNode.appendChild(doc.createTextNode("\n"));
+            }
           }
 
           // Calculate the first and last node of selection
@@ -427,35 +563,39 @@ capturer.captureDocument = async function (params) {
       // not capture selection: clone all nodes
       if (!selection) {
         rootNode = cloneNodeMapping(htmlNode, true);
-        headNode = rootNode.querySelector("head");
-        if (!headNode) {
-          headNode = doc.createElement("head");
-          rootNode.insertBefore(headNode, rootNode.firstChild);
+
+        if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+          headNode = rootNode.querySelector("head");
+          if (!headNode) {
+            headNode = rootNode.insertBefore(doc.createElement("head"), rootNode.firstChild);
+          }
         }
       }
 
       // add linefeeds to head and body to improve layout
-      const headNodeBefore = headNode.previousSibling;
-      if (!headNodeBefore || headNodeBefore.nodeType != 3) {
-        rootNode.insertBefore(doc.createTextNode("\n"), headNode);
-      }
-      const headNodeStart = headNode.firstChild;
-      if (!headNodeStart || headNodeStart.nodeType != 3) {
-        headNode.insertBefore(doc.createTextNode("\n"), headNodeStart);
-      }
-      const headNodeEnd = headNode.lastChild;
-      if (!headNodeEnd || headNodeEnd.nodeType != 3) {
-        headNode.appendChild(doc.createTextNode("\n"));
-      }
-      const headNodeAfter = headNode.nextSibling;
-      if (!headNodeAfter || headNodeAfter.nodeType != 3) {
-        rootNode.insertBefore(doc.createTextNode("\n"), headNodeAfter);
-      }
-      const bodyNode = rootNode.querySelector("body");
-      if (bodyNode) {
-        const bodyNodeAfter = bodyNode.nextSibling;
-        if (!bodyNodeAfter) {
-          rootNode.insertBefore(doc.createTextNode("\n"), bodyNodeAfter);
+      if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+        const headNodeBefore = headNode.previousSibling;
+        if (!headNodeBefore || headNodeBefore.nodeType != 3) {
+          rootNode.insertBefore(doc.createTextNode("\n"), headNode);
+        }
+        const headNodeStart = headNode.firstChild;
+        if (!headNodeStart || headNodeStart.nodeType != 3) {
+          headNode.insertBefore(doc.createTextNode("\n"), headNodeStart);
+        }
+        const headNodeEnd = headNode.lastChild;
+        if (!headNodeEnd || headNodeEnd.nodeType != 3) {
+          headNode.appendChild(doc.createTextNode("\n"));
+        }
+        const headNodeAfter = headNode.nextSibling;
+        if (!headNodeAfter || headNodeAfter.nodeType != 3) {
+          rootNode.insertBefore(doc.createTextNode("\n"), headNodeAfter);
+        }
+        const bodyNode = rootNode.querySelector("body");
+        if (bodyNode) {
+          const bodyNodeAfter = bodyNode.nextSibling;
+          if (!bodyNodeAfter) {
+            rootNode.insertBefore(doc.createTextNode("\n"), bodyNodeAfter);
+          }
         }
       }
     }
@@ -482,107 +622,318 @@ capturer.captureDocument = async function (params) {
       // skip elements that are already removed from the DOM tree
       if (!elem.parentNode) { return; }
 
-      switch (elem.nodeName.toLowerCase()) {
-        case "web-scrapbook": {
-          // webscrapbook toolbar should not be included
-          elem.remove();
-          break;
-        }
+      // webscrapbook toolbar should not be included
+      if (elem.nodeName.toLowerCase() === "web-scrapbook") {
+        elem.remove();
+        return;
+      }
 
-        case "base": {
-          if (!elem.hasAttribute("href")) { break; }
-          elem.setAttribute("href", elem.href);
-
-          switch (options["capture.base"]) {
-            case "blank":
-              captureRewriteUri(elem, "href", null);
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save":
-            default:
-              // do nothing
-              break;
+      if (elem.closest("svg")) {
+        switch (elem.nodeName.toLowerCase()) {
+          case "a": {
+            rewriteAnchor(elem, "href");
+            rewriteAnchor(elem, "xlink:href");
+            break;
           }
-          break;
-        }
 
-        case "meta": {
-          // spaced attribute e.g. http-equiv=" refresh " doesn't take effect
-          if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content")) {
-            if (elem.getAttribute("http-equiv").toLowerCase() == "content-type") {
-              // force UTF-8
-              metaCharsetNode = elem;
-              captureRewriteAttr(elem, "content", "text/html; charset=UTF-8");
-            } else if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
-              // rewrite meta refresh
-              const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
-              if (metaRefresh.url) {
-                // meta refresh is relative to document URL rather than base URL
-                const url = rewriteLocalLink(metaRefresh.url, docUrl, docUrl);
-                elem.setAttribute("content", metaRefresh.time + (url ? ";url=" + url : ""));
-              }
-            } else if (elem.getAttribute("http-equiv").toLowerCase() == "content-security-policy") {
-              // content security policy could make resources not loaded when viewed offline
-              if (options["capture.removeIntegrity"]) {
-                captureRewriteAttr(elem, "http-equiv", null);
-              }
+          case "script": {
+            if (elem.hasAttribute("href")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), refUrl);
+              elem.setAttribute("href", rewriteUrl);
             }
-          } else if (elem.hasAttribute("charset")) {
-            // force UTF-8
-            metaCharsetNode = elem;
-            captureRewriteAttr(elem, "charset", "UTF-8");
-          } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
-            switch (elem.getAttribute("property").toLowerCase()) {
-              case "og:image":
-              case "og:image:url":
-              case "og:image:secure_url":
-              case "og:audio":
-              case "og:audio:url":
-              case "og:audio:secure_url":
-              case "og:video":
-              case "og:video:url":
-              case "og:video:secure_url":
-              case "og:url":
-                // @TODO: relative to document URL or base URL?
-                // @TODO: save the og resource?
-                let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("content"), refUrl);
-                elem.setAttribute("content", rewriteUrl);
+            if (elem.hasAttribute("xlink:href")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("xlink:href"), refUrl);
+              elem.setAttribute("xlink:href", rewriteUrl);
+            }
+
+            switch (options["capture.script"]) {
+              case "link":
+                // do nothing
+                break;
+              case "blank":
+                if (elem.hasAttribute("href")) {
+                  captureRewriteUri(elem, "href", null);
+                }
+                if (elem.hasAttribute("xlink:href")) {
+                  captureRewriteUri(elem, "xlink:href", null);
+                }
+                captureRewriteTextContent(elem, "");
+                break;
+              case "remove":
+                captureRemoveNode(elem);
+                return;
+              case "save":
+              default:
+                if (elem.hasAttribute("href")) {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elem.getAttribute("href"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
+                    captureRewriteUri(elem, "href", response.url);
+                    return response;
+                  });
+                }
+                if (elem.hasAttribute("xlink:href")) {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elem.getAttribute("xlink:href"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
+                    captureRewriteUri(elem, "xlink:href", response.url);
+                    return response;
+                  });
+                }
                 break;
             }
+            break;
           }
-          break;
+
+          case "style": {
+            const css = cssHandler.getElemCss(elem);
+
+            switch (options["capture.style"]) {
+              case "blank":
+                captureRewriteTextContent(elem, "");
+                break;
+              case "remove":
+                captureRemoveNode(elem);
+                return;
+              case "save":
+              case "link":
+              default:
+                tasks[tasks.length] = halter.then(async () => {
+                  await cssHandler.rewriteCss({
+                    elem,
+                    refUrl,
+                    settings,
+                    callback: (elem, response) => {
+                      elem.textContent = response.cssText;
+                    },
+                  });
+                });
+                break;
+            }
+            break;
+          }
+
+          default: {
+            // SVG spec is quite complicated, but generally we can treat every
+            // href and xlink:href as an image link, except for "a" and "script"
+            rewriteSvgHref(elem, "href");
+            rewriteSvgHref(elem, "xlink:href");
+            break;
+          }
         }
+      } else {
+        switch (elem.nodeName.toLowerCase()) {
+          case "base": {
+            if (!elem.hasAttribute("href")) { break; }
+            elem.setAttribute("href", elem.href);
 
-        case "link": {
-          if (!elem.hasAttribute("href")) { break; }
-          const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), refUrl);
-          elem.setAttribute("href", rewriteUrl);
+            switch (options["capture.base"]) {
+              case "blank":
+                captureRewriteUri(elem, "href", null);
+                break;
+              case "remove":
+                captureRemoveNode(elem);
+                return;
+              case "save":
+              default:
+                // do nothing
+                break;
+            }
+            break;
+          }
 
-          if (elem.matches('[rel~="stylesheet"]')) {
-            // styles: link element
+          case "meta": {
+            // spaced attribute e.g. http-equiv=" refresh " doesn't take effect
+            if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content")) {
+              if (elem.getAttribute("http-equiv").toLowerCase() == "content-type") {
+                // force UTF-8
+                metaCharsetNode = elem;
+                captureRewriteAttr(elem, "content", "text/html; charset=UTF-8");
+              } else if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
+                // rewrite meta refresh
+                const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+                if (metaRefresh.url) {
+                  // meta refresh is relative to document URL rather than base URL
+                  const url = rewriteLocalLink(metaRefresh.url, docUrl, docUrl);
+                  elem.setAttribute("content", metaRefresh.time + (url ? ";url=" + url : ""));
+                }
+              } else if (elem.getAttribute("http-equiv").toLowerCase() == "content-security-policy") {
+                // content security policy could make resources not loaded when viewed offline
+                if (options["capture.removeIntegrity"]) {
+                  captureRewriteAttr(elem, "http-equiv", null);
+                }
+              }
+            } else if (elem.hasAttribute("charset")) {
+              // force UTF-8
+              metaCharsetNode = elem;
+              captureRewriteAttr(elem, "charset", "UTF-8");
+            } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
+              switch (elem.getAttribute("property").toLowerCase()) {
+                case "og:image":
+                case "og:image:url":
+                case "og:image:secure_url":
+                case "og:audio":
+                case "og:audio:url":
+                case "og:audio:secure_url":
+                case "og:video":
+                case "og:video:url":
+                case "og:video:secure_url":
+                case "og:url":
+                  // @TODO: relative to document URL or base URL?
+                  // @TODO: save the og resource?
+                  let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("content"), refUrl);
+                  elem.setAttribute("content", rewriteUrl);
+                  break;
+              }
+            }
+            break;
+          }
+
+          case "link": {
+            if (!elem.hasAttribute("href")) { break; }
+            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), refUrl);
+            elem.setAttribute("href", rewriteUrl);
+
+            if (elem.matches('[rel~="stylesheet"]')) {
+              // styles: link element
+              let disableCss = false;
+              const css = cssHandler.getElemCss(elem);
+              if (css) {
+                if (css.title) {
+                  if (!cssHandler.isBrowserPick) {
+                    captureRewriteAttr(elem, "title", null);
+
+                    // Chromium has a bug that alternative stylesheets has disabled = false,
+                    // but actually not enabled and cannot be enabled.
+                    // https://bugs.chromium.org/p/chromium/issues/detail?id=965554
+                    if (!scrapbook.userAgent.is("chromium")) {
+                      // In Firefox, stylesheets with [rel~="alternate"]:not([title]) is
+                      // disabled initially. Remove "alternate" to get it work.
+                      if (elem.matches('[rel~="alternate"]')) {
+                        const rel = Array.prototype.filter.call(
+                          elem.relList, x => x.toLowerCase() !== "alternate",
+                        ).join(" ");
+                        captureRewriteAttr(elem, "rel", rel);
+                      }
+                    }
+
+                    if (css.disabled) {
+                      disableCss = true;
+                    }
+                  }
+                } else {
+                  if (css.disabled) {
+                    disableCss = true;
+                  }
+                }
+              }
+
+              switch (options["capture.style"]) {
+                case "link":
+                  if (disableCss) {
+                    captureRewriteAttr(elem, "href", null);
+                    elem.setAttribute("data-scrapbook-css-disabled", "");
+                    break;
+                  }
+                  break;
+                case "blank":
+                  // HTML 5.1 2nd Edition / W3C Recommendation:
+                  // If the href attribute is absent, then the element does not define a link.
+                  captureRewriteUri(elem, "href", null);
+                  break;
+                case "remove":
+                  captureRemoveNode(elem);
+                  return;
+                case "save":
+                default:
+                  if (disableCss) {
+                    captureRewriteAttr(elem, "href", null);
+                    elem.setAttribute("data-scrapbook-css-disabled", "");
+                    break;
+                  }
+
+                  tasks[tasks.length] = halter.then(async () => {
+                    await cssHandler.rewriteCss({
+                      elem,
+                      refUrl,
+                      settings,
+                      callback: (elem, response) => {
+                        captureRewriteUri(elem, "href", response.url);
+                      },
+                    });
+                  });
+                  break;
+              }
+              break;
+            } else if (elem.matches('[rel~="icon"]')) {
+              // favicon: the link element
+              switch (options["capture.favicon"]) {
+                case "link":
+                  if (typeof favIconUrl === 'undefined') {
+                    favIconUrl = rewriteUrl;
+                  }
+                  break;
+                case "blank":
+                  // HTML 5.1 2nd Edition / W3C Recommendation:
+                  // If the href attribute is absent, then the element does not define a link.
+                  captureRewriteUri(elem, "href", null);
+                  if (typeof favIconUrl === 'undefined') {
+                    favIconUrl = "";
+                  }
+                  break;
+                case "remove":
+                  captureRemoveNode(elem);
+                  if (typeof favIconUrl === 'undefined') {
+                    favIconUrl = "";
+                  }
+                  return;
+                case "save":
+                default:
+                  let useFavIcon = false;
+                  if (typeof favIconUrl === 'undefined') {
+                    favIconUrl = rewriteUrl;
+                    useFavIcon = true;
+                  }
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elem.getAttribute("href"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
+                    captureRewriteUri(elem, "href", response.url);
+                    if (useFavIcon) {
+                      if (options["capture.saveAs"] === 'folder') {
+                        favIconUrl = response.url;
+                      }
+                    }
+                    return response;
+                  });
+                  break;
+              }
+            } else if (elem.matches('[rel~="preload"]')) {
+              // @TODO: handle preloads according to its "as" attribute
+              captureRewriteUri(elem, "href", null);
+            }
+            break;
+          }
+
+          // styles: style element
+          case "style": {
             let disableCss = false;
             const css = cssHandler.getElemCss(elem);
             if (css) {
               if (css.title) {
                 if (!cssHandler.isBrowserPick) {
                   captureRewriteAttr(elem, "title", null);
-
-                  // Chromium has a bug that alternative stylesheets has disabled = false,
-                  // but actually not enabled and cannot be enabled.
-                  // https://bugs.chromium.org/p/chromium/issues/detail?id=965554
-                  if (!scrapbook.userAgent.is("chromium")) {
-                    // In Firefox, stylesheets with [rel~="alternate"]:not([title]) is
-                    // disabled initially. Remove "alternate" to get it work.
-                    if (elem.matches('[rel~="alternate"]')) {
-                      const rel = Array.prototype.filter.call(
-                        elem.relList, x => x.toLowerCase() !== "alternate",
-                      ).join(" ");
-                      captureRewriteAttr(elem, "rel", rel);
-                    }
-                  }
-
                   if (css.disabled) {
                     disableCss = true;
                   }
@@ -595,518 +946,342 @@ capturer.captureDocument = async function (params) {
             }
 
             switch (options["capture.style"]) {
-              case "link":
-                if (disableCss) {
-                  captureRewriteAttr(elem, "href", null);
-                  elem.setAttribute("data-scrapbook-css-disabled", "");
-                  break;
-                }
-                break;
               case "blank":
-                // HTML 5.1 2nd Edition / W3C Recommendation:
-                // If the href attribute is absent, then the element does not define a link.
-                captureRewriteUri(elem, "href", null);
+                captureRewriteTextContent(elem, "");
                 break;
               case "remove":
                 captureRemoveNode(elem);
                 return;
               case "save":
+              case "link":
               default:
                 if (disableCss) {
-                  captureRewriteAttr(elem, "href", null);
+                  captureRewriteTextContent(elem, "");
                   elem.setAttribute("data-scrapbook-css-disabled", "");
                   break;
                 }
-
                 tasks[tasks.length] = halter.then(async () => {
                   await cssHandler.rewriteCss({
                     elem,
                     refUrl,
                     settings,
                     callback: (elem, response) => {
-                      captureRewriteUri(elem, "href", response.url);
+                      elem.textContent = response.cssText;
                     },
                   });
                 });
                 break;
             }
             break;
-          } else if (elem.matches('[rel~="icon"]')) {
-            // favicon: the link element
-            switch (options["capture.favicon"]) {
+          }
+
+          // scripts: script
+          case "script": {
+            if (elem.hasAttribute("src")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
+              elem.setAttribute("src", rewriteUrl);
+            }
+
+            switch (options["capture.script"]) {
               case "link":
-                if (typeof favIconUrl === 'undefined') {
-                  favIconUrl = rewriteUrl;
-                }
+                // do nothing
                 break;
               case "blank":
                 // HTML 5.1 2nd Edition / W3C Recommendation:
-                // If the href attribute is absent, then the element does not define a link.
-                captureRewriteUri(elem, "href", null);
-                if (typeof favIconUrl === 'undefined') {
-                  favIconUrl = "";
+                // If src is specified, it must be a valid non-empty URL.
+                //
+                // script with src="about:blank" can cause an error in some contexts
+                if (elem.hasAttribute("src")) {
+                  captureRewriteUri(elem, "src", null);
                 }
+                captureRewriteTextContent(elem, "");
                 break;
               case "remove":
                 captureRemoveNode(elem);
-                if (typeof favIconUrl === 'undefined') {
-                  favIconUrl = "";
-                }
                 return;
               case "save":
               default:
-                let useFavIcon = false;
-                if (typeof favIconUrl === 'undefined') {
-                  favIconUrl = rewriteUrl;
-                  useFavIcon = true;
-                }
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("href"),
-                    refUrl,
-                    settings,
-                    options,
+                if (elem.hasAttribute("src")) {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elem.getAttribute("src"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
+                    captureRewriteUri(elem, "src", response.url);
+                    return response;
                   });
-                  captureRewriteUri(elem, "href", response.url);
-                  if (useFavIcon) {
-                    if (options["capture.saveAs"] === 'folder') {
-                      favIconUrl = response.url;
-                    }
-                  }
-                  return response;
-                });
+                }
                 break;
             }
-          } else if (elem.matches('[rel~="preload"]')) {
-            // @TODO: handle preloads according to its "as" attribute
-            captureRewriteUri(elem, "href", null);
-          }
-          break;
-        }
-
-        // styles: style element
-        case "style": {
-          let disableCss = false;
-          const css = cssHandler.getElemCss(elem);
-          if (css) {
-            if (css.title) {
-              if (!cssHandler.isBrowserPick) {
-                captureRewriteAttr(elem, "title", null);
-                if (css.disabled) {
-                  disableCss = true;
-                }
-              }
-            } else {
-              if (css.disabled) {
-                disableCss = true;
-              }
-            }
+            break;
           }
 
-          switch (options["capture.style"]) {
-            case "blank":
-              captureRewriteTextContent(elem, "");
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save":
-            case "link":
-            default:
-              if (disableCss) {
-                captureRewriteTextContent(elem, "");
-                elem.setAttribute("data-scrapbook-css-disabled", "");
-                break;
-              }
-              tasks[tasks.length] = halter.then(async () => {
-                await cssHandler.rewriteCss({
-                  elem,
-                  refUrl,
-                  settings,
-                  callback: (elem, response) => {
-                    elem.textContent = response.cssText;
-                  },
-                });
-              });
-              break;
-          }
-          break;
-        }
-
-        // scripts: script
-        case "script": {
-          if (elem.hasAttribute("src")) {
-            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-            elem.setAttribute("src", rewriteUrl);
-          }
-
-          switch (options["capture.script"]) {
-            case "link":
-              // do nothing
-              break;
-            case "blank":
-              // HTML 5.1 2nd Edition / W3C Recommendation:
-              // If src is specified, it must be a valid non-empty URL.
-              //
-              // script with src="about:blank" can cause an error in some contexts
-              if (elem.hasAttribute("src")) {
-                captureRewriteUri(elem, "src", null);
-              }
-              captureRewriteTextContent(elem, "");
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save":
-            default:
-              if (elem.hasAttribute("src")) {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("src"),
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "src", response.url);
-                  return response;
-                });
-              }
-              break;
-          }
-          break;
-        }
-
-        // scripts: noscript
-        case "noscript": {
-          switch (options["capture.noscript"]) {
-            case "blank":
-              captureRewriteTextContent(elem, "");
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save":
-            default:
-              if (capturer.isNoscriptEscaped) {
-                let key = scrapbook.getUuid();
-                specialContentMap.set(key, scrapbook.unescapeHtml(elem.innerHTML));
-                elem.textContent = "urn:scrapbook:text:" + key;
-              }
-              break;
-          }
-          break;
-        }
-
-        case "body":
-        case "table":
-        case "tr":
-        case "th":
-        case "td": {
-          // deprecated: background attribute (deprecated since HTML5)
-          if (elem.hasAttribute("background")) {
-            let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("background"), refUrl);
-            elem.setAttribute("background", rewriteUrl);
-
-            switch (options["capture.imageBackground"]) {
-              case "link":
-                // do nothing
-                break;
+          // scripts: noscript
+          case "noscript": {
+            switch (options["capture.noscript"]) {
               case "blank":
-              case "remove": // deprecated
-                captureRewriteUri(elem, "background", null);
+                captureRewriteTextContent(elem, "");
                 break;
-              case "save-used":
+              case "remove":
+                captureRemoveNode(elem);
+                return;
               case "save":
               default:
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: rewriteUrl,
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "background", response.url);
-                  return response;
-                });
+                if (capturer.isNoscriptEscaped) {
+                  let key = scrapbook.getUuid();
+                  specialContentMap.set(key, scrapbook.unescapeHtml(elem.innerHTML));
+                  elem.textContent = "urn:scrapbook:text:" + key;
+                }
                 break;
             }
-          }
-          break;
-        }
-
-        case "frame":
-        case "iframe": {
-          const frame = elem;
-          const frameSrc = origNodeMap.get(frame);
-          if (frame.hasAttribute("src")) {
-            const rewriteUrl = capturer.resolveRelativeUrl(frame.getAttribute("src"), refUrl);
-            frame.setAttribute("src", rewriteUrl);
+            break;
           }
 
-          switch (options["capture.frame"]) {
-            case "link":
-              // do nothing
-              // keep current (resolved) src and srcdoc
-              break;
-            case "blank":
-              // HTML 5.1 2nd Edition / W3C Recommendation:
-              // The src attribute, if present, must be a valid non-empty URL.
-              captureRewriteUri(frame, "src", null);
-              captureRewriteAttr(frame, "srcdoc", null);
-              break;
-            case "remove":
-              captureRemoveNode(frame);
-              return;
-            case "save":
-            default:
-              const captureFrameCallback = (response) => {
-                isDebug && console.debug("captureFrameCallback", response);
-                if (response) {
-                  captureRewriteUri(frame, "src", response.url);
+          case "body":
+          case "table":
+          case "tr":
+          case "th":
+          case "td": {
+            // deprecated: background attribute (deprecated since HTML5)
+            if (elem.hasAttribute("background")) {
+              let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("background"), refUrl);
+              elem.setAttribute("background", rewriteUrl);
 
-                  // remove srcdoc to avoid overwriting src
-                  captureRewriteAttr(frame, "srcdoc", null);
-                } else {
-                  // Unable to capture the content document
-                  captureRewriteUri(frame, "src", null);
-                }
-                return response;
-              };
-
-              const frameSettings = JSON.parse(JSON.stringify(settings));
-              frameSettings.frameIsMain = false;
-              delete frameSettings.usedCssFontUrl;
-              delete frameSettings.usedCssImageUrl;
-
-              let frameDoc;
-              try {
-                frameDoc = frameSrc.contentDocument;
-              } catch (ex) {
-                // console.debug(ex);
-              }
-
-              if (frameDoc) {
-                // frame document accessible:
-                // capture the content document directly
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.captureDocumentOrFile({
-                    doc: frameDoc,
-                    refUrl,
-                    settings: frameSettings,
-                    options,
+              switch (options["capture.imageBackground"]) {
+                case "link":
+                  // do nothing
+                  break;
+                case "blank":
+                case "remove": // deprecated
+                  captureRewriteUri(elem, "background", null);
+                  break;
+                case "save-used":
+                case "save":
+                default:
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: rewriteUrl,
+                      refUrl,
+                      settings,
+                      options,
+                    });
+                    captureRewriteUri(elem, "background", response.url);
+                    return response;
                   });
-                  return captureFrameCallback(response);
-                });
-                break;
+                  break;
               }
+            }
+            break;
+          }
 
-              // frame document inaccessible:
-              tasks[tasks.length] = halter.then(() => {
-                let frameWindow;
+          case "frame":
+          case "iframe": {
+            const frame = elem;
+            const frameSrc = origNodeMap.get(frame);
+            if (frame.hasAttribute("src")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(frame.getAttribute("src"), refUrl);
+              frame.setAttribute("src", rewriteUrl);
+            }
+
+            switch (options["capture.frame"]) {
+              case "link":
+                // do nothing
+                // keep current (resolved) src and srcdoc
+                break;
+              case "blank":
+                // HTML 5.1 2nd Edition / W3C Recommendation:
+                // The src attribute, if present, must be a valid non-empty URL.
+                captureRewriteUri(frame, "src", null);
+                captureRewriteAttr(frame, "srcdoc", null);
+                break;
+              case "remove":
+                captureRemoveNode(frame);
+                return;
+              case "save":
+              default:
+                const captureFrameCallback = (response) => {
+                  isDebug && console.debug("captureFrameCallback", response);
+                  if (response) {
+                    captureRewriteUri(frame, "src", response.url);
+
+                    // remove srcdoc to avoid overwriting src
+                    captureRewriteAttr(frame, "srcdoc", null);
+                  } else {
+                    // Unable to capture the content document
+                    captureRewriteUri(frame, "src", null);
+                  }
+                  return response;
+                };
+
+                const frameSettings = JSON.parse(JSON.stringify(settings));
+                frameSettings.frameIsMain = false;
+                delete frameSettings.usedCssFontUrl;
+                delete frameSettings.usedCssImageUrl;
+
+                let frameDoc;
                 try {
-                  frameWindow = frameSrc.contentWindow;
+                  frameDoc = frameSrc.contentDocument;
                 } catch (ex) {
                   // console.debug(ex);
                 }
-                if (!frameWindow) { return; }
 
-                // frame window accessible:
-                // capture the content document through messaging if viable
-                // (could fail if it's data URL, sandboxed blob URL, etc.)
-                return capturer.invoke("captureDocumentOrFile", {
-                  refUrl,
-                  settings: frameSettings,
-                  options,
-                }, {frameWindow});
-              }).then((response) => {
-                if (response) { return captureFrameCallback(response); }
-
-                // frame window accessible with special cases:
-                // frame window inaccessible: (headless capture)
-
-                // if the frame has srcdoc, use it
-                // @FIXME: rewrite srcdoc content
-                if (frame.hasAttribute("srcdoc")) {
-                  captureRewriteAttr(frame, "src", null);
-                  return;
+                if (frameDoc) {
+                  // frame document accessible:
+                  // capture the content document directly
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.captureDocumentOrFile({
+                      doc: frameDoc,
+                      refUrl,
+                      settings: frameSettings,
+                      options,
+                    });
+                    return captureFrameCallback(response);
+                  });
+                  break;
                 }
 
-                // if the frame src is not absolute,
-                // skip further processing and keep current src
-                // (point to self, or not resolvable)
-                if (!scrapbook.isUrlAbsolute(frame.getAttribute("src"))) {
-                  return;
-                }
-
-                // otherwise, headlessly capture src
-                // (take care of circular reference)
-                const [sourceUrl] = scrapbook.splitUrlByAnchor(refUrl);
-                const [targetUrl] = scrapbook.splitUrlByAnchor(frameSrc.src);
-                frameSettings.isHeadless = true;
-                frameSettings.recurseChain.push(sourceUrl);
-                if (!frameSettings.recurseChain.includes(targetUrl)) {
-                  let frameOptions = options;
-
-                  // special handling of data URL
-                  if (frameSrc.src.startsWith("data:") && 
-                      options["capture.saveAs"] !== "singleHtml" && 
-                      !options["capture.saveDataUriAsFile"]) {
-                    // Save frame document and inner URLs as data URL since data URL
-                    // is null origin and no relative URL is allowed in it.
-                    frameOptions = JSON.parse(JSON.stringify(options));
-                    frameOptions["capture.saveAs"] = "singleHtml";
+                // frame document inaccessible:
+                tasks[tasks.length] = halter.then(() => {
+                  let frameWindow;
+                  try {
+                    frameWindow = frameSrc.contentWindow;
+                  } catch (ex) {
+                    // console.debug(ex);
                   }
+                  if (!frameWindow) { return; }
 
-                  return capturer.invoke("captureUrl", {
-                    url: frameSrc.src,
+                  // frame window accessible:
+                  // capture the content document through messaging if viable
+                  // (could fail if it's data URL, sandboxed blob URL, etc.)
+                  return capturer.invoke("captureDocumentOrFile", {
                     refUrl,
                     settings: frameSettings,
-                    options: frameOptions,
-                  }).then(captureFrameCallback);
-                } else {
-                  console.warn(scrapbook.lang("WarnCaptureCircular", [sourceUrl, targetUrl]));
-                  captureRewriteUri(frame, "src", `urn:scrapbook:download:circular:url:${frameSrc.src}`);
-                }
-              });
-              break;
+                    options,
+                  }, {frameWindow});
+                }).then((response) => {
+                  if (response) { return captureFrameCallback(response); }
+
+                  // frame window accessible with special cases:
+                  // frame window inaccessible: (headless capture)
+
+                  // if the frame has srcdoc, use it
+                  // @FIXME: rewrite srcdoc content
+                  if (frame.hasAttribute("srcdoc")) {
+                    captureRewriteAttr(frame, "src", null);
+                    return;
+                  }
+
+                  // if the frame src is not absolute,
+                  // skip further processing and keep current src
+                  // (point to self, or not resolvable)
+                  if (!scrapbook.isUrlAbsolute(frame.getAttribute("src"))) {
+                    return;
+                  }
+
+                  // otherwise, headlessly capture src
+                  // (take care of circular reference)
+                  const [sourceUrl] = scrapbook.splitUrlByAnchor(refUrl);
+                  const [targetUrl] = scrapbook.splitUrlByAnchor(frameSrc.src);
+                  frameSettings.isHeadless = true;
+                  frameSettings.recurseChain.push(sourceUrl);
+                  if (!frameSettings.recurseChain.includes(targetUrl)) {
+                    let frameOptions = options;
+
+                    // special handling of data URL
+                    if (frameSrc.src.startsWith("data:") && 
+                        options["capture.saveAs"] !== "singleHtml" && 
+                        !options["capture.saveDataUriAsFile"]) {
+                      // Save frame document and inner URLs as data URL since data URL
+                      // is null origin and no relative URL is allowed in it.
+                      frameOptions = JSON.parse(JSON.stringify(options));
+                      frameOptions["capture.saveAs"] = "singleHtml";
+                    }
+
+                    return capturer.invoke("captureUrl", {
+                      url: frameSrc.src,
+                      refUrl,
+                      settings: frameSettings,
+                      options: frameOptions,
+                    }).then(captureFrameCallback);
+                  } else {
+                    console.warn(scrapbook.lang("WarnCaptureCircular", [sourceUrl, targetUrl]));
+                    captureRewriteUri(frame, "src", `urn:scrapbook:download:circular:url:${frameSrc.src}`);
+                  }
+                });
+                break;
+            }
+            break;
           }
-          break;
-        }
 
-        case "a":
-        case "area": {
-          if (!elem.hasAttribute("href")) { break; }
-          let url = elem.getAttribute("href");
+          case "a":
+          case "area": {
+            rewriteAnchor(elem, "href");
+            break;
+          }
 
-          // scripts: script-like anchors
-          if (url.toLowerCase().startsWith("javascript:")) {
-            switch (options["capture.script"]) {
-              case "save":
+          // images: img
+          case "img": {
+            const elemOrig = origNodeMap.get(elem);
+
+            if (elem.hasAttribute("src")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
+              elem.setAttribute("src", rewriteUrl);
+            }
+
+            if (elem.hasAttribute("srcset")) {
+              elem.setAttribute("srcset",
+                scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
+                  return capturer.resolveRelativeUrl(url, refUrl);
+                })
+              );
+            }
+
+            switch (options["capture.image"]) {
               case "link":
                 // do nothing
                 break;
               case "blank":
-              case "remove":
-              default:
-                captureRewriteAttr(elem, "href", "javascript:");
-                break;
-            }
-            break;
-          }
-
-          // check local link and rewrite url
-          url = rewriteLocalLink(url, refUrl, docUrl);
-          elem.setAttribute("href", url);
-
-          // skip further processing for non-absolute links
-          if (!scrapbook.isUrlAbsolute(url)) {
-            break;
-          }
-
-          // check downLink
-          if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
-            switch (options["capture.downLink.mode"]) {
-              case "header": {
-                if (capturer.downLinkUrlFilter(url, options)) {
-                  break;
+                // HTML 5.1 2nd Edition / W3C Recommendation:
+                // The src attribute must be present, and must contain a valid non-empty URL.
+                if (elem.hasAttribute("src")) {
+                  captureRewriteUri(elem, "src", "about:blank");
                 }
 
-                tasks[tasks.length] = halter.then(async () => {
-                  const ext = await capturer.invoke("downLinkFetchHeader", {
-                    url,
-                    refUrl,
-                    options,
-                    settings,
-                  });
-                  if (ext === null) { return null; }
-                  if (!capturer.downLinkExtFilter(ext, options)) { return null; }
-
-                  const response = await capturer.invoke("downloadFile", {
-                    url,
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "href", response.url);
-                  return response;
-                });
-                break;
-              }
-              case "url": {
-                if (capturer.downLinkUrlFilter(url, options)) {
-                  break;
-                }
-
-                const filename = scrapbook.urlToFilename(url);
-                const [, ext] = scrapbook.filenameParts(filename);
-                if (!capturer.downLinkExtFilter(ext, options)) { break; }
-
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url,
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "href", response.url);
-                  return response;
-                });
-                break;
-              }
-              case "none":
-              default: {
-                break;
-              }
-            }
-          }
-
-          break;
-        }
-
-        // images: img
-        case "img": {
-          const elemOrig = origNodeMap.get(elem);
-
-          if (elem.hasAttribute("src")) {
-            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-            elem.setAttribute("src", rewriteUrl);
-          }
-
-          if (elem.hasAttribute("srcset")) {
-            elem.setAttribute("srcset",
-              scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
-                return capturer.resolveRelativeUrl(url, refUrl);
-              })
-            );
-          }
-
-          switch (options["capture.image"]) {
-            case "link":
-              // do nothing
-              break;
-            case "blank":
-              // HTML 5.1 2nd Edition / W3C Recommendation:
-              // The src attribute must be present, and must contain a valid non-empty URL.
-              if (elem.hasAttribute("src")) {
-                captureRewriteUri(elem, "src", "about:blank");
-              }
-
-              if (elem.hasAttribute("srcset")) {
-                captureRewriteUri(elem, "srcset", null);
-              }
-
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save-current":
-              if (!isHeadless) {
-                if (elemOrig.currentSrc) {
-                  const url = elemOrig.currentSrc;
+                if (elem.hasAttribute("srcset")) {
                   captureRewriteUri(elem, "srcset", null);
+                }
+
+                break;
+              case "remove":
+                captureRemoveNode(elem);
+                return;
+              case "save-current":
+                if (!isHeadless) {
+                  if (elemOrig.currentSrc) {
+                    const url = elemOrig.currentSrc;
+                    captureRewriteUri(elem, "srcset", null);
+                    tasks[tasks.length] = halter.then(async () => {
+                      const response = await capturer.invoke("downloadFile", {
+                        url,
+                        refUrl,
+                        settings,
+                        options,
+                      });
+                      captureRewriteUri(elem, "src", response.url);
+                      return response;
+                    });
+                  }
+                  break;
+                }
+                // Headless capture doesn't support currentSrc, fallback to "save".
+              case "save":
+              default:
+                if (elem.hasAttribute("src")) {
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await capturer.invoke("downloadFile", {
-                      url,
+                      url: elem.getAttribute("src"),
                       refUrl,
                       settings,
                       options,
@@ -1115,148 +1290,162 @@ capturer.captureDocument = async function (params) {
                     return response;
                   });
                 }
+
+                if (elem.hasAttribute("srcset")) {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
+                      return (await capturer.invoke("downloadFile", {
+                        url,
+                        refUrl,
+                        settings,
+                        options,
+                      })).url;
+                    });
+                    captureRewriteUri(elem, "srcset", response);
+                    return response;
+                  });
+                }
                 break;
-              }
-              // Headless capture doesn't support currentSrc, fallback to "save".
-            case "save":
-            default:
-              if (elem.hasAttribute("src")) {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("src"),
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "src", response.url);
-                  return response;
-                });
-              }
-
-              if (elem.hasAttribute("srcset")) {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
-                    return (await capturer.invoke("downloadFile", {
-                      url,
-                      refUrl,
-                      settings,
-                      options,
-                    })).url;
-                  });
-                  captureRewriteUri(elem, "srcset", response);
-                  return response;
-                });
-              }
-              break;
+            }
+            break;
           }
-          break;
-        }
 
-        // images: picture
-        case "picture": {
-          Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-            elem.setAttribute("srcset",
-              scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
-                return capturer.resolveRelativeUrl(url, refUrl);
-              })
-            );
-          }, this);
+          // images: picture
+          case "picture": {
+            Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
+              elem.setAttribute("srcset",
+                scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
+                  return capturer.resolveRelativeUrl(url, refUrl);
+                })
+              );
+            }, this);
 
-          switch (options["capture.image"]) {
-            case "link":
-              // do nothing
-              break;
-            case "blank":
-              Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                captureRewriteUri(elem, "srcset", null);
-              }, this);
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save-current":
-              if (!isHeadless) {
-                Array.prototype.forEach.call(elem.querySelectorAll('img'), (elem) => {
-                  const elemOrig = origNodeMap.get(elem);
-
-                  if (elemOrig.currentSrc) {
-                    elem.setAttribute("src", elem.src);
-                    captureRewriteUri(elem, "src", elemOrig.currentSrc);
-                    captureRewriteUri(elem, "srcset", null);
-                  }
-                }, this);
-
+            switch (options["capture.image"]) {
+              case "link":
+                // do nothing
+                break;
+              case "blank":
                 Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                  captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
+                  captureRewriteUri(elem, "srcset", null);
                 }, this);
-
                 break;
-              }
-              // Headless capture doesn't support currentSrc, fallback to "save".
-            case "save":
-            default:
-              Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
-                    return (await capturer.invoke("downloadFile", {
-                      url,
-                      refUrl,
-                      settings,
-                      options,
-                    })).url;
-                  });
-                  captureRewriteUri(elem, "srcset", response);
-                  return response;
-                });
-              }, this);
-              break;
-          }
-          break;
-        }
+              case "remove":
+                captureRemoveNode(elem);
+                return;
+              case "save-current":
+                if (!isHeadless) {
+                  Array.prototype.forEach.call(elem.querySelectorAll('img'), (elem) => {
+                    const elemOrig = origNodeMap.get(elem);
 
-        // media: audio
-        case "audio": {
-          const elemOrig = origNodeMap.get(elem);
+                    if (elemOrig.currentSrc) {
+                      elem.setAttribute("src", elem.src);
+                      captureRewriteUri(elem, "src", elemOrig.currentSrc);
+                      captureRewriteUri(elem, "srcset", null);
+                    }
+                  }, this);
 
-          if (elem.hasAttribute("src")) {
-            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-            elem.setAttribute("src", rewriteUrl);
-          }
-
-          Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-            elem.setAttribute("src", rewriteUrl);
-          }, this);
-
-          switch (options["capture.audio"]) {
-            case "link":
-              // do nothing
-              break;
-            case "blank":
-              if (elem.hasAttribute("src")) {
-                captureRewriteUri(elem, "src", "about:blank");
-              }
-
-              // HTML 5.1 2nd Edition / W3C Recommendation:
-              // The src attribute must be present and be a valid non-empty URL.
-              Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-                captureRewriteUri(elem, "src", "about:blank");
-              }, this);
-
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save-current":
-              if (!isHeadless) {
-                if (elemOrig.currentSrc) {
-                  const url = elemOrig.currentSrc;
-                  Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
+                  Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
                     captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
                   }, this);
+
+                  break;
+                }
+                // Headless capture doesn't support currentSrc, fallback to "save".
+              case "save":
+              default:
+                Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
+                      return (await capturer.invoke("downloadFile", {
+                        url,
+                        refUrl,
+                        settings,
+                        options,
+                      })).url;
+                    });
+                    captureRewriteUri(elem, "srcset", response);
+                    return response;
+                  });
+                }, this);
+                break;
+            }
+            break;
+          }
+
+          // media: audio
+          case "audio": {
+            const elemOrig = origNodeMap.get(elem);
+
+            if (elem.hasAttribute("src")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
+              elem.setAttribute("src", rewriteUrl);
+            }
+
+            Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
+              elem.setAttribute("src", rewriteUrl);
+            }, this);
+
+            switch (options["capture.audio"]) {
+              case "link":
+                // do nothing
+                break;
+              case "blank":
+                if (elem.hasAttribute("src")) {
+                  captureRewriteUri(elem, "src", "about:blank");
+                }
+
+                // HTML 5.1 2nd Edition / W3C Recommendation:
+                // The src attribute must be present and be a valid non-empty URL.
+                Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
+                  captureRewriteUri(elem, "src", "about:blank");
+                }, this);
+
+                break;
+              case "remove":
+                captureRemoveNode(elem);
+                return;
+              case "save-current":
+                if (!isHeadless) {
+                  if (elemOrig.currentSrc) {
+                    const url = elemOrig.currentSrc;
+                    Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
+                      captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
+                    }, this);
+                    tasks[tasks.length] = halter.then(async () => {
+                      const response = await capturer.invoke("downloadFile", {
+                        url,
+                        refUrl,
+                        settings,
+                        options,
+                      });
+                      captureRewriteUri(elem, "src", response.url);
+                      return response;
+                    });
+                  }
+
+                  Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
+                    tasks[tasks.length] = halter.then(async () => {
+                      const response = await capturer.invoke("downloadFile", {
+                        url: elem.getAttribute("src"),
+                        refUrl,
+                        settings,
+                        options,
+                      });
+                      captureRewriteUri(elem, "src", response.url);
+                      return response;
+                    });
+                  }, this);
+
+                  break;
+                }
+                // Headless capture doesn't support currentSrc, fallback to "save".
+              case "save":
+              default:
+                if (elem.hasAttribute("src")) {
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await capturer.invoke("downloadFile", {
-                      url,
+                      url: elem.getAttribute("src"),
                       refUrl,
                       settings,
                       options,
@@ -1266,7 +1455,7 @@ capturer.captureDocument = async function (params) {
                   });
                 }
 
-                Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
+                Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await capturer.invoke("downloadFile", {
                       url: elem.getAttribute("src"),
@@ -1280,87 +1469,104 @@ capturer.captureDocument = async function (params) {
                 }, this);
 
                 break;
-              }
-              // Headless capture doesn't support currentSrc, fallback to "save".
-            case "save":
-            default:
-              if (elem.hasAttribute("src")) {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("src"),
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "src", response.url);
-                  return response;
-                });
-              }
-
-              Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("src"),
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "src", response.url);
-                  return response;
-                });
-              }, this);
-
-              break;
-          }
-          break;
-        }
-
-        // media: video
-        case "video": {
-          const elemOrig = origNodeMap.get(elem);
-
-          if (elem.hasAttribute("poster")) {
-            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("poster"), refUrl);
-            elem.setAttribute("poster", rewriteUrl);
+            }
+            break;
           }
 
-          if (elem.hasAttribute("src")) {
-            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-            elem.setAttribute("src", rewriteUrl);
-          }
+          // media: video
+          case "video": {
+            const elemOrig = origNodeMap.get(elem);
 
-          Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-            elem.setAttribute("src", rewriteUrl);
-          }, this);
+            if (elem.hasAttribute("poster")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("poster"), refUrl);
+              elem.setAttribute("poster", rewriteUrl);
+            }
 
-          switch (options["capture.video"]) {
-            case "link":
-              // do nothing
-              break;
-            case "blank":
-              // HTML 5.1 2nd Edition / W3C Recommendation:
-              // The attribute, if present, must contain a valid non-empty URL.
-              if (elem.hasAttribute("poster")) {
-                captureRewriteUri(elem, "poster", null);
-              }
+            if (elem.hasAttribute("src")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
+              elem.setAttribute("src", rewriteUrl);
+            }
 
-              if (elem.hasAttribute("src")) {
-                captureRewriteUri(elem, "src", "about:blank");
-              }
+            Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
+              elem.setAttribute("src", rewriteUrl);
+            }, this);
 
-              // HTML 5.1 2nd Edition / W3C Recommendation:
-              // The src attribute must be present and be a valid non-empty URL.
-              Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-                captureRewriteUri(elem, "src", "about:blank");
-              }, this);
+            switch (options["capture.video"]) {
+              case "link":
+                // do nothing
+                break;
+              case "blank":
+                // HTML 5.1 2nd Edition / W3C Recommendation:
+                // The attribute, if present, must contain a valid non-empty URL.
+                if (elem.hasAttribute("poster")) {
+                  captureRewriteUri(elem, "poster", null);
+                }
 
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save-current":
-              if (!isHeadless) {
+                if (elem.hasAttribute("src")) {
+                  captureRewriteUri(elem, "src", "about:blank");
+                }
+
+                // HTML 5.1 2nd Edition / W3C Recommendation:
+                // The src attribute must be present and be a valid non-empty URL.
+                Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
+                  captureRewriteUri(elem, "src", "about:blank");
+                }, this);
+
+                break;
+              case "remove":
+                captureRemoveNode(elem);
+                return;
+              case "save-current":
+                if (!isHeadless) {
+                  if (elem.hasAttribute("poster")) {
+                    tasks[tasks.length] = halter.then(async () => {
+                      const response = await capturer.invoke("downloadFile", {
+                        url: elem.getAttribute("poster"),
+                        refUrl,
+                        settings,
+                        options,
+                      });
+                      captureRewriteUri(elem, "poster", response.url);
+                      return response;
+                    });
+                  }
+
+                  if (elemOrig.currentSrc) {
+                    const url = elemOrig.currentSrc;
+                    Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
+                      captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
+                    }, this);
+                    tasks[tasks.length] = halter.then(async () => {
+                      const response = await capturer.invoke("downloadFile", {
+                        url,
+                        refUrl,
+                        settings,
+                        options,
+                      })
+                      captureRewriteUri(elem, "src", response.url);
+                      return response;
+                    });
+                  }
+
+                  Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
+                    tasks[tasks.length] = halter.then(async () => {
+                      const response = await capturer.invoke("downloadFile", {
+                        url: elem.getAttribute("src"),
+                        refUrl,
+                        settings,
+                        options,
+                      });
+                      captureRewriteUri(elem, "src", response.url);
+                      return response;
+                    });
+                  }, this);
+
+                  break;
+                }
+                // Headless capture doesn't support currentSrc, fallback to "save".
+              case "save":
+              default:
                 if (elem.hasAttribute("poster")) {
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await capturer.invoke("downloadFile", {
@@ -1374,24 +1580,20 @@ capturer.captureDocument = async function (params) {
                   });
                 }
 
-                if (elemOrig.currentSrc) {
-                  const url = elemOrig.currentSrc;
-                  Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                    captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
-                  }, this);
+                if (elem.hasAttribute("src")) {
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await capturer.invoke("downloadFile", {
-                      url,
+                      url: elem.getAttribute("src"),
                       refUrl,
                       settings,
                       options,
-                    })
+                    });
                     captureRewriteUri(elem, "src", response.url);
                     return response;
                   });
                 }
 
-                Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
+                Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await capturer.invoke("downloadFile", {
                       url: elem.getAttribute("src"),
@@ -1405,259 +1607,34 @@ capturer.captureDocument = async function (params) {
                 }, this);
 
                 break;
-              }
-              // Headless capture doesn't support currentSrc, fallback to "save".
-            case "save":
-            default:
-              if (elem.hasAttribute("poster")) {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("poster"),
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "poster", response.url);
-                  return response;
-                });
-              }
-
-              if (elem.hasAttribute("src")) {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("src"),
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "src", response.url);
-                  return response;
-                });
-              }
-
-              Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("src"),
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "src", response.url);
-                  return response;
-                });
-              }, this);
-
-              break;
-          }
-          break;
-        }
-
-        // media: embed
-        case "embed": {
-          if (elem.hasAttribute("src")) {
-            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-            elem.setAttribute("src", rewriteUrl);
+            }
+            break;
           }
 
-          switch (options["capture.embed"]) {
-            case "link":
-              // do nothing
-              break;
-            case "blank":
-              // HTML 5.1 2nd Edition / W3C Recommendation:
-              // The src attribute, if present, must contain a valid non-empty URL.
-              if (elem.hasAttribute("src")) {
-                captureRewriteUri(elem, "src", null);
-              }
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save":
-            default:
-              if (elem.hasAttribute("src")) {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("src"),
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "src", response.url);
-                  return response;
-                });
-              }
-              break;
-          }
-          break;
-        }
+          // media: embed
+          case "embed": {
+            if (elem.hasAttribute("src")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
+              elem.setAttribute("src", rewriteUrl);
+            }
 
-        // media: object
-        case "object": {
-          if (elem.hasAttribute("data")) {
-            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("data"), refUrl);
-            elem.setAttribute("data", rewriteUrl);
-          }
-
-          switch (options["capture.object"]) {
-            case "link":
-              // do nothing
-              break;
-            case "blank":
-              // HTML 5.1 2nd Edition / W3C Recommendation:
-              // The data attribute, if present, must be a valid non-empty URL.
-              if (elem.hasAttribute("data")) {
-                captureRewriteUri(elem, "data", null);
-              }
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save":
-            default:
-              if (elem.hasAttribute("data")) {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("data"),
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "data", response.url);
-                  return response;
-                });
-              }
-              break;
-          }
-          break;
-        }
-
-        // media: applet
-        case "applet": {
-          if (elem.hasAttribute("code")) {
-            let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("code"), refUrl);
-            elem.setAttribute("code", rewriteUrl);
-          }
-
-          if (elem.hasAttribute("archive")) {
-            let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("archive"), refUrl);
-            elem.setAttribute("archive", rewriteUrl);
-          }
-
-          switch (options["capture.applet"]) {
-            case "link":
-              // do nothing
-              break;
-            case "blank":
-              if (elem.hasAttribute("code")) {
-                captureRewriteUri(elem, "code", null);
-              }
-
-              if (elem.hasAttribute("archive")) {
-                captureRewriteUri(elem, "archive", null);
-              }
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save":
-            default:
-              if (elem.hasAttribute("code")) {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("code"),
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "code", response.url);
-                  return response;
-                });
-              }
-
-              if (elem.hasAttribute("archive")) {
-                tasks[tasks.length] = halter.then(async () => {
-                  const response = await capturer.invoke("downloadFile", {
-                    url: elem.getAttribute("archive"),
-                    refUrl,
-                    settings,
-                    options,
-                  });
-                  captureRewriteUri(elem, "archive", response.url);
-                  return response;
-                });
-              }
-              break;
-          }
-          break;
-        }
-
-        // media: canvas
-        case "canvas": {
-          const canvasOrig = origNodeMap.get(elem);
-
-          switch (options["capture.canvas"]) {
-            case "blank":
-              // do nothing
-              break;
-            case "remove":
-              captureRemoveNode(elem);
-              return;
-            case "save":
-            default:
-              // we get only blank canvas in headless capture 
-              if (isHeadless) { break; }
-
-              try {
-                const scriptText = getCanvasDataScript(canvasOrig);
-                if (scriptText) {
-                  const canvasScript = doc.createElement("script");
-                  canvasScript.textContent = scriptText;
-                  elem.parentNode.insertBefore(canvasScript, elem.nextSibling);
+            switch (options["capture.embed"]) {
+              case "link":
+                // do nothing
+                break;
+              case "blank":
+                // HTML 5.1 2nd Edition / W3C Recommendation:
+                // The src attribute, if present, must contain a valid non-empty URL.
+                if (elem.hasAttribute("src")) {
+                  captureRewriteUri(elem, "src", null);
                 }
-              } catch (ex) {
-                console.error(ex);
-              }
-
-              break;
-          }
-          break;
-        }
-
-        case "form": {
-          if ( elem.hasAttribute("action") ) {
-              elem.setAttribute("action", elem.action);
-          }
-          break;
-        }
-
-        case "input": {
-          const elemOrig = origNodeMap.get(elem);
-
-          switch (elem.type.toLowerCase()) {
-            // images: input
-            case "image": {
-              if (elem.hasAttribute("src")) {
-                const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-                elem.setAttribute("src", rewriteUrl);
-              }
-              switch (options["capture.image"]) {
-                case "link":
-                  // do nothing
-                  break;
-                case "blank":
-                  // HTML 5.1 2nd Edition / W3C Recommendation:
-                  // The src attribute must be present, and must contain a valid non-empty URL.
-                  captureRewriteUri(elem, "src", "about:blank");
-                  break;
-                case "remove":
-                  captureRemoveNode(elem);
-                  return;
-                case "save-current":
-                  // srcset and currentSrc are not supported, do the same as save
-                case "save":
-                default:
+                break;
+              case "remove":
+                captureRemoveNode(elem);
+                return;
+              case "save":
+              default:
+                if (elem.hasAttribute("src")) {
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await capturer.invoke("downloadFile", {
                       url: elem.getAttribute("src"),
@@ -1668,77 +1645,268 @@ capturer.captureDocument = async function (params) {
                     captureRewriteUri(elem, "src", response.url);
                     return response;
                   });
-                  break;
-              }
-              break;
+                }
+                break;
             }
-            // form: input (file, password)
-            case "password":
-            case "file": {
-              // always forget
-              break;
-            }
-            // form: input (radio, checkbox)
-            case "radio":
-            case "checkbox": {
-              switch (options["capture.formStatus"]) {
-                case "keep":
-                  captureRewriteAttr(elem, "checked", elemOrig.checked ? "checked" : null);
-                  break;
-                case "reset":
-                default:
-                  // do nothing
-                  break;
-              }
-              break;
-            }
-            // form: input (other)
-            default: {
-              switch (options["capture.formStatus"]) {
-                case "keep":
-                  captureRewriteAttr(elem, "value", elemOrig.value);
-                  break;
-                case "reset":
-                default:
-                  // do nothing
-                  break;
-              }
-              break;
-            }
+            break;
           }
-          break;
+
+          // media: object
+          case "object": {
+            if (elem.hasAttribute("data")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("data"), refUrl);
+              elem.setAttribute("data", rewriteUrl);
+            }
+
+            switch (options["capture.object"]) {
+              case "link":
+                // do nothing
+                break;
+              case "blank":
+                // HTML 5.1 2nd Edition / W3C Recommendation:
+                // The data attribute, if present, must be a valid non-empty URL.
+                if (elem.hasAttribute("data")) {
+                  captureRewriteUri(elem, "data", null);
+                }
+                break;
+              case "remove":
+                captureRemoveNode(elem);
+                return;
+              case "save":
+              default:
+                if (elem.hasAttribute("data")) {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elem.getAttribute("data"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
+                    captureRewriteUri(elem, "data", response.url);
+                    return response;
+                  });
+                }
+                break;
+            }
+            break;
+          }
+
+          // media: applet
+          case "applet": {
+            if (elem.hasAttribute("code")) {
+              let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("code"), refUrl);
+              elem.setAttribute("code", rewriteUrl);
+            }
+
+            if (elem.hasAttribute("archive")) {
+              let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("archive"), refUrl);
+              elem.setAttribute("archive", rewriteUrl);
+            }
+
+            switch (options["capture.applet"]) {
+              case "link":
+                // do nothing
+                break;
+              case "blank":
+                if (elem.hasAttribute("code")) {
+                  captureRewriteUri(elem, "code", null);
+                }
+
+                if (elem.hasAttribute("archive")) {
+                  captureRewriteUri(elem, "archive", null);
+                }
+                break;
+              case "remove":
+                captureRemoveNode(elem);
+                return;
+              case "save":
+              default:
+                if (elem.hasAttribute("code")) {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elem.getAttribute("code"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
+                    captureRewriteUri(elem, "code", response.url);
+                    return response;
+                  });
+                }
+
+                if (elem.hasAttribute("archive")) {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await capturer.invoke("downloadFile", {
+                      url: elem.getAttribute("archive"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
+                    captureRewriteUri(elem, "archive", response.url);
+                    return response;
+                  });
+                }
+                break;
+            }
+            break;
+          }
+
+          // media: canvas
+          case "canvas": {
+            const canvasOrig = origNodeMap.get(elem);
+
+            switch (options["capture.canvas"]) {
+              case "blank":
+                // do nothing
+                break;
+              case "remove":
+                captureRemoveNode(elem);
+                return;
+              case "save":
+              default:
+                // we get only blank canvas in headless capture 
+                if (isHeadless) { break; }
+
+                try {
+                  const scriptText = getCanvasDataScript(canvasOrig);
+                  if (scriptText) {
+                    const canvasScript = doc.createElement("script");
+                    canvasScript.textContent = scriptText;
+                    elem.parentNode.insertBefore(canvasScript, elem.nextSibling);
+                  }
+                } catch (ex) {
+                  console.error(ex);
+                }
+
+                break;
+            }
+            break;
+          }
+
+          case "form": {
+            if ( elem.hasAttribute("action") ) {
+                elem.setAttribute("action", elem.action);
+            }
+            break;
+          }
+
+          case "input": {
+            const elemOrig = origNodeMap.get(elem);
+
+            switch (elem.type.toLowerCase()) {
+              // images: input
+              case "image": {
+                if (elem.hasAttribute("src")) {
+                  const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
+                  elem.setAttribute("src", rewriteUrl);
+                }
+                switch (options["capture.image"]) {
+                  case "link":
+                    // do nothing
+                    break;
+                  case "blank":
+                    // HTML 5.1 2nd Edition / W3C Recommendation:
+                    // The src attribute must be present, and must contain a valid non-empty URL.
+                    captureRewriteUri(elem, "src", "about:blank");
+                    break;
+                  case "remove":
+                    captureRemoveNode(elem);
+                    return;
+                  case "save-current":
+                    // srcset and currentSrc are not supported, do the same as save
+                  case "save":
+                  default:
+                    tasks[tasks.length] = halter.then(async () => {
+                      const response = await capturer.invoke("downloadFile", {
+                        url: elem.getAttribute("src"),
+                        refUrl,
+                        settings,
+                        options,
+                      });
+                      captureRewriteUri(elem, "src", response.url);
+                      return response;
+                    });
+                    break;
+                }
+                break;
+              }
+              // form: input (file, password)
+              case "password":
+              case "file": {
+                // always forget
+                break;
+              }
+              // form: input (radio, checkbox)
+              case "radio":
+              case "checkbox": {
+                switch (options["capture.formStatus"]) {
+                  case "keep":
+                    captureRewriteAttr(elem, "checked", elemOrig.checked ? "checked" : null);
+                    break;
+                  case "reset":
+                  default:
+                    // do nothing
+                    break;
+                }
+                break;
+              }
+              // form: input (other)
+              default: {
+                switch (options["capture.formStatus"]) {
+                  case "keep":
+                    captureRewriteAttr(elem, "value", elemOrig.value);
+                    break;
+                  case "reset":
+                  default:
+                    // do nothing
+                    break;
+                }
+                break;
+              }
+            }
+            break;
+          }
+
+          // form: option
+          case "option": {
+            const elemOrig = origNodeMap.get(elem);
+
+            switch (options["capture.formStatus"]) {
+              case "keep":
+                captureRewriteAttr(elem, "selected", elemOrig.selected ? "selected" : null);
+                break;
+              case "reset":
+              default:
+                // do nothing
+                break;
+            }
+            break;
+          }
+
+          // form: textarea
+          case "textarea": {
+            const elemOrig = origNodeMap.get(elem);
+
+            switch (options["capture.formStatus"]) {
+              case "keep":
+                captureRewriteTextContent(elem, elemOrig.value);
+                break;
+              case "reset":
+              default:
+                // do nothing
+                break;
+            }
+            break;
+          }
         }
 
-        // form: option
-        case "option": {
-          const elemOrig = origNodeMap.get(elem);
-
-          switch (options["capture.formStatus"]) {
-            case "keep":
-              captureRewriteAttr(elem, "selected", elemOrig.selected ? "selected" : null);
-              break;
-            case "reset":
-            default:
-              // do nothing
-              break;
-          }
-          break;
-        }
-
-        // form: textarea
-        case "textarea": {
-          const elemOrig = origNodeMap.get(elem);
-
-          switch (options["capture.formStatus"]) {
-            case "keep":
-              captureRewriteTextContent(elem, elemOrig.value);
-              break;
-            case "reset":
-            default:
-              // do nothing
-              break;
-          }
-          break;
+        // handle integrity and crossorigin
+        // We have to remove integrity check because we could modify the content
+        // and they might not work correctly in the offline environment.
+        if (options["capture.removeIntegrity"]) {
+          captureRewriteAttr(elem, "integrity", null);
+          captureRewriteAttr(elem, "crossorigin", null);
+          captureRewriteAttr(elem, "nonce", null); // this is meaningless as CSP is removed
         }
       }
 
@@ -1792,92 +1960,81 @@ capturer.captureDocument = async function (params) {
           });
           break;
       }
-
-      // handle integrity and crossorigin
-      // We have to remove integrity check because we could modify the content
-      // and they might not work correctly in the offline environment.
-      if (options["capture.removeIntegrity"]) {
-        captureRewriteAttr(elem, "integrity", null);
-        captureRewriteAttr(elem, "crossorigin", null);
-        captureRewriteAttr(elem, "nonce", null); // this is meaningless as CSP is removed
-      }
     }, this);
 
-    // force UTF-8
-    if (!metaCharsetNode) {
-      let frag = doc.createDocumentFragment();
-      metaCharsetNode = doc.createElement("meta");
-      metaCharsetNode.setAttribute("charset", "UTF-8");
-      frag.appendChild(doc.createTextNode("\n"));
-      frag.appendChild(metaCharsetNode);
-      headNode.insertBefore(frag, headNode.firstChild);
-    }
 
     // force title if a preset title is given
     if (title) {
-      let titleElem = Array.prototype.find.call(
-        rootNode.querySelectorAll('title'),
-        x => !x.closest('svg'),
-      );
-      if (titleElem) {
+      if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+        let titleElem = Array.prototype.find.call(
+          rootNode.querySelectorAll('title'),
+          x => !x.closest('html svg'),
+        );
+        if (!titleElem) {
+          titleElem = headNode.insertBefore(doc.createElement('title'), headNode.firstChild);
+        }
         titleElem.textContent = title;
-      } else {
-        let frag = doc.createDocumentFragment();
-        titleElem = doc.createElement('title');
+      } else if (doc.contentType === "image/svg+xml") {
+        let titleElem = rootNode.querySelector('title');
+        if (!titleElem) {
+          const xmlns = "http://www.w3.org/2000/svg";
+          titleElem = rootNode.insertBefore(doc.createElementNS(xmlns, 'title'), rootNode.firstChild);
+        }
         titleElem.textContent = title;
-        frag.appendChild(titleElem);
-        frag.appendChild(doc.createTextNode("\n"));
-        headNode.appendChild(frag);
       }
     }
 
-    // handle tab favicon
-    // 1. Use DOM favicon if presented.
-    // 2. Use tab favicon (from favicon.ico or browser extension).
-    // Prefer DOM favicon since tab favicon is data URL in Firefox, and results
-    // in an extra downloading of possibly duplicated image, which is not
-    // desired.
-    if (typeof favIconUrl === 'undefined') {
-      if (settings.frameIsMain && settings.favIconUrl) {
-        let icon;
-        tasks[tasks.length] = (async () => {
-          switch (options["capture.favicon"]) {
-            case "link": {
-              icon = favIconUrl = settings.favIconUrl;
-              break;
-            }
-            case "blank":
-            case "remove": {
-              // do nothing
-              break;
-            }
-            case "save":
-            default: {
-              icon = favIconUrl = settings.favIconUrl;
-              const response = await capturer.invoke("downloadFile", {
-                url: settings.favIconUrl,
-                refUrl,
-                settings,
-                options,
-              });
-              icon = response.url;
-              if (options["capture.saveAs"] === 'folder') {
-                favIconUrl = icon;
-              }
-              break;
-            }
-          }
+    if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+      // force UTF-8
+      if (!metaCharsetNode) {
+        metaCharsetNode = headNode.insertBefore(doc.createElement("meta"), headNode.firstChild);
+        metaCharsetNode.setAttribute("charset", "UTF-8");
+      }
 
-          if (icon) {
-            const frag = doc.createDocumentFragment();
-            const favIconNode = doc.createElement("link");
-            favIconNode.rel = "shortcut icon";
-            favIconNode.href = icon;
-            frag.appendChild(favIconNode);
-            frag.appendChild(doc.createTextNode("\n"));
-            headNode.appendChild(frag);
-          }
-        })();
+      // handle tab favicon
+      // 1. Use DOM favicon if presented.
+      // 2. Use tab favicon (from favicon.ico or browser extension).
+      // Prefer DOM favicon since tab favicon is data URL in Firefox, and results
+      // in an extra downloading of possibly duplicated image, which is not
+      // desired.
+      if (typeof favIconUrl === 'undefined') {
+        if (settings.frameIsMain && settings.favIconUrl) {
+          let icon;
+          tasks[tasks.length] = (async () => {
+            switch (options["capture.favicon"]) {
+              case "link": {
+                icon = favIconUrl = settings.favIconUrl;
+                break;
+              }
+              case "blank":
+              case "remove": {
+                // do nothing
+                break;
+              }
+              case "save":
+              default: {
+                icon = favIconUrl = settings.favIconUrl;
+                const response = await capturer.invoke("downloadFile", {
+                  url: settings.favIconUrl,
+                  refUrl,
+                  settings,
+                  options,
+                });
+                icon = response.url;
+                if (options["capture.saveAs"] === 'folder') {
+                  favIconUrl = icon;
+                }
+                break;
+              }
+            }
+
+            if (icon) {
+              const favIconNode = headNode.appendChild(doc.createElement("link"));
+              favIconNode.rel = "shortcut icon";
+              favIconNode.href = icon;
+            }
+          })();
+        }
       }
     }
 

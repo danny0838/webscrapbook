@@ -6626,6 +6626,64 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
   assert(doc.querySelector('a[name]').getAttribute('href') === `mailto:nonexist@example.com`);
 }
 
+/**
+ * Check if SVG can be captured correctly.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_svg() {
+  /* embed.html */
+  var options = {
+    "capture.image": "save",
+    "capture.script": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_svg/embed.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["green.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `${localhost}/capture_svg/resources/green.bmp`);
+  assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `${localhost}/capture_svg/resources/green.bmp`);
+  assert(doc.querySelectorAll('svg image')[0].getAttribute('href') === `green.bmp`);
+  assert(doc.querySelectorAll('svg image')[1].getAttribute('xlink:href') === `green.bmp`);
+  assert(doc.querySelectorAll('svg use')[0].getAttribute('href') === `#img1`);
+  assert(doc.querySelectorAll('svg use')[1].getAttribute('xlink:href') === `#img2`);
+
+  /* external.svg */
+  var options = {
+    "capture.image": "save",
+    "capture.script": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_svg/external.svg`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["index.svg"]);
+  assert(zip.files["green.bmp"]);
+
+  var indexFile = zip.file('index.svg');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `${localhost}/capture_svg/resources/green.bmp`);
+  assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `${localhost}/capture_svg/resources/green.bmp`);
+  assert(doc.querySelectorAll('svg image')[0].getAttribute('href') === `green.bmp`);
+  assert(doc.querySelectorAll('svg image')[1].getAttribute('xlink:href') === `green.bmp`);
+  assert(doc.querySelectorAll('svg use')[0].getAttribute('href') === `#img1`);
+  assert(doc.querySelectorAll('svg use')[1].getAttribute('xlink:href') === `#img2`);
+}
+
 async function test_viewer_validate() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-validate/index.html'),
@@ -6765,6 +6823,7 @@ async function runTests() {
   await test(test_capture_record_errorUrls3);
   await test(test_capture_record_errorUrls4);
   await test(test_capture_record_errorUrls5);
+  await test(test_capture_svg);
 }
 
 async function runManualTests() {

@@ -1106,6 +1106,13 @@ scrapbook.filenameParts = function (filename) {
   return [filename, ""];
 };
 
+scrapbook.splitXmlAttribute = function (attr) {
+  let ns = "", name = attr, pos;
+  pos = name.indexOf(":");
+  if (pos !== -1) { ns = name.slice(0, pos); name = name.slice(pos + 1); }
+  return [ns, name];
+};
+
 
 /******************************************************************************
  * String handling - HTML Header parsing
