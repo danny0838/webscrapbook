@@ -4211,6 +4211,7 @@ async function test_capture_script() {
   assert(a.getAttribute('href').trim() === `javascript:console.log('a');`);
   var body = doc.body;
   assert(body.getAttribute('onload').trim() === `console.log('load');`);
+  assert(body.getAttribute('oncontextmenu').trim() === `return false;`);
   var div = doc.querySelector('div');
   assert(div.getAttribute('onclick').trim() === `console.log('click');`);
 
@@ -4241,6 +4242,7 @@ async function test_capture_script() {
   assert(a.getAttribute('href').trim() === `javascript:console.log('a');`);
   var body = doc.body;
   assert(body.getAttribute('onload').trim() === `console.log('load');`);
+  assert(body.getAttribute('oncontextmenu').trim() === `return false;`);
   var div = doc.querySelector('div');
   assert(div.getAttribute('onclick').trim() === `console.log('click');`);
 
@@ -4270,7 +4272,8 @@ async function test_capture_script() {
   var a = doc.querySelector('a');
   assert(a.getAttribute('href').trim() === `javascript:`);
   var body = doc.body;
-  assert(!body.getAttribute('onload'));
+  assert(!body.hasAttribute('onload'));
+  assert(!body.hasAttribute('oncontextmenu'));
   var div = doc.querySelector('div');
   assert(!div.hasAttribute('onclick'));
 
@@ -4294,7 +4297,8 @@ async function test_capture_script() {
   var a = doc.querySelector('a');
   assert(a.getAttribute('href').trim() === `javascript:`);
   var body = doc.body;
-  assert(!body.getAttribute('onload'));
+  assert(!body.hasAttribute('onload'));
+  assert(!body.hasAttribute('oncontextmenu'));
   var div = doc.querySelector('div');
   assert(!div.hasAttribute('onclick'));
 }

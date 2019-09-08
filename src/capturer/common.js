@@ -1783,11 +1783,14 @@ capturer.captureDocument = async function (params) {
         case "blank":
         case "remove":
         default:
-          Array.prototype.forEach.call(elem.attributes, (attr) => {
-            if (attr.name.toLowerCase().startsWith("on")) {
-              captureRewriteAttr(elem, attr.name, null);
-            }
-          }, this);
+          // removing an attribute shrinks elem.attributes list
+          Array.prototype.filter.call(
+            elem.attributes,
+            attr => attr.name.toLowerCase().startsWith("on")
+          ).forEach((attr) => {
+            captureRewriteAttr(elem, attr.name, null);
+          });
+          break;
       }
 
       // handle integrity and crossorigin
