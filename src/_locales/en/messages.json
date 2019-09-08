@@ -462,13 +462,13 @@
     "message": "Scripts:"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n* Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Additionally, scripts don't run in the archive page viewer for security reasons. It is generally recommended to set capture options to \"save\" and \"canvas\" option to \"save initial status\" to avoid a conflict to and an error of the script.\n\n* Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the script.\n\n* Remove: Remove the script element. Note that this could affect the web page layout."
+    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n* Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Additionally, scripts don't run in the archive page viewer for security reasons. It is generally recommended to set capture options to \"save\" and \"canvas\" option to \"save initial status\" to avoid a conflict to and an error of the script.\n\n* Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the script.\n\n* Remove: Remove the script element. Note that this could affect the web page layout in some rare cases."
   },
   "OptionCaptureStyleLabel": {
     "message": "Styles:"
   },
   "OptionCaptureStyleTooltip": {
-    "message": "This determines how stylesheets (including external – some LINK elements – and internal – STYLE elements) are handled.\n\n* Save: Save the referenced external stylesheet resource to local.\n\n* Link: Link the external stylesheet to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the stylesheet.\n\n* Remove: Remove the stylesheet element."
+    "message": "This determines how stylesheets (including external – some LINK elements – and internal – STYLE elements) are handled.\n\n* Save: Save the referenced external stylesheet resource to local.\n\n* Link: Link the external stylesheet to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the stylesheet.\n\n* Remove: Remove the stylesheet element. Note that this could affect the web page layout in some rare cases."
   },
   "OptionCaptureVideoLabel": {
     "message": "Videos:"
