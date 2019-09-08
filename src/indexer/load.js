@@ -2940,6 +2940,10 @@ const searchEngine = {
       error: [],
       rules: {},
       sorts: [],
+      books: {
+        include: [],
+        exclude: [],
+      },
       roots: {
         include: [],
         exclude: [],
@@ -3029,6 +3033,12 @@ const searchEngine = {
         case "-re:":
           query.re = false;
           break;
+        case "book:":
+          query.books.include.push(term);
+          break;
+        case "-book:":
+          query.books.exclude.push(term);
+          break;
         case "root:":
           query.roots.include.push(term);
           break;
@@ -3115,8 +3125,22 @@ const searchEngine = {
   },
 
   search(query) {
+    const books = new Set(scrapbook.books);
+    if (query.books.include.length) {
+      for (const book of books) {
+        if (!query.books.include.includes(book.name)) {
+          books.delete(book);
+        }
+      }
+    }
+    for (const book of books) {
+      if (query.books.exclude.includes(book.name)) {
+        books.delete(book);
+      }
+    }
+
     let p = Promise.resolve();
-    scrapbook.books.forEach((book) => {
+    books.forEach((book) => {
       p = p.then(() => {
         return this.searchBook(query, book).then((results) => {
           scrapbook.showResults(results, book);
