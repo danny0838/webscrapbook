@@ -824,10 +824,13 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
         if (u.startsWith(indexUrl)) {
           return item;
         }
-      } else {
-        if (u === indexUrl) {
+      } else if (/\.(htz|maff)$/i.test(indexUrl)) {
+        if (u.startsWith(indexUrl + "!/")) {
           return item;
         }
+      }
+      if (u === indexUrl) {
+        return item;
       }
     }
 
