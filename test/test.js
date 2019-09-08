@@ -2331,6 +2331,12 @@ async function test_capture_css_rewriteCss() {
 @font-face { font-family: fontface; src: url("sansation_light.woff"); }
 #background { background: url("green.bmp"); }`);
   assert(styleElems[1].textContent.trim() === `\
+@namespace svg url(http://www.w3.org/2000/svg);
+svg|a text, text svg|a {
+  fill: blue;
+  text-decoration: underline;
+}`);
+  assert(styleElems[2].textContent.trim() === `\
 /* unsupported rules */
 #unsupported {
   *background: url("unsupported-1.bmp"); /* IE7 */
@@ -2364,6 +2370,12 @@ async function test_capture_css_rewriteCss() {
 @font-face { font-family: fontface; src: url(ref/sansation_light.woff); }
 #background { background: url(ref/green.bmp); }`);
   assert(styleElems[1].textContent.trim() === `\
+@namespace svg url(http://www.w3.org/2000/svg);
+svg|a text, text svg|a {
+  fill: blue;
+  text-decoration: underline;
+}`);
+  assert(styleElems[2].textContent.trim() === `\
 /* unsupported rules */
 #unsupported {
   *background: url(ref/unsupported-1.bmp); /* IE7 */

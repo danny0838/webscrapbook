@@ -1524,6 +1524,7 @@ scrapbook.rewriteCssText = function (cssText, options) {
   const pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
   const pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
   const pCmSp = "(?:(?:" + pCm + "|" + pSp + ")*)"; // comment or space
+  const pCmSp2 = "(?:(?:" + pCm + "|" + pSp + ")+)"; // comment or space, at least one
   const pChar = "(?:\\\\.|[^\\\\\"'])"; // a non-quote char or an escaped char sequence
   const pStr = "(?:" + pChar + "*?)"; // string
   const pSStr = "(?:" + pCmSp + pStr + pCmSp + ")"; // comment-or-space enclosed string
@@ -1532,8 +1533,9 @@ scrapbook.rewriteCssText = function (cssText, options) {
   const pES = "(?:" + "(?:" + [pCm, pDQStr, pSQStr, pChar].join("|") + ")*?" + ")"; // embeded string
   const pUrl = "(?:" + "\\burl\\(" + pSp + "(?:" + [pDQStr, pSQStr, pStr].join("|") + ")" + pSp + "\\)" + ")"; // URL
   const pUrl2 = "(" + "\\burl\\(" + pSp + ")(" + [pDQStr, pSQStr, pStr].join("|") + ")(" + pSp + "\\)" + ")"; // URL; catch 3
-  const pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")"; // rule import; catch 2
-  const pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // rule font-face; catch 1
+  const pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")"; // @import; catch 2
+  const pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // @font-face; catch 1
+  const pRNamespace = "(" + "@namespace" + pCmSp + "(?:" + pStr + pCmSp2 + ")?" + pUrl + ")"; // @namespace; catch 1
 
   const rewriteCssText = function (cssText, options = {}) {
     let mapUrlPromise;
@@ -1581,8 +1583,8 @@ scrapbook.rewriteCssText = function (cssText, options) {
     
     const {rewriteImportUrl, rewriteFontFaceUrl, rewriteBackgroundUrl} = options;
     const response = cssText.replace(
-      new RegExp([pCm, pRImport, pRFontFace, "("+pUrl+")"].join("|"), "gi"),
-      (m, im1, im2, ff, u) => {
+      new RegExp([pCm, pRImport, pRFontFace, pRNamespace, "("+pUrl+")"].join("|"), "gi"),
+      (m, im1, im2, ff, ns, u) => {
         if (im2) {
           let rewritten;
           if (im2.startsWith('"') && im2.endsWith('"')) {
@@ -1597,6 +1599,9 @@ scrapbook.rewriteCssText = function (cssText, options) {
           return im1 + rewritten;
         } else if (ff) {
           return parseUrl(m, rewriteFontFaceUrl);
+        } else if (ns) {
+          // do not rewrite @namespace rule
+          return ns;
         } else if (u) {
           return parseUrl(m, rewriteBackgroundUrl);
         }
