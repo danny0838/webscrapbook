@@ -476,11 +476,17 @@
   "OptionCaptureVideoTooltip": {
     "message": "This determines how video elements are handled.\n\n* Save: Save the referenced video resource to local.\n\n* Save current: Save the playing video resource to local and ignore alternatives for other browsers. This considerably reduces size but the video may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all video resources are saved.\n\n* Link: Link the video to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the video.\n\n* Remove: Remove the video element. Note that this could affect the web page layout."
   },
+  "OptionEditorAutoInit": {
+    "message": "Automatically load editor toolbar when visiting a page in the scrapbook"
+  },
   "OptionGroupCapture": {
     "message": "Capture - content"
   },
   "OptionGroupDownLink": {
     "message": "Capture - Download linked files"
+  },
+  "OptionGroupEditor": {
+    "message": "Editor"
   },
   "OptionGroupIndexer": {
     "message": "Indexer"

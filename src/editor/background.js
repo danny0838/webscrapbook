@@ -12,6 +12,11 @@ const urlMatch = await scrapbook.getContentPagePattern();
 browser.webNavigation.onDOMContentLoaded.addListener((details) => {
   if (details.frameId !== 0) { return; }
 
+  // skip as configured
+  if (!scrapbook.getOption("editor.autoInit")) {
+    return;
+  }
+
   const {url, tabId} = details;
   const [urlMain, urlSearch, urlHash] = scrapbook.splitUrl(url);
 

@@ -476,11 +476,17 @@
   "OptionCaptureVideoTooltip": {
     "message": "此選項決定視訊（VIDEO 元素）的處理方式。\n\n* 儲存：將視訊儲存至本地。\n\n* 儲存現用：將播放的視訊儲存至本地，忽略供其他瀏覽器使用的備用視訊。這可以縮小容量，但在其他平台可能無法播放。若擷取的頁面並未顯示於瀏覽器（例如擷取原貌），則仍儲存所有視訊。\n\n* 連結：將視訊連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將視訊無效化。\n\n* 移除：將視訊元素移除。注意這可能會影響網頁排版。"
   },
+  "OptionEditorAutoInit": {
+    "message": "瀏覽剪貼簿中的頁面時，自動載入編輯工具列"
+  },
   "OptionGroupCapture": {
     "message": "擷取 - 內容"
   },
   "OptionGroupDownLink": {
     "message": "擷取 - 下載連結檔案"
+  },
+  "OptionGroupEditor": {
+    "message": "編輯器"
   },
   "OptionGroupIndexer": {
     "message": "索引器"

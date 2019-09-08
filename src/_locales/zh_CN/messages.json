@@ -476,11 +476,17 @@
   "OptionCaptureVideoTooltip": {
     "message": "此选项决定视频（VIDEO 元素）的处理方式。\n\n* 保存：将视频保存至本地。\n\n* 保存现用：将播放的视频保存至本地，忽略供其他浏览器使用的备用视频。这可以有效缩小容量，但在其他平台可能无法播放。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有视频。\n\n* 链接：将视频连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将视频无效化。\n\n* 移除：将视频元素移除。注意这可能会影响网页排版。"
   },
+  "OptionEditorAutoInit": {
+    "message": "浏览剪贴簿中的页面时，自动载入编辑工具列"
+  },
   "OptionGroupCapture": {
     "message": "获取 - 内容"
   },
   "OptionGroupDownLink": {
     "message": "获取 - 下载链接文件"
+  },
+  "OptionGroupEditor": {
+    "message": "編輯器"
   },
   "OptionGroupIndexer": {
     "message": "索引器"
