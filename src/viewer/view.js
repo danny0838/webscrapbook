@@ -177,21 +177,39 @@ const viewer = {
    * @return {Promise<Blob>}
    */
   async parseDocument(params) {
-    const {doc, inZipPath, recurseChain} = params;
-
-    const refUrl = viewer.inZipPathToUrl(inZipPath);
-    const tasks = [];
-
     const rewriteUrl = function (url, refUrlOverwrite) {
       return viewer.parseUrl(url, refUrlOverwrite || refUrl).url;
     };
 
-    // modify URLs
-    Array.prototype.forEach.call(doc.querySelectorAll("*"), (elem) => {
-      // skip elements that are already removed from the DOM tree
-      if (!elem.parentNode) { return; }
+    // the callback should return a falsy value if the elem is removed from DOM
+    const rewriteRecursively = (elem, rootName, callback) => {
+      const nodeName = elem.nodeName.toLowerCase();
 
-      if (elem.closest("svg")) {
+      // switch rootName for certain embedded "document"
+      if (["svg", "math"].includes(nodeName)) {
+        rootName = nodeName;
+      }
+
+      const result = callback.call(this, elem, rootName);
+
+      // skip processing children if elem is removed from DOM
+      if (result) {
+        let child = elem.firstElementChild, next;
+        while (child) {
+          // record next child in prior so that we don't get a problem if child
+          // is removed in this run
+          next = child.nextElementSibling;
+
+          rewriteRecursively(child, rootName, callback);
+
+          child = next;
+        }
+      }
+      return result;
+    };
+
+    const rewriteNode = (elem, rootName) => {
+      if (rootName === "svg") {
         // href and xlink:href in SVG elements
         if (elem.hasAttribute("href")) {
           const info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
@@ -221,7 +239,7 @@ const viewer = {
             elem.setAttribute("xlink:href", info.url);
           }
         }
-      } else if (elem.closest("math")) {
+      } else if (rootName === "math") {
         if (elem.hasAttribute("href")) {
           const info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
           if (info.inZip) {
@@ -634,7 +652,18 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           });
         }
       }
-    });
+
+      return elem;
+    };
+
+    const {doc, inZipPath, recurseChain} = params;
+
+    const refUrl = viewer.inZipPathToUrl(inZipPath);
+    const tasks = [];
+
+    // rewrite URLs
+    const root = doc.documentElement;
+    rewriteRecursively(root, root.nodeName.toLowerCase(), rewriteNode);
 
     if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
       // Remove privileged APIs to avoid a potential security risk.

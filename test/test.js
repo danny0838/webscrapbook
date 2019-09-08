@@ -6711,6 +6711,36 @@ async function test_capture_mathml() {
   assert(doc.querySelectorAll('math mi')[2].getAttribute('href') === `${localhost}/capture_mathml/resources/blue.bmp`);
 }
 
+/**
+ * This issue happens when a child is "captured" after its parent is removed.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_recursive() {
+  /* embed.html */
+  var options = {
+    "capture.image": "remove",
+    "capture.script": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_recursive/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(!zip.files["red.bmp"]);
+  assert(!zip.files["blue.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector('picture'));
+  assert(!doc.querySelector('img'));
+  assert(!doc.querySelector('script'));
+}
+
 async function test_viewer_validate() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-validate/index.html'),
@@ -6852,6 +6882,7 @@ async function runTests() {
   await test(test_capture_record_errorUrls5);
   await test(test_capture_svg);
   await test(test_capture_mathml);
+  await test(test_capture_recursive);
 }
 
 async function runManualTests() {
