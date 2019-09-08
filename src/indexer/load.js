@@ -2070,7 +2070,6 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-size: .8em;
   line-height: 1.35em;
 }
 
@@ -2092,7 +2091,7 @@ body {
 }
 
 #item-root {
-  padding: 0 1.65em;
+  padding: 0 1.5em;
 }
 
 ul {
@@ -2103,11 +2102,11 @@ ul {
 li {
   list-style-type: none;
   margin: .2em 0;
-  padding-${scrapbook.lang('@@bidi_start_edge')}: .85em;
+  padding-${scrapbook.lang('@@bidi_start_edge')}: 1em;
 }
 
 li > div {
-  margin-${scrapbook.lang('@@bidi_start_edge')}: -.85em;
+  margin-${scrapbook.lang('@@bidi_start_edge')}: -1em;
   white-space: nowrap;
 }
 
@@ -2127,21 +2126,25 @@ a:active {
 
 a > img {
   display: inline-block;
-  margin-left: .1em;
-  margin-right: .1em;
+  margin: 0 .2em;
   border: none;
-  width: 1.25em;
-  height: 1.25em;
+  width: 1em;
+  height: 1em;
   vertical-align: middle;
 }
 
 a.scrapbook-toggle {
-  margin-${scrapbook.lang('@@bidi_start_edge')}: -1.45em;
+  margin-${scrapbook.lang('@@bidi_start_edge')}: -1em;
+}
+
+a.scrapbook-toggle > img {
+  margin: 0;
 }
 
 a.scrapbook-external > img {
-  width: 1em;
-  height: 1em;
+  margin: 0 .1em;
+  width: .7em;
+  height: .7em;
   vertical-align: top;
 }
 
@@ -2173,12 +2176,6 @@ a.scrapbook-external > img {
   font-weight: bold;
 }
 </style>
-<!--[if lte IE 7]><style>
-a > img {
-  display: inline;
-  zoom: 1;
-}
-</style><![endif]-->
 <link rel="stylesheet" href="map.css">
 <script>
 var scrapbook = {
@@ -2502,7 +2499,6 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-size: .8em;
   line-height: 1.35em;
 }
 
@@ -2565,11 +2561,10 @@ a:active {
 
 a > img {
   display: inline-block;
-  margin-left: .1em;
-  margin-right: .1em;
+  margin: 0 .2em;
   border: none;
-  width: 1.25em;
-  height: 1.25em;
+  width: 1em;
+  height: 1em;
   vertical-align: middle;
 }
 
@@ -2577,9 +2572,14 @@ a.scrapbook-toggle {
   margin-${scrapbook.lang('@@bidi_start_edge')}: -1.45em;
 }
 
+a.scrapbook-toggle > img {
+  margin: 0;
+}
+
 a.scrapbook-external > img {
-  width: 1em;
-  height: 1em;
+  margin: 0 .1em;
+  width: .7em;
+  height: .7em;
   vertical-align: top;
 }
 
