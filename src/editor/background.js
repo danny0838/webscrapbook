@@ -13,13 +13,20 @@ browser.webNavigation.onDOMContentLoaded.addListener((details) => {
   if (details.frameId !== 0) { return; }
 
   const {url, tabId} = details;
+  const [urlMain, urlSearch, urlHash] = scrapbook.splitUrl(url);
 
-  if (!url.startsWith(scrapbook.getOption("server.url"))) {
+  // skip URLs not in the backend server
+  if (!urlMain.startsWith(scrapbook.getOption("server.url"))) {
     return;
   }
 
   // skip directory listing
-  if (scrapbook.splitUrl(url)[0].endsWith('/')) {
+  if (urlMain.endsWith('/')) {
+    return;
+  }
+
+  // skip URLs with query as it could be some server command
+  if (urlSearch) {
     return;
   }
 
