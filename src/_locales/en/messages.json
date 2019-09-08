@@ -56,12 +56,6 @@
   "CapturerTitle": {
     "message": "Capture page"
   },
-  "ErrorLocateSidebarNotOpened": {
-    "message": "Unable to locate as no scrapbook is opened."
-  },
-  "ErrorLocateNotFound": {
-    "message": "Unable to find a matching scrapbook item of this page."
-  },
   "EditConfirmScriptedDocument": {
     "message": "This page is scripted, its content may have been changed and save it again may cause irreversible data loss. Continue to edit?"
   },
@@ -97,6 +91,12 @@
         "content": "$1"
       }
     }
+  },
+  "ErrorLocateNotFound": {
+    "message": "Unable to find a matching scrapbook item of this page."
+  },
+  "ErrorLocateSidebarNotOpened": {
+    "message": "Unable to locate as no scrapbook is opened."
   },
   "ErrorSaveBookNoTree": {
     "message": "The scrapbook disabled tree feature."

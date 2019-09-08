@@ -56,12 +56,6 @@
   "CapturerTitle": {
     "message": "获取页面"
   },
-  "ErrorLocateSidebarNotOpened": {
-    "message": "剪贴簿尚未开启，无法执行定位。"
-  },
-  "ErrorLocateNotFound": {
-    "message": "找不到本页面所属的剪贴簿项目。"
-  },
   "EditConfirmScriptedDocument": {
     "message": "此页面含有脚本，实际内容可能已变更，重新储存可能造成不可逆的资讯遗失。要继续编辑吗？"
   },
@@ -97,6 +91,12 @@
         "content": "$1"
       }
     }
+  },
+  "ErrorLocateNotFound": {
+    "message": "找不到本页面所属的剪贴簿项目。"
+  },
+  "ErrorLocateSidebarNotOpened": {
+    "message": "剪贴簿尚未开启，无法执行定位。"
   },
   "ErrorSaveBookNoTree": {
     "message": "剪贴簿停用了数据树功能。"
