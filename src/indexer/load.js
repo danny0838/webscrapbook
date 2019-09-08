@@ -2940,7 +2940,10 @@ const searchEngine = {
       error: [],
       rules: {},
       sorts: [],
-      root: null,
+      roots: {
+        include: [],
+        exclude: [],
+      },
       mc: false,
       re: false,
       default: conf.defaultField,
@@ -3027,10 +3030,10 @@ const searchEngine = {
           query.re = false;
           break;
         case "root:":
-          query.root = term;
+          query.roots.include.push(term);
           break;
         case "-root:":
-          query.root = null;
+          query.roots.exclude.push(term);
           break;
         case "sort:":
           addSort(term, 1);
@@ -3127,23 +3130,22 @@ const searchEngine = {
     return Promise.resolve().then(() => {
       const results = [];
 
-      let idPool = new Set();
+      const idPool = new Set();
       {
-        let root = query.root || 'root';
+        if (!query.roots.include.length) {
+          query.roots.include.push('root');
+        }
 
-        const addIdRecursively = (id) => {
-          for (const refId of book.toc[id]) {
-            if (book.meta[refId] && !idPool.has(refId)) {
-              idPool.add(refId);
-              if (book.toc[refId]) {
-                addIdRecursively(refId);
-              }
-            }
+        for (const root of query.roots.include) {
+          for (const id of this.getReachableItems(book, root)) {
+            idPool.add(id);
           }
-        };
+        }
 
-        if (book.toc[root]) {
-          addIdRecursively(root);
+        for (const root of query.roots.exclude) {
+          for (const id of this.getReachableItems(book, root)) {
+            idPool.delete(id);
+          }
         }
       }
 
@@ -3177,6 +3179,26 @@ const searchEngine = {
 
       return results;
     });
+  },
+
+  getReachableItems(book, root, set = new Set()) {
+    const addIdRecursively = (id) => {
+      for (const refId of book.toc[id]) {
+        if (book.meta[refId] && !set.has(refId)) {
+          set.add(refId);
+          if (book.toc[refId]) {
+            addIdRecursively(refId);
+          }
+        }
+      }
+    };
+    if (book.meta[root]) {
+      set.add(root);
+    }
+    if (book.toc[root]) {
+      addIdRecursively(root);
+    }
+    return set;
   },
 
   matchItem(item, query) {
