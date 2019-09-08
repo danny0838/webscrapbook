@@ -3127,9 +3127,9 @@ const searchEngine = {
     return Promise.resolve().then(() => {
       const results = [];
 
-      let idPool;
-      if (query.root) {
-        idPool = new Set();
+      let idPool = new Set();
+      {
+        let root = query.root || 'root';
 
         const addIdRecursively = (id) => {
           for (const refId of book.toc[id]) {
@@ -3142,11 +3142,9 @@ const searchEngine = {
           }
         };
 
-        if (book.meta[query.root] && book.toc[query.root]) {
-          addIdRecursively(query.root);
+        if (book.toc[root]) {
+          addIdRecursively(root);
         }
-      } else {
-        idPool = new Set(Object.keys(book.meta));
       }
 
       idPool.forEach((id) => {
