@@ -2687,10 +2687,9 @@ const scrapbook = {
       }
 
       const loadMeta = () => {
-        const ts = Date.now();
         const loop = () => {
-          const url = this.resolveUrl(book.treeDir + "meta" + (i || "") + ".js?ts=" + ts, base);
-          return this.loadScript(url).then(() => {
+          const url = this.resolveUrl(book.treeDir + "meta" + (i || "") + ".js", base);
+          return this.loadScript(url, true).then(() => {
             i += 1;
             return loop();
           }).catch((ex) => {
@@ -2704,10 +2703,9 @@ const scrapbook = {
       };
 
       const loadToc = () => {
-        const ts = Date.now();
         const loop = () => {
-          const url = this.resolveUrl(book.treeDir + "toc" + (i || "") + ".js?ts=" + ts, base);
-          return this.loadScript(url).then(() => {
+          const url = this.resolveUrl(book.treeDir + "toc" + (i || "") + ".js", base);
+          return this.loadScript(url, true).then(() => {
             i += 1;
             return loop();
           }).catch((ex) => {
@@ -2721,10 +2719,9 @@ const scrapbook = {
       };
 
       const loadFulltext = () => {
-        const ts = Date.now();
         const loop = () => {
-          const url = this.resolveUrl(book.treeDir + "fulltext" + (i || "") + ".js?ts=" + ts, base);
-          return this.loadScript(url).then(() => {
+          const url = this.resolveUrl(book.treeDir + "fulltext" + (i || "") + ".js", base);
+          return this.loadScript(url, true).then(() => {
             i += 1;
             return loop();
           }).catch((ex) => {
@@ -2745,7 +2742,7 @@ const scrapbook = {
     });
   },
 
-  loadScript(url) {
+  loadScript(url, noCache) {
     return new Promise((resolve, reject) => {
       const elem = document.createElement("script");
       document.getElementsByTagName("head")[0].appendChild(elem);
@@ -2757,7 +2754,7 @@ const scrapbook = {
         elem.remove();
         reject(new Error("Failed to load '" + url + "'"));
       };
-      elem.src = url;
+      elem.src = url + (noCache ? "?ts=" + Date.now() : "");
     });
   },
 
