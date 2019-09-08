@@ -13,6 +13,7 @@ const editor = {
   internalElement: null,
   inScrapBook: false,
   isScripted: false,
+  serverUrl: null,
 };
 
 /**
@@ -45,7 +46,8 @@ editor.init = async function ({willOpen, force = false}) {
   editor.isScripted = editor.isDocumentScripted(document);
 
   await scrapbook.loadOptions();
-  editor.inScrapBook = document.URL.startsWith(scrapbook.getOption("server.url"));
+  editor.serverUrl = scrapbook.getOption("server.url");
+  editor.inScrapBook = editor.serverUrl && document.URL.startsWith(editor.serverUrl);
 
   // generate toolbar content
   editor.element = wrapper = document.documentElement.appendChild(document.createElement("web-scrapbook"));
