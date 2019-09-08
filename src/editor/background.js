@@ -17,6 +17,11 @@ browser.webNavigation.onDOMContentLoaded.addListener((details) => {
     return;
   }
 
+  // skip if backend server is not set
+  if (!scrapbook.getOption("server.url")) {
+    return;
+  }
+
   const {url, tabId} = details;
   const [urlMain, urlSearch, urlHash] = scrapbook.splitUrl(url);
 
