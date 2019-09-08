@@ -6684,6 +6684,33 @@ async function test_capture_svg() {
   assert(doc.querySelectorAll('svg use')[1].getAttribute('xlink:href') === `#img2`);
 }
 
+/**
+ * Check if MathMl can be captured correctly.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_mathml() {
+  /* embed.html */
+  var options = {
+    "capture.image": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_mathml/embed.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('math')[0].getAttribute('href') === `${localhost}/capture_mathml/resources/green.bmp`);
+  assert(doc.querySelectorAll('math msup')[0].getAttribute('href') === `${localhost}/capture_mathml/resources/red.bmp`);
+  assert(doc.querySelectorAll('math mi')[2].getAttribute('href') === `${localhost}/capture_mathml/resources/blue.bmp`);
+}
+
 async function test_viewer_validate() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-validate/index.html'),
@@ -6824,6 +6851,7 @@ async function runTests() {
   await test(test_capture_record_errorUrls4);
   await test(test_capture_record_errorUrls5);
   await test(test_capture_svg);
+  await test(test_capture_mathml);
 }
 
 async function runManualTests() {

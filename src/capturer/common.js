@@ -729,6 +729,8 @@ capturer.captureDocument = async function (params) {
             break;
           }
         }
+      } else if (elem.closest("math")) {
+        rewriteAnchor(elem, "href");
       } else {
         switch (elem.nodeName.toLowerCase()) {
           case "base": {

@@ -221,6 +221,21 @@ const viewer = {
             elem.setAttribute("xlink:href", info.url);
           }
         }
+      } else if (elem.closest("math")) {
+        if (elem.hasAttribute("href")) {
+          const info = viewer.parseUrl(elem.getAttribute("href"), refUrl);
+          if (info.inZip) {
+            if (info.inZipPath !== inZipPath) {
+              elem.setAttribute("href", info.url);
+            } else {
+              // link to self
+              elem.setAttribute("href", info.hash || "#");
+            }
+          } else {
+            // link target is not in the zip
+            elem.setAttribute("href", info.url);
+          }
+        }
       } else {
         switch (elem.nodeName.toLowerCase()) {
           case "meta": {
