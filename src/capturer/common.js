@@ -1697,7 +1697,6 @@ capturer.captureDocument = async function (params) {
           const shadowRoot = elemOrig.shadowRoot;
           if (shadowRoot) {
             const shadow = doc.createElement("template");
-            shadow.setAttribute("data-scrapbook-shadowroot", "open");
             Array.prototype.forEach.call(shadowRoot.childNodes, (elem) => {
               shadow.content.appendChild(cloneNodeMapping(elem, true));
             });
@@ -2012,11 +2011,6 @@ capturer.captureDocument = async function (params) {
     let requireShadowRootLoader = false;
     rewriteRecursively(rootNode, rootNode.nodeName.toLowerCase(), rewriteNode);
 
-    // attach shadow roots
-    for (const {host, shadowRoot} of shadowRootList) {
-      host.insertBefore(shadowRoot, host.firstChild);
-    }
-
     // record source URL
     if (options["capture.recordDocumentMeta"]) {
       const url = docUrl.startsWith("data:") ? "data:" : docUrl;
@@ -2105,15 +2099,15 @@ capturer.captureDocument = async function (params) {
       loader.setAttribute("data-scrapbook-elem", "shadowroot-loader");
       // browsers supporting shadowRoot all support ES6
       loader.textContent = "(" + scrapbook.compressJsFunc(function () {
-        var k = "data-scrapbook-shadowroot", d = document, p, s, fn = n => {
-          n.querySelectorAll(`template[${k}]`).forEach(t => {
-            p = t.parentNode;
-            if (!p.shadowRoot && p.attachShadow) {
-              s = p.attachShadow({mode: t.getAttribute(k)});
-              s.appendChild(d.importNode(t.content, true));
+        var k = "data-scrapbook-shadowroot", d = document, p, s, data, mode, fn = n => {
+          n.querySelectorAll(`[${k}]`).forEach(h => {
+            if (!h.shadowRoot && h.attachShadow) {
+              ({data, mode} = JSON.parse(h.getAttribute(k)));
+              s = h.attachShadow({mode});
+              s.innerHTML = data;
               fn(s);
+              h.removeAttribute(k);
             }
-            t.remove();
           });
         };
         d.currentScript.remove();
@@ -2137,6 +2131,14 @@ capturer.captureDocument = async function (params) {
     // resolve the halter and wait for all async downloading tasks to complete
     halter.resolve();
     await Promise.all(tasks);
+
+    // record after the content of all nested shadow roots have been processed
+    for (const {host, shadowRoot} of shadowRootList) {
+      captureRewriteAttr(host, "data-scrapbook-shadowroot", JSON.stringify({
+        data: shadowRoot.innerHTML,
+        mode: "open",
+      }));
+    }
 
     // save document
     let content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;

@@ -6766,9 +6766,17 @@ async function test_capture_shadowRoot() {
   var doc = await readFileAsDocument(indexBlob);
 
   var host1 = doc.querySelector('div');
-  assert(host1.firstChild.matches('template[data-scrapbook-shadowroot="open"]'));
-  var host2 = host1.firstChild.content.querySelector('p');
-  assert(host2.firstChild.matches('template[data-scrapbook-shadowroot="open"]'));
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow1 = frag.content;
+  assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
+
+  var host2 = shadow1.querySelector('p');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host2.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow2 = frag.content;
+  assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
+
   var loader = doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]');
   assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
 }
