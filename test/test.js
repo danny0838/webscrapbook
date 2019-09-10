@@ -3628,10 +3628,10 @@ async function test_capture_canvas() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  var canvasElem = doc.querySelector('#c1');
-  var canvasLoaderElem = canvasElem.nextSibling;
-  assert(canvasLoaderElem && canvasLoaderElem.nodeName.toLowerCase() === 'script');
-  assert(/\bdata:image\/png;base64,/.test(canvasLoaderElem.textContent));
+  assert(/^data:image\/png;base64,/.test(doc.querySelector('#c1').getAttribute("data-scrapbook-canvas")));
+  assert(/^data:image\/png;base64,/.test(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas")));
+  var loader = doc.querySelector('script[data-scrapbook-elem="canvas-loader"]');
+  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
 
   /* capture.canvas = blank */
   var options = {
@@ -3649,9 +3649,9 @@ async function test_capture_canvas() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  var canvasElem = doc.querySelector('#c1');
-  var canvasLoaderElem = canvasElem.nextSibling;
-  assert(!(canvasLoaderElem && canvasLoaderElem.nodeName.toLowerCase() === 'script'));
+  assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
+  assert(!doc.querySelector('#c2').hasAttribute("data-scrapbook-canvas"));
+  assert(!doc.querySelector('script'));
 
   /* capture.canvas = remove */
   var options = {
@@ -3669,8 +3669,9 @@ async function test_capture_canvas() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  var canvasElem = doc.querySelector('#c1');
-  assert(!canvasElem);
+  assert(!doc.querySelector('#c1'));
+  assert(!doc.querySelector('#c2'));
+  assert(!doc.querySelector('script'));
 }
 
 /**

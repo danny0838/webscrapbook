@@ -364,20 +364,6 @@ capturer.captureDocument = async function (params) {
       }
     };
 
-    const getCanvasDataScript = (canvas) => {
-      const data = canvas.toDataURL();
-      const dataScript = function (data) {
-        var s = document.getElementsByTagName("script"),
-            c = s[s.length - 1],
-            t = c.previousSibling,
-            i = new Image();
-        i.onload = function(){ t.getContext('2d').drawImage(i, 0, 0); };
-        i.src = data;
-        s.parentNode.removeChild(s);
-      };
-      return "(" + scrapbook.compressJsFunc(dataScript) + ")('" + data + "')";
-    };
-
     // the callback should return a falsy value if the elem is removed from DOM
     const rewriteRecursively = (elem, rootName, callback) => {
       const nodeName = elem.nodeName.toLowerCase();
@@ -1544,7 +1530,7 @@ capturer.captureDocument = async function (params) {
 
           // media: canvas
           case "canvas": {
-            const canvasOrig = origNodeMap.get(elem);
+            const elemOrig = origNodeMap.get(elem);
 
             switch (options["capture.canvas"]) {
               case "blank":
@@ -1559,12 +1545,8 @@ capturer.captureDocument = async function (params) {
                 if (isHeadless) { break; }
 
                 try {
-                  const scriptText = getCanvasDataScript(canvasOrig);
-                  if (scriptText) {
-                    const canvasScript = doc.createElement("script");
-                    canvasScript.textContent = scriptText;
-                    elem.parentNode.insertBefore(canvasScript, elem.nextSibling);
-                  }
+                  captureRewriteAttr(elem, "data-scrapbook-canvas", elemOrig.toDataURL());
+                  requireCanvasLoader = true;
                 } catch (ex) {
                   console.error(ex);
                 }
@@ -2008,6 +1990,7 @@ capturer.captureDocument = async function (params) {
     // inspect nodes
     let metaCharsetNode;
     let favIconUrl;
+    let requireCanvasLoader = false;
     let requireShadowRootLoader = false;
     rewriteRecursively(rootNode, rootNode.nodeName.toLowerCase(), rewriteNode);
 
@@ -2112,6 +2095,30 @@ capturer.captureDocument = async function (params) {
         };
         d.currentScript.remove();
         fn(d);
+      }) + ")()";
+    }
+
+    if (requireCanvasLoader) {
+      const loader = rootNode.appendChild(doc.createElement("script"));
+      loader.setAttribute("data-scrapbook-elem", "canvas-loader");
+      loader.textContent = "(" + scrapbook.compressJsFunc(function () {
+        var k = "data-scrapbook-canvas",
+            d = document,
+            s = d.getElementsByTagName("script"),
+            e = d.getElementsByTagName("canvas"),
+            i = e.length;
+        s = s[s.length - 1];
+        s.parentNode.removeChild(s);
+        while (i--) {
+          if (e[i].hasAttribute(k)) {
+            (function () {
+              var c = e[i], g = new Image();
+              g.onload = function () { c.getContext('2d').drawImage(g, 0, 0); };
+              g.src = c.getAttribute(k);
+              c.removeAttribute(k);
+            })();
+          }
+        }
       }) + ")()";
     }
 
