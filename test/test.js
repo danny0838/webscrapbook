@@ -6741,6 +6741,38 @@ async function test_capture_recursive() {
   assert(!doc.querySelector('script'));
 }
 
+/**
+ * Check if shadowRoots (possibly nested) can be captured correctly.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_shadowRoot() {
+  var options = {
+    "capture.image": "save",
+    "capture.script": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_shadowRoot/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["green.bmp"]);
+  assert(zip.files["blue.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var host1 = doc.querySelector('div');
+  assert(host1.firstChild.matches('template[data-scrapbook-shadowroot="open"]'));
+  var host2 = host1.firstChild.content.querySelector('p');
+  assert(host2.firstChild.matches('template[data-scrapbook-shadowroot="open"]'));
+  var loader = doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]');
+  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+}
+
 async function test_viewer_validate() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-validate/index.html'),
@@ -6883,6 +6915,7 @@ async function runTests() {
   await test(test_capture_svg);
   await test(test_capture_mathml);
   await test(test_capture_recursive);
+  await test(test_capture_shadowRoot);
 }
 
 async function runManualTests() {
