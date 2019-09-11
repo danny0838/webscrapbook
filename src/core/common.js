@@ -119,6 +119,7 @@ scrapbook.options = {
   "capture.style": "save", // "save", "link", "blank", "remove"
   "capture.styleInline": "save", // "save", "blank", "remove"
   "capture.rewriteCss": "url", // "none", "url"
+  "capture.mergeCssResources": true,
   "capture.script": "remove", // "save", "link", "blank", "remove"
   "capture.noscript": "save", // "save", "blank", "remove"
   "capture.base": "blank", // "save", "blank", "remove"
@@ -1531,10 +1532,12 @@ scrapbook.rewriteCssFile = async function (data, charset, rewriter) {
  *     - {rewriteCssTextRewriter} rewriteImportUrl
  *     - {rewriteCssTextRewriter} rewriteFontFaceUrl
  *     - {rewriteCssTextRewriter} rewriteBackgroundUrl
+ *     - {Object} resourceMap
  */
 scrapbook.rewriteCssText = function (cssText, options) {
   const KEY_PREFIX = "urn:scrapbook:str:";
   const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
+  const REGEX_RESOURCE_MAP = /^(.+?-)\d+$/;
 
   const pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
   const pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
@@ -1555,7 +1558,7 @@ scrapbook.rewriteCssText = function (cssText, options) {
   const rewriteCssText = function (cssText, options = {}) {
     let mapUrlPromise;
 
-    const handleRewrittenData = function (data, prefix, postfix) {
+    const handleRewrittenData = function (data, prefix, postfix, noResMap) {
       const {url, recordUrl} = data;
       let record;
       if (!recordUrl || url === recordUrl) {
@@ -1563,22 +1566,38 @@ scrapbook.rewriteCssText = function (cssText, options) {
       } else {
         record = '/*scrapbook-orig-url="' + scrapbook.escapeCssComment(recordUrl) + '"*/';
       }
+
+      if (resourceMap && !noResMap) {
+        let name = resourceMap[url];
+        if (!name) {
+          const values = Object.keys(resourceMap);
+          if (!values.length) {
+            name = '--sb' + Date.now().toString().slice(-4) + '-1';
+          } else {
+            const p = Object.values(resourceMap)[0].match(REGEX_RESOURCE_MAP)[1];
+            name = p + (values.length + 1);
+          }
+          resourceMap[url] = name;
+        }
+        return record + 'var(' + name + ')';
+      }
+
       return record + prefix + '"' + scrapbook.escapeQuotes(url) + '"' + postfix;
     };
 
-    const handleRewritten = function (data, prefix, postfix) {
+    const handleRewritten = function (data, prefix, postfix, noResMap) {
       if (scrapbook.isPromise(data)) {
         if (!mapUrlPromise) { mapUrlPromise = new Map(); }
         const key = scrapbook.getUuid();
         mapUrlPromise.set(key, data.then(r => {
-          mapUrlPromise.set(key, handleRewrittenData(r, prefix, postfix));
+          mapUrlPromise.set(key, handleRewrittenData(r, prefix, postfix, noResMap));
         }));
         return KEY_PREFIX + key;
       }
-      return handleRewrittenData(data, prefix, postfix);
+      return handleRewrittenData(data, prefix, postfix, noResMap);
     };
 
-    const parseUrl = (text, callback) => {
+    const parseUrl = (text, callback, noResMap) => {
       return text.replace(new RegExp(pUrl2, "gi"), (m, pre, url, post) => {
         let rewritten;
         if (url.startsWith('"') && url.endsWith('"')) {
@@ -1592,11 +1611,11 @@ scrapbook.rewriteCssText = function (cssText, options) {
           rewritten = callback(u);
         }
 
-        return handleRewritten(rewritten, pre, post);
+        return handleRewritten(rewritten, pre, post, noResMap);
       });
     };
     
-    const {rewriteImportUrl, rewriteFontFaceUrl, rewriteBackgroundUrl} = options;
+    const {rewriteImportUrl, rewriteFontFaceUrl, rewriteBackgroundUrl, resourceMap} = options;
     const response = cssText.replace(
       new RegExp([pCm, pRImport, pRFontFace, pRNamespace, "("+pUrl+")"].join("|"), "gi"),
       (m, im1, im2, ff, ns, u) => {
@@ -1604,16 +1623,16 @@ scrapbook.rewriteCssText = function (cssText, options) {
           let rewritten;
           if (im2.startsWith('"') && im2.endsWith('"')) {
             const u = scrapbook.unescapeCss(im2.slice(1, -1));
-            rewritten = handleRewritten(rewriteImportUrl(u), '', '');
+            rewritten = handleRewritten(rewriteImportUrl(u), '', '', true);
           } else if (im2.startsWith("'") && im2.endsWith("'")) {
             let u = scrapbook.unescapeCss(im2.slice(1, -1));
-            rewritten = handleRewritten(rewriteImportUrl(u), '', '');
+            rewritten = handleRewritten(rewriteImportUrl(u), '', '', true);
           } else {
-            rewritten = parseUrl(im2, rewriteImportUrl);
+            rewritten = parseUrl(im2, rewriteImportUrl, true);
           }
           return im1 + rewritten;
         } else if (ff) {
-          return parseUrl(m, rewriteFontFaceUrl);
+          return parseUrl(m, rewriteFontFaceUrl, true);
         } else if (ns) {
           // do not rewrite @namespace rule
           return ns;

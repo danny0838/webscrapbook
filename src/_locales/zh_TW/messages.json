@@ -353,6 +353,12 @@
   "OptionCaptureImageTooltip": {
     "message": "此選項決定圖片（IMG、PICTURE、及一些 INPUT 元素）的處理方式。\n\n* 儲存：將圖片儲存至本地。\n\n* 儲存現用：將顯示的圖片儲存至本地，忽略其他螢幕大小或解析度的備用圖片。這可以有效縮小容量，但某些情況下顯示效果會變差。若擷取的頁面並未顯示於瀏覽器（例如擷取原貌），則仍儲存所有圖片。\n\n* 連結：將圖片連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將圖片無效化。\n\n* 移除：將圖片元素移除。注意這可能會影響網頁排版。"
   },
+  "OptionCaptureMergeCssResourcesLabel": {
+    "message": "合併樣式表重複引用的媒體"
+  },
+  "OptionCaptureMergeCssResourcesTooltip": {
+    "message": "以變數替換樣式表重複引用的媒體資源，可顯著縮小容量。此功能只有較新的瀏覽器支援，例如 Chromium ≥ 49、Firefox ≥ 31、Edge ≥ 15、Safari > 9.1、Opera ≥ 36，其他瀏覽器將無法呈現相關資源。"
+  },
   "OptionCaptureObjectLabel": {
     "message": "OBJECT 元素:"
   },
@@ -405,7 +411,7 @@
     "message": "單一 HTML 檔案"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "指定儲存網頁及參照檔案的格式。\n\n* 資料夾：建立一個資料夾並將網頁及資源檔案存入其中。Chromium 系瀏覽器注意： 儲存擷取資料至剪貼簿資料夾時，建議瀏覽器設定取消勾選「下載每個檔案前先詢問儲存位置」，以免擷取時跳出大量下載視窗；特定格式的檔案（如 .js）會被瀏覽器封鎖，須逐個選擇「保留」才能下載。\n\n* HTZ 及 MAFF 封存檔：用 ZIP 演算法將網頁及資源檔案打包，可用「檢視封存網頁」功能檢視，或用支援 ZIP 的工具解壓縮後檢視。\n\n* 單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案以 data URL 嵌入，大部分瀏覽器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL  效能不佳且無法去除重覆，網頁重覆使用多媒體檔案時，下載的檔案可能會大幅膨脹。"
+    "message": "指定儲存網頁及參照檔案的格式。\n\n* 資料夾：建立一個資料夾並將網頁及資源檔案存入其中。Chromium 系瀏覽器注意： 儲存擷取資料至剪貼簿資料夾時，建議瀏覽器設定取消勾選「下載每個檔案前先詢問儲存位置」，以免擷取時跳出大量下載視窗；特定格式的檔案（如 .js）會被瀏覽器封鎖，須逐個選擇「保留」才能下載。\n\n* HTZ 及 MAFF 封存檔：用 ZIP 演算法將網頁及資源檔案打包，可用「檢視封存網頁」功能檢視，或用支援 ZIP 的工具解壓縮後檢視。\n\n* 單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案以 data URL 等技術嵌入，大部分現代瀏覽器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL 效能較差，且缺乏有效的去重複技術，可能使檔案容量明顯增加。"
   },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ 封存檔"

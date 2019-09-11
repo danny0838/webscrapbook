@@ -426,3 +426,14 @@ function byteStringToArrayBuffer(bstr) {
   while (n--) { u8ar[n] = bstr.charCodeAt(n); }
   return u8ar.buffer;
 }
+
+async function getRulesFromCssText(cssText) {
+  const d = document.implementation.createHTMLDocument('');
+  const styleElem = d.createElement('style');
+  styleElem.textContent = cssText;
+  d.head.appendChild(styleElem);
+
+  await delay(0);
+
+  return styleElem.sheet.cssRules;
+}

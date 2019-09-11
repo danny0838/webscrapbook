@@ -23,6 +23,7 @@ const baseOptions = {
   "capture.style": "save",
   "capture.styleInline": "save",
   "capture.rewriteCss": "url",
+  "capture.mergeCssResources": false,
   "capture.script": "save",
   "capture.noscript": "save",
   "capture.base": "blank",
@@ -6826,6 +6827,113 @@ async function test_capture_shadowRoot() {
   assert(!doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]'));
 }
 
+/**
+ * Check if CSS recources merging works
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_singleHtml_mergeCss() {
+  /* capture.mergeCssResources = true */
+  var options = {
+    "capture.mergeCssResources": true,
+    "capture.saveAs": "singleHtml",
+    "capture.imageBackground": "save",
+    "capture.font": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_singleHtml_mergeCss/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  var styles = doc.querySelectorAll('style');
+
+  var o = (await getRulesFromCssText(doc.querySelector('style[data-scrapbook-elem="css-resource-map"]').textContent))[0].style;
+  var map = Array.prototype.reduce.call(o, (a, c) => {
+    a[`var(${c})`] = o.getPropertyValue(c);
+    return a;
+  }, {});
+
+  // @import cannot use CSS variable
+  var cssText = styles[0].textContent.trim();
+  assert(/^@import "data:[^"]+";$/.test(cssText));
+
+  // @font-face src cannot use CSS variable
+  var cssText = styles[1].textContent.trim();
+  assert(/src: url\("data:[^")]+"\);/.test(cssText));
+
+  // link
+  var cssText = (await xhr({
+    url: doc.querySelector('link').getAttribute('href').trim(),
+    responseType: 'text',
+  })).response.trim();
+  var cssText2 = cssText.replace(/var\(--sb\d+-\d+\)/g, x => map[x] || x);
+  assert(cssText !== cssText2);
+  assert(cssText2 === `#link { background: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }`);
+
+  // internal
+  var cssText = styles[2].textContent.trim();
+  var cssText2 = cssText.replace(/var\(--sb\d+-\d+\)/g, x => map[x] || x);
+  assert(cssText !== cssText2);
+  assert(cssText2 === `#internal { background: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }`);
+
+  // internal keyframe
+  var cssText = styles[3].textContent.trim();
+  var cssText2 = cssText.replace(/var\(--sb\d+-\d+\)/g, x => map[x] || x);
+  assert(cssText !== cssText2);
+  assert(cssText2 === `\
+@keyframes spin {
+  from { transform: rotate(0turn); background-image: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }
+  to { transform: rotate(1turn); }
+}`);
+
+  /* capture.mergeCssResources = false */
+  var options = {
+    "capture.mergeCssResources": false,
+    "capture.saveAs": "singleHtml",
+    "capture.imageBackground": "save",
+    "capture.font": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_singleHtml_mergeCss/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  var styles = doc.querySelectorAll('style');
+
+  assert(!doc.querySelector('style[data-scrapbook-elem="css-resource-map"]'));
+
+  // @import cannot use CSS variable
+  var cssText = styles[0].textContent.trim();
+  assert(/^@import "data:[^"]+";$/.test(cssText));
+
+  // @font-face src cannot use CSS variable
+  var cssText = styles[1].textContent.trim();
+  assert(/src: url\("data:[^")]+"\);/.test(cssText));
+
+  // link
+  var cssText = (await xhr({
+    url: doc.querySelector('link').getAttribute('href').trim(),
+    responseType: 'text',
+  })).response.trim();
+  assert(cssText === `#link { background: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }`);
+
+  // internal
+  var cssText = styles[2].textContent.trim();
+  assert(cssText === `#internal { background: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }`);
+
+  // internal keyframe
+  var cssText = styles[3].textContent.trim();
+  assert(cssText === `\
+@keyframes spin {
+  from { transform: rotate(0turn); background-image: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }
+  to { transform: rotate(1turn); }
+}`);
+}
+
 async function test_viewer_validate() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-validate/index.html'),
@@ -6968,6 +7076,7 @@ async function runTests() {
   await test(test_capture_mathml);
   await test(test_capture_recursive);
   await test(test_capture_shadowRoot);
+  await test(test_capture_singleHtml_mergeCss);
 }
 
 async function runManualTests() {

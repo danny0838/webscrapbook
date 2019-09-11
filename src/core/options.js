@@ -155,8 +155,9 @@ function verifyDownLinkFilters(rules) {
 }
 
 function refreshForm() {
-  renewCaptureSaveToDetails(); 
-  renewCaptureDownLinkDetails(); 
+  renewCaptureSaveToDetails();
+  renewCaptureSaveAsDetails();
+  renewCaptureDownLinkDetails();
 }
 
 function renewCaptureSaveToDetails() {
@@ -171,6 +172,12 @@ function renewCaptureSaveToDetails() {
       elem.value = 'zip';
     }
   }
+}
+
+function renewCaptureSaveAsDetails() {
+  const mode = document.getElementById("opt_capture.saveAs").value;
+
+  document.getElementById('captureSaveAsDetails').hidden = mode !== 'singleHtml';
 }
 
 function verifySavePath(event) {
@@ -218,6 +225,8 @@ window.addEventListener("DOMContentLoaded", async (event) => {
 
   // event handlers
   document.getElementById("opt_capture.saveTo").addEventListener("change", renewCaptureSaveToDetails);
+
+  document.getElementById("opt_capture.saveAs").addEventListener("change", renewCaptureSaveAsDetails);
 
   document.getElementById("opt_capture.saveFolder").addEventListener("change", verifySavePath);
 

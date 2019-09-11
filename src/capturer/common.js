@@ -2193,6 +2193,16 @@ capturer.captureDocument = async function (params) {
       }));
     }
 
+    // attach CSS resource map
+    if (cssHandler.resourceMap && Object.keys(cssHandler.resourceMap).length) {
+      const elem = doc.createElement('style');
+      elem.setAttribute("data-scrapbook-elem", "css-resource-map");
+      elem.textContent = ':root {'
+          + Object.entries(cssHandler.resourceMap).map(([k, v]) => `${v}:url("${k}");`).join('')
+          + '}';
+      headNode.appendChild(elem);
+    }
+
     // special loaders
     // remove previous loader
     Array.prototype.forEach.call(rootNode.querySelectorAll('[data-scrapbook-elem="shadowroot-loader"]'), (elem) => {
@@ -2573,6 +2583,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     this.refUrl = refUrl || doc.URL;
     this.settings = settings;
     this.options = options;
+    this.resourceMap = ((options['capture.saveAs'] === 'singleHtml') && options['capture.mergeCssResources']) ? {} : null;
   }
 
   /**
@@ -2942,6 +2953,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
           callback(targetUrl);
           return {url};
         },
+        resourceMap: this.resourceMap,
       });
     };
 
@@ -3140,6 +3152,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
           rewriteImportUrl: !isInline ? rewriteImportUrl : rewriteDummy,
           rewriteFontFaceUrl: !isInline ? rewriteFontFaceUrl : rewriteDummy,
           rewriteBackgroundUrl,
+          resourceMap: this.resourceMap,
         });
       }
       case "none":

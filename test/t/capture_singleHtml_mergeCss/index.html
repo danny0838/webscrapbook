@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test CSS Resources Merge</title>
+<style>
+@import "import.css";
+</style>
+<style>
+@font-face { font-family: myFont1; src: url("font.woff"); }
+</style>
+<link rel="stylesheet" href="link.css">
+<style>
+#internal { background: url("yellow.bmp"); }
+</style>
+<style>
+@keyframes spin {
+  from { transform: rotate(0turn); background-image: url("yellow.bmp"); }
+  to { transform: rotate(1turn); }
+}
+</style>
+</head>
+
+<!-- background style -->
+<blockquote style='background: url("yellow.bmp");'>inline bg (yellow)</blockquote>
+<blockquote id="internal">internal bg (yellow)</blockquote>
+<blockquote id="link">link bg (yellow)</blockquote>
+<blockquote id="import">import bg (yellow)</blockquote>
+
+<!-- background style in @keyframes -->
+<blockquote style="width: 60px; height: 60px; animation: spin 1s linear infinite;">spin (yellow)</blockquote>
+
+<blockquote style="font-family: myFont1;">myFont1</blockquote>
+</body>
+</html>
