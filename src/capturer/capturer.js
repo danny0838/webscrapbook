@@ -1221,9 +1221,9 @@ capturer.saveDocument = async function (params) {
           let filename = documentName + ext;
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
-          let dataUri = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
-          dataUri = dataUri.replace(";base64", ";filename=" + encodeURIComponent(filename) + ";base64");
-          return {timeId, sourceUrl, url: dataUri};
+          let url = scrapbook.stringToDataUri(data.content, data.mime, data.charset);
+          url = url.replace(";base64", ";filename=" + encodeURIComponent(filename) + ";base64");
+          return {timeId, sourceUrl, filename, url};
         } else {
           const blob = new Blob([data.content], {type: data.mime});
           const ext = "." + mapMimeExt(data.mime);
