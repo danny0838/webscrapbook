@@ -1332,9 +1332,12 @@ capturer.saveDocument = async function (params) {
                 if (n !== o) { node.nodeValue = n; }
               };
 
-              var loadDocRes = function (doc) {
-                var e = doc.getElementsByTagName('*');
+              var loadDocRes = function (r) {
+                var e = r.querySelectorAll('*');
                 for (var i = 0, I = e.length; i < I; i++) {
+                  if (e[i].shadowRoot) {
+                    loadDocRes(e[i].shadowRoot);
+                  }
                   if (['style'].indexOf(e[i].nodeName.toLowerCase()) !== -1) {
                     var c = e[i].childNodes;
                     for (var j = 0, J = c.length; j < J; j++) {
@@ -1351,7 +1354,8 @@ capturer.saveDocument = async function (params) {
                 }
               };
 
-              var s = document.getElementsByTagName('script'); s = s[s.length - 1];
+              var s = document.getElementsByTagName('script');
+              s = s[s.length - 1];
               s.parentNode.removeChild(s);
 
               loadDocRes(document);
