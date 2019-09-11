@@ -1844,12 +1844,12 @@ async function test_capture_frame_dataUri() {
   var frames = doc.querySelectorAll('iframe');
 
   var frameSrc = frames[0].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=index_\d+\.html;base64,/.test(frameSrc));
+  assert(/^data:text\/html;charset=UTF-8;filename=index_\d+\.html,/.test(frameSrc));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
 
   var frameSrc = frames[1].getAttribute('src');
-  assert(/^data:application\/xhtml\+xml;charset=UTF-8;filename=index_\d+\.xhtml;base64,/.test(frameSrc));
+  assert(/^data:application\/xhtml\+xml;charset=UTF-8;filename=index_\d+\.xhtml,/.test(frameSrc));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
 

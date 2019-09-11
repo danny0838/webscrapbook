@@ -918,10 +918,14 @@ scrapbook.decodeURIComponent = function (uri) {
   return decode(uri);
 };
 
-scrapbook.stringToDataUri = function (str, mime, charset) {
+/**
+ * @param {string} str - unicode string for utf8, or a byte string
+ */
+scrapbook.stringToDataUri = function (str, mime, isByteString) {
   mime = mime || "";
-  charset = charset ? ";charset=" + charset : "";
-  return "data:" + mime + charset + ";base64," + this.unicodeToBase64(str);
+  const charset = isByteString ? "" : ";charset=UTF-8";
+  const text = isByteString ? escape(str) : encodeURIComponent(str);
+  return "data:" + mime + charset + "," + text;
 };
 
 scrapbook.unicodeToUtf8 = function (chars) {
