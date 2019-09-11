@@ -2103,22 +2103,26 @@ capturer.captureDocument = async function (params) {
       loader.setAttribute("data-scrapbook-elem", "canvas-loader");
       loader.textContent = "(" + scrapbook.compressJsFunc(function () {
         var k = "data-scrapbook-canvas",
-            d = document,
-            s = d.getElementsByTagName("script"),
-            e = d.getElementsByTagName("canvas"),
-            i = e.length;
+            f = function (r) {
+              var e = r.querySelectorAll("*"), i = e.length;
+              while (i--) {
+                if (e[i].shadowRoot) {
+                  f(e[i].shadowRoot);
+                }
+                if (e[i].hasAttribute(k)) {
+                  (function () {
+                    var c = e[i], g = new Image();
+                    g.onload = function () { c.getContext('2d').drawImage(g, 0, 0); };
+                    g.src = c.getAttribute(k);
+                    c.removeAttribute(k);
+                  })();
+                }
+              }
+            },
+            s = document.getElementsByTagName("script");
         s = s[s.length - 1];
         s.parentNode.removeChild(s);
-        while (i--) {
-          if (e[i].hasAttribute(k)) {
-            (function () {
-              var c = e[i], g = new Image();
-              g.onload = function () { c.getContext('2d').drawImage(g, 0, 0); };
-              g.src = c.getAttribute(k);
-              c.removeAttribute(k);
-            })();
-          }
-        }
+        f(document);
       }) + ")()";
     }
 

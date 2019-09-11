@@ -3628,10 +3628,18 @@ async function test_capture_canvas() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(/^data:image\/png;base64,/.test(doc.querySelector('#c1').getAttribute("data-scrapbook-canvas")));
-  assert(/^data:image\/png;base64,/.test(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas")));
   var loader = doc.querySelector('script[data-scrapbook-elem="canvas-loader"]');
   assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+
+  assert(/^data:image\/png;base64,/.test(doc.querySelector('#c1').getAttribute("data-scrapbook-canvas")));
+  assert(/^data:image\/png;base64,/.test(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas")));
+
+  // canvas in the shadow root
+  var host = doc.querySelector('span');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow = frag.content;
+  assert(/^data:image\/png;base64,/.test(shadow.querySelector('canvas').getAttribute('data-scrapbook-canvas')));
 
   /* capture.canvas = blank */
   var options = {
@@ -3649,9 +3657,16 @@ async function test_capture_canvas() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
+  assert(!doc.querySelector('script[data-scrapbook-elem="canvas-loader"]'));
   assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
   assert(!doc.querySelector('#c2').hasAttribute("data-scrapbook-canvas"));
-  assert(!doc.querySelector('script'));
+
+  // canvas in the shadow root
+  var host = doc.querySelector('span');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow = frag.content;
+  assert(!shadow.querySelector('canvas').hasAttribute('data-scrapbook-canvas'));
 
   /* capture.canvas = remove */
   var options = {
@@ -3669,9 +3684,16 @@ async function test_capture_canvas() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
+  assert(!doc.querySelector('script[data-scrapbook-elem="canvas-loader"]'));
   assert(!doc.querySelector('#c1'));
   assert(!doc.querySelector('#c2'));
-  assert(!doc.querySelector('script'));
+
+  // canvas in the shadow root
+  var host = doc.querySelector('span');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow = frag.content;
+  assert(!shadow.querySelector('canvas'));
 }
 
 /**
