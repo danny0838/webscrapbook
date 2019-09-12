@@ -225,7 +225,7 @@ capturer.captureDocument = async function (params) {
       return captureRewriteAttr(elem, attr, value, record);
     };
 
-    const rewriteLocalLink = (relativeUrl, baseUrl, docUrl) => {
+    const rewriteLocalLink = (relativeUrl, baseUrl) => {
       let url = relativeUrl;
       try {
         url = new URL(relativeUrl, baseUrl).href;
@@ -281,7 +281,7 @@ capturer.captureDocument = async function (params) {
       }
 
       // check local link and rewrite url
-      url = rewriteLocalLink(url, refUrl, docUrl);
+      url = rewriteLocalLink(url, refUrl);
       elem.setAttribute(attr, url);
 
       // skip further processing for non-absolute links
@@ -353,7 +353,7 @@ capturer.captureDocument = async function (params) {
       let url = elem.getAttribute(attr);
 
       // check local link and rewrite url
-      url = rewriteLocalLink(url, refUrl, docUrl);
+      url = rewriteLocalLink(url, refUrl);
       elem.setAttribute(attr, url);
 
       switch (options["capture.image"]) {
@@ -764,7 +764,7 @@ capturer.captureDocument = async function (params) {
                 const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
                 if (metaRefresh.url) {
                   // meta refresh is relative to document URL rather than base URL
-                  const url = rewriteLocalLink(metaRefresh.url, docUrl, docUrl);
+                  const url = rewriteLocalLink(metaRefresh.url, docUrl);
                   elem.setAttribute("content", metaRefresh.time + (url ? ";url=" + url : ""));
                 }
               } else if (elem.getAttribute("http-equiv").toLowerCase() == "content-security-policy") {
