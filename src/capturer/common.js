@@ -119,32 +119,6 @@ capturer.captureDocument = async function (params) {
   try {
     isDebug && console.debug("call: captureDocument");
 
-    const {doc = document, title, settings, options} = params;
-    const {timeId, isHeadless} = settings;
-    let {documentName} = settings;
-    let {contentType: mime, documentElement: htmlNode} = doc;
-
-    const [docUrl] = scrapbook.splitUrlByAnchor(doc.URL);
-    const [refUrl] = scrapbook.splitUrlByAnchor(doc.baseURI);
-
-    if (settings.frameIsMain) {
-      settings.filename = await capturer.getSaveFilename({
-        title: title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
-        sourceUrl: docUrl,
-        isFolder: options["capture.saveAs"] === "folder",
-        settings,
-        options,
-      });
-    }
-
-    const tasks = [];
-    let selection;
-    let rootNode, headNode;
-
-    const origNodeMap = new WeakMap();
-    const clonedNodeMap = new WeakMap();
-    const specialContentMap = new Map();
-
     // Map cloned nodes and the original for later reference
     // since cloned nodes may lose some information,
     // e.g. cloned iframes has no content, cloned canvas has no image,
@@ -404,13 +378,35 @@ capturer.captureDocument = async function (params) {
       return "(" + scrapbook.compressJsFunc(dataScript) + ")('" + data + "')";
     };
 
+    const {doc = document, title, settings, options} = params;
+    const {timeId, isHeadless} = settings;
+    let {documentName} = settings;
+    let {contentType: mime, documentElement: htmlNode} = doc;
+
+    const [docUrl] = scrapbook.splitUrlByAnchor(doc.URL);
+    const [refUrl] = scrapbook.splitUrlByAnchor(doc.baseURI);
+
+    if (settings.frameIsMain) {
+      settings.filename = await capturer.getSaveFilename({
+        title: title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
+        sourceUrl: docUrl,
+        isFolder: options["capture.saveAs"] === "folder",
+        settings,
+        options,
+      });
+    }
+
     documentName = (await capturer.invoke("registerDocument", {
       settings,
       options,
     })).documentName;
 
     // construct the cloned node tree
-    selection = doc.getSelection();
+    const origNodeMap = new WeakMap();
+    const clonedNodeMap = new WeakMap();
+    const specialContentMap = new Map();
+    let rootNode, headNode;
+    let selection = doc.getSelection();
     {
       if (selection && selection.isCollapsed) { selection = null; }
       if (selection && options["capture.saveBeyondSelection"]) { selection = null; }
@@ -600,20 +596,19 @@ capturer.captureDocument = async function (params) {
       }
     }
 
-    // record source URL
-    if (options["capture.recordDocumentMeta"]) {
-      const url = docUrl.startsWith("data:") ? "data:" : docUrl;
-      rootNode.setAttribute("data-scrapbook-source", url);
-      rootNode.setAttribute("data-scrapbook-create", timeId);
-    }
-
-    // this is resolved after nodes are inspected and initiates async tasks
-    const halter = new scrapbook.Deferred();
-
     // init cssHandler
     const cssHandler = new capturer.DocumentCssHandler({
       doc, rootNode, origNodeMap, clonedNodeMap, refUrl, settings, options,
     });
+
+    // prepare the halter -->
+    // inspect all nodes (and register async tasks) -->
+    // additional tasks that require data after nodes are inspected -->
+    // resolve the halter -->
+    // await for all async tasks to complete -->
+    // finalize
+    const halter = new scrapbook.Deferred();
+    const tasks = [];
 
     // inspect nodes
     let metaCharsetNode;
@@ -1964,6 +1959,12 @@ capturer.captureDocument = async function (params) {
       }
     }, this);
 
+    // record source URL
+    if (options["capture.recordDocumentMeta"]) {
+      const url = docUrl.startsWith("data:") ? "data:" : docUrl;
+      rootNode.setAttribute("data-scrapbook-source", url);
+      rootNode.setAttribute("data-scrapbook-create", timeId);
+    }
 
     // force title if a preset title is given
     if (title) {
@@ -2053,10 +2054,8 @@ capturer.captureDocument = async function (params) {
       }
     }
 
-    // resolve the halter
+    // resolve the halter and wait for all async downloading tasks to complete
     halter.resolve();
-
-    // wait for all async downloading tasks to complete
     await Promise.all(tasks);
 
     // save document
