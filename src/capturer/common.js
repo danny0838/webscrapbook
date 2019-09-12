@@ -3165,7 +3165,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
         // handle duplicated accesses
         if (response.isDuplicate) {
           if (isCircular) {
-            if (["singleHtml", "singleHtmlJs"].includes(options["capture.saveAs"])) {
+            if (["singleHtml"].includes(options["capture.saveAs"])) {
               const target = sourceUrl;
               const source = settings.recurseChain[settings.recurseChain.length - 1];
               console.warn(scrapbook.lang("WarnCaptureCircular", [source, target]));

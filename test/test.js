@@ -189,74 +189,6 @@ async function test_capture_html() {
   var imgElem = doc.querySelectorAll('img')[1];
   assert(imgElem);
   assert(imgElem.getAttribute('src') === 'data:image/bmp;filename=blue.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
-
-  /* singleHtmlJs */
-  var options = {
-    "capture.saveAs": "singleHtmlJs",
-  };
-
-  var blob = await capture({
-    url: `${localhost}/capture_html/index.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-  assert(blob.type === "text/html");
-
-  var doc = await readFileAsDocument(blob);
-  assert(doc);
-  assert(doc.contentType === "text/html");
-  assert(doc.characterSet === "UTF-8");
-  assert(doc.doctype.name === "html");
-  assert(doc.doctype.publicId === "");
-  assert(doc.doctype.systemId === "");
-
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
-  assert(doc.title === 'ABC 中文 𠀀 にほんご');
-  assert(doc.querySelector('p').textContent === 'ABC 中文 𠀀 にほんご');
-
-  var loaderElem = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-  assert(loaderElem);
-  assert(/\([\n\r]+(.+)[\n\r]+\);(?:\/\/[^\r\n]*|\/\*.*?\*\/)*$/.test(loaderElem.textContent));
-  var loaderData = JSON.parse(RegExp.$1);
-  assert(loaderData);
-  assert(loaderData.length === 2);
-
-  var imgElem = doc.querySelectorAll('img')[0];
-  assert(imgElem);
-  assert(/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(imgElem.src));
-  var resType = RegExp.$1, resId = RegExp.$2;
-  assert(resType === 'image/bmp');
-  assert(loaderData[resId].p === 'red.bmp');
-  assert(loaderData[resId].d === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
-
-  var imgElem = doc.querySelectorAll('img')[1];
-  assert(imgElem);
-  assert(/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(imgElem.src));
-  var resType = RegExp.$1, resId = RegExp.$2;
-  assert(resType === 'image/bmp');
-  assert(loaderData[resId].p === 'blue.bmp');
-  assert(loaderData[resId].d === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
-}
-
-/**
- * Check if singleHtmlJs can handle special DOM cases
- *
- * capturer.saveDocument
- */
-async function test_capture_singleHtmlJs() {
-  /* post-body contents */
-  var options = {
-    "capture.saveAs": "singleHtmlJs",
-  };
-
-  var blob = await capture({
-    url: `${localhost}/capture_singleHtmlJs/post-body-tag.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var doc = await readFileAsDocument(blob);
-
-  var loaderElem = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-  assert(loaderElem);
 }
 
 /**
@@ -485,51 +417,6 @@ async function test_capture_xhtml() {
   var imgElem = doc.querySelectorAll('img')[1];
   assert(imgElem);
   assert(imgElem.getAttribute('src') === 'data:image/bmp;filename=blue.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
-
-  /* singleHtmlJs */
-  var options = {
-    "capture.saveAs": "singleHtmlJs",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_xhtml/index.xhtml`,
-    options: Object.assign({}, baseOptions, options),
-  });
-  assert(blob.type === "application/xhtml+xml");
-
-  var doc = await readFileAsDocument(blob);
-  assert(doc);
-  assert(doc.contentType === "application/xhtml+xml");
-  assert(doc.characterSet === "UTF-8");
-  assert(doc.doctype.name === "html");
-  assert(doc.doctype.publicId === "-//W3C//DTD XHTML 1.1//EN");
-  assert(doc.doctype.systemId === "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd");
-
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
-  assert(doc.title === 'ABC 中文 𠀀 にほんご');
-  assert(doc.querySelector('p').textContent === 'ABC 中文 𠀀 にほんご');
-
-  var loaderElem = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-  assert(loaderElem);
-  assert(/\([\n\r]+(.+)[\n\r]+\);(?:\/\/[^\r\n]*|\/\*.*?\*\/)*$/.test(loaderElem.textContent));
-  var loaderData = JSON.parse(RegExp.$1);
-  assert(loaderData);
-  assert(loaderData.length === 2);
-
-  var imgElem = doc.querySelectorAll('img')[0];
-  assert(imgElem);
-  assert(/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(imgElem.src));
-  var resType = RegExp.$1, resId = RegExp.$2;
-  assert(resType === 'image/bmp');
-  assert(loaderData[resId].p === 'red.bmp');
-  assert(loaderData[resId].d === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
-
-  var imgElem = doc.querySelectorAll('img')[1];
-  assert(imgElem);
-  assert(/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(imgElem.src));
-  var resType = RegExp.$1, resId = RegExp.$2;
-  assert(resType === 'image/bmp');
-  assert(loaderData[resId].p === 'blue.bmp');
-  assert(loaderData[resId].d === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
 }
 
 /**
@@ -625,37 +512,6 @@ async function test_capture_file() {
       + "data:image/bmp;filename=file.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
   assert(!doc.querySelector('a[href="file.bmp"]')); // do NOT generate anchor to avoid long content
   assert(!doc.querySelector('img'));
-
-  /* singleHtmlJs */
-  // @FIXME: singleHtmlJs for meta refresh doesn't work
-  // Firefox doesn't respect meta refresh modification by JS,
-  // and such meta refresh always goes to the empty data URL.
-  var options = {
-    "capture.saveAs": "singleHtmlJs",
-    "capture.saveFileAsHtml": false,
-  };
-
-  var blob = await capture({
-    url: `${localhost}/capture_file/file.bmp`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var doc = await readFileAsDocument(blob);
-  assert(doc);
-  assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'file');
-  var metaRefreshElem = doc.querySelector('meta[http-equiv="refresh"][content]');
-  assert(metaRefreshElem);
-  assert(metaRefreshElem.getAttribute('content') === "0;url=data:image/bmp;scrapbook-resource=0,");
-  assert(doc.querySelector('a[href="data:image/bmp;scrapbook-resource=0,"]'));
-  assert(!doc.querySelector('img'));
-
-  var loaderElem = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-  assert(/\([\n\r]+(.+)[\n\r]+\);(?:\/\/[^\r\n]*|\/\*.*?\*\/)*$/.test(loaderElem.textContent));
-  var loaderData = JSON.parse(RegExp.$1);
-  assert(loaderData);
-  assert(loaderData.length === 1);
-  assert(loaderData[0].p === 'file.bmp');
-  assert(loaderData[0].d === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 }
 
 /**
@@ -2006,36 +1862,6 @@ async function test_capture_frame_dataUri() {
   assert(/^data:text\/plain;filename=text\.txt;base64,/.test(frameSrc));
   var text = (await xhr({url: frameSrc, responseType: "text"})).response;
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
-
-  /* singleHtmlJs */
-  // frame page content and frame-referenced file content should be stored correctly
-  var options = {
-    "capture.saveAs": "singleHtmlJs",
-    "capture.frame": "save",
-  };
-
-  var blob = await capture({
-    url: `${localhost}/capture_frame/same-origin.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var doc = await readFileAsDocument(blob);
-  var frames = doc.querySelectorAll('iframe');
-
-  var loaderElem = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-  assert(/\([\n\r]+(.+)[\n\r]+\);(?:\/\/[^\r\n]*|\/\*.*?\*\/)*$/.test(loaderElem.textContent));
-  var loaderData = JSON.parse(RegExp.$1);
-  assert(loaderData);
-  assert(loaderData.length === 4);
-
-  var frameSrc = frames[0].getAttribute('src');
-  assert(/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(frameSrc));
-  var resType = RegExp.$1, resId = RegExp.$2;
-  assert(resType === 'text/html;charset=UTF-8');
-  assert(/^index_\d+\.html$/.test(loaderData[resId].p));
-  var url = `data:${resType};base64,${loaderData[resId].d}`;
-  var frameDoc = (await xhr({url, responseType: "document"})).response;
-  assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
 }
 
 /**
@@ -2771,52 +2597,6 @@ async function test_capture_css_circular() {
 
   // style3.css
   var url = RegExp.$1;
-  var text = (await xhr({url, responseType: "text"})).response;
-  assert(text.trim() === `@import "urn:scrapbook:download:circular:filename:style1.css";
-body { color: blue; }`);
-
-  /* singleHtmlJs */
-  // rewrite a circular referencing with urn:scrapbook:download:circular:filename:...
-  var options = {
-    "capture.saveAs": "singleHtmlJs",
-    "capture.style": "save",
-  };
-
-  var blob = await capture({
-    url: `${localhost}/capture_css_circular/index.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var doc = await readFileAsDocument(blob);
-
-  var loaderElem = doc.querySelector('script[data-scrapbook-elem="pageloader"]');
-  assert(/\([\n\r]+(.+)[\n\r]+\);(?:\/\/[^\r\n]*|\/\*.*?\*\/)*$/.test(loaderElem.textContent));
-  var loaderData = JSON.parse(RegExp.$1);
-
-  var url = doc.querySelector('link').getAttribute('href');
-  assert(/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(url));
-  var resType = RegExp.$1, resId = RegExp.$2;
-
-  // style1.css
-  var url = `data:${resType};base64,${loaderData[resId].d}`;
-  var text = (await xhr({url, responseType: "text"})).response;
-  assert(/^@import "(data:text\/css;[^"#]*)(?:#[^"]*)?";/.test(text));
-
-  var url = RegExp.$1;
-  assert(/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(url));
-  var resType = RegExp.$1, resId = RegExp.$2;
-
-  // style2.css
-  var url = `data:${resType};base64,${loaderData[resId].d}`;
-  var text = (await xhr({url, responseType: "text"})).response;
-  assert(/^@import "(data:text\/css;[^"#]*)(?:#[^"]*)?";/.test(text));
-
-  var url = RegExp.$1;
-  assert(/^data:([^,]+);scrapbook-resource=(\d+),(#[^'")\s]+)?/.test(url));
-  var resType = RegExp.$1, resId = RegExp.$2;
-
-  // style3.css
-  var url = `data:${resType};base64,${loaderData[resId].d}`;
   var text = (await xhr({url, responseType: "text"})).response;
   assert(text.trim() === `@import "urn:scrapbook:download:circular:filename:style1.css";
 body { color: blue; }`);
@@ -6953,7 +6733,6 @@ async function test_viewer_archive_in_frame() {
 
 async function runTests() {
   await test(test_capture_html);
-  await test(test_capture_singleHtmlJs);
   await test(test_capture_metaCharset);
   await test(test_capture_xhtml);
   await test(test_capture_file);
