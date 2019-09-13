@@ -1673,21 +1673,27 @@ capturer.captureDocument = async function (params) {
           }
         }
 
-        // handle shadowRoot
-        {
-          const elemOrig = origNodeMap.get(elem);
-          const shadowRoot = elemOrig.shadowRoot;
-          if (shadowRoot) {
-            const shadow = doc.createElement("template");
-            Array.prototype.forEach.call(shadowRoot.childNodes, (elem) => {
-              shadow.content.appendChild(cloneNodeMapping(elem, true));
-            });
-            rewriteRecursively(shadow.content, shadow.content.nodeName.toLowerCase(), rewriteNode);
-            shadowRootList.push({
-              host: elem,
-              shadowRoot: shadow,
-            });
-            requireShadowRootLoader = true;
+        // handle shadow DOM
+        switch (options["capture.shadowDom"]) {
+          case "save": {
+            const elemOrig = origNodeMap.get(elem);
+            const shadowRoot = elemOrig.shadowRoot;
+            if (shadowRoot) {
+              const shadow = doc.createElement("template");
+              Array.prototype.forEach.call(shadowRoot.childNodes, (elem) => {
+                shadow.content.appendChild(cloneNodeMapping(elem, true));
+              });
+              rewriteRecursively(shadow.content, shadow.content.nodeName.toLowerCase(), rewriteNode);
+              shadowRootList.push({
+                host: elem,
+                shadowRoot: shadow,
+              });
+              requireShadowRootLoader = true;
+            }
+            break;
+          }
+          default: {
+            break;
           }
         }
 

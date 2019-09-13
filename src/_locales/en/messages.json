@@ -462,7 +462,13 @@
     "message": "Scripts:"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n* Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Additionally, scripts don't run in the archive page viewer for security reasons. It is generally recommended to set capture options to \"save\" and \"canvas\" option to \"save initial status\" to avoid a conflict to and an error of the script.\n\n* Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the script.\n\n* Remove: Remove the script element. Note that this could affect the web page layout in some rare cases."
+    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n* Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Additionally, scripts don't run in the archive page viewer for security reasons. It is generally recommended to set capture options to \"save\", \"canvas\" option to \"save initial status\", and \"shadow DOMs\" option to \"remove\" to avoid a conflict to and an error of the script.\n\n* Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the script.\n\n* Remove: Remove the script element. Note that this could affect the web page layout in some rare cases."
+  },
+  "OptionCaptureShadowDomLabel": {
+    "message": "Shadow DOMs:"
+  },
+  "OptionCaptureShadowDomTooltip": {
+    "message": "This determines how shadow DOMs are handled. A shadow DOM is another set of DOM attached to an element in the page by scripts.\n\n* Save: Record shadow DOMs in a special attribute and create an initialization script to re-generate it on loading.\n\n* Remove: Do not record shadow DOMs."
   },
   "OptionCaptureStyleLabel": {
     "message": "Styles:"

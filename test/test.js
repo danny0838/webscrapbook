@@ -26,6 +26,7 @@ const baseOptions = {
   "capture.noscript": "save",
   "capture.base": "blank",
   "capture.formStatus": "keep",
+  "capture.shadowDom": "save",
   "capture.downLink.mode": "none",
   "capture.downLink.extFilter": "",
   "capture.downLink.urlFilter": "",
@@ -6770,7 +6771,9 @@ async function test_capture_recursive() {
  * capturer.captureDocument
  */
 async function test_capture_shadowRoot() {
+  /* capture.shadowDom = save */
   var options = {
+    "capture.shadowDom": "save",
     "capture.image": "save",
     "capture.script": "remove",
   };
@@ -6802,6 +6805,29 @@ async function test_capture_shadowRoot() {
 
   var loader = doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]');
   assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+
+  /* capture.shadowDom = remove */
+  var options = {
+    "capture.shadowDom": "remove",
+    "capture.image": "save",
+    "capture.script": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_shadowRoot/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(!zip.files["green.bmp"]);
+  assert(!zip.files["blue.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
+  assert(!doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]'));
 }
 
 async function test_viewer_validate() {
