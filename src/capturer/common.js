@@ -1677,16 +1677,18 @@ capturer.captureDocument = async function (params) {
         switch (options["capture.shadowDom"]) {
           case "save": {
             const elemOrig = origNodeMap.get(elem);
-            const shadowRoot = elemOrig.shadowRoot;
-            if (shadowRoot) {
-              const shadow = doc.createElement("template");
-              Array.prototype.forEach.call(shadowRoot.childNodes, (elem) => {
-                shadow.content.appendChild(cloneNodeMapping(elem, true));
+            const shadowRootOrig = elemOrig.shadowRoot;
+            if (shadowRootOrig) {
+              const shadowRoot = elem.attachShadow({mode: 'open'});
+              origNodeMap.set(shadowRoot, shadowRootOrig);
+              clonedNodeMap.set(shadowRootOrig, shadowRoot);
+              Array.prototype.forEach.call(shadowRootOrig.childNodes, (elem) => {
+                shadowRoot.appendChild(cloneNodeMapping(elem, true));
               });
-              rewriteRecursively(shadow.content, shadow.content.nodeName.toLowerCase(), rewriteNode);
+              rewriteRecursively(shadowRoot, shadowRoot.nodeName.toLowerCase(), rewriteNode);
               shadowRootList.push({
                 host: elem,
-                shadowRoot: shadow,
+                shadowRoot,
               });
               requireShadowRootLoader = true;
             }
