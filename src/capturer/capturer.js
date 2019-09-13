@@ -1160,6 +1160,7 @@ Redirecting to file ${anchor}
 /**
  * @kind invokable
  * @param {Object} params
+ *     - {string} params.overidingDocumentName
  *     - {Object} params.settings
  *     - {Object} params.options
  * @return {Promise<Object>}
@@ -1169,8 +1170,14 @@ capturer.registerDocument = async function (params) {
 
   const {settings, options} = params;
   const {timeId, documentName} = settings;
+  let {overidingDocumentName} = params;
 
   const files = capturer.captureInfo.get(timeId).files;
+
+  if (overidingDocumentName) {
+    overidingDocumentName = capturer.getUniqueFilename(timeId, overidingDocumentName);
+    return {documentName: overidingDocumentName};
+  }
 
   let newDocumentName = documentName;
   let newDocumentNameCI = newDocumentName.toLowerCase();

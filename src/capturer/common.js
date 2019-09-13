@@ -1866,10 +1866,18 @@ capturer.captureDocument = async function (params) {
       });
     }
 
-    documentName = (await capturer.invoke("registerDocument", {
-      settings,
-      options,
-    })).documentName;
+    if (settings.frameIsMain || options["capture.renameFrames"]) {
+      documentName = (await capturer.invoke("registerDocument", {
+        settings,
+        options,
+      })).documentName;
+    } else {
+      documentName = (await capturer.invoke("registerDocument", {
+        overidingDocumentName: scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0],
+        settings,
+        options,
+      })).documentName;
+    }
 
     // construct the cloned node tree
     const origNodeMap = new WeakMap();
