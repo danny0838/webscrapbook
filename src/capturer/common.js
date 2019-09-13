@@ -904,7 +904,10 @@ capturer.captureDocument = async function (params) {
                       }
 
                       captureRewriteUri(frame, "src", response.url);
-                      captureRewriteAttr(frame, "srcdoc", null);
+
+                      if (frame.nodeName.toLowerCase() === 'iframe') {
+                        captureRewriteAttr(frame, "srcdoc", null);
+                      }
                     }
                   } else {
                     // Unable to capture the content document
@@ -965,7 +968,8 @@ capturer.captureDocument = async function (params) {
                   // frame window inaccessible: (headless capture)
 
                   // if the frame has srcdoc, use it
-                  if (frame.hasAttribute("srcdoc")) {
+                  if (frame.nodeName.toLowerCase() === 'iframe' &&
+                      frame.hasAttribute("srcdoc")) {
                     // contentType of srcdoc is always text/html
                     const url = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute("srcdoc"))}`;
                     const doc = await scrapbook.readFileAsDocument(scrapbook.dataUriToFile(url));
