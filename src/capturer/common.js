@@ -863,21 +863,24 @@ capturer.captureDocument = async function (params) {
             }
 
             switch (options["capture.frame"]) {
-              case "link":
+              case "link": {
                 // do nothing
                 // keep current (resolved) src and srcdoc
                 break;
-              case "blank":
+              }
+              case "blank": {
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The src attribute, if present, must be a valid non-empty URL.
                 captureRewriteUri(frame, "src", null);
                 captureRewriteAttr(frame, "srcdoc", null);
                 break;
-              case "remove":
+              }
+              case "remove": {
                 captureRemoveNode(frame);
                 return;
+              }
               case "save":
-              default:
+              default: {
                 const captureFrameCallback = (response) => {
                   isDebug && console.debug("captureFrameCallback", response);
                   if (response) {
@@ -988,6 +991,7 @@ capturer.captureDocument = async function (params) {
                   }
                 });
                 break;
+              }
             }
             break;
           }
@@ -1766,7 +1770,7 @@ capturer.captureDocument = async function (params) {
     const {doc = document, title, settings, options} = params;
     const {timeId, isHeadless} = settings;
     let {documentName} = settings;
-    let {contentType: mime, documentElement: htmlNode} = doc;
+    const {contentType: mime, documentElement: htmlNode} = doc;
 
     const [docUrl] = scrapbook.splitUrlByAnchor(doc.URL);
     const [refUrl] = scrapbook.splitUrlByAnchor(doc.baseURI);
@@ -2084,6 +2088,31 @@ capturer.captureDocument = async function (params) {
       }
     }
 
+    // map used background images and fonts
+    if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
+      const {usedCssFontUrl, usedCssImageUrl} = await cssHandler.getCssResources();
+      
+      // expose filter to settings
+      if (options["capture.imageBackground"] === "save-used") {
+        settings.usedCssImageUrl = usedCssImageUrl;
+      }
+      if (options["capture.font"] === "save-used") {
+        settings.usedCssFontUrl = usedCssFontUrl;
+      }
+    }
+
+    // resolve the halter and wait for all async downloading tasks to complete
+    halter.resolve();
+    await Promise.all(tasks);
+
+    // record after the content of all nested shadow roots have been processed
+    for (const {host, shadowRoot} of shadowRootList) {
+      captureRewriteAttr(host, "data-scrapbook-shadowroot", JSON.stringify({
+        data: shadowRoot.innerHTML,
+        mode: "open",
+      }));
+    }
+
     // special loaders
     if (requireShadowRootLoader) {
       const loader = rootNode.appendChild(doc.createElement("script"));
@@ -2132,31 +2161,6 @@ capturer.captureDocument = async function (params) {
         s.parentNode.removeChild(s);
         f(document);
       }) + ")()";
-    }
-
-    // map used background images and fonts
-    if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
-      const {usedCssFontUrl, usedCssImageUrl} = await cssHandler.getCssResources();
-      
-      // expose filter to settings
-      if (options["capture.imageBackground"] === "save-used") {
-        settings.usedCssImageUrl = usedCssImageUrl;
-      }
-      if (options["capture.font"] === "save-used") {
-        settings.usedCssFontUrl = usedCssFontUrl;
-      }
-    }
-
-    // resolve the halter and wait for all async downloading tasks to complete
-    halter.resolve();
-    await Promise.all(tasks);
-
-    // record after the content of all nested shadow roots have been processed
-    for (const {host, shadowRoot} of shadowRootList) {
-      captureRewriteAttr(host, "data-scrapbook-shadowroot", JSON.stringify({
-        data: shadowRoot.innerHTML,
-        mode: "open",
-      }));
     }
 
     // save document
