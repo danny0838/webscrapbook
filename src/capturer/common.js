@@ -103,7 +103,9 @@ capturer.captureDocumentOrFile = async function (params) {
   }
 
   // otherwise, capture as document
-  return await capturer.captureDocument(params);
+  // don't pass docUrl and refUrl
+  const {docUrl: _, refUrl: __, ...p} = params;
+  return await capturer.captureDocument(p);
 };
 
 /**
@@ -111,6 +113,8 @@ capturer.captureDocumentOrFile = async function (params) {
  * @param {Object} params
  *     - {Document} params.doc
  *     - {string} params.title
+ *     - {string} params.docUrl
+ *     - {string} params.refUrl
  *     - {Object} params.settings
  *     - {Object} params.options
  * @return {Promise<Object>}
@@ -954,17 +958,25 @@ capturer.captureDocument = async function (params) {
                     settings: frameSettings,
                     options,
                   }, {frameWindow});
-                }).then((response) => {
+                }).then(async (response) => {
                   if (response) { return captureFrameCallback(response); }
 
                   // frame window accessible with special cases:
                   // frame window inaccessible: (headless capture)
 
                   // if the frame has srcdoc, use it
-                  // @FIXME: rewrite srcdoc content
                   if (frame.hasAttribute("srcdoc")) {
-                    captureRewriteAttr(frame, "src", null);
-                    return;
+                    // contentType of srcdoc is always text/html
+                    const url = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute("srcdoc"))}`;
+                    const doc = await scrapbook.readFileAsDocument(scrapbook.dataUriToFile(url));
+
+                    return capturer.captureDocument({
+                      doc,
+                      docUrl: 'about:srcdoc',
+                      refUrl,
+                      settings: frameSettings,
+                      options,
+                    }).then(captureFrameCallback);
                   }
 
                   // if the frame src is not absolute,
@@ -1783,11 +1795,12 @@ capturer.captureDocument = async function (params) {
 
     const {doc = document, title, settings, options} = params;
     const {timeId, isHeadless} = settings;
+    const {
+      docUrl = scrapbook.splitUrlByAnchor(doc.URL)[0],
+      refUrl = scrapbook.splitUrlByAnchor(doc.baseURI)[0],
+    } = params;
     let {documentName} = settings;
     const {contentType: mime, documentElement: htmlNode} = doc;
-
-    const [docUrl] = scrapbook.splitUrlByAnchor(doc.URL);
-    const [refUrl] = scrapbook.splitUrlByAnchor(doc.baseURI);
 
     if (settings.frameIsMain) {
       settings.filename = await capturer.getSaveFilename({

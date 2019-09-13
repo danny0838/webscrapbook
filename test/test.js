@@ -1699,10 +1699,7 @@ async function test_capture_frame_headless() {
  */
 async function test_capture_frame_headless2() {
   /* capture.frame = save */
-  // keep original srcdoc and remove src
-  //
-  // @FIXME: rewrite srcdoc content
-  //
+  // srcdoc content should be rewritten
   var options = {
     "capture.frame": "save",
   };
@@ -1719,15 +1716,19 @@ async function test_capture_frame_headless2() {
   var doc = await readFileAsDocument(indexBlob);
 
   var frame = doc.querySelector('iframe');
-  assert(!frame.hasAttribute('src'));
-  assert(frame.getAttribute('srcdoc') === `\
-<p>srcdoc content</p>
-<img src="frames/red.bmp">
+  assert(!frame.hasAttribute('srcdoc'));
+  assert(/^index_\d+\.html$/.test(frame.getAttribute('src')));
+  var frameFile = zip.file(frame.getAttribute('src'));
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
+  assert(frameDoc.querySelector('p').textContent.trim() === `srcdoc content`);
+  assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
 
-<style>img { width: 60px; }</style>
-<script>
-document.querySelector('p').textContent = 'srcdoc content modified';
-</script>`);
+  var imgFile = zip.file('red.bmp');
+  assert(imgFile);
+  var imgData = await imgFile.async('base64');
+  assert(imgData === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 }
 
 /**
