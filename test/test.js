@@ -1745,6 +1745,7 @@ async function test_capture_frame3() {
 <p>srcdoc content</p>
 <img src="frames/red.bmp">
 
+<style>img { width: 60px; }</style>
 <script>
 document.querySelector('p').textContent = 'srcdoc content modified';
 </script>`);
@@ -1865,6 +1866,7 @@ async function test_capture_frame_headless2() {
 <p>srcdoc content</p>
 <img src="frames/red.bmp">
 
+<style>img { width: 60px; }</style>
 <script>
 document.querySelector('p').textContent = 'srcdoc content modified';
 </script>`);
