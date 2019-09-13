@@ -491,6 +491,8 @@ scrapbook.initContentScripts = async function (tabId) {
           isDebug && console.debug("inject content scripts", tabId, frameId, url);
           try {
             await browser.tabs.executeScript(tabId, {frameId, file: "/lib/browser-polyfill.js", runAt: "document_start"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/lib/mime.js", runAt: "document_start"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/lib/sha_dev.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/core/content.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js", runAt: "document_start"});
