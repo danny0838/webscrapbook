@@ -3,7 +3,7 @@ Unit tests
 
 ### System requirements
 
-* Firefox ≥ 52, Chrome ≥ 55
+* Firefox ≥ 63, Chromium ≥ 57
 * Python 3.* (≥ 3.6 is better)
 
 ### Usage
@@ -12,7 +12,7 @@ Unit tests
 
 2. Copy `config.json` to `config.local.json` and edit it:
    * Make sure "wsb_extension_id" matches the extension ID of WebScrapBook.
-   * Make sure "server_port" is available (not used by other applications).
+   * Make sure "server_port" and "server_port2" are available (not used by other applications).
 
 3. Run `server.py` to start the local hosting server.
 

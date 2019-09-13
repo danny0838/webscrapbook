@@ -5,12 +5,12 @@
   "version": "0.1.0",
   "author": "Danny Lin",
 
-  "minimum_chrome_version": "55",
+  "minimum_chrome_version": "57",
 
   "browser_specific_settings": {
     "gecko": {
       "id": "webscrapbooktestsuite@danny0838.addons.mozilla.org",
-      "strict_min_version": "52.0"
+      "strict_min_version": "63.0"
     }
   },
 
