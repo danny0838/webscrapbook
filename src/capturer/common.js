@@ -942,31 +942,25 @@ capturer.captureDocument = async function (params) {
               default: {
                 const captureFrameCallback = async (response) => {
                   isDebug && console.debug("captureFrameCallback", response);
-                  if (response) {
-                    handler: {
-                      // use srcdoc for data URL document for iframe
-                      if (options["capture.saveDataUriAsSrcdoc"] &&
-                          response.url.startsWith('data:') &&
-                          frame.nodeName.toLowerCase() === 'iframe') {
-                        const file = scrapbook.dataUriToFile(response.url);
-                        const {type: mime} = scrapbook.parseHeaderContentType(file.type);
-                        if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(mime)) {
-                          const content = await scrapbook.readFileAsText(file);
-                          captureRewriteAttr(frame, "srcdoc", content);
-                          captureRewriteAttr(frame, "src", null);
-                          break handler;
-                        }
-                      }
-
-                      captureRewriteUri(frame, "src", response.url);
-
-                      if (frame.nodeName.toLowerCase() === 'iframe') {
-                        captureRewriteAttr(frame, "srcdoc", null);
+                  handler: {
+                    // use srcdoc for data URL document for iframe
+                    if (options["capture.saveDataUriAsSrcdoc"] &&
+                        response.url.startsWith('data:') &&
+                        frame.nodeName.toLowerCase() === 'iframe') {
+                      const file = scrapbook.dataUriToFile(response.url);
+                      const {type: mime} = scrapbook.parseHeaderContentType(file.type);
+                      if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(mime)) {
+                        const content = await scrapbook.readFileAsText(file);
+                        captureRewriteAttr(frame, "srcdoc", content);
+                        captureRewriteAttr(frame, "src", null);
+                        break handler;
                       }
                     }
-                  } else {
-                    // Unable to capture the content document
-                    captureRewriteUri(frame, "src", null);
+
+                    captureRewriteUri(frame, "src", response.url);
+                    if (frame.nodeName.toLowerCase() === 'iframe') {
+                      captureRewriteAttr(frame, "srcdoc", null);
+                    }
                   }
                   return response;
                 };
