@@ -1580,7 +1580,8 @@ async function test_capture_frame3() {
   assert(imgData === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
   /* capture.frame = link */
-  // keep original srcdoc and (resolved) src
+  // record resolved src and save rewritten srcdoc
+  // resources in srcdoc should be saved as data URL
   var options = {
     "capture.frame": "link",
   };
@@ -1599,14 +1600,13 @@ async function test_capture_frame3() {
 
   var frame = doc.querySelector('iframe');
   assert(frame.getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html`);
-  assert(frame.getAttribute('srcdoc') === `\
-<p>srcdoc content</p>
-<img src="frames/red.bmp">
+  var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
+  var srcdoc = await readFileAsDocument(srcdocBlob);
 
-<style>img { width: 60px; }</style>
-<script>
-document.querySelector('p').textContent = 'srcdoc content modified';
-</script>`);
+  assert(srcdoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
+  assert(srcdoc.querySelector('p').textContent.trim() === `srcdoc content modified`);
+  assert(srcdoc.querySelector('img').getAttribute('src') === 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+  assert(!zip.file('red.bmp'));
 
   /* capture.frame = blank */
   // srcdoc should be removed
@@ -1752,6 +1752,57 @@ async function test_capture_frame_headless2() {
 document.querySelector('p').textContent = 'srcdoc content modified';
 </script>`);
   assert(/^index_\d+\.html$/.test(frame.getAttribute('src')));
+
+  /* capture.frame = link */
+  // record resolved src and save rewritten srcdoc
+  // resources in srcdoc should be saved as data URL
+  var options = {
+    "capture.frame": "link",
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frame/srcdoc.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var frame = doc.querySelector('iframe');
+  assert(frame.getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html`);
+  var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
+  var srcdoc = await readFileAsDocument(srcdocBlob);
+
+  assert(srcdoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
+  assert(srcdoc.querySelector('p').textContent.trim() === `srcdoc content`);
+  assert(srcdoc.querySelector('img').getAttribute('src') === 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+  assert(!zip.file('red.bmp'));
+
+  // frame[srcdoc] should be ignored (left unchanged) and its src should be used
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frame/srcdoc2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var frame = doc.querySelectorAll('frame')[0];
+  assert(frame.getAttribute('srcdoc').trim() === `\
+<p>srcdoc content</p>
+<img src="frames/red.bmp">
+
+<style>img { width: 60px; }</style>
+<script>
+document.querySelector('p').textContent = 'srcdoc content modified';
+</script>`);
+  assert(frame.getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html`);
 }
 
 /**

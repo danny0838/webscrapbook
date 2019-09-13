@@ -868,8 +868,63 @@ capturer.captureDocument = async function (params) {
 
             switch (options["capture.frame"]) {
               case "link": {
-                // do nothing
-                // keep current (resolved) src and srcdoc
+                const captureFrameCallback = async (response) => {
+                  isDebug && console.debug("captureFrameCallback", response);
+                  const file = scrapbook.dataUriToFile(response.url);
+                  const content = await scrapbook.readFileAsText(file);
+                  captureRewriteAttr(frame, "srcdoc", content);
+                  return response;
+                };
+
+                // if the frame has srcdoc, use it
+                if (frame.nodeName.toLowerCase() === 'iframe' &&
+                    frame.hasAttribute("srcdoc")) {
+                  const frameSettings = JSON.parse(JSON.stringify(settings));
+                  frameSettings.frameIsMain = false;
+                  delete frameSettings.usedCssFontUrl;
+                  delete frameSettings.usedCssImageUrl;
+
+                  // save resources in srcdoc as data URL
+                  const frameOptions = JSON.parse(JSON.stringify(options));
+                  frameOptions["capture.saveAs"] = "singleHtml";
+
+                  let frameDoc;
+                  try {
+                    frameDoc = frameSrc.contentDocument;
+                  } catch (ex) {
+                    // console.debug(ex);
+                  }
+
+                  if (frameDoc) {
+                    // frame document accessible:
+                    // capture the content document directly
+                    tasks[tasks.length] = halter.then(async () => {
+                      const response = await capturer.captureDocumentOrFile({
+                        doc: frameDoc,
+                        refUrl,
+                        settings: frameSettings,
+                        options: frameOptions,
+                      });
+                      return captureFrameCallback(response);
+                    });
+                    break;
+                  }
+
+                  // frame document inaccessible (headless capture):
+                  tasks[tasks.length] = halter.then(async () => {
+                    // contentType of srcdoc is always text/html
+                    const url = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute("srcdoc"))}`;
+                    const doc = await scrapbook.readFileAsDocument(scrapbook.dataUriToFile(url));
+                    const response = await capturer.captureDocument({
+                      doc,
+                      docUrl: 'about:srcdoc',
+                      refUrl,
+                      settings: frameSettings,
+                      options: frameOptions,
+                    });
+                    return captureFrameCallback(response);
+                  });
+                }
                 break;
               }
               case "blank": {
