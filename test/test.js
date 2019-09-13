@@ -1529,8 +1529,16 @@ async function test_capture_frame() {
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
   assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
 
-  // text.txt
+  // frame3.svg
   var frame = frames[2];
+  assert(/^index_\d+\.svg$/.test(frame.getAttribute('src')));
+  var frameFile = zip.file(frame.getAttribute('src'));
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
+
+  // text.txt
+  var frame = frames[3];
   assert(frame.getAttribute('src') === 'text.txt');
   var frameFile = zip.file(frame.getAttribute('src'));
   var text = (await readFileAsText(await frameFile.async('blob'))).trim();
@@ -1556,7 +1564,8 @@ async function test_capture_frame() {
 
   assert(frames[0].getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html`);
   assert(frames[1].getAttribute('src') === `${localhost}/capture_frame/frames/frame2.xhtml`);
-  assert(frames[2].getAttribute('src') === `${localhost}/capture_frame/frames/text.txt`);
+  assert(frames[2].getAttribute('src') === `${localhost}/capture_frame/frames/frame3.svg`);
+  assert(frames[3].getAttribute('src') === `${localhost}/capture_frame/frames/text.txt`);
 
   /* capture.frame = blank */
   var options = {
@@ -1579,6 +1588,7 @@ async function test_capture_frame() {
   assert(!frames[0].hasAttribute('src'));
   assert(!frames[1].hasAttribute('src'));
   assert(!frames[2].hasAttribute('src'));
+  assert(!frames[3].hasAttribute('src'));
 
   /* capture.frame = remove */
   var options = {
@@ -1647,8 +1657,16 @@ async function test_capture_frame2() {
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
   assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
 
-  // text.txt
+  // frame3.svg
   var frame = frames[2];
+  assert(/^index_\d+\.svg$/.test(frame.getAttribute('src')));
+  var frameFile = zip.file(frame.getAttribute('src'));
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_frame/same-origin.html`);
+
+  // text.txt
+  var frame = frames[3];
   assert(frame.getAttribute('src') === 'text.txt');
   var frameFile = zip.file(frame.getAttribute('src'));
   var text = (await readFileAsText(await frameFile.async('blob'))).trim();
@@ -1802,6 +1820,13 @@ async function test_capture_frame_headless() {
   assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
 
   var frame = frames[2];
+  assert(/^index_\d+\.svg$/.test(frame.getAttribute('src')));
+  var frameFile = zip.file(frame.getAttribute('src'));
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
+
+  var frame = frames[3];
   assert(frame.getAttribute('src') === 'text.txt');
   var frameFile = zip.file(frame.getAttribute('src'));
   var text = (await readFileAsText(await frameFile.async('blob'))).trim();
@@ -1971,6 +1996,11 @@ async function test_capture_frame_dataUri() {
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
 
   var frameSrc = frames[2].getAttribute('src');
+  assert(/^data:image\/svg\+xml;charset=UTF-8;filename=index_\d+\.svg,/.test(frameSrc));
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
+
+  var frameSrc = frames[3].getAttribute('src');
   assert(/^data:text\/plain;filename=text\.txt;base64,/.test(frameSrc));
   var text = (await xhr({url: frameSrc, responseType: "text"})).response;
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");

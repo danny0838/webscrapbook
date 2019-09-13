@@ -16,6 +16,7 @@ sys.stdout.buffer.write("""Content-Type: text/html
 <body>
 <iframe src="//localhost{port}/capture_frame/frames/frame1.html"></iframe>
 <iframe src="//localhost{port}/capture_frame/frames/frame2.xhtml"></iframe>
+<iframe src="//localhost{port}/capture_frame/frames/frame3.svg"></iframe>
 <iframe src="//localhost{port}/capture_frame/frames/text.txt"></iframe>
 </body>
 </html>""".format(port=port).encode("UTF-8"))
