@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used background images (shadow DOM)</title>
+</head>
+<body>
+<blockquote><div id="shadow1"></div></blockquote>
+
+<script>
+var d = document.querySelector('#shadow1');
+var s = d.attachShadow({mode: 'open'});
+s.innerHTML = `<style>
+:host { background: url("yellow.bmp"); }
+#shadow { background: url("green.bmp"); }
+</style>
+<blockquote id="shadow">shadow</blockquote>`;
+</script>
+</body>
+</html>

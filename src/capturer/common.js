@@ -2726,11 +2726,11 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
       fontFamilies: new Set(),
     }));
 
-    const parseCssRule = async (cssRule, refUrl) => {
+    const parseCssRule = async (cssRule, refUrl, root = rootNode) => {
       switch (cssRule.type) {
         case CSSRule.STYLE_RULE: {
           // this CSS rule applies to no node in the captured area
-          if (!this.verifySelector(rootNode, cssRule.selectorText)) { break; }
+          if (!this.verifySelector(root, cssRule.selectorText)) { break; }
 
           fontFamilyMapper.use(cssRule.style.getPropertyValue('font-family'));
 
@@ -2851,25 +2851,35 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
       });
     };
 
-    for (const css of doc.styleSheets) {
-      const rules = await this.getRulesFromCss({css, refUrl});
-      for (const rule of rules) {
-        await parseCssRule(rule, css.href || refUrl);
+    const inspectDocOrShadowRoot = async (doc, root) => {
+      for (const css of doc.styleSheets) {
+        const rules = await this.getRulesFromCss({css, refUrl});
+        for (const rule of rules) {
+          await parseCssRule(rule, css.href || refUrl, root);
+        }
       }
-    }
 
-    for (const elem of rootNode.querySelectorAll("*")) {
-      const {style} = elem;
+      for (const elem of root.querySelectorAll("*")) {
+        const {style} = elem;
 
-      fontFamilyMapper.use(style.getPropertyValue('font-family'));
-      animationMapper.use(style.getPropertyValue('animation-name'));
+        fontFamilyMapper.use(style.getPropertyValue('font-family'));
+        animationMapper.use(style.getPropertyValue('animation-name'));
 
-      for (const i of style) {
-        forEachUrl(style.getPropertyValue(i), refUrl, (url) => {
-          usedCssImageUrl[url] = true;
-        });
+        for (const i of style) {
+          forEachUrl(style.getPropertyValue(i), refUrl, (url) => {
+            usedCssImageUrl[url] = true;
+          });
+        }
+
+        const shadowRoot = elem.shadowRoot;
+        if (shadowRoot) {
+          const shadowRootOrig = this.origNodeMap.get(shadowRoot);
+          await inspectDocOrShadowRoot(shadowRootOrig, shadowRoot);
+        }
       }
-    }
+    };
+
+    await inspectDocOrShadowRoot(doc, rootNode);
 
     // collect used animation and their used font family and background images
     for (const {used, urls, fontFamilies} of animationMapper.values()) {

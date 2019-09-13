@@ -3525,6 +3525,40 @@ async function test_capture_imageBackground_used() {
 }
 
 /**
+ * Check if used background images in a shadowRoot are considered
+ *
+ * capture.imageBackground
+ */
+async function test_capture_imageBackground_used2() {
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+    "capture.shadowDom": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used2/shadow.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['green.bmp']);
+  assert(zip.files['yellow.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var host1 = doc.querySelector('#shadow1');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow1 = frag.content;
+  assert(shadow1.querySelector('style').textContent.trim() === `\
+:host { background: url("yellow.bmp"); }
+#shadow { background: url("green.bmp"); }`);
+}
+
+/**
  * Check if option works
  *
  * capture.favicon
