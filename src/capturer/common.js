@@ -881,13 +881,27 @@ capturer.captureDocument = async function (params) {
               }
               case "save":
               default: {
-                const captureFrameCallback = (response) => {
+                const captureFrameCallback = async (response) => {
                   isDebug && console.debug("captureFrameCallback", response);
                   if (response) {
-                    captureRewriteUri(frame, "src", response.url);
+                    handler: {
+                      // use srcdoc for data URL document for iframe
+                      if (options["capture.saveDataUriAsSrcdoc"] &&
+                          response.url.startsWith('data:') &&
+                          frame.nodeName.toLowerCase() === 'iframe') {
+                        const file = scrapbook.dataUriToFile(response.url);
+                        const {type: mime} = scrapbook.parseHeaderContentType(file.type);
+                        if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(mime)) {
+                          const content = await scrapbook.readFileAsText(file);
+                          captureRewriteAttr(frame, "srcdoc", content);
+                          captureRewriteAttr(frame, "src", null);
+                          break handler;
+                        }
+                      }
 
-                    // remove srcdoc to avoid overwriting src
-                    captureRewriteAttr(frame, "srcdoc", null);
+                      captureRewriteUri(frame, "src", response.url);
+                      captureRewriteAttr(frame, "srcdoc", null);
+                    }
                   } else {
                     // Unable to capture the content document
                     captureRewriteUri(frame, "src", null);

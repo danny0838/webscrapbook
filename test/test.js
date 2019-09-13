@@ -8,6 +8,7 @@ const baseOptions = {
   "capture.saveBeyondSelection": false,
   "capture.saveFileAsHtml": false,
   "capture.saveDataUriAsFile": true,
+  "capture.saveDataUriAsSrcdoc": true,
   "capture.image": "save",
   "capture.imageBackground": "save",
   "capture.favicon": "save",
@@ -1022,6 +1023,7 @@ async function test_capture_dataUri_resolve2() {
     "capture.downLink.mode": "url",
     "capture.downLink.extFilter": "txt",
     "capture.downLink.urlFilter": "",
+    "capture.saveDataUriAsSrcdoc": false,
   };
 
   /* -saveDataUriAsFile; relative link in data URL iframe */
@@ -1826,13 +1828,67 @@ async function test_capture_frame_circular2() {
  * Check data URI output for frame capture
  *
  * capture.frame
+ * capture.saveDataUriAsSrcdoc
  */
-async function test_capture_frame_dataUri() {
-  /* singleHtml */
+async function test_capture_frame_singleHtml() {
+  /* capture.saveDataUriAsSrcdoc = true */
   // data URI charset should be UTF-8
   var options = {
     "capture.saveAs": "singleHtml",
     "capture.frame": "save",
+    "capture.saveDataUriAsSrcdoc": true,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_frame/same-origin.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  var frames = doc.querySelectorAll('iframe');
+
+  var frameSrc = `data:text\/html;charset=UTF-8,${encodeURIComponent(frames[0].getAttribute('srcdoc'))}`;
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+  assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
+
+  var frameSrc = `data:application\/xhtml\+xml;charset=UTF-8,${encodeURIComponent(frames[1].getAttribute('srcdoc'))}`;
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+  assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
+
+  var frameSrc = `data:image\/svg\+xml;charset=UTF-8,${encodeURIComponent(frames[2].getAttribute('srcdoc'))}`;
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
+
+  var frameSrc = frames[3].getAttribute('src');
+  assert(/^data:text\/plain;filename=text\.txt;base64,/.test(frameSrc));
+  var text = (await xhr({url: frameSrc, responseType: "text"})).response;
+  assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
+
+  // <frame> does not support srcdoc and should use data URL
+  var blob = await capture({
+    url: `${localhost}/capture_frame/frameset.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  var frames = doc.querySelectorAll('frame');
+
+  var frameSrc = frames[0].getAttribute('src');
+  assert(/^data:text\/html;charset=UTF-8;filename=index_\d+\.html,/.test(frameSrc));
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+  assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
+
+  var frameSrc = frames[1].getAttribute('src');
+  assert(/^data:application\/xhtml\+xml;charset=UTF-8;filename=index_\d+\.xhtml,/.test(frameSrc));
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+  assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
+
+  /* capture.saveDataUriAsSrcdoc = false */
+  // data URI charset should be UTF-8
+  var options = {
+    "capture.saveAs": "singleHtml",
+    "capture.frame": "save",
+    "capture.saveDataUriAsSrcdoc": false,
   };
 
   var blob = await capture({
@@ -1862,6 +1918,25 @@ async function test_capture_frame_dataUri() {
   assert(/^data:text\/plain;filename=text\.txt;base64,/.test(frameSrc));
   var text = (await xhr({url: frameSrc, responseType: "text"})).response;
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
+
+  // <frame> does not support srcdoc and should use data URL
+  var blob = await capture({
+    url: `${localhost}/capture_frame/frameset.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  var frames = doc.querySelectorAll('frame');
+
+  var frameSrc = frames[0].getAttribute('src');
+  assert(/^data:text\/html;charset=UTF-8;filename=index_\d+\.html,/.test(frameSrc));
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+  assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
+
+  var frameSrc = frames[1].getAttribute('src');
+  assert(/^data:application\/xhtml\+xml;charset=UTF-8;filename=index_\d+\.xhtml,/.test(frameSrc));
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+  assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
 }
 
 /**
@@ -6756,7 +6831,7 @@ async function runTests() {
   await test(test_capture_frame_headless3);
   await test(test_capture_frame_circular);
   await test(test_capture_frame_circular2);
-  await test(test_capture_frame_dataUri);
+  await test(test_capture_frame_singleHtml);
   await test(test_capture_css_style);
   await test(test_capture_css_styleInline);
   await test(test_capture_css_disabled);
