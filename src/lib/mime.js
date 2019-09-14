@@ -5,6 +5,8 @@
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
  */
+(function (global, undefined) {
+
 const Mime = {
   /**
    * Lookup a mime type based on extension
@@ -8016,3 +8018,7 @@ Mime.types = (() => {
   }
   return table;
 })();
+
+global['Mime'] = Mime;
+
+})(this, void 0);
