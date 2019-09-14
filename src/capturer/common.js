@@ -2194,6 +2194,11 @@ capturer.captureDocument = async function (params) {
     }
 
     // special loaders
+    // remove previous loader
+    Array.prototype.forEach.call(rootNode.querySelectorAll('[data-scrapbook-elem="shadowroot-loader"]'), (elem) => {
+      elem.remove();
+    });
+
     if (requireShadowRootLoader) {
       const loader = rootNode.appendChild(doc.createElement("script"));
       loader.setAttribute("data-scrapbook-elem", "shadowroot-loader");
@@ -2214,6 +2219,11 @@ capturer.captureDocument = async function (params) {
         fn(d);
       }) + ")()";
     }
+
+    // remove previous loader
+    Array.prototype.forEach.call(rootNode.querySelectorAll('[data-scrapbook-elem="canvas-loader"]'), (elem) => {
+      elem.remove();
+    });
 
     if (requireCanvasLoader) {
       const loader = rootNode.appendChild(doc.createElement("script"));
