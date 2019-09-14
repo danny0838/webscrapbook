@@ -848,8 +848,9 @@ async function test_capture_dataUri() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === "data:text/css;base64,Ym9keXtmb250LXNpemU6MjBweDt9");
-  assert(doc.querySelector('style').textContent.trim() === `@import url("data:text/css;base64,Ym9keXtmb250LXNpemU6MjBweDt9");
+  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === "data:text/css,body%7Bfont-size%3A20px%3B%7D");
+  assert(doc.querySelector('style').textContent.trim() === `\
+@import url("data:text/css,body%7Bfont-size%3A20px%3B%7D");
 @font-face { font-family: myFont; src: url("data:font/woff;base64,"); }
 p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
   assert(doc.querySelector('img').getAttribute('src') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
@@ -875,7 +876,8 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === "2206b4fb7241bdce17a71015c888e3de66c2b5c9.css");
-  assert(doc.querySelector('style').textContent.trim() === `@import url("2206b4fb7241bdce17a71015c888e3de66c2b5c9.css");
+  assert(doc.querySelector('style').textContent.trim() === `\
+@import url("2206b4fb7241bdce17a71015c888e3de66c2b5c9.css");
 @font-face { font-family: myFont; src: url("da39a3ee5e6b4b0d3255bfef95601890afd80709.woff"); }
 p { background-image: url("ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp"); }`);
   assert(doc.querySelector('img').getAttribute('src') === "ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp");
@@ -893,8 +895,9 @@ p { background-image: url("ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp"); }`);
   });
 
   var doc = await readFileAsDocument(blob);
-  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === "data:text/css;base64,Ym9keXtmb250LXNpemU6MjBweDt9");
-  assert(doc.querySelector('style').textContent.trim() === `@import url("data:text/css;base64,Ym9keXtmb250LXNpemU6MjBweDt9");
+  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === "data:text/css,body%7Bfont-size%3A20px%3B%7D");
+  assert(doc.querySelector('style').textContent.trim() === `\
+@import url("data:text/css,body%7Bfont-size%3A20px%3B%7D");
 @font-face { font-family: myFont; src: url("data:font/woff;base64,"); }
 p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
   assert(doc.querySelector('img').getAttribute('src') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
@@ -957,7 +960,7 @@ async function test_capture_dataUri_resolve() {
   var url = doc.querySelector('link').getAttribute('href');
   var text = (await xhr({url, responseType: "text"})).response;
   assert(text === `\
-@import "data:text/css;filename=null.css;base64,";
+@import "data:text/css;filename=null.css,";
 @font-face { font-family: myFont; src: url("data:application/octet-stream;filename=null.woff;base64,"); }
 p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
 
@@ -1090,7 +1093,7 @@ async function test_capture_dataUri_resolve2() {
 
   assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
   assert(frameDoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
-  assert(frameDoc.querySelector('a').getAttribute('href') === `data:text/plain;filename=null.txt;base64,`);
+  assert(frameDoc.querySelector('a').getAttribute('href') === `data:text/plain;filename=null.txt,`);
 
   /* +saveDataUriAsFile; relative link in data URL iframe */
   // relative link => can't resolve and error (output original URL)
@@ -1936,7 +1939,7 @@ async function test_capture_frame_singleHtml() {
   assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
 
   var frameSrc = frames[3].getAttribute('src');
-  assert(/^data:text\/plain;filename=text\.txt;base64,/.test(frameSrc));
+  assert(/^data:text\/plain;filename=text\.txt,/.test(frameSrc));
   var text = (await xhr({url: frameSrc, responseType: "text"})).response;
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
 
@@ -1991,7 +1994,7 @@ async function test_capture_frame_singleHtml() {
   assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
 
   var frameSrc = frames[3].getAttribute('src');
-  assert(/^data:text\/plain;filename=text\.txt;base64,/.test(frameSrc));
+  assert(/^data:text\/plain;filename=text\.txt,/.test(frameSrc));
   var text = (await xhr({url: frameSrc, responseType: "text"})).response;
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
 
@@ -2739,12 +2742,12 @@ async function test_capture_css_circular() {
   // style1.css
   var url = doc.querySelector('link').getAttribute('href');
   var text = (await xhr({url, responseType: "text"})).response;
-  assert(/^@import "(data:text\/css;filename=style2.css;base64,[^"#]*)(?:#[^"]*)?";/.test(text));
+  assert(/^@import "(data:text\/css;filename=style2.css,[^"#]*)(?:#[^"]*)?";/.test(text));
 
   // style2.css
   var url = RegExp.$1;
   var text = (await xhr({url, responseType: "text"})).response;
-  assert(/^@import "(data:text\/css;filename=style3.css;base64,[^"#]*)(?:#[^"]*)?";/.test(text));
+  assert(/^@import "(data:text\/css;filename=style3.css,[^"#]*)(?:#[^"]*)?";/.test(text));
 
   // style3.css
   var url = RegExp.$1;

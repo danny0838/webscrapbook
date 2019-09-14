@@ -1403,6 +1403,29 @@ scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
   return dataUriToFile(dataUri, useFilename);
 };
 
+/**
+ * Assume non-text for undefined types.
+ */
+scrapbook.mimeIsText = function (mime) {
+  const map = new Set([
+    "application/ecmascript",
+    "application/javascript",
+    "application/json",
+    "application/xml",
+    "application/sql",
+  ]);
+  const mimeIsText = (mime) => {
+    if (mime.startsWith("text/") || mime.endsWith("+xml") || mime.endsWith("+json")) {
+      return true;
+    } else if (mime.endsWith("+zip")) {
+      return false;
+    }
+    return map.has(mime);
+  };
+  scrapbook.mimeIsText = mimeIsText;
+  return mimeIsText(mime);
+};
+
 
 /******************************************************************************
  * HTML DOM related utilities

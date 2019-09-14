@@ -1959,14 +1959,25 @@ capturer.downloadBlob = async function (params) {
 
   switch (options["capture.saveAs"]) {
     case "singleHtml": {
-      let dataUri = await scrapbook.readFileAsDataURL(blob);
-      if (dataUri === "data:") {
-        // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
-        dataUri = `data:${blob.type};base64,`;
+      let dataUri;
+      const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(blob.type);
+
+      if (charset || scrapbook.mimeIsText(mime)) {
+        const isUtf8 = /utf-?8/i.test(charset);
+        const str = await scrapbook.readFileAsText(blob, isUtf8 ? "UTF-8" : false);
+        dataUri = scrapbook.stringToDataUri(str, mime, !isUtf8);
+      } else {
+        dataUri = await scrapbook.readFileAsDataURL(blob);
+        if (dataUri === "data:") {
+          // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
+          dataUri = `data:${blob.type};base64,`;
+        }
       }
+
       if (filename) {
-        dataUri = dataUri.replace(";base64,", ";filename=" + encodeURIComponent(filename) + ";base64,");
+        dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(filename) + m);
       }
+
       return {filename, url: dataUri + sourceUrlHash};
     }
 

@@ -3320,15 +3320,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
       // special management for data URI
       if (fetchResult.url.startsWith("data:")) {
         const [, hash] = scrapbook.splitUrlByAnchor(fetchResult.url);
-        const ab = scrapbook.byteStringToArrayBuffer(bytes);
-        const blob = new Blob([ab], {type: mime});
-
-        let dataUri = await scrapbook.readFileAsDataURL(blob);
-        if (dataUri === "data:") {
-          // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
-          dataUri = `data:${blob.type};base64,`;
-        }
-
+        const dataUri = scrapbook.stringToDataUri(bytes, mime, true);
         const response = {url: dataUri + hash};
         await callback(elem, response);
         return;
