@@ -3315,7 +3315,9 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     if (!elem || elem.nodeName.toLowerCase() == 'link') {
       // imported or external CSS
       const bytes = charset ? scrapbook.unicodeToUtf8(cssTextRewritten) : cssTextRewritten;
-      const mime = "text/css" + (charset ? ";charset=UTF-8" : "");
+
+      // force UTF-8 for rewritten CSS
+      const mime = "text/css;charset=UTF-8";
 
       // special management for data URI
       if (fetchResult.url.startsWith("data:")) {
