@@ -1367,11 +1367,15 @@ scrapbook.readFileAsDocument = async function (blob) {
 scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
   const regexFields = /^data:([^,]*?)(;base64)?,(.*?)$/i;
   const regexFieldValue = /^(.*?)=(.*?)$/;
+  const regexUtf8 = /[^\x00-\x7F]+/g;
+  const fnUtf8 = m => encodeURIComponent(m);
   const dataUriToFile = function (dataUri, useFilename = true) {
     if (regexFields.test(dataUri)) {
       const mediatype = RegExp.$1;
       const base64 = !!RegExp.$2;
-      const data = RegExp.$3;
+
+      // browsers treat a non-ASCII char in an URL as a UTF-8 byte sequence
+      const data = RegExp.$3.replace(regexUtf8, fnUtf8);
 
       const parts = mediatype.split(";");
       const mime = parts.shift();
