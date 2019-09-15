@@ -630,7 +630,7 @@ scrapbook.escapeFilename = function (filename) {
 scrapbook.validateFilename = function (filename, forceAscii) {
   let fn = filename
       // control chars are bad for filename
-      .replace(/[\x00-\x1F\x7F]+|^ +/g, "")
+      .replace(/[\x00-\x1F\x7F]+/g, "")
       // leading/trailing spaces and dots are not allowed on Windows
       .replace(/^\./, "_.").replace(/^ +/, "").replace(/[. ]+$/, "")
       // bad chars on most OS
@@ -896,12 +896,12 @@ scrapbook.unescapeCss = function (str) {
 };
 
 scrapbook.quoteXPath = function (str) {
-  const reQuotes = /"/g;
   const reTail = /,""\)$/;
   const quoteXPath = (str) => {
-    if (!str.includes('"')) { return `"${str}"`; }
-    const splitedQuotes = str.replace(reQuotes, `",'"',"`);
-    return `concat("${splitedQuotes}")`.replace(reTail, ")");
+    const parts = str.split('"');
+    return parts.length > 1 ? 
+        ('concat("' + parts.join(`",'"',"`) + '")').replace(reTail, ")") : 
+        `"${str}"`;
   };
   scrapbook.quoteXPath = quoteXPath;
   return quoteXPath(str);

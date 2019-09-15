@@ -1549,11 +1549,11 @@ capturer.saveDocument = async function (params) {
  * @return {Promise<Object>}
  */
 capturer.downloadFile = async function (params) {
-  const MIMES_NO_EXT_NO_MATCH = [
+  const MIMES_NO_EXT_OK = new Set([
     "application/octet-stream",
-  ];
+  ]);
 
-  const MIMES_NEED_MATCH = [
+  const MIMES_NEED_MATCH = new Set([
     "text/html",
     "text/xml",
     "text/css",
@@ -1576,7 +1576,7 @@ capturer.downloadFile = async function (params) {
     "video/mp4",
     "video/webm",
     "video/ogg",
-  ];
+  ]);
 
   const downloadFile = async (params) => {
     isDebug && console.debug("call: downloadFile", params);
@@ -1651,8 +1651,8 @@ capturer.downloadFile = async function (params) {
             if (headers.contentType) {
               const mime = headers.contentType;
               let [base, ext] = scrapbook.filenameParts(filename);
-              if ((!ext && !MIMES_NO_EXT_NO_MATCH.includes(mime)) || 
-                  (MIMES_NEED_MATCH.includes(mime) && !Mime.allExtensions(mime).includes(ext.toLowerCase()))) {
+              if ((!ext && !MIMES_NO_EXT_OK.has(mime)) || 
+                  (MIMES_NEED_MATCH.has(mime) && !Mime.allExtensions(mime).includes(ext.toLowerCase()))) {
                 ext = Mime.extension(mime);
                 if (ext) {
                   filename += "." + ext;
