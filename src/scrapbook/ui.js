@@ -1013,7 +1013,7 @@ const scrapbookUi = {
       const path = [];
       let cur = elem;
       while (cur && cur.closest('#item-root')) {
-        path.unshift(`*[@data-id=${scrapbook.escapeXpath(cur.getAttribute('data-id'))}][${getXpathPos(cur)}]`);
+        path.unshift(`*[@data-id=${scrapbook.quoteXPath(cur.getAttribute('data-id'))}][${getXpathPos(cur)}]`);
         cur = cur.parentElement.parentElement;
       }
 

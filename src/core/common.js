@@ -895,16 +895,16 @@ scrapbook.unescapeCss = function (str) {
   return unescapeCss(str);
 };
 
-scrapbook.escapeXpath = function (str) {
+scrapbook.quoteXPath = function (str) {
   const reQuotes = /"/g;
   const reTail = /,""\)$/;
-  const escapeXpath = (str) => {
+  const quoteXPath = (str) => {
     if (!str.includes('"')) { return `"${str}"`; }
     const splitedQuotes = str.replace(reQuotes, `",'"',"`);
     return `concat("${splitedQuotes}")`.replace(reTail, ")");
   };
-  scrapbook.escapeXpath = escapeXpath;
-  return escapeXpath(str);
+  scrapbook.quoteXPath = quoteXPath;
+  return quoteXPath(str);
 };
 
 /**
