@@ -948,9 +948,10 @@ capturer.captureDocument = async function (params) {
                         response.url.startsWith('data:') &&
                         frame.nodeName.toLowerCase() === 'iframe') {
                       const file = scrapbook.dataUriToFile(response.url);
-                      const {type: mime} = scrapbook.parseHeaderContentType(file.type);
+                      const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(file.type);
                       if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(mime)) {
-                        const content = await scrapbook.readFileAsText(file);
+                        // assume the charset is UTF-8 if not defined
+                        const content = await scrapbook.readFileAsText(file, charset || "UTF-8");
                         captureRewriteAttr(frame, "srcdoc", content);
                         captureRewriteAttr(frame, "src", null);
                         break handler;
@@ -3314,23 +3315,22 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     // save result back
     if (!elem || elem.nodeName.toLowerCase() == 'link') {
       // imported or external CSS
-      const bytes = charset ? scrapbook.unicodeToUtf8(cssTextRewritten) : cssTextRewritten;
-
       // force UTF-8 for rewritten CSS
-      const mime = "text/css;charset=UTF-8";
 
       // special management for data URI
       if (fetchResult.url.startsWith("data:")) {
         const [, hash] = scrapbook.splitUrlByAnchor(fetchResult.url);
-        const dataUri = scrapbook.stringToDataUri(bytes, mime, true);
+        const dataUri = charset ? 
+            scrapbook.unicodeToDataUri(cssTextRewritten, "text/css") : 
+            scrapbook.byteStringToDataUri(cssTextRewritten, "text/css;charset=UTF-8");
         const response = {url: dataUri + hash};
         await callback(elem, response);
         return;
       }
 
       const response = await capturer.invoke("downloadBytes", {
-        bytes,
-        mime,
+        bytes: charset ? scrapbook.unicodeToUtf8(cssTextRewritten) : cssTextRewritten,
+        mime: "text/css;charset=UTF-8",
         filename: newFilename,
         sourceUrl,
         accessId: isDynamicCss ? null : fetchResult.accessId,

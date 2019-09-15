@@ -1221,8 +1221,11 @@ capturer.saveDocument = async function (params) {
           let filename = documentName + ext;
           filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
 
-          let url = scrapbook.stringToDataUri(data.content, data.mime);
+          let url = data.charset === "UTF-8" ? 
+              scrapbook.unicodeToDataUri(data.content, data.mime) :
+              scrapbook.byteStringToDataUri(scrapbook.unicodeToUtf8(data.content), data.mime, data.charset);
           url = url.replace(",", ";filename=" + encodeURIComponent(filename) + ",");
+
           return {timeId, sourceUrl, filename, url};
         } else {
           const blob = new Blob([data.content], {type: data.mime});
@@ -1963,9 +1966,13 @@ capturer.downloadBlob = async function (params) {
       const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(blob.type);
 
       if (charset || scrapbook.mimeIsText(mime)) {
-        const isUtf8 = /utf-?8/i.test(charset);
-        const str = await scrapbook.readFileAsText(blob, isUtf8 ? "UTF-8" : false);
-        dataUri = scrapbook.stringToDataUri(str, mime, !isUtf8);
+        if (charset && /utf-?8/i.test(charset)) {
+          const str = await scrapbook.readFileAsText(blob, "UTF-8");
+          dataUri = scrapbook.unicodeToDataUri(str, mime);
+        } else {
+          const str = await scrapbook.readFileAsText(blob, false);
+          dataUri = scrapbook.byteStringToDataUri(str, mime, charset);
+        }
       } else {
         dataUri = await scrapbook.readFileAsDataURL(blob);
         if (dataUri === "data:") {

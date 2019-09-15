@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test singleHtml data URI</title>
+<style>
+#internal { background: url("green.bmp"); }
+#internal::after { content: "內部"; }
+</style>
+<link rel="stylesheet" href="link.css">
+<style>@import "import.css";</style>
+</head>
+<body>
+<blockquote id="internal"></blockquote>
+<blockquote id="external"></blockquote>
+<blockquote id="import"></blockquote>
+<blockquote><img src="red.bmp"></blockquote>
+<iframe src="frame.html"></iframe>
+<iframe src="big5.txt"></iframe>
+</body>
+</html>

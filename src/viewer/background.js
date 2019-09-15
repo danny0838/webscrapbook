@@ -68,7 +68,7 @@ a {
 </body>
 </html>
 `;
-      const dataUrl = scrapbook.stringToDataUri(html, "text/html");
+      const dataUrl = scrapbook.unicodeToDataUri(html, "text/html");
       return {redirectUrl: dataUrl};
     }
   }

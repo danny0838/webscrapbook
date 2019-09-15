@@ -6831,6 +6831,45 @@ async function test_capture_shadowRoot() {
 }
 
 /**
+ * Check generated data URI for singleHtml
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_singleHtml_charset() {
+  var options = {
+    "capture.saveAs": "singleHtml",
+    "capture.mergeCssResources": false,
+    "capture.image": "save",
+    "capture.frame": "save",
+    "capture.imageBackground": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_singleHtml_charset/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  assert(doc.querySelectorAll('style')[0].textContent.trim() === `\
+#internal { background: url("data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA"); }
+#internal::after { content: "內部"; }`);
+  assert(doc.querySelector('link').getAttribute('href') === `\
+data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20url(%22data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22);%20%7D%0D%0A%23external::after%20%7B%20content:%20%22外部%22;%20%7D%0D%0A`);
+  assert(doc.querySelectorAll('style')[1].textContent.trim() === `\
+@import "data:text/css;charset=UTF-8;filename=import.css,%23import%20%7B%20background:%20url(%22data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22);%20%7D%0D%0A%23import::after%20%7B%20content:%20%22匯入%22;%20%7D%0D%0A";`);
+  assert(doc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `data:text/plain;filename=big5.txt,Big5%A4%A4%A4%E5%A4%BA%AEe`);
+
+  var srcdocBlob = new Blob([doc.querySelectorAll('iframe')[0].getAttribute('srcdoc')], {type: "text/html;charset=UTF-8"});
+  var srcdoc = await readFileAsDocument(srcdocBlob);
+  assert(srcdoc.querySelector('style').textContent.trim() === `\
+#internal { background: url("data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA"); }
+#internal::after { content: "內部"; }`);
+  assert(srcdoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
+}
+
+/**
  * Check if CSS recources merging works
  *
  * capturer.captureDocument
@@ -7079,6 +7118,7 @@ async function runTests() {
   await test(test_capture_mathml);
   await test(test_capture_recursive);
   await test(test_capture_shadowRoot);
+  await test(test_capture_singleHtml_charset);
   await test(test_capture_singleHtml_mergeCss);
 }
 

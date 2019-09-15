@@ -921,13 +921,23 @@ scrapbook.decodeURIComponent = function (uri) {
 };
 
 /**
- * @param {string} str - unicode string for utf8, or a byte string
+ * This forces UTF-8 charset.
+ *
+ * Chars need encoding adopted from: https://github.com/nicktimko/svgenc
+ * Also encodes control chars and " " for safety in srcset.
  */
-scrapbook.stringToDataUri = function (str, mime, isByteString) {
-  mime = mime || "";
-  const charset = isByteString ? "" : ";charset=UTF-8";
-  const text = isByteString ? escape(str) : encodeURIComponent(str);
-  return "data:" + mime + charset + "," + text;
+scrapbook.unicodeToDataUri = function (str, mime) {
+  const regex = /[\x00-\x1F\x7F "'#%<>[\]^`{|}]+/g;
+  const fn = m => encodeURIComponent(m);
+  const unicodeToDataUri = (str, mime) =>  {
+    return `data:${(mime || "")};charset=UTF-8,${str.replace(regex, fn)}`;
+  };
+  scrapbook.unicodeToDataUri = unicodeToDataUri;
+  return unicodeToDataUri(str, mime);
+};
+
+scrapbook.byteStringToDataUri = function (str, mime, charset) {
+  return `data:${mime || ""}${charset ? ";" + encodeURIComponent(charset) : ""},${escape(str)}`;
 };
 
 scrapbook.unicodeToUtf8 = function (chars) {
