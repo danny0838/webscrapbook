@@ -158,16 +158,4 @@ document.addEventListener('DOMContentLoaded', async () => {
       singleton: true,
     });
   });
-
-  /**
-   * Asynchronous tasks
-   */
-  if (!scrapbook.isOptionsSynced) {
-    await scrapbook.loadOptions();
-  }
-
-  // allow this only when server is configured
-  if (scrapbook.hasServer()) {
-    document.getElementById("openScrapBook").disabled = false;
-  }
 });
