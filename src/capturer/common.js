@@ -493,7 +493,7 @@ capturer.captureDocument = async function (params) {
                     refUrl,
                     settings,
                     callback: (elem, response) => {
-                      elem.textContent = response.cssText;
+                      captureRewriteTextContent(elem, response.cssText);
                     },
                   });
                 });
@@ -749,7 +749,7 @@ capturer.captureDocument = async function (params) {
                     refUrl,
                     settings,
                     callback: (elem, response) => {
-                      elem.textContent = response.cssText;
+                      captureRewriteTextContent(elem, response.cssText);
                     },
                   });
                 });
