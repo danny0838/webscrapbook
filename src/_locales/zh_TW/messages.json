@@ -365,6 +365,12 @@
   "OptionCaptureObjectTooltip": {
     "message": "此選項決定 OBJECT 元素的處理方式。OBJECT 元素多用於嵌入外掛程式，也可嵌入圖片、多媒體、或框架頁。注意：外掛程式脫離原伺服器環境可能無法正常運作，且可能造成安全風險。\n\n* 儲存：將 OBJECT 元素參照的檔案儲存至本地。\n\n* 連結：將 OBJECT 元素連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將 OBJECT 元素無效化。\n\n* 移除：將 OBJECT 元素移除。注意這可能會影響網頁排版。"
   },
+  "OptionCapturePageSizeLimitLabel": {
+    "message": "單個頁面的大小限制:"
+  },
+  "OptionCapturePageSizeLimitTooltip": {
+    "message": "系統不會擷取超出此限制的頁面。空白表示不設限制。"
+  },
   "OptionCaptureRecordErrorUriLabel": {
     "message": "記錄錯誤的 URL"
   },
@@ -388,6 +394,12 @@
   },
   "OptionCaptureRecordSourceUriTooltip": {
     "message": "擷取網頁時若有改寫元素或樣式表的超連結，則建立註解或 data-* 屬性記錄原始 URL 位址。"
+  },
+  "OptionCaptureResourceSizeLimitLabel": {
+    "message": "單個資源檔案的大小限制:"
+  },
+  "OptionCaptureResourceSizeLimitTooltip": {
+    "message": "系統不會下載超出此限制的資源檔案。空白表示不設限制。"
   },
   "OptionCaptureRewriteCssLabel": {
     "message": "改寫樣式表:"
@@ -751,6 +763,22 @@
       },
       "target": {
         "content": "$2"
+      }
+    }
+  },
+  "WarnPageSizeLimitExceeded": {
+    "message": "略過超出大小限制的頁面: '$SOURCE$'",
+    "placeholders": {
+      "source": {
+        "content": "$1"
+      }
+    }
+  },
+  "WarnResourceSizeLimitExceeded": {
+    "message": "略過超出大小限制的資源: '$SOURCE$'",
+    "placeholders": {
+      "source": {
+        "content": "$1"
       }
     }
   }

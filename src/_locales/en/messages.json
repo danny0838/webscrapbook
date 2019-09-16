@@ -365,6 +365,12 @@
   "OptionCaptureObjectTooltip": {
     "message": "This determines how OBJECT elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n* Save: Save the referenced resources to local.\n\n* Link: Link the OBJECT element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the OBJECT element.\n\n* Remove: Remove the OBJECT element. Note that this could affect the web page layout."
   },
+  "OptionCapturePageSizeLimitLabel": {
+    "message": "Size limit for each page:"
+  },
+  "OptionCapturePageSizeLimitTooltip": {
+    "message": "A page exceeding the limit will not be captured. Empty for no limit."
+  },
   "OptionCaptureRecordErrorUriLabel": {
     "message": "Record error URL"
   },
@@ -388,6 +394,12 @@
   },
   "OptionCaptureRecordSourceUriTooltip": {
     "message": "If a URL of an element or a stylesheet is rewritten during the capture process, create a comment or data-* attribute to record its original address."
+  },
+  "OptionCaptureResourceSizeLimitLabel": {
+    "message": "Size limit for each resource file:"
+  },
+  "OptionCaptureResourceSizeLimitTooltip": {
+    "message": "A resource file exceeding the limit will not be saved. Empty for no limit."
   },
   "OptionCaptureRewriteCssLabel": {
     "message": "Rewrite styles:"
@@ -751,6 +763,22 @@
       },
       "target": {
         "content": "$2"
+      }
+    }
+  },
+  "WarnPageSizeLimitExceeded": {
+    "message": "Skip page exceeding size limit: '$SOURCE$'",
+    "placeholders": {
+      "source": {
+        "content": "$1"
+      }
+    }
+  },
+  "WarnResourceSizeLimitExceeded": {
+    "message": "Skip resource exceeding size limit: '$SOURCE$'",
+    "placeholders": {
+      "source": {
+        "content": "$1"
       }
     }
   }

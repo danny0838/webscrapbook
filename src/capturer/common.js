@@ -2509,6 +2509,17 @@ capturer.getErrorUrl = function (sourceUrl, options) {
   return sourceUrl;
 };
 
+capturer.getSkipUrl = function (sourceUrl) {
+  if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("file:")) {
+    return `urn:scrapbook:download:skip:${sourceUrl}`;
+  } else if (sourceUrl.startsWith("data:")) {
+    return `urn:scrapbook:download:skip:data:`;
+  } else if (sourceUrl.startsWith("blob:")) {
+    return `urn:scrapbook:download:skip:blob:`;
+  }
+  return sourceUrl;
+};
+
 capturer.downLinkExtFilter = function (ext, options) {
   // use cached filter regex if not changed
   if (arguments.callee._filter !== options["capture.downLink.extFilter"]) {

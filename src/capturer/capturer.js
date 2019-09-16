@@ -1213,6 +1213,12 @@ capturer.saveDocument = async function (params) {
       return "html";
     };
 
+    if (!settings.frameIsMain &&
+        typeof options["capture.pageSizeLimit"] === "number" && data.content.length >= options["capture.pageSizeLimit"] * 1024) {
+      capturer.warn(scrapbook.lang("WarnPageSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
+      return {url: capturer.getSkipUrl(sourceUrl), error: {message: "Page size limit exceeded."}};
+    }
+
     const title = data.title || scrapbook.urlToFilename(sourceUrl);
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
@@ -1958,6 +1964,11 @@ capturer.downloadBlob = async function (params) {
 
   const {blob, filename, sourceUrl, settings, options} = params;
   const {timeId} = settings;
+
+  if (typeof options["capture.resourceSizeLimit"] === "number" && blob.size >= options["capture.resourceSizeLimit"] * 1024) {
+    capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
+    return {url: capturer.getSkipUrl(sourceUrl), error: {message: "Resource size limit exceeded."}};
+  }
 
   switch (options["capture.saveAs"]) {
     case "singleHtml": {

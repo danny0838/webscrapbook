@@ -22,6 +22,8 @@ function getOptionFromDocument(id) {
 
   if (elem.matches('input[type="checkbox"]')) {
     return elem.checked;
+  } else if (elem.matches('input[type="number"]')) {
+    return elem.validity.valid && elem.value !== "" ? elem.valueAsNumber : null;
   } else {
     return elem.value;
   }
