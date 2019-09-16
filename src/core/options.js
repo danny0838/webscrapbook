@@ -40,10 +40,9 @@ function setOptionToDocument(id, value) {
     // generate a hidden option element for it, so that
     // importing hacking value is allowed.
     if (elem.matches('select') && elem.value != value) {
-      const c = document.createElement('option');
-      c.style.display = 'none';
+      const c = elem.appendChild(document.createElement('option'));
+      c.hidden = true;
       c.value = c.textContent = value;
-      elem.appendChild(c);
       elem.value = value;
     }
   }
