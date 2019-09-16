@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test invalid tags</title>
+</head>
+<body>
+<xmp></xmp>
+<style></style>
+<script></script>
+
+<script>
+document.currentScript.remove();
+var elem = document.querySelector('xmp').textContent = 'Explode </xmp> with a bomb!<script>alert("bomb");<\/script>';
+var elem = document.querySelector('style').textContent = '/*Explode </style> with a bomb!<script>alert("bomb");<\/script>*/';
+var elem = document.querySelector('script').textContent = '/*Explode <\/script> with a bomb!<script>alert("bomb");<\/script>*/';
+</script>
+</body>
+</html>

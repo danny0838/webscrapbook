@@ -493,7 +493,8 @@ capturer.captureDocument = async function (params) {
                     refUrl,
                     settings,
                     callback: (elem, response) => {
-                      captureRewriteTextContent(elem, response.cssText);
+                      // escape </style> as textContent can contain HTML
+                      captureRewriteTextContent(elem, response.cssText.replace(/<\/(style>)/gi, "<\\/$1"));
                     },
                   });
                 });
@@ -749,7 +750,8 @@ capturer.captureDocument = async function (params) {
                     refUrl,
                     settings,
                     callback: (elem, response) => {
-                      captureRewriteTextContent(elem, response.cssText);
+                      // escape </style> as textContent can contain HTML
+                      captureRewriteTextContent(elem, response.cssText.replace(/<\/(style>)/gi, "<\\/$1"));
                     },
                   });
                 });
@@ -798,6 +800,9 @@ capturer.captureDocument = async function (params) {
                 }
                 break;
             }
+
+            // escape </script> as textContent can contain HTML
+            elem.textContent = elem.textContent.replace(/<\/(script>)/gi, "<\\/$1");
             break;
           }
 
@@ -1741,6 +1746,13 @@ capturer.captureDocument = async function (params) {
                 // do nothing
                 break;
             }
+            break;
+          }
+
+          // xmp
+          case "xmp": {
+            // escape </xmp> as textContent can contain HTML
+            elem.textContent = elem.textContent.replace(/<\/(xmp>)/gi, "<\\/$1");
             break;
           }
         }

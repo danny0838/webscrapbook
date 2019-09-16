@@ -6977,6 +6977,32 @@ async function test_capture_singleHtml_mergeCss() {
 }`);
 }
 
+/**
+ * Escape bad tags for security
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_invalid_tags() {
+  var options = {
+    "capture.style": "save",
+    "capture.script": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_invalid_tags/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('xmp').textContent.trim() === `Explode <\\/xmp> with a bomb!<script>alert("bomb");</script>`);
+  assert(doc.querySelector('style').textContent.trim() === `/*Explode <\\/style> with a bomb!<script>alert("bomb");</script>*/`);
+  assert(doc.querySelector('script').textContent.trim() === `/*Explode <\\/script> with a bomb!<script>alert("bomb");<\\/script>*/`);
+}
+
 async function test_viewer_validate() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-validate/index.html'),
@@ -7121,6 +7147,7 @@ async function runTests() {
   await test(test_capture_shadowRoot);
   await test(test_capture_singleHtml_charset);
   await test(test_capture_singleHtml_mergeCss);
+  await test(test_capture_invalid_tags);
 }
 
 async function runManualTests() {
