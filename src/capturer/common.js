@@ -407,6 +407,8 @@ capturer.captureDocument = async function (params) {
         return;
       }
 
+      const elemOrig = origNodeMap.get(elem);
+
       if (rootName === "svg") {
         switch (elem.nodeName.toLowerCase()) {
           case "a": {
@@ -1084,8 +1086,6 @@ capturer.captureDocument = async function (params) {
 
           // images: img
           case "img": {
-            const elemOrig = origNodeMap.get(elem);
-
             if (elem.hasAttribute("src")) {
               const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
               elem.setAttribute("src", rewriteUrl);
@@ -1235,8 +1235,6 @@ capturer.captureDocument = async function (params) {
 
           // media: audio
           case "audio": {
-            const elemOrig = origNodeMap.get(elem);
-
             if (elem.hasAttribute("src")) {
               const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
               elem.setAttribute("src", rewriteUrl);
@@ -1336,8 +1334,6 @@ capturer.captureDocument = async function (params) {
 
           // media: video
           case "video": {
-            const elemOrig = origNodeMap.get(elem);
-
             if (elem.hasAttribute("poster")) {
               const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("poster"), refUrl);
               elem.setAttribute("poster", rewriteUrl);
@@ -1614,8 +1610,6 @@ capturer.captureDocument = async function (params) {
 
           // media: canvas
           case "canvas": {
-            const elemOrig = origNodeMap.get(elem);
-
             switch (options["capture.canvas"]) {
               case "blank":
                 // do nothing
@@ -1648,8 +1642,6 @@ capturer.captureDocument = async function (params) {
           }
 
           case "input": {
-            const elemOrig = origNodeMap.get(elem);
-
             switch (elem.type.toLowerCase()) {
               // images: input
               case "image": {
@@ -1726,8 +1718,6 @@ capturer.captureDocument = async function (params) {
 
           // form: option
           case "option": {
-            const elemOrig = origNodeMap.get(elem);
-
             switch (options["capture.formStatus"]) {
               case "keep":
                 captureRewriteAttr(elem, "selected", elemOrig.selected ? "selected" : null);
@@ -1742,8 +1732,6 @@ capturer.captureDocument = async function (params) {
 
           // form: textarea
           case "textarea": {
-            const elemOrig = origNodeMap.get(elem);
-
             switch (options["capture.formStatus"]) {
               case "keep":
                 captureRewriteTextContent(elem, elemOrig.value);
@@ -1760,7 +1748,6 @@ capturer.captureDocument = async function (params) {
         // handle shadow DOM
         switch (options["capture.shadowDom"]) {
           case "save": {
-            const elemOrig = origNodeMap.get(elem);
             const shadowRootOrig = elemOrig.shadowRoot;
             if (shadowRootOrig) {
               const shadowRoot = elem.attachShadow({mode: 'open'});
