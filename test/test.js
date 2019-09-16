@@ -5706,71 +5706,71 @@ async function test_capture_record_nodes() {
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<base[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<base[^>]*?>-->`
   ).test(head.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<link[^>]*? rel="shortcut icon"[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="shortcut icon"[^>]*?>-->`
   ).test(head.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<link[^>]*? rel="stylesheet"[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="stylesheet"[^>]*?>-->`
   ).test(head.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<script[^>]*?>[\\s\\S]*?</script>-->`
+    `<!--scrapbook-orig-node-${timeId}=<script[^>]*?>[\\s\\S]*?</script>-->`
   ).test(head.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<img[^>]*? src=[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<img[^>]*? src=[^>]*?>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<img[^>]*? srcset=[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<img[^>]*? srcset=[^>]*?>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<picture>[\\s\\S]*?</picture>-->`
+    `<!--scrapbook-orig-node-${timeId}=<picture>[\\s\\S]*?</picture>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<input[^>]*? type="image"[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<input[^>]*? type="image"[^>]*?>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<canvas[^>]*?>[\\s\\S]*?</canvas>-->`
+    `<!--scrapbook-orig-node-${timeId}=<canvas[^>]*?>[\\s\\S]*?</canvas>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<audio[^>]*?>[\\s\\S]*?</audio>-->`
+    `<!--scrapbook-orig-node-${timeId}=<audio[^>]*?>[\\s\\S]*?</audio>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<video[^>]*?>[\\s\\S]*?</video>-->`
+    `<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\\s\\S]*?</video>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<video[^>]*?>[\\s\\S]*?</video>-->`
+    `<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\\s\\S]*?</video>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<embed[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<embed[^>]*?>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<object[^>]*?>[\\s\\S]*?</object>-->`
+    `<!--scrapbook-orig-node-${timeId}=<object[^>]*?>[\\s\\S]*?</object>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<applet[^>]*?>[\\s\\S]*?</applet>-->`
+    `<!--scrapbook-orig-node-${timeId}=<applet[^>]*?>[\\s\\S]*?</applet>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<iframe[^>]*?>[\\s\\S]*?</iframe>-->`
+    `<!--scrapbook-orig-node-${timeId}=<iframe[^>]*?>[\\s\\S]*?</iframe>-->`
   ).test(body.innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<noscript[^>]*?>[\\s\\S]*?</noscript>-->`
+    `<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\\s\\S]*?</noscript>-->`
   ).test(body.innerHTML));
 
   /* -capture.recordRemovedNode */  
@@ -5789,71 +5789,71 @@ async function test_capture_record_nodes() {
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<base[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<base[^>]*?>-->`
   ).test(head.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<link[^>]*? rel="shortcut icon"[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="shortcut icon"[^>]*?>-->`
   ).test(head.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<link[^>]*? rel="stylesheet"[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="stylesheet"[^>]*?>-->`
   ).test(head.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<script[^>]*?>[\\s\\S]*?</script>-->`
+    `<!--scrapbook-orig-node-${timeId}=<script[^>]*?>[\\s\\S]*?</script>-->`
   ).test(head.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<img[^>]*? src=[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<img[^>]*? src=[^>]*?>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<img[^>]*? srcset=[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<img[^>]*? srcset=[^>]*?>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<picture>[\\s\\S]*?</picture>-->`
+    `<!--scrapbook-orig-node-${timeId}=<picture>[\\s\\S]*?</picture>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<input[^>]*? type="image"[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<input[^>]*? type="image"[^>]*?>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<canvas[^>]*?>[\\s\\S]*?</canvas>-->`
+    `<!--scrapbook-orig-node-${timeId}=<canvas[^>]*?>[\\s\\S]*?</canvas>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<audio[^>]*?>[\\s\\S]*?</audio>-->`
+    `<!--scrapbook-orig-node-${timeId}=<audio[^>]*?>[\\s\\S]*?</audio>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<video[^>]*?>[\\s\\S]*?</video>-->`
+    `<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\\s\\S]*?</video>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<video[^>]*?>[\\s\\S]*?</video>-->`
+    `<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\\s\\S]*?</video>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<embed[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<embed[^>]*?>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<object[^>]*?>[\\s\\S]*?</object>-->`
+    `<!--scrapbook-orig-node-${timeId}=<object[^>]*?>[\\s\\S]*?</object>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<applet[^>]*?>[\\s\\S]*?</applet>-->`
+    `<!--scrapbook-orig-node-${timeId}=<applet[^>]*?>[\\s\\S]*?</applet>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<iframe[^>]*?>[\\s\\S]*?</iframe>-->`
+    `<!--scrapbook-orig-node-${timeId}=<iframe[^>]*?>[\\s\\S]*?</iframe>-->`
   ).test(body.innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<noscript[^>]*?>[\\s\\S]*?</noscript>-->`
+    `<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\\s\\S]*?</noscript>-->`
   ).test(body.innerHTML));
 }
 
@@ -5888,15 +5888,15 @@ async function test_capture_record_nodes2() {
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<source[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
   ).test(doc.querySelector('picture').innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<source[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
   ).test(doc.querySelector('audio').innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<source[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
   ).test(doc.querySelector('video').innerHTML));
 
   /* +capture.recordSourceUri */
@@ -5914,15 +5914,15 @@ async function test_capture_record_nodes2() {
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<source[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
   ).test(doc.querySelector('picture').innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<source[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
   ).test(doc.querySelector('audio').innerHTML));
 
   assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<source[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
   ).test(doc.querySelector('video').innerHTML));
 
   /* -capture.recordSourceUri */
@@ -5940,15 +5940,15 @@ async function test_capture_record_nodes2() {
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<source[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
   ).test(doc.querySelector('picture').innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<source[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
   ).test(doc.querySelector('audio').innerHTML));
 
   assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}--<source[^>]*?>-->`
+    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
   ).test(doc.querySelector('video').innerHTML));
 }
 

@@ -148,7 +148,7 @@ capturer.captureDocument = async function (params) {
       if (!elem.parentNode) { return; }
 
       if (record) {
-        const comment = doc.createComment(`scrapbook-orig-node-${timeId}--${scrapbook.escapeHtmlComment(elem.outerHTML)}`);
+        const comment = doc.createComment(`scrapbook-orig-node-${timeId}=${scrapbook.escapeHtmlComment(elem.outerHTML)}`);
         elem.parentNode.replaceChild(comment, elem);
       } else {
         elem.parentNode.removeChild(elem);
