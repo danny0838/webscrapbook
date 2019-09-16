@@ -6672,6 +6672,48 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
 }
 
 /**
+ * Test for blob URL:
+ * Record briefly for data and blob URL.
+ *
+ * capture.recordErrorUri
+ * capturer.captureDocument
+ * capturer.downloadFile
+ * capturer.captureUrl
+ * capturer.captureBookmark
+ */
+async function test_capture_record_errorUrls6() {
+  var options = {
+    "capture.image": "save",
+    "capture.imageBackground": "save",
+    "capture.favicon": "save",
+    "capture.frame": "save",
+    "capture.font": "save",
+    "capture.style": "save",
+    "capture.rewriteCss": "url",
+    "capture.script": "save",
+    "capture.downLink.mode": "url",
+    "capture.downLink.extFilter": "txt",
+    "capture.downLink.urlFilter": "",
+  };
+
+  /* +capture.recordErrorUri */
+  options["capture.recordErrorUri"] = true;
+
+  var blob = await capture({
+    url: `${localhost}/capture_record/error-urls6.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === `urn:scrapbook:download:error:blob:`);
+  assert(doc.querySelector('script').getAttribute('src') === `urn:scrapbook:download:error:blob:`);
+  assert(doc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:blob:`);
+}
+
+/**
  * Check if SVG can be captured correctly.
  *
  * capturer.captureDocument
@@ -7162,6 +7204,7 @@ async function runTests() {
   await test(test_capture_record_errorUrls3);
   await test(test_capture_record_errorUrls4);
   await test(test_capture_record_errorUrls5);
+  await test(test_capture_record_errorUrls6);
   await test(test_capture_svg);
   await test(test_capture_mathml);
   await test(test_capture_recursive);

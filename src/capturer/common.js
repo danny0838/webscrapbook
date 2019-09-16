@@ -2500,6 +2500,10 @@ capturer.getErrorUrl = function (sourceUrl, options) {
   if (!options || options["capture.recordErrorUri"]) {
     if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("file:")) {
       return `urn:scrapbook:download:error:${sourceUrl}`;
+    } else if (sourceUrl.startsWith("data:")) {
+      return `urn:scrapbook:download:error:data:`;
+    } else if (sourceUrl.startsWith("blob:")) {
+      return `urn:scrapbook:download:error:blob:`;
     }
   }
   return sourceUrl;
