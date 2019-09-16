@@ -404,6 +404,18 @@
   "OptionCaptureRecordSourceUriTooltip": {
     "message": "擷取網頁時若有改寫元素或樣式表的超連結，則建立註解或 data-* 屬性記錄原始 URL 位址。"
   },
+  "OptionCaptureRemoveHiddenLabel": {
+    "message": "移除隱藏元素"
+  },
+  "OptionCaptureRemoveHiddenNoneLabel": {
+    "message": "停用"
+  },
+  "OptionCaptureRemoveHiddenTooltip": {
+    "message": "此選項決定隱藏元素的處理方式。\n\n* 停用：停用此功能。\n\n* 移除不顯示的元素：移除「display」樣式屬性計算值為「none」的元素。注意這可能會影響網頁排版，例如改變「+」、「~」、「:nth-child」等 CSS 選擇器的作用對象。"
+  },
+  "OptionCaptureRemoveHiddenUndisplayedLabel": {
+    "message": "移除不顯示的元素"
+  },
   "OptionCaptureResourceSizeLimitLabel": {
     "message": "單個資源檔案的大小限制:"
   },

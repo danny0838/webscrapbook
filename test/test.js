@@ -32,6 +32,7 @@ const baseOptions = {
   "capture.base": "blank",
   "capture.formStatus": "keep",
   "capture.shadowDom": "save",
+  "capture.removeHidden": "none",
   "capture.precludeSelector": "",
   "capture.downLink.mode": "none",
   "capture.downLink.extFilter": "",
@@ -4903,6 +4904,78 @@ async function test_capture_shadowRoot() {
 }
 
 /**
+ * Check if removeHidden works correctly.
+ *
+ * capturer.removeHidden
+ */
+async function test_capture_removeHidden() {
+  /* capture.removeHidden = undisplayed */
+  var options = {
+    "capture.removeHidden": "undisplayed",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_removeHidden/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(!zip.files["red.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector('p'));
+  assert(!doc.querySelector('blockquote'));
+  assert(!doc.querySelector('img'));
+
+  // these elements should not be altered anyway
+  assert(doc.querySelector('html'));
+  assert(doc.querySelector('head'));
+  assert(doc.querySelector('meta'));
+  assert(doc.querySelector('title'));
+  assert(doc.querySelector('style'));
+  assert(doc.querySelector('link[rel="stylesheet"]'));
+  assert(doc.querySelector('body'));
+  assert(doc.querySelector('noscript'));
+  assert(doc.querySelector('template'));
+
+  /* capture.removeHidden = none */
+  var options = {
+    "capture.removeHidden": "none",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_removeHidden/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["red.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('p'));
+  assert(doc.querySelector('blockquote'));
+
+  assert(doc.querySelector('img'));
+  assert(doc.querySelector('html'));
+  assert(doc.querySelector('head'));
+  assert(doc.querySelector('meta'));
+  assert(doc.querySelector('title'));
+  assert(doc.querySelector('style'));
+  assert(doc.querySelector('link[rel="stylesheet"]'));
+  assert(doc.querySelector('body'));
+  assert(doc.querySelector('noscript'));
+  assert(doc.querySelector('template'));
+}
+
+/**
  * Check if precludeSelector works correctly.
  *
  * capturer.precludeSelector
@@ -7424,6 +7497,7 @@ async function runTests() {
   await test(test_capture_base);
   await test(test_capture_formStatus);
   await test(test_capture_shadowRoot);
+  await test(test_capture_removeHidden);
   await test(test_capture_precludeSelector);
   await test(test_capture_rewrite);
   await test(test_capture_rewrite2);

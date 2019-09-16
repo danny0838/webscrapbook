@@ -409,6 +409,26 @@ capturer.captureDocument = async function (params) {
 
       const elemOrig = origNodeMap.get(elem);
 
+      // remove hidden elements
+      if (!isHeadless) {
+        switch (options["capture.removeHidden"]) {
+          case "undisplayed": {
+            const excludeNodes =
+                rootName === "svg" ? ["svg"] : 
+                rootName === "math" ? ["math"] : 
+                ["html", "head", "title", "meta", "link", "style", "script", "body", "noscript", "template", "source", "track"];
+            if (!excludeNodes.includes(elem.nodeName.toLowerCase())) {
+              const styles = doc.defaultView.getComputedStyle(elemOrig, null);
+              if (styles.getPropertyValue("display") === "none") {
+                captureRemoveNode(elem);
+                return;
+              }
+            }
+            break;
+          }
+        }
+      }
+
       if (rootName === "svg") {
         switch (elem.nodeName.toLowerCase()) {
           case "a": {

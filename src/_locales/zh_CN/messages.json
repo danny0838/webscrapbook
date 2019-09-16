@@ -404,6 +404,18 @@
   "OptionCaptureRecordSourceUriTooltip": {
     "message": "获取网页时若有改写元素或样式表的链接，则建立注解或 data-* 属性记录原始 URL 位址。"
   },
+  "OptionCaptureRemoveHiddenLabel": {
+    "message": "移除隐藏元素"
+  },
+  "OptionCaptureRemoveHiddenNoneLabel": {
+    "message": "停用"
+  },
+  "OptionCaptureRemoveHiddenTooltip": {
+    "message": "此选项决定隐藏元素的处理方式。\n\n* 停用：停用此功能。\n\n* 移除不显示的元素：移除“display”样式属性计算值为“none”的元素。注意这可能会影响网页排版，例如改变“+”、“~”、“:nth-child”等 CSS 选择器的作用对象。"
+  },
+  "OptionCaptureRemoveHiddenUndisplayedLabel": {
+    "message": "移除不显示的元素"
+  },
   "OptionCaptureResourceSizeLimitLabel": {
     "message": "单个资源文件的大小限制:"
   },

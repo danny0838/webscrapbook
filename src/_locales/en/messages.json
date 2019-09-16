@@ -404,6 +404,18 @@
   "OptionCaptureRecordSourceUriTooltip": {
     "message": "If a URL of an element or a stylesheet is rewritten during the capture process, create a comment or data-* attribute to record its original address."
   },
+  "OptionCaptureRemoveHiddenLabel": {
+    "message": "Remove hidden elements"
+  },
+  "OptionCaptureRemoveHiddenNoneLabel": {
+    "message": "Disable"
+  },
+  "OptionCaptureRemoveHiddenTooltip": {
+    "message": "Determines how hidden elements are handled.\n\n* Disable: Disable this feature.\n\n* Remove undisplayed elements: Remove elements whose \"display\" CSS property is computed to \"none\". Note that this could affect the web page layout, such as altering the targets of \"+\", \"~\", and \":nth-child\" CSS selectors."
+  },
+  "OptionCaptureRemoveHiddenUndisplayedLabel": {
+    "message": "Remove undisplayed elements"
+  },
   "OptionCaptureResourceSizeLimitLabel": {
     "message": "Size limit for each resource file:"
   },
