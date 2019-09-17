@@ -268,8 +268,6 @@ capturer.access = async function (params) {
     const accessMap = capturer.captureInfo.get(timeId).accessMap;
     const accessToken = getAccessToken(sourceUrlMain, role);
 
-    let urlHash = sourceUrlHash;
-
     // check for previous access
     {
       const accessPrevious = accessMap.get(accessToken);
@@ -325,8 +323,6 @@ capturer.access = async function (params) {
             // check for previous access if redirected
             const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
             if (responseUrlMain !== sourceUrlMain) {
-              urlHash = responseUrlHash;
-
               const responseAccessToken = getAccessToken(responseUrlMain, role);
               const responseAccessPrevious = accessMap.get(responseAccessToken);
               if (responseAccessPrevious) {
@@ -334,8 +330,8 @@ capturer.access = async function (params) {
                 if (hooks.duplicate) {
                   response = hooks.duplicate({
                     access: responseAccessPrevious,
-                    url: responseUrlMain,
-                    hash: urlHash,
+                    url: sourceUrlMain,
+                    hash: sourceUrlHash,
                   });
                 } else {
                   response = responseAccessPrevious;
@@ -353,7 +349,8 @@ capturer.access = async function (params) {
                 hooks.preHeaders({
                   access: accessCurrent,
                   xhr,
-                  hash: urlHash,
+                  url: sourceUrlMain,
+                  hash: sourceUrlHash,
                   headers,
                 });
               } else {
@@ -377,7 +374,8 @@ capturer.access = async function (params) {
               hooks.postHeaders({
                 access: accessCurrent,
                 xhr,
-                hash: urlHash,
+                url: sourceUrlMain,
+                hash: sourceUrlHash,
                 headers,
               });
             }
@@ -392,7 +390,8 @@ capturer.access = async function (params) {
         response = {
           access: accessCurrent,
           xhr,
-          hash: urlHash,
+          url: sourceUrlMain,
+          hash: sourceUrlHash,
           headers,
         };
 
@@ -405,6 +404,8 @@ capturer.access = async function (params) {
           response = await hooks.error({
             ex,
             access: accessCurrent,
+            url: sourceUrlMain,
+            hash: sourceUrlHash,
           });
         } else {
           throw ex;
