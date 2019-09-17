@@ -265,6 +265,26 @@ async function test_capture_metaCharset() {
 }
 
 /**
+ * Check renaming works correctly
+ *
+ * capturer.downloadFile
+ */
+async function test_capture_rename() {
+  var blob = await capture({
+    url: `${localhost}/capture_rename/index.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('img')[0].getAttribute('src') === `green.bmp`);
+  assert(doc.querySelectorAll('img')[1].getAttribute('src') === `green.bmp#123`);
+  assert(doc.querySelectorAll('img')[2].getAttribute('src') === `green.bmp#456`);
+}
+
+/**
  * Check xhtml saving structure in various formats
  * Check if saveAs option works
  *
@@ -7061,6 +7081,7 @@ async function test_viewer_archive_in_frame() {
 async function runTests() {
   await test(test_capture_html);
   await test(test_capture_metaCharset);
+  await test(test_capture_rename);
   await test(test_capture_xhtml);
   await test(test_capture_file);
   await test(test_capture_file_charset);

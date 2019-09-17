@@ -1535,7 +1535,7 @@ capturer.saveDocument = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- * @param {string} params.url
+ * @param {string} params.url - may include hash
  * @param {string} params.refUrl
  * @param {Object} params.settings
  * @param {Object} params.options
@@ -1579,8 +1579,8 @@ capturer.downloadFile = async function (params) {
     const {timeId, recurseChain} = settings;
 
     try {
-      return await capturer.access({
-        url: sourceUrl,
+      const response = await capturer.access({
+        url: sourceUrlMain,
         refUrl,
         role: "downloadFile",
         settings,
@@ -1614,11 +1614,11 @@ capturer.downloadFile = async function (params) {
                   options,
                   blob: file,
                   filename,
-                  sourceUrl,
+                  sourceUrl: sourceUrlMain,
                 });
               }
 
-              return {url: sourceUrl};
+              return {url: sourceUrlMain};
             }
           },
 
@@ -1661,10 +1661,13 @@ capturer.downloadFile = async function (params) {
               options,
               blob: xhr.response,
               filename,
-              sourceUrl,
+              sourceUrl: sourceUrlMain,
             });
           },
         },
+      });
+      return Object.assign({}, response, {
+        url: response.url + sourceUrlHash,
       });
     } catch (ex) {
       console.warn(ex);
@@ -1881,7 +1884,7 @@ capturer.registerFile = async function (params) {
  * @param {string} params.bytes - as byte string
  * @param {string} params.mime - may include parameters like charset
  * @param {string} params.filename - validated and unique
- * @param {string} params.sourceUrl
+ * @param {string} params.sourceUrl - may include hash
  * @param {string} params.accessId - ID of the bound access
  * @param {Object} params.settings
  * @param {Object} params.options
@@ -1891,6 +1894,7 @@ capturer.downloadBytes = async function (params) {
   isDebug && console.debug("call: downloadBytes", params);
 
   const {bytes, mime, filename, sourceUrl, accessId, settings, options} = params;
+  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
   const {timeId} = settings;
 
   const ab = scrapbook.byteStringToArrayBuffer(bytes);
@@ -1898,9 +1902,13 @@ capturer.downloadBytes = async function (params) {
   const access = capturer.downloadBlob({
     blob,
     filename,
-    sourceUrl,
+    sourceUrl: sourceUrlMain,
     settings,
     options,
+  }).then((response) => {
+    return Object.assign({}, response, {
+      url: response.url + sourceUrlHash,
+    });
   });
 
   const boundAccess = capturer.captureInfo.get(timeId).accessMap.get(accessId);
@@ -1938,7 +1946,7 @@ capturer.getAccessResult = async function (params) {
  * @param {Object} params
  * @param {Blob} params.blob
  * @param {string} params.filename - validated and unique
- * @param {string} params.sourceUrl
+ * @param {string} params.sourceUrl - must not include hash
  * @param {Object} params.settings
  * @param {Object} params.options
  * @return {Promise<Object>}
@@ -1947,7 +1955,6 @@ capturer.downloadBlob = async function (params) {
   isDebug && console.debug("call: downloadBlob", params);
 
   const {blob, filename, sourceUrl, settings, options} = params;
-  const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
   const {timeId} = settings;
 
   switch (options["capture.saveAs"]) {
@@ -1975,19 +1982,19 @@ capturer.downloadBlob = async function (params) {
         dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(filename) + m);
       }
 
-      return {filename, url: dataUri + sourceUrlHash};
+      return {filename, url: dataUri};
     }
 
     case "zip": {
       const zip = capturer.captureInfo.get(timeId).zip;
       scrapbook.zipAddFile(zip, filename, blob);
-      return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+      return {filename, url: scrapbook.escapeFilename(filename)};
     }
 
     case "maff": {
       const zip = capturer.captureInfo.get(timeId).zip;
       scrapbook.zipAddFile(zip, timeId + "/" + filename, blob);
-      return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+      return {filename, url: scrapbook.escapeFilename(filename)};
     }
 
     case "folder":
@@ -2027,7 +2034,7 @@ capturer.downloadBlob = async function (params) {
         sourceUrl,
         targetDir,
         filename: changedFilename,
-        url: scrapbook.escapeFilename(changedFilename) + sourceUrlHash,
+        url: scrapbook.escapeFilename(changedFilename),
       };
     }
   }
