@@ -39,12 +39,12 @@ class Server {
    * Wrapped API for a general request to backend server
    *
    * @param {Object} params
-   *     - {string} params.url
-   *     - {string} params.method
-   *     - {Object} params.headers
-   *     - {Object} params.body
-   *     - {Object} params.credentials
-   *     - {Object} params.cache
+   * @param {string} params.url
+   * @param {string} params.method
+   * @param {Object} params.headers
+   * @param {Object} params.body
+   * @param {Object} params.credentials
+   * @param {Object} params.cache
    */
   async request(params = {}) {
     let {
@@ -601,9 +601,9 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
    * Add (or replace) an item to the Book.
    *
    * @param {Object} params
-   *     - {Objet} params.item - null to generate a default item. Overwrites existed id.
-   *     - {string} params.parentId - null to not add to any parent
-   *     - {integer} params.index - Infinity to insert to last
+   * @param {Objet} params.item - null to generate a default item. Overwrites existed id.
+   * @param {string} params.parentId - null to not add to any parent
+   * @param {integer} params.index - Infinity to insert to last
    * @return {Objet}
    */
   addItem(params) {
@@ -649,10 +649,10 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
    * Remove an item and descneding items from the Book.
    *
    * @param {Object} params
-   *     - {string} params.id
-   *     - {string} params.parentId - null to not removed from certain parent
+   * @param {string} params.id
+   * @param {string} params.parentId - null to not removed from certain parent
    *         (useful for checking stale items)
-   *     - {integer} params.index
+   * @param {integer} params.index
    * @return {Set} a set of removed items
    */
   removeItemTree(params) {
@@ -698,12 +698,12 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
    * Remove an item from Book tree and put it to recycle bin if not referenced.
    *
    * @param {Object} params
-   *     - {string} params.id
-   *     - {string} params.currentParentId - null to not removed from certain parent
+   * @param {string} params.id
+   * @param {string} params.currentParentId - null to not removed from certain parent
    *         (useful for checking stale items)
-   *     - {integer} params.currentIndex
-   *     - {string} params.targetParentId - ID of the recycle bin item
-   *     - {integer} params.targetIndex - Infinity to insert to last
+   * @param {integer} params.currentIndex
+   * @param {string} params.targetParentId - ID of the recycle bin item
+   * @param {integer} params.targetIndex - Infinity to insert to last
    * @return {integer} the real insertion index
    */
   recycleItemTree(params) {
@@ -748,11 +748,11 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
    * Move an item in the Book.
    *
    * @param {Object} params
-   *     - {string} params.id
-   *     - {string} params.currentParentId - null if none
-   *     - {integer} params.currentIndex
-   *     - {integer} params.targetParentId
-   *     - {integer} params.targetIndex - Infinity to insert to last
+   * @param {string} params.id
+   * @param {string} params.currentParentId - null if none
+   * @param {integer} params.currentIndex
+   * @param {integer} params.targetParentId
+   * @param {integer} params.targetIndex - Infinity to insert to last
    * @return {integer} the real insertion index
    */
   moveItem(params) {

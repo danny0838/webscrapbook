@@ -35,9 +35,9 @@ const capturer = {
  * @param {string} method - The capturer method to invoke.
  * @param {string} args - The arguments to pass to the capturer method.
  * @param {string} details - Data to determine invocation behavior.
- *     - {string} details.tabId
- *     - {string} details.frameId
- *     - {Window} details.frameWindow
+ * @param {string} details.tabId
+ * @param {string} details.frameId
+ * @param {Window} details.frameWindow
  * @return {Promise<Object>}
  */
 capturer.invoke = async function (method, args, details = {}) {
@@ -75,11 +75,11 @@ capturer.invoke = async function (method, args, details = {}) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {Document} params.doc
- *     - {string} params.refUrl
- *     - {string} params.title
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {Document} params.doc
+ * @param {string} params.refUrl
+ * @param {string} params.title
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.captureDocumentOrFile = async function (params) {
@@ -111,12 +111,12 @@ capturer.captureDocumentOrFile = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {Document} params.doc
- *     - {string} params.title
- *     - {string} params.docUrl
- *     - {string} params.refUrl
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {Document} params.doc
+ * @param {string} params.title
+ * @param {string} params.docUrl
+ * @param {string} params.refUrl
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.captureDocument = async function (params) {
@@ -2301,9 +2301,9 @@ capturer.captureDocument = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {Document} params.doc
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {Document} params.doc
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.retrieveDocumentContent = async function (params) {
@@ -2348,11 +2348,11 @@ capturer.retrieveDocumentContent = async function (params) {
  * Format the filename to save.
  *
  * @param {Object} params
- *     - {string} params.title
- *     - {string} params.sourceUrl
- *     - {boolean} params.isFolder
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {string} params.title
+ * @param {string} params.sourceUrl
+ * @param {boolean} params.isFolder
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {string} The formatted filename.
  */
 capturer.getSaveFilename = async function (params) {

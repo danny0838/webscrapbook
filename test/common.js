@@ -151,8 +151,8 @@ async function openTestTab(createProperties, handler) {
 
 /**
  * @param {Object} params
- *     - {string} params.url
- *     - {Object} params.options
+ * @param {string} params.url
+ * @param {Object} params.options
  */
 async function capture(params) {
   const id = getUuid();
@@ -225,8 +225,8 @@ async function capture(params) {
 
 /**
  * @param {Object} params
- *     - {string} params.url
- *     - {Object} params.options
+ * @param {string} params.url
+ * @param {Object} params.options
  */
 async function captureHeadless(params) {
   const id = getUuid();

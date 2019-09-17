@@ -817,8 +817,8 @@ const scrapbookUi = {
 
   /**
    * @param {HTMLElement} elem - the element to be inserted to the dialog.
-   *     - Dispatch 'dialogSubmit' event on elem to resolve the Promise with value.
-   *     - Listen to 'dialogShow' event for elem to handle initialization.
+   * @param Dispatch 'dialogSubmit' event on elem to resolve the Promise with value.
+   * @param Listen to 'dialogShow' event for elem to handle initialization.
    */
   async showDialog(elem) {
     const mask = document.getElementById('dialog-mask');

@@ -95,17 +95,17 @@ const viewer = {
   /**
    * @callback fetchFileRewriteFunc
    * @param {Object} params
-   *     - {Blob} params.data
-   *     - {string} params.charset
-   *     - {string} params.url
+   * @param {Blob} params.data
+   * @param {string} params.charset
+   * @param {string} params.url
    * @return {Promise<Object>}
    */
 
   /**
    * @param {Object} params
-   *     - {string} params.inZipPath
-   *     - {fetchFileRewriteFunc} params.rewriteFunc
-   *     - {Array} params.recurseChain
+   * @param {string} params.inZipPath
+   * @param {fetchFileRewriteFunc} params.rewriteFunc
+   * @param {Array} params.recurseChain
    * @return {Promise<string>} The object URL of the file.
    */
   async fetchFile(params) {
@@ -132,9 +132,9 @@ const viewer = {
 
   /**
    * @param {Object} params
-   *     - {string} params.inZipPath
-   *     - {string} params.url
-   *     - {Array} params.recurseChain
+   * @param {string} params.inZipPath
+   * @param {string} params.url
+   * @param {Array} params.recurseChain
    * @return {Promise<string>} The URL of the page.
    */
   async fetchPage(params) {
@@ -171,9 +171,9 @@ const viewer = {
 
   /**
    * @param {Object} params
-   *     - {Document} params.doc
-   *     - {string} params.inZipPath
-   *     - {Array} params.recurseChain
+   * @param {Document} params.doc
+   * @param {string} params.inZipPath
+   * @param {Array} params.recurseChain
    * @return {Promise<Blob>}
    */
   async parseDocument(params) {

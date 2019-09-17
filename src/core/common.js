@@ -532,9 +532,9 @@ scrapbook.initContentScripts = async function (tabId) {
  * Invoke an invokable command in the extension script.
  *
  * @param {Object} params
- *     - {string} params.id
- *     - {string} params.cmd
- *     - {Object} params.args
+ * @param {string} params.id
+ * @param {string} params.cmd
+ * @param {Object} params.args
  * @return {Promise<Object>}
  */
 scrapbook.invokeExtensionScript = async function (params) {
@@ -550,10 +550,10 @@ scrapbook.invokeExtensionScript = async function (params) {
  * Invoke an invokable command in the content script.
  *
  * @param {Object} params
- *     - {integer} params.tabId
- *     - {integer} params.frameId
- *     - {string} params.cmd
- *     - {Object} params.args
+ * @param {integer} params.tabId
+ * @param {integer} params.frameId
+ * @param {string} params.cmd
+ * @param {Object} params.args
  * @return {Promise<Object>}
  */
 scrapbook.invokeContentScript = async function (params) {
@@ -569,9 +569,9 @@ scrapbook.invokeContentScript = async function (params) {
  * Invoke an invokable command in a frame.
  *
  * @param {Object} params
- *     - {integer} params.frameWindow
- *     - {string} params.cmd
- *     - {Object} params.args
+ * @param {integer} params.frameWindow
+ * @param {string} params.cmd
+ * @param {Object} params.args
  * @return {Promise<Object>}
  */
 scrapbook.invokeFrameScript = async function (params) {
@@ -1567,10 +1567,10 @@ scrapbook.rewriteCssFile = async function (data, charset, rewriter) {
  *
  * @param {string} cssText
  * @param {Object} options
- *     - {rewriteCssTextRewriter} rewriteImportUrl
- *     - {rewriteCssTextRewriter} rewriteFontFaceUrl
- *     - {rewriteCssTextRewriter} rewriteBackgroundUrl
- *     - {Object} resourceMap
+ * @param {rewriteCssTextRewriter} rewriteImportUrl
+ * @param {rewriteCssTextRewriter} rewriteFontFaceUrl
+ * @param {rewriteCssTextRewriter} rewriteBackgroundUrl
+ * @param {Object} resourceMap
  */
 scrapbook.rewriteCssText = function (cssText, options) {
   const KEY_PREFIX = "urn:scrapbook:str:";
@@ -1878,16 +1878,16 @@ scrapbook.httpStatusText = {
  * Don't use fetch() since it doen't support file: protocol.
  *
  * @param {Object} params
- *     - {string} params.url
- *     - {string} params.user
- *     - {string} params.password
- *     - {string} params.method
- *     - {string} params.responseType
- *     - {integer} params.timeout
- *     - {Object} params.requestHeaders
- *     - {Object} params.formData
- *     - {function} params.onreadystatechange
- *     - {boolean} params.onload - resolve with xhr object for custom handler
+ * @param {string} params.url
+ * @param {string} params.user
+ * @param {string} params.password
+ * @param {string} params.method
+ * @param {string} params.responseType
+ * @param {integer} params.timeout
+ * @param {Object} params.requestHeaders
+ * @param {Object} params.formData
+ * @param {function} params.onreadystatechange
+ * @param {boolean} params.onload - resolve with xhr object for custom handler
  */
 scrapbook.xhr = async function (params = {}) {
   return new Promise((resolve, reject) => {

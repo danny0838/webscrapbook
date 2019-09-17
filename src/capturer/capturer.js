@@ -90,9 +90,9 @@ capturer.getUniqueFilename = function (timeId, filename) {
  * Get a unique (deduplicated) filename for downloading
  *
  * @param {Object} params
- *     - {string} params.filename - may contain directory
- *     - {boolean} params.isFile
- *     - {string} params.options
+ * @param {string} params.filename - may contain directory
+ * @param {boolean} params.isFile
+ * @param {string} params.options
  * @return {string} The deduplicated filename.
  */
 capturer.getAvailableFilename = async function (params) {
@@ -181,13 +181,13 @@ capturer.getAvailableFilename = async function (params) {
  * An algorithm to prevent duplicated requests is implemented.
  *
  * @param {Object} params
- *     - {string} params.url
- *     - {string} params.role
- *     - {string} params.responseType
- *     - {integer} params.timeout
- *     - {Objet} params.hooks
- *     - {Objet} params.settings
- *     - {Objet} params.options
+ * @param {string} params.url
+ * @param {string} params.role
+ * @param {string} params.responseType
+ * @param {integer} params.timeout
+ * @param {Objet} params.hooks
+ * @param {Objet} params.settings
+ * @param {Objet} params.options
  */
 capturer.access = async function (params) {
   /**
@@ -201,10 +201,10 @@ capturer.access = async function (params) {
 
   /**
    * @param {Object} params
-   *     - {Object} params.headers
-   *     - {string} params.refUrl
-   *     - {string} params.targetUrl
-   *     - {Object} params.options
+   * @param {Object} params.headers
+   * @param {string} params.refUrl
+   * @param {string} params.targetUrl
+   * @param {Object} params.options
    */
   const setReferrer = function (params) {
     const {
@@ -430,12 +430,12 @@ capturer.access = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.timeId
- *     - {string} params.title
- *     - {string} params.type
- *     - {string} params.sourceUrl
- *     - {string} params.favIconUrl
- *     - {string} params.charset
+ * @param {string} params.timeId
+ * @param {string} params.title
+ * @param {string} params.type
+ * @param {string} params.sourceUrl
+ * @param {string} params.favIconUrl
+ * @param {string} params.charset
  */
 capturer.addItemToServer = async function (params) {
   const getShaFile = (data) => {
@@ -551,11 +551,11 @@ capturer.addItemToServer = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {integer} params.tabId
- *     - {integer} params.frameId
- *     - {boolean} params.saveBeyondSelection
- *     - {string} params.mode
- *     - {string} params.options - preset options that overwrites default
+ * @param {integer} params.tabId
+ * @param {integer} params.frameId
+ * @param {boolean} params.saveBeyondSelection
+ * @param {string} params.mode
+ * @param {string} params.options - preset options that overwrites default
  * @return {Promise<Object>}
  */
 capturer.captureTab = async function (params) {
@@ -724,12 +724,12 @@ capturer.captureTab = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.url
- *     - {string} params.refUrl
- *     - {string} params.title
- *     - {string} params.favIconUrl
- *     - {string} params.mode
- *     - {string} params.options - preset options that overwrites default
+ * @param {string} params.url
+ * @param {string} params.refUrl
+ * @param {string} params.title
+ * @param {string} params.favIconUrl
+ * @param {string} params.mode
+ * @param {string} params.options - preset options that overwrites default
  * @return {Promise<Object>}
  */
 capturer.captureHeadless = async function (params) {
@@ -789,11 +789,11 @@ capturer.captureHeadless = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.url
- *     - {string} params.refUrl
- *     - {string} params.title
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {string} params.url
+ * @param {string} params.refUrl
+ * @param {string} params.title
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.captureUrl = async function (params) {
@@ -880,11 +880,11 @@ capturer.captureUrl = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.url
- *     - {string} params.refUrl
- *     - {string} params.title
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {string} params.url
+ * @param {string} params.refUrl
+ * @param {string} params.title
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.captureBookmark = async function (params) {
@@ -1065,12 +1065,12 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.url
- *     - {string} params.refUrl
- *     - {string} params.title
- *     - {string} params.charset
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {string} params.url
+ * @param {string} params.refUrl
+ * @param {string} params.title
+ * @param {string} params.charset
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.captureFile = async function (params) {
@@ -1160,9 +1160,9 @@ Redirecting to file ${anchor}
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.overidingDocumentName
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {string} params.overidingDocumentName
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.registerDocument = async function (params) {
@@ -1194,16 +1194,16 @@ capturer.registerDocument = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {Object} params.data
+ * @param {Object} params.data
  *         - {string} params.data.mime
  *         - {string} params.data.charset
  *         - {string} params.data.content
  *         - {string} params.data.title
  *         - {string} params.data.favIconUrl
- *     - {string} params.documentName
- *     - {string} params.sourceUrl
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {string} params.documentName
+ * @param {string} params.sourceUrl
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.saveDocument = async function (params) {
@@ -1542,10 +1542,10 @@ capturer.saveDocument = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.url
- *     - {string} params.refUrl
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {string} params.url
+ * @param {string} params.refUrl
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.downloadFile = async function (params) {
@@ -1697,9 +1697,9 @@ capturer.downloadFile = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.url
- *     - {string} params.refUrl
- *     - {string} params.options
+ * @param {string} params.url
+ * @param {string} params.refUrl
+ * @param {string} params.options
  * @return {string} File extension of the URL.
  */
 capturer.downLinkFetchHeader = async function (params) {
@@ -1750,10 +1750,10 @@ capturer.downLinkFetchHeader = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.url
- *     - {string} params.refUrl
- *     - {string} params.settings
- *     - {string} params.options
+ * @param {string} params.url
+ * @param {string} params.refUrl
+ * @param {string} params.settings
+ * @param {string} params.options
  * @return {Promise<Object>}
  */
 capturer.fetchCss = async function (params) {
@@ -1849,11 +1849,11 @@ capturer.fetchCss = async function (params) {
 
 /**
  * @kind invokable
- *     - {string} params.filename - validated, not uniquified
- *     - {string} params.sourceUrl
- *     - {string} params.accessId - ID of the bound access
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {string} params.filename - validated, not uniquified
+ * @param {string} params.sourceUrl
+ * @param {string} params.accessId - ID of the bound access
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.registerFile = async function (params) {
@@ -1895,13 +1895,13 @@ capturer.registerFile = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.bytes - as byte string
- *     - {string} params.mime - may include parameters like charset
- *     - {string} params.filename - validated and unique
- *     - {string} params.sourceUrl
- *     - {string} params.accessId - ID of the bound access
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {string} params.bytes - as byte string
+ * @param {string} params.mime - may include parameters like charset
+ * @param {string} params.filename - validated and unique
+ * @param {string} params.sourceUrl
+ * @param {string} params.accessId - ID of the bound access
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.downloadBytes = async function (params) {
@@ -1931,10 +1931,10 @@ capturer.downloadBytes = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- *     - {string} params.sourceUrl
- *     - {string} params.accessId - ID of the bound access
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {string} params.sourceUrl
+ * @param {string} params.accessId - ID of the bound access
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.getAccessResult = async function (params) {
@@ -1953,11 +1953,11 @@ capturer.getAccessResult = async function (params) {
 
 /**
  * @param {Object} params
- *     - {Blob} params.blob
- *     - {string} params.filename - validated and unique
- *     - {string} params.sourceUrl
- *     - {Object} params.settings
- *     - {Object} params.options
+ * @param {Blob} params.blob
+ * @param {string} params.filename - validated and unique
+ * @param {string} params.sourceUrl
+ * @param {Object} params.settings
+ * @param {Object} params.options
  * @return {Promise<Object>}
  */
 capturer.downloadBlob = async function (params) {
@@ -2054,10 +2054,10 @@ capturer.downloadBlob = async function (params) {
  * Download a blob in a way like default browser "save as".
  *
  * @param {Object} params
- *     - {string} params.timeId
- *     - {Blob} params.blob
- *     - {string} params.filename
- *     - {string} params.sourceUrl
+ * @param {string} params.timeId
+ * @param {Blob} params.blob
+ * @param {string} params.filename
+ * @param {string} params.sourceUrl
  * @return {Promise<Object>}
  */
 capturer.saveBlobNaturally = async function (params) {
@@ -2124,7 +2124,7 @@ capturer.saveBlobNaturally = async function (params) {
 
 /**
  * @param {Object} params
- *     - {Blob} params.blob
+ * @param {Blob} params.blob
  * @return {Promise}
  */
 capturer.saveBlobInMemory = async function (params) {
@@ -2141,13 +2141,13 @@ capturer.saveBlobInMemory = async function (params) {
 
 /**
  * @param {Object} params
- *     - {string} params.timeId
- *     - {Blob} params.blob
- *     - {string} params.directory
- *     - {string} params.filename
- *     - {string} params.sourceUrl
- *     - {boolean} params.autoErase
- *     - {boolean} params.savePrompt
+ * @param {string} params.timeId
+ * @param {Blob} params.blob
+ * @param {string} params.directory
+ * @param {string} params.filename
+ * @param {string} params.sourceUrl
+ * @param {boolean} params.autoErase
+ * @param {boolean} params.savePrompt
  * @return {Promise<string>} Filename of the saved blob.
  */
 capturer.saveBlob = async function (params) {
@@ -2168,13 +2168,13 @@ capturer.saveBlob = async function (params) {
 
 /**
  * @param {Object} params
- *     - {string} params.timeId
- *     - {string} params.url
- *     - {string} params.directory
- *     - {string} params.filename
- *     - {string} params.sourceUrl
- *     - {boolean} params.autoErase
- *     - {boolean} params.savePrompt
+ * @param {string} params.timeId
+ * @param {string} params.url
+ * @param {string} params.directory
+ * @param {string} params.filename
+ * @param {string} params.sourceUrl
+ * @param {boolean} params.autoErase
+ * @param {boolean} params.savePrompt
  * @return {Promise<string>} Filename of the saved URL.
  */
 capturer.saveUrl = async function (params) {
@@ -2212,12 +2212,12 @@ capturer.saveUrl = async function (params) {
 
 /**
  * @param {Object} params
- *     - {string} params.timeId
- *     - {string} params.blob
- *     - {string} params.directory - URL of the server
- *     - {string} params.filename
- *     - {string} params.sourceUrl
- *     - {Object} params.options
+ * @param {string} params.timeId
+ * @param {string} params.blob
+ * @param {string} params.directory - URL of the server
+ * @param {string} params.filename
+ * @param {string} params.sourceUrl
+ * @param {Object} params.options
  * @return {Promise<string>} Filename of the saved blob.
  */
 capturer.saveToServer = async function (params) {
