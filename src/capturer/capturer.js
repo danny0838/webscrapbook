@@ -303,7 +303,7 @@ capturer.access = async function (params) {
           options,
         });
 
-        let isDuplicateAbort = false;
+        let isIntendedAbort = false;
         let headers = {};
         const xhr = await scrapbook.xhr({
           url: sourceUrlMain,
@@ -319,7 +319,7 @@ capturer.access = async function (params) {
               const responseAccessToken = getAccessToken(responseUrlMain, role);
               const responseAccessPrevious = accessMap.get(responseAccessToken);
               if (responseAccessPrevious) {
-                isDuplicateAbort = true;
+                isIntendedAbort = true;
                 if (hooks.duplicate) {
                   response = hooks.duplicate({
                     access: responseAccessPrevious,
@@ -339,13 +339,20 @@ capturer.access = async function (params) {
             // get headers
             if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
               if (hooks.preHeaders) {
-                hooks.preHeaders({
+                // synchronous only
+                const _response = hooks.preHeaders({
                   access: accessCurrent,
                   xhr,
                   url: sourceUrlMain,
                   hash: sourceUrlHash,
                   headers,
                 });
+                if (typeof _response !== "undefined") {
+                  isIntendedAbort = true;
+                  response = _response;
+                  xhr.abort();
+                  return;
+                }
               } else {
                 const headerContentType = xhr.getResponseHeader("Content-Type");
                 if (headerContentType) {
@@ -363,19 +370,26 @@ capturer.access = async function (params) {
             }
 
             if (hooks.postHeaders) {
-              hooks.postHeaders({
+              // synchronous only
+              const _response = hooks.postHeaders({
                 access: accessCurrent,
                 xhr,
                 url: sourceUrlMain,
                 hash: sourceUrlHash,
                 headers,
               });
+              if (typeof _response !== "undefined") {
+                isIntendedAbort = true;
+                response = _response;
+                xhr.abort();
+                return;
+              }
             }
           },
         });
 
         // This xhr is resolved to undefined when aborted.
-        if (!xhr && isDuplicateAbort) {
+        if (!xhr && isIntendedAbort) {
           return response;
         }
 
