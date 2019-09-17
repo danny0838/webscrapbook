@@ -387,7 +387,7 @@
     "message": "记录原始的 URL"
   },
   "OptionCaptureRecordSourceUriTooltip": {
-    "message": "获取网页时若有改写链接，则建立 data-* 属性或 HTML 注解记录原始 URL 位址。"
+    "message": "获取网页时若有改写元素或样式表的链接，则建立注解或 data-* 属性记录原始 URL 位址。"
   },
   "OptionCaptureRewriteCssLabel": {
     "message": "改写样式表:"

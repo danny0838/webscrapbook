@@ -387,7 +387,7 @@
     "message": "Record source URL"
   },
   "OptionCaptureRecordSourceUriTooltip": {
-    "message": "If a URL is rewritten during the capture process, create a data-* attribute or HTML comment to record its original address."
+    "message": "If a URL of an element or a stylesheet is rewritten during the capture process, create a comment or data-* attribute to record its original address."
   },
   "OptionCaptureRewriteCssLabel": {
     "message": "Rewrite styles:"
