@@ -194,7 +194,7 @@ capturer.access = async function (params) {
    * Get a unique token for an access.
    */
   const getAccessToken = function (url, role) {
-    let token = [scrapbook.splitUrlByAnchor(url)[0], role || "blob"].join("\t");
+    let token = [url, role || "blob"].join("\t");
     token = scrapbook.sha1(token, "TEXT");
     return token;
   };
@@ -206,14 +206,7 @@ capturer.access = async function (params) {
    * @param {string} params.targetUrl
    * @param {Object} params.options
    */
-  const setReferrer = function (params) {
-    const {
-      headers,
-      refUrl,
-      targetUrl,
-      options = {},
-    } = params;
-
+  const setReferrer = function ({headers, refUrl, targetUrl, options = {}}) {
     if (!refUrl) { return; }
     if (!refUrl.startsWith('http:') && !refUrl.startsWith('https:')) { return; }
     if (refUrl.startsWith('https:') && (!targetUrl || !targetUrl.startsWith('https:'))) { return; }
@@ -354,22 +347,21 @@ capturer.access = async function (params) {
                   headers,
                 });
               } else {
-                if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-                  const headerContentType = xhr.getResponseHeader("Content-Type");
-                  if (headerContentType) {
-                    const contentType = scrapbook.parseHeaderContentType(headerContentType);
-                    headers.contentType = contentType.type;
-                    headers.charset = contentType.parameters.charset;
-                  }
-                  const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-                  if (headerContentDisposition) {
-                    const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-                    headers.isAttachment = (contentDisposition.type === "attachment");
-                    headers.filename = contentDisposition.parameters.filename;
-                  }
+                const headerContentType = xhr.getResponseHeader("Content-Type");
+                if (headerContentType) {
+                  const contentType = scrapbook.parseHeaderContentType(headerContentType);
+                  headers.contentType = contentType.type;
+                  headers.charset = contentType.parameters.charset;
+                }
+                const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+                if (headerContentDisposition) {
+                  const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+                  headers.isAttachment = (contentDisposition.type === "attachment");
+                  headers.filename = contentDisposition.parameters.filename;
                 }
               }
             }
+
             if (hooks.postHeaders) {
               hooks.postHeaders({
                 access: accessCurrent,
@@ -1630,7 +1622,7 @@ capturer.downloadFile = async function (params) {
             }
           },
 
-          postHeaders({access, headers}) {
+          async response({access, xhr, hash, headers}) {
             // determine the filename
             // use the filename if it has been defined by header Content-Disposition
             let filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
@@ -1664,23 +1656,13 @@ capturer.downloadFile = async function (params) {
             filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
             filename = capturer.getUniqueFilename(timeId, filename);
 
-            // record the currently available filename
-            // we need this data for early return of circular referencing
-            access.filename = filename;
-          },
-
-          async response({access, xhr, hash, headers}) {
             return await capturer.downloadBlob({
               settings,
               options,
               blob: xhr.response,
-              filename: access.filename,
+              filename,
               sourceUrl,
             });
-          },
-
-          async duplicate({access, url, hash}) {
-            return await access;
           },
         },
       });
