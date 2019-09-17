@@ -782,7 +782,7 @@ capturer.captureHeadless = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- * @param {string} params.url
+ * @param {string} params.url - may include hash
  * @param {string} params.refUrl
  * @param {string} params.title
  * @param {Object} params.settings
@@ -793,11 +793,11 @@ capturer.captureUrl = async function (params) {
   isDebug && console.debug("call: captureUrl", params);
 
   const {url: sourceUrl, refUrl, title, settings, options} = params;
-  const [sourceUrlMain] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
   try {
     return await capturer.access({
-      url: sourceUrl,
+      url: sourceUrlMain,
       refUrl,
       role: "captureUrl",
       responseType: "document",
@@ -873,7 +873,7 @@ capturer.captureUrl = async function (params) {
 /**
  * @kind invokable
  * @param {Object} params
- * @param {string} params.url
+ * @param {string} params.url - may include hash
  * @param {string} params.refUrl
  * @param {string} params.title
  * @param {Object} params.settings
@@ -884,7 +884,7 @@ capturer.captureBookmark = async function (params) {
   isDebug && console.debug("call: captureBookmark", params);
 
   const {url: sourceUrl, refUrl, settings, options} = params;
-  const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
   const {timeId} = settings;
 
   let {title} = params;
@@ -895,7 +895,7 @@ capturer.captureBookmark = async function (params) {
     if (!title || !favIconUrl) {
       try {
         const {xhr} = await capturer.access({
-          url: sourceUrl,
+          url: sourceUrlMain,
           refUrl,
           role: "captureBookmark.document",
           responseType: "document",
@@ -931,14 +931,15 @@ capturer.captureBookmark = async function (params) {
     // fetch favicon as data URL
     if (favIconUrl && !favIconUrl.startsWith('data:')) {
       try {
+        const [favIconUrlMain, favIconUrlHash] = scrapbook.splitUrlByAnchor(favIconUrl);
         const {xhr} = await capturer.access({
-          url: favIconUrl,
+          url: favIconUrlMain,
           refUrl: sourceUrl,
           role: "captureBookmark.favicon",
           settings,
           options,
         });
-        favIconUrl = await scrapbook.readFileAsDataURL(xhr.response);
+        favIconUrl = (await scrapbook.readFileAsDataURL(xhr.response)) + favIconUrlHash;
       } catch (ex) {
         console.error(ex);
       }
@@ -1058,7 +1059,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
 /**
  * @kind invokable
  * @param {Object} params
- * @param {string} params.url
+ * @param {string} params.url - may include hash
  * @param {string} params.refUrl
  * @param {string} params.title
  * @param {string} params.charset
@@ -1194,7 +1195,7 @@ capturer.registerDocument = async function (params) {
  *         - {string} params.data.title
  *         - {string} params.data.favIconUrl
  * @param {string} params.documentName
- * @param {string} params.sourceUrl
+ * @param {string} params.sourceUrl - may include hash
  * @param {Object} params.settings
  * @param {Object} params.options
  * @return {Promise<Object>}
@@ -1692,10 +1693,11 @@ capturer.downLinkFetchHeader = async function (params) {
   isDebug && console.debug("call: downLinkFetchHeader", params);
 
   const {url: sourceUrl, refUrl, settings, options} = params;
+  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
   try {
     return await capturer.access({
-      url: sourceUrl,
+      url: sourceUrlMain,
       refUrl,
       role: "downLinkFetchHeader",
       responseType: "blob",
@@ -1746,12 +1748,13 @@ capturer.fetchCss = async function (params) {
   isDebug && console.debug("call: fetchCss", params);
 
   const {url: sourceUrl, refUrl, settings, options} = params;
+  const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
   const {timeId} = settings;
 
   try {
     let filename;
     return await capturer.access({
-      url: sourceUrl,
+      url: sourceUrlMain,
       refUrl,
       role: "fetchCss",
       settings,
