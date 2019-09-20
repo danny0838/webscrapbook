@@ -824,7 +824,7 @@ capturer.captureUrl = async function (params) {
             let filename = headers.filename ||
                 sourceUrlMain.startsWith("data:") ?
                     scrapbook.dataUriToFile(sourceUrlMain).name :
-                    scrapbook.urlToFilename(sourceUrlMain);
+                    scrapbook.urlToFilename(xhr.responseURL);
 
             // remove corresponding file extension for true documents
             const mime = headers.contentType || Mime.lookup(filename) || "text/html";
@@ -853,7 +853,7 @@ capturer.captureUrl = async function (params) {
             });
           } else {
             return await capturer.captureFile({
-              url: sourceUrl,
+              url: xhr.responseURL,
               refUrl,
               title,
               charset: headers.charset,
@@ -1625,7 +1625,7 @@ capturer.downloadFile = async function (params) {
           async response({access, xhr, hash, headers}) {
             // determine the filename
             // use the filename if it has been defined by header Content-Disposition
-            let filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
+            let filename = headers.filename || scrapbook.urlToFilename(xhr.responseURL);
 
             // if header Content-Type (MIME) is defined:
             // 1. If the file has no extension, assign one according to MIME,
