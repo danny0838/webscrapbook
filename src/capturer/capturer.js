@@ -366,6 +366,10 @@ capturer.access = async function (params) {
                   headers.isAttachment = (contentDisposition.type === "attachment");
                   headers.filename = contentDisposition.parameters.filename;
                 }
+                const headerContentLength = xhr.getResponseHeader("Content-Length");
+                if (headerContentLength) {
+                  headers.contentLength = parseInt(headerContentLength, 10);
+                }
               }
             }
 
@@ -1642,6 +1646,15 @@ capturer.downloadFile = async function (params) {
             }
           },
 
+          postHeaders({access, xhr, headers}) {
+            // abort fetching body for a size exceeding resource
+            if (typeof options["capture.resourceSizeLimit"] === "number" && 
+                headers.contentLength >= options["capture.resourceSizeLimit"] * 1024) {
+              capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
+              return {url: capturer.getSkipUrl(sourceUrl), error: {message: "Resource size limit exceeded."}};
+            }
+          },
+
           async response({access, xhr, hash, headers}) {
             // determine the filename
             // use the filename if it has been defined by header Content-Disposition
@@ -1820,6 +1833,13 @@ capturer.fetchCss = async function (params) {
         },
 
         postHeaders({access, headers}) {
+          // abort fetching body for a size exceeding resource
+          if (typeof options["capture.resourceSizeLimit"] === "number" && 
+              headers.contentLength >= options["capture.resourceSizeLimit"] * 1024) {
+            capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
+            return {url: capturer.getSkipUrl(sourceUrl), error: {message: "Resource size limit exceeded."}};
+          }
+
           // determine the filename
           filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
           if (scrapbook.filenameParts(filename)[1].toLowerCase() !== 'css') {
