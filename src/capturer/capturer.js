@@ -1103,11 +1103,6 @@ capturer.captureFile = async function (params) {
         (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
         "";
 
-      // do not generate link for singleHtml to avoid doubling the data URL
-      const anchor = (options["capture.saveAs"] === "singleHtml") ? 
-          `${scrapbook.escapeHtml(response.filename, false)}` : 
-          `<a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>`;
-
       const html = `<!DOCTYPE html>
 <html${meta}>
 <head>
@@ -1115,9 +1110,10 @@ capturer.captureFile = async function (params) {
 <meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(response.url)}">
 ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
 <body>
-Redirecting to file ${anchor}
+Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>
 </body>
 </html>`;
+
       return await capturer.saveDocument({
         sourceUrl,
         documentName: settings.documentName,
