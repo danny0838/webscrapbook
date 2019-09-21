@@ -1147,7 +1147,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
       return await capturer.saveDocument({
         sourceUrl,
-        documentName: settings.documentName,
+        documentFileName: settings.documentName + ".html",
         settings,
         options,
         data: {
@@ -1184,7 +1184,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 /**
  * @kind invokable
  * @param {Object} params
- * @param {string} params.overidingDocumentName
+ * @param {string} params.docUrl
+ * @param {string} params.mime
  * @param {Object} params.settings
  * @param {Object} params.options
  * @return {Promise<Object>}
@@ -1192,30 +1193,40 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 capturer.registerDocument = async function (params) {
   isDebug && console.debug("call: registerDocument", params);
 
-  const {settings, options} = params;
+  const {docUrl, mime, settings, options} = params;
   const {timeId, documentName} = settings;
-  let {overidingDocumentName} = params;
 
   const files = capturer.captureInfo.get(timeId).files;
 
-  if (overidingDocumentName) {
-    overidingDocumentName = capturer.getUniqueFilename(timeId, overidingDocumentName);
-    return {documentName: overidingDocumentName};
+  const ext = mime === "application/xhtml+xml" ? "xhtml" : 
+    mime === "image/svg+xml" ? "svg" : 
+    "html";
+
+  let documentFileName;
+  if (options["capture.renameFrames"]) {
+    let newDocumentName = scrapbook.validateFilename(documentName, options["capture.saveAsciiFilename"]);
+    let newDocumentNameCI = newDocumentName.toLowerCase();
+    let count = 0;
+    while (files.has(newDocumentNameCI + ".html") || 
+        files.has(newDocumentNameCI + ".xhtml") || 
+        files.has(newDocumentNameCI + ".svg")) {
+      newDocumentName = documentName + "_" + (++count);
+      newDocumentNameCI = newDocumentName.toLowerCase();
+    }
+    files.add(newDocumentNameCI + ".html");
+    files.add(newDocumentNameCI + ".xhtml");
+    files.add(newDocumentNameCI + ".svg");
+    documentFileName = newDocumentName + "." + ext;
+  } else {
+    let newDocumentName = documentName || scrapbook.urlToFilename(docUrl);
+    if (!newDocumentName.endsWith("." + ext)) {
+      newDocumentName += "." + ext;
+    }
+    newDocumentName = scrapbook.validateFilename(newDocumentName, options["capture.saveAsciiFilename"]);
+    documentFileName = capturer.getUniqueFilename(timeId, newDocumentName);
   }
 
-  let newDocumentName = documentName;
-  let newDocumentNameCI = newDocumentName.toLowerCase();
-  let count = 0;
-  while (files.has(newDocumentNameCI + ".html") || 
-      files.has(newDocumentNameCI + ".xhtml") || 
-      files.has(newDocumentNameCI + ".svg")) {
-    newDocumentName = documentName + "_" + (++count);
-    newDocumentNameCI = newDocumentName.toLowerCase();
-  }
-  files.add(newDocumentNameCI + ".html");
-  files.add(newDocumentNameCI + ".xhtml");
-  files.add(newDocumentNameCI + ".svg");
-  return {documentName: newDocumentName};
+  return {documentFileName};
 };
 
 /**
@@ -1227,7 +1238,7 @@ capturer.registerDocument = async function (params) {
  *         - {string} params.data.content
  *         - {string} params.data.title
  *         - {string} params.data.favIconUrl
- * @param {string} params.documentName
+ * @param {string} params.documentFileName
  * @param {string} params.sourceUrl - may include hash
  * @param {Object} params.settings
  * @param {Object} params.options
@@ -1236,7 +1247,7 @@ capturer.registerDocument = async function (params) {
 capturer.saveDocument = async function (params) {
   isDebug && console.debug("call: saveDocument", params);
 
-  const {data, documentName, sourceUrl, settings, options} = params;
+  const {data, documentFileName, sourceUrl, settings, options} = params;
   const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
   const {timeId} = settings;
 
@@ -1256,11 +1267,10 @@ capturer.saveDocument = async function (params) {
     const title = data.title || scrapbook.urlToFilename(sourceUrl);
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
-        if (!settings.frameIsMain) {
-          const ext = "." + mapMimeExt(data.mime);
-          let filename = documentName + ext;
-          filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        let filename = documentFileName;
+        let ext = scrapbook.filenameParts(filename)[1];
 
+        if (!settings.frameIsMain) {
           let url = data.charset === "UTF-8" ? 
               scrapbook.unicodeToDataUri(data.content, data.mime) :
               scrapbook.byteStringToDataUri(scrapbook.unicodeToUtf8(data.content), data.mime, data.charset);
@@ -1269,9 +1279,7 @@ capturer.saveDocument = async function (params) {
           return {timeId, sourceUrl, filename, url};
         } else {
           const blob = new Blob([data.content], {type: data.mime});
-          const ext = "." + mapMimeExt(data.mime);
           let targetDir;
-          let filename;
           let savePrompt;
           let saveMethod;
 
@@ -1281,19 +1289,19 @@ capturer.saveDocument = async function (params) {
               return await capturer.saveBlobInMemory({blob});
             }
             case 'file': {
-              filename = settings.filename + ext;
+              filename = settings.filename + "." + ext;
               saveMethod = "saveBlobNaturally";
               break;
             }
             case 'server': {
-              [targetDir, filename] = scrapbook.filepathParts(settings.filename + ext);
+              [targetDir, filename] = scrapbook.filepathParts(settings.filename + "." + ext);
               savePrompt = false;
               saveMethod = "saveToServer";
               break;
             }
             case 'folder':
             default: {
-              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ext);
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + "." + ext);
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -1328,9 +1336,8 @@ capturer.saveDocument = async function (params) {
       }
 
       case "zip": {
-        const ext = "." + mapMimeExt(data.mime);
-        let filename = documentName + ext;
-        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        let filename = documentFileName;
+        let ext = scrapbook.filenameParts(filename)[1];
 
         const zip = capturer.captureInfo.get(timeId).zip;
         scrapbook.zipAddFile(zip, filename, new Blob([data.content], {type: data.mime}), true);
@@ -1339,15 +1346,14 @@ capturer.saveDocument = async function (params) {
           return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
         } else {
           // create index.html that redirects to index.xhtml|.svg
-          if (ext !== ".html") {
-            const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index${ext}">`;
+          if (ext !== "html") {
+            const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.${ext}">`;
             scrapbook.zipAddFile(zip, "index.html", new Blob([html], {type: "text/html"}), true);
           }
 
           // generate and download the zip file
           const blob = await zip.generateAsync({type: "blob", mimeType: "application/html+zip"});
           let targetDir;
-          // let filename;
           let savePrompt;
           let saveMethod;
 
@@ -1404,9 +1410,8 @@ capturer.saveDocument = async function (params) {
       }
 
       case "maff": {
-        const ext = "." + mapMimeExt(data.mime);
-        let filename = documentName + ext;
-        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+        let filename = documentFileName;
+        let ext = scrapbook.filenameParts(filename)[1];
 
         const zip = capturer.captureInfo.get(timeId).zip;
         scrapbook.zipAddFile(zip, timeId + "/" + filename, new Blob([data.content], {type: data.mime}), true);
@@ -1416,8 +1421,8 @@ capturer.saveDocument = async function (params) {
         } else {
           {
             // create index.html that redirects to index.xhtml|.svg
-            if (ext !== ".html") {
-              const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index${ext}">`;
+            if (ext !== "html") {
+              const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.${ext}">`;
               scrapbook.zipAddFile(zip, timeId + "/" + "index.html", new Blob([html], {type: "text/html"}), true);
             }
 
@@ -1441,7 +1446,6 @@ capturer.saveDocument = async function (params) {
           // generate and download the zip file
           const blob = await zip.generateAsync({type: "blob", mimeType: "application/x-maff"});
           let targetDir;
-          // let filename;
           let savePrompt;
           let saveMethod;
 
@@ -1499,9 +1503,9 @@ capturer.saveDocument = async function (params) {
 
       case "folder":
       default: {
-        const ext = "." + mapMimeExt(data.mime);
         let targetDir;
-        let filename = documentName + ext;
+        let filename = documentFileName;
+        let ext = scrapbook.filenameParts(filename)[1];
         let savePrompt = false;
         let saveMethod;
 
@@ -1521,23 +1525,21 @@ capturer.saveDocument = async function (params) {
           }
         }
 
-        filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-
         filename = await capturer[saveMethod]({
           timeId,
           blob: new Blob([data.content], {type: data.mime}),
           directory: targetDir,
           filename,
           sourceUrl,
-          autoErase: !settings.frameIsMain || (ext !== ".html"),
+          autoErase: !settings.frameIsMain || (ext !== "html"),
           savePrompt,
           settings,
           options,
         });
 
-        if (settings.frameIsMain && (ext !== ".html")) {
+        if (settings.frameIsMain && (ext !== "html")) {
           // create index.html that redirects to index.xhtml
-          const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index${ext}">`;
+          const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.${ext}">`;
           const blob = new Blob([html], {type: "text/html"});
           await capturer[saveMethod]({
             timeId,

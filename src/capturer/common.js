@@ -891,6 +891,10 @@ capturer.captureDocument = async function (params) {
                   delete frameSettings.usedCssFontUrl;
                   delete frameSettings.usedCssImageUrl;
 
+                  if (!options["capture.renameFrames"]) {
+                    delete frameSettings.documentName;
+                  }
+
                   // save resources in srcdoc as data URL
                   const frameOptions = JSON.parse(JSON.stringify(options));
                   frameOptions["capture.saveAs"] = "singleHtml";
@@ -977,6 +981,10 @@ capturer.captureDocument = async function (params) {
                 frameSettings.frameIsMain = false;
                 delete frameSettings.usedCssFontUrl;
                 delete frameSettings.usedCssImageUrl;
+
+                if (!options["capture.renameFrames"]) {
+                  delete frameSettings.documentName;
+                }
 
                 let frameDoc;
                 try {
@@ -1865,18 +1873,12 @@ capturer.captureDocument = async function (params) {
       });
     }
 
-    if (settings.frameIsMain || options["capture.renameFrames"]) {
-      documentName = (await capturer.invoke("registerDocument", {
-        settings,
-        options,
-      })).documentName;
-    } else {
-      documentName = (await capturer.invoke("registerDocument", {
-        overidingDocumentName: scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0],
-        settings,
-        options,
-      })).documentName;
-    }
+    const documentFileName = (await capturer.invoke("registerDocument", {
+      docUrl,
+      mime,
+      settings,
+      options,
+    })).documentFileName;
 
     // construct the cloned node tree
     const origNodeMap = new WeakMap();
@@ -2280,7 +2282,7 @@ capturer.captureDocument = async function (params) {
 
     return await capturer.invoke("saveDocument", {
       sourceUrl: docUrl,
-      documentName,
+      documentFileName,
       settings,
       options,
       data: {
