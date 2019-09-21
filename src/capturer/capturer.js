@@ -966,8 +966,9 @@ capturer.captureBookmark = async function (params) {
 
     let html;
     {
+      const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
       const meta = params.options["capture.recordDocumentMeta"] ? 
-          ' data-scrapbook-source="' + scrapbook.escapeHtml(sourceUrl) + '"' + 
+          ' data-scrapbook-source="' + scrapbook.escapeHtml(url) + '"' + 
           ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
           ' data-scrapbook-type="bookmark"' : 
           "";
@@ -1094,8 +1095,9 @@ capturer.captureFile = async function (params) {
 
     if (settings.frameIsMain) {
       // for the main frame, create a index.html that redirects to the file
+      const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
       const meta = params.options["capture.recordDocumentMeta"] ? 
-        ' data-scrapbook-source="' + scrapbook.escapeHtml(sourceUrl) + '"' + 
+        ' data-scrapbook-source="' + scrapbook.escapeHtml(url) + '"' + 
         ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
         ' data-scrapbook-type="file"' + 
         (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
