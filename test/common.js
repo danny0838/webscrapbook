@@ -7,6 +7,7 @@ var testPass = 0;
 
 var userAgent = (() => {
     const ua = navigator.userAgent;
+    const manifest = browser.runtime.getManifest();
     const soup = new Set(['webext']);
     const flavor = {
       major: 0,
@@ -45,6 +46,9 @@ var userAgent = (() => {
     } else if ((match = /\bSafari\/(\d+)/.exec(ua)) !== null) {
       flavor.major = parseInt(match[1], 10) || 0;
       soup.add('apple').add('safari');
+    }
+    if (manifest.browser_specific_settings && manifest.browser_specific_settings.gecko) {
+      soup.add('gecko');
     }
     return flavor;
 })();
@@ -116,6 +120,47 @@ async function openTab(createProperties) {
   });
 }
 
+async function openCapturerTab(url) {
+  const params = {
+    url,
+    focused: false,
+    type: "popup",
+    width: 50,
+    height: 50,
+    top: window.screen.availHeight,
+    left: window.screen.availWidth,
+  };
+
+  // Firefox does not support focused in windows.create().
+  // Firefox ignores top and left in windows.create().
+  if (userAgent.is('gecko')) {
+    delete params.focused;
+  }
+
+  const win = await browser.windows.create(params);
+
+  const tab = (await browser.windows.get(win.id, {populate: true})).tabs[0];
+
+  await new Promise((resolve, reject) => {
+    const listener = (tabId, changeInfo, t) => {
+      if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
+      browser.tabs.onUpdated.removeListener(listener);
+      browser.tabs.onRemoved.removeListener(listener2);
+      resolve(t);
+    };
+    const listener2 = (tabId, removeInfo) => {
+      if (!(tabId === tab.id)) { return; }
+      browser.tabs.onUpdated.removeListener(listener);
+      browser.tabs.onRemoved.removeListener(listener2);
+      reject({message: `Tab removed before loading complete.`});
+    };
+    browser.tabs.onUpdated.addListener(listener);
+    browser.tabs.onRemoved.addListener(listener2);
+  });
+
+  return tab;
+}
+
 /**
  * Open a tab with connection for test.
  *
@@ -158,14 +203,8 @@ async function capture(params) {
   const id = getUuid();
 
   const [pageTab, capturerTab] = await Promise.all([
-    openTab({
-      url: params.url,
-      active: false,
-    }),
-    openTab({
-      url: `${wsbBaseUrl}capturer/capturer.html?mid=${id}`,
-      active: false,
-    }),
+    openCapturerTab(params.url),
+    openCapturerTab(`${wsbBaseUrl}capturer/capturer.html?mid=${id}`),
   ]);
 
   const result = await new Promise(async (resolve, reject) => {
@@ -231,10 +270,7 @@ async function capture(params) {
 async function captureHeadless(params) {
   const id = getUuid();
 
-  const capturerTab = await openTab({
-    url: `${wsbBaseUrl}capturer/capturer.html?mid=${id}`,
-    active: false,
-  });
+  const capturerTab = await openCapturerTab(`${wsbBaseUrl}capturer/capturer.html?mid=${id}`);
 
   const result = await new Promise(async (resolve, reject) => {
     const port = browser.runtime.connect(config["wsb_extension_id"], {name: id});
