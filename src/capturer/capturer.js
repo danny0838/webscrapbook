@@ -21,7 +21,14 @@ capturer.ready = false;
 capturer.missionId = scrapbook.getUuid();
 
 /**
- * @type {ProxyMap<string~timeId, {files: Set<string>, accessMap: Map<string, Promise>, zip: JSZip}>}
+ * @typedef {Object} missionCaptureInfo
+ * @property {Set<string>} files
+ * @property {Map<string, Promise>} accessMap
+ * @property {JSZip} zip
+ */
+
+/**
+ * @type {ProxyMap<string~timeId, missionCaptureInfo>}
  */
 capturer.captureInfo = new scrapbook.ProxyMap(() => ({
   // index.dat is used in legacy ScrapBook
@@ -34,7 +41,16 @@ capturer.captureInfo = new scrapbook.ProxyMap(() => ({
 }));
 
 /**
- * @type {Map<string~urlOrDownloadId, {timeId: string, src: string, autoErase: boolean, onComplete: function, onError: function}>}
+ * @typedef {Object} downloadHook
+ * @property {string} timeId
+ * @property {string} src
+ * @property {boolean} autoErase
+ * @property {Function} onComplete
+ * @property {Function} onError
+ */
+
+/**
+ * @type {Map<string~urlOrDownloadId, downloadHook>}
  */
 capturer.downloadHooks = new Map();
 
