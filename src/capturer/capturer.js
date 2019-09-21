@@ -1191,12 +1191,15 @@ capturer.registerDocument = async function (params) {
   let newDocumentName = documentName;
   let newDocumentNameCI = newDocumentName.toLowerCase();
   let count = 0;
-  while (files.has(newDocumentNameCI + ".html") || files.has(newDocumentNameCI + ".xhtml")) {
+  while (files.has(newDocumentNameCI + ".html") || 
+      files.has(newDocumentNameCI + ".xhtml") || 
+      files.has(newDocumentNameCI + ".svg")) {
     newDocumentName = documentName + "_" + (++count);
     newDocumentNameCI = newDocumentName.toLowerCase();
   }
   files.add(newDocumentNameCI + ".html");
   files.add(newDocumentNameCI + ".xhtml");
+  files.add(newDocumentNameCI + ".svg");
   return {documentName: newDocumentName};
 };
 
