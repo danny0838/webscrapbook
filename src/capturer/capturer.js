@@ -814,6 +814,17 @@ capturer.captureUrl = async function (params) {
   const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
   try {
+    // fail out if sourceUrl is empty.
+    if (!sourceUrlMain) {
+      throw new Error(`Source URL is empty.`);
+    }
+
+    // fail out if sourceUrl is relative,
+    // or it will be treated as relative to this extension page.
+    if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+      throw new Error(`Requires an absolute URL.`);
+    }
+
     return await capturer.access({
       url: sourceUrlMain,
       refUrl,
@@ -822,19 +833,6 @@ capturer.captureUrl = async function (params) {
       settings,
       options,
       hooks: {
-        async preRequest({url, hash}) {
-          // fail out if sourceUrl is empty.
-          if (!url) {
-            throw new Error(`Source URL is empty.`);
-          }
-
-          // fail out if sourceUrl is relative,
-          // or it will be treated as relative to this extension page.
-          if (!scrapbook.isUrlAbsolute(url)) {
-            throw new Error(`Requires an absolute URL.`);
-          }
-        },
-
         async response({xhr, headers}) {
           // generate a documentName if not specified
           if (!settings.documentName) {
@@ -1603,6 +1601,17 @@ capturer.downloadFile = async function (params) {
     const {timeId, recurseChain} = settings;
 
     try {
+      // fail out if sourceUrl is empty.
+      if (!sourceUrlMain) {
+        throw new Error(`Source URL is empty.`);
+      }
+
+      // fail out if sourceUrl is relative,
+      // or it will be treated as relative to this extension page.
+      if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+        throw new Error(`Requires an absolute URL.`);
+      }
+
       const response = await capturer.access({
         url: sourceUrlMain,
         refUrl,
@@ -1611,17 +1620,6 @@ capturer.downloadFile = async function (params) {
         options,
         hooks: {
           async preRequest({url, hash}) {
-            // fail out if sourceUrl is empty.
-            if (!url) {
-              throw new Error(`Source URL is empty.`);
-            }
-
-            // fail out if sourceUrl is relative,
-            // or it will be treated as relative to this extension page.
-            if (!scrapbook.isUrlAbsolute(url)) {
-              throw new Error(`Requires an absolute URL.`);
-            }
-
             // special management for data URI
             if (url.startsWith("data:")) {
               /* save data URI as file? */
@@ -1784,6 +1782,17 @@ capturer.fetchCss = async function (params) {
   const {timeId} = settings;
 
   try {
+    // fail out if sourceUrl is empty.
+    if (!sourceUrlMain) {
+      throw new Error(`Source URL is empty.`);
+    }
+
+    // fail out if sourceUrl is relative,
+    // or it will be treated as relative to this extension page.
+    if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+      throw new Error(`Requires an absolute URL.`);
+    }
+
     let filename;
     return await capturer.access({
       url: sourceUrlMain,
@@ -1793,17 +1802,6 @@ capturer.fetchCss = async function (params) {
       options,
       hooks: {
         async preRequest({access, url, hash}) {
-          // fail out if sourceUrl is empty.
-          if (!url) {
-            throw new Error(`Source URL is empty.`);
-          }
-
-          // fail out if sourceUrl is relative,
-          // or it will be treated as relative to this extension page.
-          if (!scrapbook.isUrlAbsolute(url)) {
-            throw new Error(`Requires an absolute URL.`);
-          }
-
           // special management for data URI
           if (url.startsWith("data:")) {
             const file = scrapbook.dataUriToFile(url);
