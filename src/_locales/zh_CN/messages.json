@@ -371,6 +371,15 @@
   "OptionCapturePageSizeLimitTooltip": {
     "message": "系统不会获取超出此限制的页面。空白表示不设限制。"
   },
+  "OptionCapturePrecludeSelectorError": {
+    "message": "预先排除选择器语法有误，执行时将无作用，要停下来修正吗？"
+  },
+  "OptionCapturePrecludeSelectorLabel": {
+    "message": "预先排除的元素:"
+  },
+  "OptionCapturePrecludeSelectorTooltip": {
+    "message": "可用这个 CSS 选择器在获取前预先移除一些网页元素，例如其他浏览器扩充套件插入的内容。"
+  },
   "OptionCaptureRecordErrorUriLabel": {
     "message": "记录错误的 URL"
   },

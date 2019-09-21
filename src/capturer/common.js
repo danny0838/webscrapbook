@@ -2074,6 +2074,17 @@ capturer.captureDocument = async function (params) {
           }
         }
       }
+
+      // preclude some elements
+      if (options["capture.precludeSelector"]) {
+        try {
+          Array.prototype.forEach.call(rootNode.querySelectorAll(options["capture.precludeSelector"]), (elem) => {
+            captureRemoveNode(elem);
+          });
+        } catch (ex) {
+          console.error(ex);
+        }
+      }
     }
 
     // init cssHandler

@@ -371,6 +371,15 @@
   "OptionCapturePageSizeLimitTooltip": {
     "message": "A page exceeding the limit will not be captured. Empty for no limit."
   },
+  "OptionCapturePrecludeSelectorError": {
+    "message": "Syntax of the preclude selector is invalid. Stop to fix them?"
+  },
+  "OptionCapturePrecludeSelectorLabel": {
+    "message": "Preclude elements:"
+  },
+  "OptionCapturePrecludeSelectorTooltip": {
+    "message": "Use this CSS selector to preclude page elements (e.g. those inserted by other browser extensions) before capture."
+  },
   "OptionCaptureRecordErrorUriLabel": {
     "message": "Record error URL"
   },

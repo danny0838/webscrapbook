@@ -116,6 +116,22 @@ async function closeWindow() {
   }
 }
 
+function verifyPrecludeSelectors() {
+  const sel = document.getElementById("opt_capture.precludeSelector").value;
+
+  if (sel) {
+    try {
+      document.createElement("div").querySelector(sel);
+    } catch (ex) {
+      if (confirm(scrapbook.lang("OptionCapturePrecludeSelectorError", [ex.message]))) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 function verifyDownLinkFilters(rules) {
   const checkRule = (rules) => {
     rules.split(/(?:\n|\r\n?)/).forEach(function (srcLine, index) {
@@ -239,6 +255,9 @@ window.addEventListener("DOMContentLoaded", async (event) => {
     event.preventDefault();
 
     // verify the form
+    if (!verifyPrecludeSelectors()) {
+      return;
+    }
     if (!verifyDownLinkFilters()) {
       return;
     }

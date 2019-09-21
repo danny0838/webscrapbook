@@ -32,6 +32,7 @@ const baseOptions = {
   "capture.base": "blank",
   "capture.formStatus": "keep",
   "capture.shadowDom": "save",
+  "capture.precludeSelector": "",
   "capture.downLink.mode": "none",
   "capture.downLink.extFilter": "",
   "capture.downLink.urlFilter": "",
@@ -4902,6 +4903,83 @@ async function test_capture_shadowRoot() {
 }
 
 /**
+ * Check if precludeSelector works correctly.
+ *
+ * capturer.precludeSelector
+ */
+async function test_capture_precludeSelector() {
+  /* capture.precludeSelector set */
+  var options = {
+    "capture.precludeSelector": "#exclude, .exclude, img",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_precludeSelector/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(!zip.files["red.bmp"]);
+  assert(!zip.files["green.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector('#exclude'));
+  assert(!doc.querySelector('.exclude'));
+  assert(!doc.querySelector('img'));
+
+  /* capture.precludeSelector invalid selector */
+  // invalid selector should work as not set
+  var options = {
+    "capture.precludeSelector": "###exclude, .exclude, img",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_precludeSelector/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["red.bmp"]);
+  assert(zip.files["green.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('#exclude'));
+  assert(doc.querySelector('.exclude'));
+  assert(doc.querySelector('img'));
+
+  /* capture.precludeSelector not set */
+  var options = {
+    "capture.precludeSelector": "",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_precludeSelector/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["red.bmp"]);
+  assert(zip.files["green.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('#exclude'));
+  assert(doc.querySelector('.exclude'));
+  assert(doc.querySelector('img'));
+}
+
+/**
  * Check if the URL for general saved resource is rewritten correctly
  * when base is set to another directory.
  *
@@ -7308,6 +7386,7 @@ async function runTests() {
   await test(test_capture_base);
   await test(test_capture_formStatus);
   await test(test_capture_shadowRoot);
+  await test(test_capture_precludeSelector);
   await test(test_capture_rewrite);
   await test(test_capture_rewrite2);
   await test(test_capture_anchor);
