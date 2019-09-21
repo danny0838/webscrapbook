@@ -826,8 +826,9 @@ capturer.captureUrl = async function (params) {
                     scrapbook.dataUriToFile(sourceUrlMain).name :
                     scrapbook.urlToFilename(sourceUrlMain);
 
+            // remove corresponding file extension for true documents
             const mime = headers.contentType || Mime.lookup(filename) || "text/html";
-            if (!["text/html", "application/xhtml+xml"].includes(mime)) {
+            if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(mime)) {
               const fn = filename.toLowerCase();
               for (let ext of Mime.allExtensions(mime)) {
                 ext = "." + ext.toLowerCase();
