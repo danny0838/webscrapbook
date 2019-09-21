@@ -7307,6 +7307,7 @@ async function runManualTests() {
 async function main() {
   const mode = new URL(location.href).searchParams.get('m');
 
+  let time = Date.now();
   await init();
 
   if (mode == 1 || !mode) {
@@ -7325,7 +7326,7 @@ async function main() {
     log(`\n`);
   }
 
-  log(`Done.`);
+  log(`Done in ${(Date.now() - time) / 1000} seconds.`);
 }
 
 main();
