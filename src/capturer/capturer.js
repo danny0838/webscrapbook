@@ -31,7 +31,6 @@ capturer.captureInfo = new scrapbook.ProxyMap(() => ({
 
   accessMap: new Map(),
   zip: new JSZip(),
-  zipResMap: new Map(),
 }));
 
 /**
