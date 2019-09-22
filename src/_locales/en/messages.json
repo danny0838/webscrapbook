@@ -257,9 +257,6 @@
   "OptionCaptureCommonSaveUsedLabel": {
     "message": "Save used"
   },
-  "OptionCaptureDownLinkExtFilterTooltip": {
-    "message": "This determines what to download according to file extension.\n\n* Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. jpg, jpeg) or a regular expression (e.g. /jpe?g/i).\n\n* The full extension is taken for matching. For example, .doc does not match rule docx.\n\n* Whichever matches a rule at any line are included for download.\n\n* A line starting with \"#\" is regarded as a comment and will be ignored during execution."
-  },
   "OptionCaptureDownLinkExtFilterError": {
     "message": "The following regular expressions in file extension filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
     "placeholders": {
@@ -270,6 +267,9 @@
   },
   "OptionCaptureDownLinkExtFilterLabel": {
     "message": "File extension filter:"
+  },
+  "OptionCaptureDownLinkExtFilterTooltip": {
+    "message": "This determines what to download according to file extension.\n\n* Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. jpg, jpeg) or a regular expression (e.g. /jpe?g/i).\n\n* The full extension is taken for matching. For example, .doc does not match rule docx.\n\n* Whichever matches a rule at any line are included for download.\n\n* A line starting with \"#\" is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkFilterErrorLine": {
     "message": "Line $LINE$: $ERROR$",
@@ -294,9 +294,6 @@
   "OptionCaptureDownLinkModeUrlLabel": {
     "message": "Match URL file extension"
   },
-  "OptionCaptureDownLinkUrlFilterTooltip": {
-    "message": "This determines what are forbidden for downloading according to full URL (with the \"#\" part stripped).\n\n* Each following line is a full URL (with \"#\" part stripped) or a regular expression (e.g. /[/=]logout\\b/i). \n\n* Whichever matches a rule at any line are forbidden from downloading.\n\n* A line starting with \"#\" is regarded as a comment and will be ignored during execution."
-  },
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "The following regular expressions in URL filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
     "placeholders": {
@@ -307,6 +304,9 @@
   },
   "OptionCaptureDownLinkUrlFilterLabel": {
     "message": "URL filter:"
+  },
+  "OptionCaptureDownLinkUrlFilterTooltip": {
+    "message": "This determines what are forbidden for downloading according to full URL (with the \"#\" part stripped).\n\n* Each following line is a full URL (with \"#\" part stripped) or a regular expression (e.g. /[/=]logout\\b/i). \n\n* Whichever matches a rule at any line are forbidden from downloading.\n\n* A line starting with \"#\" is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBEDs:"

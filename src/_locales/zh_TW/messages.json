@@ -257,9 +257,6 @@
   "OptionCaptureCommonSaveUsedLabel": {
     "message": "儲存使用"
   },
-  "OptionCaptureDownLinkExtFilterTooltip": {
-    "message": "此過濾器根據副檔名篩選要下載的連結。\n\n* 以下每行為一個以 \",\" 分隔的副檔名列表（不分大小寫，可含空白，如 jpg, jpeg）或一個正規表示式（如 /jpe?g/i）。\n\n* 取全副檔名比對，例如 .doc 不視為符合規則 docx。\n\n* 符合任何一行的規則即列入下載。\n\n* 以 \"#\" 開頭的行皆視為註解，執行時會略過。"
-  },
   "OptionCaptureDownLinkExtFilterError": {
     "message": "以下副檔名過濾器的正規表示式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",
     "placeholders": {
@@ -270,6 +267,9 @@
   },
   "OptionCaptureDownLinkExtFilterLabel": {
     "message": "副檔名過濾器:"
+  },
+  "OptionCaptureDownLinkExtFilterTooltip": {
+    "message": "此過濾器根據副檔名篩選要下載的連結。\n\n* 以下每行為一個以 \",\" 分隔的副檔名列表（不分大小寫，可含空白，如 jpg, jpeg）或一個正規表示式（如 /jpe?g/i）。\n\n* 取全副檔名比對，例如 .doc 不視為符合規則 docx。\n\n* 符合任何一行的規則即列入下載。\n\n* 以 \"#\" 開頭的行皆視為註解，執行時會略過。"
   },
   "OptionCaptureDownLinkFilterErrorLine": {
     "message": "第 $LINE$ 行：$ERROR$",
@@ -294,9 +294,6 @@
   "OptionCaptureDownLinkModeUrlLabel": {
     "message": "比對網址副檔名"
   },
-  "OptionCaptureDownLinkUrlFilterTooltip": {
-    "message": "此過濾器根據完整網址（去除 \"#\" 以後的部分）篩選禁止下載的連結，優先於副檔名過濾器。\n\n* 以下每行為一個完整網址（\"#\" 以後的部分會自動去除）或一個正規表示式（如 /[/=]logout\\b/i）。\n\n* 符合任何一行的規則即禁止下載。\n\n* 以 \"#\" 開頭的行皆視為註解，執行時會略過。"
-  },
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "以下網址過濾器的正規表示式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",
     "placeholders": {
@@ -307,6 +304,9 @@
   },
   "OptionCaptureDownLinkUrlFilterLabel": {
     "message": "網址過濾器:"
+  },
+  "OptionCaptureDownLinkUrlFilterTooltip": {
+    "message": "此過濾器根據完整網址（去除 \"#\" 以後的部分）篩選禁止下載的連結，優先於副檔名過濾器。\n\n* 以下每行為一個完整網址（\"#\" 以後的部分會自動去除）或一個正規表示式（如 /[/=]logout\\b/i）。\n\n* 符合任何一行的規則即禁止下載。\n\n* 以 \"#\" 開頭的行皆視為註解，執行時會略過。"
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
