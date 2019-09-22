@@ -1203,7 +1203,7 @@ capturer.registerDocument = async function (params) {
     "html";
 
   let documentFileName;
-  if (options["capture.renameFrames"]) {
+  if (options["capture.frameRename"]) {
     let newDocumentName = scrapbook.validateFilename(documentName, options["capture.saveAsciiFilename"]);
     let newDocumentNameCI = newDocumentName.toLowerCase();
     let count = 0;

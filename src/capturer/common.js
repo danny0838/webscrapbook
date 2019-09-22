@@ -891,7 +891,7 @@ capturer.captureDocument = async function (params) {
                   delete frameSettings.usedCssFontUrl;
                   delete frameSettings.usedCssImageUrl;
 
-                  if (!options["capture.renameFrames"]) {
+                  if (!options["capture.frameRename"]) {
                     delete frameSettings.documentName;
                   }
 
@@ -982,7 +982,7 @@ capturer.captureDocument = async function (params) {
                 delete frameSettings.usedCssFontUrl;
                 delete frameSettings.usedCssImageUrl;
 
-                if (!options["capture.renameFrames"]) {
+                if (!options["capture.frameRename"]) {
                   delete frameSettings.documentName;
                 }
 

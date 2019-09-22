@@ -21,7 +21,7 @@ const baseOptions = {
   "capture.object": "save",
   "capture.applet": "save",
   "capture.frame": "save",
-  "capture.renameFrames": true,
+  "capture.frameRename": true,
   "capture.font": "save",
   "capture.style": "save",
   "capture.styleInline": "save",
