@@ -636,17 +636,6 @@
   "OptionCaptureDownLinkFileExtFilterTooltip": {
     "message": "此过滤器根据扩展名筛选要下载的链接。\n\n• 以下每行为一个以“,”分隔的扩展名列表（不分大小写，可含空白，如“jpg, jpeg”）或一个正则表达式（如“/jpe?g|gif|png/i”）。取全扩展名比对，例如 ~.doc 不视为符合规则“docx”。\n• 符合任何一行的规则即列入下载。\n• 以“#”开头的行皆视为注解，执行时会略过。"
   },
-  "OptionCaptureDownLinkFilterErrorLine": {
-    "message": "第 $LINE$ 行：$ERROR$",
-    "placeholders": {
-      "line": {
-        "content": "$1"
-      },
-      "error": {
-        "content": "$2"
-      }
-    }
-  },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "匹配 HTTP 标头及网址扩展名"
   },
@@ -658,6 +647,17 @@
   },
   "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "匹配网址扩展名"
+  },
+  "OptionCaptureDownLinkFilterErrorLine": {
+    "message": "第 $LINE$ 行：$ERROR$",
+    "placeholders": {
+      "line": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
   },
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "以下网址过滤器的正则表达式语法有误，执行时会忽略它们，要停下来修正吗？\n\n$LINES$",

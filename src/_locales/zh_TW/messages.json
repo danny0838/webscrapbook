@@ -636,17 +636,6 @@
   "OptionCaptureDownLinkFileExtFilterTooltip": {
     "message": "此過濾器根據副檔名篩選要下載的連結。\n\n• 以下每行為一個以「,」分隔的副檔名列表（不分大小寫，可含空白，如「jpg, jpeg」）或一個正規表示式（如「/jpe?g|gif|png/i」）。\n• 取全副檔名比對，例如 .doc 不視為符合規則「docx」。\n• 符合任何一行的規則即列入下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
   },
-  "OptionCaptureDownLinkFilterErrorLine": {
-    "message": "第 $LINE$ 行：$ERROR$",
-    "placeholders": {
-      "line": {
-        "content": "$1"
-      },
-      "error": {
-        "content": "$2"
-      }
-    }
-  },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "比對 HTTP 標頭及網址副檔名"
   },
@@ -658,6 +647,17 @@
   },
   "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "比對網址副檔名"
+  },
+  "OptionCaptureDownLinkFilterErrorLine": {
+    "message": "第 $LINE$ 行：$ERROR$",
+    "placeholders": {
+      "line": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
   },
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "以下網址過濾器的正規表示式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",

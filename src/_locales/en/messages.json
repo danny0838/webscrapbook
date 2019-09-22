@@ -636,17 +636,6 @@
   "OptionCaptureDownLinkFileExtFilterTooltip": {
     "message": "This determines what to download according to file extension.\n\n• Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. “jpg, jpeg”) or a regular expression (e.g. “/jpe?g|gif|png/i”).\n• The full extension is taken for matching. For example, .doc does not match the rule “docx”.\n• Whichever matches a rule at any line is included for download.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
-  "OptionCaptureDownLinkFilterErrorLine": {
-    "message": "Line $LINE$: $ERROR$",
-    "placeholders": {
-      "line": {
-        "content": "$1"
-      },
-      "error": {
-        "content": "$2"
-      }
-    }
-  },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "Match HTTP header and file extension"
   },
@@ -658,6 +647,17 @@
   },
   "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "Match URL file extension"
+  },
+  "OptionCaptureDownLinkFilterErrorLine": {
+    "message": "Line $LINE$: $ERROR$",
+    "placeholders": {
+      "line": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
   },
   "OptionCaptureDownLinkUrlFilterError": {
     "message": "The following regular expressions in URL filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
