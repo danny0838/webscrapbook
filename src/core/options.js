@@ -178,7 +178,7 @@ function refreshForm() {
 function renewCaptureSaveToDetails() {
   const mode = document.getElementById("opt_capture.saveTo").value;
 
-  document.getElementById('captureSaveToFolderDetails').hidden = mode !== 'folder';
+  document.getElementById('captureScrapbookFolder').hidden = mode !== 'folder';
 
   {
     const elem = document.getElementById('opt_capture.saveAs');
@@ -192,7 +192,7 @@ function renewCaptureSaveToDetails() {
 function renewCaptureSaveAsDetails() {
   const mode = document.getElementById("opt_capture.saveAs").value;
 
-  document.getElementById('captureSaveAsDetails').hidden = mode !== 'singleHtml';
+  document.getElementById('captureMergeCssResources').hidden = mode !== 'singleHtml';
 }
 
 function verifySavePath(event) {
