@@ -2534,71 +2534,87 @@ capturer.getSkipUrl = function (sourceUrl) {
 };
 
 capturer.downLinkExtFilter = function (ext, options) {
-  // use cached filter regex if not changed
-  if (arguments.callee._filter !== options["capture.downLink.extFilter"]) {
-    arguments.callee._filter = options["capture.downLink.extFilter"];
-    arguments.callee.filters = (() => {
-      const ret = [];
-      options["capture.downLink.extFilter"].split(/[\r\n]/).forEach((line) => {
-        line = line.trim();
-        if (!line || line.startsWith("#")) { return; }
+  const compileFilters = (source) => {
+    const ret = [];
+    source.split(/[\r\n]/).forEach((line) => {
+      line = line.trim();
+      if (!line || line.startsWith("#")) { return; }
 
-        if (/^\/(.*)\/([a-z]*)$/.test(line)) {
-          try {
-            ret.push(new RegExp(`^(?:${RegExp.$1})$`, RegExp.$2));
-          } catch (ex) {
-            console.error(ex);
-          }
-        } else {
-          const regex = line.split(/[,;\s]+/)
-            .filter(x => !!x)
-            .map(x => scrapbook.escapeRegExp(x))
-            .join('|');
-          ret.push(new RegExp(`^(?:${regex})$`, 'i'));
+      if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+        try {
+          ret.push(new RegExp(`^(?:${RegExp.$1})$`, RegExp.$2));
+        } catch (ex) {
+          console.error(ex);
         }
-      });
-      return ret;
-    })();
-  }
+      } else {
+        const regex = line.split(/[,;\s]+/)
+          .filter(x => !!x)
+          .map(x => scrapbook.escapeRegExp(x))
+          .join('|');
+        ret.push(new RegExp(`^(?:${regex})$`, 'i'));
+      }
+    });
+    return ret;
+  };
+  let filterText;
+  let filters;
 
-  return arguments.callee.filters.some((filter) => {
-    return filter.test(ext);
-  });
+  const fn = capturer.downLinkFileExtFilter = (ext, options) => {
+    // use the cache if the filter is not changed
+    if (filterText !== options["capture.downLink.extFilter"]) {
+      filterText = options["capture.downLink.extFilter"];
+      filters = compileFilters(filterText);
+    }
+
+    return filters.some((filter) => {
+      return filter.test(ext);
+    });
+  };
+  return fn(ext, options);
 };
 
 capturer.downLinkUrlFilter = function (url, options) {
-  // use the cache if the filter is not changed
-  if (arguments.callee._filter !== options["capture.downLink.urlFilter"]) {
-    arguments.callee._filter = options["capture.downLink.urlFilter"];
-    arguments.callee.filters = (() => {
-      const ret = [];
-      options["capture.downLink.urlFilter"].split(/[\r\n]/).forEach((line) => {
-        line = line.trim();
-        if (!line || line.startsWith("#")) { return; }
+  const compileFilters = (source) => {
+    const ret = [];
+    source.split(/[\r\n]/).forEach((line) => {
+      line = line.trim();
+      if (!line || line.startsWith("#")) { return; }
 
-        if (/^\/(.*)\/([a-z]*)$/.test(line)) {
-          try {
-            ret.push(new RegExp(RegExp.$1, RegExp.$2));
-          } catch (ex) {
-            console.error(ex);
-          }
-        } else {
-          ret.push(scrapbook.splitUrlByAnchor(line)[0]);
+      if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+        try {
+          ret.push(new RegExp(RegExp.$1, RegExp.$2));
+        } catch (ex) {
+          console.error(ex);
         }
-      });
-      return ret;
-    })();
-  }
+      } else {
+        ret.push(scrapbook.splitUrlByAnchor(line)[0]);
+      }
+    });
+    return ret;
+  };
+  let filterText;
+  let filters;
 
-  // match the URL without hash
-  const matchUrl = scrapbook.splitUrlByAnchor(url)[0];
-  return arguments.callee.filters.some((filter) => {
-    // plain text rule must match full URL
-    if (typeof filter === 'string') {
-      return filter === matchUrl;
+  const fn = capturer.downLinkUrlFilter = (url, options) => {
+    // use the cache if the filter is not changed
+    if (filterText !== options["capture.downLink.urlFilter"]) {
+      filterText = options["capture.downLink.urlFilter"];
+      filters = compileFilters(filterText);
     }
-    return filter.test(matchUrl);
-  });
+
+    // match the URL without hash
+    const matchUrl = scrapbook.splitUrlByAnchor(url)[0];
+
+    return filters.some((filter) => {
+      // plain text rule must match full URL
+      if (typeof filter === 'string') {
+        return filter === matchUrl;
+      }
+
+      return filter.test(matchUrl);
+    });
+  };
+  return fn(url, options);
 };
 
 
