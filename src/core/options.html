@@ -12,334 +12,350 @@
 <body>
 <form id="options">
 <div id="optionsWrapper">
-  <fieldset>
-    <legend>__MSG_OptionGroupServer__</legend>
-    <p>
-      <label for="opt_server.url">__MSG_OptionServerUrlLabel__</label>
-      <input type="url" id="opt_server.url" autocomplete="url">
-      <a id="optionServerUrlTooltip" href="javascript:" data-tooltip="__MSG_OptionServerUrlTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_server.user">__MSG_OptionServerUserLabel__</label>
-      <input type="text" id="opt_server.user" autocomplete="username">
-    </p>
-    <p>
-      <label for="opt_server.password">__MSG_OptionServerPasswordLabel__</label>
-      <input type="password" id="opt_server.password" autocomplete="new-password">
-    </p>
-  </fieldset>
-  <fieldset>
-    <legend>__MSG_OptionGroupSave__</legend>
-    <p>
-      <label for="opt_capture.saveTo">__MSG_OptionCaptureSaveToLabel__</label>
-      <select id="opt_capture.saveTo">
-        <option value="server">__MSG_OptionCaptureSaveToServerLabel__</option>
-        <option value="folder">__MSG_OptionCaptureSaveToFolderLabel__</option>
-        <option value="file">__MSG_OptionCaptureSaveToFileLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveToTooltip__"></a>
-    </p>
-    <p id="captureSaveToFolderDetails" hidden>
-      <label for="opt_capture.saveFolder">__MSG_OptionCaptureScrapbookFolderLabel__</label>
-      <input type="text" id="opt_capture.saveFolder" placeholder="WebScrapBook/data">
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureScrapbookFolderTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.saveAs">__MSG_OptionCaptureSaveAsLabel__</label>
-      <select id="opt_capture.saveAs">
-        <option value="folder">__MSG_OptionCaptureSaveAsFolderLabel__</option>
-        <option value="zip">__MSG_OptionCaptureSaveAsZipLabel__</option>
-        <option value="maff">__MSG_OptionCaptureSaveAsMaffLabel__</option>
-        <option value="singleHtml">__MSG_OptionCaptureSaveAsSingleHtmlLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveAsTooltip__"></a>
-    </p>
-    <p id="captureSaveAsDetails" hidden>
-      <input type="checkbox" id="opt_capture.mergeCssResources">
-      <label for="opt_capture.mergeCssResources">__MSG_OptionCaptureMergeCssResourcesLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureMergeCssResourcesTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.saveFilename">__MSG_OptionCaptureSaveFilenameLabel__</label>
-      <input type="text" id="opt_capture.saveFilename" placeholder="%ID%">
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveFilenameTooltip__"></a>
-    </p>
-    <p>
-      <input type="checkbox" id="opt_capture.saveAsciiFilename">
-      <label for="opt_capture.saveAsciiFilename">__MSG_OptionCaptureSaveAsciiFilenameLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveAsciiFilenameTooltip__"></a>
-    </p>
-    <p>
-      <input type="checkbox" id="opt_capture.saveFileAsHtml">
-      <label for="opt_capture.saveFileAsHtml">__MSG_OptionCaptureSaveFileAsHtmlLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveFileAsHtmlTooltip__"></a>
-    </p>
-    <p>
-      <input type="checkbox" id="opt_capture.saveDataUriAsFile">
-      <label for="opt_capture.saveDataUriAsFile">__MSG_OptionCaptureSaveDataUriAsFileLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveDataUriAsFileTooltip__"></a>
-    </p>
-    <p>
-      <input type="checkbox" id="opt_capture.autoCloseDialog">
-      <label for="opt_capture.autoCloseDialog">__MSG_OptionCaptureAutoCloseDialogLabel__</label>
-    </p>
-  </fieldset>
-  <fieldset>
-    <legend>__MSG_OptionGroupCapture__</legend>
-    <p>
-      <label for="opt_capture.image">__MSG_OptionCaptureImageLabel__</label>
-      <select id="opt_capture.image">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="save-current">__MSG_OptionCaptureCommonSaveCurrentLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureImageTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.imageBackground">__MSG_OptionCaptureImageBackgroundLabel__</label>
-      <select id="opt_capture.imageBackground">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="save-used">__MSG_OptionCaptureCommonSaveUsedLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureImageBackgroundTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.favicon">__MSG_OptionCaptureFaviconLabel__</label>
-      <select id="opt_capture.favicon">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureFaviconTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.canvas">__MSG_OptionCaptureCanvasLabel__</label>
-      <select id="opt_capture.canvas">
-        <option value="save">__MSG_OptionCaptureCanvasSaveLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCanvasBlankLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureCanvasTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.audio">__MSG_OptionCaptureAudioLabel__</label>
-      <select id="opt_capture.audio">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="save-current">__MSG_OptionCaptureCommonSaveCurrentLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureAudioTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.video">__MSG_OptionCaptureVideoLabel__</label>
-      <select id="opt_capture.video">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="save-current">__MSG_OptionCaptureCommonSaveCurrentLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureVideoTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.frame">__MSG_OptionCaptureFrameLabel__</label>
-      <select id="opt_capture.frame">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureFrameTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.font">__MSG_OptionCaptureFontLabel__</label>
-      <select id="opt_capture.font">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="save-used">__MSG_OptionCaptureCommonSaveUsedLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureFontTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.style">__MSG_OptionCaptureStyleLabel__</label>
-      <select id="opt_capture.style">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureStyleTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.rewriteCss">__MSG_OptionCaptureRewriteCssLabel__</label>
-      <select id="opt_capture.rewriteCss">
-        <option value="none">__MSG_OptionCaptureRewriteCssNoneLabel__</option>
-        <option value="url">__MSG_OptionCaptureRewriteUrlLabel__</option>
-      </select>
-    </p>
-    <p>
-      <label for="opt_capture.script">__MSG_OptionCaptureScriptLabel__</label>
-      <select id="opt_capture.script">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureScriptTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.embed">__MSG_OptionCaptureEmbedLabel__</label>
-      <select id="opt_capture.embed">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureEmbedTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.object">__MSG_OptionCaptureObjectLabel__</label>
-      <select id="opt_capture.object">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureObjectTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.applet">__MSG_OptionCaptureAppletLabel__</label>
-      <select id="opt_capture.applet">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
-        <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureAppletTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.formStatus">__MSG_OptionCaptureFormStatusLabel__</label>
-      <select id="opt_capture.formStatus">
-        <option value="keep">__MSG_OptionCaptureFormStatusKeepLabel__</option>
-        <option value="reset">__MSG_OptionCaptureFormStatusResetLabel__</option>
-      </select>
-    </p>
-    <p>
-      <label for="opt_capture.shadowDom">__MSG_OptionCaptureShadowDomLabel__</label>
-      <select id="opt_capture.shadowDom">
-        <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
-        <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureShadowDomTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.pageSizeLimit">__MSG_OptionCapturePageSizeLimitLabel__</label>
-      <input type="number" min="0" id="opt_capture.pageSizeLimit">
-      <label for="opt_capture.pageSizeLimit">KB</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCapturePageSizeLimitTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.resourceSizeLimit">__MSG_OptionCaptureResourceSizeLimitLabel__</label>
-      <input type="number" min="0" id="opt_capture.resourceSizeLimit">
-      <label for="opt_capture.resourceSizeLimit">KB</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureResourceSizeLimitTooltip__"></a>
-    </p>
-    <p>
-      <label for="opt_capture.precludeSelector">__MSG_OptionCapturePrecludeSelectorLabel__</label>
-      <input type="text" size="40" id="opt_capture.precludeSelector">
-      <a href="javascript:" data-tooltip="__MSG_OptionCapturePrecludeSelectorTooltip__"></a>
-    </p>
-  </fieldset>
-  <fieldset id="capture.downLink">
-    <legend>__MSG_OptionGroupDownLink__</legend>
+  <details open>
+    <summary>__MSG_OptionGroupServer__</summary>
     <div>
-      <select id="opt_capture.downLink.mode">
-        <option value="none">__MSG_OptionCaptureDownLinkModeNoneLabel__</option>
-        <option value="url">__MSG_OptionCaptureDownLinkModeUrlLabel__</option>
-        <option value="header">__MSG_OptionCaptureDownLinkModeHeaderLabel__</option>
-      </select>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkModeTooltip__"></a>
+      <p>
+        <label for="opt_server.url">__MSG_OptionServerUrlLabel__</label>
+        <input type="url" id="opt_server.url" autocomplete="url">
+        <a id="optionServerUrlTooltip" href="javascript:" data-tooltip="__MSG_OptionServerUrlTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_server.user">__MSG_OptionServerUserLabel__</label>
+        <input type="text" id="opt_server.user" autocomplete="username">
+      </p>
+      <p>
+        <label for="opt_server.password">__MSG_OptionServerPasswordLabel__</label>
+        <input type="password" id="opt_server.password" autocomplete="new-password">
+      </p>
     </div>
-    <div id="captureDownLinkDetails" hidden>
-      <div>
-        <strong>__MSG_OptionCaptureDownLinkExtFilterTitle__</strong>
-        <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkExtFilterDesc__"></a>
-      </div>
-      <textarea id="opt_capture.downLink.extFilter"></textarea>
-      <div>
-        <strong>__MSG_OptionCaptureDownLinkUrlFilterTitle__</strong>
-        <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkUrlFilterDesc__"></a>
-      </div>
-      <textarea id="opt_capture.downLink.urlFilter"></textarea>
+  </details>
+  <details open>
+    <summary>__MSG_OptionGroupSave__</summary>
+    <div>
+      <p>
+        <label for="opt_capture.saveTo">__MSG_OptionCaptureSaveToLabel__</label>
+        <select id="opt_capture.saveTo">
+          <option value="server">__MSG_OptionCaptureSaveToServerLabel__</option>
+          <option value="folder">__MSG_OptionCaptureSaveToFolderLabel__</option>
+          <option value="file">__MSG_OptionCaptureSaveToFileLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveToTooltip__"></a>
+      </p>
+      <p id="captureSaveToFolderDetails" hidden>
+        <label for="opt_capture.saveFolder">__MSG_OptionCaptureScrapbookFolderLabel__</label>
+        <input type="text" id="opt_capture.saveFolder" placeholder="WebScrapBook/data">
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureScrapbookFolderTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.saveAs">__MSG_OptionCaptureSaveAsLabel__</label>
+        <select id="opt_capture.saveAs">
+          <option value="folder">__MSG_OptionCaptureSaveAsFolderLabel__</option>
+          <option value="zip">__MSG_OptionCaptureSaveAsZipLabel__</option>
+          <option value="maff">__MSG_OptionCaptureSaveAsMaffLabel__</option>
+          <option value="singleHtml">__MSG_OptionCaptureSaveAsSingleHtmlLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveAsTooltip__"></a>
+      </p>
+      <p id="captureSaveAsDetails" hidden>
+        <input type="checkbox" id="opt_capture.mergeCssResources">
+        <label for="opt_capture.mergeCssResources">__MSG_OptionCaptureMergeCssResourcesLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureMergeCssResourcesTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.saveFilename">__MSG_OptionCaptureSaveFilenameLabel__</label>
+        <input type="text" id="opt_capture.saveFilename" placeholder="%ID%">
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveFilenameTooltip__"></a>
+      </p>
+      <p>
+        <input type="checkbox" id="opt_capture.saveAsciiFilename">
+        <label for="opt_capture.saveAsciiFilename">__MSG_OptionCaptureSaveAsciiFilenameLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveAsciiFilenameTooltip__"></a>
+      </p>
+      <p>
+        <input type="checkbox" id="opt_capture.saveFileAsHtml">
+        <label for="opt_capture.saveFileAsHtml">__MSG_OptionCaptureSaveFileAsHtmlLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveFileAsHtmlTooltip__"></a>
+      </p>
+      <p>
+        <input type="checkbox" id="opt_capture.saveDataUriAsFile">
+        <label for="opt_capture.saveDataUriAsFile">__MSG_OptionCaptureSaveDataUriAsFileLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveDataUriAsFileTooltip__"></a>
+      </p>
+      <p>
+        <input type="checkbox" id="opt_capture.autoCloseDialog">
+        <label for="opt_capture.autoCloseDialog">__MSG_OptionCaptureAutoCloseDialogLabel__</label>
+      </p>
     </div>
-  </fieldset>
-  <fieldset>
-    <legend>__MSG_OptionGroupMetadata__</legend>
-    <p>
-      <input type="checkbox" id="opt_capture.recordRemovedNode">
-      <label for="opt_capture.recordRemovedNode">__MSG_OptionCaptureRecordRemovedNodeLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureRecordRemovedNodeTooltip__"></a>
-    </p>
-    <p>
-      <input type="checkbox" id="opt_capture.recordRewrittenAttr">
-      <label for="opt_capture.recordRewrittenAttr">__MSG_OptionCaptureRecordRewrittenAttrLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureRecordRewrittenAttrTooltip__"></a>
-    </p>
-    <p>
-      <input type="checkbox" id="opt_capture.recordSourceUri">
-      <label for="opt_capture.recordSourceUri">__MSG_OptionCaptureRecordSourceUriLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureRecordSourceUriTooltip__"></a>
-    </p>
-    <p>
-      <input type="checkbox" id="opt_capture.recordErrorUri">
-      <label for="opt_capture.recordErrorUri">__MSG_OptionCaptureRecordErrorUriLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureRecordErrorUriTooltip__"></a>
-    </p>
-  </fieldset>
-  <fieldset>
-    <legend>__MSG_OptionGroupEditor__</legend>
-    <p>
-      <input type="checkbox" id="opt_editor.autoInit">
-      <label for="opt_editor.autoInit">__MSG_OptionEditorAutoInit__</label>
-    </p>
-  </fieldset>
-  <fieldset>
-    <legend>__MSG_OptionGroupViewer__</legend>
-    <p>
-      <input type="checkbox" id="opt_viewer.viewHtz">
-      <label for="opt_viewer.viewHtz">__MSG_OptionViewerViewHtzLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionViewerViewHtzTooltip__"></a>
-    </p>
-    <p>
-      <input type="checkbox" id="opt_viewer.viewMaff">
-      <label for="opt_viewer.viewMaff">__MSG_OptionViewerViewMaffLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionViewerViewMaffTooltip__"></a>
-    </p>
-    <p>
-      <input type="checkbox" id="opt_viewer.useFileSystemApi">
-      <label for="opt_viewer.useFileSystemApi">__MSG_OptionViewerUseFileSystemApiLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionViewerUseFileSystemApiTooltip__"></a>
-    </p>
-  </fieldset>
-  <fieldset>
-    <legend>__MSG_OptionGroupIndexer__</legend>
-    <p>
-      <input type="checkbox" id="opt_indexer.fulltextCache">
-      <label for="opt_indexer.fulltextCache">__MSG_OptionIndexerFulltextCacheLabel__</label>
-    </p>
-    <p>
-      <input type="checkbox" id="opt_indexer.fulltextCacheFrameAsPageContent">
-      <label for="opt_indexer.fulltextCacheFrameAsPageContent">__MSG_OptionIndexerFulltextCacheFrameAsPageContentLabel__</label>
-    </p>
-  </fieldset>
+  </details>
+  <details open>
+    <summary>__MSG_OptionGroupCapture__</summary>
+    <div>
+      <p>
+        <label for="opt_capture.image">__MSG_OptionCaptureImageLabel__</label>
+        <select id="opt_capture.image">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="save-current">__MSG_OptionCaptureCommonSaveCurrentLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureImageTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.imageBackground">__MSG_OptionCaptureImageBackgroundLabel__</label>
+        <select id="opt_capture.imageBackground">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="save-used">__MSG_OptionCaptureCommonSaveUsedLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureImageBackgroundTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.favicon">__MSG_OptionCaptureFaviconLabel__</label>
+        <select id="opt_capture.favicon">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureFaviconTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.canvas">__MSG_OptionCaptureCanvasLabel__</label>
+        <select id="opt_capture.canvas">
+          <option value="save">__MSG_OptionCaptureCanvasSaveLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCanvasBlankLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureCanvasTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.audio">__MSG_OptionCaptureAudioLabel__</label>
+        <select id="opt_capture.audio">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="save-current">__MSG_OptionCaptureCommonSaveCurrentLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureAudioTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.video">__MSG_OptionCaptureVideoLabel__</label>
+        <select id="opt_capture.video">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="save-current">__MSG_OptionCaptureCommonSaveCurrentLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureVideoTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.frame">__MSG_OptionCaptureFrameLabel__</label>
+        <select id="opt_capture.frame">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureFrameTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.font">__MSG_OptionCaptureFontLabel__</label>
+        <select id="opt_capture.font">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="save-used">__MSG_OptionCaptureCommonSaveUsedLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureFontTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.style">__MSG_OptionCaptureStyleLabel__</label>
+        <select id="opt_capture.style">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureStyleTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.rewriteCss">__MSG_OptionCaptureRewriteCssLabel__</label>
+        <select id="opt_capture.rewriteCss">
+          <option value="none">__MSG_OptionCaptureRewriteCssNoneLabel__</option>
+          <option value="url">__MSG_OptionCaptureRewriteUrlLabel__</option>
+        </select>
+      </p>
+      <p>
+        <label for="opt_capture.script">__MSG_OptionCaptureScriptLabel__</label>
+        <select id="opt_capture.script">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureScriptTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.embed">__MSG_OptionCaptureEmbedLabel__</label>
+        <select id="opt_capture.embed">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureEmbedTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.object">__MSG_OptionCaptureObjectLabel__</label>
+        <select id="opt_capture.object">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureObjectTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.applet">__MSG_OptionCaptureAppletLabel__</label>
+        <select id="opt_capture.applet">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="link">__MSG_OptionCaptureCommonLinkLabel__</option>
+          <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureAppletTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.formStatus">__MSG_OptionCaptureFormStatusLabel__</label>
+        <select id="opt_capture.formStatus">
+          <option value="keep">__MSG_OptionCaptureFormStatusKeepLabel__</option>
+          <option value="reset">__MSG_OptionCaptureFormStatusResetLabel__</option>
+        </select>
+      </p>
+      <p>
+        <label for="opt_capture.shadowDom">__MSG_OptionCaptureShadowDomLabel__</label>
+        <select id="opt_capture.shadowDom">
+          <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
+          <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureShadowDomTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.pageSizeLimit">__MSG_OptionCapturePageSizeLimitLabel__</label>
+        <input type="number" min="0" id="opt_capture.pageSizeLimit">
+        <label for="opt_capture.pageSizeLimit">KB</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCapturePageSizeLimitTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.resourceSizeLimit">__MSG_OptionCaptureResourceSizeLimitLabel__</label>
+        <input type="number" min="0" id="opt_capture.resourceSizeLimit">
+        <label for="opt_capture.resourceSizeLimit">KB</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureResourceSizeLimitTooltip__"></a>
+      </p>
+      <p>
+        <label for="opt_capture.precludeSelector">__MSG_OptionCapturePrecludeSelectorLabel__</label>
+        <input type="text" size="40" id="opt_capture.precludeSelector">
+        <a href="javascript:" data-tooltip="__MSG_OptionCapturePrecludeSelectorTooltip__"></a>
+      </p>
+    </div>
+  </details>
+  <details open>
+    <summary>__MSG_OptionGroupDownLink__</summary>
+    <div>
+      <div>
+        <select id="opt_capture.downLink.mode">
+          <option value="none">__MSG_OptionCaptureDownLinkModeNoneLabel__</option>
+          <option value="url">__MSG_OptionCaptureDownLinkModeUrlLabel__</option>
+          <option value="header">__MSG_OptionCaptureDownLinkModeHeaderLabel__</option>
+        </select>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkModeTooltip__"></a>
+      </div>
+      <div id="captureDownLinkDetails" hidden>
+        <div>
+          <strong>__MSG_OptionCaptureDownLinkExtFilterTitle__</strong>
+          <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkExtFilterDesc__"></a>
+        </div>
+        <textarea id="opt_capture.downLink.extFilter"></textarea>
+        <div>
+          <strong>__MSG_OptionCaptureDownLinkUrlFilterTitle__</strong>
+          <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkUrlFilterDesc__"></a>
+        </div>
+        <textarea id="opt_capture.downLink.urlFilter"></textarea>
+      </div>
+    </div>
+  </details>
+  <details open>
+    <summary>__MSG_OptionGroupMetadata__</summary>
+    <div>
+      <p>
+        <input type="checkbox" id="opt_capture.recordRemovedNode">
+        <label for="opt_capture.recordRemovedNode">__MSG_OptionCaptureRecordRemovedNodeLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureRecordRemovedNodeTooltip__"></a>
+      </p>
+      <p>
+        <input type="checkbox" id="opt_capture.recordRewrittenAttr">
+        <label for="opt_capture.recordRewrittenAttr">__MSG_OptionCaptureRecordRewrittenAttrLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureRecordRewrittenAttrTooltip__"></a>
+      </p>
+      <p>
+        <input type="checkbox" id="opt_capture.recordSourceUri">
+        <label for="opt_capture.recordSourceUri">__MSG_OptionCaptureRecordSourceUriLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureRecordSourceUriTooltip__"></a>
+      </p>
+      <p>
+        <input type="checkbox" id="opt_capture.recordErrorUri">
+        <label for="opt_capture.recordErrorUri">__MSG_OptionCaptureRecordErrorUriLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureRecordErrorUriTooltip__"></a>
+      </p>
+    </div>
+  </details>
+  <details open>
+    <summary>__MSG_OptionGroupEditor__</summary>
+    <div>
+      <p>
+        <input type="checkbox" id="opt_editor.autoInit">
+        <label for="opt_editor.autoInit">__MSG_OptionEditorAutoInit__</label>
+      </p>
+    </div>
+  </details>
+  <details open>
+    <summary>__MSG_OptionGroupViewer__</summary>
+    <div>
+      <p>
+        <input type="checkbox" id="opt_viewer.viewHtz">
+        <label for="opt_viewer.viewHtz">__MSG_OptionViewerViewHtzLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionViewerViewHtzTooltip__"></a>
+      </p>
+      <p>
+        <input type="checkbox" id="opt_viewer.viewMaff">
+        <label for="opt_viewer.viewMaff">__MSG_OptionViewerViewMaffLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionViewerViewMaffTooltip__"></a>
+      </p>
+      <p>
+        <input type="checkbox" id="opt_viewer.useFileSystemApi">
+        <label for="opt_viewer.useFileSystemApi">__MSG_OptionViewerUseFileSystemApiLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionViewerUseFileSystemApiTooltip__"></a>
+      </p>
+    </div>
+  </details>
+  <details open>
+    <summary>__MSG_OptionGroupIndexer__</summary>
+    <div>
+      <p>
+        <input type="checkbox" id="opt_indexer.fulltextCache">
+        <label for="opt_indexer.fulltextCache">__MSG_OptionIndexerFulltextCacheLabel__</label>
+      </p>
+      <p>
+        <input type="checkbox" id="opt_indexer.fulltextCacheFrameAsPageContent">
+        <label for="opt_indexer.fulltextCacheFrameAsPageContent">__MSG_OptionIndexerFulltextCacheFrameAsPageContentLabel__</label>
+      </p>
+    </div>
+  </details>
 </div>
 <div id="actionsWrapper">
   <input type="submit" value="__MSG_OptionsSaveLabel__">
