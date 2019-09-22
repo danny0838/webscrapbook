@@ -5165,7 +5165,7 @@ async function test_capture_downLink() {
   /* header */
   var options = {
     "capture.downLink.mode": "header",
-    "capture.downLink.extFilter": `txt, bmp, css`,
+    "capture.downLink.extFilter": `txt, bmp, css, html`,
   };
 
   var blob = await capture({
@@ -5179,7 +5179,8 @@ async function test_capture_downLink() {
   assert(zip.files["file3.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
-  assert(Object.keys(zip.files).length === 6);
+  assert(zip.files["page.html"]);
+  assert(Object.keys(zip.files).length === 7);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5189,13 +5190,30 @@ async function test_capture_downLink() {
   assert(anchors[0].getAttribute('href') === `file.txt`);
   assert(anchors[1].getAttribute('href') === `file.css#123`);
   assert(anchors[2].getAttribute('href') === `file.bmp`);
-  assert(anchors[3].getAttribute('href') === `file2.txt`);
-  assert(anchors[4].getAttribute('href') === `file3.txt`);
+  assert(anchors[3].getAttribute('href') === `page.html`);
+  assert(anchors[4].getAttribute('href') === `file2.txt`);
+  assert(anchors[5].getAttribute('href') === `file3.txt`);
+
+  // page should be saved as file (not rewritten)
+  var file = zip.file('page.html');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `\
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>img {width: 60px;}</style>
+</head>
+<body>
+<p><img src="./file.bmp"></p>
+<p>Page content.</p>
+</body>
+</html>`);
 
   /* url */
   var options = {
     "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `txt, bmp, css`,
+    "capture.downLink.extFilter": `txt, bmp, css, html`,
   };
 
   var blob = await capture({
@@ -5209,7 +5227,8 @@ async function test_capture_downLink() {
   assert(!zip.files["file3.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
-  assert(Object.keys(zip.files).length === 4);
+  assert(zip.files["page.html"]);
+  assert(Object.keys(zip.files).length === 5);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5219,13 +5238,30 @@ async function test_capture_downLink() {
   assert(anchors[0].getAttribute('href') === `file.txt`);
   assert(anchors[1].getAttribute('href') === `file.css#123`);
   assert(anchors[2].getAttribute('href') === `file.bmp`);
-  assert(anchors[3].getAttribute('href') === `${localhost}/capture_downLink/filename.py`);
-  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink/mime.py`);
+  assert(anchors[3].getAttribute('href') === `page.html`);
+  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink/filename.py`);
+  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink/mime.py`);
+
+  // page should be saved as file (not rewritten)
+  var file = zip.file('page.html');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `\
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>img {width: 60px;}</style>
+</head>
+<body>
+<p><img src="./file.bmp"></p>
+<p>Page content.</p>
+</body>
+</html>`);
 
   /* none */
   var options = {
     "capture.downLink.mode": "none",
-    "capture.downLink.extFilter": `txt, bmp, css`,
+    "capture.downLink.extFilter": `txt, bmp, css, html`,
   };
 
   var blob = await capture({
@@ -5244,8 +5280,9 @@ async function test_capture_downLink() {
   assert(anchors[0].getAttribute('href') === `${localhost}/capture_downLink/file.txt`);
   assert(anchors[1].getAttribute('href') === `${localhost}/capture_downLink/file.css#123`);
   assert(anchors[2].getAttribute('href') === `${localhost}/capture_downLink/file.bmp`);
-  assert(anchors[3].getAttribute('href') === `${localhost}/capture_downLink/filename.py`);
-  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink/mime.py`);
+  assert(anchors[3].getAttribute('href') === `${localhost}/capture_downLink/page.html`);
+  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink/filename.py`);
+  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink/mime.py`);
 }
 
 /**
@@ -5402,7 +5439,8 @@ async function test_capture_downLink2() {
   assert(zip.files["file.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
-  assert(Object.keys(zip.files).length === 4);
+  assert(zip.files["page.html"]);
+  assert(Object.keys(zip.files).length === 5);
 
   // match full extension
   var options = {
