@@ -135,10 +135,9 @@ function verifyPrecludeSelectors() {
 function verifyDownLinkFilters(rules) {
   const checkRule = (rules) => {
     rules.split(/(?:\n|\r\n?)/).forEach(function (srcLine, index) {
-      if (srcLine.charAt(0) === "#") { return; }
-
       let line = srcLine.trim();
-      if (line === "") { return; }
+      if (!line || line.startsWith("#")) { return; }
+
       if (!/^\/(.*)\/([a-z]*)$/.test(line)) { return; }
 
       try {

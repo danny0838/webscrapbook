@@ -2540,9 +2540,8 @@ capturer.downLinkExtFilter = function (ext, options) {
     arguments.callee.filters = (() => {
       const ret = [];
       options["capture.downLink.extFilter"].split(/[\r\n]/).forEach((line) => {
-        if (line.charAt(0) === "#") { return; }
         line = line.trim();
-        if (line === "") { return; }
+        if (!line || line.startsWith("#")) { return; }
 
         if (/^\/(.*)\/([a-z]*)$/.test(line)) {
           try {
@@ -2574,9 +2573,8 @@ capturer.downLinkUrlFilter = function (url, options) {
     arguments.callee.filters = (() => {
       const ret = [];
       options["capture.downLink.urlFilter"].split(/[\r\n]/).forEach((line) => {
-        if (line.charAt(0) === "#") { return; }
         line = line.trim();
-        if (line === "") { return; }
+        if (!line || line.startsWith("#")) { return; }
 
         if (/^\/(.*)\/([a-z]*)$/.test(line)) {
           try {
