@@ -836,7 +836,7 @@ capturer.captureUrl = async function (params) {
       throw new Error(`Requires an absolute URL.`);
     }
 
-    return await capturer.access({
+    const response = await capturer.access({
       url: sourceUrlMain,
       refUrl,
       role: "captureUrl",
@@ -890,6 +890,9 @@ capturer.captureUrl = async function (params) {
           }
         },
       },
+    });
+    return Object.assign({}, response, {
+      url: response.url ? response.url + sourceUrlHash : response.url,
     });
   } catch (ex) {
     console.warn(ex);
