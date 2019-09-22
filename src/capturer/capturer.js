@@ -845,32 +845,33 @@ capturer.captureUrl = async function (params) {
       options,
       hooks: {
         async response({xhr, headers}) {
-          // generate a documentName if not specified
-          if (!settings.documentName) {
-            // use the filename if it has been defined by header Content-Disposition
-            let filename = headers.filename ||
-                sourceUrlMain.startsWith("data:") ?
-                    scrapbook.dataUriToFile(sourceUrlMain).name :
-                    scrapbook.urlToFilename(xhr.responseURL);
-
-            // remove corresponding file extension for true documents
-            const mime = headers.contentType || Mime.lookup(filename) || "text/html";
-            if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(mime)) {
-              const fn = filename.toLowerCase();
-              for (let ext of Mime.allExtensions(mime)) {
-                ext = "." + ext.toLowerCase();
-                if (fn.endsWith(ext)) {
-                  filename = filename.slice(0, -ext.length);
-                  break;
-                }
-              }
-            }
-
-            settings.documentName = filename;
-          }
+          // use the filename if it has been defined by header Content-Disposition
+          const filename = sourceUrlMain.startsWith("data:") ? 
+              scrapbook.dataUriToFile(sourceUrlMain).name : 
+              headers.filename || scrapbook.urlToFilename(xhr.responseURL);
 
           const doc = xhr.response;
           if (doc) {
+            // generate a documentName if not specified
+            if (!settings.documentName) {
+              let documentName = filename;
+
+              // remove corresponding file extension for true documents
+              const mime = doc.contentType;
+              if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(mime)) {
+                const fn = documentName.toLowerCase();
+                for (let ext of Mime.allExtensions(mime)) {
+                  ext = "." + ext.toLowerCase();
+                  if (fn.endsWith(ext)) {
+                    documentName = documentName.slice(0, -ext.length);
+                    break;
+                  }
+                }
+              }
+
+              settings.documentName = documentName;
+            }
+
             return await capturer.captureDocumentOrFile({
               doc,
               refUrl,
