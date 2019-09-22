@@ -287,6 +287,7 @@
     <summary>__MSG_OptionGroupDownLink__</summary>
     <div>
       <div>
+        <label for="opt_capture.downLink.mode">__MSG_OptionCaptureDownLinkFileModeLabel__</label>
         <select id="opt_capture.downLink.file.mode">
           <option value="none">__MSG_OptionCaptureDownLinkFileModeNoneLabel__</option>
           <option value="url">__MSG_OptionCaptureDownLinkFileModeUrlLabel__</option>
@@ -294,14 +295,30 @@
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkFileModeTooltip__"></a>
       </div>
-      <div class="captureDownLinkDetails">
+      <div class="captureDownLinkFileExtFilter">
         <label for="opt_capture.downLink.file.extFilter">__MSG_OptionCaptureDownLinkFileExtFilterLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkFileExtFilterTooltip__"></a>
         <div>
           <textarea id="opt_capture.downLink.file.extFilter"></textarea>
         </div>
       </div>
-      <div class="captureDownLinkDetails">
+      <div>
+        <label for="opt_capture.downLink.doc.depth">__MSG_OptionCaptureDownLinkDocDepthLabel__</label>
+        <input type="number" min="0" step="1" id="opt_capture.downLink.doc.depth">
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkDocDepthTooltip__"></a>
+      </div>
+      <div>
+        <label for="opt_capture.downLink.doc.delay">__MSG_OptionCaptureDownLinkDocDelayLabel__</label>
+        <input type="number" min="0" step="any" id="opt_capture.downLink.doc.delay">
+      </div>
+      <div class="captureDownLinkDocUrlFilter">
+        <label for="opt_capture.downLink.doc.urlFilter">__MSG_OptionCaptureDownLinkDocUrlFilterLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkDocUrlFilterTooltip__"></a>
+        <div>
+          <textarea id="opt_capture.downLink.doc.urlFilter"></textarea>
+        </div>
+      </div>
+      <div>
         <label for="opt_capture.downLink.urlFilter">__MSG_OptionCaptureDownLinkUrlFilterLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkUrlFilterTooltip__"></a>
         <div>

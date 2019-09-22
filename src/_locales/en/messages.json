@@ -622,6 +622,21 @@
   "OptionCaptureDeleteErasedOnSaveLabel": {
     "message": "Automatically delete all erased content on saving"
   },
+  "OptionCaptureDownLinkDocDelayLabel": {
+    "message": "Delay for capturing linked pages (ms):"
+  },
+  "OptionCaptureDownLinkDocDepthLabel": {
+    "message": "Depth to capture linked pages:"
+  },
+  "OptionCaptureDownLinkDocDepthTooltip": {
+    "message": "Capture linked pages whose depth is no more than the specified value. The main page is depth 0, pages linked by a page with depth 0 is depth 1, pages linked by a page with depth 1 is depth 2, ... and so on.\n\n• NOTE: A deep capture may download a lot of data. It's recommended to set “save captured data as” to “Folder” to prevent a potential performance issue or error. Saving as single HTML is not supported."
+  },
+  "OptionCaptureDownLinkDocUrlFilterLabel": {
+    "message": "Include these URLs:"
+  },
+  "OptionCaptureDownLinkDocUrlFilterTooltip": {
+    "message": "This determines what links are for capturing according to full URL (with the “#” part stripped).\n\n• Each following line is a full URL (with “#” part stripped) or a regular expression (e.g. “/http://example.com/.*/”). \n• Whichever matches a rule at any line is included for downloading. All URLs are included if no rule exist in any line.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
+  },
   "OptionCaptureDownLinkFileExtFilterError": {
     "message": "The following regular expressions in file extension filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
     "placeholders": {
@@ -631,13 +646,16 @@
     }
   },
   "OptionCaptureDownLinkFileExtFilterLabel": {
-    "message": "File extension filter:"
+    "message": "Include these file extensions:"
   },
   "OptionCaptureDownLinkFileExtFilterTooltip": {
     "message": "This determines what to download according to file extension.\n\n• Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. “jpg, jpeg”) or a regular expression (e.g. “/jpe?g|gif|png/i”).\n• The full extension is taken for matching. For example, .doc does not match the rule “docx”.\n• Whichever matches a rule at any line is included for download.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "Match HTTP header and file extension"
+  },
+  "OptionCaptureDownLinkFileModeLabel": {
+    "message": "Download linked files:"
   },
   "OptionCaptureDownLinkFileModeNoneLabel": {
     "message": "Disable download linked files"
@@ -671,7 +689,7 @@
     "message": "URL filter:"
   },
   "OptionCaptureDownLinkUrlFilterTooltip": {
-    "message": "This determines what are forbidden for downloading according to full URL (with the “#” part stripped).\n\n• Each following line is a full URL (with “#” part stripped) or a regular expression (e.g. “/[/=]logout\\b/i”). \n• Whichever matches a rule at any line is forbidden for downloading.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
+    "message": "This determines what are forbidden for downloading or capturing according to full URL (with the “#” part stripped).\n\n• Each following line is a full URL (with “#” part stripped) or a regular expression (e.g. “/[/=]logout\\b/i”). \n• Whichever matches a rule at any line is forbidden for downloading.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBEDs:"
@@ -949,7 +967,7 @@
     "message": "Backend server - Checker"
   },
   "OptionGroupDownLink": {
-    "message": "Capture - Download linked files"
+    "message": "Capture - capture links"
   },
   "OptionGroupEditor": {
     "message": "Editor"

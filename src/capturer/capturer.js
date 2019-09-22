@@ -42,6 +42,7 @@
    * @property {Map<string~filename, Object>} files
    * @property {Map<string~token, Promise<fetchResult>>} fetchMap
    * @property {Map<string~token, Object>} urlToFilenameMap
+   * @property {Map<string~url, Object>} linkedPages
    */
 
   /**
@@ -61,6 +62,8 @@
 
     fetchMap: new Map(),
     urlToFilenameMap: new Map(),
+
+    linkedPages: new Map(),
   }));
 
   /**
@@ -850,6 +853,7 @@
       settings: {
         missionId: capturer.missionId,
         timeId,
+        depth: 0,
         indexFilename: null,
         isMainPage: true,
         isMainFrame: true,
@@ -860,6 +864,9 @@
       },
       options,
     };
+
+    // use disk cache for in-depth capture to prevent memory exhaustion
+    capturer.captureInfo.get(timeId).useDiskCache = options["capture.downLink.doc.depth"] > 0;
 
     capturer.log(`Capturing (document) ${source} ...`);
 
@@ -956,6 +963,7 @@
       settings: {
         missionId: capturer.missionId,
         timeId,
+        depth: 0,
         isHeadless: true,
         indexFilename: null,
         isMainPage: true,
@@ -966,6 +974,9 @@
       },
       options,
     };
+
+    // use disk cache for in-depth capture to prevent memory exhaustion
+    capturer.captureInfo.get(timeId).useDiskCache = options["capture.downLink.doc.depth"] > 0;
 
     isDebug && console.debug("(main) capture", source, message);
 
@@ -1009,11 +1020,13 @@
     isDebug && console.debug("call: captureUrl", params);
 
     const {title, downLink = false, settings, options} = params;
+    let {timeId, depth} = settings;
     let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-    let fetchResponse;
-    let doc;
+    depth++;
+    let downLinkInDepth = downLink && depth <= options["capture.downLink.doc.depth"];
+    let downLinkFile = downLink && ["header", "url"].includes(options["capture.downLink.file.mode"]);
 
     // check for downLink URL filter
     if (downLink) {
@@ -1023,14 +1036,27 @@
       }
 
       // apply extension filter when checking URL
-      if (options["capture.downLink.file.mode"] === "url") {
+      if (downLinkFile && options["capture.downLink.file.mode"] === "url") {
         const filename = scrapbook.urlToFilename(sourceUrl);
         const [, ext] = scrapbook.filenameParts(filename);
         if (!capturer.downLinkFileExtFilter(ext, options)) {
-          return null;
+          downLinkFile = false;
         }
       }
+
+      // apply in-depth URL filter
+      if (downLinkInDepth && !capturer.downLinkDocUrlFilter(sourceUrl, options)) {
+        downLinkInDepth = false;
+      }
+
+      // return if downLink condition not fulfilled
+      if (!downLinkFile && !downLinkInDepth) {
+        return null;
+      }
     }
+
+    let fetchResponse;
+    let doc;
 
     // resolve meta refresh
     const metaRefreshChain = [];
@@ -1074,11 +1100,13 @@
       if (!downLink) {
         throw ex;
       }
+
+      doc = null;
     }
 
     if (downLink) {
       // check for downLink header filter
-      if (options["capture.downLink.file.mode"] === "header") {
+      if (downLinkFile && options["capture.downLink.file.mode"] === "header") {
         // determine extension
         const headers = fetchResponse.headers;
         let ext;
@@ -1095,21 +1123,37 @@
         }
 
         if (!capturer.downLinkFileExtFilter(ext, options)) {
-          return null;
+          downLinkFile = false;
         }
       }
 
-      return await capturer.downloadFile({
-        url: fetchResponse.url,
-        refUrl,
-        settings,
-        options,
-      })
-      .then(response => {
-        return Object.assign({}, response, {
-          url: response.url + (response.url.startsWith('data:') ? '' : sourceUrlHash),
+      if (downLinkFile) {
+        return await capturer.downloadFile({
+          url: fetchResponse.url,
+          refUrl,
+          settings,
+          options,
+        })
+        .then(response => {
+          return Object.assign({}, response, {
+            url: response.url + (response.url.startsWith('data:') ? '' : sourceUrlHash),
+          });
         });
-      });
+      }
+
+      if (downLinkInDepth && doc) {
+        const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
+        if (!linkedPages.has(sourceUrlMain)) {
+          const url = fetchResponse.url + (fetchResponse.url.startsWith('data:') ? '' : sourceUrlHash);
+          linkedPages.set(sourceUrlMain, {
+            url,
+            refUrl,
+            depth,
+          });
+        }
+      }
+
+      return null;
     }
 
     if (doc) {
@@ -2397,6 +2441,55 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     return fn(ext, options);
   };
 
+  capturer.downLinkDocUrlFilter = function (url, options) {
+    const compileFilters = (source) => {
+      const ret = [];
+      source.split(/[\r\n]/).forEach((line) => {
+        line = line.trim();
+        if (!line || line.startsWith("#")) { return; }
+
+        if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+          try {
+            ret.push(new RegExp(RegExp.$1, RegExp.$2));
+          } catch (ex) {
+            console.error(ex);
+          }
+        } else {
+          ret.push(scrapbook.splitUrlByAnchor(line)[0]);
+        }
+      });
+      return ret;
+    };
+    let filterText;
+    let filters;
+
+    const fn = capturer.downLinkDocUrlFilter = (url, options) => {
+      // use the cache if the filter is not changed
+      if (filterText !== options["capture.downLink.doc.urlFilter"]) {
+        filterText = options["capture.downLink.doc.urlFilter"];
+        filters = compileFilters(filterText);
+      }
+
+      // match the URL without hash
+      const matchUrl = scrapbook.splitUrlByAnchor(url)[0];
+
+      // match everything if no filters
+      if (!filters.length) {
+        return true;
+      }
+
+      return filters.some((filter) => {
+        // plain text rule must match full URL
+        if (typeof filter === 'string') {
+          return filter === matchUrl;
+        }
+
+        return filter.test(matchUrl);
+      });
+    };
+    return fn(url, options);
+  };
+
   capturer.downLinkUrlFilter = function (url, options) {
     const compileFilters = (source) => {
       const ret = [];
@@ -2700,13 +2793,58 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
     };
 
+    const handleDeepCapture = async (path) => {
+      if (!(options["capture.downLink.doc.depth"] > 0 && options["capture.saveAs"] !== "singleHtml")) {
+        return;
+      }
+
+      const delay = options["capture.downLink.doc.delay"];
+      const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
+
+      const subSettings = JSON.parse(JSON.stringify(settings));
+      subSettings.isMainPage = false;
+      subSettings.isMainFrame = true;
+      subSettings.fullPage = true;
+      subSettings.isHeadless = true;
+
+      for (const [sourceUrl, info] of linkedPages.entries()) {
+        const {url, refUrl, depth} = info;
+
+        capturer.log(`Capturing linked page (${depth}) ${sourceUrl} ...`);
+
+        subSettings.depth = depth;
+        subSettings.recurseChain = [];
+        delete subSettings.usedCssFontUrl;
+        delete subSettings.usedCssImageUrl;
+
+        const response = await capturer.captureUrl({
+          url,
+          refUrl,
+          settings: subSettings,
+          options,
+        });
+
+        if (delay > 0) {
+          capturer.log(`Waiting for ${delay} ms...`);
+          await scrapbook.delay(delay);
+        }
+      }
+
+      capturer.log('Rebuilding links...');
+      await capturer.rebuildLinks({timeId});
+    };
+
     capturer.log(`Saving data...`);
     const title = data.title || scrapbook.urlToFilename(sourceUrl);
+    let type = options["capture.downLink.doc.depth"] > 0 ? "site" : "";
     let targetDir;
     let filename;
     let [, ext] = scrapbook.filenameParts(documentFileName);
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
+        // singleHtml does not support deep capture
+        type = "";
+
         let {content, mime, charset} = data;
         if (charset) {
           content = scrapbook.byteStringToArrayBuffer(content);
@@ -2728,6 +2866,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
 
       case "zip": {
+        // handle deep capture
+        await handleDeepCapture();
+
         // create index.html that redirects to index.xhtml|.svg
         if (ext !== "html") {
           await addIndexHtml("index.html", `index.${ext}`, title);
@@ -2745,6 +2886,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
 
       case "maff": {
+        // handle deep capture
+        await handleDeepCapture();
+
         // create index.html that redirects to index.xhtml|.svg
         if (ext !== "html") {
           await addIndexHtml(`${timeId}/index.html`, `index.${ext}`, title);
@@ -2784,6 +2928,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       case "folder":
       default: {
+        // handle deep capture
+        await handleDeepCapture();
+
         // create index.html that redirects to index.xhtml|.svg
         if (ext !== "html") {
           await addIndexHtml("index.html", `index.${ext}`, title);
@@ -2812,7 +2959,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     return {
       timeId,
       title,
-      type: "",
+      type,
       sourceUrl,
       targetDir,
       filename,
@@ -3249,10 +3396,105 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     return newFilename;
   };
 
-
   /**
-   * Events handling
+   * @param {Object} params
+   * @param {string} params.timeId
    */
+  capturer.rebuildLinks = async function (params) {
+    const SUPPORT_TYPES = new Set(['text/html', 'application/xhtml+xml', 'image/svg+xml']);
+    const SVG_HREF_ATTRS = ['href', 'xlink:href'];
+    const SHADOW_ROOT_SUPPORTED = !!document.documentElement.attachShadow;
+
+    const rewriteHref = (elem, attr, urlToFilenameMap) => {
+      let u;
+      try {
+        u = new URL(elem.getAttribute(attr));
+      } catch (ex) {
+        // not absolute URL, probably already mapped
+        return;
+      }
+
+      const hash = u.hash;
+      u.hash = '';
+
+      const token = capturer.getRegisterToken(u.href, 'document');
+      const p = urlToFilenameMap.get(token);
+      if (!p) { return; }
+
+      elem.setAttribute(attr, p.url + hash);
+    };
+
+    const processRootNode = (rootNode, urlToFilenameMap) => {
+      // rewrite links
+      switch (rootNode.nodeName.toLowerCase()) {
+        case 'svg': {
+          for (const elem of rootNode.querySelectorAll('a[*|href]')) {
+            for (const attr of SVG_HREF_ATTRS) {
+              if (!elem.hasAttribute(attr)) { continue; }
+              rewriteHref(elem, attr, urlToFilenameMap);
+            }
+          }
+          break;
+        }
+        case 'html':
+        case '#document-fragment': {
+          for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
+            rewriteHref(elem, 'href', urlToFilenameMap);
+          }
+          break;
+        }
+      }
+
+      // recurse into shadow roots
+      if (SHADOW_ROOT_SUPPORTED) {
+        for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowroot]')) {
+          const {mode, data} = JSON.parse(elem.getAttribute('data-scrapbook-shadowroot'));
+          const shadowRoot = elem.attachShadow({mode});
+          shadowRoot.innerHTML = data;
+          processRootNode(shadowRoot, urlToFilenameMap);
+          elem.setAttribute("data-scrapbook-shadowroot", JSON.stringify({
+            data: shadowRoot.innerHTML,
+            mode,
+          }));
+        }
+      }
+    };
+
+    const rebuildLinks = capturer.rebuildLinks = async ({timeId}) => {
+      const info = capturer.captureInfo.get(timeId);
+      const files = info.files;
+      const urlToFilenameMap = info.urlToFilenameMap;
+
+      for (const [filename, item] of files.entries()) {
+        const blob = item.blob;
+        if (!blob) {
+          continue;
+        }
+
+        const {type} = scrapbook.parseHeaderContentType(blob.type);
+        if (!SUPPORT_TYPES.has(type)) {
+          continue;
+        }
+
+        const doc = await scrapbook.readFileAsDocument(blob);
+        processRootNode(doc.documentElement, urlToFilenameMap);
+
+        const content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
+        await capturer.saveFileCache({
+          timeId,
+          path: item.path,
+          blob: new Blob([content], {type: blob.type}),
+        });
+      }
+    };
+
+    return await rebuildLinks(params);
+  };
+
+
+  /****************************************************************************
+   * Events handling
+   ***************************************************************************/
 
   scrapbook.addMessageListener((message, sender) => {
     if (!message.cmd.startsWith("capturer.")) { return false; }

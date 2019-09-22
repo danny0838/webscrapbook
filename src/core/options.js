@@ -278,10 +278,14 @@
   }
 
   function renewCaptureDownLinkDetails() {
-    const mode = document.getElementById("opt_capture.downLink.file.mode").value;
+    var input = document.getElementById("opt_capture.downLink.file.mode");
+    Array.prototype.forEach.call(document.querySelectorAll('.captureDownLinkFileExtFilter'), (elem) => {
+      elem.hidden = input.value === 'none';
+    });
 
-    Array.prototype.forEach.call(document.querySelectorAll('.captureDownLinkDetails'), (elem) => {
-      elem.hidden = mode === 'none';
+    var input = document.getElementById("opt_capture.downLink.doc.depth");
+    Array.prototype.forEach.call(document.querySelectorAll('.captureDownLinkDocUrlFilter'), (elem) => {
+      elem.hidden = !(input.valueAsNumber > 0);
     });
   }
 
@@ -414,6 +418,8 @@
     document.getElementById("opt_capture.saveFilename").addEventListener("change", verifySavePath);
 
     document.getElementById("opt_capture.downLink.file.mode").addEventListener("change", renewCaptureDownLinkDetails);
+
+    document.getElementById("opt_capture.downLink.doc.depth").addEventListener("change", renewCaptureDownLinkDetails);
 
     document.getElementById("options").addEventListener("submit", async (event) => {
       event.preventDefault();

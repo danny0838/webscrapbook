@@ -337,7 +337,8 @@
 
       // check downLink
       if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
-        if (["header", "url"].includes(options["capture.downLink.file.mode"])) {
+        if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
+            options["capture.downLink.doc.depth"] > 0) {
           downLinkTasks = downLinkTasks.then(async () => {
             const response = await capturer.invoke("captureUrl", {
               url,
@@ -2022,6 +2023,11 @@
 
     const documentFileName = registry.filename;
 
+    // group sub-frames with same filename
+    if (isMainFrame) {
+      settings.documentName = scrapbook.filenameParts(documentFileName)[0];
+    }
+
     // construct the cloned node tree
     const origNodeMap = new WeakMap();
     const clonedNodeMap = new WeakMap();
@@ -2304,6 +2310,11 @@
 
       rootNode.setAttribute("data-scrapbook-source", url);
       rootNode.setAttribute("data-scrapbook-create", timeId);
+
+      // mark type as "site" for in-depth capture
+      if (options["capture.downLink.doc.depth"] > 0 && isMainPage && isMainFrame) {
+        rootNode.setAttribute("data-scrapbook-type", "site");
+      }
     }
 
     // force title if a preset title is given

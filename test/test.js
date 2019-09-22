@@ -36,6 +36,9 @@ const baseOptions = {
   "capture.linkUnsavedUri": false,
   "capture.downLink.file.mode": "none",
   "capture.downLink.file.extFilter": "",
+  "capture.downLink.doc.depth": 0,
+  "capture.downLink.doc.delay": null,
+  "capture.downLink.doc.urlFilter": "",
   "capture.downLink.urlFilter": "",
   "capture.removeIntegrity": true,
   "capture.recordDocumentMeta": true,
@@ -6385,7 +6388,7 @@ async function test_capture_anchor3() {
  * capture.downLink.file.mode
  * capture.downLink.file.extFilter
  */
-async function test_capture_downLink() {
+async function test_capture_downLink01() {
   /* header */
   var options = {
     "capture.downLink.file.mode": "header",
@@ -6519,7 +6522,7 @@ async function test_capture_downLink() {
  *
  * capture.downLink.file.extFilter
  */
-async function test_capture_downLink2() {
+async function test_capture_downLink02() {
   // a rule each line
   // match URL (*.py) but download using resolved filename using header (*.txt)
   var options = {
@@ -6701,7 +6704,7 @@ async function test_capture_downLink2() {
  *
  * capture.downLink.urlFilter
  */
-async function test_capture_downLink3() {
+async function test_capture_downLink03() {
   // a rule each line
   // plain text rule
   // match original URL
@@ -6782,6 +6785,485 @@ ${localhost}/capture_downLink/file.css`,
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
   assert(Object.keys(zip.files).length === 5);
+}
+
+/**
+ * Check basic in-depth capture
+ *
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink04() {
+  /* depth = 0 */
+  var options = {
+    "capture.downLink.doc.depth": 0,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink2/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(Object.keys(zip.files).length === 1);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.documentElement.hasAttribute('data-scrapbook-type'));
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink2/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink2/linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink2/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink2/linked1-4.html#444`);
+
+  /* depth = 1 */
+  var options = {
+    "capture.downLink.doc.depth": 1,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink2/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'site');
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#555`);
+
+  var indexFile = zip.file('linked1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+
+  var indexFile = zip.file('linked1-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/linked2-1.html#111`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink2/linked2-2.html#222`);
+
+  var indexFile = zip.file('linked1-3.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-5.html#555`);
+
+  var indexFile = zip.file('linked1-4.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `index.html#iii`);
+
+  var indexFile = zip.file('linked1-5.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+
+  assert(!zip.file('linked2-1.html'));
+
+  assert(!zip.file('linked2-2.html'));
+
+  /* depth = 2 */
+  var options = {
+    "capture.downLink.doc.depth": 2,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink2/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'site');
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#555`);
+
+  var indexFile = zip.file('linked1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+
+  var indexFile = zip.file('linked1-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked2-1.html#111`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked2-2.html#222`);
+
+  var indexFile = zip.file('linked1-3.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-5.html#555`);
+
+  var indexFile = zip.file('linked1-4.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `index.html#iii`);
+
+  var indexFile = zip.file('linked1-5.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+
+  var indexFile = zip.file('linked2-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+
+  var indexFile = zip.file('linked2-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/linked3-1.html#111`);
+}
+
+/**
+ * Check downLink.file should overwrite downLink.doc
+ *
+ * capture.downLink.file.mode
+ * capture.downLink.file.extFilter
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink05() {
+  var options = {
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `bmp, html`,
+    "capture.downLink.doc.depth": 1,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink2/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#555`);
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('linked1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('linked1-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `./linked2-1.html#111`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `./linked2-2.html#222`);
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('linked1-3.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `./linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `./linked1-5.html#555`);
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('linked1-4.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `./in-depth.html#iii`);
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('linked1-5.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+
+  assert(!zip.file('linked2-1.html'));
+
+  assert(!zip.file('linked2-2.html'));
+}
+
+/**
+ * Check urlFilter for doc
+ *
+ * capture.downLink.doc.depth
+ * capture.downLink.doc.urlFilter
+ */
+async function test_capture_downLink06() {
+  /* plain URLs */
+  var options = {
+    "capture.downLink.doc.depth": 2,
+    "capture.downLink.doc.urlFilter": `\
+${localhost}/capture_downLink2/linked1-2.html
+${localhost}/capture_downLink2/linked2-1.html`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink2/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink2/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink2/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink2/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink2/linked1-5.html#555`);
+
+  assert(!zip.file('linked1-1.html'));
+
+  var indexFile = zip.file('linked1-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked2-1.html#111`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink2/linked2-2.html#222`);
+
+  assert(!zip.file('linked1-3.html'));
+
+  assert(!zip.file('linked1-4.html'));
+
+  assert(!zip.file('linked1-5.html'));
+
+  var indexFile = zip.file('linked2-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+
+  assert(!zip.file('linked2-2.html'));
+
+  /* RegExp URLs */
+  var options = {
+    "capture.downLink.doc.depth": 2,
+    "capture.downLink.doc.urlFilter": `/linked1-[12]\.HTML$/i`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink2/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink2/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink2/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink2/linked1-5.html#555`);
+
+  var indexFile = zip.file('linked1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+
+  var indexFile = zip.file('linked1-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/linked2-1.html#111`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink2/linked2-2.html#222`);
+
+  assert(!zip.file('linked1-3.html'));
+
+  assert(!zip.file('linked1-4.html'));
+
+  assert(!zip.file('linked1-5.html'));
+
+  assert(!zip.file('linked2-1.html'));
+
+  assert(!zip.file('linked2-2.html'));
+}
+
+/**
+ * Check link rebuild for XHTML and SVG
+ *
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink07() {
+  var options = {
+    "capture.downLink.doc.depth": 1,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink3/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked1.html`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked2.html`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked3.html`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `subpage1.xhtml`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `subpage2.svg`);
+
+  var indexFile = zip.file('subpage1.xhtml');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked1.html`);
+
+  var indexFile = zip.file('subpage2.svg');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked2.html`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('xlink:href') === `linked3.html`);
+}
+
+/**
+ * A pages linked from a frame should have same depth as from the main page.
+ *
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink08() {
+  var options = {
+    "capture.downLink.doc.depth": 1,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink4/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
+
+  var indexFile = zip.file('index_1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked1.html`);
+
+  var indexFile = zip.file('linked1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+}
+
+/**
+ * Check frame renaming for deep pages.
+ *
+ * capture.downLink.doc.depth
+ * capture.frameRename
+ */
+async function test_capture_downLink09() {
+  var options = {
+    "capture.downLink.doc.depth": 1,
+  };
+
+  /* frameRename = true */
+  options["capture.frameRename"] = true;
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink5/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked1.html`);
+
+  var indexFile = zip.file('linked1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/^linked1_\d+\.html$/));
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/^linked1_\d+\.html$/));
+
+  /* frameRename = false */
+  options["capture.frameRename"] = false;
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink5/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked1.html`);
+
+  var indexFile = zip.file('linked1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `frame1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `frame2.html`);
+}
+
+/**
+ * Check links in shadow roots are rebuilt
+ *
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink10() {
+  var options = {
+    "capture.downLink.doc.depth": 1,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink6/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var host = doc.querySelector('div');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow = frag.content;
+  assert(shadow.querySelectorAll('a')[0].getAttribute('href') === `linked1.html#111`);
+
+  var host = shadow.querySelector('div');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow = frag.content;
+  assert(shadow.querySelectorAll('a')[0].getAttribute('href') === `linked2.html#222`);
 }
 
 /**

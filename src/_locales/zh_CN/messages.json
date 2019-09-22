@@ -622,6 +622,21 @@
   "OptionCaptureDeleteErasedOnSaveLabel": {
     "message": "保存页面时自动删除所有擦除内容"
   },
+  "OptionCaptureDownLinkDocDelayLabel": {
+    "message": "获取链接页面延迟 (ms):"
+  },
+  "OptionCaptureDownLinkDocDepthLabel": {
+    "message": "获取链接页面深度:"
+  },
+  "OptionCaptureDownLinkDocDepthTooltip": {
+    "message": "获取深度未超过此值的链接页面。目前页面为深度 0，深度 0 链接的页面为深度 1，深度 1 链接的页面为深度 2，……依此类推。\n\n• 注意：深层获取可能会下载大量资料，宜设定保存获取数据为文件夹，以避免潜在的效能问题或错误。此功能不支持保存为单一 HTML 文件。"
+  },
+  "OptionCaptureDownLinkDocUrlFilterLabel": {
+    "message": "包括以下网址:"
+  },
+  "OptionCaptureDownLinkDocUrlFilterTooltip": {
+    "message": "此过滤器根据完整网址（去除“#”以后的部分）筛选要获取的链接。\n\n• 以下每行为一个完整网址（“#”以后的部分会自动去除）或一个正规表示式（如“/http://example.com/.*/”）。\n• 符合任何一行的规则即列入下载。若每行皆无规则，则所有网址皆列入下载。\n• 以“#”开头的行皆视为注解，执行时会略过。"
+  },
   "OptionCaptureDownLinkFileExtFilterError": {
     "message": "以下扩展名过滤器的正则表达式语法有误，执行时会忽略它们，要停下来修正吗？\n\n$LINES$",
     "placeholders": {
@@ -631,13 +646,16 @@
     }
   },
   "OptionCaptureDownLinkFileExtFilterLabel": {
-    "message": "扩展名过滤器:"
+    "message": "包括以下扩展名:"
   },
   "OptionCaptureDownLinkFileExtFilterTooltip": {
     "message": "此过滤器根据扩展名筛选要下载的链接。\n\n• 以下每行为一个以“,”分隔的扩展名列表（不分大小写，可含空白，如“jpg, jpeg”）或一个正则表达式（如“/jpe?g|gif|png/i”）。取全扩展名比对，例如 ~.doc 不视为符合规则“docx”。\n• 符合任何一行的规则即列入下载。\n• 以“#”开头的行皆视为注解，执行时会略过。"
   },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "匹配 HTTP 标头及网址扩展名"
+  },
+  "OptionCaptureDownLinkFileModeLabel": {
+    "message": "下载链接文件:"
   },
   "OptionCaptureDownLinkFileModeNoneLabel": {
     "message": "停用下载链接文件"
@@ -671,7 +689,7 @@
     "message": "网址过滤器:"
   },
   "OptionCaptureDownLinkUrlFilterTooltip": {
-    "message": "此过滤器根据完整网址（去除“#”以后的部分）筛选禁止下载的链接，优先于其他过滤器。\n\n• 以下每行为一个完整网址（“#”以后的部分会自动去除）或一个正则表达式（如“/[/=]logout\\b/i”）。\n• 符合任何一行的规则即禁止下载。\n• 以“#”开头的行皆视为注解，执行时会略过。"
+    "message": "此过滤器根据完整网址（去除“#”以后的部分）筛选禁止下载或获取的链接，优先于其他过滤器。\n\n• 以下每行为一个完整网址（“#”以后的部分会自动去除）或一个正则表达式（如“/[/=]logout\\b/i”）。\n• 符合任何一行的规则即禁止下载。\n• 以“#”开头的行皆视为注解，执行时会略过。"
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
@@ -949,7 +967,7 @@
     "message": "后端服务器 - 检测器"
   },
   "OptionGroupDownLink": {
-    "message": "获取 - 下载链接文件"
+    "message": "获取 - 获取链接"
   },
   "OptionGroupEditor": {
     "message": "编辑器"
