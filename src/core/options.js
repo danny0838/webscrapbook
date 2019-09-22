@@ -225,6 +225,7 @@ function onToggleTooltip(elem) {
     tooltipMap.set(elem, null);
   } else {
     tooltip = elem.parentNode.insertBefore(document.createElement("div"), elem.nextSibling);
+    tooltip.className = "tooltip";
     tooltip.textContent = elem.getAttribute("data-tooltip");
     tooltipMap.set(elem, tooltip);
   }
