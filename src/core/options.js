@@ -178,7 +178,9 @@ function refreshForm() {
 function renewCaptureSaveToDetails() {
   const mode = document.getElementById("opt_capture.saveTo").value;
 
-  document.getElementById('captureScrapbookFolder').hidden = mode !== 'folder';
+  Array.prototype.forEach.call(document.querySelectorAll('.captureScrapbookFolder'), (elem) => {
+    elem.hidden = mode !== 'folder';
+  });
 
   {
     const elem = document.getElementById('opt_capture.saveAs');
@@ -192,8 +194,12 @@ function renewCaptureSaveToDetails() {
 function renewCaptureSaveAsDetails() {
   const mode = document.getElementById("opt_capture.saveAs").value;
 
-  document.getElementById('captureMergeCssResources').hidden = mode !== 'singleHtml';
-  document.getElementById('captureSaveDataUriAsFile').hidden = mode === 'singleHtml';
+  Array.prototype.forEach.call(document.querySelectorAll('.captureMergeCssResources'), (elem) => {
+    elem.hidden = mode !== 'singleHtml';
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.captureSaveDataUriAsFile'), (elem) => {
+    elem.hidden = mode === 'singleHtml';
+  });
 }
 
 function verifySavePath(event) {
