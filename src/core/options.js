@@ -193,6 +193,7 @@ function renewCaptureSaveAsDetails() {
   const mode = document.getElementById("opt_capture.saveAs").value;
 
   document.getElementById('captureMergeCssResources').hidden = mode !== 'singleHtml';
+  document.getElementById('captureSaveDataUriAsFile').hidden = mode === 'singleHtml';
 }
 
 function verifySavePath(event) {
