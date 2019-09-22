@@ -2042,6 +2042,57 @@ async function test_capture_frame_singleHtml() {
 }
 
 /**
+ * Check if frameRename works correctly.
+ *
+ * capture.frameRename
+ */
+async function test_capture_frameRename() {
+  /* capture.frameRename = true */
+  var options = {
+    "capture.frameRename": true,
+    "capture.frame": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_frameRename/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/^index_\d\.html$/));
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/^index_\d\.xhtml$/));
+  assert(doc.querySelectorAll('iframe')[2].getAttribute('src').match(/^index_\d\.svg$/));
+  assert(doc.querySelectorAll('iframe')[3].getAttribute('src') === `text.txt`);
+  assert(doc.querySelectorAll('iframe')[4].getAttribute('src') === `red.bmp`);
+
+  /* capture.frameRename = false */
+  var options = {
+    "capture.frameRename": false,
+    "capture.frame": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_frameRename/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `frame1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `frame2.xhtml`);
+  assert(doc.querySelectorAll('iframe')[2].getAttribute('src') === `frame3.svg`);
+  assert(doc.querySelectorAll('iframe')[3].getAttribute('src') === `text.txt`);
+  assert(doc.querySelectorAll('iframe')[4].getAttribute('src') === `red.bmp`);
+}
+
+/**
  * Check if option works
  *
  * capture.style
