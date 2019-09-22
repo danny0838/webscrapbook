@@ -622,7 +622,7 @@
   "OptionCaptureDeleteErasedOnSaveLabel": {
     "message": "Automatically delete all erased content on saving"
   },
-  "OptionCaptureDownLinkExtFilterError": {
+  "OptionCaptureDownLinkFileExtFilterError": {
     "message": "The following regular expressions in file extension filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
     "placeholders": {
       "lines": {
@@ -630,10 +630,10 @@
       }
     }
   },
-  "OptionCaptureDownLinkExtFilterLabel": {
+  "OptionCaptureDownLinkFileExtFilterLabel": {
     "message": "File extension filter:"
   },
-  "OptionCaptureDownLinkExtFilterTooltip": {
+  "OptionCaptureDownLinkFileExtFilterTooltip": {
     "message": "This determines what to download according to file extension.\n\n• Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. “jpg, jpeg”) or a regular expression (e.g. “/jpe?g|gif|png/i”).\n• The full extension is taken for matching. For example, .doc does not match the rule “docx”.\n• Whichever matches a rule at any line is included for download.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkFilterErrorLine": {
@@ -647,16 +647,16 @@
       }
     }
   },
-  "OptionCaptureDownLinkModeHeaderLabel": {
+  "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "Match HTTP header and file extension"
   },
-  "OptionCaptureDownLinkModeNoneLabel": {
+  "OptionCaptureDownLinkFileModeNoneLabel": {
     "message": "Disable download linked files"
   },
-  "OptionCaptureDownLinkModeTooltip": {
+  "OptionCaptureDownLinkFileModeTooltip": {
     "message": "This determines whether and how to download the targeted resource of a link (an A or AREA element).\n\n• Disable download linked files: Do not download the linked resource.\n• Match URL file extension: Match the file extension of the URL. This performs better but cannot differenciate dynamically generated resource. For example, a URL whose extension is .php can output a resource of html, doc, pdf, or other type, but the filter always gets “php” in this mode.\n• Match HTTP header and file extension: Traverse every link to get the HTTP header and the precise extension of the output resource for matching. NOTE: Certain sites make interactive commands as plain hyperlink, which could be unexpectedly triggered during traversal (such as logging out the site). The URL filter can be configured to avoid such trigering."
   },
-  "OptionCaptureDownLinkModeUrlLabel": {
+  "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "Match URL file extension"
   },
   "OptionCaptureDownLinkUrlFilterError": {

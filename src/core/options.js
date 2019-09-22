@@ -215,9 +215,9 @@
     };
 
     var errors = [];
-    checkRule(document.getElementById("opt_capture.downLink.extFilter").value);
+    checkRule(document.getElementById("opt_capture.downLink.file.extFilter").value);
     if (errors.length) {
-      if (confirm(scrapbook.lang("OptionCaptureDownLinkExtFilterError", [errors.join('\n\n')]))) {
+      if (confirm(scrapbook.lang("OptionCaptureDownLinkFileExtFilterError", [errors.join('\n\n')]))) {
         return false;
       }
     }
@@ -278,7 +278,7 @@
   }
 
   function renewCaptureDownLinkDetails() {
-    const mode = document.getElementById("opt_capture.downLink.mode").value;
+    const mode = document.getElementById("opt_capture.downLink.file.mode").value;
 
     Array.prototype.forEach.call(document.querySelectorAll('.captureDownLinkDetails'), (elem) => {
       elem.hidden = mode === 'none';
@@ -413,7 +413,7 @@
 
     document.getElementById("opt_capture.saveFilename").addEventListener("change", verifySavePath);
 
-    document.getElementById("opt_capture.downLink.mode").addEventListener("change", renewCaptureDownLinkDetails);
+    document.getElementById("opt_capture.downLink.file.mode").addEventListener("change", renewCaptureDownLinkDetails);
 
     document.getElementById("options").addEventListener("submit", async (event) => {
       event.preventDefault();

@@ -337,7 +337,7 @@
 
       // check downLink
       if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
-        if (["header", "url"].includes(options["capture.downLink.mode"])) {
+        if (["header", "url"].includes(options["capture.downLink.file.mode"])) {
           tasks[tasks.length] = halter.then(async () => {
             const response = await capturer.invoke("captureUrl", {
               url,
@@ -3100,7 +3100,7 @@
     return sourceUrl;
   };
 
-  capturer.downLinkExtFilter = function (ext, options) {
+  capturer.downLinkFileExtFilter = function (ext, options) {
     const compileFilters = (source) => {
       const ret = [];
       source.split(/[\r\n]/).forEach((line) => {
@@ -3126,10 +3126,10 @@
     let filterText;
     let filters;
 
-    const fn = capturer.downLinkExtFilter = (ext, options) => {
+    const fn = capturer.downLinkFileExtFilter = (ext, options) => {
       // use the cache if the filter is not changed
-      if (filterText !== options["capture.downLink.extFilter"]) {
-        filterText = options["capture.downLink.extFilter"];
+      if (filterText !== options["capture.downLink.file.extFilter"]) {
+        filterText = options["capture.downLink.file.extFilter"];
         filters = compileFilters(filterText);
       }
 

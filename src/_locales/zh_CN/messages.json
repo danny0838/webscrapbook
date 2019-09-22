@@ -622,7 +622,7 @@
   "OptionCaptureDeleteErasedOnSaveLabel": {
     "message": "保存页面时自动删除所有擦除内容"
   },
-  "OptionCaptureDownLinkExtFilterError": {
+  "OptionCaptureDownLinkFileExtFilterError": {
     "message": "以下扩展名过滤器的正则表达式语法有误，执行时会忽略它们，要停下来修正吗？\n\n$LINES$",
     "placeholders": {
       "lines": {
@@ -630,10 +630,10 @@
       }
     }
   },
-  "OptionCaptureDownLinkExtFilterLabel": {
+  "OptionCaptureDownLinkFileExtFilterLabel": {
     "message": "扩展名过滤器:"
   },
-  "OptionCaptureDownLinkExtFilterTooltip": {
+  "OptionCaptureDownLinkFileExtFilterTooltip": {
     "message": "此过滤器根据扩展名筛选要下载的链接。\n\n• 以下每行为一个以“,”分隔的扩展名列表（不分大小写，可含空白，如“jpg, jpeg”）或一个正则表达式（如“/jpe?g|gif|png/i”）。取全扩展名比对，例如 ~.doc 不视为符合规则“docx”。\n• 符合任何一行的规则即列入下载。\n• 以“#”开头的行皆视为注解，执行时会略过。"
   },
   "OptionCaptureDownLinkFilterErrorLine": {
@@ -647,16 +647,16 @@
       }
     }
   },
-  "OptionCaptureDownLinkModeHeaderLabel": {
+  "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "匹配 HTTP 标头及网址扩展名"
   },
-  "OptionCaptureDownLinkModeNoneLabel": {
+  "OptionCaptureDownLinkFileModeNoneLabel": {
     "message": "停用下载链接文件"
   },
-  "OptionCaptureDownLinkModeTooltip": {
+  "OptionCaptureDownLinkFileModeTooltip": {
     "message": "此选项决定是否下载链接（A 或 AREA 元素）指向的内容。\n\n• 停用下载链接文件：不下载链接的文件。\n• 匹配网址扩展名：匹配网址扩展名决定是否下载，效能较佳，但无法有效区分动态网页的类型。例如扩展名为 .php 的网址可能输出 html、doc、pdf 或其他格式，但此模式下都是取 php 做匹配。\n• 匹配 HTTP 标头及网址扩展名：走访每个链接取得 HTTP 标头及实际输出的扩展名，据此决定是否下载。注意：有些网站会把操作指令做成一般的链接，导致走访链接时误触指令（例如注销网站），此时可设置网址过滤器防止走访。"
   },
-  "OptionCaptureDownLinkModeUrlLabel": {
+  "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "匹配网址扩展名"
   },
   "OptionCaptureDownLinkUrlFilterError": {

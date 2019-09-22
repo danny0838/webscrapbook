@@ -978,10 +978,10 @@
       }
 
       // apply extension filter when checking URL
-      if (options["capture.downLink.mode"] === "url") {
+      if (options["capture.downLink.file.mode"] === "url") {
         const filename = scrapbook.urlToFilename(sourceUrl);
         const [, ext] = scrapbook.filenameParts(filename);
-        if (!capturer.downLinkExtFilter(ext, options)) {
+        if (!capturer.downLinkFileExtFilter(ext, options)) {
           return null;
         }
       }
@@ -1033,7 +1033,7 @@
 
     if (downLink) {
       // check for downLink header filter
-      if (options["capture.downLink.mode"] === "header") {
+      if (options["capture.downLink.file.mode"] === "header") {
         // determine extension
         const headers = fetchResponse.headers;
         let ext;
@@ -1049,7 +1049,7 @@
           [, ext] = scrapbook.filenameParts(filename);
         }
 
-        if (!capturer.downLinkExtFilter(ext, options)) {
+        if (!capturer.downLinkFileExtFilter(ext, options)) {
           return null;
         }
       }

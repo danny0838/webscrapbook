@@ -34,8 +34,8 @@ const baseOptions = {
   "capture.shadowDom": "save",
   "capture.removeHidden": "none",
   "capture.linkUnsavedUri": false,
-  "capture.downLink.mode": "none",
-  "capture.downLink.extFilter": "",
+  "capture.downLink.file.mode": "none",
+  "capture.downLink.file.extFilter": "",
   "capture.downLink.urlFilter": "",
   "capture.removeIntegrity": true,
   "capture.recordDocumentMeta": true,
@@ -1106,8 +1106,8 @@ p { background-image: url("red.bmp"); }`);
 async function test_capture_dataUri3() {
   var options = {
     "capture.frame": "save",
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": "txt",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
     "capture.saveDataUriAsSrcdoc": false,
   };
@@ -6382,14 +6382,14 @@ async function test_capture_anchor3() {
 /**
  * Check if option works
  *
- * capture.downLink.mode
- * capture.downLink.extFilter
+ * capture.downLink.file.mode
+ * capture.downLink.file.extFilter
  */
 async function test_capture_downLink() {
   /* header */
   var options = {
-    "capture.downLink.mode": "header",
-    "capture.downLink.extFilter": `txt, bmp, css, html`,
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `txt, bmp, css, html`,
   };
 
   var blob = await capture({
@@ -6438,8 +6438,8 @@ async function test_capture_downLink() {
 
   /* url */
   var options = {
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `txt, bmp, css, html`,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `txt, bmp, css, html`,
   };
 
   var blob = await capture({
@@ -6488,8 +6488,8 @@ async function test_capture_downLink() {
 
   /* none */
   var options = {
-    "capture.downLink.mode": "none",
-    "capture.downLink.extFilter": `txt, bmp, css, html`,
+    "capture.downLink.file.mode": "none",
+    "capture.downLink.file.extFilter": `txt, bmp, css, html`,
   };
 
   var blob = await capture({
@@ -6517,14 +6517,14 @@ async function test_capture_downLink() {
 /**
  * Check extFilter syntax
  *
- * capture.downLink.extFilter
+ * capture.downLink.file.extFilter
  */
 async function test_capture_downLink2() {
   // a rule each line
   // match URL (*.py) but download using resolved filename using header (*.txt)
   var options = {
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `txt\nbmp\ncss\npy`,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `txt\nbmp\ncss\npy`,
   };
 
   var blob = await captureHeadless({
@@ -6543,8 +6543,8 @@ async function test_capture_downLink2() {
 
   // space separator
   var options = {
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `txt bmp css`,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `txt bmp css`,
   };
 
   var blob = await captureHeadless({
@@ -6561,8 +6561,8 @@ async function test_capture_downLink2() {
 
   // comma separator
   var options = {
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `txt,bmp,css`,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `txt,bmp,css`,
   };
 
   var blob = await captureHeadless({
@@ -6579,8 +6579,8 @@ async function test_capture_downLink2() {
 
   // semicolon separator
   var options = {
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `txt;bmp;css`,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `txt;bmp;css`,
   };
 
   var blob = await captureHeadless({
@@ -6597,8 +6597,8 @@ async function test_capture_downLink2() {
 
   // combined separator
   var options = {
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `txt; bmp ,; css`,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `txt; bmp ,; css`,
   };
 
   var blob = await captureHeadless({
@@ -6615,8 +6615,8 @@ async function test_capture_downLink2() {
 
   // match full extension
   var options = {
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `tx, mp, s`,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `tx, mp, s`,
   };
 
   var blob = await captureHeadless({
@@ -6630,8 +6630,8 @@ async function test_capture_downLink2() {
 
   // RegExp rule with flag
   var options = {
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `/(TXT|BMP|CSS)/i`,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `/(TXT|BMP|CSS)/i`,
   };
 
   var blob = await captureHeadless({
@@ -6648,8 +6648,8 @@ async function test_capture_downLink2() {
 
   // RegExp rule with no flag
   var options = {
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `/(TXT|BMP|CSS)/`,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `/(TXT|BMP|CSS)/`,
   };
 
   var blob = await captureHeadless({
@@ -6663,8 +6663,8 @@ async function test_capture_downLink2() {
 
   // RegExp rule
   var options = {
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `/(?!py).+/`,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `/(?!py).+/`,
   };
 
   var blob = await captureHeadless({
@@ -6682,8 +6682,8 @@ async function test_capture_downLink2() {
 
   // match full extension
   var options = {
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": `/tx/`,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `/tx/`,
   };
 
   var blob = await captureHeadless({
@@ -6707,8 +6707,8 @@ async function test_capture_downLink3() {
   // match original URL
   // rule and URL have hash stripped before comparison
   var options = {
-    "capture.downLink.mode": "header",
-    "capture.downLink.extFilter": `txt, bmp, css`,
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `txt, bmp, css`,
     // 1. should match
     // 2. should match (hash in rule and URL are stripped)
     // 3. should match (hash in rule is stripped)
@@ -6733,8 +6733,8 @@ ${localhost}/capture_downLink/redirect.pyr#bar`,
 
   // plain text rule must match full URL
   var options = {
-    "capture.downLink.mode": "header",
-    "capture.downLink.extFilter": `txt, bmp, css`,
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `txt, bmp, css`,
     // 1. should not match
     // 2. should match (hash in URL is stripped)
     "capture.downLink.urlFilter": `\
@@ -6761,8 +6761,8 @@ ${localhost}/capture_downLink/file.css`,
   // match partial URL
   // URL has hash stripped before comparison but rule is not
   var options = {
-    "capture.downLink.mode": "header",
-    "capture.downLink.extFilter": `txt, bmp, css`,
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `txt, bmp, css`,
     // 1. should match
     // 2. should not match (hash stripped in URL but not in rule)
     "capture.downLink.urlFilter": `\
@@ -7796,8 +7796,8 @@ async function test_capture_record_urls() {
     "capture.styleInline": "save",
     "capture.rewriteCss": "url",
     "capture.script": "save",
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": "txt",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
   };
 
@@ -8147,8 +8147,8 @@ async function test_capture_linkUnsavedUri1() {
     "capture.style": "save",
     "capture.rewriteCss": "url",
     "capture.script": "save",
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": "txt",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
   };
 
@@ -8205,16 +8205,16 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
  * Test for downLink
  *
  * capture.linkUnsavedUri
- * capture.downLink.mode
+ * capture.downLink.file.mode
  */
 async function test_capture_linkUnsavedUri2() {
   var options = {
-    "capture.downLink.extFilter": "txt",
+    "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
   };
 
   /* -capture.linkUnsavedUri */
-  options["capture.downLink.mode"] = "url";
+  options["capture.downLink.file.mode"] = "url";
   options["capture.linkUnsavedUri"] = false;
 
   var blob = await captureHeadless({
@@ -8235,7 +8235,7 @@ async function test_capture_linkUnsavedUri2() {
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.css`);
 
   /* -capture.linkUnsavedUri */
-  options["capture.downLink.mode"] = "header";
+  options["capture.downLink.file.mode"] = "header";
   options["capture.linkUnsavedUri"] = false;
 
   var blob = await captureHeadless({
@@ -8256,7 +8256,7 @@ async function test_capture_linkUnsavedUri2() {
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.css`);
 
   /* +capture.linkUnsavedUri */
-  options["capture.downLink.mode"] = "url";
+  options["capture.downLink.file.mode"] = "url";
   options["capture.linkUnsavedUri"] = true;
 
   var blob = await captureHeadless({
@@ -8294,8 +8294,8 @@ async function test_capture_linkUnsavedUri3() {
     "capture.style": "save",
     "capture.rewriteCss": "url",
     "capture.script": "save",
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": "txt",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
   };
 
@@ -8345,8 +8345,8 @@ async function test_capture_linkUnsavedUri4() {
     "capture.style": "save",
     "capture.rewriteCss": "url",
     "capture.script": "save",
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": "txt",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
   };
 
@@ -8396,8 +8396,8 @@ async function test_capture_linkUnsavedUri5() {
     "capture.style": "save",
     "capture.rewriteCss": "url",
     "capture.script": "save",
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": "txt",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
   };
 
@@ -8452,8 +8452,8 @@ async function test_capture_linkUnsavedUri6() {
     "capture.style": "save",
     "capture.rewriteCss": "url",
     "capture.script": "save",
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": "txt",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
   };
 
@@ -8504,8 +8504,8 @@ async function test_capture_linkUnsavedUri7() {
     "capture.style": "save",
     "capture.rewriteCss": "url",
     "capture.script": "save",
-    "capture.downLink.mode": "url",
-    "capture.downLink.extFilter": "txt",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
   };
 
