@@ -12,6 +12,18 @@ details > div {
   padding: .5em;
 }
 
+details > div > div {
+  margin: .75em 0;
+}
+
+details > div > div:first-child {
+  margin-top: 0;
+}
+
+details > div > div:last-child {
+  margin-bottom: 0;
+}
+
 a[data-tooltip] {
   display: inline-block;
   color: inherit;
