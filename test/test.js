@@ -4837,6 +4837,71 @@ async function test_capture_formStatus() {
 }
 
 /**
+ * Check if shadowRoots (possibly nested) can be captured correctly.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_shadowRoot() {
+  /* capture.shadowDom = save */
+  var options = {
+    "capture.shadowDom": "save",
+    "capture.image": "save",
+    "capture.script": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_shadowRoot/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["green.bmp"]);
+  assert(zip.files["blue.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var host1 = doc.querySelector('div');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow1 = frag.content;
+  assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
+
+  var host2 = shadow1.querySelector('p');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host2.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow2 = frag.content;
+  assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
+
+  var loader = doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]');
+  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+
+  /* capture.shadowDom = remove */
+  var options = {
+    "capture.shadowDom": "remove",
+    "capture.image": "save",
+    "capture.script": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_shadowRoot/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(!zip.files["green.bmp"]);
+  assert(!zip.files["blue.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
+  assert(!doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]'));
+}
+
+/**
  * Check if the URL for general saved resource is rewritten correctly
  * when base is set to another directory.
  *
@@ -6882,71 +6947,6 @@ async function test_capture_recursive() {
 }
 
 /**
- * Check if shadowRoots (possibly nested) can be captured correctly.
- *
- * capturer.captureDocument
- */
-async function test_capture_shadowRoot() {
-  /* capture.shadowDom = save */
-  var options = {
-    "capture.shadowDom": "save",
-    "capture.image": "save",
-    "capture.script": "remove",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_shadowRoot/index.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["green.bmp"]);
-  assert(zip.files["blue.bmp"]);
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  var host1 = doc.querySelector('div');
-  var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
-  var shadow1 = frag.content;
-  assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
-
-  var host2 = shadow1.querySelector('p');
-  var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host2.getAttribute("data-scrapbook-shadowroot")).data;
-  var shadow2 = frag.content;
-  assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
-
-  var loader = doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]');
-  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
-
-  /* capture.shadowDom = remove */
-  var options = {
-    "capture.shadowDom": "remove",
-    "capture.image": "save",
-    "capture.script": "remove",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_shadowRoot/index.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(!zip.files["green.bmp"]);
-  assert(!zip.files["blue.bmp"]);
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
-  assert(!doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]'));
-}
-
-/**
  * Check generated data URI for singleHtml
  *
  * capturer.captureDocument
@@ -7307,6 +7307,7 @@ async function runTests() {
   await test(test_capture_applet);
   await test(test_capture_base);
   await test(test_capture_formStatus);
+  await test(test_capture_shadowRoot);
   await test(test_capture_rewrite);
   await test(test_capture_rewrite2);
   await test(test_capture_anchor);
@@ -7337,7 +7338,6 @@ async function runTests() {
   await test(test_capture_svg);
   await test(test_capture_mathml);
   await test(test_capture_recursive);
-  await test(test_capture_shadowRoot);
   await test(test_capture_singleHtml_charset);
   await test(test_capture_singleHtml_mergeCss);
   await test(test_capture_invalid_tags);
