@@ -2550,9 +2550,9 @@ capturer.downLinkExtFilter = function (ext, options) {
             console.error(ex);
           }
         } else {
-          const regex = line.split(/[,; ]+/)
-            .map(x => scrapbook.escapeRegExp(x))
+          const regex = line.split(/[,;\s]+/)
             .filter(x => !!x)
+            .map(x => scrapbook.escapeRegExp(x))
             .join('|');
           ret.push(new RegExp(`^(?:${regex})$`, 'i'));
         }
