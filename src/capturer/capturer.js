@@ -440,11 +440,7 @@ capturer.access = async function (params) {
     })().then(deferred.resolve, deferred.reject);
 
     accessMap.set(accessToken, accessCurrent);
-
-    do {
-      accessCurrent.id = scrapbook.getUuid();
-    } while (accessMap.has(accessCurrent.id));
-    accessMap.set(accessCurrent.id, accessCurrent);
+    accessCurrent.id = accessToken;
 
     return accessCurrent;
   };
