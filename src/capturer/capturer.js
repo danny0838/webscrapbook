@@ -955,55 +955,116 @@
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl]
    * @param {string} [params.title] - an overriding title
+   * @param {boolean} [params.downLink] - is downLink mode (check filter, download as file)
    * @param {Object} params.settings
    * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @return {Promise<Object|null>} - The capture result, or null if not to be captured.
    */
   capturer.captureUrl = async function (params) {
     isDebug && console.debug("call: captureUrl", params);
 
-    const {title, settings, options} = params;
+    const {title, downLink = false, settings, options} = params;
     let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     let fetchResponse;
     let doc;
 
+    // check for downLink URL filter
+    if (downLink) {
+      // exclude URLs mathing downLinkUrlFilter
+      if (capturer.downLinkUrlFilter(sourceUrl, options)) {
+        return null;
+      }
+
+      // apply extension filter when checking URL
+      if (options["capture.downLink.mode"] === "url") {
+        const filename = scrapbook.urlToFilename(sourceUrl);
+        const [, ext] = scrapbook.filenameParts(filename);
+        if (!capturer.downLinkExtFilter(ext, options)) {
+          return null;
+        }
+      }
+    }
+
     // resolve meta refresh
     const metaRefreshChain = [];
-    while (true) {
-      fetchResponse = await capturer.fetch({
-        url: sourceUrlMain,
+    try {
+      while (true) {
+        fetchResponse = await capturer.fetch({
+          url: sourceUrlMain,
+          refUrl,
+          ignoreSizeLimit: settings.isMainPage && settings.isMainFrame,
+          settings,
+          options,
+        });
+
+        if (fetchResponse.error) {
+          throw new Error(fetchResponse.error);
+        }
+
+        doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
+
+        if (!doc) {
+          break;
+        }
+
+        const metaRefreshTarget = scrapbook.getMetaRefreshTarget(doc, fetchResponse.url);
+
+        if (!metaRefreshTarget) {
+          break;
+        }
+
+        if (metaRefreshChain.includes(metaRefreshTarget)) {
+          throw new Error(`Circular meta refresh.`);
+        }
+
+        metaRefreshChain.push(fetchResponse.url);
+        refUrl = fetchResponse.url;
+        sourceUrl = metaRefreshTarget;
+        [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+      }
+    } catch (ex) {
+      // URL not accessible
+      if (!downLink) {
+        throw ex;
+      }
+    }
+
+    if (downLink) {
+      // check for downLink header filter
+      if (options["capture.downLink.mode"] === "header") {
+        // determine extension
+        const headers = fetchResponse.headers;
+        let ext;
+        if (headers.filename) {
+          [, ext] = scrapbook.filenameParts(headers.filename);
+          if (!ext && headers.contentType) {
+            ext = Mime.extension(headers.contentType);
+          }
+        } else if (headers.contentType) {
+          ext = Mime.extension(headers.contentType);
+        } else {
+          const filename = scrapbook.urlToFilename(fetchResponse.url);
+          [, ext] = scrapbook.filenameParts(filename);
+        }
+
+        if (!capturer.downLinkExtFilter(ext, options)) {
+          return null;
+        }
+      }
+
+      return await capturer.downloadFile({
+        url: fetchResponse.url,
         refUrl,
-        ignoreSizeLimit: settings.isMainPage && settings.isMainFrame,
         settings,
         options,
+      })
+      .then(response => {
+        return Object.assign({}, response, {
+          url: response.url + (response.url.startsWith('data:') ? '' : sourceUrlHash),
+        });
       });
-
-      if (fetchResponse.error) {
-        throw new Error(fetchResponse.error);
-      }
-
-      doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
-
-      if (!doc) {
-        break;
-      }
-
-      const metaRefreshTarget = scrapbook.getMetaRefreshTarget(doc, fetchResponse.url);
-
-      if (!metaRefreshTarget) {
-        break;
-      }
-
-      if (metaRefreshChain.includes(metaRefreshTarget)) {
-        throw new Error(`Circular meta refresh.`);
-      }
-
-      metaRefreshChain.push(fetchResponse.url);
-      refUrl = fetchResponse.url;
-      sourceUrl = metaRefreshTarget;
-      [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     }
 
     if (doc) {
@@ -2818,45 +2879,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       settings,
       options,
     });
-  };
-
-  /**
-   * @kind invokable
-   * @param {Object} params
-   * @param {string} params.url
-   * @param {string} [params.refUrl]
-   * @param {string} params.options
-   * @return {string} File extension of the URL.
-   */
-  capturer.downLinkFetchHeader = async function (params) {
-    isDebug && console.debug("call: downLinkFetchHeader", params);
-
-    const {url: sourceUrl, refUrl, settings, options} = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-
-    const fetchResponse = await capturer.fetch({
-      url: sourceUrlMain,
-      refUrl,
-      headerOnly: true,
-      options,
-      settings,
-    });
-    const headers = fetchResponse.headers;
-    if (headers.filename) {
-      let [, ext] = scrapbook.filenameParts(headers.filename);
-
-      if (!ext && headers.contentType) {
-        ext = Mime.extension(headers.contentType);
-      }
-
-      return ext;
-    } else if (headers.contentType) {
-      return Mime.extension(headers.contentType);
-    } else {
-      const filename = scrapbook.urlToFilename(fetchResponse.url);
-      const [, ext] = scrapbook.filenameParts(filename);
-      return ext;
-    }
   };
 
   /**

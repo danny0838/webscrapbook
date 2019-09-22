@@ -337,58 +337,26 @@
 
       // check downLink
       if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
-        switch (options["capture.downLink.mode"]) {
-          case "header": {
-            if (capturer.downLinkUrlFilter(url, options)) {
-              break;
-            }
-
-            tasks[tasks.length] = halter.then(async () => {
-              const ext = await capturer.invoke("downLinkFetchHeader", {
-                url,
-                refUrl,
-                options,
-                settings,
-              });
-              if (ext === null) { return null; }
-              if (!capturer.downLinkExtFilter(ext, options)) { return null; }
-
-              const response = await downloadFile({
-                url,
-                refUrl,
-                settings,
-                options,
-              });
-              captureRewriteAttr(elem, attr, response.url);
-              return response;
+        if (["header", "url"].includes(options["capture.downLink.mode"])) {
+          tasks[tasks.length] = halter.then(async () => {
+            const response = await capturer.invoke("captureUrl", {
+              url,
+              refUrl,
+              downLink: true,
+              settings,
+              options,
+            })
+            .catch((ex) => {
+              console.error(ex);
+              warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
+              return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
             });
-            break;
-          }
-          case "url": {
-            if (capturer.downLinkUrlFilter(url, options)) {
-              break;
-            }
 
-            const filename = scrapbook.urlToFilename(url);
-            const [, ext] = scrapbook.filenameParts(filename);
-            if (!capturer.downLinkExtFilter(ext, options)) { break; }
-
-            tasks[tasks.length] = halter.then(async () => {
-              const response = await downloadFile({
-                url,
-                refUrl,
-                settings,
-                options,
-              });
+            if (response) {
               captureRewriteAttr(elem, attr, response.url);
-              return response;
-            });
-            break;
-          }
-          case "none":
-          default: {
-            break;
-          }
+            }
+            return response;
+          });
         }
       }
     };
