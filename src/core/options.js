@@ -209,8 +209,10 @@ function verifySavePath(event) {
 
 function renewCaptureDownLinkDetails() {
   const mode = document.getElementById("opt_capture.downLink.mode").value;
-  const elem = document.getElementById('captureDownLinkDetails');
-  elem.hidden = mode === 'none';
+
+  Array.prototype.forEach.call(document.querySelectorAll('.captureDownLinkDetails'), (elem) => {
+    elem.hidden = mode === 'none';
+  });
 }
 
 function onToggleTooltip(elem) {

@@ -24,6 +24,12 @@ details > div > div:last-child {
   margin-bottom: 0;
 }
 
+div > textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 80px;
+}
+
 a[data-tooltip] {
   display: inline-block;
   color: inherit;
@@ -45,16 +51,6 @@ div.tooltip {
 
 #actionsWrapper {
   margin-top: 0.75em;
-}
-
-#captureDownLinkDetails > div {
-  margin: 0.5em 0.2em;
-}
-
-#captureDownLinkDetails textarea {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 80px;
 }
 
 #downloader {
