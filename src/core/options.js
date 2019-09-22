@@ -138,10 +138,11 @@ function verifyDownLinkFilters(rules) {
       let line = srcLine.trim();
       if (!line || line.startsWith("#")) { return; }
 
+      // pass non-RegExp
       if (!/^\/(.*)\/([a-z]*)$/.test(line)) { return; }
 
       try {
-        new RegExp("^(?:" + line + ")$");
+        new RegExp(`^(?:${RegExp.$1})$`, RegExp.$2);
       } catch (ex) {
         line = scrapbook.lang("OptionCaptureDownLinkFilterErrorLine", [index + 1, srcLine]);
         errors.push(line);
@@ -149,9 +150,7 @@ function verifyDownLinkFilters(rules) {
     });
   };
 
-  let errors;
-
-  errors = [];
+  var errors = [];
   checkRule(document.getElementById("opt_capture.downLink.extFilter").value);
   if (errors.length) {
     if (confirm(scrapbook.lang("OptionCaptureDownLinkExtFilterError", [errors.join('\n\n')]))) {
@@ -159,7 +158,7 @@ function verifyDownLinkFilters(rules) {
     }
   }
 
-  errors = [];
+  var errors = [];
   checkRule(document.getElementById("opt_capture.downLink.urlFilter").value);
   if (errors.length) {
     if (confirm(scrapbook.lang("OptionCaptureDownLinkUrlFilterError", [errors.join('\n\n')]))) {
