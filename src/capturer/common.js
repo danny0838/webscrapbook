@@ -2535,16 +2535,6 @@ capturer.getSaveFilename = async function (params) {
     .map(x => scrapbook.validateFilename(x, options["capture.saveAsciiFilename"]))
     .join('/');
 
-  if (isFolder) {
-    const newFilename = await capturer.invoke("getAvailableFilename", {
-      filename,
-      settings,
-      options,
-    });
-    const dir = scrapbook.filepathParts(filename)[0];
-    filename = (dir ? dir + '/' : '') + newFilename;
-  }
-
   return filename;
 };
 
