@@ -912,17 +912,8 @@ async function init() {
       if (zipObj.dir) { continue; }
       if (dir && !inZipPath.startsWith(dir + '/')) { continue; }
 
-      const mime = zipObj.type;
       const key = {table: "viewerCache", id: uuid, path: inZipPath};
-
-      const data = await scrapbook.cache.get(key);
-
-      // convert byte string to array buffer to pass to new File()
-      if (typeof data === 'string') {
-        data = scrapbook.byteStringToArrayBuffer(data);
-      }
-
-      const f = new File([data], inZipPath.replace(/.*\//, ""), {type: mime});
+      const f = await scrapbook.cache.get(key);
       const u = URL.createObjectURL(f);
       viewer.inZipFiles.set(inZipPath, {file: f, url: u});
       viewer.blobUrlToInZipPath.set(u, inZipPath);

@@ -355,30 +355,12 @@ const viewer = {
           continue;
         }
 
-        const mime = Mime.lookup(inZipPath);
-        zipData.files[inZipPath] = {
-          dir: false,
-          type: mime,
-        };
+        zipData.files[inZipPath] = {dir: false};
 
-        // @TODO: reading a large file (about 400~500 MB) once into an
-        //     arraybuffer could consume too much memory and cause the
-        //     extension to shutdown.  Loading in chunks avoids this but
-        //     is very slow and unuseful.  We currently use the faster
-        //     method.
-        const ab = await zipObj.async("arraybuffer");
-
-        let data;
-        // In Firefox < 56 and Chromium,
-        // Blob cannot be stored in browser.storage,
-        // fallback to byte string.
-        if (scrapbook.cache.current === 'storage' &&
-            !viewer.filesystem &&
-            (scrapbook.userAgent.major < 56 || scrapbook.userAgent.is('chromium'))) {
-          data = scrapbook.arrayBufferToByteString(ab);
-        } else {
-          data = new Blob([ab], {type: mime});
-        }
+        const data = new File([await zipObj.async("blob")], inZipPath.replace(/.*\//, ""), {
+          type: Mime.lookup(inZipPath),
+          lastModified: scrapbook.zipFixModifiedTime(zipObj.date),
+        });
 
         if (viewer.filesystem) {
           /* Filesystem API view */
