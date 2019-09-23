@@ -302,9 +302,63 @@ scrapbook.cache = {
   },
 
   storage: {
+    get _escapeObjectsNeeded() {
+      delete this._escapeObjectsNeeded;
+      return this._escapeObjectsNeeded = 
+          (scrapbook.userAgent.major < 56 && scrapbook.userAgent.is('gecko')) || 
+          scrapbook.userAgent.is('chromium');
+    },
+
+    async _escapeObjects(obj) {
+      // In Firefox < 56 and Chromium,
+      // Blob cannot be stored in browser.storage,
+      // fallback to an object containing byte string data.
+      if (this._escapeObjectsNeeded) {
+        if (obj instanceof File) {
+          return {
+            __type__: 'File',
+            name: obj.name,
+            type: obj.type,
+            lastModified: obj.lastModified,
+            data: await scrapbook.readFileAsText(obj, false),
+          };
+        } else if (obj instanceof Blob) {
+          return {
+            __type__: 'Blob',
+            type: obj.type,
+            data: await scrapbook.readFileAsText(obj, false),
+          };
+        }
+      }
+
+      // otherwise return the original object
+      return obj;
+    },
+
+    _unescapeObjects(obj) {
+      try {
+        switch (obj.__type__) {
+          case "File": {
+            return new File(
+              [scrapbook.byteStringToArrayBuffer(obj.data)],
+              obj.name,
+              {type: obj.type, lastModified: obj.lastModified}
+            );
+          }
+          case "Blob": {
+            return new Blob(
+              [scrapbook.byteStringToArrayBuffer(obj.data)],
+              {type: obj.type}
+            );
+          }
+        }
+      } catch (ex) {}
+      return obj;
+    },
+
     async get(key) {
       const items = await browser.storage.local.get(key);
-      return items[key];
+      return this._unescapeObjects(items[key]);
     },
 
     async getAll(filter) {
@@ -317,6 +371,7 @@ scrapbook.cache = {
               throw new Error("filter not matched");
             }
           }
+          items[key] = this._unescapeObjects(items[key]);
         } catch (ex) {
           // invalid JSON format => meaning not a cache
           // or does not match the filter
@@ -327,7 +382,7 @@ scrapbook.cache = {
     },
 
     async set(key, value) {
-      return await browser.storage.local.set({[key]: value});
+      return await browser.storage.local.set({[key]: await this._escapeObjects(value)});
     },
 
     async remove(keys) {
