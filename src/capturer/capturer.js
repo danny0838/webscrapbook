@@ -2310,6 +2310,90 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     return await registerFile(params);
   };
 
+  capturer.downLinkFileExtFilter = function (ext, options) {
+    const compileFilters = (source) => {
+      const ret = [];
+      source.split(/[\r\n]/).forEach((line) => {
+        line = line.trim();
+        if (!line || line.startsWith("#")) { return; }
+
+        if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+          try {
+            ret.push(new RegExp(`^(?:${RegExp.$1})$`, RegExp.$2));
+          } catch (ex) {
+            console.error(ex);
+          }
+        } else {
+          const regex = line.split(/[,;\s]+/)
+            .filter(x => !!x)
+            .map(x => scrapbook.escapeRegExp(x))
+            .join('|');
+          ret.push(new RegExp(`^(?:${regex})$`, 'i'));
+        }
+      });
+      return ret;
+    };
+    let filterText;
+    let filters;
+
+    const fn = capturer.downLinkFileExtFilter = (ext, options) => {
+      // use the cache if the filter is not changed
+      if (filterText !== options["capture.downLink.file.extFilter"]) {
+        filterText = options["capture.downLink.file.extFilter"];
+        filters = compileFilters(filterText);
+      }
+
+      return filters.some((filter) => {
+        return filter.test(ext);
+      });
+    };
+    return fn(ext, options);
+  };
+
+  capturer.downLinkUrlFilter = function (url, options) {
+    const compileFilters = (source) => {
+      const ret = [];
+      source.split(/[\r\n]/).forEach((line) => {
+        line = line.trim();
+        if (!line || line.startsWith("#")) { return; }
+
+        if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+          try {
+            ret.push(new RegExp(RegExp.$1, RegExp.$2));
+          } catch (ex) {
+            console.error(ex);
+          }
+        } else {
+          ret.push(scrapbook.splitUrlByAnchor(line)[0]);
+        }
+      });
+      return ret;
+    };
+    let filterText;
+    let filters;
+
+    const fn = capturer.downLinkUrlFilter = (url, options) => {
+      // use the cache if the filter is not changed
+      if (filterText !== options["capture.downLink.urlFilter"]) {
+        filterText = options["capture.downLink.urlFilter"];
+        filters = compileFilters(filterText);
+      }
+
+      // match the URL without hash
+      const matchUrl = scrapbook.splitUrlByAnchor(url)[0];
+
+      return filters.some((filter) => {
+        // plain text rule must match full URL
+        if (typeof filter === 'string') {
+          return filter === matchUrl;
+        }
+
+        return filter.test(matchUrl);
+      });
+    };
+    return fn(url, options);
+  };
+
   /**
    * @typedef {Object} saveDocumentResponse
    * @property {string} filename - The saved filename.
