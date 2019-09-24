@@ -9,7 +9,7 @@ const urlObj = new URL(document.URL);
 
 const viewerData = {
   virtualBase: browser.runtime.getURL("viewer/!/"),
-  zipId: urlObj.searchParams.get('id'),
+  id: urlObj.searchParams.get('id'),
   dir: urlObj.searchParams.get('d'),
   indexFile: urlObj.searchParams.get('p'),
 };
@@ -896,8 +896,8 @@ async function init() {
   frameRegisterLinkLoader(iframe);
 
   try {
-    const uuid = viewerData.zipId;
-    const key = {table: "viewerCache", id: uuid};
+    const id = viewerData.id;
+    const key = {table: "pageCache", id};
     const dir = viewerData.dir;
     const indexFile = viewerData.indexFile || "index.html";
 
@@ -905,7 +905,7 @@ async function init() {
     const entries = Object.entries(await scrapbook.cache.getAll(key));
 
     if (!entries.length) {
-      throw new Error(`Archive '${uuid}' does not exist or has been cleared.`);
+      throw new Error(`Archive '${id}' does not exist or has been cleared.`);
     }
 
     for (const [info, file] of entries) {

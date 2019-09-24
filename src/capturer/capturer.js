@@ -190,12 +190,12 @@ capturer.getAvailableFilename = async function (params) {
 };
 
 capturer.saveCache = async function ({timeId, path, data}) {
-  const key = {table: "capturerCache", timeId, path};
+  const key = {table: "pageCache", id: timeId, path};
   await scrapbook.cache.set(key, data);
 };
 
 capturer.loadCache = async function ({timeId}) {
-  const key = {table: "capturerCache", timeId};
+  const key = {table: "pageCache", id: timeId};
   const entries = await scrapbook.cache.getAll(key);
 
   let mainIdx = -1;
@@ -216,7 +216,7 @@ capturer.loadCache = async function ({timeId}) {
 
 capturer.loadCacheAsZip = async function ({timeId}) {
   const zip = new JSZip();
-  const key = {table: "capturerCache", timeId};
+  const key = {table: "pageCache", id: timeId};
   const entries = await scrapbook.cache.getAll(key);
   for (const [entry, data] of Object.entries(entries)) {
     scrapbook.zipAddFile(zip, JSON.parse(entry).path, data, true);
@@ -225,7 +225,7 @@ capturer.loadCacheAsZip = async function ({timeId}) {
 };
 
 capturer.clearCache = async function ({timeId}) {
-  const key = {table: "capturerCache", timeId};
+  const key = {table: "pageCache", id: timeId};
   const entries = await scrapbook.cache.getAll(key);
   await scrapbook.cache.remove(Object.keys(entries));
 };

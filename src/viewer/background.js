@@ -123,7 +123,7 @@ browser.webRequest.onHeadersReceived.addListener(function (details) {
   });
 
   /* remove cache entry for all IDs that are not being viewed */
-  const items = await scrapbook.cache.getAll({table: "viewerCache"});
+  const items = await scrapbook.cache.getAll({table: "pageCache"});
   for (const key in items) {
     const keyData = JSON.parse(key);
     if (usedIds.has(keyData.id)) {

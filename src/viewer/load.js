@@ -358,7 +358,7 @@ const viewer = {
           await fileSystemHandler.createFile(viewer.filesystem.root, uuid + "/" + inZipPath, data);
         } else {
           /* In-memory view */
-          const key = {table: "viewerCache", id: uuid, path: inZipPath};
+          const key = {table: "pageCache", id: uuid, path: inZipPath};
           await scrapbook.cache.set(key, data);
         }
       }
