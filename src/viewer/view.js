@@ -902,21 +902,24 @@ async function init() {
     const indexFile = viewerData.indexFile || "index.html";
 
     /* load zip content from previous cache */
-    const zipFiles = await scrapbook.cache.get(key);
+    const entries = Object.entries(await scrapbook.cache.getAll(key));
 
-    if (!zipFiles) {
+    if (!entries.length) {
       throw new Error(`Archive '${uuid}' does not exist or has been cleared.`);
     }
 
-    for (const [inZipPath, zipObj] of Object.entries(zipFiles)) {
-      if (zipObj.dir) { continue; }
-      if (dir && !inZipPath.startsWith(dir + '/')) { continue; }
+    for (const [info, file] of entries) {
+      const path = JSON.parse(info).path;
 
-      const key = {table: "viewerCache", id: uuid, path: inZipPath};
-      const f = await scrapbook.cache.get(key);
-      const u = URL.createObjectURL(f);
-      viewer.inZipFiles.set(inZipPath, {file: f, url: u});
-      viewer.blobUrlToInZipPath.set(u, inZipPath);
+      // exclude directories
+      if (file.type === "inode/directory") { continue; }
+
+      // filter by directory prefix
+      if (dir && !path.startsWith(dir + '/')) { continue; }
+
+      const url = URL.createObjectURL(file);
+      viewer.inZipFiles.set(path, {file, url});
+      viewer.blobUrlToInZipPath.set(url, path);
     }
 
     // remove privileged APIs in this page

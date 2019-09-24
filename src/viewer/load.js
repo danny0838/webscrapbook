@@ -336,46 +336,31 @@ const viewer = {
     try {
       const uuid = scrapbook.getUuid();
       const type = scrapbook.filenameParts(zipFile.name)[1].toLowerCase();
-      const zipData = {
-        name: zipFile.name,
-        files: {},
-      };
 
-      /* retrieve ans store zip entries */
-      let zip;
-      try {
-        zip = await (new JSZip().loadAsync(zipFile));
-      } catch (ex) {
-        throw new Error(`ZIP file invalid or unsupported.`);
-      }
+      /* retrieve and store zip entries */
+      const zip = await (async () => {
+        try {
+          return await (new JSZip().loadAsync(zipFile));
+        } catch (ex) {
+          throw new Error(`ZIP file invalid or unsupported.`);
+        }
+      })();
 
       for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
-        if (zipObj.dir) {
-          zipData.files[inZipPath] = {dir: true};
-          continue;
-        }
-
-        zipData.files[inZipPath] = {dir: false};
-
-        const data = new File([await zipObj.async("blob")], inZipPath.replace(/.*\//, ""), {
-          type: Mime.lookup(inZipPath),
+        const data = new File([zipObj.dir ? "" : await zipObj.async("blob")], inZipPath.match(/([^\/]+)\/?$/)[1], {
+          type: zipObj.dir ? "inode/directory" : Mime.lookup(inZipPath),
           lastModified: scrapbook.zipFixModifiedTime(zipObj.date),
         });
 
         if (viewer.filesystem) {
           /* Filesystem API view */
+          if (zipObj.dir) { continue; }
           await fileSystemHandler.createFile(viewer.filesystem.root, uuid + "/" + inZipPath, data);
         } else {
           /* In-memory view */
           const key = {table: "viewerCache", id: uuid, path: inZipPath};
           await scrapbook.cache.set(key, data);
         }
-      }
-
-      if (!viewer.filesystem) {
-        /* In-memory view */
-        const key = {table: "viewerCache", id: uuid};
-        await scrapbook.cache.set(key, zipData.files);
       }
 
       /* Retrieve indexFiles */
