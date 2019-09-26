@@ -43,7 +43,7 @@ const Mime = {
 /**
  * Map from mimetype to extension
  *
- * Adopted from mime-db 1.41.0
+ * Adopted from mime-db
  * ref: https://github.com/jshttp/mime-db
  */
 Mime.db = {
@@ -1468,6 +1468,10 @@ Mime.db = {
     "source": "iana",
     "compressible": true
   },
+  "application/swid+xml": {
+    "source": "iana",
+    "compressible": true
+  },
   "application/tamp-apex-update": {
     "source": "iana"
   },
@@ -2626,6 +2630,10 @@ Mime.db = {
   },
   "application/vnd.ffsns": {
     "source": "iana"
+  },
+  "application/vnd.ficlab.flb+zip": {
+    "source": "iana",
+    "compressible": false
   },
   "application/vnd.filmit.zfc": {
     "source": "iana"
@@ -6718,6 +6726,14 @@ Mime.db = {
     "source": "iana",
     "extensions": ["jxrs"]
   },
+  "image/jxs": {
+    "source": "iana",
+    "extensions": ["jxs"]
+  },
+  "image/jxsc": {
+    "source": "iana",
+    "extensions": ["jxsc"]
+  },
   "image/jxsi": {
     "source": "iana",
     "extensions": ["jxsi"]
@@ -6838,6 +6854,9 @@ Mime.db = {
   },
   "image/vnd.mozilla.apng": {
     "source": "iana"
+  },
+  "image/vnd.ms-dds": {
+    "extensions": ["dds"]
   },
   "image/vnd.ms-modi": {
     "source": "iana",
@@ -7191,8 +7210,7 @@ Mime.db = {
     "source": "iana"
   },
   "multipart/mixed": {
-    "source": "iana",
-    "compressible": false
+    "source": "iana"
   },
   "multipart/multilingual": {
     "source": "iana"
@@ -7457,6 +7475,9 @@ Mime.db = {
     "extensions": ["sub"]
   },
   "text/vnd.esmertec.theme-descriptor": {
+    "source": "iana"
+  },
+  "text/vnd.ficlab.flt": {
     "source": "iana"
   },
   "text/vnd.fly": {
