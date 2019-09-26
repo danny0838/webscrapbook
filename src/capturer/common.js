@@ -2579,7 +2579,7 @@ capturer.downLinkExtFilter = function (ext, options) {
   let filterText;
   let filters;
 
-  const fn = capturer.downLinkFileExtFilter = (ext, options) => {
+  const fn = capturer.downLinkExtFilter = (ext, options) => {
     // use the cache if the filter is not changed
     if (filterText !== options["capture.downLink.extFilter"]) {
       filterText = options["capture.downLink.extFilter"];
