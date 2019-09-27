@@ -34,6 +34,7 @@ const baseOptions = {
   "capture.shadowDom": "save",
   "capture.removeHidden": "none",
   "capture.precludeSelector": "",
+  "capture.linkUnsavedUri": false,
   "capture.downLink.mode": "none",
   "capture.downLink.extFilter": "",
   "capture.downLink.urlFilter": "",
@@ -42,7 +43,6 @@ const baseOptions = {
   "capture.recordRemovedNode": false,
   "capture.recordRewrittenAttr": false,
   "capture.recordSourceUri": false,
-  "capture.recordErrorUri": true,
 };
 
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -6700,13 +6700,13 @@ async function test_capture_record_urls4() {
 /**
  * Check if option works: for normal URL
  *
- * capture.recordErrorUri
+ * capture.linkUnsavedUri
  * capturer.captureDocument
  * capturer.downloadFile
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_record_errorUrls() {
+async function test_capture_linkUnsavedUri() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -6721,11 +6721,11 @@ async function test_capture_record_errorUrls() {
     "capture.downLink.urlFilter": "",
   };
 
-  /* +capture.recordErrorUri */
-  options["capture.recordErrorUri"] = true;
+  /* -capture.linkUnsavedUri */
+  options["capture.linkUnsavedUri"] = false;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_record/error-urls.html`,
+    url: `${localhost}/capture_linkUnsavedUri/error1.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -6734,23 +6734,23 @@ async function test_capture_record_errorUrls() {
   var doc = await readFileAsDocument(indexBlob);
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  assert(doc.querySelector('style').textContent.trim() === `@import url("urn:scrapbook:download:error:${localhost}/capture_record/nonexist.css");
-@font-face { font-family: myFont; src: url("urn:scrapbook:download:error:${localhost}/capture_record/nonexist.woff"); }
-p { background-image: url("urn:scrapbook:download:error:${localhost}/capture_record/nonexist.bmp"); }`);
-  assert(doc.querySelector('link[rel~="icon"]').getAttribute('href') === `urn:scrapbook:download:error:${localhost}/capture_record/nonexist.bmp`);
-  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === `urn:scrapbook:download:error:${localhost}/capture_record/nonexist.css`);
-  assert(doc.querySelector('script').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_record/nonexist.js`);
-  assert(doc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_record/nonexist.bmp`);
-  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_record/nonexist.bmp 1x, urn:scrapbook:download:error:${localhost}/capture_record/nonexist.bmp 2x`);
-  assert(doc.querySelector('iframe').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_record/nonexist.html`);
-  assert(doc.querySelector('a').getAttribute('href') === `urn:scrapbook:download:error:${localhost}/capture_record/nonexist.txt`);
-  assert(doc.querySelector('a[name]').getAttribute('href') === `${localhost}/capture_record/nonexist.css`); // no downLink, no error
+  assert(doc.querySelector('style').textContent.trim() === `@import url("urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.css");
+@font-face { font-family: myFont; src: url("urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.woff"); }
+p { background-image: url("urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }`);
+  assert(doc.querySelector('link[rel~="icon"]').getAttribute('href') === `urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.bmp`);
+  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === `urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.css`);
+  assert(doc.querySelector('script').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.js`);
+  assert(doc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.bmp`);
+  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.bmp 1x, urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.bmp 2x`);
+  assert(doc.querySelector('iframe').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.html`);
+  assert(doc.querySelector('a').getAttribute('href') === `urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.txt`);
+  assert(doc.querySelector('a[name]').getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.css`); // no downLink, no error
 
-  /* -capture.recordErrorUri */
-  options["capture.recordErrorUri"] = false;
+  /* +capture.linkUnsavedUri */
+  options["capture.linkUnsavedUri"] = true;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_record/error-urls.html`,
+    url: `${localhost}/capture_linkUnsavedUri/error1.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -6759,30 +6759,30 @@ p { background-image: url("urn:scrapbook:download:error:${localhost}/capture_rec
   var doc = await readFileAsDocument(indexBlob);
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  assert(doc.querySelector('style').textContent.trim() === `@import url("${localhost}/capture_record/nonexist.css");
-@font-face { font-family: myFont; src: url("${localhost}/capture_record/nonexist.woff"); }
-p { background-image: url("${localhost}/capture_record/nonexist.bmp"); }`);
-  assert(doc.querySelector('link[rel~="icon"]').getAttribute('href') === `${localhost}/capture_record/nonexist.bmp`);
-  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === `${localhost}/capture_record/nonexist.css`);
-  assert(doc.querySelector('script').getAttribute('src') === `${localhost}/capture_record/nonexist.js`);
-  assert(doc.querySelector('img').getAttribute('src') === `${localhost}/capture_record/nonexist.bmp`);
-  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `${localhost}/capture_record/nonexist.bmp 1x, ${localhost}/capture_record/nonexist.bmp 2x`);
-  assert(doc.querySelector('iframe').getAttribute('src') === `${localhost}/capture_record/nonexist.html`);
-  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_record/nonexist.txt`);
-  assert(doc.querySelector('a[name]').getAttribute('href') === `${localhost}/capture_record/nonexist.css`);
+  assert(doc.querySelector('style').textContent.trim() === `@import url("${localhost}/capture_linkUnsavedUri/nonexist.css");
+@font-face { font-family: myFont; src: url("${localhost}/capture_linkUnsavedUri/nonexist.woff"); }
+p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }`);
+  assert(doc.querySelector('link[rel~="icon"]').getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.bmp`);
+  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.css`);
+  assert(doc.querySelector('script').getAttribute('src') === `${localhost}/capture_linkUnsavedUri/nonexist.js`);
+  assert(doc.querySelector('img').getAttribute('src') === `${localhost}/capture_linkUnsavedUri/nonexist.bmp`);
+  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `${localhost}/capture_linkUnsavedUri/nonexist.bmp 1x, ${localhost}/capture_linkUnsavedUri/nonexist.bmp 2x`);
+  assert(doc.querySelector('iframe').getAttribute('src') === `${localhost}/capture_linkUnsavedUri/nonexist.html`);
+  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.txt`);
+  assert(doc.querySelector('a[name]').getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.css`);
 }
 
 /**
  * Test for "" URL:
  * Don't generate error URL for non-absolute URLs.
  *
- * capture.recordErrorUri
+ * capture.linkUnsavedUri
  * capturer.captureDocument
  * capturer.downloadFile
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_record_errorUrls2() {
+async function test_capture_linkUnsavedUri2() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -6797,11 +6797,11 @@ async function test_capture_record_errorUrls2() {
     "capture.downLink.urlFilter": "",
   };
 
-  /* +capture.recordErrorUri */
-  options["capture.recordErrorUri"] = true;
+  /* -capture.linkUnsavedUri */
+  options["capture.linkUnsavedUri"] = false;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_record/error-urls2.html`,
+    url: `${localhost}/capture_linkUnsavedUri/error2.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -6826,13 +6826,13 @@ p { background-image: url(""); }`);
  * Test for hash URL:
  * Don't generate error URL for non-absolute URLs.
  *
- * capture.recordErrorUri
+ * capture.linkUnsavedUri
  * capturer.captureDocument
  * capturer.downloadFile
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_record_errorUrls3() {
+async function test_capture_linkUnsavedUri3() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -6847,11 +6847,11 @@ async function test_capture_record_errorUrls3() {
     "capture.downLink.urlFilter": "",
   };
 
-  /* +capture.recordErrorUri */
-  options["capture.recordErrorUri"] = true;
+  /* -capture.linkUnsavedUri */
+  options["capture.linkUnsavedUri"] = false;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_record/error-urls3.html`,
+    url: `${localhost}/capture_linkUnsavedUri/error3.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -6876,13 +6876,13 @@ p { background-image: url("#123"); }`);
  * Test for non-resolvable URL:
  * Don't generate error URL for non-absolute URLs.
  *
- * capture.recordErrorUri
+ * capture.linkUnsavedUri
  * capturer.captureDocument
  * capturer.downloadFile
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_record_errorUrls4() {
+async function test_capture_linkUnsavedUri4() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -6897,11 +6897,11 @@ async function test_capture_record_errorUrls4() {
     "capture.downLink.urlFilter": "",
   };
 
-  /* +capture.recordErrorUri */
-  options["capture.recordErrorUri"] = true;
+  /* -capture.linkUnsavedUri */
+  options["capture.linkUnsavedUri"] = false;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_record/error-urls4.html`,
+    url: `${localhost}/capture_linkUnsavedUri/error4.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -6931,13 +6931,13 @@ p { background-image: url("nonexist.bmp"); }`);
  * Test for other protocol URL:
  * Don't generate error URL if the protocol is not http, https, or file
  *
- * capture.recordErrorUri
+ * capture.linkUnsavedUri
  * capturer.captureDocument
  * capturer.downloadFile
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_record_errorUrls5() {
+async function test_capture_linkUnsavedUri5() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -6952,11 +6952,11 @@ async function test_capture_record_errorUrls5() {
     "capture.downLink.urlFilter": "",
   };
 
-  /* +capture.recordErrorUri */
-  options["capture.recordErrorUri"] = true;
+  /* -capture.linkUnsavedUri */
+  options["capture.linkUnsavedUri"] = false;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_record/error-urls5.html`,
+    url: `${localhost}/capture_linkUnsavedUri/error5.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -6982,13 +6982,13 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
  * Test for blob URL:
  * Record briefly for data and blob URL.
  *
- * capture.recordErrorUri
+ * capture.linkUnsavedUri
  * capturer.captureDocument
  * capturer.downloadFile
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_record_errorUrls6() {
+async function test_capture_linkUnsavedUri6() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -7003,11 +7003,11 @@ async function test_capture_record_errorUrls6() {
     "capture.downLink.urlFilter": "",
   };
 
-  /* +capture.recordErrorUri */
-  options["capture.recordErrorUri"] = true;
+  /* -capture.linkUnsavedUri */
+  options["capture.linkUnsavedUri"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_record/error-urls6.html`,
+    url: `${localhost}/capture_linkUnsavedUri/error6.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -7511,6 +7511,12 @@ async function runTests() {
   await test(test_capture_metaRefresh2);
   await test(test_capture_metaRefresh3);
   await test(test_capture_integrity);
+  await test(test_capture_linkUnsavedUri);
+  await test(test_capture_linkUnsavedUri2);
+  await test(test_capture_linkUnsavedUri3);
+  await test(test_capture_linkUnsavedUri4);
+  await test(test_capture_linkUnsavedUri5);
+  await test(test_capture_linkUnsavedUri6);
   await test(test_capture_referrer);
   await test(test_capture_record_meta);
   await test(test_capture_record_nodes);
@@ -7520,12 +7526,6 @@ async function runTests() {
   await test(test_capture_record_urls2);
   await test(test_capture_record_urls3);
   await test(test_capture_record_urls4);
-  await test(test_capture_record_errorUrls);
-  await test(test_capture_record_errorUrls2);
-  await test(test_capture_record_errorUrls3);
-  await test(test_capture_record_errorUrls4);
-  await test(test_capture_record_errorUrls5);
-  await test(test_capture_record_errorUrls6);
   await test(test_capture_svg);
   await test(test_capture_mathml);
   await test(test_capture_recursive);

@@ -2530,7 +2530,7 @@ capturer.resolveRelativeUrl = function (relativeUrl, baseUrl) {
 };
 
 capturer.getErrorUrl = function (sourceUrl, options) {
-  if (!options || options["capture.recordErrorUri"]) {
+  if (!options || !options["capture.linkUnsavedUri"]) {
     if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("file:")) {
       return `urn:scrapbook:download:error:${sourceUrl}`;
     } else if (sourceUrl.startsWith("data:")) {

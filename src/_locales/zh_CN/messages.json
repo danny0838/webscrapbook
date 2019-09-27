@@ -353,6 +353,12 @@
   "OptionCaptureImageTooltip": {
     "message": "此选项决定图片（IMG、PICTURE、及一些 INPUT 元素）的处理方式。\n\n* 保存：将图片保存至本地。\n\n* 保存现用：将显示的图片保存至本地，忽略其他萤幕大小或解析度的备用图片。这可以有效缩小容量，但某些情况下显示效果会变差。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有图片。\n\n* 链接：将图片连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n\n* 清空：将图片无效化。\n\n* 移除：将图片元素移除。注意这可能会影响网页排版。"
   },
+  "OptionCaptureLinkUnsavedUriLabel": {
+    "message": "将无法储存的资源连往原始位址"
+  },
+  "OptionCaptureLinkUnsavedUriTooltip": {
+    "message": "勾选时无法保存的资源将连往原始位址（这会导致浏览获取页面时触发网路传输）；不勾选时则以“urn:scrapbook:*”的形式记录。"
+  },
   "OptionCaptureMergeCssResourcesLabel": {
     "message": "合并样式表重复引用的媒体"
   },
@@ -379,12 +385,6 @@
   },
   "OptionCapturePrecludeSelectorTooltip": {
     "message": "可用这个 CSS 选择器在获取前预先移除一些网页元素，例如其他浏览器扩充套件插入的内容。"
-  },
-  "OptionCaptureRecordErrorUriLabel": {
-    "message": "记录错误的 URL"
-  },
-  "OptionCaptureRecordErrorUriTooltip": {
-    "message": "获取网页时若有 URL 无法顺利连上，会以 urn:scrapbook:* 的形式记录。若不勾选则会链接至原始位址（可能仍无法连上而导致无效连线）。"
   },
   "OptionCaptureRecordRemovedNodeLabel": {
     "message": "记录移除的元素"

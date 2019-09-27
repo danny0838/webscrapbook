@@ -353,6 +353,12 @@
   "OptionCaptureImageTooltip": {
     "message": "此選項決定圖片（IMG、PICTURE、及一些 INPUT 元素）的處理方式。\n\n* 儲存：將圖片儲存至本地。\n\n* 儲存現用：將顯示的圖片儲存至本地，忽略其他螢幕大小或解析度的備用圖片。這可以有效縮小容量，但某些情況下顯示效果會變差。若擷取的頁面並未顯示於瀏覽器（例如擷取原貌），則仍儲存所有圖片。\n\n* 連結：將圖片連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n\n* 清空：將圖片無效化。\n\n* 移除：將圖片元素移除。注意這可能會影響網頁排版。"
   },
+  "OptionCaptureLinkUnsavedUriLabel": {
+    "message": "將無法儲存的資源連往原始位址"
+  },
+  "OptionCaptureLinkUnsavedUriTooltip": {
+    "message": "勾選時無法儲存的資源將連往原始位址（這會導致瀏覽擷取頁面時觸發網路傳輸）；不勾選時則以「urn:scrapbook:*」的形式記錄。"
+  },
   "OptionCaptureMergeCssResourcesLabel": {
     "message": "合併樣式表重複引用的媒體"
   },
@@ -379,12 +385,6 @@
   },
   "OptionCapturePrecludeSelectorTooltip": {
     "message": "可用此 CSS 選擇器在擷取前預先移除一些網頁元素，例如其他瀏覽器擴充套件插入的內容。"
-  },
-  "OptionCaptureRecordErrorUriLabel": {
-    "message": "記錄錯誤的 URL"
-  },
-  "OptionCaptureRecordErrorUriTooltip": {
-    "message": "擷取網頁時若有 URL 無法順利連上，會以 urn:scrapbook:* 的形式記錄。若不勾選則會連結至原始位址（可能仍無法連上而導致無效連線）。"
   },
   "OptionCaptureRecordRemovedNodeLabel": {
     "message": "記錄移除的元素"

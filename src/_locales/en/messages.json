@@ -353,6 +353,12 @@
   "OptionCaptureImageTooltip": {
     "message": "This determines how images (IMG, PICTURE, and some INPUT elements) are handled.\n\n* Save: Save the referenced image resources to local.\n\n* Save current: Save the displayed image resource to local and ignore alternatives for another screen viewport or resolution. This considerably reduces size but the display effect may be worse in another situation. If the captured page is not displayed in the browser (such as capture source), all images are saved.\n\n* Link: Link the image to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n* Blank: Disable the image.\n\n* Remove: Remove the image element. Note that this could affect the web page layout."
   },
+  "OptionCaptureLinkUnsavedUriLabel": {
+    "message": "Link uncaptured resource to source"
+  },
+  "OptionCaptureLinkUnsavedUriTooltip": {
+    "message": "If checked, an uncaptured resource is linked to the source URL (a network flow will be triggered when browsing the captured document); otherwise it's recorded as \"urn:scrapbook:*\"."
+  },
   "OptionCaptureMergeCssResourcesLabel": {
     "message": "Merge duplicated CSS media"
   },
@@ -379,12 +385,6 @@
   },
   "OptionCapturePrecludeSelectorTooltip": {
     "message": "Use this CSS selector to preclude page elements (e.g. those inserted by other browser extensions) before capture."
-  },
-  "OptionCaptureRecordErrorUriLabel": {
-    "message": "Record error URL"
-  },
-  "OptionCaptureRecordErrorUriTooltip": {
-    "message": "If connection to a URL failed during the capture process, record it as urn:scrapbook:*. If unchecked, link to the source address (which could still be unavailable and be an invalid connection)."
   },
   "OptionCaptureRecordRemovedNodeLabel": {
     "message": "Record removed elements"
