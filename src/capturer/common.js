@@ -2542,13 +2542,15 @@ capturer.getErrorUrl = function (sourceUrl, options) {
   return sourceUrl;
 };
 
-capturer.getSkipUrl = function (sourceUrl) {
-  if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("file:")) {
-    return `urn:scrapbook:download:skip:${sourceUrl}`;
-  } else if (sourceUrl.startsWith("data:")) {
-    return `urn:scrapbook:download:skip:data:`;
-  } else if (sourceUrl.startsWith("blob:")) {
-    return `urn:scrapbook:download:skip:blob:`;
+capturer.getSkipUrl = function (sourceUrl, options) {
+  if (!options || !options["capture.linkUnsavedUri"]) {
+    if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("file:")) {
+      return `urn:scrapbook:download:skip:${sourceUrl}`;
+    } else if (sourceUrl.startsWith("data:")) {
+      return `urn:scrapbook:download:skip:data:`;
+    } else if (sourceUrl.startsWith("blob:")) {
+      return `urn:scrapbook:download:skip:blob:`;
+    }
   }
   return sourceUrl;
 };

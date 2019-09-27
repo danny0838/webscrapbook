@@ -1261,7 +1261,7 @@ capturer.saveDocument = async function (params) {
     if (!settings.frameIsMain &&
         typeof options["capture.pageSizeLimit"] === "number" && data.content.length >= options["capture.pageSizeLimit"] * 1024) {
       capturer.warn(scrapbook.lang("WarnPageSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
-      return {url: capturer.getSkipUrl(sourceUrl), error: {message: "Page size limit exceeded."}};
+      return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Page size limit exceeded."}};
     }
 
     const title = data.title || scrapbook.urlToFilename(sourceUrl);
@@ -1669,7 +1669,7 @@ capturer.downloadFile = async function (params) {
             if (typeof options["capture.resourceSizeLimit"] === "number" && 
                 headers.contentLength >= options["capture.resourceSizeLimit"] * 1024) {
               capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
-              return {url: capturer.getSkipUrl(sourceUrl), error: {message: "Resource size limit exceeded."}};
+              return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Resource size limit exceeded."}};
             }
           },
 
@@ -1855,7 +1855,7 @@ capturer.fetchCss = async function (params) {
           if (typeof options["capture.resourceSizeLimit"] === "number" && 
               headers.contentLength >= options["capture.resourceSizeLimit"] * 1024) {
             capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
-            return {url: capturer.getSkipUrl(sourceUrl), error: {message: "Resource size limit exceeded."}};
+            return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Resource size limit exceeded."}};
           }
 
           // determine the filename
@@ -2019,7 +2019,7 @@ capturer.downloadBlob = async function (params) {
 
   if (typeof options["capture.resourceSizeLimit"] === "number" && blob.size >= options["capture.resourceSizeLimit"] * 1024) {
     capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
-    return {url: capturer.getSkipUrl(sourceUrl), error: {message: "Resource size limit exceeded."}};
+    return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Resource size limit exceeded."}};
   }
 
   switch (options["capture.saveAs"]) {
