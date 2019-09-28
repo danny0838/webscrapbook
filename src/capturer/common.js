@@ -104,7 +104,9 @@ capturer.captureDocumentOrFile = async function (params) {
 
   // otherwise, capture as document
   // don't pass docUrl and refUrl
-  const {docUrl: _, refUrl: __, ...p} = params;
+  const p = Object.assign({}, params);
+  delete p.docUrl;
+  delete p.refUrl;
   return await capturer.captureDocument(p);
 };
 
