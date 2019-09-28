@@ -851,25 +851,24 @@ scrapbook.getUuid = function () {
 
 scrapbook.escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
   const regex = /[&<>"']| (?= )/g;
-  const fn = m => map[m];
+  const func = m => map[m];
   const map = {
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;"
   };
-  const escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
+  const fn = scrapbook.escapeHtml = function (str, noDoubleQuotes, singleQuotes, spaces) {
     map['"'] = noDoubleQuotes ? '"' : "&quot;";
     map["'"] = singleQuotes ? "&#39;" : "'";
     map[" "] = spaces ? "&nbsp;" : " ";
-    return str.replace(regex, fn);
+    return str.replace(regex, func);
   };
-  scrapbook.escapeHtml = escapeHtml;
-  return escapeHtml(str, noDoubleQuotes, singleQuotes, spaces);
+  return fn(str, noDoubleQuotes, singleQuotes, spaces);
 };
 
 scrapbook.unescapeHtml = function (str) {
   const regex = /&(?:(?:amp|lt|gt|quot|apos|nbsp)|#(?:(\d+)|x([0-9A-Fa-f]+)));/g;
-  const fn = (entity, dec, hex) => {
+  const func = (entity, dec, hex) => {
     if (dec) { return String.fromCharCode(parseInt(dec, 10)); }
     if (hex) { return String.fromCharCode(parseInt(hex, 16)); }
     return map[entity];
@@ -882,58 +881,52 @@ scrapbook.unescapeHtml = function (str) {
     "&apos;" : "'",
     "&nbsp;" : " "
   };
-  const unescapeHtml = function (str) {
-    return str.replace(regex, fn);
+  const fn = scrapbook.unescapeHtml = function (str) {
+    return str.replace(regex, func);
   };
-  scrapbook.unescapeHtml = unescapeHtml;
-  return unescapeHtml(str);
+  return fn(str);
 };
 
 scrapbook.escapeRegExp = function (str) {
   // Escaping "-" allows the result to be inserted into a character class.
   // Escaping "/" allow the result to be used in a JS regex literal.
   const regex = /[-/\\^$*+?.|()[\]{}]/g;
-  const escapeRegExp = function (str) {
+  const fn = scrapbook.escapeRegExp = function (str) {
     return str.replace(regex, "\\$&");
   };
-  scrapbook.escapeRegExp = escapeRegExp;
-  return escapeRegExp(str);
+  return fn(str);
 };
 
 scrapbook.escapeHtmlComment = function (str) {
   const regex = /-([\u200B]*)-/g;
-  const escapeHtmlComment = function (str) {
+  const fn = scrapbook.escapeHtmlComment = function (str) {
     return str.replace(regex, "-\u200B$1-");
   };
-  scrapbook.escapeHtmlComment = escapeHtmlComment;
-  return escapeHtmlComment(str);
+  return fn(str);
 };
 
 scrapbook.escapeQuotes = function (str) {
   const regex = /[\\"]/g;
-  const escapeQuotes = function (str) {
+  const fn = scrapbook.escapeQuotes = function (str) {
     return str.replace(regex, "\\$&");
   };
-  scrapbook.escapeQuotes = escapeQuotes;
-  return escapeQuotes(str);
+  return fn(str);
 };
 
 scrapbook.unescapeQuotes = function (str) {
   const regex = /\\(.)/g;
-  const unescapeQuotes = function (str) {
+  const fn = scrapbook.unescapeQuotes = function (str) {
     return str.replace(regex, "$1");
   };
-  scrapbook.unescapeQuotes = unescapeQuotes;
-  return unescapeQuotes(str);
+  return fn(str);
 };
 
 scrapbook.escapeCssComment = function (str) {
   const regex = /\*\//g;
-  const escapeCssComment = function (str) {
+  const fn = scrapbook.escapeCssComment = function (str) {
     return str.replace(regex, "*\u200B/");
   };
-  scrapbook.escapeCssComment = escapeCssComment;
-  return escapeCssComment(str);
+  return fn(str);
 };
 
 scrapbook.unescapeCss = function (str) {
@@ -947,23 +940,21 @@ scrapbook.unescapeCss = function (str) {
     if (c) { return c; }
     if (u) { return String.fromCharCode.apply(null, getCodes(parseInt(u, 16))); }
   };
-  const unescapeCss = function (str) {
+  const fn = scrapbook.unescapeCss = function (str) {
     return str.replace(replaceRegex, replaceFunc);
   };
-  scrapbook.unescapeCss = unescapeCss;
-  return unescapeCss(str);
+  return fn(str);
 };
 
 scrapbook.quoteXPath = function (str) {
   const reTail = /,""\)$/;
-  const quoteXPath = (str) => {
+  const fn = scrapbook.quoteXPath = (str) => {
     const parts = str.split('"');
     return parts.length > 1 ? 
         ('concat("' + parts.join(`",'"',"`) + '")').replace(reTail, ")") : 
         `"${str}"`;
   };
-  scrapbook.quoteXPath = quoteXPath;
-  return quoteXPath(str);
+  return fn(str);
 };
 
 /**
@@ -972,12 +963,11 @@ scrapbook.quoteXPath = function (str) {
  */
 scrapbook.decodeURIComponent = function (uri) {
   const regex = /(%[0-9A-F]{2})+/gi;
-  const fn = m => decodeURIComponent(m);
-  const decode = function (uri) {
-    return uri.replace(regex, fn);
+  const func = m => decodeURIComponent(m);
+  const fn = scrapbook.decodeURIComponent = function (uri) {
+    return uri.replace(regex, func);
   };
-  scrapbook.decodeURIComponent = decode;
-  return decode(uri);
+  return fn(uri);
 };
 
 /**
@@ -988,12 +978,11 @@ scrapbook.decodeURIComponent = function (uri) {
  */
 scrapbook.unicodeToDataUri = function (str, mime) {
   const regex = /[\x00-\x1F\x7F "'#%<>[\]^`{|}]+/g;
-  const fn = m => encodeURIComponent(m);
-  const unicodeToDataUri = (str, mime) =>  {
-    return `data:${(mime || "")};charset=UTF-8,${str.replace(regex, fn)}`;
+  const func = m => encodeURIComponent(m);
+  const fn = scrapbook.unicodeToDataUri = (str, mime) =>  {
+    return `data:${(mime || "")};charset=UTF-8,${str.replace(regex, func)}`;
   };
-  scrapbook.unicodeToDataUri = unicodeToDataUri;
-  return unicodeToDataUri(str, mime);
+  return fn(str, mime);
 };
 
 scrapbook.byteStringToDataUri = function (str, mime, charset) {
@@ -1207,7 +1196,7 @@ scrapbook.parseHeaderContentType = function (string) {
   const regexDoubleQuotedField = /;((?:"(?:\\.|[^"])*(?:"|$)|[^"])*?)(?=;|$)/i;
   const regexKeyValue = /\s*(.*?)\s*=\s*("(?:\\.|[^"])*"|[^"]*?)\s*$/i;
   const regexDoubleQuotedValue = /^"(.*?)"$/;
-  const parseHeaderContentType = function (string) {
+  const fn = scrapbook.parseHeaderContentType = function (string) {
     const result = {type: undefined, parameters: {}};
 
     if (typeof string !== 'string') {
@@ -1236,8 +1225,7 @@ scrapbook.parseHeaderContentType = function (string) {
 
     return result;
   };
-  scrapbook.parseHeaderContentType = parseHeaderContentType;
-  return parseHeaderContentType(string);
+  return fn(string);
 };
 
 /**
@@ -1255,7 +1243,7 @@ scrapbook.parseHeaderContentDisposition = function (string) {
   const regexDoubleQuotedValue = /^"(.*?)"$/;
   const regexExtField = /^(.*)\*$/;
   const regexExtValue = /^(.*?)'(.*?)'(.*?)$/;
-  const parseHeaderContentDisposition = function (string) {
+  const fn = scrapbook.parseHeaderContentDisposition = function (string) {
     const result = {type: undefined, parameters: {}};
 
     if (typeof string !== 'string') {
@@ -1303,8 +1291,7 @@ scrapbook.parseHeaderContentDisposition = function (string) {
 
     return result;
   };
-  scrapbook.parseHeaderContentDisposition = parseHeaderContentDisposition;
-  return parseHeaderContentDisposition(string);
+  return fn(string);
 };
 
 /**
@@ -1318,7 +1305,7 @@ scrapbook.parseHeaderRefresh = function (string) {
   const regexFields = /^\s*(.*?)(?=[;,]|$)/i;
   const regexFieldValue = /^[;,]\s*url\s*=\s*((["'])?.*)$/i;
   const regexEscape = /[\t\n\r]+/g;
-  const parseHeaderRefresh = function (string) {
+  const fn = scrapbook.parseHeaderRefresh = function (string) {
     const result = {time: undefined, url: undefined};
 
     if (typeof string !== 'string') {
@@ -1342,8 +1329,7 @@ scrapbook.parseHeaderRefresh = function (string) {
 
     return result;
   };
-  scrapbook.parseHeaderRefresh = parseHeaderRefresh;
-  return parseHeaderRefresh(string);
+  return fn(string);
 };
 
 
@@ -1360,14 +1346,13 @@ scrapbook.compressJsFunc = function (func) {
   const regexComment1 = /\/\/.*$/mg;
   const regexComment2 = /\/\*[\s\S]*?\*\//g;
   const regexCompress = /(?!\w\s+\w)(.)\s+/g;
-  const compressJsFunc = function (func) {
+  const fn = scrapbook.compressJsFunc = function (func) {
     return func.toString()
       .replace(regexComment1, '')
       .replace(regexComment2, '')
       .replace(regexCompress, "$1");
   };
-  scrapbook.compressJsFunc = compressJsFunc;
-  return compressJsFunc(func);
+  return fn(func);
 };
 
 
@@ -1439,7 +1424,7 @@ scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
   const regexFieldValue = /^(.*?)=(.*?)$/;
   const regexUtf8 = /[^\x00-\x7F]+/g;
   const fnUtf8 = m => encodeURIComponent(m);
-  const dataUriToFile = function (dataUri, useFilename = true) {
+  const fn = scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
     if (regexFields.test(dataUri)) {
       const mediatype = RegExp.$1;
       const base64 = !!RegExp.$2;
@@ -1473,8 +1458,7 @@ scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
     }
     return null;
   };
-  scrapbook.dataUriToFile = dataUriToFile;
-  return dataUriToFile(dataUri, useFilename);
+  return fn(dataUri, useFilename);
 };
 
 /**
@@ -1488,7 +1472,7 @@ scrapbook.mimeIsText = function (mime) {
     "application/xml",
     "application/sql",
   ]);
-  const mimeIsText = (mime) => {
+  const fn = scrapbook.mimeIsText = (mime) => {
     if (mime.startsWith("text/") || mime.endsWith("+xml") || mime.endsWith("+json")) {
       return true;
     } else if (mime.endsWith("+zip")) {
@@ -1496,8 +1480,7 @@ scrapbook.mimeIsText = function (mime) {
     }
     return map.has(mime);
   };
-  scrapbook.mimeIsText = mimeIsText;
-  return mimeIsText(mime);
+  return fn(mime);
 };
 
 
@@ -1534,7 +1517,7 @@ scrapbook.doctypeToString = function (doctype) {
  */
 scrapbook.parseCssFile = async function (data, charset) {
   const regexAtCharset = /^@charset "([^"]*)";/;
-  const parseCssFile = async function (data, charset) {
+  const fn = scrapbook.parseCssFile = async function (data, charset) {
     if (charset) {
       let text = await scrapbook.readFileAsText(data, charset);
 
@@ -1574,8 +1557,7 @@ scrapbook.parseCssFile = async function (data, charset) {
 
     return {text: bytes, charset: null};
   };
-  scrapbook.parseCssFile = parseCssFile;
-  return await parseCssFile(data, charset);
+  return await fn(data, charset);
 };
 
 /**
@@ -1652,7 +1634,7 @@ scrapbook.rewriteCssText = function (cssText, options) {
   const pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // @font-face; catch 1
   const pRNamespace = "(" + "@namespace" + pCmSp + "(?:" + pStr + pCmSp2 + ")?" + pUrl + ")"; // @namespace; catch 1
 
-  const rewriteCssText = function (cssText, options = {}) {
+  const fn = scrapbook.rewriteCssText = function (cssText, options = {}) {
     let mapUrlPromise;
 
     const handleRewrittenData = function (data, prefix, postfix, noResMap) {
@@ -1752,8 +1734,7 @@ scrapbook.rewriteCssText = function (cssText, options) {
       });
     });
   };
-  scrapbook.rewriteCssText = rewriteCssText;
-  return rewriteCssText(cssText, options);
+  return fn(cssText, options);
 };
 
 /**
@@ -1774,7 +1755,7 @@ scrapbook.rewriteSrcset = function (srcset, rewriter) {
   const REGEX_SRCSET = /(\s*)([^ ,][^ ]*[^ ,])(\s*(?: [^ ,]+)?\s*(?:,|$))/g;
   const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
 
-  const rewriteSrcset = function (srcset, rewriter) {
+  const fn = scrapbook.rewriteSrcset = function (srcset, rewriter) {
     let mapUrlPromise;
     const response = srcset.replace(REGEX_SRCSET, (m, m1, m2, m3) => {
       let replacement = rewriter(m2);
@@ -1802,8 +1783,7 @@ scrapbook.rewriteSrcset = function (srcset, rewriter) {
       });
     });
   };
-  scrapbook.rewriteSrcset = rewriteSrcset;
-  return rewriteSrcset(srcset, rewriter);
+  return fn(srcset, rewriter);
 };
 
 /**
@@ -1828,7 +1808,7 @@ scrapbook.flattenFrames = function (doc) {
 scrapbook.parseMaffRdfDocument = function (doc) {
   const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
   const MAF = "http://maf.mozdev.org/metadata/rdf#";
-  const parseMaffRdfDocument = function (doc) {
+  const fn = scrapbook.parseMaffRdfDocument = function (doc) {
     const result = {};
     let elem;
 
@@ -1849,8 +1829,7 @@ scrapbook.parseMaffRdfDocument = function (doc) {
 
     return result;
   };
-  scrapbook.parseMaffRdfDocument = parseMaffRdfDocument;
-  return parseMaffRdfDocument(doc);
+  return fn(doc);
 };
 
 
