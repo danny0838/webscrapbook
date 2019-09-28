@@ -57,10 +57,60 @@
     "message": "擷取頁面"
   },
   "EditConfirmScriptedDocument": {
-    "message": "此頁面含有腳本，實際內容可能已變更，重新儲存可能造成不可逆的資訊遺失。要繼續編輯嗎？"
+    "message": "此頁面含有腳本，可能與編輯工具衝突，造成永久的資訊遺失。確定要儲存嗎？"
   },
   "EditTab": {
     "message": "編輯分頁"
+  },
+  "EditorButtonClose": {
+    "message": "關閉工具列"
+  },
+  "EditorButtonEraser": {
+    "message": "橡皮擦工具 - 點擊擦除選取範圍的內容；Ctrl或中鍵點擊移除選取範圍的剪貼簿註記。（擦除的內容可還原）"
+  },
+  "EditorButtonEraserRevertAll": {
+    "message": "還原所有擦除內容"
+  },
+  "EditorButtonEraserRevertSelection": {
+    "message": "還原選取範圍的擦除內容"
+  },
+  "EditorButtonEraserSelection": {
+    "message": "擦除選取範圍的內容"
+  },
+  "EditorButtonEraserSelector": {
+    "message": "透過 CSS 選擇器擦除內容"
+  },
+  "EditorButtonEraserSelectorPrompt": {
+    "message": "請輸入用於擦除內容的 CSS 選擇器："
+  },
+  "EditorButtonHtmlEditor": {
+    "message": "HTML 編輯工具 - 點擊開啟或關閉。開啟後可自由編輯頁面內容。（儲存後無法復原）"
+  },
+  "EditorButtonLocate": {
+    "message": "定位工具 - 在剪貼簿顯示此項目的位置。"
+  },
+  "EditorButtonMarker": {
+    "message": "標示工具 - 點擊標示選取範圍的文字。"
+  },
+  "EditorButtonMarkerItem": {
+    "message": "標示 $INDEX$",
+    "placeholders": {
+      "index": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditorButtonRemoveEditsAll": {
+    "message": "移除所有剪貼簿註記"
+  },
+  "EditorButtonRemoveEditsSelection": {
+    "message": "移除選取範圍的剪貼簿註記"
+  },
+  "EditorButtonSave": {
+    "message": "儲存頁面"
+  },
+  "EditorButtonUndo": {
+    "message": "復原"
   },
   "ErrorContentScriptExecute": {
     "message": "無法執行內容處理腳本 ($SOURCE$): $REASON$",
@@ -70,6 +120,14 @@
       },
       "reason": {
         "content": "$2"
+      }
+    }
+  },
+  "ErrorEditorButtonEraserSelectorInvalid": {
+    "message": "'$SELECTOR$' 不是有效的 CSS 選擇器。",
+    "placeholders": {
+      "selector": {
+        "content": "$1"
       }
     }
   },
@@ -520,6 +578,9 @@
   },
   "OptionEditorAutoInit": {
     "message": "瀏覽剪貼簿中的頁面時，自動載入編輯工具列"
+  },
+  "OptionEditorLineMarkerStyleLabel": {
+    "message": "行內標示樣式"
   },
   "OptionGroupCapture": {
     "message": "擷取 - 內容"

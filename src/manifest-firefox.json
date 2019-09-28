@@ -47,6 +47,7 @@
   },
 
   "web_accessible_resources": [
+    "resources/*",
     "viewer/load.html"
   ],
 

@@ -57,10 +57,60 @@
     "message": "Capture page"
   },
   "EditConfirmScriptedDocument": {
-    "message": "This page is scripted, its content may have been changed and save it again may cause irreversible data loss. Continue to edit?"
+    "message": "This page has scripts, which could conflict with the editor causing permanent data loss. Save anyway?"
   },
   "EditTab": {
     "message": "Edit tab"
+  },
+  "EditorButtonClose": {
+    "message": "Close toolbar"
+  },
+  "EditorButtonEraser": {
+    "message": "Eraser - Click to erase content in the selected area; Ctrl- or middle-click to remove scrapbook edits in the selected area. (Erases can be reverted.)"
+  },
+  "EditorButtonEraserRevertAll": {
+    "message": "Revert all erases"
+  },
+  "EditorButtonEraserRevertSelection": {
+    "message": "Revert erases in selection"
+  },
+  "EditorButtonEraserSelection": {
+    "message": "Revert all erases"
+  },
+  "EditorButtonEraserSelector": {
+    "message": "Erase via CSS selector"
+  },
+  "EditorButtonEraserSelectorPrompt": {
+    "message": "Specify the CSS selector to erase elements:"
+  },
+  "EditorButtonHtmlEditor": {
+    "message": "HTML editor - Click to toggle page content editing. (Edits cannot be undone after save.)"
+  },
+  "EditorButtonLocate": {
+    "message": "Locater - Locate this item in scrapbook."
+  },
+  "EditorButtonMarker": {
+    "message": "Marker - Click to mark selection."
+  },
+  "EditorButtonMarkerItem": {
+    "message": "Marker $INDEX$",
+    "placeholders": {
+      "index": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditorButtonRemoveEditsAll": {
+    "message": "Remove all scrapbook edits"
+  },
+  "EditorButtonRemoveEditsSelection": {
+    "message": "Remove scrapbook edits in selection"
+  },
+  "EditorButtonSave": {
+    "message": "Save page"
+  },
+  "EditorButtonUndo": {
+    "message": "Undo"
   },
   "ErrorContentScriptExecute": {
     "message": "Unable to execute content script ($SOURCE$): $REASON$",
@@ -70,6 +120,14 @@
       },
       "reason": {
         "content": "$2"
+      }
+    }
+  },
+  "ErrorEditorButtonEraserSelectorInvalid": {
+    "message": "'$selector$' is not a valid selector.",
+    "placeholders": {
+      "selector": {
+        "content": "$1"
       }
     }
   },
@@ -520,6 +578,9 @@
   },
   "OptionEditorAutoInit": {
     "message": "Automatically load editor toolbar when visiting a page in the scrapbook"
+  },
+  "OptionEditorLineMarkerStyleLabel": {
+    "message": "Inline marker style"
   },
   "OptionGroupCapture": {
     "message": "Capture - content"

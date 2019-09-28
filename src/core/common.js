@@ -141,6 +141,19 @@ scrapbook.options = {
   "capture.recordRewrittenAttr": false,
   "capture.recordSourceUri": false,
   "editor.autoInit": true,
+  "editor.lineMarker.checked": null,
+  "editor.lineMarker.style.1": "background-color: #FFFF00; text-shadow: 0 0 1px black;",
+  "editor.lineMarker.style.2": "background-color: #00FF00; text-shadow: 0 0 1px black;",
+  "editor.lineMarker.style.3": "background-color: #00FFFF; text-shadow: 0 0 1px black;",
+  "editor.lineMarker.style.4": "background-color: #FF0000; text-shadow: 0 0 1px black;",
+  "editor.lineMarker.style.5": "border-bottom: 2px solid #00FF00;",
+  "editor.lineMarker.style.6": "border-bottom: 2px solid #FF0000;",
+  "editor.lineMarker.style.7": "border-bottom: 2px dotted #0000FF;",
+  "editor.lineMarker.style.8": "border-bottom: 2px dotted #FF0000;",
+  "editor.lineMarker.style.9": "background-color: #FFFF99; color: #000000; border: thin dashed #FFCC00;",
+  "editor.lineMarker.style.10": "background-color: #CCFFFF; color: #000000; border: thin solid #0099FF;",
+  "editor.lineMarker.style.11": "border: medium double #993399;",
+  "editor.lineMarker.style.12": "background-color: #EE3311; color: #FFFFFF; font-weight: bold;",
   "viewer.useFileSystemApi": false,
   "viewer.viewHtz": true,
   "viewer.viewMaff": true,
@@ -557,6 +570,7 @@ scrapbook.initContentScripts = async function (tabId) {
             await browser.tabs.executeScript(tabId, {frameId, file: "/lib/mime.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/lib/sha_dev.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js", runAt: "document_start"});
+            await browser.tabs.executeScript(tabId, {frameId, file: "/core/optionsAuto.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/core/content.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/editor/content.js", runAt: "document_start"});
@@ -901,6 +915,14 @@ scrapbook.escapeHtmlComment = function (str) {
   const regex = /-([\u200B]*)-/g;
   const fn = scrapbook.escapeHtmlComment = function (str) {
     return str.replace(regex, "-\u200B$1-");
+  };
+  return fn(str);
+};
+
+scrapbook.unescapeHtmlComment = function (str) {
+  const regex = /-[\u200B]([\u200B]*)-/g;
+  const fn = scrapbook.unescapeHtmlComment = function (str) {
+    return str.replace(regex, "-$1-");
   };
   return fn(str);
 };
