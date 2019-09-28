@@ -89,8 +89,8 @@ height: 100% !important;
   }
   editor.internalElement = iwrapper;
 
-  const style = iwrapper.appendChild(document.createElement("style"));
-  style.textContent = `
+  iwrapper.innerHTML = `\
+<style>
 #toolbar {
   position: relative;
   box-sizing: border-box;
@@ -145,37 +145,33 @@ height: 100% !important;
 #toolbar #toolbar-close:hover {
   opacity: 1;
 }
+</style>
+<div id="toolbar">
+  <button id="toolbar-locate">locate</button>
+  <button id="toolbar-edit">edit</button>
+  <button id="toolbar-save">save</button>
+  <a id="toolbar-close" href="javascript:"></a>
+</div>
 `;
 
-  const toolbar = iwrapper.appendChild(document.createElement("div"));
-  toolbar.id = "toolbar";
-
-  const locate = toolbar.appendChild(document.createElement("button"));
-  locate.id = "toolbar-locate";
-  locate.textContent = 'locate';
-  locate.addEventListener("click", async (event) => {
+  var elem = iwrapper.querySelector('#toolbar-locate');
+  elem.addEventListener("click", async (event) => {
     editor.locate();
   });
-  locate.disabled = locate.hidden = !editor.inScrapBook;
+  elem.disabled = elem.hidden = !editor.inScrapBook;
 
-  const edit = toolbar.appendChild(document.createElement("button"));
-  edit.id = "toolbar-edit";
-  edit.textContent = 'edit';
-  edit.addEventListener("click", (event) => {
+  var elem = iwrapper.querySelector('#toolbar-edit');
+  elem.addEventListener("click", (event) => {
     editor.edit();
   });
 
-  const save = toolbar.appendChild(document.createElement("button"));
-  save.id = "toolbar-save";
-  save.textContent = 'save';
-  save.addEventListener("click", (event) => {
+  var elem = iwrapper.querySelector('#toolbar-save');
+  elem.addEventListener("click", (event) => {
     editor.save();
   });
 
-  const close = toolbar.appendChild(document.createElement("a"));
-  close.id = "toolbar-close";
-  close.href = "javascript:";
-  close.addEventListener("click", (event) => {
+  var elem = iwrapper.querySelector('#toolbar-close');
+  elem.addEventListener("click", (event) => {
     editor.close();
   });
 };
