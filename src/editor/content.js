@@ -195,7 +195,7 @@ editor.locate = async function () {
 editor.edit = async function (willEditable) {
   if (!editor.element && editor.element.parentNode) { return; }
 
-  const editElem = editor.internalElement.getElementById("toolbar-edit");
+  const editElem = editor.internalElement.querySelector('#toolbar-edit');
 
   if (typeof willEditable === "undefined") {
     willEditable = !editElem.hasAttribute("checked");
