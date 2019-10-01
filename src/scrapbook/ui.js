@@ -817,20 +817,33 @@ const scrapbookUi = {
 
   /**
    * @param {HTMLElement} elem - the element to be inserted to the dialog.
-   * @param Dispatch 'dialogSubmit' event on elem to resolve the Promise with value.
-   * @param Listen to 'dialogShow' event for elem to handle initialization.
+   *   - Dispatch 'dialogSubmit' event on elem to resolve the Promise with value.
+   *   - Listen to 'dialogShow' event for elem to handle initialization.
    */
   async showDialog(elem) {
     const mask = document.getElementById('dialog-mask');
     const wrapper = document.getElementById('dialog-wrapper');
-    const cancelElem = elem.querySelector('.buttons input[type="button"]')
+    const cancelElem = elem.querySelector('.cancel');
 
-    const onKeyEscape = (event) => {
-      if (event.code === 'Escape' &&
-          !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
-        event.preventDefault();
-        elem.dispatchEvent(new CustomEvent('dialogSubmit'), {detail: null});
+    const onKeyDown = (event) => {
+      // skip if there's a modifier
+      if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+        return;
       }
+
+      if (event.code === "Escape" || event.code === "F10") {
+        event.preventDefault();
+        elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: null}));
+      }
+    };
+
+    const onFocusOut = (event) => {
+      // skip when focusing another descendant of the wrapper
+      if (wrapper.contains(event.relatedTarget)) {
+        return;
+      }
+      
+      elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: null}));
     };
 
     const onSubmit = (event) => {
@@ -843,13 +856,19 @@ const scrapbookUi = {
       elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: null}));
     };
 
-    window.addEventListener('keydown', onKeyEscape, true);
-    elem.addEventListener('submit', onSubmit);
-    cancelElem.addEventListener('click', onCancel);
-
     wrapper.innerHTML = '';
     wrapper.appendChild(elem);
     mask.hidden = false;
+
+    if (!wrapper.hasAttribute('tabindex')) {
+      wrapper.setAttribute('tabindex', -1);
+    }
+    wrapper.focus();
+
+    window.addEventListener('keydown', onKeyDown, true);
+    wrapper.addEventListener('focusout', onFocusOut);
+    elem.addEventListener('submit', onSubmit);
+    cancelElem.addEventListener('click', onCancel);
 
     const result = await new Promise((resolve, reject) => {
       elem.addEventListener('dialogSubmit', (event) => {
@@ -858,9 +877,10 @@ const scrapbookUi = {
       elem.dispatchEvent(new CustomEvent('dialogShow', {detail: null}));
     });
 
-    window.removeEventListener('keydown', onKeyEscape);
+    window.removeEventListener('keydown', onKeyDown, true);
+    wrapper.removeEventListener('focusout', onFocusOut);
     elem.removeEventListener('submit', onSubmit);
-    cancelElem.removeEventListener('submit', onCancel);
+    cancelElem.removeEventListener('click', onCancel);
 
     mask.hidden = true;
 
