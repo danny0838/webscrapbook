@@ -511,7 +511,7 @@ scrapbook.lang = function (key, args) {
 };
 
 scrapbook.loadLanguages = function (rootNode) {
-  Array.prototype.forEach.call(rootNode.getElementsByTagName("*"), (elem) => {
+  Array.prototype.forEach.call(rootNode.querySelectorAll('*'), (elem) => {
     if (elem.childNodes.length === 1) {
       let child = elem.firstChild;
       if (child.nodeType === 3) {
