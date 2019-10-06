@@ -64,8 +64,17 @@
       </div>
       <div>
         <label for="opt_capture.saveFilename">__MSG_OptionCaptureSaveFilenameLabel__</label>
-        <input type="text" id="opt_capture.saveFilename" placeholder="%ID%">
+        <input type="text" id="opt_capture.saveFilename" placeholder="%ID%" list="capture.saveFilename.preset">
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveFilenameTooltip__"></a>
+        <datalist id="capture.saveFilename.preset">
+          <option value="%ID%">
+          <option value="%ID% - %TITLE%">
+          <option value="%UUID%">
+          <option value="%TITLE%">
+          <option value="%TITLE% (%DATE% %TIME%)">
+          <option value="%TITLE% (%HOST%)">
+          <option value="%YEAR_UTC%/%MONTH_UTC%/%ID% - %TITLE%">
+        </datalist>
       </div>
       <div>
         <input type="checkbox" id="opt_capture.saveAsciiFilename">
