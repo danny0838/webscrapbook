@@ -155,107 +155,13 @@ background.captureCurrentTab = async function (params, sender) {
 /**
  * @kind invokable
  */
-background.lineMarker = async function (params, sender) {
+background.invokeEditorCommand = async function ({cmd, args}, sender) {
   const tabId = sender.tab.id;
   const tasks = Array.prototype.map.call(
     await scrapbook.initContentScripts(tabId),
     async ({tabId, frameId, injected}) => {
       return await scrapbook.invokeContentScript({
-        tabId,
-        frameId,
-        cmd: "editor.lineMarkerInternal",
-        args: params,
-      });
-    });
-  return Promise.all(tasks);
-};
-
-/**
- * @kind invokable
- */
-background.eraseNodes = async function (params, sender) {
-  const tabId = sender.tab.id;
-  const tasks = Array.prototype.map.call(
-    await scrapbook.initContentScripts(tabId),
-    async ({tabId, frameId, injected}) => {
-      return await scrapbook.invokeContentScript({
-        tabId,
-        frameId,
-        cmd: "editor.eraseNodesInternal",
-        args: params,
-      });
-    });
-  return Promise.all(tasks);
-};
-
-/**
- * @kind invokable
- */
-background.eraseSelector = async function (params, sender) {
-  const tabId = sender.tab.id;
-  const tasks = Array.prototype.map.call(
-    await scrapbook.initContentScripts(tabId),
-    async ({tabId, frameId, injected}) => {
-      return await scrapbook.invokeContentScript({
-        tabId,
-        frameId,
-        cmd: "editor.eraseSelectorInternal",
-        args: params,
-      });
-    });
-  return Promise.all(tasks);
-};
-
-/**
- * @kind invokable
- */
-background.uneraseNodes = async function (params, sender) {
-  const tabId = sender.tab.id;
-  const tasks = Array.prototype.map.call(
-    await scrapbook.initContentScripts(tabId),
-    async ({tabId, frameId, injected}) => {
-      return await scrapbook.invokeContentScript({
-        tabId,
-        frameId,
-        cmd: "editor.uneraseNodesInternal",
-        args: params,
-      });
-    });
-  return Promise.all(tasks);
-};
-
-/**
- * @kind invokable
- */
-background.removeEdits = async function (params, sender) {
-  const tabId = sender.tab.id;
-  const tasks = Array.prototype.map.call(
-    await scrapbook.initContentScripts(tabId),
-    async ({tabId, frameId, injected}) => {
-      return await scrapbook.invokeContentScript({
-        tabId,
-        frameId,
-        cmd: "editor.removeEditsInternal",
-        args: params,
-      });
-    });
-  return Promise.all(tasks);
-};
-
-/**
- * @kind invokable
- */
-background.toggleHtmlEditor = async function (params, sender) {
-  const tabId = sender.tab.id;
-
-  const tasks = Array.prototype.map.call(
-    await scrapbook.initContentScripts(tabId),
-    async ({tabId, frameId, injected}) => {
-      return await scrapbook.invokeContentScript({
-        tabId,
-        frameId,
-        cmd: "editor.toggleHtmlEditor",
-        args: params,
+        tabId, frameId, cmd, args,
       });
     });
   return Promise.all(tasks);

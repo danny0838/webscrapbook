@@ -655,15 +655,21 @@ editor.locate = async function () {
 
 editor.lineMarker = async function (style) {
   return await scrapbook.invokeExtensionScript({
-    cmd: "background.lineMarker",
-    args: {style},
+    cmd: "background.invokeEditorCommand",
+    args: {
+      cmd: "editor.lineMarkerInternal",
+      args: {style},
+    },
   });
 };
 
 editor.eraseNodes = async function () {
   return await scrapbook.invokeExtensionScript({
-    cmd: "background.eraseNodes",
-    args: {},
+    cmd: "background.invokeEditorCommand",
+    args: {
+      cmd: "editor.eraseNodesInternal",
+      args: {},
+    },
   });
 };
 
@@ -682,22 +688,31 @@ editor.eraseSelector = async function () {
   }
 
   return await scrapbook.invokeExtensionScript({
-    cmd: "background.eraseSelector",
-    args: {selector},
+    cmd: "background.invokeEditorCommand",
+    args: {
+      cmd: "editor.eraseSelectorInternal",
+      args: {selector},
+    },
   });
 };
 
 editor.uneraseNodes = async function (inSelection) {
   return await scrapbook.invokeExtensionScript({
-    cmd: "background.uneraseNodes",
-    args: {inSelection},
+    cmd: "background.invokeEditorCommand",
+    args: {
+      cmd: "editor.uneraseNodesInternal",
+      args: {inSelection},
+    },
   });
 };
 
 editor.removeEdits = async function (inSelection) {
   return await scrapbook.invokeExtensionScript({
-    cmd: "background.removeEdits",
-    args: {inSelection},
+    cmd: "background.invokeEditorCommand",
+    args: {
+      cmd: "editor.removeEditsInternal",
+      args: {inSelection},
+    },
   });
 };
 
@@ -713,8 +728,11 @@ editor.htmlEditor = async function (willEditable) {
   willEditable ? editElem.setAttribute("checked", "") : editElem.removeAttribute("checked");
 
   return await scrapbook.invokeExtensionScript({
-    cmd: "background.toggleHtmlEditor",
-    args: {willEditable},
+    cmd: "background.invokeEditorCommand",
+    args: {
+      cmd: "editor.toggleHtmlEditor",
+      args: {willEditable},
+    },
   });
 };
 
