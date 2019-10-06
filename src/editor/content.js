@@ -15,6 +15,28 @@ const editor = {
   isScripted: false,
   serverUrl: null,
   history: [],
+
+  /**
+   * @return {Object<number~hWidth, number~vWidth>}
+   */
+  get scrollbar() {
+    const elem = document.createElement('div');
+    elem.style = `
+display: block;
+position: absolute;
+top: -200vh;
+overflow: scroll;
+width: 100vw;
+height: 100vh;`;
+    document.body.appendChild(elem);
+    const result = {
+      hWidth: elem.offsetWidth - elem.clientWidth,
+      vWidth: elem.offsetHeight - elem.clientHeight,
+    };
+    elem.remove();
+    delete editor.scrollbar;
+    return editor.scrollbar = result;
+  },
 };
 
 
@@ -203,6 +225,8 @@ ${sRoot}.toolbar .toolbar-save > button:first-of-type {
 ${sRoot}.toolbar > div > ul {
   display: block !important;
   position: absolute !important;
+  overflow: auto !important;
+  box-sizing: border-box !important;
   list-style: none !important;
   bottom: 32px !important;
   margin: 0 !important;
@@ -211,6 +235,7 @@ ${sRoot}.toolbar > div > ul {
   box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.3) !important;
   padding: 0 !important;
   background: white !important;
+  max-height: calc(100vh - 32px - ${editor.scrollbar.vWidth}px - 2px) !important;
 }
 
 ${sRoot}.toolbar > div > ul[hidden] {
