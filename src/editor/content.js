@@ -253,7 +253,6 @@ ${sRoot}.toolbar > div > ul > li > button {
   font-size: 14px !important;
   color: #333 !important;
   cursor: pointer !important;
-  text-align: justify !important;
 }
 
 ${sRoot}.toolbar > div > ul > li > button:focus {
