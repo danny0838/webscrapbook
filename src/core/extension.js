@@ -176,7 +176,8 @@ scrapbook.invokeCapture = async function (params) {
 };
 
 /**
- * @param {boolean} newTab
+ * @param {boolean} newTab - Whether to open in a new tab.
+ * @return {undefined|Window|Tab}
  */
 scrapbook.openScrapBook = async function ({newTab = true}) {
   const url = browser.runtime.getURL("scrapbook/sidebar.html");
@@ -188,7 +189,7 @@ scrapbook.openScrapBook = async function ({newTab = true}) {
   } else if (browser.windows) {
     const currentWindow = await browser.windows.getCurrent({windowTypes: ['normal']});
 
-    const sideWindow = (await browser.windows.getAll({
+    let sideWindow = (await browser.windows.getAll({
       windowTypes: ['popup'],
       populate: true,
     })).filter(w => w.tabs[0].url.startsWith(url))[0];
@@ -206,7 +207,7 @@ scrapbook.openScrapBook = async function ({newTab = true}) {
     const mainHeight = Math.min(screenHeight - 1, currentWindow.height);
 
     if (sideWindow) {
-      await browser.windows.update(sideWindow.id, {
+      sideWindow = await browser.windows.update(sideWindow.id, {
         left,
         top,
         width,
@@ -214,7 +215,7 @@ scrapbook.openScrapBook = async function ({newTab = true}) {
         drawAttention: true,
       });
     } else {
-      await browser.windows.create({
+      sideWindow = await browser.windows.create({
         url,
         left,
         top,
@@ -230,7 +231,8 @@ scrapbook.openScrapBook = async function ({newTab = true}) {
     if (mainWidth !== currentWindow.width) { axis.width = mainWidth; }
     if (mainHeight !== currentWindow.height) { axis.height = mainHeight; }
 
-    return await browser.windows.update(currentWindow.id, axis);
+    await browser.windows.update(currentWindow.id, axis);
+    return sideWindow;
   } else {
     // Firefox Android does not support windows
     return await scrapbook.visitLink({url, newTab});
