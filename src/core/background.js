@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * General background initialization
+ * The background script for the main (auto-generated) background page.
  *
  *****************************************************************************/
 
@@ -77,8 +77,10 @@ if (!browser.browserAction) {
  * Attempt to locate an item in the sidebar.
  *
  * @kind invokable
- * @return {Object|null|false} - the located item; null: no item located;
- *      false: no sidebar opened.
+ * @return {Object|null|false} - The located item.
+ *     - Object: the located item
+ *     - null: no item located
+ *     - false: no sidebar opened
  */
 background.locateCurrentTab = async function (params, sender) {
   const cmd = 'scrapbookUi.locate';
