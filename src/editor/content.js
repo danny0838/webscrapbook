@@ -576,20 +576,26 @@ editor.uneraseNodesInternal = function ({}) {
 editor.uneraseAllNodesInternal = function ({}) {
   editor.addHistory();
 
-  const selectedNodes = [];
-  const nodeIterator = document.createNodeIterator(
-    document.documentElement,
-    NodeFilter.SHOW_COMMENT,
-  );
-  let node;
-  while (node = nodeIterator.nextNode()) {
-    selectedNodes.push(node);
-  }
+  const unerase = () => {
+    const selectedNodes = [];
+    const nodeIterator = document.createNodeIterator(
+      document.documentElement,
+      NodeFilter.SHOW_COMMENT,
+    );
+    let node;
+    while (node = nodeIterator.nextNode()) {
+      selectedNodes.push(node);
+    }
 
-  // handle descendant node first as it may be altered when handling ancestor
-  for (const elem of selectedNodes.reverse()) {
-    editor.removeScrapBookObject(elem);
-  }
+    // handle descendant node first as it may be altered when handling ancestor
+    for (const elem of selectedNodes.reverse()) {
+      editor.removeScrapBookObject(elem);
+    }
+
+    return selectedNodes.length > 0;
+  };
+
+  while (unerase()) {};
 };
 
 /**
