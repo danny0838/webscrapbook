@@ -86,6 +86,74 @@
   "EditorButtonHtmlEditor": {
     "message": "HTML 编辑工具 - 点击开启或关闭。开启后可自由编辑页面内容。（保存后无法复原）"
   },
+  "EditorButtonHtmlEditorEm": {
+    "message": "切换斜体"
+  },
+  "EditorButtonHtmlEditorFormatBlockDiv": {
+    "message": "设定为 DIV 区块"
+  },
+  "EditorButtonHtmlEditorFormatBlockH": {
+    "message": "设定为 $LEVEL$ 级标题",
+    "placeholders": {
+      "level": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditorButtonHtmlEditorFormatBlockP": {
+    "message": "设定为一般段落"
+  },
+  "EditorButtonHtmlEditorFormatBlockPre": {
+    "message": "设定为 PRE 区块"
+  },
+  "EditorButtonHtmlEditorHr": {
+    "message": "插入水平线"
+  },
+  "EditorButtonHtmlEditorIndent": {
+    "message": "增加缩排"
+  },
+  "EditorButtonHtmlEditorJustifyCenter": {
+    "message": "置中对齐"
+  },
+  "EditorButtonHtmlEditorJustifyFull": {
+    "message": "左右对齐"
+  },
+  "EditorButtonHtmlEditorJustifyLeft": {
+    "message": "靠左对齐"
+  },
+  "EditorButtonHtmlEditorJustifyRight": {
+    "message": "靠右对齐"
+  },
+  "EditorButtonHtmlEditorListOrdered": {
+    "message": "设定为有序列表"
+  },
+  "EditorButtonHtmlEditorListUnordered": {
+    "message": "设定为无序列表"
+  },
+  "EditorButtonHtmlEditorOutdent": {
+    "message": "减少缩排"
+  },
+  "EditorButtonHtmlEditorRemoveFormat": {
+    "message": "清除格式"
+  },
+  "EditorButtonHtmlEditorStrike": {
+    "message": "切换删除线"
+  },
+  "EditorButtonHtmlEditorStrong": {
+    "message": "切换粗体"
+  },
+  "EditorButtonHtmlEditorSubscript": {
+    "message": "切换下标"
+  },
+  "EditorButtonHtmlEditorSuperscript": {
+    "message": "切换上标"
+  },
+  "EditorButtonHtmlEditorUnderline": {
+    "message": "切换底线"
+  },
+  "EditorButtonHtmlEditorUnlink": {
+    "message": "移除链接"
+  },
   "EditorButtonLocate": {
     "message": "定位工具 - 在剪贴簿显示此项目的位置。"
   },

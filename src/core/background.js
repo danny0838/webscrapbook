@@ -179,9 +179,9 @@ background.getFocusedFrameId = async function ({}, sender) {
 /**
  * @kind invokable
  */
-background.invokeEditorCommand = async function ({code, cmd, args, frameId}, sender) {
+background.invokeEditorCommand = async function ({code, cmd, args, frameId = -1}, sender) {
   const tabId = sender.tab.id;
-  if (frameId) {
+  if (frameId !== -1) {
     const response = code ? 
       await browser.tabs.executeScript(tabId, {
         frameId,

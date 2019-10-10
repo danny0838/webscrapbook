@@ -86,6 +86,74 @@
   "EditorButtonHtmlEditor": {
     "message": "HTML editor - Click to toggle page content editing. (Edits cannot be undone after save.)"
   },
+  "EditorButtonHtmlEditorEm": {
+    "message": "Toggle italic"
+  },
+  "EditorButtonHtmlEditorFormatBlockDiv": {
+    "message": "Set to DIV block"
+  },
+  "EditorButtonHtmlEditorFormatBlockH": {
+    "message": "Set to header level $LEVEL$",
+    "placeholders": {
+      "level": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditorButtonHtmlEditorFormatBlockP": {
+    "message": "Set to normal paragraph"
+  },
+  "EditorButtonHtmlEditorFormatBlockPre": {
+    "message": "Set to PRE block"
+  },
+  "EditorButtonHtmlEditorHr": {
+    "message": "Insert a horizontal rule"
+  },
+  "EditorButtonHtmlEditorIndent": {
+    "message": "Indent"
+  },
+  "EditorButtonHtmlEditorJustifyCenter": {
+    "message": "Align center"
+  },
+  "EditorButtonHtmlEditorJustifyFull": {
+    "message": "Align justify"
+  },
+  "EditorButtonHtmlEditorJustifyLeft": {
+    "message": "Align left"
+  },
+  "EditorButtonHtmlEditorJustifyRight": {
+    "message": "Align right"
+  },
+  "EditorButtonHtmlEditorListOrdered": {
+    "message": "Toggle unordered list"
+  },
+  "EditorButtonHtmlEditorListUnordered": {
+    "message": "Toggle ordered list"
+  },
+  "EditorButtonHtmlEditorOutdent": {
+    "message": "Outdent"
+  },
+  "EditorButtonHtmlEditorRemoveFormat": {
+    "message": "Clear formats"
+  },
+  "EditorButtonHtmlEditorStrike": {
+    "message": "Toggle line-through"
+  },
+  "EditorButtonHtmlEditorStrong": {
+    "message": "Toggle bold"
+  },
+  "EditorButtonHtmlEditorSubscript": {
+    "message": "Toggle subscript"
+  },
+  "EditorButtonHtmlEditorSuperscript": {
+    "message": "Toggle superscript"
+  },
+  "EditorButtonHtmlEditorUnderline": {
+    "message": "Togger underline"
+  },
+  "EditorButtonHtmlEditorUnlink": {
+    "message": "Remove hyperlinks"
+  },
   "EditorButtonLocate": {
     "message": "Locater - Locate this item in scrapbook."
   },

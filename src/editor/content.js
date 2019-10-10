@@ -184,6 +184,7 @@ ${sRoot}.toolbar > div > button:active {
 
 ${sRoot}.toolbar > div > button[disabled] {
   filter: grayscale(100%) !important;
+  opacity: 0.6 !important;
 }
 
 ${sRoot}.toolbar > div > button[checked] {
@@ -347,7 +348,42 @@ ${sRoot}.toolbar .toolbar-close:hover {
     </ul>
   </div>
   <div class="toolbar-htmlEditor" title="${scrapbook.lang('EditorButtonHtmlEditor')}">
-    <button></button>
+    <button></button><button disabled=""></button>
+    <ul hidden="" title="">
+      <li><button class="toolbar-htmlEditor-strong">${scrapbook.lang('EditorButtonHtmlEditorStrong')}</button></li>
+      <li><button class="toolbar-htmlEditor-em">${scrapbook.lang('EditorButtonHtmlEditorEm')}</button></li>
+      <li><button class="toolbar-htmlEditor-underline">${scrapbook.lang('EditorButtonHtmlEditorUnderline')}</button></li>
+      <li><button class="toolbar-htmlEditor-strike">${scrapbook.lang('EditorButtonHtmlEditorStrike')}</button></li>
+      <hr/>
+      <li><button class="toolbar-htmlEditor-superscript">${scrapbook.lang('EditorButtonHtmlEditorSuperscript')}</button></li>
+      <li><button class="toolbar-htmlEditor-subscript">${scrapbook.lang('EditorButtonHtmlEditorSubscript')}</button></li>
+      <hr/>
+      <li><button class="toolbar-htmlEditor-formatBlockP">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockP')}</button></li>
+      <li><button class="toolbar-htmlEditor-formatBlockH1">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [1])}</button></li>
+      <li><button class="toolbar-htmlEditor-formatBlockH2">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [2])}</button></li>
+      <li><button class="toolbar-htmlEditor-formatBlockH3">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [3])}</button></li>
+      <li><button class="toolbar-htmlEditor-formatBlockH4">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [4])}</button></li>
+      <li><button class="toolbar-htmlEditor-formatBlockH5">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [5])}</button></li>
+      <li><button class="toolbar-htmlEditor-formatBlockH6">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [6])}</button></li>
+      <li><button class="toolbar-htmlEditor-formatBlockDiv">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockDiv')}</button></li>
+      <li><button class="toolbar-htmlEditor-formatBlockPre">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockPre')}</button></li>
+      <hr/>
+      <li><button class="toolbar-htmlEditor-listUnordered">${scrapbook.lang('EditorButtonHtmlEditorListUnordered')}</button></li>
+      <li><button class="toolbar-htmlEditor-listOrdered">${scrapbook.lang('EditorButtonHtmlEditorListOrdered')}</button></li>
+      <hr/>
+      <li><button class="toolbar-htmlEditor-outdent">${scrapbook.lang('EditorButtonHtmlEditorOutdent')}</button></li>
+      <li><button class="toolbar-htmlEditor-indent">${scrapbook.lang('EditorButtonHtmlEditorIndent')}</button></li>
+      <hr/>
+      <li><button class="toolbar-htmlEditor-justifyLeft">${scrapbook.lang('EditorButtonHtmlEditorJustifyLeft')}</button></li>
+      <li><button class="toolbar-htmlEditor-justifyRight">${scrapbook.lang('EditorButtonHtmlEditorJustifyRight')}</button></li>
+      <li><button class="toolbar-htmlEditor-justifyCenter">${scrapbook.lang('EditorButtonHtmlEditorJustifyCenter')}</button></li>
+      <li><button class="toolbar-htmlEditor-justifyFull">${scrapbook.lang('EditorButtonHtmlEditorJustifyFull')}</button></li>
+      <hr/>
+      <li><button class="toolbar-htmlEditor-hr">${scrapbook.lang('EditorButtonHtmlEditorHr')}</button></li>
+      <hr/>
+      <li><button class="toolbar-htmlEditor-removeFormat">${scrapbook.lang('EditorButtonHtmlEditorRemoveFormat')}</button></li>
+      <li><button class="toolbar-htmlEditor-unlink">${scrapbook.lang('EditorButtonHtmlEditorUnlink')}</button></li>
+    </ul>
   </div>
   <div class="toolbar-undo" title="${scrapbook.lang('EditorButtonUndo')}">
     <button disabled=""></button>
@@ -444,6 +480,323 @@ ${sRoot}.toolbar .toolbar-close:hover {
   var elem = wrapper.querySelector('.toolbar-htmlEditor > button:first-of-type');
   elem.addEventListener("click", (event) => {
     editor.htmlEditor();
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor > button:last-of-type');
+  elem.addEventListener("click", (event) => {
+    editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-strong');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('bold', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-em');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('italic', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-underline');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('underline', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-strike');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('strikeThrough', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-superscript');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('superscript', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-subscript');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('subscript', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockP');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('formatBlock', false, 'p');`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH1');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('formatBlock', false, 'h1');`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH2');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('formatBlock', false, 'h2');`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH3');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('formatBlock', false, 'h3');`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH4');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('formatBlock', false, 'h4');`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH5');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('formatBlock', false, 'h5');`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH6');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('formatBlock', false, 'h6');`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockDiv');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('formatBlock', false, 'div');`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockPre');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('formatBlock', false, 'pre');`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-listUnordered');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('insertUnorderedList', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-listOrdered');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('insertOrderedList', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-outdent');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('outdent', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-indent');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('indent', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyLeft');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('justifyLeft', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyRight');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('justifyRight', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyCenter');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('justifyCenter', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyFull');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('justifyFull', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-hr');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('insertHorizontalRule', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-removeFormat');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('removeFormat', false, null);`,
+      },
+    });
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-htmlEditor-unlink');
+  elem.addEventListener("click", async (event) => {
+    const frameId = await editor.getFocusedFrameId();
+    return scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        code: `document.execCommand('unlink', false, null);`,
+      },
+    });
   }, {passive: true});
 
   // undo
@@ -789,7 +1142,13 @@ editor.htmlEditor = async function (willEditable) {
     willEditable = !editElem.hasAttribute("checked");
   }
 
-  willEditable ? editElem.setAttribute("checked", "") : editElem.removeAttribute("checked");
+  if (willEditable) {
+    editElem.setAttribute("checked", "");
+    editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = false;
+  } else {
+    editElem.removeAttribute("checked");
+    editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = true;
+  }
 
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
