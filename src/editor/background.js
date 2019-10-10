@@ -42,7 +42,7 @@ browser.webNavigation.onDOMContentLoaded.addListener((details) => {
 
   return scrapbook.editTab({
     tabId,
-    toggle: true,
+    willOpen: true,
   });
 }, {url: [{schemes: ["http", "https"]}]});
 

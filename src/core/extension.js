@@ -239,13 +239,13 @@ scrapbook.openScrapBook = async function ({newTab = true}) {
   }
 };
 
-scrapbook.editTab = async function ({tabId, frameId = 0, toggle, force}) {
+scrapbook.editTab = async function ({tabId, frameId = 0, willOpen, force}) {
   await scrapbook.initContentScripts(tabId);
   return await scrapbook.invokeContentScript({
     tabId,
     frameId,
     cmd: "editor.init",
-    args: {toggle, force},
+    args: {willOpen, force},
   });
 };
 
