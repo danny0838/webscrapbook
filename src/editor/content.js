@@ -421,22 +421,22 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
   var elem = wrapper.querySelector('.toolbar-eraser-uneraseSelection');
   elem.addEventListener("click", (event) => {
-    editor.uneraseNodes(true);
+    editor.uneraseNodes();
   }, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-eraser-uneraseAll');
   elem.addEventListener("click", (event) => {
-    editor.uneraseNodes(false);
+    editor.uneraseAllNodes();
   }, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-eraser-removeEditsSelected');
   elem.addEventListener("click", (event) => {
-    editor.removeEdits(true);
+    editor.removeEdits();
   }, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-eraser-removeEditsAll');
   elem.addEventListener("click", (event) => {
-    editor.removeEdits(false);
+    editor.removeAllEdits();
   }, {passive: true});
 
   // htmlEditor
@@ -554,26 +554,36 @@ editor.eraseSelectorInternal = function ({selector}) {
 /**
  * @kind invokable
  */
-editor.uneraseNodesInternal = function ({inSelection}) {
+editor.uneraseNodesInternal = function ({}) {
   editor.addHistory();
 
-  let selectedNodes = [];
-  if (inSelection) {
-    // get selected element nodes with tweaks for boundary selection cases
-    selectedNodes = editor.getSelectedNodes({
-      nodeFilter: (node) => {
-        return node.nodeType === Node.COMMENT_NODE;
-      }
-    });
-  } else {
-    const nodeIterator = document.createNodeIterator(
-      document.documentElement,
-      NodeFilter.SHOW_COMMENT,
-    );
-    let node;
-    while (node = nodeIterator.nextNode()) {
-      selectedNodes.push(node);
+  // get selected element nodes with tweaks for boundary selection cases
+  const selectedNodes = editor.getSelectedNodes({
+    nodeFilter: (node) => {
+      return node.nodeType === Node.COMMENT_NODE;
     }
+  });
+
+  // handle descendant node first as it may be altered when handling ancestor
+  for (const elem of selectedNodes.reverse()) {
+    editor.removeScrapBookObject(elem);
+  }
+};
+
+/**
+ * @kind invokable
+ */
+editor.uneraseAllNodesInternal = function ({}) {
+  editor.addHistory();
+
+  const selectedNodes = [];
+  const nodeIterator = document.createNodeIterator(
+    document.documentElement,
+    NodeFilter.SHOW_COMMENT,
+  );
+  let node;
+  while (node = nodeIterator.nextNode()) {
+    selectedNodes.push(node);
   }
 
   // handle descendant node first as it may be altered when handling ancestor
@@ -585,38 +595,48 @@ editor.uneraseNodesInternal = function ({inSelection}) {
 /**
  * @kind invokable
  */
-editor.removeEditsInternal = function ({inSelection}) {
+editor.removeEditsInternal = function ({}) {
   editor.addHistory();
 
-  let selectedNodes = [];
-  if (inSelection) {
-    // get selected element nodes with tweaks for boundary selection cases
-    selectedNodes = editor.getSelectedNodes({
-      rangeTweaker: (range) => {
-        const startNode = range.startContainer;
-        if ([3, 4, 8].includes(startNode.nodeType)) {
-          // <span>[foo => start from <span> rather than #text(foo)
-          // <span>f[oo => start from <span> rather than #text(foo)
-          // <p><span>foo</span>[bar => start from #text(bar)
-          // <p><span>foo</span>b[ar => start from #text(bar)
-          if (!startNode.previousSibling) {
-            range.setStartBefore(startNode.parentNode);
-          }
+  // get selected element nodes with tweaks for boundary selection cases
+  const selectedNodes = editor.getSelectedNodes({
+    rangeTweaker: (range) => {
+      const startNode = range.startContainer;
+      if ([3, 4, 8].includes(startNode.nodeType)) {
+        // <span>[foo => start from <span> rather than #text(foo)
+        // <span>f[oo => start from <span> rather than #text(foo)
+        // <p><span>foo</span>[bar => start from #text(bar)
+        // <p><span>foo</span>b[ar => start from #text(bar)
+        if (!startNode.previousSibling) {
+          range.setStartBefore(startNode.parentNode);
         }
-      },
-      nodeFilter: (node) => {
-        return node.nodeType === Node.ELEMENT_NODE;
       }
-    });
-  } else {
-    const nodeIterator = document.createNodeIterator(
-      document.documentElement,
-      NodeFilter.SHOW_ELEMENT,
-    );
-    let node;
-    while (node = nodeIterator.nextNode()) {
-      selectedNodes.push(node);
+    },
+    nodeFilter: (node) => {
+      return node.nodeType === Node.ELEMENT_NODE;
     }
+  });
+
+  // handle descendant node first as it may be altered when handling ancestor
+  for (const elem of selectedNodes.reverse()) {
+    editor.removeScrapBookObject(elem);
+  }
+};
+
+/**
+ * @kind invokable
+ */
+editor.removeAllEditsInternal = function ({}) {
+  editor.addHistory();
+
+  const selectedNodes = [];
+  const nodeIterator = document.createNodeIterator(
+    document.documentElement,
+    NodeFilter.SHOW_ELEMENT,
+  );
+  let node;
+  while (node = nodeIterator.nextNode()) {
+    selectedNodes.push(node);
   }
 
   // handle descendant node first as it may be altered when handling ancestor
@@ -696,22 +716,42 @@ editor.eraseSelector = async function () {
   });
 };
 
-editor.uneraseNodes = async function (inSelection) {
+editor.uneraseNodes = async function () {
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.uneraseNodesInternal",
-      args: {inSelection},
+      args: {},
     },
   });
 };
 
-editor.removeEdits = async function (inSelection) {
+editor.uneraseAllNodes = async function () {
+  return await scrapbook.invokeExtensionScript({
+    cmd: "background.invokeEditorCommand",
+    args: {
+      cmd: "editor.uneraseAllNodesInternal",
+      args: {},
+    },
+  });
+};
+
+editor.removeEdits = async function () {
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
       cmd: "editor.removeEditsInternal",
-      args: {inSelection},
+      args: {},
+    },
+  });
+};
+
+editor.removeAllEdits = async function () {
+  return await scrapbook.invokeExtensionScript({
+    cmd: "background.invokeEditorCommand",
+    args: {
+      cmd: "editor.removeAllEditsInternal",
+      args: {},
     },
   });
 };
