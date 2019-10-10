@@ -1145,9 +1145,21 @@ editor.htmlEditor = async function (willEditable) {
   if (willEditable) {
     editElem.setAttribute("checked", "");
     editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = false;
+    Array.prototype.forEach.call(
+      editor.internalElement.querySelectorAll('.toolbar-marker > button, .toolbar-eraser > button'),
+      (elem) => {
+        elem.disabled = true;
+      });
+    editor.updateUndoButton();
   } else {
     editElem.removeAttribute("checked");
     editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = true;
+    Array.prototype.forEach.call(
+      editor.internalElement.querySelectorAll('.toolbar-marker > button, .toolbar-eraser > button'),
+      (elem) => {
+        elem.disabled = false;
+      });
+    editor.updateUndoButton();
   }
 
   return await scrapbook.invokeExtensionScript({
@@ -1170,10 +1182,7 @@ editor.undo = async function () {
   document.body.parentNode.replaceChild(editor.history.pop(), document.body);
 
   // update disabled status of the undo button
-  if (editor.internalElement && !editor.history.length) {
-    const button = editor.internalElement.querySelector('.toolbar-undo > button:first-of-type');
-    button.disabled = true;
-  }
+  editor.updateUndoButton();
 };
 
 editor.save = async function () {
@@ -1311,6 +1320,20 @@ editor.updateLineMarkers = function () {
   let idx = scrapbook.getOption('editor.lineMarker.checked');
   idx = Math.min(parseInt(idx, 10) || 0, buttons.length - 1);
   buttons[idx].setAttribute('checked', '');
+};
+
+editor.updateUndoButton = function () {
+  if (!editor.internalElement) { return; }
+
+  const button = editor.internalElement.querySelector('.toolbar-undo > button:first-of-type');
+
+  // disable if HTMLEditor is on
+  if (editor.internalElement.querySelector('.toolbar-htmlEditor > button').hasAttribute('checked')) {
+    button.disabled = true;
+    return;
+  }
+
+  button.disabled = editor.history.length === 0;
 };
 
 editor.getFocusedFrameId = async function () {
@@ -1638,10 +1661,7 @@ editor.addHistory = () => {
   editor.history.push(document.body.cloneNode(true));
 
   // update disabled status of the undo button
-  if (editor.internalElement && editor.history.length === 1) {
-    const button = editor.internalElement.querySelector('.toolbar-undo > button:first-of-type');
-    button.disabled = false;
-  }
+  editor.updateUndoButton();
 };
 
 window.addEventListener("focus", (event) => {
