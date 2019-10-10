@@ -938,6 +938,7 @@ editor.uneraseAllNodesInternal = function ({}) {
   editor.addHistory();
 
   const unerase = () => {
+    let unerased = false;
     const selectedNodes = [];
     const nodeIterator = document.createNodeIterator(
       document.documentElement,
@@ -950,10 +951,12 @@ editor.uneraseAllNodesInternal = function ({}) {
 
     // handle descendant node first as it may be altered when handling ancestor
     for (const elem of selectedNodes.reverse()) {
-      editor.removeScrapBookObject(elem);
+      if (editor.removeScrapBookObject(elem) !== -1) {
+        unerased = true;
+      }
     }
 
-    return selectedNodes.length > 0;
+    return unerased;
   };
 
   while (unerase()) {};
