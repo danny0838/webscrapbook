@@ -155,16 +155,64 @@ background.captureCurrentTab = async function (params, sender) {
 /**
  * @kind invokable
  */
-background.invokeEditorCommand = async function ({cmd, args}, sender) {
+background.getFocusedFrameId = async function ({}, sender) {
   const tabId = sender.tab.id;
   const tasks = Array.prototype.map.call(
     await scrapbook.initContentScripts(tabId),
     async ({tabId, frameId, injected}) => {
-      return await scrapbook.invokeContentScript({
+      const time = await scrapbook.invokeContentScript({
+        tabId, frameId,
+        cmd: 'editor.getFocusInfo',
+        args: {},
+      });
+      return {frameId, time};
+    });
+  const {frameId} = (await Promise.all(tasks)).reduce((acc, cur) => {
+    if (cur.time > acc.time) {
+      return cur;
+    }
+    return acc;
+  });
+  return frameId;
+};
+
+/**
+ * @kind invokable
+ */
+background.invokeEditorCommand = async function ({code, cmd, args, frameId}, sender) {
+  const tabId = sender.tab.id;
+  if (frameId) {
+    const response = code ? 
+      await browser.tabs.executeScript(tabId, {
+        frameId,
+        code,
+        runAt: "document_start",
+      }) : 
+      await scrapbook.invokeContentScript({
         tabId, frameId, cmd, args,
       });
+    await browser.tabs.executeScript(tabId, {
+      frameId,
+      code: `window.focus();`,
+      runAt: "document_start"
     });
-  return Promise.all(tasks);
+    return response;
+  } else {
+    const tasks = Array.prototype.map.call(
+      await scrapbook.initContentScripts(tabId),
+      async ({tabId, frameId, injected}) => {
+        return code ? 
+          await browser.tabs.executeScript(tabId, {
+            frameId,
+            code,
+            runAt: "document_start",
+          }) : 
+          await scrapbook.invokeContentScript({
+            tabId, frameId, cmd, args,
+          });
+      });
+    return Promise.all(tasks);
+  }
 };
 
 /* commands */

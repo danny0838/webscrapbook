@@ -15,6 +15,7 @@ const editor = {
   isScripted: false,
   serverUrl: null,
   history: [],
+  lastFocusTime: null,
 
   /**
    * @return {Object<number~hWidth, number~vWidth>}
@@ -467,6 +468,13 @@ ${sRoot}.toolbar .toolbar-close:hover {
 /**
  * @kind invokable
  */
+editor.getFocusInfo = async function ({}) {
+  return editor.lastFocusTime;
+};
+
+/**
+ * @kind invokable
+ */
 editor.lineMarkerInternal = function ({style}) {
   editor.addHistory();
 
@@ -680,9 +688,11 @@ editor.locate = async function () {
 };
 
 editor.lineMarker = async function (style) {
+  const frameId = await editor.getFocusedFrameId();
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
+      frameId,
       cmd: "editor.lineMarkerInternal",
       args: {style},
     },
@@ -690,9 +700,11 @@ editor.lineMarker = async function (style) {
 };
 
 editor.eraseNodes = async function () {
+  const frameId = await editor.getFocusedFrameId();
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
+      frameId,
       cmd: "editor.eraseNodesInternal",
       args: {},
     },
@@ -700,6 +712,7 @@ editor.eraseNodes = async function () {
 };
 
 editor.eraseSelector = async function () {
+  const frameId = await editor.getFocusedFrameId();
   const selector = prompt(scrapbook.lang('EditorButtonEraserSelectorPrompt'));
 
   if (!selector) {
@@ -716,6 +729,7 @@ editor.eraseSelector = async function () {
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
+      frameId,
       cmd: "editor.eraseSelectorInternal",
       args: {selector},
     },
@@ -723,9 +737,11 @@ editor.eraseSelector = async function () {
 };
 
 editor.uneraseNodes = async function () {
+  const frameId = await editor.getFocusedFrameId();
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
+      frameId,
       cmd: "editor.uneraseNodesInternal",
       args: {},
     },
@@ -743,9 +759,11 @@ editor.uneraseAllNodes = async function () {
 };
 
 editor.removeEdits = async function () {
+  const frameId = await editor.getFocusedFrameId();
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
+      frameId,
       cmd: "editor.removeEditsInternal",
       args: {},
     },
@@ -934,6 +952,13 @@ editor.updateLineMarkers = function () {
   let idx = scrapbook.getOption('editor.lineMarker.checked');
   idx = Math.min(parseInt(idx, 10) || 0, buttons.length - 1);
   buttons[idx].setAttribute('checked', '');
+};
+
+editor.getFocusedFrameId = async function () {
+  return await scrapbook.invokeExtensionScript({
+    cmd: "background.getFocusedFrameId",
+    args: {},
+  });
 };
 
 /**
@@ -1259,6 +1284,18 @@ editor.addHistory = () => {
     button.disabled = false;
   }
 };
+
+window.addEventListener("focus", (event) => {
+  if (event.target.closest && event.target.closest('web-scrapbook')) {
+    if (Date.now() - editor.lastFocusTime < 50) {
+      // Assume a focus on web-scrapbook element just after window as a
+      // toolbar operation for a frame.
+      editor.lastFocusTime = null;
+    }
+    return;
+  }
+  editor.lastFocusTime = Date.now();
+}, {capture: true, passive: true});
 
 window.editor = editor;
 
