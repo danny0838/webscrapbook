@@ -393,7 +393,10 @@ ${sRoot}.toolbar .toolbar-close:hover {
     <button></button>
   </div>
   <div class="toolbar-save" title="${scrapbook.lang('EditorButtonSave')}">
-    <button></button>
+    <button></button><button></button>
+    <ul hidden="" title="">
+      <li><button class="toolbar-save-deleteErased">${scrapbook.lang('EditorButtonSaveDeleteErased')}</button></li>
+    </ul>
   </div>
   <a class="toolbar-close" href="javascript:" title="${scrapbook.lang('EditorButtonClose')}"></a>
 </div>
@@ -820,6 +823,16 @@ ${sRoot}.toolbar .toolbar-close:hover {
     editor.save();
   }, {passive: true});
 
+  var elem = wrapper.querySelector('.toolbar-save > button:last-of-type');
+  elem.addEventListener("click", (event) => {
+    editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-save-deleteErased');
+  elem.addEventListener("click", (event) => {
+    editor.deleteErased();
+  }, {passive: true});
+
   // close
   var elem = wrapper.querySelector('.toolbar-close');
   elem.addEventListener("click", (event) => {
@@ -1047,6 +1060,29 @@ editor.undoInternal = function ({}) {
   document.body.parentNode.replaceChild(editor.history.pop(), document.body);
 };
 
+/**
+ * @kind invokable
+ */
+editor.deleteErasedInternal = function ({}) {
+  editor.addHistory();
+
+  const selectedNodes = [];
+  const nodeIterator = document.createNodeIterator(
+    document.documentElement,
+    NodeFilter.SHOW_COMMENT,
+    node => editor.getScrapBookObjectRemoveType(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+  );
+  let node;
+  while (node = nodeIterator.nextNode()) {
+    selectedNodes.push(node);
+  }
+
+  // handle descendant node first as it may be altered when handling ancestor
+  for (const elem of selectedNodes.reverse()) {
+    elem.remove();
+  }
+};
+
 
 /******************************************************************************
  * Event handlers / Toolbar controllers
@@ -1247,6 +1283,16 @@ editor.save = async function () {
       cmd: "background.captureCurrentTab",
     });
   }
+};
+
+editor.deleteErased = async function () {
+  return await scrapbook.invokeExtensionScript({
+    cmd: "background.invokeEditorCommand",
+    args: {
+      cmd: "editor.deleteErasedInternal",
+      args: {},
+    },
+  });
 };
 
 editor.close = async function () {

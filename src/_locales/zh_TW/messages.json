@@ -180,6 +180,9 @@
   "EditorButtonSave": {
     "message": "儲存頁面"
   },
+  "EditorButtonSaveDeleteErased": {
+    "message": "永久刪除所有擦除內容（所有框架頁）"
+  },
   "EditorButtonUndo": {
     "message": "復原"
   },

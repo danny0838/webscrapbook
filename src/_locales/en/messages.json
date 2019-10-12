@@ -180,6 +180,9 @@
   "EditorButtonSave": {
     "message": "Save page"
   },
+  "EditorButtonSaveDeleteErased": {
+    "message": "Permanently delete all erases (all frames)"
+  },
   "EditorButtonUndo": {
     "message": "Undo"
   },
