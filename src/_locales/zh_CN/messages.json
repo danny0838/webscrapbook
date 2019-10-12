@@ -80,6 +80,9 @@
   "EditorButtonEraserSelector": {
     "message": "透过 CSS 选择器擦除内容"
   },
+  "EditorButtonEraserSelectorAll": {
+    "message": "透过 CSS 选择器擦除内容（所有框架页）"
+  },
   "EditorButtonEraserSelectorPrompt": {
     "message": "请输入用于擦除内容的 CSS 选择器："
   },

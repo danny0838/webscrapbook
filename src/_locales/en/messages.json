@@ -80,6 +80,9 @@
   "EditorButtonEraserSelector": {
     "message": "Erase via CSS selector"
   },
+  "EditorButtonEraserSelectorAll": {
+    "message": "Erase via CSS selector (all frames)"
+  },
   "EditorButtonEraserSelectorPrompt": {
     "message": "Specify the CSS selector to erase elements:"
   },

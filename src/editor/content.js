@@ -342,6 +342,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     <ul hidden="" title="">
       <li><button class="toolbar-eraser-eraseSelection">${scrapbook.lang('EditorButtonEraserSelection')}</button></li>
       <li><button class="toolbar-eraser-eraseSelector">${scrapbook.lang('EditorButtonEraserSelector')}</button></li>
+      <li><button class="toolbar-eraser-eraseSelectorAll">${scrapbook.lang('EditorButtonEraserSelectorAll')}</button></li>
       <hr/>
       <li><button class="toolbar-eraser-uneraseSelection">${scrapbook.lang('EditorButtonEraserRevertSelection')}</button></li>
       <li><button class="toolbar-eraser-uneraseAll">${scrapbook.lang('EditorButtonEraserRevertAll')}</button></li>
@@ -457,6 +458,11 @@ ${sRoot}.toolbar .toolbar-close:hover {
   var elem = wrapper.querySelector('.toolbar-eraser-eraseSelector');
   elem.addEventListener("click", (event) => {
     editor.eraseSelector();
+  }, {passive: true});
+
+  var elem = wrapper.querySelector('.toolbar-eraser-eraseSelectorAll');
+  elem.addEventListener("click", (event) => {
+    editor.eraseSelectorAll();
   }, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-eraser-uneraseSelection');
@@ -1101,6 +1107,29 @@ editor.eraseSelector = async function () {
     cmd: "background.invokeEditorCommand",
     args: {
       frameId,
+      cmd: "editor.eraseSelectorInternal",
+      args: {selector},
+    },
+  });
+};
+
+editor.eraseSelectorAll = async function () {
+  const selector = prompt(scrapbook.lang('EditorButtonEraserSelectorPrompt'));
+
+  if (!selector) {
+    return;
+  }
+
+  try {
+    document.querySelector(selector);
+  } catch (ex) {
+    alert(scrapbook.lang('ErrorEditorButtonEraserSelectorInvalid', [selector]));
+    return;
+  }
+
+  return await scrapbook.invokeExtensionScript({
+    cmd: "background.invokeEditorCommand",
+    args: {
       cmd: "editor.eraseSelectorInternal",
       args: {selector},
     },
