@@ -69,7 +69,7 @@
     "message": "橡皮擦工具 - 點擊擦除選取範圍的內容；Ctrl或中鍵點擊移除選取範圍的剪貼簿註記。（擦除的內容可還原）"
   },
   "EditorButtonEraserRevertAll": {
-    "message": "還原所有擦除內容"
+    "message": "還原所有擦除內容（所有框架頁）"
   },
   "EditorButtonEraserRevertSelection": {
     "message": "還原選取範圍的擦除內容"
@@ -169,7 +169,7 @@
     }
   },
   "EditorButtonRemoveEditsAll": {
-    "message": "移除所有剪貼簿註記"
+    "message": "移除所有剪貼簿註記（所有框架頁）"
   },
   "EditorButtonRemoveEditsSelection": {
     "message": "移除選取範圍的剪貼簿註記"

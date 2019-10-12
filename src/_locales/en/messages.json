@@ -69,7 +69,7 @@
     "message": "Eraser - Click to erase content in the selected area; Ctrl- or middle-click to remove scrapbook edits in the selected area. (Erases can be reverted.)"
   },
   "EditorButtonEraserRevertAll": {
-    "message": "Revert all erases"
+    "message": "Revert all erases (all frames)"
   },
   "EditorButtonEraserRevertSelection": {
     "message": "Revert erases in selection"
@@ -169,7 +169,7 @@
     }
   },
   "EditorButtonRemoveEditsAll": {
-    "message": "Remove all scrapbook edits"
+    "message": "Remove all scrapbook edits (all frames)"
   },
   "EditorButtonRemoveEditsSelection": {
     "message": "Remove scrapbook edits in selection"
