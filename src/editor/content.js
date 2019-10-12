@@ -172,17 +172,17 @@ ${sRoot}.toolbar > div > button {
   background-repeat: no-repeat !important;
 }
 
-${sRoot}.toolbar > div > button:hover,
-${sRoot}.toolbar > div > button:focus {
+${sRoot}.toolbar > div > button:enabled:hover,
+${sRoot}.toolbar > div > button:enabled:focus {
   border-color: #999 !important;
   background-color: #B9B9B9 !important;
 }
 
-${sRoot}.toolbar > div > button:active {
+${sRoot}.toolbar > div > button:enabled:active {
   border-style: inset !important;
 }
 
-${sRoot}.toolbar > div > button[disabled] {
+${sRoot}.toolbar > div > button:disabled {
   filter: grayscale(100%) !important;
   opacity: 0.6 !important;
 }
