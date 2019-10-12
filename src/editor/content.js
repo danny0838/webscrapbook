@@ -166,10 +166,13 @@ ${sRoot}.toolbar > div > button {
   border: 1px solid transparent !important;
   width: 28px !important;
   height: 28px !important;
-  cursor: pointer !important;
   background-size: 16px 16px !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
+}
+
+${sRoot}.toolbar > div > button:enabled {
+  cursor: pointer !important;
 }
 
 ${sRoot}.toolbar > div > button:enabled:hover,
