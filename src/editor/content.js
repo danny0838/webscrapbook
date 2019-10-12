@@ -886,11 +886,12 @@ editor.eraseNodesInternal = function () {
   editor.addHistory();
 
   // reverse the order as a range may be altered when changing a node before it
+  const timeId = scrapbook.dateToId();
   for (const range of editor.getSafeSelectionRanges().reverse()) {
     if (!range.collapsed) {
       const wrapper = document.createElement('scrapbook-erased');
       range.surroundContents(wrapper);
-      wrapper.parentNode.replaceChild(document.createComment(`scrapbook-erased=${scrapbook.escapeHtmlComment(wrapper.innerHTML)}`), wrapper);
+      wrapper.parentNode.replaceChild(document.createComment(`scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(wrapper.innerHTML)}`), wrapper);
     }
   }
 };
@@ -903,13 +904,14 @@ editor.eraseSelectorInternal = function ({selector}) {
   const fn = editor.eraseSelectorInternal = ({selector}) => {
     editor.addHistory();
 
+    const timeId = scrapbook.dateToId();
     const elems = document.querySelectorAll(selector);
 
     // handle descendant node first as it may be altered when handling ancestor
     for (const elem of Array.from(elems).reverse()) {
       if (elem.matches(FORBIDDEN_NODES)) { continue; }
 
-      elem.parentNode.replaceChild(document.createComment(`scrapbook-erased=${scrapbook.escapeHtmlComment(elem.outerHTML)}`), elem);
+      elem.parentNode.replaceChild(document.createComment(`scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(elem.outerHTML)}`), elem);
     }
   };
   return fn({selector});
