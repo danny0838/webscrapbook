@@ -2798,8 +2798,19 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
   async getRulesFromCss({css, refUrl, crossOrigin = true, errorWithNull = false}) {
     let rules = null;
     try {
+      // Firefox may get this for a stylesheet with relative URL imported from
+      // a stylesheet with null href (mostly created via
+      // document.implementation.createHTMLDocument). In such case css.cssRules
+      // is an empty CSSRuleList.
+      if (css.href === 'about:invalid') {
+        throw new Error('cssRules not accessible.');
+      }
+
       rules = css.cssRules;
-      if (!rules) { throw new Error('cssRules not accessible.'); }
+
+      if (!rules) {
+        throw new Error('cssRules not accessible.');
+      }
     } catch (ex) {
       // cssRules not accessible, probably a cross-domain CSS.
       if (crossOrigin) {
