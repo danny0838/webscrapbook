@@ -198,6 +198,7 @@ capturer.getAvailableFilename = async function (params) {
  * @param {Object} params
  * @param {string} params.url
  * @param {string} params.role
+ * @param {string} params.refUrl - URL of the referrer
  * @param {string} params.responseType
  * @param {integer} params.timeout
  * @param {Objet} params.hooks

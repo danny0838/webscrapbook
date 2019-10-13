@@ -2795,6 +2795,17 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     return styleElem.sheet.cssRules;
   }
 
+  /**
+   * @param {Object} params
+   * @param {CSSStyleSheet} params.css - The CSS to get rules from.
+   * @param {string} params.url - The overriding source URL for retrieving a
+   *     cross-orign CSS.
+   * @param {string} params.refUrl - The referrer URL for retrieving a
+   *     cross-orign CSS.
+   * @param {boolean} params.crossOrigin - Whether to retrieve CSS via web
+   *     request if it's cross origin.
+   * @return {Array<CSSStyleRule>|null}
+   */
   async getRulesFromCss({css, url, refUrl, crossOrigin = true, errorWithNull = false}) {
     let rules = null;
     try {
@@ -3100,7 +3111,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
    * Rewrite a given CSS Text.
    *
    * @param {string} cssText - the CSS text to rewrite.
-   * @param {string} refUrl - the reference URL for URL resolve.
+   * @param {string} refUrl - the reference URL for URL resolving.
    * @param {CSSStyleSheet} refCss - the reference CSS (for imported CSS).
    * @param {boolean} isInline - whether cssText is inline.
    * @param {Object} settings
@@ -3257,7 +3268,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
    * @param {HTMLElement} elem - the elem to have CSS rewritten.
    * @param {string} url - the source URL of the imported CSS.
    * @param {string} refCss - the reference CSS of the imported CSS.
-   * @param {string} refUrl - the reference URL for URL resolve.
+   * @param {string} refUrl - the reference URL for URL resolving.
    * @param {Function} callback
    * @param {Object} settings
    * @param {Object} options
