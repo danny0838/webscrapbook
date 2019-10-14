@@ -2795,7 +2795,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     return styleElem.sheet.cssRules;
   }
 
-  async getRulesFromCss({css, refUrl, crossOrigin = true, errorWithNull = false}) {
+  async getRulesFromCss({css, url, refUrl, crossOrigin = true, errorWithNull = false}) {
     let rules = null;
     try {
       // Firefox may get this for a stylesheet with relative URL imported from
@@ -2819,7 +2819,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
         } else {
           const {settings, options} = this;
           const response = await capturer.invoke("fetchCss", {
-            url: css.href,
+            url: url || css.href,
             refUrl,
             settings,
             options,
@@ -2935,9 +2935,10 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
           if (!cssRule.styleSheet) { break; }
 
           const css = cssRule.styleSheet;
-          const rules = await this.getRulesFromCss({css, refUrl});
+          const url = new URL(cssRule.href, refUrl).href;
+          const rules = await this.getRulesFromCss({css, url, refUrl});
           for (const rule of rules) {
-            await parseCssRule(rule, css.href || refUrl);
+            await parseCssRule(rule, url);
           }
           break;
         }
@@ -3139,7 +3140,7 @@ capturer.DocumentCssHandler = class DocumentCssHandler {
     const importRules = [];
     let importRuleIdx = 0;
     if (refCss) {
-      const rules = await this.getRulesFromCss({css: refCss});
+      const rules = await this.getRulesFromCss({css: refCss, url: refUrl, refUrl});
       for (const rule of rules) {
         if (rule.type === 3) {
           importRules.push(rule);
