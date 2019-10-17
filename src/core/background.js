@@ -74,6 +74,16 @@ if (!browser.browserAction) {
 }
 
 /**
+ * @kind invokable
+ */
+background.invokeFrameScript = async function ({frameId, cmd, args}, sender) {
+  const tabId = sender.tab.id;
+  return await scrapbook.invokeContentScript({
+    tabId, frameId, cmd, args,
+  });
+};
+
+/**
  * Attempt to locate an item in the sidebar.
  *
  * @kind invokable

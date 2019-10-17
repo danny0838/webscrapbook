@@ -574,6 +574,7 @@ scrapbook.initContentScripts = async function (tabId) {
             await browser.tabs.executeScript(tabId, {frameId, file: "/core/content.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js", runAt: "document_start"});
             await browser.tabs.executeScript(tabId, {frameId, file: "/editor/content.js", runAt: "document_start"});
+            await browser.tabs.executeScript(tabId, {frameId, code: `core.frameId = ${frameId};`, runAt: "document_start"});
           } catch (ex) {
             // Chromium may fail to inject content script to some pages due to unclear reason.
             // Record the error and pass.
@@ -650,30 +651,28 @@ scrapbook.invokeContentScript = async function (params) {
 scrapbook.invokeFrameScript = async function (params) {
   const {frameWindow, cmd, args} = params;
 
-  const extension = browser.runtime.id;
-  const uid = scrapbook.dateToId();
-  return await new Promise((resolve, reject) => {
+  const frameId = await new Promise((resolve, reject) => {
+    const extension = browser.runtime.getURL('');
     const channel = new MessageChannel();
     const timeout = setTimeout(() => {
       resolve(undefined);
       delete channel;
     }, 1000);
-
-    isDebug && console.debug(cmd, "send to frame", args);
-    frameWindow.postMessage({extension, uid, cmd, args}, "*", [channel.port2]);
     channel.port1.onmessage = (event) => {
-      const message = event.data;
-      if (message.extension !== extension) { return; }
-      if (message.uid !== uid) { return; }
-      if (message.cmd === cmd + ".start") {
-        clearTimeout(timeout);
-      } else if (message.cmd === cmd + ".complete") {
-        isDebug && console.debug(cmd, "response from frame", message.response);
-        resolve(message.response);
-        delete channel;
-      }
+      const {frameId} = event.data;
+      resolve(frameId);
+      clearTimeout(timeout);
+      delete channel;
     };
+    frameWindow.postMessage(extension, "*", [channel.port2]);
   });
+
+  if (frameId) {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeFrameScript",
+      args: {frameId, cmd, args},
+    });
+  }
 };
 
 

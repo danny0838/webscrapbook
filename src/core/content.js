@@ -4,6 +4,7 @@
  *
  * @require {boolean} isDebug
  * @require {Object} scrapbook
+ * @public {Object} core
  *****************************************************************************/
 
 ((window, document, browser) => {
@@ -19,32 +20,13 @@ core.isScriptLoaded = async function (params) {
   return true;
 };
 
+/**
+ * Return frameId of the frame of this content script.
+ */
 window.addEventListener("message", async (event) => {
-  const message = event.data;
-  const extension = browser.runtime.id;
-  if (message.extension !== extension) { return; }
+  if (event.data !== browser.runtime.getURL('')) { return; }
 
-  const {uid, cmd, args} = message;
-  isDebug && console.debug(cmd, "frame window receive", args);
-
-  const [mainCmd, subCmd] = cmd.split(".");
-
-  const object = window[mainCmd];
-  if (!object || !object[subCmd]) { return; }
-
-  event.ports[0].postMessage({
-    extension,
-    uid,
-    cmd: cmd + ".start",
-  });
-
-  const response = await object[subCmd](args);
-  event.ports[0].postMessage({
-    extension,
-    uid,
-    cmd: cmd + ".complete",
-    response,
-  });
+  event.ports[0].postMessage({frameId: core.frameId});
 }, false);
 
 browser.runtime.onMessage.addListener((message, sender) => {
@@ -61,5 +43,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
 
   return fn(args);
 });
+
+window.core = core;
 
 })(this, this.document, this.browser);
