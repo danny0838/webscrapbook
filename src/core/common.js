@@ -2038,7 +2038,6 @@ scrapbook.isPromise = function (object) {
  * @require JSZip
  *****************************************************************************/
 
-// @TODO: fix the modification date of auto-generated folders
 scrapbook.zipAddFile = function (zipObj, filename, blob, isText, options = {}) {
   if (typeof isText === 'undefined' || isText === null) {
     isText = /^text\/|\b(?:xml|json|javascript)\b/.test(blob.type);
@@ -2048,22 +2047,27 @@ scrapbook.zipAddFile = function (zipObj, filename, blob, isText, options = {}) {
   const zipOptions = (isText && blob.size >= 128) ?
       {compression: "DEFLATE", compressionOptions: {level: 9}} :
       {compression: "STORE"};
+  Object.assign(zipOptions, options);
 
-  // The timestamp field of zip usually use local time,
-  // while JSZip writes UTC time for compatibility purpose since it does
-  // not support extended UTC fields.
-  // This leads a file modified at 08:00 in UTC+8 become 00:00 when unzipped.
-  // We fix this by ourselves.
+  // The timestamp field of zip usually use local time, while JSZip writes UTC
+  // time for compatibility purpose since it does not support extended UTC
+  // fields. For example, a file modified at 08:00 (UTC+8) is stored with
+  // timestamp 00:00. We fix this by ourselves.
   // https://github.com/Stuk/jszip/issues/369
+  const _defaultDate = JSZip.defaults.date;
   const d = options.date || new Date();
-  zipOptions.date = new Date(d.valueOf() - d.getTimezoneOffset() * 60 * 1000);
+  d.setTime(d.valueOf() - d.getTimezoneOffset() * 60 * 1000);
+  JSZip.defaults.date = d;
+  delete zipOptions.date;
 
-  zipObj.file(filename, blob, Object.assign(options, zipOptions));
+  zipObj.file(filename, blob, zipOptions);
+
+  JSZip.defaults.date = _defaultDate;
 };
 
-// JSZip assumes the timestamp is UTC time and returns adjusted local time.
-// This leads a file in UTC+8 stored with modified time 00:00 become 08:00.
-// We fix this by ourselves.
+// JSZip assumes timestamp of every file be UTC time and returns adjusted local
+// time. For example, retrieving date for an entry with timestamp 00:00 gets
+// 08:00 if the timezone is UTC+8. We fix this by ourselves.
 // https://github.com/Stuk/jszip/issues/369
 scrapbook.zipFixModifiedTime = function (dateInZip) {
   return new Date(dateInZip.valueOf() + dateInZip.getTimezoneOffset() * 60 * 1000);
