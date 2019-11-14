@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test shadowRoot</title>
+</head>
+<body>
+<custom-elem><strong>This</strong> is very good.</custom-elem>
+</body>
+<script>
+customElements.define(
+  'custom-elem',
+  class CustomElem extends HTMLElement {
+    constructor() {
+      super();
+      var shadow = this.attachShadow({mode: 'open'});
+      var style = shadow.appendChild(document.createElement('style'));
+      style.textContent = `\
+:host { display: block; background-color: yellow; }
+div { background-color: red; }
+img { width: 60px; height: 60px; }`;
+      var div = shadow.appendChild(document.createElement('div'));
+      div.textContent = 'This is sub-content.';
+      var img = shadow.appendChild(document.createElement('img'));
+      img.src = 'resources/green.bmp';
+    }
+  },
+);
+</script>
+</html>

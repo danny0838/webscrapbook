@@ -4904,6 +4904,59 @@ async function test_capture_shadowRoot() {
 }
 
 /**
+ * Check for shadowRoot auto-generated via custom elements.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_shadowRoot2() {
+  var options = {
+    "capture.shadowDom": "save",
+    "capture.image": "save",
+    "capture.script": "remove",
+  };
+
+  /* mode: open */
+  var blob = await capture({
+    url: `${localhost}/capture_shadowRoot2/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["green.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var host1 = doc.querySelector('custom-elem');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow1 = frag.content;
+  assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
+
+  var loader = doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]');
+  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+
+  /* mode: closed */
+  var blob = await capture({
+    url: `${localhost}/capture_shadowRoot2/index2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(!zip.files["green.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
+  assert(!doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]'));
+}
+
+/**
  * Check if removeHidden works correctly.
  *
  * capturer.removeHidden
@@ -7525,6 +7578,7 @@ async function runTests() {
   await test(test_capture_base);
   await test(test_capture_formStatus);
   await test(test_capture_shadowRoot);
+  await test(test_capture_shadowRoot2);
   await test(test_capture_removeHidden);
   await test(test_capture_precludeSelector);
   await test(test_capture_rewrite);
