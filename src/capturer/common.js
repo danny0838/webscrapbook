@@ -1813,6 +1813,7 @@ capturer.captureDocument = async function (params) {
                   shadowRoot.appendChild(cloneNodeMapping(elem, true));
                 });
 
+                addAdoptedStyleSheets(shadowRootOrig, shadowRoot);
                 rewriteRecursively(shadowRoot, shadowRoot.nodeName.toLowerCase(), rewriteNode);
                 shadowRootList.push({
                   host: elem,
@@ -1890,6 +1891,19 @@ capturer.captureDocument = async function (params) {
       }
 
       return elem;
+    };
+
+    const addAdoptedStyleSheets = (docOrShadowRoot, root) => {
+      if (docOrShadowRoot.adoptedStyleSheets) {
+        for (const refCss of docOrShadowRoot.adoptedStyleSheets) {
+          const css = root.appendChild(cloneNodeMapping(doc.createElement("style")));
+          css.textContent = Array.prototype.map.call(
+            refCss.cssRules,
+            cssRule => cssRule.cssText,
+          ).join("\n");
+          css.setAttribute("data-scrapbook-elem", "adoptedStyleSheets");
+        }
+      }
     };
 
     const {doc = document, title, settings, options} = params;
@@ -2123,6 +2137,8 @@ capturer.captureDocument = async function (params) {
           console.error(ex);
         }
       }
+
+      addAdoptedStyleSheets(doc, rootNode);
     }
 
     // init cssHandler
