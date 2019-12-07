@@ -1558,11 +1558,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
   },
 
   onItemDragStart(event) {
-    if (document.querySelector('#command option[value="move_drag"]').closest(':disabled')) {
-      event.dataTransfer.effectAllowed = 'none';
-      return;
-    }
-
     this.highlightItem(event.currentTarget.parentNode, true);
 
     const selectedItemElems = Array.prototype.map.call(
@@ -1594,8 +1589,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
   },
 
   onItemDragEnter(event) {
-    if (!this.lastDraggedElem) { return; }
-
     const wrapper = event.currentTarget;
     if (!wrapper.classList.contains('dragover')) {
       wrapper.classList.add('dragover');
@@ -1608,10 +1601,20 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       }
       cur = cur.parentNode.parentNode;
     }
+
+    this.onItemDragOver(event);
   },
 
   onItemDragOver(event) {
     if (!this.lastDraggedElem) { return; }
+
+    event.preventDefault();
+
+    // disallow when commands disabled
+    if (document.querySelector('#command:disabled')) {
+      event.dataTransfer.dropEffect = 'none';
+      return;
+    }
 
     const wrapper = event.currentTarget;
     const wrapperRect = wrapper.getBoundingClientRect();
@@ -1637,14 +1640,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       event.dataTransfer.dropEffect = 'move';
       document.getElementById('items').classList.add('moving');
     }
-
-    // prevent default to allow drop
-    event.preventDefault();
   },
 
   onItemDragLeave(event) {
-    if (!this.lastDraggedElem) { return; }
-
     const wrapper = event.currentTarget;
     let enteredElem = event.relatedTarget;
 
@@ -1670,7 +1668,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
   async onItemDrop(event) {
     if (!this.lastDraggedElem) { return; }
 
-    // prevent default navigation effect
     event.preventDefault();
 
     const wrapper = event.currentTarget;
