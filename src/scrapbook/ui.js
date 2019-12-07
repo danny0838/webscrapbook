@@ -1557,6 +1557,15 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     await this.book.saveTreeFiles({toc: true});
   },
 
+  onWindowItemDragEnter(event) {
+    this.onWindowItemDragOver(event);
+  },
+
+  onWindowItemDragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'none';
+  },
+
   onItemDragStart(event) {
     this.highlightItem(event.currentTarget.parentNode, true);
 
@@ -1589,6 +1598,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
   },
 
   onItemDragEnter(event) {
+    event.stopPropagation();
+
     const wrapper = event.currentTarget;
     if (!wrapper.classList.contains('dragover')) {
       wrapper.classList.add('dragover');
@@ -1606,9 +1617,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
   },
 
   onItemDragOver(event) {
+    event.stopPropagation();
+
     if (!this.lastDraggedElem) { return; }
 
     event.preventDefault();
+    event.stopPropagation();
 
     // disallow when commands disabled
     if (document.querySelector('#command:disabled')) {
@@ -1643,6 +1657,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
   },
 
   onItemDragLeave(event) {
+    event.stopPropagation();
+
     const wrapper = event.currentTarget;
     let enteredElem = event.relatedTarget;
 
@@ -1993,6 +2009,9 @@ scrapbook.addMessageListener((message, sender) => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   scrapbook.loadLanguages(document);
+
+  window.addEventListener('dragenter', scrapbookUi.onWindowItemDragEnter.bind(scrapbookUi));
+  window.addEventListener('dragover', scrapbookUi.onWindowItemDragOver.bind(scrapbookUi));
 
   document.getElementById("book").addEventListener('change', scrapbookUi.onBookChange.bind(scrapbookUi));
 
