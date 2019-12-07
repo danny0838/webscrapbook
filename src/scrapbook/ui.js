@@ -1976,6 +1976,17 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
     await this.saveViewStatus();
   },
+
+  onClickFileSelector(event) {
+    event.preventDefault();
+    const evt = new CustomEvent("command", {
+      detail: {
+        cmd: 'upload',
+        files: event.target.files,
+      },
+    });
+    window.dispatchEvent(evt);
+  },
 };
 
 scrapbook.addMessageListener((message, sender) => {
@@ -1993,16 +2004,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById("command").addEventListener('change', scrapbookUi.onCommandChange.bind(scrapbookUi));
 
   // file selector
-  document.getElementById('upload-file-selector').addEventListener('change', (event) => {
-    event.preventDefault();
-    const evt = new CustomEvent("command", {
-      detail: {
-        cmd: 'upload',
-        files: event.target.files,
-      },
-    });
-    window.dispatchEvent(evt);
-  });
+  document.getElementById('upload-file-selector').addEventListener('change', scrapbookUi.onClickFileSelector.bind(scrapbookUi));
 
   // command handler
   window.addEventListener('command', scrapbookUi.onCommandRun.bind(scrapbookUi));
