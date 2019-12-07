@@ -1567,7 +1567,59 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
   onWindowItemDragOver(event) {
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'none';
+
+    // disallow when commands disabled
+    if (document.querySelector('#command:disabled')) {
+      event.dataTransfer.dropEffect = 'none';
+      return;
+    }
+
+    if (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle') {
+      event.dataTransfer.dropEffect = 'copy';
+    } else {
+      event.dataTransfer.dropEffect = 'none';
+    }
+  },
+
+  async onWindowItemDrop(event) {
+    event.preventDefault();
+
+    if (event.dataTransfer.types.includes('Files')) {
+      const targetId = this.rootId;
+      const targetIndex = Infinity;
+
+      if (!this.itemIsValidTarget(targetId)) { return; }
+
+      this.enableUi(false);
+
+      try {
+        const entries = Array.prototype.map.call(
+          event.dataTransfer.items,
+          x => x.webkitGetAsEntry && x.webkitGetAsEntry()
+        );
+
+        const files = [];
+        for (const entry of entries) {
+          if (!entry.isFile) { continue; }
+          try {
+            const file = await new Promise((resolve, reject) => {
+              entry.file(resolve, reject);
+            });
+            files.push(file);
+          } catch (ex) {}
+        }
+
+        await this.uploadItems(files, targetId, targetIndex);
+      } catch (ex) {
+        console.error(ex);
+        this.error(ex.message);
+        // when any error happens, the UI is possibility in an inconsistent status.
+        // lock the UI to avoid further manipulation and damage.
+        return;
+      }
+
+      this.enableUi(true);
+    }
   },
 
   onItemDragStart(event) {
@@ -1692,6 +1744,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
   },
 
   async onItemDrop(event) {
+    event.stopPropagation();
     event.preventDefault();
 
     if (this.lastDraggedElem || event.dataTransfer.types.includes('Files')) {
@@ -2084,6 +2137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   window.addEventListener('dragenter', scrapbookUi.onWindowItemDragEnter.bind(scrapbookUi));
   window.addEventListener('dragover', scrapbookUi.onWindowItemDragOver.bind(scrapbookUi));
+  window.addEventListener('drop', scrapbookUi.onWindowItemDrop.bind(scrapbookUi));
 
   document.getElementById("book").addEventListener('change', scrapbookUi.onBookChange.bind(scrapbookUi));
 
