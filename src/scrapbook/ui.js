@@ -1240,6 +1240,7 @@ const scrapbookUi = {
       } else {
         icon.src = {
           'folder': browser.runtime.getURL('resources/fclose.png'),
+          'file': browser.runtime.getURL('resources/file.png'),
           'note': browser.runtime.getURL('resources/note.png'),
           'postit': browser.runtime.getURL('resources/postit.png'),
         }[meta.type] || browser.runtime.getURL('resources/item.png');

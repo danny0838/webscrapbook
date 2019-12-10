@@ -1288,6 +1288,7 @@ const indexer = {
       [this.treeDir + "icon/item.png"]: browser.runtime.getURL("resources/item.png"),
       [this.treeDir + "icon/fclose.png"]: browser.runtime.getURL("resources/fclose.png"),
       [this.treeDir + "icon/fopen.png"]: browser.runtime.getURL("resources/fopen.png"),
+      [this.treeDir + "icon/file.png"]: browser.runtime.getURL("resources/file.png"),
       [this.treeDir + "icon/note.png"]: browser.runtime.getURL("resources/note.png"),  // ScrapBook X notex
       [this.treeDir + "icon/postit.png"]: browser.runtime.getURL("resources/postit.png"),  // ScrapBook X note
     };
@@ -2227,6 +2228,7 @@ var scrapbook = {
       } else {
         icon.src = {
           'folder': 'icon/fclose.png',
+          'file': 'icon/file.png',
           'note': 'icon/note.png',
           'postit': 'icon/postit.png',
         }[meta.type] || 'icon/item.png';
