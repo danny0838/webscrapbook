@@ -416,7 +416,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     const buttons = Array.from(wrapper.querySelectorAll('.toolbar-marker ul button'));
     let idx = scrapbook.getOption('editor.lineMarker.checked');
     idx = Math.min(parseInt(idx, 10) || 0, buttons.length - 1);
-    editor.lineMarker(buttons[idx].querySelector('web-scrapbook-samp').style.cssText);
+    editor.lineMarker(buttons[idx].querySelector('web-scrapbook-samp').getAttribute('style'));
   }, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-marker > button:last-of-type');
@@ -429,7 +429,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     elem.addEventListener("click", (event) => {
       const idx = Array.prototype.indexOf.call(wrapper.querySelectorAll('.toolbar-marker ul button'), event.currentTarget);
       scrapbook.setOption('editor.lineMarker.checked', idx);
-      editor.lineMarker(event.currentTarget.querySelector('web-scrapbook-samp').style.cssText);
+      editor.lineMarker(event.currentTarget.querySelector('web-scrapbook-samp').getAttribute('style'));
     }, {passive: true});
   }
 
@@ -856,7 +856,7 @@ editor.lineMarkerInternal = function ({style}) {
   const hElem = document.createElement('span');
   hElem.setAttribute('data-scrapbook-id', scrapbook.dateToId());
   hElem.setAttribute('data-scrapbook-elem', 'linemarker');
-  hElem.style = style;
+  hElem.setAttribute('style', style);
 
   for (const range of editor.getSelectionRanges()) {
     const selectedNodes = editor.getSelectedNodes({
@@ -1398,8 +1398,9 @@ editor.updateLineMarkers = function () {
   Array.prototype.forEach.call(
     editor.internalElement.querySelectorAll('.toolbar-marker ul web-scrapbook-samp'),
     (elem, i) => {
-      elem.style = scrapbook.getOption(`editor.lineMarker.style.${i + 1}`);
-      elem.title = elem.style.cssText;
+      let style = scrapbook.getOption(`editor.lineMarker.style.${i + 1}`);
+      elem.setAttribute('style', style);
+      elem.title = style;
     });
 
   const buttons = Array.from(editor.internalElement.querySelectorAll('.toolbar-marker ul button'));
