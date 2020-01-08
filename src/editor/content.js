@@ -854,7 +854,7 @@ editor.lineMarkerInternal = function ({style}) {
   editor.addHistory();
 
   const hElem = document.createElement('span');
-  hElem.setAttribute('data-scrapbook-id', Date.now());
+  hElem.setAttribute('data-scrapbook-id', scrapbook.dateToId());
   hElem.setAttribute('data-scrapbook-elem', 'linemarker');
   hElem.style = style;
 
