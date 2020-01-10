@@ -500,316 +500,82 @@ ${sRoot}.toolbar .toolbar-close:hover {
   }, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-strong');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('bold', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.strong, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-em');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('italic', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.em, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-underline');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('underline', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.underline, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-strike');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('strikeThrough', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.strike, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-superscript');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('superscript', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.superscript, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-subscript');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('subscript', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.subscript, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockP');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('formatBlock', false, 'p');`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.formatBlockP, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH1');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('formatBlock', false, 'h1');`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.formatBlockH1, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH2');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('formatBlock', false, 'h2');`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.formatBlockH2, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH3');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('formatBlock', false, 'h3');`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.formatBlockH3, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH4');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('formatBlock', false, 'h4');`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.formatBlockH4, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH5');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('formatBlock', false, 'h5');`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.formatBlockH5, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockH6');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('formatBlock', false, 'h6');`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.formatBlockH6, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockDiv');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('formatBlock', false, 'div');`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.formatBlockDiv, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockPre');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('formatBlock', false, 'pre');`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.formatBlockPre, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-listUnordered');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('insertUnorderedList', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.listUnordered, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-listOrdered');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('insertOrderedList', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.listOrdered, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-outdent');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('outdent', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.outdent, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-indent');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('indent', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.indent, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyLeft');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('justifyLeft', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.justifyLeft, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyRight');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('justifyRight', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.justifyRight, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyCenter');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('justifyCenter', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.justifyCenter, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyFull');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('justifyFull', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.justifyFull, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-hr');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('insertHorizontalRule', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.hr, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-removeFormat');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('removeFormat', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.removeFormat, {passive: true});
 
   var elem = wrapper.querySelector('.toolbar-htmlEditor-unlink');
-  elem.addEventListener("click", async (event) => {
-    const frameId = await editor.getFocusedFrameId();
-    return scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
-        frameId,
-        code: `document.execCommand('unlink', false, null);`,
-      },
-    });
-  }, {passive: true});
+  elem.addEventListener("click", htmlEditor.unlink, {passive: true});
 
   // undo
   var elem = wrapper.querySelector('.toolbar-undo > button:first-of-type');
@@ -1042,17 +808,6 @@ editor.removeAllEditsInternal = function ({}) {
 /**
  * @kind invokable
  */
-editor.toggleHtmlEditor = function ({willEditable}) {
-  if (willEditable && document.designMode) {
-    editor.addHistory();
-  }
-
-  document.designMode = willEditable ? "on" : "off";
-};
-
-/**
- * @kind invokable
- */
 editor.undoInternal = function ({}) {
   if (!editor.history.length) { return; }
   if (!document.body) { return; }
@@ -1101,11 +856,10 @@ editor.locate = async function () {
 };
 
 editor.lineMarker = async function (style) {
-  const frameId = await editor.getFocusedFrameId();
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
-      frameId,
+      frameId: await editor.getFocusedFrameId(),
       cmd: "editor.lineMarkerInternal",
       args: {style},
     },
@@ -1113,11 +867,10 @@ editor.lineMarker = async function (style) {
 };
 
 editor.eraseNodes = async function () {
-  const frameId = await editor.getFocusedFrameId();
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
-      frameId,
+      frameId: await editor.getFocusedFrameId(),
       cmd: "editor.eraseNodesInternal",
       args: {},
     },
@@ -1173,11 +926,10 @@ editor.eraseSelectorAll = async function () {
 };
 
 editor.uneraseNodes = async function () {
-  const frameId = await editor.getFocusedFrameId();
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
-      frameId,
+      frameId: await editor.getFocusedFrameId(),
       cmd: "editor.uneraseNodesInternal",
       args: {},
     },
@@ -1195,11 +947,10 @@ editor.uneraseAllNodes = async function () {
 };
 
 editor.removeEdits = async function () {
-  const frameId = await editor.getFocusedFrameId();
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
-      frameId,
+      frameId: await editor.getFocusedFrameId(),
       cmd: "editor.removeEditsInternal",
       args: {},
     },
@@ -1227,37 +978,29 @@ editor.htmlEditor = async function (willEditable) {
 
   if (willEditable) {
     editElem.setAttribute("checked", "");
-    editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = false;
-    Array.prototype.forEach.call(
-      editor.internalElement.querySelectorAll('.toolbar-marker > button, .toolbar-eraser > button, .toolbar-undo > button'),
-      (elem) => {
-        elem.disabled = true;
-      });
   } else {
     editElem.removeAttribute("checked");
-    editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = true;
-    Array.prototype.forEach.call(
-      editor.internalElement.querySelectorAll('.toolbar-marker > button, .toolbar-eraser > button, .toolbar-undo > button'),
-      (elem) => {
-        elem.disabled = false;
-      });
   }
 
-  return await scrapbook.invokeExtensionScript({
-    cmd: "background.invokeEditorCommand",
-    args: {
-      cmd: "editor.toggleHtmlEditor",
-      args: {willEditable},
-    },
-  });
+  editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = !willEditable;
+  Array.prototype.forEach.call(
+    editor.internalElement.querySelectorAll('.toolbar-marker > button, .toolbar-eraser > button, .toolbar-undo > button'),
+    (elem) => {
+      elem.disabled = willEditable;
+    });
+
+  if (willEditable) {
+    return await htmlEditor.activate();
+  } else {
+    return await htmlEditor.deactivate();
+  }
 };
 
 editor.undo = async function () {
-  const frameId = await editor.getFocusedFrameId();
   return await scrapbook.invokeExtensionScript({
     cmd: "background.invokeEditorCommand",
     args: {
-      frameId,
+      frameId: await editor.getFocusedFrameId(),
       cmd: "editor.undoInternal",
       args: {},
     },
@@ -1737,6 +1480,288 @@ editor.addHistory = () => {
   editor.history.push(document.body.cloneNode(true));
 };
 
+
+const htmlEditor = {
+  async activate() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        code: `editor.addHistory(); document.designMode = "on";`,
+      },
+    });
+  },
+
+  async deactivate() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        code: `document.designMode = "off";`,
+      },
+    });
+  },
+
+  async strong() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId(),
+        code: `document.execCommand('bold', false, null);`,
+      },
+    });
+  },
+
+  async em() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('italic', false, null);`,
+      },
+    });
+  },
+
+  async underline() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('underline', false, null);`,
+      },
+    });
+  },
+
+  async strike() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('strikeThrough', false, null);`,
+      },
+    });
+  },
+
+  async superscript() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('superscript', false, null);`,
+      },
+    });
+  },
+
+  async subscript() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('subscript', false, null);`,
+      },
+    });
+  },
+
+  async formatBlockP() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('formatBlock', false, 'p');`,
+      },
+    });
+  },
+
+  async formatBlockH1() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('formatBlock', false, 'h1');`,
+      },
+    });
+  },
+
+  async formatBlockH2() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('formatBlock', false, 'h2');`,
+      },
+    });
+  },
+
+  async formatBlockH3() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('formatBlock', false, 'h3');`,
+      },
+    });
+  },
+
+  async formatBlockH4() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('formatBlock', false, 'h4');`,
+      },
+    });
+  },
+
+  async formatBlockH5() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('formatBlock', false, 'h5');`,
+      },
+    });
+  },
+
+  async formatBlockH6() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('formatBlock', false, 'h6');`,
+      },
+    });
+  },
+
+  async formatBlockDiv() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('formatBlock', false, 'div');`,
+      },
+    });
+  },
+
+  async formatBlockPre() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('formatBlock', false, 'pre');`,
+      },
+    });
+  },
+
+  async listUnordered() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('insertUnorderedList', false, null);`,
+      },
+    });
+  },
+
+  async listOrdered() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('insertOrderedList', false, null);`,
+      },
+    });
+  },
+
+  async outdent() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('outdent', false, null);`,
+      },
+    });
+  },
+
+  async indent() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('indent', false, null);`,
+      },
+    });
+  },
+
+  async justifyLeft() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('justifyLeft', false, null);`,
+      },
+    });
+  },
+
+  async justifyRight() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('justifyRight', false, null);`,
+      },
+    });
+  },
+
+  async justifyCenter() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('justifyCenter', false, null);`,
+      },
+    });
+  },
+
+  async justifyFull() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('justifyFull', false, null);`,
+      },
+    });
+  },
+
+  async hr() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('insertHorizontalRule', false, null);`,
+      },
+    });
+  },
+
+  async removeFormat() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('removeFormat', false, null);`,
+      },
+    });
+  },
+
+  async unlink() {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId,
+        code: `document.execCommand('unlink', false, null);`,
+      },
+    });
+  },
+};
+
+
 window.addEventListener("focus", (event) => {
   if (event.target.closest && event.target.closest('web-scrapbook')) {
     if (Date.now() - editor.lastFocusTime < 50) {
@@ -1750,5 +1775,6 @@ window.addEventListener("focus", (event) => {
 }, {capture: true, passive: true});
 
 window.editor = editor;
+window.htmlEditor = htmlEditor;
 
 })(this, this.document, this.browser);
