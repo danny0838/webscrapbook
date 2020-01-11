@@ -177,8 +177,8 @@ ${sRoot}.toolbar > div > button:enabled {
 
 ${sRoot}.toolbar > div > button:enabled:hover,
 ${sRoot}.toolbar > div > button:enabled:focus {
-  border-color: #999 !important;
-  background-color: #B9B9B9 !important;
+  border-color: #CCC !important;
+  background-color: #FFF !important;
 }
 
 ${sRoot}.toolbar > div > button:enabled:active {
