@@ -215,6 +215,10 @@ ${sRoot}.toolbar .toolbar-eraser > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-eraser.png")}") !important;
 }
 
+${sRoot}.toolbar .toolbar-domEraser > button:first-of-type {
+  background-image: url("${browser.runtime.getURL("resources/edit-dom-eraser.png")}") !important;
+}
+
 ${sRoot}.toolbar .toolbar-htmlEditor > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-html.png")}") !important;
 }
@@ -351,6 +355,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
       <li><button class="toolbar-eraser-removeEditsAll">${scrapbook.lang('EditorButtonRemoveEditsAll')}</button></li>
     </ul>
   </div>
+  <div class="toolbar-domEraser" title="${scrapbook.lang('EditorButtonDomEraser')}">
+    <button></button>
+  </div>
   <div class="toolbar-htmlEditor" title="${scrapbook.lang('EditorButtonHtmlEditor')}">
     <button></button><button disabled=""></button>
     <ul hidden="" title="">
@@ -486,6 +493,12 @@ ${sRoot}.toolbar .toolbar-close:hover {
   var elem = wrapper.querySelector('.toolbar-eraser-removeEditsAll');
   elem.addEventListener("click", (event) => {
     editor.removeAllEdits();
+  }, {passive: true});
+
+  // DOMEraser
+  var elem = wrapper.querySelector('.toolbar-domEraser > button:first-of-type');
+  elem.addEventListener("click", (event) => {
+    editor.domEraser();
   }, {passive: true});
 
   // htmlEditor
@@ -967,6 +980,36 @@ editor.removeAllEdits = async function () {
   });
 };
 
+editor.domEraser = async function (willEnable) {
+  if (!editor.element && editor.element.parentNode) { return; }
+
+  const editElem = editor.internalElement.querySelector('.toolbar-domEraser > button');
+
+  if (typeof willEnable === "undefined") {
+    willEnable = !editElem.hasAttribute("checked");
+  }
+
+  if (willEnable) {
+    editElem.setAttribute("checked", "");
+  } else {
+    editElem.removeAttribute("checked");
+  }
+
+  Array.prototype.forEach.call(
+    editor.internalElement.querySelectorAll('.toolbar-marker > button, .toolbar-eraser > button, .toolbar-htmlEditor > button, .toolbar-undo > button, .toolbar-save > button'),
+    (elem) => {
+      elem.disabled = willEnable;
+    });
+
+  return await scrapbook.invokeExtensionScript({
+    cmd: "background.invokeEditorCommand",
+    args: {
+      cmd: "domEraser.toggle",
+      args: {willEnable},
+    },
+  });
+};
+
 editor.htmlEditor = async function (willEditable) {
   if (!editor.element && editor.element.parentNode) { return; }
 
@@ -984,7 +1027,7 @@ editor.htmlEditor = async function (willEditable) {
 
   editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = !willEditable;
   Array.prototype.forEach.call(
-    editor.internalElement.querySelectorAll('.toolbar-marker > button, .toolbar-eraser > button, .toolbar-undo > button'),
+    editor.internalElement.querySelectorAll('.toolbar-marker > button, .toolbar-eraser > button, .toolbar-domEraser > button, .toolbar-undo > button'),
     (elem) => {
       elem.disabled = willEditable;
     });
@@ -1041,6 +1084,7 @@ editor.deleteErased = async function () {
 editor.close = async function () {
   if (!editor.element && editor.element.parentNode) { return; }
 
+  await editor.domEraser(false);
   await editor.htmlEditor(false);
   editor.element.remove();
 };
@@ -1481,6 +1525,317 @@ editor.addHistory = () => {
 };
 
 
+const domEraser = (function () {
+  const FORBID_NODES = `web-scrapbook, web-scrapbook *`;
+  const TOOLTIP_NODES = `web-scrapbook-tooltip, web-scrapbook-tooltip *`;
+  const SKIP_NODES = `html, head, body, ${FORBID_NODES}, ${TOOLTIP_NODES}`;
+
+  const mapElemOutline = new WeakMap();
+  const mapElemOutlinePriority = new WeakMap();
+  const mapElemCursor = new WeakMap();
+  const mapElemCursorPriority = new WeakMap();
+  const mapElemHadStyleAttr = new WeakMap();
+  const mapElemTooltip = new WeakMap();
+
+  let lastTarget = null;
+  let lastTouchTarget = null;
+  let tooltipElem = null;
+
+  const getViewportDimensions = (win) => {
+    let out = {};
+    let doc = win.document;
+
+    if (win.pageXOffset) {
+      out.scrollX = win.pageXOffset;
+      out.scrollY = win.pageYOffset;
+    } else if (doc.documentElement) {
+      out.scrollX = doc.body.scrollLeft + doc.documentElement.scrollLeft;
+      out.scrollY = doc.body.scrollTop + doc.documentElement.scrollTop;
+    } else if (doc.body.scrollLeft >= 0) {
+      out.scrollX = doc.body.scrollLeft;
+      out.scrollY = doc.body.scrollTop;
+    }
+    if (doc.compatMode == "BackCompat") {
+      out.width = doc.body.clientWidth;
+      out.height = doc.body.clientHeight;
+    } else {
+      out.width = doc.documentElement.clientWidth;
+      out.height = doc.documentElement.clientHeight;
+    }
+    return out;
+  };
+
+  const onTouchStart = (event) => {
+    lastTouchTarget = event.target;
+  };
+
+  const onMouseOver = (event) => {
+    let elem = event.target;
+    if (elem.matches(SKIP_NODES)) { return; }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    // don't set target for a simulated mouseover for a touch,
+    // so that the click event will reset the target as it gets no lastTarget.
+    if (elem === lastTouchTarget) { return; }
+
+    elem = domEraser.adjustTarget(elem);
+    domEraser.setTarget(elem);
+  };
+
+  const onMouseOut = (event) => {
+    if (event.target.matches(FORBID_NODES)) { return; }
+
+    // don't consider a true mouseout when the mouse moves into the tooltip
+    if (event.relatedTarget && event.relatedTarget.matches(TOOLTIP_NODES)) { return; }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    domEraser.clearTarget();
+  };
+
+  const onMouseDown = (event) => {
+    if (event.button !== 1) { return; }
+    if (event.target.matches(FORBID_NODES)) { return; }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const elem = lastTarget;
+    if (!elem) { return; }
+    domEraser.isolateTarget(elem);
+  };
+
+  const onClick = (event) => {
+    if (event.target.matches(FORBID_NODES)) { return; }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const elem = lastTarget;
+    const target = domEraser.adjustTarget(event.target);
+
+    // domEraser may happen if it's a keybord enter or touch,
+    // reset the target rather than performing the erase.
+    if (target !== elem && !target.matches(FORBID_NODES) && !target.matches(TOOLTIP_NODES)) {
+      if (target.matches(SKIP_NODES)) { return; }
+      domEraser.setTarget(target);
+      return;
+    }
+
+    if (!elem) { return; }
+
+    if (event.ctrlKey) {
+      domEraser.isolateTarget(elem);
+    } else {
+      domEraser.eraseTarget(elem);
+    }
+  };
+
+  const onKeyDown = (event) => {
+    // skip if there's a modifier
+    if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+      return;
+    }
+
+    if (event.code === "Escape" || event.code === "F10") {
+      event.preventDefault();
+      event.stopPropagation();
+      editor.domEraser(false);
+    }
+  };
+
+  const domEraser = {
+    adjustTarget(elem) {
+      // special handling for special elements
+      // as their inner elements cannot be tooltiped and handled.
+      if (elem.closest('svg')) {
+        while (elem.tagName.toLowerCase() !== 'svg') {
+          elem = elem.parentNode;
+        }
+      }
+
+      if (elem.closest('math')) {
+        while (elem.tagName.toLowerCase() !== 'math') {
+          elem = elem.parentNode;
+        }
+      }
+
+      return elem;
+    },
+
+    setTarget(elem) {
+      // do nothing if the new target is same as the current one
+      if (lastTarget === elem) { return; }
+
+      // remove tooltip in other frames
+      (async () => {
+        scrapbook.invokeExtensionScript({
+          cmd: "background.invokeEditorCommand",
+          args: {
+            cmd: "domEraser.clearTarget",
+            frameIdExcept: core.frameId,
+          },
+        });
+      })()
+
+      domEraser.clearTarget();
+      lastTarget = elem;
+
+      if (editor.getScrapbookObjectType(elem) === false) {
+        const id = elem.id;
+        const classText = Array.from(elem.classList.values()).join(' '); // elements like svg doesn't support .className property
+        var outlineStyle = '2px solid red';
+        var labelHtml = `<b style="all: unset !important; font-weight: bold !important;">${scrapbook.escapeHtml(elem.tagName.toLowerCase(), false, false, true)}</b>` + 
+            (id ? ", id: " + scrapbook.escapeHtml(id, false, false, true) : "") + 
+            (classText ? ", class: " + scrapbook.escapeHtml(classText, false, false, true) : "");
+      } else {
+        var outlineStyle = '2px dashed blue';
+        var labelHtml = scrapbook.escapeHtml(scrapbook.lang("EditorButtonDOMEraserRemoveEdit"), false, false, true);
+      }
+
+      // outline
+      // elements like math doesn't implement the .style property and could throw an error
+      try {
+        mapElemHadStyleAttr.set(elem, elem.hasAttribute('style'));
+        mapElemOutline.set(elem, elem.style.getPropertyValue('outline'));
+        mapElemOutlinePriority.set(elem, elem.style.getPropertyPriority('outline'));
+        mapElemCursor.set(elem, elem.style.getPropertyValue('cursor'));
+        mapElemCursorPriority.set(elem, elem.style.getPropertyPriority('cursor'));
+        elem.style.setProperty('outline', outlineStyle, 'important');
+        elem.style.setProperty('cursor', 'pointer', 'important');
+      } catch (ex) {
+        // pass
+      }
+
+      // tooltip
+      const viewport = getViewportDimensions(window);
+      const boundingRect = elem.getBoundingClientRect();
+      let x = viewport.scrollX + boundingRect.left;
+      let y = viewport.scrollY + boundingRect.bottom;
+
+      const labelElem = document.body.appendChild(document.createElement("web-scrapbook-tooltip"));
+      labelElem.style.setProperty('all', 'initial', 'important');
+      labelElem.style.setProperty('position', 'absolute', 'important');
+      labelElem.style.setProperty('z-index', '2147483647', 'important');
+      labelElem.style.setProperty('display', 'block', 'important');
+      labelElem.style.setProperty('border', '2px solid black', 'important');
+      labelElem.style.setProperty('border-radius', '6px', 'important');
+      labelElem.style.setProperty('padding', '2px 5px 2px 5px', 'important');
+      labelElem.style.setProperty('background-color', '#fff0cc', 'important');
+      labelElem.style.setProperty('font-size', '12px', 'important');
+      labelElem.style.setProperty('font-family', 'sans-serif', 'important');
+      labelElem.innerHTML = labelHtml;
+
+      // fix label position to prevent overflowing the viewport
+      const availWidth = viewport.scrollX + viewport.width;
+      const labelWidth = labelElem.offsetWidth;
+      x = Math.max(x, 0);
+      x = Math.min(x, availWidth - labelWidth);
+      
+      const availHeight = viewport.scrollY + viewport.height;
+      const labelHeight = labelElem.offsetHeight;
+      y = Math.max(y, 0);
+      y = Math.min(y, availHeight - labelHeight);
+
+      labelElem.style.setProperty('left', x + 'px', 'important');
+      labelElem.style.setProperty('top', y + 'px', 'important');
+
+      tooltipElem = labelElem;
+    },
+
+    clearTarget() {
+      let elem = lastTarget;
+      if (!elem) { return; }
+
+      // outline
+      // elements like math doesn't implement the .style property and could throw an error
+      try {
+        elem.style.setProperty('outline', mapElemOutline.get(elem), mapElemOutlinePriority.get(elem));
+        elem.style.setProperty('cursor', mapElemCursor.get(elem), mapElemCursorPriority.get(elem));
+        if (!elem.getAttribute('style') && !mapElemHadStyleAttr.get(elem)) { elem.removeAttribute('style'); }
+      } catch (ex) {
+        // pass
+      }
+
+      // tooltip
+      if (tooltipElem) {
+        tooltipElem.remove();
+        tooltipElem = null;
+      }
+
+      // unset lastTarget
+      lastTarget = null;
+    },
+
+    eraseTarget(elem) {
+      domEraser.clearTarget();
+      editor.addHistory();
+
+      let type = editor.removeScrapBookObject(elem);
+      if (type === -1) {
+        const timeId = scrapbook.dateToId();
+        elem.parentNode.replaceChild(document.createComment(`scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(elem.outerHTML)}`), elem);
+      }
+    },
+
+    isolateTarget(elem) {
+      domEraser.clearTarget();
+      editor.addHistory();
+
+      const timeId = scrapbook.dateToId();
+      while (!elem.matches(SKIP_NODES)) {
+        const parent = elem.parentNode;
+        if (!parent) { break; }
+
+        for (const child of parent.childNodes) {
+          if (child === elem) { continue; }
+
+          let replaceHtml;
+          if (child.nodeType === 1) {
+            if (child.matches(SKIP_NODES)) { continue; }
+            replaceHtml = `scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(child.outerHTML)}`;
+          } else {
+            const wrapper = document.createElement('scrapbook-erased');
+            wrapper.appendChild(child.cloneNode(true));
+            replaceHtml = `scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(wrapper.innerHTML)}`;
+          }
+          parent.replaceChild(document.createComment(replaceHtml), child);
+        }
+
+        elem = parent;
+      }
+    },
+
+    /**
+     * @kind invokable
+     */
+    toggle({willEnable}) {
+      if (willEnable) {
+        window.addEventListener('touchstart', onTouchStart, true);
+        window.addEventListener('mouseover', onMouseOver, true);
+        window.addEventListener('mouseout', onMouseOut, true);
+        window.addEventListener('mousedown', onMouseDown, true);
+        window.addEventListener('click', onClick, true);
+        window.addEventListener("keydown", onKeyDown, true);
+      } else {
+        domEraser.clearTarget();
+        window.removeEventListener('touchstart', onTouchStart, true);
+        window.removeEventListener('mouseover', onMouseOver, true);
+        window.removeEventListener('mouseout', onMouseOut, true);
+        window.removeEventListener('mousedown', onMouseDown, true);
+        window.removeEventListener('click', onClick, true);
+        window.removeEventListener("keydown", onKeyDown, true);
+      }
+    },
+  };
+
+  return domEraser;
+})();
+
+
 const htmlEditor = {
   async activate() {
     return await scrapbook.invokeExtensionScript({
@@ -1775,6 +2130,7 @@ window.addEventListener("focus", (event) => {
 }, {capture: true, passive: true});
 
 window.editor = editor;
+window.domEraser = domEraser;
 window.htmlEditor = htmlEditor;
 
 })(this, this.document, this.browser);

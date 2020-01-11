@@ -189,7 +189,7 @@ background.getFocusedFrameId = async function ({}, sender) {
 /**
  * @kind invokable
  */
-background.invokeEditorCommand = async function ({code, cmd, args, frameId = -1}, sender) {
+background.invokeEditorCommand = async function ({code, cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
   const tabId = sender.tab.id;
   if (frameId !== -1) {
     const response = code ? 
@@ -207,6 +207,22 @@ background.invokeEditorCommand = async function ({code, cmd, args, frameId = -1}
       runAt: "document_start"
     });
     return response;
+  } else if (frameIdExcept !== -1) {
+    const tasks = Array.prototype.map.call(
+      await scrapbook.initContentScripts(tabId),
+      async ({tabId, frameId, injected}) => {
+        if (frameId === frameIdExcept) { return undefined; }
+        return code ? 
+          await browser.tabs.executeScript(tabId, {
+            frameId,
+            code,
+            runAt: "document_start",
+          }) : 
+          await scrapbook.invokeContentScript({
+            tabId, frameId, cmd, args,
+          });
+      });
+    return Promise.all(tasks);
   } else {
     const tasks = Array.prototype.map.call(
       await scrapbook.initContentScripts(tabId),
