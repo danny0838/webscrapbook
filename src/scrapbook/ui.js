@@ -1219,7 +1219,7 @@ const scrapbookUi = {
     if (meta.type !== 'separator') {
       var a = document.createElement('a');
       a.appendChild(document.createTextNode(meta.title || id));
-      a.title = meta.title || id;
+      a.title = (meta.title || id) + (meta.source ? "\n" + meta.source : "");
       if (meta.type !== 'bookmark') {
         if (meta.index) { a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index); }
       } else {

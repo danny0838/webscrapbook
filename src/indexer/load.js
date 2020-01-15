@@ -2331,7 +2331,7 @@ var scrapbook = {
     if (meta.type !== 'separator') {
       var a = document.createElement('a');
       a.appendChild(document.createTextNode(meta.title || id));
-      a.title = meta.title || id;
+      a.title = (meta.title || id) + (meta.source ? "\\n" + meta.source : "");
       if (meta.type !== 'bookmark') {
         if (meta.index) { a.href = scrapbook.conf.dataDir + scrapbook.escapeFilename(meta.index); }
       } else {
@@ -2938,7 +2938,8 @@ const scrapbook = {
       const a = document.createElement("a");
       if (href) { a.href = href; }
       a.target = "main";
-      a.textContent = a.title = meta.title;
+      a.textContent = meta.title || id;
+      a.title = (meta.title || id) + (meta.source ? "\\n" + meta.source : "");
       div.appendChild(a);
 
       if (file && !(
