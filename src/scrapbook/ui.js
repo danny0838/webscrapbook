@@ -1041,7 +1041,7 @@ const scrapbookUi = {
 
     // locate the item element
     curElem.scrollIntoView();
-    this.highlightItem(curElem, true);
+    this.highlightItem(curElem, true, true);
     this.saveViewStatus();
 
     return item;
@@ -1301,20 +1301,21 @@ const scrapbookUi = {
     return elem;
   },
 
-  highlightItem(itemElem, willHighlight, rangedSelection = false) {
-    if (typeof willHighlight === "undefined") {
-      willHighlight = !this.getHighlightElem(itemElem).classList.contains("highlight");
-    }
-
+  highlightItem(itemElem,
+      willHighlight = !this.getHighlightElem(itemElem).classList.contains("highlight"),
+      reselect = true,
+      ranged = false) {
     if (willHighlight) {
-      if (this.mode !== 'manage') {
+      if (reselect) {
         if (this.lastHighlightElem) {
-          this.getHighlightElem(this.lastHighlightElem).classList.remove("highlight");
+          Array.prototype.forEach.call(document.querySelectorAll('#items .highlight'), (elem) => {
+            elem.classList.remove("highlight");
+          });
         }
         this.getHighlightElem(itemElem).classList.add("highlight");
         this.lastHighlightElem = itemElem;
       } else {
-        if (!rangedSelection) {
+        if (!ranged) {
           this.getHighlightElem(itemElem).classList.add("highlight");
           this.lastHighlightElem = itemElem;
         } else {
@@ -1344,11 +1345,15 @@ const scrapbookUi = {
         }
       }
     } else {
-      if (this.mode !== 'manage') {
-        this.getHighlightElem(itemElem).classList.remove("highlight");
-        this.lastHighlightElem = null;
+      if (reselect) {
+        if (this.lastHighlightElem) {
+          Array.prototype.forEach.call(document.querySelectorAll('#items .highlight'), (elem) => {
+            elem.classList.remove("highlight");
+          });
+          this.lastHighlightElem = null;
+        }
       } else {
-        if (!rangedSelection) {
+        if (!ranged) {
           this.getHighlightElem(itemElem).classList.remove("highlight");
           this.lastHighlightElem = itemElem;
         } else {
@@ -1624,7 +1629,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
   },
 
   onItemDragStart(event) {
-    this.highlightItem(event.currentTarget.parentNode, true);
+    const itemElem = event.currentTarget.parentNode;
+    if (!this.getHighlightElem(itemElem).classList.contains("highlight")) {
+      this.highlightItem(event.currentTarget.parentNode, true, true);
+    }
 
     const selectedItemElems = Array.prototype.map.call(
       document.querySelectorAll('#item-root .highlight'),
@@ -1881,7 +1889,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
   onClickItem(event) {
     const itemElem = event.currentTarget.parentNode;
-    this.highlightItem(itemElem, void 0, event.shiftKey);
+    const reselect = this.mode !== 'manage' && !event.ctrlKey && !event.shiftKey;
+    this.highlightItem(itemElem, undefined, reselect, event.shiftKey);
   },
 
   onMiddleClickItem(event) {
@@ -1898,8 +1907,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
   onClickToggle(event) {
     event.preventDefault();
+    event.stopPropagation();
     const itemElem = event.currentTarget.parentNode.parentNode;
-    this.highlightItem(itemElem);
     this.toggleItem(itemElem);
     this.saveViewStatus();
   },
@@ -1911,15 +1920,17 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     }
 
     if (this.mode !== 'manage') {
-      if (browser.windows) {
-        if (!event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey) {
+      if (event.ctrlKey || event.altKey || event.shiftKey || event.metaKey) {
+        event.preventDefault();
+      } else {
+        if (browser.windows) {
           // for desktop browsers, open link in the same tab of the main window
           event.preventDefault();
           await scrapbookUi.openLink(elem.href);
+        } else {
+          // for Firefox Android (browser.windows not supported)
+          // use default action to open in the "webscrapbook" tab
         }
-      } else {
-        // for Firefox Android (browser.windows not supported)
-        // use default action to open in the "webscrapbook" tab
       }
     } else {
       // do not open link on click in manage mode
