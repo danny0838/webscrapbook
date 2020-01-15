@@ -620,8 +620,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
   // close
   var elem = wrapper.querySelector('.toolbar-close');
   elem.addEventListener("click", (event) => {
+    event.preventDefault();
     editor.close();
-  }, {passive: true});
+  });
 };
 
 /**
