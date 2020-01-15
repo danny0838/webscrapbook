@@ -569,8 +569,8 @@ const indexer = {
         const id = elem.getAttributeNS(NS1, "id") || RegExp.$1;
         const meta = {id};
         Array.prototype.forEach.call(elem.attributes, (attrElem) => {
-          if (attrElem.prefix === "NS1" && attrElem.nodeName !== "NS1:id") {
-            const attrName = attrElem.nodeName.slice(4);
+          const attrName = attrElem.localName;
+          if (attrElem.namespaceURI === NS1 && attrName !== "id") {
             meta[attrName] = elem.getAttributeNS(NS1, attrName);
           }
         });
