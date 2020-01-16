@@ -157,6 +157,7 @@ scrapbook.options = {
   "viewer.useFileSystemApi": false,
   "viewer.viewHtz": true,
   "viewer.viewMaff": true,
+  "indexer.createStaticIndex": true,
   "indexer.fulltextCache": true,
   "indexer.fulltextCacheFrameAsPageContent": true,
 };

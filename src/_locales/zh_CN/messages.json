@@ -686,6 +686,9 @@
   "OptionGroupViewer": {
     "message": "检视器"
   },
+  "OptionIndexerCreateStaticIndexLabel": {
+    "message": "更新静态索引页面 index.html"
+  },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
     "message": "将框架页内容缓存为主页内容"
   },

@@ -686,6 +686,9 @@
   "OptionGroupViewer": {
     "message": "檢視器"
   },
+  "OptionIndexerCreateStaticIndexLabel": {
+    "message": "更新靜態索引頁面 index.html"
+  },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
     "message": "將框架頁內容快取為主頁內容"
   },
