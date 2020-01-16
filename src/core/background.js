@@ -165,30 +165,6 @@ background.captureCurrentTab = async function (params, sender) {
 /**
  * @kind invokable
  */
-background.getFocusedFrameId = async function ({}, sender) {
-  const tabId = sender.tab.id;
-  const tasks = Array.prototype.map.call(
-    await scrapbook.initContentScripts(tabId),
-    async ({tabId, frameId, injected}) => {
-      const time = await scrapbook.invokeContentScript({
-        tabId, frameId,
-        cmd: 'editor.getFocusInfo',
-        args: {},
-      });
-      return {frameId, time};
-    });
-  const {frameId} = (await Promise.all(tasks)).reduce((acc, cur) => {
-    if (cur.time > acc.time) {
-      return cur;
-    }
-    return acc;
-  });
-  return frameId;
-};
-
-/**
- * @kind invokable
- */
 background.invokeEditorCommand = async function ({code, cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
   const tabId = sender.tab.id;
   if (frameId !== -1) {

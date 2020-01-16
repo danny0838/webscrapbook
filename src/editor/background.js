@@ -9,7 +9,7 @@
 
 const urlMatch = await scrapbook.getContentPagePattern();
 
-browser.webNavigation.onDOMContentLoaded.addListener((details) => {
+browser.webNavigation.onCompleted.addListener((details) => {
   if (details.frameId !== 0) { return; }
 
   // skip as configured

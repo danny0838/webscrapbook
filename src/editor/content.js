@@ -15,7 +15,9 @@ const editor = {
   isScripted: false,
   serverUrl: null,
   history: [],
-  lastFocusTime: null,
+  lastWindowFocusTime: -1,
+  lastWindowBlurTime: -1,
+  directToolbarClick: false,
 
   /**
    * @return {Object<number~hWidth, number~vWidth>}
@@ -628,13 +630,6 @@ ${sRoot}.toolbar .toolbar-close:hover {
 /**
  * @kind invokable
  */
-editor.getFocusInfo = async function ({}) {
-  return editor.lastFocusTime;
-};
-
-/**
- * @kind invokable
- */
 editor.lineMarkerInternal = function ({style}) {
   editor.addHistory();
 
@@ -1206,10 +1201,33 @@ editor.updateLineMarkers = function () {
 };
 
 editor.getFocusedFrameId = async function () {
-  return await scrapbook.invokeExtensionScript({
-    cmd: "background.getFocusedFrameId",
-    args: {},
+  if (!editor.directToolbarClick) {
+    return 0;
+  }
+
+  const arr = await scrapbook.invokeExtensionScript({
+    cmd: "background.invokeEditorCommand",
+    args: {
+      code: "({frameId: core.frameId, time: editor.lastWindowBlurTime})",
+      frameIdExcept: 0,
+    },
   });
+
+  const lastFrame = arr.reduce((acc, cur) => {
+    if (cur) {
+      cur = cur[0];
+      if (cur.time > acc.time) {
+        return cur;
+      }
+    }
+    return acc;
+  }, {frameId: 0, time: -1});
+
+  if (lastFrame.frameId !== 0 && editor.lastWindowFocusTime - lastFrame.time < 50) {
+    return lastFrame.frameId;
+  }
+
+  return 0;
 };
 
 /**
@@ -2124,15 +2142,19 @@ const htmlEditor = {
 
 
 window.addEventListener("focus", (event) => {
-  if (event.target.closest && event.target.closest('web-scrapbook')) {
-    if (Date.now() - editor.lastFocusTime < 50) {
-      // Assume a focus on web-scrapbook element just after window as a
-      // toolbar operation for a frame.
-      editor.lastFocusTime = null;
-    }
-    return;
+  // in Firefox, window of the content script is a sandbox object,
+  // so use document.defaultView instead.
+  if (event.target === document.defaultView) {
+    editor.lastWindowFocusTime = Date.now();
+  } else if (event.target.closest && event.target.closest('web-scrapbook')) {
+    editor.directToolbarClick = Date.now() - editor.lastWindowFocusTime < 50;
   }
-  editor.lastFocusTime = Date.now();
+}, {capture: true, passive: true});
+
+window.addEventListener("blur", (event) => {
+  if (event.target === document.defaultView) {
+    editor.lastWindowBlurTime = Date.now();
+  }
 }, {capture: true, passive: true});
 
 window.editor = editor;
