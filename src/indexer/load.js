@@ -497,28 +497,75 @@ const indexer = {
       const dataFiles = new FileMapper();
       const treeFiles = new FileMapper();
       const otherFiles = new FileMapper();
+
       for (const {path, file} of inputData.files) {
         if (path.startsWith(this.treeDir)) {
           treeFiles.set(path, file);
         } else if (path.startsWith(this.dataDir) && (this.wsbDir === null || !path.startsWith(this.wsbDir))) {
           const subpath = path.slice(this.dataDir.length);
           dataFiles.set(subpath, file);
-
-          // treat */index.html, */index.md as an item
-          const [dir, base] = scrapbook.filepathParts(subpath);
-          if (dir && ['index.html', 'index.md'].includes(base)) {
-            dataDirIds.add(dir);
-          }
         } else {
           otherFiles.set(path, file);
         }
       }
 
-      // add <dir>/* if <dir> is not an item
+      // add ID from files
+      const excludeDirs = new Set();
+      const excludePrefixes = new Set();
+      const excludePrefix = (path) => {
+        for (const prefix of excludePrefixes) {
+          if (path.startsWith(prefix)) { return true; }
+        }
+        return false;
+      };
       for (const subpath of dataFiles.keys()) {
-        const [dir, base] = scrapbook.filepathParts(subpath);
-        if (!dataDirIds.has(dir)) {
-          dataDirIds.add(scrapbook.filenameParts(subpath)[0]);
+        if (excludePrefix(subpath)) { continue; }
+
+        const [dir, basename] = scrapbook.filepathParts(subpath);
+
+        // handle directory
+        if (dir && !excludeDirs.has(dir)) {
+          excludeDirs.add(dir);
+
+          // <dir>.files, <dir>_files
+          if (dir.endsWith('.files') || dir.endsWith('_files')) {
+            const id = dir.slice(0, -6);
+
+            // a corresponding *.html|*.htm exists
+            // treat this as a supporting folder and skip entries under it
+            if (dataFiles.has(`${id}.html`) || dataFiles.has(`${id}.htm`)) {
+              dataDirIds.add(id);
+              excludePrefixes.add(`${id}.`);
+              excludePrefixes.add(`${id}/`);
+              // excludePrefixes.add(`${id}.files/`);
+              excludePrefixes.add(`${id}_files/`);
+              continue;
+            }
+          }
+
+          // <dir>/index.html, <dir>/index.md
+          if (dataFiles.has(`${dir}/index.html`) || dataFiles.has(`${dir}/index.md`)) {
+            dataDirIds.add(dir);
+            excludePrefixes.add(`${dir}.`);
+            excludePrefixes.add(`${dir}/`);
+            // excludePrefixes.add(`${dir}/index.files/`);
+            // excludePrefixes.add(`${dir}/index_files/`);
+            continue;
+          }
+        }
+
+        // <dir>/*.*
+        const [id, ext] = scrapbook.filenameParts(subpath);
+        if (['html', 'htm', 'xhtml', 'xht', 'md', 'maff', 'htz'].includes(ext)) {
+          dataDirIds.add(id);
+          excludeDirs.add(id);
+          excludePrefixes.add(`${id}.`);
+          excludePrefixes.add(`${id}/`);
+          if (dataFiles.has(`${id}.html`) || dataFiles.has(`${id}.htm`)) {
+            // excludePrefixes.add(`${id}.files/`);
+            excludePrefixes.add(`${id}_files/`);
+          }
+          continue;
         }
       }
 
