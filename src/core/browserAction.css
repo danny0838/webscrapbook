@@ -1,6 +1,5 @@
 button {
   display: block;
-  cursor: pointer;
   outline: none;
   border: none;
   background: none;
@@ -10,22 +9,27 @@ button {
   white-space: nowrap;
 }
 
-button[hidden] {
-  display: none;
-}
-
-button:focus {
+button:enabled:focus {
   outline: 1px solid rgba(125, 162, 206, 0.8);
   background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.8));
 }
 
-button:hover {
-  background-color: #aaaaaa;
+button:enabled:hover {
+  background-color: rgba(202, 202, 202, 0.8);
 }
 
-button:active {
-  background-color: #000000;
+button:enabled:active {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.9), rgba(64, 64, 64, 0.9));
   color: #FFFFFF;
+}
+
+button:disabled {
+  filter: grayscale(100%);
+  opacity: 0.3;
+}
+
+button[hidden] {
+  display: none;
 }
 
 .sub {

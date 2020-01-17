@@ -187,7 +187,7 @@ ${sRoot}.toolbar > div > button:enabled:active {
 
 ${sRoot}.toolbar > div > button:disabled {
   filter: grayscale(100%) !important;
-  opacity: 0.6 !important;
+  opacity: 0.3 !important;
 }
 
 ${sRoot}.toolbar > div > button[checked] {
@@ -242,7 +242,7 @@ ${sRoot}.toolbar > div > ul {
   border: 1px solid #999 !important;
   border-radius: 2px !important;
   box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.3) !important;
-  padding: 0 !important;
+  padding: 1px !important;
   background: white !important;
   max-height: calc(100vh - 32px - ${editor.scrollbar.vWidth}px - 2px) !important;
 }
@@ -261,20 +261,25 @@ ${sRoot}.toolbar > div > ul > li > button {
   width: 100% !important;
   font-size: 14px !important;
   color: #333 !important;
-  cursor: pointer !important;
 }
 
-${sRoot}.toolbar > div > ul > li > button:focus {
-  outline: 1px solid rgb(77, 144, 254) !important;
+${sRoot}.toolbar > div > ul > li > button:enabled:focus {
+  outline: 1px solid rgba(125, 162, 206, 0.8) !important;
+  background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.8)) !important;
 }
 
-${sRoot}.toolbar > div > ul > li > button:hover {
-  background-image: radial-gradient(rgba(176, 176, 176, 0.9), rgba(238, 238, 238, 0.9)) !important;
+${sRoot}.toolbar > div > ul > li > button:enabled:hover {
+  background-color: rgba(202, 202, 202, 0.8) !important;
 }
 
-${sRoot}.toolbar > div > ul > li > button:active {
+${sRoot}.toolbar > div > ul > li > button:enabled:active {
   background-image: radial-gradient(rgba(0, 0, 0, 0.9), rgba(64, 64, 64, 0.9)) !important;
   color: #FFFFFF !important;
+}
+
+${sRoot}.toolbar > div > ul > li > button:disabled {
+  filter: grayscale(100%) !important;
+  opacity: 0.3 !important;
 }
 
 ${sRoot}.toolbar > div > ul > li > button[checked] {
