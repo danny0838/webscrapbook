@@ -1012,38 +1012,39 @@ const indexer = {
   /* Generate cache for favicon */
   async cacheFavicons({scrapbookData, dataFiles, treeFiles, zip}) {
     this.log(`Inspecting favicons...`);
+
+    const getShaFile = (data) => {
+      if (!data) { throw new Error(`Unable to fetch a file for this favicon URL.`); }
+
+      let {ab, mime, ext} = data;
+
+      // validate that we have a correct image mimetype
+      if (!mime.startsWith('image/') && mime !== 'application/octet-stream') {
+        throw new Error(`Invalid image mimetype '${mime}'.`);
+      }
+
+      // if no extension, generate one according to mime
+      if (!ext) { ext = Mime.extension(mime); }
+
+      const sha = scrapbook.sha1(ab, 'ARRAYBUFFER');
+      return new File([ab], `${sha}${ext ? '.' + ext : ''}`, {type: mime});
+    };
+
+    // generate cache for every favicon with an absolute URL, data URL, or in-zip path
     const urlAccessMap = new Map();
     return await Promise.all(Object.keys(scrapbookData.meta).map(async (id) => {
       try {
         let {index, icon: favIconUrl} = scrapbookData.meta[id];
         index = index || "";
 
-        // the favIconUrl is ok
-        if (!favIconUrl || favIconUrl.startsWith('../')) { return; }
-
-        // allow relative favicon if index is HTML
-        if (this.isHtmlFile(index) && !scrapbook.isUrlAbsolute(favIconUrl)) { return; }
+        if (!favIconUrl) { return; }
 
         try {
           const file = await (async () => {
-            const getShaFile = (data) => {
-              if (!data) { throw new Error(`Unable to fetch a file for this favicon URL.`); }
+            if (favIconUrl.startsWith("data:")) {
+              return scrapbook.dataUriToFile(favIconUrl, false);
+            }
 
-              let {ab, mime, ext} = data;
-
-              // validate that we have a correct image mimetype
-              if (!mime.startsWith('image/') && mime !== 'application/octet-stream') {
-                throw new Error(`Invalid image mimetype '${mime}'.`);
-              }
-
-              // if no extension, generate one according to mime
-              if (!ext) { ext = Mime.extension(mime); }
-
-              const sha = scrapbook.sha1(ab, 'ARRAYBUFFER');
-              return new File([ab], `${sha}${ext ? '.' + ext : ''}`, {type: mime});
-            };
-
-            // retrive absolute URL
             if (scrapbook.isUrlAbsolute(favIconUrl)) {
               const prevAccess = urlAccessMap.get(favIconUrl);
               if (prevAccess) {
@@ -1052,10 +1053,6 @@ const indexer = {
               }
 
               const p = (async () => {
-                if (favIconUrl.startsWith("data:")) {
-                  return scrapbook.dataUriToFile(favIconUrl, false);
-                }
-
                 const headers = {};
                 let xhr;
                 try {
@@ -1071,14 +1068,7 @@ const indexer = {
                         const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
                         if (headerContentDisposition) {
                           const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-                          // headers.isAttachment = (contentDisposition.type === "attachment");
                           headers.filename = contentDisposition.parameters.filename;
-                        }
-                        const headerContentType = xhr.getResponseHeader("Content-Type");
-                        if (headerContentType) {
-                          const contentType = scrapbook.parseHeaderContentType(headerContentType);
-                          headers.contentType = contentType.type;
-                          // headers.charset = contentType.parameters.charset;
                         }
                       }
                     },
@@ -1096,21 +1086,20 @@ const indexer = {
               })();
               urlAccessMap.set(favIconUrl, p);
               return p;
-            } else if (this.isHtzFile(index) || this.isMaffFile(index)) {
+            }
+
+            if (this.isHtzFile(index) || this.isMaffFile(index)) {
+              // skip obvious not in-zip path
+              if (favIconUrl.startsWith('../')) { return; }
+              
               const zip = await new JSZip().loadAsync(await dataFiles.getFile(index), {createFolders: true});
 
-              let zipDir;
-              if (this.isMaffFile(index)) {
-                zipDir = zip.folder(Object.keys(zip.files)[0]);
-              } else {
-                zipDir = zip;
-              }
-
+              const zipDir = this.isMaffFile(index) ? zip.folder(Object.keys(zip.files)[0]) : zip;
               const favIconPath = decodeURIComponent(favIconUrl);
               const zipFile = zipDir.file(favIconPath);
 
               if (!zipFile) {
-                throw new Error(`'${favIconPath}' does not exist.`);
+                throw new Error(`'${favIconPath}' does not exist in '${index}'.`);
               }
 
               const mime = Mime.lookup(zipFile.name);
@@ -1120,6 +1109,8 @@ const indexer = {
               return getShaFile({ab, mime, ext});
             }
           })();
+
+          if (!file) { return; }
 
           const path = `${this.treeDir}favicon/${file.name}`;
 
