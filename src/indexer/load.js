@@ -1091,6 +1091,10 @@ const indexer = {
             if (this.isHtzFile(index) || this.isMaffFile(index)) {
               // skip obvious not in-zip path
               if (favIconUrl.startsWith('../')) { return; }
+
+              // skip if the favicon is already in the tree/favicon directory
+              const resolvedFaviconPath = (new URL(favIconUrl, 'file:///' + this.dataDir + index)).href.slice(8);
+              if (resolvedFaviconPath.startsWith(this.treeDir + 'favicon/')) { return; }
               
               const zip = await new JSZip().loadAsync(await dataFiles.getFile(index), {createFolders: true});
 
