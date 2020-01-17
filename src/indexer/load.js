@@ -504,9 +504,9 @@ const indexer = {
           const subpath = path.slice(this.dataDir.length);
           dataFiles.set(subpath, file);
 
-          // treat */index.html as an item
+          // treat */index.html, */index.md as an item
           const [dir, base] = scrapbook.filepathParts(subpath);
-          if (dir && base === 'index.html') {
+          if (dir && ['index.html', 'index.md'].includes(base)) {
             dataDirIds.add(dir);
           }
         } else {
@@ -1801,6 +1801,9 @@ const indexer = {
     let index;
 
     index = `${id}/index.html`;
+    if (dataFiles.has(index)) { return index; }
+
+    index = `${id}/index.md`;
     if (dataFiles.has(index)) { return index; }
 
     index = `${id}.html`;
