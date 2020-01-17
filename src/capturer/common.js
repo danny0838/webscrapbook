@@ -2302,7 +2302,6 @@ capturer.captureDocument = async function (params) {
             }
           });
         };
-        d.currentScript.remove();
         fn(d);
       }) + ")()";
     }
@@ -2332,10 +2331,7 @@ capturer.captureDocument = async function (params) {
                   })();
                 }
               }
-            },
-            s = document.getElementsByTagName("script");
-        s = s[s.length - 1];
-        s.parentNode.removeChild(s);
+            };
         f(document);
       }) + ")()";
     }
