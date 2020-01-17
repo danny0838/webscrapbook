@@ -1565,30 +1565,6 @@ const domEraser = (function () {
   let lastTouchTarget = null;
   let tooltipElem = null;
 
-  const getViewportDimensions = (win) => {
-    let out = {};
-    let doc = win.document;
-
-    if (win.pageXOffset) {
-      out.scrollX = win.pageXOffset;
-      out.scrollY = win.pageYOffset;
-    } else if (doc.documentElement) {
-      out.scrollX = doc.body.scrollLeft + doc.documentElement.scrollLeft;
-      out.scrollY = doc.body.scrollTop + doc.documentElement.scrollTop;
-    } else if (doc.body.scrollLeft >= 0) {
-      out.scrollX = doc.body.scrollLeft;
-      out.scrollY = doc.body.scrollTop;
-    }
-    if (doc.compatMode == "BackCompat") {
-      out.width = doc.body.clientWidth;
-      out.height = doc.body.clientHeight;
-    } else {
-      out.width = doc.documentElement.clientWidth;
-      out.height = doc.documentElement.clientHeight;
-    }
-    return out;
-  };
-
   const onTouchStart = (event) => {
     lastTouchTarget = event.target;
   };
@@ -1735,7 +1711,7 @@ const domEraser = (function () {
       }
 
       // tooltip
-      const viewport = getViewportDimensions(window);
+      const viewport = scrapbook.getViewportDimensions(window);
       const boundingRect = elem.getBoundingClientRect();
       let x = viewport.scrollX + boundingRect.left;
       let y = viewport.scrollY + boundingRect.bottom;

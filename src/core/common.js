@@ -1854,6 +1854,35 @@ scrapbook.parseMaffRdfDocument = function (doc) {
   return fn(doc);
 };
 
+/**
+ * Get dimentions of the viewport (main window)
+ *
+ * @return {{width: integer, height: integer, scrollX: integer, scrollY: integer}}
+ */
+scrapbook.getViewportDimensions = function (win) {
+  const out = {};
+  const doc = win.document;
+
+  if (win.pageXOffset) {
+    out.scrollX = win.pageXOffset;
+    out.scrollY = win.pageYOffset;
+  } else if (doc.documentElement) {
+    out.scrollX = doc.body.scrollLeft + doc.documentElement.scrollLeft;
+    out.scrollY = doc.body.scrollTop + doc.documentElement.scrollTop;
+  } else if (doc.body.scrollLeft >= 0) {
+    out.scrollX = doc.body.scrollLeft;
+    out.scrollY = doc.body.scrollTop;
+  }
+  if (doc.compatMode == "BackCompat") {
+    out.width = doc.body.clientWidth;
+    out.height = doc.body.clientHeight;
+  } else {
+    out.width = doc.documentElement.clientWidth;
+    out.height = doc.documentElement.clientHeight;
+  }
+  return out;
+};
+
 
 /******************************************************************************
  * Network utilities
