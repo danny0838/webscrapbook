@@ -68,6 +68,9 @@
   "EditorButtonDOMEraser": {
     "message": "元素橡皮擦工具 - 开启后点击可擦除目标元素；Ctrl 或中键点击擦移除目标以外的元素。（擦除的内容可还原）"
   },
+  "EditorButtonDOMEraserRemoveEdit": {
+    "message": "移除这个剪贴簿注记"
+  },
   "EditorButtonEraser": {
     "message": "橡皮擦工具 - 点击擦除选取范围的内容；Ctrl 或中键点击移除选取范围的剪贴簿注记。（擦除的内容可还原）"
   },

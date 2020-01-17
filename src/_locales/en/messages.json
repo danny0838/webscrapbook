@@ -68,6 +68,9 @@
   "EditorButtonDOMEraser": {
     "message": "DOM eraser - When activated, click to erase the target element; Ctrl- or middle-click to erase elements except the target. (Erases can be reverted.)"
   },
+  "EditorButtonDOMEraserRemoveEdit": {
+    "message": "Remove this scrapbook edit"
+  },
   "EditorButtonEraser": {
     "message": "Eraser - Click to erase content in the selected area; Ctrl- or middle-click to remove scrapbook edits in the selected area. (Erases can be reverted.)"
   },
