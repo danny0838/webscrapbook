@@ -1126,7 +1126,7 @@ const indexer = {
             this.log(`Use saved favicon for '${scrapbook.crop(favIconUrl, 256)}' for '${id}' at '${path}'.`);
           }
 
-          const url = '../'.repeat(index.split('/').length) + scrapbook.escapeFilename(path);
+          const url = scrapbook.getRelativeUrl(path, this.dataDir + index);
           scrapbookData.meta[id].icon = url;
         } catch (ex) {
           console.error(ex);
