@@ -748,9 +748,6 @@
   "OptionsSaveLabel": {
     "message": "Save"
   },
-  "ScrapBookBookRefresh": {
-    "message": "<Refresh>"
-  },
   "ScrapBookCommandBrowse": {
     "message": "Browse locally"
   },

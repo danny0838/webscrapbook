@@ -748,9 +748,6 @@
   "OptionsSaveLabel": {
     "message": "保存"
   },
-  "ScrapBookBookRefresh": {
-    "message": "<刷新>"
-  },
   "ScrapBookCommandBrowse": {
     "message": "在文件管理员检视"
   },

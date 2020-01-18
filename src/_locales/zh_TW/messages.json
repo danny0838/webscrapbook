@@ -748,9 +748,6 @@
   "OptionsSaveLabel": {
     "message": "儲存"
   },
-  "ScrapBookBookRefresh": {
-    "message": "<重新整理>"
-  },
   "ScrapBookCommandBrowse": {
     "message": "在檔案管理員檢視"
   },
