@@ -2211,9 +2211,15 @@ capturer.saveBlob = async function (params) {
 
   const {timeId, blob, directory, filename, sourceUrl, autoErase, savePrompt} = params;
 
+  // In Chromium >= 78, the file extension downloaded by chrome.downloads.download
+  // is altered to match the content type. Create a new blob with a safe MIME type
+  // to avoid this issue.
+  // https://bugs.chromium.org/p/chromium/issues/detail?id=1021638
+  const fixedBlob = new Blob([blob], {type: "application/octet-stream"});
+
   return await capturer.saveUrl({
     timeId,
-    url: URL.createObjectURL(blob),
+    url: URL.createObjectURL(fixedBlob),
     directory,
     filename,
     sourceUrl,
