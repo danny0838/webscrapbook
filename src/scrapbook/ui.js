@@ -737,15 +737,15 @@ const scrapbookUi = {
 
       switch (selectedItemElems.length) {
         case 0: {
-          menuElem.querySelector('button[value="index"]').hidden = !(!isRecycle);
-          menuElem.querySelector('button[value="search"]').hidden = !(!isRecycle);
-          menuElem.querySelector('button[value="exec_book"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="index"]').hidden = false;
+          menuElem.querySelector('button[value="search"]').hidden = false;
+          menuElem.querySelector('button[value="exec_book"]').hidden = false;
           menuElem.querySelector('button[value="open"]').hidden = true;
           menuElem.querySelector('button[value="opentab"]').hidden = true;
           menuElem.querySelector('button[value="exec"]').hidden = true;
           menuElem.querySelector('button[value="browse"]').hidden = true;
           menuElem.querySelector('button[value="source"]').hidden = true;
-          menuElem.querySelector('button[value="manage"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="manage"]').hidden = false;
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
