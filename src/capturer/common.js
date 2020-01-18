@@ -1984,7 +1984,7 @@ capturer.captureDocument = async function (params) {
           if (iRange === 0) {
             rootNode = cloneNodeMapping(htmlNode, false);
 
-            if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+            if (rootNode.nodeName.toLowerCase() === "html") {
               headNode = doc.querySelector("head");
               headNode = headNode ? cloneNodeMapping(headNode, true) : doc.createElement("head");
               rootNode.appendChild(headNode);
@@ -2092,7 +2092,7 @@ capturer.captureDocument = async function (params) {
       if (!selection) {
         rootNode = cloneNodeMapping(htmlNode, true);
 
-        if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+        if (rootNode.nodeName.toLowerCase() === "html") {
           headNode = rootNode.querySelector("head");
           if (!headNode) {
             headNode = rootNode.insertBefore(doc.createElement("head"), rootNode.firstChild);
@@ -2101,7 +2101,7 @@ capturer.captureDocument = async function (params) {
       }
 
       // add linefeeds to head and body to improve layout
-      if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+      if (rootNode.nodeName.toLowerCase() === "html") {
         const headNodeBefore = headNode.previousSibling;
         if (!headNodeBefore || headNodeBefore.nodeType != 3) {
           rootNode.insertBefore(doc.createTextNode("\n"), headNode);
@@ -2189,13 +2189,15 @@ capturer.captureDocument = async function (params) {
       }
     }
 
-    if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
-      // force UTF-8
+    // force UTF-8
+    if (rootNode.nodeName.toLowerCase() === "html") {
       if (!metaCharsetNode) {
         metaCharsetNode = headNode.insertBefore(doc.createElement("meta"), headNode.firstChild);
         metaCharsetNode.setAttribute("charset", "UTF-8");
       }
+    }
 
+    if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
       // handle tab favicon
       // 1. Use DOM favicon if presented.
       // 2. Use tab favicon (from favicon.ico or browser extension).
