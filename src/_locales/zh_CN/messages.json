@@ -841,9 +841,6 @@
   "ScrapBookCommandMoveUp": {
     "message": "上移"
   },
-  "ScrapBookCommandOpen": {
-    "message": "开启"
-  },
   "ScrapBookCommandOpenTab": {
     "message": "开启在新分页"
   },

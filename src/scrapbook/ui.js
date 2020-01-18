@@ -18,11 +18,11 @@ const scrapbookUi = {
   mode: 'normal',
   commands: {
     async index(selectedItemElems) {
-      await this.openLink(this.book.indexUrl);
+      await this.openLink(this.book.indexUrl, true);
     },
 
     async search(selectedItemElems) {
-      await this.openLink(this.book.treeUrl + 'search.html');
+      await this.openLink(this.book.treeUrl + 'search.html', true);
     },
 
     async exec_book(selectedItemElems) {
@@ -31,31 +31,6 @@ const scrapbookUi = {
         url: target + '?a=exec&f=json',
         method: "GET",
       });
-    },
-
-    async open(selectedItemElems) {
-      const id = selectedItemElems[0].getAttribute('data-id');
-      const item = this.book.meta[id];
-      switch (item.type) {
-        case 'folder':
-        case 'separator': {
-          break;
-        }
-        case 'bookmark': {
-          if (item.source) {
-            await this.openLink(item.source);
-          }
-          break;
-        }
-        case 'file':
-        default: {
-          if (item.index) {
-            const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
-            await this.openLink(target);
-          }
-          break;
-        }
-      }
     },
 
     async opentab(selectedItemElems) {
@@ -127,13 +102,12 @@ const scrapbookUi = {
     },
 
     async source(selectedItemElems) {
-      const inNewTab = selectedItemElems.length > 1;
       for (const elem of selectedItemElems) {
         const id = elem.getAttribute('data-id');
         const item = this.book.meta[id];
         if (item.source) {
           const target = item.source;
-          await this.openLink(target, inNewTab);
+          await this.openLink(target, true);
         }
       }
     },
@@ -398,7 +372,7 @@ const scrapbookUi = {
       });
 
       // open link
-      await this.openLink(target + `?a=${action}`);
+      await this.openLink(target + `?a=${action}`, true);
     },
 
     async upload(selectedItemElems, detail) {
@@ -424,7 +398,7 @@ const scrapbookUi = {
       const id = selectedItemElems[0].getAttribute('data-id');
       const item = this.book.meta[id];
       const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
-      await this.openLink(target + '?a=edit');
+      await this.openLink(target + '?a=edit', true);
     },
 
     async editx(selectedItemElems) {
@@ -433,7 +407,7 @@ const scrapbookUi = {
       const id = selectedItemElems[0].getAttribute('data-id');
       const item = this.book.meta[id];
       const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
-      await this.openLink(target + '?a=editx');
+      await this.openLink(target + '?a=editx', true);
     },
 
     async move_up(selectedItemElems) {
@@ -740,7 +714,6 @@ const scrapbookUi = {
           menuElem.querySelector('button[value="index"]').hidden = false;
           menuElem.querySelector('button[value="search"]').hidden = false;
           menuElem.querySelector('button[value="exec_book"]').hidden = false;
-          menuElem.querySelector('button[value="open"]').hidden = true;
           menuElem.querySelector('button[value="opentab"]').hidden = true;
           menuElem.querySelector('button[value="exec"]').hidden = true;
           menuElem.querySelector('button[value="browse"]').hidden = true;
@@ -772,7 +745,6 @@ const scrapbookUi = {
           menuElem.querySelector('button[value="index"]').hidden = true;
           menuElem.querySelector('button[value="search"]').hidden = true;
           menuElem.querySelector('button[value="exec_book"]').hidden = true;
-          menuElem.querySelector('button[value="open"]').hidden = ['folder', 'separator'].includes(item.type);
           menuElem.querySelector('button[value="opentab"]').hidden = ['folder', 'separator'].includes(item.type);
           menuElem.querySelector('button[value="exec"]').hidden = !(item.type === 'file' && item.index);
           menuElem.querySelector('button[value="browse"]').hidden = !(item.index);
@@ -801,7 +773,6 @@ const scrapbookUi = {
           menuElem.querySelector('button[value="index"]').hidden = true;
           menuElem.querySelector('button[value="search"]').hidden = true;
           menuElem.querySelector('button[value="exec_book"]').hidden = true;
-          menuElem.querySelector('button[value="open"]').hidden = true;
           menuElem.querySelector('button[value="opentab"]').hidden = false;
           menuElem.querySelector('button[value="exec"]').hidden = true;
           menuElem.querySelector('button[value="browse"]').hidden = true;
@@ -996,7 +967,6 @@ const scrapbookUi = {
     const menuElem = document.getElementById('command-popup');
     menuElem.querySelector('button[value="search"]').disabled = !!this.book.config.no_tree;
     menuElem.querySelector('button[value="exec_book"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
-    menuElem.querySelector('button[value="open"]').disabled = !!this.book.config.no_tree;
     menuElem.querySelector('button[value="opentab"]').disabled = !!this.book.config.no_tree;
     menuElem.querySelector('button[value="exec"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
     menuElem.querySelector('button[value="browse"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
