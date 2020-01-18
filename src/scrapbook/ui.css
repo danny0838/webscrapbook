@@ -3,6 +3,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  font-size: 16px;
 }
 
 #wrapper {
@@ -72,7 +73,7 @@ body {
   background: none;
   padding: 1px 3px;
   width: 100%;
-  font-size: 14px;
+  font-size: 0.833em;
   text-align: __MSG_@@bidi_start_edge__;
   white-space: nowrap;
 }
@@ -200,7 +201,7 @@ body {
   flex: 1 1 auto;
   overflow: auto;
   position: relative;
-  font-size: 16px;
+  font-size: 0.875em;
   line-height: 1;
 }
 
