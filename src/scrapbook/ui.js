@@ -803,7 +803,7 @@ const scrapbookUi = {
           menuElem.querySelector('button[value="exec_book"]').hidden = true;
           menuElem.querySelector('button[value="open"]').hidden = true;
           menuElem.querySelector('button[value="opentab"]').hidden = false;
-          menuElem.querySelector('button[value="exec"]').hidden = false;
+          menuElem.querySelector('button[value="exec"]').hidden = true;
           menuElem.querySelector('button[value="browse"]').hidden = true;
           menuElem.querySelector('button[value="source"]').hidden = false;
           menuElem.querySelector('button[value="manage"]').hidden = true;
@@ -998,7 +998,7 @@ const scrapbookUi = {
     menuElem.querySelector('button[value="exec_book"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
     menuElem.querySelector('button[value="open"]').disabled = !!this.book.config.no_tree;
     menuElem.querySelector('button[value="opentab"]').disabled = !!this.book.config.no_tree;
-    menuElem.querySelector('button[value="exec"]').disabled = !!this.book.config.no_tree;
+    menuElem.querySelector('button[value="exec"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
     menuElem.querySelector('button[value="browse"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
     menuElem.querySelector('button[value="source"]').disabled = !!this.book.config.no_tree;
     menuElem.querySelector('button[value="manage"]').disabled = !!this.book.config.no_tree;
