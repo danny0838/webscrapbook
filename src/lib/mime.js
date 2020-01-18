@@ -140,7 +140,8 @@ Mime.db = {
   },
   "application/atomdeleted+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["atomdeleted"]
   },
   "application/atomicmail": {
     "source": "iana"
@@ -152,15 +153,22 @@ Mime.db = {
   },
   "application/atsc-dwd+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["dwd"]
   },
   "application/atsc-held+xml": {
+    "source": "iana",
+    "compressible": true,
+    "extensions": ["held"]
+  },
+  "application/atsc-rdt+json": {
     "source": "iana",
     "compressible": true
   },
   "application/atsc-rsat+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["rsat"]
   },
   "application/atxml": {
     "source": "iana"
@@ -190,7 +198,8 @@ Mime.db = {
   },
   "application/calendar+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["xcs"]
   },
   "application/call-completion": {
     "source": "iana"
@@ -199,6 +208,9 @@ Mime.db = {
     "source": "iana"
   },
   "application/cbor": {
+    "source": "iana"
+  },
+  "application/cbor-seq": {
     "source": "iana"
   },
   "application/cccex": {
@@ -215,7 +227,8 @@ Mime.db = {
   },
   "application/cdfx+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["cdfx"]
   },
   "application/cdmi-capability": {
     "source": "iana",
@@ -253,6 +266,10 @@ Mime.db = {
   },
   "application/cfw": {
     "source": "iana"
+  },
+  "application/clue+xml": {
+    "source": "iana",
+    "compressible": true
   },
   "application/clue_info+xml": {
     "source": "iana",
@@ -451,7 +468,8 @@ Mime.db = {
   },
   "application/emotionml+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["emotionml"]
   },
   "application/encaprtp": {
     "source": "iana"
@@ -484,7 +502,8 @@ Mime.db = {
   },
   "application/fdt+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["fdt"]
   },
   "application/fhir+json": {
     "source": "iana",
@@ -625,7 +644,8 @@ Mime.db = {
   },
   "application/its+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["its"]
   },
   "application/java-archive": {
     "source": "apache",
@@ -710,7 +730,8 @@ Mime.db = {
   },
   "application/lgr+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["lgr"]
   },
   "application/link-format": {
     "source": "iana"
@@ -869,11 +890,13 @@ Mime.db = {
   },
   "application/mmt-aei+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["maei"]
   },
   "application/mmt-usd+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["musd"]
   },
   "application/mods+xml": {
     "source": "iana",
@@ -911,11 +934,13 @@ Mime.db = {
   },
   "application/mrb-consumer+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["xdf"]
   },
   "application/mrb-publish+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["xdf"]
   },
   "application/msc-ivr+xml": {
     "source": "iana",
@@ -933,6 +958,9 @@ Mime.db = {
   "application/mud+json": {
     "source": "iana",
     "compressible": true
+  },
+  "application/multipart-core": {
+    "source": "iana"
   },
   "application/mxf": {
     "source": "iana",
@@ -1018,7 +1046,8 @@ Mime.db = {
   },
   "application/p2p-overlay+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["relo"]
   },
   "application/parityfec": {
     "source": "iana"
@@ -1136,7 +1165,8 @@ Mime.db = {
   },
   "application/provenance+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["provx"]
   },
   "application/prs.alvestrand.titrax-sheet": {
     "source": "iana"
@@ -1230,15 +1260,18 @@ Mime.db = {
   },
   "application/route-apd+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["rapd"]
   },
   "application/route-s-tsid+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["sls"]
   },
   "application/route-usd+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["rusd"]
   },
   "application/rpki-ghostbusters": {
     "source": "iana",
@@ -1332,7 +1365,8 @@ Mime.db = {
   },
   "application/senml+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["senmlx"]
   },
   "application/senml-exi": {
     "source": "iana"
@@ -1346,7 +1380,8 @@ Mime.db = {
   },
   "application/sensml+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["sensmlx"]
   },
   "application/sensml-exi": {
     "source": "iana"
@@ -1470,7 +1505,8 @@ Mime.db = {
   },
   "application/swid+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["swidtag"]
   },
   "application/tamp-apex-update": {
     "source": "iana"
@@ -1557,7 +1593,8 @@ Mime.db = {
   },
   "application/ttml+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["ttml"]
   },
   "application/tve-trigger": {
     "source": "iana"
@@ -1577,7 +1614,8 @@ Mime.db = {
   },
   "application/urc-ressheet+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["rsheet"]
   },
   "application/urc-targetdesc+xml": {
     "source": "iana",
@@ -1603,7 +1641,8 @@ Mime.db = {
   },
   "application/vnd.1000minds.decision-model+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["1km"]
   },
   "application/vnd.3gpp-prose+xml": {
     "source": "iana",
@@ -1840,7 +1879,34 @@ Mime.db = {
   "application/vnd.afpc.afplinedata": {
     "source": "iana"
   },
+  "application/vnd.afpc.afplinedata-pagedef": {
+    "source": "iana"
+  },
+  "application/vnd.afpc.foca-charset": {
+    "source": "iana"
+  },
+  "application/vnd.afpc.foca-codedfont": {
+    "source": "iana"
+  },
+  "application/vnd.afpc.foca-codepage": {
+    "source": "iana"
+  },
   "application/vnd.afpc.modca": {
+    "source": "iana"
+  },
+  "application/vnd.afpc.modca-formdef": {
+    "source": "iana"
+  },
+  "application/vnd.afpc.modca-mediummap": {
+    "source": "iana"
+  },
+  "application/vnd.afpc.modca-objectcontainer": {
+    "source": "iana"
+  },
+  "application/vnd.afpc.modca-overlay": {
+    "source": "iana"
+  },
+  "application/vnd.afpc.modca-pagesegment": {
     "source": "iana"
   },
   "application/vnd.ah-barcode": {
@@ -1917,6 +1983,10 @@ Mime.db = {
     "source": "iana",
     "compressible": true
   },
+  "application/vnd.aplextor.warrp+json": {
+    "source": "iana",
+    "compressible": true
+  },
   "application/vnd.apothekende.reservation+json": {
     "source": "iana",
     "compressible": true
@@ -1981,7 +2051,8 @@ Mime.db = {
   },
   "application/vnd.balsamiq.bmml+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["bmml"]
   },
   "application/vnd.balsamiq.bmpr": {
     "source": "iana"
@@ -2732,6 +2803,10 @@ Mime.db = {
   "application/vnd.genomatix.tuxedo": {
     "source": "iana",
     "extensions": ["txd"]
+  },
+  "application/vnd.gentics.grd+json": {
+    "source": "iana",
+    "compressible": true
   },
   "application/vnd.geo+json": {
     "source": "iana",
@@ -3699,7 +3774,8 @@ Mime.db = {
   },
   "application/vnd.nokia.n-gage.ac+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["ac"]
   },
   "application/vnd.nokia.n-gage.data": {
     "source": "iana",
@@ -4053,7 +4129,8 @@ Mime.db = {
   },
   "application/vnd.openblox.game+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["obgx"]
   },
   "application/vnd.openblox.game-binary": {
     "source": "iana"
@@ -4067,7 +4144,8 @@ Mime.db = {
   },
   "application/vnd.openstreetmap.data+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["osm"]
   },
   "application/vnd.openxmlformats-officedocument.custom-properties+xml": {
     "source": "iana",
@@ -4746,7 +4824,8 @@ Mime.db = {
   },
   "application/vnd.software602.filler.form+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["fo"]
   },
   "application/vnd.software602.filler.form-xml-zip": {
     "source": "iana"
@@ -4893,7 +4972,8 @@ Mime.db = {
   },
   "application/vnd.syncml.dmddf+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["ddf"]
   },
   "application/vnd.syncml.dmtnds+wbxml": {
     "source": "iana"
@@ -5530,6 +5610,9 @@ Mime.db = {
   "application/x-javascript": {
     "compressible": true
   },
+  "application/x-keepass2": {
+    "extensions": ["kdbx"]
+  },
   "application/x-latex": {
     "source": "apache",
     "compressible": false,
@@ -5842,11 +5925,13 @@ Mime.db = {
   },
   "application/xcap-att+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["xav"]
   },
   "application/xcap-caps+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["xca"]
   },
   "application/xcap-diff+xml": {
     "source": "iana",
@@ -5855,15 +5940,18 @@ Mime.db = {
   },
   "application/xcap-el+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["xel"]
   },
   "application/xcap-error+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["xer"]
   },
   "application/xcap-ns+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["xns"]
   },
   "application/xcon-conference-info+xml": {
     "source": "iana",
@@ -5889,7 +5977,8 @@ Mime.db = {
   },
   "application/xliff+xml": {
     "source": "iana",
-    "compressible": true
+    "compressible": true,
+    "extensions": ["xlf"]
   },
   "application/xml": {
     "source": "iana",
@@ -6209,7 +6298,8 @@ Mime.db = {
     "extensions": ["mid","midi","kar","rmi"]
   },
   "audio/mobile-xmf": {
-    "source": "iana"
+    "source": "iana",
+    "extensions": ["mxmf"]
   },
   "audio/mp3": {
     "compressible": false,
@@ -7558,6 +7648,7 @@ Mime.db = {
     "extensions": ["wmls"]
   },
   "text/vtt": {
+    "source": "iana",
     "charset": "UTF-8",
     "compressible": true,
     "extensions": ["vtt"]
