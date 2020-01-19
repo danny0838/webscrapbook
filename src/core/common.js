@@ -22,6 +22,8 @@
   );
 }(this, function (isDebug, browser, JSZip, jsSHA, Mime, window, console, crypto) {
 
+  'use strict';
+
   const scrapbook = {
     backendMinVersion: '0.8.*',
 
@@ -670,13 +672,13 @@
       const channel = new MessageChannel();
       const timeout = setTimeout(() => {
         resolve(undefined);
-        delete channel;
+        channel.port1.close();
       }, 1000);
       channel.port1.onmessage = (event) => {
         const {frameId} = event.data;
         resolve(frameId);
+        channel.port1.close();
         clearTimeout(timeout);
-        delete channel;
       };
       frameWindow.postMessage(extension, "*", [channel.port2]);
     });

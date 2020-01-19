@@ -17,6 +17,8 @@
   );
 }(this, function (isDebug, browser, scrapbook, window, document, console) {
 
+  'use strict';
+
   const urlObj = new URL(document.URL);
 
   const viewerData = {

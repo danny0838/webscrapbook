@@ -19,6 +19,8 @@
   );
 }(this, function (isDebug, browser, scrapbook, scrapbookUi, window, console) {
 
+  'use strict';
+
   scrapbookUi.mode = "manage";
 
 }));

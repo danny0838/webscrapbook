@@ -17,6 +17,9 @@
     root.Mime = factory();
   }
 }(this, function () {
+
+  'use strict';
+
   /**
    * Map from mimetype to extension
    *

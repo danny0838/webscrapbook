@@ -19,6 +19,8 @@
   );
 }(this, function (isDebug, browser, scrapbook, window, document, console) {
 
+  'use strict';
+
   const capturer = {
     isContentScript: true,
     get isNoscriptEscaped() {

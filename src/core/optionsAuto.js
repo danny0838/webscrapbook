@@ -17,6 +17,8 @@
   );
 }(this, function (isDebug, browser, scrapbook, window, console) {
 
+  'use strict';
+
   scrapbook.loadOptionsAuto = scrapbook.loadOptions();
 
   browser.storage.onChanged.addListener((changes, areaName) => {

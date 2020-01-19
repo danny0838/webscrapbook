@@ -24,6 +24,8 @@
   );
 }(this, function (isDebug, browser, scrapbook, server, capturer, JSZip, window, document, console) {
 
+  'use strict';
+
   // overwrite the value of common.js to define this is not a content script
   capturer.isContentScript = false;
 

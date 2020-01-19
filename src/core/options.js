@@ -16,6 +16,8 @@
   );
 }(this, function (isDebug, browser, scrapbook, window, console) {
 
+  'use strict';
+
   const OPTION_PREFIX = "opt_";
 
   const defaultOptions = JSON.parse(JSON.stringify(scrapbook.options));

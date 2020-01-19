@@ -15,6 +15,8 @@
   );
 }(this, async function (isDebug, browser, scrapbook, console) {
 
+  'use strict';
+
   const urlMatch = await scrapbook.getContentPagePattern();
 
   browser.webNavigation.onCompleted.addListener((details) => {

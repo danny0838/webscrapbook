@@ -1,3 +1,5 @@
+'use strict';
+
 var config;
 var localhost;
 var localhost2;

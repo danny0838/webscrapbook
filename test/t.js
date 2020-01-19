@@ -1,3 +1,5 @@
+'use strict';
+
 var messagePort;
 
 chrome.runtime.onConnect.addListener((port) => {

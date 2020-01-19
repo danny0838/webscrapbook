@@ -16,6 +16,8 @@
   );
 }(this, function (isDebug, browser, scrapbook, window, console) {
 
+  'use strict';
+
   document.addEventListener('DOMContentLoaded', async () => {
     // load languages
     scrapbook.loadLanguages(document);

@@ -18,6 +18,8 @@
   ));
 }(this, function (isDebug, browser, scrapbook, window, console) {
 
+  'use strict';
+
   class Server {
     constructor () {
       this._config = null;

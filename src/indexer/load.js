@@ -18,6 +18,8 @@
   );
 }(this, function (isDebug, browser, scrapbook, JSZip, window, document, console) {
 
+  'use strict';
+
   /**
    * We usually get:
    *
@@ -1320,25 +1322,31 @@
 
       /* tree/index.html */
       if (this.options["indexer.createStaticIndex"]) {
-        content = this.generateMapFile(scrapbookData, "index", metaFiles, tocFiles);
-        file = new Blob([content], {type: "text/html"});
+        const content = this.generateMapFile(scrapbookData, "index", metaFiles, tocFiles);
+        const file = new Blob([content], {type: "text/html"});
         scrapbook.zipAddFile(zip, `${this.treeDir}index.html`, file, true);
       }
 
       /* tree/map.html */
-      content = this.generateMapFile(scrapbookData, "map", metaFiles, tocFiles);
-      file = new Blob([content], {type: "text/html"});
-      scrapbook.zipAddFile(zip, `${this.treeDir}map.html`, file, true);
+      {
+        const content = this.generateMapFile(scrapbookData, "map", metaFiles, tocFiles);
+        const file = new Blob([content], {type: "text/html"});
+        scrapbook.zipAddFile(zip, `${this.treeDir}map.html`, file, true);
+      }
 
       /* tree/frame.html */
-      content = this.generateFrameFile(scrapbookData);
-      file = new Blob([content], {type: "text/html"});
-      scrapbook.zipAddFile(zip, `${this.treeDir}frame.html`, file, true);
+      {
+        const content = this.generateFrameFile(scrapbookData);
+        const file = new Blob([content], {type: "text/html"});
+        scrapbook.zipAddFile(zip, `${this.treeDir}frame.html`, file, true);
+      }
 
       /* tree/search.html */
-      content = this.generateSearchFile(scrapbookData);
-      file = new Blob([content], {type: "text/html"});
-      scrapbook.zipAddFile(zip, `${this.treeDir}search.html`, file, true);
+      {
+        const content = this.generateSearchFile(scrapbookData);
+        const file = new Blob([content], {type: "text/html"});
+        scrapbook.zipAddFile(zip, `${this.treeDir}search.html`, file, true);
+      }
 
       /* resource files */
       const resToInclude = {

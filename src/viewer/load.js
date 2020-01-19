@@ -18,6 +18,8 @@
   );
 }(this, function (isDebug, browser, scrapbook, JSZip, window, document, console) {
 
+  'use strict';
+
   /**
    * We usually get:
    *

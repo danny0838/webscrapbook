@@ -15,6 +15,8 @@
   );
 }(this, async function (isDebug, browser, scrapbook, console) {
 
+  'use strict';
+
   if (browser.contextMenus) {
     const urlMatch = await scrapbook.getContentPagePattern();
 

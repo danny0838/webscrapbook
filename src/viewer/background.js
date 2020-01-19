@@ -15,6 +15,8 @@
   );
 }(this, async function (isDebug, browser, scrapbook, console) {
 
+  'use strict';
+
   function redirectUrl(tabId, type, url, filename, mime) {
     if (mime === "application/html+zip" && scrapbook.getOption("viewer.viewHtz")) {
       // redirect
