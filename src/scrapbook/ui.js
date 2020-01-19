@@ -2115,7 +2115,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
   },
 
   async onCommandClick(event) {
-    if (!event.target.localName === 'button') { return; }
+    if (event.target.localName !== 'button') { return; }
 
     this.showCommands(false);
 
