@@ -2,7 +2,18 @@
  * Loader script for view.html
  *****************************************************************************/
 
-(async function (window, undefined) {
+(function (root, factory) {
+  // Browser globals
+  factory(
+    root.isDebug,
+    root.browser,
+    root.scrapbook,
+    window,
+    document,
+    console,
+  );
+}(this, async function (isDebug, browser, scrapbook, window, document, console) {
+
   let scripts = [
     browser.runtime.getURL('core/common.js'),
     browser.runtime.getURL('viewer/view.js'),
@@ -116,4 +127,5 @@ viewer.deApiScript = function () {
 
     await loadScripts(scripts);
   }
-})(window, undefined);
+
+}));

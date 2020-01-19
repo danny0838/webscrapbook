@@ -6,23 +6,32 @@
  * @public {Function} scrapbook.loadOptionsAuto
  *****************************************************************************/
 
-((window, document, browser) => {
+(function (root, factory) {
+  // Browser globals
+  factory(
+    root.isDebug,
+    root.browser,
+    root.scrapbook,
+    window,
+    console,
+  );
+}(this, function (isDebug, browser, scrapbook, window, console) {
 
-scrapbook.loadOptionsAuto = scrapbook.loadOptions();
+  scrapbook.loadOptionsAuto = scrapbook.loadOptions();
 
-browser.storage.onChanged.addListener((changes, areaName) => {
-  // Config keys are stored in storage.sync and fallbacks to storage.local;
-  // cache keys are stored in storage.local and are valid JSON format.
-  // We only update when a config key is changed.
-  if (areaName !== "sync") {
-    try {
-      for (let key in changes) { JSON.parse(key); }
-      return;
-    } catch(ex) {}
-  }
-  for (let key in changes) {
-    scrapbook.options[key] = changes[key].newValue;
-  }
-});
+  browser.storage.onChanged.addListener((changes, areaName) => {
+    // Config keys are stored in storage.sync and fallbacks to storage.local;
+    // cache keys are stored in storage.local and are valid JSON format.
+    // We only update when a config key is changed.
+    if (areaName !== "sync") {
+      try {
+        for (let key in changes) { JSON.parse(key); }
+        return;
+      } catch(ex) {}
+    }
+    for (let key in changes) {
+      scrapbook.options[key] = changes[key].newValue;
+    }
+  });
 
-})(this, this.document, this.browser);
+}));

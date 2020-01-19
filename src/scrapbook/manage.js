@@ -7,8 +7,18 @@
  * @require {Object} server
  *****************************************************************************/
 
-((window, document, browser) => {
+(function (root, factory) {
+  // Browser globals
+  factory(
+    root.isDebug,
+    root.browser,
+    root.scrapbook,
+    root.scrapbookUi,
+    window,
+    console,
+  );
+}(this, function (isDebug, browser, scrapbook, scrapbookUi, window, console) {
 
-scrapbookUi.mode = "manage";
+  scrapbookUi.mode = "manage";
 
-})(this, this.document, this.browser);
+}));
