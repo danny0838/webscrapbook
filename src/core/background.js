@@ -104,7 +104,7 @@
    *     - false: no sidebar opened
    */
   background.locateCurrentTab = async function (params, sender) {
-    const cmd = 'scrapbookUi.locate';
+    const cmd = 'tree.locate';
     const args = {
       url: sender.url,
     };

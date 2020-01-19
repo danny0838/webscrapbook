@@ -1,15 +1,15 @@
 /******************************************************************************
  *
- * UI controller for scrapbooks, such as sidebar.html and manage.html.
+ * Scrapbook tree UI controller, for pages like sidebar.html and manage.html.
  *
  * @require {Object} scrapbook
  * @require {Object} server
- * @public {Object} scrapbookUi
+ * @public {Object} tree
  *****************************************************************************/
 
 (function (root, factory) {
   // Browser globals
-  root.scrapbookUi = factory(
+  root.tree = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,
@@ -21,7 +21,7 @@
 
   'use strict';
 
-  const scrapbookUi = {
+  const tree = {
     lastDraggedElem: null,
     lastHighlightElem: null,
     bookId: null,
@@ -2053,7 +2053,7 @@
           if (browser.windows) {
             // for desktop browsers, open link in the same tab of the main window
             event.preventDefault();
-            await scrapbookUi.openLink(elem.href);
+            await tree.openLink(elem.href);
           } else {
             // for Firefox Android (browser.windows not supported)
             // use default action to open in the "webscrapbook" tab
@@ -2198,41 +2198,41 @@
   };
 
   scrapbook.addMessageListener((message, sender) => {
-    if (!message.cmd.startsWith("scrapbookUi.")) { return false; }
+    if (!message.cmd.startsWith("tree.")) { return false; }
     return true;
   });
 
   document.addEventListener('DOMContentLoaded', async () => {
     scrapbook.loadLanguages(document);
 
-    window.addEventListener('keydown', scrapbookUi.onKeyDown.bind(scrapbookUi));
-    window.addEventListener('contextmenu', scrapbookUi.onContextMenu.bind(scrapbookUi));
+    window.addEventListener('keydown', tree.onKeyDown.bind(tree));
+    window.addEventListener('contextmenu', tree.onContextMenu.bind(tree));
 
-    window.addEventListener('dragenter', scrapbookUi.onWindowItemDragEnter.bind(scrapbookUi));
-    window.addEventListener('dragover', scrapbookUi.onWindowItemDragOver.bind(scrapbookUi));
-    window.addEventListener('drop', scrapbookUi.onWindowItemDrop.bind(scrapbookUi));
+    window.addEventListener('dragenter', tree.onWindowItemDragEnter.bind(tree));
+    window.addEventListener('dragover', tree.onWindowItemDragOver.bind(tree));
+    window.addEventListener('drop', tree.onWindowItemDrop.bind(tree));
 
-    document.getElementById("book").addEventListener('change', scrapbookUi.onBookChange.bind(scrapbookUi));
+    document.getElementById("book").addEventListener('change', tree.onBookChange.bind(tree));
 
-    document.getElementById("refresh").addEventListener('click', scrapbookUi.onRefreshButtonClick.bind(scrapbookUi));
-    document.getElementById("command").addEventListener('click', scrapbookUi.onCommandButtonClick.bind(scrapbookUi));
+    document.getElementById("refresh").addEventListener('click', tree.onRefreshButtonClick.bind(tree));
+    document.getElementById("command").addEventListener('click', tree.onCommandButtonClick.bind(tree));
 
-    document.getElementById("command-popup").addEventListener('click', scrapbookUi.onCommandClick.bind(scrapbookUi));
+    document.getElementById("command-popup").addEventListener('click', tree.onCommandClick.bind(tree));
 
-    document.getElementById("command-popup").addEventListener('focusout', scrapbookUi.onCommandFocusOut.bind(scrapbookUi));
+    document.getElementById("command-popup").addEventListener('focusout', tree.onCommandFocusOut.bind(tree));
 
     // file selector
-    document.getElementById('upload-file-selector').addEventListener('change', scrapbookUi.onClickFileSelector.bind(scrapbookUi));
+    document.getElementById('upload-file-selector').addEventListener('change', tree.onClickFileSelector.bind(tree));
 
     // command handler
-    window.addEventListener('command', scrapbookUi.onCommandRun.bind(scrapbookUi));
+    window.addEventListener('command', tree.onCommandRun.bind(tree));
 
-    document.getElementById('item-root').addEventListener('click', scrapbookUi.onClickAnchor.bind(scrapbookUi));
+    document.getElementById('item-root').addEventListener('click', tree.onClickAnchor.bind(tree));
 
-    await scrapbookUi.init();
+    await tree.init();
   });
 
 
-  return scrapbookUi;
+  return tree;
 
 }));

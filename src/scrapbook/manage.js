@@ -3,7 +3,7 @@
  * Script for manage.html.
  *
  * @require {Object} scrapbook
- * @require {Object} scrapbookUi
+ * @require {Object} tree
  * @require {Object} server
  *****************************************************************************/
 
@@ -13,14 +13,14 @@
     root.isDebug,
     root.browser,
     root.scrapbook,
-    root.scrapbookUi,
+    root.tree,
     window,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, scrapbookUi, window, console) {
+}(this, function (isDebug, browser, scrapbook, tree, window, console) {
 
   'use strict';
 
-  scrapbookUi.mode = "manage";
+  tree.mode = "manage";
 
 }));
