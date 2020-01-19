@@ -29,34 +29,6 @@
   const viewer = {
     metaRefreshIdentifier: "data-scrapbook-meta-refresh-" + scrapbook.dateToId(),
 
-    // It'd be better if the archive page content be served in a sandboxed iframe
-    // without "allow-same-origin", which is not viable since such iframe cannot
-    // access its frames under blob: or data: scheme.
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=1091887
-    //
-    // Serving an archive page in an iframe of an extension page is necessary at
-    // present. Scripts in the archive page thus gain extension privilege, which
-    // could introduce a security risk.
-    //
-    // We minimize the risk by removing privileged APIs from this page and all
-    // frames serving the web page content.
-    insertDeApiScript: function (doc) {
-      let deApiScriptUrl;
-      {
-        const text = "(" + viewer.deApiScript.toString().replace(/(?!\w\s+\w)(.)\s+/g, "$1") + ")()";
-        const url = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
-        deApiScriptUrl = url;
-      }
-      const insertDeApiScript = function (doc) {
-        if (!viewer.deApiScript) { return; }
-        const elem = doc.createElement("script");
-        elem.src = deApiScriptUrl;
-        const head = doc.querySelector("head");
-        head.insertBefore(elem, head.firstChild);
-      };
-      viewer.insertDeApiScript = insertDeApiScript;
-      return insertDeApiScript(doc);
-    },
     inZipFiles: new Map(),
     blobUrlToInZipPath: new Map(),
     rewrittenBlobUrl: new Set(),
@@ -678,9 +650,6 @@
       rewriteRecursively(root, root.nodeName.toLowerCase(), rewriteNode);
 
       if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
-        // Remove privileged APIs to avoid a potential security risk.
-        if (viewer.hasCsp) { viewer.insertDeApiScript(doc); }
-
         // Reset CSS for Chromium
         const elem = doc.createElement("link");
         elem.rel = "stylesheet";
@@ -933,12 +902,6 @@
         viewer.inZipFiles.set(path, {file, url});
         viewer.blobUrlToInZipPath.set(url, path);
       }
-
-      // remove privileged APIs in this page
-      // An error happens if browser.* is called when window.chrome
-      // is removed in Chromium, so defer the removal until extension
-      // APIs are no more needed.
-      if (viewer.hasCsp) { viewer.deApiScript(); }
 
       /* show the page */
       const fetchedUrl = await viewer.fetchPage({
