@@ -108,6 +108,7 @@ body {
   overflow: auto;
   white-space: pre-wrap;
   padding: 3px;
+  font-size: 0.75em;
 }
 
 #logger .warn {
