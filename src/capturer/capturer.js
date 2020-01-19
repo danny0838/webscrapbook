@@ -2406,25 +2406,37 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         if (port.name !== capturer.missionId) {
           return;
         }
-        const onMessage = async (message) => {
+        const onMessage = (message) => {
           const {cmd, args} = message;
-          const [mainCmd, subCmd] = cmd.split(".");
-          if (mainCmd !== "capturer") { return; }
           isDebug && console.debug(cmd, "receive", port.sender, args);
 
-          if (!capturer[subCmd]) { return; }
+          if (!cmd.startsWith("capturer.")) { return; }
 
-          try {
-            const response = await capturer[subCmd](args);
-            port.postMessage({
-              cmd: 'capturerResponse',
-              args: response,
-            });
-          } catch (ex) {
-            console.error(ex);
-            const err = `Unexpected error: ${ex.message}`;
-            capturer.error(err);
+          const parts = cmd.split(".");
+          let subCmd = parts.pop();
+          let object = window;
+          while (parts.length) {
+            object = object[parts.shift()];
           }
+
+          // thrown Error don't show here but cause the sender to receive an error
+          if (!object || !subCmd || typeof object[subCmd] !== 'function') {
+            throw new Error(`Unable to invoke unknown command '${cmd}'.`);
+          }
+
+          return (async () => {
+            try {
+              const response = await object[subCmd](args, port.sender);
+              port.postMessage({
+                cmd: 'capturerResponse',
+                args: response,
+              });
+            } catch (ex) {
+              console.error(ex);
+              const err = `Unexpected error: ${ex.message}`;
+              capturer.error(err);
+            }
+          })();
         };
         port.onMessage.addListener(onMessage);
         port.postMessage({cmd: 'capturerReady', args: {}});

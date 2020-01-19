@@ -43,15 +43,26 @@
     const {cmd, args} = message;
     isDebug && console.debug(cmd, "receive", args);
 
-    const [mainCmd, subCmd] = cmd.split(".");
+    const parts = cmd.split(".");
+    let subCmd = parts.pop();
+    let object = window;
+    while (parts.length) {
+      object = object[parts.shift()];
+    }
 
-    const object = window[mainCmd];
-    if (!object) { return; }
+    // thrown Error don't show here but cause the sender to receive an error
+    if (!object || !subCmd || typeof object[subCmd] !== 'function') {
+      throw new Error(`Unable to invoke unknown command '${cmd}'.`);
+    }
 
-    const fn = object[subCmd];
-    if (!fn) { return; }
-
-    return fn(args);
+    return Promise.resolve()
+      .then(() => {
+        return object[subCmd](args, sender);
+      })
+      .catch((ex) => {
+        console.error(ex);
+        return {error: {message: ex.message}};
+      });
   });
 
   return core;

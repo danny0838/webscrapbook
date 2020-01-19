@@ -269,24 +269,28 @@
 
   if (browser.runtime.onMessageExternal) {
     // Available in Firefox >= 54.
-    browser.runtime.onMessageExternal.addListener(async (message, sender, sendResponse) => {
-      try {
-        const {cmd, args} = message;
-        let result;
-        switch (cmd) {
-          case "getBaseUrl": {
-            result = {
-              url: browser.runtime.getURL(""),
-            };
-            break;
-          }
-        }
+    browser.runtime.onMessageExternal.addListener((message, sender) => {
+      const {cmd, args} = message;
 
-        if (result.error) { throw result.error; }
-        return result;
-      } catch (ex) {
-        return {error: {message: ex.message}};
+      let result;
+      switch (cmd) {
+        case "getBaseUrl": {
+          result = {
+            url: browser.runtime.getURL(""),
+          };
+          break;
+        }
+        default: {
+          // thrown Error don't show here but cause the sender to receive an error
+          throw new Error(`Unable to invoke unknown command '${cmd}'.`);
+        }
       }
+
+      return Promise.resolve(result)
+        .catch((ex) => {
+          console.error(ex);
+          return {error: {message: ex.message}};
+        });
     });
   }
 

@@ -39,21 +39,23 @@
       const {cmd, args} = message;
       isDebug && console.debug(cmd, "receive", `[${sender.tab ? sender.tab.id : -1}]`, args);
 
-      const [mainCmd, subCmd] = cmd.split(".");
-
-      const object = window[mainCmd];
-      if (!object || !object[subCmd]) { return; }
-
-      let response;
-      try {
-        response = object[subCmd](args, sender);
-        if (scrapbook.isPromise(response)) {
-          if (errorHandler) { response = response.catch(errorHandler); }
-        }
-      } catch (ex) {
-        if (errorHandler) { return errorHandler(ex); }
+      const parts = cmd.split(".");
+      let subCmd = parts.pop();
+      let object = window;
+      while (parts.length) {
+        object = object[parts.shift()];
       }
-      return response;
+
+      // thrown Error don't show here but cause the sender to receive an error
+      if (!object || !subCmd || typeof object[subCmd] !== 'function') {
+        throw new Error(`Unable to invoke unknown command '${cmd}'.`);
+      }
+
+      return Promise.resolve()
+        .then(() => {
+          return object[subCmd](args, sender);
+        })
+        .catch(errorHandler);
     };
     browser.runtime.onMessage.addListener(listener);
     return listener;
