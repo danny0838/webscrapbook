@@ -20,78 +20,28 @@
 
   'use strict';
 
-  /**
-   * We usually get:
-   *
-   * onDragEnter html
-   * onDragEnter .dropmask
-   * onDragLeave html
-   * onDragOver .dropmask
-   * onDragOver .dropmask
-   * ...
-   * onDragLeave .dropmask[1]
-   *  or
-   * onDrop   .dropmask (in this case onDragLeave doesn't fire)
-   *
-   * [1]: In Firefox, we get document (e10s) or XULDocument (non-e10s).
-   *      https://bugzilla.mozilla.org/show_bug.cgi?id=1420590
-   */
-  function onDragEnter(e) {
-    indexer.dropmask.hidden = false;
-    indexer.lastDropTarget = e.target;
-  };
+  const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);
 
-  function onDragOver(e) {
-    e.preventDefault(); // required to allow drop
-  };
+  const FULLTEXT_NO_INDEX_SELECTOR = `
+head,
+style, script,
+frame, iframe,
+embed, object, applet,
+audio, video,
+canvas,
+noframes, noscript, noembed,
+parsererror,
+svg, math`;
 
-  function onDragLeave(e) {
-    let shouldUnMask = false;
-    try {
-      if (e.target === indexer.lastDropTarget || 
-          e.target === document || 
-          e.target.nodeName === "#document"/* XULDocument */) {
-        shouldUnMask = true;
-      }
-    } catch (ex) {
-      // access to XULDocument may throw
-      shouldUnMask = true;
-    }
-    if (shouldUnMask) {
-      indexer.dropmask.hidden = true;
-    }
-  };
-
-  function onDrop(e) {
-    e.preventDefault();
-    indexer.dropmask.hidden = true;
-    const entries = Array.prototype.map.call(
-      e.dataTransfer.items,
-      x => x.webkitGetAsEntry && x.webkitGetAsEntry()
-    );
-    indexer.loadDrop(entries);
-  };
-
-  function onChangeDir(e) {
-    e.preventDefault();
-    const files = e.target.files;
-    if (!(files && files.length)) { return; }
-
-    indexer.loadInputDir(files);
-  };
-
-  function onChangeFiles(e) {
-    e.preventDefault();
-    const files = e.target.files;
-    if (!(files && files.length)) { return; }
-
-    indexer.loadInputFiles(files);
-  };
-
-  function onChangeLoadServer(e) {
-    e.preventDefault();
-    indexer.loadServerFiles();
-  }
+  const FULLTEXT_NO_META_REFRESH_SELECTOR = `
+style, script,
+frame, iframe,
+embed, object, applet,
+audio, video,
+canvas,
+noframes, noscript, noembed,
+parsererror,
+svg, math`;
 
   class RemoteFile {
     constructor(url, name, options = {}) {
@@ -128,6 +78,79 @@
     }
   }
 
+  /**
+   * We usually get:
+   *
+   * onDragEnter html
+   * onDragEnter .dropmask
+   * onDragLeave html
+   * onDragOver .dropmask
+   * onDragOver .dropmask
+   * ...
+   * onDragLeave .dropmask[1]
+   *  or
+   * onDrop   .dropmask (in this case onDragLeave doesn't fire)
+   *
+   * [1]: In Firefox, we get document (e10s) or XULDocument (non-e10s).
+   *      https://bugzilla.mozilla.org/show_bug.cgi?id=1420590
+   */
+  function onDragEnter(e) {
+    indexer.dropmask.hidden = false;
+    indexer.lastDropTarget = e.target;
+  }
+
+  function onDragOver(e) {
+    e.preventDefault(); // required to allow drop
+  }
+
+  function onDragLeave(e) {
+    let shouldUnMask = false;
+    try {
+      if (e.target === indexer.lastDropTarget || 
+          e.target === document || 
+          e.target.nodeName === "#document"/* XULDocument */) {
+        shouldUnMask = true;
+      }
+    } catch (ex) {
+      // access to XULDocument may throw
+      shouldUnMask = true;
+    }
+    if (shouldUnMask) {
+      indexer.dropmask.hidden = true;
+    }
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    indexer.dropmask.hidden = true;
+    const entries = Array.prototype.map.call(
+      e.dataTransfer.items,
+      x => x.webkitGetAsEntry && x.webkitGetAsEntry()
+    );
+    indexer.loadDrop(entries);
+  }
+
+  function onChangeDir(e) {
+    e.preventDefault();
+    const files = e.target.files;
+    if (!(files && files.length)) { return; }
+
+    indexer.loadInputDir(files);
+  }
+
+  function onChangeFiles(e) {
+    e.preventDefault();
+    const files = e.target.files;
+    if (!(files && files.length)) { return; }
+
+    indexer.loadInputFiles(files);
+  }
+
+  function onChangeLoadServer(e) {
+    e.preventDefault();
+    indexer.loadServerFiles();
+  }
+
   const indexer = {
     /**
      * UI related methods
@@ -141,6 +164,10 @@
       span.className = 'error';
       span.appendChild(document.createTextNode(msg + '\n'));
       logger.appendChild(span);
+    },
+
+    isSpecialItem(id) {
+      return SPECIAL_ITEM_ID.has(id);
     },
 
     initEvents() {
@@ -996,16 +1023,15 @@
       this.log(`Inspecting TOC...`);
       const referredIds = new Set();
       const titleIdMap = new Map();
-      const specialItems = new Set(['root', 'hidden', 'recycle']);
       for (const id in scrapbookData.toc) {
-        if (!scrapbookData.meta[id] && !specialItems.has(id)) {
+        if (!scrapbookData.meta[id] && !this.isSpecialItem(id)) {
           delete(scrapbookData.toc[id]);
           this.error(`Removed TOC entry '${id}': Missing metadata entry.`);
           continue;
         }
 
         scrapbookData.toc[id] = scrapbookData.toc[id].filter((refId) => {
-          if (specialItems.has(refId)) {
+          if (this.isSpecialItem(refId)) {
             this.error(`Removed TOC reference '${refId}' from '${id}': Invalid entry.`);
             return false;
           }
@@ -1415,20 +1441,6 @@
 
       /* Build cache for items */
       await (async () => {
-        const noIndexTags = new Set([
-          "head",
-          "style", "script",
-          "frame", "iframe",
-          "embed", "object", "applet",
-          "audio", "video",
-          "canvas",
-          "noframes", "noscript", "noembed",
-          "parsererror",
-          "svg", "math",
-        ]);
-        const noMetaRefreshTags = [...noIndexTags];
-        noMetaRefreshTags.shift(); // remove "head"
-
         const getIndexPaths = async () => {
           if (this.isMaffFile(index)) {
             itemZip = itemZip || await new JSZip().loadAsync(await dataFiles.getFile(index), {createFolders: true});
@@ -1540,7 +1552,7 @@
                     }
                   }
                 }
-                if (!noIndexTags.has(nodeName)) {
+                if (!child.closest(FULLTEXT_NO_INDEX_SELECTOR)) {
                   await getElementTextRecursively(child);
                 }
               } else if (child.nodeType === 3) {
@@ -1560,8 +1572,7 @@
           // check for a potential meta refresh (mostly for file item)
           let hasInstantRedirect = false;
           for (const metaRefreshElem of doc.querySelectorAll('meta[http-equiv="refresh"][content]')) {
-            // skip if metaRefreshElem is in a non-index tag
-            if (noMetaRefreshTags.some(t => metaRefreshElem.closest(t))) { continue; }
+            if (metaRefreshElem.closest(FULLTEXT_NO_META_REFRESH_SELECTOR)) { continue; }
 
             const {time, url} = scrapbook.parseHeaderRefresh(metaRefreshElem.getAttribute("content"));
             if (time === 0) { hasInstantRedirect = true; }

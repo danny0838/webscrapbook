@@ -9,7 +9,6 @@
 
 (function (root, factory) {
   // Browser globals
-  root.isDebug = false;
   root.scrapbook = factory(
     root.isDebug,
     root.browser,
@@ -19,15 +18,176 @@
     window,
     console,
     crypto,
+    navigator,
   );
-}(this, function (isDebug, browser, JSZip, jsSHA, Mime, window, console, crypto) {
+}(this, function (isDebug, browser, JSZip, jsSHA, Mime, window, console, crypto, navigator) {
 
   'use strict';
 
+  const BACKEND_MIN_VERSION = '0.8.*';
+
+  const DEFAULT_OPTIONS = {
+    "server.url": "",
+    "server.user": "",
+    "server.password": "",
+    "server.scrapbook": "",
+    "capture.saveTo": "folder", // "server", "folder", "memory"
+    "capture.saveFolder": "WebScrapBook/data",
+    "capture.saveAs": "folder", // "folder", "zip", "maff", "singleHtml"
+    "capture.saveFilename": "%ID%",
+    "capture.saveAsciiFilename": false,
+    "capture.saveBeyondSelection": false,
+    "capture.saveFileAsHtml": false,
+    "capture.saveDataUriAsFile": true,
+    "capture.saveDataUriAsSrcdoc": true,
+    "capture.autoCloseDialog": false,
+    "capture.pageSizeLimit": null,
+    "capture.resourceSizeLimit": null,
+    "capture.image": "save", // "save", "save-current", "link", "blank", "remove"
+    "capture.imageBackground": "save-used", // "save", "save-used", "link", "blank"
+    "capture.favicon": "save", // "save", "link", "blank", "remove"
+    "capture.canvas": "save", // "save", "blank", "remove"
+    "capture.audio": "save", // "save", "save-current", "link", "blank", "remove"
+    "capture.video": "save", // "save", "save-current", "link", "blank", "remove"
+    "capture.embed": "blank", // "save", "link", "blank", "remove"
+    "capture.object": "blank", // "save", "link", "blank", "remove"
+    "capture.applet": "blank", // "save", "link", "blank", "remove"
+    "capture.frame": "save", // "save", "link", "blank", "remove"
+    "capture.frameRename": true,
+    "capture.font": "save-used", // "save", "save-used", "link", "blank"
+    "capture.style": "save", // "save", "link", "blank", "remove"
+    "capture.styleInline": "save", // "save", "blank", "remove"
+    "capture.rewriteCss": "url", // "none", "url"
+    "capture.mergeCssResources": true,
+    "capture.script": "remove", // "save", "link", "blank", "remove"
+    "capture.noscript": "save", // "save", "blank", "remove"
+    "capture.base": "blank", // "save", "blank", "remove"
+    "capture.formStatus": "keep", // "keep", "reset"
+    "capture.shadowDom": "save", // "save", "remove"
+    "capture.removeHidden": "none", // "none", "undisplayed"
+    "capture.precludeSelector": "",
+    "capture.linkUnsavedUri": false,
+    "capture.downLink.mode": "none", // "none", "url", "header"
+    "capture.downLink.extFilter": "###image\n#bmp, gif, ico, jpg, jpeg, jpe, jp2, png, tif, tiff, svg\n###audio\n#aac, ape, flac, mid, midi, mp3, ogg, oga, ra, ram, rm, rmx, wav, wma\n###video\n#avc, avi, flv, mkv, mov, mpg, mpeg, mp4, wmv\n###archive\n#zip, rar, jar, bz2, gz, tar, rpm, 7z, 7zip, xz, jar, xpi, lzh, lha, lzma\n#/z[0-9]{2}|r[0-9]{2}/\n###document\n#pdf, doc, docx, xls, xlsx, ppt, pptx, odt, ods, odp, odg, odf, rtf, txt, csv\n###executable\n#exe, msi, dmg, bin, xpi, iso\n###any non-web-page\n#/(?!$|html?|xht(ml)?|php|py|pl|aspx?|cgi|jsp)(.*)/i",
+    "capture.downLink.urlFilter": "###skip common logout URL\n/[/=]logout\\b/i",
+    "capture.removeIntegrity": true,
+    "capture.requestReferrer": "auto", // "none", "auto", "origin", "all"
+    "capture.recordDocumentMeta": true,
+    "capture.recordRemovedNode": false,
+    "capture.recordRewrittenAttr": false,
+    "capture.recordSourceUri": false,
+    "editor.autoInit": true,
+    "editor.lineMarker.checked": null,
+    "editor.lineMarker.style.1": "background: rgba(255,255,0,0.9); background: linear-gradient(transparent 40%, rgba(255,255,0,0.9) 90%, transparent 100%);",
+    "editor.lineMarker.style.2": "background: rgba(0,255,0,0.9); background: linear-gradient(transparent 40%, rgba(0,255,0,0.9) 90%, transparent 100%);",
+    "editor.lineMarker.style.3": "background: rgba(255,0,0,0.9); background: linear-gradient(transparent 40%, rgba(255,0,0,0.9) 90%, transparent 100%);",
+    "editor.lineMarker.style.4": "background: rgba(0,0,255,0.9); background: linear-gradient(transparent 40%, rgba(0,0,255,0.9) 90%, transparent 100%);",
+    "editor.lineMarker.style.5": "background-color: #FFFF7C; color: black;",
+    "editor.lineMarker.style.6": "background-color: #93EF8D; color: black;",
+    "editor.lineMarker.style.7": "background-color: #FFBBB6; color: black;",
+    "editor.lineMarker.style.8": "background-color: #95D0FF; color: black;",
+    "editor.lineMarker.style.9": "background-color: #FFFF99; color: #000000; border: thin dashed #FFCC00;",
+    "editor.lineMarker.style.10": "background-color: #CCFFFF; color: #000000; border: thin solid #0099FF;",
+    "editor.lineMarker.style.11": "border: medium double #993399;",
+    "editor.lineMarker.style.12": "background-color: #EE3311; color: #FFFFFF; font-weight: bold;",
+    "viewer.useFileSystemApi": false,
+    "viewer.viewHtz": true,
+    "viewer.viewMaff": true,
+    "indexer.createStaticIndex": true,
+    "indexer.fulltextCache": true,
+    "indexer.fulltextCacheFrameAsPageContent": true,
+  };
+
+  const CONTENT_SCRIPT_FILES = [
+    "/lib/browser-polyfill.js",
+    "/lib/mime.js",
+    "/lib/sha_dev.js",
+    "/core/common.js",
+    "/core/optionsAuto.js",
+    "/core/content.js",
+    "/capturer/common.js",
+    "/editor/content.js",
+    ];
+
+  const HTTP_STATUS_TEXT = {
+    // 1××: Informational
+    100: "Continue",
+    101: "Switching Protocols",
+    102: "Processing",
+
+    // 2××: Success
+    200: "OK",
+    201: "Created",
+    202: "Accepted",
+    203: "Non-Authoritative Information",
+    204: "No Content",
+    205: "Reset Content",
+    206: "Partial Content",
+    207: "Multi-Status",
+    208: "Already Reported",
+    226: "IM Used",
+
+    // 3××: Redirection
+    300: "Multiple Choices",
+    301: "Moved Permanently",
+    302: "Found",
+    303: "See Other",
+    304: "Not Modified",
+    305: "Use Proxy",
+    306: "Switch Proxy",
+    307: "Temporary Redirect",
+    308: "Permanent Redirect",
+
+    // 4××: Client Errors
+    400: "Bad Request",
+    401: "Unauthorized",
+    402: "Payment Required",
+    403: "Forbidden",
+    404: "Not Found",
+    405: "Method Not Allowed",
+    406: "Not Acceptable",
+    407: "Proxy Authentication Required",
+    408: "Request Timeout",
+    409: "Conflict",
+    410: "Gone",
+    411: "Length Required",
+    412: "Precondition Failed",
+    413: "Payload Too Large",
+    414: "URI Too Long",
+    415: "Unsupported Media Type",
+    416: "Range Not Satisfiable",
+    417: "Expectation Failed",
+    418: "I'm a teapot",
+    421: "Misdirected Request",
+    422: "Unprocessable Entity",
+    423: "Locked",
+    424: "Failed Dependency",
+    426: "Upgrade Required",
+    428: "Precondition Required",
+    429: "Too Many Requests",
+    431: "Request Header Fields Too Large",
+    451: "Unavailable For Legal Reasons",
+
+    // 5××: Server Errors
+    500: "Internal Server Error",
+    501: "Not Implemented",
+    502: "Bad Gateway",
+    503: "Service Unavailable",
+    504: "Gateway Timeout",
+    505: "HTTP Version Not Supported",
+    506: "Variant Also Negotiates",
+    507: "Insufficient Storage",
+    508: "Loop Detected",
+    510: "Not Extended",
+    511: "Network Authentication Required",
+  };
+
   const scrapbook = {
-    backendMinVersion: '0.8.*',
+    BACKEND_MIN_VERSION,
 
     /**
+     * scrapbook.userAgent
+     *
      * ref: source code of vAPI.webextFlavor of uBlock Origin
      */
     get userAgent() {
@@ -105,78 +265,7 @@
    * Options
    *****************************************************************************/
 
-  scrapbook.options = {
-    "server.url": "",
-    "server.user": "",
-    "server.password": "",
-    "server.scrapbook": "",
-    "capture.saveTo": "folder", // "server", "folder", "memory"
-    "capture.saveFolder": "WebScrapBook/data",
-    "capture.saveAs": "folder", // "folder", "zip", "maff", "singleHtml"
-    "capture.saveFilename": "%ID%",
-    "capture.saveAsciiFilename": false,
-    "capture.saveBeyondSelection": false,
-    "capture.saveFileAsHtml": false,
-    "capture.saveDataUriAsFile": true,
-    "capture.saveDataUriAsSrcdoc": true,
-    "capture.autoCloseDialog": false,
-    "capture.pageSizeLimit": null,
-    "capture.resourceSizeLimit": null,
-    "capture.image": "save", // "save", "save-current", "link", "blank", "remove"
-    "capture.imageBackground": "save-used", // "save", "save-used", "link", "blank"
-    "capture.favicon": "save", // "save", "link", "blank", "remove"
-    "capture.canvas": "save", // "save", "blank", "remove"
-    "capture.audio": "save", // "save", "save-current", "link", "blank", "remove"
-    "capture.video": "save", // "save", "save-current", "link", "blank", "remove"
-    "capture.embed": "blank", // "save", "link", "blank", "remove"
-    "capture.object": "blank", // "save", "link", "blank", "remove"
-    "capture.applet": "blank", // "save", "link", "blank", "remove"
-    "capture.frame": "save", // "save", "link", "blank", "remove"
-    "capture.frameRename": true,
-    "capture.font": "save-used", // "save", "save-used", "link", "blank"
-    "capture.style": "save", // "save", "link", "blank", "remove"
-    "capture.styleInline": "save", // "save", "blank", "remove"
-    "capture.rewriteCss": "url", // "none", "url"
-    "capture.mergeCssResources": true,
-    "capture.script": "remove", // "save", "link", "blank", "remove"
-    "capture.noscript": "save", // "save", "blank", "remove"
-    "capture.base": "blank", // "save", "blank", "remove"
-    "capture.formStatus": "keep", // "keep", "reset"
-    "capture.shadowDom": "save", // "save", "remove"
-    "capture.removeHidden": "none", // "none", "undisplayed"
-    "capture.precludeSelector": "",
-    "capture.linkUnsavedUri": false,
-    "capture.downLink.mode": "none", // "none", "url", "header"
-    "capture.downLink.extFilter": "###image\n#bmp, gif, ico, jpg, jpeg, jpe, jp2, png, tif, tiff, svg\n###audio\n#aac, ape, flac, mid, midi, mp3, ogg, oga, ra, ram, rm, rmx, wav, wma\n###video\n#avc, avi, flv, mkv, mov, mpg, mpeg, mp4, wmv\n###archive\n#zip, rar, jar, bz2, gz, tar, rpm, 7z, 7zip, xz, jar, xpi, lzh, lha, lzma\n#/z[0-9]{2}|r[0-9]{2}/\n###document\n#pdf, doc, docx, xls, xlsx, ppt, pptx, odt, ods, odp, odg, odf, rtf, txt, csv\n###executable\n#exe, msi, dmg, bin, xpi, iso\n###any non-web-page\n#/(?!$|html?|xht(ml)?|php|py|pl|aspx?|cgi|jsp)(.*)/i",
-    "capture.downLink.urlFilter": "###skip common logout URL\n/[/=]logout\\b/i",
-    "capture.removeIntegrity": true,
-    "capture.requestReferrer": "auto", // "none", "auto", "origin", "all"
-    "capture.recordDocumentMeta": true,
-    "capture.recordRemovedNode": false,
-    "capture.recordRewrittenAttr": false,
-    "capture.recordSourceUri": false,
-    "editor.autoInit": true,
-    "editor.lineMarker.checked": null,
-    "editor.lineMarker.style.1": "background: rgba(255,255,0,0.9); background: linear-gradient(transparent 40%, rgba(255,255,0,0.9) 90%, transparent 100%);",
-    "editor.lineMarker.style.2": "background: rgba(0,255,0,0.9); background: linear-gradient(transparent 40%, rgba(0,255,0,0.9) 90%, transparent 100%);",
-    "editor.lineMarker.style.3": "background: rgba(255,0,0,0.9); background: linear-gradient(transparent 40%, rgba(255,0,0,0.9) 90%, transparent 100%);",
-    "editor.lineMarker.style.4": "background: rgba(0,0,255,0.9); background: linear-gradient(transparent 40%, rgba(0,0,255,0.9) 90%, transparent 100%);",
-    "editor.lineMarker.style.5": "background-color: #FFFF7C; color: black;",
-    "editor.lineMarker.style.6": "background-color: #93EF8D; color: black;",
-    "editor.lineMarker.style.7": "background-color: #FFBBB6; color: black;",
-    "editor.lineMarker.style.8": "background-color: #95D0FF; color: black;",
-    "editor.lineMarker.style.9": "background-color: #FFFF99; color: #000000; border: thin dashed #FFCC00;",
-    "editor.lineMarker.style.10": "background-color: #CCFFFF; color: #000000; border: thin solid #0099FF;",
-    "editor.lineMarker.style.11": "border: medium double #993399;",
-    "editor.lineMarker.style.12": "background-color: #EE3311; color: #FFFFFF; font-weight: bold;",
-    "viewer.useFileSystemApi": false,
-    "viewer.viewHtz": true,
-    "viewer.viewMaff": true,
-    "indexer.createStaticIndex": true,
-    "indexer.fulltextCache": true,
-    "indexer.fulltextCacheFrameAsPageContent": true,
-  };
-
+  scrapbook.options = DEFAULT_OPTIONS;
   scrapbook.isOptionsSynced = false;
 
   /**
@@ -582,14 +671,9 @@
           .catch(async (ex) => {
             isDebug && console.debug("inject content scripts", tabId, frameId, url);
             try {
-              await browser.tabs.executeScript(tabId, {frameId, file: "/lib/browser-polyfill.js", runAt: "document_start"});
-              await browser.tabs.executeScript(tabId, {frameId, file: "/lib/mime.js", runAt: "document_start"});
-              await browser.tabs.executeScript(tabId, {frameId, file: "/lib/sha_dev.js", runAt: "document_start"});
-              await browser.tabs.executeScript(tabId, {frameId, file: "/core/common.js", runAt: "document_start"});
-              await browser.tabs.executeScript(tabId, {frameId, file: "/core/optionsAuto.js", runAt: "document_start"});
-              await browser.tabs.executeScript(tabId, {frameId, file: "/core/content.js", runAt: "document_start"});
-              await browser.tabs.executeScript(tabId, {frameId, file: "/capturer/common.js", runAt: "document_start"});
-              await browser.tabs.executeScript(tabId, {frameId, file: "/editor/content.js", runAt: "document_start"});
+              for (const file of CONTENT_SCRIPT_FILES) {
+                await browser.tabs.executeScript(tabId, {frameId, file, runAt: "document_start"});
+              }
               await browser.tabs.executeScript(tabId, {frameId, code: `core.frameId = ${frameId};`, runAt: "document_start"});
             } catch (ex) {
               // Chromium may fail to inject content script to some pages due to unclear reason.
@@ -1903,79 +1987,6 @@
    * Network utilities
    *****************************************************************************/
 
-  scrapbook.httpStatusText = {
-    // 1××: Informational
-    100: "Continue",
-    101: "Switching Protocols",
-    102: "Processing",
-
-    // 2××: Success
-    200: "OK",
-    201: "Created",
-    202: "Accepted",
-    203: "Non-Authoritative Information",
-    204: "No Content",
-    205: "Reset Content",
-    206: "Partial Content",
-    207: "Multi-Status",
-    208: "Already Reported",
-    226: "IM Used",
-
-    // 3××: Redirection
-    300: "Multiple Choices",
-    301: "Moved Permanently",
-    302: "Found",
-    303: "See Other",
-    304: "Not Modified",
-    305: "Use Proxy",
-    306: "Switch Proxy",
-    307: "Temporary Redirect",
-    308: "Permanent Redirect",
-
-    // 4××: Client Errors
-    400: "Bad Request",
-    401: "Unauthorized",
-    402: "Payment Required",
-    403: "Forbidden",
-    404: "Not Found",
-    405: "Method Not Allowed",
-    406: "Not Acceptable",
-    407: "Proxy Authentication Required",
-    408: "Request Timeout",
-    409: "Conflict",
-    410: "Gone",
-    411: "Length Required",
-    412: "Precondition Failed",
-    413: "Payload Too Large",
-    414: "URI Too Long",
-    415: "Unsupported Media Type",
-    416: "Range Not Satisfiable",
-    417: "Expectation Failed",
-    418: "I'm a teapot",
-    421: "Misdirected Request",
-    422: "Unprocessable Entity",
-    423: "Locked",
-    424: "Failed Dependency",
-    426: "Upgrade Required",
-    428: "Precondition Required",
-    429: "Too Many Requests",
-    431: "Request Header Fields Too Large",
-    451: "Unavailable For Legal Reasons",
-
-    // 5××: Server Errors
-    500: "Internal Server Error",
-    501: "Not Implemented",
-    502: "Bad Gateway",
-    503: "Service Unavailable",
-    504: "Gateway Timeout",
-    505: "HTTP Version Not Supported",
-    506: "Variant Also Negotiates",
-    507: "Insufficient Storage",
-    508: "Loop Detected",
-    510: "Not Extended",
-    511: "Network Authentication Required"
-  };
-
   /**
    * A simple XMLHttpRequest wrapper for most common tasks.
    * 
@@ -2012,7 +2023,7 @@
           resolve(xhr);
         } else {
           // treat "404 Not found" or so as error
-          let statusText = xhr.statusText || scrapbook.httpStatusText[xhr.status];
+          let statusText = xhr.statusText || HTTP_STATUS_TEXT[xhr.status];
           statusText = xhr.status + (statusText ? " " + statusText : "");
           reject(new Error(statusText));
         }

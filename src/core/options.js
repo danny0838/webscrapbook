@@ -255,7 +255,7 @@
   window.addEventListener("DOMContentLoaded", async (event) => {
     // load languages
     scrapbook.loadLanguages(document);
-    document.getElementById("optionServerUrlTooltip").setAttribute('data-tooltip', scrapbook.lang('OptionServerUrlTooltip', [scrapbook.backendMinVersion]));
+    document.getElementById("optionServerUrlTooltip").setAttribute('data-tooltip', scrapbook.lang('OptionServerUrlTooltip', [scrapbook.BACKEND_MIN_VERSION]));
 
     // load default options
     await initDefaultOptions();

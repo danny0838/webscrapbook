@@ -1025,7 +1025,7 @@
           await this.book.loadMeta(true);
 
           const rootId = this.rootId;
-          if (!this.book.meta[rootId] && !this.book.specialItems.has(rootId)) {
+          if (!this.book.meta[rootId] && !this.book.isSpecialItem(rootId)) {
             throw new Error(`specified root item "${rootId}" does not exist.`);
           }
 
@@ -1267,7 +1267,7 @@
     },
 
     itemIsValidTarget(itemId) {
-      return itemId && (!!this.book.meta[itemId] || this.book.specialItems.has(itemId));
+      return itemId && (!!this.book.meta[itemId] || this.book.isSpecialItem(itemId));
     },
 
     itemMakeContainer(elem) {

@@ -3,22 +3,23 @@
  * Shared class for server related manipulation.
  *
  * @require {Object} scrapbook
- * @public {Class} Server
  * @public {Object} server
  *****************************************************************************/
 
 (function (root, factory) {
   // Browser globals
-  Object.assign(root, factory(
+  root.server = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,
     window,
     console,
-  ));
+  );
 }(this, function (isDebug, browser, scrapbook, window, console) {
 
   'use strict';
+
+  const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);
 
   class Server {
     constructor () {
@@ -275,6 +276,10 @@
         folder: undefined,
         exported: undefined,
       };
+    }
+
+    isSpecialItem(id) {
+      return SPECIAL_ITEM_ID.has(id);
     }
 
     /**
@@ -873,9 +878,6 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
     }
   }
 
-  return {
-    Server,
-    server: new Server(),
-  };
+  return new Server();
 
 }));
