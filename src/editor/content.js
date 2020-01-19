@@ -8,14 +8,14 @@
 
 (function (root, factory) {
   // Browser globals
-  Object.assign(root, factory(
+  root.editor = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,
     window,
     document,
     console,
-  ));
+  );
 }(this, function (isDebug, browser, scrapbook, window, document, console) {
 
   'use strict';
@@ -517,13 +517,13 @@ ${sRoot}.toolbar .toolbar-close:hover {
     // DOMEraser
     var elem = wrapper.querySelector('.toolbar-domEraser > button:first-of-type');
     elem.addEventListener("click", (event) => {
-      editor.domEraser();
+      editor.toggleDomEraser();
     }, {passive: true});
 
     // htmlEditor
     var elem = wrapper.querySelector('.toolbar-htmlEditor > button:first-of-type');
     elem.addEventListener("click", (event) => {
-      editor.htmlEditor();
+      editor.toggleHtmlEditor();
     }, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor > button:last-of-type');
@@ -993,7 +993,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     });
   };
 
-  editor.domEraser = async function (willEnable) {
+  editor.toggleDomEraser = async function (willEnable) {
     if (!editor.element && editor.element.parentNode) { return; }
 
     const editElem = editor.internalElement.querySelector('.toolbar-domEraser > button');
@@ -1017,13 +1017,13 @@ ${sRoot}.toolbar .toolbar-close:hover {
     return await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
-        cmd: "domEraser.toggle",
+        cmd: "editor.domEraser.toggle",
         args: {willEnable},
       },
     });
   };
 
-  editor.htmlEditor = async function (willEditable) {
+  editor.toggleHtmlEditor = async function (willEditable) {
     if (!editor.element && editor.element.parentNode) { return; }
 
     const editElem = editor.internalElement.querySelector('.toolbar-htmlEditor > button');
@@ -1097,8 +1097,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
   editor.close = async function () {
     if (!editor.element && editor.element.parentNode) { return; }
 
-    await editor.domEraser(false);
-    await editor.htmlEditor(false);
+    await editor.toggleDomEraser(false);
+    await editor.toggleHtmlEditor(false);
     editor.element.remove();
   };
 
@@ -1561,7 +1561,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
   };
 
 
-  const domEraser = (function () {
+  const domEraser = editor.domEraser = (function () {
     const FORBID_NODES = `web-scrapbook, web-scrapbook *`;
     const TOOLTIP_NODES = `web-scrapbook-tooltip, web-scrapbook-tooltip *`;
     const SKIP_NODES = `html, head, body, ${FORBID_NODES}, ${TOOLTIP_NODES}`;
@@ -1655,7 +1655,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       if (event.code === "Escape" || event.code === "F10") {
         event.preventDefault();
         event.stopPropagation();
-        editor.domEraser(false);
+        editor.toggleDomEraser(false);
       }
     };
 
@@ -1687,7 +1687,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
           scrapbook.invokeExtensionScript({
             cmd: "background.invokeEditorCommand",
             args: {
-              cmd: "domEraser.clearTarget",
+              cmd: "editor.domEraser.clearTarget",
               frameIdExcept: core.frameId,
             },
           });
@@ -1848,7 +1848,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
   })();
 
 
-  const htmlEditor = {
+  const htmlEditor = editor.htmlEditor = {
     async activate() {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
@@ -2145,10 +2145,6 @@ ${sRoot}.toolbar .toolbar-close:hover {
     }
   }, {capture: true, passive: true});
 
-  return {
-    editor,
-    domEraser,
-    htmlEditor,
-  };
+  return editor;
 
 }));
