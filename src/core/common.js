@@ -102,6 +102,7 @@
     "/lib/browser-polyfill.js",
     "/lib/mime.js",
     "/lib/sha_dev.js",
+    "/lib/map-with-default.js",
     "/core/common.js",
     "/core/optionsAuto.js",
     "/core/content.js",
@@ -2191,20 +2192,6 @@
   /******************************************************************************
    * Classes
    *****************************************************************************/
-
-  scrapbook.ProxyMap = class ProxyMap extends Map {
-    constructor(fn) {
-      super();
-      this.defaultFunc = fn;
-    }
-
-    get(key) {
-      if (!super.has(key)) {
-        super.set(key, this.defaultFunc.call(this, key));
-      }
-      return super.get(key);
-    }
-  };
 
   scrapbook.Deferred = class Deferred {
     constructor() {

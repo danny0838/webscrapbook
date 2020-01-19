@@ -13,11 +13,12 @@
     root.isDebug,
     root.browser,
     root.scrapbook,
+    root.MapWithDefault,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, MapWithDefault, window, document, console) {
 
   'use strict';
 
@@ -2898,7 +2899,7 @@
       const usedCssFontUrl = {};
       const usedCssImageUrl = {};
 
-      const FontFamilyMapper = class FontFamilyMapper extends scrapbook.ProxyMap {
+      const FontFamilyMapper = class FontFamilyMapper extends MapWithDefault {
         addUrl(fontFamily, url) {
           if (!url) { return; }
           this.get(fontFamily).urls.add(url);
@@ -2936,7 +2937,7 @@
         urls: new Set(),
       }));
 
-      const AnimationMapper = class AnimationMapper extends scrapbook.ProxyMap {
+      const AnimationMapper = class AnimationMapper extends MapWithDefault {
         addUrl(name, url) {
           if (!url) { return; }
           this.get(name).urls.add(url);

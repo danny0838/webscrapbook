@@ -18,11 +18,12 @@
     root.server,
     root.capturer,
     root.JSZip,
+    root.MapWithDefault,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, server, capturer, JSZip, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, server, capturer, JSZip, MapWithDefault, window, document, console) {
 
   'use strict';
 
@@ -43,9 +44,9 @@
    */
 
   /**
-   * @type {ProxyMap<string~timeId, missionCaptureInfo>}
+   * @type {MapWithDefault<string~timeId, missionCaptureInfo>}
    */
-  capturer.captureInfo = new scrapbook.ProxyMap(() => ({
+  capturer.captureInfo = new MapWithDefault(() => ({
     // index.dat is used in legacy ScrapBook
     // index.rdf and ^metadata^ are used in MAFF
     // http://maf.mozdev.org/maff-specification.html
