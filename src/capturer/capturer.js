@@ -18,12 +18,13 @@
     root.server,
     root.capturer,
     root.JSZip,
+    root.Deferred,
     root.MapWithDefault,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, server, capturer, JSZip, MapWithDefault, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, server, capturer, JSZip, Deferred, MapWithDefault, window, document, console) {
 
   'use strict';
 
@@ -352,7 +353,7 @@
         }
       }
 
-      const deferred = new scrapbook.Deferred();
+      const deferred = new Deferred();
       const accessCurrent = deferred.promise;
       (async () => {
         let response;
@@ -2019,7 +2020,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
       if (boundAccess) {
         boundAccess.newFilename = newFilename;
-        boundAccess.deferred = new scrapbook.Deferred();
+        boundAccess.deferred = new Deferred();
       }
 
       return {

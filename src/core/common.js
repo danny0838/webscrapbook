@@ -102,6 +102,7 @@
     "/lib/browser-polyfill.js",
     "/lib/mime.js",
     "/lib/sha_dev.js",
+    "/lib/deferred.js",
     "/lib/map-with-default.js",
     "/core/common.js",
     "/core/optionsAuto.js",
@@ -2188,21 +2189,6 @@
     return indexFiles;
   };
 
-
-  /******************************************************************************
-   * Classes
-   *****************************************************************************/
-
-  scrapbook.Deferred = class Deferred {
-    constructor() {
-      let p = this.promise = new Promise((resolve, reject) => {
-          this.resolve = resolve;
-          this.reject = reject;
-      });
-      this.then = this.promise.then.bind(p);
-      this.catch = this.promise.catch.bind(p);    
-    }
-  };
 
   return scrapbook;
 

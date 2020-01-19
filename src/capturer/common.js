@@ -13,12 +13,13 @@
     root.isDebug,
     root.browser,
     root.scrapbook,
+    root.Deferred,
     root.MapWithDefault,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, MapWithDefault, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, Deferred, MapWithDefault, window, document, console) {
 
   'use strict';
 
@@ -2164,7 +2165,7 @@
       // resolve the halter -->
       // await for all async tasks to complete -->
       // finalize
-      const halter = new scrapbook.Deferred();
+      const halter = new Deferred();
       const tasks = [];
 
       // inspect nodes
