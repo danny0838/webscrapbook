@@ -24,7 +24,7 @@
 
   'use strict';
 
-  const BACKEND_MIN_VERSION = '0.8.0';
+  const BACKEND_MIN_VERSION = '0.12.0';
 
   const DEFAULT_OPTIONS = {
     "server.url": "",

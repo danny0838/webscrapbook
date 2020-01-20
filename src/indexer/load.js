@@ -451,40 +451,49 @@ svg, math`;
         this.serverData.isIndexingServer = true;
         await server.init();
 
-        for (const book of Object.values(server.books)) {
-          const loadEntry = async (book, path, type = 'dir', size, lastModified) => {
-            const target = book.topUrl + scrapbook.escapeFilename(path);
-            try {
-              if (type === 'dir') {
-                const json = await server.request({
-                  url: target + '/?a=list&f=json',
-                  method: 'GET',
-                }).then(r => r.json());
-                for (const entry of json.data) {
-                  await loadEntry(
-                    book,
-                    (path ? path + '/' : '') + entry.name,
-                    entry.type,
-                    entry.size,
-                    parseInt(entry.last_modified * 1000)
-                  );
-                }
-              } else {
+        const loadEntry = async (book, inputData) => {
+          const target = book.topUrl;
+          const evtSource = new EventSource(target + '?a=list&f=sse&recursive=1');
+
+          return await new Promise((resolve, reject) => {
+            evtSource.addEventListener('complete', (event) => {
+              evtSource.close();
+              resolve();
+            });
+
+            evtSource.addEventListener('error', (event) => {
+              evtSource.close();
+              reject(new Error('Disconnected when downloading file list.'));
+            });
+
+            evtSource.addEventListener('message', (event) => {
+              try {
+                const entry = JSON.parse(event.data);
+                if (entry.type !== 'file') { return; }
+
+                const {name: path, size, last_modified} = entry;
+                const lastModified = parseInt(last_modified * 1000);
+                const target = book.topUrl + scrapbook.escapeFilename(path);
+
                 const file = new RemoteFile(
                   target + '?a=source',
                   scrapbook.filepathParts(path)[1],
                   {size, lastModified},
                 );
+
                 inputData.files.push({
                   path,
                   file,
                 });
+              } catch (ex) {
+                evtSource.close();
+                reject(ex);
               }
-            } catch (ex) {
-              this.error(`Unable to load "${target}": ${ex.message}`);
-            }
-          };
+            });
+          });
+        };
 
+        for (const book of Object.values(server.books)) {
           if (!!book.config.no_tree) {
             this.log(`Skip no-tree book '${book.name}' at '${book.topUrl}'.`);
             continue;
@@ -503,7 +512,15 @@ svg, math`;
 
           this.log(`Got book '${book.name}' at '${book.topUrl}'.`);
           this.log(`Inspecting files...`);
-          await loadEntry(book, '');
+
+          try {
+            await loadEntry(book, inputData);
+          } catch (ex) {
+            console.error(ex);
+            this.error(`Skipped due to error: ${ex.message}`);
+            this.log('');
+            continue;
+          }
 
           this.log(`Found ${inputData.files.length} files.`);
           await this.import(inputData);
@@ -1452,15 +1469,15 @@ svg, math`;
           return [scrapbook.filepathParts(index)[1]];
         };
 
-        const getFile = async (path) => {
+        const getFile = async (path, lazy = false) => {
           if (this.isHtmlFile(index)) {
             if (path === '.') {
-              return await dataFiles.getFile(index);
+              return lazy ? dataFiles.get(index) : await dataFiles.getFile(index);
             }
 
             let [base] = scrapbook.filepathParts(index);
             base = base ? base + '/' : '';
-            return await dataFiles.getFile(base + path);
+            return lazy ? dataFiles.get(base + path) : await dataFiles.getFile(base + path);
           } else if (this.isHtzFile(index) || this.isMaffFile(index)) {
             const [base, filename] = scrapbook.filepathParts(path);
             itemZip = itemZip || await new JSZip().loadAsync(await dataFiles.getFile(index), {createFolders: true});
@@ -1668,7 +1685,7 @@ svg, math`;
                     filePath = filePathNew;
                   }
 
-                  const file = await getFile(filePath);
+                  const file = await getFile(filePath, true);
                   if (!file) {
                     // removed: remove the cache
                     delete(scrapbookData.fulltext[id][filePath]);
