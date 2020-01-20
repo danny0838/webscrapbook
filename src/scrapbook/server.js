@@ -165,6 +165,13 @@
           this._config = xhr.response.data;
         }
 
+        // validate if the server version is compatible
+        {
+          if (scrapbook.versionCompare(this._config.VERSION, scrapbook.BACKEND_MIN_VERSION) < 0) {
+            throw new Error(`Require server app version >= ${scrapbook.BACKEND_MIN_VERSION}.`);
+          }
+        }
+
         // revise server root URL
         // rootUrl may be too deep, replace with server configured base path
         {

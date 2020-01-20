@@ -24,7 +24,7 @@
 
   'use strict';
 
-  const BACKEND_MIN_VERSION = '0.8.*';
+  const BACKEND_MIN_VERSION = '0.8.0';
 
   const DEFAULT_OPTIONS = {
     "server.url": "",
@@ -901,6 +901,35 @@
   /******************************************************************************
    * String handling
    *****************************************************************************/
+
+  /**
+   * Compare given 2 versions.
+   *
+   * @return {integer} 1: a > b; 0: a = b; -1: a < b
+   */
+  scrapbook.versionCompare = function (a, b) {
+    //treat non-numerical characters as lower version
+    //replacing them with a negative number based on charcode of each character
+    function fix(s) {
+      return "." + (s.toLowerCase().charCodeAt(0) - 2147483647) + ".";
+    }
+
+    a = ("" + a).replace(/[^0-9\.]/g, fix).split('.');
+    b = ("" + b).replace(/[^0-9\.]/g, fix).split('.');
+    const c = Math.max(a.length, b.length);
+    for (let i = 0; i < c; i++) {
+      //convert to integer the most efficient way
+      a[i] = ~~a[i];
+      b[i] = ~~b[i];
+
+      if (a[i] > b[i]) {
+        return 1;
+      } else if (a[i] < b[i]) {
+        return -1;
+      }
+    }
+    return 0;
+  };
 
   /**
    * Crops the given string

@@ -705,7 +705,7 @@
     "message": "网址:"
   },
   "OptionServerUrlTooltip": {
-    "message": "后端服务器程序的根目录，例如“http://localhost:8080/”或“https://example.com/wsb/”。\n\n* 后端服务器可用 PyWebScrapBook 套件（相容版本：$BACKEND_VERSION$）架设，安装细节参见 https://pypi.org/project/webscrapbook/。",
+    "message": "后端服务器程序的根目录，例如“http://localhost:8080/”或“https://example.com/wsb/”。\n\n* 后端服务器可用 PyWebScrapBook 套件（最低相容版本：$BACKEND_VERSION$）架设，安装细节参见 https://pypi.org/project/webscrapbook/。",
     "placeholders": {
       "backend_version": {
         "content": "$1"
