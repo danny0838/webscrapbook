@@ -198,7 +198,7 @@
     }
 
     async lockTree(params = {}) {
-      const {timeout, stale_threshold} = params;
+      const {timeout = 5, staleThreshold = 60} = params;
 
       const formData = new FormData();
       formData.append('token', await this.acquireToken());
@@ -206,8 +206,8 @@
       if (timeout !== undefined) {
         formData.append('chkt', timeout);
       }
-      if (stale_threshold !== undefined) {
-        formData.append('chks', stale_threshold);
+      if (staleThreshold !== undefined) {
+        formData.append('chks', staleThreshold);
       }
 
       await this.request({
