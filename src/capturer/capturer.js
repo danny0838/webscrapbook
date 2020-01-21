@@ -582,13 +582,14 @@
         const file = await getFavIcon(icon);
         const target = book.treeUrl + 'favicon/' + file.name;
 
-        // save image if it doesn't exist
         const json = await server.request({
           url: target + '?f=json',
           method: "GET",
         }).then(r => r.json());
 
-        if (json.data.type === null) {
+        // save favicon if nonexistent or emptied
+        if (json.data.type === null || 
+            (file.size > 0 && json.data.type === 'file' && json.data.size === 0)) {
           const formData = new FormData();
           formData.append('token', await server.acquireToken());
           formData.append('upload', file);
