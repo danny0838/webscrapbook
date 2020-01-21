@@ -505,10 +505,10 @@ svg, math`;
           };
 
           this.serverData.book = book;
-          this.wsbDir = server.config.WSB_DIR + '/';
-          this.dataDir = book.dataUrl.slice(book.topUrl.length);
-          this.treeDir = book.treeUrl.slice(book.topUrl.length);
-          this.indexPage = book.indexUrl.slice(book.treeUrl.length);
+          this.wsbDir = (server.config.WSB_DIR + '/').replace(/^\/+/, '');
+          this.dataDir = (book.config.data_dir + '/').replace(/^\/+/, '');
+          this.treeDir = (book.config.tree_dir + '/').replace(/^\/+/, '');
+          this.indexPage = book.config.index;
 
           this.log(`Got book '${book.name}' at '${book.topUrl}'.`);
           this.log(`Inspecting files...`);
@@ -1231,7 +1231,10 @@ svg, math`;
               this.log(`Use saved favicon for '${scrapbook.crop(favIconUrl, 256)}' for '${id}' at '${path}'.`);
             }
 
-            const url = scrapbook.getRelativeUrl(path, this.dataDir + index);
+            const url = scrapbook.getRelativeUrl(
+              scrapbook.escapeFilename(path),
+              scrapbook.escapeFilename(this.dataDir + index)
+            );
             scrapbookData.meta[id].icon = url;
           } catch (ex) {
             console.error(ex);
@@ -2148,13 +2151,13 @@ scrapbook.fulltext(${JSON.stringify(jsonData, null, 1)})`;
 
             let href = (meta.type === 'bookmark' && meta.source) ?
                 meta.source :
-                (scrapbook.getRelativeUrl(this.dataDir, this.treeDir) + scrapbook.escapeFilename(meta.index || ""));
+                (scrapbook.getRelativeUrl(scrapbook.escapeFilename(this.dataDir), scrapbook.escapeFilename(this.treeDir)) + scrapbook.escapeFilename(meta.index || ""));
             href = meta.type !== 'folder' ? ' href="' + scrapbook.escapeHtml(href) + '"' : '';
 
             let icon = meta.icon ?
                 (/^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || "") ? 
                     meta.icon : 
-                    (scrapbook.getRelativeUrl(this.dataDir, this.treeDir) + scrapbook.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon) : 
+                    (scrapbook.getRelativeUrl(scrapbook.escapeFilename(this.dataDir), scrapbook.escapeFilename(this.treeDir)) + scrapbook.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon) : 
                 ({
                   'folder': 'icon/fclose.png',
                   'file': 'icon/file.png',
@@ -2196,7 +2199,7 @@ scrapbook.fulltext(${JSON.stringify(jsonData, null, 1)})`;
 <head>
 <base target="main">
 <meta charset="UTF-8">
-<title>${scrapbookData.title || ""}</title>
+<title>${scrapbook.escapeHtml(scrapbookData.title || "", true)}</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 html {
@@ -2316,7 +2319,7 @@ a.scrapbook-external > img {
 <script>
 var scrapbook = {
   conf: {
-    dataDir: "${scrapbook.getRelativeUrl(this.dataDir, this.treeDir)}",
+    dataDir: "${scrapbook.getRelativeUrl(scrapbook.escapeFilename(this.dataDir), scrapbook.escapeFilename(this.treeDir))}",
     viewSourceTitle: "${scrapbook.escapeQuotes(scrapbook.lang('IndexerTreeSourceLinkTitle'))}"
   },
 
@@ -2588,7 +2591,7 @@ ${loadTocJs()}
 </head>
 <body>
 <div id="header">
-<a id="toggle-all" title="${scrapbook.escapeHtml(scrapbook.lang('IndexerTreeToggleAll'))}" href="#"><img src="icon/toggle.png">${scrapbookData.title || ""}</a>
+<a id="toggle-all" title="${scrapbook.escapeHtml(scrapbook.lang('IndexerTreeToggleAll'))}" href="#"><img src="icon/toggle.png">${scrapbook.escapeHtml(scrapbookData.title || "", true)}</a>
 <a id="search" href="search.html" target="_self" title="${scrapbook.escapeHtml(scrapbook.lang('IndexerTreeSearchLinkTitle'))}"><img src="icon/search.png" alt=""></a>
 </div>
 ${itemHtml}<script>scrapbook.init();</script>
@@ -2611,7 +2614,7 @@ ${itemHtml}<script>scrapbook.init();</script>
 <html dir="${scrapbook.lang('@@bidi_dir')}" data-scrapbook-tree-page="frame">
 <head>
 <meta charset="UTF-8">
-<title>${scrapbookData.title || ""}</title>
+<title>${scrapbook.escapeHtml(scrapbookData.title || "", true)}</title>
 <link rel="stylesheet" href="frame.css">
 <script src="frame.js"></script>
 </head>
@@ -2758,12 +2761,12 @@ a.scrapbook-external > img {
 <script>
 const conf = {
   scrapbooks: [
-    {name: "", path: "${scrapbook.getRelativeUrl('', this.treeDir)}", dataDir: "${this.dataDir}", treeDir: "${this.treeDir}"}
+    {name: "", path: "${scrapbook.getRelativeUrl('', scrapbook.escapeFilename(this.treeDir))}", dataDir: "${scrapbook.escapeFilename(this.dataDir)}", treeDir: "${scrapbook.escapeFilename(this.treeDir)}"}
   ],
   allowHttp: 0,  // whether to load js cache from HTTP(S)? -1: deny, 0: ask; 1: allow
   defaultSearch: "-type:folder -type:separator",  // the constant string to add before the input keyword
   defaultField: "tcc",  // the field to search for bare key terms
-  viewInMapPath: "${scrapbook.escapeQuotes(this.indexPage)}",  // path (related to treeDir) of the map page for "view in map"
+  viewInMapPath: "${scrapbook.escapeQuotes(scrapbook.escapeFilename(this.indexPage))}",  // path (related to treeDir) of the map page for "view in map"
   viewInMapTitle: "${scrapbook.escapeQuotes(scrapbook.lang('IndexerTreeSearchViewInMap'))}",  // title for "view in map"
 };
 
