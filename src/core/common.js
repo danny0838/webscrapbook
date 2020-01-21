@@ -1203,17 +1203,23 @@
   scrapbook.getRelativeUrl = function (targetUrl, baseUrl) {
     let targetUrlObj;
     let baseUrlObj;
-    if (!scrapbook.isUrlAbsolute(targetUrl) && !scrapbook.isUrlAbsolute(baseUrl)) {
-      targetUrlObj = new URL('file:///' + targetUrl);
-      baseUrlObj = new URL('file:///' + baseUrl);
-    } else {
+    if (scrapbook.isUrlAbsolute(targetUrl) && scrapbook.isUrlAbsolute(baseUrl)) {
       targetUrlObj = new URL(targetUrl);
       baseUrlObj = new URL(baseUrl);
+    } else if (scrapbook.isUrlAbsolute(targetUrl)) {
+      return new URL(targetUrl).href;
+    } else if (scrapbook.isUrlAbsolute(baseUrl)) {
+      // this should not happen
+      throw new Error("Unable to get a relative URL from an absolute URL to a non-absolute URL");
+    } else {
+      // assume that both URLs are realative to the same root
+      targetUrlObj = new URL('file:///' + targetUrl);
+      baseUrlObj = new URL('file:///' + baseUrl);
     }
 
     // absolute
     if (targetUrlObj.protocol !== baseUrlObj.protocol) {
-      return targetUrl;
+      return targetUrlObj.href;
     }
 
     // protocol-relative
