@@ -1150,6 +1150,9 @@ svg, math`;
 
           if (!favIconUrl) { return; }
 
+          // skip to avoid repeated prefixing of invalid URL
+          if (favIconUrl.startsWith('urn:')) { return; }
+
           try {
             const file = await (async () => {
               if (favIconUrl.startsWith("data:")) {
@@ -1245,8 +1248,8 @@ svg, math`;
             scrapbookData.meta[id].icon = url;
           } catch (ex) {
             console.error(ex);
-            this.error(`Removed invalid favicon '${scrapbook.crop(favIconUrl, 256)}' for '${id}': ${ex.message}`);
-            scrapbookData.meta[id].icon = "";
+            this.error(`Prefixed invalid favicon '${scrapbook.crop(favIconUrl, 256)}' for '${id}': ${ex.message}`);
+            scrapbookData.meta[id].icon = `urn:scrapbook:icon:error:${favIconUrl}`;
           }
         } catch (ex) {
           console.error(ex);
