@@ -1470,15 +1470,7 @@ svg, math`;
         };
 
         const getFile = async (path, lazy = false) => {
-          if (this.isHtmlFile(index)) {
-            if (path === '.') {
-              return lazy ? dataFiles.get(index) : await dataFiles.getFile(index);
-            }
-
-            let [base] = scrapbook.filepathParts(index);
-            base = base ? base + '/' : '';
-            return lazy ? dataFiles.get(base + path) : await dataFiles.getFile(base + path);
-          } else if (this.isHtzFile(index) || this.isMaffFile(index)) {
+          if (this.isHtzFile(index) || this.isMaffFile(index)) {
             const [base, filename] = scrapbook.filepathParts(path);
             itemZip = itemZip || await new JSZip().loadAsync(await dataFiles.getFile(index), {createFolders: true});
 
@@ -1487,6 +1479,14 @@ svg, math`;
 
             const ab = await file.async("arraybuffer");
             return new File([ab], filename, {type: Mime.lookup(filename)});
+          } else {
+            if (path === '.') {
+              return lazy ? dataFiles.get(index) : await dataFiles.getFile(index);
+            }
+
+            let [base] = scrapbook.filepathParts(index);
+            base = base ? base + '/' : '';
+            return lazy ? dataFiles.get(base + path) : await dataFiles.getFile(base + path);
           }
         };
 
