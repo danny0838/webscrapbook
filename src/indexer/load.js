@@ -200,6 +200,7 @@ svg, math`;
       this.wsbDir = null;
       this.dataDir = 'data/';
       this.treeDir = 'tree/';
+      this.faviconDir = this.treeDir + 'favicon/';
       this.indexPage = 'map.html';
       this.serverData = {};
       this.startTime = Date.now();
@@ -508,6 +509,7 @@ svg, math`;
           this.wsbDir = (server.config.WSB_DIR + '/').replace(/^\/+/, '');
           this.dataDir = (book.config.data_dir + '/').replace(/^\/+/, '');
           this.treeDir = (book.config.tree_dir + '/').replace(/^\/+/, '');
+          this.faviconDir = this.treeDir + 'favicon/';
           this.indexPage = book.config.index;
 
           this.log(`Got book '${book.name}' at '${book.topUrl}'.`);
@@ -1198,9 +1200,10 @@ svg, math`;
                 if (favIconUrl.startsWith('../')) { return; }
 
                 // skip if the favicon is already in the tree/favicon directory
-                const resolvedFaviconPath = (new URL(favIconUrl, 'file:///' + this.dataDir + index)).href.slice(8);
-                if (resolvedFaviconPath.startsWith(this.treeDir + 'favicon/')) { return; }
-                
+                const u1 = (new URL(favIconUrl, 'file:///' + scrapbook.escapeFilename(this.dataDir + index))).href;
+                const u2 = (new URL('file:///' + scrapbook.escapeFilename(this.faviconDir))).href;
+                if (u1.startsWith(u2)) { return; }
+
                 const zip = await new JSZip().loadAsync(await dataFiles.getFile(index), {createFolders: true});
 
                 const zipDir = this.isMaffFile(index) ? zip.folder(Object.keys(zip.files)[0]) : zip;
@@ -1221,7 +1224,7 @@ svg, math`;
 
             if (!file) { return; }
 
-            const path = `${this.treeDir}favicon/${file.name}`;
+            const path = this.faviconDir + file.name;
 
             // A non-empty existed file is a duplicate since favicon files are named using a checksum.
             if (!treeFiles.has(path) || treeFiles.get(path).size === 0) {
@@ -1252,24 +1255,31 @@ svg, math`;
     async handleBadFavicons({scrapbookData, treeFiles, zip}) {
       const referedFavIcons = new Set();
       for (const id in scrapbookData.meta) {
-        if (/^(?:[.][.][/]){1,2}(tree[/]favicon[/].*)$/.test(scrapbookData.meta[id].icon)) {
-          let path = RegExp.$1;
+        const meta = scrapbookData.meta[id];
+        const u1 = new URL(meta.icon, 'file:///' + scrapbook.escapeFilename(this.dataDir + meta.index)).href;
+        const u2 = new URL('file:///' + scrapbook.escapeFilename(this.faviconDir)).href;
+        if (u1.startsWith(u2)) {
+          const path = scrapbook.decodeURIComponent(u1.slice(8));
           referedFavIcons.add(path);
 
-        if (!treeFiles.has(path) && !zip.files[path]) {
+          if (!treeFiles.has(path) && !zip.files[path]) {
             this.error(`Missing favicon: '${path}' (used by '${id}')`);
           }
         }
       }
 
-      for (const path of treeFiles.keys()) {
-        if (/^tree[/]favicon[/]/.test(path)) {
+      for (const [path, file] of treeFiles.entries()) {
+        if (path.startsWith(this.faviconDir)) {
           if (!referedFavIcons.has(path)) {
-            this.error(`Unused favicon: '${path}'`);
+            if (file.size > 0) {
+              this.error(`Unused favicon: '${path}'`);
 
-            // generate an empty icon file to replace it
-            const file = new Blob([""], {type: "application/octet-stream"});
-            scrapbook.zipAddFile(zip, path, file, false);
+              // generate an empty icon file to replace it
+              const newFile = new Blob([""], {type: "application/octet-stream"});
+              scrapbook.zipAddFile(zip, path, newFile, false);
+            } else {
+              this.error(`Unused favicon (emptied): '${path}'`);
+            }
           }
         }
       }
