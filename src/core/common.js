@@ -1268,7 +1268,7 @@
     // decode %xx%xx%xx only if it's correctly UTF-8 encoded
     // @TODO: decode using a specified charset
     try {
-      name = decodeURIComponent(name);
+      name = scrapbook.decodeURIComponent(name);
     } catch (ex) {}
     return name;
   };
