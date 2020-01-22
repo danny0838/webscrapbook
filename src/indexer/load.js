@@ -200,7 +200,9 @@ svg, math`;
       this.wsbDir = null;
       this.dataDir = 'data/';
       this.treeDir = 'tree/';
+      this.treeBakDir = 'tree.bak/';
       this.faviconDir = this.treeDir + 'favicon/';
+      this.cacheDir = this.treeDir + 'cache/';
       this.indexPage = 'map.html';
       this.serverData = {};
       this.startTime = Date.now();
@@ -509,7 +511,9 @@ svg, math`;
           this.wsbDir = (server.config.WSB_DIR + '/').replace(/^\/+/, '');
           this.dataDir = (book.config.data_dir + '/').replace(/^\/+/, '');
           this.treeDir = (book.config.tree_dir + '/').replace(/^\/+/, '');
+          this.treeBakDir = this.treeDir.replace(/\/+$/, '') + '.bak/';
           this.faviconDir = this.treeDir + 'favicon/';
+          this.cacheDir = this.treeDir + 'cache/';
           this.indexPage = book.config.index;
 
           this.log(`Got book '${book.name}' at '${book.topUrl}'.`);
@@ -1792,27 +1796,18 @@ svg, math`;
     async checkSameAndBackup({scrapbookData, treeFiles, zip}) {
       for (const [path, zipObj] of Object.entries(zip.files)) {
         if (zipObj.dir) { continue; }
-        if (path.startsWith(`${this.treeDir}cache/`)) { continue; }
+        if (!path.startsWith(this.treeDir)) { continue; }
+        if (path.startsWith(this.cacheDir)) { continue; }
 
-        let bakPath;
-        let oldFile;
-
-        if (path.startsWith(this.treeDir)) {
-          bakPath = this.treeDir.slice(0, -1) + '.bak/' + path.slice(this.treeDir.length);
-          oldFile = await treeFiles.getFile(path);
-        } else {
-          continue;
-        }
+        const bakPath = this.treeBakDir + path.slice(this.treeDir.length);
+        const oldFile = await treeFiles.getFile(path);
 
         if (!oldFile) { continue; }
 
         // @TODO: Maybe binary compare is better than sha compare?
-        let shaOld;
         try {
-          let ab = await scrapbook.readFileAsArrayBuffer(oldFile);
-          shaOld = scrapbook.sha1(ab, 'ARRAYBUFFER');
-          ab = await zipObj.async('arraybuffer');
-          const shaNew = scrapbook.sha1(ab, 'ARRAYBUFFER');
+          const shaOld = scrapbook.sha1(await scrapbook.readFileAsArrayBuffer(oldFile), 'ARRAYBUFFER');
+          const shaNew = scrapbook.sha1(await zipObj.async('arraybuffer'), 'ARRAYBUFFER');
           if (shaOld !== shaNew) {
             scrapbook.zipAddFile(zip, bakPath, oldFile, null, {date: oldFile.lastModifiedDate});
           } else {
