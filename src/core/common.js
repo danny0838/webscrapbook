@@ -783,14 +783,16 @@
    *****************************************************************************/
 
   /**
-   * Escapes the given filename string to be used in the URI
+   * Escapes the given filename (may contain '/') string to be used in the URI
    *
-   * Preserves other chars for beauty
+   * Preserves non-URL-functional chars for beauty.
+   *
+   * decodeURIComponent do the inverse to convert a relative URL to filename.
    *
    * see also: validateFilename
    */
   scrapbook.escapeFilename = function (filename) {
-    return filename.replace(/[ %#]+/g, m => encodeURIComponent(m));
+    return filename.replace(/\\/g, '/').replace(/[ %#]+/g, m => encodeURIComponent(m));
   };
 
   /**
