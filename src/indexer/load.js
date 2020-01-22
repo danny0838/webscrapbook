@@ -1845,6 +1845,23 @@ svg, math`;
         const book = this.serverData.book;
 
         await server.lockTree();
+
+        // delete backup folder
+        try {
+          const target = book.topUrl + scrapbook.escapeFilename(this.treeBakDir);
+
+          const formData = new FormData();
+          formData.append('token', await server.acquireToken());
+
+          await server.request({
+            url: target + '?a=delete&f=json',
+            method: 'POST',
+            body: formData,
+          });
+        } catch (ex) {
+          // ignore
+        }
+
         for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
           if (zipObj.dir) { continue; }
 
