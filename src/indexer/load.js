@@ -1283,7 +1283,7 @@ svg, math`;
 
               // generate an empty icon file to replace it
               const newFile = new Blob([""], {type: "application/octet-stream"});
-              scrapbook.zipAddFile(zip, path, newFile, false);
+              scrapbook.zipAddFile(zip, path, newFile, false, {comment: 'emptying'});
             } else {
               this.error(`Unused favicon (emptied): '${path}'`);
             }
@@ -1847,6 +1847,21 @@ svg, math`;
         await server.lockTree();
         for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
           if (zipObj.dir) { continue; }
+
+          // delete emptying favicons
+          if (inZipPath.startsWith(this.faviconDir) && zipObj.comment === "emptying") {
+            const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
+
+            const formData = new FormData();
+            formData.append('token', await server.acquireToken());
+
+            await server.request({
+              url: target + '?a=delete&f=json',
+              method: 'POST',
+              body: formData,
+            });
+            continue;
+          }
 
           const file = new File(
             [await zipObj.async('blob')],
