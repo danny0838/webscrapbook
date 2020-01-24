@@ -983,7 +983,7 @@
 
       const menuElem = document.getElementById('command-popup');
       menuElem.querySelector('button[value="search"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="exec_book"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
+      menuElem.querySelector('button[value="exec_book"]').disabled = !server.config.app.is_local;
       menuElem.querySelector('button[value="opentab"]').disabled = !!this.book.config.no_tree;
       menuElem.querySelector('button[value="exec"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
       menuElem.querySelector('button[value="browse"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
