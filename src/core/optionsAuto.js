@@ -8,7 +8,7 @@
 
 (function (root, factory) {
   // Browser globals
-  factory(
+  root.loadOptionsAuto = root.loadOptionsAuto || factory(
     root.isDebug,
     root.browser,
     root.scrapbook,
@@ -35,5 +35,7 @@
       scrapbook.options[key] = changes[key].newValue;
     }
   });
+
+  return scrapbook.loadOptionsAuto;
 
 }));

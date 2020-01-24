@@ -9,7 +9,7 @@
 
 (function (root, factory) {
   // Browser globals
-  root.scrapbook = factory(
+  root.scrapbook = root.scrapbook || factory(
     root.isDebug,
     root.browser,
     root.JSZip,

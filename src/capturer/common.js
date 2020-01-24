@@ -9,7 +9,7 @@
 
 (function (root, factory) {
   // Browser globals
-  root.capturer = factory(
+  root.capturer = root.capturer || factory(
     root.isDebug,
     root.browser,
     root.scrapbook,
