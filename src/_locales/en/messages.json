@@ -282,7 +282,7 @@
   },
   "ExtensionDescription": {
     "description": "Description of the extension as it's visible to the outside world",
-    "message": "Captures the web page faithfully with highly customizable configurations."
+    "message": "Capture web pages to local device or backend server for future retrieval, organization, annotation, and editing."
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",

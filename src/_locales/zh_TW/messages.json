@@ -282,7 +282,7 @@
   },
   "ExtensionDescription": {
     "description": "Description of the extension as it's visible to the outside world",
-    "message": "忠實地擷取網頁內容，提供多種儲存格式與客製化設定。"
+    "message": "擷取網頁至本地或後端伺服器供檢索、組織、加註、編輯。"
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",

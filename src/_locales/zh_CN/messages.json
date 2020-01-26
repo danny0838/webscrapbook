@@ -282,7 +282,7 @@
   },
   "ExtensionDescription": {
     "description": "Description of the extension as it's visible to the outside world",
-    "message": "忠实地获取网页内容，提供多种保存格式与客制化设定。"
+    "message": "获取网页至本地或后端服务器供检索、组织、加注、编辑。"
   },
   "ExtensionName": {
     "description": "Name of the extension as it's visible to the outside world",
