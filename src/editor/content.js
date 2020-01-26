@@ -2145,6 +2145,47 @@ ${sRoot}.toolbar .toolbar-close:hover {
     }
   }, {capture: true, passive: true});
 
+  {
+    const frameNodeSelector = 'frame, iframe';
+    const frameAddObserver = (elem) => {
+      elem.addEventListener("load", (event) => {
+        // console.warn('frame load', event);
+        // init content scripts for all descendant frames as we can hardly
+        // get this specific frame
+        return scrapbook.invokeExtensionScript({
+          cmd: "background.invokeEditorCommand",
+          args: {
+            frameIdExcept: 0,
+            code: `core.frameId;`,
+          },
+        });
+      });
+    }
+
+    const docObserver = new MutationObserver((mutations) => {
+      for (let mutation of mutations) {
+        // console.warn("DOM update", mutation);
+        for (let node of mutation.addedNodes) {
+          if (node.nodeType === 1) {
+            if (node.matches(frameNodeSelector)) {
+              frameAddObserver(node);
+            } else {
+              Array.prototype.forEach.call(node.querySelectorAll(frameNodeSelector), (elem) => {
+                frameAddObserver(elem);
+              });
+            }
+          }
+        }
+      }
+    });
+    const docObserverConf = {childList: true, subtree: true};
+
+    docObserver.observe(document.documentElement, docObserverConf);
+    Array.prototype.forEach.call(document.querySelectorAll(frameNodeSelector), (elem) => {
+      frameAddObserver(elem);
+    });
+  }
+
   return editor;
 
 }));
