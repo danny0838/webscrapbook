@@ -12,10 +12,11 @@
     root.isDebug,
     root.browser,
     root.scrapbook,
+    root,
     window,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, window, console) {
+}(this, function (isDebug, browser, scrapbook, root, window, console) {
 
   'use strict';
 
@@ -45,7 +46,7 @@
 
     const parts = cmd.split(".");
     let subCmd = parts.pop();
-    let object = window;
+    let object = root;
     while (parts.length) {
       object = object[parts.shift()];
     }

@@ -20,11 +20,12 @@
     root.JSZip,
     root.Deferred,
     root.MapWithDefault,
+    root,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, server, capturer, JSZip, Deferred, MapWithDefault, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, server, capturer, JSZip, Deferred, MapWithDefault, root, window, document, console) {
 
   'use strict';
 
@@ -2415,7 +2416,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
           const parts = cmd.split(".");
           let subCmd = parts.pop();
-          let object = window;
+          let object = root;
           while (parts.length) {
             object = object[parts.shift()];
           }
