@@ -139,6 +139,7 @@ body {
   padding: 12px;
   background-color: #fcfcfc;
   overflow: auto;
+  font-size: 0.75em;
 }
 
 #dialog-wrapper dl {
