@@ -965,7 +965,8 @@
         const wrapper = document.getElementById('book');
         wrapper.hidden = false;
 
-        for (const book of Object.values(server.books)) {
+        for (const key of Object.keys(server.books).sort()) {
+          const book = server.books[key];
           const opt = document.createElement('option');
           opt.value = book.id;
           opt.textContent = book.name;
