@@ -93,7 +93,7 @@
     "viewer.useFileSystemApi": false,
     "viewer.viewHtz": true,
     "viewer.viewMaff": true,
-    "indexer.createStaticIndex": true,
+    "indexer.createStaticIndex": false,
     "indexer.fulltextCache": true,
     "indexer.fulltextCacheFrameAsPageContent": true,
   };
