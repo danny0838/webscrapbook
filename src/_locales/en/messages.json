@@ -687,7 +687,7 @@
     "message": "Viewer"
   },
   "OptionIndexerCreateStaticIndexLabel": {
-    "message": "Update static page index.html"
+    "message": "Update static index page (index.html)"
   },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
     "message": "Cache frame content as main document content"
