@@ -94,6 +94,8 @@
     "viewer.viewHtz": true,
     "viewer.viewMaff": true,
     "indexer.createStaticIndex": false,
+    "indexer.createRssFeed": false,
+    "indexer.createRssFeedBase": "",
     "indexer.fulltextCache": true,
     "indexer.fulltextCacheFrameAsPageContent": true,
   };

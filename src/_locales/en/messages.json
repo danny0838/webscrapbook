@@ -686,6 +686,12 @@
   "OptionGroupViewer": {
     "message": "Viewer"
   },
+  "OptionIndexerCreateRssFeedBaseLabel": {
+    "message": "Root URL of RSS feed:"
+  },
+  "OptionIndexerCreateRssFeedLabel": {
+    "message": "Update RSS feed (feed.atom)"
+  },
   "OptionIndexerCreateStaticIndexLabel": {
     "message": "Update static index page (index.html)"
   },

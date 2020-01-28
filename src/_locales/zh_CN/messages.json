@@ -686,6 +686,12 @@
   "OptionGroupViewer": {
     "message": "检视器"
   },
+  "OptionIndexerCreateRssFeedBaseLabel": {
+    "message": "RSS 摘要根网址:"
+  },
+  "OptionIndexerCreateRssFeedLabel": {
+    "message": "更新 RSS 摘要 (feed.atom)"
+  },
   "OptionIndexerCreateStaticIndexLabel": {
     "message": "更新静态索引页 (index.html)"
   },
