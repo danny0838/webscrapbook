@@ -259,7 +259,7 @@
       this.treeUrl = this.topUrl +
           (this.config.tree_dir ? scrapbook.escapeFilename(this.config.tree_dir) + '/' : '');
 
-      this.indexUrl = this.topUrl + scrapbook.escapeFilename(this.config.index);
+      this.indexUrl = this.topUrl + this.config.index;
 
       this.treeFiles = null;
       this.toc = null;
