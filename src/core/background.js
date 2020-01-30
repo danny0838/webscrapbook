@@ -117,7 +117,8 @@
         return false;
       }
 
-      return await scrapbook.invokeExtensionScript({cmd, args});
+      // pass windowId to restrict response to the current window sidebar
+      return await scrapbook.invokeExtensionScript({id: (await browser.windows.getCurrent()).id, cmd, args});
     } else if (browser.windows) {
       const sidebarWindow = (await browser.windows.getAll({
         windowTypes: ['popup'],

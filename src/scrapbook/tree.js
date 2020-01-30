@@ -28,6 +28,7 @@
     book: null,
     rootId: 'root',
     mode: 'normal',
+    sidebarWindowId: null,
     commands: {
       async index(selectedItemElems) {
         if (this.book.config.no_tree) {
@@ -2205,8 +2206,20 @@
 
   scrapbook.addMessageListener((message, sender) => {
     if (!message.cmd.startsWith("tree.")) { return false; }
+    if (message.id && message.id !== tree.sidebarWindowId) { return false; }
     return true;
   });
+
+  // record current windowId for later validation if it's sidebar
+  if (browser.sidebarAction && browser.windows) {
+    (async () => {
+      // Firefox has an issue that getViews({windowId}) does not contain sidebars.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1612390
+      if ((await browser.extension.getViews({type: 'sidebar'})).some(v => v === window)) {
+        tree.sidebarWindowId = (await browser.windows.getCurrent()).id;
+      }
+    })();
+  }
 
   document.addEventListener('DOMContentLoaded', async () => {
     scrapbook.loadLanguages(document);
