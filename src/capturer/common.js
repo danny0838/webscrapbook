@@ -426,7 +426,7 @@
         const elemOrig = origNodeMap.get(elem);
 
         // remove hidden elements
-        if (!isHeadless) {
+        if (!isHeadless && elemOrig) {
           switch (options["capture.removeHidden"]) {
             case "undisplayed": {
               const excludeNodes =
@@ -1173,7 +1173,7 @@
                   return;
                 case "save-current":
                   if (!isHeadless) {
-                    if (elemOrig.currentSrc) {
+                    if (elemOrig && elemOrig.currentSrc) {
                       const url = elemOrig.currentSrc;
                       captureRewriteUri(elem, "srcset", null);
                       tasks[tasks.length] = halter.then(async () => {
@@ -1251,7 +1251,7 @@
                     Array.prototype.forEach.call(elem.querySelectorAll('img'), (elem) => {
                       const elemOrig = origNodeMap.get(elem);
 
-                      if (elemOrig.currentSrc) {
+                      if (elemOrig && elemOrig.currentSrc) {
                         elem.setAttribute("src", elem.src);
                         captureRewriteUri(elem, "src", elemOrig.currentSrc);
                         captureRewriteUri(elem, "srcset", null);
@@ -1319,7 +1319,7 @@
                   return;
                 case "save-current":
                   if (!isHeadless) {
-                    if (elemOrig.currentSrc) {
+                    if (elemOrig && elemOrig.currentSrc) {
                       const url = elemOrig.currentSrc;
                       Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                         captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
@@ -1442,7 +1442,7 @@
                       });
                     }
 
-                    if (elemOrig.currentSrc) {
+                    if (elemOrig && elemOrig.currentSrc) {
                       const url = elemOrig.currentSrc;
                       Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                         captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
@@ -1673,7 +1673,7 @@
                 case "save":
                 default:
                   // we get only blank canvas in headless capture 
-                  if (isHeadless) { break; }
+                  if (isHeadless || !elemOrig) { break; }
 
                   try {
                     captureRewriteAttr(elem, "data-scrapbook-canvas", elemOrig.toDataURL());
@@ -1743,7 +1743,9 @@
                 case "checkbox": {
                   switch (options["capture.formStatus"]) {
                     case "keep":
-                      captureRewriteAttr(elem, "checked", elemOrig.checked ? "checked" : null);
+                      if (elemOrig) {
+                        captureRewriteAttr(elem, "checked", elemOrig.checked ? "checked" : null);
+                      }
                       break;
                     case "reset":
                     default:
@@ -1756,7 +1758,9 @@
                 default: {
                   switch (options["capture.formStatus"]) {
                     case "keep":
-                      captureRewriteAttr(elem, "value", elemOrig.value);
+                      if (elemOrig) {
+                        captureRewriteAttr(elem, "value", elemOrig.value);
+                      }
                       break;
                     case "reset":
                     default:
@@ -1773,7 +1777,9 @@
             case "option": {
               switch (options["capture.formStatus"]) {
                 case "keep":
-                  captureRewriteAttr(elem, "selected", elemOrig.selected ? "selected" : null);
+                  if (elemOrig) {
+                    captureRewriteAttr(elem, "selected", elemOrig.selected ? "selected" : null);
+                  }
                   break;
                 case "reset":
                 default:
@@ -1787,7 +1793,9 @@
             case "textarea": {
               switch (options["capture.formStatus"]) {
                 case "keep":
-                  captureRewriteTextContent(elem, elemOrig.value);
+                  if (elemOrig) {
+                    captureRewriteTextContent(elem, elemOrig.value);
+                  }
                   break;
                 case "reset":
                 default:
@@ -1808,7 +1816,7 @@
           // handle shadow DOM
           switch (options["capture.shadowDom"]) {
             case "save": {
-              const shadowRootOrig = elemOrig.shadowRoot;
+              const shadowRootOrig = elemOrig && elemOrig.shadowRoot;
               if (shadowRootOrig) {
                 let shadowRoot;
 
