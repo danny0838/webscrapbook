@@ -26,11 +26,11 @@
   const capturer = {
     isContentScript: true,
     get isNoscriptEscaped() {
-      // Chromium has a feature (bug?) that the innerHTML of <noscript>
-      // becomes escaped after set if javascript is enabled.
+      // For some browsers (e.g. Firefox 73 and Chromium 79), <noscript> has
+      // only text content when JavaScript is enabled.
       let elem = document.createElement("noscript"); elem.innerHTML = "<br>";
       delete capturer.isNoscriptEscaped;
-      return capturer.isNoscriptEscaped = (elem.innerHTML !== "<br>");
+      return capturer.isNoscriptEscaped = (elem.firstChild.nodeType !== 1);
     }
   };
 
