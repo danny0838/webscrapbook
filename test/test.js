@@ -4433,15 +4433,14 @@ async function test_capture_noscript() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['red.bmp']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var noscripts = doc.querySelectorAll('noscript');
   assert(noscripts[0].textContent.trim() === `Your browser does not support JavaScript.`);
-  assert(noscripts[1].innerHTML.trim() === `<style>
-body { background-color: red; }
-</style>`);
+  assert(noscripts[1].querySelector('img[src="red.bmp"]'));
 
   /* capture.noscript = blank */
   var options = {

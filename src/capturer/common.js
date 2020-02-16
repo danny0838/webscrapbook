@@ -855,8 +855,12 @@
                 default:
                   if (capturer.isNoscriptEscaped) {
                     let key = scrapbook.getUuid();
-                    specialContentMap.set(key, scrapbook.unescapeHtml(elem.innerHTML));
-                    elem.textContent = "urn:scrapbook:text:" + key;
+                    specialContentMap.set(key, "noscript");
+                    const replaceElem = document.createElement(`jc-${key}`);
+                    replaceElem.innerHTML = elem.textContent;
+                    elem.parentNode.replaceChild(replaceElem, elem);
+                    rewriteRecursively(replaceElem, rootName, rewriteNode);
+                    return;
                   }
                   break;
               }
@@ -2352,7 +2356,7 @@
 
       // save document
       let content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
-      content = content.replace(/urn:scrapbook:text:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
+      content = content.replace(/jc-([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
         if (specialContentMap.has(key)) { return specialContentMap.get(key); }
         return match;
       });
