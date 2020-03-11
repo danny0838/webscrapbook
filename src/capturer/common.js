@@ -3110,6 +3110,7 @@
 
         for (const elem of root.querySelectorAll("*")) {
           const {style} = elem;
+          if (!style) { continue; }
 
           fontFamilyMapper.use(style.getPropertyValue('font-family'));
           animationMapper.use(style.getPropertyValue('animation-name'));
