@@ -87,24 +87,15 @@
 
   "commands": {
     "openScrapBook": {
-      "suggested_key": {
-        "default": "Alt+K"
-      },
       "description": "__MSG_OpenScrapBook__"
     },
     "openOptions": {
       "description": "__MSG_OpenOptions__"
     },
     "openViewer": {
-      "suggested_key": {
-        "default": "Alt+V"
-      },
       "description": "__MSG_OpenViewer__"
     },
     "captureTab": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+K"
-      },
       "description": "__MSG_CaptureTab__"
     },
     "captureTabSource": {
@@ -114,9 +105,6 @@
       "description": "__MSG_CaptureTabBookmark__"
     },
     "editTab": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+E"
-      },
       "description": "__MSG_EditTab__"
     }
   }
