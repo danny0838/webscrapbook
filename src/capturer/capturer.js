@@ -1650,6 +1650,17 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                 savePrompt,
                 settings,
                 options,
+              }).catch((ex) => {
+                // handle bug for zero-sized in Firefox < 65
+                // path should be same as the download filename (though the
+                // value is not acturally used)
+                // see browser.downloads.onChanged handler
+                if (data.size === 0 && ex.message === "Cannot find downloaded item.") {
+                  return path;
+                }
+
+                // throw unexpected error
+                throw ex;
               });
             }));
 
@@ -2490,9 +2501,16 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     let erase = true;
     try {
       if (downloadDelta.state && downloadDelta.state.current === "complete") {
-        const results = await browser.downloads.search({id: downloadId});
-        const [dir, filename] = scrapbook.filepathParts(results[0].filename);
-        downloadHooks.get(downloadId).onComplete(filename);
+        const result = (await browser.downloads.search({id: downloadId}))[0];
+        if (result) {
+          const [dir, filename] = scrapbook.filepathParts(result.filename);
+          downloadHooks.get(downloadId).onComplete(filename);
+        } else {
+          // Firefox < 65 has a bug that a zero-sized file is never found by
+          // browser.downloads.search.
+          // https://bugzilla.mozilla.org/show_bug.cgi?id=1503760
+          downloadHooks.get(downloadId).onError(new Error("Cannot find downloaded item."));
+        }
       } else if (downloadDelta.error) {
         downloadHooks.get(downloadId).onError(new Error(downloadDelta.error.current));
       } else {
