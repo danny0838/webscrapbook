@@ -1783,8 +1783,8 @@
     const pChar = `(?:\\\\.|[^\\\\"'])`; // a non-quote char or an escaped char sequence
     const pStr = `(?:${pChar}*?)`; // string
     const pSStr = `(?:${pCmSp}${pStr}${pCmSp})`; // comment-or-space enclosed string
-    const pDQStr = `(?:"(?:\\\\.|[^\\\\"])*")`; // double quoted string
-    const pSQStr = `(?:'(?:\\\\.|[^\\\\'])*')`; // single quoted string
+    const pDQStr = `(?:"[^\\\\"]*(?:\\\\.[^\\\\"]*)*")`; // double quoted string
+    const pSQStr = `(?:'[^\\\\']*(?:\\\\.[^\\\\']*)*')`; // single quoted string
     const pES = `(?:(?:${pCm}|${pDQStr}|${pSQStr}|${pChar})*?)`; // embeded string
     const pUrl = `(?:\\burl\\(${pSp}(?:${pDQStr}|${pSQStr}|${pStr})${pSp}\\))`; // URL
     const pUrl2 = `(\\burl\\(${pSp})(${pDQStr}|${pSQStr}|${pStr})(${pSp}\\))`; // URL; catch 3
