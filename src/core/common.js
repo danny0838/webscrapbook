@@ -1770,10 +1770,10 @@
    *
    * @param {string} cssText
    * @param {Object} options
-   * @param {rewriteCssTextRewriter} rewriteImportUrl
-   * @param {rewriteCssTextRewriter} rewriteFontFaceUrl
-   * @param {rewriteCssTextRewriter} rewriteBackgroundUrl
-   * @param {Object} resourceMap
+   * @param {rewriteCssTextRewriter} options.rewriteImportUrl
+   * @param {rewriteCssTextRewriter} options.rewriteFontFaceUrl
+   * @param {rewriteCssTextRewriter} options.rewriteBackgroundUrl
+   * @param {Object} options.resourceMap
    */
   scrapbook.rewriteCssText = function (cssText, options) {
     const KEY_PREFIX = "urn:scrapbook:str:";
@@ -1842,13 +1842,13 @@
         return text.replace(new RegExp(pUrl2, "gi"), (m, pre, url, post) => {
           let rewritten;
           if (url.startsWith('"') && url.endsWith('"')) {
-            let u = scrapbook.unescapeCss(url.slice(1, -1));
+            const u = scrapbook.unescapeCss(url.slice(1, -1));
             rewritten = callback(u);
           } else if (url.startsWith("'") && url.endsWith("'")) {
-            let u = scrapbook.unescapeCss(url.slice(1, -1));
+            const u = scrapbook.unescapeCss(url.slice(1, -1));
             rewritten = callback(u);
           } else {
-            let u = scrapbook.unescapeCss(url.trim());
+            const u = scrapbook.unescapeCss(url.trim());
             rewritten = callback(u);
           }
 
@@ -1866,7 +1866,7 @@
               const u = scrapbook.unescapeCss(im2.slice(1, -1));
               rewritten = handleRewritten(rewriteImportUrl(u), '', '', true);
             } else if (im2.startsWith("'") && im2.endsWith("'")) {
-              let u = scrapbook.unescapeCss(im2.slice(1, -1));
+              const u = scrapbook.unescapeCss(im2.slice(1, -1));
               rewritten = handleRewritten(rewriteImportUrl(u), '', '', true);
             } else {
               rewritten = parseUrl(im2, rewriteImportUrl, true);
