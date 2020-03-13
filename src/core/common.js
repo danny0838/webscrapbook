@@ -1776,21 +1776,21 @@
    * @param {Object} options.resourceMap
    */
   scrapbook.rewriteCssText = function (cssText, options) {
-    const pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
-    const pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
-    const pCmSp = "(?:(?:" + pCm + "|" + pSp + ")*)"; // comment or space
-    const pCmSp2 = "(?:(?:" + pCm + "|" + pSp + ")+)"; // comment or space, at least one
-    const pChar = "(?:\\\\.|[^\\\\\"'])"; // a non-quote char or an escaped char sequence
-    const pStr = "(?:" + pChar + "*?)"; // string
-    const pSStr = "(?:" + pCmSp + pStr + pCmSp + ")"; // comment-or-space enclosed string
-    const pDQStr = '(?:"(?:\\\\.|[^\\\\"])*")'; // double quoted string
-    const pSQStr = "(?:'(?:\\\\.|[^\\\\'])*')"; // single quoted string
-    const pES = "(?:" + "(?:" + [pCm, pDQStr, pSQStr, pChar].join("|") + ")*?" + ")"; // embeded string
-    const pUrl = "(?:" + "\\burl\\(" + pSp + "(?:" + [pDQStr, pSQStr, pStr].join("|") + ")" + pSp + "\\)" + ")"; // URL
-    const pUrl2 = "(" + "\\burl\\(" + pSp + ")(" + [pDQStr, pSQStr, pStr].join("|") + ")(" + pSp + "\\)" + ")"; // URL; catch 3
-    const pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")"; // @import; catch 2
-    const pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // @font-face; catch 1
-    const pRNamespace = "(" + "@namespace" + pCmSp + "(?:" + pStr + pCmSp2 + ")?" + pUrl + ")"; // @namespace; catch 1
+    const pCm = `(?:/\\*[\\s\\S]*?\\*/)`; // comment
+    const pSp = `(?:[ \\t\\r\\n\\v\\f]*)`; // space equivalents
+    const pCmSp = `(?:(?:${pCm}|${pSp})*)`; // comment or space
+    const pCmSp2 = `(?:(?:${pCm}|${pSp})+)`; // comment or space, at least one
+    const pChar = `(?:\\\\.|[^\\\\"'])`; // a non-quote char or an escaped char sequence
+    const pStr = `(?:${pChar}*?)`; // string
+    const pSStr = `(?:${pCmSp}${pStr}${pCmSp})`; // comment-or-space enclosed string
+    const pDQStr = `(?:"(?:\\\\.|[^\\\\"])*")`; // double quoted string
+    const pSQStr = `(?:'(?:\\\\.|[^\\\\'])*')`; // single quoted string
+    const pES = `(?:(?:${pCm}|${pDQStr}|${pSQStr}|${pChar})*?)`; // embeded string
+    const pUrl = `(?:\\burl\\(${pSp}(?:${pDQStr}|${pSQStr}|${pStr})${pSp}\\))`; // URL
+    const pUrl2 = `(\\burl\\(${pSp})(${pDQStr}|${pSQStr}|${pStr})(${pSp}\\))`; // URL; catch 3
+    const pRImport = `(@import${pCmSp})(${pUrl}|${pDQStr}|${pSQStr})`; // @import; catch 2
+    const pRFontFace = `(@font-face${pCmSp}{${pES}})`; // @font-face; catch 1
+    const pRNamespace = `(@namespace${pCmSp}(?:${pStr}${pCmSp2})?${pUrl})`; // @namespace; catch 1
 
     const KEY_PREFIX = "urn:scrapbook:str:";
     const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
