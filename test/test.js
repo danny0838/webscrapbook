@@ -4217,6 +4217,7 @@ async function test_capture_font_used() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['internal.woff']);
+  assert(zip.files['internal2.woff']);
   assert(zip.files['link.woff']);
   assert(zip.files['import.woff']);
   assert(zip.files['internal-ranged1.woff']);
@@ -4231,13 +4232,14 @@ async function test_capture_font_used() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
-  assert(styleElems[2].textContent.trim() === `\
+  assert(styleElems[1].textContent.trim() === `@font-face { font-family: 'internal 2'; src: url("internal2.woff"); }`);
+  assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
 @font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
-  assert(styleElems[3].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
-  assert(styleElems[5].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
-  assert(styleElems[8].textContent.trim() === `@font-face { font-family: removed-internal; src: url(""); }`);
-  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url(""); }`);
+  assert(styleElems[4].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
+  assert(styleElems[6].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
+  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-internal; src: url(""); }`);
+  assert(styleElems[10].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url(""); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
@@ -4261,6 +4263,7 @@ async function test_capture_font_used() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['internal.woff']);
+  assert(zip.files['internal2.woff']);
   assert(zip.files['link.woff']);
   assert(zip.files['import.woff']);
   assert(zip.files['internal-ranged1.woff']);
@@ -4275,13 +4278,14 @@ async function test_capture_font_used() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
-  assert(styleElems[2].textContent.trim() === `\
+  assert(styleElems[1].textContent.trim() === `@font-face { font-family: 'internal 2'; src: url("internal2.woff"); }`);
+  assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
 @font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
-  assert(styleElems[3].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
-  assert(styleElems[5].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
-  assert(styleElems[8].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);
-  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);
+  assert(styleElems[4].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
+  assert(styleElems[6].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
+  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);
+  assert(styleElems[10].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));

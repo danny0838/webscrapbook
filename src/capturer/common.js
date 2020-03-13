@@ -2915,7 +2915,9 @@
       const FontFamilyMapper = class FontFamilyMapper extends MapWithDefault {
         addUrl(fontFamily, url) {
           if (!url) { return; }
-          this.get(fontFamily).urls.add(url);
+          for (const ff of this.parseFontFamilyProperty(fontFamily)) {
+            this.get(ff).urls.add(url);
+          }
         }
 
         /**
@@ -2923,7 +2925,12 @@
          */
         use(fontFamily) {
           if (!fontFamily) { return; }
+          for (const ff of this.parseFontFamilyProperty(fontFamily)) {
+            this.get(ff).used = true;
+          }
+        }
 
+        parseFontFamilyProperty(fontFamily) {
           // The fontFamily property value is normalized:
           // - Names are separated with ", ".
           // - Unsafe names are quoted with "", not '' ('"'s inside are escaped with '\"').
@@ -2938,10 +2945,7 @@
               names.push(RegExp.$2);
             }
           }
-
-          for (const fontFamily of names) {
-            this.get(fontFamily).used = true;
-          }
+          return names;
         }
       };
 
