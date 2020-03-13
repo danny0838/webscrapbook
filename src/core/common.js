@@ -1776,10 +1776,6 @@
    * @param {Object} options.resourceMap
    */
   scrapbook.rewriteCssText = function (cssText, options) {
-    const KEY_PREFIX = "urn:scrapbook:str:";
-    const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
-    const REGEX_RESOURCE_MAP = /^(.+?-)\d+$/;
-
     const pCm = "(?:/\\*[\\s\\S]*?\\*/)"; // comment
     const pSp = "(?:[ \\t\\r\\n\\v\\f]*)"; // space equivalents
     const pCmSp = "(?:(?:" + pCm + "|" + pSp + ")*)"; // comment or space
@@ -1795,6 +1791,12 @@
     const pRImport = "(" + "@import" + pCmSp + ")(" + [pUrl, pDQStr, pSQStr].join("|") + ")"; // @import; catch 2
     const pRFontFace = "(" + "@font-face" + pCmSp + "{" + pES + "}" + ")"; // @font-face; catch 1
     const pRNamespace = "(" + "@namespace" + pCmSp + "(?:" + pStr + pCmSp2 + ")?" + pUrl + ")"; // @namespace; catch 1
+
+    const KEY_PREFIX = "urn:scrapbook:str:";
+    const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
+    const REGEX_RESOURCE_MAP = /^(.+?-)\d+$/;
+    const REGEX_REWRITE_CSS = new RegExp(`${pCm}|${pRImport}|${pRFontFace}|${pRNamespace}|(${pUrl})`, "gi");
+    const REGEX_PARSE_URL = new RegExp(pUrl2, "gi");
 
     const fn = scrapbook.rewriteCssText = function (cssText, options = {}) {
       let mapUrlPromise;
@@ -1839,7 +1841,7 @@
       };
 
       const parseUrl = (text, callback, noResMap) => {
-        return text.replace(new RegExp(pUrl2, "gi"), (m, pre, url, post) => {
+        return text.replace(REGEX_PARSE_URL, (m, pre, url, post) => {
           let rewritten;
           if (url.startsWith('"') && url.endsWith('"')) {
             const u = scrapbook.unescapeCss(url.slice(1, -1));
@@ -1858,7 +1860,7 @@
       
       const {rewriteImportUrl, rewriteFontFaceUrl, rewriteBackgroundUrl, resourceMap} = options;
       const response = cssText.replace(
-        new RegExp([pCm, pRImport, pRFontFace, pRNamespace, "("+pUrl+")"].join("|"), "gi"),
+        REGEX_REWRITE_CSS,
         (m, im1, im2, ff, ns, u) => {
           if (im2) {
             let rewritten;
