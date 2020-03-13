@@ -1776,7 +1776,7 @@
    * @param {Object} options.resourceMap
    */
   scrapbook.rewriteCssText = function (cssText, options) {
-    const pCm = `(?:/\\*[\\s\\S]*?\\*/)`; // comment
+    const pCm = `(?:/\\*[\\s\\S]*?(?:\\*/|$))`; // comment
     const pSp = `(?:[ \\t\\r\\n\\v\\f]*)`; // space equivalents
     const pCmSp = `(?:(?:${pCm}|${pSp})*)`; // comment or space
     const pCmSp2 = `(?:(?:${pCm}|${pSp})+)`; // comment or space, at least one

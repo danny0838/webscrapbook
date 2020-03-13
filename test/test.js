@@ -2521,6 +2521,7 @@ async function test_capture_css_syntax() {
   assert(css[17].textContent.trim() === `#test17 { background: url(  "${localhost}/capture_css_syntax/green.bmp"  ); }`);
   assert(css[18].textContent.trim() === `#test18 { background: url("${localhost}/*c*/green.bmp"); }`);
   assert(css[19].textContent.trim() === `#test19 { background: url("${localhost}/capture_css_syntax/green.bmp/*c*/"); }`);
+  assert(css[20].textContent.trim() === `#test20 { background: /*url("green.bmp"); }`);
 
   /* font */
   var options = {
