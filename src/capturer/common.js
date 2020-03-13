@@ -2936,7 +2936,7 @@
           // - Unsafe names are quoted with "", not '' ('"'s inside are escaped with '\"').
           // - Unicode escape sequences are unescaped.
           // - No CSS comment.
-          const regex = /("(?:\\"|[^"])*")|([^,\s]+)(?:,\s*|$)/g;
+          const regex = /("[^\\"]*(?:\\"[^\\"]*)*")|([^,\s"]+)(?:,\s*|$)/g;
           const names = [];
           while (regex.test(fontFamily)) {
             if (RegExp.$1) {
