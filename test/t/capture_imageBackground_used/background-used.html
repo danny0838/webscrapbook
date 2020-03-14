@@ -20,6 +20,12 @@
   to { transform: rotate(1turn); }
 }
 </style>
+<style>
+@keyframes internal\ 2 {
+  from { transform: rotate(0turn); background-image: url("internal-keyframes2.bmp"); }
+  to { transform: rotate(1turn); }
+}
+</style>
 <link rel="stylesheet" href="link-keyframes.css">
 <style>
 @import "import-keyframes.css";
@@ -57,6 +63,7 @@
 
 <h2>@keyframes</h2>
 <blockquote id="internal-keyframes" style="width: 60px; height: 60px; display: inline-block; animation: internal 1s linear infinite;">internal</blockquote>
+<blockquote id="internal-keyframes2" style="width: 60px; height: 60px; display: inline-block; animation: internal\ 2 1s linear infinite;">internal</blockquote>
 <blockquote id="link-keyframes" style="width: 60px; height: 60px; display: inline-block; animation: link 1s linear infinite;">link</blockquote>
 <blockquote id="import-keyframes" style="width: 60px; height: 60px; display: inline-block; animation: import 1s linear infinite;">import</blockquote>
 

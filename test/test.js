@@ -3450,6 +3450,7 @@ async function test_capture_imageBackground_used() {
   assert(zip.files['link-keyframes.css']);
   assert(zip.files['import-keyframes.css']);
   assert(zip.files['internal-keyframes.bmp']);
+  assert(zip.files['internal-keyframes2.bmp']);
   assert(zip.files['link-keyframes.bmp']);
   assert(zip.files['import-keyframes.bmp']);
   assert(!zip.files['neverused.bmp']);
@@ -3465,13 +3466,17 @@ async function test_capture_imageBackground_used() {
   from { transform: rotate(0turn); background-image: url("internal-keyframes.bmp"); }
   to { transform: rotate(1turn); }
 }`);
-  assert(styleElems[4].textContent.trim() === `#neverused { background: url(""); }`);
-  assert(styleElems[5].textContent.trim() === `@keyframes neverused {
+  assert(styleElems[3].textContent.trim() === `@keyframes internal\\ 2 {
+  from { transform: rotate(0turn); background-image: url("internal-keyframes2.bmp"); }
+  to { transform: rotate(1turn); }
+}`);
+  assert(styleElems[5].textContent.trim() === `#neverused { background: url(""); }`);
+  assert(styleElems[6].textContent.trim() === `@keyframes neverused {
   from { transform: rotate(0turn); background-image: url(""); }
   to { transform: rotate(1turn); }
 }`);
-  assert(styleElems[6].textContent.trim() === `#removed-internal { background: url(""); }`);
-  assert(styleElems[7].textContent.trim() === `@keyframes removed {
+  assert(styleElems[7].textContent.trim() === `#removed-internal { background: url(""); }`);
+  assert(styleElems[8].textContent.trim() === `@keyframes removed {
   from { transform: rotate(0turn); background-image: url(""); }
   to { transform: rotate(1turn); }
 }`);
@@ -3520,6 +3525,7 @@ async function test_capture_imageBackground_used() {
   assert(zip.files['link-keyframes.css']);
   assert(zip.files['import-keyframes.css']);
   assert(zip.files['internal-keyframes.bmp']);
+  assert(zip.files['internal-keyframes2.bmp']);
   assert(zip.files['link-keyframes.bmp']);
   assert(zip.files['import-keyframes.bmp']);
   assert(zip.files['neverused.bmp']);
@@ -3535,13 +3541,17 @@ async function test_capture_imageBackground_used() {
   from { transform: rotate(0turn); background-image: url("internal-keyframes.bmp"); }
   to { transform: rotate(1turn); }
 }`);
-  assert(styleElems[4].textContent.trim() === `#neverused { background: url("neverused.bmp"); }`);
-  assert(styleElems[5].textContent.trim() === `@keyframes neverused {
+  assert(styleElems[3].textContent.trim() === `@keyframes internal\\ 2 {
+  from { transform: rotate(0turn); background-image: url("internal-keyframes2.bmp"); }
+  to { transform: rotate(1turn); }
+}`);
+  assert(styleElems[5].textContent.trim() === `#neverused { background: url("neverused.bmp"); }`);
+  assert(styleElems[6].textContent.trim() === `@keyframes neverused {
   from { transform: rotate(0turn); background-image: url("neverused.bmp"); }
   to { transform: rotate(1turn); }
 }`);
-  assert(styleElems[6].textContent.trim() === `#removed-internal { background: url("removed.bmp"); }`);
-  assert(styleElems[7].textContent.trim() === `@keyframes removed {
+  assert(styleElems[7].textContent.trim() === `#removed-internal { background: url("removed.bmp"); }`);
+  assert(styleElems[8].textContent.trim() === `@keyframes removed {
   from { transform: rotate(0turn); background-image: url("removed.bmp"); }
   to { transform: rotate(1turn); }
 }`);

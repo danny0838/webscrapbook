@@ -2967,6 +2967,10 @@
 
         use(name) {
           if (!name) { return; }
+
+          // CSS animation-name is in escaped form
+          name = scrapbook.unescapeCss(name);
+
           this.get(name).used = true;
         }
       };
