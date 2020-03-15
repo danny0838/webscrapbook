@@ -3035,6 +3035,38 @@ async function test_capture_css_dynamic2() {
 }
 
 /**
+ * Check if adoptedStyleSheets are handled correctly.
+ *
+ * capturer.DocumentCssHandler
+ */
+async function test_capture_css_adoptedStyleSheets() {
+  // Document.adoptedStyleSheets is supported by Chromium only.
+  // Skip for a browser that does not support it.
+  if (!document.adoptedStyleSheets) { return; }
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_adoptedStyleSheets/index.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[1].textContent.trim() === `#adopted { background-color: rgb(0, 255, 0); }`);
+  assert(styleElems[2].textContent.trim() === `#adopted2 { background-color: rgb(0, 255, 0); }`);
+
+  var host1 = doc.querySelector('#shadow1');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow1 = frag.content;
+  var styleElems = shadow1.querySelectorAll('style');
+  assert(styleElems[1].textContent.trim() === `#adopted { background-color: rgb(0, 255, 0); }`);
+}
+
+/**
  * Check if option works
  *
  * capture.image
@@ -7703,6 +7735,7 @@ async function runTests() {
   await test(test_capture_css_cross_origin);
   await test(test_capture_css_dynamic);
   await test(test_capture_css_dynamic2);
+  await test(test_capture_css_adoptedStyleSheets);
   await test(test_capture_image);
   await test(test_capture_imageBackground);
   await test(test_capture_imageBackground_used);
