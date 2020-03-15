@@ -1927,7 +1927,7 @@
               refCss.cssRules,
               cssRule => cssRule.cssText,
             ).join("\n");
-            css.setAttribute("data-scrapbook-elem", "adoptedStyleSheets");
+            css.setAttribute("data-scrapbook-elem", "adoptedStyleSheet");
           }
         }
       };
