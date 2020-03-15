@@ -7580,6 +7580,7 @@ async function runTests() {
   await test(test_capture_image);
   await test(test_capture_imageBackground);
   await test(test_capture_imageBackground_used);
+  await test(test_capture_imageBackground_used2);
   await test(test_capture_favicon);
   await test(test_capture_canvas);
   await test(test_capture_audio);
