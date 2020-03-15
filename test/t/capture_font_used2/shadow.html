@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used fonts (scoped @font-face)</title>
+<style>
+@font-face { font-family: internal; src: url("internal.woff"); }
+</style>
+</head>
+<body>
+<blockquote><div id="shadow1"></div></blockquote>
+
+<script>
+var d = document.querySelector('#shadow1');
+var s = d.attachShadow({mode: 'open'});
+s.innerHTML = `<style>
+@font-face { font-family: shadow; src: url("shadow.woff"); }
+@font-face { font-family: internal; src: url("shadow2.woff"); }
+</style>
+<blockquote id="shadow" style="font-family: shadow;">shadow</blockquote>
+<blockquote id="shadow2" style="font-family: internal;">shadow2</blockquote>`;
+</script>
+</body>
+</html>

@@ -2898,88 +2898,157 @@
     /**
      * Collect used resource URLs by decendants of rootNode.
      *
-     * - Don't consider unicode-range, as checking all related text nodes is
-     *   not performant.
-     * - Don't consider cross-domain (invalid) fonts. Even if we check status of 
-     *   Document.fonts, we can hardly be sure that "loading" will become
-     *  "loaded" or "error".
+     * - Currently we only check whether a font is USED (font-family referred
+     *   by CSS) rather than LOADED due to performance consideration and
+     *   technical restriction—even if Document.fonts can be checked, it's
+     *   hard to trace whether a "loading" status will become "loaded" or
+     *   "error".
+     * - Scoped @font-face is hard to implement and is unlikely used. But for
+     *   completeness we currently implement as if it's scoped, just like
+     *   @keyframes.
+     *   ref: https://bugs.chromium.org/p/chromium/issues/detail?id=336876
      *
      * @return {{usedCssFontUrl: Object, usedCssImageUrl: Object}}
      */
     async getCssResources() {
       const {doc, rootNode, refUrl, settings, options} = this;
 
-      const usedCssFontUrl = {};
-      const usedCssImageUrl = {};
+      const collector = {
+        scopes: [],
+        usedFontUrls: {},
+        usedImageUrls: {},
 
-      const FontFamilyMapper = class FontFamilyMapper extends MapWithDefault {
-        addUrl(fontFamily, url) {
-          if (!url) { return; }
-          for (const ff of this.parseFontFamilyProperty(fontFamily)) {
-            this.get(ff).urls.add(url);
+        getUsedResources() {
+          while (this.scopes.length) {
+            this.scopePop();
           }
-        }
+          const data = {
+            usedCssFontUrl: this.usedFontUrls,
+            usedCssImageUrl: this.usedImageUrls,
+          };
+          return data;
+        },
 
         /**
-         * @param {string} fontFamily - Raw font-family text value
+         * - propText is CSS property value of font-family or animation-name,
+         *   which is normalized.
+         * - Names are separated with ", ".
+         * - An identifier is not quoted, with special chars escaped with '\'.
+         * - A string is quoted with "", and '"'s inside are escaped with '\"'.
+         * - Unicode escape sequences are unescaped.
+         * - CSS comments are removed.
          */
-        use(fontFamily) {
-          if (!fontFamily) { return; }
-          for (const ff of this.parseFontFamilyProperty(fontFamily)) {
-            this.get(ff).used = true;
-          }
-        }
-
-        parseFontFamilyProperty(fontFamily) {
-          // The fontFamily property value is normalized:
-          // - Names are separated with ", ".
-          // - Unsafe names are quoted with "", not '' ('"'s inside are escaped with '\"').
-          // - Unicode escape sequences are unescaped.
-          // - No CSS comment.
-          const regex = /("[^\\"]*(?:\\"[^\\"]*)*")|([^,\s"]+)(?:,\s*|$)/g;
+        parseNames(propText) {
+          const regex = /"[^\\"]*(?:\\.[^\\"]*)*"|((?:[^,\s\\"]|\\.)+)(?:,|$)/g;
           const names = [];
-          while (regex.test(fontFamily)) {
-            if (RegExp.$1) {
-              names.push(RegExp.$1.slice(1, -1).replace(/\\(.)/g, "$1"));
-            } else {
-              names.push(RegExp.$2);
-            }
+          while (regex.test(propText)) {
+            let value = RegExp.$1 || RegExp.lastMatch.slice(1, -1);
+            value = scrapbook.unescapeCss(value);
+            names.push(value);
           }
           return names;
-        }
-      };
+        },
 
-      const fontFamilyMapper = new FontFamilyMapper(() => ({
-        used: false,
-        urls: new Set(),
-      }));
+        scopePush(docOrShadowRoot) {
+          this.scopes.push({
+            root: docOrShadowRoot,
+            fontMap: new MapWithDefault(() => ({
+              used: false,
+              urls: new Set(),
+            })),
+            keyFrameMap: new MapWithDefault(() => ({
+              used: false,
+              fonts: new Set(),
+              urls: new Set(),
+            })),
+          });
+        },
 
-      const AnimationMapper = class AnimationMapper extends MapWithDefault {
-        addUrl(name, url) {
+        scopePop() {
+          const scope = this.scopes.pop();
+
+          // collect used keyFrames and their used fonts and images
+          for (const {used, fonts, urls} of scope.keyFrameMap.values()) {
+            if (!used) { continue; }
+            for (const font of fonts) {
+              scope.fontMap.get(font).used = true;
+            }
+            for (const url of urls) {
+              this.usedImageUrls[url] = true;
+            }
+          }
+
+          // collect used fonts
+          for (const {used, urls} of scope.fontMap.values()) {
+            if (!used) { continue; }
+            for (const url of urls) {
+              this.usedFontUrls[url] = true;
+            }
+          }
+        },
+
+        inspectStyle(style, refUrl) {
+          for (let prop of style) {
+            if (prop === 'font-family') {
+              this.useFont(style.getPropertyValue('font-family'));
+            } else if (prop === 'animation-name') {
+              this.useKeyFrame(style.getPropertyValue('animation-name'));
+            } else {
+              forEachUrl(style.getPropertyValue(prop), refUrl, (url) => {
+                this.useImage(url);
+              });
+            }
+          }
+        },
+        
+        addFontUrl(fontFamilyText, url) {
           if (!url) { return; }
-          this.get(name).urls.add(url);
-        }
+          for (const ff of this.parseNames(fontFamilyText)) {
+            this.scopes[this.scopes.length - 1].fontMap.get(ff).urls.add(url);
+          }
+        },
 
-        addFontFamily(name, fontFamily) {
-          if (!fontFamily) { return; }
-          this.get(name).fontFamilies.add(fontFamily);
-        }
+        useFont(fontFamilyText) {
+          if (!fontFamilyText) { return; }
+          for (const ff of this.parseNames(fontFamilyText)) {
+            for (let i = this.scopes.length; i--;) {
+              if (i === 0 || this.scopes[i].fontMap.has(ff)) {
+                this.scopes[i].fontMap.get(ff).used = true;
+                break;
+              }
+            }
+          }
+        },
 
-        use(name) {
-          if (!name) { return; }
+        addKeyFrameFont(name, fontFamilyText) {
+          if (!fontFamilyText) { return; }
+          for (const ff of this.parseNames(fontFamilyText)) {
+            this.scopes[this.scopes.length - 1].keyFrameMap.get(name).fonts.add(ff);
+          }
+        },
 
-          // CSS animation-name is in escaped form
-          name = scrapbook.unescapeCss(name);
+        addKeyFrameUrl(name, url) {
+          if (!url) { return; }
+          this.scopes[this.scopes.length - 1].keyFrameMap.get(name).urls.add(url);
+        },
 
-          this.get(name).used = true;
-        }
+        useKeyFrame(animationNameText) {
+          if (!animationNameText) { return; }
+
+          for (const name of this.parseNames(animationNameText)) {
+            for (let i = this.scopes.length; i--;) {
+              if (i === 0 || this.scopes[i].keyFrameMap.has(name)) {
+                this.scopes[i].keyFrameMap.get(name).used = true;
+                break;
+              }
+            }
+          }
+        },
+
+        useImage(url) {
+          this.usedImageUrls[url] = true;
+        },
       };
-
-      const animationMapper = new AnimationMapper(() => ({
-        used: false,
-        urls: new Set(),
-        fontFamilies: new Set(),
-      }));
 
       const parseCssRule = async (cssRule, refUrl, root = rootNode) => {
         switch (cssRule.type) {
@@ -2987,13 +3056,7 @@
             // this CSS rule applies to no node in the captured area
             if (!this.verifySelector(root, cssRule.selectorText)) { break; }
 
-            fontFamilyMapper.use(cssRule.style.getPropertyValue('font-family'));
-
-            animationMapper.use(cssRule.style.getPropertyValue('animation-name'));
-
-            forEachUrl(cssRule.cssText, refUrl, (url) => {
-              usedCssImageUrl[url] = true;
-            });
+            collector.inspectStyle(cssRule.style, refUrl);
             break;
           }
           case CSSRule.IMPORT_RULE: {
@@ -3023,9 +3086,9 @@
 
             if (!fontFamily || !src) { break; }
 
-            // record this font family and its font URL
+            // record this font family and its font URLs
             forEachUrl(src, refUrl, (url) => {
-              fontFamilyMapper.addUrl(fontFamily, url);
+              collector.addFontUrl(fontFamily, url);
             });
 
             break;
@@ -3033,19 +3096,11 @@
           case CSSRule.PAGE_RULE: {
             if (!cssRule.cssText) { break; }
 
-            fontFamilyMapper.use(cssRule.style.getPropertyValue('font-family'));
-
-            animationMapper.use(cssRule.style.getPropertyValue('animation-name'));
-
-            forEachUrl(cssRule.cssText, refUrl, (url) => {
-              usedCssImageUrl[url] = true;
-            });
+            collector.inspectStyle(cssRule.style, refUrl);
             break;
           }
           case CSSRule.KEYFRAMES_RULE: {
             if (!cssRule.cssRules) { break; }
-
-            animationMapper.get(cssRule.name);
 
             for (const rule of cssRule.cssRules) {
               await parseCssRule(rule, refUrl);
@@ -3055,10 +3110,10 @@
           case CSSRule.KEYFRAME_RULE: {
             if (!cssRule.cssText) { break; }
 
-            animationMapper.addFontFamily(cssRule.parentRule.name, cssRule.style.getPropertyValue('font-family'));
+            collector.addKeyFrameFont(cssRule.parentRule.name, cssRule.style.getPropertyValue('font-family'));
 
             forEachUrl(cssRule.cssText, refUrl, (url) => {
-              animationMapper.addUrl(cssRule.parentRule.name, url);
+              collector.addKeyFrameUrl(cssRule.parentRule.name, url);
             });
             break;
           }
@@ -3068,7 +3123,7 @@
             if (!cssRule.symbols) { break; }
 
             forEachUrl(cssRule.symbols, refUrl, (url) => {
-              usedCssImageUrl[url] = true;
+              collector.useImage(url);
             });
             break;
           }
@@ -3116,53 +3171,34 @@
           }
         }
 
+        await inspectElement(root);
         for (const elem of root.querySelectorAll("*")) {
-          const {style} = elem;
-          if (!style) { continue; }
+          await inspectElement(elem);
+        }
+      };
 
-          fontFamilyMapper.use(style.getPropertyValue('font-family'));
-          animationMapper.use(style.getPropertyValue('animation-name'));
+      const inspectElement = async (elem) => {
+        const {style} = elem;
+        if (style) {
+          collector.inspectStyle(style, refUrl);
+        }
 
-          for (const i of style) {
-            forEachUrl(style.getPropertyValue(i), refUrl, (url) => {
-              usedCssImageUrl[url] = true;
-            });
-          }
-
-          const shadowRoot = elem.shadowRoot;
-          if (shadowRoot) {
-            const shadowRootOrig = this.origNodeMap.get(shadowRoot);
-            if (shadowRootOrig) {
-              await inspectDocOrShadowRoot(shadowRootOrig, shadowRoot);
-            }
+        const shadowRoot = elem.shadowRoot;
+        if (shadowRoot) {
+          const shadowRootOrig = this.origNodeMap.get(shadowRoot);
+          if (shadowRootOrig) {
+            collector.scopePush(shadowRootOrig);
+            await inspectDocOrShadowRoot(shadowRootOrig, shadowRoot);
+            collector.scopePop();
           }
         }
       };
 
+      collector.scopePush(doc);
       await inspectDocOrShadowRoot(doc, rootNode);
 
-      // collect used animation and their used font family and background images
-      for (const {used, urls, fontFamilies} of animationMapper.values()) {
-        if (!used) { continue; }
-        for (const url of urls) {
-          usedCssImageUrl[url] = true;
-        }
-        for (const fontFamily of fontFamilies) {
-          fontFamilyMapper.use(fontFamily);
-        }
-      }
-
-      // collect used font families
-      for (const {used, urls} of fontFamilyMapper.values()) {
-        if (!used) { continue; }
-        for (const url of urls) {
-          usedCssFontUrl[url] = true;
-        }
-      }
-
-      return {usedCssFontUrl, usedCssImageUrl};
+      return collector.getUsedResources();
     }
-
 
     /**
      * Rewrite a given CSS Text.

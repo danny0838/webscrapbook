@@ -3632,6 +3632,53 @@ async function test_capture_imageBackground_used2() {
 }
 
 /**
+ * Check if used background images in scoped @keyframe are handled correctly
+ *
+ * capture.imageBackground
+ */
+async function test_capture_imageBackground_used3() {
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+    "capture.shadowDom": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used3/shadow.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files['internal-keyframes.bmp']);
+  assert(zip.files['shadow-keyframes.bmp']);
+  assert(zip.files['shadow-keyframes2.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('style').textContent.trim() === `\
+@keyframes internal {
+  from { transform: rotate(0turn); background-image: url(""); }
+  to { transform: rotate(1turn); }
+}`);
+
+  var host1 = doc.querySelector('#shadow1');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow1 = frag.content;
+  assert(shadow1.querySelector('style').textContent.trim() === `\
+@keyframes shadow {
+  from { transform: rotate(0turn); background-image: url("shadow-keyframes.bmp"); }
+  to { transform: rotate(1turn); }
+}
+@keyframes internal {
+  from { transform: rotate(0turn); background-image: url("shadow-keyframes2.bmp"); }
+  to { transform: rotate(1turn); }
+}`);
+}
+
+/**
  * Check if option works
  *
  * capture.favicon
@@ -4340,6 +4387,43 @@ async function test_capture_font_used() {
   var cssFile = zip.file('import.css');
   var text = await readFileAsText(await cssFile.async('blob'));
   assert(text.trim() === `@font-face { font-family: import; src: url("import.woff"); }`);
+}
+
+/**
+ * Check if used fonts in scoped @font-face are handled correctly
+ *
+ * capture.font
+ */
+async function test_capture_font_used2() {
+  /* capture.font = save-used */
+  var options = {
+    "capture.rewriteCss": "url",
+    "capture.font": "save-used",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_font_used2/shadow.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files['internal.woff']);
+  assert(zip.files['shadow.woff']);
+  assert(zip.files['shadow2.woff']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('style').textContent.trim() === `\
+@font-face { font-family: internal; src: url(""); }`);
+
+  var host1 = doc.querySelector('#shadow1');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow1 = frag.content;
+  assert(shadow1.querySelector('style').textContent.trim() === `\
+@font-face { font-family: shadow; src: url("shadow.woff"); }
+@font-face { font-family: internal; src: url("shadow2.woff"); }`);
 }
 
 /**
@@ -7617,12 +7701,14 @@ async function runTests() {
   await test(test_capture_imageBackground);
   await test(test_capture_imageBackground_used);
   await test(test_capture_imageBackground_used2);
+  await test(test_capture_imageBackground_used3);
   await test(test_capture_favicon);
   await test(test_capture_canvas);
   await test(test_capture_audio);
   await test(test_capture_video);
   await test(test_capture_font);
   await test(test_capture_font_used);
+  await test(test_capture_font_used2);
   await test(test_capture_script);
   await test(test_capture_noscript);
   await test(test_capture_embed);
