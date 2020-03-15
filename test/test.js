@@ -3711,6 +3711,44 @@ async function test_capture_imageBackground_used3() {
 }
 
 /**
+ * Check if used background images in adoptedStyleSheets are handled correctly
+ *
+ * capture.imageBackground
+ */
+async function test_capture_imageBackground_used4() {
+  // Document.adoptedStyleSheets is supported by Chromium only.
+  // Skip for a browser that does not support it.
+  if (!document.adoptedStyleSheets) { return; }
+
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+    "capture.shadowDom": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used4/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['doc.bmp']);
+  assert(zip.files['shadow.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('style').textContent.trim() === `#adopted { background-image: url("doc.bmp"); }`);
+
+  var host1 = doc.querySelector('#shadow1');
+  var frag = doc.createElement("template");
+  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  var shadow1 = frag.content;
+  assert(shadow1.querySelector('style').textContent.trim() === `#adopted { background-image: url("shadow.bmp"); }`);
+}
+
+/**
  * Check if option works
  *
  * capture.favicon
@@ -7741,6 +7779,7 @@ async function runTests() {
   await test(test_capture_imageBackground_used);
   await test(test_capture_imageBackground_used2);
   await test(test_capture_imageBackground_used3);
+  await test(test_capture_imageBackground_used4);
   await test(test_capture_favicon);
   await test(test_capture_canvas);
   await test(test_capture_audio);

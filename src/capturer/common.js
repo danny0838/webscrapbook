@@ -3171,6 +3171,15 @@
           }
         }
 
+        if (doc.adoptedStyleSheets) {
+          for (const css of doc.adoptedStyleSheets) {
+            const rules = await this.getRulesFromCss({css, refUrl});
+            for (const rule of rules) {
+              await parseCssRule(rule, css.href || refUrl, root);
+            }
+          }
+        }
+
         await inspectElement(root);
         for (const elem of root.querySelectorAll("*")) {
           await inspectElement(elem);
