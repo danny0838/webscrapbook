@@ -4233,6 +4233,8 @@ async function test_capture_font_used() {
   assert(zip.files['internal-ranged1.woff']);
   assert(zip.files['internal-ranged2.woff']);
   assert(zip.files['internal-keyframes.woff']);
+  assert(zip.files['internal-keyframes2.woff']);
+  assert(zip.files['internal-keyframes3.woff']);
   assert(!zip.files['neverused.woff']);
   assert(!zip.files['removed.woff']);
 
@@ -4246,7 +4248,10 @@ async function test_capture_font_used() {
   assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
 @font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
-  assert(styleElems[4].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
+  assert(styleElems[4].textContent.trim() === `\
+@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }
+@font-face { font-family: "internal-keyframes 2"; src: url("internal-keyframes2.woff"); }
+@font-face { font-family: "internal-keyframes 3"; src: url("internal-keyframes3.woff"); }`);
   assert(styleElems[6].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
   assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-internal; src: url(""); }`);
   assert(styleElems[10].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url(""); }`);
@@ -4279,6 +4284,8 @@ async function test_capture_font_used() {
   assert(zip.files['internal-ranged1.woff']);
   assert(zip.files['internal-ranged2.woff']);
   assert(zip.files['internal-keyframes.woff']);
+  assert(zip.files['internal-keyframes2.woff']);
+  assert(zip.files['internal-keyframes3.woff']);
   assert(zip.files['neverused.woff']);
   assert(zip.files['removed.woff']);
 
@@ -4292,7 +4299,10 @@ async function test_capture_font_used() {
   assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
 @font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
-  assert(styleElems[4].textContent.trim() === `@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
+  assert(styleElems[4].textContent.trim() === `\
+@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }
+@font-face { font-family: "internal-keyframes 2"; src: url("internal-keyframes2.woff"); }
+@font-face { font-family: "internal-keyframes 3"; src: url("internal-keyframes3.woff"); }`);
   assert(styleElems[6].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
   assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);
   assert(styleElems[10].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);

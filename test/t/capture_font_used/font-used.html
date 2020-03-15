@@ -27,11 +27,13 @@
 <!-- @keyframes -->
 <style>
 @font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }
+@font-face { font-family: "internal-keyframes 2"; src: url("internal-keyframes2.woff"); }
+@font-face { font-family: "internal-keyframes 3"; src: url("internal-keyframes3.woff"); }
 </style>
 <style>
 @keyframes internal {
-  from { transform: rotate(0turn); font-family: internal-keyframes; }
-  to { transform: rotate(1turn); }
+  from { transform: rotate(0turn); font-family: internal-keyframes, "internal-keyframes 2"; }
+  to { transform: rotate(1turn); font-family: "internal-keyframes 3"; }
 }
 </style>
 
