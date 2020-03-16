@@ -15,7 +15,8 @@
 
 <!-- Complex name -->
 <style>
-@font-face { font-family: 'internal complex name'; src: url("internal-complex-name.woff"); }
+@font-face { font-family: "internal complex \\\"name\\\" \0A 1"; src: url("internal-complex-name1.woff"); }
+@font-face { font-family: "internal complex \\'name\\' 2"; src: url("internal-complex-name2.woff"); }
 </style>
 
 <!-- Pseudo-elements -->
@@ -79,7 +80,7 @@
 <blockquote style="font-family: import;">import</blockquote>
 
 <h2>Complex name</h2>
-<blockquote style="font-family: 'internal complex name';">internal-complex-name</blockquote>
+<blockquote style="font-family: 'internal complex \\&quot;name\\&quot; \0A 1', 'internal complex \\\'name\\\' 2';">internal-complex-name</blockquote>
 
 <h2>Pseudo-elements</h2>
 <blockquote id="pseudo1">before</blockquote>

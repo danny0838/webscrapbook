@@ -4294,7 +4294,8 @@ async function test_capture_font_used() {
   assert(zip.files['internal.woff']);
   assert(zip.files['link.woff']);
   assert(zip.files['import.woff']);
-  assert(zip.files['internal-complex-name.woff']);
+  assert(zip.files['internal-complex-name1.woff']);
+  assert(zip.files['internal-complex-name2.woff']);
   assert(zip.files['pseudo1.woff']);
   assert(zip.files['internal-ranged1.woff']);
   assert(zip.files['internal-ranged2.woff']);
@@ -4310,7 +4311,9 @@ async function test_capture_font_used() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
-  assert(styleElems[2].textContent.trim() === `@font-face { font-family: 'internal complex name'; src: url("internal-complex-name.woff"); }`);
+  assert(styleElems[2].textContent.trim() === `\
+@font-face { font-family: "internal complex \\\\\\"name\\\\\\" \\0A 1"; src: url("internal-complex-name1.woff"); }
+@font-face { font-family: "internal complex \\\\'name\\\\' 2"; src: url("internal-complex-name2.woff"); }`);
   assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: pseudo1; src: url("pseudo1.woff"); }
 #pseudo1::before { font-family: pseudo1; content: "X"; }`);
@@ -4349,7 +4352,8 @@ async function test_capture_font_used() {
   assert(zip.files['internal.woff']);
   assert(zip.files['link.woff']);
   assert(zip.files['import.woff']);
-  assert(zip.files['internal-complex-name.woff']);
+  assert(zip.files['internal-complex-name1.woff']);
+  assert(zip.files['internal-complex-name2.woff']);
   assert(zip.files['pseudo1.woff']);
   assert(zip.files['internal-ranged1.woff']);
   assert(zip.files['internal-ranged2.woff']);
@@ -4365,7 +4369,9 @@ async function test_capture_font_used() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
-  assert(styleElems[2].textContent.trim() === `@font-face { font-family: 'internal complex name'; src: url("internal-complex-name.woff"); }`);
+  assert(styleElems[2].textContent.trim() === `\
+@font-face { font-family: "internal complex \\\\\\"name\\\\\\" \\0A 1"; src: url("internal-complex-name1.woff"); }
+@font-face { font-family: "internal complex \\\\'name\\\\' 2"; src: url("internal-complex-name2.woff"); }`);
   assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: pseudo1; src: url("pseudo1.woff"); }
 #pseudo1::before { font-family: pseudo1; content: "X"; }`);
