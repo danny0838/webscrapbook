@@ -8,12 +8,14 @@
 <style>
 @font-face { font-family: internal; src: url("internal.woff"); }
 </style>
-<style>
-@font-face { font-family: 'internal 2'; src: url("internal2.woff"); }
-</style>
 <link rel="stylesheet" href="link.css">
 <style>
 @import "import.css";
+</style>
+
+<!-- Complex name -->
+<style>
+@font-face { font-family: 'internal complex name'; src: url("internal-complex-name.woff"); }
 </style>
 
 <!-- Unicode-range -->
@@ -65,9 +67,11 @@
 <body>
 <h2>Basic</h2>
 <blockquote style="font-family: internal;">internal</blockquote>
-<blockquote style="font-family: 'internal 2';">internal 2</blockquote>
 <blockquote style="font-family: link;">link</blockquote>
 <blockquote style="font-family: import;">import</blockquote>
+
+<h2>Complex name</h2>
+<blockquote style="font-family: 'internal complex name';">internal-complex-name</blockquote>
 
 <h2>Unicode range</h2>
 <blockquote style="font-family: internal-ranged;">internal-ranged</blockquote>

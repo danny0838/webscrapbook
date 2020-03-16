@@ -4227,9 +4227,9 @@ async function test_capture_font_used() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['internal.woff']);
-  assert(zip.files['internal2.woff']);
   assert(zip.files['link.woff']);
   assert(zip.files['import.woff']);
+  assert(zip.files['internal-complex-name.woff']);
   assert(zip.files['internal-ranged1.woff']);
   assert(zip.files['internal-ranged2.woff']);
   assert(zip.files['internal-keyframes.woff']);
@@ -4242,7 +4242,7 @@ async function test_capture_font_used() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
-  assert(styleElems[1].textContent.trim() === `@font-face { font-family: 'internal 2'; src: url("internal2.woff"); }`);
+  assert(styleElems[2].textContent.trim() === `@font-face { font-family: 'internal complex name'; src: url("internal-complex-name.woff"); }`);
   assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
 @font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
@@ -4273,9 +4273,9 @@ async function test_capture_font_used() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['internal.woff']);
-  assert(zip.files['internal2.woff']);
   assert(zip.files['link.woff']);
   assert(zip.files['import.woff']);
+  assert(zip.files['internal-complex-name.woff']);
   assert(zip.files['internal-ranged1.woff']);
   assert(zip.files['internal-ranged2.woff']);
   assert(zip.files['internal-keyframes.woff']);
@@ -4288,7 +4288,7 @@ async function test_capture_font_used() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
-  assert(styleElems[1].textContent.trim() === `@font-face { font-family: 'internal 2'; src: url("internal2.woff"); }`);
+  assert(styleElems[2].textContent.trim() === `@font-face { font-family: 'internal complex name'; src: url("internal-complex-name.woff"); }`);
   assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
 @font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
