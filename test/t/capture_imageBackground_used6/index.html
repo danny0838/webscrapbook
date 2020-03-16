@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used background images (CSS variable)</title>
+<style>
+:root { --var-1: url("var1.bmp"); }
+#var1 { background: var(--var-1); }
+</style>
+<style>
+@keyframes var2 {
+  from { background-image: url("var2.bmp"); }
+  to { transform: translateX(40px); }
+}
+:root { --var-2: var2 3s linear infinite; }
+#var2 { animation: var(--var-2); }
+</style>
+<style>
+@keyframes var3 {
+  from { background-image: url("var3.bmp"); }
+  to { transform: translateX(40px); }
+}
+:root { --var-3: var3; }
+#var3 { animation: var(--var-3) 3s linear infinite; }
+</style>
+<style>
+@keyframes var4 {
+  from { background-image: url("var4.bmp"); }
+  to { transform: translateX(40px); }
+}
+:root { --var-4: var4; }
+#var4 {
+  animation-name: var(--var-4);
+  animation-duration: 3s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+</style>
+<style>
+@keyframes var5 {
+  from { background-image: var(--var-5); }
+  to { transform: translateX(40px); }
+}
+:root { --var-5: url("var5.bmp"); }
+#var5 { animation: var5 3s linear infinite; }
+</style>
+<style>
+@keyframes var6 {
+  from { --var-6: url("var6.bmp"); }
+  to { transform: translateX(40px); }
+}
+#var6 { animation: var6 3s linear infinite; }
+</style>
+</head>
+<body>
+<blockquote id="var1">var for background</blockquote>
+<blockquote id="var2">var for @keyframes (complete)</blockquote>
+<blockquote id="var3">var for @keyframes (partial)</blockquote>
+<blockquote id="var4">var for @keyframes (local)</blockquote>
+<blockquote id="var5">var in @keyframes</blockquote>
+<blockquote id="var6" style="background-image: var(--var-6);">var by @keyframes</blockquote>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used fonts (CSS variable)</title>
+<style>
+@font-face { font-family: var1; src: url("var1.woff"); }
+:root { --var-1: 1.1em var1; }
+#var1 { font: var(--var-1); }
+</style>
+<style>
+@font-face { font-family: var2; src: url("var2.woff"); }
+:root { --var-2: var2; }
+#var2 { font: 1.1em var(--var-2); }
+</style>
+<style>
+@font-face { font-family: var3; src: url("var3.woff"); }
+:root { --var-3: var3; }
+#var3 { font-family: var(--var-3); font-size: 1.1em; }
+</style>
+<style>
+@font-face { font-family: var4; src: url("var4.woff"); }
+@keyframes anime4 {
+  from { font-family: var(--var-4); font-size: 1.1em; }
+  to { transform: translateX(40px); }
+}
+:root { --var-4: var4; }
+#var4 { animation: anime4 3s linear infinite; }
+</style>
+<style>
+@font-face { font-family: var5; src: url("var5.woff"); }
+@keyframes anime5 {
+  from { --var-5: var5; }
+  to { transform: translateX(40px); }
+}
+#var5 { animation: anime5 3s linear infinite; font-family: var(--var-5); font-size: 1.1em; }
+</style>
+</head>
+<body>
+<blockquote id="var1">var for @font-face (complete)</blockquote>
+<blockquote id="var2">var for @font-face (partial)</blockquote>
+<blockquote id="var3">var for @font-face (local)</blockquote>
+<blockquote id="var4">var in @keyframes</blockquote>
+<blockquote id="var5">var by @keyframes</blockquote>
+</body>
+</html>
