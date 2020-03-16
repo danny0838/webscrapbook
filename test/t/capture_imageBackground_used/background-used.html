@@ -13,6 +13,14 @@
 @import "import.css";
 </style>
 
+<!-- Pseudo-elements -->
+<style>
+#pseudo1::before { background: url("pseudo1.bmp"); content: "X"; }
+#pseudo2::after { background: url("pseudo2.bmp"); content: "X"; }
+#pseudo3::first-letter { background: url("pseudo3.bmp"); }
+#pseudo4::first-line { background: url("pseudo4.bmp"); }
+</style>
+
 <!-- @keyframes -->
 <style>
 @keyframes internal {
@@ -60,6 +68,12 @@
 <blockquote id="internal">internal</blockquote>
 <blockquote id="link">link</blockquote>
 <blockquote id="import">import</blockquote>
+
+<h2>Pseudo-elements</h2>
+<blockquote id="pseudo1">before</blockquote>
+<blockquote id="pseudo2">after</blockquote>
+<blockquote id="pseudo3">first-letter</blockquote>
+<blockquote id="pseudo4">first-line<br>second line</blockquote>
 
 <h2>@keyframes</h2>
 <blockquote id="internal-keyframes" style="width: 60px; height: 60px; display: inline-block; animation: internal 1s linear infinite;">internal</blockquote>

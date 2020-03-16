@@ -18,6 +18,12 @@
 @font-face { font-family: 'internal complex name'; src: url("internal-complex-name.woff"); }
 </style>
 
+<!-- Pseudo-elements -->
+<style>
+@font-face { font-family: pseudo1; src: url("pseudo1.woff"); }
+#pseudo1::before { font-family: pseudo1; content: "X"; }
+</style>
+
 <!-- Unicode-range -->
 <style>
 @font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
@@ -74,6 +80,9 @@
 
 <h2>Complex name</h2>
 <blockquote style="font-family: 'internal complex name';">internal-complex-name</blockquote>
+
+<h2>Pseudo-elements</h2>
+<blockquote id="pseudo1">before</blockquote>
 
 <h2>Unicode range</h2>
 <blockquote style="font-family: internal-ranged;">internal-ranged</blockquote>
