@@ -11,8 +11,8 @@
 var d = document.querySelector('#shadow1');
 var s = d.attachShadow({mode: 'open'});
 s.innerHTML = `<style>
-:host { background: url("yellow.bmp"); }
-#shadow { background: url("green.bmp"); }
+:host { background-image: url("yellow.bmp"); }
+#shadow { background-image: url("green.bmp"); }
 </style>
 <blockquote id="shadow">shadow</blockquote>`;
 </script>

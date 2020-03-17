@@ -3486,7 +3486,6 @@ async function test_capture_imageBackground_used() {
   assert(zip.files['link-keyframes.css']);
   assert(zip.files['import-keyframes.css']);
   assert(zip.files['internal-keyframes.bmp']);
-  assert(zip.files['internal-keyframes2.bmp']);
   assert(zip.files['link-keyframes.bmp']);
   assert(zip.files['import-keyframes.bmp']);
   assert(!zip.files['neverused.bmp']);
@@ -3497,51 +3496,52 @@ async function test_capture_imageBackground_used() {
   var doc = await readFileAsDocument(indexBlob);
 
   var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[0].textContent.trim() === `#internal { background: url("internal.bmp"); }`);
+  assert(styleElems[0].textContent.trim() === `#internal { background-image: url("internal.bmp"); }`);
   assert(styleElems[2].textContent.trim() === `\
-#pseudo1::before { background: url("pseudo1.bmp"); content: "X"; }
-#pseudo2::after { background: url("pseudo2.bmp"); content: "X"; }
-#pseudo3::first-letter { background: url("pseudo3.bmp"); }
-#pseudo4::first-line { background: url("pseudo4.bmp"); }`);
-  assert(styleElems[3].textContent.trim() === `@keyframes internal {
-  from { transform: rotate(0turn); background-image: url("internal-keyframes.bmp"); }
-  to { transform: rotate(1turn); }
+#pseudo1::before { background-image: url("pseudo1.bmp"); content: "X"; }
+#pseudo2::after { background-image: url("pseudo2.bmp"); content: "X"; }
+#pseudo3::first-letter { background-image: url("pseudo3.bmp"); }
+#pseudo4::first-line { background-image: url("pseudo4.bmp"); }`);
+  assert(styleElems[3].textContent.trim() === `\
+@keyframes internal {
+  from { background-image: url("internal-keyframes.bmp"); }
+  to { transform: translateX(40px); }
 }`);
-  assert(styleElems[4].textContent.trim() === `@keyframes internal\\ 2 {
-  from { transform: rotate(0turn); background-image: url("internal-keyframes2.bmp"); }
-  to { transform: rotate(1turn); }
+  assert(styleElems[5].textContent.trim() === `#neverused { background-image: url(""); }`);
+  assert(styleElems[6].textContent.trim() === `\
+@keyframes neverused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
 }`);
-  assert(styleElems[6].textContent.trim() === `#neverused { background: url(""); }`);
-  assert(styleElems[7].textContent.trim() === `@keyframes neverused {
-  from { transform: rotate(0turn); background-image: url(""); }
-  to { transform: rotate(1turn); }
-}`);
-  assert(styleElems[8].textContent.trim() === `#removed-internal { background: url(""); }`);
-  assert(styleElems[9].textContent.trim() === `@keyframes removed {
-  from { transform: rotate(0turn); background-image: url(""); }
-  to { transform: rotate(1turn); }
+  assert(styleElems[7].textContent.trim() === `#removed-internal { background-image: url(""); }`);
+  assert(styleElems[8].textContent.trim() === `\
+@keyframes removed {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
 }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#link { background: url("link.bmp"); }`);
+  assert(text.trim() === `#link { background-image: url("link.bmp"); }`);
 
   var cssFile = zip.file('import.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#import { background: url("import.bmp"); }`);
+  assert(text.trim() === `#import { background-image: url("import.bmp"); }`);
 
   var cssFile = zip.file('link-keyframes.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `@keyframes link {
-  from { transform: rotate(0turn); background-image: url("link-keyframes.bmp"); }
-  to { transform: rotate(1turn); }
+  assert(text.trim() === `\
+@keyframes link {
+  from { background-image: url("link-keyframes.bmp"); }
+  to { transform: translateX(40px); }
 }`);
 
   var cssFile = zip.file('import-keyframes.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `@keyframes import {
-  from { transform: rotate(0turn); background-image: url("import-keyframes.bmp"); }
-  to { transform: rotate(1turn); }
+  assert(text.trim() === `\
+@keyframes import {
+  from { background-image: url("import-keyframes.bmp"); }
+  to { transform: translateX(40px); }
 }`);
 
   /* capture.imageBackground = save-used (headless) */
@@ -3570,7 +3570,6 @@ async function test_capture_imageBackground_used() {
   assert(zip.files['link-keyframes.css']);
   assert(zip.files['import-keyframes.css']);
   assert(zip.files['internal-keyframes.bmp']);
-  assert(zip.files['internal-keyframes2.bmp']);
   assert(zip.files['link-keyframes.bmp']);
   assert(zip.files['import-keyframes.bmp']);
   assert(zip.files['neverused.bmp']);
@@ -3581,51 +3580,101 @@ async function test_capture_imageBackground_used() {
   var doc = await readFileAsDocument(indexBlob);
 
   var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[0].textContent.trim() === `#internal { background: url("internal.bmp"); }`);
+  assert(styleElems[0].textContent.trim() === `#internal { background-image: url("internal.bmp"); }`);
   assert(styleElems[2].textContent.trim() === `\
-#pseudo1::before { background: url("pseudo1.bmp"); content: "X"; }
-#pseudo2::after { background: url("pseudo2.bmp"); content: "X"; }
-#pseudo3::first-letter { background: url("pseudo3.bmp"); }
-#pseudo4::first-line { background: url("pseudo4.bmp"); }`);
-  assert(styleElems[3].textContent.trim() === `@keyframes internal {
-  from { transform: rotate(0turn); background-image: url("internal-keyframes.bmp"); }
-  to { transform: rotate(1turn); }
+#pseudo1::before { background-image: url("pseudo1.bmp"); content: "X"; }
+#pseudo2::after { background-image: url("pseudo2.bmp"); content: "X"; }
+#pseudo3::first-letter { background-image: url("pseudo3.bmp"); }
+#pseudo4::first-line { background-image: url("pseudo4.bmp"); }`);
+  assert(styleElems[3].textContent.trim() === `\
+@keyframes internal {
+  from { background-image: url("internal-keyframes.bmp"); }
+  to { transform: translateX(40px); }
 }`);
-  assert(styleElems[4].textContent.trim() === `@keyframes internal\\ 2 {
-  from { transform: rotate(0turn); background-image: url("internal-keyframes2.bmp"); }
-  to { transform: rotate(1turn); }
+  assert(styleElems[5].textContent.trim() === `#neverused { background-image: url("neverused.bmp"); }`);
+  assert(styleElems[6].textContent.trim() === `\
+@keyframes neverused {
+  from { background-image: url("neverused.bmp"); }
+  to { transform: translateX(40px); }
 }`);
-  assert(styleElems[6].textContent.trim() === `#neverused { background: url("neverused.bmp"); }`);
-  assert(styleElems[7].textContent.trim() === `@keyframes neverused {
-  from { transform: rotate(0turn); background-image: url("neverused.bmp"); }
-  to { transform: rotate(1turn); }
-}`);
-  assert(styleElems[8].textContent.trim() === `#removed-internal { background: url("removed.bmp"); }`);
-  assert(styleElems[9].textContent.trim() === `@keyframes removed {
-  from { transform: rotate(0turn); background-image: url("removed.bmp"); }
-  to { transform: rotate(1turn); }
+  assert(styleElems[7].textContent.trim() === `#removed-internal { background-image: url("removed.bmp"); }`);
+  assert(styleElems[8].textContent.trim() === `\
+@keyframes removed {
+  from { background-image: url("removed.bmp"); }
+  to { transform: translateX(40px); }
 }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#link { background: url("link.bmp"); }`);
+  assert(text.trim() === `#link { background-image: url("link.bmp"); }`);
 
   var cssFile = zip.file('import.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#import { background: url("import.bmp"); }`);
+  assert(text.trim() === `#import { background-image: url("import.bmp"); }`);
 
   var cssFile = zip.file('link-keyframes.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `@keyframes link {
-  from { transform: rotate(0turn); background-image: url("link-keyframes.bmp"); }
-  to { transform: rotate(1turn); }
+  assert(text.trim() === `\
+@keyframes link {
+  from { background-image: url("link-keyframes.bmp"); }
+  to { transform: translateX(40px); }
 }`);
 
   var cssFile = zip.file('import-keyframes.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `@keyframes import {
-  from { transform: rotate(0turn); background-image: url("import-keyframes.bmp"); }
-  to { transform: rotate(1turn); }
+  assert(text.trim() === `\
+@keyframes import {
+  from { background-image: url("import-keyframes.bmp"); }
+  to { transform: translateX(40px); }
+}`);
+}
+
+/**
+ * Check syntax for used background images
+ *
+ * capture.imageBackground
+ */
+async function test_capture_imageBackground_used2() {
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used2/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['keyframes-1.bmp']);
+  assert(zip.files['keyframes-complex-1.bmp']);
+  assert(zip.files['keyframes-multi-1.bmp']);
+  assert(zip.files['keyframes-multi-2.bmp']);
+  assert(zip.files['keyframes-multi-3.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[1].textContent.trim() === `\
+@keyframes keyframes1 {
+  from { background-image: url("keyframes-1.bmp"); }
+  to { transform: translateX(40px); }
+}`);
+  assert(styleElems[2].textContent.trim() === `\
+@keyframes keyframes\\Awith\\ complex\\\\syntax {
+  from { background-image: url("keyframes-complex-1.bmp"); }
+  to { transform: translateX(40px); }
+}`);
+  assert(styleElems[3].textContent.trim() === `\
+@keyframes multi\\ 1 {
+  from { background-image: url("keyframes-multi-1.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes multi\\"2\\" {
+  33% { background-image: url("keyframes-multi-2.bmp"); }
+  66% { background-image: url("keyframes-multi-3.bmp"); }
 }`);
 }
 
@@ -3659,8 +3708,8 @@ async function test_capture_imageBackground_used3() {
   frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
   var shadow1 = frag.content;
   assert(shadow1.querySelector('style').textContent.trim() === `\
-:host { background: url("yellow.bmp"); }
-#shadow { background: url("green.bmp"); }`);
+:host { background-image: url("yellow.bmp"); }
+#shadow { background-image: url("green.bmp"); }`);
 }
 
 /**
@@ -3691,8 +3740,8 @@ async function test_capture_imageBackground_used4() {
 
   assert(doc.querySelector('style').textContent.trim() === `\
 @keyframes internal {
-  from { transform: rotate(0turn); background-image: url(""); }
-  to { transform: rotate(1turn); }
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
 }`);
 
   var host1 = doc.querySelector('#shadow1');
@@ -3701,12 +3750,12 @@ async function test_capture_imageBackground_used4() {
   var shadow1 = frag.content;
   assert(shadow1.querySelector('style').textContent.trim() === `\
 @keyframes shadow {
-  from { transform: rotate(0turn); background-image: url("shadow-keyframes.bmp"); }
-  to { transform: rotate(1turn); }
+  from { background-image: url("shadow-keyframes.bmp"); }
+  to { transform: translateX(40px); }
 }
 @keyframes internal {
-  from { transform: rotate(0turn); background-image: url("shadow-keyframes2.bmp"); }
-  to { transform: rotate(1turn); }
+  from { background-image: url("shadow-keyframes2.bmp"); }
+  to { transform: translateX(40px); }
 }`);
 }
 
@@ -4364,14 +4413,10 @@ async function test_capture_font_used() {
   assert(zip.files['internal.woff']);
   assert(zip.files['link.woff']);
   assert(zip.files['import.woff']);
-  assert(zip.files['internal-complex-name1.woff']);
-  assert(zip.files['internal-complex-name2.woff']);
   assert(zip.files['pseudo1.woff']);
   assert(zip.files['internal-ranged1.woff']);
   assert(zip.files['internal-ranged2.woff']);
   assert(zip.files['internal-keyframes.woff']);
-  assert(zip.files['internal-keyframes2.woff']);
-  assert(zip.files['internal-keyframes3.woff']);
   assert(!zip.files['neverused.woff']);
   assert(!zip.files['removed.woff']);
 
@@ -4382,21 +4427,16 @@ async function test_capture_font_used() {
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
   assert(styleElems[2].textContent.trim() === `\
-@font-face { font-family: "internal complex \\\\\\"name\\\\\\" \\0A 1"; src: url("internal-complex-name1.woff"); }
-@font-face { font-family: "internal complex \\\\'name\\\\' 2"; src: url("internal-complex-name2.woff"); }`);
-  assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: pseudo1; src: url("pseudo1.woff"); }
 #pseudo1::before { font-family: pseudo1; content: "X"; }`);
-  assert(styleElems[4].textContent.trim() === `\
+  assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
 @font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
-  assert(styleElems[5].textContent.trim() === `\
-@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }
-@font-face { font-family: "internal-keyframes 2"; src: url("internal-keyframes2.woff"); }
-@font-face { font-family: "internal-keyframes 3"; src: url("internal-keyframes3.woff"); }`);
-  assert(styleElems[7].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
-  assert(styleElems[10].textContent.trim() === `@font-face { font-family: removed-internal; src: url(""); }`);
-  assert(styleElems[11].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url(""); }`);
+  assert(styleElems[4].textContent.trim() === `\
+@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
+  assert(styleElems[6].textContent.trim() === `@font-face { font-family: neverused; src: url(""); }`);
+  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-internal; src: url(""); }`);
+  assert(styleElems[10].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url(""); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
@@ -4422,14 +4462,10 @@ async function test_capture_font_used() {
   assert(zip.files['internal.woff']);
   assert(zip.files['link.woff']);
   assert(zip.files['import.woff']);
-  assert(zip.files['internal-complex-name1.woff']);
-  assert(zip.files['internal-complex-name2.woff']);
   assert(zip.files['pseudo1.woff']);
   assert(zip.files['internal-ranged1.woff']);
   assert(zip.files['internal-ranged2.woff']);
   assert(zip.files['internal-keyframes.woff']);
-  assert(zip.files['internal-keyframes2.woff']);
-  assert(zip.files['internal-keyframes3.woff']);
   assert(zip.files['neverused.woff']);
   assert(zip.files['removed.woff']);
 
@@ -4440,21 +4476,16 @@ async function test_capture_font_used() {
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: internal; src: url("internal.woff"); }`);
   assert(styleElems[2].textContent.trim() === `\
-@font-face { font-family: "internal complex \\\\\\"name\\\\\\" \\0A 1"; src: url("internal-complex-name1.woff"); }
-@font-face { font-family: "internal complex \\\\'name\\\\' 2"; src: url("internal-complex-name2.woff"); }`);
-  assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: pseudo1; src: url("pseudo1.woff"); }
 #pseudo1::before { font-family: pseudo1; content: "X"; }`);
-  assert(styleElems[4].textContent.trim() === `\
+  assert(styleElems[3].textContent.trim() === `\
 @font-face { font-family: internal-ranged; unicode-range: U+0-7F; src: url("internal-ranged1.woff"); }
 @font-face { font-family: internal-ranged; unicode-range: U+8?, U+9?, U+1??; src: url("internal-ranged2.woff"); }`);
-  assert(styleElems[5].textContent.trim() === `\
-@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }
-@font-face { font-family: "internal-keyframes 2"; src: url("internal-keyframes2.woff"); }
-@font-face { font-family: "internal-keyframes 3"; src: url("internal-keyframes3.woff"); }`);
-  assert(styleElems[7].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
-  assert(styleElems[10].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);
-  assert(styleElems[11].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);
+  assert(styleElems[4].textContent.trim() === `\
+@font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }`);
+  assert(styleElems[6].textContent.trim() === `@font-face { font-family: neverused; src: url("neverused.woff"); }`);
+  assert(styleElems[9].textContent.trim() === `@font-face { font-family: removed-internal; src: url("removed.woff"); }`);
+  assert(styleElems[10].textContent.trim() === `@font-face { font-family: removed-keyframes; src: url("removed.woff"); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
@@ -4463,6 +4494,64 @@ async function test_capture_font_used() {
   var cssFile = zip.file('import.css');
   var text = await readFileAsText(await cssFile.async('blob'));
   assert(text.trim() === `@font-face { font-family: import; src: url("import.woff"); }`);
+}
+
+/**
+ * Check syntax for used fonts
+ *
+ * capture.font = "save-used"
+ */
+async function test_capture_font_used2() {
+  /* capture.font = save-used */
+  var options = {
+    "capture.rewriteCss": "url",
+    "capture.font": "save-used",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_font_used2/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['identifier-1.woff']);
+  assert(zip.files['identifier-2.woff']);
+  assert(zip.files['string-1.woff']);
+  assert(zip.files['string-2.woff']);
+  assert(zip.files['string-3.woff']);
+  assert(zip.files['string-4.woff']);
+  assert(zip.files['complex-name-1.woff']);
+  assert(zip.files['complex-name-2.woff']);
+  assert(zip.files['multiple-value-1.woff']);
+  assert(zip.files['multiple-value-2.woff']);
+  assert(zip.files['keyframes-1.woff']);
+  assert(zip.files['keyframes-2.woff']);
+  assert(zip.files['keyframes-3.woff']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[1].textContent.trim() === `@font-face { font-family: identifier1; src: url("identifier-1.woff"); }`);
+  assert(styleElems[2].textContent.trim() === `@font-face { font-family: identifier2; src: url("identifier-2.woff"); }`);
+  assert(styleElems[3].textContent.trim() === `@font-face { font-family: "string1"; src: url("string-1.woff"); }`);
+  assert(styleElems[4].textContent.trim() === `@font-face { font-family: "string2"; src: url("string-2.woff"); }`);
+  assert(styleElems[5].textContent.trim() === `@font-face { font-family: "string3"; src: url("string-3.woff"); }`);
+  assert(styleElems[6].textContent.trim() === `@font-face { font-family: "string 4"; src: url("string-4.woff"); }`);
+  assert(styleElems[7].textContent.trim() === `@font-face { font-family: "complex \\\\\\"name\\\\\\" \\0A 1"; src: url("complex-name-1.woff"); }`);
+  assert(styleElems[8].textContent.trim() === `@font-face { font-family: "complex \\\\'name\\\\' 2"; src: url("complex-name-2.woff"); }`);
+  assert(styleElems[9].textContent.trim() === `\
+@font-face { font-family: "multiple value 1"; src: url("multiple-value-1.woff"); }
+@font-face { font-family: "multiple value 2"; src: url("multiple-value-2.woff"); }`);
+  assert(styleElems[10].textContent.trim() === `\
+@font-face { font-family: keyframes1; src: url("keyframes-1.woff"); }
+@font-face { font-family: "keyframes 2"; src: url("keyframes-2.woff"); }
+@font-face { font-family: "keyframes\\A 3"; src: url("keyframes-3.woff"); }
+
+@keyframes keyframes1 {
+  from { font-family: keyframes1, "keyframes 2"; }
+  to { transform: translateX(40px); font-family: "keyframes\\A 3"; }
+}`);
 }
 
 /**
@@ -7777,6 +7866,7 @@ async function runTests() {
   await test(test_capture_image);
   await test(test_capture_imageBackground);
   await test(test_capture_imageBackground_used);
+  await test(test_capture_imageBackground_used2);
   await test(test_capture_imageBackground_used3);
   await test(test_capture_imageBackground_used4);
   await test(test_capture_imageBackground_used5);
@@ -7786,6 +7876,7 @@ async function runTests() {
   await test(test_capture_video);
   await test(test_capture_font);
   await test(test_capture_font_used);
+  await test(test_capture_font_used2);
   await test(test_capture_font_used3);
   await test(test_capture_script);
   await test(test_capture_noscript);

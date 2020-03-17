@@ -13,12 +13,6 @@
 @import "import.css";
 </style>
 
-<!-- Complex name -->
-<style>
-@font-face { font-family: "internal complex \\\"name\\\" \0A 1"; src: url("internal-complex-name1.woff"); }
-@font-face { font-family: "internal complex \\'name\\' 2"; src: url("internal-complex-name2.woff"); }
-</style>
-
 <!-- Pseudo-elements -->
 <style>
 @font-face { font-family: pseudo1; src: url("pseudo1.woff"); }
@@ -34,13 +28,11 @@
 <!-- @keyframes -->
 <style>
 @font-face { font-family: internal-keyframes; src: url("internal-keyframes.woff"); }
-@font-face { font-family: "internal-keyframes 2"; src: url("internal-keyframes2.woff"); }
-@font-face { font-family: "internal-keyframes 3"; src: url("internal-keyframes3.woff"); }
 </style>
 <style>
 @keyframes internal {
-  from { transform: rotate(0turn); font-family: internal-keyframes, "internal-keyframes 2"; }
-  to { transform: rotate(1turn); font-family: "internal-keyframes 3"; }
+  from { font-family: internal-keyframes; }
+  to { transform: translateX(40px); }
 }
 </style>
 
@@ -53,8 +45,8 @@
 </style>
 <style>
 @keyframes neverused {
-  from { transform: rotate(0turn); font-family: neverused; }
-  to { transform: rotate(1turn); }
+  from { font-family: neverused; }
+  to { transform: translateX(40px); }
 }
 </style>
 
@@ -67,8 +59,8 @@
 </style>
 <style>
 @keyframes removed {
-  from { transform: rotate(0turn); font-family: removed-keyframes; }
-  to { transform: rotate(1turn); }
+  from { font-family: removed-keyframes; }
+  to { transform: translateX(40px); }
 }
 </style>
 
@@ -79,9 +71,6 @@
 <blockquote style="font-family: link;">link</blockquote>
 <blockquote style="font-family: import;">import</blockquote>
 
-<h2>Complex name</h2>
-<blockquote style="font-family: 'internal complex \\&quot;name\\&quot; \0A 1', 'internal complex \\\'name\\\' 2';">internal-complex-name</blockquote>
-
 <h2>Pseudo-elements</h2>
 <blockquote id="pseudo1">before</blockquote>
 
@@ -89,10 +78,10 @@
 <blockquote style="font-family: internal-ranged;">internal-ranged</blockquote>
 
 <h2>@keyframes</h2>
-<blockquote style="width: 60px; height: 60px; animation: internal 1s linear infinite;">internal-keyframes</blockquote>
+<blockquote style="animation: internal 3s linear infinite;">internal-keyframes</blockquote>
 
 <h2>Removed elements</h2>
 <video id="removed-internal" style="font-family: removed;">removed-internal</video>
-<video id="removed-keyframes" style="width: 60px; height: 60px; animation: removed 1s linear infinite;">removed-keyframes</video>
+<video id="removed-keyframes" style="animation: removed 3s linear infinite;">removed-keyframes</video>
 </body>
 </html>

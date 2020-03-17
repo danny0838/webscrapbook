@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used background images (syntax)</title>
+<style>
+blockquote::before {
+  content: attr(style) " ";
+}
+</style>
+<style>
+@keyframes keyframes1 {
+  from { background-image: url("keyframes-1.bmp"); }
+  to { transform: translateX(40px); }
+}
+</style>
+<style>
+@keyframes keyframes\Awith\ complex\\syntax {
+  from { background-image: url("keyframes-complex-1.bmp"); }
+  to { transform: translateX(40px); }
+}
+</style>
+<style>
+@keyframes multi\ 1 {
+  from { background-image: url("keyframes-multi-1.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes multi\"2\" {
+  33% { background-image: url("keyframes-multi-2.bmp"); }
+  66% { background-image: url("keyframes-multi-3.bmp"); }
+}
+</style>
+</head>
+<body>
+<blockquote style="animation: keyframes1 3s linear infinite;"></blockquote>
+<blockquote style="animation: keyframes\Awith\ complex\\syntax 3s linear infinite;"></blockquote>
+<blockquote style="animation: multi\ 1 3s linear infinite, multi\&quot;2\&quot; 3s linear infinite;"></blockquote>
+</body>
+</html>

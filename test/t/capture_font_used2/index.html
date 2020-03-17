@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used fonts (syntax)</title>
+<style>
+blockquote::before {
+  content: attr(style) " ";
+}
+</style>
+
+<style>
+@font-face { font-family: identifier1; src: url("identifier-1.woff"); }
+</style>
+<style>
+@font-face { font-family: identifier2; src: url("identifier-2.woff"); }
+</style>
+
+<style>
+@font-face { font-family: "string1"; src: url("string-1.woff"); }
+</style>
+<style>
+@font-face { font-family: "string2"; src: url("string-2.woff"); }
+</style>
+<style>
+@font-face { font-family: "string3"; src: url("string-3.woff"); }
+</style>
+<style>
+@font-face { font-family: "string 4"; src: url("string-4.woff"); }
+</style>
+
+<style>
+@font-face { font-family: "complex \\\"name\\\" \0A 1"; src: url("complex-name-1.woff"); }
+</style>
+<style>
+@font-face { font-family: "complex \\'name\\' 2"; src: url("complex-name-2.woff"); }
+</style>
+
+<style>
+@font-face { font-family: "multiple value 1"; src: url("multiple-value-1.woff"); }
+@font-face { font-family: "multiple value 2"; src: url("multiple-value-2.woff"); }
+</style>
+
+<style>
+@font-face { font-family: keyframes1; src: url("keyframes-1.woff"); }
+@font-face { font-family: "keyframes 2"; src: url("keyframes-2.woff"); }
+@font-face { font-family: "keyframes\A 3"; src: url("keyframes-3.woff"); }
+
+@keyframes keyframes1 {
+  from { font-family: keyframes1, "keyframes 2"; }
+  to { transform: translateX(40px); font-family: "keyframes\A 3"; }
+}
+</style>
+
+</head>
+<body>
+<blockquote style="font-family: identifier1;"></blockquote>
+<blockquote style='font-family: "identifier2";'>(referred by string)</blockquote>
+
+<blockquote style='font-family: "string1";'></blockquote>
+<blockquote style="font-family: 'string2';"></blockquote>
+<blockquote style="font-family: string3;">(referred by identifier)</blockquote>
+<blockquote style='font-family: "string 4";'></blockquote>
+
+<blockquote style="font-family: 'complex \\&quot;name\\&quot; \0A 1';"></blockquote>
+<blockquote style="font-family: 'complex \\\'name\\\' 2';"></blockquote>
+
+<blockquote style="font-family: 'multiple value 1', 'multiple value 2';"></blockquote>
+
+<blockquote style="animation: keyframes1 3s linear infinite;"></blockquote>
+</body>
+</html>

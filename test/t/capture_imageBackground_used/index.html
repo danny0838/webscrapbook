@@ -6,7 +6,7 @@
 
 <!-- Basic -->
 <style>
-#internal { background: url("internal.bmp"); }
+#internal { background-image: url("internal.bmp"); }
 </style>
 <link rel="stylesheet" href="link.css">
 <style>
@@ -15,23 +15,17 @@
 
 <!-- Pseudo-elements -->
 <style>
-#pseudo1::before { background: url("pseudo1.bmp"); content: "X"; }
-#pseudo2::after { background: url("pseudo2.bmp"); content: "X"; }
-#pseudo3::first-letter { background: url("pseudo3.bmp"); }
-#pseudo4::first-line { background: url("pseudo4.bmp"); }
+#pseudo1::before { background-image: url("pseudo1.bmp"); content: "X"; }
+#pseudo2::after { background-image: url("pseudo2.bmp"); content: "X"; }
+#pseudo3::first-letter { background-image: url("pseudo3.bmp"); }
+#pseudo4::first-line { background-image: url("pseudo4.bmp"); }
 </style>
 
 <!-- @keyframes -->
 <style>
 @keyframes internal {
-  from { transform: rotate(0turn); background-image: url("internal-keyframes.bmp"); }
-  to { transform: rotate(1turn); }
-}
-</style>
-<style>
-@keyframes internal\ 2 {
-  from { transform: rotate(0turn); background-image: url("internal-keyframes2.bmp"); }
-  to { transform: rotate(1turn); }
+  from { background-image: url("internal-keyframes.bmp"); }
+  to { transform: translateX(40px); }
 }
 </style>
 <link rel="stylesheet" href="link-keyframes.css">
@@ -41,30 +35,29 @@
 
 <!-- neverused -->
 <style>
-#neverused { background: url("neverused.bmp"); }
+#neverused { background-image: url("neverused.bmp"); }
 </style>
 <style>
 @keyframes neverused {
-  from { transform: rotate(0turn); background-image: url("neverused.bmp"); }
-  to { transform: rotate(1turn); }
+  from { background-image: url("neverused.bmp"); }
+  to { transform: translateX(40px); }
 }
 </style>
 
 <!-- removed elements -->
 <style>
-#removed-internal { background: url("removed.bmp"); }
+#removed-internal { background-image: url("removed.bmp"); }
 </style>
 <style>
 @keyframes removed {
-  from { transform: rotate(0turn); background-image: url("removed.bmp"); }
-  to { transform: rotate(1turn); }
+  from { background-image: url("removed.bmp"); }
+  to { transform: translateX(40px); }
 }
 </style>
-
 </head>
 <body>
 <h2>Basic</h2>
-<blockquote id="inline" style="background: url(inline.bmp)">inline</blockquote>
+<blockquote id="inline" style="background-image: url(inline.bmp)">inline</blockquote>
 <blockquote id="internal">internal</blockquote>
 <blockquote id="link">link</blockquote>
 <blockquote id="import">import</blockquote>
@@ -76,13 +69,12 @@
 <blockquote id="pseudo4">first-line<br>second line</blockquote>
 
 <h2>@keyframes</h2>
-<blockquote id="internal-keyframes" style="width: 60px; height: 60px; display: inline-block; animation: internal 1s linear infinite;">internal</blockquote>
-<blockquote id="internal-keyframes2" style="width: 60px; height: 60px; display: inline-block; animation: internal\ 2 1s linear infinite;">internal</blockquote>
-<blockquote id="link-keyframes" style="width: 60px; height: 60px; display: inline-block; animation: link 1s linear infinite;">link</blockquote>
-<blockquote id="import-keyframes" style="width: 60px; height: 60px; display: inline-block; animation: import 1s linear infinite;">import</blockquote>
+<blockquote id="internal-keyframes" style="animation: internal 3s linear infinite;">internal</blockquote>
+<blockquote id="link-keyframes" style="animation: link 3s linear infinite;">link</blockquote>
+<blockquote id="import-keyframes" style="animation: import 3s linear infinite;">import</blockquote>
 
 <h2>Removed elements</h2>
-<video id="removed-internal" style="width: 60px; height: 60px;">removed internal</video>
-<video id="removed-keyframes" style="width: 60px; height: 60px; animation: removed 1s linear infinite;">removed keyframes</video>
+<video id="removed-internal">removed internal</video>
+<video id="removed-keyframes" style="animation: removed 3s linear infinite;">removed keyframes</video>
 </body>
 </html>
