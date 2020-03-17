@@ -2,13 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Test used background images (scoped @keyframes)</title>
-<style>
-@keyframes internal {
-  from { transform: rotate(0turn); background-image: url("internal-keyframes.bmp"); }
-  to { transform: rotate(1turn); }
-}
-</style>
+<title>Test used background images (shadow DOM)</title>
 </head>
 <body>
 <blockquote><div id="shadow1"></div></blockquote>
@@ -17,18 +11,10 @@
 var d = document.querySelector('#shadow1');
 var s = d.attachShadow({mode: 'open'});
 s.innerHTML = `<style>
-@keyframes shadow {
-  from { transform: rotate(0turn); background-image: url("shadow-keyframes.bmp"); }
-  to { transform: rotate(1turn); }
-}
-@keyframes internal {
-  from { transform: rotate(0turn); background-image: url("shadow-keyframes2.bmp"); }
-  to { transform: rotate(1turn); }
-}
+:host { background: url("yellow.bmp"); }
+#shadow { background: url("green.bmp"); }
 </style>
-<blockquote id="shadow-keyframes" style="width: 60px; height: 60px; display: inline-block; animation: shadow 1s linear infinite;">shadow</blockquote>
-<blockquote id="shadow-keyframes2" style="width: 60px; height: 60px; display: inline-block; animation: internal 1s linear infinite;">shadow2</blockquote>
-`;
+<blockquote id="shadow">shadow</blockquote>`;
 </script>
 </body>
 </html>

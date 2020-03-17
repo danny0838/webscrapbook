@@ -3634,7 +3634,7 @@ async function test_capture_imageBackground_used() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used2() {
+async function test_capture_imageBackground_used3() {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -3642,7 +3642,7 @@ async function test_capture_imageBackground_used2() {
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used2/index.html`,
+    url: `${localhost}/capture_imageBackground_used3/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3668,7 +3668,7 @@ async function test_capture_imageBackground_used2() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used3() {
+async function test_capture_imageBackground_used4() {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -3676,7 +3676,7 @@ async function test_capture_imageBackground_used3() {
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used3/index.html`,
+    url: `${localhost}/capture_imageBackground_used4/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3715,7 +3715,7 @@ async function test_capture_imageBackground_used3() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used4() {
+async function test_capture_imageBackground_used5() {
   // Document.adoptedStyleSheets is supported by Chromium only.
   // Skip for a browser that does not support it.
   if (!document.adoptedStyleSheets) { return; }
@@ -3727,7 +3727,7 @@ async function test_capture_imageBackground_used4() {
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used4/index.html`,
+    url: `${localhost}/capture_imageBackground_used5/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4470,14 +4470,14 @@ async function test_capture_font_used() {
  *
  * capture.font
  */
-async function test_capture_font_used2() {
+async function test_capture_font_used3() {
   /* capture.font = save-used */
   var options = {
     "capture.rewriteCss": "url",
     "capture.font": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used2/index.html`,
+    url: `${localhost}/capture_font_used3/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7777,16 +7777,16 @@ async function runTests() {
   await test(test_capture_image);
   await test(test_capture_imageBackground);
   await test(test_capture_imageBackground_used);
-  await test(test_capture_imageBackground_used2);
   await test(test_capture_imageBackground_used3);
   await test(test_capture_imageBackground_used4);
+  await test(test_capture_imageBackground_used5);
   await test(test_capture_favicon);
   await test(test_capture_canvas);
   await test(test_capture_audio);
   await test(test_capture_video);
   await test(test_capture_font);
   await test(test_capture_font_used);
-  await test(test_capture_font_used2);
+  await test(test_capture_font_used3);
   await test(test_capture_script);
   await test(test_capture_noscript);
   await test(test_capture_embed);

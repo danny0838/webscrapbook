@@ -2,25 +2,33 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Test used background images (adoptedStyleSheets)</title>
+<title>Test used background images (scoped @keyframes)</title>
+<style>
+@keyframes internal {
+  from { transform: rotate(0turn); background-image: url("internal-keyframes.bmp"); }
+  to { transform: rotate(1turn); }
+}
+</style>
 </head>
 <body>
-<blockquote id="adopted">#adopted</blockquote>
-<script>
-var css = new CSSStyleSheet();
-css.insertRule('#adopted { background-image: url(./doc.bmp); }');
-document.adoptedStyleSheets = [...document.adoptedStyleSheets, css];
-</script>
+<blockquote><div id="shadow1"></div></blockquote>
 
-<div id="shadow1"></div>
 <script>
 var d = document.querySelector('#shadow1');
 var s = d.attachShadow({mode: 'open'});
-s.innerHTML = `<blockquote id="adopted">#adopted</blockquote>`;
-
-var css2 = new CSSStyleSheet();
-css2.insertRule('#adopted { background-image: url(./shadow.bmp); }');
-s.adoptedStyleSheets = [...s.adoptedStyleSheets, css2];
+s.innerHTML = `<style>
+@keyframes shadow {
+  from { transform: rotate(0turn); background-image: url("shadow-keyframes.bmp"); }
+  to { transform: rotate(1turn); }
+}
+@keyframes internal {
+  from { transform: rotate(0turn); background-image: url("shadow-keyframes2.bmp"); }
+  to { transform: rotate(1turn); }
+}
+</style>
+<blockquote id="shadow-keyframes" style="width: 60px; height: 60px; display: inline-block; animation: shadow 1s linear infinite;">shadow</blockquote>
+<blockquote id="shadow-keyframes2" style="width: 60px; height: 60px; display: inline-block; animation: internal 1s linear infinite;">shadow2</blockquote>
+`;
 </script>
 </body>
 </html>
