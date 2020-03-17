@@ -479,6 +479,20 @@
   "OptionCaptureFrameTooltip": {
     "message": "This determines how frames (FRAME and IFRAME elements) are handled.\n\n• Save: Save the frame pages to local.\n• Link: Link the frame to its source URL. Note that a network flow will be triggered when browsing the captured document in the future. NOTE: Due to the restriction of SOP, ths font cannot be loaded by the captured page unless CORS has been properly configured by its source server.\n• Blank: Disable the frame elements.\n• Remove: Remove the frame. Note that this could affect the web page layout."
   },
+  "OptionCaptureHelpersError": {
+    "message": "Capture helper syntax is invalid and will not work when run. Stop to fix them now?\n\n$MESSAGE$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "OptionCaptureHelpersLabel": {
+    "message": "Enable capture helpers"
+  },
+  "OptionCaptureHelpersTooltip": {
+    "message": "Capture helpers preprocess the captured content to improve the capture quality. It's defined using JSON syntax with the following format:\n\n  [\n    {\n     \"description\": \"foo\",\n     \"pattern\": \"/https?://example.com/i\",\n     \"commands\": [\n       [\"remove\", \"#a-bad-element\"],\n       [\"unwrap\", \"#i-want-to-strip-this\"],\n       ...\n     ]\n    },\n    {\n     \"description\": \"bar\",\n     \"commands\": [\n       [\"remove\", \"#bad-element-inserted-by-xxx-extension\"],\n       ...\n     ]\n    },\n    ...\n  ]\n\n• description: a string to annotate this helper, optional.\n• pattern: a regular expression string (“/expression/flags”; same for followings) to restrict URLs this helper works for. Works for all pages when omitted.\n• commands: Commands to run in order. Available commands are as follows (selector for a name with “(x)” is an XPath string when an “x” is appended and a CSS selector otherwise):\n  • [\"remove(x)\", selector]: remove each element matched by selector.\n  • [\"unwrap(x)\", selector]: remove each element matched by selector but keep descendants.\n  • [\"html(x)\", selector, htmlText]: for each element matched by selector, set HTML content to htmlText (string).\n  • [\"htmlr(x)\", selector, pattern, replacement]: for each element matched by selector, replace HTML content using pattern (regex string) with replacement (string).\n  • [\"text(x)\", selector, text]: for each element matched by selector, set text content to text (string).\n  • [\"textr(x)\", selector, pattern, replacement]: for each element matched by selector, replace text content using pattern (regex string) with replacement (string).\n  • [\"attr(x)\", selector, name, value]: for each element matched by selector, set attribute name (string) to value (string, or null to delete attribute).\n  • [\"attr(x)\", selector, {name: value, ...}]: for each element matched by selector, set multiple attributes.\n  • [\"attrr(x)\", selector, name, pattern, replacement]: for each element matched by selector, replace attribute name (string) using pattern (regex string) with replacement (string). Treat nonexistent attribute as empty string when replacing.\n  • [\"css(x)\", selector, name, value, priority]: for each element matched by selector, set CSS property name (string) to value (string, or null to delete property) with priority (\"important\" or \"\" or omitted).\n  • [\"css(x)\", selector, {name: value, ...}]: for each element matched by selector, set multiple CSS properties."
+  },
   "OptionCaptureImageBackgroundLabel": {
     "message": "Style images:"
   },
@@ -514,15 +528,6 @@
   },
   "OptionCapturePageSizeLimitTooltip": {
     "message": "A page exceeding the limit will not be captured. Empty for no limit."
-  },
-  "OptionCapturePrecludeSelectorError": {
-    "message": "Syntax of the preclude selector is invalid. Stop to fix them?"
-  },
-  "OptionCapturePrecludeSelectorLabel": {
-    "message": "Preclude elements:"
-  },
-  "OptionCapturePrecludeSelectorTooltip": {
-    "message": "Use this CSS selector to preclude page elements (e.g. those inserted by other browser extensions) before capture."
   },
   "OptionCaptureRecordRemovedNodeLabel": {
     "message": "Record removed elements"
@@ -670,6 +675,9 @@
   },
   "OptionGroupEditor": {
     "message": "Editor"
+  },
+  "OptionGroupHelpers": {
+    "message": "Capture - Capture Helpers"
   },
   "OptionGroupIndexer": {
     "message": "Indexer"

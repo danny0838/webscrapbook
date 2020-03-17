@@ -479,6 +479,20 @@
   "OptionCaptureFrameTooltip": {
     "message": "此選項決定框架頁（FRAME 及 IFRAME 元素）的處理方式。\n\n• 儲存：將框架頁儲存至本地。\n• 連結：將框架頁連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n• 清空：將框架頁無效化。\n• 移除：將框架頁元素移除。注意這可能會影響網頁排版。"
   },
+  "OptionCaptureHelpersError": {
+    "message": "擷取助手語法錯誤，執行時將無作用，要停下來修正嗎？\n\n$MESSAGE$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "OptionCaptureHelpersLabel": {
+    "message": "啟用擷取助手"
+  },
+  "OptionCaptureHelpersTooltip": {
+    "message": "擷取助手可在擷取前對網頁內容做預先處理，以改善擷取效果。擷取助手使用 JSON 定義，格式如下：\n\n  [\n    {\n     \"description\": \"foo\",\n     \"pattern\": \"/https?://example.com/i\",\n     \"commands\": [\n       [\"remove\", \"#a-bad-element\"],\n       [\"unwrap\", \"#i-want-to-strip-this\"],\n       ...\n     ]\n    },\n    {\n     \"description\": \"bar\",\n     \"commands\": [\n       [\"remove\", \"#bad-element-inserted-by-xxx-extension\"],\n       ...\n     ]\n    },\n    ...\n  ]\n\n• description: 字串，註記此助手的功能，可省略。\n• pattern: 字串，為正規表示式字串（「/表示式/標幟」，下同），用於限定此助手作用的網址。若省略此項則作用於所有網頁。\n• commands: 要依序執行的指令列表。可用的指令如下：（標示「(x)」者 selector 在不加「x」時為 CSS 選擇器，加「x」時為 XPath）\n  • [\"remove(x)\", selector]: 移除匹配 selector 的元素。\n  • [\"unwrap(x)\", selector]: 移除匹配 selector 的元素，但保留子元素。\n  • [\"html(x)\", selector, htmlText]: 對匹配 selector 的元素設定 HTML 內容為 htmlText（字串）。\n  • [\"htmlr(x)\", selector, pattern, replacement]: 對匹配 selector 的元素將 HTML 內容用 pattern（正規表示式字串）取代為 replacement（字串）。\n  • [\"text(x)\", selector, text]: 對匹配 selector 的元素設定文字內容為 text（字串）。\n  • [\"textr(x)\", selector, pattern, replacement]: 對匹配 selector 的元素將文字內容用 pattern（正規表示式字串）取代為 replacement（字串）。\n  • [\"attr(x)\", selector, name, value]: 對匹配 selector 的元素設定屬性 name（字串）的值為 value（字串，或 null 表示刪除屬性）。\n  • [\"attr(x)\", selector, {name: value, ...}]: 對匹配 selector 的元素設定多個屬性。\n  • [\"attrr(x)\", selector, name, pattern, replacement]: 對匹配 selector 的元素將屬性 name（字串）的值用 pattern（正規表示式字串）取代為 replacement（字串）。取代時不存在的屬性值視為空字串。\n  • [\"css(x)\", selector, name, value, priority]: 對匹配 selector 的元素設定 CSS 屬性 name（字串）內容為 value（字串，或 null 表示刪除屬性），優先權為 priority（\"important\" 或 \"\" 或省略）。\n  • [\"css(x)\", selector, {name: value, ...}]: 對匹配 selector 的元素設定多個 CSS 屬性。"
+  },
   "OptionCaptureImageBackgroundLabel": {
     "message": "樣式圖片:"
   },
@@ -514,15 +528,6 @@
   },
   "OptionCapturePageSizeLimitTooltip": {
     "message": "系統不會擷取超出此限制的頁面。空白表示不設限制。"
-  },
-  "OptionCapturePrecludeSelectorError": {
-    "message": "預先排除選擇器語法有誤，執行時將無作用，要停下來修正嗎？"
-  },
-  "OptionCapturePrecludeSelectorLabel": {
-    "message": "預先排除的元素:"
-  },
-  "OptionCapturePrecludeSelectorTooltip": {
-    "message": "可用此 CSS 選擇器在擷取前預先移除一些網頁元素，例如其他瀏覽器擴充套件插入的內容。"
   },
   "OptionCaptureRecordRemovedNodeLabel": {
     "message": "記錄移除的元素"
@@ -670,6 +675,9 @@
   },
   "OptionGroupEditor": {
     "message": "編輯器"
+  },
+  "OptionGroupHelpers": {
+    "message": "擷取 - 擷取助手"
   },
   "OptionGroupIndexer": {
     "message": "索引器"

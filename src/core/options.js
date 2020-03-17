@@ -129,14 +129,14 @@
     }
   }
 
-  function verifyPrecludeSelectors() {
-    const sel = document.getElementById("opt_capture.precludeSelector").value;
+  function verifyHelpers() {
+    const json = document.getElementById("opt_capture.helpers").value;
 
-    if (sel) {
+    if (json) {
       try {
-        document.createElement("div").querySelector(sel);
+        JSON.parse(json);
       } catch (ex) {
-        if (confirm(scrapbook.lang("OptionCapturePrecludeSelectorError", [ex.message]))) {
+        if (confirm(scrapbook.lang("OptionCaptureHelpersError", [ex.message]))) {
           return false;
         }
       }
@@ -276,7 +276,7 @@
       event.preventDefault();
 
       // verify the form
-      if (!verifyPrecludeSelectors()) {
+      if (!verifyHelpers()) {
         return;
       }
       if (!verifyDownLinkFilters()) {

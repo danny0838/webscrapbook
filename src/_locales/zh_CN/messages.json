@@ -479,6 +479,20 @@
   "OptionCaptureFrameTooltip": {
     "message": "此选项决定框架页（FRAME 及 IFRAME 元素）的处理方式。\n\n• 保存：将框架页保存至本地。\n• 链接：将框架页连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将框架页无效化。\n• 移除：将框架页元素移除。注意这可能会影响网页排版。"
   },
+  "OptionCaptureHelpersError": {
+    "message": "获取助手语法错误，执行时将无作用，要停下来修正吗？\n\n$MESSAGE$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "OptionCaptureHelpersLabel": {
+    "message": "启用获取助手"
+  },
+  "OptionCaptureHelpersTooltip": {
+    "message": "获取助手可在获取前对网页内容做预先处理，以改善获取效果。获取助手使用 JSON 定义，格式如下：\n\n  [\n    {\n     \"description\": \"foo\",\n     \"pattern\": \"/https?://example.com/i\",\n     \"commands\": [\n       [\"remove\", \"#a-bad-element\"],\n       [\"unwrap\", \"#i-want-to-strip-this\"],\n       ...\n     ]\n    },\n    {\n     \"description\": \"bar\",\n     \"commands\": [\n       [\"remove\", \"#bad-element-inserted-by-xxx-extension\"],\n       ...\n     ]\n    },\n    ...\n  ]\n\n• description: 字串，注记此助手的功能，可省略。\n• pattern: 字串，为正则表达式字串（“/表达式/标帜”，下同），用于限定此助手作用的网址。若省略此项则作用于所有网页。\n• commands: 要依序执行的命令列表。可用的命令如下：（标示“(x)”者 selector 在不加“x”时为 CSS 选择器，加“x”时为 XPath）\n  • [\"remove(x)\", selector]: 移除匹配 selector 的元素。\n  • [\"unwrap(x)\", selector]: 移除匹配 selector 的元素，但保留子元素。\n  • [\"html(x)\", selector, htmlText]: 对匹配 selector 的元素设定 HTML 内容为 htmlText（字串）。\n  • [\"htmlr(x)\", selector, pattern, replacement]: 对匹配 selector 的元素将 HTML 内容用 pattern（正则表达式字串）取代为 replacement（字串）。\n  • [\"text(x)\", selector, text]: 对匹配 selector 的元素设定文字内容为 text（字串）。\n  • [\"textr(x)\", selector, pattern, replacement]: 对匹配 selector 的元素将文字内容用 pattern（正则表达式字串）取代为 replacement（字串）。\n  • [\"attr(x)\", selector, name, value]: 对匹配 selector 的元素设定属性 name（字串）的值为 value（字串，或 null 表示删除属性）。\n  • [\"attr(x)\", selector, {name: value, ...}]: 对匹配 selector 的元素设定多个属性。\n  • [\"attrr(x)\", selector, name, pattern, replacement]: 对匹配 selector 的元素将属性 name（字串）的值用 pattern（正则表达式字串）取代为 replacement（字串）。取代时不存在的属性值视为空字串。\n  • [\"css(x)\", selector, name, value, priority]: 对匹配 selector 的元素设定 CSS 属性 name（字串）内容为 value（字串，或 null 表示删除属性），优先权为 priority（\"important\" 或 \"\" 或省略）。\n  • [\"css(x)\", selector, {name: value, ...}]: 对匹配 selector 的元素设定多个 CSS 属性。"
+  },
   "OptionCaptureImageBackgroundLabel": {
     "message": "样式图片:"
   },
@@ -514,15 +528,6 @@
   },
   "OptionCapturePageSizeLimitTooltip": {
     "message": "系统不会获取超出此限制的页面。空白表示不设限制。"
-  },
-  "OptionCapturePrecludeSelectorError": {
-    "message": "预先排除选择器语法有误，执行时将无作用，要停下来修正吗？"
-  },
-  "OptionCapturePrecludeSelectorLabel": {
-    "message": "预先排除的元素:"
-  },
-  "OptionCapturePrecludeSelectorTooltip": {
-    "message": "可用这个 CSS 选择器在获取前预先移除一些网页元素，例如其他浏览器扩充套件插入的内容。"
   },
   "OptionCaptureRecordRemovedNodeLabel": {
     "message": "记录移除的元素"
@@ -670,6 +675,9 @@
   },
   "OptionGroupEditor": {
     "message": "編輯器"
+  },
+  "OptionGroupHelpers": {
+    "message": "获取 - 获取助手"
   },
   "OptionGroupIndexer": {
     "message": "索引器"

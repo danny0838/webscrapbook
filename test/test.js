@@ -35,7 +35,6 @@ const baseOptions = {
   "capture.formStatus": "keep",
   "capture.shadowDom": "save",
   "capture.removeHidden": "none",
-  "capture.precludeSelector": "",
   "capture.linkUnsavedUri": false,
   "capture.downLink.mode": "none",
   "capture.downLink.extFilter": "",
@@ -45,6 +44,8 @@ const baseOptions = {
   "capture.recordRemovedNode": false,
   "capture.recordRewrittenAttr": false,
   "capture.recordSourceUri": false,
+  "capture.helpersEnabled": false,
+  "capture.helpers": "",
 };
 
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -5361,83 +5362,6 @@ async function test_capture_removeHidden() {
 }
 
 /**
- * Check if precludeSelector works correctly.
- *
- * capturer.precludeSelector
- */
-async function test_capture_precludeSelector() {
-  /* capture.precludeSelector set */
-  var options = {
-    "capture.precludeSelector": "#exclude, .exclude, img",
-  };
-
-  var blob = await capture({
-    url: `${localhost}/capture_precludeSelector/index.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(!zip.files["red.bmp"]);
-  assert(!zip.files["green.bmp"]);
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  assert(!doc.querySelector('#exclude'));
-  assert(!doc.querySelector('.exclude'));
-  assert(!doc.querySelector('img'));
-
-  /* capture.precludeSelector invalid selector */
-  // invalid selector should work as not set
-  var options = {
-    "capture.precludeSelector": "###exclude, .exclude, img",
-  };
-
-  var blob = await capture({
-    url: `${localhost}/capture_precludeSelector/index.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["red.bmp"]);
-  assert(zip.files["green.bmp"]);
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  assert(doc.querySelector('#exclude'));
-  assert(doc.querySelector('.exclude'));
-  assert(doc.querySelector('img'));
-
-  /* capture.precludeSelector not set */
-  var options = {
-    "capture.precludeSelector": "",
-  };
-
-  var blob = await capture({
-    url: `${localhost}/capture_precludeSelector/index.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["red.bmp"]);
-  assert(zip.files["green.bmp"]);
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  assert(doc.querySelector('#exclude'));
-  assert(doc.querySelector('.exclude'));
-  assert(doc.querySelector('img'));
-}
-
-/**
  * Check if the URL for general saved resource is rewritten correctly
  * when base is set to another directory.
  *
@@ -7796,6 +7720,124 @@ async function test_capture_sizeLimit() {
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `${localhost}/capture_sizeLimit/iframe2.html`);
 }
 
+/**
+ * Check if capture helper works correctly.
+ *
+ * capturer.helpersEnabled
+ * capture.helpers
+ */
+async function test_capture_helpers() {
+  /* capture.helpers set and enabled */
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `\
+[
+  {
+    "commands": [
+      ["remove", "#exclude, .exclude, img"]
+    ]
+  }
+]`,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_helpers/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(!zip.files["red.bmp"]);
+  assert(!zip.files["green.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector('#exclude'));
+  assert(!doc.querySelector('.exclude'));
+  assert(!doc.querySelector('img'));
+
+  /* capture.helpers disabled */
+  var options = {
+    "capture.helpersEnabled": false,
+    "capture.helpers": `\
+[
+  {
+    "commands": [
+      ["remove", "#exclude, .exclude, img"]
+    ]
+  }
+]`,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_helpers/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["red.bmp"]);
+  assert(zip.files["green.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('#exclude'));
+  assert(doc.querySelector('.exclude'));
+  assert(doc.querySelector('img'));
+
+  /* capture.helpers invalid (regard as not set) */
+  var options = {
+    "capture.helpersEnabled": false,
+    "capture.helpers": `[bad syntax]`,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_helpers/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["red.bmp"]);
+  assert(zip.files["green.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('#exclude'));
+  assert(doc.querySelector('.exclude'));
+  assert(doc.querySelector('img'));
+
+  /* capture.helpers not set */
+  var options = {
+    "capture.helpersEnabled": false,
+    "capture.helpers": "",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_helpers/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["red.bmp"]);
+  assert(zip.files["green.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('#exclude'));
+  assert(doc.querySelector('.exclude'));
+  assert(doc.querySelector('img'));
+}
+
 async function test_viewer_validate() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-validate/index.html'),
@@ -7919,7 +7961,6 @@ async function runTests() {
   await test(test_capture_shadowRoot);
   await test(test_capture_shadowRoot2);
   await test(test_capture_removeHidden);
-  await test(test_capture_precludeSelector);
   await test(test_capture_rewrite);
   await test(test_capture_rewrite2);
   await test(test_capture_anchor);
@@ -7954,6 +7995,7 @@ async function runTests() {
   await test(test_capture_singleHtml_mergeCss);
   await test(test_capture_invalid_tags);
   await test(test_capture_sizeLimit);
+  await test(test_capture_helpers);
 }
 
 async function runManualTests() {
