@@ -2939,7 +2939,7 @@
          * - CSS comments are removed.
          */
         parseNames(propText) {
-          const regex = /"[^\\"]*(?:\\.[^\\"]*)*"|((?:[^,\s\\"]|\\.)+)(?:,|$)/g;
+          const regex = /"[^\\"]*(?:\\.[^\\"]*)*"|((?:[^,\s\\"]|\\(?:[0-9A-Fa-f]{1,6} ?|.))+)(?:,|$)/g;
           const names = [];
           while (regex.test(propText)) {
             let value = RegExp.$1 || RegExp.lastMatch.slice(1, -1);
