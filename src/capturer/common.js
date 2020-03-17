@@ -2961,10 +2961,32 @@
               fonts: new Set(),
               urls: new Set(),
             })),
+            fontUsed: new Set(),
+            keyFrameUsed: new Set(),
           });
         },
 
         scopePop() {
+          // mark used keyFrames
+          for (let name of this.scopes[this.scopes.length - 1].keyFrameUsed) {
+            for (let i = this.scopes.length; i--;) {
+              if (i === 0 || this.scopes[i].keyFrameMap.has(name)) {
+                this.scopes[i].keyFrameMap.get(name).used = true;
+                break;
+              }
+            }
+          }
+
+          // mark used fonts
+          for (let ff of this.scopes[this.scopes.length - 1].fontUsed) {
+            for (let i = this.scopes.length; i--;) {
+              if (i === 0 || this.scopes[i].fontMap.has(ff)) {
+                this.scopes[i].fontMap.get(ff).used = true;
+                break;
+              }
+            }
+          }
+
           const scope = this.scopes.pop();
 
           // collect used keyFrames and their used fonts and images
@@ -3011,12 +3033,7 @@
         useFont(fontFamilyText) {
           if (!fontFamilyText) { return; }
           for (const ff of this.parseNames(fontFamilyText)) {
-            for (let i = this.scopes.length; i--;) {
-              if (i === 0 || this.scopes[i].fontMap.has(ff)) {
-                this.scopes[i].fontMap.get(ff).used = true;
-                break;
-              }
-            }
+            this.scopes[this.scopes.length - 1].fontUsed.add(ff);
           }
         },
 
@@ -3036,12 +3053,7 @@
           if (!animationNameText) { return; }
 
           for (const name of this.parseNames(animationNameText)) {
-            for (let i = this.scopes.length; i--;) {
-              if (i === 0 || this.scopes[i].keyFrameMap.has(name)) {
-                this.scopes[i].keyFrameMap.get(name).used = true;
-                break;
-              }
-            }
+            this.scopes[this.scopes.length - 1].keyFrameUsed.add(name);
           }
         },
 

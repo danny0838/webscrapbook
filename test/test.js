@@ -3730,16 +3730,23 @@ async function test_capture_imageBackground_used4() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files['internal-keyframes.bmp']);
-  assert(zip.files['shadow-keyframes.bmp']);
+  assert(!zip.files['internal-keyframes1.bmp']);
+  assert(!zip.files['internal-keyframes2.bmp']);
+  assert(zip.files['shadow-keyframes1.bmp']);
   assert(zip.files['shadow-keyframes2.bmp']);
+  assert(zip.files['shadow-keyframes3.bmp']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelector('style').textContent.trim() === `\
-@keyframes internal {
+@keyframes internal1 {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes internal2 {
   from { background-image: url(""); }
   to { transform: translateX(40px); }
 }`);
@@ -3749,12 +3756,27 @@ async function test_capture_imageBackground_used4() {
   frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
   var shadow1 = frag.content;
   assert(shadow1.querySelector('style').textContent.trim() === `\
-@keyframes shadow {
-  from { background-image: url("shadow-keyframes.bmp"); }
+@keyframes shadow1 {
+  from { background-image: url("shadow-keyframes1.bmp"); }
   to { transform: translateX(40px); }
 }
-@keyframes internal {
+#shadow-keyframes1 {
+  animation: shadow1 3s linear infinite;
+}
+
+@keyframes internal1 {
   from { background-image: url("shadow-keyframes2.bmp"); }
+  to { transform: translateX(40px); }
+}
+#shadow-keyframes2 {
+  animation: internal1 3s linear infinite;
+}
+
+#shadow-keyframes3 {
+  animation: internal2 3s linear infinite;
+}
+@keyframes internal2 {
+  from { background-image: url("shadow-keyframes3.bmp"); }
   to { transform: translateX(40px); }
 }`);
 }
@@ -4571,24 +4593,33 @@ async function test_capture_font_used3() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files['internal.woff']);
-  assert(zip.files['shadow.woff']);
+  assert(!zip.files['internal1.woff']);
+  assert(!zip.files['internal2.woff']);
+  assert(zip.files['shadow1.woff']);
   assert(zip.files['shadow2.woff']);
+  assert(zip.files['shadow3.woff']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelector('style').textContent.trim() === `\
-@font-face { font-family: internal; src: url(""); }`);
+@font-face { font-family: internal1; src: url(""); }
+@font-face { font-family: internal2; src: url(""); }`);
 
   var host1 = doc.querySelector('#shadow1');
   var frag = doc.createElement("template");
   frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
   var shadow1 = frag.content;
   assert(shadow1.querySelector('style').textContent.trim() === `\
-@font-face { font-family: shadow; src: url("shadow.woff"); }
-@font-face { font-family: internal; src: url("shadow2.woff"); }`);
+@font-face { font-family: shadow1; src: url("shadow1.woff"); }
+#shadow1 { font-family: shadow1; }
+
+@font-face { font-family: internal1; src: url("shadow2.woff"); }
+#shadow2 { font-family: internal1; }
+
+#shadow3 { font-family: internal2; }
+@font-face { font-family: internal2; src: url("shadow3.woff"); }`);
 }
 
 /**
