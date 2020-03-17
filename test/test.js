@@ -3273,7 +3273,7 @@ async function test_capture_imageBackground() {
     "capture.imageBackground": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground/background.html`,
+    url: `${localhost}/capture_imageBackground/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3322,7 +3322,7 @@ async function test_capture_imageBackground() {
     "capture.imageBackground": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground/background.html`,
+    url: `${localhost}/capture_imageBackground/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3371,7 +3371,7 @@ async function test_capture_imageBackground() {
     "capture.imageBackground": "link",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground/background.html`,
+    url: `${localhost}/capture_imageBackground/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3415,7 +3415,7 @@ async function test_capture_imageBackground() {
     "capture.imageBackground": "blank",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground/background.html`,
+    url: `${localhost}/capture_imageBackground/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3468,7 +3468,7 @@ async function test_capture_imageBackground_used() {
     "capture.imageBackground": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used/background-used.html`,
+    url: `${localhost}/capture_imageBackground_used/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3552,7 +3552,7 @@ async function test_capture_imageBackground_used() {
     "capture.imageBackground": "save-used",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_imageBackground_used/background-used.html`,
+    url: `${localhost}/capture_imageBackground_used/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3642,7 +3642,7 @@ async function test_capture_imageBackground_used2() {
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used2/shadow.html`,
+    url: `${localhost}/capture_imageBackground_used2/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3676,7 +3676,7 @@ async function test_capture_imageBackground_used3() {
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used3/shadow.html`,
+    url: `${localhost}/capture_imageBackground_used3/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4271,7 +4271,7 @@ async function test_capture_font() {
     "capture.font": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font/font.html`,
+    url: `${localhost}/capture_font/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4290,7 +4290,7 @@ async function test_capture_font() {
     "capture.font": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font/font.html`,
+    url: `${localhost}/capture_font/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4309,7 +4309,7 @@ async function test_capture_font() {
     "capture.font": "link",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font/font.html`,
+    url: `${localhost}/capture_font/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4328,7 +4328,7 @@ async function test_capture_font() {
     "capture.font": "blank",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font/font.html`,
+    url: `${localhost}/capture_font/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4356,7 +4356,7 @@ async function test_capture_font_used() {
     "capture.font": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used/font-used.html`,
+    url: `${localhost}/capture_font_used/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4414,7 +4414,7 @@ async function test_capture_font_used() {
     "capture.font": "save-used",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_font_used/font-used.html`,
+    url: `${localhost}/capture_font_used/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4477,7 +4477,7 @@ async function test_capture_font_used2() {
     "capture.font": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used2/shadow.html`,
+    url: `${localhost}/capture_font_used2/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
