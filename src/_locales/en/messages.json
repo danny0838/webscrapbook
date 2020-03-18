@@ -689,11 +689,20 @@
   "OptionIndexerCreateRssFeedBaseLabel": {
     "message": "Root URL of RSS feed:"
   },
+  "OptionIndexerCreateRssFeedBaseTooltip": {
+    "message": "The address of an RSS feed must be an absolute URL. When the site index is generated via the backend server it will be automatically detected and this field can be left blank. If the site index is not generated via the backend server or the static site is to be distributed on another server, the root URL path of the scrapbook (which looks like “https://example.com/wsb/”) must be provided explicitly."
+  },
   "OptionIndexerCreateRssFeedLabel": {
     "message": "Update RSS feed (feed.atom)"
   },
+  "OptionIndexerCreateRssFeedTooltip": {
+    "message": "The RSS feed lists recently modified data items, to inform the subscribers about recent updates."
+  },
   "OptionIndexerCreateStaticIndexLabel": {
     "message": "Update static index page (index.html)"
+  },
+  "OptionIndexerCreateStaticIndexTooltip": {
+    "message": "The static index page provides a static list of data items, for the search engine to index and for a client not supporting JavaScript to browse. This page is loads slower than map.html, though."
   },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
     "message": "Cache frame content as main document content"
@@ -707,11 +716,14 @@
   "OptionServerPasswordLabel": {
     "message": "Password:"
   },
+  "OptionServerPasswordTooltip": {
+    "message": "If the backend server is configured to require HTTP authorization, the password can be provided here to prevent being asked for repeatedly."
+  },
   "OptionServerUrlLabel": {
     "message": "Address:"
   },
   "OptionServerUrlTooltip": {
-    "message": "The root path of the backend server application, such as “http://localhost:8080/” or “https://example.com/wsb/”.\n\n• The backend server can be hosted using PyWebScrapBook (minimal compatible version: $BACKEND_VERSION$). See https://pypi.org/project/webscrapbook/ for further details.",
+    "message": "The root URL path (which must ends with “/”) of the backend server application, such as “http://localhost:8080/” or “https://example.com/wsb/”.\n\n• The backend server can be hosted using PyWebScrapBook (minimal compatible version: $BACKEND_VERSION$). See https://pypi.org/project/webscrapbook/ for further details.\n\n• The default address of a local PyWebScrapBook backend server is “http://localhost:8080/”.",
     "placeholders": {
       "backend_version": {
         "content": "$1"
@@ -720,6 +732,9 @@
   },
   "OptionServerUserLabel": {
     "message": "User:"
+  },
+  "OptionServerUserTooltip": {
+    "message": "If the backend server is configured to require HTTP authorization, the user name can be provided here to prevent being asked for repeatedly."
   },
   "OptionViewerUseFileSystemApiLabel": {
     "message": "Use Filesystem API"

@@ -689,11 +689,20 @@
   "OptionIndexerCreateRssFeedBaseLabel": {
     "message": "RSS 摘要根网址:"
   },
+  "OptionIndexerCreateRssFeedBaseTooltip": {
+    "message": "RSS 摘要的网址须为绝对路径，透过后端伺服器建立索引时会自动侦测，此项可空白。若不是透过后端伺服器建立索引，或要转发布至其他伺服器，则须在此提供发布剪贴簿的网址根目录，例如“https://example.com/wsb/”。"
+  },
   "OptionIndexerCreateRssFeedLabel": {
     "message": "更新 RSS 摘要 (feed.atom)"
   },
+  "OptionIndexerCreateRssFeedTooltip": {
+    "message": "RSS 摘要会列出最近更动的资料项目，以告知订阅者近期更新情形。"
+  },
   "OptionIndexerCreateStaticIndexLabel": {
     "message": "更新静态索引页 (index.html)"
+  },
+  "OptionIndexerCreateStaticIndexTooltip": {
+    "message": "静态索引页提供静态的资料项目列表，供搜寻引擎检索及不支援 JavaScript 的客户端浏览，但此页面载入较 map.html 慢。"
   },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
     "message": "将框架页内容缓存为主页内容"
@@ -707,11 +716,14 @@
   "OptionServerPasswordLabel": {
     "message": "密码:"
   },
+  "OptionServerPasswordTooltip": {
+    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的密码，以免浏览器询问。"
+  },
   "OptionServerUrlLabel": {
     "message": "网址:"
   },
   "OptionServerUrlTooltip": {
-    "message": "后端服务器程序的根目录，例如“http://localhost:8080/”或“https://example.com/wsb/”。\n\n• 后端服务器可用 PyWebScrapBook 套件（最低相容版本：$BACKEND_VERSION$）架设，安装细节参见 https://pypi.org/project/webscrapbook/。",
+    "message": "后端服务器程序的网址根目录（必须以“/”结尾），例如“http://localhost:8080/”或“https://example.com/wsb/”。\n\n• 后端服务器可用 PyWebScrapBook 套件（最低相容版本：$BACKEND_VERSION$）架设，安装细节参见 https://pypi.org/project/webscrapbook/。\n• 本地架设的 PyWebScrapBook 后端服务器预设网址为“http://localhost:8080/”。",
     "placeholders": {
       "backend_version": {
         "content": "$1"
@@ -720,6 +732,9 @@
   },
   "OptionServerUserLabel": {
     "message": "用户:"
+  },
+  "OptionServerUserTooltip": {
+    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的用户名，以免浏览器询问。"
   },
   "OptionViewerUseFileSystemApiLabel": {
     "message": "使用 Filesystem API"
