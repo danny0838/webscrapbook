@@ -407,7 +407,7 @@
     "message": "File extension filter:"
   },
   "OptionCaptureDownLinkExtFilterTooltip": {
-    "message": "This determines what to download according to file extension.\n\n• Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. \"jpg, jpeg\") or a regular expression (e.g. \"/jpe?g|gif|png/i\").\n\n• The full extension is taken for matching. For example, .doc does not match the rule \"docx\".\n\n• Whichever matches a rule at any line is included for download.\n\n• A line starting with \"#\" is regarded as a comment and will be ignored during execution."
+    "message": "This determines what to download according to file extension.\n\n• Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. “jpg, jpeg”) or a regular expression (e.g. “/jpe?g|gif|png/i”).\n\n• The full extension is taken for matching. For example, .doc does not match the rule “docx”.\n\n• Whichever matches a rule at any line is included for download.\n\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkFilterErrorLine": {
     "message": "Line $LINE$: $ERROR$",
@@ -427,7 +427,7 @@
     "message": "Disable download linked files"
   },
   "OptionCaptureDownLinkModeTooltip": {
-    "message": "This determines whether and how to download the targeted resource of a link (an A or AREA element).\n\n• Disable download linked files: Do not download the linked resource.\n\n• Match URL file extension: Match the file extension of the URL. This performs better but cannot differenciate dynamically generated resource. For example, a URL whose extension is .php can output a resource of html, doc, pdf, or other type, but the filter always gets \"php\" in this mode.\n\n• Match HTTP header and file extension: Traverse every link to get the HTTP header and the precise extension of the output resource for matching. NOTE: Certain sites make interactive commands as plain hyperlink, which could be unexpectedly triggered during traversal (such as logging out the site). The URL filter can be configured to avoid such trigering."
+    "message": "This determines whether and how to download the targeted resource of a link (an A or AREA element).\n\n• Disable download linked files: Do not download the linked resource.\n\n• Match URL file extension: Match the file extension of the URL. This performs better but cannot differenciate dynamically generated resource. For example, a URL whose extension is .php can output a resource of html, doc, pdf, or other type, but the filter always gets “php” in this mode.\n\n• Match HTTP header and file extension: Traverse every link to get the HTTP header and the precise extension of the output resource for matching. NOTE: Certain sites make interactive commands as plain hyperlink, which could be unexpectedly triggered during traversal (such as logging out the site). The URL filter can be configured to avoid such trigering."
   },
   "OptionCaptureDownLinkModeUrlLabel": {
     "message": "Match URL file extension"
@@ -444,7 +444,7 @@
     "message": "URL filter:"
   },
   "OptionCaptureDownLinkUrlFilterTooltip": {
-    "message": "This determines what are forbidden for downloading according to full URL (with the \"#\" part stripped).\n\n• Each following line is a full URL (with \"#\" part stripped) or a regular expression (e.g. \"/[/=]logout\\b/i\"). \n\n• Whichever matches a rule at any line is forbidden for downloading.\n\n• A line starting with \"#\" is regarded as a comment and will be ignored during execution."
+    "message": "This determines what are forbidden for downloading according to full URL (with the “#” part stripped).\n\n• Each following line is a full URL (with “#” part stripped) or a regular expression (e.g. “/[/=]logout\\b/i”). \n\n• Whichever matches a rule at any line is forbidden for downloading.\n\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBEDs:"
@@ -495,7 +495,7 @@
     "message": "Link uncaptured resource to source"
   },
   "OptionCaptureLinkUnsavedUriTooltip": {
-    "message": "If checked, an uncaptured resource is linked to the source URL (a network flow will be triggered when browsing the captured document); otherwise it's recorded as \"urn:scrapbook:*\"."
+    "message": "If checked, an uncaptured resource is linked to the source URL (a network flow will be triggered when browsing the captured document); otherwise it's recorded as “urn:scrapbook:*”."
   },
   "OptionCaptureMergeCssResourcesLabel": {
     "message": "Merge duplicated CSS media"
@@ -549,7 +549,7 @@
     "message": "Disable"
   },
   "OptionCaptureRemoveHiddenTooltip": {
-    "message": "Determines how hidden elements are handled.\n\n• Disable: Disable this feature.\n\n• Remove undisplayed elements: Remove elements whose \"display\" CSS property is computed to \"none\". Note that this could affect the web page layout, such as altering the targets of \"+\", \"~\", and \":nth-child\" CSS selectors."
+    "message": "Determines how hidden elements are handled.\n\n• Disable: Disable this feature.\n\n• Remove undisplayed elements: Remove elements whose “display” CSS property is computed to “none”. Note that this could affect the web page layout, such as altering the targets of “+”, “~”, and “:nth-child” CSS selectors."
   },
   "OptionCaptureRemoveHiddenUndisplayedLabel": {
     "message": "Remove undisplayed elements"
@@ -582,7 +582,7 @@
     "message": "Single HTML"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "This determines how the web page and referenced files are saved.\n\n• Folder: Generates a folder and save the web page and resource files into it. NOTE for Chromium: When saving captured data to scrapbook folder, it's recommended that \"Ask where to save each file before downloading\" be unchecked to avoid massive prompts for a capture; additionally, several file formats (.js for example) are blocked by the browser, and the user has to select \"Keep\" for each of them to download them.\n\n• HTZ or MAFF package: Packs web page and referenced resources in to a single file using ZIP algorithm. Such files can be viewed using the \"View archive page\" feature or by unzipping them.\n\n• Single HTML: Stores the referenced resource as data URL, which is supported by most browsers, such as Chromium > 0, Firefox > 0, Edge > 0, Safari > 0, Opera ≥ 7.2, and IE ≥ 8 (very limited in IE). NOTE: Data URLs are less performant and cannot effectively deduplicate resources, which can cause the file size to increase significantly."
+    "message": "This determines how the web page and referenced files are saved.\n\n• Folder: Generates a folder and save the web page and resource files into it. NOTE for Chromium: When saving captured data to scrapbook folder, it's recommended that “Ask where to save each file before downloading” be unchecked to avoid massive prompts for a capture; additionally, several file formats (.js for example) are blocked by the browser, and the user has to select “Keep” for each of them to download them.\n\n• HTZ or MAFF package: Packs web page and referenced resources in to a single file using ZIP algorithm. Such files can be viewed using the “View archive page” feature or by unzipping them.\n\n• Single HTML: Stores the referenced resource as data URL, which is supported by most browsers, such as Chromium > 0, Firefox > 0, Edge > 0, Safari > 0, Opera ≥ 7.2, and IE ≥ 8 (very limited in IE). NOTE: Data URLs are less performant and cannot effectively deduplicate resources, which can cause the file size to increase significantly."
   },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ package"
@@ -609,7 +609,7 @@
     "message": "Filename to save:"
   },
   "OptionCaptureSaveFilenameTooltip": {
-    "message": "This determines the filename (excluding the extension) when saving a capture. Following template syntaxes are available:\n• %% - a literal \"%\".\n• %ID% - the unique identifier of the capture, e.g. \"20190301124533216\".\n• %ID_0% - the unique identifier using legacy ScrapBook format, e.g. \"20190301204533\".\n• %UUID% - generates a random UUID, e.g. \"941e4674-d6c7-4709-9703-a1b4359286c6\".\n• %TITLE% - page title, or the last URL segment.\n• %HOST% - domain name of the source, e.g. \"example.com\".\n• %PAGE% - the last URL segment, with extension removed.\n• %FILE% - the last URL segment.\n• %DATE% - current date, in YYYY-MM-DD format.\n• %TIME% - current time, in HH-MM-SS format.\n• %YEAR% - current year, in YYYY format.\n• %MONTH% - current month, in MM format。\n• %DAY% - current date in the month, in DD format.\n• %HOURS% - current hours, in HH format.\n• %MINUTES% - current minutes, in MM format.\n• %SECONDS% - current seconds, in SS format.\n• \"_UTC\" can be appended to date/time parameters to use UTC time, e.g.  %TIME_UTC%, %HOURS_UTC%.\n• A slash \"/\" can be used to specify a subfolder, e.g. \"%YEAR%/%MONTH%/%TITLE%\"."
+    "message": "This determines the filename (excluding the extension) when saving a capture. Following template syntaxes are available:\n• %% - a literal “%”.\n• %ID% - the unique identifier of the capture, e.g. “20190301124533216”.\n• %ID_0% - the unique identifier using legacy ScrapBook format, e.g. “20190301204533”.\n• %UUID% - generates a random UUID, e.g. “941e4674-d6c7-4709-9703-a1b4359286c6”.\n• %TITLE% - page title, or the last URL segment.\n• %HOST% - domain name of the source, e.g. “example.com”.\n• %PAGE% - the last URL segment, with extension removed.\n• %FILE% - the last URL segment.\n• %DATE% - current date, in YYYY-MM-DD format.\n• %TIME% - current time, in HH-MM-SS format.\n• %YEAR% - current year, in YYYY format.\n• %MONTH% - current month, in MM format。\n• %DAY% - current date in the month, in DD format.\n• %HOURS% - current hours, in HH format.\n• %MINUTES% - current minutes, in MM format.\n• %SECONDS% - current seconds, in SS format.\n• “_UTC” can be appended to date/time parameters to use UTC time, e.g.  %TIME_UTC%, %HOURS_UTC%.\n• A slash “/” can be used to specify a subfolder, e.g. “%YEAR%/%MONTH%/%TITLE%”."
   },
   "OptionCaptureSaveToFileLabel": {
     "message": "File"
@@ -630,13 +630,13 @@
     "message": "Scrapbook folder:"
   },
   "OptionCaptureScrapbookFolderTooltip": {
-    "message": "The top-level folder scrapbook data are saved in. This is a path under the <default download folder>, such as \"WebScrapBook/data\".\n\n• Browser extensions are restricted to download only to the <default download folder>. To specify a folder beyond it, create a symbolic link (or junction point in Windows) targeting to the desired folder under <default download folder>.\n\n• NOTE: The indexer supports generating index only for a scrapbook folder with \"data\" subfolder, for downward compatibility. A backend server is required to run the indexer if other data schema is used."
+    "message": "The top-level folder scrapbook data are saved in. This is a path under the <default download folder>, such as “WebScrapBook/data”.\n\n• Browser extensions are restricted to download only to the <default download folder>. To specify a folder beyond it, create a symbolic link (or junction point in Windows) targeting to the desired folder under <default download folder>.\n\n• NOTE: The indexer supports generating index only for a scrapbook folder with “data” subfolder, for downward compatibility. A backend server is required to run the indexer if other data schema is used."
   },
   "OptionCaptureScriptLabel": {
     "message": "Scripts:"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n• Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Additionally, scripts don't run in the archive page viewer for security reasons. It is generally recommended to set capture options to \"save\", \"canvas\" option to \"save initial status\", and \"shadow DOMs\" option to \"remove\" to avoid a conflict to and an error of the script.\n\n• Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n• Blank: Disable the script.\n\n• Remove: Remove the script element. Note that this could affect the web page layout in some rare cases."
+    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n• Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Additionally, scripts don't run in the archive page viewer for security reasons. It is generally recommended to set capture options to “save”, “canvas” option to “save initial status”, and “shadow DOMs” option to “remove” to avoid a conflict to and an error of the script.\n\n• Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n\n• Blank: Disable the script.\n\n• Remove: Remove the script element. Note that this could affect the web page layout in some rare cases."
   },
   "OptionCaptureShadowDomLabel": {
     "message": "Shadow DOMs:"
@@ -731,13 +731,13 @@
     "message": "View HTZ file"
   },
   "OptionViewerViewHtzTooltip": {
-    "message": "When the browser loads an HTZ file, view it with the viewer. Check \"Allow access to file URLs\" in a supported browser to enable opening such files directly."
+    "message": "When the browser loads an HTZ file, view it with the viewer. Check “Allow access to file URLs” in a supported browser to enable opening such files directly."
   },
   "OptionViewerViewMaffLabel": {
     "message": "View MAFF file"
   },
   "OptionViewerViewMaffTooltip": {
-    "message": "When the browser loads a MAFF file, view it with the viewer. Check \"Allow access to file URLs\" in a supported browser to enable opening such files directly."
+    "message": "When the browser loads a MAFF file, view it with the viewer. Check “Allow access to file URLs” in a supported browser to enable opening such files directly."
   },
   "OptionsExportLabel": {
     "message": "Export"
