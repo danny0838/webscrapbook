@@ -104,22 +104,18 @@
     const tabs = await browser.tabs.query({
       currentWindow: true,
     });
-    const target = tabs
-      .filter(t => (
-        scrapbook.isContentPage(t.url, allowFileAccess) &&
-        // Select active and highlighted tabs.
-        //
-        // Normally active tabs are always highlighted, but in some browsers
-        // (e.g. Opera 58) Tab.highlighted = false, so check for active tabs
-        // explictly as a fallback.
-        //
-        // Firefox for Android < 54 does not support Tab.highlighted. Treat
-        // undefined as true.
-        (t.active || t.highlighted !== false)
-      ))
-      .map(t => t.id)
-      .join(',');
-    return target;
+    return tabs.filter(t => (
+      scrapbook.isContentPage(t.url, allowFileAccess) &&
+      // Select active and highlighted tabs.
+      //
+      // Normally active tabs are always highlighted, but in some browsers
+      // (e.g. Opera 58) Tab.highlighted = false, so check for active tabs
+      // explictly as a fallback.
+      //
+      // Firefox for Android < 54 does not support Tab.highlighted. Treat
+      // undefined as true.
+      (t.active || t.highlighted !== false)
+    ));
   };
 
   /**
@@ -149,34 +145,19 @@
   };
 
   /**
-   * @param {string} target - a list of tabId and frameId
-   * @param {string} url - a list of URL and title
-   * @param {string} mode
+   * @param {Array} tasks
    * @return {Promise<(Window|Tab)>}
    */
-  scrapbook.invokeCapture = async function (params) {
-    const {
-      target, full,
-      url, title, refUrl, favIconUrl,
-      mode,
-    } = params;
-
-    const urlObj = new URL(browser.runtime.getURL("capturer/capturer.html"));
-    if (target) {
-      urlObj.searchParams.set('t', target);
-      if (full) { urlObj.searchParams.set('f', 1); }
-    } else if (url) {
-      urlObj.searchParams.set('u', url);
-      if (title) { urlObj.searchParams.set('t', title); }
-      if (refUrl) { urlObj.searchParams.set('r', refUrl); }
-      if (favIconUrl) { urlObj.searchParams.set('f', favIconUrl); }
-    }
-    if (mode) { urlObj.searchParams.set('m', mode); }
+  scrapbook.invokeCapture = async function (tasks) {
+    const missionId = scrapbook.getUuid();
+    const key = {table: "captureMissionCache", id: missionId};
+    await scrapbook.cache.set(key, tasks);
+    const url = browser.runtime.getURL("capturer/capturer.html") + `?mid=${missionId}`;
 
     if (browser.windows) {
       const win = await browser.windows.getCurrent();
       return await browser.windows.create({
-        url: urlObj.href,
+        url,
         type: 'popup',
         width: 400,
         height: 400,
@@ -184,7 +165,7 @@
       });
     } else {
       return await browser.tabs.create({
-        url: urlObj.href,
+        url,
       });
     }
   };

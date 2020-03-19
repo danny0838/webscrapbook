@@ -81,15 +81,17 @@
         return await generateActionButtonForTabs(
           document.getElementById("captureTab"),
           async (tab) => {
-            return await scrapbook.invokeCapture({
-              target: tab.id,
-            });
+            return await scrapbook.invokeCapture([{
+              tabId: tab.id,
+            }]);
           });
       }
 
-      return await scrapbook.invokeCapture({
-        target: await scrapbook.getHighlightedTabs(),
-      });
+      return await scrapbook.invokeCapture(
+        (await scrapbook.getHighlightedTabs()).map(tab => ({
+          tabId: tab.id,
+        }))
+      );
     });
 
     document.getElementById("captureTabSource").addEventListener('click', async (event) => {
@@ -97,17 +99,19 @@
         return await generateActionButtonForTabs(
           document.getElementById("captureTabSource"),
           async (tab) => {
-            return await scrapbook.invokeCapture({
-              target: tab.id,
+            return await scrapbook.invokeCapture([{
+              tabId: tab.id,
               mode: "source",
-            });
+            }]);
           });
       }
 
-      return await scrapbook.invokeCapture({
-        target: await scrapbook.getHighlightedTabs(),
-        mode: "source",
-      });
+      return await scrapbook.invokeCapture(
+        (await scrapbook.getHighlightedTabs()).map(tab => ({
+          tabId: tab.id,
+          mode: "source",
+        }))
+      );
     });
 
     document.getElementById("captureTabBookmark").addEventListener('click', async (event) => {
@@ -115,24 +119,28 @@
         return await generateActionButtonForTabs(
           document.getElementById("captureTabBookmark"),
           async (tab) => {
-            return await scrapbook.invokeCapture({
-              target: tab.id,
+            return await scrapbook.invokeCapture([{
+              tabId: tab.id,
               mode: "bookmark",
-            });
+            }]);
           });
       }
 
-      return await scrapbook.invokeCapture({
-        target: await scrapbook.getHighlightedTabs(),
-        mode: "bookmark",
-      });
+      return await scrapbook.invokeCapture(
+        (await scrapbook.getHighlightedTabs()).map(tab => ({
+          tabId: tab.id,
+          mode: "bookmark",
+        }))
+      );
     });
 
     document.getElementById("captureAllTabs").addEventListener('click', async (event) => {
       const tabs = await scrapbook.getContentTabs();
-      return await scrapbook.invokeCapture({
-        target: tabs.map(t => t.id).join(','),
-      });
+      return await scrapbook.invokeCapture(
+        tabs.map(tab => ({
+          tabId: tab.id,
+        }))
+      );
     });
 
     document.getElementById("editTab").addEventListener('click', async (event) => {

@@ -39,23 +39,29 @@
       },
 
       async captureTab() {
-        return await scrapbook.invokeCapture({
-          target: await scrapbook.getHighlightedTabs(),
-        });
+        return await scrapbook.invokeCapture(
+          (await scrapbook.getHighlightedTabs()).map(tab => ({
+            tabId: tab.id,
+          }))
+        );
       },
 
       async captureTabSource() {
-        return await scrapbook.invokeCapture({
-          target: await scrapbook.getHighlightedTabs(),
-          mode: "source",
-        });
+        return await scrapbook.invokeCapture(
+          (await scrapbook.getHighlightedTabs()).map(tab => ({
+            tabId: tab.id,
+            mode: "source",
+          }))
+        );
       },
 
       async captureTabBookmark() {
-        return await scrapbook.invokeCapture({
-          target: await scrapbook.getHighlightedTabs(),
-          mode: "bookmark",
-        });
+        return await scrapbook.invokeCapture(
+          (await scrapbook.getHighlightedTabs()).map(tab => ({
+            tabId: tab.id,
+            mode: "bookmark",
+          }))
+        );
       },
 
       async editTab() {
@@ -161,17 +167,19 @@
    * @kind invokable
    */
   background.saveCurrentTab = async function (params, sender) {
-    const target = sender.tab.id;
-    const mode = 'save';
-    return await scrapbook.invokeCapture({target, mode});
+    return await scrapbook.invokeCapture([{
+      tabId: sender.tab.id,
+      mode: 'save',
+    }]);
   };
 
   /**
    * @kind invokable
    */
   background.captureCurrentTab = async function (params, sender) {
-    const target = sender.tab.id;
-    return await scrapbook.invokeCapture({target});
+    return await scrapbook.invokeCapture([{
+      tabId: sender.tab.id,
+    }]);
   };
 
   /**

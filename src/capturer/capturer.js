@@ -634,6 +634,72 @@
   /**
    * @kind invokable
    * @param {Object} params
+   * @param {Array} params.tasks
+   * @return {Promise<Array|Object>} - list of task results (or error), or an object of error
+   */
+  capturer.runTasks = async function (params) {
+    try {
+      const {tasks} = params;
+      const results = [];
+
+      for (const task of tasks) {
+        const {
+          tabId, frameId, full,
+          url, refUrl, title, favIconUrl,
+          mode, options,
+        } = task;
+
+        let result;
+        try {
+          if (typeof tabId === 'number') {
+            // capture tab
+            const source = `[${tabId}:${frameId}]`;
+            result = await capturer.captureTab({
+              tabId,
+              frameId,
+              saveBeyondSelection: full,
+              mode,
+              options,
+            });
+          } else if (typeof url === 'string') {
+            // capture headless
+            result = await capturer.captureHeadless({
+              url,
+              refUrl,
+              title,
+              favIconUrl,
+              mode,
+              options,
+            });
+          }
+        } catch (ex) {
+          console.error(ex);
+          const err = `Unexpected error: ${ex.message}`;
+          capturer.error(err);
+          result = {error: {message: err}};
+        }
+
+        if (!result.error) {
+          capturer.log(`Done.`);
+        }
+        results.push(result);
+
+        // short delay before next task
+        await scrapbook.delay(5);
+      }
+
+      return results;
+    } catch (ex) {
+      console.error(ex);
+      const err = `Fatal error: ${ex.message}`;
+      capturer.error(err);
+      return {error: {message: err}};
+    }
+  };
+
+  /**
+   * @kind invokable
+   * @param {Object} params
    * @param {integer} params.tabId
    * @param {integer} params.frameId
    * @param {boolean} params.saveBeyondSelection
@@ -2546,87 +2612,39 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     const urlObj = new URL(document.URL);
     const s = urlObj.searchParams;
 
-    let autoClose = true;
-    if (!urlObj.search) {
-      capturer.error(`Nothing to capture.`);
-      autoClose = false;
-    } else if (s.has('mid')) {
-      // use the missionId to receive further message
-      // and avoids auto-closing
-      capturer.missionId = s.get('mid');
+    // use the missionId to receive further message
+    const missionId = capturer.missionId = s.get('mid');
 
-      autoClose = false;
-    } else if (s.has('u')) {
-      const urls = s.getAll('u');
-      const refUrls = s.getAll('r');
-      const titles = s.getAll('t');
-      const favIconUrls = s.getAll('f');
-      const mode = s.get('m') || undefined;
+    // wait for further message and prevents auto-closing
+    const pendingMode = s.has('p');
 
-      for (let i = 0, I = urls.length; i < I; i++) {
-        const url = urls[i];
-        const refUrl = refUrls[i];
-        const title = titles[i];
-        const favIconUrl = favIconUrls[i];
-        let response;
-        try {
-          response = await capturer.captureHeadless({
-            url,
-            refUrl,
-            title,
-            favIconUrl,
-            mode,
-          });
-        } catch (ex) {
-          console.error(ex);
-          const err = `Unexpected error: ${ex.message}`;
-          console.error(err);
-          response = {error: {message: err}};
-        }
-
-        if (response.error) { autoClose = false; }
-        else { capturer.log(`Done.`); }
-        await scrapbook.delay(5);
-      }
-    } else if (s.has('t')) {
-      const tabFrameList = s.get('t').split(',').map(x => {
-        let [tabId, frameId] = x.split(':');
-        tabId = parseInt(tabId, 10);
-        if (isNaN(tabId)) { tabId = -1; }
-        frameId = parseInt(frameId, 10);
-        if (isNaN(frameId)) { frameId = undefined; }
-        return {tabId, frameId};
-      });
-      const mode = s.get('m') || undefined;
-      const saveBeyondSelection = !!s.get('f');
-      
-      for (const {tabId, frameId} of tabFrameList) {
-        const source = `[${tabId}:${frameId}]`;
-        let response;
-        try {
-          response = await capturer.captureTab({
-            tabId,
-            frameId,
-            saveBeyondSelection,
-            mode,
-          });
-        } catch (ex) {
-          console.error(ex);
-          const err = `Unexpected error: ${ex.message}`;
-          capturer.error(err);
-          response = {error: {message: err}};
-        }
-
-        if (response.error) { autoClose = false; }
-        else { capturer.log(`Done.`); }
-        await scrapbook.delay(5);
-      }
-    } else {
-      capturer.error(`Unexpected error: Parameters not supported.`);
+    let autoClose = scrapbook.getOption("capture.autoCloseDialog");
+    if (pendingMode) {
       autoClose = false;
     }
 
-    if (!isDebug && autoClose && scrapbook.getOption("capture.autoCloseDialog")) {
+    let results;
+    if (missionId) {
+      const key = {table: "captureMissionCache", id: missionId};
+      const tasks = await scrapbook.cache.get(key);
+      await scrapbook.cache.remove(key);
+      if (tasks) {
+        results = await capturer.runTasks({tasks});
+      } else {
+        capturer.error(`Error: missing task data for mission "${missionId}".`);
+      }
+    } else {
+      capturer.error(`Error: Mission ID not set.`);
+    }
+
+    // do not autoclose if there's no adequate results
+    if (autoClose) {
+      if (!results || results.error || results.some(x => x.error)) {
+        autoClose = false;
+      }
+    }
+
+    if (autoClose && !isDebug) {
       await scrapbook.delay(1000);
       if (browser.windows) {
         const win = await browser.windows.getCurrent();
@@ -2636,7 +2654,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         return browser.tabs.remove(tab.id);
       }
     }
-    
+
     document.dispatchEvent(new CustomEvent('capturerReady'));
   });
 

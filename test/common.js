@@ -191,7 +191,7 @@ async function capture(params) {
 
   const [pageTab, capturerTab] = await Promise.all([
     openCapturerTab(params.url),
-    openCapturerTab(`${wsbBaseUrl}capturer/capturer.html?mid=${id}`),
+    openCapturerTab(`${wsbBaseUrl}capturer/capturer.html?mid=${id}&p=1`),
   ]);
 
   const result = await new Promise(async (resolve, reject) => {
@@ -257,7 +257,7 @@ async function capture(params) {
 async function captureHeadless(params) {
   const id = getUuid();
 
-  const capturerTab = await openCapturerTab(`${wsbBaseUrl}capturer/capturer.html?mid=${id}`);
+  const capturerTab = await openCapturerTab(`${wsbBaseUrl}capturer/capturer.html?mid=${id}&p=1`);
 
   const result = await new Promise(async (resolve, reject) => {
     const port = browser.runtime.connect(config["wsb_extension_id"], {name: id});

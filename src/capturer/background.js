@@ -26,7 +26,9 @@
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
         onclick: (info, tab) => {
-          return scrapbook.invokeCapture({target: tab.id});
+          return scrapbook.invokeCapture([{
+            tabId: tab.id,
+          }]);
         }
       });
       browser.contextMenus.create({
@@ -34,7 +36,10 @@
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
         onclick: (info, tab) => {
-          return scrapbook.invokeCapture({target: tab.id, mode: "source"});
+          return scrapbook.invokeCapture([{
+            tabId: tab.id,
+            mode: "source",
+          }]);
         }
       });
       browser.contextMenus.create({
@@ -42,7 +47,10 @@
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
         onclick: (info, tab) => {
-          return scrapbook.invokeCapture({target: tab.id, mode: "bookmark"});
+          return scrapbook.invokeCapture([{
+            tabId: tab.id,
+            mode: "bookmark",
+          }]);
         }
       });
     } catch (ex) {
@@ -54,7 +62,10 @@
       contexts: ["page"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.invokeCapture({target: `${tab.id}:0`, full: true});
+        return scrapbook.invokeCapture([{
+          tabId: tab.id,
+          full: true,
+        }]);
       }
     });
 
@@ -63,7 +74,10 @@
       contexts: ["page"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.invokeCapture({url: info.pageUrl, mode: "source"});
+        return scrapbook.invokeCapture([{
+          tabId: tab.id,
+          mode: "source",
+        }]);
       }
     });
 
@@ -72,7 +86,10 @@
       contexts: ["page"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.invokeCapture({url: info.pageUrl, mode: "bookmark"});
+        return scrapbook.invokeCapture([{
+          tabId: tab.id,
+          mode: "bookmark",
+        }]);
       }
     });
 
@@ -81,7 +98,11 @@
       contexts: ["frame"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.invokeCapture({target: `${tab.id}:${info.frameId}`, full: true});
+        return scrapbook.invokeCapture([{
+          tabId: tab.id,
+          frameId: info.frameId,
+          full: true,
+        }]);
       }
     });
 
@@ -90,7 +111,10 @@
       contexts: ["frame"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.invokeCapture({url: info.frameUrl, mode: "source"});
+        return scrapbook.invokeCapture([{
+          url: info.frameUrl,
+          mode: "source",
+        }]);
       }
     });
 
@@ -99,7 +123,10 @@
       contexts: ["frame"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.invokeCapture({url: info.frameUrl, mode: "bookmark"});
+        return scrapbook.invokeCapture([{
+          url: info.frameUrl,
+          mode: "bookmark",
+        }]);
       }
     });
 
@@ -108,7 +135,11 @@
       contexts: ["selection"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.invokeCapture({target: `${tab.id}:${info.frameId}`, full: false});
+        return scrapbook.invokeCapture([{
+          tabId: tab.id,
+          frameId: info.frameId,
+          full: false,
+        }]);
       }
     });
 
@@ -117,7 +148,10 @@
       contexts: ["link"],
       targetUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.invokeCapture({url: info.linkUrl, mode: "source"});
+        return scrapbook.invokeCapture([{
+          url: info.linkUrl,
+          mode: "source",
+        }]);
       }
     });
 
@@ -126,7 +160,10 @@
       contexts: ["link"],
       targetUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.invokeCapture({url: info.linkUrl, mode: "bookmark"});
+        return scrapbook.invokeCapture([{
+          url: info.linkUrl,
+          mode: "bookmark",
+        }]);
       }
     });
 
@@ -135,7 +172,11 @@
       contexts: ["image", "audio", "video"],
       targetUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.invokeCapture({url: info.srcUrl, refUrl: info.pageUrl, mode: "source"});
+        return scrapbook.invokeCapture([{
+          url: info.srcUrl,
+          refUrl: info.pageUrl,
+          mode: "source",
+        }]);
       }
     });
   }
