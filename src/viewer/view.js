@@ -271,16 +271,16 @@
                       });
                     } else {
                       const content = `<!DOCTYPE html>
-  <html ${viewer.metaRefreshIdentifier}="1">
-  <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  </head>
-  <body>
-  Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHtml(info.url, true)}</a>
-  </body>
-  </html>
-  `;
+<html ${viewer.metaRefreshIdentifier}="1">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body>
+Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHtml(info.url, true)}</a>
+</body>
+</html>
+`;
                       const url = URL.createObjectURL(new Blob([content], {type: "text/html"})) + targetPageHash;
                       elem.setAttribute("content", metaRefresh.time + ";url=" + url);
                     }
