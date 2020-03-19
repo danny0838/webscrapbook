@@ -798,9 +798,6 @@
   "ScrapBookCommandEdit": {
     "message": "Edit"
   },
-  "ScrapBookCommandEditx": {
-    "message": "Edit page"
-  },
   "ScrapBookCommandExec": {
     "message": "Open locally"
   },

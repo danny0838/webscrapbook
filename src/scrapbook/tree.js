@@ -419,15 +419,6 @@
         await this.openLink(target + '?a=edit', true);
       },
 
-      async editx(selectedItemElems) {
-        if (!selectedItemElems.length) { return; }
-
-        const id = selectedItemElems[0].getAttribute('data-id');
-        const item = this.book.meta[id];
-        const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
-        await this.openLink(target + '?a=editx', true);
-      },
-
       async move_up(selectedItemElems) {
         if (!selectedItemElems.length) { return; }
 
@@ -744,7 +735,6 @@
             menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
 
             menuElem.querySelector('button[value="edit"]').hidden = true;
-            menuElem.querySelector('button[value="editx"]').hidden = true;
             menuElem.querySelector('button[value="move_up"]').hidden = true;
             menuElem.querySelector('button[value="move_down"]').hidden = true;
             menuElem.querySelector('button[value="move_into"]').hidden = true;
@@ -758,7 +748,6 @@
 
           case 1: {
             const item = this.book.meta[selectedItemElems[0].getAttribute('data-id')];
-            const isHtml = /\.(?:html?|xht(?:ml)?)$/.test(item.index);
 
             menuElem.querySelector('button[value="index"]').hidden = true;
             menuElem.querySelector('button[value="search"]').hidden = true;
@@ -774,8 +763,7 @@
             menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
             menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
 
-            menuElem.querySelector('button[value="edit"]').hidden = !(!isRecycle && ['', 'note'].includes(item.type) && item.index);
-            menuElem.querySelector('button[value="editx"]').hidden = !(!isRecycle && ['', 'note'].includes(item.type) && isHtml);
+            menuElem.querySelector('button[value="edit"]').hidden = !(!isRecycle && ['note'].includes(item.type) && item.index);
             menuElem.querySelector('button[value="move_up"]').hidden = !(!isRecycle);
             menuElem.querySelector('button[value="move_down"]').hidden = !(!isRecycle);
             menuElem.querySelector('button[value="move_into"]').hidden = false;
@@ -803,7 +791,6 @@
             menuElem.querySelector('button[value="upload"]').hidden = true;
 
             menuElem.querySelector('button[value="edit"]').hidden = true;
-            menuElem.querySelector('button[value="editx"]').hidden = true;
             menuElem.querySelector('button[value="move_up"]').hidden = true;
             menuElem.querySelector('button[value="move_down"]').hidden = true;
             menuElem.querySelector('button[value="move_into"]').hidden = false;
@@ -998,7 +985,6 @@
       menuElem.querySelector('button[value="upload"]').disabled = !!this.book.config.no_tree;
 
       menuElem.querySelector('button[value="edit"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="editx"]').disabled = !!this.book.config.no_tree;
       menuElem.querySelector('button[value="move_up"]').disabled = !!this.book.config.no_tree;
       menuElem.querySelector('button[value="move_down"]').disabled = !!this.book.config.no_tree;
       menuElem.querySelector('button[value="move_into"]').disabled = !!this.book.config.no_tree;

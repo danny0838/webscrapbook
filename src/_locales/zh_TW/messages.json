@@ -798,9 +798,6 @@
   "ScrapBookCommandEdit": {
     "message": "編輯"
   },
-  "ScrapBookCommandEditx": {
-    "message": "編輯頁面"
-  },
   "ScrapBookCommandExec": {
     "message": "用預設程式開啟"
   },
