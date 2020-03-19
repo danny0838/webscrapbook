@@ -36,6 +36,7 @@
   capturer.ready = false;
 
   // missionId is fixed to this page, to identify the capture mission
+  // generate a unique one, if not otherwise set
   capturer.missionId = scrapbook.getUuid();
 
   /**
@@ -636,7 +637,7 @@
    * @param {integer} params.tabId
    * @param {integer} params.frameId
    * @param {boolean} params.saveBeyondSelection
-   * @param {string} params.mode
+   * @param {string} params.mode - "source", "bookmark", "save"
    * @param {string} params.options - preset options that overwrites default
    * @return {Promise<Object>}
    */
@@ -810,7 +811,7 @@
    * @param {string} params.refUrl
    * @param {string} params.title
    * @param {string} params.favIconUrl
-   * @param {string} params.mode
+   * @param {string} params.mode - "source", "bookmark"
    * @param {string} params.options - preset options that overwrites default
    * @return {Promise<Object>}
    */
