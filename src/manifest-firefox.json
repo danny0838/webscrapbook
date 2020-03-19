@@ -23,7 +23,6 @@
   "permissions": [
     "contextMenus",
     "downloads",
-    "history",
     "storage",
     "tabs",
     "unlimitedStorage",

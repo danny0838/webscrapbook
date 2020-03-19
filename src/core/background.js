@@ -244,15 +244,6 @@
     });
   }
 
-  if (browser.history) {
-    browser.history.onVisited.addListener((result) => {
-      // suppress extension pages from generating a history entry
-      if (result.url.startsWith(browser.runtime.getURL(""))) {
-        browser.history.deleteUrl({url: result.url});
-      }
-    });
-  }
-
   {
     const extraInfoSpec = ["blocking", "requestHeaders"];
     if (browser.webRequest.OnBeforeSendHeadersOptions.hasOwnProperty('EXTRA_HEADERS')) {
