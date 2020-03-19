@@ -341,14 +341,14 @@
             newItem.index = newItem.id + '/' + filename;
             target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
             const content = `<!DOCTYPE html>
-  <html data-scrapbook-type="note">
-  <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  </head>
-  <body>${newItem.title}</body>
-  </html>
-  `;
+<html data-scrapbook-type="note">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body>${newItem.title}</body>
+</html>
+`;
             file = new File([content], filename, {type: 'text/html'});
             action = 'editx';
             break;
@@ -1643,16 +1643,16 @@
               const title = newItem.title;
               const url = scrapbook.escapeFilename(filename);
               const html = `<!DOCTYPE html>
-  <html>
-  <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(url)}">
-  ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
-  <body>
-  Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtml(filename, false)}</a>
-  </body>
-  </html>
-  `;
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(url)}">
+${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
+<body>
+Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtml(filename, false)}</a>
+</body>
+</html>
+`;
               const file = new File([html], 'index.html', {type: 'text/html'});
               const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
               const formData = new FormData();
