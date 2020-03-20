@@ -32,9 +32,6 @@
   // overwrite the value of common.js to define this is not a content script
   capturer.isContentScript = false;
 
-  // whether the capturer is ready to receive an external command
-  capturer.ready = false;
-
   // missionId is fixed to this page, to identify the capture mission
   // generate a unique one, if not otherwise set
   capturer.missionId = scrapbook.getUuid();
@@ -633,6 +630,13 @@
 
   /**
    * @kind invokable
+   * @return {Promise<Object>}
+   */
+  capturer.getMissionResult = async function () {
+    return capturePromise;
+  };
+
+  /**
    * @param {Object} params
    * @param {Array} params.tasks
    * @return {Promise<Array|Object>} - list of task results (or error), or an object of error
@@ -698,7 +702,6 @@
   };
 
   /**
-   * @kind invokable
    * @param {Object} params
    * @param {integer} params.tabId
    * @param {integer} params.frameId
@@ -871,7 +874,6 @@
   };
 
   /**
-   * @kind invokable
    * @param {Object} params
    * @param {string} params.url
    * @param {string} params.refUrl
@@ -936,7 +938,6 @@
   };
 
   /**
-   * @kind invokable
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} params.refUrl
@@ -1030,7 +1031,6 @@
   };
 
   /**
-   * @kind invokable
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} params.refUrl
@@ -2480,62 +2480,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     capturer.error(err);
   });
 
-  {
-    const listener = (port) => {
-      const onCapturerReady = () => {
-        if (port.name !== capturer.missionId) {
-          return;
-        }
-        const onMessage = (message) => {
-          const {cmd, args} = message;
-          isDebug && console.debug(cmd, "receive", port.sender, args);
-
-          if (!cmd.startsWith("capturer.")) { return; }
-
-          const parts = cmd.split(".");
-          let subCmd = parts.pop();
-          let object = root;
-          while (parts.length) {
-            object = object[parts.shift()];
-          }
-
-          // thrown Error don't show here but cause the sender to receive an error
-          if (!object || !subCmd || typeof object[subCmd] !== 'function') {
-            throw new Error(`Unable to invoke unknown command '${cmd}'.`);
-          }
-
-          return (async () => {
-            try {
-              const response = await object[subCmd](args, port.sender);
-              port.postMessage({
-                cmd: 'capturerResponse',
-                args: response,
-              });
-            } catch (ex) {
-              console.error(ex);
-              const err = `Unexpected error: ${ex.message}`;
-              capturer.error(err);
-            }
-          })();
-        };
-        port.onMessage.addListener(onMessage);
-        port.postMessage({cmd: 'capturerReady', args: {}});
-      };
-      if (capturer.ready) {
-        onCapturerReady();
-      } else {
-        document.addEventListener("capturerReady", onCapturerReady);
-      }
-    };
-
-    browser.runtime.onConnect.addListener(listener);
-
-    if (browser.runtime.onConnectExternal) {
-      // Available in Firefox >= 54.
-      browser.runtime.onConnectExternal.addListener(listener);
-    }
-  }
-
   browser.downloads.onCreated.addListener((downloadItem) => {
     isDebug && console.debug("downloads.onCreated", downloadItem);
 
@@ -2600,66 +2544,63 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     }
   });
 
-  // init
-  document.addEventListener("DOMContentLoaded", async function () {
-    scrapbook.loadLanguages(document);
-
-    capturer.logger = document.getElementById('logger');
-    capturer.downloader = document.getElementById('downloader');
-
-    await scrapbook.loadOptions();
-
+  const capturePromise = new Promise((resolve, reject) => {
     const urlObj = new URL(document.URL);
     const s = urlObj.searchParams;
 
-    // use the missionId to receive further message
+    // use missionId provided from URL params to read task data
     const missionId = capturer.missionId = s.get('mid');
 
-    // wait for further message and prevents auto-closing
+    // pending for special handling and prevents auto-closing
     const pendingMode = s.has('p');
 
-    let autoClose = scrapbook.getOption("capture.autoCloseDialog");
-    if (pendingMode) {
-      autoClose = false;
-    }
+    document.addEventListener("DOMContentLoaded", async function () {
+      scrapbook.loadLanguages(document);
 
-    let results;
-    if (missionId) {
-      const key = {table: "captureMissionCache", id: missionId};
-      const tasks = await scrapbook.cache.get(key);
-      await scrapbook.cache.remove(key);
-      if (tasks) {
-        results = await capturer.runTasks({tasks});
-      } else {
-        capturer.error(`Error: missing task data for mission "${missionId}".`);
-      }
-    } else {
-      capturer.error(`Error: Mission ID not set.`);
-    }
+      capturer.logger = document.getElementById('logger');
+      capturer.downloader = document.getElementById('downloader');
 
-    // do not autoclose if there's no adequate results
-    if (autoClose) {
-      if (!results || results.error || results.some(x => x.error)) {
+      await scrapbook.loadOptions();
+
+      let autoClose = scrapbook.getOption("capture.autoCloseDialog");
+      if (pendingMode) {
         autoClose = false;
       }
-    }
 
-    if (autoClose && !isDebug) {
-      await scrapbook.delay(1000);
-      if (browser.windows) {
-        const win = await browser.windows.getCurrent();
-        return browser.windows.remove(win.id);
+      let results;
+      if (missionId) {
+        const key = {table: "captureMissionCache", id: missionId};
+        const tasks = await scrapbook.cache.get(key);
+        await scrapbook.cache.remove(key);
+        if (tasks) {
+          results = await capturer.runTasks({tasks});
+        } else {
+          capturer.error(`Error: missing task data for mission "${missionId}".`);
+        }
       } else {
-        const tab = await browser.tabs.getCurrent();
-        return browser.tabs.remove(tab.id);
+        capturer.error(`Error: Mission ID not set.`);
       }
-    }
 
-    document.dispatchEvent(new CustomEvent('capturerReady'));
-  });
+      resolve(results);
 
-  document.addEventListener("capturerReady", function (event) {
-    capturer.ready = true;
+      // do not autoclose if there's no adequate results
+      if (autoClose) {
+        if (!results || results.error || results.some(x => x.error)) {
+          autoClose = false;
+        }
+      }
+
+      if (autoClose && !isDebug) {
+        await scrapbook.delay(1000);
+        if (browser.windows) {
+          const win = await browser.windows.getCurrent();
+          return browser.windows.remove(win.id);
+        } else {
+          const tab = await browser.tabs.getCurrent();
+          return browser.tabs.remove(tab.id);
+        }
+      }
+    });
   });
 
 }));

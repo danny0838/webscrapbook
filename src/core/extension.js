@@ -145,29 +145,92 @@
   };
 
   /**
+   * Simplified API to invoke a capture with an array of tasks.
+   *
    * @param {Array} tasks
    * @return {Promise<(Window|Tab)>}
    */
   scrapbook.invokeCapture = async function (tasks) {
+    return await scrapbook.invokeCaptureEx({tasks, waitForResponse: false});
+  };
+
+  /**
+   * Advanced API to invoke a capture.
+   *
+   * @param {Object} params
+   * @param {Array} params.tasks
+   * @param {Object} params.windowCreateData
+   * @param {boolean} params.waitForResponse
+   * @return {Promise<(Object|Window|Tab)>}
+   */
+  scrapbook.invokeCaptureEx = async function ({
+    tasks,
+    windowCreateData,
+    waitForResponse = true,
+  }) {
     const missionId = scrapbook.getUuid();
     const key = {table: "captureMissionCache", id: missionId};
     await scrapbook.cache.set(key, tasks);
     const url = browser.runtime.getURL("capturer/capturer.html") + `?mid=${missionId}`;
 
+    // launch capturer
+    let tab;
     if (browser.windows) {
       const win = await browser.windows.getCurrent();
-      return await browser.windows.create({
+      const captureWinow = await browser.windows.create(Object.assign({
         url,
         type: 'popup',
         width: 400,
         height: 400,
         incognito: win.incognito,
-      });
+      }, windowCreateData));
+
+      if (!waitForResponse) {
+        return captureWinow;
+      }
+
+      tab = captureWinow.tabs[0];
     } else {
-      return await browser.tabs.create({
+      const captureTab = await browser.tabs.create({
         url,
       });
+
+      if (!waitForResponse) {
+        return captureTab;
+      }
+
+      tab = captureTab;
     }
+
+    // wait until tab loading complete
+    await new Promise((resolve, reject) => {
+      const listener = (tabId, changeInfo, t) => {
+        if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
+        browser.tabs.onUpdated.removeListener(listener);
+        browser.tabs.onRemoved.removeListener(listener2);
+        resolve(t);
+      };
+      const listener2 = (tabId, removeInfo) => {
+        if (!(tabId === tab.id)) { return; }
+        browser.tabs.onUpdated.removeListener(listener);
+        browser.tabs.onRemoved.removeListener(listener2);
+        reject({message: `Tab removed before loading complete.`});
+      };
+      browser.tabs.onUpdated.addListener(listener);
+      browser.tabs.onRemoved.addListener(listener2);
+    });
+
+    // retrieve capture results
+    const results = await scrapbook.invokeExtensionScript({
+      id: missionId,
+      cmd: 'capturer.getMissionResult',
+      args: {},
+    });
+
+    return {
+      tab,
+      results,
+    };
   };
 
   /**

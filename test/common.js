@@ -3,7 +3,6 @@
 var config;
 var localhost;
 var localhost2;
-var wsbBaseUrl;
 var testTotal = 0;
 var testPass = 0;
 
@@ -88,14 +87,6 @@ async function init() {
     error(`Unable to connect to local server "${localhost2}". Make sure the server has been started and the port is not occupied by another application.`);
     throw ex;
   }
-
-  try {
-    const response = await browser.runtime.sendMessage(config["wsb_extension_id"], {cmd: 'getBaseUrl'});
-    wsbBaseUrl = response.url;
-  } catch (ex) {
-    error(`Unable to invoke WebScrapBook extension. Make sure it's installed and its extension ID is correctly set in config.local.json.`);
-    throw ex;
-  }
 }
 
 async function delay(ms) {
@@ -170,7 +161,6 @@ async function openTestTab(createProperties, handler) {
       args: {
         config,
         localhost,
-        wsbBaseUrl,
       },
     });
   });
@@ -184,131 +174,51 @@ async function openTestTab(createProperties, handler) {
 /**
  * @param {Object} params
  * @param {string} params.url
+ * @param {string} params.mode
  * @param {Object} params.options
  */
-async function capture(params) {
-  const id = getUuid();
+async function capture(params, headless = false) {
+  const pageTab = !headless && await openCapturerTab(params.url);
 
-  const [pageTab, capturerTab] = await Promise.all([
-    openCapturerTab(params.url),
-    openCapturerTab(`${wsbBaseUrl}capturer/capturer.html?mid=${id}&p=1`),
-  ]);
+  const windowCreateData = {
+    focused: false,
+    type: "popup",
+    width: 50,
+    height: 50,
+    top: window.screen.availHeight,
+    left: window.screen.availWidth,
+  };
 
-  const result = await new Promise(async (resolve, reject) => {
-    const port = browser.runtime.connect(config["wsb_extension_id"], {name: id});
-    const onDisconnect = () => {
-      reject(new Error(`Page tab disconnected.`));
-    };
-    port.onDisconnect.addListener(onDisconnect);
+  // Firefox does not support focused in windows.create().
+  // Firefox ignores top and left in windows.create().
+  if (userAgent.is('gecko')) {
+    delete windowCreateData.focused;
+  }
 
-    try {
-      await new Promise((resolve, reject) => {
-        const onMessage = (message) => {
-          if (message.cmd === 'capturerReady') {
-            port.onMessage.removeListener(onMessage);
-            resolve();
-          }
-        };
-        port.onMessage.addListener(onMessage);
-      });
+  const args = {
+    tasks: [!headless ? Object.assign({tabId: pageTab.id}, params) : params],
+    windowCreateData,
+    waitForResponse: true,
+  };
 
-      const response = await new Promise((resolve, reject) => {
-        const onMessage = (message) => {
-          if (message.cmd === 'capturerResponse') {
-            port.onMessage.removeListener(onMessage);
-            const response = message.args;
-            if (response.error) {
-              reject(response.error);
-            } else {
-              resolve(response);
-            }
-          }
-        };
-        port.onMessage.addListener(onMessage);
-        port.postMessage({
-          cmd: "capturer.captureTab",
-          args: Object.assign({tabId: pageTab.id}, params),
-        });
-      });
-
-      resolve(response);
-    } catch (ex) {
-      reject(ex);
-    }
-
-    port.onDisconnect.removeListener(onDisconnect);
-    port.disconnect();
+  const response = await browser.runtime.sendMessage(config["wsb_extension_id"], {
+    cmd: "invokeCaptureEx",
+    args,
   });
 
-  await Promise.all([
-    browser.tabs.remove(pageTab.id),
-    browser.tabs.remove(capturerTab.id),
-  ]);
+  const result = response.results[0];
+  !result.error && await browser.tabs.remove(response.tab.id);
+  !headless && await browser.tabs.remove(pageTab.id);
 
   const blob = new Blob([byteStringToArrayBuffer(result.data)], {type: result.type});
   return blob;
 }
 
 /**
- * @param {Object} params
- * @param {string} params.url
- * @param {Object} params.options
+ * Shortcut for capture(params, true)
  */
 async function captureHeadless(params) {
-  const id = getUuid();
-
-  const capturerTab = await openCapturerTab(`${wsbBaseUrl}capturer/capturer.html?mid=${id}&p=1`);
-
-  const result = await new Promise(async (resolve, reject) => {
-    const port = browser.runtime.connect(config["wsb_extension_id"], {name: id});
-    const onDisconnect = () => {
-      reject(new Error(`Page tab disconnected.`));
-    };
-    port.onDisconnect.addListener(onDisconnect);
-
-    try {
-      await new Promise((resolve, reject) => {
-        const onMessage = (message) => {
-          if (message.cmd === 'capturerReady') {
-            port.onMessage.removeListener(onMessage);
-            resolve();
-          }
-        };
-        port.onMessage.addListener(onMessage);
-      });
-
-      const response = await new Promise((resolve, reject) => {
-        const onMessage = (message) => {
-          if (message.cmd === 'capturerResponse') {
-            port.onMessage.removeListener(onMessage);
-            const response = message.args;
-            if (response.error) {
-              reject(response.error);
-            } else {
-              resolve(response);
-            }
-          }
-        };
-        port.onMessage.addListener(onMessage);
-        port.postMessage({
-          cmd: "capturer.captureHeadless",
-          args: params,
-        });
-      });
-
-      resolve(response);
-    } catch (ex) {
-      reject(ex);
-    }
-
-    port.onDisconnect.removeListener(onDisconnect);
-    port.disconnect();
-  });
-
-  await browser.tabs.remove(capturerTab.id);
-
-  const blob = new Blob([byteStringToArrayBuffer(result.data)], {type: result.type});
-  return blob;
+  return await capture(params, true);
 }
 
 function readFileAsArrayBuffer(blob) {

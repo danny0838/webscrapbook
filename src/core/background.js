@@ -277,16 +277,18 @@
   });
 
   if (browser.runtime.onMessageExternal) {
-    // Available in Firefox >= 54.
+    // Available for Firefox >= 54.
     browser.runtime.onMessageExternal.addListener((message, sender) => {
       const {cmd, args} = message;
 
       let result;
       switch (cmd) {
-        case "getBaseUrl": {
-          result = {
-            url: browser.runtime.getURL(""),
-          };
+        case "invokeCapture": {
+          result = scrapbook.invokeCapture(args);
+          break;
+        }
+        case "invokeCaptureEx": {
+          result = scrapbook.invokeCaptureEx(args);
           break;
         }
         default: {
