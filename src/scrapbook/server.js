@@ -110,7 +110,7 @@
     async init(refresh = false) {
       if (!this._config || refresh) {
         if (!scrapbook.hasServer()) {
-          return null;
+          throw new Error('Backend server not configured.');
         }
 
         // record configs
