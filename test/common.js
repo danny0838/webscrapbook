@@ -102,9 +102,8 @@ async function delay(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-async function openTab(createProperties) {
-  const tab = await browser.tabs.create(createProperties);
-  return new Promise((resolve, reject) => {
+async function waitTabLoading(tab) {
+  return await new Promise((resolve, reject) => {
     const listener = (tabId, changeInfo, t) => {
       if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
       browser.tabs.onUpdated.removeListener(listener);
@@ -115,11 +114,16 @@ async function openTab(createProperties) {
       if (!(tabId === tab.id)) { return; }
       browser.tabs.onUpdated.removeListener(listener);
       browser.tabs.onRemoved.removeListener(listener2);
-      reject({message: `Tab removed before loading complete.`});
+      reject(new Error(`Tab removed before loading complete.`));
     };
     browser.tabs.onUpdated.addListener(listener);
     browser.tabs.onRemoved.addListener(listener2);
   });
+};
+
+async function openTab(createProperties) {
+  const tab = await browser.tabs.create(createProperties);
+  return await waitTabLoading(tab);
 }
 
 async function openCapturerTab(url) {
@@ -140,27 +144,8 @@ async function openCapturerTab(url) {
   }
 
   const win = await browser.windows.create(params);
-
-  const tab = (await browser.windows.get(win.id, {populate: true})).tabs[0];
-
-  await new Promise((resolve, reject) => {
-    const listener = (tabId, changeInfo, t) => {
-      if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-      browser.tabs.onUpdated.removeListener(listener);
-      browser.tabs.onRemoved.removeListener(listener2);
-      resolve(t);
-    };
-    const listener2 = (tabId, removeInfo) => {
-      if (!(tabId === tab.id)) { return; }
-      browser.tabs.onUpdated.removeListener(listener);
-      browser.tabs.onRemoved.removeListener(listener2);
-      reject({message: `Tab removed before loading complete.`});
-    };
-    browser.tabs.onUpdated.addListener(listener);
-    browser.tabs.onRemoved.addListener(listener2);
-  });
-
-  return tab;
+  const tab = win.tabs[0];
+  return await waitTabLoading(tab);
 }
 
 /**
