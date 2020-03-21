@@ -1435,7 +1435,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               }
             }
 
-            capturer.log(`Preparing download...`);
+            capturer.log(`Saving data...`);
             return await capturer[saveMethod]({
               timeId,
               blob,
@@ -1518,7 +1518,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               }
             }
 
-            capturer.log(`Preparing download...`);
+            capturer.log(`Saving data...`);
             return await capturer[saveMethod]({
               timeId,
               blob,
@@ -1623,7 +1623,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               }
             }
 
-            capturer.log(`Preparing download...`);
+            capturer.log(`Saving data...`);
             return await capturer[saveMethod]({
               timeId,
               blob,
@@ -1704,6 +1704,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               }
             }
 
+            capturer.log(`Saving data...`);
             const entries = await capturer.loadCache({timeId});
             await capturer.clearCache({timeId});
             await Promise.all(entries.map(([path, data]) => {
