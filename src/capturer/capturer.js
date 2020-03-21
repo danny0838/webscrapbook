@@ -571,6 +571,8 @@
       return;
     }
 
+    capturer.log(`Updating server index...`);
+
     const index = (params.targetDir ? params.targetDir + '/' : '') + params.filename;
     let icon = params.favIconUrl;
     
