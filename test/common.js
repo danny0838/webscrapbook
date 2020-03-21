@@ -384,7 +384,7 @@ async function xhr(params = {}) {
         resolve(xhr);
       } else {
         // treat "404 Not found" or so as error
-        let statusText = xhr.statusText || scrapbook.httpStatusText[xhr.status];
+        let statusText = xhr.statusText;
         statusText = xhr.status + (statusText ? " " + statusText : "");
         reject(new Error(statusText));
       }
