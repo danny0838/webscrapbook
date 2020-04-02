@@ -3208,6 +3208,16 @@ const scrapbook = {
 };
 
 const searchEngine = {
+  get supportRegexUnicodeFlag() {
+    let support = false;
+    try {
+      new RegExp('', 'u');
+      support = true;
+    } catch (ex) {}
+    delete(this.supportRegexUnicodeFlag);
+    return this.supportRegexUnicodeFlag = support;
+  },
+
   parseQuery(queryStr) {
     const query = {
       error: [],
@@ -3252,7 +3262,8 @@ const searchEngine = {
     };
 
     const parseStr = (term, exactMatch = false) => {
-      const flags = query.mc ? "m" : "im";
+      let flags = query.mc ? "m" : "im";
+      if (this.supportRegexUnicodeFlag) { flags += "u"; }
       let regex = "";
       if (query.re) {
         try {
