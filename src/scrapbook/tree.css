@@ -199,7 +199,7 @@ body {
 }
 
 /* tree */
-#items {
+.tree {
   flex: 1 1 auto;
   overflow: auto;
   position: relative;
@@ -207,31 +207,31 @@ body {
   line-height: 1;
 }
 
-#items ul {
+.tree ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-#items ul li {
+.tree ul li {
   display: block;
   box-sizing: border-box;
   padding: .25em;
   padding-__MSG_@@bidi_start_edge__: 1em;
 }
 
-#items ul li ul {
+.tree ul li ul {
   margin-top: .25em;
   margin-bottom: -.25em;
 }
 
-#items li > div {
+.tree li > div {
   white-space: nowrap;
   padding: 1px 0;
   cursor: cell;
 }
 
-#items li > div::before {
+.tree li > div::before {
   position: absolute;
   box-sizing: border-box;
   left: 0;
@@ -242,19 +242,19 @@ body {
   content: "";
 }
 
-#items li > div:hover::before {
+.tree li > div:hover::before {
   border: 1px solid rgba(125, 162, 206, 0.3);
   background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.3));
 }
 
-#items a {
+.tree a {
   position: relative;
   z-index: 1;
   text-decoration: none;
   color: #000000;
 }
 
-#items a > img {
+.tree a > img {
   display: inline-block;
   margin-left: .2em;
   margin-right: .2em;
@@ -264,28 +264,28 @@ body {
   vertical-align: middle;
 }
 
-#items a.toggle {
+.tree a.toggle {
   position: absolute;
   margin-__MSG_@@bidi_start_edge__: -1em;
 }
 
-#items a.toggle > img {
+.tree a.toggle > img {
   margin: 0;
 }
 
-#items [data-type="bookmark"] > div > a {
+.tree [data-type="bookmark"] > div > a {
   color: rgb(32,192,32);
 }
 
-#items [data-type="note"] > div > a {
+.tree [data-type="note"] > div > a {
   color: rgb(80,0,32);
 }
 
-#items [data-type="site"] > div > a {
+.tree [data-type="site"] > div > a {
   color: blue;
 }
 
-#items [data-type="separator"] > div > fieldset {
+.tree [data-type="separator"] > div > fieldset {
   position: relative;
   z-index: 1;
   margin: 0;
@@ -295,44 +295,44 @@ body {
   text-indent: 0;
 }
 
-#items [data-type="separator"] > div > fieldset > legend {
+.tree [data-type="separator"] > div > fieldset > legend {
   padding: 0;
   height: 1em;
 }
 
-#items [data-marked] > div > a {
+.tree [data-marked] > div > a {
   font-weight: bold;
 }
 
-#items li > div.highlight::before {
+.tree li > div.highlight::before {
   border: 1px solid rgba(125, 162, 206, 1);
   background: linear-gradient(rgba(235, 244, 253, 1), rgba(196, 221, 252, 1));
 }
 
-#items.moving li.dragged {
+.tree.moving li.dragged {
   opacity: 0.5;
 }
 
-#items.moving li.dragover-within {
+.tree.moving li.dragover-within {
   opacity: unset;
 }
 
-#items li > div.dragover::before {
+.tree li > div.dragover::before {
   z-index: -1;
 }
 
-#items li > div.dragover.above {
+.tree li > div.dragover.above {
   border-top: 2px solid #3399FF;
   padding-top: 0;
   padding-bottom: 0;
 }
 
-#items li > div.dragover.below {
+.tree li > div.dragover.below {
   border-bottom: 2px solid #3399FF;
   padding-top: 0;
   padding-bottom: 0;
 }
 
-#items li > div.dragover.within {
+.tree li > div.dragover.within {
   outline: 2px dashed #3399FF;
 }
