@@ -2891,12 +2891,11 @@ a.scrapbook-external > img {
 <script>
 const conf = {
   scrapbooks: [
-    {name: "", path: "${scrapbook.getRelativeUrl('', scrapbook.escapeFilename(this.treeDir))}", dataDir: "${scrapbook.escapeFilename(this.dataDir)}", treeDir: "${scrapbook.escapeFilename(this.treeDir)}"}
+    {name: "", path: "${scrapbook.getRelativeUrl('', scrapbook.escapeFilename(this.treeDir))}", dataDir: "${scrapbook.escapeFilename(this.dataDir)}", treeDir: "${scrapbook.escapeFilename(this.treeDir)}", indexPage: "${this.indexPage}"}
   ],
   allowHttp: 0,  // whether to load js cache from HTTP(S)? -1: deny, 0: ask; 1: allow
   defaultSearch: "-type:folder -type:separator",  // the constant string to add before the input keyword
   defaultField: "tcc",  // the field to search for bare key terms
-  viewInMapPath: "${scrapbook.escapeQuotes(scrapbook.escapeFilename(this.indexPage))}",  // path (related to treeDir) of the map page for "view in map"
   viewInMapTitle: "${scrapbook.escapeQuotes(scrapbook.lang('IndexerTreeSearchViewInMap'))}",  // title for "view in map"
 };
 
@@ -3152,7 +3151,7 @@ const scrapbook = {
 
     {
       const a = document.createElement("a");
-      a.href = book.path + book.treeDir + conf.viewInMapPath + "#item-" + id;
+      a.href = book.path + book.indexPage + "#item-" + id;
       a.target = "_blank";
       a.className = "scrapbook-external";
       a.title = conf.viewInMapTitle;
