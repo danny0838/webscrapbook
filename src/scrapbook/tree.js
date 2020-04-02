@@ -951,17 +951,19 @@
         }
 
         // init book select
-        const wrapper = document.getElementById('book');
-        wrapper.hidden = false;
+        if (this.mode === 'normal') {
+          const wrapper = document.getElementById('book');
+          wrapper.hidden = false;
 
-        for (const key of Object.keys(server.books).sort()) {
-          const book = server.books[key];
-          const opt = document.createElement('option');
-          opt.value = book.id;
-          opt.textContent = book.name;
-          wrapper.appendChild(opt);
+          for (const key of Object.keys(server.books).sort()) {
+            const book = server.books[key];
+            const opt = document.createElement('option');
+            opt.value = book.id;
+            opt.textContent = book.name;
+            wrapper.appendChild(opt);
+          }
+          wrapper.value = bookId;
         }
-        wrapper.value = bookId;
       } catch (ex) {
         console.error(ex);
         this.error(scrapbook.lang('ScrapBookErrorLoadBooks', [ex.message]));
