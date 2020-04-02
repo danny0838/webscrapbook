@@ -235,6 +235,15 @@
         body: formData,
       });
     }
+
+    async findBookIdFromUrl(url) {
+      const u = scrapbook.splitUrl(url)[0];
+      for (const [id, book] of Object.entries(this.books)) {
+        if (u.startsWith(book.dataUrl) && !book.config.no_tree) {
+          return id;
+        }
+      }
+    }
   }
 
   class Book {

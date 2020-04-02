@@ -1141,10 +1141,22 @@
     /**
      * @kind invokable
      */
-    async locate({url, root = 'root'}) {
+    async locate({bookId, id, url, root = 'root'}) {
       if (this.mode !== 'normal') { return null; }
 
-      const item = await this.book.findItemFromUrl(url);
+      if (url && typeof bookId === 'undefined') {
+        bookId = await server.findBookIdFromUrl(url);
+      }
+      if (typeof bookId !== 'undefined' && bookId !== this.bookId) {
+        await this.refresh(bookId);
+      }
+
+      let item;
+      if (id) {
+        item = this.book.meta[id];
+      } else if (url) {
+        item = await this.book.findItemFromUrl(url);
+      }
       if (!item) { return null; }
 
       const paths = this.book.findItemPaths(item.id, this.rootId);
