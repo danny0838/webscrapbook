@@ -13,11 +13,12 @@
     root.isDebug,
     root.browser,
     root.scrapbook,
+    root.server,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, server, window, document, console) {
 
   'use strict';
 

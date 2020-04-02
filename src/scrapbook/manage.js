@@ -4,7 +4,6 @@
  *
  * @require {Object} scrapbook
  * @require {Object} tree
- * @require {Object} server
  *****************************************************************************/
 
 (function (root, factory) {
