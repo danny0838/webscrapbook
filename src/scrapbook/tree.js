@@ -23,13 +23,13 @@
   'use strict';
 
   const tree = {
-    lastDraggedElem: null,
-    lastHighlightElem: null,
     bookId: null,
     book: null,
     rootId: 'root',
     mode: 'normal',
     sidebarWindowId: null,
+    lastDraggedElem: null,
+    lastHighlightElem: null,
     commands: {
       async index(selectedItemElems) {
         if (this.book.config.no_tree) {
@@ -970,39 +970,6 @@
         return;
       }
 
-      // init UI
-      document.title = this.book.name + (this.rootId !== 'root' ? ' :: ' + this.rootId : '') + ' | ' + server.config.app.name;
-
-      const menuElem = document.getElementById('command-popup');
-      menuElem.querySelector('button[value="search"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="exec_book"]').disabled = !server.config.app.is_local;
-      menuElem.querySelector('button[value="opentab"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="exec"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
-      menuElem.querySelector('button[value="browse"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
-      menuElem.querySelector('button[value="source"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="manage"]').disabled = !!this.book.config.no_tree;
-
-      menuElem.querySelector('button[value="mkfolder"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="mksep"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="mknote"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="upload"]').disabled = !!this.book.config.no_tree;
-
-      menuElem.querySelector('button[value="edit"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="move_up"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="move_down"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="move_into"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="move_drag"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="recycle"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="delete"]').disabled = !!this.book.config.no_tree;
-
-      menuElem.querySelector('button[value="meta"]').disabled = !!this.book.config.no_tree;
-      menuElem.querySelector('button[value="view_recycle"]').disabled = !!this.book.config.no_tree;
-
-      const rootElem = document.getElementById('item-root');
-      rootElem.container = document.createElement('ul');
-      rootElem.container.classList.add('container');
-      rootElem.appendChild(rootElem.container);
-
       // bind "this" variable for command callbacks functions
       for (const cmd in this.commands) {
         this.commands[cmd] = this.commands[cmd].bind(this);
@@ -1011,14 +978,55 @@
       await this.refresh();
     },
 
-    async refresh() {
+    async refresh(bookId) {
       this.enableUi(false);
 
-      if (!this.book.config.no_tree) {
-        try {
-          await this.book.loadTreeFiles(true);
-          await this.book.loadToc(true);
-          await this.book.loadMeta(true);
+      try {
+        // reset variables
+        if (typeof bookId !== 'undefined' && bookId !== this.bookId) {
+          await scrapbook.setOption("server.scrapbook", bookId);
+          this.bookId = bookId;
+          this.book = server.books[bookId];
+          document.getElementById('book').value = bookId;
+        }
+        this.lastDraggedElem = null;
+        this.lastHighlightElem = null;
+
+        // refresh UI
+        document.title = this.book.name + (this.rootId !== 'root' ? ' :: ' + this.rootId : '') + ' | ' + server.config.app.name;
+
+        const menuElem = document.getElementById('command-popup');
+        menuElem.querySelector('button[value="search"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="exec_book"]').disabled = !server.config.app.is_local;
+        menuElem.querySelector('button[value="opentab"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="exec"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
+        menuElem.querySelector('button[value="browse"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
+        menuElem.querySelector('button[value="source"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="manage"]').disabled = !!this.book.config.no_tree;
+
+        menuElem.querySelector('button[value="mkfolder"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="mksep"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="mknote"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="upload"]').disabled = !!this.book.config.no_tree;
+
+        menuElem.querySelector('button[value="edit"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="move_up"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="move_down"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="move_into"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="move_drag"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="recycle"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="delete"]').disabled = !!this.book.config.no_tree;
+
+        menuElem.querySelector('button[value="meta"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="view_recycle"]').disabled = !!this.book.config.no_tree;
+
+        document.getElementById('logger').textContent = '';
+
+        // refresh book tree
+        if (!this.book.config.no_tree) {
+          await this.book.loadTreeFiles();
+          await this.book.loadToc();
+          await this.book.loadMeta();
 
           const rootId = this.rootId;
           if (!this.book.meta[rootId] && !this.book.isSpecialItem(rootId)) {
@@ -1027,13 +1035,20 @@
 
           const rootElem = document.getElementById('item-root');
           rootElem.setAttribute('data-id', rootId);
+          rootElem.textContent = '';
+          rootElem.container = document.createElement('ul');
+          rootElem.container.classList.add('container');
+          rootElem.appendChild(rootElem.container);
           this.toggleItem(rootElem, true);
           await this.loadViewStatus();
-        } catch (ex) {
-          console.error(ex);
-          this.error(scrapbook.lang('ScrapBookErrorInitTree', [ex.message]));
-          return;
+        } else {
+          const rootElem = document.getElementById('item-root');
+          rootElem.textContent = '';
         }
+      } catch (ex) {
+        console.error(ex);
+        this.error(scrapbook.lang('ScrapBookErrorInitTree', [ex.message]));
+        return;
       }
 
       this.enableUi(true);
@@ -2062,14 +2077,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     },
 
     async onBookChange(event) {
-      this.enableUi(false);
       const bookId = event.target.value;
-      await scrapbook.setOption("server.scrapbook", bookId);
-      const urlObj = new URL(location.href);
-      urlObj.searchParams.set('id', bookId);
-      urlObj.searchParams.delete('root');
-      location.assign(urlObj.href);
-      this.enableUi(true);
+      await this.refresh(bookId);
     },
 
     onKeyDown(event) {
