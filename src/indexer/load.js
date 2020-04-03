@@ -3288,109 +3288,65 @@ const searchEngine = {
       return n.length >= width ? n : n + new Array(width - n.length + 1).join(z);
     };
 
-    queryStr.replace(/(-?[A-Za-z]+:|-)(?:"([^"]*(?:""[^"]*)*)"|([^"\\s]*))|(?:"([^"]*(?:""[^"]*)*)"|([^"\\s]+))/g, (match, cmd, qterm, term, qterm2, term2) => {
+    queryStr.replace(/(-*[A-Za-z]+:|-+)(?:"([^"]*(?:""[^"]*)*)"|([^"\\s]*))|(?:"([^"]*(?:""[^"]*)*)"|([^"\\s]+))/g, (match, cmd, qterm, term, qterm2, term2) => {
+      let pos = true;
       if (cmd) {
         term = (qterm !== undefined) ? qterm.replace(/""/g, '"') : term;
+        let m = /^(-*)(.*)$/.exec(cmd);
+        if (m[1].length % 2 === 1) { pos = false; }
+        cmd = m[2];
       } else {
         term = (qterm2 !== undefined) ? qterm2.replace(/""/g, '"') : term2;
       }
 
       switch (cmd) {
         case "mc:":
-          query.mc = true;
-          break;
-        case "-mc:":
-          query.mc = false;
+          query.mc = pos;
           break;
         case "re:":
-          query.re = true;
-          break;
-        case "-re:":
-          query.re = false;
+          query.re = pos;
           break;
         case "book:":
-          query.books.include.push(term);
-          break;
-        case "-book:":
-          query.books.exclude.push(term);
+          query.books[pos ? 'include' : 'exclude'].push(term);
           break;
         case "root:":
-          query.roots.include.push(term);
-          break;
-        case "-root:":
-          query.roots.exclude.push(term);
+          query.roots[pos ? 'include' : 'exclude'].push(term);
           break;
         case "sort:":
-          addSort(term, 1);
-          break;
-        case "-sort:":
-          addSort(term, -1);
+          addSort(term, pos ? 1 : -1);
           break;
         case "type:":
-          addRule("type", "include", parseStr(term, true));
-          break;
-        case "-type:":
-          addRule("type", "exclude", parseStr(term, true));
+          addRule("type", pos ? "include" : "exclude", parseStr(term, true));
           break;
         case "id:":
-          addRule("id", "include", parseStr(term, true));
-          break;
-        case "-id:":
-          addRule("id", "exclude", parseStr(term, true));
+          addRule("id", pos ? "include" : "exclude", parseStr(term, true));
           break;
         case "file:":
-          addRule("file", "include", parseStr(term));
-          break;
-        case "-file:":
-          addRule("file", "exclude", parseStr(term));
+          addRule("file", pos ? "include" : "exclude", parseStr(term));
           break;
         case "source:":
-          addRule("source", "include", parseStr(term));
-          break;
-        case "-source:":
-          addRule("source", "exclude", parseStr(term));
+          addRule("source", pos ? "include" : "exclude", parseStr(term));
           break;
         case "tcc:":
-          addRule("tcc", "include", parseStr(term));
-          break;
-        case "-tcc:":
-          addRule("tcc", "exclude", parseStr(term));
+          addRule("tcc", pos ? "include" : "exclude", parseStr(term));
           break;
         case "title:":
-          addRule("title", "include", parseStr(term));
-          break;
-        case "-title:":
-          addRule("title", "exclude", parseStr(term));
+          addRule("title", pos ? "include" : "exclude", parseStr(term));
           break;
         case "comment:":
-          addRule("comment", "include", parseStr(term));
-          break;
-        case "-comment:":
-          addRule("comment", "exclude", parseStr(term));
+          addRule("comment", pos ? "include" : "exclude", parseStr(term));
           break;
         case "content:":
-          addRule("content", "include", parseStr(term));
-          break;
-        case "-content:":
-          addRule("content", "exclude", parseStr(term));
+          addRule("content", pos ? "include" : "exclude", parseStr(term));
           break;
         case "create:":
-          addRule("create", "include", parseDate(term));
-          break;
-        case "-create:":
-          addRule("create", "exclude", parseDate(term));
+          addRule("create", pos ? "include" : "exclude", parseDate(term));
           break;
         case "modify:":
-          addRule("modify", "include", parseDate(term));
-          break;
-        case "-modify:":
-          addRule("modify", "exclude", parseDate(term));
-          break;
-        case "-":
-          addRule(query["default"], "exclude", parseStr(term));
+          addRule("modify", pos ? "include" : "exclude", parseDate(term));
           break;
         default:
-          addRule(query["default"], "include", parseStr(term));
+          addRule(query["default"], pos ? "include" : "exclude", parseStr(term));
           break;
       }
 
