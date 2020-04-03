@@ -871,7 +871,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
   editor.locate = async function () {
     const response = await scrapbook.invokeExtensionScript({
-      cmd: "background.locateCurrentTab",
+      cmd: "background.locateItem",
+      args: {url: document.URL},
     });
     if (response === false) {
       alert(scrapbook.lang("ErrorLocateSidebarNotOpened"));

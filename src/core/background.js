@@ -109,11 +109,9 @@
    *     - null: no item located
    *     - false: no sidebar opened
    */
-  background.locateCurrentTab = async function (params, sender) {
+  background.locateItem = async function (params, sender) {
     const cmd = 'tree.locate';
-    const args = {
-      url: sender.url,
-    };
+    const args = params;
     const sidebarUrl = browser.runtime.getURL("scrapbook/sidebar.html");
 
     if (browser.sidebarAction) {
