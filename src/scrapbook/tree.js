@@ -1205,9 +1205,13 @@
 
     async openLink(url, newTab) {
       if (newTab) {
-        await browser.tabs.create({
-          url,
-        });
+        if (typeof newTab === 'string') {
+          window.open(url, newTab);
+        } else {
+          await browser.tabs.create({
+            url,
+          });
+        }
         return;
       }
 
