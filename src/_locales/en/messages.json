@@ -931,6 +931,31 @@
     "description": "Default name of a new note",
     "message": "New Note"
   },
+  "SidebarTitle": {
+    "message": "$BOOK$ | $APP$",
+    "placeholders": {
+      "app": {
+        "content": "$1"
+      },
+      "book": {
+        "content": "$2"
+      }
+    }
+  },
+  "SidebarTitleWithRoot": {
+    "message": "$BOOK$ :: $ROOT$ | $APP$",
+    "placeholders": {
+      "app": {
+        "content": "$1"
+      },
+      "book": {
+        "content": "$2"
+      },
+      "root": {
+        "content": "$3"
+      }
+    }
+  },
   "ViewerDesc": {
     "message": "Pick HTZ or MAFF archive files to open, via dropping them into this window, or using the buttons below:"
   },

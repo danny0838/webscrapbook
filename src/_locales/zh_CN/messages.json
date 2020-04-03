@@ -931,6 +931,31 @@
     "description": "Default name of a new note",
     "message": "新笔记"
   },
+  "SidebarTitle": {
+    "message": "$BOOK$ | $APP$",
+    "placeholders": {
+      "app": {
+        "content": "$1"
+      },
+      "book": {
+        "content": "$2"
+      }
+    }
+  },
+  "SidebarTitleWithRoot": {
+    "message": "$BOOK$ :: $ROOT$ | $APP$",
+    "placeholders": {
+      "app": {
+        "content": "$1"
+      },
+      "book": {
+        "content": "$2"
+      },
+      "root": {
+        "content": "$3"
+      }
+    }
+  },
   "ViewerDesc": {
     "message": "选择 HTZ 或 MAFF 封存文件以开启之。你可以拖放它们至此窗口，或使用以下按钮："
   },

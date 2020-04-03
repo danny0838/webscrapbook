@@ -993,7 +993,11 @@
         this.lastHighlightElem = null;
 
         // refresh UI
-        document.title = this.book.name + (this.rootId !== 'root' ? ' :: ' + this.rootId : '') + ' | ' + server.config.app.name;
+        if (this.rootId === 'root') {
+          document.title = scrapbook.lang('SidebarTitle', [server.config.app.name, this.book.name]);
+        } else {
+          document.title = scrapbook.lang('SidebarTitleWithRoot', [server.config.app.name, this.book.name, this.rootId])
+        }
 
         const menuElem = document.getElementById('command-popup');
         menuElem.querySelector('button[value="search"]').disabled = !!this.book.config.no_tree;
