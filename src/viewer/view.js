@@ -817,13 +817,13 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               e.preventDefault();
               e.stopPropagation();
 
-              const urlObj = new URL(location.href);
+              const urlObj = new URL(document.URL);
               if (inZipPath !== urlObj.searchParams.get('p')) {
                 urlObj.searchParams.set('p', inZipPath);
                 urlObj.hash = hash;
-                location.href = urlObj.href;
+                document.location.assign(urlObj.href);
               } else {
-                frameDoc.location.href = url;
+                frameDoc.location.assign(url);
                 urlObj.hash = hash;
                 history.replaceState({}, null, urlObj.href);
               }
@@ -831,14 +831,14 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               // external link
               e.preventDefault();
               e.stopPropagation();
-              location.href = url;
+              document.location.assign(url);
             } else {
               // a relative link targeting a non-existed file in the zip, e.g. 'nonexist.html'
               // in Chromium, url.href is ''
               // in Firefox, url.href is raw 'nonexist.html'
               e.preventDefault();
               e.stopPropagation();
-              location.href = 'about:blank';
+              document.location.assign('about:blank');
             }
           } else {
             const [main, search, hash] = scrapbook.splitUrl(url);

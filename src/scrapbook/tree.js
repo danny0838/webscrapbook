@@ -934,7 +934,7 @@
       }
 
       // load URL params
-      const urlParams = new URL(location.href).searchParams;
+      const urlParams = new URL(document.URL).searchParams;
       this.rootId = urlParams.get('root') || this.rootId;
 
       // load current scrapbook and scrapbooks list
