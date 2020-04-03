@@ -3346,7 +3346,9 @@ const searchEngine = {
           addRule("modify", pos ? "include" : "exclude", parseDate(term));
           break;
         default:
-          addRule(query["default"], pos ? "include" : "exclude", parseStr(term));
+          if (!cmd) {
+            addRule(query["default"], pos ? "include" : "exclude", parseStr(term));
+          }
           break;
       }
 
