@@ -3125,7 +3125,7 @@ const scrapbook = {
         (this.isZipFile(meta.index) && file === "index.html") || 
         (!this.isZipFile(meta.index) && file === meta.index.replace(/^.*[/]/, ''))
         )) {
-      const span = a.appendChild(document.createElement("span"));
+      const span = div.appendChild(document.createElement("span"));
       span.textContent = " (" + file + ")";
     }
 
