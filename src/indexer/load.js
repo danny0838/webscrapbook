@@ -3082,86 +3082,77 @@ const scrapbook = {
   showResults(results, book) {
     const name = book.name ? "(" + book.name + ") " : "";
     this.addMsg(name + "Found " + results.length + " results:");
+    const wrapper = document.getElementById("result");
     for (const item of results) {
-      this.addResult(item, book);
+      this.addResult(item, book, wrapper);
     }
     this.addMsg("\\u00A0");
   },
 
-  addResult(item, book) {
+  addResult(item, book, wrapper) {
     const {id, file, meta, fulltext} = item;
 
     const li = document.createElement("li");
     if (meta.type) {
       li.className = "scrapbook-type-" + meta.type;
     }
-    document.getElementById("result").appendChild(li);
 
-    const div = document.createElement("div");
-    li.appendChild(div);
+    const div = li.appendChild(document.createElement("div"));
 
-    {
-      let href;
-      if (meta.type !== "bookmark") {
-        if (meta.index) {
-          let subpath = 
-              (!file || file === '.' || this.isZipFile(meta.index)) ? 
-              meta.index : 
-              meta.index.replace(/[^/]+$/, '') + file;
-          subpath = this.escapeFilename(subpath || "");
-          if (subpath) {
-            href = book.path + book.dataDir + subpath;
-          }
+    var a = div.appendChild(document.createElement("a"));
+    if (meta.type !== "bookmark") {
+      if (meta.index) {
+        let subpath = 
+            (!file || file === '.' || this.isZipFile(meta.index)) ? 
+            meta.index : 
+            meta.index.replace(/[^/]+$/, '') + file;
+        subpath = this.escapeFilename(subpath || "");
+        if (subpath) {
+          a.href = book.path + book.dataDir + subpath;
         }
-      } else {
-        href = meta.source;
       }
-      const a = document.createElement("a");
-      if (href) { a.href = href; }
-      a.target = "main";
-      a.textContent = meta.title || id;
-      a.title = (meta.title || id) + (meta.source ? "\\n" + meta.source : "");
-      div.appendChild(a);
+    } else {
+      if (meta.source) {
+        a.href = meta.source;
+      }
+    }
+    a.target = "main";
+    a.textContent = meta.title || id;
+    a.title = (meta.title || id) + (meta.source ? "\\n" + meta.source : "");
 
-      if (file && !(
-          file === "." || 
-          (this.isZipFile(meta.index) && file === "index.html") || 
-          (!this.isZipFile(meta.index) && file === meta.index.replace(/^.*[/]/, ''))
-          )) {
-        const span = document.createElement("span");
-        span.textContent = " (" + file + ")";
-        a.appendChild(span);
-      }
-
-      const icon = document.createElement('img');
-      if (meta.icon) {
-        icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || "") ? 
-            meta.icon : 
-            (book.path + book.dataDir + this.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon;
-      } else {
-        icon.src = {
-          'folder': 'icon/fclose.png',
-          'note': 'icon/note.png',
-          'postit': 'icon/postit.png',
-        }[meta.type] || 'icon/item.png';
-      }
-      icon.alt = "";
-      a.insertBefore(icon, a.firstChild);
+    if (file && !(
+        file === "." || 
+        (this.isZipFile(meta.index) && file === "index.html") || 
+        (!this.isZipFile(meta.index) && file === meta.index.replace(/^.*[/]/, ''))
+        )) {
+      const span = a.appendChild(document.createElement("span"));
+      span.textContent = " (" + file + ")";
     }
 
-    {
-      const a = document.createElement("a");
-      a.href = book.path + book.indexPage + "#item-" + id;
-      a.target = "_blank";
-      a.className = "scrapbook-external";
-      a.title = conf.viewInMapTitle;
-      div.appendChild(a);
-
-      var img = document.createElement("img");
-      img.src = "icon/external.png";
-      img.alt = "";
-      a.appendChild(img);
+    var icon = a.insertBefore(document.createElement('img'), a.firstChild);
+    if (meta.icon) {
+      icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || "") ? 
+          meta.icon : 
+          (book.path + book.dataDir + this.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon;
+    } else {
+      icon.src = {
+        'folder': 'icon/fclose.png',
+        'note': 'icon/note.png',
+        'postit': 'icon/postit.png',
+      }[meta.type] || 'icon/item.png';
     }
+    icon.alt = "";
+
+    var a = div.appendChild(document.createElement("a"));
+    a.href = book.path + book.indexPage + "#item-" + id;
+    a.target = "_blank";
+    a.className = "scrapbook-external";
+    a.title = conf.viewInMapTitle;
+    var img = a.appendChild(document.createElement("img"));
+    img.src = "icon/external.png";
+    img.alt = "";
+
+    wrapper.appendChild(li);
   },
 
   clearResult() {
@@ -3297,7 +3288,7 @@ const searchEngine = {
       return n.length >= width ? n : n + new Array(width - n.length + 1).join(z);
     };
 
-    queryStr.replace(/(-?[A-Za-z]+:|-)(?:"((?:""|[^"])*)"|([^"\\s]*))|(?:"((?:""|[^"])*)"|([^"\\s]+))/g, (match, cmd, qterm, term, qterm2, term2) => {
+    queryStr.replace(/(-?[A-Za-z]+:|-)(?:"([^"]*(?:""[^"]*)*)"|([^"\\s]*))|(?:"([^"]*(?:""[^"]*)*)"|([^"\\s]+))/g, (match, cmd, qterm, term, qterm2, term2) => {
       if (cmd) {
         term = (qterm !== undefined) ? qterm.replace(/""/g, '"') : term;
       } else {
@@ -3457,7 +3448,7 @@ const searchEngine = {
         }
       }
 
-      idPool.forEach((id) => {
+      for (const id of idPool) {
         let subfiles = book.fulltext[id] || {};
         if (!Object.keys(subfiles).length) { subfiles[""] = {}; }
 
@@ -3472,7 +3463,7 @@ const searchEngine = {
             results.push(item);
           }
         }
-      });
+      }
 
       // sort results
       for (const {key, subkey, order} of query.sorts) {
