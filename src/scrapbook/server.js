@@ -331,9 +331,12 @@
         }
       }
 
+      let regex = /^(?:meta|toc)\d*\.js$/i;
       let treeLastModified = new Date(response.headers.get('Last-Modified')).valueOf();
       let treeFiles = data.reduce((data, item) => {
-        treeLastModified = Math.max(treeLastModified, parseInt(item.last_modified) * 1000);
+        if (regex.test(item.name)) {
+          treeLastModified = Math.max(treeLastModified, parseInt(item.last_modified) * 1000);
+        }
         data.set(item.name, item);
         return data;
       }, new Map());
