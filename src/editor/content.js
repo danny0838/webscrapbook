@@ -86,7 +86,7 @@ height: 100vh;`;
     }
 
     // do not load the toolbar for non-HTML document (unless forced)
-    if (!force && !["text/html", "application/xhtml+xml"].includes(document.contentType)) {
+    if (!force && !/html?|xht(?:ml)?/i.test(document.location.pathname)) {
       return;
     }
 
