@@ -442,7 +442,7 @@ svg, math`;
       await this.end();
     },
 
-    async loadServerFiles() {
+    async loadServerFiles(bookIds) {
       try {
         await this.start();
 
@@ -496,7 +496,15 @@ svg, math`;
           });
         };
 
-        for (const book of Object.values(server.books)) {
+        bookIds = bookIds && bookIds.length ? bookIds : Object.keys(server.books).sort();
+        for (const bookId of bookIds) {
+          const book = server.books[bookId];
+          if (!book) {
+            this.error(`Skipped invalid bookId '${bookId}'.`);
+            this.log('');
+            continue;
+          }
+
           if (!!book.config.no_tree) {
             this.log(`Skip no-tree book '${book.name}' at '${book.topUrl}'.`);
             this.log('');
@@ -3670,7 +3678,7 @@ Supported browsers: Chromium ≥ 49, Firefox ≥ 41, Edge ≥ 14, Safari ≥ 8, 
     switch (params.get('a')) {
       case 'load_server':
         if (scrapbook.hasServer()) {
-          await indexer.loadServerFiles();
+          await indexer.loadServerFiles(params.getAll('bookId'));
           return;
         }
         break;
