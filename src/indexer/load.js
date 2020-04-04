@@ -3479,7 +3479,7 @@ const searchEngine = {
   },
 
   _match_id(rule, item) {
-    return this.matchText(rule, item.id);
+    return this.matchTextOr(rule, item.id);
   },
 
   _match_file(rule, item) {
@@ -3499,22 +3499,7 @@ const searchEngine = {
   },
 
   _match_type(rule, item) {
-    const text = item.meta.type;
-    
-    for (const key of rule.exclude) {
-      if (key.test(text)) {
-        return false;
-      }
-    }
-
-    // use "or" clause
-    if (!rule.include.length) { return true; }
-    for (const key of rule.include) {
-      if (key.test(text)) {
-        return true;
-      }
-    }
-    return false;
+    return this.matchTextOr(rule, item.meta.type);
   },
 
   _match_create(rule, item) {
@@ -3541,6 +3526,24 @@ const searchEngine = {
     }
 
     return true;
+  },
+
+  matchTextOr(rule, text) {
+    text = text || "";
+    
+    for (const key of rule.exclude) {
+      if (key.test(text)) {
+        return false;
+      }
+    }
+
+    if (!rule.include.length) { return true; }
+    for (const key of rule.include) {
+      if (key.test(text)) {
+        return true;
+      }
+    }
+    return false;
   },
 
   matchDate(rule, date) {
