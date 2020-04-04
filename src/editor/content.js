@@ -97,6 +97,18 @@ height: 100vh;`;
     editor.serverUrl = scrapbook.getOption("server.url");
     editor.inScrapBook = editor.serverUrl && document.URL.startsWith(editor.serverUrl);
 
+    // more accurately check whether the current document is really under dataDir of a book
+    try {
+      await server.init(true);
+      const bookId = await server.findBookIdFromUrl(document.URL);
+      if (typeof bookId === 'undefined') {
+        editor.inScrapBook = false;
+        if (!force) {
+          return;
+        }
+      }
+    } catch (ex) {}
+
     // generate toolbar content
     const uuid = scrapbook.getUuid();
     editor.element = wrapper = document.documentElement.appendChild(document.createElement("web-scrapbook"));
