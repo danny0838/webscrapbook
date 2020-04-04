@@ -226,6 +226,7 @@
         u.searchParams.set('a', 'load_server');
         u.searchParams.set('bookId', book.id);
         a.href = u.href;
+        a.target = '_blank';
         this.addMsg(a, 'warn');
       } else if (metaMtime > fulltextMtime) {
         if (Date.now() > fulltextMtime + scrapbook.getOption('indexer.fulltextCacheUpdateThreshold')) {
@@ -235,6 +236,7 @@
           u.searchParams.set('a', 'load_server');
           u.searchParams.set('bookId', book.id);
           a.href = u.href;
+          a.target = '_blank';
           this.addMsg(a, 'warn');
         }
       }
