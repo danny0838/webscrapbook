@@ -499,6 +499,7 @@ svg, math`;
         for (const book of Object.values(server.books)) {
           if (!!book.config.no_tree) {
             this.log(`Skip no-tree book '${book.name}' at '${book.topUrl}'.`);
+            this.log('');
             continue;
           }
 
