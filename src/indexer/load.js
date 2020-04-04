@@ -3665,6 +3665,13 @@ Supported browsers: Chromium ≥ 49, Firefox ≥ 41, Edge ≥ 14, Safari ≥ 8, 
     filesSelectorLabel.hidden = false;
     if (scrapbook.hasServer()) {
       indexer.loadServerLabel.hidden = false;
+
+      // quick server fulltext cache update
+      const params = new URL(document.URL).searchParams;
+      if (params.get('m') === 'server') {
+        document.getElementById('panel').hidden = true;
+        await indexer.loadServerFiles();
+      }
     }
   });
 

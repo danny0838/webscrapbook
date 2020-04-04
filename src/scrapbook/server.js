@@ -417,6 +417,39 @@
       return this.toc = Object.assign.apply(this, objList);
     }
 
+    async loadFulltext(refresh = false) {
+      if (this.fulltext && !refresh) {
+        return this.fulltext;
+      }
+
+      const objList = [{}];
+      const treeFiles = await this.loadTreeFiles();
+      const prefix = this.treeUrl;
+      for (let i = 0; ; i++) {
+        const file = `fulltext${i || ""}.js`;
+        if (treeFiles.has(file) && treeFiles.get(file).type === 'file') {
+          const url = prefix + encodeURIComponent(file);
+          try {
+            const text = await this.server.request({
+              url,
+              method: "GET",
+            }).then(r => r.text());
+
+            if (!/^(?:\/\*.*\*\/|[^(])+\(([\s\S]*)\)(?:\/\*.*\*\/|[\s;])*$/.test(text)) {
+              throw new Error(`Unable to retrieve JSON data.`);
+            }
+
+            objList.push(JSON.parse(RegExp.$1));
+          } catch (ex) {
+            throw new Error(`Error loading '${url}': ${ex.message}`);
+          }
+        } else {
+          break;
+        }
+      }
+      return this.fulltext = Object.assign.apply(this, objList);
+    }
+
     async lockTree(...args) {
       await this.server.lockTree(...args);
     }

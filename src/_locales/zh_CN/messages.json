@@ -277,6 +277,30 @@
       }
     }
   },
+  "ErrorSearch": {
+    "message": "错误: $REASON$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSearchInvalidDate": {
+    "message": "日期格式错误: $DATE$",
+    "placeholders": {
+      "date": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSearchInvalidRegExp": {
+    "message": "正则表达式格式错误: $REGEX$",
+    "placeholders": {
+      "regex": {
+        "content": "$1"
+      }
+    }
+  },
   "ErrorTabDiscarded": {
     "message": "分页已卸载，请重新载入再嘗试。"
   },
@@ -931,6 +955,45 @@
     "description": "Default name of a new note",
     "message": "新笔记"
   },
+  "SearchFound": {
+    "message": "【$BOOK$】找到 $RESULTS$ 笔结果：",
+    "placeholders": {
+      "book": {
+        "content": "$1"
+      },
+      "results": {
+        "content": "$2"
+      }
+    }
+  },
+  "SearchHelpDesc": {
+    "message": "• 输入的关键词会在标题、内文、注解中查找。\n• 可用半形空白分隔要检索的多个关键词。例如“w3c organization”表示搜索含有“w3c”及“organization”的项目 。\n• 可用半形双引号检索完整关键词，若关键词包含半形双引号，可用连续两个半形双引号表示。例如“\"Tom \"\"loves\"\" Mary.\"”表示搜索含有“Tom \"loves\" Mary.”的项目。\n• 可用负号排除关键词。例如“-virus”表示搜索不含“virus”的项目。\n• 可用“<命令>:<关键词>”指定特殊的检索条件，命令前可加负号表示排除或反向。可用命令如下：\n  • mc：之后的关键词皆比对大小写。加负号则反之。例如“mc: CIA FBI -mc: president”表示搜索含有区分大小写的“CIA”、“FBI”及不分大小写的“president”的项目。\n  • re：之后的关键词皆视为正则表达式。加负号则反之。例如“re: \\bcolou?r\\b -re: 1+1=2”表示搜索匹配正则表达式“\\bcolou?r\\b”且含有关键词“1+1=2”的项目。\n  • id：搜索 ID 等同关键词（或与正则表达式匹配）的项目。多次指定时以“或”连接。例如“id:2020 id:2021”表示搜索 ID 为“2020”或“2021”的项目；“-id:2020”表示搜索 ID 不为“2020”的项目。\n  • type：搜索类型等同关键词（或与正则表达式匹配）的项目。多次指定时以“或”连接。可用的类型有“”（网页）、“bookmark”（书签）、“file”（档案）、“note”（笔记）等等。例如“type: type:bookmark”表示搜索类型为网页或书签的项目。\n  • title：搜索标题含有关键词的项目。\n  • content：搜索全文含有关键词的项目。\n  • comment：搜索注解含有关键词的项目。\n  • tcc：搜索标题、全文或注解含有关键词的项目。\n  • file：搜索档名含有关键词的项目。\n  • root：搜索此 ID 项目下的子项目。多次指定时以“或”连接。\n  • book：搜索指定剪贴簿（依名称）中的项目。多次指定时以“或”连接。\n  • source：搜索原始网址含有关键词的项目。\n  • create：搜索建立时间符合条件的项目。时间格式为 0-17 位数字，后面接负号（可略），再接 0-17 位数字。省略的部分自动补 0，但后面的时间全省略时补 9（即无限大）。例如“create:2014-2015”表示 20140000000000000 到 20150000000000000，“create:-201309”表示 00000000000000000 到 20130900000000000，“create:20110825”表示 20110825000000000 到 99999999999999999。\n  • modify：搜索修改时间符合条件的项目。时间格式同 create。\n  • sort：将搜索结果按指定方式排序，负号表示倒序。可填入 id、title、comment、content、source、type、create、modify。例如“sort:id -sort:modify”表示先按 ID 递增排序再按修改时间递减排序。"
+  },
+  "SearchHelpSummary": {
+    "message": "搜索语法说明"
+  },
+  "SearchLocateTitle": {
+    "message": "在剪贴簿显示此项目的位置"
+  },
+  "SearchTitle": {
+    "message": "搜索 $BOOK$",
+    "placeholders": {
+      "book": {
+        "content": "$1"
+      }
+    }
+  },
+  "SearchTitleWithRoot": {
+    "message": "搜索 $BOOK$ :: $ROOT$",
+    "placeholders": {
+      "book": {
+        "content": "$1"
+      },
+      "root": {
+        "content": "$2"
+      }
+    }
+  },
   "SidebarTitle": {
     "message": "$BOOK$ | $APP$",
     "placeholders": {
@@ -988,6 +1051,22 @@
     "message": "略过超出大小限制的资源: '$SOURCE$'",
     "placeholders": {
       "source": {
+        "content": "$1"
+      }
+    }
+  },
+  "WarnSearchCacheMissing": {
+    "message": "剪贴簿“$BOOK$”尚未建立全文搜索缓存，请点我建立再刷新本页。",
+    "placeholders": {
+      "book": {
+        "content": "$1"
+      }
+    }
+  },
+  "WarnSearchCacheOutdated": {
+    "message": "剪贴簿“$BOOK$”的全文搜索缓存似乎已过时，请点我更新再刷新本页。",
+    "placeholders": {
+      "book": {
         "content": "$1"
       }
     }

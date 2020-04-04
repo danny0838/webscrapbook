@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html dir="__MSG_@@bidi_dir__">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__MSG_SearchTitle__</title>
+<base target="search_result">
+<link rel="stylesheet" href="search.css">
+<script src="../lib/browser-polyfill.js"></script>
+<script src="../core/common.js"></script>
+<script src="server.js"></script>
+<script src="search.js"></script>
+</head>
+<body>
+<form id="searchForm">
+  <select id="books" multiple size="1"></select>
+  <input id="keyword" type="text">
+  <select id="helper">
+    <option value="" selected="selected"></option>
+    <option value="id:">id:</option>
+    <option value="title:">title:</option>
+    <option value="comment:">comment:</option>
+    <option value="content:">content:</option>
+    <option value="tcc:">tcc:</option>
+    <option value="source:">source:</option>
+    <option value="type:">type:</option>
+    <option value="create:">create:</option>
+    <option value="modify:">modify:</option>
+    <option value="re:">re:</option>
+    <option value="mc:">mc:</option>
+    <option value="file:">file:</option>
+    <option value="root:">root:</option>
+    <option value="sort:">sort:</option>
+    <option value="-sort:modify">Last Modified</option>
+    <option value="-sort:create">Last Created</option>
+    <option value="sort:title">Title Ascending</option>
+    <option value="-sort:title">Title Descending</option>
+    <option value="sort:id">ID Sort</option>
+  </select>
+  <input id="search" type="submit" value="🔍" disabled autocomplete="off">
+</form>
+<details id="help">
+<summary>__MSG_SearchHelpSummary__</summary>
+<div>__MSG_SearchHelpDesc__</div>
+</details>
+<div id="result"></div>
+</body>
+</html>

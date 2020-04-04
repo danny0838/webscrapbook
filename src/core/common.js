@@ -99,6 +99,7 @@
     "indexer.createRssFeedBase": "",
     "indexer.fulltextCache": true,
     "indexer.fulltextCacheFrameAsPageContent": true,
+    "indexer.fulltextCacheUpdateThreshold": 5 * 24 * 60 * 60 * 1000,
   };
 
   const CONTENT_SCRIPT_FILES = [

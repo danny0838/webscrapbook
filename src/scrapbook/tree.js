@@ -40,10 +40,6 @@
         await this.openLink(this.book.indexUrl, true);
       },
 
-      async search(selectedItemElems) {
-        await this.openLink(this.book.treeUrl + 'search.html', true);
-      },
-
       async exec_book(selectedItemElems) {
         const target = this.book.topUrl;
         await server.request({
@@ -722,7 +718,6 @@
         switch (selectedItemElems.length) {
           case 0: {
             menuElem.querySelector('button[value="index"]').hidden = false;
-            menuElem.querySelector('button[value="search"]').hidden = false;
             menuElem.querySelector('button[value="exec_book"]').hidden = false;
             menuElem.querySelector('button[value="opentab"]').hidden = true;
             menuElem.querySelector('button[value="exec"]').hidden = true;
@@ -751,7 +746,6 @@
             const item = this.book.meta[selectedItemElems[0].getAttribute('data-id')];
 
             menuElem.querySelector('button[value="index"]').hidden = true;
-            menuElem.querySelector('button[value="search"]').hidden = true;
             menuElem.querySelector('button[value="exec_book"]').hidden = true;
             menuElem.querySelector('button[value="opentab"]').hidden = ['folder', 'separator'].includes(item.type);
             menuElem.querySelector('button[value="exec"]').hidden = !(item.type === 'file' && item.index);
@@ -778,7 +772,6 @@
 
           default: {
             menuElem.querySelector('button[value="index"]').hidden = true;
-            menuElem.querySelector('button[value="search"]').hidden = true;
             menuElem.querySelector('button[value="exec_book"]').hidden = true;
             menuElem.querySelector('button[value="opentab"]').hidden = false;
             menuElem.querySelector('button[value="exec"]').hidden = true;
@@ -999,35 +992,39 @@
           document.title = scrapbook.lang('SidebarTitleWithRoot', [server.config.app.name, this.book.name, this.rootId])
         }
 
+        const isLocal = server.config.app.is_local;
+        const isNoTree = !!this.book.config.no_tree;
+
+        document.getElementById('search').disabled = isNoTree;
+
         const menuElem = document.getElementById('command-popup');
-        menuElem.querySelector('button[value="search"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="exec_book"]').disabled = !server.config.app.is_local;
-        menuElem.querySelector('button[value="opentab"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="exec"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
-        menuElem.querySelector('button[value="browse"]').disabled = !(!this.book.config.no_tree && server.config.app.is_local);
-        menuElem.querySelector('button[value="source"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="manage"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="exec_book"]').disabled = !isLocal;
+        menuElem.querySelector('button[value="opentab"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="exec"]').disabled = !(!isNoTree && isLocal);
+        menuElem.querySelector('button[value="browse"]').disabled = !(!isNoTree && isLocal);
+        menuElem.querySelector('button[value="source"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
 
-        menuElem.querySelector('button[value="mkfolder"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="mksep"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="mknote"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="upload"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="mkfolder"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="mksep"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="mknote"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="upload"]').disabled = isNoTree;
 
-        menuElem.querySelector('button[value="edit"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="move_up"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="move_down"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="move_into"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="move_drag"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="recycle"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="delete"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="edit"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="move_up"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="move_down"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="move_into"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="move_drag"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="recycle"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="delete"]').disabled = isNoTree;
 
-        menuElem.querySelector('button[value="meta"]').disabled = !!this.book.config.no_tree;
-        menuElem.querySelector('button[value="view_recycle"]').disabled = !!this.book.config.no_tree;
+        menuElem.querySelector('button[value="meta"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="view_recycle"]').disabled = isNoTree;
 
         document.getElementById('logger').textContent = '';
 
         // refresh book tree
-        if (!this.book.config.no_tree) {
+        if (!isNoTree) {
           await this.book.loadTreeFiles();
           await this.book.loadToc();
           await this.book.loadMeta();
@@ -2133,6 +2130,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       this.showCommands(true, event.pageX, event.pageY);
     },
 
+    onSearchButtonClick(event) {
+      event.preventDefault();
+      this.openLink(browser.runtime.getURL(`scrapbook/search.html?id=${this.bookId}&root=${this.rootId}`), "search");
+    },
+
     onRefreshButtonClick(event) {
       event.preventDefault();
       location.reload();
@@ -2251,6 +2253,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
     document.getElementById("book").addEventListener('change', tree.onBookChange.bind(tree));
 
+    document.getElementById("search").addEventListener('click', tree.onSearchButtonClick.bind(tree));
     document.getElementById("refresh").addEventListener('click', tree.onRefreshButtonClick.bind(tree));
     document.getElementById("command").addEventListener('click', tree.onCommandButtonClick.bind(tree));
 
