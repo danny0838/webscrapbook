@@ -222,13 +222,13 @@
       if (fulltextMtime === -Infinity) {
         let a = document.createElement('a');
         a.textContent = scrapbook.lang('WarnSearchCacheMissing', [book.name]);
-        a.href = browser.runtime.getURL('indexer/load.html?m=server');
+        a.href = browser.runtime.getURL('indexer/load.html?a=load_server');
         this.addMsg(a, 'warn');
       } else if (metaMtime > fulltextMtime) {
         if (Date.now() > fulltextMtime + scrapbook.getOption('indexer.fulltextCacheUpdateThreshold')) {
           let a = document.createElement('a');
           a.textContent = scrapbook.lang('WarnSearchCacheOutdated', [book.name]);
-          a.href = browser.runtime.getURL('indexer/load.html?m=server');
+          a.href = browser.runtime.getURL('indexer/load.html?a=load_server');
           this.addMsg(a, 'warn');
         }
       }

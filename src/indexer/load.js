@@ -146,7 +146,7 @@ svg, math`;
     indexer.loadInputFiles(files);
   }
 
-  function onChangeLoadServer(e) {
+  function onClickLoadServer(e) {
     e.preventDefault();
     indexer.loadServerFiles();
   }
@@ -170,30 +170,32 @@ svg, math`;
       return SPECIAL_ITEM_ID.has(id);
     },
 
-    initEvents() {
+    enableUi() {
       window.addEventListener("dragenter", onDragEnter, false);
       window.addEventListener("dragover", onDragOver, false);
       window.addEventListener("dragleave", onDragLeave, false);
       window.addEventListener("drop", onDrop, false);
       this.dirSelector.addEventListener("change", onChangeDir, false);
       this.filesSelector.addEventListener("change", onChangeFiles, false);
-      this.loadServerLabel.addEventListener("click", onChangeLoadServer, false);
+      this.loadServerLabel.addEventListener("click", onClickLoadServer, false);
+
+      this.panel.disabled = false;
     },
 
-    uninitEvents() {
+    disableUi() {
       window.removeEventListener("dragenter", onDragEnter, false);
       window.removeEventListener("dragover", onDragOver, false);
       window.removeEventListener("dragleave", onDragLeave, false);
       window.removeEventListener("drop", onDrop, false);
       this.dirSelector.removeEventListener("change", onChangeDir, false);
       this.filesSelector.removeEventListener("change", onChangeFiles, false);
-      this.loadServerLabel.removeEventListener("click", onChangeLoadServer, false);
+      this.loadServerLabel.removeEventListener("click", onClickLoadServer, false);
+
+      this.panel.disabled = true;
     },
 
     start() {
-      this.uninitEvents();
-      this.dirSelector.disabled = true;
-      this.filesSelector.disabled = true;
+      this.disableUi();
       this.logger.textContent = '';
       this.logger.className = '';
       this.options = Object.assign({}, scrapbook.options);
@@ -213,11 +215,9 @@ svg, math`;
       this.log(`Time spent: ${t} seconds.`);
       this.log('');
 
-      this.dirSelector.disabled = false;
       this.dirSelector.value = null;
-      this.filesSelector.disabled = false;
       this.filesSelector.value = null;
-      this.initEvents();
+      this.enableUi();
     },
 
     async loadZipFile(file) {
@@ -3635,22 +3635,21 @@ Supported browsers: Chromium ≥ 49, Firefox ≥ 41, Edge ≥ 14, Safari ≥ 8, 
     scrapbook.loadLanguages(document);
 
     // init common elements and events
+    indexer.logger = document.getElementById('logger');
     indexer.dropmask = document.getElementById('dropmask');
     indexer.downloader = document.getElementById('downloader');
+
+    indexer.panel = document.getElementById('panel');
     indexer.dirSelector = document.getElementById('dir-selector');
     indexer.filesSelector = document.getElementById('files-selector');
     indexer.loadServerLabel = document.getElementById('load-server-label');
-    indexer.logger = document.getElementById('logger');
 
     const dirSelectorLabel = document.getElementById('dir-selector-label');
     const filesSelectorLabel = document.getElementById('files-selector-label');
 
     await scrapbook.loadOptionsAuto;
 
-    // init events
-    indexer.initEvents();
-
-    // enable UI
+    // init UI
     if (
       // Check for "webkitdirectory" attribute only as it is implemented by major
       // browsers and is the ongoing standard of File and Directory Entries API.
@@ -3664,16 +3663,21 @@ Supported browsers: Chromium ≥ 49, Firefox ≥ 41, Edge ≥ 14, Safari ≥ 8, 
       dirSelectorLabel.hidden = false;
     }
     filesSelectorLabel.hidden = false;
-    if (scrapbook.hasServer()) {
-      indexer.loadServerLabel.hidden = false;
+    indexer.loadServerLabel.hidden = !scrapbook.hasServer();
 
-      // quick server fulltext cache update
-      const params = new URL(document.URL).searchParams;
-      if (params.get('m') === 'server') {
-        document.getElementById('panel').hidden = true;
-        await indexer.loadServerFiles();
-      }
+    // handle URL actions
+    const params = new URL(document.URL).searchParams;
+    switch (params.get('a')) {
+      case 'load_server':
+        if (scrapbook.hasServer()) {
+          await indexer.loadServerFiles();
+          return;
+        }
+        break;
     }
+
+    // enable UI if no action
+    indexer.enableUi();
   });
 
   return indexer;

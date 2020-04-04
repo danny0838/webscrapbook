@@ -25,10 +25,17 @@ body {
 }
 
 #panel {
+  all: unset;
+  display: block;
   padding: .5em 1em;
   background-color: grey;
   color: white;
   text-align: center;
+}
+
+#panel:disabled {
+  filter: grayscale(100%);
+  opacity: 0.3;
 }
 
 #panel div {
