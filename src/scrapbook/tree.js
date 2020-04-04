@@ -347,7 +347,6 @@
 </html>
 `;
             file = new File([content], filename, {type: 'text/html'});
-            action = 'editx';
             break;
           }
 
@@ -356,7 +355,6 @@
             newItem.index = newItem.id + '/' + filename;
             target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
             file = new File([], filename, {type: 'text/markdown'});
-            action = 'edit';
             break;
           }
         }
@@ -368,7 +366,6 @@
         const formData = new FormData();
         formData.append('token', await server.acquireToken());
         formData.append('upload', file);
-
         await server.request({
           url: target + '?a=save&f=json',
           method: "POST",
@@ -387,7 +384,20 @@
         });
 
         // open link
-        await this.openLink(target + `?a=${action}`, true);
+        switch (type) {
+          case 'html': {
+            await this.openLink(target, true);
+            break;
+          }
+
+          case 'markdown': {
+            const u = new URL(browser.runtime.getURL("scrapbook/edit.html"));
+            u.searchParams.set('id', newItem.id);
+            u.searchParams.set('bookId', this.bookId);
+            await this.openLink(u.href, true);
+            break;
+          }
+        }
       },
 
       async upload(selectedItemElems, detail) {
@@ -411,9 +421,10 @@
         if (!selectedItemElems.length) { return; }
 
         const id = selectedItemElems[0].getAttribute('data-id');
-        const item = this.book.meta[id];
-        const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
-        await this.openLink(target + '?a=edit', true);
+        const urlObj = new URL(browser.runtime.getURL("scrapbook/edit.html"));
+        urlObj.searchParams.set('id', id);
+        urlObj.searchParams.set('bookId', this.bookId);
+        await this.openLink(urlObj.href, true);
       },
 
       async move_up(selectedItemElems) {

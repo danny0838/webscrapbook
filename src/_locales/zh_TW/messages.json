@@ -59,8 +59,33 @@
   "EditConfirmScriptedDocument": {
     "message": "此頁面含有腳本，可能與編輯工具衝突，造成永久的資訊遺失。確定要儲存嗎？"
   },
+  "EditExitLabel": {
+    "message": "離開"
+  },
+  "EditSaveLabel": {
+    "message": "儲存"
+  },
   "EditTab": {
     "message": "編輯分頁"
+  },
+  "EditTitle": {
+    "message": "編輯 $ID$",
+    "placeholders": {
+      "id": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditTitleWithFile": {
+    "message": "編輯 $ID$ :: $FILE$",
+    "placeholders": {
+      "id": {
+        "content": "$1"
+      },
+      "file": {
+        "content": "$2"
+      }
+    }
   },
   "EditorButtonClose": {
     "message": "關閉工具列"

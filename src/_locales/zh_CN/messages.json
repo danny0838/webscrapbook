@@ -59,8 +59,33 @@
   "EditConfirmScriptedDocument": {
     "message": "此页面含有脚本，可能与编辑工具冲突，造成永久的信息遗失。确定要保存吗？"
   },
+  "EditExitLabel": {
+    "message": "离开"
+  },
+  "EditSaveLabel": {
+    "message": "保存"
+  },
   "EditTab": {
     "message": "编辑分页"
+  },
+  "EditTitle": {
+    "message": "编辑 $ID$",
+    "placeholders": {
+      "id": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditTitleWithFile": {
+    "message": "编辑 $ID$ :: $FILE$",
+    "placeholders": {
+      "id": {
+        "content": "$1"
+      },
+      "file": {
+        "content": "$2"
+      }
+    }
   },
   "EditorButtonClose": {
     "message": "关闭工具列"

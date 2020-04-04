@@ -59,8 +59,33 @@
   "EditConfirmScriptedDocument": {
     "message": "This page has scripts, which could conflict with the editor causing permanent data loss. Save anyway?"
   },
+  "EditExitLabel": {
+    "message": "Exit"
+  },
+  "EditSaveLabel": {
+    "message": "Save"
+  },
   "EditTab": {
     "message": "Edit tab"
+  },
+  "EditTitle": {
+    "message": "Edit $ID$",
+    "placeholders": {
+      "id": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditTitleWithFile": {
+    "message": "Edit $ID$ :: $FILE$",
+    "placeholders": {
+      "id": {
+        "content": "$1"
+      },
+      "file": {
+        "content": "$2"
+      }
+    }
   },
   "EditorButtonClose": {
     "message": "Close toolbar"
