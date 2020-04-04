@@ -128,13 +128,6 @@
         }
         const rootUrl = rootUrlObj.href;
 
-        // use the cached config if the configured server root isn't changed
-        if (this._config) {
-          if (rootUrl.startsWith(this._serverRoot)) {
-            return this._config;
-          }
-        }
-
         // load config from server
         {
           // Use xhr for the first time for authentication as fetch API doesn't
