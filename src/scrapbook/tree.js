@@ -1372,7 +1372,7 @@
       if (meta.type !== 'separator') {
         var a = div.appendChild(document.createElement('a'));
         a.appendChild(document.createTextNode(meta.title || id));
-        a.title = (meta.title || id) + (meta.source ? "\n" + meta.source : "");
+        a.title = (meta.title || id) + (meta.source ? "\n" + meta.source : "") + (meta.comment ? "\n\n" + meta.comment : "");
         if (meta.type !== 'bookmark') {
           if (meta.index) { a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index); }
         } else {
@@ -1400,7 +1400,7 @@
         icon.alt = "";
       } else {
         var line = div.appendChild(document.createElement('fieldset'));
-        if (meta.comment) { line.title = meta.comment; }
+        line.title = (meta.title || "") + (meta.source ? "\n" + meta.source : "") + (meta.comment ? "\n\n" + meta.comment : "");
 
         var legend = line.appendChild(document.createElement('legend'));
         if (meta.title) {
