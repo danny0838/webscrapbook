@@ -2645,8 +2645,10 @@ var scrapbook = {
   onClickFolder: function (event) {
     event.preventDefault();
     var target = this.previousSibling;
-    target.focus();
-    target.click();
+    if (target) {
+      target.focus();
+      target.click();
+    }
   },
 
   onClickItem: function (event) {
