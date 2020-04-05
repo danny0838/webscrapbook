@@ -2407,10 +2407,6 @@ a:focus {
   background-color: rgba(196, 221, 252, 1);
 }
 
-a:active {
-  background-color: #FFB699;
-}
-
 a > img {
   display: inline-block;
   margin: 0 .2em;
@@ -2846,10 +2842,6 @@ a {
 a:focus {
   outline-style: auto;
   background-color: rgba(196, 221, 252, 1);
-}
-
-a:active {
-  background-color: #FFB699;
 }
 
 a > img {
