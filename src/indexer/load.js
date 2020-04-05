@@ -2394,8 +2394,8 @@ a {
 }
 
 a:focus {
-  background-color: #6495ED;
-  text-decoration: underline;
+  outline-style: auto;
+  background-color: rgba(196, 221, 252, 1);
 }
 
 a:active {
@@ -2829,8 +2829,8 @@ a {
 }
 
 a:focus {
-  background-color: #6495ED;
-  text-decoration: underline;
+  outline-style: auto;
+  background-color: rgba(196, 221, 252, 1);
 }
 
 a:active {
