@@ -2388,6 +2388,10 @@ li > div {
   white-space: nowrap;
 }
 
+li > div:hover {
+  background-color: rgba(196, 221, 252, 0.3);
+}
+
 li > div:focus {
   outline-style: auto;
   background-color: rgba(196, 221, 252, 1);
@@ -2828,6 +2832,10 @@ li {
 
 li > div {
   white-space: nowrap;
+}
+
+li > div:hover {
+  background-color: rgba(196, 221, 252, 0.3);
 }
 
 a {
