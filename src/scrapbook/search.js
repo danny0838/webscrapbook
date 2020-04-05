@@ -21,17 +21,20 @@
 
   'use strict';
 
-  const conf = {
-    defaultSearch: "-type:folder -type:separator",  // the constant string to add before the input keyword
-  };
-
   const search = {
+    defaultSearch: "",
+    fulltextCacheUpdateThreshold: null,
     books: [],
 
     async init() {
       try {
         scrapbook.loadLanguages(document);
         await scrapbook.loadOptions();
+
+        // load conf from options
+        this.defaultSearch = scrapbook.getOption("scrapbook.defaultSearch");
+        this.fulltextCacheUpdateThreshold = scrapbook.getOption('scrapbook.fulltextCacheUpdateThreshold');
+
         await server.init();
 
         // parse URL params
@@ -47,7 +50,7 @@
 
         let rootId = urlParams.get('root') || 'root';
         if (rootId !== 'root') {
-          conf.defaultSearch = `${conf.defaultSearch} root:"${rootId.replace(/"/g, '""')}"`;
+          this.defaultSearch = `${this.defaultSearch} root:"${rootId.replace(/"/g, '""')}"`;
         }
 
         // init UI
@@ -91,8 +94,8 @@
 
         // set query string
         let queryStr = document.getElementById("keyword").value;
-        if (conf.defaultSearch) {
-          queryStr = conf.defaultSearch + " " + queryStr;
+        if (this.defaultSearch) {
+          queryStr = this.defaultSearch + " " + queryStr;
         }
         if (queryStrFromFrom) {
           queryStr = queryStrFromFrom + " " + queryStr;
@@ -228,7 +231,7 @@
         a.target = '_blank';
         this.addMsg(a, 'warn');
       } else if (metaMtime > fulltextMtime) {
-        const threshold = scrapbook.getOption('scrapbook.fulltextCacheUpdateThreshold');
+        const threshold = this.fulltextCacheUpdateThreshold;
         if (typeof threshold === 'number' && Date.now() > fulltextMtime + threshold) {
           let a = document.createElement('a');
           a.textContent = scrapbook.lang('WarnSearchCacheOutdated', [book.name]);

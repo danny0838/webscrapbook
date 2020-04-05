@@ -737,6 +737,9 @@
   "OptionGroupSave": {
     "message": "获取 - 保存"
   },
+  "OptionGroupScrapbook": {
+    "message": "剪贴簿"
+  },
   "OptionGroupServer": {
     "message": "后端服务器"
   },
@@ -769,6 +772,9 @@
   },
   "OptionPageTitle": {
     "message": "选项设定"
+  },
+  "OptionScrapbookDefaultSearchLabel": {
+    "message": "默认搜索条件:"
   },
   "OptionServerPasswordLabel": {
     "message": "密码:"

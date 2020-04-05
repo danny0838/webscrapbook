@@ -737,6 +737,9 @@
   "OptionGroupSave": {
     "message": "Capture - saving"
   },
+  "OptionGroupScrapbook": {
+    "message": "Scrapbook"
+  },
   "OptionGroupServer": {
     "message": "Backend server"
   },
@@ -769,6 +772,9 @@
   },
   "OptionPageTitle": {
     "message": "Options"
+  },
+  "OptionScrapbookDefaultSearchLabel": {
+    "message": "Default search condiiton:"
   },
   "OptionServerPasswordLabel": {
     "message": "Password:"

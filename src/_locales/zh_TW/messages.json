@@ -737,6 +737,9 @@
   "OptionGroupSave": {
     "message": "擷取 - 儲存"
   },
+  "OptionGroupScrapbook": {
+    "message": "剪貼簿"
+  },
   "OptionGroupServer": {
     "message": "後端伺服器"
   },
@@ -769,6 +772,9 @@
   },
   "OptionPageTitle": {
     "message": "選項設定"
+  },
+  "OptionScrapbookDefaultSearchLabel": {
+    "message": "預設搜尋條件:"
   },
   "OptionServerPasswordLabel": {
     "message": "密碼:"
