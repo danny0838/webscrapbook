@@ -2961,10 +2961,6 @@ const scrapbook = {
   loadBook(book) {
     return Promise.resolve().then(() => {
       let base = this.resolveUrl(book.path, location.href);
-      if (!this.checkHttp(base)) {
-        this.addMsg("Rejected to load book from HTTP: " + base);
-        return;
-      }
 
       const loadMeta = () => {
         const loop = () => {
@@ -3014,11 +3010,19 @@ const scrapbook = {
       };
 
       scrapbook.data = book;
-      return Promise.all([
-        loadMeta(),
-        loadToc(),
-        loadFulltext(),
-      ]);
+      if (!this.checkHttp(base)) {
+        this.addMsg("Rejected to load remote fulltext cache: " + base);
+        return Promise.all([
+          loadMeta(),
+          loadToc(),
+        ]);
+      } else {
+        return Promise.all([
+          loadMeta(),
+          loadToc(),
+          loadFulltext(),
+        ]);
+      }
     });
   },
 
@@ -3044,7 +3048,7 @@ const scrapbook = {
     if (['http:', 'https:'].indexOf(targetUrlObj.protocol) !== -1 &&
         ['localhost', '127.0.0.1'].indexOf(targetUrlObj.hostname) === -1) {
       if (conf.allowHttp === 0) {
-        if (confirm("Loading search database from the web could produce large network flow. Continue?")) {
+        if (confirm("Loading remote fulltext cache may require large network flow. Continue?")) {
           conf.allowHttp = 1;
         } else {
           conf.allowHttp = -1;
