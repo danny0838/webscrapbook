@@ -1388,7 +1388,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       };
 
       if (!settings.frameIsMain &&
-          typeof options["capture.pageSizeLimit"] === "number" && data.content.length >= options["capture.pageSizeLimit"] * 1024) {
+          typeof options["capture.pageSizeLimit"] === "number" && data.content.length >= options["capture.pageSizeLimit"] * 1024 * 1024) {
         capturer.warn(scrapbook.lang("WarnPageSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
         return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Page size limit exceeded."}};
       }
@@ -1848,7 +1848,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             postHeaders({access, xhr, headers}) {
               // abort fetching body for a size exceeding resource
               if (typeof options["capture.resourceSizeLimit"] === "number" && 
-                  headers.contentLength >= options["capture.resourceSizeLimit"] * 1024) {
+                  headers.contentLength >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
                 capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
                 return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Resource size limit exceeded."}};
               }
