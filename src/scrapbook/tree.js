@@ -1356,13 +1356,8 @@
       if (meta.type) { elem.setAttribute('data-type', meta.type); };
       if (meta.marked) { elem.setAttribute('data-marked', ''); }
       this.itemMakeContainer(parent);
-      if (isFinite(index)) {
-        parent.container.insertBefore(elem, parent.container.children[index]);
-      } else {
-        parent.container.appendChild(elem);
-      }
 
-      var div = document.createElement('div');
+      var div = elem.appendChild(document.createElement('div'));
       div.setAttribute('draggable', true);
       div.addEventListener('click', this.onItemClick.bind(this));
       div.addEventListener('mousedown', this.onItemMiddleClick.bind(this));
@@ -1373,10 +1368,9 @@
       div.addEventListener('dragover', this.onItemDragOver.bind(this));
       div.addEventListener('dragleave', this.onItemDragLeave.bind(this));
       div.addEventListener('drop', this.onItemDrop.bind(this));
-      elem.appendChild(div);
 
       if (meta.type !== 'separator') {
-        var a = document.createElement('a');
+        var a = div.appendChild(document.createElement('a'));
         a.appendChild(document.createTextNode(meta.title || id));
         a.title = (meta.title || id) + (meta.source ? "\n" + meta.source : "");
         if (meta.type !== 'bookmark') {
@@ -1389,9 +1383,8 @@
           }
         }
         if (meta.type === 'folder') { a.addEventListener('onclick', this.onFolderClick.bind(this)); }
-        div.appendChild(a);
 
-        var icon = document.createElement('img');
+        var icon = a.insertBefore(document.createElement('img'), a.firstChild);
         if (meta.icon) {
           icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || "") ? 
               meta.icon : 
@@ -1405,22 +1398,25 @@
           }[meta.type] || browser.runtime.getURL('resources/item.png');
         }
         icon.alt = "";
-        a.insertBefore(icon, a.firstChild);
       } else {
-        var line = document.createElement('fieldset');
+        var line = div.appendChild(document.createElement('fieldset'));
         if (meta.comment) { line.title = meta.comment; }
-        div.appendChild(line);
 
-        var legend = document.createElement('legend');
+        var legend = line.appendChild(document.createElement('legend'));
         if (meta.title) {
           legend.appendChild(document.createTextNode('\xA0' + meta.title + '\xA0'));
         }
-        line.appendChild(legend);
       }
 
       var childIdList = this.book.toc[id];
       if (childIdList && childIdList.length) {
         this.itemMakeContainer(elem);
+      }
+
+      if (isFinite(index)) {
+        parent.container.insertBefore(elem, parent.container.children[index]);
+      } else {
+        parent.container.appendChild(elem);
       }
 
       return elem;

@@ -2513,14 +2513,12 @@ var scrapbook = {
     elem.id = 'item-' + id;
     if (meta.type) { elem.className = 'scrapbook-type-' + meta.type + ' '; };
     if (meta.marked) { elem.className += 'scrapbook-marked '; }
-    parent.container.appendChild(elem);
 
-    var div = document.createElement('div');
+    var div = elem.appendChild(document.createElement('div'));
     div.onclick = scrapbook.onClickItem;
-    elem.appendChild(div);
 
     if (meta.type !== 'separator') {
-      var a = document.createElement('a');
+      var a = div.appendChild(document.createElement('a'));
       a.appendChild(document.createTextNode(meta.title || id));
       a.title = (meta.title || id) + (meta.source ? "\\n" + meta.source : "");
       if (meta.type !== 'bookmark') {
@@ -2533,9 +2531,8 @@ var scrapbook = {
         }
       }
       if (meta.type === 'folder') { a.onclick = scrapbook.onClickFolder; }
-      div.appendChild(a);
 
-      var icon = document.createElement('img');
+      var icon = a.insertBefore(document.createElement('img'), a.firstChild);
       if (meta.icon) {
         icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || "") ? 
             meta.icon : 
@@ -2549,39 +2546,33 @@ var scrapbook = {
         }[meta.type] || 'icon/item.png';
       }
       icon.alt = "";
-      a.insertBefore(icon, a.firstChild);
 
       if (meta.type !== 'bookmark' && meta.source) {
-        var srcLink = document.createElement('a');
+        var srcLink = div.appendChild(document.createElement('a'));
         srcLink.className = 'scrapbook-external';
         srcLink.href = meta.source;
         srcLink.title = scrapbook.conf.viewSourceTitle;
-        div.appendChild(srcLink);
         srcLink.target = "_blank";
 
-        var srcImg = document.createElement('img');
+        var srcImg = srcLink.appendChild(document.createElement('img'));
         srcImg.src = 'icon/external.png';
         srcImg.alt = '';
-        srcLink.appendChild(srcImg);
       }
 
       var childIdList = scrapbook.data.toc[id];
       if (childIdList && childIdList.length) {
-        elem.toggle = document.createElement('a');
+        elem.toggle = div.insertBefore(document.createElement('a'), div.firstChild);
         elem.toggle.href = '#';
         elem.toggle.className = 'scrapbook-toggle';
         elem.toggle.onclick = scrapbook.onClickToggle;
-        div.insertBefore(elem.toggle, div.firstChild);
 
-        var toggleImg = document.createElement('img');
+        var toggleImg = elem.toggle.appendChild(document.createElement('img'));
         toggleImg.src = 'icon/collapse.png';
         toggleImg.alt = '';
-        elem.toggle.appendChild(toggleImg);
 
-        elem.container = document.createElement('ul');
+        elem.container = elem.appendChild(document.createElement('ul'));
         elem.container.className = 'scrapbook-container';
         elem.container.style.display = 'none';
-        elem.appendChild(elem.container);
 
         var childIdChain = idChain.slice();
         childIdChain.push(id);
@@ -2593,14 +2584,14 @@ var scrapbook = {
         }
       }
     } else {
-      var line = document.createElement('fieldset');
+      var line = div.appendChild(document.createElement('fieldset'));
       if (meta.comment) { line.title = meta.comment; }
-      div.appendChild(line);
 
-      var legend = document.createElement('legend');
+      var legend = line.appendChild(document.createElement('legend'));
       legend.appendChild(document.createTextNode('\\xA0' + (meta.title || '') + '\\xA0'));
-      line.appendChild(legend);
     }
+
+    parent.container.appendChild(elem);
 
     return elem;
   },
@@ -2608,7 +2599,7 @@ var scrapbook = {
   loadHash: function () {
     var hash = self.location.hash || top.location.hash;
     if (!hash) { return; }
-    
+
     var itemElem = document.getElementById(hash.slice(1));
     if (!itemElem) { return; }
 
@@ -2628,7 +2619,7 @@ var scrapbook = {
 
     if (anchor) {
       if (self !== top) {
-        top.document.title = anchor.childNodes[1].nodeValue || scrapbook.data.title;
+        top.document.title = anchor.firstChild.nodeValue || scrapbook.data.title;
         if (anchor.href) { top.frames["main"].location = anchor.href; }
       }
       setTimeout(function(){ anchor.focus(); }, 0);
@@ -2663,7 +2654,7 @@ var scrapbook = {
     var anchor = scrapbook.getItemAnchor(this.parentNode);
 
     try {
-      var title = anchor ? anchor.childNodes[1].nodeValue : "";
+      var title = anchor ? anchor.firstChild.nodeValue : "";
       title = title || scrapbook.data.title;
 
       if (self !== top) {
