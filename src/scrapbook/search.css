@@ -43,8 +43,9 @@ a {
   color: inherit;
 }
 
-a:hover {
-  text-decoration: underline;
+a:focus {
+  outline-style: auto;
+  background-color: rgba(196, 221, 252, 1);
 }
 
 .warn {
@@ -62,6 +63,10 @@ a:hover {
   width: 1em;
   height: 1em;
   vertical-align: middle;
+}
+
+.tree [data-id] > div:hover {
+  background-color: rgba(196, 221, 252, 0.3);
 }
 
 .tree [data-type="bookmark"] > div > a {
