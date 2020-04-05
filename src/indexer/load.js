@@ -2900,7 +2900,6 @@ const conf = {
   ],
   allowHttp: 0,  // whether to load js cache from HTTP(S)? -1: deny, 0: ask; 1: allow
   defaultSearch: "-type:folder -type:separator",  // the constant string to add before the input keyword
-  defaultField: "tcc",  // the field to search for bare key terms
   viewInMapTitle: "${scrapbook.escapeQuotes(scrapbook.lang('IndexerTreeSearchViewInMap'))}",  // title for "view in map"
 };
 
@@ -3233,7 +3232,7 @@ const searchEngine = {
       },
       mc: false,
       re: false,
-      default: conf.defaultField,
+      default: "tcc",
     };
 
     const addRule = (name, type, value) => {
@@ -3308,56 +3307,60 @@ const searchEngine = {
         term = (qterm2 !== undefined) ? qterm2.replace(/""/g, '"') : term2;
       }
 
+      if (cmd) {
+        cmd = cmd.slice(0, -1);
+      } else {
+        cmd = query.default;
+      }
+
       switch (cmd) {
-        case "mc:":
+        case "default":
+          query.default = String(term);
+          break;
+        case "mc":
           query.mc = pos;
           break;
-        case "re:":
+        case "re":
           query.re = pos;
           break;
-        case "book:":
+        case "book":
           query.books[pos ? 'include' : 'exclude'].push(term);
           break;
-        case "root:":
+        case "root":
           query.roots[pos ? 'include' : 'exclude'].push(term);
           break;
-        case "sort:":
+        case "sort":
           addSort(term, pos ? 1 : -1);
           break;
-        case "type:":
+        case "type":
           addRule("type", pos ? "include" : "exclude", parseStr(term, true));
           break;
-        case "id:":
+        case "id":
           addRule("id", pos ? "include" : "exclude", parseStr(term, true));
           break;
-        case "file:":
+        case "file":
           addRule("file", pos ? "include" : "exclude", parseStr(term));
           break;
-        case "source:":
+        case "source":
           addRule("source", pos ? "include" : "exclude", parseStr(term));
           break;
-        case "tcc:":
+        case "tcc":
           addRule("tcc", pos ? "include" : "exclude", parseStr(term));
           break;
-        case "title:":
+        case "title":
           addRule("title", pos ? "include" : "exclude", parseStr(term));
           break;
-        case "comment:":
+        case "comment":
           addRule("comment", pos ? "include" : "exclude", parseStr(term));
           break;
-        case "content:":
+        case "content":
           addRule("content", pos ? "include" : "exclude", parseStr(term));
           break;
-        case "create:":
+        case "create":
           addRule("create", pos ? "include" : "exclude", parseDate(term));
           break;
-        case "modify:":
+        case "modify":
           addRule("modify", pos ? "include" : "exclude", parseDate(term));
-          break;
-        default:
-          if (!cmd) {
-            addRule(query["default"], pos ? "include" : "exclude", parseStr(term));
-          }
           break;
       }
 
