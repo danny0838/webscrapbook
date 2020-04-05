@@ -24,6 +24,7 @@
   const search = {
     defaultSearch: "",
     fulltextCacheUpdateThreshold: null,
+    fulltextCacheRemoteSizeLimit: null,
     books: [],
 
     async init() {
@@ -34,6 +35,7 @@
         // load conf from options
         this.defaultSearch = scrapbook.getOption("scrapbook.defaultSearch");
         this.fulltextCacheUpdateThreshold = scrapbook.getOption('scrapbook.fulltextCacheUpdateThreshold');
+        this.fulltextCacheRemoteSizeLimit = scrapbook.getOption('scrapbook.fulltextCacheRemoteSizeLimit');
 
         await server.init();
 
@@ -200,22 +202,22 @@
     },
 
     async loadBook(book) {
-      await Promise.all([
-        book.loadMeta(),
-        book.loadToc(),
-        book.loadFulltext(),
-      ]);
+      await book.loadTreeFiles();
 
       // check fulltext cache
       let regexFulltext = /^fulltext\d*\.js$/;
       let regexMeta = /^(?:meta|toc)\d*\.js$/;
       let fulltextMtime = -Infinity;
+      let fulltextSize = 0;
       let metaMtime = -Infinity;
+      let metaSize = 0;
       for (const file of book.treeFiles.values()) {
         if (regexFulltext.test(file.name)) {
           fulltextMtime = Math.max(fulltextMtime, file.last_modified);
+          if (file.size !== null) { fulltextSize += file.size; }
         } else if (regexMeta.test(file.name)) {
           metaMtime = Math.max(metaMtime, file.last_modified);
+          if (file.size !== null) { metaSize += file.size; }
         }
       }
       fulltextMtime = Math.floor(fulltextMtime) * 1000;
@@ -243,6 +245,27 @@
           this.addMsg(a, 'warn');
         }
       }
+
+      // check size
+      const tasks = [
+        book.loadMeta(),
+        book.loadToc(),
+      ];
+      if (!server.config.app.is_local
+          && typeof this.fulltextCacheRemoteSizeLimit === 'number'
+          && fulltextSize > this.fulltextCacheRemoteSizeLimit * 1024 * 1024) {
+        let size = fulltextSize / (1024 * 1024);
+        size = size > 0.1 ? size.toFixed(1) + ' MiB' :
+            size * 1024 > 0.1 ? (size * 1024).toFixed(1) + ' KiB' :
+            fulltextSize + ' B';
+        this.addMsg(scrapbook.lang('WarnFulltextCacheBlocked', [book.name, size]), 'warn');
+        book.fulltext = {};
+      } else {
+        tasks.push(book.loadFulltext());
+      }
+
+      // load index
+      await Promise.all(tasks);
     },
 
     addMsg(msg, className) {

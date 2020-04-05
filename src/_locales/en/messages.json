@@ -776,6 +776,9 @@
   "OptionScrapbookDefaultSearchLabel": {
     "message": "Default search condiiton:"
   },
+  "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
+    "message": "Size limit for remote fulltext cache:"
+  },
   "OptionServerPasswordLabel": {
     "message": "Password:"
   },
@@ -1066,6 +1069,17 @@
         "content": "$1"
       },
       "target": {
+        "content": "$2"
+      }
+    }
+  },
+  "WarnFulltextCacheBlocked": {
+    "message": "Skipped loading remote fulltext cache for book “$BOOK$” due to exceeding size limit (totally $SIZE$).",
+    "placeholders": {
+      "book": {
+        "content": "$1"
+      },
+      "size": {
         "content": "$2"
       }
     }

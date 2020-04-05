@@ -100,6 +100,7 @@
     "indexer.fulltextCache": true,
     "indexer.fulltextCacheFrameAsPageContent": true,
     "scrapbook.defaultSearch": "-type:folder -type:separator",
+    "scrapbook.fulltextCacheRemoteSizeLimit": null,
     "scrapbook.fulltextCacheUpdateThreshold": 5 * 24 * 60 * 60 * 1000,
   };
 

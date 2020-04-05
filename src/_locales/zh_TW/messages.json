@@ -776,6 +776,9 @@
   "OptionScrapbookDefaultSearchLabel": {
     "message": "預設搜尋條件:"
   },
+  "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
+    "message": "遠端全文搜尋快取大小限制:"
+  },
   "OptionServerPasswordLabel": {
     "message": "密碼:"
   },
@@ -1066,6 +1069,17 @@
         "content": "$1"
       },
       "target": {
+        "content": "$2"
+      }
+    }
+  },
+  "WarnFulltextCacheBlocked": {
+    "message": "已停止載入遠端剪貼簿「$BOOK$」的全文搜尋快取，因超出大小限制（共 $SIZE$）。",
+    "placeholders": {
+      "book": {
+        "content": "$1"
+      },
+      "size": {
         "content": "$2"
       }
     }

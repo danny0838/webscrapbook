@@ -776,6 +776,9 @@
   "OptionScrapbookDefaultSearchLabel": {
     "message": "默认搜索条件:"
   },
+  "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
+    "message": "远程全文搜索缓存大小限制:"
+  },
   "OptionServerPasswordLabel": {
     "message": "密码:"
   },
@@ -1066,6 +1069,17 @@
         "content": "$1"
       },
       "target": {
+        "content": "$2"
+      }
+    }
+  },
+  "WarnFulltextCacheBlocked": {
+    "message": "已停止载入远程剪贴簿“$BOOK$”的全文搜索缓存，因超出大小限制（共 $SIZE$）。",
+    "placeholders": {
+      "book": {
+        "content": "$1"
+      },
+      "size": {
         "content": "$2"
       }
     }
