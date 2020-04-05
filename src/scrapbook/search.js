@@ -229,7 +229,8 @@
         a.target = '_blank';
         this.addMsg(a, 'warn');
       } else if (metaMtime > fulltextMtime) {
-        if (Date.now() > fulltextMtime + scrapbook.getOption('indexer.fulltextCacheUpdateThreshold')) {
+        const threshold = scrapbook.getOption('scrapbook.fulltextCacheUpdateThreshold');
+        if (typeof threshold === 'number' && Date.now() > fulltextMtime + threshold) {
           let a = document.createElement('a');
           a.textContent = scrapbook.lang('WarnSearchCacheOutdated', [book.name]);
           let u = new URL(browser.runtime.getURL('indexer/load.html'));
