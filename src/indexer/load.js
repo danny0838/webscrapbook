@@ -2388,6 +2388,11 @@ li > div {
   white-space: nowrap;
 }
 
+li > div:focus {
+  outline-style: auto;
+  background-color: rgba(196, 221, 252, 1);
+}
+
 a {
   text-decoration: none;
   color: #000000;
@@ -2515,6 +2520,7 @@ var scrapbook = {
     if (meta.marked) { elem.className += 'scrapbook-marked '; }
 
     var div = elem.appendChild(document.createElement('div'));
+    div.setAttribute('tabindex', -1);
     div.onclick = scrapbook.onClickItem;
 
     if (meta.type !== 'separator') {
@@ -2615,6 +2621,8 @@ var scrapbook = {
       location.hash = hash;
     }
 
+    setTimeout(function(){ itemElem.firstChild.focus(); }, 0);
+
     var anchor = scrapbook.getItemAnchor(itemElem);
 
     if (anchor) {
@@ -2622,7 +2630,6 @@ var scrapbook = {
         top.document.title = anchor.firstChild.nodeValue || scrapbook.data.title;
         if (anchor.href) { top.frames["main"].location = anchor.href; }
       }
-      setTimeout(function(){ anchor.focus(); }, 0);
     }
   },
 
