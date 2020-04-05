@@ -1050,9 +1050,6 @@ svg, math`;
 
         /* meta.icon */
         meta.icon = meta.icon || "";
-
-        /* meta.comment */
-        meta.comment = meta.comment || "";
       }
 
       /* Remove stale items from TOC */
