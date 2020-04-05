@@ -913,7 +913,9 @@ svg, math`;
               /* meta.title */
               meta.title = html.hasAttribute('data-scrapbook-title') ? 
                   html.getAttribute('data-scrapbook-title') : 
-                  doc.title || meta.title;
+                  doc.title || meta.title || 
+                  (meta.source ? scrapbook.urlToFilename(meta.source) : '') || 
+                  (meta.type !== 'separator' ? id : '');
 
               /* meta.create */
               meta.create = html.hasAttribute('data-scrapbook-create') ? 
@@ -1036,10 +1038,7 @@ svg, math`;
         meta.source = meta.source || "";
 
         /* meta.title */
-        // fallback to source and then id
-        meta.title = meta.title || 
-            (meta.source ? scrapbook.urlToFilename(meta.source) : '') || 
-            (meta.type !== 'separator' ? id : '');
+        meta.title = meta.title || "";
 
         /* meta.modify */
         // fallback to current time
