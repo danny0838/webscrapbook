@@ -743,7 +743,6 @@
       // save whole page beyond selection?
       message.options["capture.saveBeyondSelection"] = !!saveBeyondSelection;
 
-      isDebug && console.debug("(main) send", source, message);
       if (mode === 'save') {
         capturer.log(`Saving (document) ${source} ...`);
       } else {
@@ -784,6 +783,7 @@
       });
 
       if (mode === 'save') {
+        isDebug && console.debug("(main) send", source, message);
         const response = await capturer.invoke("retrieveDocumentContent", message, {tabId, frameId});
         isDebug && console.debug("(main) response", source, response);
 
@@ -857,6 +857,7 @@
         };
       }
 
+      isDebug && console.debug("(main) send", source, message);
       const response = await capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
       isDebug && console.debug("(main) response", source, response);
       capturer.captureInfo.delete(timeId);
