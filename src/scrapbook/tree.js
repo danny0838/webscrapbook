@@ -1189,7 +1189,6 @@
         for (let i = 1, I = paths[0].length; i < I; ++i) {
           const {pos} = paths[0][i];
           this.toggleItem(curElem, true);
-          console.warn(curElem, curElem.children);
           curElem = curElem.container.children[pos];
         }
       }
