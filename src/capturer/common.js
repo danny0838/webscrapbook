@@ -2584,14 +2584,12 @@
    * @kind invokable
    * @param {Object} params
    * @param {Document} params.doc
-   * @param {Object} params.settings
-   * @param {Object} params.options
    * @return {Promise<Object>}
    */
   capturer.retrieveDocumentContent = async function (params) {
     isDebug && console.debug("call: retrieveDocumentContent");
 
-    const {doc = document, settings, options} = params;
+    const {doc = document} = params;
 
     const data = {};
     Array.prototype.forEach.call(scrapbook.flattenFrames(doc), (doc) => {
