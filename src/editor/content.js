@@ -1191,7 +1191,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
           return true;
         }
         if (elem.matches('script:not([src])')) {
-          if (!/^(?:\s|\/\*.*\*\/)*$/.test(elem.textContent)) {
+          if (!/^\s*(?:(?:\/\*[^*]*(?:\*(?!\/)[^*]*)*\*\/|\/\/.*)\s*)*$/.test(elem.textContent)) {
             return true;
           }
         }
