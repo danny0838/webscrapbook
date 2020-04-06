@@ -1239,6 +1239,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         throw new Error(scrapbook.lang("ErrorTabDiscarded"));
       }
 
+      const mime = Mime.lookup(scrapbook.urlToFilename(url));
+      if (!["text/html", "application/xhtml+xml"].includes(mime)) {
+        throw new Error(scrapbook.lang("ErrorSaveNonHtml", [url]));
+      }
+
       // Load server config and verify whether we can actually save the page.
       await server.init();
       const bookId = await server.findBookIdFromUrl(url);
@@ -1250,11 +1255,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
       if (!url.startsWith(book.dataUrl)) {
         throw new Error(scrapbook.lang("ErrorSaveNotUnderDataDir", [url]));
-      }
-
-      const mime = Mime.lookup(scrapbook.urlToFilename(url));
-      if (!["text/html", "application/xhtml+xml"].includes(mime)) {
-        throw new Error(scrapbook.lang("ErrorSaveNonHtml", [url]));
       }
 
       (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
