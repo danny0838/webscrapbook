@@ -2577,20 +2577,20 @@
     }
   };
 
-
   /**
    * @kind invokable
    * @param {Object} params
    * @param {Document} params.doc
+   * @param {Object} params.settings
    * @return {Promise<Object>}
    */
   capturer.retrieveDocumentContent = async function (params) {
     isDebug && console.debug("call: retrieveDocumentContent");
 
-    const {doc = document} = params;
+    const {doc = document, settings: {item, frameIsMain}} = params;
 
     const data = {};
-    Array.prototype.forEach.call(scrapbook.flattenFrames(doc), (doc) => {
+    Array.prototype.forEach.call(scrapbook.flattenFrames(doc), (doc, idx) => {
       const url = scrapbook.splitUrl(doc.URL)[0];
       if (url in data) { return; }
 
@@ -2599,11 +2599,73 @@
         return;
       }
 
-      // tweak the content before saving
       const rootNode = doc.documentElement.cloneNode(true);
 
-      // remove webscrapbook toolbar
-      Array.prototype.forEach.call(rootNode.querySelectorAll("web-scrapbook"), elem => { elem.remove(); });
+      const info = {
+        title: (frameIsMain && idx === 0 ? item && item.title : doc.title) || "",
+      };
+
+      // handle special scrapbook elements
+      {
+        // remove webscrapbook toolbar
+        for (const elem of rootNode.querySelectorAll("web-scrapbook")) {
+          elem.remove();
+        }
+
+        // record form element status for "todo" elements
+        for (const elem of rootNode.querySelectorAll("input")) {
+          if (scrapbook.getScrapbookObjectType(elem) === "todo") {
+            switch (elem.type.toLowerCase()) {
+              case "checkbox":
+              case "radio":
+                if (elem.checked) {
+                  elem.setAttribute("checked", "checked");
+                } else {
+                  elem.removeAttribute("checked");
+                }
+                break;
+              case "image":
+                // skip image
+                break;
+              case "text":
+              default:
+                elem.setAttribute("value", elem.value);
+                break;
+            }
+          }
+        }
+
+        for (const elem of rootNode.querySelectorAll("textarea")) {
+          if (scrapbook.getScrapbookObjectType(elem) === "todo") {
+            elem.textContent = elem.value;
+          }
+        }
+
+        // handle "title", "title-src" elements
+        {
+          const titleNodes = [];
+          const titleSrcNodes = [];
+          for (const elem of rootNode.querySelectorAll("*")) {
+            switch (scrapbook.getScrapbookObjectType(elem)) {
+              case "title":
+                titleNodes.push(elem);
+                break;
+              case "title-src":
+                titleSrcNodes.push(elem);
+                break;
+            }
+          }
+          for (const elem of titleSrcNodes) {
+            const text = elem.textContent;
+            if (text) { info.title = text; }
+          }
+          for (const elem of titleNodes.concat(titleSrcNodes)) {
+            if (elem.textContent !== info.title) {
+              elem.textContent = info.title;
+            }
+          }
+        }
+      }
 
       let content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
 
@@ -2617,6 +2679,7 @@
         content,
         charset: doc.characterSet,
         mime: doc.contentType,
+        info,
       };
     });
     return data;

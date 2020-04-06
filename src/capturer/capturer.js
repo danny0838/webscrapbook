@@ -1229,7 +1229,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
       const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
       const timeId = scrapbook.dateToId();
-      const message = {};
 
       capturer.log(`Saving (document) ${source} ...`);
 
@@ -1263,6 +1262,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
       }
 
+      const frameIsMain = book.isItemIndexUrl(item, url);
+
       (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
         if (error) {
           const source = `[${tabId}:${frameId}] ${url}`;
@@ -1270,6 +1271,13 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           capturer.error(err);
         }
       });
+
+      const message = {
+        settings: {
+          item,
+          frameIsMain,
+        }
+      };
 
       isDebug && console.debug("(main) send", source, message);
       const response = await capturer.invoke("retrieveDocumentContent", message, {tabId, frameId});
@@ -1286,11 +1294,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
         }
 
-        for (const [url, data] of Object.entries(response)) {
-          const target = scrapbook.splitUrl(url)[0];
+        for (const [fileUrl, data] of Object.entries(response)) {
+          const target = scrapbook.splitUrl(fileUrl)[0];
 
           // only save files under dataDir
-          if (!url.startsWith(book.dataUrl)) {
+          if (!fileUrl.startsWith(book.dataUrl)) {
             capturer.warn(scrapbook.lang("ErrorSaveNotUnderDataDir", [target]));
             continue;
           }
@@ -1301,12 +1309,13 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             continue;
           }
 
+          // save file
           try {
-            const file = new File([data.content], scrapbook.urlToFilename(url), {type: "text/html"});
+            const blob = new Blob([data.content], {type: "text/html"});
 
             const formData = new FormData();
             formData.append('token', await server.acquireToken());
-            formData.append('upload', file);
+            formData.append('upload', blob);
 
             await server.request({
               url: target + '?a=save&f=json',
@@ -1316,6 +1325,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             capturer.log(`Updated ${target}`);
           } catch (ex) {
             capturer.error(scrapbook.lang("ErrorSaveUploadFailure", [target, ex.message]));
+          }
+
+          // update item for main frame
+          if (frameIsMain && url === fileUrl) {
+            item.title = data.info.title;
           }
         }
 

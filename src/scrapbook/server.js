@@ -872,6 +872,32 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
       return set;
     }
 
+    /**
+     * Check whether url is a valid index file for item.
+     *
+     * - Currently any ~/inde.html in a MAFF archive is considered true as
+     *   there's no good way to determine which subdirectory corresponds to
+     *   the item.
+     */
+    isItemIndexUrl(item, url) {
+      if (!(item && item.index && url)) { return false; }
+
+      const u = new URL(this.dataUrl + scrapbook.escapeFilename(item.index));
+      u.hash = '';
+      const u1 = new URL(url);
+      u1.hash = '';
+
+      const p = u.pathname.toLowerCase();
+      if (p.endsWith('.maff')) {
+        const regex = new RegExp('^' + scrapbook.escapeRegExp(u.href) + '!/[^/]*/index\.html$');
+        return regex.test(u1.href);
+      }
+      if (p.endsWith('.htz')) {
+        u.pathname += '!/index.html';
+      }
+      return u.href === u1.href;
+    }
+
     async findItemFromUrl(url) {
       await this.loadTreeFiles();
       await this.loadMeta();
