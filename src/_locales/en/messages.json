@@ -264,6 +264,9 @@
   "ErrorSaveBookNoTree": {
     "message": "The scrapbook disabled tree feature."
   },
+  "ErrorSaveLockedItem": {
+    "message": "Unable to save a locked item."
+  },
   "ErrorSaveNonHtml": {
     "message": "Unable to save a non-HTML file ($URL$).",
     "placeholders": {

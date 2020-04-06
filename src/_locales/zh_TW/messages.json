@@ -264,6 +264,9 @@
   "ErrorSaveBookNoTree": {
     "message": "剪貼簿停用了資料樹功能。"
   },
+  "ErrorSaveLockedItem": {
+    "message": "此項目已鎖定，無法儲存。"
+  },
   "ErrorSaveNonHtml": {
     "message": "無法儲存非 HTML 檔案 ($URL$)。",
     "placeholders": {

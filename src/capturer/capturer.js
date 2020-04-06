@@ -1257,6 +1257,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         throw new Error(scrapbook.lang("ErrorSaveNotUnderDataDir", [url]));
       }
 
+      const item = await book.findItemFromUrl(url);
+
+      if (item && item.locked) {
+        throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
+      }
+
       (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
         if (error) {
           const source = `[${tabId}:${frameId}] ${url}`;
@@ -1314,7 +1320,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         }
 
         // update item
-        const item = await book.findItemFromUrl(url);
         if (item) {
           item.modify = modify;
           book.meta[item.id] = item;

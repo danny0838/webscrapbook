@@ -264,6 +264,9 @@
   "ErrorSaveBookNoTree": {
     "message": "剪贴簿停用了数据树功能。"
   },
+  "ErrorSaveLockedItem": {
+    "message": "此项目已锁定，无法保存。"
+  },
   "ErrorSaveNonHtml": {
     "message": "无法保存非 HTML 文件 ($URL$)。",
     "placeholders": {
