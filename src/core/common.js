@@ -906,6 +906,121 @@
 
 
   /******************************************************************************
+   * ScrapBook related DOM handling
+   *****************************************************************************/
+
+  /**
+   * linemarker (span)
+   * inline (span)
+   * annotation (span) (for downward compatibility with SBX 1.12.0a - 1.12.0a45)
+   * link-url (a)
+   * link-inner (a)
+   * link-file (a)
+   * freenote (div)
+   * freenote-header
+   * freenote-body
+   * freenote-footer
+   * freenote-save
+   * freenote-delete
+   * sticky (div) (for downward compatibility with SBX <= 1.12.0a34)
+   * sticky-header
+   * sticky-footer
+   * sticky-save
+   * sticky-delete
+   * block-comment (div) (for downward compatibility with SB <= 0.17.0)
+   *
+   * title (*)
+   * title-src (*)
+   * stylesheet (link, style)
+   * stylesheet-temp (link, style)
+   * todo (input, textarea)
+   * fulltext
+   *
+   * custom (*) (custom objects to be removed by the eraser)
+   * custom-wrapper (*) (custom objects to be unwrapped by the eraser)
+   *
+   * @return {false|string} Scrapbook object type of the element; or false.
+   */
+  scrapbook.getScrapbookObjectType = function (elem) {
+    if (elem.nodeType === 8) {
+      const m = elem.nodeValue.match(/^scrapbook-(.*?)(?:-\d+)?=/);
+      if (m) {
+        return m[1];
+      }
+      return false;
+    }
+
+    if (elem.nodeType !== 1) { return false; }
+
+    let type = elem.getAttribute("data-scrapbook-elem");
+    if (type) { return type; }
+
+    // for downward compatibility with legacy ScrapBook (X)
+    type = elem.getAttribute("data-sb-obj");
+    if (type) { return type; }
+
+    switch (elem.className) {
+      case "linemarker-marked-line":
+        return "linemarker";
+      case "scrapbook-inline":
+        return "inline";
+      case "scrapbook-sticky":
+      case "scrapbook-sticky scrapbook-sticky-relative":
+        return "sticky";
+      case "scrapbook-sticky-header":
+        return "sticky-header";
+      case "scrapbook-sticky-footer":
+        return "sticky-footer";
+      case "scrapbook-block-comment":
+        return "block-comment";
+    }
+
+    if (elem.id == "scrapbook-sticky-css") {
+      return "stylesheet";
+    }
+
+    return false;
+  };
+
+  /**
+   * @return {integer} Scrapbook object remove type of the element.
+   *     -1: not a scrapbook object
+   *      0: not removable
+   *      1: should remove
+   *      2: should unwrap
+   *      3: should uncomment
+   */
+  scrapbook.getScrapBookObjectRemoveType = function (elem) {
+    let type = scrapbook.getScrapbookObjectType(elem);
+    if (!type) { return -1; }
+    if (["title", "title-src", "stylesheet", "stylesheet-temp", "todo"].includes(type)) { return 0; }
+    if (["linemarker", "inline", "link-url", "link-inner", "link-file", "custom-wrapper"].includes(type)) { return 2; }
+    if (["erased"].includes(type)) { return 3; }
+    if (elem.nodeType === 8) { return 0; }
+    return 1;
+  };
+
+  /**
+   * @return {Array<Element>} Related elements having the shared ID; or the
+   *     original element.
+   */
+  scrapbook.getScrapBookObjectsById = function (elem) {
+    let id = elem.getAttribute("data-scrapbook-id");
+    if (id) {
+      return elem.ownerDocument.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`);
+    }
+
+    // for downward compatibility with legacy ScrapBook (X)
+    id = elem.getAttribute("data-sb-id");
+    if (id) {
+      return elem.ownerDocument.querySelectorAll(`[data-sb-id="${CSS.escape(id)}"]`);
+    }
+
+    return [elem];
+  };
+
+
+  /******************************************************************************
    * String handling
    *****************************************************************************/
 
