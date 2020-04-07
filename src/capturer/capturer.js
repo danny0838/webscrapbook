@@ -2034,7 +2034,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           postHeaders({access, headers}) {
             // abort fetching body for a size exceeding resource
             if (typeof options["capture.resourceSizeLimit"] === "number" && 
-                headers.contentLength >= options["capture.resourceSizeLimit"] * 1024) {
+                headers.contentLength >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
               capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
               return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Resource size limit exceeded."}};
             }
@@ -2198,7 +2198,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     const {blob, filename, sourceUrl, settings, options} = params;
     const {timeId} = settings;
 
-    if (typeof options["capture.resourceSizeLimit"] === "number" && blob.size >= options["capture.resourceSizeLimit"] * 1024) {
+    if (typeof options["capture.resourceSizeLimit"] === "number" && blob.size >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
       capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
       return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Resource size limit exceeded."}};
     }
