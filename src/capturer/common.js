@@ -2176,14 +2176,21 @@
             return null;
           };
 
-          const queryXpath = (rootNode, selector) => {
-            const iter = doc.evaluate(selector, rootNode);
-            const elems = [];
-            let elem;
-            while ((elem = iter.iterateNext())) {
-              elems.push(elem);
+          const queryNodes = (rootNode, selector) => {
+            if (typeof selector === 'string') {
+              return rootNode.querySelectorAll(selector);
             }
-            return elems;
+            if (typeof selector.css === 'string') {
+              return rootNode.querySelectorAll(selector.css);
+            } if (typeof selector.xpath === 'string') {
+              const iter = doc.evaluate(selector.xpath, rootNode);
+              let elems = [], elem;
+              while (elem = iter.iterateNext()) {
+                elems.push(elem);
+              }
+              return elems;
+            }
+            return [];
           };
 
           for (const helper of helpers) {
@@ -2203,21 +2210,15 @@
             try {
               for (const command of helper.commands) {
                 switch (command[0]) {
-                  case "remove":
-                  case "removex": {
-                    const elems = command[0].endsWith('x') ? 
-                        queryXpath(rootNode, command[1]): 
-                        rootNode.querySelectorAll(command[1]);
+                  case "remove": {
+                    const elems = queryNodes(rootNode, command[1]);
                     for (const elem of elems) {
                       elem.remove();
                     }
                     break;
                   }
-                  case "unwrap":
-                  case "unwrapx": {
-                    const elems = command[0].endsWith('x') ? 
-                        queryXpath(rootNode, command[1]): 
-                        rootNode.querySelectorAll(command[1]);
+                  case "unwrap": {
+                    const elems = queryNodes(rootNode, command[1]);
                     for (const elem of elems) {
                       const frag = doc.createDocumentFragment();
                       let child;
@@ -2228,22 +2229,16 @@
                     }
                     break;
                   }
-                  case "html":
-                  case "htmlx": {
-                    const elems = command[0].endsWith('x') ? 
-                        queryXpath(rootNode, command[1]): 
-                        rootNode.querySelectorAll(command[1]);
+                  case "html": {
+                    const elems = queryNodes(rootNode, command[1]);
                     for (const elem of elems) {
                       elem.innerHTML = command[2];
                     }
                     break;
                   }
-                  case "htmlr":
-                  case "htmlrx": {
+                  case "htmlr": {
+                    const elems = queryNodes(rootNode, command[1]);
                     const regex = makeRegExp(command[2]) || scrapbook.escapeRegExp(command[2]);
-                    const elems = command[0].endsWith('x') ? 
-                        queryXpath(rootNode, command[1]): 
-                        rootNode.querySelectorAll(command[1]);
                     for (const elem of elems) {
                       const value0 = elem.innerHTML;
                       let value = value0.replace(regex, command[3]);
@@ -2253,22 +2248,16 @@
                     }
                     break;
                   }
-                  case "text":
-                  case "textx": {
-                    const elems = command[0].endsWith('x') ? 
-                        queryXpath(rootNode, command[1]): 
-                        rootNode.querySelectorAll(command[1]);
+                  case "text": {
+                    const elems = queryNodes(rootNode, command[1]);
                     for (const elem of elems) {
                       elem.textContent = command[2];
                     }
                     break;
                   }
-                  case "textr":
-                  case "textrx": {
+                  case "textr": {
+                    const elems = queryNodes(rootNode, command[1]);
                     const regex = makeRegExp(command[2]) || scrapbook.escapeRegExp(command[2]);
-                    const elems = command[0].endsWith('x') ? 
-                        queryXpath(rootNode, command[1]): 
-                        rootNode.querySelectorAll(command[1]);
                     for (const elem of elems) {
                       const value0 = elem.textContent;
                       let value = value0.replace(regex, command[3]);
@@ -2278,11 +2267,8 @@
                     }
                     break;
                   }
-                  case "attr":
-                  case "attrx": {
-                    const elems = command[0].endsWith('x') ? 
-                        queryXpath(rootNode, command[1]): 
-                        rootNode.querySelectorAll(command[1]);
+                  case "attr": {
+                    const elems = queryNodes(rootNode, command[1]);
                     for (const elem of elems) {
                       if (typeof command[2] === "string") {
                         const key = command[2];
@@ -2305,12 +2291,9 @@
                     }
                     break;
                   }
-                  case "attrr":
-                  case "attrrx": {
+                  case "attrr": {
+                    const elems = queryNodes(rootNode, command[1]);
                     const regex = makeRegExp(command[3]) || scrapbook.escapeRegExp(command[3]);
-                    const elems = command[0].endsWith('x') ? 
-                        queryXpath(rootNode, command[1]): 
-                        rootNode.querySelectorAll(command[1]);
                     for (const elem of elems) {
                       const value0 = (elem.getAttribute(command[2]) || "");
                       let value = value0.replace(regex, command[4]);
@@ -2320,11 +2303,8 @@
                     }
                     break;
                   }
-                  case "css":
-                  case "cssx": {
-                    const elems = command[0].endsWith('x') ? 
-                        queryXpath(rootNode, command[1]): 
-                        rootNode.querySelectorAll(command[1]);
+                  case "css": {
+                    const elems = queryNodes(rootNode, command[1]);
                     for (const elem of elems) {
                       if (!elem.style) { continue; }
                       if (typeof command[2] === "string") {
