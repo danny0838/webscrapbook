@@ -266,7 +266,7 @@
      * Get a unique token for an access.
      */
     const getAccessToken = function (url, role) {
-      let token = [url, role || "blob"].join("\t");
+      let token = [scrapbook.normalizeUrl(url), role || "blob"].join("\t");
       token = scrapbook.sha1(token, "TEXT");
       return token;
     };

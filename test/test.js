@@ -272,7 +272,7 @@ async function test_capture_metaCharset() {
 }
 
 /**
- * Check renaming works correctly
+ * URLs different only in hash should be considered identical.
  *
  * capturer.downloadFile
  */
@@ -289,6 +289,36 @@ async function test_capture_rename() {
   assert(doc.querySelectorAll('img')[0].getAttribute('src') === `green.bmp`);
   assert(doc.querySelectorAll('img')[1].getAttribute('src') === `green.bmp#123`);
   assert(doc.querySelectorAll('img')[2].getAttribute('src') === `green.bmp#456`);
+}
+
+/**
+ * Check URL normalization.
+ *
+ * capturer.access
+ */
+async function test_capture_rename2() {
+  var blob = await capture({
+    url: `${localhost}/capture_rename2/index.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(Object.keys(zip.files).length === 3);
+  assert(zip.files["index.html"]);
+  assert(zip.files["abc.bmp"]);
+  assert(zip.files["123ABCabc中文 !#$%&'()+,-;=@[]^_`{}-.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var imgs = doc.querySelectorAll('img');
+  assert(imgs[0].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}-.bmp");
+  assert(imgs[1].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}-.bmp");
+  assert(imgs[2].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}-.bmp");
+  assert(imgs[3].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}-.bmp");
+  assert(imgs[4].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}-.bmp");
+  assert(imgs[5].getAttribute('src') === "abc.bmp#abc%E4%B8%AD%E6%96%87%");
+  assert(imgs[6].getAttribute('src') === "abc.bmp#ab%63%e4%b8%ad%e6%96%87%25");
 }
 
 /**
@@ -7897,6 +7927,7 @@ async function runTests() {
   await test(test_capture_html);
   await test(test_capture_metaCharset);
   await test(test_capture_rename);
+  await test(test_capture_rename2);
   await test(test_capture_xhtml);
   await test(test_capture_file);
   await test(test_capture_file_charset);

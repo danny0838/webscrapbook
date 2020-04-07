@@ -2591,7 +2591,7 @@
 
     const data = {};
     Array.prototype.forEach.call(scrapbook.flattenFrames(doc), (doc, idx) => {
-      const url = scrapbook.splitUrl(doc.URL)[0];
+      const url = scrapbook.normalizeUrl(scrapbook.splitUrl(doc.URL)[0]);
       if (url in data) { return; }
 
       // skip non-HTML documents

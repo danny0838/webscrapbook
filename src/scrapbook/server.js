@@ -882,30 +882,28 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
     isItemIndexUrl(item, url) {
       if (!(item && item.index && url)) { return false; }
 
-      const u = new URL(this.dataUrl + scrapbook.escapeFilename(item.index));
-      u.hash = '';
-      const u1 = new URL(url);
-      u1.hash = '';
+      let u = scrapbook.normalizeUrl(scrapbook.splitUrl(this.dataUrl + scrapbook.escapeFilename(item.index))[0]);
+      let u1 = scrapbook.normalizeUrl(scrapbook.splitUrl(url)[0]);
 
-      const p = u.pathname.toLowerCase();
+      const p = u.toLowerCase();
       if (p.endsWith('.maff')) {
-        const regex = new RegExp('^' + scrapbook.escapeRegExp(u.href) + '!/[^/]*/index\.html$');
-        return regex.test(u1.href);
+        const regex = new RegExp('^' + scrapbook.escapeRegExp(u) + '!/[^/]*/index\.html$');
+        return regex.test(u1);
       }
       if (p.endsWith('.htz')) {
-        u.pathname += '!/index.html';
+        u += '!/index.html';
       }
-      return u.href === u1.href;
+      return u === u1;
     }
 
     async findItemFromUrl(url) {
       await this.loadTreeFiles();
       await this.loadMeta();
 
-      const u = scrapbook.splitUrl(url)[0];
+      const u = scrapbook.normalizeUrl(scrapbook.splitUrl(url)[0]);
       for (const [id, item] of Object.entries(this.meta)) {
         if (!item.index) { continue; }
-        const indexUrl = new URL(this.dataUrl + scrapbook.escapeFilename(item.index)).href;
+        const indexUrl = scrapbook.normalizeUrl(scrapbook.splitUrl(this.dataUrl + scrapbook.escapeFilename(item.index))[0]);
         if (indexUrl.endsWith('/index.html')) {
           if (u.startsWith(indexUrl.slice(0, -10))) {
             return item;

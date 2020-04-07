@@ -1344,6 +1344,46 @@
    * String handling - URL and filename
    *****************************************************************************/
 
+  /**
+   * Ensure normalizeUrl(url1) === normalizeUrl(url2)
+   *
+   * - All upper case for percent encoding.
+   * - Decode sub-delims !'()~, which are encoded in XHTML files an in some server APP.
+   * - Encode single "%", which can cause error for decodeURIComponent().
+   * - Encode non-encoded chars in path, such as +,;=@[]^`{}
+   * - e.g. normalizeUrl("http://abc/?中文!def%") === normalizeUrl("http://ab%63/?%E4%B8%AD%E6%96%87%21def%25")
+   */
+  scrapbook.normalizeUrl = function (url) {
+    const regex = /((?:%[0-9A-F]{2})+)|[^%/]*(?:%(?![0-9A-F]{2})[^%/]*)*/gi;
+    const subfix = (m, e) => {
+      if (e) { return encodeURIComponent(decodeURIComponent(m)); }
+      return encodeURIComponent(m);
+    };
+    const fix = str => str.replace(regex, subfix);
+    const regex2 = /((?:%[0-9A-F]{2})+)|%(?![0-9A-F]{2})/gi;
+    const subfix2 = (m, e) => {
+      if (e) { return encodeURIComponent(decodeURIComponent(m)); }
+      return encodeURIComponent(m);
+    };
+    const fix2 = str => str.replace(regex2, subfix2);
+    const fn = scrapbook.normalizeUrl = (url) => {
+      const u = new URL(url);
+      try {
+        u.pathname = fix(u.pathname);
+        u.search = fix2(u.search);
+        u.hash = fix2(u.hash);
+      } catch (ex) {
+        // @FIXME:
+        // This URL gets decodeURIComponent error since it's not encoded as
+        // UTF-8. Keep it unchanged since we cannot reliably decode it without
+        // breaking functional URL chars.
+        console.error(ex);
+      }
+      return u.href;
+    };
+    return fn(url);
+  };
+
   scrapbook.isUrlAbsolute = function (url) {
     const regex = /^[a-z][a-z0-9+.-]*:/i;
     const isUrlAbsolute = function (url) {
