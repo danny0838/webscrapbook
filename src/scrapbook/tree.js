@@ -330,23 +330,43 @@
 
         // create file
         let target;
-        let file;
-        let action;
+        let template_text;
         switch (type) {
           case 'html': {
             const filename = 'index.html';
             newItem.index = newItem.id + '/' + filename;
             target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
-            const content = `<!DOCTYPE html>
+
+            // attempt to load template
+            const url = this.book.treeUrl + '/templates/note_template.html';
+            try {
+              template_text = await server.request({
+                url: url + '?a=source',
+                method: "GET",
+              }).then(r => r.text());
+            } catch (ex) {
+              // template file not exist, generate default one
+              template_text = `<!DOCTYPE html>
 <html data-scrapbook-type="note">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-scrapbook-elem="title">%NOTE_TITLE%</title>
 </head>
-<body>${newItem.title}</body>
+<body>%NOTE_TITLE%</body>
 </html>
 `;
-            file = new File([content], filename, {type: 'text/html'});
+              const blob = new Blob([template_text], {type: "text/html"});
+              const formData = new FormData();
+              formData.append('token', await server.acquireToken());
+              formData.append('upload', blob);
+              await server.request({
+                url: url + '?a=save&f=json',
+                method: "POST",
+                body: formData,
+              });
+            }
+
             break;
           }
 
@@ -354,10 +374,46 @@
             const filename = 'index.md';
             newItem.index = newItem.id + '/' + filename;
             target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
-            file = new File([], filename, {type: 'text/markdown'});
+
+            // attempt to load template
+            const url = this.book.treeUrl + '/templates/note_template.md';
+            try {
+              template_text = await server.request({
+                url: url + '?a=source',
+                method: "GET",
+              }).then(r => r.text());
+            } catch (ex) {
+              // template file not exist, generate default one
+              template_text = `%NOTE_TITLE%`;
+              const blob = new Blob([template_text], {type: "text/markdown"});
+              const formData = new FormData();
+              formData.append('token', await server.acquireToken());
+              formData.append('upload', blob);
+              await server.request({
+                url: url + '?a=save&f=json',
+                method: "POST",
+                body: formData,
+              });
+            }
+
             break;
           }
         }
+
+        // generate content
+        const dict = {
+          '': '%',
+          NOTE_TITLE: newItem.title,
+          SCRAPBOOK_DIR: scrapbook.getRelativeUrl(this.book.topUrl, target),
+          DATA_DIR: scrapbook.getRelativeUrl(this.book.dataUrl, target),
+          TREE_DIR: scrapbook.getRelativeUrl(this.book.treeUrl, target),
+        };
+        const content = template_text.replace(/%([^%\s]*)%/gu, (_, key) => {
+          const value = typeof dict[key] === 'string' ? dict[key] : key;
+          return scrapbook.escapeHtml(value);
+        });
+        
+        const blob = new Blob([content], {type: 'text/plain'});
 
         // save meta and TOC
         await this.book.saveTreeFiles({meta: true, toc: true});
@@ -365,7 +421,7 @@
         // save data files
         const formData = new FormData();
         formData.append('token', await server.acquireToken());
-        formData.append('upload', file);
+        formData.append('upload', blob);
         await server.request({
           url: target + '?a=save&f=json',
           method: "POST",
