@@ -879,13 +879,13 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
       const u = scrapbook.splitUrl(url)[0];
       for (const [id, item] of Object.entries(this.meta)) {
         if (!item.index) { continue; }
-        const indexUrl = new URL(this.dataUrl + scrapbook.escapeFilename(item.index).replace(/\/index.[^.]+$/, '/')).href;
-
-        if (indexUrl.endsWith('/')) {
-          if (u.startsWith(indexUrl)) {
+        const indexUrl = new URL(this.dataUrl + scrapbook.escapeFilename(item.index)).href;
+        if (indexUrl.endsWith('/index.html')) {
+          if (u.startsWith(indexUrl.slice(0, -10))) {
             return item;
           }
-        } else if (/\.(htz|maff)$/i.test(indexUrl)) {
+        }
+        if (/\.(htz|maff)$/i.test(indexUrl)) {
           if (u.startsWith(indexUrl + "!/")) {
             return item;
           }
