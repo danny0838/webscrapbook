@@ -14,6 +14,9 @@
   "CaptureFrameSource": {
     "message": "Capture frame (source)"
   },
+  "CaptureLink": {
+    "message": "Capture linked page (new tab)"
+  },
   "CaptureLinkBookmark": {
     "message": "Capture linked page (bookmark)"
   },

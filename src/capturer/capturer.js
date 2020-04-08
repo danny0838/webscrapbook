@@ -669,7 +669,7 @@
             });
           } else if (typeof url === 'string') {
             // capture headless
-            result = await capturer.captureHeadless({
+            result = await capturer.captureRemote({
               url,
               refUrl,
               title,
@@ -723,7 +723,7 @@
         if (typeof frameId === "number") {
           ({url, title, favIconUrl} = await browser.webNavigation.getFrame({tabId, frameId}));
         }
-        return await capturer.captureHeadless({url, title, favIconUrl, mode, options});
+        return await capturer.captureRemote({url, title, favIconUrl, mode, options});
       } else if (mode === "save") {
         return await capturer.resaveTab({tabId, frameId, options});
       }
@@ -790,9 +790,49 @@
    * @param {string} params.options - preset options that overwrites default
    * @return {Promise<Object>}
    */
-  capturer.captureHeadless = async function (params) {
+  capturer.captureRemote = async function (params) {
     try {
       const {url, refUrl, title, favIconUrl, mode, options} = params;
+
+      // default mode => launch a tab to capture
+      if (!mode) {
+        capturer.log(`Launching remote tab ...`);
+
+        const tab = await browser.tabs.create({
+          url,
+          active: false,
+        });
+
+        // wait until tab loading complete
+        await new Promise((resolve, reject) => {
+          const listener = (tabId, changeInfo, t) => {
+            if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
+            browser.tabs.onUpdated.removeListener(listener);
+            browser.tabs.onRemoved.removeListener(listener2);
+            resolve(t);
+          };
+          const listener2 = (tabId, removeInfo) => {
+            if (!(tabId === tab.id)) { return; }
+            browser.tabs.onUpdated.removeListener(listener);
+            browser.tabs.onRemoved.removeListener(listener2);
+            reject({message: `Tab removed before loading complete.`});
+          };
+          browser.tabs.onUpdated.addListener(listener);
+          browser.tabs.onRemoved.addListener(listener2);
+        });
+
+        const response = await capturer.captureTab({
+          tabId: tab.id,
+          saveBeyondSelection: true,
+          options,
+        });
+
+        try {
+          await browser.tabs.remove(tab.id);
+        } catch (ex) {}
+
+        return response;
+      }
 
       const source = `${url}`;
       const timeId = scrapbook.dateToId();

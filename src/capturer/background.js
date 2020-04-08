@@ -144,6 +144,17 @@
     });
 
     browser.contextMenus.create({
+      title: scrapbook.lang("CaptureLink"),
+      contexts: ["link"],
+      targetUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          url: info.linkUrl,
+        }]);
+      }
+    });
+
+    browser.contextMenus.create({
       title: scrapbook.lang("CaptureLinkSource"),
       contexts: ["link"],
       targetUrlPatterns: urlMatch,

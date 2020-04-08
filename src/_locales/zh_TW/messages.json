@@ -14,6 +14,9 @@
   "CaptureFrameSource": {
     "message": "擷取框架頁 (原貌)"
   },
+  "CaptureLink": {
+    "message": "擷取連結頁面 (新分頁)"
+  },
   "CaptureLinkBookmark": {
     "message": "擷取連結頁面 (書籤)"
   },
