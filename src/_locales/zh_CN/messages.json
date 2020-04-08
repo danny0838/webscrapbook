@@ -399,6 +399,9 @@
   "OpenScrapBookTooltip": {
     "message": "本功能需要架设后端服务器并做好相关设定才能运作。"
   },
+  "OpenSearch": {
+    "message": "搜索剪贴簿"
+  },
   "OpenViewer": {
     "message": "检视封存网页"
   },

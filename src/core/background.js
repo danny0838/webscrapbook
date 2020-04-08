@@ -38,6 +38,13 @@
         });
       },
 
+      async openSearch() {
+        return await scrapbook.visitLink({
+          url: browser.runtime.getURL("scrapbook/search.html"),
+          newTab: true,
+        });
+      },
+
       async captureTab() {
         return await scrapbook.invokeCapture(
           (await scrapbook.getHighlightedTabs()).map(tab => ({

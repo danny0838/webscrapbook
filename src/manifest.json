@@ -81,6 +81,9 @@
       },
       "description": "__MSG_OpenViewer__"
     },
+    "openSearch": {
+      "description": "__MSG_OpenSearch__"
+    },
     "captureTab": {
       "suggested_key": {
         "default": "Ctrl+Shift+K"

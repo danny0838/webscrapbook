@@ -94,6 +94,9 @@
     "openViewer": {
       "description": "__MSG_OpenViewer__"
     },
+    "openSearch": {
+      "description": "__MSG_OpenSearch__"
+    },
     "captureTab": {
       "description": "__MSG_CaptureTab__"
     },
