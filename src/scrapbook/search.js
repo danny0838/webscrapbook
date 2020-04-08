@@ -29,7 +29,6 @@
 
     async init() {
       try {
-        scrapbook.loadLanguages(document);
         await scrapbook.loadOptions();
 
         // load conf from options
@@ -664,6 +663,8 @@
   };
 
   document.addEventListener('DOMContentLoaded', (event) => {
+    scrapbook.loadLanguages(document);
+
     document.getElementById('searchForm').addEventListener('submit', (event) => {
       event.preventDefault();
       search.search();

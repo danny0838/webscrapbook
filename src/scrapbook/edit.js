@@ -28,8 +28,6 @@
 
     async init() {
       try {
-        scrapbook.loadLanguages(document);
-
         const params = new URL(document.URL).searchParams;
         const id = this.id = params.get('id');
         const bookId = this.bookId = params.get('bookId');
@@ -140,6 +138,8 @@
   };
 
   document.addEventListener('DOMContentLoaded', (event) => {
+    scrapbook.loadLanguages(document);
+
     document.getElementById('btn-save').addEventListener('click', (event) => {
        editor.save();
     });

@@ -19,6 +19,8 @@
 
   'use strict';
 
+  scrapbook.loadLanguages(document);
+
   const urlObj = new URL(document.URL);
 
   const viewerData = {
@@ -754,7 +756,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
   };
 
   async function init() {
-    scrapbook.loadLanguages(document);
     await scrapbook.loadOptions();
 
     const defaultTitle = document.querySelector('title').textContent;
