@@ -1202,11 +1202,11 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
         // for the main frame, create a index.html that redirects to the file
         const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
         const meta = params.options["capture.recordDocumentMeta"] ? 
-          ' data-scrapbook-source="' + scrapbook.escapeHtml(url) + '"' + 
-          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
-          ' data-scrapbook-type="file"' + 
-          (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
-          "";
+            ' data-scrapbook-source="' + scrapbook.escapeHtml(url) + '"' + 
+            ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
+            ' data-scrapbook-type="file"' + 
+            (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
+            "";
 
         const html = `<!DOCTYPE html>
 <html${meta}>
@@ -1473,6 +1473,29 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
+    const addIndexHtml = async (path, target, title) => {
+      const meta = options["capture.recordDocumentMeta"] ? 
+          ' data-scrapbook-source="' + scrapbook.escapeHtml(sourceUrl) + '"' + 
+          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' : 
+          "";
+
+      const html = `<!DOCTYPE html>
+<html${meta}>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(target)}">
+${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
+<body>
+Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(target, false)}</a>
+</body>
+</html>`;
+      await capturer.saveCache({
+        timeId,
+        path,
+        data: new Blob([html], {type: "text/html"}),
+      });
+    };
+
     try {
       const mapMimeExt = (mime) => {
         if (mime === "application/xhtml+xml") { return "xhtml"; }
@@ -1572,12 +1595,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           } else {
             // create index.html that redirects to index.xhtml|.svg
             if (ext !== "html") {
-              const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.${ext}">`;
-              await capturer.saveCache({
-                timeId,
-                path: "index.html",
-                data: new Blob([html], {type: "text/html"}),
-              });
+              await addIndexHtml("index.html", `index.${ext}`, title);
             }
 
             // generate and download the zip file
@@ -1656,12 +1674,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             {
               // create index.html that redirects to index.xhtml|.svg
               if (ext !== "html") {
-                const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.${ext}">`;
-                await capturer.saveCache({
-                  timeId,
-                  path: timeId + "/" + "index.html",
-                  data: new Blob([html], {type: "text/html"}),
-                });
+                await addIndexHtml(`${timeId}/index.html`, `index.${ext}`, title);
               }
 
               // generate index.rdf
@@ -1761,12 +1774,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           } else {
             // create index.html that redirects to index.xhtml|.svg
             if (ext !== "html") {
-              const html = `<meta charset="UTF-8"><meta http-equiv="refresh" content="0;url=index.${ext}">`;
-              await capturer.saveCache({
-                timeId,
-                path: "index.html",
-                data: new Blob([html], {type: "text/html"}),
-              });
+              await addIndexHtml("index.html", `index.${ext}`, title);
             }
 
             let targetDir;
