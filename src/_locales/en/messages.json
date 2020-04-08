@@ -1,4 +1,31 @@
 {
+  "BatchCapture": {
+    "message": "Batch capture"
+  },
+  "BatchCaptureAbortLabel": {
+    "message": "Abort"
+  },
+  "BatchCaptureCaptureLabel": {
+    "message": "Capture"
+  },
+  "BatchCaptureOptionCustomTitleLabel": {
+    "message": "Overwrite title"
+  },
+  "BatchCaptureOptionUniquifyLabel": {
+    "message": "Ignore duplicated URLs"
+  },
+  "BatchCaptureOptionUseJsonLabel": {
+    "message": "Use JSON format"
+  },
+  "BatchCaptureTitle": {
+    "message": "Batch capture"
+  },
+  "BatchCaptureUrlsLabel": {
+    "message": "URL list:"
+  },
+  "BatchCaptureUrlsTooltip": {
+    "message": "Input a list of URLs to capture. One URL per line, with optionally a title separated by spaces.\n\nIf “Use JSON format” is checked, the list should be an array of objects with following properties:\n• url: The URL to capture.\n• title: A custom title (works only when “Overwrite title” is checked).\n• mode: Capture mode. Omit for launching a new tab; “source” to capture source, and “bookmark” to capture as a bookmark."
+  },
   "Cancel": {
     "message": "Cancel"
   },

@@ -1,4 +1,31 @@
 {
+  "BatchCapture": {
+    "message": "批次擷取網頁"
+  },
+  "BatchCaptureAbortLabel": {
+    "message": "取消"
+  },
+  "BatchCaptureCaptureLabel": {
+    "message": "擷取"
+  },
+  "BatchCaptureOptionCustomTitleLabel": {
+    "message": "覆寫網頁標題"
+  },
+  "BatchCaptureOptionUniquifyLabel": {
+    "message": "略過重複網址"
+  },
+  "BatchCaptureOptionUseJsonLabel": {
+    "message": "使用 JSON 格式"
+  },
+  "BatchCaptureTitle": {
+    "message": "批次擷取網頁"
+  },
+  "BatchCaptureUrlsLabel": {
+    "message": "網頁列表:"
+  },
+  "BatchCaptureUrlsTooltip": {
+    "message": "輸入欲擷取的網頁列表。格式為每行一個網址，網址後可加上網頁標題，以空白字元分隔。\n\n若勾選「使用 JSON 格式」，則格式為一個物件陣列，每個物件可使用以下屬性：\n• url: 待擷取的網址。\n• title: 自訂標題（勾選「覆寫網頁標題」才有作用）。\n• mode: 擷取模式。省略時為開新分頁擷取，「source」為擷取原貌，「bookmark」為擷取書籤。"
+  },
   "Cancel": {
     "message": "取消"
   },

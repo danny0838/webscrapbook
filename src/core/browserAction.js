@@ -154,6 +154,13 @@
       }
     });
 
+    document.getElementById("batchCapture").addEventListener('click', async (event) => {
+      return await scrapbook.visitLink({
+        url: browser.runtime.getURL("capturer/batch.html"),
+        newTab: !!targetTab,
+      });
+    });
+
     document.getElementById("openScrapBook").addEventListener('click', async (event) => {
       return await scrapbook.openScrapBook({newTab: !!targetTab});
     });

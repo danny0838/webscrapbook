@@ -78,6 +78,13 @@
           force: true,
         });
       },
+
+      async batchCapture() {
+        return await scrapbook.visitLink({
+          url: browser.runtime.getURL("capturer/batch.html"),
+          newTab: true,
+        });
+      },
     },
   };
 

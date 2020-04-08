@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html dir="__MSG_@@bidi_dir__">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__MSG_BatchCaptureTitle__</title>
+<link rel="stylesheet" href="batch.css">
+<script src="../lib/browser-polyfill.js"></script>
+<script src="../core/common.js"></script>
+<script src="../core/extension.js"></script>
+<script src="batch.js"></script>
+</head>
+<body>
+<div id="wrapper">
+<div id="desc">
+  <label>__MSG_BatchCaptureUrlsLabel__</label>
+  <a class="tooltip" href="javascript:" data-tooltip="__MSG_BatchCaptureUrlsTooltip__"></a>
+</div>
+<textarea id="urls"></textarea>
+<div id="toolbar">
+  <div>
+    <label><input id="opt-customTitle" type="checkbox"><span>__MSG_BatchCaptureOptionCustomTitleLabel__</span></label>
+    <label><input id="opt-uniquify" type="checkbox" checked><span>__MSG_BatchCaptureOptionUniquifyLabel__</span></label>
+    <label><input id="opt-useJson" type="checkbox"><span>__MSG_BatchCaptureOptionUseJsonLabel__</span></label>
+  </div>
+  <div>
+    <input id="btn-capture" type="button" value="__MSG_BatchCaptureCaptureLabel__" autocomplete="off">
+    <input id="btn-abort" type="button" value="__MSG_BatchCaptureAbortLabel__" autocomplete="off">
+  </div>
+</div>
+</div>
+</body>
+</html>

@@ -108,6 +108,9 @@
     },
     "editTab": {
       "description": "__MSG_EditTab__"
+    },
+    "batchCapture": {
+      "description": "__MSG_BatchCapture__"
     }
   }
 }

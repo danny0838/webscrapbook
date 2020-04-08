@@ -1,4 +1,31 @@
 {
+  "BatchCapture": {
+    "message": "批量获取网页"
+  },
+  "BatchCaptureAbortLabel": {
+    "message": "取消"
+  },
+  "BatchCaptureCaptureLabel": {
+    "message": "获取"
+  },
+  "BatchCaptureOptionCustomTitleLabel": {
+    "message": "覆写网页标题"
+  },
+  "BatchCaptureOptionUniquifyLabel": {
+    "message": "忽略重复网址"
+  },
+  "BatchCaptureOptionUseJsonLabel": {
+    "message": "使用 JSON 格式"
+  },
+  "BatchCaptureTitle": {
+    "message": "批量获取网页"
+  },
+  "BatchCaptureUrlsLabel": {
+    "message": "网页列表:"
+  },
+  "BatchCaptureUrlsTooltip": {
+    "message": "输入欲获取的网页列表。格式为每行一个网址，网址后可加上网页标题，以空白字元分隔。\n\n若勾选“使用 JSON 格式”，则格式为一个物件数组，每个物件可使用以下属性：\n• url: 待获取的网址。\n• title: 自订标题（勾选“覆写网页标题”才有作用）。\n• mode: 获取模式。省略时为开新分页获取，“source”为获取原貌，“bookmark”为获取书签。"
+  },
   "Cancel": {
     "message": "取消"
   },

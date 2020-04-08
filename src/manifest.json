@@ -101,6 +101,9 @@
         "default": "Ctrl+Shift+E"
       },
       "description": "__MSG_EditTab__"
+    },
+    "batchCapture": {
+      "description": "__MSG_BatchCapture__"
     }
   }
 }
