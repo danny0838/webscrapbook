@@ -791,8 +791,8 @@ svg, math`;
         let meta;
         let importedIndexDat = false;
 
+        // import legacy ScrapBook item (check for index.html and index.dat)
         await (async () => {
-          // check for index.dat of legacy ScrapBook X
           if (!(!index || index.endsWith('/index.html'))) { return; }
 
           const indexDatPath = `${id}/index.dat`;
@@ -1937,7 +1937,7 @@ svg, math`;
 
         await server.lockTree();
 
-        // delete backup folder
+        // delete previous backup folder
         try {
           const target = book.topUrl + scrapbook.escapeFilename(this.treeBakDir);
 
