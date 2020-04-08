@@ -708,13 +708,14 @@
    * @param {integer} params.tabId
    * @param {integer} params.frameId
    * @param {boolean} params.saveBeyondSelection
+   * @param {string} params.title - overriding title
    * @param {string} params.mode - "source", "bookmark", "resave"
    * @param {string} params.options - preset options that overwrites default
    * @return {Promise<Object>}
    */
   capturer.captureTab = async function (params) {
     try {
-      const {tabId, frameId, saveBeyondSelection, mode, options} = params;
+      const {tabId, frameId, saveBeyondSelection, title: title0, mode, options} = params;
       let {url, title, favIconUrl, discarded} = await browser.tabs.get(tabId);
 
       // redirect headless capture
@@ -731,6 +732,7 @@
       const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
       const timeId = scrapbook.dateToId();
       const message = {
+        title: title0,
         settings: {
           missionId: capturer.missionId,
           timeId,
@@ -784,8 +786,8 @@
    * @param {Object} params
    * @param {string} params.url
    * @param {string} params.refUrl
-   * @param {string} params.title
-   * @param {string} params.favIconUrl
+   * @param {string} params.title - overriding title
+   * @param {string} params.favIconUrl - fallback favicon
    * @param {string} params.mode - "source", "bookmark"
    * @param {string} params.options - preset options that overwrites default
    * @return {Promise<Object>}
@@ -824,6 +826,7 @@
         const response = await capturer.captureTab({
           tabId: tab.id,
           saveBeyondSelection: true,
+          title, 
           options,
         });
 
