@@ -174,7 +174,7 @@
   background.saveCurrentTab = async function (params, sender) {
     return await scrapbook.invokeCapture([{
       tabId: sender.tab.id,
-      mode: 'save',
+      mode: 'resave',
     }]);
   };
 

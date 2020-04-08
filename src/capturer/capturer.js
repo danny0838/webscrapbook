@@ -708,7 +708,7 @@
    * @param {integer} params.tabId
    * @param {integer} params.frameId
    * @param {boolean} params.saveBeyondSelection
-   * @param {string} params.mode - "source", "bookmark", "save"
+   * @param {string} params.mode - "source", "bookmark", "resave"
    * @param {string} params.options - preset options that overwrites default
    * @return {Promise<Object>}
    */
@@ -724,7 +724,7 @@
           ({url, title, favIconUrl} = await browser.webNavigation.getFrame({tabId, frameId}));
         }
         return await capturer.captureRemote({url, title, favIconUrl, mode, options});
-      } else if (mode === "save") {
+      } else if (mode === "resave") {
         return await capturer.resaveTab({tabId, frameId, options});
       }
 
