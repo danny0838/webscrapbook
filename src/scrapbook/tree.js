@@ -1747,7 +1747,7 @@ Redirecting to file <a href="index.md">index.md</a>
               const title = newItem.title;
               const url = scrapbook.escapeFilename(filename);
               const html = `<!DOCTYPE html>
-<html>
+<html data-scrapbook-type="file">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(url)}">
