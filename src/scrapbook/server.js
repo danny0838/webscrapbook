@@ -357,7 +357,8 @@
       const prefix = this.treeUrl;
       for (let i = 0; ; i++) {
         const file = `meta${i || ""}.js`;
-        if (treeFiles.has(file) && treeFiles.get(file).type === 'file') {
+        const fileObj = treeFiles.get(file);
+        if (fileObj && fileObj.type === 'file' && fileObj.size > 0) {
           const url = prefix + encodeURIComponent(file);
           try {
             const text = await this.server.request({
@@ -394,7 +395,8 @@
       const prefix = this.treeUrl;
       for (let i = 0; ; i++) {
         const file = `toc${i || ""}.js`;
-        if (treeFiles.has(file) && treeFiles.get(file).type === 'file') {
+        const fileObj = treeFiles.get(file);
+        if (fileObj && fileObj.type === 'file' && fileObj.size > 0) {
           const url = prefix + encodeURIComponent(file);
           try {
             const text = await this.server.request({
@@ -427,7 +429,8 @@
       const prefix = this.treeUrl;
       for (let i = 0; ; i++) {
         const file = `fulltext${i || ""}.js`;
-        if (treeFiles.has(file) && treeFiles.get(file).type === 'file') {
+        const fileObj = treeFiles.get(file);
+        if (fileObj && fileObj.type === 'file' && fileObj.size > 0) {
           const url = prefix + encodeURIComponent(file);
           try {
             const text = await this.server.request({
