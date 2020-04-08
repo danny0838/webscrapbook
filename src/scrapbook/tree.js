@@ -333,8 +333,7 @@
         let template_text;
         switch (type) {
           case 'html': {
-            const filename = 'index.html';
-            newItem.index = newItem.id + '/' + filename;
+            newItem.index = newItem.id + '/index.html';
             target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
 
             // attempt to load template
@@ -371,9 +370,8 @@
           }
 
           case 'markdown': {
-            const filename = 'index.md';
-            newItem.index = newItem.id + '/' + filename;
-            target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
+            newItem.index = newItem.id + '/index.html';
+            target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.md');
 
             // attempt to load template
             const url = this.book.treeUrl + '/templates/note_template.md';
@@ -412,7 +410,7 @@
           const value = typeof dict[key] === 'string' ? dict[key] : key;
           return scrapbook.escapeHtml(value);
         });
-        
+
         const blob = new Blob([content], {type: 'text/plain'});
 
         // save meta and TOC
@@ -427,6 +425,29 @@
           method: "POST",
           body: formData,
         });
+
+        if (type === 'markdown') {
+          const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
+          const content = `<!DOCTYPE html>
+<html data-scrapbook-type="note">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0;url=index.md">
+</head>
+<body>
+Redirecting to file <a href="index.md">index.md</a>
+</body>
+</html>`;
+          const blob = new Blob([content], {type: 'text/plain'});
+          const formData = new FormData();
+          formData.append('token', await server.acquireToken());
+          formData.append('upload', blob);
+          await server.request({
+            url: target + '?a=save&f=json',
+            method: "POST",
+            body: formData,
+          });
+        }
 
         // update DOM
         Array.prototype.filter.call(
