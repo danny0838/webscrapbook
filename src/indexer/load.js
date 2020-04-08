@@ -1019,8 +1019,9 @@ svg, math`;
           if (!meta.index || !dataFiles.has(meta.index)) {
             const index = this.getIndexPath(dataFiles, id);
             if (index) {
+              const _index = meta.index || '';
               meta.index = index;
-              this.error(`Missing index file '${meta.index || ''}' for '${id}'. Shifted to '${index}'.`);
+              this.error(`Missing index file '${_index}' for '${id}'. Shifted to '${index}'.`);
             } else {
               delete(scrapbookData.meta[id]);
               this.error(`Removed metadata entry for '${id}': Missing index file.`);
