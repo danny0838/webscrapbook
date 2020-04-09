@@ -2220,12 +2220,7 @@
                   case "unwrap": {
                     const elems = queryNodes(rootNode, command[1]);
                     for (const elem of elems) {
-                      const frag = doc.createDocumentFragment();
-                      let child;
-                      while (child = elem.firstChild) {
-                        frag.appendChild(child);
-                      }
-                      elem.parentNode.replaceChild(frag, elem);
+                      scrapbook.unwrapElement(elem);
                     }
                     break;
                   }

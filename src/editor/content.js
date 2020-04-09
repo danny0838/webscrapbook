@@ -1270,7 +1270,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       }
       case 2: {
         for (const part of scrapbook.getScrapBookObjectsById(elem)) {
-          editor.unwrapNode(part);
+          scrapbook.unwrapElement(part);
         }
         break;
       }
@@ -1291,17 +1291,6 @@ ${sRoot}.toolbar .toolbar-close:hover {
       }
     }
     return type;
-  };
-
-  /**
-   * Remove the element while keeping all children.
-   */
-  editor.unwrapNode = function (elem) {
-    let childs = elem.childNodes;
-    let parent = elem.parentNode;
-    while (childs.length) { parent.insertBefore(childs[0], elem); }
-    elem.remove();
-    parent.normalize();
   };
 
   editor.addHistory = () => {

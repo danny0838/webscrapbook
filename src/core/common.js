@@ -2337,6 +2337,19 @@
     return rs.concat(re);
   };
 
+  /**
+   * Remove the element while keeping all children.
+   */
+  scrapbook.unwrapElement = function (elem) {
+    const parent = elem.parentNode;
+    if (!parent) { return; }
+    const frag = elem.ownerDocument.createDocumentFragment();
+    let child;
+    while (child = elem.firstChild) { frag.appendChild(child); }
+    parent.replaceChild(frag, elem);
+    parent.normalize();
+  };
+
 
   /******************************************************************************
    * Network utilities
