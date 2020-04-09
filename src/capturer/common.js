@@ -2675,8 +2675,9 @@
     const {doc = document} = params;
 
     const nodes = scrapbook.getSelectedNodes({
+      whatToShow: NodeFilter.SHOW_ELEMENT,
       nodeFilter: (node) => {
-        return node.nodeType === Node.ELEMENT_NODE && node.matches('a[href], area[href]');
+        return node.matches('a[href], area[href]');
       },
       fuzzy: true,
     });

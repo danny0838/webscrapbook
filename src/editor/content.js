@@ -665,22 +665,20 @@ ${sRoot}.toolbar .toolbar-close:hover {
     hElem.setAttribute('style', style);
 
     for (const range of scrapbook.getSelectionRanges()) {
+      // tweak the range
+      if (range.startContainer.nodeType === Node.TEXT_NODE && range.startOffset) {
+        let newNode = range.startContainer.splitText(range.startOffset);
+        range.setStartBefore(newNode);
+      }
+      if (range.endContainer.nodeType === Node.TEXT_NODE && range.endOffset) {
+        let endNode = range.endContainer;
+        endNode.splitText(range.endOffset);
+        range.setEndAfter(endNode);
+      }
+
       const selectedNodes = scrapbook.getSelectedNodes({
         range,
-        rangeTweaker: (range) => {
-          if (range.startContainer.nodeType === Node.TEXT_NODE && range.startOffset) {
-            let newNode = range.startContainer.splitText(range.startOffset);
-            range.setStartBefore(newNode);
-          }
-          if (range.endContainer.nodeType === Node.TEXT_NODE && range.endOffset) {
-            let endNode = range.endContainer;
-            endNode.splitText(range.endOffset);
-            range.setEndAfter(endNode);
-          }
-        },
-        nodeFilter: (node) => {
-          return node.nodeType === Node.TEXT_NODE;
-        }
+        whatToShow: NodeFilter.SHOW_TEXT,
       });
 
       // reverse the order as a range may be altered when changing a node before it
@@ -750,9 +748,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     // get selected element nodes with tweaks for boundary selection cases
     const selectedNodes = scrapbook.getSelectedNodes({
-      nodeFilter: (node) => {
-        return node.nodeType === Node.COMMENT_NODE;
-      }
+      whatToShow: NodeFilter.SHOW_COMMENT,
     });
 
     // handle descendant node first as it may be altered when handling ancestor
@@ -800,9 +796,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     // get selected element nodes with tweaks for boundary selection cases
     const selectedNodes = scrapbook.getSelectedNodes({
-      nodeFilter: (node) => {
-        return node.nodeType === Node.ELEMENT_NODE;
-      },
+      whatToShow: NodeFilter.SHOW_ELEMENT,
       fuzzy: true,
     });
 

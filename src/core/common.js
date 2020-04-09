@@ -2191,12 +2191,13 @@
    * @param {Object} params
    * @param {Window} params.win - The Window to operate on.
    * @param {Range} params.range - The Range object to get selected nodes within.
-   * @param {Function} params.rangeTweaker - A function to tweak ranges.
-   * @param {Function} params.nodeFilter - A function to filter returned nodes.
-   * @param {boolean} params.fuzzy - Include fuzzily selected nodes.
+   * @param {integer} params.whatToShow - Filter for allowed node types.
+   * @param {Function} params.nodeFilter - A function to filter allowed nodes.
+   * @param {boolean} params.fuzzy - Include partially selected nodes.
    * @return {Array<Element>} Elements in the selected range(s).
    */
-  scrapbook.getSelectedNodes = function ({win = window, range, rangeTweaker, nodeFilter, fuzzy = false}) {
+  scrapbook.getSelectedNodes = function ({win = window, range, whatToShow = -1, nodeFilter, fuzzy = false}) {
+    const doc = win.document;
     const result = [];
     const ranges = range ? [range] : scrapbook.getSelectionRanges(win);
     for (let range of ranges) {
@@ -2204,51 +2205,35 @@
         continue;
       }
 
-      if (typeof rangeTweaker === "function") {
-        rangeTweaker(range);
-      }
-
-      const nodeIterator = win.document.createNodeIterator(
+      const nodeRange = doc.createRange();
+      const walker = doc.createTreeWalker(
         range.commonAncestorContainer,
-        -1
+        whatToShow,
+        {
+          acceptNode: (node) => {
+            nodeRange.selectNode(node);
+            if (fuzzy) {
+              if (range.compareBoundaryPoints(Range.END_TO_START, nodeRange) <= 0
+                  && range.compareBoundaryPoints(Range.START_TO_END, nodeRange) >= 0) {
+                if (typeof nodeFilter !== "function" || nodeFilter(node)) {
+                  return NodeFilter.FILTER_ACCEPT;
+                }
+              }
+            } else {
+              if (nodeRange.compareBoundaryPoints(Range.START_TO_START, range) >= 0
+                  && nodeRange.compareBoundaryPoints(Range.END_TO_END, range) <= 0) {
+                if (typeof nodeFilter !== "function" || nodeFilter(node)) {
+                  return NodeFilter.FILTER_ACCEPT;
+                }
+              }
+            }
+            return NodeFilter.FILTER_SKIP;
+          },
+        }
       );
-      let startNode = range.startContainer;
-      if (![3, 4, 8].includes(startNode.nodeType)) {
-        // <p>[<span> => start from <span> rather than <p>
-        // <p>[</p><span> => start from <span> rather than <p>
-        startNode = startNode.childNodes[range.startOffset] || startNode.nextSibling;
-      } else if (fuzzy) {
-        // <span>[foo => start from <span> rather than #text(foo)
-        // <span>f[oo => start from <span> rather than #text(foo)
-        // <p><span>foo</span>[bar => start from #text(bar)
-        // <p><span>foo</span>b[ar => start from #text(bar)
-        if (!startNode.previousSibling && startNode.parentNode) {
-          startNode = startNode.parentNode;
-        }
-      }
-      let endNode = range.endContainer;
-      if (![3, 4, 8].includes(endNode.nodeType)) {
-        // <p><span>foo</span>]<em>bar => ends at <span> rather than <p>
-        // <p>]foo => ends at <p>
-        if (range.endOffset > 0) {
-          endNode = endNode.childNodes[range.endOffset - 1];
-        }
-      }
-      let node, start = false;
-      while (node = nodeIterator.nextNode()) {
-        if (!start) {
-          if (node === startNode) {
-            start = true;
-          }
-        }
-        if (start) {
-          if (typeof nodeFilter !== "function" || nodeFilter(node)) {
-            result.push(node);
-          }
-          if (node === endNode) {
-            break;
-          }
-        }
+      let node;
+      while (node = walker.nextNode()) {
+        result.push(node);
       }
     }
     return result;
