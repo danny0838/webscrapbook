@@ -1329,7 +1329,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
       let startNode = range.startContainer;
       if (![3, 4, 8].includes(startNode.nodeType)) {
         // <p>[<span> => start from <span> rather than <p>
-        startNode = startNode.childNodes[range.startOffset];
+        // <p>[</p><span> => start from <span> rather than <p>
+        startNode = startNode.childNodes[range.startOffset] || startNode.nextSibling;
       } else if (fuzzy) {
         // <span>[foo => start from <span> rather than #text(foo)
         // <span>f[oo => start from <span> rather than #text(foo)
