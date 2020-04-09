@@ -2679,10 +2679,12 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         const key = {table: "captureMissionCache", id: missionId};
         const tasks = await scrapbook.cache.get(key);
         await scrapbook.cache.remove(key);
-        if (tasks) {
-          results = await capturer.runTasks({tasks});
-        } else {
+        if (!tasks) {
           capturer.error(`Error: missing task data for mission "${missionId}".`);
+        } else if (!tasks.length) {
+          capturer.error(`Error: nothing to capture.`);
+        } else {
+          results = await capturer.runTasks({tasks});
         }
       } else {
         capturer.error(`Error: Mission ID not set.`);
