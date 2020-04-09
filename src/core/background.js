@@ -178,20 +178,9 @@
   /**
    * @kind invokable
    */
-  background.saveCurrentTab = async function (params, sender) {
-    return await scrapbook.invokeCapture([{
-      tabId: sender.tab.id,
-      mode: 'resave',
-    }]);
-  };
-
-  /**
-   * @kind invokable
-   */
-  background.captureCurrentTab = async function (params, sender) {
-    return await scrapbook.invokeCapture([{
-      tabId: sender.tab.id,
-    }]);
+  background.captureCurrentTab = async function (params = {}, sender) {
+    const task = Object.assign({tabId: sender.tab.id}, params);
+    return await scrapbook.invokeCapture([task]);
   };
 
   /**

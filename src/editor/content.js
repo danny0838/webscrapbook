@@ -1073,7 +1073,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
       }
 
       return await scrapbook.invokeExtensionScript({
-        cmd: "background.saveCurrentTab",
+        cmd: "background.captureCurrentTab",
+        args: {mode: "resave"},
       });
     } else {
       return await scrapbook.invokeExtensionScript({
