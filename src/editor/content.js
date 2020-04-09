@@ -800,21 +800,10 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     // get selected element nodes with tweaks for boundary selection cases
     const selectedNodes = editor.getSelectedNodes({
-      rangeTweaker: (range) => {
-        const startNode = range.startContainer;
-        if ([3, 4, 8].includes(startNode.nodeType)) {
-          // <span>[foo => start from <span> rather than #text(foo)
-          // <span>f[oo => start from <span> rather than #text(foo)
-          // <p><span>foo</span>[bar => start from #text(bar)
-          // <p><span>foo</span>b[ar => start from #text(bar)
-          if (!startNode.previousSibling) {
-            range.setStartBefore(startNode.parentNode);
-          }
-        }
-      },
       nodeFilter: (node) => {
         return node.nodeType === Node.ELEMENT_NODE;
-      }
+      },
+      fuzzy: true,
     });
 
     // handle descendant node first as it may be altered when handling ancestor
@@ -1318,9 +1307,10 @@ ${sRoot}.toolbar .toolbar-close:hover {
    * @param {Range} params.range - The Range object to get selected node within.
    * @param {Function} params.rangeTweaker - A function to tweak ranges.
    * @param {Function} params.nodeFilter - A function to filter returned nodes.
+   * @param {boolean} params.fuzzy - Include fuzzily selected nodes.
    * @return {Array<Element>} Elements in the selected range(s).
    */
-  editor.getSelectedNodes = function ({range, rangeTweaker, nodeFilter}) {
+  editor.getSelectedNodes = function ({range, rangeTweaker, nodeFilter, fuzzy = false}) {
     const result = [];
     const ranges = range ? [range] : editor.getSelectionRanges();
     for (range of ranges) {
@@ -1340,6 +1330,14 @@ ${sRoot}.toolbar .toolbar-close:hover {
       if (![3, 4, 8].includes(startNode.nodeType)) {
         // <p>[<span> => start from <span> rather than <p>
         startNode = startNode.childNodes[range.startOffset];
+      } else if (fuzzy) {
+        // <span>[foo => start from <span> rather than #text(foo)
+        // <span>f[oo => start from <span> rather than #text(foo)
+        // <p><span>foo</span>[bar => start from #text(bar)
+        // <p><span>foo</span>b[ar => start from #text(bar)
+        if (!startNode.previousSibling && startNode.parentNode) {
+          startNode = startNode.parentNode;
+        }
       }
       let endNode = range.endContainer;
       if (![3, 4, 8].includes(endNode.nodeType)) {
