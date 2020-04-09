@@ -2277,19 +2277,23 @@
     // Start -- Work inward from the start, selecting the largest safe range
     const s = [], rs = [];
     if (dangerous.startContainer != ca) {
-      for (let i = dangerous.startContainer; i != ca; i = i.parentNode) {
-        s.push(i)
+      for (let i = dangerous.startContainer; i !== ca; i = i.parentNode) {
+        s.push(i);
       }
     }
-    if (0 < s.length) {
+    if (s.length > 0) {
       for (let i = 0; i < s.length; i++) {
         const xs = doc.createRange();
         if (i) {
           xs.setStartAfter(s[i-1]);
-          xs.setEndAfter(s[i].lastChild);
+          xs.setEnd(s[i], s[i].childNodes.length);
         } else {
           xs.setStart(s[i], dangerous.startOffset);
-          xs.setEndAfter(s[i].nodeType === Node.TEXT_NODE ? s[i] : s[i].lastChild);
+          if ([3, 4, 8].includes(s[i].nodeType)) {
+            xs.setEndAfter(s[i]);
+          } else {
+            xs.setEnd(s[i], s[i].childNodes.length);
+          }
         }
         rs.push(xs);
       }
@@ -2298,18 +2302,22 @@
     // End -- basically the same code reversed
     const e = [], re = [];
     if (dangerous.endContainer != ca) {
-      for (let i = dangerous.endContainer; i != ca; i = i.parentNode) {
-        e.push(i)
+      for (let i = dangerous.endContainer; i !== ca; i = i.parentNode) {
+        e.push(i);
       }
     }
-    if (0 < e.length) {
+    if (e.length > 0) {
       for (let i = 0; i < e.length; i++) {
         const xe = doc.createRange();
         if (i) {
-          xe.setStartBefore(e[i].firstChild);
+          xe.setStart(e[i], 0);
           xe.setEndBefore(e[i-1]);
         } else {
-          xe.setStartBefore(e[i].nodeType === Node.TEXT_NODE ? e[i] : e[i].firstChild);
+          if ([3, 4, 8].includes(e[i].nodeType)) {
+            xe.setStartBefore(e[i]);
+          } else {
+            xe.setStart(e[i], 0);
+          }
           xe.setEnd(e[i], dangerous.endOffset);
         }
         re.unshift(xe);
@@ -2317,7 +2325,7 @@
     }
 
     // Middle -- the uncaptured middle
-    if ((0 < s.length) && (0 < e.length)) {
+    if ((s.length > 0) && (e.length > 0)) {
       const xm = doc.createRange();
       xm.setStartAfter(s[s.length - 1]);
       xm.setEndBefore(e[e.length - 1]);
