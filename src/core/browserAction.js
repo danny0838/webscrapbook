@@ -144,14 +144,24 @@
     });
 
     document.getElementById("editTab").addEventListener('click', async (event) => {
-      if (targetTab) {
-        return await scrapbook.editTab({
-          tabId: targetTab.id,
-          force: true,
-        });
-      } else {
-        // This won't happen as editTab is unhidden only when targetTab exists.
+      if (!targetTab) {
+        return await generateActionButtonForTabs(
+          document.getElementById("editTab"),
+          async (tab) => {
+            await scrapbook.editTab({
+              tabId: tab.id,
+              force: true,
+            });
+            return await browser.tabs.update(tab.id, {
+              active: true,
+            });
+          });
       }
+
+      return await scrapbook.editTab({
+        tabId: targetTab.id,
+        force: true,
+      });
     });
 
     document.getElementById("batchCapture").addEventListener('click', async (event) => {
