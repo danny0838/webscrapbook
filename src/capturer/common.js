@@ -2674,7 +2674,7 @@
   capturer.retrieveSelectedLinks = async function (params = {}) {
     const {doc = document} = params;
 
-    const nodes = editor.getSelectedNodes({
+    const nodes = scrapbook.getSelectedNodes({
       nodeFilter: (node) => {
         return node.nodeType === Node.ELEMENT_NODE && node.matches('a[href], area[href]');
       },

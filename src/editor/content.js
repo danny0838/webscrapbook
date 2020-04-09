@@ -664,8 +664,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
     hElem.setAttribute('data-scrapbook-elem', 'linemarker');
     hElem.setAttribute('style', style);
 
-    for (const range of editor.getSelectionRanges()) {
-      const selectedNodes = editor.getSelectedNodes({
+    for (const range of scrapbook.getSelectionRanges()) {
+      const selectedNodes = scrapbook.getSelectedNodes({
         range,
         rangeTweaker: (range) => {
           if (range.startContainer.nodeType === Node.TEXT_NODE && range.startOffset) {
@@ -712,7 +712,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     // reverse the order as a range may be altered when changing a node before it
     const timeId = scrapbook.dateToId();
-    for (const range of editor.getSafeSelectionRanges().reverse()) {
+    for (const range of scrapbook.getSafeSelectionRanges().reverse()) {
       if (!range.collapsed) {
         const wrapper = document.createElement('scrapbook-erased');
         range.surroundContents(wrapper);
@@ -749,7 +749,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     editor.addHistory();
 
     // get selected element nodes with tweaks for boundary selection cases
-    const selectedNodes = editor.getSelectedNodes({
+    const selectedNodes = scrapbook.getSelectedNodes({
       nodeFilter: (node) => {
         return node.nodeType === Node.COMMENT_NODE;
       }
@@ -799,7 +799,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     editor.addHistory();
 
     // get selected element nodes with tweaks for boundary selection cases
-    const selectedNodes = editor.getSelectedNodes({
+    const selectedNodes = scrapbook.getSelectedNodes({
       nodeFilter: (node) => {
         return node.nodeType === Node.ELEMENT_NODE;
       },
@@ -1153,7 +1153,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     // clicks outside.
     const sel = window.getSelection();
     const wasCollapsed = sel.isCollapsed;
-    const ranges = editor.getSelectionRanges();
+    const ranges = scrapbook.getSelectionRanges();
 
     if (!elem.hasAttribute('tabindex')) {
       elem.setAttribute('tabindex', -1);
@@ -1298,164 +1298,6 @@ ${sRoot}.toolbar .toolbar-close:hover {
     while (childs.length) { parent.insertBefore(childs[0], elem); }
     elem.remove();
     parent.normalize();
-  };
-
-  /**
-   * Get nodes in the selected range(s).
-   *
-   * @param {Object} params
-   * @param {Range} params.range - The Range object to get selected node within.
-   * @param {Function} params.rangeTweaker - A function to tweak ranges.
-   * @param {Function} params.nodeFilter - A function to filter returned nodes.
-   * @param {boolean} params.fuzzy - Include fuzzily selected nodes.
-   * @return {Array<Element>} Elements in the selected range(s).
-   */
-  editor.getSelectedNodes = function ({range, rangeTweaker, nodeFilter, fuzzy = false}) {
-    const result = [];
-    const ranges = range ? [range] : editor.getSelectionRanges();
-    for (range of ranges) {
-      if (range.collapsed) {
-        continue;
-      }
-
-      if (typeof rangeTweaker === "function") {
-        rangeTweaker(range);
-      }
-
-      const nodeIterator = document.createNodeIterator(
-        range.commonAncestorContainer,
-        -1
-      );
-      let startNode = range.startContainer;
-      if (![3, 4, 8].includes(startNode.nodeType)) {
-        // <p>[<span> => start from <span> rather than <p>
-        // <p>[</p><span> => start from <span> rather than <p>
-        startNode = startNode.childNodes[range.startOffset] || startNode.nextSibling;
-      } else if (fuzzy) {
-        // <span>[foo => start from <span> rather than #text(foo)
-        // <span>f[oo => start from <span> rather than #text(foo)
-        // <p><span>foo</span>[bar => start from #text(bar)
-        // <p><span>foo</span>b[ar => start from #text(bar)
-        if (!startNode.previousSibling && startNode.parentNode) {
-          startNode = startNode.parentNode;
-        }
-      }
-      let endNode = range.endContainer;
-      if (![3, 4, 8].includes(endNode.nodeType)) {
-        // <p><span>foo</span>]<em>bar => ends at <span> rather than <p>
-        // <p>]foo => ends at <p>
-        if (range.endOffset > 0) {
-          endNode = endNode.childNodes[range.endOffset - 1];
-        }
-      }
-      let node, start = false;
-      while (node = nodeIterator.nextNode()) {
-        if (!start) {
-          if (node === startNode) {
-            start = true;
-          }
-        }
-        if (start) {
-          if (typeof nodeFilter !== "function" || nodeFilter(node)) {
-            result.push(node);
-          }
-          if (node === endNode) {
-            break;
-          }
-        }
-      }
-    }
-    return result;
-  };
-
-  editor.getSelectionRanges = function () {
-    let result = [];
-    const sel = window.getSelection();
-    if (sel) {
-      for (let i = 0; i < sel.rangeCount; i++) {
-        result.push(sel.getRangeAt(i));
-      }
-    }
-    return result;
-  };
-
-  /**
-   * See editor.getSafeRanges() for details.
-   */
-  editor.getSafeSelectionRanges = function () {
-    let result = [];
-    const sel = window.getSelection();
-    if (sel) {
-      for (let i = 0; i < sel.rangeCount; i++) {
-        const range = sel.getRangeAt(i);
-        result = result.concat(editor.getSafeRanges(range));
-      }
-    }
-    return result;
-  };
-
-  /**
-   * Get splitted selection range parts which do not cross an element boundary.
-   *
-   * Revised from:
-   * https://stackoverflow.com/a/12823606/1667884
-   */
-  editor.getSafeRanges = (dangerous) => {
-    const ca = dangerous.commonAncestorContainer;
-
-    // Start -- Work inward from the start, selecting the largest safe range
-    const s = [], rs = [];
-    if (dangerous.startContainer != ca) {
-      for (let i = dangerous.startContainer; i != ca; i = i.parentNode) {
-        s.push(i)
-      }
-    }
-    if (0 < s.length) {
-      for (let i = 0; i < s.length; i++) {
-        const xs = document.createRange();
-        if (i) {
-          xs.setStartAfter(s[i-1]);
-          xs.setEndAfter(s[i].lastChild);
-        } else {
-          xs.setStart(s[i], dangerous.startOffset);
-          xs.setEndAfter(s[i].nodeType === Node.TEXT_NODE ? s[i] : s[i].lastChild);
-        }
-        rs.push(xs);
-      }
-    }
-
-    // End -- basically the same code reversed
-    const e = [], re = [];
-    if (dangerous.endContainer != ca) {
-      for (let i = dangerous.endContainer; i != ca; i = i.parentNode) {
-        e.push(i)
-      }
-    }
-    if (0 < e.length) {
-      for (let i = 0; i < e.length; i++) {
-        const xe = document.createRange();
-        if (i) {
-          xe.setStartBefore(e[i].firstChild);
-          xe.setEndBefore(e[i-1]);
-        } else {
-          xe.setStartBefore(e[i].nodeType === Node.TEXT_NODE ? e[i] : e[i].firstChild);
-          xe.setEnd(e[i], dangerous.endOffset);
-        }
-        re.unshift(xe);
-      }
-    }
-
-    // Middle -- the uncaptured middle
-    if ((0 < s.length) && (0 < e.length)) {
-      const xm = document.createRange();
-      xm.setStartAfter(s[s.length - 1]);
-      xm.setEndBefore(e[e.length - 1]);
-      rs.push(xm);
-    } else {
-      return [dangerous];
-    }
-
-    return rs.concat(re);
   };
 
   editor.addHistory = () => {
