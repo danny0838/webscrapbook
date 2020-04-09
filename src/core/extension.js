@@ -234,6 +234,24 @@
   };
 
   /**
+   * Invoke batch capture with preset params.
+   *
+   * @param {Object} params
+   * @param {Array} params.tasks
+   * @param {boolean} params.useJson
+   * @param {boolean} params.customTitle
+   * @return {Promise<Tab>}
+   */
+  scrapbook.invokeBatchCapture = async function (params) {
+    const missionId = scrapbook.getUuid();
+    const key = {table: "batchCaptureMissionCache", id: missionId};
+    await scrapbook.cache.set(key, params);
+    const url = browser.runtime.getURL("capturer/batch.html") + `?mid=${missionId}`;
+    const tab = await browser.tabs.create({url});
+    return tab;
+  };
+
+  /**
    * @param {boolean} newTab - Whether to open in a new tab.
    * @return {undefined|Window|Tab}
    */

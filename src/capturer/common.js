@@ -2666,6 +2666,27 @@
   };
 
   /**
+   * @kind invokable
+   * @param {Object} params
+   * @param {Object} params.doc
+   * @return {Promise<Array>}
+   */
+  capturer.retrieveSelectedLinks = async function (params = {}) {
+    const {doc = document} = params;
+
+    const nodes = editor.getSelectedNodes({
+      nodeFilter: (node) => {
+        return node.nodeType === Node.ELEMENT_NODE && node.matches('a[href], area[href]');
+      },
+      fuzzy: true,
+    });
+    return Array.prototype.map.call(nodes, a => ({
+     url: a.href,
+     title: a.textContent,
+    }));
+  };
+
+  /**
    * Format the filename to save.
    *
    * @param {Object} params

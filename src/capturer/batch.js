@@ -18,6 +18,35 @@
 
   'use strict';
 
+  async function init() {
+    const missionId = new URL(document.URL).searchParams.get('mid');
+    if (!missionId) { return; }
+
+    const key = {table: "batchCaptureMissionCache", id: missionId};
+    let data;
+    try {
+      data = await scrapbook.cache.get(key);
+      await scrapbook.cache.remove(key);
+      if (!data) { throw new Error(`Missing data for mission "${missionId}".`); }
+    } catch (ex) {
+      console.error(ex);
+      return;
+    }
+
+    if (typeof data.customTitle !== 'undefined') {
+      document.getElementById('opt-customTitle').checked = data.customTitle;
+    }
+    if (typeof data.useJson !== 'undefined') {
+      document.getElementById('opt-useJson').checked = data.useJson;
+    }
+    if (typeof data.uniquify !== 'undefined') {
+      document.getElementById('opt-uniquify').checked = data.uniquify;
+    }
+    if (typeof data.tasks !== 'undefined') {
+      document.getElementById('urls').value = stringifyTasks(data.tasks, document.getElementById('opt-useJson').checked);
+    }
+  }
+
   async function capture({inputText, customTitle, useJson, uniquify}) {
     let tasks = parseInputText(inputText, useJson);
 
@@ -149,6 +178,8 @@
         onToggleTooltip(elem);
       });
     }
+
+    init();
   });
 
   return {

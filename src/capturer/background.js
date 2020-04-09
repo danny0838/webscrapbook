@@ -144,6 +144,25 @@
     });
 
     browser.contextMenus.create({
+      title: scrapbook.lang("CaptureSelectedLinks"),
+      contexts: ["selection"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.initContentScripts(tab.id)
+          .then(() => {
+            return scrapbook.invokeContentScript({
+              tabId: tab.id,
+              frameId: info.frameId,
+              cmd: "capturer.retrieveSelectedLinks",
+            });
+          })
+          .then((tasks) => {
+            return scrapbook.invokeBatchCapture({tasks});
+          });
+      }
+    });
+
+    browser.contextMenus.create({
       title: scrapbook.lang("CaptureLink"),
       contexts: ["link"],
       targetUrlPatterns: urlMatch,
