@@ -1270,9 +1270,12 @@ ${sRoot}.toolbar .toolbar-close:hover {
       case 3: {
         const m = elem.nodeValue.match(/^.+?=([\s\S]*)$/);
         if (m) {
-          const t = document.createElement('template');
+          const doc = elem.ownerDocument;
+          const parent = elem.parentNode;
+          const t = doc.createElement('template');
           t.innerHTML = scrapbook.unescapeHtmlComment(m[1]);
-          elem.parentNode.replaceChild(document.importNode(t.content, true), elem);
+          parent.replaceChild(doc.importNode(t.content, true), elem);
+          parent.normalize();
         } else {
           // this shouldn't happen
           return -1;
