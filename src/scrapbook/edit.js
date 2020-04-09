@@ -141,7 +141,8 @@
       if (this.target) {
         location.assign(this.target);
       } else {
-        window.close();
+        const tab = await browser.tabs.getCurrent();
+        return browser.tabs.remove(tab.id);
       }
     },
 
