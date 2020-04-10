@@ -229,6 +229,17 @@
       });
     }
 
+    async getMetaRefreshTarget(refUrl) {
+      const doc = await server.request({
+        url: refUrl,
+        method: "GET",
+      })
+        .then(r => r.blob())
+        .then(b => scrapbook.readFileAsDocument(b));
+
+      return scrapbook.getMetaRefreshTarget(doc, refUrl);
+    }
+
     async findBookIdFromUrl(url) {
       const u = scrapbook.splitUrl(url)[0];
       for (const [id, book] of Object.entries(this.books)) {

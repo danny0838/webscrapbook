@@ -60,7 +60,7 @@
           let target = this.target = book.dataUrl + scrapbook.escapeFilename(file);
 
           if (checkMetaRefresh && target.endsWith('.html')) {
-            const redirectedTarget = await this.getMetaRefreshTarget(target);
+            const redirectedTarget = await server.getMetaRefreshTarget(target);
             if (redirectedTarget) {
               target = this.target = redirectedTarget;
             }
@@ -144,30 +144,6 @@
         const tab = await browser.tabs.getCurrent();
         return browser.tabs.remove(tab.id);
       }
-    },
-
-    async getMetaRefreshTarget(refUrl) {
-      const doc = await server.request({
-        url: refUrl,
-        method: "GET",
-      })
-        .then(r => r.blob())
-        .then(b => scrapbook.readFileAsDocument(b));
-
-      let target;
-      Array.prototype.some.call(
-        doc.querySelectorAll('meta[http-equiv][content]'),
-        (elem) => {
-          if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
-            const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
-            if (metaRefresh.url) {
-              target = new URL(metaRefresh.url, refUrl).href;
-              return true;
-            }
-          }
-        }
-      );
-      return target;
     },
   };
 

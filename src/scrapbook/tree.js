@@ -82,7 +82,7 @@
           const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
 
           if (target.endsWith('.html')) {
-            const redirectedTarget = await this.getMetaRefreshTarget(target);
+            const redirectedTarget = await server.getMetaRefreshTarget(target);
             if (redirectedTarget) {
               target = redirectedTarget;
             }
@@ -104,7 +104,7 @@
         target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
 
         if (target.endsWith('.html')) {
-          const redirectedTarget = await this.getMetaRefreshTarget(target);
+          const redirectedTarget = await server.getMetaRefreshTarget(target);
           if (redirectedTarget) {
             target = redirectedTarget;
           }
@@ -1355,30 +1355,6 @@ Redirecting to file <a href="index.md">index.md</a>
           url,
         });
       }
-    },
-
-    async getMetaRefreshTarget(refUrl) {
-      const doc = await server.request({
-        url: refUrl,
-        method: "GET",
-      })
-        .then(r => r.blob())
-        .then(b => scrapbook.readFileAsDocument(b));
-
-      let target;
-      Array.prototype.some.call(
-        doc.querySelectorAll('meta[http-equiv][content]'),
-        (elem) => {
-          if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
-            const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
-            if (metaRefresh.url) {
-              target = new URL(metaRefresh.url, refUrl).href;
-              return true;
-            }
-          }
-        }
-      );
-      return target;
     },
 
     itemIsValidTarget(itemId) {

@@ -2186,6 +2186,30 @@
   };
 
   /**
+   * Get primary meta refresh target URL.
+   *
+   * @param {Document} doc
+   * @param {string} refUrl - An arbitarary reference URL. Use document.URL if not set.
+   * @param {boolean} ignoreDelayedRefresh - Only consider meta refresh with 0 refresh time.
+   * @return {string|undefined} Absolute URL of the meta refresh target.
+   */
+  scrapbook.getMetaRefreshTarget = (doc, refUrl, ignoreDelayedRefresh = false) => {
+    if (typeof refUrl === 'undefined') {
+      refUrl = doc.URL;
+    }
+    for (const elem of doc.querySelectorAll('meta[http-equiv][content]')) {
+      if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
+        const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+        if (metaRefresh.url) {
+          if (!ignoreDelayedRefresh || metaRefresh.time === 0) {
+            return new URL(metaRefresh.url, refUrl).href;
+          }
+        }
+      }
+    }
+  };
+
+  /**
    * Get nodes in the selected range(s).
    *
    * @param {Object} params
