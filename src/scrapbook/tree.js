@@ -97,24 +97,24 @@
       },
 
       async browse(selectedItemElems) {
-        if (!selectedItemElems.length) { return; }
+        for (const elem of selectedItemElems) {
+          const id = elem.getAttribute('data-id');
+          const item = this.book.meta[id];
+          if (!item.index) { continue; }
 
-        let target;
-        const id = selectedItemElems[0].getAttribute('data-id');
-        const item = this.book.meta[id];
-        target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
-
-        if (target.endsWith('.html')) {
-          const redirectedTarget = await server.getMetaRefreshTarget(target);
-          if (redirectedTarget) {
-            target = redirectedTarget;
+          let target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
+          if (target.endsWith('/index.html')) {
+            const redirectedTarget = await server.getMetaRefreshTarget(target);
+            if (redirectedTarget) {
+              target = redirectedTarget;
+            }
           }
-        }
 
-        await server.request({
-          url: target + '?a=browse&f=json',
-          method: "GET",
-        });
+          await server.request({
+            url: target + '?a=browse&f=json',
+            method: "GET",
+          });
+        }
       },
 
       async source(selectedItemElems) {
@@ -864,7 +864,7 @@ Redirecting to file <a href="index.md">index.md</a>
             menuElem.querySelector('button[value="exec_book"]').hidden = true;
             menuElem.querySelector('button[value="opentab"]').hidden = false;
             menuElem.querySelector('button[value="exec"]').hidden = true;
-            menuElem.querySelector('button[value="browse"]').hidden = true;
+            menuElem.querySelector('button[value="browse"]').hidden = false;
             menuElem.querySelector('button[value="source"]').hidden = false;
             menuElem.querySelector('button[value="manage"]').hidden = true;
 
