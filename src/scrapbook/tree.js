@@ -79,9 +79,10 @@
         for (const elem of selectedItemElems) {
           const id = elem.getAttribute('data-id');
           const item = this.book.meta[id];
-          const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
+          if (!item.index) { continue; }
 
-          if (target.endsWith('.html')) {
+          let target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
+          if (target.endsWith('/index.html')) {
             const redirectedTarget = await server.getMetaRefreshTarget(target);
             if (redirectedTarget) {
               target = redirectedTarget;
