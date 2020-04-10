@@ -190,6 +190,10 @@ body {
   align-content: stretch;
 }
 
+#dialog-wrapper form.meta dl > div[hidden] {
+  display: none;
+}
+
 #dialog-wrapper form.meta dl > div > dt {
   flex: 1 0 6em;
 }

@@ -163,6 +163,11 @@
         dialog.querySelector('[name="modify"]').value = item.modify ? scrapbook.idToDate(item.modify).toLocaleString() : "";
         dialog.querySelector('[name="comment"]').value = item.comment || "";
 
+        dialog.querySelector('[name="index"]').parentNode.parentNode.hidden = ['folder', 'separator'].includes(item.type);
+        dialog.querySelector('[name="source"]').parentNode.parentNode.hidden = ['folder', 'separator'].includes(item.type);
+        dialog.querySelector('[name="icon"]').parentNode.parentNode.hidden = ['separator'].includes(item.type);
+        dialog.querySelector('[name="charset"]').parentNode.parentNode.hidden = ['folder', 'separator', 'bookmark'].includes(item.type);
+
         dialog.addEventListener('dialogShow', (event) => {
           dialog.querySelector('[name="title"]').focus();
         });
