@@ -1621,7 +1621,7 @@
    *
    * ref: https://www.w3.org/TR/html5/document-metadata.html
    *
-   * @return {{time: string, url: string}}
+   * @return {{time: integer, url: string}}
    */
   scrapbook.parseHeaderRefresh = function (string) {
     const regexFields = /^\s*(.*?)(?=[;,]|$)/i;
