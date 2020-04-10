@@ -2182,6 +2182,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       // for mouse right click, skip if not in the tree area
       if (event.button === 2 && !event.target.closest('#items')) { return; }
 
+      // disallow when commands disabled
+      if (document.querySelector('#command:disabled')) {
+        event.dataTransfer.dropEffect = 'none';
+        return;
+      }
+
       event.preventDefault();
       this.showCommands(true, event.pageX, event.pageY);
     },
