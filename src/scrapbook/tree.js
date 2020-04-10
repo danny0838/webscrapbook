@@ -411,6 +411,7 @@
           SCRAPBOOK_DIR: scrapbook.getRelativeUrl(this.book.topUrl, target),
           DATA_DIR: scrapbook.getRelativeUrl(this.book.dataUrl, target),
           TREE_DIR: scrapbook.getRelativeUrl(this.book.treeUrl, target),
+          ITEM_DIR: './',
         };
         const content = template_text.replace(/%([^%\s]*)%/gu, (_, key) => {
           const value = typeof dict[key] === 'string' ? dict[key] : key;
