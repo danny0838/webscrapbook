@@ -117,6 +117,17 @@
     return '';
   }
 
+  function updateInputText(elem, value) {
+    // Use execCommand rather than set value to allow undo in the textarea.
+    // Note that this removes current selection.
+    // It does not work in Firefox, and set value as fallback:
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1220696
+    elem.select();
+    if (!document.execCommand('insertText', false, value)) {
+      elem.value = value;
+    }
+  }
+
   function onToggleTooltip(elem) {
     if (!onToggleTooltip.tooltipMap) {
       onToggleTooltip.tooltipMap = new WeakMap();
@@ -151,10 +162,7 @@
       }
 
       const newInputText = stringifyTasks(tasks, useJson);
-
-      // use execCommand reather than set value to allow undo in the textarea
-      document.getElementById('urls').select();
-      document.execCommand('insertText', null, newInputText);
+      updateInputText(document.getElementById('urls'), newInputText);
     });
     document.getElementById('btn-capture').addEventListener('click', (event) => {
       const inputText = document.getElementById('urls').value;
