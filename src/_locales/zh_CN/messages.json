@@ -247,6 +247,9 @@
   "EditorButtonSaveDeleteErased": {
     "message": "永久删除所有擦除内容（所有框架页）"
   },
+  "EditorButtonSaveInternalize": {
+    "message": "保存内嵌的外部資源"
+  },
   "EditorButtonUndo": {
     "message": "复原"
   },

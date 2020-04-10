@@ -436,6 +436,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     <button></button><button></button>
     <ul hidden="" title="">
       <li><button class="toolbar-save-deleteErased">${scrapbook.lang('EditorButtonSaveDeleteErased')}</button></li>
+      <li><button class="toolbar-save-internalize">${scrapbook.lang('EditorButtonSaveInternalize')}</button></li>
     </ul>
   </div>
   <a class="toolbar-close" href="javascript:" title="${scrapbook.lang('EditorButtonClose')}"></a>
@@ -643,6 +644,11 @@ ${sRoot}.toolbar .toolbar-close:hover {
     var elem = wrapper.querySelector('.toolbar-save-deleteErased');
     elem.addEventListener("click", (event) => {
       editor.deleteErased();
+    }, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-save-internalize');
+    elem.addEventListener("click", (event) => {
+      editor.save({internalize: true});
     }, {passive: true});
 
     // close
@@ -1061,7 +1067,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     });
   };
 
-  editor.save = async function () {
+  editor.save = async function (params = {}) {
     if (!editor.element && editor.element.parentNode) { return; }
 
     if (editor.inScrapBook) {
@@ -1074,7 +1080,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
       return await scrapbook.invokeExtensionScript({
         cmd: "background.captureCurrentTab",
-        args: {mode: "resave"},
+        args: {mode: params.internalize ? "internalize" : "resave"},
       });
     } else {
       return await scrapbook.invokeExtensionScript({

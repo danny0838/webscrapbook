@@ -2562,28 +2562,87 @@
    * @param {Object} params
    * @param {Document} params.doc
    * @param {Object} params.settings
+   * @param {boolean} params.internalize
    * @return {Promise<Object>}
    */
   capturer.retrieveDocumentContent = async function (params) {
     isDebug && console.debug("call: retrieveDocumentContent");
 
-    const {doc = document, settings: {item, frameIsMain}} = params;
+    const {doc = document, settings: {item, frameIsMain}, internalize} = params;
 
     const data = {};
-    Array.prototype.forEach.call(scrapbook.flattenFrames(doc), (doc, idx) => {
-      const url = scrapbook.normalizeUrl(scrapbook.splitUrl(doc.URL)[0]);
-      if (url in data) { return; }
+    const docs = scrapbook.flattenFrames(doc);
+    for (let i = 0, I = docs.length; i < I; i++) {
+      const doc = docs[i];
+      const docUrl = scrapbook.normalizeUrl(scrapbook.splitUrl(doc.URL)[0]);
+      if (docUrl in data) { continue; }
 
       // skip non-HTML documents
       if (!["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
-        return;
+        continue;
       }
 
       const rootNode = doc.documentElement.cloneNode(true);
 
       const info = {
-        title: (frameIsMain && idx === 0 ? item && item.title : doc.title) || "",
+        title: (frameIsMain && i === 0 ? item && item.title : doc.title) || "",
       };
+
+      // handle internalization
+      const resources = {};
+      if (internalize) {
+        const addResource = (url) => {
+          const uuid = scrapbook.getUuid();
+          const key = "urn:scrapbook:url:" + uuid;
+          resources[uuid] = url;
+          return key;
+        };
+
+        for (const elem of rootNode.querySelectorAll('img')) {
+          if (elem.hasAttribute('src')) {
+            elem.setAttribute('src', addResource(elem.getAttribute('src')));
+          }
+          if (elem.hasAttribute("srcset")) {
+            elem.setAttribute("srcset", scrapbook.rewriteSrcset(elem.getAttribute("srcset"), url => addResource(url)));
+          }
+        }
+
+        for (const elem of rootNode.querySelectorAll('input[type="image"]')) {
+          if (elem.hasAttribute('src')) {
+            elem.setAttribute('src', addResource(elem.getAttribute('src')));
+          }
+        }
+
+        for (const elem of rootNode.querySelectorAll('audio')) {
+          if (elem.hasAttribute('src')) {
+            elem.setAttribute('src', addResource(elem.getAttribute('src')));
+          }
+        }
+
+        for (const elem of rootNode.querySelectorAll('video')) {
+          if (elem.hasAttribute('src')) {
+            elem.setAttribute('src', addResource(elem.getAttribute('src')));
+          }
+          if (elem.hasAttribute('poster')) {
+            elem.setAttribute('poster', addResource(elem.getAttribute('poster')));
+          }
+        }
+
+        for (const elem of rootNode.querySelectorAll('audio source, video source, picture source')) {
+          if (elem.hasAttribute('src')) {
+            elem.setAttribute('src', addResource(elem.getAttribute('src')));
+          }
+          if (elem.hasAttribute("srcset")) {
+            elem.setAttribute("srcset", scrapbook.rewriteSrcset(elem.getAttribute("srcset"), url => addResource(url)));
+          }
+        }
+
+        for (const elem of rootNode.querySelectorAll('audio track, video track')) {
+          if (elem.hasAttribute('src')) {
+            elem.setAttribute('src', addResource(elem.getAttribute('src')));
+          }
+        }
+      }
 
       // handle special scrapbook elements
       {
@@ -2647,21 +2706,16 @@
         }
       }
 
-      let content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
+      const content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
 
-      // Firefox >= 56 can pass a Blob via browser.runtime.sendMessage. Use it to
-      // improve performance and avoid the messaging size limit.
-      if (scrapbook.userAgent.major > 56 && scrapbook.userAgent.is('gecko')) {
-        content = new Blob([content], {type: "text/html"});
-      }
-
-      data[url] = {
+      data[docUrl] = {
         content,
         charset: doc.characterSet,
         mime: doc.contentType,
         info,
+        resources,
       };
-    });
+    }
     return data;
   };
 

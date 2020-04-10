@@ -709,7 +709,7 @@
    * @param {integer} params.frameId
    * @param {boolean} params.saveBeyondSelection
    * @param {string} params.title - overriding title
-   * @param {string} params.mode - "source", "bookmark", "resave"
+   * @param {string} params.mode - "source", "bookmark", "resave", "internalize"
    * @param {string} params.options - preset options that overwrites default
    * @return {Promise<Object>}
    */
@@ -727,6 +727,8 @@
         return await capturer.captureRemote({url, title, favIconUrl, mode, options});
       } else if (mode === "resave") {
         return await capturer.resaveTab({tabId, frameId, options});
+      } else if (mode === "internalize") {
+        return await capturer.resaveTab({tabId, frameId, options, internalize: true});
       }
 
       const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
@@ -1263,11 +1265,13 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {integer} params.tabId
    * @param {integer} params.frameId
    * @param {string} params.options - preset options that overwrites default
+   * @param {boolean} params.internalize
    * @return {Promise<Object>}
    */
   capturer.resaveTab = async function (params) {
     try {
       const {tabId, frameId, options} = params;
+      let {internalize = false} = params;
       let {url, title, favIconUrl, discarded} = await browser.tabs.get(tabId);
 
       const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
@@ -1307,6 +1311,36 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
       const frameIsMain = book.isItemIndexUrl(item, url);
 
+      let internalizePrefix;
+      if (internalize) {
+        if (item && item.index) {
+          const index = item.index;
+          const indexCI = index.toLowerCase();
+          if (index.endsWith('/index.html')) {
+            internalizePrefix = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(index.slice(0, -10)));
+          } else if (indexCI.endsWith('.htz')) {
+            internalizePrefix = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(item.index + '!/'));
+          } else if (indexCI.endsWith('.maff')) {
+            // Trust only the subdirectory in the current URL, as it is
+            // possible that */index.html be redirected to another page.
+            const base = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(item.index + '!/'));
+            const urlN = scrapbook.normalizeUrl(url);
+            if (urlN.startsWith(base)) {
+              const m = urlN.slice(base.length).match(/^[^/]+\//);
+              if (m) {
+                internalizePrefix = base + m[0];
+              }
+            }
+            if (!internalizePrefix) {
+              // unable to determine which subdirectory to be prefix
+              internalize = false;
+            }
+          }
+        } else {
+          internalize = false;
+        }
+      }
+
       (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
         if (error) {
           const source = `[${tabId}:${frameId}] ${url}`;
@@ -1319,7 +1353,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         settings: {
           item,
           frameIsMain,
-        }
+        },
+        internalize,
       };
 
       isDebug && console.debug("(main) send", source, message);
@@ -1327,6 +1362,43 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       isDebug && console.debug("(main) response", source, response);
 
       const modify = scrapbook.dateToId();
+
+      // handle resources to internalize
+      const resourceMap = new Map();
+      if (internalize) {
+        for (const [fileUrl, data] of Object.entries(response)) {
+          const fetchResource = async (url) => {
+            const fullUrl = scrapbook.normalizeUrl(capturer.resolveRelativeUrl(url, fileUrl));
+            if (fullUrl.startsWith(internalizePrefix)) { return null; }
+
+            const file = resourceMap.get(fullUrl);
+            if (typeof file !== 'undefined') { return file; }
+
+            resourceMap.set(fullUrl, null);
+
+            try {
+              const xhr = await scrapbook.xhr({
+                url: fullUrl,
+                responseType: 'blob',
+              });
+              const blob = xhr.response;
+              const sha = scrapbook.sha1(await scrapbook.readFileAsArrayBuffer(blob), 'ARRAYBUFFER');
+              const ext = Mime.extension(blob.type);
+              const file = new File([blob], sha + '.' + ext, {type: blob.type});
+              resourceMap.set(fullUrl, file);
+              return file;
+            } catch (ex) {
+              console.error(ex);
+              capturer.warn(`Unable to internalize resource "${scrapbook.crop(url, 256)}": ${ex.message}`);
+            }
+          };
+
+          for (const [uuid, url] of Object.entries(data.resources)) {
+            const file = await fetchResource(url);
+            data.resources[uuid] = {url, file};
+          }
+        }
+      }
 
       // acquire a lock
       await book.lockTree();
@@ -1337,6 +1409,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
         }
 
+        // documents
         for (const [fileUrl, data] of Object.entries(response)) {
           const target = scrapbook.splitUrl(fileUrl)[0];
 
@@ -1352,14 +1425,28 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             continue;
           }
 
-          // save file
+          // save document
           try {
-            const blob = new Blob([data.content], {type: "text/html"});
+            let content = data.content;
 
+            // replace resource URLs
+            content = content.replace(/urn:scrapbook:url:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
+              if (data.resources[key]) {
+                if (data.resources[key].file) {
+                  const resUrl = internalizePrefix + data.resources[key].file.name;
+                  const u = scrapbook.getRelativeUrl(resUrl, fileUrl);
+                  return scrapbook.escapeHtml(u);
+                } else {
+                  return scrapbook.escapeHtml(data.resources[key].url);
+                }
+              }
+              return match;
+            });
+            
+            const blob = new Blob([content], {type: "text/html"});
             const formData = new FormData();
             formData.append('token', await server.acquireToken());
             formData.append('upload', blob);
-
             await server.request({
               url: target + '?a=save&f=json',
               method: "POST",
@@ -1367,6 +1454,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             });
             capturer.log(`Updated ${target}`);
           } catch (ex) {
+            console.error(ex);
             capturer.error(scrapbook.lang("ErrorSaveUploadFailure", [target, ex.message]));
           }
 
@@ -1374,6 +1462,21 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           if (frameIsMain && url === fileUrl) {
             item.title = data.info.title;
           }
+        }
+
+        // resources
+        for (const [url, file] of resourceMap.entries()) {
+          if (!file) { continue; }
+          const target = internalizePrefix + file.name;
+          const formData = new FormData();
+          formData.append('token', await server.acquireToken());
+          formData.append('upload', file);
+          await server.request({
+            url: target + '?a=save&f=json',
+            method: "POST",
+            body: formData,
+          });
+          capturer.log(`Internalized resource ${target}`);
         }
 
         // update item

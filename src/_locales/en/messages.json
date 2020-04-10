@@ -247,6 +247,9 @@
   "EditorButtonSaveDeleteErased": {
     "message": "Permanently delete all erases (all frames)"
   },
+  "EditorButtonSaveInternalize": {
+    "message": "Internalize external resources"
+  },
   "EditorButtonUndo": {
     "message": "Undo"
   },
