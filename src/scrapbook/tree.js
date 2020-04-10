@@ -795,6 +795,7 @@ Redirecting to file <a href="index.md">index.md</a>
     },
 
     enableUi(willEnable) {
+      document.getElementById('book').disabled = !willEnable;
       document.getElementById('command').disabled = !willEnable;
     },
 
