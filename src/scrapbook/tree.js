@@ -953,15 +953,6 @@ Redirecting to file <a href="index.md">index.md</a>
         }
       };
 
-      const onFocusOut = (event) => {
-        // skip when focusing another descendant of the wrapper
-        if (wrapper.contains(event.relatedTarget)) {
-          return;
-        }
-        
-        elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: null}));
-      };
-
       const onSubmit = (event) => {
         event.preventDefault();
         elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: true}));
@@ -974,6 +965,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
       wrapper.innerHTML = '';
       wrapper.appendChild(elem);
+      this.enableUi(false);
       mask.hidden = false;
 
       if (!wrapper.hasAttribute('tabindex')) {
@@ -982,7 +974,6 @@ Redirecting to file <a href="index.md">index.md</a>
       wrapper.focus();
 
       window.addEventListener('keydown', onKeyDown, true);
-      wrapper.addEventListener('focusout', onFocusOut);
       elem.addEventListener('submit', onSubmit);
       cancelElem.addEventListener('click', onCancel);
 
@@ -994,11 +985,11 @@ Redirecting to file <a href="index.md">index.md</a>
       });
 
       window.removeEventListener('keydown', onKeyDown, true);
-      wrapper.removeEventListener('focusout', onFocusOut);
       elem.removeEventListener('submit', onSubmit);
       cancelElem.removeEventListener('click', onCancel);
 
       mask.hidden = true;
+      this.enableUi(true);
 
       return result;
     },
