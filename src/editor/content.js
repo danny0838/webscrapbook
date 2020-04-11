@@ -112,9 +112,9 @@ height: 100vh;`;
     }
 
     // generate toolbar content
-    const uuid = scrapbook.getUuid();
+    const uid = 'scrapbook-' + scrapbook.getUuid();
     editor.element = wrapper = document.documentElement.appendChild(document.createElement("web-scrapbook"));
-    wrapper.id = uuid;
+    wrapper.id = uid;
     wrapper.setAttribute('dir', scrapbook.lang('@@bidi_dir'));
     wrapper.style = `\
 all: initial !important;
@@ -134,7 +134,7 @@ z-index: 2147483645 !important;
       sRoot = '';
     } else {
       editor.internalElement = wrapper;
-      sRoot = `#${CSS.escape(uuid)} `;
+      sRoot = `#${uid} `;
     }
 
     // this needs to be XHTML compatible
