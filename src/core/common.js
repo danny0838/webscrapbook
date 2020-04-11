@@ -2349,10 +2349,18 @@
     }
 
     // Middle -- the uncaptured middle
-    if ((s.length > 0) && (e.length > 0)) {
+    if (s.length || e.length) {
       const xm = doc.createRange();
-      xm.setStartAfter(s[s.length - 1]);
-      xm.setEndBefore(e[e.length - 1]);
+      if (s.length) {
+        xm.setStartAfter(s[s.length - 1]);
+      } else {
+        xm.setStart(dangerous.startContainer, dangerous.startOffset);
+      }
+      if (e.length) {
+        xm.setEndBefore(e[e.length - 1]);
+      } else {
+        xm.setEnd(dangerous.endContainer, dangerous.endOffset);
+      }
       rs.push(xm);
     } else {
       return [dangerous];
