@@ -1122,7 +1122,10 @@ svg, math`;
       })) {
         if (!referredIds.has(id) && id !== 'root' && id !== 'hidden') {
           insertToToc(id, scrapbookData.toc, scrapbookData.meta);
-          titleIdMap.set(scrapbookData.meta[id].title, id);
+          const title = scrapbookData.meta[id].title;
+          if (!titleIdMap.has(title)) {
+            titleIdMap.set(title, id);
+          }
         }
 
         // id, folder, and exported are temporary
