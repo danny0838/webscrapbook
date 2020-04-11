@@ -2295,17 +2295,17 @@
    * Revised from:
    * https://stackoverflow.com/a/12823606/1667884
    */
-  scrapbook.getSafeRanges = (dangerous, doc) => {
+  scrapbook.getSafeRanges = (dangerous) => {
     const ca = dangerous.commonAncestorContainer;
+    const doc = ca.ownerDocument;
 
     // Start -- Work inward from the start, selecting the largest safe range
+    // <n1>n1s<n2>n2s[n2e</n2>n1e</n1> => <n1>n1s<n2>n2s[n2e]</n2>[n1e]</n1>
     const s = [], rs = [];
-    if (dangerous.startContainer != ca) {
+    if (dangerous.startContainer !== ca) {
       for (let i = dangerous.startContainer; i !== ca; i = i.parentNode) {
         s.push(i);
       }
-    }
-    if (s.length > 0) {
       for (let i = 0; i < s.length; i++) {
         const xs = doc.createRange();
         if (i) {
@@ -2323,14 +2323,13 @@
       }
     }
 
-    // End -- basically the same code reversed
+    // End -- same logic as start, with reversed direction
+    // <n3>n3s<n4>n4s]n4e</n4>n3e</n3> => <n3>[n3s]<n4>[n4s]n4e</n4>n3e</n3>
     const e = [], re = [];
-    if (dangerous.endContainer != ca) {
+    if (dangerous.endContainer !== ca) {
       for (let i = dangerous.endContainer; i !== ca; i = i.parentNode) {
         e.push(i);
       }
-    }
-    if (e.length > 0) {
       for (let i = 0; i < e.length; i++) {
         const xe = doc.createRange();
         if (i) {
@@ -2348,23 +2347,20 @@
       }
     }
 
-    // Middle -- the uncaptured middle
-    if (s.length || e.length) {
-      const xm = doc.createRange();
-      if (s.length) {
-        xm.setStartAfter(s[s.length - 1]);
-      } else {
-        xm.setStart(dangerous.startContainer, dangerous.startOffset);
-      }
-      if (e.length) {
-        xm.setEndBefore(e[e.length - 1]);
-      } else {
-        xm.setEnd(dangerous.endContainer, dangerous.endOffset);
-      }
-      rs.push(xm);
+    // Middle -- the range after start and before end in commonAncestorContainer
+    // (<ca>cas|...</n1>)[...](<n3>...|cae</ca>)
+    const xm = doc.createRange();
+    if (s.length) {
+      xm.setStartAfter(s[s.length - 1]);
     } else {
-      return [dangerous];
+      xm.setStart(dangerous.startContainer, dangerous.startOffset);
     }
+    if (e.length) {
+      xm.setEndBefore(e[e.length - 1]);
+    } else {
+      xm.setEnd(dangerous.endContainer, dangerous.endOffset);
+    }
+    rs.push(xm);
 
     return rs.concat(re);
   };
