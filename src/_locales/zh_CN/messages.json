@@ -153,6 +153,12 @@
   "EditorButtonHtmlEditor": {
     "message": "HTML 编辑工具 - 点击开启或关闭。开启后可自由编辑页面内容。（保存后无法复原）"
   },
+  "EditorButtonHtmlEditorBgColor": {
+    "message": "设定背景颜色"
+  },
+  "EditorButtonHtmlEditorBgColorPrompt": {
+    "message": "请输入要设定的背景颜色（使用 CSS 颜色语法）："
+  },
   "EditorButtonHtmlEditorCreateLink": {
     "message": "建立链接"
   },
@@ -161,6 +167,12 @@
   },
   "EditorButtonHtmlEditorEm": {
     "message": "切换斜体"
+  },
+  "EditorButtonHtmlEditorFgColor": {
+    "message": "设定文字颜色"
+  },
+  "EditorButtonHtmlEditorFgColorPrompt": {
+    "message": "请输入要设定的文字颜色（使用 CSS 颜色语法）："
   },
   "EditorButtonHtmlEditorFormatBlockDiv": {
     "message": "设定为 DIV 区块"

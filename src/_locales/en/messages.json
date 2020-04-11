@@ -153,6 +153,12 @@
   "EditorButtonHtmlEditor": {
     "message": "HTML editor - Click to toggle page content editing. (Edits cannot be undone after save.)"
   },
+  "EditorButtonHtmlEditorBgColor": {
+    "message": "Set background color"
+  },
+  "EditorButtonHtmlEditorBgColorPrompt": {
+    "message": "Input a background color (using CSS color syntax):"
+  },
   "EditorButtonHtmlEditorCreateLink": {
     "message": "Create hyperlink"
   },
@@ -161,6 +167,12 @@
   },
   "EditorButtonHtmlEditorEm": {
     "message": "Toggle italic"
+  },
+  "EditorButtonHtmlEditorFgColor": {
+    "message": "Set text color"
+  },
+  "EditorButtonHtmlEditorFgColorPrompt": {
+    "message": "Input a text color (using CSS color syntax):"
   },
   "EditorButtonHtmlEditorFormatBlockDiv": {
     "message": "Set to DIV block"

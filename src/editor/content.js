@@ -410,6 +410,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
       <li><button class="toolbar-htmlEditor-superscript">${scrapbook.lang('EditorButtonHtmlEditorSuperscript')}</button></li>
       <li><button class="toolbar-htmlEditor-subscript">${scrapbook.lang('EditorButtonHtmlEditorSubscript')}</button></li>
       <hr/>
+      <li><button class="toolbar-htmlEditor-fgColor">${scrapbook.lang('EditorButtonHtmlEditorFgColor')}</button></li>
+      <li><button class="toolbar-htmlEditor-bgColor">${scrapbook.lang('EditorButtonHtmlEditorBgColor')}</button></li>
+      <hr/>
       <li><button class="toolbar-htmlEditor-formatBlockP">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockP')}</button></li>
       <li><button class="toolbar-htmlEditor-formatBlockH1">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [1])}</button></li>
       <li><button class="toolbar-htmlEditor-formatBlockH2">${scrapbook.lang('EditorButtonHtmlEditorFormatBlockH', [2])}</button></li>
@@ -572,6 +575,12 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor-subscript');
     elem.addEventListener("click", htmlEditor.subscript, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-htmlEditor-fgColor');
+    elem.addEventListener("click", htmlEditor.foreColor, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-htmlEditor-bgColor');
+    elem.addEventListener("click", htmlEditor.hiliteColor, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor-formatBlockP');
     elem.addEventListener("click", htmlEditor.formatBlockP, {passive: true});
@@ -1679,6 +1688,30 @@ ${sRoot}.toolbar .toolbar-close:hover {
         args: {
           frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('subscript', false, null);`,
+        },
+      });
+    },
+
+    async foreColor() {
+      const color = prompt(scrapbook.lang('EditorButtonHtmlEditorFgColorPrompt'));
+      if (!color) { return; }
+      return await scrapbook.invokeExtensionScript({
+        cmd: "background.invokeEditorCommand",
+        args: {
+          frameId: await editor.getFocusedFrameId(),
+          code: `document.execCommand('styleWithCSS', false, true); document.execCommand('foreColor', false, "${scrapbook.escapeQuotes(color)}");`,
+        },
+      });
+    },
+
+    async hiliteColor() {
+      const color = prompt(scrapbook.lang('EditorButtonHtmlEditorBgColorPrompt'));
+      if (!color) { return; }
+      return await scrapbook.invokeExtensionScript({
+        cmd: "background.invokeEditorCommand",
+        args: {
+          frameId: await editor.getFocusedFrameId(),
+          code: `document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, "${scrapbook.escapeQuotes(color)}");`,
         },
       });
     },
