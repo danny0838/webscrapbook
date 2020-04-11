@@ -1096,7 +1096,7 @@ svg, math`;
         }
 
         let parentId = 'root';
-        metas[id].folder.split(/[\t\n\r\v\f]+/).forEach((folder) => {
+        for (const folder of metas[id].folder.split(/[\t\n\r\v\f]+/)) {
           let folderId = titleIdMap.get(folder);
           if (!(metas[folderId] && toc[parentId].includes(folderId))) {
             folderId = this.generateFolder(folder, metas);
@@ -1108,7 +1108,7 @@ svg, math`;
             toc[folderId] = [];
           }
           parentId = folderId;
-        });
+        }
         toc[parentId].push(id);
         this.log(`Appended '${id}' to '${parentId}'.`);
       };
