@@ -75,6 +75,27 @@
         }
       },
 
+      async view_text(selectedItemElems) {
+        for (const elem of selectedItemElems) {
+          const id = elem.getAttribute('data-id');
+          const item = this.book.meta[id];
+          if (!item.index) { continue; }
+
+          let target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
+          if (target.endsWith('/index.html')) {
+            const redirectedTarget = await server.getMetaRefreshTarget(target);
+            if (redirectedTarget) {
+              target = redirectedTarget;
+            }
+          }
+
+          const u = new URL(target);
+          u.searchParams.set('a', 'source');
+          if (item.charset) { u.searchParams.set('e', item.charset); }
+          await this.openLink(u.href, true);
+        }
+      },
+
       async exec(selectedItemElems) {
         for (const elem of selectedItemElems) {
           const id = elem.getAttribute('data-id');
@@ -817,6 +838,7 @@ Redirecting to file <a href="index.md">index.md</a>
             menuElem.querySelector('button[value="index"]').hidden = false;
             menuElem.querySelector('button[value="exec_book"]').hidden = false;
             menuElem.querySelector('button[value="opentab"]').hidden = true;
+            menuElem.querySelector('button[value="view_text"]').hidden = true;
             menuElem.querySelector('button[value="exec"]').hidden = true;
             menuElem.querySelector('button[value="browse"]').hidden = true;
             menuElem.querySelector('button[value="source"]').hidden = true;
@@ -845,6 +867,7 @@ Redirecting to file <a href="index.md">index.md</a>
             menuElem.querySelector('button[value="index"]').hidden = true;
             menuElem.querySelector('button[value="exec_book"]').hidden = true;
             menuElem.querySelector('button[value="opentab"]').hidden = ['folder', 'separator'].includes(item.type);
+            menuElem.querySelector('button[value="view_text"]').hidden = !(item.type === 'file' && item.index);
             menuElem.querySelector('button[value="exec"]').hidden = !(item.type === 'file' && item.index);
             menuElem.querySelector('button[value="browse"]').hidden = !(item.index);
             menuElem.querySelector('button[value="source"]').hidden = !(item.source);
@@ -871,6 +894,7 @@ Redirecting to file <a href="index.md">index.md</a>
             menuElem.querySelector('button[value="index"]').hidden = true;
             menuElem.querySelector('button[value="exec_book"]').hidden = true;
             menuElem.querySelector('button[value="opentab"]').hidden = false;
+            menuElem.querySelector('button[value="view_text"]').hidden = true;
             menuElem.querySelector('button[value="exec"]').hidden = true;
             menuElem.querySelector('button[value="browse"]').hidden = false;
             menuElem.querySelector('button[value="source"]').hidden = false;
@@ -1088,6 +1112,7 @@ Redirecting to file <a href="index.md">index.md</a>
         const menuElem = document.getElementById('command-popup');
         menuElem.querySelector('button[value="exec_book"]').disabled = !isLocal;
         menuElem.querySelector('button[value="opentab"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="view_text"]').disabled = isNoTree;
         menuElem.querySelector('button[value="exec"]').disabled = !(!isNoTree && isLocal);
         menuElem.querySelector('button[value="browse"]').disabled = !(!isNoTree && isLocal);
         menuElem.querySelector('button[value="source"]').disabled = isNoTree;

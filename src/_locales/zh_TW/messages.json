@@ -985,6 +985,9 @@
   "ScrapBookCommandViewRecycle": {
     "message": "檢視回收筒"
   },
+  "ScrapBookCommandViewText": {
+    "message": "檢視文字"
+  },
   "ScrapBookErrorBookNotExist": {
     "message": "剪貼簿 $NAME$ 不存在，重設為預設剪貼簿",
     "placeholders": {

@@ -985,6 +985,9 @@
   "ScrapBookCommandViewRecycle": {
     "message": "View recycle bin"
   },
+  "ScrapBookCommandViewText": {
+    "message": "View text"
+  },
   "ScrapBookErrorBookNotExist": {
     "message": "Scrapbook $NAME$ does not exist. Reset to default scrapbook.",
     "placeholders": {
