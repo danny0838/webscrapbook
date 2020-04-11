@@ -153,6 +153,12 @@
   "EditorButtonHtmlEditor": {
     "message": "HTML 编辑工具 - 点击开启或关闭。开启后可自由编辑页面内容。（保存后无法复原）"
   },
+  "EditorButtonHtmlEditorCreateLink": {
+    "message": "建立链接"
+  },
+  "EditorButtonHtmlEditorCreateLinkPrompt": {
+    "message": "请输入要建立的链接网址："
+  },
   "EditorButtonHtmlEditorEm": {
     "message": "切换斜体"
   },

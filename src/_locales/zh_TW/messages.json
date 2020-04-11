@@ -153,6 +153,12 @@
   "EditorButtonHtmlEditor": {
     "message": "HTML 編輯工具 - 點擊開啟或關閉。開啟後可自由編輯頁面內容。（儲存後無法復原）"
   },
+  "EditorButtonHtmlEditorCreateLink": {
+    "message": "建立超連結"
+  },
+  "EditorButtonHtmlEditorCreateLinkPrompt": {
+    "message": "請輸入要建立的超連結網址："
+  },
   "EditorButtonHtmlEditorEm": {
     "message": "切換斜體"
   },

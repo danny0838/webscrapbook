@@ -431,6 +431,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       <li><button class="toolbar-htmlEditor-justifyRight">${scrapbook.lang('EditorButtonHtmlEditorJustifyRight')}</button></li>
       <li><button class="toolbar-htmlEditor-justifyFull">${scrapbook.lang('EditorButtonHtmlEditorJustifyFull')}</button></li>
       <hr/>
+      <li><button class="toolbar-htmlEditor-createLink">${scrapbook.lang('EditorButtonHtmlEditorCreateLink')}</button></li>
       <li><button class="toolbar-htmlEditor-hr">${scrapbook.lang('EditorButtonHtmlEditorHr')}</button></li>
       <hr/>
       <li><button class="toolbar-htmlEditor-removeFormat">${scrapbook.lang('EditorButtonHtmlEditorRemoveFormat')}</button></li>
@@ -622,6 +623,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyFull');
     elem.addEventListener("click", htmlEditor.justifyFull, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-htmlEditor-createLink');
+    elem.addEventListener("click", htmlEditor.createLink, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor-hr');
     elem.addEventListener("click", htmlEditor.hr, {passive: true});
@@ -1845,6 +1849,18 @@ ${sRoot}.toolbar .toolbar-close:hover {
         args: {
           frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('justifyFull', false, null);`,
+        },
+      });
+    },
+
+    async createLink() {
+      const url = prompt(scrapbook.lang('EditorButtonHtmlEditorCreateLinkPrompt'));
+      if (!url) { return; }
+      return await scrapbook.invokeExtensionScript({
+        cmd: "background.invokeEditorCommand",
+        args: {
+          frameId: await editor.getFocusedFrameId(),
+          code: `document.execCommand('createLink', false, "${scrapbook.escapeQuotes(url)}");`,
         },
       });
     },

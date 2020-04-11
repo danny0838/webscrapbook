@@ -153,6 +153,12 @@
   "EditorButtonHtmlEditor": {
     "message": "HTML editor - Click to toggle page content editing. (Edits cannot be undone after save.)"
   },
+  "EditorButtonHtmlEditorCreateLink": {
+    "message": "Create hyperlink"
+  },
+  "EditorButtonHtmlEditorCreateLinkPrompt": {
+    "message": "Input a URL to create the link:"
+  },
   "EditorButtonHtmlEditorEm": {
     "message": "Toggle italic"
   },
