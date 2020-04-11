@@ -116,30 +116,38 @@ height: 100vh;`;
     editor.element = wrapper = document.documentElement.appendChild(document.createElement("web-scrapbook"));
     wrapper.id = uid;
     wrapper.setAttribute('dir', scrapbook.lang('@@bidi_dir'));
-    wrapper.style = `\
-all: initial !important;
-position: fixed !important;
-display: block !important;
-${scrapbook.lang('@@bidi_start_edge')}: 0px !important;
-bottom: 0px !important;
-width: 100% !important;
-height: 32px !important;
-z-index: 2147483645 !important;
-`;
 
     // Attach a shadowRoot if supported; otherwise fallback with an ID selector.
+    let sHost;
     let sRoot;
     if (wrapper.attachShadow) {
       editor.internalElement = wrapper = wrapper.attachShadow({mode: 'open'});
+      sHost = `:host`;
       sRoot = '';
     } else {
       editor.internalElement = wrapper;
+      sHost = `#${uid}`;
       sRoot = `#${uid} `;
     }
 
     // this needs to be XHTML compatible
     wrapper.innerHTML = `\
 <style>
+${sHost} {
+  all: initial !important;
+  position: fixed !important;
+  display: block !important;
+  ${scrapbook.lang('@@bidi_start_edge')}: 0px !important;
+  bottom: 0px !important;
+  width: 100% !important;
+  height: 32px !important;
+  z-index: 2147483645 !important;
+}
+
+${sHost} style {
+  display: none !important;
+}
+
 ${sRoot}*:not(web-scrapbook-samp) {
   visibility: unset !important;
   opacity: unset !important;
