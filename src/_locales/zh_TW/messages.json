@@ -233,6 +233,9 @@
   "EditorButtonHtmlEditorSuperscript": {
     "message": "切換上標"
   },
+  "EditorButtonHtmlEditorTodo": {
+    "message": "插入核取方塊"
+  },
   "EditorButtonHtmlEditorUnderline": {
     "message": "切換底線"
   },

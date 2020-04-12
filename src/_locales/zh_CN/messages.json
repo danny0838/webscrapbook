@@ -233,6 +233,9 @@
   "EditorButtonHtmlEditorSuperscript": {
     "message": "切换上标"
   },
+  "EditorButtonHtmlEditorTodo": {
+    "message": "插入复选框"
+  },
   "EditorButtonHtmlEditorUnderline": {
     "message": "切换底线"
   },

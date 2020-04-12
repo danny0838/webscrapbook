@@ -233,6 +233,9 @@
   "EditorButtonHtmlEditorSuperscript": {
     "message": "Toggle superscript"
   },
+  "EditorButtonHtmlEditorTodo": {
+    "message": "Insert a checkbox"
+  },
   "EditorButtonHtmlEditorUnderline": {
     "message": "Togger underline"
   },
