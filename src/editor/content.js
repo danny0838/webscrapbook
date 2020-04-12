@@ -1147,16 +1147,21 @@ ${sRoot}.toolbar .toolbar-close:hover {
     };
 
     const exitContextMenu = () => {
-      elem.hidden = true;
       elem.removeEventListener("focusout", onFocusOut);
-      elem.removeEventListener("click", onClick);
+      window.removeEventListener("click", onClick, true);
       window.removeEventListener("keydown", onKeyDown, true);
+      elem.hidden = true;
     };
 
-    elem.hidden = false;
     elem.addEventListener("focusout", onFocusOut, {passive: true});
-    elem.addEventListener("click", onClick, {passive: true});
+    // Firefox has an issue that focusout isn't fired when designMode is on.
+    // Catch any click as a fallback for any click in the window (not work for
+    // a click in a frame, though).
+    // Use capture to prevent fired by bubbling of the click event that opens
+    // the context menu.
+    window.addEventListener("click", onClick, {passive: true, capture: true});
     window.addEventListener("keydown", onKeyDown, true);
+    elem.hidden = false;
 
     // Focus on the context menu element for focusout event to work when the user
     // clicks outside.
