@@ -441,6 +441,18 @@
       <option value="color: #FF0000; text-decoration: line-through;">ScrapBook 7 (red strike)</option>
       <option value="border-bottom: thin solid #3366FF;">ScrapBook 8 (blue underline)</option>
     </datalist>
+    <div>
+      <div>
+        <label for="opt_editor.insertDateFormat">__MSG_OptionEditorInsertDateFormatLabel__</label>
+        <input type="text" size="40" id="opt_editor.insertDateFormat" list="editor.insertDateFormat.preset">
+        <a href="javascript:" data-tooltip="__MSG_OptionEditorInsertDateFormatTooltip__"></a>
+        <datalist id="editor.insertDateFormat.preset">
+          <option value="%Y-%m-%d %H:%M:%S">
+          <option value="%Y/%m/%d %H:%M:%S">
+          <option value="%c">
+        </datalist>
+      </div>
+    </div>
   </details>
   <details open>
     <summary>__MSG_OptionGroupViewer__</summary>

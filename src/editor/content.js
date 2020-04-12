@@ -437,6 +437,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       <li><button class="toolbar-htmlEditor-createLink">${scrapbook.lang('EditorButtonHtmlEditorCreateLink')}</button></li>
       <li><button class="toolbar-htmlEditor-hr">${scrapbook.lang('EditorButtonHtmlEditorHr')}</button></li>
       <li><button class="toolbar-htmlEditor-todo">${scrapbook.lang('EditorButtonHtmlEditorTodo')}</button></li>
+      <li><button class="toolbar-htmlEditor-insertDate">${scrapbook.lang('EditorButtonHtmlEditorInsertDate')}</button></li>
       <hr/>
       <li><button class="toolbar-htmlEditor-removeFormat">${scrapbook.lang('EditorButtonHtmlEditorRemoveFormat')}</button></li>
       <li><button class="toolbar-htmlEditor-unlink">${scrapbook.lang('EditorButtonHtmlEditorUnlink')}</button></li>
@@ -556,6 +557,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor > button:last-of-type');
     elem.addEventListener("click", (event) => {
+      editor.updateHtmlEditorUi();
       editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
     }, {passive: true});
 
@@ -642,6 +644,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor-todo');
     elem.addEventListener("click", htmlEditor.todo, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-htmlEditor-insertDate');
+    elem.addEventListener("click", htmlEditor.insertDate, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor-removeFormat');
     elem.addEventListener("click", htmlEditor.removeFormat, {passive: true});
@@ -1245,6 +1250,15 @@ ${sRoot}.toolbar .toolbar-close:hover {
     let idx = scrapbook.getOption('editor.lineMarker.checked');
     idx = Math.min(parseInt(idx, 10) || 0, buttons.length - 1);
     buttons[idx].setAttribute('checked', '');
+  };
+
+  editor.updateHtmlEditorUi = function () {
+    {
+      const elem = editor.internalElement.querySelector('.toolbar-htmlEditor-insertDate');
+      const format = scrapbook.getOption("editor.insertDateFormat");
+      const sample = strftime(format);
+      elem.title = format + '\n' + sample;
+    }
   };
 
   editor.getFocusedFrameId = async function () {
@@ -1918,6 +1932,18 @@ ${sRoot}.toolbar .toolbar-close:hover {
         args: {
           frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('insertHTML', false, '<input type="checkbox" data-scrapbook-elem="todo"/>');`,
+        },
+      });
+    },
+
+    async insertDate() {
+      const format = scrapbook.getOption("editor.insertDateFormat");
+      const dateStr = strftime(format);
+      return await scrapbook.invokeExtensionScript({
+        cmd: "background.invokeEditorCommand",
+        args: {
+          frameId: await editor.getFocusedFrameId(),
+          code: `document.execCommand('insertText', false, "${scrapbook.escapeQuotes(dateStr)}");`,
         },
       });
     },

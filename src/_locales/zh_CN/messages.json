@@ -197,6 +197,9 @@
   "EditorButtonHtmlEditorIndent": {
     "message": "增加缩排"
   },
+  "EditorButtonHtmlEditorInsertDate": {
+    "message": "插入日期"
+  },
   "EditorButtonHtmlEditorJustifyCenter": {
     "message": "置中对齐"
   },
@@ -775,6 +778,12 @@
   },
   "OptionEditorAutoInit": {
     "message": "浏览剪贴簿中的页面时，自动载入编辑工具列"
+  },
+  "OptionEditorInsertDateFormatLabel": {
+    "message": "插入日期格式:"
+  },
+  "OptionEditorInsertDateFormatTooltip": {
+    "message": "插入本地的目前时间，使用 POSIX strftime 格式。以下列出一小部分较常用的格式：\n\n• %c: 本地日期时间\n• %x: 本地年月日\n• %Y: 四位数年份\n• %y: 二位数年份\n• %m: 二位数月份（01 至 12）\n• %B: 本地月份长名\n• %b: 本地月份短名\n• %d: 二位数月中日期（01 至 31）\n• %A: 本地星期几长名\n• %a: 本地星期几短名\n• %X: 本地时分秒\n• %H: 二位数小时数，24 时制（00 至 23）\n• %I: 二位数小时数，12 时制（00 至 12）\n• %p: AM 或 PM\n• %M: 二位数分钟数（00 至 59）\n• %S: 二位数秒数（00 至 59）\n• %z: 本地时区偏移值\n• %Z: 本地时区名称\n• %%: % 符号"
   },
   "OptionEditorLineMarkerStyleLabel": {
     "message": "行内标示样式"

@@ -197,6 +197,9 @@
   "EditorButtonHtmlEditorIndent": {
     "message": "Indent"
   },
+  "EditorButtonHtmlEditorInsertDate": {
+    "message": "Insert datetime"
+  },
   "EditorButtonHtmlEditorJustifyCenter": {
     "message": "Align center"
   },
@@ -775,6 +778,12 @@
   },
   "OptionEditorAutoInit": {
     "message": "Automatically load editor toolbar when visiting a page in the scrapbook"
+  },
+  "OptionEditorInsertDateFormatLabel": {
+    "message": "Insert date format:"
+  },
+  "OptionEditorInsertDateFormatTooltip": {
+    "message": "The inserted date is the current local time, using POSIX strftime format. Below is a short list of frequently used formats:\n\n• %c: local datetime\n• %x: locate date\n• %Y: year with 4 digits\n• %y: year with 2 digits\n• %m: month with 2 digits (01 to 12)\n• %B: local full month name\n• %b: local abbreviated month name\n• %d: date of month with 2 digits (01 to 31)\n• %A: local full weekday name\n• %a: local abbreviated weekday name\n• %X: local time\n• %H: hour (24-hour clock) with 2 digits (00 to 23)\n• %I: hour (24-hour clock) with 2 digits (00 to 12)\n• %p: AM or PM\n• %M: minute with 2 digits (00 to 59)\n• %S: second with 2 digits (00 to 59)\n• %z: local timezone offset\n• %Z: local timezone name\n• %%: % sign"
   },
   "OptionEditorLineMarkerStyleLabel": {
     "message": "Inline marker style"
