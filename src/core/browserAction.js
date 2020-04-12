@@ -161,6 +161,12 @@
       return await scrapbook.editTab({
         tabId: targetTab.id,
         force: true,
+      }).then(() => {
+        if (!isPrompt) {
+          return browser.tabs.update(targetTab.id, {
+            active: true,
+          });
+        }
       });
     });
 
