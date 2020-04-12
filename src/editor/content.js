@@ -1628,7 +1628,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('italic', false, null);`,
         },
       });
@@ -1638,7 +1638,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('underline', false, null);`,
         },
       });
@@ -1648,7 +1648,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('strikeThrough', false, null);`,
         },
       });
@@ -1658,7 +1658,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('superscript', false, null);`,
         },
       });
@@ -1668,7 +1668,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('subscript', false, null);`,
         },
       });
@@ -1678,7 +1678,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('formatBlock', false, 'p');`,
         },
       });
@@ -1688,7 +1688,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('formatBlock', false, 'h1');`,
         },
       });
@@ -1698,7 +1698,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('formatBlock', false, 'h2');`,
         },
       });
@@ -1708,7 +1708,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('formatBlock', false, 'h3');`,
         },
       });
@@ -1718,7 +1718,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('formatBlock', false, 'h4');`,
         },
       });
@@ -1728,7 +1728,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('formatBlock', false, 'h5');`,
         },
       });
@@ -1738,7 +1738,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('formatBlock', false, 'h6');`,
         },
       });
@@ -1748,7 +1748,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('formatBlock', false, 'div');`,
         },
       });
@@ -1758,7 +1758,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('formatBlock', false, 'pre');`,
         },
       });
@@ -1768,7 +1768,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('insertUnorderedList', false, null);`,
         },
       });
@@ -1778,7 +1778,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('insertOrderedList', false, null);`,
         },
       });
@@ -1788,7 +1788,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('outdent', false, null);`,
         },
       });
@@ -1798,7 +1798,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('indent', false, null);`,
         },
       });
@@ -1808,7 +1808,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('justifyLeft', false, null);`,
         },
       });
@@ -1818,7 +1818,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('justifyRight', false, null);`,
         },
       });
@@ -1828,7 +1828,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('justifyCenter', false, null);`,
         },
       });
@@ -1838,7 +1838,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('justifyFull', false, null);`,
         },
       });
@@ -1848,7 +1848,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('insertHorizontalRule', false, null);`,
         },
       });
@@ -1858,7 +1858,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('removeFormat', false, null);`,
         },
       });
@@ -1868,7 +1868,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId,
+          frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('unlink', false, null);`,
         },
       });
