@@ -8,6 +8,7 @@
 
 (function (root, factory) {
   // Browser globals
+  if (root.hasOwnProperty('server')) { return; }
   root.server = factory(
     root.isDebug,
     root.browser,

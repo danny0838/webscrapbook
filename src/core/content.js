@@ -8,7 +8,8 @@
 
 (function (root, factory) {
   // Browser globals
-  root.core = root.core || factory(
+  if (root.hasOwnProperty('core')) { return; }
+  root.core = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,

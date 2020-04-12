@@ -7,7 +7,7 @@
 
 (function (root, factory) {
   // Browser globals
-  root.batch = root.batch || factory(
+  root.batch = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,

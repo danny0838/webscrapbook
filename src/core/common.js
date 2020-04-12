@@ -9,7 +9,8 @@
 
 (function (root, factory) {
   // Browser globals
-  root.scrapbook = root.scrapbook || factory(
+  if (root.hasOwnProperty('scrapbook')) { return; }
+  root.scrapbook = factory(
     root.isDebug,
     root.browser,
     root.JSZip,

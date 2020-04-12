@@ -8,7 +8,8 @@
 
 (function (root, factory) {
   // Browser globals
-  root.loadOptionsAuto = root.loadOptionsAuto || factory(
+  if (root.hasOwnProperty('loadOptionsAuto')) { return; }
+  root.loadOptionsAuto = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,

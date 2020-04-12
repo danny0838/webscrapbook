@@ -8,7 +8,8 @@
 
 (function (root, factory) {
   // Browser globals
-  root.editor = root.editor || factory(
+  if (root.hasOwnProperty('editor')) { return; }
+  root.editor = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,
