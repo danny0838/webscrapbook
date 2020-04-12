@@ -427,8 +427,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
       <li><button class="toolbar-htmlEditor-indent">${scrapbook.lang('EditorButtonHtmlEditorIndent')}</button></li>
       <hr/>
       <li><button class="toolbar-htmlEditor-justifyLeft">${scrapbook.lang('EditorButtonHtmlEditorJustifyLeft')}</button></li>
-      <li><button class="toolbar-htmlEditor-justifyRight">${scrapbook.lang('EditorButtonHtmlEditorJustifyRight')}</button></li>
       <li><button class="toolbar-htmlEditor-justifyCenter">${scrapbook.lang('EditorButtonHtmlEditorJustifyCenter')}</button></li>
+      <li><button class="toolbar-htmlEditor-justifyRight">${scrapbook.lang('EditorButtonHtmlEditorJustifyRight')}</button></li>
       <li><button class="toolbar-htmlEditor-justifyFull">${scrapbook.lang('EditorButtonHtmlEditorJustifyFull')}</button></li>
       <hr/>
       <li><button class="toolbar-htmlEditor-hr">${scrapbook.lang('EditorButtonHtmlEditorHr')}</button></li>
@@ -614,11 +614,11 @@ ${sRoot}.toolbar .toolbar-close:hover {
     var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyLeft');
     elem.addEventListener("click", htmlEditor.justifyLeft, {passive: true});
 
-    var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyRight');
-    elem.addEventListener("click", htmlEditor.justifyRight, {passive: true});
-
     var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyCenter');
     elem.addEventListener("click", htmlEditor.justifyCenter, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyRight');
+    elem.addEventListener("click", htmlEditor.justifyRight, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor-justifyFull');
     elem.addEventListener("click", htmlEditor.justifyFull, {passive: true});
@@ -1819,22 +1819,22 @@ ${sRoot}.toolbar .toolbar-close:hover {
       });
     },
 
-    async justifyRight() {
-      return await scrapbook.invokeExtensionScript({
-        cmd: "background.invokeEditorCommand",
-        args: {
-          frameId: await editor.getFocusedFrameId(),
-          code: `document.execCommand('justifyRight', false, null);`,
-        },
-      });
-    },
-
     async justifyCenter() {
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
           frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('justifyCenter', false, null);`,
+        },
+      });
+    },
+
+    async justifyRight() {
+      return await scrapbook.invokeExtensionScript({
+        cmd: "background.invokeEditorCommand",
+        args: {
+          frameId: await editor.getFocusedFrameId(),
+          code: `document.execCommand('justifyRight', false, null);`,
         },
       });
     },
