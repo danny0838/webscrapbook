@@ -401,6 +401,46 @@
       this._current = value;
     },
 
+    async _escapeObject(obj) {
+      if (obj instanceof File) {
+        return {
+          __type__: 'File',
+          name: obj.name,
+          type: obj.type,
+          lastModified: obj.lastModified,
+          data: await scrapbook.readFileAsText(obj, false),
+        };
+      } else if (obj instanceof Blob) {
+        return {
+          __type__: 'Blob',
+          type: obj.type,
+          data: await scrapbook.readFileAsText(obj, false),
+        };
+      }
+      return obj;
+    },
+
+    _unescapeObject(obj) {
+      try {
+        switch (obj.__type__) {
+          case "File": {
+            return new File(
+              [scrapbook.byteStringToArrayBuffer(obj.data)],
+              obj.name,
+              {type: obj.type, lastModified: obj.lastModified}
+            );
+          }
+          case "Blob": {
+            return new Blob(
+              [scrapbook.byteStringToArrayBuffer(obj.data)],
+              {type: obj.type}
+            );
+          }
+        }
+      } catch (ex) {}
+      return obj;
+    },
+
     /**
      * @param {string|Object} key
      */
@@ -448,21 +488,7 @@
         // Blob cannot be stored in browser.storage,
         // fallback to an object containing byte string data.
         if (this._escapeObjectNeeded) {
-          if (obj instanceof File) {
-            return {
-              __type__: 'File',
-              name: obj.name,
-              type: obj.type,
-              lastModified: obj.lastModified,
-              data: await scrapbook.readFileAsText(obj, false),
-            };
-          } else if (obj instanceof Blob) {
-            return {
-              __type__: 'Blob',
-              type: obj.type,
-              data: await scrapbook.readFileAsText(obj, false),
-            };
-          }
+          return await scrapbook.cache._escapeObject(obj);
         }
 
         // otherwise return the original object
@@ -470,24 +496,7 @@
       },
 
       _unescapeObject(obj) {
-        try {
-          switch (obj.__type__) {
-            case "File": {
-              return new File(
-                [scrapbook.byteStringToArrayBuffer(obj.data)],
-                obj.name,
-                {type: obj.type, lastModified: obj.lastModified}
-              );
-            }
-            case "Blob": {
-              return new Blob(
-                [scrapbook.byteStringToArrayBuffer(obj.data)],
-                {type: obj.type}
-              );
-            }
-          }
-        } catch (ex) {}
-        return obj;
+        return scrapbook.cache._unescapeObject(obj);
       },
 
       async get(key) {
