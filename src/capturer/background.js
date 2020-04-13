@@ -211,4 +211,15 @@
     });
   }
 
+  // clear capturer caches
+  {
+    const items = await scrapbook.cache.getAll({table: "captureMissionCache"});
+    await scrapbook.cache.remove(Object.keys(items));
+  }
+
+  {
+    const items = await scrapbook.cache.getAll({table: "batchCaptureMissionCache"});
+    await scrapbook.cache.remove(Object.keys(items));
+  }
+
 }));
