@@ -1169,7 +1169,7 @@ Redirecting to file <a href="index.md">index.md</a>
     },
 
     getViewStatusKey() {
-      return `scrapbook.view["${this.bookId}"]`;
+      return {table: "scrapbookTreeView", bookId: this.bookId};
     },
 
     async saveViewStatus() {
@@ -1218,11 +1218,7 @@ Redirecting to file <a href="index.md">index.md</a>
           selects,
         };
 
-        if (this.mode === 'normal') {
-          await browser.storage.local.set({[key]: data});
-        } else {
-          sessionStorage.setItem(key, JSON.stringify(data));
-        }
+        await scrapbook.cache.set(key, data, this.mode === 'normal' ? 'storage' : 'sessionStorage');
       };
       this.saveViewStatus = saveViewStatus;
       return await saveViewStatus();
@@ -1231,13 +1227,7 @@ Redirecting to file <a href="index.md">index.md</a>
     async loadViewStatus() {
       try {
         const key = this.getViewStatusKey();
-        let data;
-
-        if (this.mode === 'normal') {
-          data = (await browser.storage.local.get(key))[key];
-        } else {
-          data = JSON.parse(sessionStorage.getItem(key));
-        }
+        const data = await scrapbook.cache.get(key, this.mode === 'normal' ? 'storage' : 'sessionStorage');
 
         if (!data) { return; }
 
