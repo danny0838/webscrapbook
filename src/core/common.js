@@ -444,35 +444,35 @@
     /**
      * @param {string|Object} key
      */
-    async get(key) {
+    async get(key, cache = this.current) {
       const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
-      return this[this.current].get(keyStr);
+      return this[cache].get(keyStr);
     },
 
     /**
      * @param {Object} filter - an object filter that each item key must match
      */
-    async getAll(filter) {
-      return this[this.current].getAll(filter);
+    async getAll(filter, cache = this.current) {
+      return this[cache].getAll(filter);
     },
 
     /**
      * @param {string|Object} key
      */
-    async set(key, value) {
+    async set(key, value, cache = this.current) {
       const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
-      return this[this.current].set(keyStr, value);
+      return this[cache].set(keyStr, value);
     },
 
     /**
      * @param {string|Object|Array} keys - a key (string or Object) or an array of keys
      */
-    async remove(keys) {
+    async remove(keys, cache = this.current) {
       if (!Array.isArray(keys)) { keys = [keys]; }
       keys = keys.map((key) => {
         return (typeof key === "string") ? key : JSON.stringify(key);
       });
-      return this[this.current].remove(keys);
+      return this[cache].remove(keys);
     },
 
     storage: {
