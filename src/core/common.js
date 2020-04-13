@@ -645,6 +645,50 @@
         });
       },
     },
+
+    sessionStorage: {
+      async _escapeObject(obj) {
+        return await scrapbook.cache._escapeObject(obj);
+      },
+
+      _unescapeObject(obj) {
+        return scrapbook.cache._unescapeObject(obj);
+      },
+
+      async get(key) {
+        return this._unescapeObject(JSON.parse(sessionStorage.getItem(key)));
+      },
+
+      async getAll(filter) {
+        const items = [];
+        for (var i = 0, I = sessionStorage.length; i < I; i++) {
+          const key = sessionStorage.key(i);
+          try {
+            let obj = JSON.parse(key);
+            for (let cond in filter) {
+              if (obj[cond] !== filter[cond]) {
+                throw new Error("filter not matched");
+              }
+            }
+            items[key] = this._unescapeObject(JSON.parse(sessionStorage.getItem(key)));
+          } catch (ex) {
+            // invalid JSON format => meaning not a cache
+            // or does not match the filter
+          }
+        }
+        return items;
+      },
+
+      async set(key, value) {
+        return sessionStorage.setItem(key, JSON.stringify(await this._escapeObject(value)));
+      },
+
+      async remove(keys) {
+        for (const key of keys) {
+          sessionStorage.removeItem(key);
+        }
+      },
+    },
   };
 
 
