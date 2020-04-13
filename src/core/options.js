@@ -43,8 +43,33 @@
   }
 
   function setOptionToDocument(id, value) {
-    const elem = document.getElementById(OPTION_PREFIX + id);
-    if (!elem) { return; }
+    let elem = document.getElementById(OPTION_PREFIX + id);
+
+    // If the given option is not in the form, create a hidden element to allow
+    // reseting hidden values or do some hacking.
+    if (!elem) {
+      const wrapper = document.getElementById('options');
+      if (typeof value === 'string') {
+        elem = document.createElement('input');
+        elem.type = 'text';
+        elem.value = value;
+      } else if (typeof value === 'boolean') {
+        elem = document.createElement('input');
+        elem.type = 'checkbox';
+        elem.checked = value;
+      } else if (typeof value === 'number') {
+        elem = document.createElement('input');
+        elem.type = 'number';
+        elem.value = value;
+      } else if (value === null) {
+        // null is only used for an unset number
+        elem = document.createElement('input');
+        elem.type = 'number';
+      }
+      elem.id = OPTION_PREFIX + id;
+      elem.hidden = true;
+      wrapper.appendChild(elem);
+    }
 
     if (elem.matches('input[type="checkbox"]')) {
       elem.checked = !!value;
