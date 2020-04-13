@@ -471,10 +471,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
     var elem = wrapper.querySelector('.toolbar-marker > button:first-of-type');
     elem.addEventListener("click", (event) => {
       editor.updateLineMarkers();
-      const buttons = Array.from(wrapper.querySelectorAll('.toolbar-marker ul button'));
-      let idx = scrapbook.getOption('editor.lineMarker.checked');
-      idx = Math.min(parseInt(idx, 10) || 0, buttons.length - 1);
-      editor.lineMarker(buttons[idx].querySelector('web-scrapbook-samp').getAttribute('style'));
+      const marker = wrapper.querySelector('.toolbar-marker ul button[checked] web-scrapbook-samp');
+      editor.lineMarker(marker.getAttribute('style'));
     }, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-marker > button:last-of-type');
