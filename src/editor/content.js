@@ -469,23 +469,25 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     // marker
     var elem = wrapper.querySelector('.toolbar-marker > button:first-of-type');
-    elem.addEventListener("click", (event) => {
-      editor.updateLineMarkers();
+    elem.addEventListener("click", async (event) => {
+      await editor.updateLineMarkers();
       const marker = wrapper.querySelector('.toolbar-marker ul button[checked] web-scrapbook-samp');
       editor.lineMarker(marker.getAttribute('style'));
     }, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-marker > button:last-of-type');
-    elem.addEventListener("click", (event) => {
-      editor.updateLineMarkers();
-      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
+    elem.addEventListener("click", async (event) => {
+      const elem = event.currentTarget;
+      await editor.updateLineMarkers();
+      editor.showContextMenu(elem.parentElement.querySelector('ul'));
     }, {passive: true});
 
     for (const elem of wrapper.querySelectorAll('.toolbar-marker ul button')) {
       elem.addEventListener("click", (event) => {
-        const idx = Array.prototype.indexOf.call(wrapper.querySelectorAll('.toolbar-marker ul button'), event.currentTarget);
-        scrapbook.setOption('editor.lineMarker.checked', idx);
-        editor.lineMarker(event.currentTarget.querySelector('web-scrapbook-samp').getAttribute('style'));
+        const elem = event.currentTarget;
+        const idx = Array.prototype.indexOf.call(wrapper.querySelectorAll('.toolbar-marker ul button'), elem);
+        scrapbook.cache.set(editor.getStatusKey('lineMarkerSelected'), idx, 'storage'); // async
+        editor.lineMarker(elem.querySelector('web-scrapbook-samp').getAttribute('style'));
       }, {passive: true});
     }
 
@@ -1240,7 +1242,11 @@ ${sRoot}.toolbar .toolbar-close:hover {
     return false;
   };
 
-  editor.updateLineMarkers = function () {
+  editor.getStatusKey = function (key) {
+    return {table: "scrapbookEditorStatus", key};
+  };
+
+  editor.updateLineMarkers = async function () {
     Array.prototype.forEach.call(
       editor.internalElement.querySelectorAll('.toolbar-marker ul web-scrapbook-samp'),
       (elem, i) => {
@@ -1253,7 +1259,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     buttons.forEach((elem) => {
       elem.removeAttribute('checked');
     });
-    let idx = scrapbook.getOption('editor.lineMarker.checked');
+    let idx = await scrapbook.cache.get(editor.getStatusKey('lineMarkerSelected'), 'storage');
     idx = Math.min(parseInt(idx, 10) || 0, buttons.length - 1);
     buttons[idx].setAttribute('checked', '');
   };

@@ -79,7 +79,6 @@
     "capture.helpersEnabled": false,
     "capture.helpers": "",
     "editor.autoInit": true,
-    "editor.lineMarker.checked": null,
     "editor.lineMarker.style.1": "background: rgba(255,255,0,0.9); background: linear-gradient(transparent 40%, rgba(255,255,0,0.9) 90%, transparent 100%);",
     "editor.lineMarker.style.2": "background: rgba(0,255,0,0.9); background: linear-gradient(transparent 40%, rgba(0,255,0,0.9) 90%, transparent 100%);",
     "editor.lineMarker.style.3": "background: rgba(255,0,0,0.9); background: linear-gradient(transparent 40%, rgba(255,0,0,0.9) 90%, transparent 100%);",
