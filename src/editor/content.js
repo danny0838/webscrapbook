@@ -96,7 +96,9 @@ height: 100vh;`;
 
     await scrapbook.loadOptionsAuto;
     editor.serverUrl = scrapbook.getOption("server.url");
-    editor.inScrapBook = editor.serverUrl && document.URL.startsWith(editor.serverUrl);
+    editor.inScrapBook = editor.serverUrl
+        && document.URL.startsWith(editor.serverUrl)
+        && !document.location.search;
 
     // more accurately check whether the current document is really under dataDir of a book
     if (editor.inScrapBook) {
