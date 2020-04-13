@@ -2990,11 +2990,11 @@
   };
 
 
-  /******************************************************************************
+  /****************************************************************************
    * A class that handles document CSS analysis.
    *
    * @class DocumentCssHandler
-   *****************************************************************************/
+   ***************************************************************************/
 
   capturer.DocumentCssHandler = class DocumentCssHandler {
     constructor({doc, rootNode, origNodeMap, clonedNodeMap, refUrl, settings, options}) {
