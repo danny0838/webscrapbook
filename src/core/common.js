@@ -404,9 +404,9 @@
     /**
      * @param {string|Object} key
      */
-    async get(key, defaultValue) {
+    async get(key) {
       const keyStr = (typeof key === "string") ? key : JSON.stringify(key);
-      return this[this.current].get(keyStr, defaultValue);
+      return this[this.current].get(keyStr);
     },
 
     /**
