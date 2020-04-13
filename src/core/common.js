@@ -389,9 +389,9 @@
     get current() {
       if (this._current === 'auto') {
         if (scrapbook.userAgent.is('gecko')) {
-          this.current = 'storage';
+          this._current = 'storage';
         } else {
-          this.current = 'indexedDB';
+          this._current = 'indexedDB';
         }
       }
       return this._current;
