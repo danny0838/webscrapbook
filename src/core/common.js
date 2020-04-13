@@ -371,12 +371,16 @@
 
 
   /****************************************************************************
-   * Cache
-   * 
-   * Use indexedDB for Chromium since storing Blobs is not supported by storage.
-   * 
-   * Use storage API for Firefox since storing Blobs is supported, and
-   * indexedDB is not available for private windows.
+   * Cache system
+   *
+   * - IndexedDb is powerful but more restricted (not available for a content
+   *   script and a Firefox private window, and not shared with an incognito
+   *   window in Chromium). Arbitrarily use storage if needed.
+   * - Storage API does not support storing a Blob or File in Firefox < 56 and
+   *   Chromium. A shim with byte-string based object is implemented, but it's
+   *   not performant and should thus be avoided whenever possible.
+   * - By default, use indexedDB for Chromium and storage API for Firefox, due
+   *   to above reasons.
    ***************************************************************************/
 
   scrapbook.cache = {
