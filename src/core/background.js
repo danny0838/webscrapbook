@@ -207,7 +207,8 @@
     } else if (frameIdExcept !== -1) {
       const tasks = Array.prototype.map.call(
         await scrapbook.initContentScripts(tabId),
-        async ({tabId, frameId, injected}) => {
+        async ({tabId, frameId, error, injected}) => {
+          if (error) { return undefined; }
           if (frameId === frameIdExcept) { return undefined; }
           return code ? 
             await browser.tabs.executeScript(tabId, {
@@ -223,7 +224,8 @@
     } else {
       const tasks = Array.prototype.map.call(
         await scrapbook.initContentScripts(tabId),
-        async ({tabId, frameId, injected}) => {
+        async ({tabId, frameId, error, injected}) => {
+          if (error) { return undefined; }
           return code ? 
             await browser.tabs.executeScript(tabId, {
               frameId,
