@@ -531,6 +531,9 @@
             }
             db.createObjectStore("cache", {keyPath: "key"});
           };
+          request.onblocked = (event) => {
+            reject("Upgrade of the indexedDB is blocked by another connection.");
+          };
           request.onsuccess = (event) => {
             resolve(event.target.result);
           };
