@@ -5398,9 +5398,10 @@ async function test_capture_base() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var base = doc.querySelector('base');
-  assert(base.getAttribute('href') === `http://example.com/`);
-  assert(base.getAttribute('target') === `_blank`);
+  var bases = doc.querySelectorAll('base');
+  assert(bases[0].getAttribute('href') === `http://example.com/`);
+  assert(bases[0].getAttribute('target') === `_blank`);
+  assert(bases[1].getAttribute('href') === `${localhost}/capture_base/subdir/dummy.html`);
 
   /* capture.base = blank */
   var options = {
@@ -5416,9 +5417,10 @@ async function test_capture_base() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var base = doc.querySelector('base');
-  assert(!base.hasAttribute('href'));
-  assert(base.getAttribute('target') === `_blank`);
+  var bases = doc.querySelectorAll('base');
+  assert(!bases[0].hasAttribute('href'));
+  assert(bases[0].getAttribute('target') === `_blank`);
+  assert(!bases[1].hasAttribute('href'));
 
   /* capture.base = remove */
   var options = {
@@ -5434,8 +5436,8 @@ async function test_capture_base() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var base = doc.querySelector('base');
-  assert(!base);
+  var bases = doc.querySelectorAll('base');
+  assert(!bases.length);
 }
 
 /**

@@ -570,7 +570,10 @@
           switch (elem.nodeName.toLowerCase()) {
             case "base": {
               if (!elem.hasAttribute("href")) { break; }
-              elem.setAttribute("href", elem.href);
+
+              // resolve base URL using document URL rather than base URL
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), docUrl);
+              elem.setAttribute("href", rewriteUrl);
 
               switch (options["capture.base"]) {
                 case "blank":
@@ -1254,7 +1257,8 @@
 
                       if (elemOrig && elemOrig.currentSrc) {
                         // elem will be further processed in the following loop that handles "img"
-                        elem.setAttribute("src", elem.src);
+                        const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
+                        elem.setAttribute("src", rewriteUrl);
                         captureRewriteUri(elem, "src", elemOrig.currentSrc);
                         captureRewriteUri(elem, "srcset", null);
                       }
@@ -1692,8 +1696,9 @@
             }
 
             case "form": {
-              if ( elem.hasAttribute("action") ) {
-                  elem.setAttribute("action", elem.action);
+              if (elem.hasAttribute("action")) {
+                const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("action"), refUrl);
+                elem.setAttribute("action", rewriteUrl);
               }
               break;
             }
