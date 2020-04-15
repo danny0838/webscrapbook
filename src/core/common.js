@@ -2235,9 +2235,14 @@
         continue;
       }
 
+      // A fuzzy match can include an ancestor of the selected nodes,
+      // and thus we must traverse all nodes in the document.
+      // e.g. <node><b><span>...[foo]...</span>...</b></node> includes <node>
+      const root = fuzzy ? doc : range.commonAncestorContainer;
+
       const nodeRange = doc.createRange();
       const walker = doc.createTreeWalker(
-        range.commonAncestorContainer,
+        root,
         whatToShow,
         {
           acceptNode: (node) => {
