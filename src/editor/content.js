@@ -703,13 +703,18 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     for (const range of scrapbook.getSelectionRanges()) {
       // tweak the range
-      if (range.startContainer.nodeType === Node.TEXT_NODE && range.startOffset) {
-        let newNode = range.startContainer.splitText(range.startOffset);
-        range.setStartBefore(newNode);
+      if (range.startContainer.nodeType === Node.TEXT_NODE) {
+        let startNode = range.startContainer;
+        if (range.startOffset) {
+          startNode = range.startContainer.splitText(range.startOffset);
+        }
+        range.setStartBefore(startNode);
       }
-      if (range.endContainer.nodeType === Node.TEXT_NODE && range.endOffset) {
+      if (range.endContainer.nodeType === Node.TEXT_NODE) {
         let endNode = range.endContainer;
-        endNode.splitText(range.endOffset);
+        if (range.endOffset) {
+          endNode.splitText(range.endOffset);
+        }
         range.setEndAfter(endNode);
       }
 
