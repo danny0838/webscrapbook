@@ -98,97 +98,8 @@
     return viewer.loadFiles(files);
   };
 
-  const fileSystemHandler = {
-    /**
-     * Request from Filesystem API if available
-     *
-     * @TODO:
-     * Request a 5GB filesystem currently.
-     * Do we need larger space or make it configurable?
-     */
-    async requestFileSystem(size = 5*1024*1024*1024 /* 5GB */) {
-      // In Chromium >= 68, top-frame navigation to filesystem URLs is blocked,
-      // making filesystem view useless.
-      // https://bugs.chromium.org/p/chromium/issues/detail?id=811558
-      if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.major >= 68) {
-        return null;
-      }
-
-      // filesystem scheme never works in an incognito window,
-      // but sometimes the requestFileSystem call doesn't throw, 
-      // and an error occurs afterwards instead. Add a check
-      // to prevent such error.
-      if (browser.tabs && (await browser.tabs.getCurrent()).incognito) {
-        return null;
-      }
-
-      try {
-        return await new Promise((resolve, reject) => {
-          window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
-          
-          window.requestFileSystem(window.TEMPORARY, size, resolve, reject);
-        });
-      } catch (ex) {
-        // error for filesystem API
-        // console.error(ex);
-      }
-      return null;
-    },
-
-    async getDir(dirEntry, path) {
-      return new Promise((resolve, reject) => {
-        dirEntry.getDirectory(path, {}, resolve, reject);
-      });
-    },
-
-    async getFile(dirEntry, path) {
-      return new Promise((resolve, reject) => {
-        dirEntry.getFile(path, {}, resolve, reject);
-      });
-    },
-
-    async createDir(dirEntry, path) {
-      let dirParts = Array.isArray(path) ? path : path.split("/");
-      // Throw out './' or '/' and move on to prevent something like '/foo/.//bar'.
-      dirParts = dirParts.filter(x => x && x !== '.');
-
-      try {
-        return await fileSystemHandler.getDir(dirParts.join("/"));
-      } catch (ex) {
-        const createDirInternal = async function (dirEntry, dirParts) {
-          dirEntry = await new Promise((resolve, reject) => {
-            dirEntry.getDirectory(dirParts[0], {create: true}, resolve, reject);
-          });
-
-          // Recursively add the new subfolder (if we still have another to create).
-          if (dirParts.length) {
-            return await createDirInternal(dirEntry, dirParts.slice(1));
-          }
-          return dirEntry;
-        };
-        return createDirInternal(dirEntry, dirParts);
-      }
-    },
-
-    async createFile(dirEntry, path, fileBlob) {
-      await this.createDir(dirEntry, path.split("/").slice(0, -1));
-      const fileEntry = await new Promise((resolve, reject) => {
-        dirEntry.getFile(path, {create: true}, resolve, reject);
-      });
-      const fileWriter = await new Promise((resolve, reject) => {
-        fileEntry.createWriter(resolve, reject);
-      });
-      return await new Promise((resolve, reject) => {
-        fileWriter.onwriteend = resolve;
-        fileWriter.onerror = reject;
-        fileWriter.write(fileBlob);
-      });
-    },
-  };
-
   const viewer = {
     mainUrl: new URL(document.URL),
-    filesystem: null,
     urlSearch: "",
     urlHash: "",
     pageList: [],
@@ -265,11 +176,6 @@
 
     async start() {
       try {
-        /* request Filesystem API by config */
-        if (scrapbook.getOption("viewer.useFileSystemApi")) {
-          viewer.filesystem = await fileSystemHandler.requestFileSystem();
-        }
-
         /* process URL params */
         const files = [];
         const zipSourceUrl = viewer.mainUrl.searchParams.get("src");
@@ -367,15 +273,8 @@
             lastModified: scrapbook.zipFixModifiedTime(zipObj.date),
           });
 
-          if (viewer.filesystem) {
-            /* Filesystem API view */
-            if (zipObj.dir) { continue; }
-            await fileSystemHandler.createFile(viewer.filesystem.root, uuid + "/" + inZipPath, data);
-          } else {
-            /* In-memory view */
-            const key = {table: "pageCache", id: uuid, path: inZipPath};
-            await scrapbook.cache.set(key, data);
-          }
+          const key = {table: "pageCache", id: uuid, path: inZipPath};
+          await scrapbook.cache.set(key, data);
         }
 
         /* Retrieve indexFiles */
@@ -401,36 +300,23 @@
         }
 
         /* convert indexFiles to this.pageList */
-        if (viewer.filesystem) {
-          /* Filesystem API view */
-          const root = viewer.filesystem.root;
-          for (const indexFile of indexFiles) {
-            const fileEntry = await fileSystemHandler.getFile(root, uuid + "/" + indexFile);
-            const url = new URL(fileEntry.toURL());
-            url.search = viewer.urlSearch;
-            url.hash = viewer.urlHash;
-            this.pageList.push(url.href);
+        const url = new URL(browser.runtime.getURL("viewer/view.html"));
+        const s = url.searchParams;
+        s.set("id", uuid);
+        url.hash = viewer.urlHash;
+
+        for (const indexFile of indexFiles) {
+          const pos = indexFile.lastIndexOf('/');
+
+          // set dir filter
+          if (pos !== -1) {
+            s.set("d", indexFile.slice(0, pos));
+          } else {
+            s.delete("d");
           }
-        } else {
-          /* In-memory view */
-          const url = new URL(browser.runtime.getURL("viewer/view.html"));
-          const s = url.searchParams;
-          s.set("id", uuid);
-          url.hash = viewer.urlHash;
 
-          for (const indexFile of indexFiles) {
-            const pos = indexFile.lastIndexOf('/');
-
-            // set dir filter
-            if (pos !== -1) {
-              s.set("d", indexFile.slice(0, pos));
-            } else {
-              s.delete("d");
-            }
-
-            s.set("p", indexFile);
-            this.pageList.push(url.href);
-          }
+          s.set("p", indexFile);
+          this.pageList.push(url.href);
         }
       } catch (ex) {
         console.error(ex);

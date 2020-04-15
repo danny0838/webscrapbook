@@ -874,12 +874,6 @@
   "OptionServerUserTooltip": {
     "message": "If the backend server is configured to require HTTP authorization, the user name can be provided here to prevent being asked for repeatedly."
   },
-  "OptionViewerUseFileSystemApiLabel": {
-    "message": "Use Filesystem API"
-  },
-  "OptionViewerUseFileSystemApiTooltip": {
-    "message": "Use filesystem API to create a virtual filesystem and view the archive file when supported, to get a better performance and fidelity."
-  },
   "OptionViewerViewHtzLabel": {
     "message": "View HTZ file"
   },

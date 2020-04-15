@@ -92,7 +92,6 @@
     "editor.lineMarker.style.11": "border: medium double #993399;",
     "editor.lineMarker.style.12": "background-color: #EE3311; color: #FFFFFF; font-weight: bold;",
     "editor.insertDateFormat": "%Y-%m-%d %H:%M:%S",
-    "viewer.useFileSystemApi": false,
     "viewer.viewHtz": true,
     "viewer.viewMaff": true,
     "indexer.createStaticIndex": false,

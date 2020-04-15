@@ -874,12 +874,6 @@
   "OptionServerUserTooltip": {
     "message": "若後端伺服器有設定 HTTP 認證機制，可在這裡填入認證所需的使用者名稱，以免瀏覽器詢問。"
   },
-  "OptionViewerUseFileSystemApiLabel": {
-    "message": "使用 Filesystem API"
-  },
-  "OptionViewerUseFileSystemApiTooltip": {
-    "message": "在支援的瀏覽器上使用 filesystem API 建立虛擬檔案系統檢視封存檔案，有較佳的效能及保真性。"
-  },
   "OptionViewerViewHtzLabel": {
     "message": "檢視 HTZ 檔案"
   },
