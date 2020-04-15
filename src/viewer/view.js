@@ -290,22 +290,9 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                     elem.setAttribute("content", metaRefresh.time + (targetPageHash ? ";url=" + targetPageHash : ""));
                   }
                 }
-              } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
-                switch (elem.getAttribute("property").toLowerCase()) {
-                  case "og:image":
-                  case "og:image:url":
-                  case "og:image:secure_url":
-                  case "og:audio":
-                  case "og:audio:url":
-                  case "og:audio:secure_url":
-                  case "og:video":
-                  case "og:video:url":
-                  case "og:video:secure_url":
-                  case "og:url":
-                    elem.setAttribute("content", rewriteUrl(elem.getAttribute("content"), refUrl));
-                    break;
-                }
               }
+              // An open graph URL does not acknowledge <base> and should always use an absolute URL,
+              // and thus we simply skip meta[property="og:*"].
               break;
             }
 

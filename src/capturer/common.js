@@ -597,25 +597,9 @@
                 // force UTF-8
                 metaCharsetNode = elem;
                 captureRewriteAttr(elem, "charset", "UTF-8");
-              } else if (elem.hasAttribute("property") && elem.hasAttribute("content")) {
-                switch (elem.getAttribute("property").toLowerCase()) {
-                  case "og:image":
-                  case "og:image:url":
-                  case "og:image:secure_url":
-                  case "og:audio":
-                  case "og:audio:url":
-                  case "og:audio:secure_url":
-                  case "og:video":
-                  case "og:video:url":
-                  case "og:video:secure_url":
-                  case "og:url":
-                    // @TODO: relative to document URL or base URL?
-                    // @TODO: save the og resource?
-                    let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("content"), refUrl);
-                    elem.setAttribute("content", rewriteUrl);
-                    break;
-                }
               }
+              // An open graph URL does not acknowledge <base> and should always use an absolute URL,
+              // and thus we simply skip meta[property="og:*"].
               break;
             }
 
