@@ -91,7 +91,7 @@
    * @kind invokable
    * @param {Object} params
    * @param {Document} params.doc
-   * @param {string} params.refUrl
+   * @param {string} params.refUrl - the referrer URL
    * @param {string} params.title
    * @param {Object} params.settings
    * @param {Object} params.options
@@ -130,8 +130,9 @@
    * @param {Object} params
    * @param {Document} params.doc
    * @param {string} params.title
-   * @param {string} params.docUrl
-   * @param {string} params.refUrl
+   * @param {string} params.docUrl - an overriding document URL
+   * @param {string} params.refUrl - an overriding URL for resolving links
+   *     (i.e. base URL)
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -1253,6 +1254,7 @@
                       const elemOrig = origNodeMap.get(elem);
 
                       if (elemOrig && elemOrig.currentSrc) {
+                        // elem will be further processed in the following loop that handles "img"
                         elem.setAttribute("src", elem.src);
                         captureRewriteUri(elem, "src", elemOrig.currentSrc);
                         captureRewriteUri(elem, "srcset", null);
@@ -3528,7 +3530,8 @@
      *
      * @param {string} cssText - the CSS text to rewrite.
      * @param {string} refUrl - the reference URL for URL resolving.
-     * @param {CSSStyleSheet} refCss - the reference CSS (for imported CSS).
+     * @param {CSSStyleSheet} refCss - the reference CSS (which holds the
+     *     @import rule(s), for imported CSS).
      * @param {boolean} isInline - whether cssText is inline.
      * @param {Object} settings
      * @param {Object} options
@@ -3683,7 +3686,8 @@
      *
      * @param {HTMLElement} elem - the elem to have CSS rewritten.
      * @param {string} url - the source URL of the imported CSS.
-     * @param {string} refCss - the reference CSS of the imported CSS.
+     * @param {string} refCss - the reference CSS (the imported styleSheet
+     *     object) of the imported CSS.
      * @param {string} refUrl - the reference URL for URL resolving.
      * @param {Function} callback
      * @param {Object} settings

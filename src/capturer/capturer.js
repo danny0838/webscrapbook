@@ -254,7 +254,7 @@
    * @param {Object} params
    * @param {string} params.url
    * @param {string} params.role
-   * @param {string} params.refUrl - URL of the referrer
+   * @param {string} params.refUrl - the referrer URL
    * @param {string} params.responseType
    * @param {integer} params.timeout
    * @param {Objet} params.hooks
@@ -1172,7 +1172,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
    * @kind invokable
    * @param {Object} params
    * @param {string} params.url - may include hash
-   * @param {string} params.refUrl
+   * @param {string} params.refUrl - the referrer URL
    * @param {string} params.title
    * @param {string} params.charset
    * @param {Object} params.settings
@@ -1966,7 +1966,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @kind invokable
    * @param {Object} params
    * @param {string} params.url - may include hash
-   * @param {string} params.refUrl
+   * @param {string} params.refUrl - the referrer URL
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
