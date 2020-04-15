@@ -75,16 +75,16 @@
     "message": "Capture tab (bookmark)"
   },
   "CaptureTabBookmarkTooltip": {
-    "message": "Capture selected tabs as bookmark pages, which redirects to the source page when navigated."
+    "message": "Capture each selected tab as a bookmark page or scrapbook item."
   },
   "CaptureTabSource": {
     "message": "Capture tab (source)"
   },
   "CaptureTabSourceTooltip": {
-    "message": "Capture the original content of the selected tabs (before processed by scripts)."
+    "message": "Capture the original content of each selected tab (before processed by the scripts)."
   },
   "CaptureTabTooltip": {
-    "message": "Capture the current status of the selected tabs. Only the selected range(s) is captured if there's a selection in the tab."
+    "message": "Capture the current status of each selected tab. Only the selected range(s) is captured if there's a selection in the tab."
   },
   "CapturerTitle": {
     "message": "Capture page"
@@ -469,13 +469,13 @@
     "message": "APPLETs:"
   },
   "OptionCaptureAppletTooltip": {
-    "message": "This determines how APPLET elements, which are used to embed JAVA applets and are no more supported by most modern browsers, are handled. NOTE: JAVA applets may not work without original server environment, and could cause a security hazard.\n\n• Save: Save the referenced resources to local.\n• Link: Link the APPLET element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the APPLET element.\n• Remove: Remove the APPLET element. Note that this could affect the web page layout."
+    "message": "This determines how APPLET elements, which are used to embed JAVA applets and are no more supported by most modern browsers, are handled. NOTE: JAVA applets may not work without original server environment, and could cause a security hazard.\n\n• Save: Save the referenced resources to local.\n• Link: Link the APPLET element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the APPLET element.\n• Remove: Remove the APPLET element. Note that this could alter the web page layout."
   },
   "OptionCaptureAudioLabel": {
     "message": "Audios:"
   },
   "OptionCaptureAudioTooltip": {
-    "message": "This determines how audio elements are handled.\n\n• Save: Save the referenced audio resources to local.\n• Save current: Save the playing audio resource to local and ignore alternatives for other browsers. This considerably reduces size but the audio may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all audio resources are saved.\n• Link: Link the audio to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the audio.\n• Remove: Remove the audio element. Note that this could affect the web page layout."
+    "message": "This determines how audio elements are handled.\n\n• Save: Save the referenced audio resources to local.\n• Save current: Save the playing audio resource to local and ignore alternatives for other browsers. This considerably reduces size but the audio may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all audio resources are saved.\n• Link: Link the audio to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the audio.\n• Remove: Remove the audio element. Note that this could alter the web page layout."
   },
   "OptionCaptureAutoCloseDialogLabel": {
     "message": "Auto-close dialog when capture succeeded"
@@ -565,7 +565,7 @@
     "message": "EMBEDs:"
   },
   "OptionCaptureEmbedTooltip": {
-    "message": "This determines how EMBED elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n• Save: Save the referenced resources to local.\n• Link: Link the EMBED element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the EMBED element.\n• Remove: Remove the EMBED element. Note that this could affect the web page layout."
+    "message": "This determines how EMBED elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n• Save: Save the referenced resources to local.\n• Link: Link the EMBED element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the EMBED element.\n• Remove: Remove the EMBED element. Note that this could alter the web page layout."
   },
   "OptionCaptureFaviconLabel": {
     "message": "Favicon:"
@@ -592,7 +592,7 @@
     "message": "Frames:"
   },
   "OptionCaptureFrameTooltip": {
-    "message": "This determines how frames (FRAME and IFRAME elements) are handled.\n\n• Save: Save the frame pages to local.\n• Link: Link the frame to its source URL. Note that a network flow will be triggered when browsing the captured document in the future. NOTE: Due to the restriction of SOP, ths font cannot be loaded by the captured page unless CORS has been properly configured by its source server.\n• Blank: Disable the frame elements.\n• Remove: Remove the frame. Note that this could affect the web page layout."
+    "message": "This determines how frames (FRAME and IFRAME elements) are handled.\n\n• Save: Save the frame pages to local.\n• Link: Link the frame to its source URL. Note that a network flow will be triggered when browsing the captured document in the future. NOTE: Due to the restriction of SOP, ths font cannot be loaded by the captured page unless CORS has been properly configured by its source server.\n• Blank: Disable the frame elements.\n• Remove: Remove the frame. Note that this could alter the web page layout."
   },
   "OptionCaptureHelpersError": {
     "message": "Capture helper syntax is invalid and will not work when run. Stop to fix them now?\n\n$MESSAGE$",
@@ -618,7 +618,7 @@
     "message": "Images:"
   },
   "OptionCaptureImageTooltip": {
-    "message": "This determines how images (IMG, PICTURE, and some INPUT elements) are handled.\n\n• Save: Save the referenced image resources to local.\n• Save current: Save the displayed image resource to local and ignore alternatives for another screen viewport or resolution. This considerably reduces size but the display effect may be worse in another situation. If the captured page is not displayed in the browser (such as capture source), all images are saved.\n• Link: Link the image to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the image.\n• Remove: Remove the image element. Note that this could affect the web page layout."
+    "message": "This determines how images (IMG, PICTURE, and some INPUT elements) are handled.\n\n• Save: Save the referenced image resources to local.\n• Save current: Save the displayed image resource to local and ignore alternatives for another screen viewport or resolution. This considerably reduces size but may affect the display effect on another device. If the captured page is not displayed in the browser (such as capture source), all images are saved.\n• Link: Link the image to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the image.\n• Remove: Remove the image element. Note that this could alter the web page layout."
   },
   "OptionCaptureLinkUnsavedUriLabel": {
     "message": "Link uncaptured resource to source"
@@ -636,7 +636,7 @@
     "message": "OBJECTs:"
   },
   "OptionCaptureObjectTooltip": {
-    "message": "This determines how OBJECT elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n• Save: Save the referenced resources to local.\n• Link: Link the OBJECT element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the OBJECT element.\n• Remove: Remove the OBJECT element. Note that this could affect the web page layout."
+    "message": "This determines how OBJECT elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n• Save: Save the referenced resources to local.\n• Link: Link the OBJECT element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the OBJECT element.\n• Remove: Remove the OBJECT element. Note that this could alter the web page layout."
   },
   "OptionCapturePageSizeLimitLabel": {
     "message": "Size limit for each page:"
@@ -663,13 +663,13 @@
     "message": "If a URL of an element or a stylesheet is rewritten during the capture process, create a comment or data-* attribute to record its original address."
   },
   "OptionCaptureRemoveHiddenLabel": {
-    "message": "Remove hidden elements"
+    "message": "Remove hidden elements:"
   },
   "OptionCaptureRemoveHiddenNoneLabel": {
     "message": "Disable"
   },
   "OptionCaptureRemoveHiddenTooltip": {
-    "message": "Determines how hidden elements are handled.\n\n• Disable: Disable this feature.\n• Remove undisplayed elements: Remove elements whose “display” CSS property is computed to “none”. Note that this could affect the web page layout, such as altering the targets of “+”, “~”, and “:nth-child” CSS selectors."
+    "message": "Determines how hidden elements are handled.\n\n• Disable: Disable this feature.\n• Remove undisplayed elements: Remove elements whose “display” CSS property is computed to “none”. An ad-blocker tool may inject hidden CSS to hide ad elements, and this helps truly remove them. Note that this could alter the web page layout, such as altering the targets of “+”, “~”, and “:nth-child” CSS selectors."
   },
   "OptionCaptureRemoveHiddenUndisplayedLabel": {
     "message": "Remove undisplayed elements"
@@ -686,7 +686,7 @@
   "OptionCaptureRewriteCssNoneLabel": {
     "message": "No rewrite"
   },
-  "OptionCaptureRewriteUrlLabel": {
+  "OptionCaptureRewriteCssUrlLabel": {
     "message": "Rewrite URL"
   },
   "OptionCaptureSaveAsFolderLabel": {
@@ -756,7 +756,7 @@
     "message": "Scripts:"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n• Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Additionally, scripts don't run in the archive page viewer for security reasons. It is generally recommended to set capture options to “save”, “canvas” option to “save initial status”, and “shadow DOMs” option to “remove” to avoid a conflict to and an error of the script.\n• Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the script.\n• Remove: Remove the script element. Note that this could affect the web page layout in some rare cases."
+    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n• Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Besides, saved scripts don't run in the archive page viewer due to a security concern. It is generally recommended to set capture options to “save”, “canvas” to “save initial status”, “shadow DOMs” to “remove”, and “remove hidden elements” to “disable”, to avoid a conflict with the script.\n• Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the script.\n• Remove: Remove the script element. Note that this could alter the web page layout in some rare cases."
   },
   "OptionCaptureShadowDomLabel": {
     "message": "Shadow DOMs:"
@@ -768,13 +768,13 @@
     "message": "Styles:"
   },
   "OptionCaptureStyleTooltip": {
-    "message": "This determines how stylesheets (including external – some LINK elements – and internal – STYLE elements) are handled.\n\n• Save: Save the referenced external stylesheet resource to local.\n• Link: Link the external stylesheet to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the stylesheet.\n• Remove: Remove the stylesheet element. Note that this could affect the web page layout in some rare cases."
+    "message": "This determines how stylesheets (including external – some LINK elements – and internal – STYLE elements) are handled.\n\n• Save: Save the referenced external stylesheet resource to local.\n• Link: Link the external stylesheet to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the stylesheet.\n• Remove: Remove the stylesheet element. Note that this could alter the web page layout in some rare cases."
   },
   "OptionCaptureVideoLabel": {
     "message": "Videos:"
   },
   "OptionCaptureVideoTooltip": {
-    "message": "This determines how video elements are handled.\n\n• Save: Save the referenced video resource to local.\n• Save current: Save the playing video resource to local and ignore alternatives for other browsers. This considerably reduces size but the video may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all video resources are saved.\n• Link: Link the video to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the video.\n• Remove: Remove the video element. Note that this could affect the web page layout."
+    "message": "This determines how video elements are handled.\n\n• Save: Save the referenced video resource to local.\n• Save current: Save the playing video resource to local and ignore alternatives for other browsers. This considerably reduces size but the video may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all video resources are saved.\n• Link: Link the video to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the video.\n• Remove: Remove the video element. Note that this could alter the web page layout."
   },
   "OptionEditorAutoInit": {
     "message": "Automatically load editor toolbar when visiting a page in the scrapbook"

@@ -75,7 +75,7 @@
     "message": "获取分页 (书签)"
   },
   "CaptureTabBookmarkTooltip": {
-    "message": "将㧥择的分页获取为书签网页，浏览书签网页会导向至原始页面。"
+    "message": "将㧥择的分页获取为书签网页或剪贴簿项目。"
   },
   "CaptureTabSource": {
     "message": "获取分页 (原样)"
@@ -618,7 +618,7 @@
     "message": "图片:"
   },
   "OptionCaptureImageTooltip": {
-    "message": "此选项决定图片（IMG、PICTURE、及一些 INPUT 元素）的处理方式。\n\n• 保存：将图片保存至本地。\n• 保存现用：将显示的图片保存至本地，忽略其他萤幕大小或解析度的备用图片。这可以有效缩小容量，但某些情况下显示效果会变差。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有图片。\n• 链接：将图片连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将图片无效化。\n• 移除：将图片元素移除。注意这可能会影响网页排版。"
+    "message": "此选项决定图片（IMG、PICTURE、及一些 INPUT 元素）的处理方式。\n\n• 保存：将图片保存至本地。\n• 保存现用：将显示的图片保存至本地，忽略其他萤幕大小或解析度的备用图片。这可以有效缩小容量，但可能影响在其他设备的显示效果。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有图片。\n• 链接：将图片连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将图片无效化。\n• 移除：将图片元素移除。注意这可能会影响网页排版。"
   },
   "OptionCaptureLinkUnsavedUriLabel": {
     "message": "将无法储存的资源连往原始位址"
@@ -663,13 +663,13 @@
     "message": "获取网页时若有改写元素或样式表的链接，则建立注解或 data-* 属性记录原始 URL 位址。"
   },
   "OptionCaptureRemoveHiddenLabel": {
-    "message": "移除隐藏元素"
+    "message": "移除隐藏元素:"
   },
   "OptionCaptureRemoveHiddenNoneLabel": {
     "message": "停用"
   },
   "OptionCaptureRemoveHiddenTooltip": {
-    "message": "此选项决定隐藏元素的处理方式。\n\n• 停用：停用此功能。\n• 移除不显示的元素：移除“display”样式属性计算值为“none”的元素。注意这可能会影响网页排版，例如改变“+”、“~”、“:nth-child”等 CSS 选择器的作用对象。"
+    "message": "此选项决定隐藏元素的处理方式。\n\n• 停用：停用此功能。\n• 移除不显示的元素：移除“display”样式属性计算值为“none”的元素。有些挡广告工具会外挂样式表隐藏广告相关元素，此选项有助于真正移除这些广告。注意这可能会影响网页排版，例如改变“+”、“~”、“:nth-child”等 CSS 选择器的作用对象。"
   },
   "OptionCaptureRemoveHiddenUndisplayedLabel": {
     "message": "移除不显示的元素"
@@ -686,8 +686,8 @@
   "OptionCaptureRewriteCssNoneLabel": {
     "message": "不改写"
   },
-  "OptionCaptureRewriteUrlLabel": {
-    "message": "改写 URL"
+  "OptionCaptureRewriteCssUrlLabel": {
+    "message": "改写网址"
   },
   "OptionCaptureSaveAsFolderLabel": {
     "message": "文件夹"
@@ -756,7 +756,7 @@
     "message": "脚本:"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "此选项决定所有网页脚本（包括 SCRIPT 元素、javascript: 协定的链接、onclick 之类的动态属性等等）的处理方式。\n\n• 保存：将脚本保存至本地。注意：获取的页面由于离开了原服务器环境且改写了部分内容，保存的脚本可能无法正常执行；此外基于安全性考量，脚本也无法在封存网页检视器中执行。一般建议将各获取选项设为“保存”并将“画布”设为“保存初始状态”、将“影子元素”设为“移除”，以避免脚本冲突出错。\n• 链接：将脚本连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将脚本无效化。\n• 移除：将脚本元素移除。注意在少数情况下这可能会影响网页排版。"
+    "message": "此选项决定所有网页脚本（包括 SCRIPT 元素、javascript: 协定的链接、onclick 之类的动态属性等等）的处理方式。\n\n• 保存：将脚本保存至本地。注意：获取的页面由于离开了原服务器环境且改写了部分内容，保存的脚本可能无法正常执行；此外基于安全性考量，脚本也无法在封存网页检视器中执行。一般建议将各获取选项设为“保存”，并将“画布”设为“保存初始状态”，“影子元素”设为“移除”，“移除隐藏元素”设为“停用”，以避免脚本冲突出错。\n• 链接：将脚本连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将脚本无效化。\n• 移除：将脚本元素移除。注意在少数情况下这可能会影响网页排版。"
   },
   "OptionCaptureShadowDomLabel": {
     "message": "影子物件:"
