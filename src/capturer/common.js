@@ -3638,104 +3638,96 @@
         }
       }
 
-      switch (options["capture.rewriteCss"]) {
-        case "url": {
-          const rewriteImportUrl = async (sourceUrl) => {
-            let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
-            switch (options["capture.style"]) {
-              case "link":
-                // do nothing
-                break;
-              case "blank":
-              case "remove":
-                url = "";
-                break;
-              case "save":
-              default:
-                if (valid) {
-                  const rule = importRules[importRuleIdx++];
-                  await this.rewriteCss({
-                    url,
-                    refCss: rule && rule.styleSheet,
-                    refUrl,
-                    settings,
-                    options,
-                    callback: (elem, response) => {
-                      url = response.url;
-                    },
-                  });
-                }
-                break;
+      const rewriteImportUrl = async (sourceUrl) => {
+        let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
+        switch (options["capture.style"]) {
+          case "link":
+            // do nothing
+            break;
+          case "blank":
+          case "remove":
+            url = "";
+            break;
+          case "save":
+          default:
+            if (valid) {
+              const rule = importRules[importRuleIdx++];
+              await this.rewriteCss({
+                url,
+                refCss: rule && rule.styleSheet,
+                refUrl,
+                settings,
+                options,
+                callback: (elem, response) => {
+                  url = response.url;
+                },
+              });
             }
-            return {url, recordUrl};
-          };
-
-          const rewriteFontFaceUrl = async (sourceUrl) => {
-            let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
-            switch (options["capture.font"]) {
-              case "link":
-                // do nothing
-                break;
-              case "blank":
-              case "remove": // deprecated
-                url = "";
-                break;
-              case "save-used":
-              case "save":
-              default:
-                if (usedCssFontUrl && !usedCssFontUrl[url]) {
-                  url = "";
-                  break;
-                }
-
-                if (valid) {
-                  url = await downloadFileInCss(url);
-                }
-                break;
-            }
-            return {url, recordUrl};
-          };
-
-          const rewriteBackgroundUrl = async (sourceUrl) => {
-            let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
-            switch (options["capture.imageBackground"]) {
-              case "link":
-                // do nothing
-                break;
-              case "blank":
-              case "remove": // deprecated
-                url = "";
-                break;
-              case "save-used":
-              case "save":
-              default:
-                if (usedCssImageUrl && !usedCssImageUrl[url]) {
-                  url = "";
-                  break;
-                }
-
-                if (valid) {
-                  url = await downloadFileInCss(url);
-                }
-                break;
-            }
-            return {url, recordUrl};
-          };
-
-          const rewriteDummy = (x) => ({url: x, recordUrl: ''});
-
-          return await scrapbook.rewriteCssText(cssText, {
-            rewriteImportUrl: !isInline ? rewriteImportUrl : rewriteDummy,
-            rewriteFontFaceUrl: !isInline ? rewriteFontFaceUrl : rewriteDummy,
-            rewriteBackgroundUrl,
-            resourceMap: this.resourceMap,
-          });
+            break;
         }
-        case "none":
-        default: {
-          return cssText;
+        return {url, recordUrl};
+      };
+
+      const rewriteFontFaceUrl = async (sourceUrl) => {
+        let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
+        switch (options["capture.font"]) {
+          case "link":
+            // do nothing
+            break;
+          case "blank":
+          case "remove": // deprecated
+            url = "";
+            break;
+          case "save-used":
+          case "save":
+          default:
+            if (usedCssFontUrl && !usedCssFontUrl[url]) {
+              url = "";
+              break;
+            }
+
+            if (valid) {
+              url = await downloadFileInCss(url);
+            }
+            break;
         }
-      }
+        return {url, recordUrl};
+      };
+
+      const rewriteBackgroundUrl = async (sourceUrl) => {
+        let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
+        switch (options["capture.imageBackground"]) {
+          case "link":
+            // do nothing
+            break;
+          case "blank":
+          case "remove": // deprecated
+            url = "";
+            break;
+          case "save-used":
+          case "save":
+          default:
+            if (usedCssImageUrl && !usedCssImageUrl[url]) {
+              url = "";
+              break;
+            }
+
+            if (valid) {
+              url = await downloadFileInCss(url);
+            }
+            break;
+        }
+        return {url, recordUrl};
+      };
+
+      const rewriteDummy = (x) => ({url: x, recordUrl: ''});
+
+      return await scrapbook.rewriteCssText(cssText, {
+        rewriteImportUrl: !isInline ? rewriteImportUrl : rewriteDummy,
+        rewriteFontFaceUrl: !isInline ? rewriteFontFaceUrl : rewriteDummy,
+        rewriteBackgroundUrl,
+        resourceMap: this.resourceMap,
+      });
     }
 
     /**
@@ -3880,13 +3872,23 @@
       }
 
       // do the rewriting according to options
-      const cssTextRewritten = await this.rewriteCssText({
-        cssText,
-        refUrl: sourceUrl || refUrl,
-        refCss,
-        settings,
-        options,
-      });
+      switch (options["capture.rewriteCss"]) {
+        case "url": {
+          cssText = await this.rewriteCssText({
+            cssText,
+            refUrl: sourceUrl || refUrl,
+            refCss,
+            settings,
+            options,
+          });
+          break;
+        }
+        case "none":
+        default: {
+          // do nothing
+          break;
+        }
+      }
 
       // save result back
       if (!elem || elem.nodeName.toLowerCase() == 'link') {
@@ -3897,15 +3899,15 @@
         if (fetchResult.url.startsWith("data:")) {
           const [, hash] = scrapbook.splitUrlByAnchor(fetchResult.url);
           const dataUri = charset ? 
-              scrapbook.unicodeToDataUri(cssTextRewritten, "text/css") : 
-              scrapbook.byteStringToDataUri(cssTextRewritten, "text/css;charset=UTF-8");
+              scrapbook.unicodeToDataUri(cssText, "text/css") : 
+              scrapbook.byteStringToDataUri(cssText, "text/css;charset=UTF-8");
           const response = {url: dataUri + hash};
           await callback(elem, response);
           return;
         }
 
         const response = await capturer.invoke("downloadBytes", {
-          bytes: charset ? scrapbook.unicodeToUtf8(cssTextRewritten) : cssTextRewritten,
+          bytes: charset ? scrapbook.unicodeToUtf8(cssText) : cssText,
           mime: "text/css;charset=UTF-8",
           filename: newFilename,
           sourceUrl,
@@ -3917,7 +3919,7 @@
       } else {
         // internal CSS
         const response = {
-          cssText: cssTextRewritten,
+          cssText,
         };
         await callback(elem, response);
       }
