@@ -815,6 +815,9 @@
   "OptionGroupServer": {
     "message": "Backend server"
   },
+  "OptionGroupUi": {
+    "message": "User interface"
+  },
   "OptionGroupViewer": {
     "message": "Viewer"
   },
@@ -873,6 +876,9 @@
   },
   "OptionServerUserTooltip": {
     "message": "If the backend server is configured to require HTTP authorization, the user name can be provided here to prevent being asked for repeatedly."
+  },
+  "OptionUiShowContextMenuLabel": {
+    "message": "Enable context menu"
   },
   "OptionViewerViewHtzLabel": {
     "message": "View HTZ file"

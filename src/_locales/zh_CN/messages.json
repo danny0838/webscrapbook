@@ -815,6 +815,9 @@
   "OptionGroupServer": {
     "message": "后端服务器"
   },
+  "OptionGroupUi": {
+    "message": "操作介面"
+  },
   "OptionGroupViewer": {
     "message": "检视器"
   },
@@ -873,6 +876,9 @@
   },
   "OptionServerUserTooltip": {
     "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的用户名，以免浏览器询问。"
+  },
+  "OptionUiShowContextMenuLabel": {
+    "message": "启用右键菜单"
   },
   "OptionViewerViewHtzLabel": {
     "message": "检视 HTZ 文件"

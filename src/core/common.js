@@ -28,6 +28,7 @@
   const BACKEND_MIN_VERSION = '0.12.0';
 
   const DEFAULT_OPTIONS = {
+    "ui.showContextMenu": true,
     "server.url": "",
     "server.user": "",
     "server.password": "",

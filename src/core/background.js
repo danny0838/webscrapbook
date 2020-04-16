@@ -104,6 +104,206 @@
     });
   }
 
+  /* context menu */
+  async function updateContextMenu(willShow = true) {
+    if (!browser.contextMenus) { return; }
+
+    await browser.contextMenus.removeAll();
+
+    if (!willShow) { return; }
+
+    const urlMatch = await scrapbook.getContentPagePattern();
+
+    // Available only in Firefox >= 53.
+    if (browser.contextMenus.ContextType.TAB) {
+      browser.contextMenus.create({
+        title: scrapbook.lang("CaptureTab"),
+        contexts: ["tab"],
+        documentUrlPatterns: urlMatch,
+        onclick: (info, tab) => {
+          return scrapbook.invokeCapture([{
+            tabId: tab.id,
+          }]);
+        }
+      });
+      browser.contextMenus.create({
+        title: scrapbook.lang("CaptureTabSource"),
+        contexts: ["tab"],
+        documentUrlPatterns: urlMatch,
+        onclick: (info, tab) => {
+          return scrapbook.invokeCapture([{
+            tabId: tab.id,
+            mode: "source",
+          }]);
+        }
+      });
+      browser.contextMenus.create({
+        title: scrapbook.lang("CaptureTabBookmark"),
+        contexts: ["tab"],
+        documentUrlPatterns: urlMatch,
+        onclick: (info, tab) => {
+          return scrapbook.invokeCapture([{
+            tabId: tab.id,
+            mode: "bookmark",
+          }]);
+        }
+      });
+    }
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CapturePage"),
+      contexts: ["page"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          tabId: tab.id,
+          full: true,
+        }]);
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CapturePageSource"),
+      contexts: ["page"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          tabId: tab.id,
+          mode: "source",
+        }]);
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CapturePageBookmark"),
+      contexts: ["page"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          tabId: tab.id,
+          mode: "bookmark",
+        }]);
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CaptureFrame"),
+      contexts: ["frame"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          tabId: tab.id,
+          frameId: info.frameId,
+          full: true,
+        }]);
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CaptureFrameSource"),
+      contexts: ["frame"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          url: info.frameUrl,
+          mode: "source",
+        }]);
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CaptureFrameBookmark"),
+      contexts: ["frame"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          url: info.frameUrl,
+          mode: "bookmark",
+        }]);
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CaptureSelection"),
+      contexts: ["selection"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          tabId: tab.id,
+          frameId: info.frameId,
+          full: false,
+        }]);
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CaptureSelectedLinks"),
+      contexts: ["selection"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.initContentScripts(tab.id)
+          .then(() => {
+            return scrapbook.invokeContentScript({
+              tabId: tab.id,
+              frameId: info.frameId,
+              cmd: "capturer.retrieveSelectedLinks",
+            });
+          })
+          .then((tasks) => {
+            return scrapbook.invokeBatchCapture({tasks});
+          });
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CaptureLink"),
+      contexts: ["link"],
+      targetUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          url: info.linkUrl,
+        }]);
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CaptureLinkSource"),
+      contexts: ["link"],
+      targetUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          url: info.linkUrl,
+          mode: "source",
+        }]);
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CaptureLinkBookmark"),
+      contexts: ["link"],
+      targetUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          url: info.linkUrl,
+          mode: "bookmark",
+        }]);
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CaptureMedia"),
+      contexts: ["image", "audio", "video"],
+      targetUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeCapture([{
+          url: info.srcUrl,
+          refUrl: info.pageUrl,
+          mode: "source",
+        }]);
+      }
+    });
+  }
+
   /**
    * @kind invokable
    */
@@ -299,6 +499,15 @@
     });
   }
 
+  browser.storage.onChanged.addListener((changes, areaName) => {
+    if (changes["ui.showContextMenu"]) {
+      updateContextMenu(changes["ui.showContextMenu"].newValue); // async
+    }
+  });
+
+  scrapbook.loadOptionsAuto.then(() => {
+    updateContextMenu(scrapbook.getOption("ui.showContextMenu")); // async
+  });
 
   return background;
 

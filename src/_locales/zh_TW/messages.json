@@ -815,6 +815,9 @@
   "OptionGroupServer": {
     "message": "後端伺服器"
   },
+  "OptionGroupUi": {
+    "message": "操作介面"
+  },
   "OptionGroupViewer": {
     "message": "檢視器"
   },
@@ -873,6 +876,9 @@
   },
   "OptionServerUserTooltip": {
     "message": "若後端伺服器有設定 HTTP 認證機制，可在這裡填入認證所需的使用者名稱，以免瀏覽器詢問。"
+  },
+  "OptionUiShowContextMenuLabel": {
+    "message": "啟用右鍵選單"
   },
   "OptionViewerViewHtzLabel": {
     "message": "檢視 HTZ 檔案"
