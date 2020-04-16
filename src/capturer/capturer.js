@@ -1350,11 +1350,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       });
 
       const message = {
+        internalize,
         settings: {
           item,
           frameIsMain,
         },
-        internalize,
+        options: Object.assign(scrapbook.getOptions("capture"), options),
       };
 
       isDebug && console.debug("(main) send", source, message);

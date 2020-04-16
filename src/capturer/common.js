@@ -2459,59 +2459,12 @@
         headNode.appendChild(elem);
       }
 
-      // special loaders
-      // remove previous loader
-      Array.prototype.forEach.call(rootNode.querySelectorAll('[data-scrapbook-elem="shadowroot-loader"]'), (elem) => {
-        elem.remove();
+      // common pre-save process
+      await capturer.preSaveProcess({
+        rootNode,
+        requireShadowRootLoader,
+        requireCanvasLoader,
       });
-
-      if (requireShadowRootLoader) {
-        const loader = rootNode.appendChild(doc.createElement("script"));
-        loader.setAttribute("data-scrapbook-elem", "shadowroot-loader");
-        // browsers supporting shadowRoot all support ES6
-        loader.textContent = "(" + scrapbook.compressJsFunc(function () {
-          var k = "data-scrapbook-shadowroot", d = document, p, s, data, mode, fn = n => {
-            n.querySelectorAll(`[${k}]`).forEach(h => {
-              if (!h.shadowRoot && h.attachShadow) {
-                ({data, mode} = JSON.parse(h.getAttribute(k)));
-                s = h.attachShadow({mode});
-                s.innerHTML = data;
-                fn(s);
-              }
-            });
-          };
-          fn(d);
-        }) + ")()";
-      }
-
-      // remove previous loader
-      Array.prototype.forEach.call(rootNode.querySelectorAll('[data-scrapbook-elem="canvas-loader"]'), (elem) => {
-        elem.remove();
-      });
-
-      if (requireCanvasLoader) {
-        const loader = rootNode.appendChild(doc.createElement("script"));
-        loader.setAttribute("data-scrapbook-elem", "canvas-loader");
-        loader.textContent = "(" + scrapbook.compressJsFunc(function () {
-          var k = "data-scrapbook-canvas",
-              f = function (r) {
-                var e = r.querySelectorAll("*"), i = e.length;
-                while (i--) {
-                  if (e[i].shadowRoot) {
-                    f(e[i].shadowRoot);
-                  }
-                  if (e[i].hasAttribute(k)) {
-                    (function () {
-                      var c = e[i], g = new Image();
-                      g.onload = function () { c.getContext('2d').drawImage(g, 0, 0); };
-                      g.src = c.getAttribute(k);
-                    })();
-                  }
-                }
-              };
-          f(document);
-        }) + ")()";
-      }
 
       // save document
       let content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
@@ -2543,14 +2496,16 @@
    * @kind invokable
    * @param {Object} params
    * @param {Document} params.doc
-   * @param {Object} params.settings
    * @param {boolean} params.internalize
+   * @param {Object} params.settings
+   * @param {Object} params.options
    * @return {Promise<Object>}
    */
   capturer.retrieveDocumentContent = async function (params) {
     isDebug && console.debug("call: retrieveDocumentContent");
 
-    const {doc = document, settings: {item, frameIsMain}, internalize} = params;
+    const {doc = document, internalize, settings, options} = params;
+    const {item, frameIsMain} = settings;
 
     const data = {};
     const docs = scrapbook.flattenFrames(doc);
@@ -2686,6 +2641,13 @@
             }
           }
         }
+
+        // common pre-save process
+        await capturer.preSaveProcess({
+          rootNode,
+          requireShadowRootLoader: !!rootNode.querySelector('[data-scrapbook-shadowroot]'),
+          requireCanvasLoader: !!rootNode.querySelector('canvas[data-scrapbook-canvas]'),
+        });
       }
 
       const content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
@@ -2699,6 +2661,74 @@
       };
     }
     return data;
+  };
+
+  /**
+   * Process DOM before capture or resave.
+   *
+   * @param {Object} params
+   * @param {Document} params.rootNode
+   * @param {boolean} params.requireShadowRootLoader
+   * @param {boolean} params.requireCanvasLoader
+   * @return {Promise<Object>}
+   */
+  capturer.preSaveProcess = async function (params) {
+    isDebug && console.debug("call: preSaveProcess");
+
+    const {rootNode, requireShadowRootLoader, requireCanvasLoader} = params;
+    const doc = rootNode.ownerDocument;
+
+    // update special loaders
+    // shadow root
+    for (const elem of rootNode.querySelectorAll('script[data-scrapbook-elem="shadowroot-loader"]')) {
+      elem.remove();
+    }
+    if (requireShadowRootLoader) {
+      const loader = rootNode.appendChild(doc.createElement("script"));
+      loader.setAttribute("data-scrapbook-elem", "shadowroot-loader");
+      // browsers supporting shadowRoot all support ES6
+      loader.textContent = "(" + scrapbook.compressJsFunc(function () {
+        var k = "data-scrapbook-shadowroot", d = document, p, s, data, mode, fn = n => {
+          n.querySelectorAll(`[${k}]`).forEach(h => {
+            if (!h.shadowRoot && h.attachShadow) {
+              ({data, mode} = JSON.parse(h.getAttribute(k)));
+              s = h.attachShadow({mode});
+              s.innerHTML = data;
+              fn(s);
+            }
+          });
+        };
+        fn(d);
+      }) + ")()";
+    }
+
+    // canvas
+    for (const elem of rootNode.querySelectorAll('script[data-scrapbook-elem="canvas-loader"]')) {
+      elem.remove();
+    }
+    if (requireCanvasLoader) {
+      const loader = rootNode.appendChild(doc.createElement("script"));
+      loader.setAttribute("data-scrapbook-elem", "canvas-loader");
+      loader.textContent = "(" + scrapbook.compressJsFunc(function () {
+        var k = "data-scrapbook-canvas",
+            f = function (r) {
+              var e = r.querySelectorAll("*"), i = e.length;
+              while (i--) {
+                if (e[i].shadowRoot) {
+                  f(e[i].shadowRoot);
+                }
+                if (e[i].hasAttribute(k)) {
+                  (function () {
+                    var c = e[i], g = new Image();
+                    g.onload = function () { c.getContext('2d').drawImage(g, 0, 0); };
+                    g.src = c.getAttribute(k);
+                  })();
+                }
+              }
+            };
+        f(document);
+      }) + ")()";
+    }
   };
 
   /**
