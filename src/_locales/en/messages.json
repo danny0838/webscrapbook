@@ -510,6 +510,12 @@
   "OptionCaptureCommonSaveUsedLabel": {
     "message": "Save used"
   },
+  "OptionCaptureDeleteErasedOnCaptureLabel": {
+    "message": "Automatically delete all erased content on capturing"
+  },
+  "OptionCaptureDeleteErasedOnSaveLabel": {
+    "message": "Automatically delete all erased content on saving"
+  },
   "OptionCaptureDownLinkExtFilterError": {
     "message": "The following regular expressions in file extension filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
     "placeholders": {

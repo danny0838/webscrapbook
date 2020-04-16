@@ -2462,6 +2462,7 @@
       // common pre-save process
       await capturer.preSaveProcess({
         rootNode,
+        deleteErased: options["capture.deleteErasedOnCapture"],
         requireShadowRootLoader,
         requireCanvasLoader,
       });
@@ -2645,6 +2646,7 @@
         // common pre-save process
         await capturer.preSaveProcess({
           rootNode,
+          deleteErased: options["capture.deleteErasedOnSave"],
           requireShadowRootLoader: !!rootNode.querySelector('[data-scrapbook-shadowroot]'),
           requireCanvasLoader: !!rootNode.querySelector('canvas[data-scrapbook-canvas]'),
         });
@@ -2668,6 +2670,7 @@
    *
    * @param {Object} params
    * @param {Document} params.rootNode
+   * @param {boolean} params.deleteErased
    * @param {boolean} params.requireShadowRootLoader
    * @param {boolean} params.requireCanvasLoader
    * @return {Promise<Object>}
@@ -2675,8 +2678,27 @@
   capturer.preSaveProcess = async function (params) {
     isDebug && console.debug("call: preSaveProcess");
 
-    const {rootNode, requireShadowRootLoader, requireCanvasLoader} = params;
+    const {rootNode, deleteErased, requireShadowRootLoader, requireCanvasLoader} = params;
     const doc = rootNode.ownerDocument;
+
+    // delete all erased contents
+    if (deleteErased) {
+      const selectedNodes = [];
+      const nodeIterator = doc.createNodeIterator(
+        rootNode,
+        NodeFilter.SHOW_COMMENT,
+        node => scrapbook.getScrapBookObjectRemoveType(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+      );
+      let node;
+      while (node = nodeIterator.nextNode()) {
+        selectedNodes.push(node);
+      }
+
+      // handle descendant node first as it may be altered when handling ancestor
+      for (const elem of selectedNodes.reverse()) {
+        elem.remove();
+      }
+    }
 
     // update special loaders
     // shadow root

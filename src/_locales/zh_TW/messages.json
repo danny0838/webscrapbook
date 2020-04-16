@@ -510,6 +510,12 @@
   "OptionCaptureCommonSaveUsedLabel": {
     "message": "儲存使用"
   },
+  "OptionCaptureDeleteErasedOnCaptureLabel": {
+    "message": "擷取頁面時自動刪除所有擦除內容"
+  },
+  "OptionCaptureDeleteErasedOnSaveLabel": {
+    "message": "儲存頁面時自動刪除所有擦除內容"
+  },
   "OptionCaptureDownLinkExtFilterError": {
     "message": "以下副檔名過濾器的正規表示式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",
     "placeholders": {

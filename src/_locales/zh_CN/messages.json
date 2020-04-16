@@ -510,6 +510,12 @@
   "OptionCaptureCommonSaveUsedLabel": {
     "message": "保存使用"
   },
+  "OptionCaptureDeleteErasedOnCaptureLabel": {
+    "message": "获取页面时自动删除所有擦除内容"
+  },
+  "OptionCaptureDeleteErasedOnSaveLabel": {
+    "message": "保存页面时自动删除所有擦除内容"
+  },
   "OptionCaptureDownLinkExtFilterError": {
     "message": "以下扩展名过滤器的正则表达式语法有误，执行时会忽略它们，要停下来修正吗？\n\n$LINES$",
     "placeholders": {
