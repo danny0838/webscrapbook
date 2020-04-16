@@ -154,6 +154,30 @@
     }
   }
 
+  function getDetailStatusKey() {
+      return {table: "optionDetailStatus"};
+  }
+
+  async function loadDetailStatus() {
+    const status = await scrapbook.cache.get(getDetailStatusKey(), 'storage');
+    if (!status) { return; }
+
+    for (const id in status) {
+      const elem = document.getElementById(id);
+      if (elem) {
+        elem.open = status[id];
+      }
+    }
+  }
+
+  async function saveDetailStatus() {
+    const status = {};
+    for (const elem of document.querySelectorAll('details')) {
+      status[elem.id] = elem.open;
+    }
+    await scrapbook.cache.set(getDetailStatusKey(), status, 'storage');
+  }
+
   function verifyHelpers() {
     const json = document.getElementById("opt_capture.helpers").value;
 
@@ -286,6 +310,9 @@
     await initDefaultOptions();
     refreshForm();
 
+    // load detail status
+    await loadDetailStatus();
+
     // event handlers
     document.getElementById("opt_capture.saveTo").addEventListener("change", renewCaptureSaveToDetails);
 
@@ -345,6 +372,12 @@
       await importOptions(file);
       refreshForm();
     });
+
+    for (const elem of document.querySelectorAll('details')) {
+      elem.addEventListener("toggle", (event) => {
+        saveDetailStatus();
+      });
+    }
 
     for (const elem of document.querySelectorAll('a[data-tooltip]')) {
       elem.addEventListener("click", (event) => {
