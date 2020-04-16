@@ -59,7 +59,7 @@
     "capture.font": "save-used", // "save", "save-used", "link", "blank"
     "capture.style": "save", // "save", "link", "blank", "remove"
     "capture.styleInline": "save", // "save", "blank", "remove"
-    "capture.rewriteCss": "url", // "none", "url"
+    "capture.rewriteCss": "url", // "none", "url", "tidy"
     "capture.mergeCssResources": true,
     "capture.script": "remove", // "save", "link", "blank", "remove"
     "capture.noscript": "save", // "save", "blank", "remove"

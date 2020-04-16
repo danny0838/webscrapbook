@@ -692,6 +692,12 @@
   "OptionCaptureRewriteCssNoneLabel": {
     "message": "不改寫"
   },
+  "OptionCaptureRewriteCssTidyLabel": {
+    "message": "整理"
+  },
+  "OptionCaptureRewriteCssTooltip": {
+    "message": "此選項決定樣式表的改寫方式。\n\n• 不改寫：儲存原來的樣式表，不做任何改寫。\n• 改寫網址：改寫樣式表的網址，使之連結至擷取的資源。\n• 整理：改寫網址並整理樣式表，移除註解、多餘空白、及瀏覽器無法解讀的樣式。這有助於縮小容量，但可能導致在其他瀏覽器無法正常顯示。"
+  },
   "OptionCaptureRewriteCssUrlLabel": {
     "message": "改寫網址"
   },

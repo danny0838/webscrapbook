@@ -1864,7 +1864,7 @@
             case "save":
             default:
               switch (options["capture.rewriteCss"]) {
-                case "url":
+                case "url": {
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await cssHandler.rewriteCssText({
                       cssText: elem.getAttribute("style"),
@@ -1875,10 +1875,24 @@
                     return response;
                   });
                   break;
+                }
+                case "tidy": {
+                  tasks[tasks.length] = halter.then(async () => {
+                    const response = await cssHandler.rewriteCssText({
+                      cssText: elem.style.cssText,
+                      refUrl,
+                      isInline: true,
+                    });
+                    elem.setAttribute("style", response);
+                    return response;
+                  });
+                  break;
+                }
                 case "none":
-                default:
+                default: {
                   // do nothing
                   break;
+                }
               }
               break;
           }
@@ -3874,6 +3888,31 @@
       // do the rewriting according to options
       switch (options["capture.rewriteCss"]) {
         case "url": {
+          cssText = await this.rewriteCssText({
+            cssText,
+            refUrl: sourceUrl || refUrl,
+            refCss,
+            settings,
+            options,
+          });
+          break;
+        }
+        case "tidy": {
+          if (!isDynamicCss) {
+            charset = "UTF-8";
+            if (refCss && !isCircular) {
+              const cssRulesCssom = await this.getRulesFromCss({
+                css: refCss,
+                refUrl,
+              });
+              cssText = Array.prototype.map.call(
+                cssRulesCssom,
+                cssRule => cssRule.cssText,
+              ).join("\n");
+            } else {
+              cssText = '';
+            }
+          }
           cssText = await this.rewriteCssText({
             cssText,
             refUrl: sourceUrl || refUrl,

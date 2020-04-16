@@ -692,6 +692,12 @@
   "OptionCaptureRewriteCssNoneLabel": {
     "message": "No rewrite"
   },
+  "OptionCaptureRewriteCssTidyLabel": {
+    "message": "Tidy"
+  },
+  "OptionCaptureRewriteCssTooltip": {
+    "message": "This determines how stylesheets are rewritten.\n\n• No rewrite: Save stylesheets as-is.\n• Rewrite URL: Rewrite URLs in the stylesheets to get them link to downloaded resources correctly.\n• Tidy: Rewrite URLs and tidy stylesheets, by removing comments, spaces, and style declarations not recognized by the browser. This helps reduce size, but may cause the page not shown correctly on another browser."
+  },
   "OptionCaptureRewriteCssUrlLabel": {
     "message": "Rewrite URL"
   },
