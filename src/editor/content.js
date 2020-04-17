@@ -1219,15 +1219,42 @@ ${sRoot}.toolbar .toolbar-close:hover {
    * @return {boolean} Whether the document has a working script.
    */
   editor.isDocumentScripted = function (doc) {
+    // https://mimesniff.spec.whatwg.org/
+    const SCRIPT_TYPES = new Set([
+      "",
+      "application/ecmascript",
+      "application/javascript",
+      "application/x-ecmascript",
+      "application/x-javascript",
+      "text/ecmascript",
+      "text/javascript",
+      "text/javascript1.0",
+      "text/javascript1.1",
+      "text/javascript1.2",
+      "text/javascript1.3",
+      "text/javascript1.4",
+      "text/javascript1.5",
+      "text/jscript",
+      "text/livescript",
+      "text/x-ecmascript",
+      "text/x-javascript",
+    ]);
+    const LOADER_TYPES = new Set([
+      "canvas-loader",
+      "shadowroot-loader",
+    ]);
+
     for (const fdoc of scrapbook.flattenFrames(doc)) {
       for (const elem of fdoc.querySelectorAll("*")) {
         // check <script> elements
-        if (elem.matches('script[src]')) {
-          return true;
-        }
-        if (elem.matches('script:not([src])')) {
-          if (!/^\s*(?:(?:\/\*[^*]*(?:\*(?!\/)[^*]*)*\*\/|\/\/.*)\s*)*$/.test(elem.textContent)) {
-            return true;
+        if (elem.nodeName.toLowerCase() === 'script') {
+          if (SCRIPT_TYPES.has(elem.type.toLowerCase()) &&
+              !LOADER_TYPES.has(scrapbook.getScrapbookObjectType(elem))) {
+            if (elem.src) {
+              return true;
+            } else if (!/^\s*(?:(?:\/\*[^*]*(?:\*(?!\/)[^*]*)*\*\/|\/\/.*)\s*)*$/.test(elem.textContent)) {
+              return true;
+            }
           }
         }
 
