@@ -2820,6 +2820,7 @@
               s = h.attachShadow({mode});
               s.innerHTML = data;
               fn(s);
+              h.removeAttribute(k);
             }
           });
         };
@@ -2847,6 +2848,7 @@
                     var c = e[i], g = new Image();
                     g.onload = function () { c.getContext('2d').drawImage(g, 0, 0); };
                     g.src = c.getAttribute(k);
+                    c.removeAttribute(k);
                   })();
                 }
               }
