@@ -3061,12 +3061,17 @@
       return result;
     }
 
+    /**
+     * Verify whether selectorText matches something in root.
+     *
+     * @param {Element|DocumentFragment} root
+     * @param {string} selectorText - selectorText of a CSSStyleRule
+     */
     verifySelector(root, selectorText) {
       try {
+        // querySelector of a pseudo selector like a:hover always return null
         if (root.querySelector(selectorText)) { return true; }
 
-        // querySelector of selectors like a:hover or so always return null
-        //
         // Preserve a pseudo-class(:*) or pseudo-element(::*) only if:
         // 1. it's a pure pseudo (e.g. :hover), or
         // 2. its non-pseudo version (e.g. a for a:hover) exist
@@ -3098,7 +3103,18 @@
             if (depseudoSelectors[i] === "" || root.querySelector(depseudoSelectors[i])) return true;
           };
         }
-      } catch (ex) {}
+      } catch (ex) {
+        // As CSSStyleRule.selectorText is already a valid selector,
+        // an error means it's valid but not supported by querySelector.
+        // One example is a namespaced selector like: svg|a,
+        // as querySelector cannot consume a @namespace rule in prior.
+        // Return true in such case as false positive is safer than false
+        // negative.
+        //
+        // @TODO:
+        // Full implementation of a correct selector match.
+        return true;
+      }
 
       return false;
     }
