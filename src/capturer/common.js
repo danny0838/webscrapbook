@@ -1876,7 +1876,8 @@
                   });
                   break;
                 }
-                case "tidy": {
+                case "tidy":
+                case "match": {
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await cssHandler.rewriteCssText({
                       cssText: elem.style.cssText,
@@ -3745,6 +3746,142 @@
     }
 
     /**
+     * Rewrite given cssRules to cssText.
+     */
+    async rewriteCssRules({cssRules, refUrl, refCss, rootNode, indent = '', settings, options}) {
+      // get rootNode, the cloned <html> or documentElement (shadowRoot)
+      if (!rootNode) {
+        let css = refCss;
+        let parent = css.parentStyleSheet;
+        while (parent) {
+          css = parent;
+          parent = css.parentStyleSheet;
+        }
+
+        rootNode = this.clonedNodeMap.get(css.ownerNode).getRootNode();
+
+        // if it's <html>, wrap it with a documentFragment, so that CSS selector "html" can match
+        if (rootNode.nodeType === 1) {
+          const frag = rootNode.ownerDocument.createDocumentFragment();
+          frag.appendChild(rootNode);
+          rootNode = frag;
+        }
+      }
+
+      const rules = [];
+      for (const cssRule of cssRules) {
+        switch (cssRule.type) {
+          case CSSRule.STYLE_RULE: {
+            // this CSS rule applies to no node in the captured area
+            if (rootNode && !this.verifySelector(rootNode, cssRule.selectorText)) { break; }
+
+            const cssText = await this.rewriteCssText({
+              cssText: cssRule.cssText,
+              refUrl,
+              refCss,
+              settings,
+              options,
+            });
+            if (cssText) {
+              rules[rules.length] = indent + cssText;
+            }
+            break;
+          }
+          case CSSRule.IMPORT_RULE: {
+            const cssText = await this.rewriteCssText({
+              cssText: cssRule.cssText,
+              refUrl,
+              refCss,
+              settings,
+              options,
+            });
+            if (cssText) {
+              rules[rules.length] = indent + cssText;
+            }
+            break;
+          }
+          case CSSRule.MEDIA_RULE: {
+            const cssText = (await this.rewriteCssRules({
+              cssRules: cssRule.cssRules,
+              refUrl,
+              refCss,
+              rootNode,
+              indent: indent + '  ',
+              settings,
+              options,
+            }));
+            if (cssText) {
+              rules[rules.length] = indent + '@media ' + cssRule.conditionText + ' {\n'
+                  + cssText + '\n'
+                  + indent + '}';
+            }
+            break;
+          }
+          case CSSRule.KEYFRAMES_RULE: {
+            const cssText = (await this.rewriteCssRules({
+              cssRules: cssRule.cssRules,
+              refUrl,
+              refCss,
+              rootNode,
+              indent: indent + '  ',
+              settings,
+              options,
+            }));
+            if (cssText) {
+              rules[rules.length] = indent + '@keyframes ' + CSS.escape(cssRule.name) + ' {\n'
+                  + cssText + '\n'
+                  + indent + '}';
+            }
+            break;
+          }
+          case CSSRule.SUPPORTS_RULE: {
+            const cssText = (await this.rewriteCssRules({
+              cssRules: cssRule.cssRules,
+              refUrl,
+              refCss,
+              rootNode,
+              indent: indent + '  ',
+              settings,
+              options,
+            }));
+            if (cssText) {
+              rules[rules.length] = indent + '@supports ' + cssRule.conditionText + ' {\n'
+                  + cssText + '\n'
+                  + indent + '}';
+            }
+            break;
+          }
+          case CSSRule.FONT_FACE_RULE:
+          case CSSRule.PAGE_RULE:
+          case CSSRule.KEYFRAME_RULE:
+          case 11/* CSSRule.COUNTER_STYLE_RULE */:
+          case 13/* CSSRule.DOCUMENT_RULE */:
+          default: {
+            const cssText = await this.rewriteCssText({
+              cssText: cssRule.cssText,
+              refUrl,
+              refCss,
+              settings,
+              options,
+            });
+            if (cssText) {
+              rules[rules.length] = indent + cssText;
+            }
+            break;
+          }
+          case CSSRule.NAMESPACE_RULE: {
+            const cssText = cssRule.cssText;
+            if (cssText) {
+              rules[rules.length] = indent + cssText;
+            }
+            break;
+          }
+        }
+      }
+      return rules.join('\n');
+    }
+
+    /**
      * Rewrite an internal, external, or imported CSS.
      *
      * - Pass {elem, callback} for internal or external CSS.
@@ -3763,6 +3900,7 @@
       let sourceUrl;
       let fetchResult;
       let cssText = "";
+      let cssRules;
       let charset;
       let newFilename;
       let isCircular = false;
@@ -3814,27 +3952,27 @@
       // - Firefox: cssRules of the circularly referenced StyleSheet "style1.css"
       //            is empty, but can be modified by scripts.
       if (refCss && !isCircular) {
-        let cssRulesCssom = await this.getRulesFromCss({
+        cssRules = await this.getRulesFromCss({
           css: refCss,
           refUrl,
           crossOrigin: false,
           errorWithNull: true,
         });
-        if (cssRulesCssom) {
+        if (cssRules) {
           // scrapbook.utf8ToUnicode throws an error if cssText contains a UTF-8 invalid char
           const cssTextUnicode = charset ? cssText : await scrapbook.readFileAsText(new Blob([scrapbook.byteStringToArrayBuffer(cssText)]));
 
           const cssRulesSource = await this.getRulesFromCssText(cssTextUnicode);
 
-          if (cssRulesSource.length !== cssRulesCssom.length ||
+          if (cssRulesSource.length !== cssRules.length ||
               !Array.prototype.every.call(
                 cssRulesSource,
-                (cssRule, i) => (cssRule.cssText === cssRulesCssom[i].cssText),
+                (cssRule, i) => (cssRule.cssText === cssRules[i].cssText),
               )) {
             isDynamicCss = true;
             charset = "UTF-8";
             cssText = Array.prototype.map.call(
-              cssRulesCssom,
+              cssRules,
               cssRule => cssRule.cssText,
             ).join("\n");
           }
@@ -3920,6 +4058,29 @@
             settings,
             options,
           });
+          break;
+        }
+        case "match": {
+          if (!cssRules) {
+            charset = "UTF-8";
+            if (refCss && !isCircular) {
+              cssRules = await this.getRulesFromCss({
+                css: refCss,
+                refUrl,
+              });
+            }
+          }
+          if (cssRules) {
+            cssText = await this.rewriteCssRules({
+              cssRules,
+              refUrl: sourceUrl || refUrl,
+              refCss,
+              settings,
+              options,
+            });
+          } else {
+            cssText = '';
+          }
           break;
         }
         case "none":

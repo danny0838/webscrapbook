@@ -2562,6 +2562,72 @@ svg|a text, text svg|a {
   );
   assert(doc.querySelector('blockquote').getAttribute('style').match(regex));
 
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["imported.css"]);
+  assert(zip.files["sansation_light.woff"]);
+  assert(zip.files["green.bmp"]);
+  assert(!zip.files["unsupported-1.bmp"]);
+  assert(!zip.files["unsupported-2.bmp"]);
+  assert(!zip.files["unsupported-3.bmp"]);
+  assert(!zip.files["unsupported-4.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+  var regex = new RegExp(
+    `@import url\\("imported.css"\\);\\s*` +
+    `@font-face\\s*{\\s*font-family:\\s*fontface;\\s*src:\\s*url\\("sansation_light.woff"\\);\\s*}\\s*` +
+    `#background\\s*{\\s*background:\\s*(?=.*url\\("green.bmp"\\)).*;\\s*}\\s*`
+  );
+  assert(styleElems[0].textContent.trim().match(regex));
+  var regex = new RegExp(
+    `@media\\s*print\\s*{\\s*` +
+    `#media\\s*{\\s*color:\\s*green;\\s*}\\s*` +
+    `}\\s*`
+  );
+  assert(styleElems[1].textContent.trim().match(regex));
+  var regex = new RegExp(
+    `@keyframes\\s*demo\\s*{\\s*` +
+    `0%\\s*{\\s*transform:\\s*translateX\\(-5px\\);\\s*}\\s*` +
+    `100%\\s*{\\s*transform:\\s*translateX\\(40px\\);\\s*}\\s*` +
+    `}\\s*` +
+    `#keyframes\\s*{\\s*animation:\\s*(?=.*\\b3s\\b)(?=.*\\bdemo\\b)(?=.*\\blinear\\b)(?=.*\\binfinite\\b).*;\\s*}\\s*`
+  );
+  assert(styleElems[2].textContent.trim().match(regex));
+  var regex = new RegExp(
+    `@supports\\s*\\(--myvar:\\s*green\\s*\\)\\s*{\\s*` +
+    `:root\\s*{\\s*--myvar:\\s*green;\\s*}\\s*` +
+    `#supports\\s*{\\s*color:\\s*var\\(--myvar\\);\\s*}\\s*` +
+    `}\\s*`
+  );
+  assert(styleElems[3].textContent.trim().match(regex));
+  var regex = new RegExp(
+    `@namespace\\s*svg\\s*url\\("http://www.w3.org/2000/svg"\\);\\s*` +
+    `svg\\|a\\s*text,\\s*text\\s*svg\\|a\\s*{\\s*fill:\\s*blue;\\s*text-decoration:\\s*underline;\\s*}\\s*`
+  );
+  assert(styleElems[4].textContent.trim().match(regex));
+  var regex = new RegExp(
+    `#unsupported\\s*{\\s*}\\s*`
+  );
+  assert(styleElems[5].textContent.trim().match(regex));
+
+  var regex = new RegExp(
+    `background:\\s*(?=.*\\burl\\("green.bmp"\\)).*;\\s*`
+  );
+  assert(doc.querySelector('blockquote').getAttribute('style').match(regex));
+
   /* capture.rewriteCss = none */
   var options = {
     "capture.rewriteCss": "none",
@@ -2619,6 +2685,67 @@ svg|a text, text svg|a {
 }`);
 
   assert(doc.querySelector('blockquote').getAttribute('style') === `background: blue; background: url(ref/green.bmp);`);
+}
+
+/**
+ * Check CSS not matching DOM is correctly removed for capture.rewriteCss = "match"
+ *
+ * capture.rewriteCss
+ */
+async function test_capture_css_rewriteCss2() {
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss2/rewrite.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files["green.bmp"]);
+  assert(!zip.files["unsupported-1.bmp"]);
+  assert(!zip.files["unsupported-2.bmp"]);
+  assert(!zip.files["unsupported-3.bmp"]);
+  assert(!zip.files["unsupported-4.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+
+  var regex = new RegExp(`^$`);
+  assert(styleElems[0].textContent.trim().match(regex));
+
+  var regex = new RegExp(`^$`);
+  assert(styleElems[1].textContent.trim().match(regex));
+
+  var regex = new RegExp(
+    `@keyframes\\s*demo\\s*{\\s*` +
+    `0%\\s*{\\s*transform:\\s*translateX\\(-5px\\);\\s*}\\s*` +
+    `100%\\s*{\\s*transform:\\s*translateX\\(40px\\);\\s*}\\s*` +
+    `}\\s*`
+  );
+  assert(styleElems[2].textContent.trim().match(regex));
+
+  var regex = new RegExp(
+    `@supports\\s*\\(--myvar:\\s*green\\s*\\)\\s*{\\s*` +
+    `:root\\s*{\\s*--myvar:\\s*green;\\s*}\\s*` +
+    `}\\s*`
+  );
+  assert(styleElems[3].textContent.trim().match(regex));
+
+  // @FIXME: remove style declaration with an unmatched namespaced selector
+  var regex = new RegExp(
+    `@namespace\\s*svg\\s*url\\("http://www.w3.org/2000/svg"\\);\\s*` +
+    `svg\\|a\\s*nonexist,\\s*nonexist\\s*svg\\|a\\s*{\\s*fill:\\s*blue;\\s*text-decoration:\\s*underline;\\s*}\\s*`
+  );
+  assert(styleElems[4].textContent.trim().match(regex));
+
+  var regex = new RegExp(`^$`);
+  assert(styleElems[5].textContent.trim().match(regex));
 }
 
 /**
@@ -8101,6 +8228,7 @@ async function runTests() {
   await test(test_capture_css_styleInline);
   await test(test_capture_css_disabled);
   await test(test_capture_css_rewriteCss);
+  await test(test_capture_css_rewriteCss2);
   await test(test_capture_css_syntax);
   await test(test_capture_css_charset);
   await test(test_capture_css_rewrite);

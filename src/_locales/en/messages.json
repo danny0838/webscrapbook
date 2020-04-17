@@ -689,6 +689,9 @@
   "OptionCaptureRewriteCssLabel": {
     "message": "Rewrite styles:"
   },
+  "OptionCaptureRewriteCssMatchLabel": {
+    "message": "Advanced tidy"
+  },
   "OptionCaptureRewriteCssNoneLabel": {
     "message": "No rewrite"
   },
@@ -696,7 +699,7 @@
     "message": "Tidy"
   },
   "OptionCaptureRewriteCssTooltip": {
-    "message": "This determines how stylesheets are rewritten.\n\n• No rewrite: Save stylesheets as-is.\n• Rewrite URL: Rewrite URLs in the stylesheets to get them link to downloaded resources correctly.\n• Tidy: Rewrite URLs and tidy stylesheets, by removing comments, spaces, and style declarations not recognized by the browser. This helps reduce size, but may cause the page not shown correctly on another browser."
+    "message": "This determines how stylesheets are rewritten.\n\n• No rewrite: Save stylesheets as-is.\n• Rewrite URL: Rewrite URLs in the stylesheets to get them link to downloaded resources correctly.\n• Tidy: Rewrite URLs and tidy stylesheets, by removing comments, spaces, and style declarations not recognized by the browser. This helps reduce size, but may cause the page not shown correctly on another browser.\n• Advanced tidy: Rewrite URLs, tidy stylesheets, and remove style declarations that is not used by the captured page. This helps further reduce size, but may cause the page not shown correctly on another browser, and could conflict with the saved scripts."
   },
   "OptionCaptureRewriteCssUrlLabel": {
     "message": "Rewrite URL"
@@ -768,7 +771,7 @@
     "message": "Scripts:"
   },
   "OptionCaptureScriptTooltip": {
-    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n• Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Besides, saved scripts don't run in the archive page viewer due to a security concern. It is generally recommended to set capture options to “save”, “canvas” to “save initial status”, “shadow DOMs” to “remove”, and “remove hidden elements” to “disable”, to avoid a conflict with the script.\n• Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the script.\n• Remove: Remove the script element. Note that this could alter the web page layout in some rare cases."
+    "message": "This determines how all scripts (including SCRIPT elements, links with javascript: protocol, and dynamic attributes like onclick, etc.) are handled.\n\n• Save: Save the referenced script resource to local. NOTE: The saved script may not run normally as the captured page has left the original server environment and has had partial content rewritten. Besides, saved scripts don't run in the archive page viewer due to a security concern. It is generally recommended to set capture options to “save”, “canvas” to “save initial status”, “shadow DOMs” to “remove”, “remove hidden elements” to “disable”, and “rewrite styles” to non-“advanced tidy”, to avoid a conflict with the script.\n• Link: Link the script to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the script.\n• Remove: Remove the script element. Note that this could alter the web page layout in some rare cases."
   },
   "OptionCaptureShadowDomLabel": {
     "message": "Shadow DOMs:"

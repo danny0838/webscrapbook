@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+#nonexist { background: url(ref/green.bmp); }
+</style>
+<style>
+@media print {
+  #nonexist { color: green; }
+}
+</style>
+<style>
+@keyframes demo {
+  from { transform: translateX(-5px); }
+  to { transform: translateX(40px); }
+}
+#nonexist { animation: demo 3s linear infinite; }
+</style>
+<style>
+@supports (--myvar: green) {
+  :root {
+    --myvar: green;
+  }
+  #nonexist {
+    color: var(--myvar);
+  }
+}
+</style>
+<style>
+@namespace svg url(http://www.w3.org/2000/svg);
+svg|a nonexist, nonexist svg|a {
+  fill: blue;
+  text-decoration: underline;
+}
+</style>
+<style>
+/* unsupported rules */
+#nonexist {
+  *background: url(ref/unsupported-1.bmp); /* IE7 */
+  _background: url(ref/unsupported-2.bmp); /* IE6 */
+  -o-background: url(ref/unsupported-3.bmp); /* vandor prefix */
+  unknown: url(ref/unsupported-4.bmp); /* unknown */
+}
+</style>
+</head>
+<body>
+</body>
+</html>
