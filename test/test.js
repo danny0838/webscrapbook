@@ -967,7 +967,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
  *
  * capture.saveDataUriAsFile
  * capturer.downloadFile
- * capturer.processCssText
+ * capturer.DocumentCssHandler
  */
 async function test_capture_dataUri_resolve() {
   var options = {
@@ -2429,7 +2429,7 @@ async function test_capture_css_disabled() {
  * Check if option works
  *
  * capture.rewriteCss
- * capturer.processCssText
+ * capturer.DocumentCssHandler
  */
 async function test_capture_css_rewriteCss() {
   /* capture.rewriteCss = url */
@@ -6728,7 +6728,7 @@ async function test_capture_record_attrs() {
  *
  * capture.recordSourceUri
  * capturer.captureDocument
- * capturer.processCssText
+ * capturer.DocumentCssHandler
  */
 async function test_capture_record_urls() {
   var options = {
@@ -6850,7 +6850,7 @@ p { background-image: url("null.bmp"); }`);
  *
  * capture.recordSourceUri
  * capturer.captureDocument
- * capturer.processCssText
+ * capturer.DocumentCssHandler
  */
 async function test_capture_record_urls2() {
   var options = {
@@ -6963,7 +6963,7 @@ p { background-image: url(""); }`);
  *
  * capture.recordSourceUri
  * capturer.captureDocument
- * capturer.processCssText
+ * capturer.DocumentCssHandler
  */
 async function test_capture_record_urls3() {
   var options = {
@@ -7034,7 +7034,7 @@ async function test_capture_record_urls3() {
  *
  * capture.recordSourceUri
  * capturer.captureDocument
- * capturer.processCssText
+ * capturer.DocumentCssHandler
  */
 async function test_capture_record_urls4() {
   var options = {
