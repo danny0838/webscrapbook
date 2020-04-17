@@ -46,6 +46,8 @@ const baseOptions = {
   "capture.recordSourceUri": false,
   "capture.helpersEnabled": false,
   "capture.helpers": "",
+  "capture.deleteErasedOnCapture": false,
+  "capture.deleteErasedOnSave": false,
 };
 
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
