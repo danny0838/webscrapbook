@@ -2545,137 +2545,215 @@
         continue;
       }
 
-      const rootNode = doc.documentElement.cloneNode(true);
+      const cloneNodeMapping = (node, deep = false) => {
+        const newNode = node.cloneNode(false);
+        origNodeMap.set(newNode, node);
+        clonedNodeMap.set(node, newNode);
 
-      const info = {
-        title: (frameIsMain && i === 0 ? item && item.title : doc.title) || "",
+        // recursively clone descendant nodes
+        if (deep) {
+          for (const childNode of node.childNodes) {
+            const newChildNode = cloneNodeMapping(childNode, true);
+            newNode.appendChild(newChildNode);
+          }
+        }
+
+        return newNode;
       };
 
-      // handle internalization
-      const resources = {};
-      if (internalize) {
-        const addResource = (url) => {
-          const uuid = scrapbook.getUuid();
-          const key = "urn:scrapbook:url:" + uuid;
-          resources[uuid] = url;
-          return key;
-        };
+      const addResource = (url) => {
+        const uuid = scrapbook.getUuid();
+        const key = "urn:scrapbook:url:" + uuid;
+        resources[uuid] = url;
+        return key;
+      };
 
-        for (const elem of rootNode.querySelectorAll('img')) {
-          if (elem.hasAttribute('src')) {
-            elem.setAttribute('src', addResource(elem.getAttribute('src')));
-          }
-          if (elem.hasAttribute("srcset")) {
-            elem.setAttribute("srcset", scrapbook.rewriteSrcset(elem.getAttribute("srcset"), url => addResource(url)));
-          }
-        }
-
-        for (const elem of rootNode.querySelectorAll('input[type="image"]')) {
-          if (elem.hasAttribute('src')) {
-            elem.setAttribute('src', addResource(elem.getAttribute('src')));
-          }
-        }
-
-        for (const elem of rootNode.querySelectorAll('audio')) {
-          if (elem.hasAttribute('src')) {
-            elem.setAttribute('src', addResource(elem.getAttribute('src')));
-          }
-        }
-
-        for (const elem of rootNode.querySelectorAll('video')) {
-          if (elem.hasAttribute('src')) {
-            elem.setAttribute('src', addResource(elem.getAttribute('src')));
-          }
-          if (elem.hasAttribute('poster')) {
-            elem.setAttribute('poster', addResource(elem.getAttribute('poster')));
-          }
-        }
-
-        for (const elem of rootNode.querySelectorAll('audio source, video source, picture source')) {
-          if (elem.hasAttribute('src')) {
-            elem.setAttribute('src', addResource(elem.getAttribute('src')));
-          }
-          if (elem.hasAttribute("srcset")) {
-            elem.setAttribute("srcset", scrapbook.rewriteSrcset(elem.getAttribute("srcset"), url => addResource(url)));
-          }
-        }
-
-        for (const elem of rootNode.querySelectorAll('audio track, video track')) {
-          if (elem.hasAttribute('src')) {
-            elem.setAttribute('src', addResource(elem.getAttribute('src')));
-          }
-        }
-      }
-
-      // handle special scrapbook elements
-      {
+      const processRootNode = (rootNode) => {
         // remove webscrapbook toolbar
         for (const elem of rootNode.querySelectorAll("web-scrapbook")) {
           elem.remove();
         }
 
-        // record form element status for "todo" elements
-        for (const elem of rootNode.querySelectorAll("input")) {
-          if (scrapbook.getScrapbookObjectType(elem) === "todo") {
-            switch (elem.type.toLowerCase()) {
-              case "checkbox":
-              case "radio":
-                if (elem.checked) {
-                  elem.setAttribute("checked", "checked");
-                } else {
-                  elem.removeAttribute("checked");
-                }
-                break;
-              case "image":
-                // skip image
-                break;
-              case "text":
-              default:
-                elem.setAttribute("value", elem.value);
-                break;
+        // handle internalization
+        if (internalize) {
+          for (const elem of rootNode.querySelectorAll('img')) {
+            if (elem.hasAttribute('src')) {
+              elem.setAttribute('src', addResource(elem.getAttribute('src')));
+            }
+            if (elem.hasAttribute("srcset")) {
+              elem.setAttribute("srcset", scrapbook.rewriteSrcset(elem.getAttribute("srcset"), url => addResource(url)));
+            }
+          }
+
+          for (const elem of rootNode.querySelectorAll('input[type="image"]')) {
+            if (elem.hasAttribute('src')) {
+              elem.setAttribute('src', addResource(elem.getAttribute('src')));
+            }
+          }
+
+          for (const elem of rootNode.querySelectorAll('audio')) {
+            if (elem.hasAttribute('src')) {
+              elem.setAttribute('src', addResource(elem.getAttribute('src')));
+            }
+          }
+
+          for (const elem of rootNode.querySelectorAll('video')) {
+            if (elem.hasAttribute('src')) {
+              elem.setAttribute('src', addResource(elem.getAttribute('src')));
+            }
+            if (elem.hasAttribute('poster')) {
+              elem.setAttribute('poster', addResource(elem.getAttribute('poster')));
+            }
+          }
+
+          for (const elem of rootNode.querySelectorAll('audio source, video source, picture source')) {
+            if (elem.hasAttribute('src')) {
+              elem.setAttribute('src', addResource(elem.getAttribute('src')));
+            }
+            if (elem.hasAttribute("srcset")) {
+              elem.setAttribute("srcset", scrapbook.rewriteSrcset(elem.getAttribute("srcset"), url => addResource(url)));
+            }
+          }
+
+          for (const elem of rootNode.querySelectorAll('audio track, video track')) {
+            if (elem.hasAttribute('src')) {
+              elem.setAttribute('src', addResource(elem.getAttribute('src')));
             }
           }
         }
 
-        for (const elem of rootNode.querySelectorAll("textarea")) {
-          if (scrapbook.getScrapbookObjectType(elem) === "todo") {
-            elem.textContent = elem.value;
-          }
-        }
-
-        // handle "title", "title-src" elements
+        // handle special scrapbook elements
         {
-          const titleNodes = [];
-          const titleSrcNodes = [];
-          for (const elem of rootNode.querySelectorAll("*")) {
-            switch (scrapbook.getScrapbookObjectType(elem)) {
-              case "title":
-                titleNodes.push(elem);
-                break;
-              case "title-src":
-                titleSrcNodes.push(elem);
-                break;
+          // record form element status for "todo" elements
+          for (const elem of rootNode.querySelectorAll("input")) {
+            if (scrapbook.getScrapbookObjectType(elem) === "todo") {
+              switch (elem.type.toLowerCase()) {
+                case "checkbox":
+                case "radio":
+                  if (elem.checked) {
+                    elem.setAttribute("checked", "checked");
+                  } else {
+                    elem.removeAttribute("checked");
+                  }
+                  break;
+                case "image":
+                  // skip image
+                  break;
+                case "text":
+                default:
+                  elem.setAttribute("value", elem.value);
+                  break;
+              }
             }
           }
-          for (const elem of titleSrcNodes) {
-            const text = elem.textContent;
-            if (text) { info.title = text; }
+
+          for (const elem of rootNode.querySelectorAll("textarea")) {
+            if (scrapbook.getScrapbookObjectType(elem) === "todo") {
+              elem.textContent = elem.value;
+            }
           }
-          for (const elem of titleNodes.concat(titleSrcNodes)) {
-            if (elem.textContent !== info.title) {
-              elem.textContent = info.title;
+
+          // handle "title", "title-src" elements
+          {
+            const titleNodes = [];
+            const titleSrcNodes = [];
+            for (const elem of rootNode.querySelectorAll("*")) {
+              switch (scrapbook.getScrapbookObjectType(elem)) {
+                case "title":
+                  titleNodes.push(elem);
+                  break;
+                case "title-src":
+                  titleSrcNodes.push(elem);
+                  break;
+              }
+            }
+            for (const elem of titleSrcNodes) {
+              const text = elem.textContent;
+              if (text) { info.title = text; }
+            }
+            for (const elem of titleNodes.concat(titleSrcNodes)) {
+              if (elem.textContent !== info.title) {
+                elem.textContent = info.title;
+              }
             }
           }
         }
 
-        // common pre-save process
-        await capturer.preSaveProcess({
-          rootNode,
-          deleteErased: options["capture.deleteErasedOnSave"],
-          requireShadowRootLoader: !!rootNode.querySelector('[data-scrapbook-shadowroot]'),
-          requireCanvasLoader: !!rootNode.querySelector('canvas[data-scrapbook-canvas]'),
-        });
-      }
+        // update canvas data
+        for (const elem of rootNode.querySelectorAll("canvas")) {
+          elem.removeAttribute("data-scrapbook-canvas");
+          const elemOrig = origNodeMap.get(elem);
+          if (!elemOrig) { continue; }
+          if (scrapbook.isCanvasBlank(elemOrig)) { continue; }
+          elem.setAttribute("data-scrapbook-canvas", elemOrig.toDataURL());
+          requireCanvasLoader = true;
+        }
+
+        // update shadow root data
+        if (shadowRootSupported) {
+          for (const elem of rootNode.querySelectorAll("*")) {
+            elem.removeAttribute("data-scrapbook-shadowroot");
+
+            const elemOrig = origNodeMap.get(elem);
+            if (!elemOrig) { continue; }
+
+            const shadowRootOrig = elemOrig.shadowRoot;
+            if (!shadowRootOrig) { continue; }
+
+            let shadowRoot;
+            try {
+              shadowRoot = elem.attachShadow({mode: 'open'});
+            } catch (ex) {
+              // The elem already owns a shadowRoot
+              // (auto-generated by a defined custom element).
+              // Use it when accessible (open).
+              shadowRoot = elem.shadowRoot;
+              if (shadowRoot) {
+                shadowRoot.innerHTML = '';
+              }
+            }
+
+            if (shadowRoot) {
+              origNodeMap.set(shadowRoot, shadowRootOrig);
+              clonedNodeMap.set(shadowRootOrig, shadowRoot);
+              for (const elem of shadowRootOrig.childNodes) {
+                shadowRoot.appendChild(cloneNodeMapping(elem, true));
+              }
+              processRootNode(shadowRoot);
+              elem.setAttribute("data-scrapbook-shadowroot", JSON.stringify({
+                data: shadowRoot.innerHTML,
+                mode: "open",
+              }));
+              requireShadowRootLoader = true;
+            }
+          }
+        } else {
+          // shadowRoot not supported by the browser.
+          // Just record whether there's a recorded shadow root.
+          requireShadowRootLoader = !!rootNode.querySelector('[data-scrapbook-shadowroot]');
+        }
+      };
+
+      const origNodeMap = new WeakMap();
+      const clonedNodeMap = new WeakMap();
+      const rootNode = cloneNodeMapping(doc.documentElement, true);
+      const info = {
+        title: (frameIsMain && i === 0 ? item && item.title : doc.title) || "",
+      };
+      const resources = {};
+      const shadowRootSupported = !!rootNode.attachShadow;
+      let requireShadowRootLoader = false;
+      let requireCanvasLoader = false;
+
+      processRootNode(rootNode);
+
+      // common pre-save process
+      await capturer.preSaveProcess({
+        rootNode,
+        deleteErased: options["capture.deleteErasedOnSave"],
+        requireShadowRootLoader,
+        requireCanvasLoader,
+      });
 
       const content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
 
