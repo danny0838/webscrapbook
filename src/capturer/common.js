@@ -189,7 +189,10 @@
 
           if (record) {
             const recordAttr = `${ns ? ns + ":" : ""}data-scrapbook-orig-attr-${att}-${timeId}`;
-            if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, oldValue); }
+            const recordAttr2 = `${ns ? ns + ":" : ""}data-scrapbook-orig-null-attr-${att}-${timeId}`;
+            if (!elem.hasAttribute(recordAttr) && !elem.hasAttribute(recordAttr2)) {
+              elem.setAttribute(recordAttr, oldValue);
+            }
           }
         } else {
           if (value === null || value === undefined) { return; }
@@ -198,7 +201,10 @@
 
           if (record) {
             const recordAttr = `${ns ? ns + ":" : ""}data-scrapbook-orig-null-attr-${att}-${timeId}`;
-            if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, ""); }
+            const recordAttr2 = `${ns ? ns + ":" : ""}data-scrapbook-orig-attr-${att}-${timeId}`;
+            if (!elem.hasAttribute(recordAttr) && !elem.hasAttribute(recordAttr2)) {
+              elem.setAttribute(recordAttr, "");
+            }
           }
         }
       };
