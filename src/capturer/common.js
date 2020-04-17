@@ -1993,6 +1993,14 @@
               break;
             }
 
+            // @TODO:
+            // A selection in a shadow root will cause an error and requires special care.
+            // Currently treat as no selection.
+            if (caNode.getRootNode().nodeType === 11) {
+              selection = null;
+              break;
+            }
+
             // For the first range, clone html and head.
             if (iRange === 0) {
               rootNode = cloneNodeMapping(htmlNode, false);
