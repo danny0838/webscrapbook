@@ -4199,7 +4199,7 @@ async function test_capture_canvas() {
   var loader = doc.querySelector('script[data-scrapbook-elem="canvas-loader"]');
   assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
 
-  assert(/^data:image\/png;base64,/.test(doc.querySelector('#c1').getAttribute("data-scrapbook-canvas")));
+  assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
   assert(/^data:image\/png;base64,/.test(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas")));
 
   // canvas in the shadow root

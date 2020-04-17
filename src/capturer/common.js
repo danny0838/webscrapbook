@@ -1663,8 +1663,10 @@
                   if (isHeadless || !elemOrig) { break; }
 
                   try {
-                    captureRewriteAttr(elem, "data-scrapbook-canvas", elemOrig.toDataURL());
-                    requireCanvasLoader = true;
+                    if (!scrapbook.isCanvasBlank(elemOrig)) {
+                      captureRewriteAttr(elem, "data-scrapbook-canvas", elemOrig.toDataURL());
+                      requireCanvasLoader = true;
+                    }
                   } catch (ex) {
                     console.error(ex);
                   }
