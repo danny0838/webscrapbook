@@ -2184,170 +2184,8 @@
         }
 
         if (helpers) {
-          const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/i;
-
-          const makeRegExp = (str) => {
-            const m = str.match(REGEX_PATTERN);
-            if (m) {
-              return new RegExp(m[1], m[2]);
-            }
-            return null;
-          };
-
-          const queryNodes = (rootNode, selector) => {
-            if (typeof selector === 'string') {
-              return rootNode.querySelectorAll(selector);
-            }
-            if (typeof selector.css === 'string') {
-              return rootNode.querySelectorAll(selector.css);
-            } if (typeof selector.xpath === 'string') {
-              const iter = doc.evaluate(selector.xpath, rootNode);
-              let elems = [], elem;
-              while (elem = iter.iterateNext()) {
-                elems.push(elem);
-              }
-              return elems;
-            }
-            return [];
-          };
-
-          for (const helper of helpers) {
-            if (typeof helper.pattern === 'string') {
-              const regex = makeRegExp(helper.pattern);
-              if (regex) {
-                // regex pattern
-                if (!regex.test(docUrl)) {
-                  continue;
-                }
-              } else {
-                // @TODO: support alternative filtering
-                continue;
-              }
-            }
-
-            try {
-              for (const command of helper.commands) {
-                switch (command[0]) {
-                  case "remove": {
-                    const elems = queryNodes(rootNode, command[1]);
-                    for (const elem of elems) {
-                      elem.remove();
-                    }
-                    break;
-                  }
-                  case "unwrap": {
-                    const elems = queryNodes(rootNode, command[1]);
-                    for (const elem of elems) {
-                      scrapbook.unwrapElement(elem);
-                    }
-                    break;
-                  }
-                  case "html": {
-                    const elems = queryNodes(rootNode, command[1]);
-                    for (const elem of elems) {
-                      elem.innerHTML = command[2];
-                    }
-                    break;
-                  }
-                  case "htmlr": {
-                    const elems = queryNodes(rootNode, command[1]);
-                    const regex = makeRegExp(command[2]) || scrapbook.escapeRegExp(command[2]);
-                    for (const elem of elems) {
-                      const value0 = elem.innerHTML;
-                      let value = value0.replace(regex, command[3]);
-                      if (value !== value0) {
-                        elem.innerHTML = value;
-                      }
-                    }
-                    break;
-                  }
-                  case "text": {
-                    const elems = queryNodes(rootNode, command[1]);
-                    for (const elem of elems) {
-                      elem.textContent = command[2];
-                    }
-                    break;
-                  }
-                  case "textr": {
-                    const elems = queryNodes(rootNode, command[1]);
-                    const regex = makeRegExp(command[2]) || scrapbook.escapeRegExp(command[2]);
-                    for (const elem of elems) {
-                      const value0 = elem.textContent;
-                      let value = value0.replace(regex, command[3]);
-                      if (value !== value0) {
-                        elem.textContent = value;
-                      }
-                    }
-                    break;
-                  }
-                  case "attr": {
-                    const elems = queryNodes(rootNode, command[1]);
-                    for (const elem of elems) {
-                      if (typeof command[2] === "string") {
-                        const key = command[2];
-                        const value = command[3];
-                        if (value !== null) {
-                          elem.setAttribute(key, value);
-                        } else {
-                          elem.removeAttribute(key);
-                        }
-                      } else {
-                        for (const key in command[2]) {
-                          const value = command[2][key];
-                          if (value !== null) {
-                            elem.setAttribute(key, value);
-                          } else {
-                            elem.removeAttribute(key);
-                          }
-                        }
-                      }
-                    }
-                    break;
-                  }
-                  case "attrr": {
-                    const elems = queryNodes(rootNode, command[1]);
-                    const regex = makeRegExp(command[3]) || scrapbook.escapeRegExp(command[3]);
-                    for (const elem of elems) {
-                      const value0 = (elem.getAttribute(command[2]) || "");
-                      let value = value0.replace(regex, command[4]);
-                      if (value !== value0) {
-                        elem.setAttribute(command[2], value);
-                      }
-                    }
-                    break;
-                  }
-                  case "css": {
-                    const elems = queryNodes(rootNode, command[1]);
-                    for (const elem of elems) {
-                      if (!elem.style) { continue; }
-                      if (typeof command[2] === "string") {
-                        const key = command[2];
-                        const value = command[3];
-                        const priority = command[4];
-                        if (value !== null) {
-                          elem.style.setProperty(key, value, priority);
-                        } else {
-                          elem.style.removeProperty(key);
-                        }
-                      } else {
-                        for (const key in command[2]) {
-                          const value = command[2][key];
-                          if (value !== null) {
-                            elem.style.setProperty(key, value);
-                          } else {
-                            elem.style.removeProperty(key);
-                          }
-                        }
-                      }
-                    }
-                    break;
-                  }
-                }
-              }
-            } catch (ex) {
-              console.error(ex);
-            }
-          }
+          const parser = new capturer.CaptureHelperHandler(helpers, rootNode, docUrl);
+          parser.run();
         }
       }
 
@@ -4210,6 +4048,188 @@
           cssText,
         };
         await callback(elem, response);
+      }
+    }
+  };
+
+
+  /****************************************************************************
+   * A class that handles capture helpers.
+   ***************************************************************************/
+
+  capturer.CaptureHelperHandler = class CaptureHelperHandler {
+    constructor(helpers, rootNode, docUrl) {
+      this.helpers = helpers;
+      this.rootNode = rootNode;
+      this.docUrl = docUrl;
+    }
+
+    run() {
+      const {helpers, rootNode, docUrl} = this;
+
+      for (const helper of helpers) {
+        if (typeof helper.pattern === 'string') {
+          const regex = this.parseRegexStr(helper.pattern);
+          if (regex) {
+            // regex pattern
+            if (!regex.test(docUrl)) {
+              continue;
+            }
+          } else {
+            // @TODO: support alternative filtering
+            continue;
+          }
+        }
+
+        if (Array.isArray(helper.commands)) {
+          for (const command of helper.commands) {
+            try {
+              this.runCommand(command, rootNode);
+            } catch (ex) {
+              console.error(`Error running helper command: ${JSON.stringify(command)}`);
+              console.error(ex);
+            }
+          }
+        }
+      }
+    }
+
+    parseRegexStr(str) {
+      const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/i;
+      const parseRegexStr = this.parseRegexStr = (str) => {
+        const m = str.match(REGEX_PATTERN);
+        if (m) {
+          return new RegExp(m[1], m[2]);
+        }
+        return null;
+      };
+      return parseRegexStr(str);
+    }
+
+    selectNodes(rootNode, selector) {
+      if (typeof selector === 'string') {
+        return rootNode.querySelectorAll(selector);
+      }
+      if (typeof selector.css === 'string') {
+        return rootNode.querySelectorAll(selector.css);
+      } if (typeof selector.xpath === 'string') {
+        const iter = rootNode.ownerDocument.evaluate(selector.xpath, rootNode);
+        let elems = [], elem;
+        while (elem = iter.iterateNext()) {
+          elems.push(elem);
+        }
+        return elems;
+      }
+      return [];
+    }
+
+    runCommand(command, rootNode) {
+      const cmd = command[0];
+      if (!this['cmd_' + cmd]) {
+        throw new Error(`Unknown helper command: ${cmd}`);
+      }
+      return this['cmd_' + cmd].apply(this, [rootNode, ...command.slice(1)]);
+    }
+
+    cmd_remove(rootNode, selector) {
+      const elems = this.selectNodes(rootNode, selector);
+      for (const elem of elems) {
+        elem.remove();
+      }
+    }
+
+    cmd_unwrap(rootNode, selector) {
+      const elems = this.selectNodes(rootNode, selector);
+      for (const elem of elems) {
+        scrapbook.unwrapElement(elem);
+      }
+    }
+
+    cmd_html(rootNode, selector, value) {
+      const elems = this.selectNodes(rootNode, selector);
+      for (const elem of elems) {
+        elem.innerHTML = value;
+      }
+    }
+
+    cmd_htmlr(rootNode, selector, pattern, replacement) {
+      const elems = this.selectNodes(rootNode, selector);
+      const regex = this.parseRegexStr(pattern) || scrapbook.escapeRegExp(pattern);
+      for (const elem of elems) {
+        const value0 = elem.innerHTML;
+        let value = value0.replace(regex, replacement);
+        if (value !== value0) {
+          elem.innerHTML = value;
+        }
+      }
+    }
+
+    cmd_text(rootNode, selector, value) {
+      const elems = this.selectNodes(rootNode, selector);
+      for (const elem of elems) {
+        elem.textContent = value;
+      }
+    }
+
+    cmd_textr(rootNode, selector, pattern, replacement) {
+      const elems = this.selectNodes(rootNode, selector);
+      const regex = this.parseRegexStr(pattern) || scrapbook.escapeRegExp(pattern);
+      for (const elem of elems) {
+        const value0 = elem.textContent;
+        let value = value0.replace(regex, replacement);
+        if (value !== value0) {
+          elem.textContent = value;
+        }
+      }
+    }
+
+    cmd_attr(rootNode, selector, attrOrDict, valueOrNull) {
+      const elems = this.selectNodes(rootNode, selector);
+      for (const elem of elems) {
+        if (typeof attrOrDict === "string") {
+          const key = attrOrDict;
+          const value = valueOrNull;
+          if (value !== null) {
+            elem.setAttribute(key, value);
+          } else {
+            elem.removeAttribute(key);
+          }
+        } else {
+          for (const key in attrOrDict) {
+            const value = attrOrDict[key];
+            if (value !== null) {
+              elem.setAttribute(key, value);
+            } else {
+              elem.removeAttribute(key);
+            }
+          }
+        }
+      }
+    }
+
+    cmd_css(rootNode, selector, styleOrDict, valueOrNull, priorityOrNull) {
+      const elems = this.selectNodes(rootNode, selector);
+      for (const elem of elems) {
+        if (!elem.style) { continue; }
+        if (typeof styleOrDict === "string") {
+          const key = styleOrDict;
+          const value = valueOrNull;
+          const priority = priorityOrNull;
+          if (value !== null) {
+            elem.style.setProperty(key, value, priority);
+          } else {
+            elem.style.removeProperty(key);
+          }
+        } else {
+          for (const key in styleOrDict) {
+            const value = styleOrDict[key];
+            if (value !== null) {
+              elem.style.setProperty(key, value);
+            } else {
+              elem.style.removeProperty(key);
+            }
+          }
+        }
       }
     }
   };
