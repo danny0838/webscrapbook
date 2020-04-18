@@ -4083,10 +4083,14 @@
 
         if (Array.isArray(helper.commands)) {
           for (const command of helper.commands) {
+            if (!this.isCommand(command)) {
+              console.error(`WebScrapBook: Invalid capture helper command: ${JSON.stringify(command)}`);
+              continue;
+            }
             try {
               this.runCommand(command, rootNode);
             } catch (ex) {
-              console.error(`Error running helper command: ${JSON.stringify(command)}`);
+              console.error(`WebScrapBook: Error running capture helper command: ${JSON.stringify(command)}`);
               console.error(ex);
             }
           }
@@ -4107,12 +4111,33 @@
     }
 
     selectNodes(rootNode, selector) {
+      if (!selector) {
+        return [rootNode];
+      }
       if (typeof selector === 'string') {
-        return rootNode.querySelectorAll(selector);
+        switch (selector) {
+          case 'root':
+            return [rootNode.getRootNode()];
+          case 'parent':
+            return [rootNode.parentNode];
+          case 'firstChild':
+            return [rootNode.firstChild];
+          case 'lastChild':
+            return [rootNode.lastChild];
+          case 'previousSibling':
+            return [rootNode.previousSibling];
+          case 'nextSibling':
+            return [rootNode.nextSibling];
+          case 'self':
+            return [rootNode];
+          default:
+            return rootNode.querySelectorAll(selector);
+        }
       }
       if (typeof selector.css === 'string') {
         return rootNode.querySelectorAll(selector.css);
-      } if (typeof selector.xpath === 'string') {
+      }
+      if (typeof selector.xpath === 'string') {
         const iter = rootNode.ownerDocument.evaluate(selector.xpath, rootNode);
         let elems = [], elem;
         while (elem = iter.iterateNext()) {
@@ -4123,80 +4148,167 @@
       return [];
     }
 
+    isCommand(obj) {
+      if (Array.isArray(obj) && typeof obj[0] === 'string') {
+        return true;
+      }
+      return false;
+    }
+
     runCommand(command, rootNode) {
-      const cmd = command[0];
+      const cmd = this.resolve(command[0], rootNode);
       if (!this['cmd_' + cmd]) {
         throw new Error(`Unknown helper command: ${cmd}`);
       }
       return this['cmd_' + cmd].apply(this, [rootNode, ...command.slice(1)]);
     }
 
+    resolve(obj, rootNode) {
+      if (this.isCommand(obj)) {
+        return this.runCommand(obj, rootNode);
+      }
+      return obj;
+    }
+
+    cmd_if(rootNode, condition, thenValue, elseValue) {
+      if (this.resolve(condition, rootNode)) {
+        return this.resolve(thenValue, rootNode);
+      }
+      return this.resolve(elseValue, rootNode);
+    }
+
+    cmd_and(rootNode, ...args) {
+      let value;
+      for (const arg of args) {
+        value = this.resolve(arg, rootNode);
+        if (!value) {
+          return value;
+        }
+      }
+      return value;
+    }
+
+    cmd_or(rootNode, ...args) {
+      let value;
+      for (const arg of args) {
+        value = this.resolve(arg, rootNode);
+        if (value) {
+          return value;
+        }
+      }
+      return value;
+    }
+
+    cmd_for(rootNode, selector, ...commands) {
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
+      for (const elem of elems) {
+        for (const command of commands) {
+          this.resolve(command, elem);
+        }
+      }
+    }
+
+    cmd_match(rootNode, str, pattern, index) {
+      str = this.resolve(str, rootNode) || "";
+      pattern = this.parseRegexStr(this.resolve(pattern, rootNode));
+      index = this.resolve(index, rootNode);
+      if (typeof index !== 'number' && typeof index !== 'string') {
+        // boolean mode
+        if (!pattern) { return false; }
+        return pattern.test(str);
+      } else {
+        // substring mode
+        if (!pattern) { return null; }
+        const m = str.match(pattern);
+        if (!m) { return null; }
+        return m[index];
+      }
+    }
+
+    cmd_replace(rootNode, str, pattern, replacement) {
+      str = this.resolve(str, rootNode) || "";
+      pattern = this.parseRegexStr(this.resolve(pattern, rootNode));
+      replacement = this.resolve(replacement, rootNode) || "";
+      return pattern ? str.replace(pattern, replacement) : str;
+    }
+
+    cmd_has_elem(rootNode, selector) {
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
+      if (elems.length) {
+        return true;
+      }
+      return false;
+    }
+
+    cmd_has_attr(rootNode, selector, attr) {
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
+      return (elems[0] && elems[0].hasAttribute || false) && elems[0].hasAttribute(this.resolve(attr, rootNode));
+    }
+
+    cmd_get_html(rootNode, selector) {
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
+      return (elems[0] || null) && elems[0].innerHTML;
+    }
+
+    cmd_get_text(rootNode, selector) {
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
+      return (elems[0] || null) && elems[0].textContent;
+    }
+
+    cmd_get_attr(rootNode, selector, attr) {
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
+      return (elems[0] && elems[0].getAttribute || null) && elems[0].getAttribute(this.resolve(attr, rootNode));
+    }
+
+    cmd_get_css(rootNode, selector, style) {
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
+      return (elems[0] && elems[0].style || null) && elems[0].style.getPropertyValue(this.resolve(style, rootNode));
+    }
+
     cmd_remove(rootNode, selector) {
-      const elems = this.selectNodes(rootNode, selector);
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
         elem.remove();
       }
     }
 
     cmd_unwrap(rootNode, selector) {
-      const elems = this.selectNodes(rootNode, selector);
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
         scrapbook.unwrapElement(elem);
       }
     }
 
     cmd_html(rootNode, selector, value) {
-      const elems = this.selectNodes(rootNode, selector);
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
-        elem.innerHTML = value;
-      }
-    }
-
-    cmd_htmlr(rootNode, selector, pattern, replacement) {
-      const elems = this.selectNodes(rootNode, selector);
-      const regex = this.parseRegexStr(pattern) || scrapbook.escapeRegExp(pattern);
-      for (const elem of elems) {
-        const value0 = elem.innerHTML;
-        let value = value0.replace(regex, replacement);
-        if (value !== value0) {
-          elem.innerHTML = value;
-        }
+        elem.innerHTML = this.resolve(value, elem);
       }
     }
 
     cmd_text(rootNode, selector, value) {
-      const elems = this.selectNodes(rootNode, selector);
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
-        elem.textContent = value;
-      }
-    }
-
-    cmd_textr(rootNode, selector, pattern, replacement) {
-      const elems = this.selectNodes(rootNode, selector);
-      const regex = this.parseRegexStr(pattern) || scrapbook.escapeRegExp(pattern);
-      for (const elem of elems) {
-        const value0 = elem.textContent;
-        let value = value0.replace(regex, replacement);
-        if (value !== value0) {
-          elem.textContent = value;
-        }
+        elem.textContent = this.resolve(value, elem);
       }
     }
 
     cmd_attr(rootNode, selector, attrOrDict, valueOrNull) {
-      const elems = this.selectNodes(rootNode, selector);
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
-        if (typeof attrOrDict === "string") {
-          const key = attrOrDict;
-          const value = valueOrNull;
+        if (!elem.setAttribute) { continue; }
+        const attrOrDict_ = this.resolve(attrOrDict, elem);
+        if (typeof attrOrDict_ === "string") {
+          const key = attrOrDict_;
+          const value = this.resolve(valueOrNull, elem);
           if (value !== null) {
             elem.setAttribute(key, value);
           } else {
             elem.removeAttribute(key);
           }
         } else {
-          for (const key in attrOrDict) {
-            const value = attrOrDict[key];
+          for (const key in attrOrDict_) {
+            const value = this.resolve(attrOrDict_[key], elem);
             if (value !== null) {
               elem.setAttribute(key, value);
             } else {
@@ -4208,21 +4320,22 @@
     }
 
     cmd_css(rootNode, selector, styleOrDict, valueOrNull, priorityOrNull) {
-      const elems = this.selectNodes(rootNode, selector);
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
         if (!elem.style) { continue; }
-        if (typeof styleOrDict === "string") {
-          const key = styleOrDict;
-          const value = valueOrNull;
-          const priority = priorityOrNull;
+        const styleOrDict_ = this.resolve(styleOrDict, elem);
+        if (typeof styleOrDict_ === "string") {
+          const key = styleOrDict_;
+          const value = this.resolve(valueOrNull, elem);
+          const priority = this.resolve(priorityOrNull, elem);
           if (value !== null) {
             elem.style.setProperty(key, value, priority);
           } else {
             elem.style.removeProperty(key);
           }
         } else {
-          for (const key in styleOrDict) {
-            const value = styleOrDict[key];
+          for (const key in styleOrDict_) {
+            const value = this.resolve(styleOrDict_[key], elem);
             if (value !== null) {
               elem.style.setProperty(key, value);
             } else {
