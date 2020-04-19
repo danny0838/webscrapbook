@@ -307,6 +307,17 @@
       }
     }
   },
+  "ErrorFileSaveError": {
+    "message": "Error saving file ($URL$): $REASON$",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
+      }
+    }
+  },
   "ErrorImportOptions": {
     "message": "Error on importing options: $REASON$",
     "placeholders": {

@@ -307,6 +307,17 @@
       }
     }
   },
+  "ErrorFileSaveError": {
+    "message": "儲存檔案錯誤 ($URL$): $REASON$",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      },
+      "reason": {
+        "content": "$2"
+      }
+    }
+  },
   "ErrorImportOptions": {
     "message": "匯入選項失敗: $REASON$",
     "placeholders": {

@@ -205,8 +205,8 @@
     return path;
   };
 
-  capturer.saveCache = async function ({timeId, path, data}) {
-    const key = {table: "pageCache", id: timeId, path};
+  capturer.saveCache = async function ({timeId, path, source, data}) {
+    const key = {table: "pageCache", id: timeId, path, source};
     await scrapbook.cache.set(key, data);
   };
 
@@ -216,13 +216,15 @@
 
     let mainIdx = -1;
     const result = Object.entries(entries).map(([entry, data], idx) => {
-      const path = JSON.parse(entry).path;
+      const {path, source} = JSON.parse(entry);
       if (path === 'index.html') {
         mainIdx = idx;
       }
-      return [path, data];
+      return [path, source, data];
     });
 
+    // move index page to the last one because the browser may not be able to
+    // show it if it's flooded over by other downloads
     if (mainIdx >= 0) {
       return result.concat(result.splice(mainIdx, 1));
     }
@@ -1577,7 +1579,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     isDebug && console.debug("call: saveDocument", params);
 
     const {data, documentFileName, sourceUrl, settings, options} = params;
-    const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
     const addIndexHtml = async (path, target, title) => {
@@ -1599,6 +1601,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       await capturer.saveCache({
         timeId,
         path,
+        source: sourceUrlMain,
         data: new Blob([html], {type: "text/html"}),
       });
     };
@@ -1688,6 +1691,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           await capturer.saveCache({
             timeId,
             path: filename,
+            source: sourceUrlMain,
             data: new Blob([data.content], {type: data.mime}),
           });
 
@@ -1766,6 +1770,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           await capturer.saveCache({
             timeId,
             path: timeId + "/" + filename,
+            source: sourceUrlMain,
             data: new Blob([data.content], {type: data.mime}),
           });
 
@@ -1795,6 +1800,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               await capturer.saveCache({
                 timeId,
                 path: timeId + "/" + "index.rdf",
+                source: sourceUrlMain,
                 data: new Blob([rdfContent], {type: "application/rdf+xml"}),
               });
             }
@@ -1867,6 +1873,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           await capturer.saveCache({
             timeId,
             path: filename,
+            source: sourceUrlMain,
             data: new Blob([data.content], {type: data.mime}),
           });
 
@@ -1911,30 +1918,39 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             capturer.log(`Saving data...`);
             const entries = await capturer.loadCache({timeId});
             await capturer.clearCache({timeId});
-            await Promise.all(entries.map(([path, data]) => {
-              return capturer[saveMethod]({
-                timeId,
-                blob: data,
-                directory: targetDir,
-                filename: path,
-                sourceUrl,
-                autoErase: path !== "index.html",
-                savePrompt,
-                settings,
-                options,
-              }).catch((ex) => {
-                // handle bug for zero-sized in Firefox < 65
-                // path should be same as the download filename (though the
-                // value is not acturally used)
-                // see browser.downloads.onChanged handler
-                if (data.size === 0 && ex.message === "Cannot find downloaded item.") {
-                  return path;
-                }
+            let errorUrl = sourceUrl;
+            try {
+              await Promise.all(entries.map(([path, sourceUrl, data]) => {
+                return capturer[saveMethod]({
+                  timeId,
+                  blob: data,
+                  directory: targetDir,
+                  filename: path,
+                  sourceUrl,
+                  autoErase: path !== "index.html",
+                  savePrompt,
+                  settings,
+                  options,
+                }).catch((ex) => {
+                  // handle bug for zero-sized in Firefox < 65
+                  // path should be same as the download filename (though the
+                  // value is not acturally used)
+                  // see browser.downloads.onChanged handler
+                  if (data.size === 0 && ex.message === "Cannot find downloaded item.") {
+                    return path;
+                  }
 
-                // throw unexpected error
-                throw ex;
-              });
-            }));
+                  // throw an unexpected error
+                  errorUrl = sourceUrl;
+                  throw ex;
+                });
+              }));
+            } catch (ex) {
+              // error out for individual file saving error
+              console.error(ex);
+              const message = scrapbook.lang("ErrorFileSaveError", [errorUrl, ex.message]);
+              return {url: capturer.getErrorUrl(errorUrl, options), error: {message}};
+            }
 
             return {
               timeId,
@@ -1952,7 +1968,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
     } catch (ex) {
       console.warn(ex);
-      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+      capturer.warn(scrapbook.lang("ErrorFileSaveError", [sourceUrl, ex.message]));
       return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
     }
   };
@@ -2437,6 +2453,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         await capturer.saveCache({
           timeId,
           path: filename,
+          source: sourceUrl,
           data: blob,
         });
         return {filename, url: scrapbook.escapeFilename(filename)};
@@ -2446,6 +2463,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         await capturer.saveCache({
           timeId,
           path: timeId + "/" + filename,
+          source: sourceUrl,
           data: blob,
         });
         return {filename, url: scrapbook.escapeFilename(filename)};
@@ -2456,6 +2474,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         await capturer.saveCache({
           timeId,
           path: filename,
+          source: sourceUrl,
           data: blob,
         });
         return {filename, url: scrapbook.escapeFilename(filename)};
