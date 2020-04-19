@@ -1589,11 +1589,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Page size limit exceeded."}};
       }
 
+      let filename = documentFileName;
+      let ext = scrapbook.filenameParts(filename)[1];
+
       switch (options["capture.saveAs"]) {
         case "singleHtml": {
-          let filename = documentFileName;
-          let ext = scrapbook.filenameParts(filename)[1];
-
           if (settings.frameIsMain) {
             return capturer.saveMainDocument({data, sourceUrl, filename, ext, settings, options});
           }
@@ -1608,9 +1608,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         }
 
         case "zip": {
-          let filename = documentFileName;
-          let ext = scrapbook.filenameParts(filename)[1];
-
           await capturer.saveCache({
             timeId,
             path: filename,
@@ -1626,9 +1623,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         }
 
         case "maff": {
-          let filename = documentFileName;
-          let ext = scrapbook.filenameParts(filename)[1];
-
           await capturer.saveCache({
             timeId,
             path: timeId + "/" + filename,
@@ -1645,9 +1639,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
         case "folder":
         default: {
-          let filename = documentFileName;
-          let ext = scrapbook.filenameParts(filename)[1];
-
           await capturer.saveCache({
             timeId,
             path: filename,
@@ -1718,6 +1709,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     };
 
     try {
+      capturer.log(`Saving data...`);
       const title = data.title || scrapbook.urlToFilename(sourceUrl);
       switch (options["capture.saveAs"]) {
         case "singleHtml": {
@@ -1751,8 +1743,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             }
           }
 
-          capturer.log(`Saving data...`);
-          return await capturer[saveMethod]({
+          filename = await capturer[saveMethod]({
             timeId,
             blob,
             directory: targetDir,
@@ -1762,18 +1753,18 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             savePrompt,
             settings,
             options,
-          }).then((filename) => {
-            return {
-              timeId,
-              title,
-              type: "",
-              sourceUrl,
-              targetDir,
-              filename,
-              url: scrapbook.escapeFilename(filename) + sourceUrlHash,
-              favIconUrl: data.favIconUrl,
-            };
           });
+
+          return {
+            timeId,
+            title,
+            type: "",
+            sourceUrl,
+            targetDir,
+            filename,
+            url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+            favIconUrl: data.favIconUrl,
+          };
         }
 
         case "zip": {
@@ -1784,7 +1775,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
           // generate and download the zip file
           const zip = await capturer.loadCacheAsZip({timeId});
-          await capturer.clearCache({timeId});
           const blob = await zip.generateAsync({type: "blob", mimeType: "application/html+zip"});
           let targetDir;
           let savePrompt;
@@ -1815,8 +1805,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             }
           }
 
-          capturer.log(`Saving data...`);
-          return await capturer[saveMethod]({
+          filename = await capturer[saveMethod]({
             timeId,
             blob,
             directory: targetDir,
@@ -1826,18 +1815,20 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             savePrompt,
             settings,
             options,
-          }).then((filename) => {
-            return {
-              timeId,
-              title,
-              type: "",
-              sourceUrl,
-              targetDir,
-              filename,
-              url: scrapbook.escapeFilename(filename) + sourceUrlHash,
-              favIconUrl: data.favIconUrl,
-            };
           });
+
+          await capturer.clearCache({timeId});
+
+          return {
+            timeId,
+            title,
+            type: "",
+            sourceUrl,
+            targetDir,
+            filename,
+            url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+            favIconUrl: data.favIconUrl,
+          };
         }
 
         case "maff": {
@@ -1871,7 +1862,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
           // generate and download the zip file
           const zip = await capturer.loadCacheAsZip({timeId});
-          await capturer.clearCache({timeId});
           const blob = await zip.generateAsync({type: "blob", mimeType: "application/x-maff"});
           let targetDir;
           let savePrompt;
@@ -1902,8 +1892,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             }
           }
 
-          capturer.log(`Saving data...`);
-          return await capturer[saveMethod]({
+          filename = await capturer[saveMethod]({
             timeId,
             blob,
             directory: targetDir,
@@ -1913,18 +1902,20 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             savePrompt,
             settings,
             options,
-          }).then((filename) => {
-            return {
-              timeId,
-              title,
-              type: "",
-              sourceUrl,
-              targetDir,
-              filename,
-              url: scrapbook.escapeFilename(filename) + sourceUrlHash,
-              favIconUrl: data.favIconUrl,
-            };
           });
+
+          await capturer.clearCache({timeId});
+
+          return {
+            timeId,
+            title,
+            type: "",
+            sourceUrl,
+            targetDir,
+            filename,
+            url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+            favIconUrl: data.favIconUrl,
+          };
         }
 
         case "folder":
@@ -1955,8 +1946,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               break;
             }
             case 'folder':
-            case 'file': // fallback
-            case 'memory': // fallback
+            case 'file': // not supported, fallback to folder
+            case 'memory': // not supported, fallback to folder
             default: {
               targetDir = options["capture.saveFolder"] + "/" + settings.filename;
               saveMethod = "saveBlob";
@@ -1964,9 +1955,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             }
           }
 
-          capturer.log(`Saving data...`);
           const entries = await capturer.loadCache({timeId});
-          await capturer.clearCache({timeId});
           let errorUrl = sourceUrl;
           try {
             await Promise.all(entries.map(([path, sourceUrl, data]) => {
@@ -2000,6 +1989,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             const message = scrapbook.lang("ErrorFileSaveError", [errorUrl, ex.message]);
             return {url: capturer.getErrorUrl(errorUrl, options), error: {message}};
           }
+          await capturer.clearCache({timeId});
 
           return {
             timeId,
