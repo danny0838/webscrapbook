@@ -146,15 +146,22 @@
       // e.g. cloned iframes has no content, cloned canvas has no image,
       // and cloned form elements has no current status.
       const cloneNodeMapping = (node, deep = false) => {
-        const newNode = node.cloneNode(false);
+        const newNode = node.cloneNode(deep);
         origNodeMap.set(newNode, node);
         clonedNodeMap.set(node, newNode);
 
-        // recursively clone descendant nodes
+        // map descendants
         if (deep) {
-          for (const childNode of node.childNodes) {
-            const newChildNode = cloneNodeMapping(childNode, true);
-            newNode.appendChild(newChildNode);
+          const doc = node.ownerDocument;
+          const walker1 = doc.createNodeIterator(node);
+          const walker2 = doc.createNodeIterator(newNode);
+          let node1 = walker1.nextNode();
+          let node2 = walker2.nextNode();
+          while (node1) {
+            origNodeMap.set(node2, node1);
+            clonedNodeMap.set(node1, node2);
+            node1 = walker1.nextNode();
+            node2 = walker2.nextNode();
           }
         }
 
@@ -2390,15 +2397,22 @@
       }
 
       const cloneNodeMapping = (node, deep = false) => {
-        const newNode = node.cloneNode(false);
+        const newNode = node.cloneNode(deep);
         origNodeMap.set(newNode, node);
         clonedNodeMap.set(node, newNode);
 
-        // recursively clone descendant nodes
+        // map descendants
         if (deep) {
-          for (const childNode of node.childNodes) {
-            const newChildNode = cloneNodeMapping(childNode, true);
-            newNode.appendChild(newChildNode);
+          const doc = node.ownerDocument;
+          const walker1 = doc.createNodeIterator(node);
+          const walker2 = doc.createNodeIterator(newNode);
+          let node1 = walker1.nextNode();
+          let node2 = walker2.nextNode();
+          while (node1) {
+            origNodeMap.set(node2, node1);
+            clonedNodeMap.set(node1, node2);
+            node1 = walker1.nextNode();
+            node2 = walker2.nextNode();
           }
         }
 
