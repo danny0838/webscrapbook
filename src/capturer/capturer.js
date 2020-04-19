@@ -1582,6 +1582,117 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
+    try {
+      if (!settings.frameIsMain &&
+          typeof options["capture.pageSizeLimit"] === "number" && data.content.length >= options["capture.pageSizeLimit"] * 1024 * 1024) {
+        capturer.warn(scrapbook.lang("WarnPageSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
+        return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Page size limit exceeded."}};
+      }
+
+      switch (options["capture.saveAs"]) {
+        case "singleHtml": {
+          let filename = documentFileName;
+          let ext = scrapbook.filenameParts(filename)[1];
+
+          if (settings.frameIsMain) {
+            return capturer.saveMainDocument({data, sourceUrl, filename, ext, settings, options});
+          }
+
+          let url = data.charset === "UTF-8" ? 
+              scrapbook.unicodeToDataUri(data.content, data.mime) :
+              scrapbook.byteStringToDataUri(scrapbook.unicodeToUtf8(data.content), data.mime, data.charset);
+          url = url.replace(",", ";filename=" + encodeURIComponent(filename) + ",");
+
+          // do not add sourceUrlHash as data URL with a hash could cause an error in some browsers
+          return {timeId, sourceUrl, filename, url};
+        }
+
+        case "zip": {
+          let filename = documentFileName;
+          let ext = scrapbook.filenameParts(filename)[1];
+
+          await capturer.saveCache({
+            timeId,
+            path: filename,
+            source: sourceUrlMain,
+            data: new Blob([data.content], {type: data.mime}),
+          });
+
+          if (settings.frameIsMain) {
+            return capturer.saveMainDocument({data, sourceUrl, filename, ext, settings, options});
+          }
+
+          return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        }
+
+        case "maff": {
+          let filename = documentFileName;
+          let ext = scrapbook.filenameParts(filename)[1];
+
+          await capturer.saveCache({
+            timeId,
+            path: timeId + "/" + filename,
+            source: sourceUrlMain,
+            data: new Blob([data.content], {type: data.mime}),
+          });
+
+          if (settings.frameIsMain) {
+            return capturer.saveMainDocument({data, sourceUrl, filename, ext, settings, options});
+          }
+
+          return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        }
+
+        case "folder":
+        default: {
+          let filename = documentFileName;
+          let ext = scrapbook.filenameParts(filename)[1];
+
+          await capturer.saveCache({
+            timeId,
+            path: filename,
+            source: sourceUrlMain,
+            data: new Blob([data.content], {type: data.mime}),
+          });
+
+          if (settings.frameIsMain) {
+            return capturer.saveMainDocument({data, sourceUrl, filename, ext, settings, options});
+          }
+
+          return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        }
+      }
+    } catch (ex) {
+      console.warn(ex);
+      capturer.warn(scrapbook.lang("ErrorFileSaveError", [sourceUrl, ex.message]));
+      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+    }
+  };
+
+  /**
+   * @kind invokable
+   * @param {Object} params
+   * @param {Object} params.data
+   *         - {string} params.data.mime
+   *         - {string} params.data.charset
+   *         - {string} params.data.content
+   *         - {string} params.data.title
+   *         - {string} params.data.favIconUrl
+   * @param {string} params.sourceUrl - may include hash
+   * @param {string} params.filename
+   * @param {string} params.ext
+   * @param {Object} params.settings
+   * @param {Object} params.options
+   * @return {Promise<Object>}
+   */
+  capturer.saveMainDocument = async function (params) {
+    isDebug && console.debug("call: saveMainDocument", params);
+
+    const {data, sourceUrl, settings, options} = params;
+    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const {timeId} = settings;
+    let {filename, ext} = params;
+
     const addIndexHtml = async (path, target, title) => {
       const meta = options["capture.recordDocumentMeta"] ? 
           ' data-scrapbook-source="' + scrapbook.escapeHtml(sourceUrl) + '"' + 
@@ -1607,351 +1718,51 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     };
 
     try {
-      if (!settings.frameIsMain &&
-          typeof options["capture.pageSizeLimit"] === "number" && data.content.length >= options["capture.pageSizeLimit"] * 1024 * 1024) {
-        capturer.warn(scrapbook.lang("WarnPageSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
-        return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Page size limit exceeded."}};
-      }
-
       const title = data.title || scrapbook.urlToFilename(sourceUrl);
       switch (options["capture.saveAs"]) {
         case "singleHtml": {
-          let filename = documentFileName;
-          let ext = scrapbook.filenameParts(filename)[1];
+          const blob = new Blob([data.content], {type: data.mime});
+          let targetDir;
+          let savePrompt;
+          let saveMethod;
 
-          if (!settings.frameIsMain) {
-            let url = data.charset === "UTF-8" ? 
-                scrapbook.unicodeToDataUri(data.content, data.mime) :
-                scrapbook.byteStringToDataUri(scrapbook.unicodeToUtf8(data.content), data.mime, data.charset);
-            url = url.replace(",", ";filename=" + encodeURIComponent(filename) + ",");
-
-            return {timeId, sourceUrl, filename, url};
-          } else {
-            const blob = new Blob([data.content], {type: data.mime});
-            let targetDir;
-            let savePrompt;
-            let saveMethod;
-
-            switch (options["capture.saveTo"]) {
-              case 'memory': {
-                // special handling (for unit test)
-                return await capturer.saveBlobInMemory({blob});
-              }
-              case 'file': {
-                filename = settings.filename + "." + ext;
-                saveMethod = "saveBlobNaturally";
-                break;
-              }
-              case 'server': {
-                [targetDir, filename] = scrapbook.filepathParts(settings.filename + "." + ext);
-                savePrompt = false;
-                saveMethod = "saveToServer";
-                break;
-              }
-              case 'folder':
-              default: {
-                [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + "." + ext);
-                savePrompt = false;
-                saveMethod = "saveBlob";
-                break;
-              }
+          switch (options["capture.saveTo"]) {
+            case 'memory': {
+              // special handling (for unit test)
+              return await capturer.saveBlobInMemory({blob});
             }
-
-            capturer.log(`Saving data...`);
-            return await capturer[saveMethod]({
-              timeId,
-              blob,
-              directory: targetDir,
-              filename,
-              sourceUrl,
-              autoErase: false,
-              savePrompt,
-              settings,
-              options,
-            }).then((filename) => {
-              return {
-                timeId,
-                title,
-                type: "",
-                sourceUrl,
-                targetDir,
-                filename,
-                url: scrapbook.escapeFilename(filename) + sourceUrlHash,
-                favIconUrl: data.favIconUrl,
-              };
-            });
+            case 'file': {
+              filename = settings.filename + "." + ext;
+              saveMethod = "saveBlobNaturally";
+              break;
+            }
+            case 'server': {
+              [targetDir, filename] = scrapbook.filepathParts(settings.filename + "." + ext);
+              savePrompt = false;
+              saveMethod = "saveToServer";
+              break;
+            }
+            case 'folder':
+            default: {
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + "." + ext);
+              savePrompt = false;
+              saveMethod = "saveBlob";
+              break;
+            }
           }
-          break;
-        }
 
-        case "zip": {
-          let filename = documentFileName;
-          let ext = scrapbook.filenameParts(filename)[1];
-
-          await capturer.saveCache({
+          capturer.log(`Saving data...`);
+          return await capturer[saveMethod]({
             timeId,
-            path: filename,
-            source: sourceUrlMain,
-            data: new Blob([data.content], {type: data.mime}),
-          });
-
-          if (!settings.frameIsMain) {
-            return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-          } else {
-            // create index.html that redirects to index.xhtml|.svg
-            if (ext !== "html") {
-              await addIndexHtml("index.html", `index.${ext}`, title);
-            }
-
-            // generate and download the zip file
-            const zip = await capturer.loadCacheAsZip({timeId});
-            await capturer.clearCache({timeId});
-            const blob = await zip.generateAsync({type: "blob", mimeType: "application/html+zip"});
-            let targetDir;
-            let savePrompt;
-            let saveMethod;
-
-            switch (options["capture.saveTo"]) {
-              case 'memory': {
-                // special handling (for unit test)
-                return await capturer.saveBlobInMemory({blob});
-              }
-              case 'file': {
-                filename = settings.filename + ".htz";
-                saveMethod = "saveBlobNaturally";
-                break;
-              }
-              case 'server': {
-                [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".htz");
-                savePrompt = false;
-                saveMethod = "saveToServer";
-                break;
-              }
-              case 'folder':
-              default: {
-                [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ".htz");
-                savePrompt = false;
-                saveMethod = "saveBlob";
-                break;
-              }
-            }
-
-            capturer.log(`Saving data...`);
-            return await capturer[saveMethod]({
-              timeId,
-              blob,
-              directory: targetDir,
-              filename,
-              sourceUrl,
-              autoErase: false,
-              savePrompt,
-              settings,
-              options,
-            }).then((filename) => {
-              return {
-                timeId,
-                title,
-                type: "",
-                sourceUrl,
-                targetDir,
-                filename,
-                url: scrapbook.escapeFilename(filename) + sourceUrlHash,
-                favIconUrl: data.favIconUrl,
-              };
-            });
-          }
-          break;
-        }
-
-        case "maff": {
-          let filename = documentFileName;
-          let ext = scrapbook.filenameParts(filename)[1];
-
-          await capturer.saveCache({
-            timeId,
-            path: timeId + "/" + filename,
-            source: sourceUrlMain,
-            data: new Blob([data.content], {type: data.mime}),
-          });
-
-          if (!settings.frameIsMain) {
-            return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-          } else {
-            {
-              // create index.html that redirects to index.xhtml|.svg
-              if (ext !== "html") {
-                await addIndexHtml(`${timeId}/index.html`, `index.${ext}`, title);
-              }
-
-              // generate index.rdf
-              const rdfContent = `<?xml version="1.0"?>
-<RDF:RDF xmlns:MAF="http://maf.mozdev.org/metadata/rdf#"
-         xmlns:NC="http://home.netscape.com/NC-rdf#"
-         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-  <RDF:Description RDF:about="urn:root">
-    <MAF:originalurl RDF:resource="${scrapbook.escapeHtml(sourceUrl)}"/>
-    <MAF:title RDF:resource="${scrapbook.escapeHtml(data.title)}"/>
-    <MAF:archivetime RDF:resource="${scrapbook.escapeHtml(scrapbook.idToDate(timeId).toUTCString())}"/>
-    <MAF:indexfilename RDF:resource="${filename}"/>
-    <MAF:charset RDF:resource="UTF-8"/>
-  </RDF:Description>
-</RDF:RDF>
-`;
-              await capturer.saveCache({
-                timeId,
-                path: timeId + "/" + "index.rdf",
-                source: sourceUrlMain,
-                data: new Blob([rdfContent], {type: "application/rdf+xml"}),
-              });
-            }
-
-            // generate and download the zip file
-            const zip = await capturer.loadCacheAsZip({timeId});
-            await capturer.clearCache({timeId});
-            const blob = await zip.generateAsync({type: "blob", mimeType: "application/x-maff"});
-            let targetDir;
-            let savePrompt;
-            let saveMethod;
-
-            switch (options["capture.saveTo"]) {
-              case 'memory': {
-                // special handling (for unit test)
-                return await capturer.saveBlobInMemory({blob});
-              }
-              case 'file': {
-                filename = settings.filename + ".maff";
-                saveMethod = "saveBlobNaturally";
-                break;
-              }
-              case 'server': {
-                [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".maff");
-                savePrompt = false;
-                saveMethod = "saveToServer";
-                break;
-              }
-              case 'folder':
-              default: {
-                [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ".maff");
-                savePrompt = false;
-                saveMethod = "saveBlob";
-                break;
-              }
-            }
-
-            capturer.log(`Saving data...`);
-            return await capturer[saveMethod]({
-              timeId,
-              blob,
-              directory: targetDir,
-              filename,
-              sourceUrl,
-              autoErase: false,
-              savePrompt,
-              settings,
-              options,
-            }).then((filename) => {
-              return {
-                timeId,
-                title,
-                type: "",
-                sourceUrl,
-                targetDir,
-                filename,
-                url: scrapbook.escapeFilename(filename) + sourceUrlHash,
-                favIconUrl: data.favIconUrl,
-              };
-            });
-          }
-          break;
-        }
-
-        case "folder":
-        default: {
-          let filename = documentFileName;
-          let ext = scrapbook.filenameParts(filename)[1];
-
-          await capturer.saveCache({
-            timeId,
-            path: filename,
-            source: sourceUrlMain,
-            data: new Blob([data.content], {type: data.mime}),
-          });
-
-          if (!settings.frameIsMain) {
-            return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-          } else {
-            // create index.html that redirects to index.xhtml|.svg
-            if (ext !== "html") {
-              await addIndexHtml("index.html", `index.${ext}`, title);
-            }
-
-            let targetDir;
-            let savePrompt = false;
-            let saveMethod;
-
-            {
-              const newFilename = await capturer.invoke("getAvailableFilename", {
-                filename: settings.filename,
-                settings,
-                options,
-              });
-              const dir = scrapbook.filepathParts(filename)[0];
-              settings.filename = (dir ? dir + '/' : '') + newFilename;
-            }
-
-            switch (options["capture.saveTo"]) {
-              case 'server': {
-                targetDir = settings.filename;
-                saveMethod = "saveToServer";
-                break;
-              }
-              case 'folder':
-              case 'file': // fallback
-              case 'memory': // fallback
-              default: {
-                targetDir = options["capture.saveFolder"] + "/" + settings.filename;
-                saveMethod = "saveBlob";
-                break;
-              }
-            }
-
-            capturer.log(`Saving data...`);
-            const entries = await capturer.loadCache({timeId});
-            await capturer.clearCache({timeId});
-            let errorUrl = sourceUrl;
-            try {
-              await Promise.all(entries.map(([path, sourceUrl, data]) => {
-                return capturer[saveMethod]({
-                  timeId,
-                  blob: data,
-                  directory: targetDir,
-                  filename: path,
-                  sourceUrl,
-                  autoErase: path !== "index.html",
-                  savePrompt,
-                  settings,
-                  options,
-                }).catch((ex) => {
-                  // handle bug for zero-sized in Firefox < 65
-                  // path should be same as the download filename (though the
-                  // value is not acturally used)
-                  // see browser.downloads.onChanged handler
-                  if (data.size === 0 && ex.message === "Cannot find downloaded item.") {
-                    return path;
-                  }
-
-                  // throw an unexpected error
-                  errorUrl = sourceUrl;
-                  throw ex;
-                });
-              }));
-            } catch (ex) {
-              // error out for individual file saving error
-              console.error(ex);
-              const message = scrapbook.lang("ErrorFileSaveError", [errorUrl, ex.message]);
-              return {url: capturer.getErrorUrl(errorUrl, options), error: {message}};
-            }
-
+            blob,
+            directory: targetDir,
+            filename,
+            sourceUrl,
+            autoErase: false,
+            savePrompt,
+            settings,
+            options,
+          }).then((filename) => {
             return {
               timeId,
               title,
@@ -1962,14 +1773,250 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               url: scrapbook.escapeFilename(filename) + sourceUrlHash,
               favIconUrl: data.favIconUrl,
             };
+          });
+        }
+
+        case "zip": {
+          // create index.html that redirects to index.xhtml|.svg
+          if (ext !== "html") {
+            await addIndexHtml("index.html", `index.${ext}`, title);
           }
-          break;
+
+          // generate and download the zip file
+          const zip = await capturer.loadCacheAsZip({timeId});
+          await capturer.clearCache({timeId});
+          const blob = await zip.generateAsync({type: "blob", mimeType: "application/html+zip"});
+          let targetDir;
+          let savePrompt;
+          let saveMethod;
+
+          switch (options["capture.saveTo"]) {
+            case 'memory': {
+              // special handling (for unit test)
+              return await capturer.saveBlobInMemory({blob});
+            }
+            case 'file': {
+              filename = settings.filename + ".htz";
+              saveMethod = "saveBlobNaturally";
+              break;
+            }
+            case 'server': {
+              [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".htz");
+              savePrompt = false;
+              saveMethod = "saveToServer";
+              break;
+            }
+            case 'folder':
+            default: {
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ".htz");
+              savePrompt = false;
+              saveMethod = "saveBlob";
+              break;
+            }
+          }
+
+          capturer.log(`Saving data...`);
+          return await capturer[saveMethod]({
+            timeId,
+            blob,
+            directory: targetDir,
+            filename,
+            sourceUrl,
+            autoErase: false,
+            savePrompt,
+            settings,
+            options,
+          }).then((filename) => {
+            return {
+              timeId,
+              title,
+              type: "",
+              sourceUrl,
+              targetDir,
+              filename,
+              url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+              favIconUrl: data.favIconUrl,
+            };
+          });
+        }
+
+        case "maff": {
+          {
+            // create index.html that redirects to index.xhtml|.svg
+            if (ext !== "html") {
+              await addIndexHtml(`${timeId}/index.html`, `index.${ext}`, title);
+            }
+
+            // generate index.rdf
+            const rdfContent = `<?xml version="1.0"?>
+<RDF:RDF xmlns:MAF="http://maf.mozdev.org/metadata/rdf#"
+       xmlns:NC="http://home.netscape.com/NC-rdf#"
+       xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<RDF:Description RDF:about="urn:root">
+  <MAF:originalurl RDF:resource="${scrapbook.escapeHtml(sourceUrl)}"/>
+  <MAF:title RDF:resource="${scrapbook.escapeHtml(data.title)}"/>
+  <MAF:archivetime RDF:resource="${scrapbook.escapeHtml(scrapbook.idToDate(timeId).toUTCString())}"/>
+  <MAF:indexfilename RDF:resource="${filename}"/>
+  <MAF:charset RDF:resource="UTF-8"/>
+</RDF:Description>
+</RDF:RDF>
+`;
+            await capturer.saveCache({
+              timeId,
+              path: timeId + "/" + "index.rdf",
+              source: sourceUrlMain,
+              data: new Blob([rdfContent], {type: "application/rdf+xml"}),
+            });
+          }
+
+          // generate and download the zip file
+          const zip = await capturer.loadCacheAsZip({timeId});
+          await capturer.clearCache({timeId});
+          const blob = await zip.generateAsync({type: "blob", mimeType: "application/x-maff"});
+          let targetDir;
+          let savePrompt;
+          let saveMethod;
+
+          switch (options["capture.saveTo"]) {
+            case 'memory': {
+              // special handling (for unit test)
+              return await capturer.saveBlobInMemory({blob});
+            }
+            case 'file': {
+              filename = settings.filename + ".maff";
+              saveMethod = "saveBlobNaturally";
+              break;
+            }
+            case 'server': {
+              [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".maff");
+              savePrompt = false;
+              saveMethod = "saveToServer";
+              break;
+            }
+            case 'folder':
+            default: {
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ".maff");
+              savePrompt = false;
+              saveMethod = "saveBlob";
+              break;
+            }
+          }
+
+          capturer.log(`Saving data...`);
+          return await capturer[saveMethod]({
+            timeId,
+            blob,
+            directory: targetDir,
+            filename,
+            sourceUrl,
+            autoErase: false,
+            savePrompt,
+            settings,
+            options,
+          }).then((filename) => {
+            return {
+              timeId,
+              title,
+              type: "",
+              sourceUrl,
+              targetDir,
+              filename,
+              url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+              favIconUrl: data.favIconUrl,
+            };
+          });
+        }
+
+        case "folder":
+        default: {
+          // create index.html that redirects to index.xhtml|.svg
+          if (ext !== "html") {
+            await addIndexHtml("index.html", `index.${ext}`, title);
+          }
+
+          let targetDir;
+          let savePrompt = false;
+          let saveMethod;
+
+          {
+            const newFilename = await capturer.invoke("getAvailableFilename", {
+              filename: settings.filename,
+              settings,
+              options,
+            });
+            const dir = scrapbook.filepathParts(filename)[0];
+            settings.filename = (dir ? dir + '/' : '') + newFilename;
+          }
+
+          switch (options["capture.saveTo"]) {
+            case 'server': {
+              targetDir = settings.filename;
+              saveMethod = "saveToServer";
+              break;
+            }
+            case 'folder':
+            case 'file': // fallback
+            case 'memory': // fallback
+            default: {
+              targetDir = options["capture.saveFolder"] + "/" + settings.filename;
+              saveMethod = "saveBlob";
+              break;
+            }
+          }
+
+          capturer.log(`Saving data...`);
+          const entries = await capturer.loadCache({timeId});
+          await capturer.clearCache({timeId});
+          let errorUrl = sourceUrl;
+          try {
+            await Promise.all(entries.map(([path, sourceUrl, data]) => {
+              return capturer[saveMethod]({
+                timeId,
+                blob: data,
+                directory: targetDir,
+                filename: path,
+                sourceUrl,
+                autoErase: path !== "index.html",
+                savePrompt,
+                settings,
+                options,
+              }).catch((ex) => {
+                // handle bug for zero-sized in Firefox < 65
+                // path should be same as the download filename (though the
+                // value is not acturally used)
+                // see browser.downloads.onChanged handler
+                if (data.size === 0 && ex.message === "Cannot find downloaded item.") {
+                  return path;
+                }
+
+                // throw an unexpected error
+                errorUrl = sourceUrl;
+                throw ex;
+              });
+            }));
+          } catch (ex) {
+            // error out for individual file saving error
+            console.error(ex);
+            const message = scrapbook.lang("ErrorFileSaveError", [errorUrl, ex.message]);
+            return {url: capturer.getErrorUrl(errorUrl, options), error: {message}};
+          }
+
+          return {
+            timeId,
+            title,
+            type: "",
+            sourceUrl,
+            targetDir,
+            filename,
+            url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+            favIconUrl: data.favIconUrl,
+          };
         }
       }
     } catch (ex) {
-      console.warn(ex);
-      capturer.warn(scrapbook.lang("ErrorFileSaveError", [sourceUrl, ex.message]));
-      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+      console.error(ex);
+      const message = scrapbook.lang("ErrorFileSaveError", [sourceUrl, ex.message]);
+      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message}};
     }
   };
 
