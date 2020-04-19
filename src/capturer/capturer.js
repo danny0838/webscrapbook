@@ -1604,12 +1604,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     };
 
     try {
-      const mapMimeExt = (mime) => {
-        if (mime === "application/xhtml+xml") { return "xhtml"; }
-        if (mime === "image/svg+xml") { return "svg"; }
-        return "html";
-      };
-
       if (!settings.frameIsMain &&
           typeof options["capture.pageSizeLimit"] === "number" && data.content.length >= options["capture.pageSizeLimit"] * 1024 * 1024) {
         capturer.warn(scrapbook.lang("WarnPageSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
