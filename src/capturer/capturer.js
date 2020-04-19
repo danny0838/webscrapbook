@@ -1939,10 +1939,31 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             settings.filename = (dir ? dir + '/' : '') + newFilename;
           }
 
+          const entries = await capturer.loadCache({timeId});
           switch (options["capture.saveTo"]) {
             case 'server': {
               targetDir = settings.filename;
               saveMethod = "saveToServer";
+              for (const [path, sourceUrl, data] of entries) {
+                try {
+                  await capturer[saveMethod]({
+                    timeId,
+                    blob: data,
+                    directory: targetDir,
+                    filename: path,
+                    sourceUrl,
+                    autoErase: path !== "index.html",
+                    savePrompt,
+                    settings,
+                    options,
+                  });
+                } catch (ex) {
+                  // error out for individual file saving error
+                  console.error(ex);
+                  const message = scrapbook.lang("ErrorFileSaveError", [sourceUrl, ex.message]);
+                  return {url: capturer.getErrorUrl(sourceUrl, options), error: {message}};
+                }
+              }
               break;
             }
             case 'folder':
@@ -1951,43 +1972,41 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             default: {
               targetDir = options["capture.saveFolder"] + "/" + settings.filename;
               saveMethod = "saveBlob";
+              let errorUrl = sourceUrl;
+              try {
+                await Promise.all(entries.map(([path, sourceUrl, data]) => {
+                  return capturer[saveMethod]({
+                    timeId,
+                    blob: data,
+                    directory: targetDir,
+                    filename: path,
+                    sourceUrl,
+                    autoErase: path !== "index.html",
+                    savePrompt,
+                    settings,
+                    options,
+                  }).catch((ex) => {
+                    // handle bug for zero-sized in Firefox < 65
+                    // path should be same as the download filename (though the
+                    // value is not acturally used)
+                    // see browser.downloads.onChanged handler
+                    if (data.size === 0 && ex.message === "Cannot find downloaded item.") {
+                      return path;
+                    }
+
+                    // throw an unexpected error
+                    errorUrl = sourceUrl;
+                    throw ex;
+                  });
+                }));
+              } catch (ex) {
+                // error out for individual file saving error
+                console.error(ex);
+                const message = scrapbook.lang("ErrorFileSaveError", [errorUrl, ex.message]);
+                return {url: capturer.getErrorUrl(errorUrl, options), error: {message}};
+              }
               break;
             }
-          }
-
-          const entries = await capturer.loadCache({timeId});
-          let errorUrl = sourceUrl;
-          try {
-            await Promise.all(entries.map(([path, sourceUrl, data]) => {
-              return capturer[saveMethod]({
-                timeId,
-                blob: data,
-                directory: targetDir,
-                filename: path,
-                sourceUrl,
-                autoErase: path !== "index.html",
-                savePrompt,
-                settings,
-                options,
-              }).catch((ex) => {
-                // handle bug for zero-sized in Firefox < 65
-                // path should be same as the download filename (though the
-                // value is not acturally used)
-                // see browser.downloads.onChanged handler
-                if (data.size === 0 && ex.message === "Cannot find downloaded item.") {
-                  return path;
-                }
-
-                // throw an unexpected error
-                errorUrl = sourceUrl;
-                throw ex;
-              });
-            }));
-          } catch (ex) {
-            // error out for individual file saving error
-            console.error(ex);
-            const message = scrapbook.lang("ErrorFileSaveError", [errorUrl, ex.message]);
-            return {url: capturer.getErrorUrl(errorUrl, options), error: {message}};
           }
           await capturer.clearCache({timeId});
 
