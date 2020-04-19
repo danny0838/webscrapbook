@@ -1052,7 +1052,7 @@ Redirecting to file <a href="index.md">index.md</a>
           this.warn(scrapbook.lang('ScrapBookErrorBookNotExist', [bookId]));
           bookId = this.bookId = '';
           book = this.book = server.books[bookId];
-          await scrapbook.setOption("server.scrapbook", bookId);
+          await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
         }
 
         // init book select
@@ -1089,7 +1089,7 @@ Redirecting to file <a href="index.md">index.md</a>
       try {
         // reset variables
         if (typeof bookId !== 'undefined' && bookId !== this.bookId) {
-          await scrapbook.setOption("server.scrapbook", bookId);
+          await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
           this.bookId = bookId;
           this.book = server.books[bookId];
           document.getElementById('book').value = bookId;

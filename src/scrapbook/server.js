@@ -117,7 +117,7 @@
         // record configs
         this._user = scrapbook.getOption("server.user");
         this._password = scrapbook.getOption("server.password");
-        this._bookId = scrapbook.getOption("server.scrapbook");
+        this._bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
 
         let rootUrlObj;
         try {

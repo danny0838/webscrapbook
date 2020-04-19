@@ -32,7 +32,6 @@
     "server.url": "",
     "server.user": "",
     "server.password": "",
-    "server.scrapbook": "",
     "capture.saveTo": "folder", // "server", "folder", "memory"
     "capture.saveFolder": "WebScrapBook/data",
     "capture.saveAs": "folder", // "folder", "zip", "maff", "singleHtml"
