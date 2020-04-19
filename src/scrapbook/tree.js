@@ -1080,10 +1080,10 @@ Redirecting to file <a href="index.md">index.md</a>
         this.commands[cmd] = this.commands[cmd].bind(this);
       }
 
-      await this.refresh();
+      await this.refresh(undefined, true);
     },
 
-    async refresh(bookId) {
+    async refresh(bookId, keepLogs = false) {
       this.enableUi(false);
 
       try {
@@ -1134,7 +1134,9 @@ Redirecting to file <a href="index.md">index.md</a>
         menuElem.querySelector('button[value="meta"]').disabled = isNoTree;
         menuElem.querySelector('button[value="view_recycle"]').disabled = isNoTree;
 
-        document.getElementById('logger').textContent = '';
+        if (!keepLogs) {
+          document.getElementById('logger').textContent = '';
+        }
 
         // refresh book tree
         if (!isNoTree) {
