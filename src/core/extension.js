@@ -299,6 +299,16 @@
           height,
           type: 'popup',
         });
+
+        // Fix a bug for Firefox that positioning not work for windows.create
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1271047
+        // @FIXME: this occasionally doesn't work.
+        if (scrapbook.userAgent.is('gecko')) {
+          await browser.windows.update(sideWindow.id, {
+            left,
+            top,
+          });
+        }
       }
 
       const axis = {};
