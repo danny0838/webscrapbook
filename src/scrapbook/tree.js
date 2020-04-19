@@ -1307,36 +1307,70 @@ Redirecting to file <a href="index.md">index.md</a>
     },
 
     async openLink(url, newTab) {
-      if (newTab) {
-        if (typeof newTab === 'string') {
-          window.open(url, newTab);
-        } else {
-          await browser.tabs.create({
-            url,
-          });
-        }
-        return;
-      }
-
-      if (browser.windows) {
+      const getLastFocusedWindow = async (windowTypes = ['normal']) => {
         let win;
         try {
           win = await browser.windows.getLastFocused({
             populate: true,
-            windowTypes: ['normal'],
+            windowTypes,
           });
-          if (win.type !== 'normal') {
+          if (!windowTypes.includes(win.type)) {
             // Firefox deprecates windowTypes argument and may get a last focused
             // window of a bad type. Attempt to get another window instead.
             win = (await browser.windows.getAll({
               populate: true,
-            })).find(x => x.type === 'normal');
+            })).find(x => windowTypes.includes(x.type));
           }
           if (!win) {
             throw new Error('no last-focused window');
           }
         } catch (ex) {
           // no last-focused window
+          return null;
+        }
+        return win;
+      };
+
+      if (newTab) {
+        if (typeof newTab === 'string') {
+          window.open(url, newTab);
+          return;
+        }
+
+        if (scrapbook.userAgent.is('gecko') && browser.windows) {
+          // Firefox < 60 (?) allows multiple tabs in a popup window,
+          // but the user cannot switch between them.
+          // Open the newTab in the last-focused window instead.
+          if ((await browser.windows.getCurrent()).type !== 'normal') {
+            const win = await getLastFocusedWindow();
+            if (!win) {
+              await browser.windows.create({
+                url,
+              });
+              return;
+            }
+
+            await browser.tabs.create({
+              windowId: win.id,
+              url,
+            });
+            return;
+          }
+        }
+
+        // Chromium allows only one tab in a popup window.
+        // If the current tab is already in a popup, the newly created tab
+        // will be in the most recently focused window, which does not work
+        // same as window.getCurrentWindow or window.getLastFocusedWindow.
+        const tab = await browser.tabs.create({
+          url,
+        });
+        return;
+      }
+
+      if (browser.windows) {
+        const win = await getLastFocusedWindow();
+        if (!win) {
           await browser.windows.create({
             url,
           });
