@@ -32,6 +32,9 @@
     "server.url": "",
     "server.user": "",
     "server.password": "",
+    "capture.serverUploadWorkers": 4,
+    "capture.serverUploadRetryCount": 2,
+    "capture.serverUploadRetryDelay": 2000,
     "capture.saveTo": "folder", // "server", "folder", "memory"
     "capture.saveFolder": "WebScrapBook/data",
     "capture.saveAs": "folder", // "folder", "zip", "maff", "singleHtml"

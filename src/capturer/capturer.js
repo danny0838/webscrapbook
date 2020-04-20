@@ -1944,7 +1944,15 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             case 'server': {
               targetDir = settings.filename;
               saveMethod = "saveToServer";
-              for (const [path, sourceUrl, data] of entries) {
+
+              let workers = options["capture.serverUploadWorkers"];
+              if (!(workers >= 1)) { workers = Infinity; }
+              workers = Math.min(workers, entries.length);
+
+              let taskIdx = 0;
+              const runNextTask = async () => {
+                if (taskIdx >= entries.length) { return; }
+                const [path, sourceUrl, data] = entries[taskIdx++];
                 try {
                   await capturer[saveMethod]({
                     timeId,
@@ -1958,11 +1966,21 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
                     options,
                   });
                 } catch (ex) {
-                  // error out for individual file saving error
-                  console.error(ex);
-                  const message = scrapbook.lang("ErrorFileSaveError", [sourceUrl, ex.message]);
-                  return {url: capturer.getErrorUrl(sourceUrl, options), error: {message}};
+                  // throw an unexpected error
+                  errorUrl = sourceUrl;
+                  throw ex;
                 }
+                return runNextTask();
+              };
+
+              let errorUrl = sourceUrl;
+              try {
+                await Promise.all(Array.from({length: workers}, _ => runNextTask()));
+              } catch (ex) {
+                // error out for individual file saving error
+                console.error(ex);
+                const message = scrapbook.lang("ErrorFileSaveError", [errorUrl, ex.message]);
+                return {url: capturer.getErrorUrl(errorUrl, options), error: {message}};
               }
               break;
             }
@@ -2728,16 +2746,31 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const target = server.books[server.bookId].dataUrl +
       scrapbook.escapeFilename((directory ? directory + '/' : '') + newFilename);
 
-    const formData = new FormData();
-    formData.append('token', await server.acquireToken());
-    formData.append('upload', blob);
-
     try {
-      await server.request({
-        url: target + '?a=save&f=json',
-        method: "POST",
-        body: formData,
-      });
+      const retryCount = options["capture.serverUploadRetryCount"];
+      const retryDelay = options["capture.serverUploadRetryDelay"];
+      let tried = 0;
+      while (true) {
+        try {
+          const formData = new FormData();
+          formData.append('token', await server.acquireToken());
+          formData.append('upload', blob);
+
+          await server.request({
+            url: target + '?a=save&f=json',
+            method: "POST",
+            body: formData,
+          });
+          break;
+        } catch (ex) {
+          if (tried++ < retryCount) {
+            console.error(`Upload failed for "${target}" (tried ${tried}): ${ex.message}`);
+            await scrapbook.delay(retryDelay);
+          } else {
+            throw ex;
+          }
+        }
+      }
     } catch (ex) {
       throw new Error(`Unable to upload to backend server: ${ex.message}`);
     }
