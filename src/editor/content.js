@@ -683,6 +683,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     elem.addEventListener("click", (event) => {
       editor.save({internalize: true});
     }, {passive: true});
+    elem.disabled = !editor.inScrapBook;
 
     // close
     var elem = wrapper.querySelector('.toolbar-close');
