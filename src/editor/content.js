@@ -1245,7 +1245,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
       "text/x-javascript",
     ]);
     const LOADER_TYPES = new Set([
-      "canvas-loader",
+      "canvas-loader", // WebScrapBook < 0.69
+      "basic-loader",
       "shadowroot-loader",
     ]);
 

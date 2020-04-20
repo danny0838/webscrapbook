@@ -4198,7 +4198,7 @@ async function test_capture_canvas() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  var loader = doc.querySelector('script[data-scrapbook-elem="canvas-loader"]');
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
   assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
 
   assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
@@ -4227,7 +4227,7 @@ async function test_capture_canvas() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('script[data-scrapbook-elem="canvas-loader"]'));
+  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
   assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
   assert(!doc.querySelector('#c2').hasAttribute("data-scrapbook-canvas"));
 
@@ -4254,7 +4254,7 @@ async function test_capture_canvas() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(!doc.querySelector('script[data-scrapbook-elem="canvas-loader"]'));
+  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
   assert(!doc.querySelector('#c1'));
   assert(!doc.querySelector('#c2'));
 
@@ -5416,8 +5416,14 @@ async function test_capture_formStatus() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('input[type="radio"]').hasAttribute('checked'));
-  assert(doc.querySelector('input[type="checkbox"]').hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('data-scrapbook-input-indeterminate'));
   assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
   assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
   assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
@@ -5442,8 +5448,14 @@ async function test_capture_formStatus() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector('input[type="radio"]').hasAttribute('checked'));
-  assert(!doc.querySelector('input[type="checkbox"]').hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('data-scrapbook-input-indeterminate'));
   assert(!doc.querySelector('input[type="text"]').hasAttribute('value'));
   assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
   assert(!doc.querySelector('input[type="number"]').hasAttribute('value'));

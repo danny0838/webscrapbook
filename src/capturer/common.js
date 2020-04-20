@@ -1678,7 +1678,7 @@
                   try {
                     if (!scrapbook.isCanvasBlank(elemOrig)) {
                       captureRewriteAttr(elem, "data-scrapbook-canvas", elemOrig.toDataURL());
-                      requireCanvasLoader = true;
+                      requireBasicLoader = true;
                     }
                   } catch (ex) {
                     console.error(ex);
@@ -1747,6 +1747,10 @@
                     case "keep":
                       if (elemOrig) {
                         captureRewriteAttr(elem, "checked", elemOrig.checked ? "checked" : null);
+                        if (elemOrig.indeterminate && elem.type.toLowerCase() === 'checkbox') {
+                          captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", "");
+                          requireBasicLoader = true;
+                        }
                       }
                       break;
                     case "reset":
@@ -2212,8 +2216,8 @@
       // inspect nodes
       let metaCharsetNode;
       let favIconUrl;
-      let requireCanvasLoader = false;
       let requireShadowRootLoader = false;
+      let requireBasicLoader = false;
       rewriteRecursively(rootNode, rootNode.nodeName.toLowerCase(), rewriteNode);
 
       // record source URL
@@ -2340,7 +2344,7 @@
         rootNode,
         deleteErased: options["capture.deleteErasedOnCapture"],
         requireShadowRootLoader,
-        requireCanvasLoader,
+        requireBasicLoader,
       });
 
       // save document
@@ -2483,7 +2487,16 @@
         // record form element status
         for (const elem of rootNode.querySelectorAll("input")) {
           switch (elem.type.toLowerCase()) {
-            case "checkbox":
+            case "checkbox": {
+              // indeterminate
+              elem.removeAttribute("data-scrapbook-input-indeterminate");
+              const elemOrig = origNodeMap.get(elem);
+              if (!elemOrig) { continue; }
+              if (elemOrig.indeterminate) {
+                elem.setAttribute("data-scrapbook-input-indeterminate", "");
+                requireBasicLoader = true;
+              }
+            }
             case "radio":
               if (elem.checked) {
                 elem.setAttribute("checked", "checked");
@@ -2541,7 +2554,7 @@
           if (!elemOrig) { continue; }
           if (scrapbook.isCanvasBlank(elemOrig)) { continue; }
           elem.setAttribute("data-scrapbook-canvas", elemOrig.toDataURL());
-          requireCanvasLoader = true;
+          requireBasicLoader = true;
         }
 
         // update shadow root data
@@ -2598,7 +2611,7 @@
       const resources = {};
       const shadowRootSupported = !!rootNode.attachShadow;
       let requireShadowRootLoader = false;
-      let requireCanvasLoader = false;
+      let requireBasicLoader = false;
 
       processRootNode(rootNode);
 
@@ -2607,7 +2620,7 @@
         rootNode,
         deleteErased: options["capture.deleteErasedOnSave"],
         requireShadowRootLoader,
-        requireCanvasLoader,
+        requireBasicLoader,
       });
 
       const content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
@@ -2630,13 +2643,13 @@
    * @param {Document} params.rootNode
    * @param {boolean} params.deleteErased
    * @param {boolean} params.requireShadowRootLoader
-   * @param {boolean} params.requireCanvasLoader
+   * @param {boolean} params.requireBasicLoader
    * @return {Promise<Object>}
    */
   capturer.preSaveProcess = async function (params) {
     isDebug && console.debug("call: preSaveProcess");
 
-    const {rootNode, deleteErased, requireShadowRootLoader, requireCanvasLoader} = params;
+    const {rootNode, deleteErased, requireShadowRootLoader, requireBasicLoader} = params;
     const doc = rootNode.ownerDocument;
 
     // delete all erased contents
@@ -2683,30 +2696,37 @@
       }) + ")()";
     }
 
-    // canvas
-    for (const elem of rootNode.querySelectorAll('script[data-scrapbook-elem="canvas-loader"]')) {
+    // canvas, input-indeterminate
+    // remove canvas-loader for downward compatibility with WebScrapBook < 0.69
+    for (const elem of rootNode.querySelectorAll('script[data-scrapbook-elem="basic-loader"], script[data-scrapbook-elem="canvas-loader"]')) {
       elem.remove();
     }
-    if (requireCanvasLoader) {
+    if (requireBasicLoader) {
       const loader = rootNode.appendChild(doc.createElement("script"));
-      loader.setAttribute("data-scrapbook-elem", "canvas-loader");
-      // HTMLCanvasElement requires Firefox >= 1.5
-      // querySelectorAll requires Firefox >= 3.5
+      loader.setAttribute("data-scrapbook-elem", "basic-loader");
+      // Keep downward compatibility with IE8.
+      // indeterminate checkbox: IE >= 6, getAttribute: IE >= 8
+      // HTMLCanvasElement: Firefox >= 1.5, querySelectorAll: Firefox >= 3.5
       // getElementsByTagName is not implemented for DocumentFragment (shadow root)
       loader.textContent = "(" + scrapbook.compressJsFunc(function () {
-        var k = "data-scrapbook-canvas",
+        var k1 = "data-scrapbook-input-indeterminate", k2 = "data-scrapbook-canvas",
             fn = function (r) {
-              var e = r.querySelectorAll ? r.querySelectorAll("*") : r.getElementsByTagName("*"), i = e.length;
+              var E = r.querySelectorAll ? r.querySelectorAll("*") : r.getElementsByTagName("*"), i = E.length, e;
               while (i--) {
-                if (e[i].shadowRoot) {
-                  fn(e[i].shadowRoot);
+                e = E[i];
+                if (e.shadowRoot) {
+                  fn(e.shadowRoot);
                 }
-                if (e[i].hasAttribute(k)) {
+                if (e.hasAttribute(k1)) {
+                  e.indeterminate = true;
+                  e.removeAttribute(k1);
+                }
+                if (e.hasAttribute(k2)) {
                   (function () {
-                    var c = e[i], g = new Image();
+                    var c = e, g = new Image();
                     g.onload = function () { c.getContext('2d').drawImage(g, 0, 0); };
-                    g.src = c.getAttribute(k);
-                    c.removeAttribute(k);
+                    g.src = c.getAttribute(k2);
+                    c.removeAttribute(k2);
                   })();
                 }
               }
