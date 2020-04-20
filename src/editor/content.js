@@ -1610,7 +1610,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
         editor.addHistory();
 
         let type = editor.removeScrapBookObject(elem);
-        if (type === -1) {
+        if (type <= 0) {
           const timeId = scrapbook.dateToId();
           elem.parentNode.replaceChild(document.createComment(`scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(elem.outerHTML)}`), elem);
         }
