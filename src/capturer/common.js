@@ -2690,10 +2690,13 @@
     if (requireCanvasLoader) {
       const loader = rootNode.appendChild(doc.createElement("script"));
       loader.setAttribute("data-scrapbook-elem", "canvas-loader");
+      // HTMLCanvasElement requires Firefox >= 1.5
+      // querySelectorAll requires Firefox >= 3.5
+      // getElementsByTagName is not implemented for DocumentFragment (shadow root)
       loader.textContent = "(" + scrapbook.compressJsFunc(function () {
         var k = "data-scrapbook-canvas",
             f = function (r) {
-              var e = r.querySelectorAll("*"), i = e.length;
+              var e = r.querySelectorAll ? r.querySelectorAll("*") : r.getElementsByTagName("*"), i = e.length;
               while (i--) {
                 if (e[i].shadowRoot) {
                   f(e[i].shadowRoot);
