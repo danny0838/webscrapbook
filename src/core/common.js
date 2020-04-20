@@ -81,7 +81,7 @@
     "capture.recordSourceUri": false,
     "capture.helpersEnabled": false,
     "capture.helpers": "",
-    "capture.deleteErasedOnCapture": false,
+    "capture.deleteErasedOnCapture": true,
     "capture.deleteErasedOnSave": false,
     "editor.autoInit": true,
     "editor.lineMarker.style.1": "background: #FFFF00; background: linear-gradient(transparent 40%, rgba(255,255,0,0.9) 90%, transparent 100%);",
