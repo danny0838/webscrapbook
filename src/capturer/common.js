@@ -2491,6 +2491,9 @@
                 elem.removeAttribute("checked");
               }
               break;
+            case "password":
+            case "file":
+              // skip for security
             case "image":
               // skip image
               break;
