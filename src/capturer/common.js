@@ -2668,18 +2668,18 @@
       loader.setAttribute("data-scrapbook-elem", "shadowroot-loader");
       // browsers supporting shadowRoot all support ES6
       loader.textContent = "(" + scrapbook.compressJsFunc(function () {
-        var k = "data-scrapbook-shadowroot", d = document, p, s, data, mode, fn = n => {
-          n.querySelectorAll(`[${k}]`).forEach(h => {
-            if (!h.shadowRoot && h.attachShadow) {
-              ({data, mode} = JSON.parse(h.getAttribute(k)));
-              s = h.attachShadow({mode});
+        var k = "data-scrapbook-shadowroot", s, data, mode, fn = n => {
+          n.querySelectorAll(`[${k}]`).forEach(r => {
+            if (!r.shadowRoot && r.attachShadow) {
+              ({data, mode} = JSON.parse(r.getAttribute(k)));
+              s = r.attachShadow({mode});
               s.innerHTML = data;
               fn(s);
-              h.removeAttribute(k);
+              r.removeAttribute(k);
             }
           });
         };
-        fn(d);
+        fn(document);
       }) + ")()";
     }
 
@@ -2695,11 +2695,11 @@
       // getElementsByTagName is not implemented for DocumentFragment (shadow root)
       loader.textContent = "(" + scrapbook.compressJsFunc(function () {
         var k = "data-scrapbook-canvas",
-            f = function (r) {
+            fn = function (r) {
               var e = r.querySelectorAll ? r.querySelectorAll("*") : r.getElementsByTagName("*"), i = e.length;
               while (i--) {
                 if (e[i].shadowRoot) {
-                  f(e[i].shadowRoot);
+                  fn(e[i].shadowRoot);
                 }
                 if (e[i].hasAttribute(k)) {
                   (function () {
@@ -2711,7 +2711,7 @@
                 }
               }
             };
-        f(document);
+        fn(document);
       }) + ")()";
     }
   };
