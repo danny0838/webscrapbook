@@ -200,6 +200,12 @@
   "EditorButtonHtmlEditorInsertDate": {
     "message": "插入日期"
   },
+  "EditorButtonHtmlEditorInsertHtml": {
+    "message": "插入 HTML"
+  },
+  "EditorButtonHtmlEditorInsertHtmlPrompt": {
+    "message": "請輸入要插入的 HTML："
+  },
   "EditorButtonHtmlEditorJustifyCenter": {
     "message": "置中對齊"
   },

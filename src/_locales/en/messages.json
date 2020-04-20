@@ -200,6 +200,12 @@
   "EditorButtonHtmlEditorInsertDate": {
     "message": "Insert datetime"
   },
+  "EditorButtonHtmlEditorInsertHtml": {
+    "message": "Insert HTML"
+  },
+  "EditorButtonHtmlEditorInsertHtmlPrompt": {
+    "message": "Input the HTML to insert:"
+  },
   "EditorButtonHtmlEditorJustifyCenter": {
     "message": "Align center"
   },

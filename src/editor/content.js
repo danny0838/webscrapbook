@@ -441,6 +441,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       <li><button class="toolbar-htmlEditor-hr">${scrapbook.lang('EditorButtonHtmlEditorHr')}</button></li>
       <li><button class="toolbar-htmlEditor-todo">${scrapbook.lang('EditorButtonHtmlEditorTodo')}</button></li>
       <li><button class="toolbar-htmlEditor-insertDate">${scrapbook.lang('EditorButtonHtmlEditorInsertDate')}</button></li>
+      <li><button class="toolbar-htmlEditor-insertHtml">${scrapbook.lang('EditorButtonHtmlEditorInsertHtml')}</button></li>
       <hr/>
       <li><button class="toolbar-htmlEditor-removeFormat">${scrapbook.lang('EditorButtonHtmlEditorRemoveFormat')}</button></li>
       <li><button class="toolbar-htmlEditor-unlink">${scrapbook.lang('EditorButtonHtmlEditorUnlink')}</button></li>
@@ -650,6 +651,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor-insertDate');
     elem.addEventListener("click", htmlEditor.insertDate, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-htmlEditor-insertHtml');
+    elem.addEventListener("click", htmlEditor.insertHtml, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor-removeFormat');
     elem.addEventListener("click", htmlEditor.removeFormat, {passive: true});
@@ -1984,6 +1988,18 @@ ${sRoot}.toolbar .toolbar-close:hover {
         args: {
           frameId: await editor.getFocusedFrameId(),
           code: `document.execCommand('insertText', false, "${scrapbook.escapeQuotes(dateStr)}");`,
+        },
+      });
+    },
+
+    async insertHtml() {
+      const html = prompt(scrapbook.lang('EditorButtonHtmlEditorInsertHtmlPrompt'));
+      if (!html) { return; }
+      return await scrapbook.invokeExtensionScript({
+        cmd: "background.invokeEditorCommand",
+        args: {
+          frameId: await editor.getFocusedFrameId(),
+          code: `document.execCommand('insertHTML', false, "${scrapbook.escapeQuotes(html)}");`,
         },
       });
     },
