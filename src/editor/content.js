@@ -1519,7 +1519,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
         domEraser.clearTarget();
         lastTarget = elem;
 
-        if (scrapbook.getScrapbookObjectType(elem) === false) {
+        if (scrapbook.getScrapBookObjectRemoveType(elem) <= 0) {
           const id = elem.id;
           const classText = Array.from(elem.classList.values()).join(' '); // elements like svg doesn't support .className property
           var outlineStyle = '2px solid red';
