@@ -27,6 +27,7 @@
     inScrapBook: false,
     isScripted: false,
     serverUrl: null,
+    erasedContents: new WeakMap(),
     history: [],
     lastWindowFocusTime: -1,
     lastWindowBlurTime: -1,
@@ -1316,6 +1317,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     const wrapper = doc.createElement('scrapbook-erased');
     range.surroundContents(wrapper);
     const comment = document.createComment(`scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(wrapper.innerHTML)}`);
+    editor.erasedContents.set(comment, wrapper);
     wrapper.parentNode.replaceChild(comment, wrapper);
   };
 
@@ -1353,6 +1355,18 @@ ${sRoot}.toolbar .toolbar-close:hover {
         break;
       }
       case 3: {
+        let wrapper = editor.erasedContents.get(elem);
+
+        // if the erased nodes are still in the stack, recover it
+        if (wrapper) {
+          const frag = elem.ownerDocument.createDocumentFragment();
+          let child;
+          while (child = wrapper.firstChild) { frag.appendChild(child); }
+          elem.parentNode.replaceChild(frag, elem);
+          break;
+        }
+
+        // otherwise, recover from recorded HTML
         const m = elem.nodeValue.match(/^.+?=([\s\S]*)$/);
         if (m) {
           const doc = elem.ownerDocument;
