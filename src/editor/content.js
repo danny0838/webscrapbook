@@ -761,9 +761,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     const timeId = scrapbook.dateToId();
     for (const range of scrapbook.getSafeSelectionRanges().reverse()) {
       if (!range.collapsed) {
-        const wrapper = document.createElement('scrapbook-erased');
-        range.surroundContents(wrapper);
-        wrapper.parentNode.replaceChild(document.createComment(`scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(wrapper.innerHTML)}`), wrapper);
+        editor.eraseRange(range, timeId);
       }
     }
   };
@@ -783,7 +781,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       for (const elem of Array.from(elems).reverse()) {
         if (elem.matches(FORBID_NODES)) { continue; }
 
-        elem.parentNode.replaceChild(document.createComment(`scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(elem.outerHTML)}`), elem);
+        editor.eraseNode(elem, timeId);
       }
     };
     return fn({selector});
@@ -1336,6 +1334,20 @@ ${sRoot}.toolbar .toolbar-close:hover {
     return 0;
   };
 
+  editor.eraseRange = function (range, timeId = scrapbook.dateToId()) {
+    const doc = range.commonAncestorContainer.ownerDocument;
+    const wrapper = doc.createElement('scrapbook-erased');
+    range.surroundContents(wrapper);
+    const comment = document.createComment(`scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(wrapper.innerHTML)}`);
+    wrapper.parentNode.replaceChild(comment, wrapper);
+  };
+
+  editor.eraseNode = function (node, timeId = scrapbook.dateToId()) {
+    const range = new Range();
+    range.selectNode(node);
+    return editor.eraseRange(range, timeId);
+  };
+
   /**
    * Remove a scrapbook object.
    *
@@ -1616,8 +1628,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
         let type = editor.removeScrapBookObject(elem);
         if (type <= 0) {
-          const timeId = scrapbook.dateToId();
-          elem.parentNode.replaceChild(document.createComment(`scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(elem.outerHTML)}`), elem);
+          editor.eraseNode(elem);
         }
       },
 
@@ -1632,17 +1643,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
           for (const child of parent.childNodes) {
             if (child === elem) { continue; }
-
-            let replaceHtml;
-            if (child.nodeType === 1) {
-              if (child.matches(SKIP_NODES)) { continue; }
-              replaceHtml = `scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(child.outerHTML)}`;
-            } else {
-              const wrapper = document.createElement('scrapbook-erased');
-              wrapper.appendChild(child.cloneNode(true));
-              replaceHtml = `scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(wrapper.innerHTML)}`;
-            }
-            parent.replaceChild(document.createComment(replaceHtml), child);
+            if (child.nodeType === 1 && child.matches(SKIP_NODES)) { continue; }
+            editor.eraseNode(child, timeId);
           }
 
           elem = parent;
