@@ -1851,7 +1851,7 @@
                     host: elem,
                     shadowRoot,
                   });
-                  requireShadowRootLoader = true;
+                  requireBasicLoader = true;
                 }
               }
               break;
@@ -2216,7 +2216,6 @@
       // inspect nodes
       let metaCharsetNode;
       let favIconUrl;
-      let requireShadowRootLoader = false;
       let requireBasicLoader = false;
       rewriteRecursively(rootNode, rootNode.nodeName.toLowerCase(), rewriteNode);
 
@@ -2343,7 +2342,6 @@
       await capturer.preSaveProcess({
         rootNode,
         deleteErased: options["capture.deleteErasedOnCapture"],
-        requireShadowRootLoader,
         requireBasicLoader,
       });
 
@@ -2592,13 +2590,15 @@
                 data: shadowRoot.innerHTML,
                 mode: "open",
               }));
-              requireShadowRootLoader = true;
+              requireBasicLoader = true;
             }
           }
         } else {
           // shadowRoot not supported by the browser.
           // Just record whether there's a recorded shadow root.
-          requireShadowRootLoader = !!rootNode.querySelector('[data-scrapbook-shadowroot]');
+          if (rootNode.querySelector('[data-scrapbook-shadowroot]')) {
+            requireBasicLoader = true;
+          }
         }
       };
 
@@ -2610,7 +2610,6 @@
       };
       const resources = {};
       const shadowRootSupported = !!rootNode.attachShadow;
-      let requireShadowRootLoader = false;
       let requireBasicLoader = false;
 
       processRootNode(rootNode);
@@ -2619,7 +2618,6 @@
       await capturer.preSaveProcess({
         rootNode,
         deleteErased: options["capture.deleteErasedOnSave"],
-        requireShadowRootLoader,
         requireBasicLoader,
       });
 
@@ -2642,14 +2640,13 @@
    * @param {Object} params
    * @param {Document} params.rootNode
    * @param {boolean} params.deleteErased
-   * @param {boolean} params.requireShadowRootLoader
    * @param {boolean} params.requireBasicLoader
    * @return {Promise<Object>}
    */
   capturer.preSaveProcess = async function (params) {
     isDebug && console.debug("call: preSaveProcess");
 
-    const {rootNode, deleteErased, requireShadowRootLoader, requireBasicLoader} = params;
+    const {rootNode, deleteErased, requireBasicLoader} = params;
     const doc = rootNode.ownerDocument;
 
     // delete all erased contents
@@ -2671,34 +2668,13 @@
       }
     }
 
-    // update special loaders
-    // shadow root
-    for (const elem of rootNode.querySelectorAll('script[data-scrapbook-elem="shadowroot-loader"]')) {
-      elem.remove();
-    }
-    if (requireShadowRootLoader) {
-      const loader = rootNode.appendChild(doc.createElement("script"));
-      loader.setAttribute("data-scrapbook-elem", "shadowroot-loader");
-      // browsers supporting shadowRoot all support ES6
-      loader.textContent = "(" + scrapbook.compressJsFunc(function () {
-        var k = "data-scrapbook-shadowroot", s, data, mode, fn = n => {
-          n.querySelectorAll(`[${k}]`).forEach(r => {
-            if (!r.shadowRoot && r.attachShadow) {
-              ({data, mode} = JSON.parse(r.getAttribute(k)));
-              s = r.attachShadow({mode});
-              s.innerHTML = data;
-              fn(s);
-              r.removeAttribute(k);
-            }
-          });
-        };
-        fn(document);
-      }) + ")()";
-    }
-
-    // canvas, input-indeterminate
-    // remove canvas-loader for downward compatibility with WebScrapBook < 0.69
-    for (const elem of rootNode.querySelectorAll('script[data-scrapbook-elem="basic-loader"], script[data-scrapbook-elem="canvas-loader"]')) {
+    // update loader
+    // remove shadowroot-loader and canvas-loader for downward compatibility with WebScrapBook < 0.69.
+    for (const elem of rootNode.querySelectorAll([
+          'script[data-scrapbook-elem="basic-loader"]',
+          'script[data-scrapbook-elem="canvas-loader"]',
+          'script[data-scrapbook-elem="shadowroot-loader"]',
+        ].join(','))) {
       elem.remove();
     }
     if (requireBasicLoader) {
@@ -2709,24 +2685,30 @@
       // HTMLCanvasElement: Firefox >= 1.5, querySelectorAll: Firefox >= 3.5
       // getElementsByTagName is not implemented for DocumentFragment (shadow root)
       loader.textContent = "(" + scrapbook.compressJsFunc(function () {
-        var k1 = "data-scrapbook-input-indeterminate", k2 = "data-scrapbook-canvas",
+        var k1 = "data-scrapbook-shadowroot", k2 = "data-scrapbook-input-indeterminate", k3 = "data-scrapbook-canvas",
             fn = function (r) {
-              var E = r.querySelectorAll ? r.querySelectorAll("*") : r.getElementsByTagName("*"), i = E.length, e;
+              var E = r.querySelectorAll ? r.querySelectorAll("*") : r.getElementsByTagName("*"), i = E.length, e, d, s;
               while (i--) {
                 e = E[i];
+                if (e.hasAttribute(k1) && !e.shadowRoot && e.attachShadow) {
+                  d = JSON.parse(e.getAttribute(k1));
+                  s = e.attachShadow({mode: d.mode});
+                  s.innerHTML = d.data;
+                  e.removeAttribute(k1);
+                }
                 if (e.shadowRoot) {
                   fn(e.shadowRoot);
                 }
-                if (e.hasAttribute(k1)) {
-                  e.indeterminate = true;
-                  e.removeAttribute(k1);
-                }
                 if (e.hasAttribute(k2)) {
+                  e.indeterminate = true;
+                  e.removeAttribute(k2);
+                }
+                if (e.hasAttribute(k3)) {
                   (function () {
                     var c = e, g = new Image();
                     g.onload = function () { c.getContext('2d').drawImage(g, 0, 0); };
-                    g.src = c.getAttribute(k2);
-                    c.removeAttribute(k2);
+                    g.src = c.getAttribute(k3);
+                    c.removeAttribute(k3);
                   })();
                 }
               }

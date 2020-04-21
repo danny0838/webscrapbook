@@ -4205,6 +4205,20 @@ async function test_capture_canvas() {
   assert(/^data:image\/png;base64,/.test(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas")));
 
   // canvas in the shadow root
+  var blob = await capture({
+    url: `${localhost}/capture_canvas/canvas2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
+  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
   frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
@@ -4232,6 +4246,20 @@ async function test_capture_canvas() {
   assert(!doc.querySelector('#c2').hasAttribute("data-scrapbook-canvas"));
 
   // canvas in the shadow root
+  var blob = await capture({
+    url: `${localhost}/capture_canvas/canvas2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
+  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
   frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
@@ -4259,6 +4287,20 @@ async function test_capture_canvas() {
   assert(!doc.querySelector('#c2'));
 
   // canvas in the shadow root
+  var blob = await capture({
+    url: `${localhost}/capture_canvas/canvas2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
+  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
   frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
@@ -5505,7 +5547,7 @@ async function test_capture_shadowRoot() {
   var shadow2 = frag.content;
   assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
 
-  var loader = doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]');
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
   assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
 
   /* capture.shadowDom = remove */
@@ -5529,7 +5571,7 @@ async function test_capture_shadowRoot() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
-  assert(!doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]'));
+  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 }
 
 /**
@@ -5564,7 +5606,7 @@ async function test_capture_shadowRoot2() {
   var shadow1 = frag.content;
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 
-  var loader = doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]');
+  var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
   assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
 
   /* mode: closed */
@@ -5582,7 +5624,7 @@ async function test_capture_shadowRoot2() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
-  assert(!doc.querySelector('script[data-scrapbook-elem="shadowroot-loader"]'));
+  assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
 }
 
 /**

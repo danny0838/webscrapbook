@@ -1245,9 +1245,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
       "text/x-javascript",
     ]);
     const LOADER_TYPES = new Set([
-      "canvas-loader", // WebScrapBook < 0.69
       "basic-loader",
-      "shadowroot-loader",
+      "shadowroot-loader", // WebScrapBook < 0.69
+      "canvas-loader", // WebScrapBook < 0.69
     ]);
 
     for (const fdoc of scrapbook.flattenFrames(doc)) {
