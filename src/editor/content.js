@@ -772,7 +772,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
    * @kind invokable
    */
   editor.eraseSelectorInternal = function ({selector}) {
-    const FORBIDDEN_NODES = 'html, head, body';
+    const FORBID_NODES = `html, head, body, scrapbook-toolbar, scrapbook-toolbar *`;
     const fn = editor.eraseSelectorInternal = ({selector}) => {
       editor.addHistory();
 
@@ -781,7 +781,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
       // handle descendant node first as it may be altered when handling ancestor
       for (const elem of Array.from(elems).reverse()) {
-        if (elem.matches(FORBIDDEN_NODES)) { continue; }
+        if (elem.matches(FORBID_NODES)) { continue; }
 
         elem.parentNode.replaceChild(document.createComment(`scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(elem.outerHTML)}`), elem);
       }
