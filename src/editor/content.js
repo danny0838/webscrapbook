@@ -524,7 +524,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     var elem = wrapper.querySelector('.toolbar-eraser-eraseSelectorAll');
     elem.addEventListener("click", (event) => {
-      editor.eraseSelectorAll();
+      editor.eraseSelector(true);
     }, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-eraser-uneraseSelection');
@@ -948,8 +948,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
     });
   };
 
-  editor.eraseSelector = async function () {
-    const frameId = await editor.getFocusedFrameId();
+  editor.eraseSelector = async function (allFrames = false) {
+    const frameId = allFrames ? undefined : await editor.getFocusedFrameId();
     const selector = prompt(scrapbook.lang('EditorButtonEraserSelectorPrompt'));
 
     if (!selector) {
@@ -967,29 +967,6 @@ ${sRoot}.toolbar .toolbar-close:hover {
       cmd: "background.invokeEditorCommand",
       args: {
         frameId,
-        cmd: "editor.eraseSelectorInternal",
-        args: {selector},
-      },
-    });
-  };
-
-  editor.eraseSelectorAll = async function () {
-    const selector = prompt(scrapbook.lang('EditorButtonEraserSelectorPrompt'));
-
-    if (!selector) {
-      return;
-    }
-
-    try {
-      document.querySelector(selector);
-    } catch (ex) {
-      alert(scrapbook.lang('ErrorEditorButtonEraserSelectorInvalid', [selector]));
-      return;
-    }
-
-    return await scrapbook.invokeExtensionScript({
-      cmd: "background.invokeEditorCommand",
-      args: {
         cmd: "editor.eraseSelectorInternal",
         args: {selector},
       },
