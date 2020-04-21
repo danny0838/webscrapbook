@@ -64,7 +64,7 @@ height: 100vh;`;
    * @kind invokable
    */
   editor.init = async function ({willOpen, force = false}) {
-    let wrapper = editor.element = editor.element || document.querySelector("web-scrapbook");
+    let wrapper = editor.element = editor.element || document.querySelector("scrapbook-toolbar");
 
     if (typeof willOpen === "undefined") {
       willOpen = !(wrapper && wrapper.parentNode);
@@ -116,7 +116,7 @@ height: 100vh;`;
 
     // generate toolbar content
     const uid = 'scrapbook-' + scrapbook.getUuid();
-    editor.element = wrapper = document.documentElement.appendChild(document.createElement("web-scrapbook"));
+    editor.element = wrapper = document.documentElement.appendChild(document.createElement("scrapbook-toolbar"));
     wrapper.id = uid;
     wrapper.setAttribute('dir', scrapbook.lang('@@bidi_dir'));
 
@@ -151,7 +151,7 @@ ${sHost} style {
   display: none !important;
 }
 
-${sRoot}*:not(web-scrapbook-samp) {
+${sRoot}*:not(scrapbook-toolbar-samp) {
   visibility: unset !important;
   opacity: unset !important;
   position: unset !important;
@@ -178,7 +178,7 @@ ${sRoot}*:not(web-scrapbook-samp) {
   vertical-align: unset !important;
 }
 
-${sRoot}web-scrapbook-samp {
+${sRoot}scrapbook-toolbar-samp {
   all: unset;
 }
 
@@ -371,18 +371,18 @@ ${sRoot}.toolbar .toolbar-close:hover {
   <div class="toolbar-marker" title="${scrapbook.lang('EditorButtonMarker')}">
     <button></button><button></button>
     <ul hidden="" title="">
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [1])}</web-scrapbook-samp></button></li>
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [2])}</web-scrapbook-samp></button></li>
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [3])}</web-scrapbook-samp></button></li>
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [4])}</web-scrapbook-samp></button></li>
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [5])}</web-scrapbook-samp></button></li>
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [6])}</web-scrapbook-samp></button></li>
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [7])}</web-scrapbook-samp></button></li>
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [8])}</web-scrapbook-samp></button></li>
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [9])}</web-scrapbook-samp></button></li>
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [10])}</web-scrapbook-samp></button></li>
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [11])}</web-scrapbook-samp></button></li>
-      <li><button><web-scrapbook-samp>${scrapbook.lang('EditorButtonMarkerItem', [12])}</web-scrapbook-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [1])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [2])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [3])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [4])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [5])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [6])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [7])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [8])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [9])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [10])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [11])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [12])}</scrapbook-toolbar-samp></button></li>
     </ul>
   </div>
   <div class="toolbar-eraser" title="${scrapbook.lang('EditorButtonEraser')}">
@@ -472,7 +472,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     var elem = wrapper.querySelector('.toolbar-marker > button:first-of-type');
     elem.addEventListener("click", async (event) => {
       await editor.updateLineMarkers();
-      const marker = wrapper.querySelector('.toolbar-marker ul button[checked] web-scrapbook-samp');
+      const marker = wrapper.querySelector('.toolbar-marker ul button[checked] scrapbook-toolbar-samp');
       editor.lineMarker(marker.getAttribute('style'));
     }, {passive: true});
 
@@ -488,7 +488,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
         const elem = event.currentTarget;
         const idx = Array.prototype.indexOf.call(wrapper.querySelectorAll('.toolbar-marker ul button'), elem);
         scrapbook.cache.set(editor.getStatusKey('lineMarkerSelected'), idx, 'storage'); // async
-        editor.lineMarker(elem.querySelector('web-scrapbook-samp').getAttribute('style'));
+        editor.lineMarker(elem.querySelector('scrapbook-toolbar-samp').getAttribute('style'));
       }, {passive: true});
     }
 
@@ -1281,7 +1281,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
   editor.updateLineMarkers = async function () {
     Array.prototype.forEach.call(
-      editor.internalElement.querySelectorAll('.toolbar-marker ul web-scrapbook-samp'),
+      editor.internalElement.querySelectorAll('.toolbar-marker ul scrapbook-toolbar-samp'),
       (elem, i) => {
         let style = scrapbook.getOption(`editor.lineMarker.style.${i + 1}`);
         elem.setAttribute('style', style);
@@ -1390,8 +1390,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
 
   const domEraser = editor.domEraser = (function () {
-    const FORBID_NODES = `web-scrapbook, web-scrapbook *`;
-    const TOOLTIP_NODES = `web-scrapbook-tooltip, web-scrapbook-tooltip *`;
+    const FORBID_NODES = `scrapbook-toolbar, scrapbook-toolbar *`;
+    const TOOLTIP_NODES = `scrapbook-toolbar-tooltip, scrapbook-toolbar-tooltip *`;
     const SKIP_NODES = `html, head, body, ${FORBID_NODES}, ${TOOLTIP_NODES}`;
 
     const mapElemOutline = new WeakMap();
@@ -1556,7 +1556,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
         let x = viewport.scrollX + boundingRect.left;
         let y = viewport.scrollY + boundingRect.bottom;
 
-        const labelElem = document.body.appendChild(document.createElement("web-scrapbook-tooltip"));
+        const labelElem = document.body.appendChild(document.createElement("scrapbook-toolbar-tooltip"));
         labelElem.style.setProperty('all', 'initial', 'important');
         labelElem.style.setProperty('position', 'absolute', 'important');
         labelElem.style.setProperty('z-index', '2147483647', 'important');
@@ -2032,7 +2032,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     // so use document.defaultView instead.
     if (event.target === document.defaultView) {
       editor.lastWindowFocusTime = Date.now();
-    } else if (event.target.closest && event.target.closest('web-scrapbook')) {
+    } else if (event.target.closest && event.target.closest('scrapbook-toolbar')) {
       editor.directToolbarClick = Date.now() - editor.lastWindowFocusTime < 50;
     }
   }, {capture: true, passive: true});

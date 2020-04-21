@@ -433,7 +433,7 @@
         }
 
         // webscrapbook toolbar should not be included
-        if (elem.nodeName.toLowerCase() === "web-scrapbook") {
+        if (elem.nodeName.toLowerCase() === "scrapbook-toolbar") {
           elem.remove();
           return;
         }
@@ -2430,7 +2430,7 @@
 
       const processRootNode = (rootNode) => {
         // remove webscrapbook toolbar
-        for (const elem of rootNode.querySelectorAll("web-scrapbook")) {
+        for (const elem of rootNode.querySelectorAll("scrapbook-toolbar")) {
           elem.remove();
         }
 
