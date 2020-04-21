@@ -530,6 +530,9 @@
   "OptionCaptureDeleteErasedOnCaptureLabel": {
     "message": "擷取頁面時自動刪除所有擦除內容"
   },
+  "OptionCaptureDeleteErasedOnCaptureTooltip": {
+    "message": "注意：擦除內容相關的外部資源、互動要素等在擷取後可能無法還原。"
+  },
   "OptionCaptureDeleteErasedOnSaveLabel": {
     "message": "儲存頁面時自動刪除所有擦除內容"
   },

@@ -530,6 +530,9 @@
   "OptionCaptureDeleteErasedOnCaptureLabel": {
     "message": "Automatically delete all erased content on capturing"
   },
+  "OptionCaptureDeleteErasedOnCaptureTooltip": {
+    "message": "NOTE: those related with the erased content, such as a external resource or an interactive factor, may not be reverted after captured."
+  },
   "OptionCaptureDeleteErasedOnSaveLabel": {
     "message": "Automatically delete all erased content on saving"
   },

@@ -530,6 +530,9 @@
   "OptionCaptureDeleteErasedOnCaptureLabel": {
     "message": "获取页面时自动删除所有擦除内容"
   },
+  "OptionCaptureDeleteErasedOnCaptureTooltip": {
+    "message": "注意：擦除内容相关的外部资源、互动要素等在获取后可能无法还原。"
+  },
   "OptionCaptureDeleteErasedOnSaveLabel": {
     "message": "保存页面时自动删除所有擦除内容"
   },
