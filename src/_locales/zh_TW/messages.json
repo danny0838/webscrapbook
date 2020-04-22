@@ -670,17 +670,17 @@
   "OptionCapturePageSizeLimitTooltip": {
     "message": "系統不會擷取超出此限制的頁面。空白表示不設限制。"
   },
-  "OptionCaptureRecordRemovedNodeLabel": {
-    "message": "記錄移除的元素"
-  },
-  "OptionCaptureRecordRemovedNodeTooltip": {
-    "message": "擷取網頁時若有移除元素，則在原位置建立 HTML 註解記錄原始內容。"
-  },
   "OptionCaptureRecordRewrittenAttrLabel": {
     "message": "記錄改寫的屬性"
   },
   "OptionCaptureRecordRewrittenAttrTooltip": {
     "message": "擷取網頁時若有改寫元素的屬性，則建立對應的 data-* 屬性記錄原始值。"
+  },
+  "OptionCaptureRecordRewrittenNodeLabel": {
+    "message": "記錄改寫的元素"
+  },
+  "OptionCaptureRecordRewrittenNodeTooltip": {
+    "message": "擷取網頁時若有新增或移除的元素，則建立 HTML 註解記錄原始內容。"
   },
   "OptionCaptureRecordSourceUriLabel": {
     "message": "記錄原始的 URL"

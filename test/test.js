@@ -41,7 +41,7 @@ const baseOptions = {
   "capture.downLink.urlFilter": "",
   "capture.removeIntegrity": true,
   "capture.recordDocumentMeta": true,
-  "capture.recordRemovedNode": false,
+  "capture.recordRewrittenNode": false,
   "capture.recordRewrittenAttr": false,
   "capture.recordSourceUri": false,
   "capture.helpersEnabled": false,
@@ -6659,7 +6659,7 @@ async function test_capture_record_meta() {
 /**
  * Check if option works
  *
- * capture.recordRemovedNode
+ * capture.recordRewrittenNode
  * capturer.captureDocument
  */
 async function test_capture_record_nodes() {
@@ -6679,8 +6679,8 @@ async function test_capture_record_nodes() {
     "capture.base": "remove",
   };
 
-  /* +capture.recordRemovedNode */
-  options["capture.recordRemovedNode"] = true;
+  /* +capture.recordRewrittenNode */
+  options["capture.recordRewrittenNode"] = true;
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_record/nodes.html`,
@@ -6763,8 +6763,8 @@ async function test_capture_record_nodes() {
     `<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\\s\\S]*?</noscript>-->`
   ).test(body.innerHTML));
 
-  /* -capture.recordRemovedNode */  
-  options["capture.recordRemovedNode"] = false;
+  /* -capture.recordRewrittenNode */  
+  options["capture.recordRewrittenNode"] = false;
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_record/nodes.html`,
@@ -6851,9 +6851,9 @@ async function test_capture_record_nodes() {
 /**
  * Check handling of removal of source nodes in picture, audio, and video
  * The removed source nodes should be recorded when 
- * either recordRemovedNode or recordSourceUri is set.
+ * either recordRewrittenNode or recordSourceUri is set.
  *
- * capture.recordRemovedNode
+ * capture.recordRewrittenNode
  * capture.recordSourceUri
  * capturer.captureDocument
  */
@@ -6864,8 +6864,8 @@ async function test_capture_record_nodes2() {
     "capture.video": "save-current",
   };
 
-  /* +capture.recordRemovedNode */
-  options["capture.recordRemovedNode"] = true;
+  /* +capture.recordRewrittenNode */
+  options["capture.recordRewrittenNode"] = true;
   options["capture.recordSourceUri"] = false;
 
   var blob = await capture({
@@ -6891,7 +6891,7 @@ async function test_capture_record_nodes2() {
   ).test(doc.querySelector('video').innerHTML));
 
   /* +capture.recordSourceUri */
-  options["capture.recordRemovedNode"] = false;
+  options["capture.recordRewrittenNode"] = false;
   options["capture.recordSourceUri"] = true;
 
   var blob = await capture({
@@ -6917,7 +6917,7 @@ async function test_capture_record_nodes2() {
   ).test(doc.querySelector('video').innerHTML));
 
   /* -capture.recordSourceUri */
-  options["capture.recordRemovedNode"] = false;
+  options["capture.recordRewrittenNode"] = false;
   options["capture.recordSourceUri"] = false;
 
   var blob = await capture({

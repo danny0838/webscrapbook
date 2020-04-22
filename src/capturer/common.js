@@ -170,8 +170,17 @@
         return newNode;
       };
 
+      const captureRecordAddedNode = (elem, record = options["capture.recordRewrittenNode"]) => {
+        if (record) {
+          const recordAttr = `data-scrapbook-orig-null-node-${timeId}`;
+          if (!elem.hasAttribute(recordAttr)) {
+            elem.setAttribute(recordAttr, '');
+          }
+        }
+      };
+
       // remove the specified node, record it if option set
-      const captureRemoveNode = (elem, record = options["capture.recordRemovedNode"]) => {
+      const captureRemoveNode = (elem, record = options["capture.recordRewrittenNode"]) => {
         if (!elem.parentNode) { return; }
 
         if (record) {
@@ -199,7 +208,8 @@
           if (record) {
             const recordAttr = `${ns ? ns + ":" : ""}data-scrapbook-orig-attr-${att}-${timeId}`;
             const recordAttr2 = `${ns ? ns + ":" : ""}data-scrapbook-orig-null-attr-${att}-${timeId}`;
-            if (!elem.hasAttribute(recordAttr) && !elem.hasAttribute(recordAttr2)) {
+            const recordAttr3 = `data-scrapbook-orig-null-node-${timeId}`;
+            if (!elem.hasAttribute(recordAttr) && !elem.hasAttribute(recordAttr2) && !elem.hasAttribute(recordAttr3)) {
               elem.setAttribute(recordAttr, oldValue);
             }
           }
@@ -211,6 +221,7 @@
           if (record) {
             const recordAttr = `${ns ? ns + ":" : ""}data-scrapbook-orig-null-attr-${att}-${timeId}`;
             const recordAttr2 = `${ns ? ns + ":" : ""}data-scrapbook-orig-attr-${att}-${timeId}`;
+            const recordAttr3 = `data-scrapbook-orig-null-node-${timeId}`;
             if (!elem.hasAttribute(recordAttr) && !elem.hasAttribute(recordAttr2)) {
               elem.setAttribute(recordAttr, "");
             }
@@ -1280,7 +1291,7 @@
                     }, this);
 
                     Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                      captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
+                      captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRewrittenNode"]);
                     }, this);
 
                     break;
@@ -1343,7 +1354,7 @@
                     if (elemOrig && elemOrig.currentSrc) {
                       const url = elemOrig.currentSrc;
                       Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                        captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
+                        captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRewrittenNode"]);
                       }, this);
                       tasks[tasks.length] = halter.then(async () => {
                         const response = await capturer.invoke("downloadFile", {
@@ -1466,7 +1477,7 @@
                     if (elemOrig && elemOrig.currentSrc) {
                       const url = elemOrig.currentSrc;
                       Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                        captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRemovedNode"]);
+                        captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRewrittenNode"]);
                       }, this);
                       tasks[tasks.length] = halter.then(async () => {
                         const response = await capturer.invoke("downloadFile", {
@@ -2054,7 +2065,12 @@
 
               if (rootNode.nodeName.toLowerCase() === "html") {
                 headNode = doc.querySelector("head");
-                headNode = headNode ? cloneNodeMapping(headNode, true) : doc.createElement("head");
+                if (headNode) {
+                  headNode = cloneNodeMapping(headNode, true);
+                } else {
+                  headNode = doc.createElement("head");
+                  captureRecordAddedNode(headNode);
+                }
                 rootNode.appendChild(headNode);
                 rootNode.appendChild(doc.createTextNode("\n"));
               }
@@ -2164,6 +2180,7 @@
             headNode = rootNode.querySelector("head");
             if (!headNode) {
               headNode = rootNode.insertBefore(doc.createElement("head"), rootNode.firstChild);
+              captureRecordAddedNode(headNode);
             }
           }
         }
@@ -2248,6 +2265,7 @@
           );
           if (!titleElem) {
             titleElem = headNode.insertBefore(doc.createElement('title'), headNode.firstChild);
+            captureRecordAddedNode(titleElem);
           }
           titleElem.textContent = title;
         } else if (doc.contentType === "image/svg+xml") {
@@ -2255,6 +2273,7 @@
           if (!titleElem) {
             const xmlns = "http://www.w3.org/2000/svg";
             titleElem = rootNode.insertBefore(doc.createElementNS(xmlns, 'title'), rootNode.firstChild);
+            captureRecordAddedNode(titleElem);
           }
           titleElem.textContent = title;
         }
@@ -2265,6 +2284,7 @@
         if (!metaCharsetNode) {
           metaCharsetNode = headNode.insertBefore(doc.createElement("meta"), headNode.firstChild);
           metaCharsetNode.setAttribute("charset", "UTF-8");
+          captureRecordAddedNode(metaCharsetNode);
         }
       }
 
@@ -2310,6 +2330,7 @@
                 const favIconNode = headNode.appendChild(doc.createElement("link"));
                 favIconNode.rel = "shortcut icon";
                 favIconNode.href = icon;
+                captureRecordAddedNode(favIconNode);
               }
             })();
           }

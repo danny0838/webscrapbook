@@ -670,17 +670,17 @@
   "OptionCapturePageSizeLimitTooltip": {
     "message": "A page exceeding the limit will not be captured. Empty for no limit."
   },
-  "OptionCaptureRecordRemovedNodeLabel": {
-    "message": "Record removed elements"
-  },
-  "OptionCaptureRecordRemovedNodeTooltip": {
-    "message": "If an element is removed during the capture process, create an HTML comment in place to record its original content."
-  },
   "OptionCaptureRecordRewrittenAttrLabel": {
     "message": "Record rewritten attributes"
   },
   "OptionCaptureRecordRewrittenAttrTooltip": {
     "message": "If an attribute is rewritten during the capture process, create a corresponding data-* attribute to record its original value."
+  },
+  "OptionCaptureRecordRewrittenNodeLabel": {
+    "message": "Record rewritten elements"
+  },
+  "OptionCaptureRecordRewrittenNodeTooltip": {
+    "message": "If an element is added or removed during the capture process, create an HTML comment to record the original content."
   },
   "OptionCaptureRecordSourceUriLabel": {
     "message": "Record source URL"

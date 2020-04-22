@@ -76,7 +76,7 @@
     "capture.removeIntegrity": true,
     "capture.requestReferrer": "auto", // "none", "auto", "origin", "all"
     "capture.recordDocumentMeta": true,
-    "capture.recordRemovedNode": false,
+    "capture.recordRewrittenNode": false,
     "capture.recordRewrittenAttr": false,
     "capture.recordSourceUri": false,
     "capture.helpersEnabled": false,

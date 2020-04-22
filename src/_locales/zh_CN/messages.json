@@ -670,17 +670,17 @@
   "OptionCapturePageSizeLimitTooltip": {
     "message": "系统不会获取超出此限制的页面。空白表示不设限制。"
   },
-  "OptionCaptureRecordRemovedNodeLabel": {
-    "message": "记录移除的元素"
-  },
-  "OptionCaptureRecordRemovedNodeTooltip": {
-    "message": "获取网页时若有移除元素，则在原位置建立 HTML 注解记录原始内容。"
-  },
   "OptionCaptureRecordRewrittenAttrLabel": {
     "message": "记录改写的属性"
   },
   "OptionCaptureRecordRewrittenAttrTooltip": {
     "message": "获取网页时若有改写元素的属性，则建立对应的 data-* 属性记录原始值。"
+  },
+  "OptionCaptureRecordRewrittenNodeLabel": {
+    "message": "记录改写的元素"
+  },
+  "OptionCaptureRecordRewrittenNodeTooltip": {
+    "message": "获取网页时若有添加或移除的元素，则建立 HTML 注解记录原始内容。"
   },
   "OptionCaptureRecordSourceUriLabel": {
     "message": "记录原始的 URL"
