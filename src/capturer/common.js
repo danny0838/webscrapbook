@@ -440,6 +440,11 @@
           return;
         }
 
+        // skip a special elements and its descendants
+        if (scrapbook.getScrapbookObjectType(elem)) {
+          return elem;
+        }
+
         const elemOrig = origNodeMap.get(elem);
 
         // remove hidden elements
@@ -752,6 +757,11 @@
 
             // styles: style element
             case "style": {
+              // skip special elements
+              if (scrapbook.getScrapbookObjectType(elem)) {
+                break;
+              }
+
               let disableCss = false;
               const css = cssHandler.getElemCss(elem);
               if (css) {
@@ -802,6 +812,11 @@
 
             // scripts: script
             case "script": {
+              // skip special elements
+              if (scrapbook.getScrapbookObjectType(elem)) {
+                break;
+              }
+
               if (elem.hasAttribute("src")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
                 elem.setAttribute("src", rewriteUrl);
