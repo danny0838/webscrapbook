@@ -4283,9 +4283,11 @@
       return (elems[0] && elems[0].getAttribute || null) && elems[0].getAttribute(this.resolve(attr, rootNode));
     }
 
-    cmd_get_css(rootNode, selector, style) {
+    cmd_get_css(rootNode, selector, style, getPriority) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
-      return (elems[0] && elems[0].style || null) && elems[0].style.getPropertyValue(this.resolve(style, rootNode));
+      return (elems[0] && elems[0].style || null) && this.resolve(getPriority, rootNode) ?
+          elems[0].style.getPropertyPriority(this.resolve(style, rootNode)) :
+          elems[0].style.getPropertyValue(this.resolve(style, rootNode));
     }
 
     cmd_remove(rootNode, selector) {
