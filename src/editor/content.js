@@ -21,6 +21,8 @@
 
   'use strict';
 
+  const LINEMARKABLE_ELEMENTS = `img, picture, canvas, input[type="image"]`;
+
   const editor = {
     element: null,
     internalElement: null,
@@ -728,25 +730,28 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
       const selectedNodes = scrapbook.getSelectedNodes({
         range,
-        whatToShow: NodeFilter.SHOW_TEXT,
+        whatToShow: NodeFilter.SHOW_ELEMENT + NodeFilter.SHOW_TEXT,
+        nodeFilter: node => node.nodeType === 3 || node.matches(LINEMARKABLE_ELEMENTS),
       });
 
       // reverse the order as a range may be altered when changing a node before it
       const firstNode = selectedNodes[0];
       const lastNode = selectedNodes[selectedNodes.length - 1];
       for (const node of selectedNodes.reverse()) {
-        if (/[^ \f\n\r\t\v]/.test(node.nodeValue)) {
-          const wrapper = hElem.cloneNode(false);
-          node.parentNode.insertBefore(wrapper, node);
-          wrapper.appendChild(node);
+        if (node.nodeType === 3 && /^[ \f\n\r\t\v]*$/.test(node.nodeValue)) {
+          continue;
+        }
 
-          if (node === firstNode) {
-            range.setStartBefore(wrapper);
-          }
+        const wrapper = hElem.cloneNode(false);
+        node.parentNode.insertBefore(wrapper, node);
+        wrapper.appendChild(node);
 
-          if (node === lastNode) {
-            range.setEndAfter(wrapper);
-          }
+        if (node === firstNode) {
+          range.setStartBefore(wrapper);
+        }
+
+        if (node === lastNode) {
+          range.setEndAfter(wrapper);
         }
       }
     }
