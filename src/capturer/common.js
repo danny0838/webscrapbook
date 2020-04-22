@@ -156,7 +156,7 @@
         if (deep) {
           const doc = node.ownerDocument;
           const walker1 = doc.createNodeIterator(node);
-          const walker2 = doc.createNodeIterator(newNode);
+          const walker2 = newDoc.createNodeIterator(newNode);
           let node1 = walker1.nextNode();
           let node2 = walker2.nextNode();
           while (node1) {
@@ -184,7 +184,7 @@
         if (!elem.parentNode) { return; }
 
         if (record) {
-          const comment = doc.createComment(`scrapbook-orig-node-${timeId}=${scrapbook.escapeHtmlComment(elem.outerHTML)}`);
+          const comment = newDoc.createComment(`scrapbook-orig-node-${timeId}=${scrapbook.escapeHtmlComment(elem.outerHTML)}`);
           elem.parentNode.replaceChild(comment, elem);
         } else {
           elem.parentNode.removeChild(elem);
@@ -1961,7 +1961,7 @@
       const addAdoptedStyleSheets = (docOrShadowRoot, root) => {
         if (docOrShadowRoot.adoptedStyleSheets) {
           for (const refCss of docOrShadowRoot.adoptedStyleSheets) {
-            const css = root.appendChild(cloneNodeMapping(doc.createElement("style")));
+            const css = root.appendChild(newDoc.createElement("style"));
             css.textContent = Array.prototype.map.call(
               refCss.cssRules,
               cssRule => cssRule.cssText,
@@ -2068,11 +2068,11 @@
                 if (headNode) {
                   headNode = cloneNodeMapping(headNode, true);
                 } else {
-                  headNode = doc.createElement("head");
+                  headNode = newDoc.createElement("head");
                   captureRecordAddedNode(headNode);
                 }
                 rootNode.appendChild(headNode);
-                rootNode.appendChild(doc.createTextNode("\n"));
+                rootNode.appendChild(newDoc.createTextNode("\n"));
               }
             }
 
@@ -2101,15 +2101,15 @@
             // Some tags like <td> require special care.
             if (lastNodePrev && firstNode.parentNode === lastNodePrev.parentNode &&
                 isTextNode(lastNodePrev) && isTextNode(firstNode)) {
-              clonedRefNode.appendChild(doc.createComment("scrapbook-capture-selected-splitter"));
-              clonedRefNode.appendChild(doc.createTextNode(" … "));
-              clonedRefNode.appendChild(doc.createComment("/scrapbook-capture-selected-splitter"));
+              clonedRefNode.appendChild(newDoc.createComment("scrapbook-capture-selected-splitter"));
+              clonedRefNode.appendChild(newDoc.createTextNode(" … "));
+              clonedRefNode.appendChild(newDoc.createComment("/scrapbook-capture-selected-splitter"));
             }
             lastNodePrev = lastNode;
 
             // Clone sparingly selected nodes in the common ancestor.
             // (with special handling of text nodes)
-            clonedRefNode.appendChild(doc.createComment("scrapbook-capture-selected"));
+            clonedRefNode.appendChild(newDoc.createComment("scrapbook-capture-selected"));
             {
               const iterator = doc.createNodeIterator(refNode, -1);
               let node, started = false;
@@ -2168,7 +2168,7 @@
                 cloneNodeAndAncestors(node);
               }
             }
-            clonedRefNode.appendChild(doc.createComment("/scrapbook-capture-selected"));
+            clonedRefNode.appendChild(newDoc.createComment("/scrapbook-capture-selected"));
           }
         }
 
@@ -2179,7 +2179,7 @@
           if (rootNode.nodeName.toLowerCase() === "html") {
             headNode = rootNode.querySelector("head");
             if (!headNode) {
-              headNode = rootNode.insertBefore(doc.createElement("head"), rootNode.firstChild);
+              headNode = rootNode.insertBefore(newDoc.createElement("head"), rootNode.firstChild);
               captureRecordAddedNode(headNode);
             }
           }
@@ -2189,25 +2189,25 @@
         if (rootNode.nodeName.toLowerCase() === "html") {
           const headNodeBefore = headNode.previousSibling;
           if (!headNodeBefore || headNodeBefore.nodeType != 3) {
-            rootNode.insertBefore(doc.createTextNode("\n"), headNode);
+            rootNode.insertBefore(newDoc.createTextNode("\n"), headNode);
           }
           const headNodeStart = headNode.firstChild;
           if (!headNodeStart || headNodeStart.nodeType != 3) {
-            headNode.insertBefore(doc.createTextNode("\n"), headNodeStart);
+            headNode.insertBefore(newDoc.createTextNode("\n"), headNodeStart);
           }
           const headNodeEnd = headNode.lastChild;
           if (!headNodeEnd || headNodeEnd.nodeType != 3) {
-            headNode.appendChild(doc.createTextNode("\n"));
+            headNode.appendChild(newDoc.createTextNode("\n"));
           }
           const headNodeAfter = headNode.nextSibling;
           if (!headNodeAfter || headNodeAfter.nodeType != 3) {
-            rootNode.insertBefore(doc.createTextNode("\n"), headNodeAfter);
+            rootNode.insertBefore(newDoc.createTextNode("\n"), headNodeAfter);
           }
           const bodyNode = rootNode.querySelector("body");
           if (bodyNode) {
             const bodyNodeAfter = bodyNode.nextSibling;
             if (!bodyNodeAfter) {
-              rootNode.insertBefore(doc.createTextNode("\n"), bodyNodeAfter);
+              rootNode.insertBefore(newDoc.createTextNode("\n"), bodyNodeAfter);
             }
           }
         }
@@ -2264,7 +2264,7 @@
             x => !x.closest('html svg'),
           );
           if (!titleElem) {
-            titleElem = headNode.insertBefore(doc.createElement('title'), headNode.firstChild);
+            titleElem = headNode.insertBefore(newDoc.createElement('title'), headNode.firstChild);
             captureRecordAddedNode(titleElem);
           }
           titleElem.textContent = title;
@@ -2272,7 +2272,7 @@
           let titleElem = rootNode.querySelector('title');
           if (!titleElem) {
             const xmlns = "http://www.w3.org/2000/svg";
-            titleElem = rootNode.insertBefore(doc.createElementNS(xmlns, 'title'), rootNode.firstChild);
+            titleElem = rootNode.insertBefore(newDoc.createElementNS(xmlns, 'title'), rootNode.firstChild);
             captureRecordAddedNode(titleElem);
           }
           titleElem.textContent = title;
@@ -2282,7 +2282,7 @@
       // force UTF-8
       if (rootNode.nodeName.toLowerCase() === "html") {
         if (!metaCharsetNode) {
-          metaCharsetNode = headNode.insertBefore(doc.createElement("meta"), headNode.firstChild);
+          metaCharsetNode = headNode.insertBefore(newDoc.createElement("meta"), headNode.firstChild);
           metaCharsetNode.setAttribute("charset", "UTF-8");
           captureRecordAddedNode(metaCharsetNode);
         }
@@ -2327,7 +2327,7 @@
               }
 
               if (icon) {
-                const favIconNode = headNode.appendChild(doc.createElement("link"));
+                const favIconNode = headNode.appendChild(newDoc.createElement("link"));
                 favIconNode.rel = "shortcut icon";
                 favIconNode.href = icon;
                 captureRecordAddedNode(favIconNode);
@@ -2364,7 +2364,7 @@
 
       // attach CSS resource map
       if (cssHandler.resourceMap && Object.keys(cssHandler.resourceMap).length) {
-        const elem = doc.createElement('style');
+        const elem = newDoc.createElement('style');
         elem.setAttribute("data-scrapbook-elem", "css-resource-map");
         elem.textContent = ':root {'
             + Object.entries(cssHandler.resourceMap).map(([k, v]) => `${v}:url("${k}");`).join('')
@@ -2441,7 +2441,7 @@
         if (deep) {
           const doc = node.ownerDocument;
           const walker1 = doc.createNodeIterator(node);
-          const walker2 = doc.createNodeIterator(newNode);
+          const walker2 = newDoc.createNodeIterator(newNode);
           let node1 = walker1.nextNode();
           let node2 = walker2.nextNode();
           while (node1) {
