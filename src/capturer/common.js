@@ -2647,7 +2647,7 @@
       const nodeIterator = doc.createNodeIterator(
         rootNode,
         NodeFilter.SHOW_COMMENT,
-        node => scrapbook.getScrapBookObjectRemoveType(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+        node => scrapbook.getScrapBookObjectRemoveType(node) === 3 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
       );
       let node;
       while (node = nodeIterator.nextNode()) {
