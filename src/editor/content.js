@@ -735,8 +735,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
       });
 
       // reverse the order as a range may be altered when changing a node before it
-      const firstNode = selectedNodes[0];
-      const lastNode = selectedNodes[selectedNodes.length - 1];
+      let firstWrapper = null;
+      let lastWrapper = null;
       for (const node of selectedNodes.reverse()) {
         if (node.nodeType === 3 && /^[ \f\n\r\t\v]*$/.test(node.nodeValue)) {
           continue;
@@ -746,13 +746,21 @@ ${sRoot}.toolbar .toolbar-close:hover {
         node.parentNode.insertBefore(wrapper, node);
         wrapper.appendChild(node);
 
-        if (node === firstNode) {
-          range.setStartBefore(wrapper);
+        if (!lastWrapper) {
+          lastWrapper = wrapper;
         }
 
-        if (node === lastNode) {
-          range.setEndAfter(wrapper);
-        }
+        firstWrapper = wrapper;
+      }
+
+      // mark first and last valid node
+      if (firstWrapper) {
+        firstWrapper.setAttribute('data-scrapbook-linemarker-first', '');
+        range.setStartBefore(firstWrapper);
+      }
+      if (lastWrapper) {
+        lastWrapper.setAttribute('data-scrapbook-linemarker-last', '');
+        range.setEndAfter(lastWrapper);
       }
     }
   };
