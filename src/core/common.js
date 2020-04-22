@@ -197,8 +197,15 @@
     511: "Network Authentication Required",
   };
 
+  const ANNOTATION_CSS = `\
+[data-scrapbook-elem="linemarker"][title] {
+  cursor: help;
+}
+`;
+
   const scrapbook = {
     BACKEND_MIN_VERSION,
+    ANNOTATION_CSS,
 
     /**
      * scrapbook.userAgent
@@ -1013,6 +1020,8 @@
    *   adoptedStyleSheet (since 0.56.4 <= WSB)
    *   css-resource-map (since 0.52.0 <= WSB)
    *   basic-loader (since 0.69.0 <= WSB)
+   *   annotation-css (since 0.70.0 <= WSB)
+   *   annotation-loader (since 0.70.0 <= WSB)
    *   canvas-loader (for 0.51 <= WSB < 0.69)
    *   shadowroot-loader (for 0.51 <= WSB < 0.69)
    *   stylesheet (link, style) (for SBX)

@@ -255,7 +255,7 @@
     "message": "定位工具 - 在剪貼簿顯示此項目的位置。"
   },
   "EditorButtonMarker": {
-    "message": "標示工具 - 點擊標示選取範圍的文字。"
+    "message": "標示工具 - 點擊標示選取範圍的文字。右鍵點擊標示可建立或編輯批註。"
   },
   "EditorButtonMarkerItem": {
     "message": "標示 $INDEX$",
@@ -282,6 +282,9 @@
   },
   "EditorButtonUndo": {
     "message": "復原"
+  },
+  "EditorMarkerAnnotationPrompt": {
+    "message": "編輯批註內容："
   },
   "ErrorContentScriptExecute": {
     "message": "無法執行內容處理腳本 ($SOURCE$): $REASON$",

@@ -2698,11 +2698,12 @@
     }
 
     // update loader
-    // remove shadowroot-loader and canvas-loader for downward compatibility with WebScrapBook < 0.69.
     for (const elem of rootNode.querySelectorAll([
+          'style[data-scrapbook-elem="annotation-css"]',
           'script[data-scrapbook-elem="basic-loader"]',
-          'script[data-scrapbook-elem="canvas-loader"]',
-          'script[data-scrapbook-elem="shadowroot-loader"]',
+          'script[data-scrapbook-elem="annotation-loader"]',
+          'script[data-scrapbook-elem="canvas-loader"]', // WebScrapBook < 0.69
+          'script[data-scrapbook-elem="shadowroot-loader"]', // WebScrapBook < 0.69
         ].join(','))) {
       elem.remove();
     }
@@ -2743,6 +2744,25 @@
               }
             };
         fn(document);
+      }) + ")()";
+    }
+    if (rootNode.querySelector('[data-scrapbook-elem="linemarker"]')) {
+      const css = rootNode.appendChild(doc.createElement("style"));
+      css.setAttribute("data-scrapbook-elem", "annotation-css");
+      css.textContent = scrapbook.compressCode(scrapbook.ANNOTATION_CSS);
+      const loader = rootNode.appendChild(doc.createElement("script"));
+      loader.setAttribute("data-scrapbook-elem", "annotation-loader");
+      // Mobile support with showing title on long touch.
+      // Firefox >= 52, Chrome >= 22, Edge >= 12
+      loader.textContent = "(" + scrapbook.compressJsFunc(function () {
+        var d = document, r = d.documentElement, e;
+        d.addEventListener('contextmenu', function (E) {
+          if (r.hasAttribute('data-scrapbook-toolbar-active')) { return; }
+          e = E.target;
+          if (e.matches('[data-scrapbook-elem="linemarker"]')) {
+            if (e.title) { alert(e.title); }
+          }
+        }, true);
       }) + ")()";
     }
   };

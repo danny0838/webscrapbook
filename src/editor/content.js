@@ -789,7 +789,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
     const FORBID_NODES = `\
 html, head, body,
 scrapbook-toolbar, scrapbook-toolbar *,
+[data-scrapbook-elem="annotation-css"],
 [data-scrapbook-elem="basic-loader"],
+[data-scrapbook-elem="annotation-loader"],
 [data-scrapbook-elem="shadowroot-loader"],
 [data-scrapbook-elem="canvas-loader"],
 [data-scrapbook-elem="custom-css"],
@@ -1046,7 +1048,17 @@ scrapbook-toolbar, scrapbook-toolbar *,
     });
   };
 
-  editor.toggleDomEraser = async function (willActive) {
+  editor.toggleAnnotator = async function (willActive) {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        cmd: "editor.annotator.toggle",
+        args: {willActive},
+      },
+    });
+  };
+
+  editor.toggleDomEraser = async function (willActive, ignoreAnnotator = false) {
     const editElem = editor.internalElement.querySelector('.toolbar-domEraser > button');
 
     if (typeof willActive === "undefined") {
@@ -1077,16 +1089,24 @@ scrapbook-toolbar, scrapbook-toolbar *,
       elem.disabled = willActive;
     }
 
-    return await scrapbook.invokeExtensionScript({
+    if (willActive && !ignoreAnnotator) {
+      await editor.toggleAnnotator(false);
+    }
+
+    await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         cmd: "editor.domEraser.toggle",
         args: {willActive},
       },
     });
+
+    if (!willActive && !ignoreAnnotator) {
+      await editor.toggleAnnotator(true);
+    }
   };
 
-  editor.toggleHtmlEditor = async function (willActive) {
+  editor.toggleHtmlEditor = async function (willActive, ignoreAnnotator = false) {
     const editElem = editor.internalElement.querySelector('.toolbar-htmlEditor > button');
 
     if (typeof willActive === "undefined") {
@@ -1117,13 +1137,21 @@ scrapbook-toolbar, scrapbook-toolbar *,
       elem.disabled = willActive;
     }
 
-    return await scrapbook.invokeExtensionScript({
+    if (willActive && !ignoreAnnotator) {
+      await editor.toggleAnnotator(false);
+    }
+
+    await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         cmd: "editor.htmlEditor.toggle",
         args: {willActive},
       },
     });
+
+    if (!willActive && !ignoreAnnotator) {
+      await editor.toggleAnnotator(true);
+    }
   };
 
   editor.undo = async function () {
@@ -1172,6 +1200,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
     document.documentElement.setAttribute('data-scrapbook-toolbar-active', '');
     document.documentElement.appendChild(editor.element);
+    await editor.toggleAnnotator(true);
   };
 
   editor.close = async function () {
@@ -1179,8 +1208,9 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
     document.documentElement.removeAttribute('data-scrapbook-toolbar-active');
     editor.element.remove();
-    await editor.toggleDomEraser(false);
-    await editor.toggleHtmlEditor(false);
+    await editor.toggleDomEraser(false, true);
+    await editor.toggleHtmlEditor(false, true);
+    await editor.toggleAnnotator(false);
   };
 
   /**
@@ -1279,6 +1309,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
     ]);
     const LOADER_TYPES = new Set([
       "basic-loader",
+      "annotation-loader",
       "shadowroot-loader", // WebScrapBook < 0.69
       "canvas-loader", // WebScrapBook < 0.69
       "custom-script-safe",
@@ -1448,6 +1479,84 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
     editor.history.push(document.body.cloneNode(true));
   };
+
+
+  const annotator = editor.annotator = (function () {
+    const onContextMenu = (event) => {
+      let target = event.target;
+      let objectType = scrapbook.getScrapbookObjectType(target);
+      switch (objectType) {
+        case 'linemarker': {
+          event.preventDefault();
+          annotator.editLineMarkerAnnotation(target);
+          break;
+        }
+      }
+    };
+
+    const annotator = {
+      active: false,
+
+      /**
+       * @kind invokable
+       */
+      toggle({willActive}) {
+        if (typeof willActive === 'undefined') {
+          willActive = !this.active;
+        }
+
+        if (willActive) {
+          if (!this.active) {
+            this.active = true;
+            this.updateAnnotationCss();
+            window.addEventListener("contextmenu", onContextMenu, true);
+          }
+        } else {
+          if (this.active) {
+            this.active = false;
+            window.removeEventListener("contextmenu", onContextMenu, true);
+          }
+        }
+      },
+
+      updateAnnotationCss() {
+        this.clearAnnotationCss();
+        const css = document.createElement("style");
+        css.setAttribute("data-scrapbook-elem", "annotation-css");
+        css.textContent = scrapbook.ANNOTATION_CSS;
+        document.documentElement.appendChild(css);
+      },
+
+      clearAnnotationCss() {
+        for (const elem of document.querySelectorAll(`style[data-scrapbook-elem="annotation-css"]`)) {
+          elem.remove();
+        }
+      },
+
+      /**
+       * @kind invokable
+       */
+      editLineMarkerAnnotation(elem) {
+        if (!elem) { return; }
+
+        const annotation = prompt(scrapbook.lang('EditorMarkerAnnotationPrompt'), elem.title);
+        if (annotation === null) {
+          return;
+        }
+
+        editor.addHistory();
+        for (const part of scrapbook.getScrapBookObjectsById(elem)) {
+          if (annotation) {
+            part.setAttribute('title', annotation);
+          } else {
+            part.removeAttribute('title');
+          }
+        }
+      },
+    };
+
+    return annotator;
+  })();
 
 
   const domEraser = editor.domEraser = (function () {
