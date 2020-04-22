@@ -127,10 +127,10 @@
     "message": "DOM eraser - When activated, click to erase the target element; Ctrl- or middle-click to erase elements except the target. (Erases can be reverted.)"
   },
   "EditorButtonDOMEraserRemoveEdit": {
-    "message": "Remove this scrapbook edit"
+    "message": "Remove this scrapbook marking"
   },
   "EditorButtonEraser": {
-    "message": "Eraser - Click to erase content in the selected area; Ctrl- or middle-click to remove scrapbook edits in the selected area. (Erases can be reverted.)"
+    "message": "Eraser - Click to erase content in the selected area; Ctrl- or middle-click to remove scrapbook markings in the selected area. (Erases can be reverted.)"
   },
   "EditorButtonEraserRevertAll": {
     "message": "Revert all erases (all frames)"
@@ -266,10 +266,10 @@
     }
   },
   "EditorButtonRemoveEditsAll": {
-    "message": "Remove all scrapbook edits (all frames)"
+    "message": "Remove all scrapbook markings (all frames)"
   },
   "EditorButtonRemoveEditsSelection": {
-    "message": "Remove scrapbook edits in selection"
+    "message": "Remove scrapbook markings in selection"
   },
   "EditorButtonSave": {
     "message": "Save page"
@@ -821,7 +821,7 @@
     "message": "The inserted date is the current local time, using POSIX strftime format. Below is a short list of frequently used formats:\n\n• %c: local datetime\n• %x: locate date\n• %Y: year with 4 digits\n• %y: year with 2 digits\n• %m: month with 2 digits (01 to 12)\n• %B: local full month name\n• %b: local abbreviated month name\n• %d: date of month with 2 digits (01 to 31)\n• %A: local full weekday name\n• %a: local abbreviated weekday name\n• %X: local time\n• %H: hour (24-hour clock) with 2 digits (00 to 23)\n• %I: hour (24-hour clock) with 2 digits (00 to 12)\n• %p: AM or PM\n• %M: minute with 2 digits (00 to 59)\n• %S: second with 2 digits (00 to 59)\n• %z: local timezone offset\n• %Z: local timezone name\n• %%: % sign"
   },
   "OptionEditorLineMarkerStyleLabel": {
-    "message": "Inline marker style"
+    "message": "Marker style"
   },
   "OptionGroupCapture": {
     "message": "Capture - content"
