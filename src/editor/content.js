@@ -1481,13 +1481,65 @@ scrapbook-toolbar, scrapbook-toolbar *,
   };
 
 
+  const converter = editor.converter = {
+    convertLegacyObject(elem) {
+      if (elem.nodeName.toLowerCase().startsWith('scrapbook-') || elem.matches('[data-scrapbook-elem]')) { return elem; }
+
+      switch (scrapbook.getScrapbookObjectType(elem)) {
+        case 'linemarker':
+        case 'inline': {
+          editor.addHistory();
+
+          const hElem = document.createElement('span');
+          if (elem.hasAttribute('data-sb-id')) {
+            const date = new Date(parseInt(elem.getAttribute('data-sb-id'), 10));
+            if (!isNaN(date.valueOf())) {
+              hElem.setAttribute('data-scrapbook-id', scrapbook.dateToId(date));
+            }
+          }
+          if (!hElem.hasAttribute('data-scrapbook-id')) {
+            hElem.setAttribute('data-scrapbook-id', scrapbook.dateToId());
+          }
+          hElem.setAttribute('data-scrapbook-elem', 'linemarker');
+          hElem.setAttribute('style', elem.getAttribute('style'));
+          if (elem.hasAttribute('title')) {
+            hElem.setAttribute('title', elem.getAttribute('title'));
+          }
+
+          const newElems = Array.prototype.map.call(
+            scrapbook.getScrapBookObjectsById(elem),
+            (elem) => {
+              const newElem = hElem.cloneNode(false);
+              let node;
+              while (node = elem.firstChild) {
+                newElem.appendChild(node);
+              }
+              elem.parentNode.replaceChild(newElem, elem);
+              return newElem;
+            });
+          newElems[0].classList.add('first');
+          newElems[newElems.length - 1].classList.add('last');
+          return newElems[0];
+        }
+      }
+
+      return elem;
+    },
+  };
+
+
   const annotator = editor.annotator = (function () {
     const onContextMenu = (event) => {
       let target = event.target;
       let objectType = scrapbook.getScrapbookObjectType(target);
       switch (objectType) {
-        case 'linemarker': {
+        case 'linemarker':
+        case 'inline': {
           event.preventDefault();
+
+          // convert legacy ScrapBook objects into WebScrapBook version
+          target = converter.convertLegacyObject(target);
+
           annotator.editLineMarkerAnnotation(target);
           break;
         }
