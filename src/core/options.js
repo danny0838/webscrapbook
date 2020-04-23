@@ -42,12 +42,14 @@
     }
   }
 
-  function setOptionToDocument(id, value) {
+  function setOptionToDocument(id, value, includeHidden) {
     let elem = document.getElementById(OPTION_PREFIX + id);
 
     // If the given option is not in the form, create a hidden element to allow
     // reseting hidden values or do some hacking.
     if (!elem) {
+      if (!includeHidden) { return; }
+
       const wrapper = document.getElementById('options');
       if (typeof value === 'string') {
         elem = document.createElement('input');
@@ -90,7 +92,7 @@
 
   function resetOptions(file) {
     for (const id in defaultOptions) {
-      setOptionToDocument(id, defaultOptions[id]);
+      setOptionToDocument(id, defaultOptions[id], true);
     }
   }
 
@@ -131,7 +133,7 @@
       scrapbook.options = options;
       await scrapbook.saveOptions();
       for (const id in options) {
-        setOptionToDocument(id, options[id]);
+        setOptionToDocument(id, options[id], true);
       }
       alert(scrapbook.lang("OptionsImportSuccess"));
     } catch (ex) {
