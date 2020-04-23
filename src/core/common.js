@@ -976,34 +976,47 @@
    ***************************************************************************/
 
   /**
-   * linemarker (span)
-   * inline (span)
-   * annotation (span) (for downward compatibility with SBX 1.12.0a - 1.12.0a45)
-   * link-url (a)
-   * link-inner (a)
-   * link-file (a)
-   * freenote (div)
-   * freenote-header
-   * freenote-body
-   * freenote-footer
-   * freenote-save
-   * freenote-delete
-   * sticky (div) (for downward compatibility with SBX <= 1.12.0a34)
-   * sticky-header
-   * sticky-footer
-   * sticky-save
-   * sticky-delete
-   * block-comment (div) (for downward compatibility with SB <= 0.17.0)
+   * - Markings
+   *   linemarker (span) (since SB, SBX)
+   *   inline (span) (for SB, SBX)
+   *   annotation (span) (for 1.12.0a <= SBX <= 1.12.0a45)
+   *   link-url (a) (for SBX)
+   *   link-inner (a) (for SBX)
+   *   link-file (a) (for SBX)
+   *   freenote (div) (for 1.12.0a35 <= SBX)
+   *   freenote-header (for 1.12.0a35 <= SBX)
+   *   freenote-body (for 1.12.0a35 <= SBX)
+   *   freenote-footer (for 1.12.0a35 <= SBX)
+   *   freenote-save (for 1.12.0a35 <= SBX)
+   *   freenote-delete (for 1.12.0a35 <= SBX)
+   *   sticky (div) (for 0.22.10? <= SB, SBX <= 1.12.0a34)
+   *   sticky-header (for 0.22.10? <= SB, SBX <= 1.12.0a34)
+   *   sticky-footer (for 0.22.10? <= SB, SBX <= 1.12.0a34)
+   *   sticky-save (for 0.22.10? <= SB, SBX <= 1.12.0a34)
+   *   sticky-delete (for 0.22.10? <= SB, SBX <= 1.12.0a34)
+   *   block-comment (div) (for SB < 0.19?)
+   *   erased (since WSB)
    *
-   * title (*)
-   * title-src (*)
-   * stylesheet (link, style)
-   * stylesheet-temp (link, style)
-   * todo (input, textarea)
-   * fulltext
+   *   title (*) (since SBX)
+   *   title-src (*) (since SBX)
+   *   todo (input, textarea) (since SBX)
    *
-   * custom (*) (custom objects to be removed by the eraser)
-   * custom-wrapper (*) (custom objects to be unwrapped by the eraser)
+   *   custom (*) (custom objects to be removed by the eraser) (since SBX)
+   *   custom-wrapper (*) (custom objects to be unwrapped by the eraser) (since SBX)
+   *
+   * - Other special elements
+   *   toolbar (since WSB)
+   *   toolbar-* (since WSB)
+   *   fulltext (for 1.12.0a37 <= SBX)
+   *  
+   * - CSS and JS
+   *   adoptedStyleSheet (since 0.56.4 <= WSB)
+   *   css-resource-map (since 0.52.0 <= WSB)
+   *   basic-loader (since 0.69.0 <= WSB)
+   *   canvas-loader (for 0.51 <= WSB < 0.69)
+   *   shadowroot-loader (for 0.51 <= WSB < 0.69)
+   *   stylesheet (link, style) (for SBX)
+   *   stylesheet-temp (link, style) (for SBX)
    *
    * @return {false|string} Scrapbook object type of the element; or false.
    */
@@ -1021,10 +1034,11 @@
     let type = elem.getAttribute("data-scrapbook-elem");
     if (type) { return type; }
 
-    // for downward compatibility with legacy ScrapBook (X)
+    // for downward compatibility with legacy ScrapBook X
     type = elem.getAttribute("data-sb-obj");
     if (type) { return type; }
 
+    // for downward compatibility with legacy ScrapBook
     switch (elem.className) {
       case "linemarker-marked-line":
         return "linemarker";
