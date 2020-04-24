@@ -737,7 +737,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       for (const node of selectedNodes.reverse()) {
         if (/[^ \f\n\r\t\v]/.test(node.nodeValue)) {
           const wrapper = hElem.cloneNode(false);
-          node.parentNode.replaceChild(wrapper, node);
+          node.parentNode.insertBefore(wrapper, node);
           wrapper.appendChild(node);
 
           if (node === firstNode) {
