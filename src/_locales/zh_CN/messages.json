@@ -826,6 +826,12 @@
   "OptionEditorLineMarkerStyleLabel": {
     "message": "标示样式"
   },
+  "OptionEditorUseNativeTagsLabel": {
+    "message": "使用原生 HTML 标签注记"
+  },
+  "OptionEditorUseNativeTagsTooltip": {
+    "message": "使用原生 HTML 标签注记使之与旧浏览器（如 IE < 9）兼容，但较易受原网页干扰造成样式异常。"
+  },
   "OptionGroupCapture": {
     "message": "获取 - 内容"
   },

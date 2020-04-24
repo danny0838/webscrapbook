@@ -826,6 +826,12 @@
   "OptionEditorLineMarkerStyleLabel": {
     "message": "Marker style"
   },
+  "OptionEditorUseNativeTagsLabel": {
+    "message": "Use native HTML tags for markings"
+  },
+  "OptionEditorUseNativeTagsTooltip": {
+    "message": "Use native HTML tags for markings to be compatible with old browsers (e.g. IE < 9), but are more likely to be intefered by the original web page and results in an abnormal style."
+  },
   "OptionGroupCapture": {
     "message": "Capture - content"
   },

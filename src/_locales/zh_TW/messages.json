@@ -826,6 +826,12 @@
   "OptionEditorLineMarkerStyleLabel": {
     "message": "標示樣式"
   },
+  "OptionEditorUseNativeTagsLabel": {
+    "message": "使用原生 HTML 標籤註記"
+  },
+  "OptionEditorUseNativeTagsTooltip": {
+    "message": "使用原生 HTML 標籤註記使之與舊瀏覽器（如 IE < 9）相容，但較易受原網頁干擾造成樣式異常。"
+  },
   "OptionGroupCapture": {
     "message": "擷取 - 內容"
   },

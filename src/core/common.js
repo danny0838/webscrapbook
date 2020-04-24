@@ -84,6 +84,7 @@
     "capture.deleteErasedOnCapture": true,
     "capture.deleteErasedOnSave": false,
     "editor.autoInit": true,
+    "editor.useNativeTags": false,
     "editor.lineMarker.style.1": "background: #FFFF00; background: linear-gradient(transparent 40%, rgba(255,255,0,0.9) 90%, transparent 100%);",
     "editor.lineMarker.style.2": "background: #00FF00; background: linear-gradient(transparent 40%, rgba(0,255,0,0.9) 90%, transparent 100%);",
     "editor.lineMarker.style.3": "background: #FF0000; background: linear-gradient(transparent 40%, rgba(255,0,0,0.9) 90%, transparent 100%);",

@@ -953,19 +953,20 @@ scrapbook-toolbar, scrapbook-toolbar *,
   };
 
   editor.lineMarker = async function (style) {
+    const args = {
+      tagName: scrapbook.getOption("editor.useNativeTags") ? 'span' : 'scrapbook-linemarker',
+      attrs: {
+        'data-scrapbook-id': scrapbook.dateToId(),
+        'data-scrapbook-elem': 'linemarker',
+        'style': style,
+      },
+    };
     return await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
         cmd: "editor.lineMarkerInternal",
-        args: {
-          tagName: 'span',
-          attrs: {
-            'data-scrapbook-id': scrapbook.dateToId(),
-            'data-scrapbook-elem': 'linemarker',
-            'style': style,
-          },
-        },
+        args,
       },
     });
   };
@@ -1490,7 +1491,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
         case 'inline': {
           editor.addHistory();
 
-          const hElem = document.createElement('span');
+          const useNativeTags = scrapbook.getOption("editor.useNativeTags");
+          const hElem = document.createElement(useNativeTags ? 'span' : 'scrapbook-linemarker');
           if (elem.hasAttribute('data-sb-id')) {
             const date = new Date(parseInt(elem.getAttribute('data-sb-id'), 10));
             if (!isNaN(date.valueOf())) {
