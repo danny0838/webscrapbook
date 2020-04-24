@@ -701,13 +701,13 @@ ${sRoot}.toolbar .toolbar-close:hover {
   /**
    * @kind invokable
    */
-  editor.lineMarkerInternal = function ({style}) {
+  editor.lineMarkerInternal = function ({tagName = 'span', attrs = {}}) {
     editor.addHistory();
 
-    const hElem = document.createElement('span');
-    hElem.setAttribute('data-scrapbook-id', scrapbook.dateToId());
-    hElem.setAttribute('data-scrapbook-elem', 'linemarker');
-    hElem.setAttribute('style', style);
+    const hElem = document.createElement(tagName);
+    for (const [name, value] of Object.entries(attrs)) {
+      hElem.setAttribute(name, value);
+    }
 
     for (const range of scrapbook.getSelectionRanges()) {
       // tweak the range
@@ -938,7 +938,14 @@ scrapbook-toolbar, scrapbook-toolbar *,
       args: {
         frameId: await editor.getFocusedFrameId(),
         cmd: "editor.lineMarkerInternal",
-        args: {style},
+        args: {
+          tagName: 'span',
+          attrs: {
+            'data-scrapbook-id': scrapbook.dateToId(),
+            'data-scrapbook-elem': 'linemarker',
+            'style': style,
+          },
+        },
       },
     });
   };
