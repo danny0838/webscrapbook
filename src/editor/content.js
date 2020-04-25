@@ -36,7 +36,7 @@
     directToolbarClick: false,
 
     get active() {
-      return !!(editor.element && editor.element.parentNode);
+      return document.documentElement.hasAttribute('data-scrapbook-toolbar-active');
     },
 
     /**
@@ -71,21 +71,16 @@ height: 100vh;`;
    * @kind invokable
    */
   editor.init = async function ({willActive, force = false}) {
-    let wrapper = editor.element = editor.element || document.querySelector("scrapbook-toolbar");
-
     if (typeof willActive === "undefined") {
-      willActive = !(wrapper && wrapper.parentNode);
+      willActive = !editor.active;
     }
 
     if (!willActive) {
       return editor.close();
     }
 
-    if (wrapper) {
-      if (!wrapper.parentNode) {
-        document.documentElement.appendChild(wrapper);
-      }
-      return;
+    if (editor.element) {
+      return editor.open();
     }
 
     // do not load the toolbar if the document cannot be load as HTML
@@ -123,7 +118,7 @@ height: 100vh;`;
 
     // generate toolbar content
     const uid = 'scrapbook-' + scrapbook.getUuid();
-    editor.element = wrapper = document.documentElement.appendChild(document.createElement("scrapbook-toolbar"));
+    let wrapper = editor.element = document.documentElement.appendChild(document.createElement("scrapbook-toolbar"));
     wrapper.id = uid;
     wrapper.setAttribute('dir', scrapbook.lang('@@bidi_dir'));
 
@@ -702,6 +697,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
       event.preventDefault();
       editor.close();
     });
+
+    return editor.open();
   };
 
   /**
@@ -1166,12 +1163,20 @@ scrapbook-toolbar, scrapbook-toolbar *,
     });
   };
 
+  editor.open = async function () {
+    if (editor.active) { return; }
+
+    document.documentElement.setAttribute('data-scrapbook-toolbar-active', '');
+    document.documentElement.appendChild(editor.element);
+  };
+
   editor.close = async function () {
     if (!editor.active) { return; }
 
+    document.documentElement.removeAttribute('data-scrapbook-toolbar-active');
+    editor.element.remove();
     await editor.toggleDomEraser(false);
     await editor.toggleHtmlEditor(false);
-    editor.element.remove();
   };
 
   /**

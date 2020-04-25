@@ -445,12 +445,6 @@
           return elem;
         }
 
-        // webscrapbook toolbar should not be included
-        if (elem.nodeName.toLowerCase() === "scrapbook-toolbar") {
-          elem.remove();
-          return;
-        }
-
         // skip a special elements and its descendants
         if (scrapbook.getScrapbookObjectType(elem)) {
           return elem;
@@ -2215,6 +2209,12 @@
         addAdoptedStyleSheets(doc, rootNode);
       }
 
+      // remove webscrapbook toolbar related
+      rootNode.removeAttribute('data-scrapbook-toolbar-active');
+      for (const elem of rootNode.querySelectorAll(`scrapbook-toolbar`)) {
+        elem.remove();
+      }
+
       // preprocess with helpers
       if (options["capture.helpersEnabled"] && options["capture.helpers"]) {
         let helpers;
@@ -2463,11 +2463,6 @@
       };
 
       const processRootNode = (rootNode) => {
-        // remove webscrapbook toolbar
-        for (const elem of rootNode.querySelectorAll("scrapbook-toolbar")) {
-          elem.remove();
-        }
-
         // handle internalization
         if (internalize) {
           for (const elem of rootNode.querySelectorAll('img')) {
@@ -2639,6 +2634,12 @@
       const resources = {};
       const shadowRootSupported = !!rootNode.attachShadow;
       let requireBasicLoader = false;
+
+      // remove webscrapbook toolbar related
+      rootNode.removeAttribute('data-scrapbook-toolbar-active');
+      for (const elem of rootNode.querySelectorAll(`scrapbook-toolbar`)) {
+        elem.remove();
+      }
 
       processRootNode(rootNode);
 
