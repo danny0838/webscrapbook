@@ -771,7 +771,12 @@ ${sRoot}.toolbar .toolbar-close:hover {
    * @kind invokable
    */
   editor.eraseSelectorInternal = function ({selector}) {
-    const FORBID_NODES = `html, head, body, scrapbook-toolbar, scrapbook-toolbar *`;
+    const FORBID_NODES = `\
+html, head, body,
+scrapbook-toolbar, scrapbook-toolbar *,
+[data-scrapbook-elem="basic-loader"],
+[data-scrapbook-elem="shadowroot-loader"],
+[data-scrapbook-elem="canvas-loader"]`;
     const fn = editor.eraseSelectorInternal = ({selector}) => {
       editor.addHistory();
 
