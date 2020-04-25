@@ -755,11 +755,11 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
       // mark first and last valid node
       if (firstWrapper) {
-        firstWrapper.setAttribute('data-scrapbook-linemarker-first', '');
+        firstWrapper.classList.add('first');
         range.setStartBefore(firstWrapper);
       }
       if (lastWrapper) {
-        lastWrapper.setAttribute('data-scrapbook-linemarker-last', '');
+        lastWrapper.classList.add('last');
         range.setEndAfter(lastWrapper);
       }
     }
