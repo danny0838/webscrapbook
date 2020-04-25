@@ -35,6 +35,10 @@
     lastWindowBlurTime: -1,
     directToolbarClick: false,
 
+    get active() {
+      return !!(editor.element && editor.element.parentNode);
+    },
+
     /**
      * @return {Object<number~hWidth, number~vWidth>}
      */
@@ -66,14 +70,14 @@ height: 100vh;`;
   /**
    * @kind invokable
    */
-  editor.init = async function ({willOpen, force = false}) {
+  editor.init = async function ({willActive, force = false}) {
     let wrapper = editor.element = editor.element || document.querySelector("scrapbook-toolbar");
 
-    if (typeof willOpen === "undefined") {
-      willOpen = !(wrapper && wrapper.parentNode);
+    if (typeof willActive === "undefined") {
+      willActive = !(wrapper && wrapper.parentNode);
     }
 
-    if (!willOpen) {
+    if (!willActive) {
       return editor.close();
     }
 
@@ -564,7 +568,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor > button:last-of-type');
     elem.addEventListener("click", (event) => {
-      editor.updateHtmlEditorUi();
+      editor.updateHtmlEditorMenu();
       editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
     }, {passive: true});
 
@@ -1041,63 +1045,84 @@ scrapbook-toolbar, scrapbook-toolbar *,
     });
   };
 
-  editor.toggleDomEraser = async function (willEnable) {
-    if (!editor.element && editor.element.parentNode) { return; }
-
+  editor.toggleDomEraser = async function (willActive) {
     const editElem = editor.internalElement.querySelector('.toolbar-domEraser > button');
 
-    if (typeof willEnable === "undefined") {
-      willEnable = !editElem.hasAttribute("checked");
+    if (typeof willActive === "undefined") {
+      willActive = !editElem.hasAttribute("checked");
     }
 
-    if (willEnable) {
+    if (willActive) {
+      if (editElem.hasAttribute("checked")) {
+        // already active or is doing async activating
+        return;
+      }
       editElem.setAttribute("checked", "");
     } else {
+      if (!editElem.hasAttribute("checked")) {
+        // already inactive or is doing async deactivating
+        return;
+      }
       editElem.removeAttribute("checked");
     }
 
-    Array.prototype.forEach.call(
-      editor.internalElement.querySelectorAll('.toolbar-marker > button, .toolbar-eraser > button, .toolbar-htmlEditor > button, .toolbar-undo > button, .toolbar-save > button'),
-      (elem) => {
-        elem.disabled = willEnable;
-      });
+    for (const elem of editor.internalElement.querySelectorAll([
+          '.toolbar-marker > button',
+          '.toolbar-eraser > button',
+          '.toolbar-htmlEditor > button',
+          '.toolbar-undo > button',
+          '.toolbar-save > button',
+        ].join(','))) {
+      elem.disabled = willActive;
+    }
 
     return await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         cmd: "editor.domEraser.toggle",
-        args: {willEnable},
+        args: {willActive},
       },
     });
   };
 
-  editor.toggleHtmlEditor = async function (willEditable) {
-    if (!editor.element && editor.element.parentNode) { return; }
-
+  editor.toggleHtmlEditor = async function (willActive) {
     const editElem = editor.internalElement.querySelector('.toolbar-htmlEditor > button');
 
-    if (typeof willEditable === "undefined") {
-      willEditable = !editElem.hasAttribute("checked");
+    if (typeof willActive === "undefined") {
+      willActive = !editElem.hasAttribute("checked");
     }
 
-    if (willEditable) {
+    if (willActive) {
+      if (editElem.hasAttribute("checked")) {
+        // already active or is doing async activating
+        return;
+      }
       editElem.setAttribute("checked", "");
     } else {
+      if (!editElem.hasAttribute("checked")) {
+        // already inactive or is doing async deactivating
+        return;
+      }
       editElem.removeAttribute("checked");
     }
 
-    editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = !willEditable;
-    Array.prototype.forEach.call(
-      editor.internalElement.querySelectorAll('.toolbar-marker > button, .toolbar-eraser > button, .toolbar-domEraser > button, .toolbar-undo > button'),
-      (elem) => {
-        elem.disabled = willEditable;
-      });
-
-    if (willEditable) {
-      return await htmlEditor.activate();
-    } else {
-      return await htmlEditor.deactivate();
+    editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = !willActive;
+    for (const elem of editor.internalElement.querySelectorAll([
+          '.toolbar-marker > button',
+          '.toolbar-eraser > button',
+          '.toolbar-domEraser > button',
+          '.toolbar-undo > button'
+        ].join(','))) {
+      elem.disabled = willActive;
     }
+
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        cmd: "editor.htmlEditor.toggle",
+        args: {willActive},
+      },
+    });
   };
 
   editor.undo = async function () {
@@ -1112,8 +1137,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
   };
 
   editor.save = async function (params = {}) {
-    if (!editor.element && editor.element.parentNode) { return; }
-
     if (editor.inScrapBook) {
       // prompt a confirm if this page is scripted
       if (editor.isScripted) {
@@ -1144,7 +1167,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   };
 
   editor.close = async function () {
-    if (!editor.element && editor.element.parentNode) { return; }
+    if (!editor.active) { return; }
 
     await editor.toggleDomEraser(false);
     await editor.toggleHtmlEditor(false);
@@ -1298,7 +1321,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
     buttons[idx].setAttribute('checked', '');
   };
 
-  editor.updateHtmlEditorUi = function () {
+  editor.updateHtmlEditorMenu = function () {
     {
       const elem = editor.internalElement.querySelector('.toolbar-htmlEditor-insertDate');
       const format = scrapbook.getOption("editor.insertDateFormat");
@@ -1516,6 +1539,40 @@ scrapbook-toolbar, scrapbook-toolbar *,
     };
 
     const domEraser = {
+      active: false,
+
+      /**
+       * @kind invokable
+       */
+      toggle({willActive}) {
+        if (typeof willActive === 'undefined') {
+          willActive = !this.active;
+        }
+
+        if (willActive) {
+          if (!this.active) {
+            this.active = true;
+            window.addEventListener('touchstart', onTouchStart, true);
+            window.addEventListener('mouseover', onMouseOver, true);
+            window.addEventListener('mouseout', onMouseOut, true);
+            window.addEventListener('mousedown', onMouseDown, true);
+            window.addEventListener('click', onClick, true);
+            window.addEventListener("keydown", onKeyDown, true);
+          }
+        } else {
+          if (this.active) {
+            this.active = false;
+            domEraser.clearTarget();
+            window.removeEventListener('touchstart', onTouchStart, true);
+            window.removeEventListener('mouseover', onMouseOver, true);
+            window.removeEventListener('mouseout', onMouseOut, true);
+            window.removeEventListener('mousedown', onMouseDown, true);
+            window.removeEventListener('click', onClick, true);
+            window.removeEventListener("keydown", onKeyDown, true);
+          }
+        }
+      },
+
       adjustTarget(elem) {
         let checkElem;
 
@@ -1667,28 +1724,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
           elem = parent;
         }
       },
-
-      /**
-       * @kind invokable
-       */
-      toggle({willEnable}) {
-        if (willEnable) {
-          window.addEventListener('touchstart', onTouchStart, true);
-          window.addEventListener('mouseover', onMouseOver, true);
-          window.addEventListener('mouseout', onMouseOut, true);
-          window.addEventListener('mousedown', onMouseDown, true);
-          window.addEventListener('click', onClick, true);
-          window.addEventListener("keydown", onKeyDown, true);
-        } else {
-          domEraser.clearTarget();
-          window.removeEventListener('touchstart', onTouchStart, true);
-          window.removeEventListener('mouseover', onMouseOver, true);
-          window.removeEventListener('mouseout', onMouseOut, true);
-          window.removeEventListener('mousedown', onMouseDown, true);
-          window.removeEventListener('click', onClick, true);
-          window.removeEventListener("keydown", onKeyDown, true);
-        }
-      },
     };
 
     return domEraser;
@@ -1696,22 +1731,28 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
 
   const htmlEditor = editor.htmlEditor = {
-    async activate() {
-      return await scrapbook.invokeExtensionScript({
-        cmd: "background.invokeEditorCommand",
-        args: {
-          code: `editor.addHistory(); document.designMode = "on";`,
-        },
-      });
-    },
+    active: false,
 
-    async deactivate() {
-      return await scrapbook.invokeExtensionScript({
-        cmd: "background.invokeEditorCommand",
-        args: {
-          code: `document.designMode = "off";`,
-        },
-      });
+    /**
+     * @kind invokable
+     */
+    async toggle({willActive}) {
+      if (typeof willActive === 'undefined') {
+        willActive = !this.active;
+      }
+
+      if (willActive) {
+        if (!this.active) {
+          this.active = true;
+          editor.addHistory();
+          document.designMode = "on";
+        }
+      } else {
+        if (this.active) {
+          this.active = false;
+          document.designMode = "off";
+        }
+      }
     },
 
     async strong() {

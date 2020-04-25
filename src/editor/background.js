@@ -52,7 +52,7 @@
 
     return scrapbook.editTab({
       tabId,
-      willOpen: true,
+      willActive: true,
     });
   }, {url: [{schemes: ["http", "https"]}]});
 

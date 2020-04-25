@@ -325,13 +325,13 @@
     }
   };
 
-  scrapbook.editTab = async function ({tabId, frameId = 0, willOpen, force}) {
+  scrapbook.editTab = async function ({tabId, frameId = 0, willActive, force}) {
     await scrapbook.initContentScripts(tabId);
     return await scrapbook.invokeContentScript({
       tabId,
       frameId,
       cmd: "editor.init",
-      args: {willOpen, force},
+      args: {willActive, force},
     });
   };
 
