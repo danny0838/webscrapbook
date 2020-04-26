@@ -21,6 +21,8 @@
 
   'use strict';
 
+  const SHADOW_DOM_SUPPORTED = !!document.documentElement.attachShadow;
+
   const LINEMARKABLE_ELEMENTS = `img, picture, canvas, input[type="image"]`;
 
   const editor = {
@@ -201,6 +203,10 @@ ${sRoot}.toolbar > div {
   display: inline-block !important;
 }
 
+${sRoot}.toolbar > div[hidden] {
+  display: none !important;
+}
+
 ${sRoot}.toolbar > div > button {
   display: inline-block !important;
   margin: 0 !important;
@@ -251,6 +257,10 @@ ${sRoot}.toolbar .toolbar-locate > button:first-of-type {
 
 ${sRoot}.toolbar .toolbar-marker > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-marker.png")}") !important;
+}
+
+${sRoot}.toolbar .toolbar-annotation > button:first-of-type {
+  background-image: url("${browser.runtime.getURL("resources/edit-annotation.png")}") !important;
 }
 
 ${sRoot}.toolbar .toolbar-eraser > button:first-of-type {
@@ -388,6 +398,13 @@ ${sRoot}.toolbar .toolbar-close:hover {
       <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [12])}</scrapbook-toolbar-samp></button></li>
     </ul>
   </div>
+  <div class="toolbar-annotation" title="${scrapbook.lang('EditorButtonAnnotation')}">
+    <button></button><button></button>
+    <ul hidden="" title="">
+      <li><button class="toolbar-annotation-sticky">${scrapbook.lang('EditorButtonAnnotationSticky')}</button></li>
+      <li><button class="toolbar-annotation-sticky-richtext">${scrapbook.lang('EditorButtonAnnotationStickyRichText')}</button></li>
+    </ul>
+  </div>
   <div class="toolbar-eraser" title="${scrapbook.lang('EditorButtonEraser')}">
     <button></button><button></button>
     <ul hidden="" title="">
@@ -494,6 +511,30 @@ ${sRoot}.toolbar .toolbar-close:hover {
         editor.lineMarker(elem.querySelector('scrapbook-toolbar-samp').getAttribute('style'));
       }, {passive: true});
     }
+
+    // annotation
+    var elem = wrapper.querySelector('.toolbar-annotation');
+    elem.hidden = !SHADOW_DOM_SUPPORTED;
+
+    var elem = wrapper.querySelector('.toolbar-annotation > button:first-of-type');
+    elem.addEventListener("click", (event) => {
+      editor.createSticky();
+    }, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-annotation > button:last-of-type');
+    elem.addEventListener("click", (event) => {
+      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
+    }, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-annotation-sticky');
+    elem.addEventListener("click", (event) => {
+      editor.createSticky();
+    }, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-annotation-sticky-richtext');
+    elem.addEventListener("click", (event) => {
+      editor.createSticky(true);
+    }, {passive: true});
 
     // eraser
     var elem = wrapper.querySelector('.toolbar-eraser > button:first-of-type');
@@ -971,6 +1012,19 @@ scrapbook-toolbar, scrapbook-toolbar *,
     });
   };
 
+  editor.createSticky = async function (richText) {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId(),
+        cmd: "editor.annotator.createSticky",
+        args: {
+          richText,
+        },
+      },
+    });
+  };
+
   editor.eraseNodes = async function () {
     return await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
@@ -1082,6 +1136,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
     for (const elem of editor.internalElement.querySelectorAll([
           '.toolbar-marker > button',
+          '.toolbar-annotation > button',
           '.toolbar-eraser > button',
           '.toolbar-htmlEditor > button',
           '.toolbar-undo > button',
@@ -1131,6 +1186,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
     editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = !willActive;
     for (const elem of editor.internalElement.querySelectorAll([
           '.toolbar-marker > button',
+          '.toolbar-annotation > button',
           '.toolbar-eraser > button',
           '.toolbar-domEraser > button',
           '.toolbar-undo > button'
@@ -1175,11 +1231,25 @@ scrapbook-toolbar, scrapbook-toolbar *,
         }
       }
 
+      await scrapbook.invokeExtensionScript({
+        cmd: "background.invokeEditorCommand",
+        args: {
+          cmd: "editor.annotator.saveStickyAll",
+          args: {},
+        },
+      });
       return await scrapbook.invokeExtensionScript({
         cmd: "background.captureCurrentTab",
         args: {mode: params.internalize ? "internalize" : "resave"},
       });
     } else {
+      await scrapbook.invokeExtensionScript({
+        cmd: "background.invokeEditorCommand",
+        args: {
+          cmd: "editor.annotator.saveStickyAll",
+          args: {},
+        },
+      });
       return await scrapbook.invokeExtensionScript({
         cmd: "background.captureCurrentTab",
       });
@@ -1635,24 +1705,89 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
 
   const annotator = editor.annotator = (function () {
-    const onClick = (event) => {
+    const STICKY_DEFAULT_WIDTH = 250;
+    const STICKY_DEFAULT_HEIGHT = 100;
+
+    const draggingData = {};
+
+    const onMouseDown = (event) => {
+      // A mousedown during a dragging caould be pressing another mouse button,
+      // or a touch with another finger. In either case the current dragging
+      // should be stopped and no new dragging should be initiated.
+      if (draggingData.target) {
+        stopDrag(event);
+        return;
+      }
+
       let target = event.target;
       let objectType = scrapbook.getScrapbookObjectType(target);
       switch (objectType) {
-        case 'freenote':
-        case 'sticky':
+        case 'sticky': {
+          if (target.shadowRoot) {
+            const innerTarget = getEventInnerTarget(event);
+            if (innerTarget.matches('header')) {
+              if (target.classList.contains('relative')) {
+                break;
+              }
+
+              if (!event.touches) {
+                startDrag(event);
+              } else {
+                if (event.touches.length === 1) {
+                  startDrag(event);
+                } else {
+                  stopDrag(event);
+                }
+              }
+            } else if (innerTarget.matches('.resizer')) {
+              if (!event.touches) {
+                startDrag(event, new Set([...innerTarget.classList]));
+              } else {
+                if (event.touches.length === 1) {
+                  startDrag(event, new Set([...innerTarget.classList]));
+                } else {
+                  stopDrag(event);
+                }
+              }
+            }
+            break;
+          } else {
+            event.preventDefault();
+
+            // convert legacy ScrapBook objects into WebScrapBook version
+            target = converter.convertLegacyObject(target);
+
+            annotator.editSticky(target);
+          }
+          break;
+        }
+
         case 'sticky-header':
         case 'sticky-footer':
         case 'sticky-save':
         case 'sticky-delete':
+        case 'freenote':
         case 'block-comment': {
           event.preventDefault();
 
           // convert legacy ScrapBook objects into WebScrapBook version
           target = converter.convertLegacyObject(target);
 
+          annotator.editSticky(target);
           break;
         }
+      }
+    };
+
+    const onMouseMove = (event) => {
+      if (draggingData.target) {
+        moveDrag(event);
+      }
+    };
+
+    const onMouseUp = (event) => {
+      if (draggingData.target) {
+        stopDrag(event);
       }
     };
 
@@ -1673,6 +1808,96 @@ scrapbook-toolbar, scrapbook-toolbar *,
       }
     };
 
+    const startDrag = (event, resizeClass = false) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const target = draggingData.target = event.target;
+      draggingData.target.classList.add('dragging');
+      draggingData.resizeClass = resizeClass;
+
+      const {clientX, clientY} = getEventPositionObject(event);
+      const rect = target.getBoundingClientRect();
+      draggingData.deltaX = clientX - rect.left;
+      draggingData.deltaY = clientY - rect.top;
+
+      // create a whole page mask to prevent mouse event be trapped by an iframe
+      const maskElem = draggingData.mask = document.createElement('scrapbook-toolbar-mask');
+      maskElem.setAttribute('data-scrapbook-elem', 'toolbar-mask');
+      maskElem.style.setProperty('display', 'block', 'important');
+      maskElem.style.setProperty('position', 'fixed', 'important');
+      maskElem.style.setProperty('z-index', '2147483640', 'important');
+      maskElem.style.setProperty('top', 0, 'important');
+      maskElem.style.setProperty('right', 0, 'important');
+      maskElem.style.setProperty('bottom', 0, 'important');
+      maskElem.style.setProperty('left', 0, 'important');
+      document.documentElement.appendChild(maskElem);
+
+      window.addEventListener("mousemove", onMouseMove, true);
+      window.addEventListener("touchmove", onMouseMove, {capture: true, passive: false});
+      window.addEventListener("mouseup", onMouseUp, true);
+      window.addEventListener("touchend", onMouseUp, {capture: true, passive: false});
+    };
+
+    const moveDrag = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const {clientX, clientY} = getEventPositionObject(event);
+      const mainElem = draggingData.target;
+      const resizeClass = draggingData.resizeClass;
+      if (resizeClass) {
+        const rect = mainElem.getBoundingClientRect();
+        if (resizeClass.has('nwse')) {
+          mainElem.style.width = clientX - rect.left + 'px';
+          mainElem.style.height = clientY - rect.top + 'px';
+        } else if (resizeClass.has('ns')) {
+          mainElem.style.height = clientY - rect.top + 'px';
+        } else if (resizeClass.has('ew')) {
+          mainElem.style.width = clientX - rect.left + 'px';
+        }
+      } else {
+        const anchorElem = document.documentElement;
+        const anchorRect = anchorElem.getBoundingClientRect();
+        const anchorStyle = window.getComputedStyle(anchorElem);
+        const borderX = parseInt(anchorStyle.getPropertyValue('border-left-width'), 10);
+        const borderY = parseInt(anchorStyle.getPropertyValue('border-top-width'), 10);
+
+        let left = clientX - draggingData.deltaX - anchorRect.left - borderX;
+        let top = clientY - draggingData.deltaY - anchorRect.top - borderY;
+        left = Math.max(left, 0);
+        top = Math.max(top, 0);
+
+        mainElem.style.left = left + 'px';
+        mainElem.style.top = top + 'px';
+      }
+    };
+
+    const stopDrag = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      window.removeEventListener("mousemove", onMouseMove, true);
+      window.removeEventListener("touchmove", onMouseMove, true);
+      window.removeEventListener("mouseup", onMouseUp, true);
+      window.removeEventListener("touchend", onMouseUp, true);
+
+      draggingData.mask.remove();
+      draggingData.target.classList.remove('dragging');
+      draggingData.target = null;
+    };
+
+    const getEventPositionObject = (event) => {
+      return event.changedTouches ? event.changedTouches[0] : event;
+    };
+
+    const getEventInnerTarget = (event) => {
+      // Get the targeted element in the shadow root.
+      // In Firefox event.explicitOriginalTarget is the target in shadowRoot.
+      // In Chromium event.path bubbles from the target in shadowRoot upwards.
+      return event.path ? event.path[0] : event.explicitOriginalTarget;
+    };
+
     const annotator = {
       active: false,
 
@@ -1688,14 +1913,17 @@ scrapbook-toolbar, scrapbook-toolbar *,
           if (!this.active) {
             this.active = true;
             this.updateAnnotationCss();
-            window.addEventListener("click", onClick, true);
             window.addEventListener("contextmenu", onContextMenu, true);
+            window.addEventListener("mousedown", onMouseDown, true);
+            window.addEventListener("touchstart", onMouseDown, {capture: true, passive: false});
           }
         } else {
           if (this.active) {
             this.active = false;
-            window.removeEventListener("click", onClick, true);
             window.removeEventListener("contextmenu", onContextMenu, true);
+            window.removeEventListener("mousedown", onMouseDown, true);
+            window.removeEventListener("touchstart", onMouseDown, true);
+            this.saveStickyAll();
           }
         }
       },
@@ -1733,6 +1961,186 @@ scrapbook-toolbar, scrapbook-toolbar *,
             part.removeAttribute('title');
           }
         }
+      },
+
+      /**
+       * @kind invokable
+       */
+      createSticky({richText}) {
+        if (!SHADOW_DOM_SUPPORTED) { return; }
+
+        editor.addHistory();
+
+        const useNativeTags = scrapbook.getOption("editor.useNativeTags");
+        const mainElem = document.createElement(useNativeTags ? 'div' : 'scrapbook-sticky');
+        mainElem.setAttribute('data-scrapbook-id', scrapbook.dateToId());
+        mainElem.setAttribute('data-scrapbook-elem', 'sticky');
+        mainElem.classList.add('styled');
+        if (!richText) {
+          mainElem.classList.add('plaintext');
+        }
+        mainElem.style.left = window.scrollX + Math.round((window.innerWidth - STICKY_DEFAULT_WIDTH) / 2) + 'px';
+        mainElem.style.top = window.scrollY + Math.round((window.innerHeight - STICKY_DEFAULT_HEIGHT) / 2) + 'px';
+        mainElem.style.width = STICKY_DEFAULT_WIDTH + 'px';
+        mainElem.style.height = STICKY_DEFAULT_HEIGHT + 'px';
+
+        document.body.appendChild(mainElem);
+        this.editSticky(mainElem);
+      },
+
+      editSticky(mainElem) {
+        if (mainElem.shadowRoot) { return; }
+
+        // @TODO: support editing non-styled sticky
+        if (!mainElem.classList.contains('styled')) { return; }
+
+        const shadowRoot = mainElem.attachShadow({mode: 'open'});
+        mainElem.classList.add('editing');
+
+        const styleElem = shadowRoot.appendChild(document.createElement('style'));
+        styleElem.textContent = `\
+:host {
+  padding: 0 !important;
+  overflow: visible !important;
+  cursor: inherit !important;
+}
+:host > section {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+:host > section > header {
+  position: absolute;
+  display: flex;
+  box-sizing: border-box;
+  margin-top: -1.25em;
+  height: 1.25em;
+  width: 100%;
+  justify-content: flex-end;
+  cursor: ${mainElem.classList.contains('relative') ? 'inherit' : 'move'};
+}
+:host > section > header img {
+  margin: .1em;
+  width: 1em;
+  height: 1em;
+  cursor: pointer;
+}
+:host > section > header button {
+  margin: .125em;
+  border: 0;
+  padding: 0;
+  width: 1em;
+  height: 1em;
+  cursor: pointer;
+}
+:host > section > header button.save {
+  background: url("${browser.runtime.getURL("resources/edit-sticky-save.gif")}") center/contain;
+}
+:host > section > header button.delete {
+  background: url("${browser.runtime.getURL("resources/edit-sticky-delete.gif")}") center/contain;
+}
+:host > section > textarea,
+:host > section > article {
+  box-sizing: border-box;
+  border: none;
+  padding: .25em;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: transparent;
+  resize: none;
+  font: inherit;
+}
+:host > section > .resizer {
+  position: absolute;
+  box-sizing: border-box;
+}
+:host > section > .resizer.ns {
+  right: 9px;
+  bottom: -6px;
+  left: -6px;
+  height: 15px;
+  cursor: ns-resize;
+}
+:host > section > .resizer.ew {
+  right: -6px;
+  bottom: 9px;
+  top: 0;
+  width: 15px;
+  cursor: ew-resize;
+}
+:host > section > .resizer.nwse {
+  right: -6px;
+  bottom: -6px;
+  width: 15px;
+  height: 15px;
+  cursor: nwse-resize;
+}
+`;
+
+        const sectionElem = shadowRoot.appendChild(document.createElement('section'));
+
+        const headerElem = sectionElem.appendChild(document.createElement('header'));
+
+        const saveElem = headerElem.appendChild(document.createElement('button'));
+        saveElem.classList.add('save');
+        saveElem.addEventListener('click', (event) => { this.saveSticky(mainElem); });
+
+        const deleteElem = headerElem.appendChild(document.createElement('button'));
+        deleteElem.classList.add('delete');
+        deleteElem.addEventListener('click', (event) => { this.deleteSticky(mainElem); });
+
+        let bodyElem;
+        if (mainElem.classList.contains('plaintext')) {
+          bodyElem = sectionElem.appendChild(document.createElement('textarea'));
+          bodyElem.value = mainElem.textContent;
+        } else {
+          bodyElem = sectionElem.appendChild(document.createElement('article'));
+          bodyElem.setAttribute('contenteditable', 'true');
+          let node;
+          while (node = mainElem.firstChild) { bodyElem.appendChild(node); }
+        }
+
+        const resizerElemNS = sectionElem.appendChild(document.createElement('div'));
+        resizerElemNS.classList.add('resizer');
+        resizerElemNS.classList.add('ns');
+
+        const resizerElemEW = sectionElem.appendChild(document.createElement('div'));
+        resizerElemEW.classList.add('resizer');
+        resizerElemEW.classList.add('ew');
+
+        const resizerElemNWSE = sectionElem.appendChild(document.createElement('div'));
+        resizerElemNWSE.classList.add('resizer');
+        resizerElemNWSE.classList.add('nwse');
+
+        bodyElem.focus();
+      },
+
+      saveSticky(mainElem) {
+        if (!mainElem.shadowRoot) { return; }
+
+        const newElem = mainElem.cloneNode(false);
+        newElem.classList.remove('editing');
+        if (mainElem.classList.contains('plaintext')) {
+          let bodyElem = mainElem.shadowRoot.querySelector('textarea');
+          newElem.textContent = bodyElem.value;
+        } else {
+          let bodyElem = mainElem.shadowRoot.querySelector('article'), node;
+          while (node = bodyElem.firstChild) {
+            newElem.appendChild(node);
+          }
+        }
+        mainElem.parentNode.replaceChild(newElem, mainElem);
+      },
+
+      saveStickyAll() {
+        for (const elem of document.querySelectorAll('[data-scrapbook-elem="sticky"].editing')) {
+          this.saveSticky(elem);
+        }
+      },
+
+      deleteSticky(mainElem) {
+        mainElem.remove();
       },
     };
 

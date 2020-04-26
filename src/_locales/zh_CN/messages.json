@@ -120,6 +120,15 @@
       }
     }
   },
+  "EditorButtonAnnotation": {
+    "message": "批注工具 - 点击创建便利贴批注。"
+  },
+  "EditorButtonAnnotationSticky": {
+    "message": "创建便利贴"
+  },
+  "EditorButtonAnnotationStickyRichText": {
+    "message": "创建便利贴（富文本）"
+  },
   "EditorButtonClose": {
     "message": "关闭工具列"
   },

@@ -120,6 +120,15 @@
       }
     }
   },
+  "EditorButtonAnnotation": {
+    "message": "Annotation tool - Click to create a sticky note."
+  },
+  "EditorButtonAnnotationSticky": {
+    "message": "Create sticky note"
+  },
+  "EditorButtonAnnotationStickyRichText": {
+    "message": "Create sticky note (rich text)"
+  },
   "EditorButtonClose": {
     "message": "Close toolbar"
   },

@@ -209,7 +209,7 @@
 [data-scrapbook-elem="sticky"].styled {
   position: absolute;
   z-index: 500000;
-  opacity: 1;
+  opacity: .95;
   box-sizing: border-box;
   margin: 0;
   border: 1px solid #CCCCCC;
@@ -231,6 +231,10 @@
 }
 [data-scrapbook-elem="sticky"].styled.plaintext {
   white-space: pre-wrap;
+}
+[data-scrapbook-elem="sticky"].dragging {
+  opacity: .75;
+  z-index: 2147483641;
 }
 `;
 

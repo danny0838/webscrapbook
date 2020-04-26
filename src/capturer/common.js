@@ -2755,7 +2755,7 @@
       // Mobile support with showing title on long touch.
       // Firefox >= 52, Chrome >= 22, Edge >= 12
       loader.textContent = ("(" + scrapbook.compressJsFunc(function () {
-        var d = document, r = d.documentElement, e;
+        var w = window, d = document, r = d.documentElement, e;
         d.addEventListener('contextmenu', function (E) {
           if (r.hasAttribute('data-scrapbook-toolbar-active')) { return; }
           e = E.target;
@@ -2765,6 +2765,7 @@
         }, true);
         d.addEventListener('click', function (E) {
           if (r.hasAttribute('data-scrapbook-toolbar-active')) { return; }
+          if (!w.getSelection().isCollapsed) { return; }
           e = E.target;
           if (e.matches('[data-scrapbook-elem="sticky"]')) {
             if (confirm('%EditorDeleteAnnotationConfirm%')) {
