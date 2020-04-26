@@ -1012,7 +1012,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
     });
   };
 
-  editor.createSticky = async function (richText) {
+  editor.createSticky = async function (richText, refNode) {
     return await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
@@ -1020,6 +1020,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         cmd: "editor.annotator.createSticky",
         args: {
           richText,
+          refNode,
         },
       },
     });
@@ -1965,8 +1966,10 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
       /**
        * @kind invokable
+       * @param {Node|false|undefined} - The ref node to create a sticky note around.
+       *     Auto-detected by selection when unspecified. False to not create a relative note.
        */
-      createSticky({richText}) {
+      createSticky({richText, refNode}) {
         if (!SHADOW_DOM_SUPPORTED) { return; }
 
         editor.addHistory();
@@ -1979,13 +1982,54 @@ scrapbook-toolbar, scrapbook-toolbar *,
         if (!richText) {
           mainElem.classList.add('plaintext');
         }
-        mainElem.style.left = window.scrollX + Math.round((window.innerWidth - STICKY_DEFAULT_WIDTH) / 2) + 'px';
-        mainElem.style.top = window.scrollY + Math.round((window.innerHeight - STICKY_DEFAULT_HEIGHT) / 2) + 'px';
-        mainElem.style.width = STICKY_DEFAULT_WIDTH + 'px';
-        mainElem.style.height = STICKY_DEFAULT_HEIGHT + 'px';
 
-        document.body.appendChild(mainElem);
+        if (!refNode && refNode !== false) {
+          const sel = window.getSelection();
+          if (sel && !sel.isCollapsed) {
+            refNode = sel.anchorNode;
+          }
+        }
+
+        if (refNode) {
+          // relative
+          mainElem.classList.add('relative');
+          refNode = findBlockRefNode(refNode);
+          if (refNode.matches('body')) {
+            refNode.appendChild(mainElem);
+          } else {
+            refNode.parentNode.insertBefore(mainElem, refNode.nextSibling);
+          }
+        } else {
+          // absolute
+          mainElem.style.left = window.scrollX + Math.round((window.innerWidth - STICKY_DEFAULT_WIDTH) / 2) + 'px';
+          mainElem.style.top = window.scrollY + Math.round((window.innerHeight - STICKY_DEFAULT_HEIGHT) / 2) + 'px';
+          mainElem.style.width = STICKY_DEFAULT_WIDTH + 'px';
+          mainElem.style.height = STICKY_DEFAULT_HEIGHT + 'px';
+
+          document.body.appendChild(mainElem);
+        }
+
         this.editSticky(mainElem);
+
+        function findBlockRefNode(node) {
+          // must be one of these block elements
+          let refNode = node;
+
+          if (refNode.nodeType !== 1) {
+            refNode = refNode.parentNode;
+          }
+
+          refNode = refNode.closest(`body, main, section, article, aside, header, footer, div, blockquote, pre, p, table, li, dt, dd`);
+
+          // if it's before a (relative) sticky note, move it to be after
+          let nextNode;
+          while ((nextNode = refNode.nextSibling)
+              && scrapbook.getScrapbookObjectType(nextNode) === "sticky")  {
+            refNode = refNode.nextSibling;
+          }
+
+          return refNode;
+        }
       },
 
       editSticky(mainElem) {
