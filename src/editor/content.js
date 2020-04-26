@@ -1519,9 +1519,16 @@ scrapbook-toolbar, scrapbook-toolbar *,
       adjustTarget(elem) {
         let checkElem;
 
-        // special handling for special elements
-        // as their inner elements cannot be tooltiped and handled.
-        while ((checkElem = elem.closest('svg, math')) && checkElem !== elem) {
+        // Special handling for special elements,
+        // as their inner elements cannot be tooltiped and handled,
+        // or should be treated as a whole.
+        while ((checkElem = elem.closest([
+              'svg, math',
+              '[data-sb-obj="freenote"]', // SBX
+              '[data-sb-obj="annotation"]', // 1.12.0a <= SBX <= 1.12.0a45
+              '.scrapbook-sticky', // SB, SBX <= 1.12.0a34
+              '.scrapbook-block-comment', // SB < 0.19?
+            ].join(', '))) && checkElem !== elem) {
           elem = checkElem;
         }
 
