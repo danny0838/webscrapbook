@@ -1523,6 +1523,110 @@ scrapbook-toolbar, scrapbook-toolbar *,
           newElems[newElems.length - 1].classList.add('last');
           return newElems[0];
         }
+
+        case 'freenote': {
+          editor.addHistory();
+
+          const oldElem = elem;
+          const useNativeTags = scrapbook.getOption("editor.useNativeTags");
+          const newElem = document.createElement(useNativeTags ? 'div' : 'scrapbook-sticky');
+          newElem.setAttribute('data-scrapbook-elem', 'sticky');
+          newElem.classList.add('styled');
+          if (oldElem.style.getPropertyValue('position') === 'static') {
+            newElem.classList.add('relative');
+          }
+          for (const prop of ['left', 'top', 'width', 'height']) {
+            newElem.style.setProperty(prop, oldElem.style.getPropertyValue(prop));
+          }
+
+          let node;
+          while (node = oldElem.firstChild) {
+            newElem.appendChild(node);
+          }
+
+          oldElem.parentNode.replaceChild(newElem, oldElem);
+          return newElem;
+        }
+
+        case 'sticky':
+        case 'sticky-header':
+        case 'sticky-footer':
+        case 'sticky-save':
+        case 'sticky-delete': {
+          let oldElem = elem;
+          while (oldElem && scrapbook.getScrapbookObjectType(oldElem) !== 'sticky') {
+            oldElem = oldElem.parentNode;
+          }
+          if (!oldElem) {
+            return elem;
+          }
+
+          editor.addHistory();
+
+          let text;
+          try {
+            if (oldElem.lastChild.nodeName == "#text") {
+              // general cases
+              text = oldElem.lastChild.data;
+            } else {
+              // SB/SBP unsaved sticky
+              text = oldElem.childNodes[1].value;
+            }
+          } catch (ex) {
+            // Data corrupted? Treat as no text.
+            console.error(ex);
+          }
+
+          const useNativeTags = scrapbook.getOption("editor.useNativeTags");
+          const newElem = document.createElement(useNativeTags ? 'div' : 'scrapbook-sticky');
+          newElem.setAttribute('data-scrapbook-elem', 'sticky');
+          newElem.classList.add('styled');
+          newElem.classList.add('plaintext');
+          if (oldElem.classList.contains('scrapbook-sticky-relative')) {
+            newElem.classList.add('relative');
+          }
+          for (const prop of ['left', 'top', 'width', 'height']) {
+            newElem.style.setProperty(prop, oldElem.style.getPropertyValue(prop));
+          }
+
+          newElem.textContent = text;
+
+          oldElem.parentNode.replaceChild(newElem, oldElem);
+          return newElem;
+        }
+
+        case 'block-comment': {
+          editor.addHistory();
+
+          let oldElem = elem;
+
+          let text;
+          try {
+            if (oldElem.firstChild.nodeName == "#text") {
+              // general cases
+              text = oldElem.firstChild.data;
+            } else {
+              // unsaved block comment
+              text = oldElem.firstChild.firstChild.value;
+            }
+          } catch (ex) {
+            // Data corrupted? Treat as no text.
+            console.error(ex);
+          }
+
+          const useNativeTags = scrapbook.getOption("editor.useNativeTags");
+          const newElem = document.createElement(useNativeTags ? 'div' : 'scrapbook-sticky');
+          newElem.setAttribute('data-scrapbook-elem', 'sticky');
+          newElem.classList.add('plaintext');
+          newElem.classList.add('relative');
+          newElem.setAttribute('style', oldElem.getAttribute('style'));
+          newElem.style.setProperty('white-space', 'pre-wrap');
+
+          newElem.textContent = text;
+
+          oldElem.parentNode.replaceChild(newElem, oldElem);
+          return newElem;
+        }
       }
 
       return elem;
@@ -1531,6 +1635,27 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
 
   const annotator = editor.annotator = (function () {
+    const onClick = (event) => {
+      let target = event.target;
+      let objectType = scrapbook.getScrapbookObjectType(target);
+      switch (objectType) {
+        case 'freenote':
+        case 'sticky':
+        case 'sticky-header':
+        case 'sticky-footer':
+        case 'sticky-save':
+        case 'sticky-delete':
+        case 'block-comment': {
+          event.preventDefault();
+
+          // convert legacy ScrapBook objects into WebScrapBook version
+          target = converter.convertLegacyObject(target);
+
+          break;
+        }
+      }
+    };
+
     const onContextMenu = (event) => {
       let target = event.target;
       let objectType = scrapbook.getScrapbookObjectType(target);
@@ -1563,11 +1688,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
           if (!this.active) {
             this.active = true;
             this.updateAnnotationCss();
+            window.addEventListener("click", onClick, true);
             window.addEventListener("contextmenu", onContextMenu, true);
           }
         } else {
           if (this.active) {
             this.active = false;
+            window.removeEventListener("click", onClick, true);
             window.removeEventListener("contextmenu", onContextMenu, true);
           }
         }

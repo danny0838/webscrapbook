@@ -283,6 +283,9 @@
   "EditorButtonUndo": {
     "message": "复原"
   },
+  "EditorDeleteAnnotationConfirm": {
+    "message": "删除这个批注吗？"
+  },
   "EditorMarkerAnnotationPrompt": {
     "message": "编辑批注内容："
   },

@@ -202,6 +202,36 @@
 [data-scrapbook-elem="linemarker"][title] {
   cursor: help;
 }
+[data-scrapbook-elem="sticky"] {
+  display: block;
+  overflow: auto;
+}
+[data-scrapbook-elem="sticky"].styled {
+  position: absolute;
+  z-index: 500000;
+  opacity: 1;
+  box-sizing: border-box;
+  margin: 0;
+  border: 1px solid #CCCCCC;
+  border-top-width: 1.25em;
+  border-radius: .25em;
+  padding: .25em;
+  min-width: 6em;
+  min-height: 4em;
+  background: #FAFFFA;
+  box-shadow: .15em .15em .3em black;
+  font: .875em/1.2 sans-serif;
+  color: black;
+  overflow-wrap: break-word;
+  cursor: help;
+}
+[data-scrapbook-elem="sticky"].styled.relative {
+  position: relative;
+  margin: 16px auto;
+}
+[data-scrapbook-elem="sticky"].styled.plaintext {
+  white-space: pre-wrap;
+}
 `;
 
   const scrapbook = {
@@ -997,7 +1027,7 @@
    *   freenote-footer (for 1.12.0a35 <= SBX)
    *   freenote-save (for 1.12.0a35 <= SBX)
    *   freenote-delete (for 1.12.0a35 <= SBX)
-   *   sticky (div) (for 0.22.10? <= SB, SBX <= 1.12.0a34)
+   *   sticky (div) (for 0.22.10? <= SB, SBX <= 1.12.0a34; reworked in WSB)
    *   sticky-header (for 0.22.10? <= SB, SBX <= 1.12.0a34)
    *   sticky-footer (for 0.22.10? <= SB, SBX <= 1.12.0a34)
    *   sticky-save (for 0.22.10? <= SB, SBX <= 1.12.0a34)

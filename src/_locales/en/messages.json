@@ -283,6 +283,9 @@
   "EditorButtonUndo": {
     "message": "Undo"
   },
+  "EditorDeleteAnnotationConfirm": {
+    "message": "Delete this annotation?"
+  },
   "EditorMarkerAnnotationPrompt": {
     "message": "Edit the annotation text:"
   },

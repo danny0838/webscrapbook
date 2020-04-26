@@ -2746,7 +2746,7 @@
         fn(document);
       }) + ")()";
     }
-    if (rootNode.querySelector('[data-scrapbook-elem="linemarker"]')) {
+    if (rootNode.querySelector('[data-scrapbook-elem="linemarker"], [data-scrapbook-elem="sticky"]')) {
       const css = rootNode.appendChild(doc.createElement("style"));
       css.setAttribute("data-scrapbook-elem", "annotation-css");
       css.textContent = scrapbook.compressCode(scrapbook.ANNOTATION_CSS);
@@ -2754,7 +2754,7 @@
       loader.setAttribute("data-scrapbook-elem", "annotation-loader");
       // Mobile support with showing title on long touch.
       // Firefox >= 52, Chrome >= 22, Edge >= 12
-      loader.textContent = "(" + scrapbook.compressJsFunc(function () {
+      loader.textContent = ("(" + scrapbook.compressJsFunc(function () {
         var d = document, r = d.documentElement, e;
         d.addEventListener('contextmenu', function (E) {
           if (r.hasAttribute('data-scrapbook-toolbar-active')) { return; }
@@ -2763,7 +2763,18 @@
             if (e.title) { alert(e.title); }
           }
         }, true);
-      }) + ")()";
+        d.addEventListener('click', function (E) {
+          if (r.hasAttribute('data-scrapbook-toolbar-active')) { return; }
+          e = E.target;
+          if (e.matches('[data-scrapbook-elem="sticky"]')) {
+            if (confirm('%EditorDeleteAnnotationConfirm%')) {
+              e.parentNode.removeChild(e);
+              E.preventDefault();
+              E.stopPropagation();
+            }
+          }
+        }, true);
+      }) + ")()").replace(/%(\w+)%/g, (_, key) => scrapbook.lang(key));
     }
   };
 
