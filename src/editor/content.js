@@ -1492,18 +1492,12 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     const domEraser = {
       adjustTarget(elem) {
+        let checkElem;
+
         // special handling for special elements
         // as their inner elements cannot be tooltiped and handled.
-        if (elem.closest('svg')) {
-          while (elem.tagName.toLowerCase() !== 'svg') {
-            elem = elem.parentNode;
-          }
-        }
-
-        if (elem.closest('math')) {
-          while (elem.tagName.toLowerCase() !== 'math') {
-            elem = elem.parentNode;
-          }
+        while ((checkElem = elem.closest('svg, math')) && checkElem !== elem) {
+          elem = checkElem;
         }
 
         return elem;
