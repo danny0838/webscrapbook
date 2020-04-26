@@ -1744,14 +1744,21 @@
    ***************************************************************************/
 
   /**
-   * A simple tool to compress javascript code
+   * A simple tool to compress code (CSS or JavaScript)
+   */
+  scrapbook.compressCode = function (code) {
+    const regexCompress = /(?!\w\s+\w)(.)\s+/g;
+    const fn = scrapbook.compressCode = function (code) {
+      return code.toString().replace(regexCompress, "$1");
+    };
+    return fn(code);
+  };
+
+  /**
+   * A shortcut to compress javascript code
    */
   scrapbook.compressJsFunc = function (func) {
-    const regexCompress = /(?!\w\s+\w)(.)\s+/g;
-    const fn = scrapbook.compressJsFunc = function (func) {
-      return func.toString().replace(regexCompress, "$1");
-    };
-    return fn(func);
+    return scrapbook.compressCode(func.toString());
   };
 
 
