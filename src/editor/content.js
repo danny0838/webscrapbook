@@ -791,7 +791,10 @@ html, head, body,
 scrapbook-toolbar, scrapbook-toolbar *,
 [data-scrapbook-elem="basic-loader"],
 [data-scrapbook-elem="shadowroot-loader"],
-[data-scrapbook-elem="canvas-loader"]`;
+[data-scrapbook-elem="canvas-loader"],
+[data-scrapbook-elem="custom-css"],
+[data-scrapbook-elem="custom-script"],
+[data-scrapbook-elem="custom-script-safe"]`;
     const fn = editor.eraseSelectorInternal = ({selector}) => {
       editor.addHistory();
 
@@ -1278,6 +1281,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       "basic-loader",
       "shadowroot-loader", // WebScrapBook < 0.69
       "canvas-loader", // WebScrapBook < 0.69
+      "custom-script-safe",
     ]);
 
     for (const fdoc of scrapbook.flattenFrames(doc)) {
