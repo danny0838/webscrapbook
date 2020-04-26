@@ -1747,9 +1747,9 @@
    * A simple tool to compress code (CSS or JavaScript)
    */
   scrapbook.compressCode = function (code) {
-    const regexCompress = /(?!\w\s+\w)(.)\s+/g;
+    const regex = /[^\S　]+/g;
     const fn = scrapbook.compressCode = function (code) {
-      return code.toString().replace(regexCompress, "$1");
+      return code.toString().replace(regex, " ");
     };
     return fn(code);
   };
