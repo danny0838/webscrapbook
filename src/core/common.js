@@ -1745,18 +1745,11 @@
 
   /**
    * A simple tool to compress javascript code
-   *
-   * Note: this does not handle comments inside a string
    */
   scrapbook.compressJsFunc = function (func) {
-    const regexComment1 = /\/\/.*$/mg;
-    const regexComment2 = /\/\*[\s\S]*?\*\//g;
     const regexCompress = /(?!\w\s+\w)(.)\s+/g;
     const fn = scrapbook.compressJsFunc = function (func) {
-      return func.toString()
-        .replace(regexComment1, '')
-        .replace(regexComment2, '')
-        .replace(regexCompress, "$1");
+      return func.toString().replace(regexCompress, "$1");
     };
     return fn(func);
   };
