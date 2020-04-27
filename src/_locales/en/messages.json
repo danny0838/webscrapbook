@@ -264,7 +264,7 @@
     "message": "Locater - Locate this item in scrapbook."
   },
   "EditorButtonMarker": {
-    "message": "Marker - Click to mark selection. Right-click on a mark to create or edit annotation."
+    "message": "Marker - Click to mark the selected text. Click on a mark to create or edit annotation."
   },
   "EditorButtonMarkerItem": {
     "message": "Marker $INDEX$",

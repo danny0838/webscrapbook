@@ -1792,12 +1792,17 @@ scrapbook-toolbar, scrapbook-toolbar *,
       }
     };
 
-    const onContextMenu = (event) => {
+    const onClick = (event) => {
       let target = event.target;
       let objectType = scrapbook.getScrapbookObjectType(target);
       switch (objectType) {
         case 'linemarker':
         case 'inline': {
+          // A click event fires when mouse down and up in the same element,
+          // including a selection. Exclude selection as the user probably
+          // doesn't want a popup when he makes a selection.
+          if (!window.getSelection().isCollapsed) { break; }
+
           event.preventDefault();
 
           // convert legacy ScrapBook objects into WebScrapBook version
@@ -1914,14 +1919,14 @@ scrapbook-toolbar, scrapbook-toolbar *,
           if (!this.active) {
             this.active = true;
             this.updateAnnotationCss();
-            window.addEventListener("contextmenu", onContextMenu, true);
+            window.addEventListener("click", onClick, true);
             window.addEventListener("mousedown", onMouseDown, true);
             window.addEventListener("touchstart", onMouseDown, {capture: true, passive: false});
           }
         } else {
           if (this.active) {
             this.active = false;
-            window.removeEventListener("contextmenu", onContextMenu, true);
+            window.removeEventListener("click", onClick, true);
             window.removeEventListener("mousedown", onMouseDown, true);
             window.removeEventListener("touchstart", onMouseDown, true);
             this.saveStickyAll();

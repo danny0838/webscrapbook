@@ -264,7 +264,7 @@
     "message": "定位工具 - 在剪贴簿显示此项目的位置。"
   },
   "EditorButtonMarker": {
-    "message": "标示工具 - 点击标示选取范围的文字。右击标示可创建或编辑批注。"
+    "message": "标示工具 - 点击以标示选取的文字。点击标示可创建或编辑批注。"
   },
   "EditorButtonMarkerItem": {
     "message": "标示 $INDEX$",

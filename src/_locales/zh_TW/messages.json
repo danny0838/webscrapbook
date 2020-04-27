@@ -264,7 +264,7 @@
     "message": "定位工具 - 在剪貼簿顯示此項目的位置。"
   },
   "EditorButtonMarker": {
-    "message": "標示工具 - 點擊標示選取範圍的文字。右鍵點擊標示可建立或編輯批註。"
+    "message": "標示工具 - 點擊以標示選取的文字。點擊標示可建立或編輯批註。"
   },
   "EditorButtonMarkerItem": {
     "message": "標示 $INDEX$",
