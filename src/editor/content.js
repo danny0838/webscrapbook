@@ -1647,7 +1647,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         let x = viewport.scrollX + boundingRect.left;
         let y = viewport.scrollY + boundingRect.bottom;
 
-        const labelElem = document.body.appendChild(document.createElement("scrapbook-toolbar-tooltip"));
+        const labelElem = document.createElement("scrapbook-toolbar-tooltip");
         labelElem.style.setProperty('all', 'initial', 'important');
         labelElem.style.setProperty('position', 'absolute', 'important');
         labelElem.style.setProperty('z-index', '2147483647', 'important');
@@ -1659,6 +1659,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         labelElem.style.setProperty('font-size', '12px', 'important');
         labelElem.style.setProperty('font-family', 'sans-serif', 'important');
         labelElem.innerHTML = labelHtml;
+        document.body.appendChild(labelElem);
 
         // fix label position to prevent overflowing the viewport
         const availWidth = viewport.scrollX + viewport.width;
