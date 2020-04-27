@@ -2211,7 +2211,7 @@
 
       // remove webscrapbook toolbar related
       rootNode.removeAttribute('data-scrapbook-toolbar-active');
-      for (const elem of rootNode.querySelectorAll(`scrapbook-toolbar`)) {
+      for (const elem of rootNode.querySelectorAll(`[data-scrapbook-elem|="toolbar"]`)) {
         elem.remove();
       }
 
@@ -2637,7 +2637,7 @@
 
       // remove webscrapbook toolbar related
       rootNode.removeAttribute('data-scrapbook-toolbar-active');
-      for (const elem of rootNode.querySelectorAll(`scrapbook-toolbar`)) {
+      for (const elem of rootNode.querySelectorAll(`[data-scrapbook-elem|="toolbar"]`)) {
         elem.remove();
       }
 

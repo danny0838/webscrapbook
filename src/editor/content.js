@@ -120,6 +120,7 @@ height: 100vh;`;
     const uid = 'scrapbook-' + scrapbook.getUuid();
     let wrapper = editor.element = document.documentElement.appendChild(document.createElement("scrapbook-toolbar"));
     wrapper.id = uid;
+    wrapper.setAttribute('data-scrapbook-elem', 'toolbar');
     wrapper.setAttribute('dir', scrapbook.lang('@@bidi_dir'));
 
     // Attach a shadowRoot if supported; otherwise fallback with an ID selector.
@@ -373,18 +374,18 @@ ${sRoot}.toolbar .toolbar-close:hover {
   <div class="toolbar-marker" title="${scrapbook.lang('EditorButtonMarker')}">
     <button></button><button></button>
     <ul hidden="" title="">
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [1])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [2])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [3])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [4])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [5])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [6])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [7])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [8])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [9])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [10])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [11])}</scrapbook-toolbar-samp></button></li>
-      <li><button><scrapbook-toolbar-samp>${scrapbook.lang('EditorButtonMarkerItem', [12])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [1])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [2])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [3])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [4])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [5])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [6])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [7])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [8])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [9])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [10])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [11])}</scrapbook-toolbar-samp></button></li>
+      <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [12])}</scrapbook-toolbar-samp></button></li>
     </ul>
   </div>
   <div class="toolbar-eraser" title="${scrapbook.lang('EditorButtonEraser')}">
@@ -1648,6 +1649,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         let y = viewport.scrollY + boundingRect.bottom;
 
         const labelElem = document.createElement("scrapbook-toolbar-tooltip");
+        labelElem.setAttribute('data-scrapbook-elem', 'toolbar-tooltip');
         labelElem.style.setProperty('all', 'initial', 'important');
         labelElem.style.setProperty('position', 'absolute', 'important');
         labelElem.style.setProperty('z-index', '2147483647', 'important');
