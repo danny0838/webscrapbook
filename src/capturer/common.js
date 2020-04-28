@@ -2761,7 +2761,12 @@
           if (!w.getSelection().isCollapsed) { return; }
           e = E.target;
           if (e.matches('[data-scrapbook-elem="linemarker"]')) {
-            if (e.title) { alert(e.title); }
+            if (e.title) {
+              if (!confirm(e.title)) {
+                E.preventDefault();
+                E.stopPropagation();
+              }
+            }
           } else if (e.matches('[data-scrapbook-elem="sticky"]')) {
             if (confirm('%EditorDeleteAnnotationConfirm%')) {
               e.parentNode.removeChild(e);
