@@ -296,7 +296,12 @@
     "message": "Delete this annotation?"
   },
   "EditorMarkerAnnotationPrompt": {
-    "message": "Edit the annotation text:"
+    "message": "Edit the annotation text (add 2 trailing spaces to insert a new line):\n$TEXT$",
+    "placeholders": {
+      "text": {
+        "content": "$1"
+      }
+    }
   },
   "ErrorContentScriptExecute": {
     "message": "Unable to execute content script ($SOURCE$): $REASON$",

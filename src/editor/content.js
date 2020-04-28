@@ -1954,10 +1954,26 @@ scrapbook-toolbar, scrapbook-toolbar *,
       editLineMarkerAnnotation(elem) {
         if (!elem) { return; }
 
-        const annotation = prompt(scrapbook.lang('EditorMarkerAnnotationPrompt'), elem.title);
-        if (annotation === null) {
-          return;
+        const linesNew = [];
+        const lines = elem.title.split('\n');
+        let i = 0;
+        while (true) {
+          let line = lines[i] || '';
+          if (linesNew.length < lines.length - 1) {
+            line += '  ';
+          }
+          const lineNew = prompt(scrapbook.lang('EditorMarkerAnnotationPrompt', [elem.title]), line);
+          if (lineNew === null) {
+            return;
+          }
+          if (!lineNew.endsWith('  ')) {
+            linesNew.push(lineNew);
+            break;
+          }
+          linesNew.push(lineNew.slice(0, -2));
+          i++;
         }
+        const annotation = linesNew.join('\n');
 
         editor.addHistory();
         for (const part of scrapbook.getScrapBookObjectsById(elem)) {

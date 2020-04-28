@@ -296,7 +296,12 @@
     "message": "删除这个批注吗？"
   },
   "EditorMarkerAnnotationPrompt": {
-    "message": "编辑批注内容："
+    "message": "编辑批注内容（行尾输入两个空白可添加新行）：\n$TEXT$",
+    "placeholders": {
+      "text": {
+        "content": "$1"
+      }
+    }
   },
   "ErrorContentScriptExecute": {
     "message": "无法执行内容处理脚本 ($SOURCE$): $REASON$",
