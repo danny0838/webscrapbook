@@ -841,6 +841,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
       } = params;
 
       // fix when moving within the same parent
+      // -1 as the current item will be removed from the original position
       if (currentParentId === targetParentId && targetIndex > currentIndex) {
         targetIndex--;
       }
