@@ -1854,6 +1854,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         selectedItemElems.map(x => x.getAttribute('data-id')).join('\r\n')
       );
 
+      // prevent mis-intereprated as a regular link
+      event.dataTransfer.clearData('text/uri-list');
+
       event.dataTransfer.effectAllowed = 'all';
       this.lastDraggedElem = selectedItemElems;
     },
@@ -1899,7 +1902,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       // return for non-allowed cases
       if (!(
         (this.lastDraggedElem && !wholeWindow) ||
-        (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle')
+        (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle') ||
+        (event.dataTransfer.types.includes('text/uri-list') && this.rootId !== 'recycle')
       )) {
         event.dataTransfer.dropEffect = 'none';
         return;
@@ -1935,6 +1939,13 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         }
       } else if (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle') {
         event.dataTransfer.dropEffect = 'copy';
+      } else if (event.dataTransfer.types.includes('text/uri-list') && this.rootId !== 'recycle') {
+        // determine the drop effect according to modifiers
+        if (event.ctrlKey) {
+          event.dataTransfer.dropEffect = 'link';
+        } else {
+          event.dataTransfer.dropEffect = 'copy';
+        }
       }
     },
 
@@ -1973,7 +1984,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       // return for non-allowed cases
       if (!(
         (this.lastDraggedElem && !wholeWindow) ||
-        (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle')
+        (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle') ||
+        (event.dataTransfer.types.includes('text/uri-list') && this.rootId !== 'recycle')
       )) {
         event.dataTransfer.dropEffect = 'none';
         return;
@@ -2073,6 +2085,36 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
           }
 
           await this.uploadItems(files, targetId, targetIndex);
+        } catch (ex) {
+          console.error(ex);
+          this.error(ex.message);
+          // when any error happens, the UI is possibility in an inconsistent status.
+          // lock the UI to avoid further manipulation and damage.
+          return;
+        }
+
+        this.enableUi(true);
+      } else if (event.dataTransfer.types.includes('text/uri-list') && this.rootId !== 'recycle') {
+        this.enableUi(false);
+
+        const mode = event.ctrlKey ? 'bookmark' : event.altKey ? '' : 'source';
+        try {
+          const tasks = event.dataTransfer.getData('text/uri-list')
+            .split('\r\n')
+            .filter(x => !x.startsWith('#') && x.trim())
+            .map(url => ({
+              url,
+              mode,
+              options: {
+                "capture.saveTo": "server",
+              },
+            }));
+          await scrapbook.invokeCaptureEx({
+            tasks,
+            parentId: targetId,
+            index: targetIndex,
+            waitForResponse: true,
+          });
         } catch (ex) {
           console.error(ex);
           this.error(ex.message);
