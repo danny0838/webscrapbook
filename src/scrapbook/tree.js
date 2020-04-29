@@ -1516,11 +1516,7 @@ Redirecting to file <a href="index.md">index.md</a>
         this.itemMakeContainer(elem);
       }
 
-      if (isFinite(index)) {
-        parent.container.insertBefore(elem, parent.container.children[index]);
-      } else {
-        parent.container.appendChild(elem);
-      }
+      parent.container.insertBefore(elem, parent.container.children[index]);
 
       return elem;
     },
