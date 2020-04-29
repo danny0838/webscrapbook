@@ -511,12 +511,9 @@
   /**
    * @kind invokable
    * @param {Object} params
-   * @param {string} params.timeId
-   * @param {string} params.title
-   * @param {string} params.type
-   * @param {string} params.sourceUrl
-   * @param {string} params.favIconUrl
-   * @param {string} params.charset
+   * @param {Object} params.item
+   * @param {string} params.parentId
+   * @param {integer} params.index
    */
   capturer.addItemToServer = async function (params) {
     const getShaFile = (data) => {
@@ -567,6 +564,8 @@
       return getShaFile({ab, mime, ext});
     };
 
+    const {item, parentId, index} = params;
+
     await server.init();
     const book = server.books[server.bookId];
     if (!!book.config.no_tree) {
@@ -575,13 +574,11 @@
 
     capturer.log(`Updating server index...`);
 
-    const index = (params.targetDir ? params.targetDir + '/' : '') + params.filename;
-    let icon = params.favIconUrl;
-    
     // cache favicon
+    let icon = item.icon;
     if (scrapbook.isUrlAbsolute(icon)) {
       try {
-        const base = book.dataUrl + index;
+        const base = book.dataUrl + item.index;
         const file = await getFavIcon(icon);
         const target = book.treeUrl + 'favicon/' + file.name;
 
@@ -617,16 +614,9 @@
     await book.loadMeta(true);
     await book.loadToc(true);
     await book.addItem({
-      item: {
-        id: params.timeId,
-        index,
-        title: params.title,
-        type: params.type || "",
-        create: params.timeId,
-        source: params.sourceUrl,
-        icon,
-        charset: params.charset,
-      },
+      item: Object.assign({}, item, {icon}),
+      parentId,
+      index,
     });
     await book.saveTreeFiles({meta: true, toc: true, useLock: false});
     await book.unlockTree();
@@ -774,7 +764,18 @@
       if (response.error) { throw new Error(response.error.message); }
 
       if (message.options["capture.saveTo"] === "server") {
-        await capturer.addItemToServer(response);
+        await capturer.addItemToServer({
+          item: {
+            id: response.timeId,
+            index: (response.targetDir ? response.targetDir + '/' : '') + response.filename,
+            title: response.title,
+            type: response.type,
+            create: response.timeId,
+            source: response.sourceUrl,
+            icon: response.favIconUrl,
+            charset: response.charset,
+          },
+        });
       }
 
       return response;
@@ -879,7 +880,18 @@
       if (response.error) { throw new Error(response.error.message); }
 
       if (message.options["capture.saveTo"] === "server") {
-        await capturer.addItemToServer(response);
+        await capturer.addItemToServer({
+          item: {
+            id: response.timeId,
+            index: (response.targetDir ? response.targetDir + '/' : '') + response.filename,
+            title: response.title,
+            type: response.type,
+            create: response.timeId,
+            source: response.sourceUrl,
+            icon: response.favIconUrl,
+            charset: response.charset,
+          },
+        });
       }
 
       return response;
