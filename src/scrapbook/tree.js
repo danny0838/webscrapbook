@@ -1822,64 +1822,15 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     },
 
     onWindowItemDragEnter(event) {
-      this.onWindowItemDragOver(event);
+      return this.onItemDragEnter(event, true);
     },
 
     onWindowItemDragOver(event) {
-      event.preventDefault();
-
-      // disallow when commands disabled
-      if (document.querySelector('#command:disabled')) {
-        event.dataTransfer.dropEffect = 'none';
-        return;
-      }
-
-      if (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle') {
-        event.dataTransfer.dropEffect = 'copy';
-      } else {
-        event.dataTransfer.dropEffect = 'none';
-      }
+      return this.onItemDragOver(event, true);
     },
 
     async onWindowItemDrop(event) {
-      event.preventDefault();
-
-      if (event.dataTransfer.types.includes('Files')) {
-        const targetId = this.rootId;
-        const targetIndex = Infinity;
-
-        if (!this.itemIsValidTarget(targetId)) { return; }
-
-        this.enableUi(false);
-
-        try {
-          const entries = Array.prototype.map.call(
-            event.dataTransfer.items,
-            x => x.webkitGetAsEntry && x.webkitGetAsEntry()
-          );
-
-          const files = [];
-          for (const entry of entries) {
-            if (!entry.isFile) { continue; }
-            try {
-              const file = await new Promise((resolve, reject) => {
-                entry.file(resolve, reject);
-              });
-              files.push(file);
-            } catch (ex) {}
-          }
-
-          await this.uploadItems(files, targetId, targetIndex);
-        } catch (ex) {
-          console.error(ex);
-          this.error(ex.message);
-          // when any error happens, the UI is possibility in an inconsistent status.
-          // lock the UI to avoid further manipulation and damage.
-          return;
-        }
-
-        this.enableUi(true);
-      }
+      return this.onItemDrop(event, true);
     },
 
     onItemDragStart(event) {
@@ -1916,26 +1867,26 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       this.lastDraggedElem = null;
     },
 
-    onItemDragEnter(event) {
-      event.stopPropagation();
-
-      const wrapper = event.currentTarget;
-      if (!wrapper.classList.contains('dragover')) {
-        wrapper.classList.add('dragover');
-      }
-
-      let cur = wrapper.parentNode;
-      while (cur && cur.closest('#items')) {
-        if (!cur.classList.contains('dragover-within')) {
-          cur.classList.add('dragover-within');
+    onItemDragEnter(event, wholeWindow = false) {
+      if (!wholeWindow) {
+        const wrapper = event.currentTarget;
+        if (!wrapper.classList.contains('dragover')) {
+          wrapper.classList.add('dragover');
         }
-        cur = cur.parentNode.parentNode;
+
+        let cur = wrapper.parentNode;
+        while (cur && cur.closest('#items')) {
+          if (!cur.classList.contains('dragover-within')) {
+            cur.classList.add('dragover-within');
+          }
+          cur = cur.parentNode.parentNode;
+        }
       }
 
-      this.onItemDragOver(event);
+      this.onItemDragOver(event, wholeWindow);
     },
 
-    onItemDragOver(event) {
+    onItemDragOver(event, wholeWindow = false) {
       event.stopPropagation();
       event.preventDefault();
 
@@ -1947,7 +1898,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
       // return for non-allowed cases
       if (!(
-        this.lastDraggedElem ||
+        (this.lastDraggedElem && !wholeWindow) ||
         (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle')
       )) {
         event.dataTransfer.dropEffect = 'none';
@@ -1955,23 +1906,25 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       }
 
       // update GUI
-      const wrapper = event.currentTarget;
-      const wrapperRect = wrapper.getBoundingClientRect();
-      const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
+      if (!wholeWindow) {
+        const wrapper = event.currentTarget;
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
 
-      wrapper.classList.remove('above');
-      wrapper.classList.remove('below');
-      wrapper.classList.remove('within');
+        wrapper.classList.remove('above');
+        wrapper.classList.remove('below');
+        wrapper.classList.remove('within');
 
-      if (pos < 1/3) {
-        wrapper.classList.add('above');
-      } else if (pos > 2/3) {
-        wrapper.classList.add('below');
-      } else {
-        wrapper.classList.add('within');
+        if (pos < 1/3) {
+          wrapper.classList.add('above');
+        } else if (pos > 2/3) {
+          wrapper.classList.add('below');
+        } else {
+          wrapper.classList.add('within');
+        }
       }
 
-      if (this.lastDraggedElem) {
+      if (this.lastDraggedElem && !wholeWindow) {
         // determine the drop effect according to modifiers
         if (event.ctrlKey && this.rootId !== 'recycle') {
           event.dataTransfer.dropEffect = 'link';
@@ -2013,35 +1966,35 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       }
     },
 
-    async onItemDrop(event) {
+    async onItemDrop(event, wholeWindow = false) {
       event.stopPropagation();
       event.preventDefault();
 
       // return for non-allowed cases
       if (!(
-        this.lastDraggedElem ||
+        (this.lastDraggedElem && !wholeWindow) ||
         (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle')
       )) {
         event.dataTransfer.dropEffect = 'none';
         return;
       }
 
-      // update GUI
-      const wrapper = event.currentTarget;
-      wrapper.classList.remove('dragover');
-      wrapper.classList.remove('above');
-      wrapper.classList.remove('below');
-      wrapper.classList.remove('within');
-
-      let cur = wrapper.parentNode;
-      while (cur && cur.closest('#items')) {
-        cur.classList.remove('dragover-within');
-        cur = cur.parentNode.parentNode;
-      }
-
+      // update GUI and calculate position
       let targetId;
       let targetIndex;
-      {
+      if (!wholeWindow) {
+        const wrapper = event.currentTarget;
+        wrapper.classList.remove('dragover');
+        wrapper.classList.remove('above');
+        wrapper.classList.remove('below');
+        wrapper.classList.remove('within');
+
+        let cur = wrapper.parentNode;
+        while (cur && cur.closest('#items')) {
+          cur.classList.remove('dragover-within');
+          cur = cur.parentNode.parentNode;
+        }
+
         const wrapperRect = wrapper.getBoundingClientRect();
         const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
         const itemElem = wrapper.parentNode;
@@ -2065,12 +2018,14 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
           targetId = itemElem.getAttribute('data-id');
           targetIndex = Infinity;
         }
+      } else {
+        targetId = this.rootId;
+        targetIndex = Infinity;
       }
-
       if (!this.itemIsValidTarget(targetId)) { return; }
 
       // handle action
-      if (this.lastDraggedElem) {
+      if (this.lastDraggedElem && !wholeWindow) {
         const selectedItemElems = Array.prototype.map.call(
           document.querySelectorAll('#item-root .highlight'),
           x => x.parentNode
