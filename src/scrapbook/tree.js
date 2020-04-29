@@ -1945,39 +1945,43 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         return;
       }
 
-      if (this.lastDraggedElem ||
-          (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle')) {
-
-        const wrapper = event.currentTarget;
-        const wrapperRect = wrapper.getBoundingClientRect();
-        const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
-
-        wrapper.classList.remove('above');
-        wrapper.classList.remove('below');
-        wrapper.classList.remove('within');
-
-        if (pos < 1/3) {
-          wrapper.classList.add('above');
-        } else if (pos > 2/3) {
-          wrapper.classList.add('below');
-        } else {
-          wrapper.classList.add('within');
-        }
-
-        if (this.lastDraggedElem) {
-          // determine the drop effect according to modifiers
-          if (event.ctrlKey && this.rootId !== 'recycle') {
-            event.dataTransfer.dropEffect = 'link';
-            document.getElementById('items').classList.remove('moving');
-          } else {
-            event.dataTransfer.dropEffect = 'move';
-            document.getElementById('items').classList.add('moving');
-          }
-        } else if (event.dataTransfer.types.includes('Files')) {
-          event.dataTransfer.dropEffect = 'copy';
-        }
-      } else {
+      // return for non-allowed cases
+      if (!(
+        this.lastDraggedElem ||
+        (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle')
+      )) {
         event.dataTransfer.dropEffect = 'none';
+        return;
+      }
+
+      // update GUI
+      const wrapper = event.currentTarget;
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
+
+      wrapper.classList.remove('above');
+      wrapper.classList.remove('below');
+      wrapper.classList.remove('within');
+
+      if (pos < 1/3) {
+        wrapper.classList.add('above');
+      } else if (pos > 2/3) {
+        wrapper.classList.add('below');
+      } else {
+        wrapper.classList.add('within');
+      }
+
+      if (this.lastDraggedElem) {
+        // determine the drop effect according to modifiers
+        if (event.ctrlKey && this.rootId !== 'recycle') {
+          event.dataTransfer.dropEffect = 'link';
+          document.getElementById('items').classList.remove('moving');
+        } else {
+          event.dataTransfer.dropEffect = 'move';
+          document.getElementById('items').classList.add('moving');
+        }
+      } else if (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle') {
+        event.dataTransfer.dropEffect = 'copy';
       }
     },
 
@@ -1992,17 +1996,20 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         enteredElem = enteredElem.parentElement;
       }
 
-      if (!enteredElem || enteredElem.closest('.dragover') !== wrapper) {
-        wrapper.classList.remove('dragover');
-        wrapper.classList.remove('above');
-        wrapper.classList.remove('below');
-        wrapper.classList.remove('within');
+      // skip when entering another descendant of the same dragover element
+      if (enteredElem && enteredElem.closest('.dragover') === wrapper) {
+        return;
+      }
 
-        let cur = wrapper.parentNode;
-        while (cur && cur.closest('#items')) {
-          cur.classList.remove('dragover-within');
-          cur = cur.parentNode.parentNode;
-        }
+      wrapper.classList.remove('dragover');
+      wrapper.classList.remove('above');
+      wrapper.classList.remove('below');
+      wrapper.classList.remove('within');
+
+      let cur = wrapper.parentNode;
+      while (cur && cur.closest('#items')) {
+        cur.classList.remove('dragover-within');
+        cur = cur.parentNode.parentNode;
       }
     },
 
@@ -2010,134 +2017,116 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       event.stopPropagation();
       event.preventDefault();
 
-      if (this.lastDraggedElem || event.dataTransfer.types.includes('Files')) {
-        const wrapper = event.currentTarget;
-        wrapper.classList.remove('dragover');
-        wrapper.classList.remove('above');
-        wrapper.classList.remove('below');
-        wrapper.classList.remove('within');
+      // return for non-allowed cases
+      if (!(
+        this.lastDraggedElem ||
+        (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle')
+      )) {
+        event.dataTransfer.dropEffect = 'none';
+        return;
+      }
 
-        let cur = wrapper.parentNode;
-        while (cur && cur.closest('#items')) {
-          cur.classList.remove('dragover-within');
-          cur = cur.parentNode.parentNode;
+      // update GUI
+      const wrapper = event.currentTarget;
+      wrapper.classList.remove('dragover');
+      wrapper.classList.remove('above');
+      wrapper.classList.remove('below');
+      wrapper.classList.remove('within');
+
+      let cur = wrapper.parentNode;
+      while (cur && cur.closest('#items')) {
+        cur.classList.remove('dragover-within');
+        cur = cur.parentNode.parentNode;
+      }
+
+      let targetId;
+      let targetIndex;
+      {
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
+        const itemElem = wrapper.parentNode;
+
+        if (pos < 1/3) {
+          // above
+          const parentItemElem = itemElem.parentNode.parentNode;
+          const siblingItems = parentItemElem.container.children;
+          const index = Array.prototype.indexOf.call(siblingItems, itemElem);
+          targetId = parentItemElem.getAttribute('data-id');
+          targetIndex = index;
+        } else if (pos > 2/3) {
+          // below
+          const parentItemElem = itemElem.parentNode.parentNode;
+          const siblingItems = parentItemElem.container.children;
+          const index = Array.prototype.indexOf.call(siblingItems, itemElem);
+          targetId = parentItemElem.getAttribute('data-id');
+          targetIndex = index + 1;
+        } else {
+          // within
+          targetId = itemElem.getAttribute('data-id');
+          targetIndex = Infinity;
+        }
+      }
+
+      if (!this.itemIsValidTarget(targetId)) { return; }
+
+      // handle action
+      if (this.lastDraggedElem) {
+        const selectedItemElems = Array.prototype.map.call(
+          document.querySelectorAll('#item-root .highlight'),
+          x => x.parentNode
+        );
+        if (!selectedItemElems.length) {
+          // this shouldn't happen as this.lastDraggedElem should be selected
+          return;
         }
 
-        if (this.lastDraggedElem) {
-          const selectedItemElems = Array.prototype.map.call(
-            document.querySelectorAll('#item-root .highlight'),
-            x => x.parentNode
+        this.enableUi(false);
+
+        try {
+          if (event.ctrlKey && this.rootId !== 'recycle') {
+            await this.linkItems(selectedItemElems, targetId, targetIndex);
+          } else {
+            await this.moveItems(selectedItemElems, targetId, targetIndex);
+          }
+        } catch (ex) {
+          console.error(ex);
+          this.error(ex.message);
+          // when any error happens, the UI is possibility in an inconsistent status.
+          // lock the UI to avoid further manipulation and damage.
+          return;
+        }
+
+        this.enableUi(true);
+      } else if (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle') {
+        this.enableUi(false);
+
+        try {
+          const entries = Array.prototype.map.call(
+            event.dataTransfer.items,
+            x => x.webkitGetAsEntry && x.webkitGetAsEntry()
           );
-          if (!selectedItemElems.length) { return; }
 
-          let targetId;
-          let targetIndex;
-          {
-            const wrapperRect = wrapper.getBoundingClientRect();
-            const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
-            const itemElem = wrapper.parentNode;
-
-            if (pos < 1/3) {
-              // above
-              const parentItemElem = itemElem.parentNode.parentNode;
-              const siblingItems = parentItemElem.container.children;
-              const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-              targetId = parentItemElem.getAttribute('data-id');
-              targetIndex = index;
-            } else if (pos > 2/3) {
-              // below
-              const parentItemElem = itemElem.parentNode.parentNode;
-              const siblingItems = parentItemElem.container.children;
-              const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-              targetId = parentItemElem.getAttribute('data-id');
-              targetIndex = index + 1;
-            } else {
-              // within
-              targetId = itemElem.getAttribute('data-id');
-              targetIndex = Infinity;
-            }
+          const files = [];
+          for (const entry of entries) {
+            if (!entry.isFile) { continue; }
+            try {
+              const file = await new Promise((resolve, reject) => {
+                entry.file(resolve, reject);
+              });
+              files.push(file);
+            } catch (ex) {}
           }
 
-          if (!this.itemIsValidTarget(targetId)) { return; }
-
-          this.enableUi(false);
-
-          try {
-            if (event.ctrlKey && this.rootId !== 'recycle') {
-              await this.linkItems(selectedItemElems, targetId, targetIndex);
-            } else {
-              await this.moveItems(selectedItemElems, targetId, targetIndex);
-            }
-          } catch (ex) {
-            console.error(ex);
-            this.error(ex.message);
-            // when any error happens, the UI is possibility in an inconsistent status.
-            // lock the UI to avoid further manipulation and damage.
-            return;
-          }
-
-          this.enableUi(true);
-        } else if (event.dataTransfer.types.includes('Files')) {
-          let targetId;
-          let targetIndex;
-          {
-            const wrapperRect = wrapper.getBoundingClientRect();
-            const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
-            const itemElem = wrapper.parentNode;
-
-            if (pos < 1/3) {
-              // above
-              const parentItemElem = itemElem.parentNode.parentNode;
-              const siblingItems = parentItemElem.container.children;
-              const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-              targetId = parentItemElem.getAttribute('data-id');
-              targetIndex = index;
-            } else if (pos > 2/3) {
-              // below
-              const parentItemElem = itemElem.parentNode.parentNode;
-              const siblingItems = parentItemElem.container.children;
-              const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-              targetId = parentItemElem.getAttribute('data-id');
-              targetIndex = index + 1;
-            } else {
-              // within
-              targetId = itemElem.getAttribute('data-id');
-              targetIndex = Infinity;
-            }
-          }
-
-          if (!this.itemIsValidTarget(targetId)) { return; }
-
-          this.enableUi(false);
-
-          try {
-            const entries = Array.prototype.map.call(
-              event.dataTransfer.items,
-              x => x.webkitGetAsEntry && x.webkitGetAsEntry()
-            );
-
-            const files = [];
-            for (const entry of entries) {
-              if (!entry.isFile) { continue; }
-              try {
-                const file = await new Promise((resolve, reject) => {
-                  entry.file(resolve, reject);
-                });
-                files.push(file);
-              } catch (ex) {}
-            }
-
-            await this.uploadItems(files, targetId, targetIndex);
-          } catch (ex) {
-            console.error(ex);
-            this.error(ex.message);
-            // when any error happens, the UI is possibility in an inconsistent status.
-            // lock the UI to avoid further manipulation and damage.
-            return;
-          }
-
-          this.enableUi(true);
+          await this.uploadItems(files, targetId, targetIndex);
+        } catch (ex) {
+          console.error(ex);
+          this.error(ex.message);
+          // when any error happens, the UI is possibility in an inconsistent status.
+          // lock the UI to avoid further manipulation and damage.
+          return;
         }
+
+        this.enableUi(true);
       }
     },
 
