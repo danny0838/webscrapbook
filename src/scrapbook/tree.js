@@ -1904,7 +1904,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       // Firefox requires at least one data to get dragging work
       event.dataTransfer.setData(
         'text/plain',
-        selectedItemElems.map(x => x.getAttribute('data-id')).join('\n')
+        selectedItemElems.map(x => x.getAttribute('data-id')).join('\r\n')
       );
 
       event.dataTransfer.effectAllowed = 'all';
