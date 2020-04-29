@@ -715,7 +715,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
         if (!this.toc[parentId]) {
           this.toc[parentId] = [];
         }
-        this.toc[parentId].splice(index + 1, 0, item.id);
+        this.toc[parentId].splice(index, 0, item.id);
       }
 
       return item;

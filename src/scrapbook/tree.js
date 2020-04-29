@@ -247,7 +247,7 @@
           const parentItemElem = itemElem.parentNode.parentNode;
           parentItemId = parentItemElem.getAttribute('data-id');
           const siblingItems = parentItemElem.container.children;
-          index = Array.prototype.indexOf.call(siblingItems, itemElem);
+          index = Array.prototype.indexOf.call(siblingItems, itemElem) + 1;
         }
 
         // create new item
@@ -271,7 +271,7 @@
           if (!(parentElem.parentNode)) { return; }
           this.itemMakeContainer(parentElem);
           if (!parentElem.container.hasAttribute('data-loaded')) { return; }
-          this.addItem(newItem.id, parentElem, index + 1);
+          this.addItem(newItem.id, parentElem, index);
         });
       },
 
@@ -286,7 +286,7 @@
           const parentItemElem = itemElem.parentNode.parentNode;
           parentItemId = parentItemElem.getAttribute('data-id');
           const siblingItems = parentItemElem.container.children;
-          index = Array.prototype.indexOf.call(siblingItems, itemElem);
+          index = Array.prototype.indexOf.call(siblingItems, itemElem) + 1;
         }
 
         // create new item
@@ -310,7 +310,7 @@
           if (!(parentElem.parentNode)) { return; }
           this.itemMakeContainer(parentElem);
           if (!parentElem.container.hasAttribute('data-loaded')) { return; }
-          this.addItem(newItem.id, parentElem, index + 1);
+          this.addItem(newItem.id, parentElem, index);
         });
       },
 
@@ -325,7 +325,7 @@
           const parentItemElem = itemElem.parentNode.parentNode;
           parentItemId = parentItemElem.getAttribute('data-id');
           const siblingItems = parentItemElem.container.children;
-          index = Array.prototype.indexOf.call(siblingItems, itemElem);
+          index = Array.prototype.indexOf.call(siblingItems, itemElem) + 1;
         }
 
         let type;
@@ -485,7 +485,7 @@ Redirecting to file <a href="index.md">index.md</a>
           if (!(parentElem.parentNode)) { return; }
           this.itemMakeContainer(parentElem);
           if (!parentElem.container.hasAttribute('data-loaded')) { return; }
-          this.addItem(newItem.id, parentElem, index + 1);
+          this.addItem(newItem.id, parentElem, index);
         });
 
         // open link
@@ -516,7 +516,7 @@ Redirecting to file <a href="index.md">index.md</a>
           const parentItemElem = itemElem.parentNode.parentNode;
           parentItemId = parentItemElem.getAttribute('data-id');
           const siblingItems = parentItemElem.container.children;
-          index = Array.prototype.indexOf.call(siblingItems, itemElem);
+          index = Array.prototype.indexOf.call(siblingItems, itemElem) + 1;
         }
 
         await this.uploadItems(detail.files, parentItemId, index);
@@ -1804,7 +1804,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
               if (!(parentElem.parentNode)) { return; }
               this.itemMakeContainer(parentElem);
               if (!parentElem.container.hasAttribute('data-loaded')) { return; }
-              this.addItem(newItem.id, parentElem, targetIndex + 1);
+              this.addItem(newItem.id, parentElem, targetIndex);
             });
 
             targetIndex++;
@@ -2095,14 +2095,14 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
               const siblingItems = parentItemElem.container.children;
               const index = Array.prototype.indexOf.call(siblingItems, itemElem);
               targetId = parentItemElem.getAttribute('data-id');
-              targetIndex = index - 1;
+              targetIndex = index;
             } else if (pos > 2/3) {
               // below
               const parentItemElem = itemElem.parentNode.parentNode;
               const siblingItems = parentItemElem.container.children;
               const index = Array.prototype.indexOf.call(siblingItems, itemElem);
               targetId = parentItemElem.getAttribute('data-id');
-              targetIndex = index;
+              targetIndex = index + 1;
             } else {
               // within
               targetId = itemElem.getAttribute('data-id');
