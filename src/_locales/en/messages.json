@@ -95,6 +95,9 @@
   "EditExitLabel": {
     "message": "Exit"
   },
+  "EditPage": {
+    "message": "Edit page"
+  },
   "EditSaveLabel": {
     "message": "Save"
   },

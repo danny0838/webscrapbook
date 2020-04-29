@@ -148,6 +148,17 @@
           }]);
         }
       });
+      browser.contextMenus.create({
+        title: scrapbook.lang("EditTab"),
+        contexts: ["tab"],
+        documentUrlPatterns: urlMatch,
+        onclick: (info, tab) => {
+          return scrapbook.editTab({
+            tabId: tab.id,
+            force: true,
+          });
+        }
+      });
     }
 
     browser.contextMenus.create({
@@ -183,6 +194,18 @@
           tabId: tab.id,
           mode: "bookmark",
         }]);
+      }
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("EditPage"),
+      contexts: ["page"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.editTab({
+          tabId: tab.id,
+          force: true,
+        });
       }
     });
 

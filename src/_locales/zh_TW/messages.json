@@ -95,6 +95,9 @@
   "EditExitLabel": {
     "message": "離開"
   },
+  "EditPage": {
+    "message": "編輯頁面"
+  },
   "EditSaveLabel": {
     "message": "儲存"
   },
