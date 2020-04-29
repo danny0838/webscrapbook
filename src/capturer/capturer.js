@@ -633,11 +633,13 @@
   /**
    * @param {Object} params
    * @param {Array} params.tasks
+   * @param {string} params.parentId - parent item ID for the captured items
+   * @param {integer} params.index - position index for the captured items
    * @return {Promise<Array|Object>} - list of task results (or error), or an object of error
    */
   capturer.runTasks = async function (params) {
     try {
-      const {tasks} = params;
+      let {tasks, parentId, index} = params;
       const results = [];
 
       for (const task of tasks) {
@@ -658,6 +660,8 @@
               saveBeyondSelection: full,
               mode,
               options,
+              parentId,
+              index,
             });
           } else if (typeof url === 'string') {
             // capture headless
@@ -668,6 +672,8 @@
               favIconUrl,
               mode,
               options,
+              parentId,
+              index,
             });
           }
         } catch (ex) {
@@ -678,6 +684,7 @@
         }
 
         if (!result.error) {
+          index++;
           capturer.log(`Done.`);
         }
         results.push(result);
@@ -703,11 +710,13 @@
    * @param {string} params.title - overriding title
    * @param {string} params.mode - "source", "bookmark", "resave", "internalize"
    * @param {string} params.options - preset options that overwrites default
+   * @param {string} params.parentId - parent item ID for the captured item
+   * @param {integer} params.index - position index for the captured item
    * @return {Promise<Object>}
    */
   capturer.captureTab = async function (params) {
     try {
-      const {tabId, frameId, saveBeyondSelection, title: title0, mode, options} = params;
+      const {tabId, frameId, saveBeyondSelection, title: title0, mode, options, parentId, index} = params;
       let {url, title, favIconUrl, discarded} = await browser.tabs.get(tabId);
 
       // redirect headless capture
@@ -775,6 +784,8 @@
             icon: response.favIconUrl,
             charset: response.charset,
           },
+          parentId,
+          index,
         });
       }
 
@@ -795,11 +806,13 @@
    * @param {string} params.favIconUrl - fallback favicon
    * @param {string} params.mode - "source", "bookmark"
    * @param {string} params.options - preset options that overwrites default
+   * @param {string} params.parentId - parent item ID for the captured item
+   * @param {integer} params.index - position index for the captured item
    * @return {Promise<Object>}
    */
   capturer.captureRemote = async function (params) {
     try {
-      const {url, refUrl, title, favIconUrl, mode, options} = params;
+      const {url, refUrl, title, favIconUrl, mode, options, parentId, index} = params;
 
       // default mode => launch a tab to capture
       if (!mode) {
@@ -891,6 +904,8 @@
             icon: response.favIconUrl,
             charset: response.charset,
           },
+          parentId,
+          index,
         });
       }
 
@@ -2895,14 +2910,14 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       let results;
       if (missionId) {
         const key = {table: "captureMissionCache", id: missionId};
-        const tasks = await scrapbook.cache.get(key);
+        const data = await scrapbook.cache.get(key);
         await scrapbook.cache.remove(key);
-        if (!tasks) {
+        if (!data || !data.tasks) {
           capturer.error(`Error: missing task data for mission "${missionId}".`);
-        } else if (!tasks.length) {
+        } else if (!data.tasks.length) {
           capturer.error(`Error: nothing to capture.`);
         } else {
-          results = await capturer.runTasks({tasks});
+          results = await capturer.runTasks(data);
         }
       } else {
         capturer.error(`Error: Mission ID not set.`);
