@@ -1272,6 +1272,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
     document.documentElement.setAttribute('data-scrapbook-toolbar-active', '');
     document.documentElement.appendChild(editor.element);
+    await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        code: `document.documentElement.setAttribute('data-scrapbook-toolbar-active', '')`,
+        frameIdExcept: 0,
+      },
+    });
     await editor.toggleAnnotator(true);
   };
 
@@ -1280,6 +1287,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
     document.documentElement.removeAttribute('data-scrapbook-toolbar-active');
     editor.element.remove();
+    await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        code: `document.documentElement.removeAttribute('data-scrapbook-toolbar-active')`,
+        frameIdExcept: 0,
+      },
+    });
     await editor.toggleDomEraser(false, true);
     await editor.toggleHtmlEditor(false, true);
     await editor.toggleAnnotator(false);
