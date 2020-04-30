@@ -2174,8 +2174,13 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       event.preventDefault();
       event.stopPropagation();
       const itemElem = event.currentTarget.parentNode.parentNode;
-      this.toggleItem(itemElem);
-      this.saveViewStatus();
+      const reselect = this.mode !== 'manage' && !event.ctrlKey && !event.shiftKey;
+      if (reselect) {
+        this.toggleItem(itemElem);
+        this.saveViewStatus();
+      } else {
+        this.highlightItem(itemElem, undefined, false, event.shiftKey);
+      }
     },
 
     async onClickAnchor(event) {
