@@ -1724,6 +1724,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
     const STICKY_DEFAULT_HEIGHT = 100;
 
     const draggingData = {};
+    let lastEditedElem = null;
 
     const onMouseDown = (event) => {
       // A mousedown during a dragging caould be pressing another mouse button,
@@ -2068,10 +2069,16 @@ scrapbook-toolbar, scrapbook-toolbar *,
       },
 
       editSticky(mainElem) {
+        if (lastEditedElem) {
+          this.saveSticky(lastEditedElem);
+        }
+
         if (mainElem.shadowRoot) { return; }
 
         // @TODO: support editing non-styled sticky
         if (!mainElem.classList.contains('styled')) { return; }
+
+        lastEditedElem = mainElem;
 
         const shadowRoot = mainElem.attachShadow({mode: 'open'});
         mainElem.classList.add('editing');
@@ -2196,6 +2203,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
       },
 
       saveSticky(mainElem) {
+        lastEditedElem = null;
+
         if (!mainElem.shadowRoot) { return; }
 
         const newElem = mainElem.cloneNode(false);
