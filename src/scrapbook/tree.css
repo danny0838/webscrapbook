@@ -314,8 +314,8 @@ body {
 }
 
 .tree li > div.highlight::before {
-  border: 1px solid rgba(125, 162, 206, 1);
-  background: linear-gradient(rgba(235, 244, 253, 1), rgba(196, 221, 252, 1));
+  border: 1px solid rgba(125, 162, 206, .7);
+  background: linear-gradient(rgba(235, 244, 253, .7), rgba(196, 221, 252, .7));
 }
 
 .tree.moving li.dragged {
@@ -324,10 +324,6 @@ body {
 
 .tree.moving li.dragover-within {
   opacity: unset;
-}
-
-.tree li > div.dragover::before {
-  z-index: -1;
 }
 
 .tree li > div.dragover.above {
