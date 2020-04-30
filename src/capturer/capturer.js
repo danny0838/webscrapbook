@@ -1770,6 +1770,11 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             }
           }
 
+          // special handling: single HTML cannot use "index.html"
+          if (filename === 'index.html') {
+            filename = 'index_.html';
+          }
+
           filename = await capturer[saveMethod]({
             timeId,
             blob,
