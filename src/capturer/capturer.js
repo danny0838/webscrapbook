@@ -1617,12 +1617,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       }
 
       let filename = documentFileName;
-      let ext = scrapbook.filenameParts(filename)[1];
-
       switch (options["capture.saveAs"]) {
         case "singleHtml": {
           if (settings.frameIsMain) {
-            return capturer.saveMainDocument({data, sourceUrl, filename, ext, settings, options});
+            return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
           }
 
           let url = data.charset === "UTF-8" ? 
@@ -1643,7 +1641,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           });
 
           if (settings.frameIsMain) {
-            return capturer.saveMainDocument({data, sourceUrl, filename, ext, settings, options});
+            return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
           }
 
           return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
@@ -1658,7 +1656,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           });
 
           if (settings.frameIsMain) {
-            return capturer.saveMainDocument({data, sourceUrl, filename, ext, settings, options});
+            return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
           }
 
           return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
@@ -1674,7 +1672,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           });
 
           if (settings.frameIsMain) {
-            return capturer.saveMainDocument({data, sourceUrl, filename, ext, settings, options});
+            return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
           }
 
           return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
@@ -1697,8 +1695,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    *         - {string} params.data.title
    *         - {string} params.data.favIconUrl
    * @param {string} params.sourceUrl - may include hash
-   * @param {string} params.filename
-   * @param {string} params.ext
+   * @param {string} params.documentFileName
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -1706,10 +1703,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   capturer.saveMainDocument = async function (params) {
     isDebug && console.debug("call: saveMainDocument", params);
 
-    const {data, sourceUrl, settings, options} = params;
+    const {data, sourceUrl, documentFileName, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
-    let {filename, ext} = params;
 
     const addIndexHtml = async (path, target, title) => {
       const meta = options["capture.recordDocumentMeta"] ? 
@@ -1738,6 +1734,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     try {
       capturer.log(`Saving data...`);
       const title = data.title || scrapbook.urlToFilename(sourceUrl);
+      let filename;
+      let [, ext] = scrapbook.filenameParts(documentFileName);
       switch (options["capture.saveAs"]) {
         case "singleHtml": {
           const blob = new Blob([data.content], {type: data.mime});
@@ -1794,7 +1792,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             sourceUrl,
             targetDir,
             filename,
-            url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+            url: scrapbook.escapeFilename(documentFileName) + sourceUrlHash,
             favIconUrl: data.favIconUrl,
           };
         }
@@ -1858,7 +1856,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             sourceUrl,
             targetDir,
             filename,
-            url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+            url: scrapbook.escapeFilename(documentFileName) + sourceUrlHash,
             favIconUrl: data.favIconUrl,
           };
         }
@@ -1879,7 +1877,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   <MAF:originalurl RDF:resource="${scrapbook.escapeHtml(sourceUrl)}"/>
   <MAF:title RDF:resource="${scrapbook.escapeHtml(data.title)}"/>
   <MAF:archivetime RDF:resource="${scrapbook.escapeHtml(scrapbook.idToDate(timeId).toUTCString())}"/>
-  <MAF:indexfilename RDF:resource="${filename}"/>
+  <MAF:indexfilename RDF:resource="${documentFileName}"/>
   <MAF:charset RDF:resource="UTF-8"/>
 </RDF:Description>
 </RDF:RDF>
@@ -1945,7 +1943,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             sourceUrl,
             targetDir,
             filename,
-            url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+            url: scrapbook.escapeFilename(documentFileName) + sourceUrlHash,
             favIconUrl: data.favIconUrl,
           };
         }
@@ -2066,8 +2064,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             type: "",
             sourceUrl,
             targetDir,
-            filename,
-            url: scrapbook.escapeFilename(filename) + sourceUrlHash,
+            filename: documentFileName,
+            url: scrapbook.escapeFilename(documentFileName) + sourceUrlHash,
             favIconUrl: data.favIconUrl,
           };
         }
