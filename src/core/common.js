@@ -2629,6 +2629,36 @@
 
 
   /****************************************************************************
+   * Miscellaneous utilities
+   ***************************************************************************/
+
+  /**
+   * A polled prompt for a multi-line input.
+   */
+  scrapbook.prompt = function (message, prefill = '', linebreak = '  ') {
+    const linesNew = [];
+    const lines = prefill.split(/\n|\r?\n/g);
+    let i = 0;
+    while (true) {
+      let line = lines[i] || '';
+      if (linesNew.length < lines.length - 1) {
+        line += linebreak;
+      }
+      const lineNew = prompt(message, line);
+      if (lineNew === null) {
+        return null;
+      }
+      if (!lineNew.endsWith(linebreak)) {
+        linesNew.push(lineNew);
+        break;
+      }
+      linesNew.push(lineNew.slice(0, -linebreak.length));
+      i++;
+    }
+    return linesNew.join('\n');
+  };
+
+  /****************************************************************************
    * Zip utilities
    *
    * @require JSZip
