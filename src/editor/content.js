@@ -2206,10 +2206,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
         if (mainElem.shadowRoot) { return; }
 
-        // @TODO: support editing non-styled sticky
-        if (!mainElem.classList.contains('styled')) { return; }
-
-        if (!SHADOW_DOM_SUPPORTED) {
+        if (!SHADOW_DOM_SUPPORTED || !mainElem.classList.contains('styled')) {
           const attr = mainElem.classList.contains('plaintext') ? 'textContent' : 'innerHTML';
           let content = mainElem[attr];
           content = scrapbook.prompt(scrapbook.lang('EditorEditAnnotationPrompt', [content]), content);
