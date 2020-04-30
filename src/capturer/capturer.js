@@ -1962,12 +1962,12 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           let saveMethod;
 
           {
+            const dir = scrapbook.filepathParts(settings.filename)[0];
             const newFilename = await capturer.invoke("getAvailableFilename", {
               filename: settings.filename,
               settings,
               options,
             });
-            const dir = scrapbook.filepathParts(filename)[0];
             settings.filename = (dir ? dir + '/' : '') + newFilename;
           }
 
