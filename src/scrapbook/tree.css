@@ -231,8 +231,11 @@ body {
 }
 
 .tree li > div {
+  box-sizing: border-box;
+  margin: -2px 0;
+  border: solid transparent;
+  border-width: 2px 0;
   white-space: nowrap;
-  padding: 1px 0;
   cursor: cell;
 }
 
@@ -243,12 +246,13 @@ body {
   right: 0;
   margin-top: -.25em;
   height: 1.5em;
+  border: 1px solid transparent;
   border-radius: 2px;
   content: "";
 }
 
 .tree li > div:hover::before {
-  border: 1px solid rgba(125, 162, 206, 0.3);
+  border-color: rgba(125, 162, 206, 0.3);
   background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.3));
 }
 
@@ -327,15 +331,11 @@ body {
 }
 
 .tree li > div.dragover.above {
-  border-top: 2px solid #3399FF;
-  padding-top: 0;
-  padding-bottom: 0;
+  border-top-color: #3399FF;
 }
 
 .tree li > div.dragover.below {
-  border-bottom: 2px solid #3399FF;
-  padding-top: 0;
-  padding-bottom: 0;
+  border-bottom-color: #3399FF;
 }
 
 .tree li > div.dragover.within {
