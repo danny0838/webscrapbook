@@ -1915,16 +1915,36 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         const wrapperRect = wrapper.getBoundingClientRect();
         const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
 
-        wrapper.classList.remove('above');
-        wrapper.classList.remove('below');
-        wrapper.classList.remove('within');
-
         if (pos < 1/3) {
-          wrapper.classList.add('above');
+          if (!wrapper.classList.contains('above')) {
+            wrapper.classList.add('above');
+          }
+          if (wrapper.classList.contains('below')) {
+            wrapper.classList.remove('below');
+          }
+          if (wrapper.classList.contains('within')) {
+            wrapper.classList.remove('within');
+          }
         } else if (pos > 2/3) {
-          wrapper.classList.add('below');
+          if (wrapper.classList.contains('above')) {
+            wrapper.classList.remove('above');
+          }
+          if (!wrapper.classList.contains('below')) {
+            wrapper.classList.add('below');
+          }
+          if (wrapper.classList.contains('within')) {
+            wrapper.classList.remove('within');
+          }
         } else {
-          wrapper.classList.add('within');
+          if (wrapper.classList.contains('above')) {
+            wrapper.classList.remove('above');
+          }
+          if (wrapper.classList.contains('below')) {
+            wrapper.classList.remove('below');
+          }
+          if (!wrapper.classList.contains('within')) {
+            wrapper.classList.add('within');
+          }
         }
       }
 
