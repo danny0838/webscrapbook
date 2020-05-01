@@ -26,6 +26,8 @@
 
   const DOMPARSER_SUPPORT_TYPES = new Set(['text/html', 'application/xhtml+xml', 'text/xml', 'application/xml', 'image/svg+xml']);
 
+  const REWRITABLE_SPECIAL_OBJECTS = new Set([false, 'adoptedStyleSheet']);
+
   const capturer = {
     isContentScript: true,
     get isNoscriptEscaped() {
@@ -446,7 +448,7 @@
         }
 
         // skip a special elements and its descendants
-        if (scrapbook.getScrapbookObjectType(elem)) {
+        if (!REWRITABLE_SPECIAL_OBJECTS.has(scrapbook.getScrapbookObjectType(elem))) {
           return elem;
         }
 
