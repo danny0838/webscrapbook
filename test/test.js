@@ -4199,7 +4199,7 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
 
   assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
   assert(/^data:image\/png;base64,/.test(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas")));
@@ -4217,7 +4217,7 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
   
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
@@ -4258,7 +4258,7 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
 
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
@@ -4299,7 +4299,7 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
 
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
@@ -5550,7 +5550,7 @@ async function test_capture_shadowRoot() {
   assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
 
   /* capture.shadowDom = remove */
   var options = {
@@ -5609,7 +5609,7 @@ async function test_capture_shadowRoot2() {
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function\(\)\{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
 
   /* mode: closed */
   var blob = await capture({
