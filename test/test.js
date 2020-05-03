@@ -6944,6 +6944,74 @@ async function test_capture_record_nodes2() {
 }
 
 /**
+ * Check added nodes are recorded.
+ *
+ * capture.recordRewrittenNode
+ * capturer.captureDocument
+ */
+async function test_capture_record_nodes3() {
+  var options = {
+    "capture.image": "save-current",
+    "capture.audio": "save-current",
+    "capture.video": "save-current",
+  };
+
+  /* +capture.recordRewrittenNode */
+  options["capture.recordRewrittenNode"] = true;
+
+  var blob = await capture({
+    url: `${localhost}/capture_record/nodes3.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+  assert(doc.querySelector(`head:not([data-scrapbook-orig-null-node-${timeId}])`));
+  assert(doc.querySelector(`meta[charset="UTF-8"][data-scrapbook-orig-null-node-${timeId}]`));
+
+  var blob = await capture({
+    url: `${localhost}/capture_record/nodes4.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+  assert(doc.querySelector(`head[data-scrapbook-orig-null-node-${timeId}]`));
+  assert(doc.querySelector(`meta[charset="UTF-8"][data-scrapbook-orig-null-node-${timeId}]`));
+
+  /* -capture.recordSourceUri */
+  options["capture.recordRewrittenNode"] = false;
+
+  var blob = await capture({
+    url: `${localhost}/capture_record/nodes3.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+  assert(doc.querySelector(`head:not([data-scrapbook-orig-null-node-${timeId}])`));
+  assert(doc.querySelector(`meta[charset="UTF-8"]:not([data-scrapbook-orig-null-node-${timeId}])`));
+
+  var blob = await capture({
+    url: `${localhost}/capture_record/nodes4.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+  assert(doc.querySelector(`head:not([data-scrapbook-orig-null-node-${timeId}])`));
+  assert(doc.querySelector(`meta[charset="UTF-8"]:not([data-scrapbook-orig-null-node-${timeId}])`));
+}
+
+/**
  * Check if option works
  *
  * capture.recordRewrittenAttr
@@ -8346,6 +8414,7 @@ async function runTests() {
   await test(test_capture_record_meta);
   await test(test_capture_record_nodes);
   await test(test_capture_record_nodes2);
+  await test(test_capture_record_nodes3);
   await test(test_capture_record_attrs);
   await test(test_capture_record_urls);
   await test(test_capture_record_urls2);
