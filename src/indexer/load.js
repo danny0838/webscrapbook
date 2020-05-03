@@ -1014,8 +1014,8 @@ svg, math`;
         const meta = scrapbookData.meta[id];
 
         // remove stale items
-        // fix missing index file
         if (!['folder', 'separator', 'bookmark'].includes(meta.type)) {
+          // index-dependant item: fix missing index file
           if (!meta.index || !dataFiles.has(meta.index)) {
             const index = this.getIndexPath(dataFiles, id);
             if (index) {
@@ -1027,6 +1027,12 @@ svg, math`;
               this.error(`Removed metadata entry for '${id}': Missing index file.`);
               continue;
             }
+          }
+        } else {
+          // index-independant item: update index
+          if (meta.index && !dataFiles.has(meta.index)) {
+            meta.index = "";
+            this.log(`Removed index file entry for '${id}': Missing index file.`);
           }
         }
 
