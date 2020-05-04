@@ -785,6 +785,7 @@ svg, math`;
       this.log(`Inspecting data files...`);
       for (const id of [...dataDirIds].sort()) {
         if (scrapbookData.meta[id]) { continue; }
+        if (SPECIAL_ITEM_ID.has(id)) { continue; }
 
         const index = this.getIndexPath(dataFiles, id);
 
@@ -1126,7 +1127,7 @@ svg, math`;
         if (token_a < token_b) { return -1; }
         return 0;
       })) {
-        if (!referredIds.has(id) && id !== 'root' && id !== 'hidden') {
+        if (!referredIds.has(id) && !SPECIAL_ITEM_ID.has(id)) {
           insertToToc(id, scrapbookData.toc, scrapbookData.meta);
           const title = scrapbookData.meta[id].title;
           if (!titleIdMap.has(title)) {
