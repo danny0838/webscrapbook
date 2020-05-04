@@ -1061,10 +1061,9 @@ svg, math`;
       }
 
       /* Remove stale items from TOC */
-      // generate referredIds and titleIdMap during the loop for later use
+      // generate referredIds during the loop for later use
       this.log(`Inspecting TOC...`);
       const referredIds = new Set();
-      const titleIdMap = new Map();
       for (const id in scrapbookData.toc) {
         if (!scrapbookData.meta[id] && !this.isSpecialItem(id)) {
           delete(scrapbookData.toc[id]);
@@ -1082,7 +1081,6 @@ svg, math`;
             return false;
           }
           referredIds.add(refId);
-          titleIdMap.set(scrapbookData.meta[refId].title, refId);
           return true;
         });
 
@@ -1102,20 +1100,29 @@ svg, math`;
           return;
         }
 
-        let parentId = 'root';
+        let parentIds = ['root'];
         for (const folder of metas[id].folder.split(/[\t\n\r\v\f]+/)) {
-          let folderId = titleIdMap.get(folder);
-          if (!(metas[folderId] && toc[parentId].includes(folderId))) {
-            folderId = this.generateFolder(folder, metas);
+          const parentIdsNext = [];
+          for (const parentId of parentIds) {
+            if (!toc[parentId]) { continue; }
+            for (const folderId of toc[parentId]) {
+              if (scrapbookData.meta[folderId].title === folder) {
+                parentIdsNext.push(folderId);
+              }
+            }
+          }
+          if (!parentIdsNext.length) {
+            const folderId = this.generateFolder(folder, metas);
+            const parentId = parentIds[parentIds.length - 1];
+            if (!toc[parentId]) { toc[parentId] = []; }
             toc[parentId].push(folderId);
-            titleIdMap.set(folder, folderId);
-            this.log(`Generated folder '${folderId}' with name '${folder}'.`);
+            parentIdsNext.push(folderId);
+            this.log(`Generated folder '${folderId}' (${folder}) under '${parentId}'.`);
           }
-          if (!toc[folderId]) {
-            toc[folderId] = [];
-          }
-          parentId = folderId;
+          parentIds = parentIdsNext;
         }
+        const parentId = parentIds[parentIds.length - 1];
+        if (!toc[parentId]) { toc[parentId] = []; }
         toc[parentId].push(id);
         this.log(`Appended '${id}' to '${parentId}'.`);
       };
@@ -1130,9 +1137,6 @@ svg, math`;
         if (!referredIds.has(id) && !SPECIAL_ITEM_ID.has(id)) {
           insertToToc(id, scrapbookData.toc, scrapbookData.meta);
           const title = scrapbookData.meta[id].title;
-          if (!titleIdMap.has(title)) {
-            titleIdMap.set(title, id);
-          }
         }
 
         // id, folder, and exported are temporary
