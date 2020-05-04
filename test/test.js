@@ -8267,6 +8267,42 @@ async function test_capture_helpers() {
   assert(doc.querySelector('img'));
 }
 
+/**
+ * Check nested capture helper.
+ *
+ * capturer.helpersEnabled
+ * capture.helpers
+ */
+async function test_capture_helpers2() {
+  var options = {
+    "capture.helpersEnabled": true,
+    "capture.helpers": `\
+[
+  {
+    "commands": [
+      ["attr", {"css": "img[data-src]"}, "src", ["get_attr", null, "data-src"]]
+    ]
+  }
+]`,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_helpers2/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.html"]);
+  assert(zip.files["green.bmp"]);
+  assert(!zip.files["red.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('img[src="green.bmp"]'));
+}
+
 async function test_viewer_validate() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-validate/index.html'),
@@ -8428,6 +8464,7 @@ async function runTests() {
   await test(test_capture_invalid_tags);
   await test(test_capture_sizeLimit);
   await test(test_capture_helpers);
+  await test(test_capture_helpers2);
 }
 
 async function runManualTests() {
