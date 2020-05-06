@@ -2091,12 +2091,12 @@ scrapbook-toolbar, scrapbook-toolbar *,
   overflow: visible !important;
   cursor: inherit !important;
 }
-:host > section {
+:host > form {
   position: relative;
   width: 100%;
   height: 100%;
 }
-:host > section > header {
+:host > form > header {
   position: absolute;
   display: flex;
   box-sizing: border-box;
@@ -2106,13 +2106,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
   justify-content: flex-end;
   cursor: ${mainElem.classList.contains('relative') ? 'inherit' : 'move'};
 }
-:host > section > header img {
+:host > form > header img {
   margin: .1em;
   width: 1em;
   height: 1em;
   cursor: pointer;
 }
-:host > section > header button {
+:host > form > header button {
   margin: .125em;
   border: 0;
   padding: 0;
@@ -2120,14 +2120,14 @@ scrapbook-toolbar, scrapbook-toolbar *,
   height: 1em;
   cursor: pointer;
 }
-:host > section > header button.save {
+:host > form > header button.save {
   background: url("${browser.runtime.getURL("resources/edit-sticky-save.gif")}") center/contain;
 }
-:host > section > header button.delete {
+:host > form > header button.delete {
   background: url("${browser.runtime.getURL("resources/edit-sticky-delete.gif")}") center/contain;
 }
-:host > section > textarea,
-:host > section > article {
+:host > form > textarea,
+:host > form > article {
   box-sizing: border-box;
   border: none;
   padding: .25em;
@@ -2138,25 +2138,25 @@ scrapbook-toolbar, scrapbook-toolbar *,
   resize: none;
   font: inherit;
 }
-:host > section > .resizer {
+:host > form > .resizer {
   position: absolute;
   box-sizing: border-box;
 }
-:host > section > .resizer.ns {
+:host > form > .resizer.ns {
   right: 9px;
   bottom: -6px;
   left: -6px;
   height: 15px;
   cursor: ns-resize;
 }
-:host > section > .resizer.ew {
+:host > form > .resizer.ew {
   right: -6px;
   bottom: 9px;
   top: 0;
   width: 15px;
   cursor: ew-resize;
 }
-:host > section > .resizer.nwse {
+:host > form > .resizer.nwse {
   right: -6px;
   bottom: -6px;
   width: 15px;
@@ -2165,9 +2165,9 @@ scrapbook-toolbar, scrapbook-toolbar *,
 }
 `;
 
-        const sectionElem = shadowRoot.appendChild(document.createElement('section'));
+        const formElem = shadowRoot.appendChild(document.createElement('form'));
 
-        const headerElem = sectionElem.appendChild(document.createElement('header'));
+        const headerElem = formElem.appendChild(document.createElement('header'));
 
         const saveElem = headerElem.appendChild(document.createElement('button'));
         saveElem.classList.add('save');
@@ -2179,24 +2179,24 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
         let bodyElem;
         if (mainElem.classList.contains('plaintext')) {
-          bodyElem = sectionElem.appendChild(document.createElement('textarea'));
+          bodyElem = formElem.appendChild(document.createElement('textarea'));
           bodyElem.value = mainElem.textContent;
         } else {
-          bodyElem = sectionElem.appendChild(document.createElement('article'));
+          bodyElem = formElem.appendChild(document.createElement('article'));
           bodyElem.setAttribute('contenteditable', 'true');
           let node;
           while (node = mainElem.firstChild) { bodyElem.appendChild(node); }
         }
 
-        const resizerElemNS = sectionElem.appendChild(document.createElement('div'));
+        const resizerElemNS = formElem.appendChild(document.createElement('div'));
         resizerElemNS.classList.add('resizer');
         resizerElemNS.classList.add('ns');
 
-        const resizerElemEW = sectionElem.appendChild(document.createElement('div'));
+        const resizerElemEW = formElem.appendChild(document.createElement('div'));
         resizerElemEW.classList.add('resizer');
         resizerElemEW.classList.add('ew');
 
-        const resizerElemNWSE = sectionElem.appendChild(document.createElement('div'));
+        const resizerElemNWSE = formElem.appendChild(document.createElement('div'));
         resizerElemNWSE.classList.add('resizer');
         resizerElemNWSE.classList.add('nwse');
 
