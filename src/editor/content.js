@@ -2209,6 +2209,17 @@ scrapbook-toolbar, scrapbook-toolbar *,
         // @TODO: support editing non-styled sticky
         if (!mainElem.classList.contains('styled')) { return; }
 
+        if (!SHADOW_DOM_SUPPORTED) {
+          const attr = mainElem.classList.contains('plaintext') ? 'textContent' : 'innerHTML';
+          let content = mainElem[attr];
+          content = scrapbook.prompt(scrapbook.lang('EditorEditAnnotationPrompt', [content]), content);
+          if (content === null) {
+            return;
+          }
+          mainElem[attr] = content;
+          return;
+        }
+
         const shadowRoot = mainElem.attachShadow({mode: 'open'});
         mainElem.classList.add('editing');
 
