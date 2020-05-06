@@ -298,10 +298,29 @@
   "EditorDeleteAnnotationConfirm": {
     "message": "刪除這個批註嗎？"
   },
+  "EditorEditAnnotation": {
+    "message": "編輯批註內容："
+  },
   "EditorEditAnnotationPrompt": {
     "message": "編輯批註內容（行尾輸入兩個空白可加入新行）：\n$TEXT$",
     "placeholders": {
       "text": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditorLineMarkerCancel": {
+    "message": "取消编辑 [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditorLineMarkerSave": {
+    "message": "儲存變更 [$KEY$]",
+    "placeholders": {
+      "key": {
         "content": "$1"
       }
     }
