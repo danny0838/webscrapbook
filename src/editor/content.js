@@ -2180,7 +2180,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         let bodyElem;
         if (mainElem.classList.contains('plaintext')) {
           bodyElem = formElem.appendChild(document.createElement('textarea'));
-          bodyElem.value = mainElem.textContent;
+          bodyElem.textContent = mainElem.textContent;
         } else {
           bodyElem = formElem.appendChild(document.createElement('article'));
           bodyElem.setAttribute('contenteditable', 'true');
