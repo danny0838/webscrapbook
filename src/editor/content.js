@@ -1788,6 +1788,11 @@ scrapbook-toolbar, scrapbook-toolbar *,
     const onClick = (event) => {
       let target = event.target;
       let objectType = scrapbook.getScrapbookObjectType(target);
+      while (!objectType) {
+        target = target.parentNode;
+        if (!target) { return; }
+        objectType = scrapbook.getScrapbookObjectType(target);
+      }
       switch (objectType) {
         case 'linemarker':
         case 'inline': {
