@@ -1822,7 +1822,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
           // convert legacy ScrapBook objects into WebScrapBook version
           target = converter.convertLegacyObject(target);
 
-          annotator.editLineMarkerAnnotation(target);
+          annotator.editLineMarker(target);
           break;
         }
       }
@@ -1971,7 +1971,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       /**
        * @kind invokable
        */
-      editLineMarkerAnnotation(elem) {
+      editLineMarker(elem) {
         if (!elem) { return; }
 
         const linesNew = [];
@@ -1982,7 +1982,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
           if (linesNew.length < lines.length - 1) {
             line += '  ';
           }
-          const lineNew = prompt(scrapbook.lang('EditorMarkerAnnotationPrompt', [elem.title]), line);
+          const lineNew = prompt(scrapbook.lang('EditorEditAnnotationPrompt', [elem.title]), line);
           if (lineNew === null) {
             return;
           }

@@ -298,7 +298,7 @@
   "EditorDeleteAnnotationConfirm": {
     "message": "Delete this annotation?"
   },
-  "EditorMarkerAnnotationPrompt": {
+  "EditorEditAnnotationPrompt": {
     "message": "Edit the annotation text (add 2 trailing spaces to insert a new line):\n$TEXT$",
     "placeholders": {
       "text": {

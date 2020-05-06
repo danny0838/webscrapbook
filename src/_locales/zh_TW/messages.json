@@ -298,7 +298,7 @@
   "EditorDeleteAnnotationConfirm": {
     "message": "刪除這個批註嗎？"
   },
-  "EditorMarkerAnnotationPrompt": {
+  "EditorEditAnnotationPrompt": {
     "message": "編輯批註內容（行尾輸入兩個空白可加入新行）：\n$TEXT$",
     "placeholders": {
       "text": {
