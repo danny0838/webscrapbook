@@ -306,6 +306,17 @@
       }
     }
   },
+  "EditorStickyDelete": {
+    "message": "刪除這個便利貼"
+  },
+  "EditorStickySave": {
+    "message": "儲存變更 [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
   "ErrorContentScriptExecute": {
     "message": "無法執行內容處理腳本 ($SOURCE$): $REASON$",
     "placeholders": {

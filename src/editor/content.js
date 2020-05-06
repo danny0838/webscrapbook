@@ -2166,6 +2166,17 @@ scrapbook-toolbar, scrapbook-toolbar *,
 `;
 
         const formElem = shadowRoot.appendChild(document.createElement('form'));
+        formElem.addEventListener('keydown', (event) => {
+          if (event.code === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            this.cancelSticky(mainElem);
+          } else if (event.code === 'KeyS' && event.altKey) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.saveSticky(mainElem);
+          }
+        });
 
         let bodyElem;
         if (mainElem.classList.contains('plaintext')) {
@@ -2181,10 +2192,12 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
         const saveElem = headerElem.appendChild(document.createElement('button'));
         saveElem.classList.add('save');
+        saveElem.title = scrapbook.lang('EditorStickySave', ['Alt+S']);
         saveElem.addEventListener('click', (event) => { this.saveSticky(mainElem); });
 
         const deleteElem = headerElem.appendChild(document.createElement('button'));
         deleteElem.classList.add('delete');
+        deleteElem.title = scrapbook.lang('EditorStickyDelete');
         deleteElem.addEventListener('click', (event) => { this.deleteSticky(mainElem); });
 
         const resizerElemNS = formElem.appendChild(document.createElement('div'));
@@ -2216,6 +2229,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
             newElem.appendChild(node);
           }
         }
+        mainElem.parentNode.replaceChild(newElem, mainElem);
+      },
+
+      cancelSticky(mainElem) {
+        if (!mainElem.shadowRoot) { return; }
+
+        const newElem = mainElem.cloneNode(true);
         mainElem.parentNode.replaceChild(newElem, mainElem);
       },
 

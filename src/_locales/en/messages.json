@@ -306,6 +306,17 @@
       }
     }
   },
+  "EditorStickyDelete": {
+    "message": "Delete this sticky note"
+  },
+  "EditorStickySave": {
+    "message": "Save changes [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
   "ErrorContentScriptExecute": {
     "message": "Unable to execute content script ($SOURCE$): $REASON$",
     "placeholders": {

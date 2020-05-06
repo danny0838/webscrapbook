@@ -306,6 +306,17 @@
       }
     }
   },
+  "EditorStickyDelete": {
+    "message": "删除这个便利贴"
+  },
+  "EditorStickySave": {
+    "message": "保存变更 [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
   "ErrorContentScriptExecute": {
     "message": "无法执行内容处理脚本 ($SOURCE$): $REASON$",
     "placeholders": {
