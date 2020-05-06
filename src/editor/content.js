@@ -1767,29 +1767,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
               }
             }
             break;
-          } else {
-            event.preventDefault();
-
-            // convert legacy ScrapBook objects into WebScrapBook version
-            target = converter.convertLegacyObject(target);
-
-            annotator.editSticky(target);
           }
-          break;
-        }
-
-        case 'sticky-header':
-        case 'sticky-footer':
-        case 'sticky-save':
-        case 'sticky-delete':
-        case 'freenote':
-        case 'block-comment': {
-          event.preventDefault();
-
-          // convert legacy ScrapBook objects into WebScrapBook version
-          target = converter.convertLegacyObject(target);
-
-          annotator.editSticky(target);
           break;
         }
       }
@@ -1825,6 +1803,25 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
           const {clientX, clientY} = getEventPositionObject(event);
           annotator.editLineMarker(target, {clientX, clientY});
+          break;
+        }
+
+        case 'sticky':
+        case 'sticky-header':
+        case 'sticky-footer':
+        case 'sticky-save':
+        case 'sticky-delete':
+        case 'freenote':
+        case 'block-comment': {
+          if (!window.getSelection().isCollapsed) { break; }
+          if (target.shadowRoot) { break; }
+
+          event.preventDefault();
+
+          // convert legacy ScrapBook objects into WebScrapBook version
+          target = converter.convertLegacyObject(target);
+
+          annotator.editSticky(target);
           break;
         }
       }
