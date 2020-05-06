@@ -2184,8 +2184,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         } else {
           bodyElem = formElem.appendChild(document.createElement('article'));
           bodyElem.setAttribute('contenteditable', 'true');
-          let node;
-          while (node = mainElem.firstChild) { bodyElem.appendChild(node); }
+          bodyElem.innerHTML = mainElem.innerHTML;
         }
 
         const resizerElemNS = formElem.appendChild(document.createElement('div'));
