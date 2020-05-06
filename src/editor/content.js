@@ -1235,7 +1235,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          cmd: "editor.annotator.saveStickyAll",
+          cmd: "editor.annotator.saveAll",
           args: {},
         },
       });
@@ -1247,7 +1247,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          cmd: "editor.annotator.saveStickyAll",
+          cmd: "editor.annotator.saveAll",
           args: {},
         },
       });
@@ -1724,7 +1724,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
     const STICKY_DEFAULT_HEIGHT = 100;
 
     const draggingData = {};
-    let lastEditedElem = null;
 
     const onMouseDown = (event) => {
       // A mousedown during a dragging caould be pressing another mouse button,
@@ -1944,7 +1943,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
             window.removeEventListener("click", onClick, true);
             window.removeEventListener("mousedown", onMouseDown, true);
             window.removeEventListener("touchstart", onMouseDown, true);
-            this.saveStickyAll();
+            this.saveAll();
           }
         }
       },
@@ -1960,6 +1959,12 @@ scrapbook-toolbar, scrapbook-toolbar *,
       clearAnnotationCss() {
         for (const elem of document.querySelectorAll(`style[data-scrapbook-elem="annotation-css"]`)) {
           elem.remove();
+        }
+      },
+
+      saveAll() {
+        for (const elem of document.querySelectorAll('[data-scrapbook-elem="sticky"].editing')) {
+          this.saveSticky(elem);
         }
       },
 
@@ -2069,16 +2074,12 @@ scrapbook-toolbar, scrapbook-toolbar *,
       },
 
       editSticky(mainElem) {
-        if (lastEditedElem) {
-          this.saveSticky(lastEditedElem);
-        }
+        this.saveAll();
 
         if (mainElem.shadowRoot) { return; }
 
         // @TODO: support editing non-styled sticky
         if (!mainElem.classList.contains('styled')) { return; }
-
-        lastEditedElem = mainElem;
 
         const shadowRoot = mainElem.attachShadow({mode: 'open'});
         mainElem.classList.add('editing');
@@ -2203,8 +2204,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
       },
 
       saveSticky(mainElem) {
-        lastEditedElem = null;
-
         if (!mainElem.shadowRoot) { return; }
 
         const newElem = mainElem.cloneNode(false);
@@ -2219,12 +2218,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
           }
         }
         mainElem.parentNode.replaceChild(newElem, mainElem);
-      },
-
-      saveStickyAll() {
-        for (const elem of document.querySelectorAll('[data-scrapbook-elem="sticky"].editing')) {
-          this.saveSticky(elem);
-        }
       },
 
       deleteSticky(mainElem) {
