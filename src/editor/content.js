@@ -2447,16 +2447,17 @@ scrapbook-toolbar, scrapbook-toolbar *,
       event.preventDefault();
       event.stopPropagation();
 
-      const target = domEraser.adjustTarget(event.target);
-
-      // if the click is triggered via touch or keybord enter, update target
-      // for the first time, and perform action when clicking for the second
-      // time.
-      if (target !== lastTarget && !target.matches(TOOLTIP_NODES)) {
-        if (target.matches(SKIP_NODES)) { return; }
-        domEraser.setTarget(target);
-        return;
+      // if the click is triggered via a touch, update target for the first
+      // time, and perform action when for the second time.
+      if (event.target === lastTouchTarget) {
+        const target = domEraser.adjustTarget(event.target);
+        if (target !== lastTarget && !target.matches(TOOLTIP_NODES)) {
+          domEraser.setTarget(target);
+          return;
+        }
       }
+
+      if (!lastTarget) { return; }
 
       if (event.ctrlKey) {
         domEraser.isolateTarget(lastTarget);
