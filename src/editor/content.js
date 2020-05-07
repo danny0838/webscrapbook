@@ -2391,6 +2391,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
     const FORBID_NODES = `scrapbook-toolbar, scrapbook-toolbar *`;
     const TOOLTIP_NODES = `scrapbook-toolbar-tooltip, scrapbook-toolbar-tooltip *`;
     const SKIP_NODES = `html, head, body, ${FORBID_NODES}, ${TOOLTIP_NODES}`;
+    const ATOMIC_NODES = [
+      'svg, math',
+      '[data-sb-obj="freenote"]', // SBX
+      '[data-sb-obj="annotation"]', // 1.12.0a <= SBX <= 1.12.0a45
+      '.scrapbook-sticky', // SB, SBX <= 1.12.0a34
+      '.scrapbook-block-comment', // SB < 0.19?
+    ].join(', ');
 
     const mapElemOutline = new WeakMap();
     const mapElemOutlinePriority = new WeakMap();
@@ -2441,9 +2448,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
       event.preventDefault();
       event.stopPropagation();
 
-      const elem = lastTarget;
-      if (!elem) { return; }
-      domEraser.isolateTarget(elem);
+      if (!lastTarget) { return; }
+      domEraser.isolateTarget(lastTarget);
     };
 
     const onClick = (event) => {
@@ -2452,23 +2458,21 @@ scrapbook-toolbar, scrapbook-toolbar *,
       event.preventDefault();
       event.stopPropagation();
 
-      const elem = lastTarget;
       const target = domEraser.adjustTarget(event.target);
 
-      // domEraser may happen if it's a keybord enter or touch,
-      // reset the target rather than performing the erase.
-      if (target !== elem && !target.matches(FORBID_NODES) && !target.matches(TOOLTIP_NODES)) {
+      // if the click is triggered via touch or keybord enter, update target
+      // for the first time, and perform action when clicking for the second
+      // time.
+      if (target !== lastTarget && !target.matches(TOOLTIP_NODES)) {
         if (target.matches(SKIP_NODES)) { return; }
         domEraser.setTarget(target);
         return;
       }
 
-      if (!elem) { return; }
-
       if (event.ctrlKey) {
-        domEraser.isolateTarget(elem);
+        domEraser.isolateTarget(lastTarget);
       } else {
-        domEraser.eraseTarget(elem);
+        domEraser.eraseTarget(lastTarget);
       }
     };
 
@@ -2526,13 +2530,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         // Special handling for special elements,
         // as their inner elements cannot be tooltiped and handled,
         // or should be treated as a whole.
-        while ((checkElem = elem.closest([
-              'svg, math',
-              '[data-sb-obj="freenote"]', // SBX
-              '[data-sb-obj="annotation"]', // 1.12.0a <= SBX <= 1.12.0a45
-              '.scrapbook-sticky', // SB, SBX <= 1.12.0a34
-              '.scrapbook-block-comment', // SB < 0.19?
-            ].join(', '))) && checkElem !== elem) {
+        while ((checkElem = elem.closest(ATOMIC_NODES)) && checkElem !== elem) {
           elem = checkElem;
         }
 
