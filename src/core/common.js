@@ -2289,28 +2289,56 @@
    *
    * @return {{width: integer, height: integer, scrollX: integer, scrollY: integer}}
    */
-  scrapbook.getViewportDimensions = function (win) {
-    const out = {};
+  scrapbook.getViewport = function (win) {
     const doc = win.document;
+    const isQuirkMode = doc.compatMode == "BackCompat";
+    return {
+      scrollX: win.scrollX,
+      scrollY: win.scrollY,
+      width: (isQuirkMode ? doc.body : doc.documentElement).clientWidth,
+      height: (isQuirkMode ? doc.body : doc.documentElement).clientHeight,
+    };
+  };
 
-    if (win.pageXOffset) {
-      out.scrollX = win.pageXOffset;
-      out.scrollY = win.pageYOffset;
-    } else if (doc.documentElement) {
-      out.scrollX = doc.body.scrollLeft + doc.documentElement.scrollLeft;
-      out.scrollY = doc.body.scrollTop + doc.documentElement.scrollTop;
-    } else if (doc.body.scrollLeft >= 0) {
-      out.scrollX = doc.body.scrollLeft;
-      out.scrollY = doc.body.scrollTop;
+  /**
+   * Get appropriate offset for absolute positioning.
+   *
+   * @return {{left: integer, top: integer}}
+   */
+  scrapbook.getAnchoredPosition = function (elem, {clientX, clientY}, viewport) {
+    const win = elem.ownerDocument.defaultView;
+
+    // The innermost ancestor element that is relatively positioned.
+    let relativeAncestor = null;
+    let ancestor = elem.parentElement;
+    while (ancestor && ancestor.nodeType === 1) {
+      if (win.getComputedStyle(ancestor).getPropertyValue('position') === 'relative') {
+        relativeAncestor = ancestor;
+        break;
+      }
+      ancestor = ancestor.parentElement;
     }
-    if (doc.compatMode == "BackCompat") {
-      out.width = doc.body.clientWidth;
-      out.height = doc.body.clientHeight;
+
+    let deltaX;
+    let deltaY;
+    if (relativeAncestor) {
+      // - getBoundingClientRect is border + padding + width (content-box)
+      // - CSS left and top are relative to the box (padding + width)
+      //   of relativeAncestor.
+      const ancestorRect = relativeAncestor.getBoundingClientRect();
+      const ancestorStyle = win.getComputedStyle(relativeAncestor);
+      deltaX = ancestorRect.left + parseFloat(ancestorStyle.getPropertyValue('border-left-width'));
+      deltaY = ancestorRect.top + parseFloat(ancestorStyle.getPropertyValue('border-top-width'));
     } else {
-      out.width = doc.documentElement.clientWidth;
-      out.height = doc.documentElement.clientHeight;
+      viewport = viewport || scrapbook.getViewport(win);
+      deltaX = -viewport.scrollX;
+      deltaY = -viewport.scrollY;
     }
-    return out;
+
+    return {
+      left: clientX - deltaX,
+      top: clientY - deltaY,
+    };
   };
 
   /**

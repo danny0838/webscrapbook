@@ -1907,19 +1907,12 @@ scrapbook-toolbar, scrapbook-toolbar *,
           mainElem.style.width = clientX - rect.left + 'px';
         }
       } else {
-        const anchorElem = document.documentElement;
-        const anchorRect = anchorElem.getBoundingClientRect();
-        const anchorStyle = window.getComputedStyle(anchorElem);
-        const borderX = parseInt(anchorStyle.getPropertyValue('border-left-width'), 10);
-        const borderY = parseInt(anchorStyle.getPropertyValue('border-top-width'), 10);
-
-        let left = clientX - draggingData.deltaX - anchorRect.left - borderX;
-        let top = clientY - draggingData.deltaY - anchorRect.top - borderY;
-        left = Math.max(left, 0);
-        top = Math.max(top, 0);
-
-        mainElem.style.left = left + 'px';
-        mainElem.style.top = top + 'px';
+        const pos = scrapbook.getAnchoredPosition(mainElem, {
+          clientX: Math.max(clientX - draggingData.deltaX, 0),
+          clientY: Math.max(clientY - draggingData.deltaY, 0),
+        });
+        mainElem.style.left = pos.left + 'px';
+        mainElem.style.top = pos.top + 'px';
       }
     };
 
@@ -2619,11 +2612,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
         }
 
         // tooltip
-        const viewport = scrapbook.getViewportDimensions(window);
-        const boundingRect = elem.getBoundingClientRect();
-        let x = viewport.scrollX + boundingRect.left;
-        let y = viewport.scrollY + boundingRect.bottom;
-
         const labelElem = document.createElement("scrapbook-toolbar-tooltip");
         labelElem.setAttribute('data-scrapbook-elem', 'toolbar-tooltip');
         labelElem.style.setProperty('all', 'initial', 'important');
@@ -2639,19 +2627,14 @@ scrapbook-toolbar, scrapbook-toolbar *,
         labelElem.innerHTML = labelHtml;
         document.body.appendChild(labelElem);
 
-        // fix label position to prevent overflowing the viewport
-        const availWidth = viewport.scrollX + viewport.width;
-        const labelWidth = labelElem.offsetWidth;
-        x = Math.max(x, 0);
-        x = Math.min(x, availWidth - labelWidth);
-        
-        const availHeight = viewport.scrollY + viewport.height;
-        const labelHeight = labelElem.offsetHeight;
-        y = Math.max(y, 0);
-        y = Math.min(y, availHeight - labelHeight);
-
-        labelElem.style.setProperty('left', x + 'px', 'important');
-        labelElem.style.setProperty('top', y + 'px', 'important');
+        const boundingRect = elem.getBoundingClientRect();
+        const viewport = scrapbook.getViewport(window);
+        const anchorPos = scrapbook.getAnchoredPosition(labelElem, {
+          clientX: Math.min(Math.max(boundingRect.left, 0), viewport.width - labelElem.offsetWidth),
+          clientY: Math.min(Math.max(boundingRect.bottom, 0), viewport.height - labelElem.offsetHeight),
+        }, viewport);
+        labelElem.style.setProperty('left', anchorPos.left + 'px', 'important');
+        labelElem.style.setProperty('top', anchorPos.top + 'px', 'important');
 
         tooltipElem = labelElem;
         return lastTarget;

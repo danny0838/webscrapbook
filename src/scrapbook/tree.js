@@ -822,7 +822,7 @@ Redirecting to file <a href="index.md">index.md</a>
       document.getElementById('search').disabled = !(willEnable && !this.book.config.no_tree);
     },
 
-    showCommands(willShow = document.getElementById('command-popup').hidden, x, y) {
+    showCommands(willShow = document.getElementById('command-popup').hidden, pos = {}) {
       const menuElem = document.getElementById('command-popup');
 
       if (!willShow) {
@@ -942,20 +942,18 @@ Redirecting to file <a href="index.md">index.md</a>
       }
 
       // show menu and fix position
-      const viewport = scrapbook.getViewportDimensions(window);
-      const availWidth = viewport.scrollX + viewport.width;
-      const availHeight = viewport.scrollY + viewport.height;
-      menuElem.style.maxWidth = availWidth + 'px';
-      menuElem.style.maxHeight = availHeight + 'px';
-      menuElem.style.left = menuElem.style.top = 0;
+      menuElem.style.setProperty('max-width', '95vw');
+      menuElem.style.setProperty('max-height', '95vh');
       menuElem.hidden = false;
 
-      x = Math.max(x, 0);
-      x = Math.min(x, availWidth - menuElem.offsetWidth);
-      y = Math.max(y, 0);
-      y = Math.min(y, availHeight - menuElem.offsetHeight);
-      menuElem.style.left = x + 'px';
-      menuElem.style.top = y + 'px';
+      const {clientX = 0, clientY = 0} = pos;
+      const viewport = scrapbook.getViewport(window);
+      const anchorPos = scrapbook.getAnchoredPosition(menuElem, {
+        clientX: Math.min(Math.max(clientX, 0), viewport.width - menuElem.offsetWidth),
+        clientY: Math.min(Math.max(clientY, 0), viewport.height - menuElem.offsetHeight),
+      }, viewport);
+      menuElem.style.setProperty('left', anchorPos.left + 'px');
+      menuElem.style.setProperty('top', anchorPos.top + 'px');
 
       menuElem.focus();
     },
@@ -2252,7 +2250,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       }
 
       event.preventDefault();
-      this.showCommands(true, event.pageX, event.pageY);
+      this.showCommands(true, event);
     },
 
     onSearchButtonClick(event) {
@@ -2267,15 +2265,15 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
     onCommandButtonClick(event) {
       event.preventDefault();
-      let x = event.pageX;
-      let y = event.pageY;
-      if (x === 0 && y === 0) {
+      let clientX = event.clientX;
+      let clientY = event.clientY;
+      if (clientX === 0 && clientY === 0) {
         // keybord or other device
         const rect = document.getElementById('command').getBoundingClientRect();
-        x = window.scrollX + rect.left;
-        y = window.scrollY + rect.top;
+        clientX = rect.left;
+        clientY = rect.top;
       }
-      this.showCommands(true, x, y);
+      this.showCommands(true, {clientX, clientY});
     },
 
     async onCommandClick(event) {
