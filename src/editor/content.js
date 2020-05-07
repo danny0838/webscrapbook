@@ -419,8 +419,14 @@ ${sRoot}.toolbar .toolbar-close:hover {
       <li><button class="toolbar-eraser-removeEditsAll">${scrapbook.lang('EditorButtonRemoveEditsAll')}</button></li>
     </ul>
   </div>
-  <div class="toolbar-domEraser" title="${scrapbook.lang('EditorButtonDomEraser')}">
-    <button></button>
+  <div class="toolbar-domEraser" title="${scrapbook.lang('EditorButtonDOMEraser')}">
+    <button></button><button disabled=""></button>
+    <ul hidden="" title="">
+      <li><button class="toolbar-domEraser-expand">${scrapbook.lang('EditorButtonDOMEraserExpand', ['W'])}</button></li>
+      <li><button class="toolbar-domEraser-shrink">${scrapbook.lang('EditorButtonDOMEraserShrink', ['N'])}</button></li>
+      <li><button class="toolbar-domEraser-erase">${scrapbook.lang('EditorButtonDOMEraserErase', ['R'])}</button></li>
+      <li><button class="toolbar-domEraser-isolate">${scrapbook.lang('EditorButtonDOMEraserIsolate', ['I'])}</button></li>
+    </ul>
   </div>
   <div class="toolbar-htmlEditor" title="${scrapbook.lang('EditorButtonHtmlEditor')}">
     <button></button><button disabled=""></button>
@@ -596,6 +602,24 @@ ${sRoot}.toolbar .toolbar-close:hover {
     elem.addEventListener("click", (event) => {
       editor.toggleDomEraser();
     }, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-domEraser > button:last-of-type');
+    elem.addEventListener("click", (event) => {
+      editor.updateHtmlEditorMenu();
+      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
+    }, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-domEraser-expand');
+    elem.addEventListener("click", domEraser.expandTarget.bind(domEraser), {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-domEraser-shrink');
+    elem.addEventListener("click", domEraser.shrinkTarget.bind(domEraser), {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-domEraser-erase');
+    elem.addEventListener("click", domEraser.eraseTarget.bind(domEraser), {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-domEraser-isolate');
+    elem.addEventListener("click", domEraser.isolateTarget.bind(domEraser), {passive: true});
 
     // htmlEditor
     var elem = wrapper.querySelector('.toolbar-htmlEditor > button:first-of-type');
@@ -1135,6 +1159,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       editElem.removeAttribute("checked");
     }
 
+    editor.internalElement.querySelector('.toolbar-domEraser > button:last-of-type').disabled = !willActive;
     for (const elem of editor.internalElement.querySelectorAll([
           '.toolbar-locate > button',
           '.toolbar-marker > button',
@@ -2409,6 +2434,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
     let lastTarget = null;
     let lastTouchTarget = null;
     let tooltipElem = null;
+    let mapExpandStack = new WeakMap();
 
     const onTouchStart = (event) => {
       lastTouchTarget = event.target;
@@ -2428,6 +2454,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
       elem = domEraser.adjustTarget(elem);
       domEraser.setTarget(elem);
+      mapExpandStack = new WeakMap();
     };
 
     const onMouseDown = (event) => {
@@ -2453,6 +2480,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         const target = domEraser.adjustTarget(event.target);
         if (target !== lastTarget && !target.matches(TOOLTIP_NODES)) {
           domEraser.setTarget(target);
+          mapExpandStack = new WeakMap();
           return;
         }
       }
@@ -2460,9 +2488,9 @@ scrapbook-toolbar, scrapbook-toolbar *,
       if (!lastTarget) { return; }
 
       if (event.ctrlKey) {
-        domEraser.isolateTarget(lastTarget);
+        domEraser.isolateTarget();
       } else {
-        domEraser.eraseTarget(lastTarget);
+        domEraser.eraseTarget();
       }
     };
 
@@ -2476,6 +2504,22 @@ scrapbook-toolbar, scrapbook-toolbar *,
         event.preventDefault();
         event.stopPropagation();
         editor.toggleDomEraser(false);
+      } else if (event.code === "KeyW") {
+        event.preventDefault();
+        event.stopPropagation();
+        domEraser.expandTarget();
+      } else if (event.code === "KeyN") {
+        event.preventDefault();
+        event.stopPropagation();
+        domEraser.shrinkTarget();
+      } else if (event.code === "KeyR") {
+        event.preventDefault();
+        event.stopPropagation();
+        domEraser.eraseTarget();
+      } else if (event.code === "KeyI") {
+        event.preventDefault();
+        event.stopPropagation();
+        domEraser.isolateTarget();
       }
     };
 
@@ -2584,7 +2628,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         labelElem.setAttribute('data-scrapbook-elem', 'toolbar-tooltip');
         labelElem.style.setProperty('all', 'initial', 'important');
         labelElem.style.setProperty('position', 'absolute', 'important');
-        labelElem.style.setProperty('z-index', '2147483647', 'important');
+        labelElem.style.setProperty('z-index', '2147483644', 'important');
         labelElem.style.setProperty('display', 'block', 'important');
         labelElem.style.setProperty('border', '2px solid black', 'important');
         labelElem.style.setProperty('border-radius', '6px', 'important');
@@ -2610,6 +2654,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         labelElem.style.setProperty('top', y + 'px', 'important');
 
         tooltipElem = labelElem;
+        return lastTarget;
       },
 
       clearTarget() {
@@ -2636,7 +2681,30 @@ scrapbook-toolbar, scrapbook-toolbar *,
         lastTarget = null;
       },
 
-      eraseTarget(elem) {
+      expandTarget() {
+        const elem = lastTarget;
+        if (!elem) { return; }
+
+        let target = elem.parentElement;
+        if (!target || target.matches(SKIP_NODES)) { return; }
+        target = this.setTarget(target);
+        if (!target) { return; }
+        mapExpandStack.set(target, elem);
+      },
+
+      shrinkTarget() {
+        const elem = lastTarget;
+        if (!elem) { return; }
+
+        let target = mapExpandStack.get(elem);
+        if (!target) { return; }
+        this.setTarget(target);
+      },
+
+      eraseTarget() {
+        const elem = lastTarget;
+        if (!elem) { return; }
+
         domEraser.clearTarget();
         editor.addHistory();
 
@@ -2646,7 +2714,10 @@ scrapbook-toolbar, scrapbook-toolbar *,
         }
       },
 
-      isolateTarget(elem) {
+      isolateTarget() {
+        let elem = lastTarget;
+        if (!elem) { return; }
+
         domEraser.clearTarget();
         editor.addHistory();
 

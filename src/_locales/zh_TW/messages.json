@@ -138,8 +138,40 @@
   "EditorButtonDOMEraser": {
     "message": "元素橡皮擦工具 - 開啟後點擊可擦除目標元素；Ctrl 或中鍵點擊擦除目標以外的元素。（擦除的內容可還原）"
   },
+  "EditorButtonDOMEraserErase": {
+    "message": "擦除選取範圍 [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditorButtonDOMEraserExpand": {
+    "message": "擴大選取範圍 [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditorButtonDOMEraserIsolate": {
+    "message": "析離選取範圍 [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
   "EditorButtonDOMEraserRemoveEdit": {
     "message": "移除這個剪貼簿註記"
+  },
+  "EditorButtonDOMEraserShrink": {
+    "message": "縮小選取範圍 [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
   },
   "EditorButtonEraser": {
     "message": "橡皮擦工具 - 點擊擦除選取範圍的內容；Ctrl 或中鍵點擊移除選取範圍的剪貼簿註記。（擦除的內容可還原）"

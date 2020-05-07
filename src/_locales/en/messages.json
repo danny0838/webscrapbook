@@ -138,8 +138,40 @@
   "EditorButtonDOMEraser": {
     "message": "DOM eraser - When activated, click to erase the target element; Ctrl- or middle-click to erase elements except the target. (Erases can be reverted.)"
   },
+  "EditorButtonDOMEraserErase": {
+    "message": "Erase selection [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditorButtonDOMEraserExpand": {
+    "message": "Widen selection [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
+  "EditorButtonDOMEraserIsolate": {
+    "message": "Isolate selection [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
+  },
   "EditorButtonDOMEraserRemoveEdit": {
     "message": "Remove this scrapbook marking"
+  },
+  "EditorButtonDOMEraserShrink": {
+    "message": "Narrow selection [$KEY$]",
+    "placeholders": {
+      "key": {
+        "content": "$1"
+      }
+    }
   },
   "EditorButtonEraser": {
     "message": "Eraser - Click to erase content in the selected area; Ctrl- or middle-click to remove scrapbook markings in the selected area. (Erases can be reverted.)"
