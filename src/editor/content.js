@@ -1136,6 +1136,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
     }
 
     for (const elem of editor.internalElement.querySelectorAll([
+          '.toolbar-locate > button',
           '.toolbar-marker > button',
           '.toolbar-annotation > button',
           '.toolbar-eraser > button',
