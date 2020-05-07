@@ -2100,7 +2100,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   position: absolute;
   display: flex;
   box-sizing: border-box;
-  margin-top: -1.25em;
+  top: -1.25em;
   height: 1.25em;
   width: 100%;
   justify-content: flex-end;
@@ -2167,16 +2167,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
         const formElem = shadowRoot.appendChild(document.createElement('form'));
 
-        const headerElem = formElem.appendChild(document.createElement('header'));
-
-        const saveElem = headerElem.appendChild(document.createElement('button'));
-        saveElem.classList.add('save');
-        saveElem.addEventListener('click', (event) => { this.saveSticky(mainElem); });
-
-        const deleteElem = headerElem.appendChild(document.createElement('button'));
-        deleteElem.classList.add('delete');
-        deleteElem.addEventListener('click', (event) => { this.deleteSticky(mainElem); });
-
         let bodyElem;
         if (mainElem.classList.contains('plaintext')) {
           bodyElem = formElem.appendChild(document.createElement('textarea'));
@@ -2186,6 +2176,16 @@ scrapbook-toolbar, scrapbook-toolbar *,
           bodyElem.setAttribute('contenteditable', 'true');
           bodyElem.innerHTML = mainElem.innerHTML;
         }
+
+        const headerElem = formElem.appendChild(document.createElement('header'));
+
+        const saveElem = headerElem.appendChild(document.createElement('button'));
+        saveElem.classList.add('save');
+        saveElem.addEventListener('click', (event) => { this.saveSticky(mainElem); });
+
+        const deleteElem = headerElem.appendChild(document.createElement('button'));
+        deleteElem.classList.add('delete');
+        deleteElem.addEventListener('click', (event) => { this.deleteSticky(mainElem); });
 
         const resizerElemNS = formElem.appendChild(document.createElement('div'));
         resizerElemNS.classList.add('resizer');
