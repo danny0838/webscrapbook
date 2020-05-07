@@ -2415,30 +2415,19 @@ scrapbook-toolbar, scrapbook-toolbar *,
     };
 
     const onMouseOver = (event) => {
-      let elem = event.target;
-      if (elem.matches(SKIP_NODES)) { return; }
-
       event.preventDefault();
       event.stopPropagation();
+
+      let elem = event.target;
 
       // don't set target for a simulated mouseover for a touch,
       // so that the click event will reset the target as it gets no lastTarget.
       if (elem === lastTouchTarget) { return; }
 
+      if (elem.matches(TOOLTIP_NODES)) { return; }
+
       elem = domEraser.adjustTarget(elem);
       domEraser.setTarget(elem);
-    };
-
-    const onMouseOut = (event) => {
-      if (event.target.matches(FORBID_NODES)) { return; }
-
-      // don't consider a true mouseout when the mouse moves into the tooltip
-      if (event.relatedTarget && event.relatedTarget.matches(TOOLTIP_NODES)) { return; }
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      domEraser.clearTarget();
     };
 
     const onMouseDown = (event) => {
@@ -2505,7 +2494,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
             this.active = true;
             window.addEventListener('touchstart', onTouchStart, true);
             window.addEventListener('mouseover', onMouseOver, true);
-            window.addEventListener('mouseout', onMouseOut, true);
             window.addEventListener('mousedown', onMouseDown, true);
             window.addEventListener('click', onClick, true);
             window.addEventListener("keydown", onKeyDown, true);
@@ -2516,7 +2504,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
             domEraser.clearTarget();
             window.removeEventListener('touchstart', onTouchStart, true);
             window.removeEventListener('mouseover', onMouseOver, true);
-            window.removeEventListener('mouseout', onMouseOut, true);
             window.removeEventListener('mousedown', onMouseDown, true);
             window.removeEventListener('click', onClick, true);
             window.removeEventListener("keydown", onKeyDown, true);
@@ -2525,11 +2512,12 @@ scrapbook-toolbar, scrapbook-toolbar *,
       },
 
       adjustTarget(elem) {
-        let checkElem;
+        if (!elem) { return elem; }
 
         // Special handling for special elements,
         // as their inner elements cannot be tooltiped and handled,
         // or should be treated as a whole.
+        let checkElem;
         while ((checkElem = elem.closest(ATOMIC_NODES)) && checkElem !== elem) {
           elem = checkElem;
         }
@@ -2553,6 +2541,10 @@ scrapbook-toolbar, scrapbook-toolbar *,
         })()
 
         domEraser.clearTarget();
+
+        // skip if the new target is invalid
+        if (elem.matches(SKIP_NODES)) { return; }
+
         lastTarget = elem;
 
         if (scrapbook.getScrapBookObjectRemoveType(elem) <= 0) {
