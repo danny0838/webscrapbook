@@ -2587,11 +2587,11 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
         if (scrapbook.getScrapBookObjectRemoveType(elem) <= 0) {
           const id = elem.id;
-          const classText = Array.from(elem.classList.values()).join(' '); // elements like svg doesn't support .className property
+          const classText = Array.from(elem.classList.values()).map(x => '.' + x).join(''); // elements like svg doesn't support .className property
           var outlineStyle = '2px solid red';
           var labelHtml = `<b style="all: unset !important; font-weight: bold !important;">${scrapbook.escapeHtml(elem.tagName.toLowerCase(), false, false, true)}</b>` + 
-              (id ? ", id: " + scrapbook.escapeHtml(id, false, false, true) : "") + 
-              (classText ? ", class: " + scrapbook.escapeHtml(classText, false, false, true) : "");
+              (id ? "#" + scrapbook.escapeHtml(id, false, false, true) : "") + 
+              classText;
         } else {
           var outlineStyle = '2px dashed blue';
           var labelHtml = scrapbook.escapeHtml(scrapbook.lang("EditorButtonDOMEraserRemoveEdit"), false, false, true);
