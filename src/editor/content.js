@@ -2629,9 +2629,10 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
         const boundingRect = elem.getBoundingClientRect();
         const viewport = scrapbook.getViewport(window);
+        const toolbarHeight = editor.element ? editor.element.offsetHeight : 0;
         const anchorPos = scrapbook.getAnchoredPosition(labelElem, {
           clientX: Math.min(Math.max(boundingRect.left, 0), viewport.width - labelElem.offsetWidth),
-          clientY: Math.min(Math.max(boundingRect.bottom, 0), viewport.height - labelElem.offsetHeight),
+          clientY: Math.min(Math.max(boundingRect.bottom, 0), viewport.height - toolbarHeight - labelElem.offsetHeight),
         }, viewport);
         labelElem.style.setProperty('left', anchorPos.left + 'px', 'important');
         labelElem.style.setProperty('top', anchorPos.top + 'px', 'important');
