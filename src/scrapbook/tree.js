@@ -823,139 +823,141 @@ Redirecting to file <a href="index.md">index.md</a>
     },
 
     showCommands(willShow = document.getElementById('command-popup').hidden, x, y) {
-      if (willShow) {
-        const menuElem = document.getElementById('command-popup');
+      const menuElem = document.getElementById('command-popup');
 
-        const selectedItemElems = Array.prototype.map.call(
-          document.querySelectorAll('#item-root .highlight'),
-          x => x.parentNode
-        );
+      if (!willShow) {
+        menuElem.hidden = true;
+        return;
+      }
 
-        const isRecycle = this.rootId === 'recycle';
+      const selectedItemElems = Array.prototype.map.call(
+        document.querySelectorAll('#item-root .highlight'),
+        x => x.parentNode
+      );
 
-        switch (selectedItemElems.length) {
-          case 0: {
-            menuElem.querySelector('button[value="index"]').hidden = false;
-            menuElem.querySelector('button[value="exec_book"]').hidden = false;
-            menuElem.querySelector('button[value="opentab"]').hidden = true;
-            menuElem.querySelector('button[value="view_text"]').hidden = true;
-            menuElem.querySelector('button[value="exec"]').hidden = true;
-            menuElem.querySelector('button[value="browse"]').hidden = true;
-            menuElem.querySelector('button[value="source"]').hidden = true;
-            menuElem.querySelector('button[value="manage"]').hidden = false;
+      const isRecycle = this.rootId === 'recycle';
 
-            menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
-            menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
-            menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
-            menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
+      switch (selectedItemElems.length) {
+        case 0: {
+          menuElem.querySelector('button[value="index"]').hidden = false;
+          menuElem.querySelector('button[value="exec_book"]').hidden = false;
+          menuElem.querySelector('button[value="opentab"]').hidden = true;
+          menuElem.querySelector('button[value="view_text"]').hidden = true;
+          menuElem.querySelector('button[value="exec"]').hidden = true;
+          menuElem.querySelector('button[value="browse"]').hidden = true;
+          menuElem.querySelector('button[value="source"]').hidden = true;
+          menuElem.querySelector('button[value="manage"]').hidden = false;
 
-            menuElem.querySelector('button[value="edit"]').hidden = true;
-            menuElem.querySelector('button[value="move_up"]').hidden = true;
-            menuElem.querySelector('button[value="move_down"]').hidden = true;
-            menuElem.querySelector('button[value="move_into"]').hidden = true;
-            menuElem.querySelector('button[value="recycle"]').hidden = true;
-            menuElem.querySelector('button[value="delete"]').hidden = true;
+          menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
 
-            menuElem.querySelector('button[value="meta"]').hidden = true;
-            menuElem.querySelector('button[value="view_recycle"]').hidden = !(!isRecycle);
-            break;
-          }
+          menuElem.querySelector('button[value="edit"]').hidden = true;
+          menuElem.querySelector('button[value="move_up"]').hidden = true;
+          menuElem.querySelector('button[value="move_down"]').hidden = true;
+          menuElem.querySelector('button[value="move_into"]').hidden = true;
+          menuElem.querySelector('button[value="recycle"]').hidden = true;
+          menuElem.querySelector('button[value="delete"]').hidden = true;
 
-          case 1: {
-            const item = this.book.meta[selectedItemElems[0].getAttribute('data-id')];
-
-            menuElem.querySelector('button[value="index"]').hidden = true;
-            menuElem.querySelector('button[value="exec_book"]').hidden = true;
-            menuElem.querySelector('button[value="opentab"]').hidden = ['folder', 'separator'].includes(item.type);
-            menuElem.querySelector('button[value="view_text"]').hidden = !(item.type === 'file' && item.index);
-            menuElem.querySelector('button[value="exec"]').hidden = !(item.type === 'file' && item.index);
-            menuElem.querySelector('button[value="browse"]').hidden = !(item.index);
-            menuElem.querySelector('button[value="source"]').hidden = !(item.source);
-            menuElem.querySelector('button[value="manage"]').hidden = !(item.type === 'folder' || this.book.toc[item.id]);
-
-            menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
-            menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
-            menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
-            menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
-
-            menuElem.querySelector('button[value="edit"]').hidden = !(!isRecycle && ['note'].includes(item.type) && item.index);
-            menuElem.querySelector('button[value="move_up"]').hidden = !(!isRecycle);
-            menuElem.querySelector('button[value="move_down"]').hidden = !(!isRecycle);
-            menuElem.querySelector('button[value="move_into"]').hidden = false;
-            menuElem.querySelector('button[value="recycle"]').hidden = !(!isRecycle);
-            menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
-
-            menuElem.querySelector('button[value="meta"]').hidden = false;
-            menuElem.querySelector('button[value="view_recycle"]').hidden = true;
-            break;
-          }
-
-          default: {
-            menuElem.querySelector('button[value="index"]').hidden = true;
-            menuElem.querySelector('button[value="exec_book"]').hidden = true;
-            menuElem.querySelector('button[value="opentab"]').hidden = false;
-            menuElem.querySelector('button[value="view_text"]').hidden = true;
-            menuElem.querySelector('button[value="exec"]').hidden = true;
-            menuElem.querySelector('button[value="browse"]').hidden = false;
-            menuElem.querySelector('button[value="source"]').hidden = false;
-            menuElem.querySelector('button[value="manage"]').hidden = true;
-
-            menuElem.querySelector('button[value="mkfolder"]').hidden = true;
-            menuElem.querySelector('button[value="mksep"]').hidden = true;
-            menuElem.querySelector('button[value="mknote"]').hidden = true;
-            menuElem.querySelector('button[value="upload"]').hidden = true;
-
-            menuElem.querySelector('button[value="edit"]').hidden = true;
-            menuElem.querySelector('button[value="move_up"]').hidden = true;
-            menuElem.querySelector('button[value="move_down"]').hidden = true;
-            menuElem.querySelector('button[value="move_into"]').hidden = false;
-            menuElem.querySelector('button[value="recycle"]').hidden = !(!isRecycle);
-            menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
-
-            menuElem.querySelector('button[value="meta"]').hidden = true;
-            menuElem.querySelector('button[value="view_recycle"]').hidden = true;
-            break;
-          }
+          menuElem.querySelector('button[value="meta"]').hidden = true;
+          menuElem.querySelector('button[value="view_recycle"]').hidden = !(!isRecycle);
+          break;
         }
 
-        // show/hide each separator if there are shown items around it
-        let hasShownItem = false;
-        let lastSep = null;
-        for (const elem of menuElem.querySelectorAll('button, hr')) {
-          if (elem.localName === 'hr') {
-            elem.hidden = true;
-            if (hasShownItem) { lastSep = elem; }
-            hasShownItem = false;
-          } else {
-            if (!elem.hidden) {
-              hasShownItem = true;
-              if (lastSep) {
-                lastSep.hidden = false;
-                lastSep = null;
-              }
+        case 1: {
+          const item = this.book.meta[selectedItemElems[0].getAttribute('data-id')];
+
+          menuElem.querySelector('button[value="index"]').hidden = true;
+          menuElem.querySelector('button[value="exec_book"]').hidden = true;
+          menuElem.querySelector('button[value="opentab"]').hidden = ['folder', 'separator'].includes(item.type);
+          menuElem.querySelector('button[value="view_text"]').hidden = !(item.type === 'file' && item.index);
+          menuElem.querySelector('button[value="exec"]').hidden = !(item.type === 'file' && item.index);
+          menuElem.querySelector('button[value="browse"]').hidden = !(item.index);
+          menuElem.querySelector('button[value="source"]').hidden = !(item.source);
+          menuElem.querySelector('button[value="manage"]').hidden = !(item.type === 'folder' || this.book.toc[item.id]);
+
+          menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
+
+          menuElem.querySelector('button[value="edit"]').hidden = !(!isRecycle && ['note'].includes(item.type) && item.index);
+          menuElem.querySelector('button[value="move_up"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="move_down"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="move_into"]').hidden = false;
+          menuElem.querySelector('button[value="recycle"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
+
+          menuElem.querySelector('button[value="meta"]').hidden = false;
+          menuElem.querySelector('button[value="view_recycle"]').hidden = true;
+          break;
+        }
+
+        default: {
+          menuElem.querySelector('button[value="index"]').hidden = true;
+          menuElem.querySelector('button[value="exec_book"]').hidden = true;
+          menuElem.querySelector('button[value="opentab"]').hidden = false;
+          menuElem.querySelector('button[value="view_text"]').hidden = true;
+          menuElem.querySelector('button[value="exec"]').hidden = true;
+          menuElem.querySelector('button[value="browse"]').hidden = false;
+          menuElem.querySelector('button[value="source"]').hidden = false;
+          menuElem.querySelector('button[value="manage"]').hidden = true;
+
+          menuElem.querySelector('button[value="mkfolder"]').hidden = true;
+          menuElem.querySelector('button[value="mksep"]').hidden = true;
+          menuElem.querySelector('button[value="mknote"]').hidden = true;
+          menuElem.querySelector('button[value="upload"]').hidden = true;
+
+          menuElem.querySelector('button[value="edit"]').hidden = true;
+          menuElem.querySelector('button[value="move_up"]').hidden = true;
+          menuElem.querySelector('button[value="move_down"]').hidden = true;
+          menuElem.querySelector('button[value="move_into"]').hidden = false;
+          menuElem.querySelector('button[value="recycle"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
+
+          menuElem.querySelector('button[value="meta"]').hidden = true;
+          menuElem.querySelector('button[value="view_recycle"]').hidden = true;
+          break;
+        }
+      }
+
+      // show/hide each separator if there are shown items around it
+      let hasShownItem = false;
+      let lastSep = null;
+      for (const elem of menuElem.querySelectorAll('button, hr')) {
+        if (elem.localName === 'hr') {
+          elem.hidden = true;
+          if (hasShownItem) { lastSep = elem; }
+          hasShownItem = false;
+        } else {
+          if (!elem.hidden) {
+            hasShownItem = true;
+            if (lastSep) {
+              lastSep.hidden = false;
+              lastSep = null;
             }
           }
         }
-
-        // show menu and fix position
-        const viewport = scrapbook.getViewportDimensions(window);
-        const availWidth = viewport.scrollX + viewport.width;
-        const availHeight = viewport.scrollY + viewport.height;
-        menuElem.style.maxWidth = availWidth + 'px';
-        menuElem.style.maxHeight = availHeight + 'px';
-        menuElem.style.left = menuElem.style.top = 0;
-        menuElem.hidden = false;
-        x = Math.max(x, 0);
-        x = Math.min(x, availWidth - menuElem.offsetWidth);
-        y = Math.max(y, 0);
-        y = Math.min(y, availHeight - menuElem.offsetHeight);
-        menuElem.style.left = x + 'px';
-        menuElem.style.top = y + 'px';
-        menuElem.focus();
-      } else {
-        const menuElem = document.getElementById('command-popup');
-        menuElem.hidden = true;
       }
+
+      // show menu and fix position
+      const viewport = scrapbook.getViewportDimensions(window);
+      const availWidth = viewport.scrollX + viewport.width;
+      const availHeight = viewport.scrollY + viewport.height;
+      menuElem.style.maxWidth = availWidth + 'px';
+      menuElem.style.maxHeight = availHeight + 'px';
+      menuElem.style.left = menuElem.style.top = 0;
+      menuElem.hidden = false;
+
+      x = Math.max(x, 0);
+      x = Math.min(x, availWidth - menuElem.offsetWidth);
+      y = Math.max(y, 0);
+      y = Math.min(y, availHeight - menuElem.offsetHeight);
+      menuElem.style.left = x + 'px';
+      menuElem.style.top = y + 'px';
+
+      menuElem.focus();
     },
 
     /**
