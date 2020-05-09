@@ -2142,6 +2142,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         editor.addHistory();
         popupElem.remove();
         for (const part of scrapbook.getScrapBookObjectsById(popupElem)) {
+          part.classList.remove('editing');
           if (annotation) {
             part.setAttribute('title', annotation);
           } else {
