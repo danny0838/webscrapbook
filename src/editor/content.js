@@ -2143,6 +2143,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         popupElem.remove();
         for (const part of scrapbook.getScrapBookObjectsById(popupElem)) {
           part.classList.remove('editing');
+          if (!part.classList.length) { part.removeAttribute('class'); }
           if (annotation) {
             part.setAttribute('title', annotation);
           } else {
@@ -2378,6 +2379,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
         const newElem = mainElem.cloneNode(false);
         newElem.classList.remove('editing');
+        if (!newElem.classList.length) { newElem.removeAttribute('class'); }
         if (mainElem.classList.contains('plaintext')) {
           let bodyElem = mainElem.shadowRoot.querySelector('textarea');
           newElem.textContent = bodyElem.value;
