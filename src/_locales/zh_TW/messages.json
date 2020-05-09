@@ -735,6 +735,9 @@
   "OptionCaptureRecordRewritesTooltip": {
     "message": "擷取網頁時若有改寫的元素、屬性或樣式表，則用 data-* 屬性、HTML 註解、CSS 註解等方式記錄原始內容。"
   },
+  "OptionCaptureRemoteTabDelayLabel": {
+    "message": "擷取自動開啟的新分頁前延遲 (ms):"
+  },
   "OptionCaptureRemoveHiddenLabel": {
     "message": "移除隱藏元素:"
   },

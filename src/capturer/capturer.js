@@ -936,6 +936,14 @@
         browser.tabs.onRemoved.addListener(listener2);
       });
 
+      {
+        const delay = options["capture.remoteTabDelay"];
+        if (typeof delay === 'number') {
+          capturer.log(`Waiting for ${delay} ms...`);
+          await scrapbook.delay(delay);
+        }
+      }
+
       const response = await capturer.captureTab({
         tabId: tab.id,
         fullPage: true,

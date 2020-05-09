@@ -735,6 +735,9 @@
   "OptionCaptureRecordRewritesTooltip": {
     "message": "获取网页时若有改写的元素、属性或样式表，则用 data-* 属性、HTML 注解、CSS 注解等方式记录原始内容。"
   },
+  "OptionCaptureRemoteTabDelayLabel": {
+    "message": "获取自动开启的新分页前延迟 (ms):"
+  },
   "OptionCaptureRemoveHiddenLabel": {
     "message": "移除隐藏元素:"
   },

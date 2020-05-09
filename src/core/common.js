@@ -93,6 +93,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.recordRewrites": false,
     "capture.helpersEnabled": false,
     "capture.helpers": "",
+    "capture.remoteTabDelay": null,
     "capture.deleteErasedOnCapture": true,
     "capture.deleteErasedOnSave": false,
     "editor.autoInit": true,

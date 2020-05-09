@@ -42,6 +42,7 @@ const baseOptions = {
   "capture.recordRewrites": false,
   "capture.helpersEnabled": false,
   "capture.helpers": "",
+  "capture.remoteTabDelay": null,
   "capture.deleteErasedOnCapture": false,
   "capture.deleteErasedOnSave": false,
 };

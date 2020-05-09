@@ -735,6 +735,9 @@
   "OptionCaptureRecordRewritesTooltip": {
     "message": "Create a corresponding data-* attribute, or HTML or CSS comment to record the original value for every rewriting during the capture process."
   },
+  "OptionCaptureRemoteTabDelayLabel": {
+    "message": "Delay before capturing an auto new tab (ms):"
+  },
   "OptionCaptureRemoveHiddenLabel": {
     "message": "Remove hidden elements:"
   },
