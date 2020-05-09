@@ -1997,8 +1997,10 @@ scrapbook-toolbar, scrapbook-toolbar *,
       /**
        * @kind invokable
        */
-      editLineMarker(elem, pos) {
+      editLineMarker(elem, pos, skipHistory = false) {
         if (elem.shadowRoot) { return; }
+
+        this.saveAll();
 
         // fallback to popup if shadow DOM is not supported
         if (!SHADOW_DOM_SUPPORTED) {
@@ -2008,7 +2010,10 @@ scrapbook-toolbar, scrapbook-toolbar *,
             return;
           }
 
-          editor.addHistory();
+          if (!skipHistory) {
+            editor.addHistory();
+          }
+
           for (const part of scrapbook.getScrapBookObjectsById(elem)) {
             if (annotation) {
               part.setAttribute('title', annotation);
@@ -2019,7 +2024,9 @@ scrapbook-toolbar, scrapbook-toolbar *,
           return;
         }
 
-        this.saveAll();
+        if (!skipHistory) {
+          editor.addHistory();
+        }
 
         elem.classList.add('editing');
 
@@ -2138,8 +2145,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
         if (!popupElem.shadowRoot) { return; }
 
         const annotation = popupElem.shadowRoot.querySelector('textarea').value;
-
-        editor.addHistory();
         popupElem.remove();
         for (const part of scrapbook.getScrapBookObjectsById(popupElem)) {
           part.classList.remove('editing');
@@ -2201,7 +2206,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
           document.body.appendChild(mainElem);
         }
 
-        this.editSticky(mainElem);
+        this.editSticky(mainElem, true);
 
         function findBlockRefNode(node) {
           // must be one of these block elements
@@ -2224,10 +2229,10 @@ scrapbook-toolbar, scrapbook-toolbar *,
         }
       },
 
-      editSticky(mainElem) {
-        this.saveAll();
-
+      editSticky(mainElem, skipHistory = false) {
         if (mainElem.shadowRoot) { return; }
+
+        this.saveAll();
 
         if (!SHADOW_DOM_SUPPORTED || !mainElem.classList.contains('styled')) {
           const attr = mainElem.classList.contains('plaintext') ? 'textContent' : 'innerHTML';
@@ -2236,8 +2241,17 @@ scrapbook-toolbar, scrapbook-toolbar *,
           if (content === null) {
             return;
           }
+
+          if (!skipHistory) {
+            editor.addHistory();
+          }
+
           mainElem[attr] = content;
           return;
+        }
+
+        if (!skipHistory) {
+          editor.addHistory();
         }
 
         const shadowRoot = mainElem.attachShadow({mode: 'open'});
