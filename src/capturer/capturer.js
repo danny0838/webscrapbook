@@ -769,6 +769,7 @@
       const response = await capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
       isDebug && console.debug("(main) response", source, response);
       capturer.captureInfo.delete(timeId);
+      if (!response) { throw new Error(`Response not received.`); }
       if (response.error) { throw new Error(response.error.message); }
 
       if (message.options["capture.saveTo"] === "server") {
@@ -889,6 +890,7 @@
 
       isDebug && console.debug("(main) response", source, response);
       capturer.captureInfo.delete(timeId);
+      if (!response) { throw new Error(`Response not received.`); }
       if (response.error) { throw new Error(response.error.message); }
 
       if (message.options["capture.saveTo"] === "server") {
