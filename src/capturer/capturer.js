@@ -653,7 +653,6 @@
         try {
           if (typeof tabId === 'number') {
             // capture tab
-            const source = `[${tabId}:${frameId}]`;
             result = await capturer.captureTab({
               tabId,
               frameId,
