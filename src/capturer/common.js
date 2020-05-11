@@ -944,6 +944,7 @@
                       frame.hasAttribute("srcdoc")) {
                     const frameSettings = JSON.parse(JSON.stringify(settings));
                     frameSettings.frameIsMain = false;
+                    frameSettings.fullPage = true;
                     delete frameSettings.usedCssFontUrl;
                     delete frameSettings.usedCssImageUrl;
 
@@ -1035,6 +1036,7 @@
 
                   const frameSettings = JSON.parse(JSON.stringify(settings));
                   frameSettings.frameIsMain = false;
+                  frameSettings.fullPage = true;
                   delete frameSettings.usedCssFontUrl;
                   delete frameSettings.usedCssImageUrl;
 
