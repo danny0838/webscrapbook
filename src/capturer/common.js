@@ -301,7 +301,7 @@
 
         // check local link and rewrite url
         url = rewriteLocalLink(url, refUrl);
-        elem.setAttribute(attr, url);
+        captureRewriteAttr(elem, attr, url);
 
         // skip further processing for non-absolute links
         if (!scrapbook.isUrlAbsolute(url)) {
@@ -373,7 +373,7 @@
 
         // check local link and rewrite url
         url = rewriteLocalLink(url, refUrl);
-        elem.setAttribute(attr, url);
+        captureRewriteAttr(elem, attr, url);
 
         switch (options["capture.image"]) {
           case "link":
@@ -480,11 +480,11 @@
             case "script": {
               if (elem.hasAttribute("href")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), refUrl);
-                elem.setAttribute("href", rewriteUrl);
+                captureRewriteAttr(elem, "href", rewriteUrl);
               }
               if (elem.hasAttribute("xlink:href")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("xlink:href"), refUrl);
-                elem.setAttribute("xlink:href", rewriteUrl);
+                captureRewriteAttr(elem, "xlink:href", rewriteUrl);
               }
 
               switch (options["capture.script"]) {
@@ -580,7 +580,7 @@
 
               // resolve base URL using document URL rather than base URL
               const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), docUrl);
-              elem.setAttribute("href", rewriteUrl);
+              captureRewriteAttr(elem, "href", rewriteUrl);
 
               switch (options["capture.base"]) {
                 case "blank":
@@ -610,7 +610,7 @@
                   if (metaRefresh.url) {
                     // meta refresh is relative to document URL rather than base URL
                     const url = rewriteLocalLink(metaRefresh.url, docUrl);
-                    elem.setAttribute("content", metaRefresh.time + (url ? ";url=" + url : ""));
+                    captureRewriteAttr(elem, "content", metaRefresh.time + (url ? ";url=" + url : ""));
                   }
                 } else if (elem.getAttribute("http-equiv").toLowerCase() == "content-security-policy") {
                   // content security policy could make resources not loaded when viewed offline
@@ -631,7 +631,7 @@
             case "link": {
               if (!elem.hasAttribute("href")) { break; }
               const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), refUrl);
-              elem.setAttribute("href", rewriteUrl);
+              captureRewriteAttr(elem, "href", rewriteUrl);
 
               if (elem.matches('[rel~="stylesheet"]')) {
                 // styles: link element
@@ -811,7 +811,7 @@
             case "script": {
               if (elem.hasAttribute("src")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-                elem.setAttribute("src", rewriteUrl);
+                captureRewriteAttr(elem, "src", rewriteUrl);
               }
 
               switch (options["capture.script"]) {
@@ -886,7 +886,7 @@
               // deprecated: background attribute (deprecated since HTML5)
               if (elem.hasAttribute("background")) {
                 let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("background"), refUrl);
-                elem.setAttribute("background", rewriteUrl);
+                captureRewriteAttr(elem, "background", rewriteUrl);
 
                 switch (options["capture.imageBackground"]) {
                   case "link":
@@ -921,7 +921,7 @@
               const frameSrc = origNodeMap.get(frame);
               if (frame.hasAttribute("src")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(frame.getAttribute("src"), refUrl);
-                frame.setAttribute("src", rewriteUrl);
+                captureRewriteAttr(frame, "src", rewriteUrl);
               }
 
               switch (options["capture.frame"]) {
@@ -1154,15 +1154,14 @@
             case "img": {
               if (elem.hasAttribute("src")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-                elem.setAttribute("src", rewriteUrl);
+                captureRewriteAttr(elem, "src", rewriteUrl);
               }
 
               if (elem.hasAttribute("srcset")) {
-                elem.setAttribute("srcset",
-                  scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
-                    return capturer.resolveRelativeUrl(url, refUrl);
-                  })
-                );
+                const rewriteSrcset = scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
+                  return capturer.resolveRelativeUrl(url, refUrl);
+                });
+                captureRewriteAttr(elem, "srcset", rewriteSrcset);
               }
 
               switch (options["capture.image"]) {
@@ -1240,11 +1239,10 @@
             // images: picture
             case "picture": {
               Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                elem.setAttribute("srcset",
-                  scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
-                    return capturer.resolveRelativeUrl(url, refUrl);
-                  })
-                );
+                const rewriteSrcset = scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
+                  return capturer.resolveRelativeUrl(url, refUrl);
+                });
+                captureRewriteAttr(elem, "srcset", rewriteSrcset);
               }, this);
 
               switch (options["capture.image"]) {
@@ -1266,8 +1264,6 @@
 
                       if (elemOrig && elemOrig.currentSrc) {
                         // elem will be further processed in the following loop that handles "img"
-                        const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-                        elem.setAttribute("src", rewriteUrl);
                         captureRewriteAttr(elem, "src", elemOrig.currentSrc);
                         captureRewriteAttr(elem, "srcset", null);
                       }
@@ -1285,8 +1281,9 @@
                   Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
                     tasks[tasks.length] = halter.then(async () => {
                       const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
+                        const rewriteUrl = capturer.resolveRelativeUrl(url, refUrl);
                         return (await capturer.invoke("downloadFile", {
-                          url,
+                          url: rewriteUrl,
                           refUrl,
                           settings,
                           options,
@@ -1305,12 +1302,12 @@
             case "audio": {
               if (elem.hasAttribute("src")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-                elem.setAttribute("src", rewriteUrl);
+                captureRewriteAttr(elem, "src", rewriteUrl);
               }
 
               Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-                elem.setAttribute("src", rewriteUrl);
+                captureRewriteAttr(elem, "src", rewriteUrl);
               }, this);
 
               switch (options["capture.audio"]) {
@@ -1404,17 +1401,17 @@
             case "video": {
               if (elem.hasAttribute("poster")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("poster"), refUrl);
-                elem.setAttribute("poster", rewriteUrl);
+                captureRewriteAttr(elem, "poster", rewriteUrl);
               }
 
               if (elem.hasAttribute("src")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-                elem.setAttribute("src", rewriteUrl);
+                captureRewriteAttr(elem, "src", rewriteUrl);
               }
 
               Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-                elem.setAttribute("src", rewriteUrl);
+                captureRewriteAttr(elem, "src", rewriteUrl);
               }, this);
 
               switch (options["capture.video"]) {
@@ -1540,7 +1537,7 @@
             case "embed": {
               if (elem.hasAttribute("src")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-                elem.setAttribute("src", rewriteUrl);
+                captureRewriteAttr(elem, "src", rewriteUrl);
               }
 
               switch (options["capture.embed"]) {
@@ -1580,7 +1577,7 @@
             case "object": {
               if (elem.hasAttribute("data")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("data"), refUrl);
-                elem.setAttribute("data", rewriteUrl);
+                captureRewriteAttr(elem, "data", rewriteUrl);
               }
 
               switch (options["capture.object"]) {
@@ -1620,12 +1617,12 @@
             case "applet": {
               if (elem.hasAttribute("code")) {
                 let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("code"), refUrl);
-                elem.setAttribute("code", rewriteUrl);
+                captureRewriteAttr(elem, "code", rewriteUrl);
               }
 
               if (elem.hasAttribute("archive")) {
                 let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("archive"), refUrl);
-                elem.setAttribute("archive", rewriteUrl);
+                captureRewriteAttr(elem, "archive", rewriteUrl);
               }
 
               switch (options["capture.applet"]) {
@@ -1707,7 +1704,7 @@
             case "form": {
               if (elem.hasAttribute("action")) {
                 const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("action"), refUrl);
-                elem.setAttribute("action", rewriteUrl);
+                captureRewriteAttr(elem, "action", rewriteUrl);
               }
               break;
             }
@@ -1718,7 +1715,7 @@
                 case "image": {
                   if (elem.hasAttribute("src")) {
                     const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-                    elem.setAttribute("src", rewriteUrl);
+                    captureRewriteAttr(elem, "src", rewriteUrl);
                   }
                   switch (options["capture.image"]) {
                     case "link":
@@ -1891,7 +1888,7 @@
                       refUrl,
                       isInline: true,
                     });
-                    elem.setAttribute("style", response);
+                    captureRewriteAttr(elem, "style", response);
                     return response;
                   });
                   break;
@@ -1904,7 +1901,7 @@
                       refUrl,
                       isInline: true,
                     });
-                    elem.setAttribute("style", response);
+                    captureRewriteAttr(elem, "style", response);
                     return response;
                   });
                   break;
@@ -3617,7 +3614,7 @@
 
         return {
           url,
-          recordUrl: options["capture.recordRewrites"] ? url : "",
+          recordUrl: options["capture.recordRewrites"] ? sourceUrl : "",
           valid,
         };
       };
