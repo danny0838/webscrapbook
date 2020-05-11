@@ -7113,6 +7113,11 @@ async function test_capture_record_urls() {
   assert(doc.querySelector('applet').getAttribute(`data-scrapbook-orig-attr-archive-${timeId}`) === `./null.jar`);
   assert(doc.querySelector('a').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.txt`);
 
+  assert(doc.querySelectorAll('svg a[*|href]')[0].getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.txt`);
+  assert(doc.querySelectorAll('svg a[*|href]')[1].getAttribute(`xlink:data-scrapbook-orig-attr-href-${timeId}`) === `./null.txt`);
+  assert(doc.querySelectorAll('svg image[*|href]')[0].getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.bmp`);
+  assert(doc.querySelectorAll('svg image[*|href]')[1].getAttribute(`xlink:data-scrapbook-orig-attr-href-${timeId}`) === `./null.bmp`);
+
   // CSS
   assert(doc.querySelector('style').textContent.trim() === `@import /*scrapbook-orig-url="./null.css"*/url("null.css");
 @font-face { font-family: myFont; src: /*scrapbook-orig-url="./null.woff"*/url("null.woff"); }
@@ -7157,6 +7162,11 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url("null.bmp"); }`);
   assert(!doc.querySelector('applet').hasAttribute(`data-scrapbook-orig-attr-code-${timeId}`));
   assert(!doc.querySelector('applet').hasAttribute(`data-scrapbook-orig-attr-archive-${timeId}`));
   assert(!doc.querySelector('a').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
+
+  assert(!doc.querySelectorAll('svg a[*|href]')[0].hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
+  assert(!doc.querySelectorAll('svg a[*|href]')[1].hasAttribute(`xlink:data-scrapbook-orig-attr-href-${timeId}`));
+  assert(!doc.querySelectorAll('svg image[*|href]')[0].hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
+  assert(!doc.querySelectorAll('svg image[*|href]')[1].hasAttribute(`xlink:data-scrapbook-orig-attr-href-${timeId}`));
 
   // CSS
   assert(doc.querySelector('style').textContent.trim() === `@import url("null.css");
