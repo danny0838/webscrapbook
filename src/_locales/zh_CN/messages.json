@@ -755,23 +755,11 @@
   "OptionCapturePageSizeLimitTooltip": {
     "message": "系统不会获取超出此限制的页面。空白表示不设限制。"
   },
-  "OptionCaptureRecordRewrittenAttrLabel": {
-    "message": "记录改写的属性"
+  "OptionCaptureRecordRewritesLabel": {
+    "message": "记录改写的內容"
   },
-  "OptionCaptureRecordRewrittenAttrTooltip": {
-    "message": "获取网页时若有改写元素的属性，则建立对应的 data-* 属性记录原始值。"
-  },
-  "OptionCaptureRecordRewrittenNodeLabel": {
-    "message": "记录改写的元素"
-  },
-  "OptionCaptureRecordRewrittenNodeTooltip": {
-    "message": "获取网页时若有添加或移除的元素，则建立 HTML 注解记录原始内容。"
-  },
-  "OptionCaptureRecordSourceUriLabel": {
-    "message": "记录原始的 URL"
-  },
-  "OptionCaptureRecordSourceUriTooltip": {
-    "message": "获取网页时若有改写元素或样式表的链接，则建立注解或 data-* 属性记录原始 URL 位址。"
+  "OptionCaptureRecordRewritesTooltip": {
+    "message": "获取网页时若有改写的元素、属性或样式表，则用 data-* 属性、HTML 注解、CSS 注解等方式记录原始内容。"
   },
   "OptionCaptureRemoveHiddenLabel": {
     "message": "移除隐藏元素:"
@@ -928,9 +916,6 @@
   },
   "OptionGroupIndexer": {
     "message": "索引器"
-  },
-  "OptionGroupMetadata": {
-    "message": "获取 - 元数据"
   },
   "OptionGroupSave": {
     "message": "获取 - 保存"

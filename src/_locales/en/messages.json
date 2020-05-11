@@ -755,23 +755,11 @@
   "OptionCapturePageSizeLimitTooltip": {
     "message": "A page exceeding the limit will not be captured. Empty for no limit."
   },
-  "OptionCaptureRecordRewrittenAttrLabel": {
-    "message": "Record rewritten attributes"
+  "OptionCaptureRecordRewritesLabel": {
+    "message": "Record rewrites"
   },
-  "OptionCaptureRecordRewrittenAttrTooltip": {
-    "message": "If an attribute is rewritten during the capture process, create a corresponding data-* attribute to record its original value."
-  },
-  "OptionCaptureRecordRewrittenNodeLabel": {
-    "message": "Record rewritten elements"
-  },
-  "OptionCaptureRecordRewrittenNodeTooltip": {
-    "message": "If an element is added or removed during the capture process, create an HTML comment to record the original content."
-  },
-  "OptionCaptureRecordSourceUriLabel": {
-    "message": "Record source URL"
-  },
-  "OptionCaptureRecordSourceUriTooltip": {
-    "message": "If a URL of an element or a stylesheet is rewritten during the capture process, create a comment or data-* attribute to record its original address."
+  "OptionCaptureRecordRewritesTooltip": {
+    "message": "Create a corresponding data-* attribute, or HTML or CSS comment to record the original value for every rewriting during the capture process."
   },
   "OptionCaptureRemoveHiddenLabel": {
     "message": "Remove hidden elements:"
@@ -928,9 +916,6 @@
   },
   "OptionGroupIndexer": {
     "message": "Indexer"
-  },
-  "OptionGroupMetadata": {
-    "message": "Capture - metadata"
   },
   "OptionGroupSave": {
     "message": "Capture - saving"

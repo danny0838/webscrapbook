@@ -172,7 +172,7 @@
         return newNode;
       };
 
-      const captureRecordAddedNode = (elem, record = options["capture.recordRewrittenNode"]) => {
+      const captureRecordAddedNode = (elem, record = options["capture.recordRewrites"]) => {
         if (record) {
           const recordAttr = `data-scrapbook-orig-null-node-${timeId}`;
           if (!elem.hasAttribute(recordAttr)) {
@@ -182,7 +182,7 @@
       };
 
       // remove the specified node, record it if option set
-      const captureRemoveNode = (elem, record = options["capture.recordRewrittenNode"]) => {
+      const captureRemoveNode = (elem, record = options["capture.recordRewrites"]) => {
         if (!elem.parentNode) { return; }
 
         if (record) {
@@ -194,7 +194,7 @@
       };
 
       // rewrite (or remove if value is null/undefined) the specified attr, record it if option set
-      const captureRewriteAttr = (elem, attr, value, record = options["capture.recordRewrittenAttr"]) => {
+      const captureRewriteAttr = (elem, attr, value, record = options["capture.recordRewrites"]) => {
         let [ns, att] = scrapbook.splitXmlAttribute(attr);
 
         if (elem.hasAttribute(attr)) {
@@ -232,7 +232,7 @@
       };
 
       // rewrite the textContent, record it if option set
-      const captureRewriteTextContent = (elem, value, record = options["capture.recordRewrittenAttr"]) => {
+      const captureRewriteTextContent = (elem, value, record = options["capture.recordRewrites"]) => {
         const oldValue = elem.textContent;
         if (oldValue === value) { return; }
 
@@ -242,11 +242,6 @@
           const recordAttr = `data-scrapbook-orig-textContent-${timeId}`;
           if (!elem.hasAttribute(recordAttr)) { elem.setAttribute(recordAttr, oldValue); }
         }
-      };
-
-      // similar to captureRewriteAttr, but use option capture.recordSourceUri
-      const captureRewriteUri = (elem, attr, value, record = options["capture.recordSourceUri"]) => {
-        return captureRewriteAttr(elem, attr, value, record);
       };
 
       const rewriteLocalLink = (relativeUrl, baseUrl) => {
@@ -337,7 +332,7 @@
                   settings,
                   options,
                 });
-                captureRewriteUri(elem, attr, response.url);
+                captureRewriteAttr(elem, attr, response.url);
                 return response;
               });
               break;
@@ -358,7 +353,7 @@
                   settings,
                   options,
                 });
-                captureRewriteUri(elem, attr, response.url);
+                captureRewriteAttr(elem, attr, response.url);
                 return response;
               });
               break;
@@ -386,7 +381,7 @@
             break;
           case "blank":
             if (elem.hasAttribute(attr)) {
-              captureRewriteUri(elem, attr, null);
+              captureRewriteAttr(elem, attr, null);
             }
             break;
           case "remove":
@@ -407,7 +402,7 @@
                 settings,
                 options,
               });
-              captureRewriteUri(elem, attr, response.url);
+              captureRewriteAttr(elem, attr, response.url);
               return response;
             });
             break;
@@ -498,10 +493,10 @@
                   break;
                 case "blank":
                   if (elem.hasAttribute("href")) {
-                    captureRewriteUri(elem, "href", null);
+                    captureRewriteAttr(elem, "href", null);
                   }
                   if (elem.hasAttribute("xlink:href")) {
-                    captureRewriteUri(elem, "xlink:href", null);
+                    captureRewriteAttr(elem, "xlink:href", null);
                   }
                   captureRewriteTextContent(elem, "");
                   break;
@@ -518,7 +513,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "href", response.url);
+                      captureRewriteAttr(elem, "href", response.url);
                       return response;
                     });
                   }
@@ -530,7 +525,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "xlink:href", response.url);
+                      captureRewriteAttr(elem, "xlink:href", response.url);
                       return response;
                     });
                   }
@@ -589,7 +584,7 @@
 
               switch (options["capture.base"]) {
                 case "blank":
-                  captureRewriteUri(elem, "href", null);
+                  captureRewriteAttr(elem, "href", null);
                   break;
                 case "remove":
                   captureRemoveNode(elem);
@@ -683,7 +678,7 @@
                   case "blank":
                     // HTML 5.1 2nd Edition / W3C Recommendation:
                     // If the href attribute is absent, then the element does not define a link.
-                    captureRewriteUri(elem, "href", null);
+                    captureRewriteAttr(elem, "href", null);
                     break;
                   case "remove":
                     captureRemoveNode(elem);
@@ -702,7 +697,7 @@
                         refUrl,
                         settings,
                         callback: (elem, response) => {
-                          captureRewriteUri(elem, "href", response.url);
+                          captureRewriteAttr(elem, "href", response.url);
                         },
                       });
                     });
@@ -720,7 +715,7 @@
                   case "blank":
                     // HTML 5.1 2nd Edition / W3C Recommendation:
                     // If the href attribute is absent, then the element does not define a link.
-                    captureRewriteUri(elem, "href", null);
+                    captureRewriteAttr(elem, "href", null);
                     if (typeof favIconUrl === 'undefined') {
                       favIconUrl = "";
                     }
@@ -745,7 +740,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "href", response.url);
+                      captureRewriteAttr(elem, "href", response.url);
                       if (useFavIcon) {
                         if (options["capture.saveAs"] === 'folder') {
                           favIconUrl = response.url;
@@ -757,7 +752,7 @@
                 }
               } else if (elem.matches('[rel~="preload"]')) {
                 // @TODO: handle preloads according to its "as" attribute
-                captureRewriteUri(elem, "href", null);
+                captureRewriteAttr(elem, "href", null);
               }
               break;
             }
@@ -829,7 +824,7 @@
                   //
                   // script with src="about:blank" can cause an error in some contexts
                   if (elem.hasAttribute("src")) {
-                    captureRewriteUri(elem, "src", null);
+                    captureRewriteAttr(elem, "src", null);
                   }
                   captureRewriteTextContent(elem, "");
                   break;
@@ -846,7 +841,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "src", response.url);
+                      captureRewriteAttr(elem, "src", response.url);
                       return response;
                     });
                   }
@@ -899,7 +894,7 @@
                     break;
                   case "blank":
                   case "remove": // deprecated
-                    captureRewriteUri(elem, "background", null);
+                    captureRewriteAttr(elem, "background", null);
                     break;
                   case "save-used":
                   case "save":
@@ -911,7 +906,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "background", response.url);
+                      captureRewriteAttr(elem, "background", response.url);
                       return response;
                     });
                     break;
@@ -998,7 +993,7 @@
                 case "blank": {
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // The src attribute, if present, must be a valid non-empty URL.
-                  captureRewriteUri(frame, "src", null);
+                  captureRewriteAttr(frame, "src", null);
                   captureRewriteAttr(frame, "srcdoc", null);
                   break;
                 }
@@ -1026,7 +1021,7 @@
                         }
                       }
 
-                      captureRewriteUri(frame, "src", response.url);
+                      captureRewriteAttr(frame, "src", response.url);
                       if (frame.nodeName.toLowerCase() === 'iframe') {
                         captureRewriteAttr(frame, "srcdoc", null);
                       }
@@ -1140,7 +1135,7 @@
                       }).then(captureFrameCallback);
                     } else {
                       console.warn(scrapbook.lang("WarnCaptureCircular", [sourceUrl, targetUrl]));
-                      captureRewriteUri(frame, "src", `urn:scrapbook:download:circular:url:${frame.src}`);
+                      captureRewriteAttr(frame, "src", `urn:scrapbook:download:circular:url:${frame.src}`);
                     }
                   });
                   break;
@@ -1178,11 +1173,11 @@
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // The src attribute must be present, and must contain a valid non-empty URL.
                   if (elem.hasAttribute("src")) {
-                    captureRewriteUri(elem, "src", "about:blank");
+                    captureRewriteAttr(elem, "src", "about:blank");
                   }
 
                   if (elem.hasAttribute("srcset")) {
-                    captureRewriteUri(elem, "srcset", null);
+                    captureRewriteAttr(elem, "srcset", null);
                   }
 
                   break;
@@ -1193,7 +1188,7 @@
                   if (!isHeadless) {
                     if (elemOrig && elemOrig.currentSrc) {
                       const url = elemOrig.currentSrc;
-                      captureRewriteUri(elem, "srcset", null);
+                      captureRewriteAttr(elem, "srcset", null);
                       tasks[tasks.length] = halter.then(async () => {
                         const response = await capturer.invoke("downloadFile", {
                           url,
@@ -1201,7 +1196,7 @@
                           settings,
                           options,
                         });
-                        captureRewriteUri(elem, "src", response.url);
+                        captureRewriteAttr(elem, "src", response.url);
                         return response;
                       });
                     }
@@ -1218,7 +1213,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "src", response.url);
+                      captureRewriteAttr(elem, "src", response.url);
                       return response;
                     });
                   }
@@ -1233,7 +1228,7 @@
                           options,
                         })).url;
                       });
-                      captureRewriteUri(elem, "srcset", response);
+                      captureRewriteAttr(elem, "srcset", response);
                       return response;
                     });
                   }
@@ -1258,7 +1253,7 @@
                   break;
                 case "blank":
                   Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                    captureRewriteUri(elem, "srcset", null);
+                    captureRewriteAttr(elem, "srcset", null);
                   }, this);
                   break;
                 case "remove":
@@ -1273,13 +1268,13 @@
                         // elem will be further processed in the following loop that handles "img"
                         const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
                         elem.setAttribute("src", rewriteUrl);
-                        captureRewriteUri(elem, "src", elemOrig.currentSrc);
-                        captureRewriteUri(elem, "srcset", null);
+                        captureRewriteAttr(elem, "src", elemOrig.currentSrc);
+                        captureRewriteAttr(elem, "srcset", null);
                       }
                     }, this);
 
                     Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                      captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRewrittenNode"]);
+                      captureRemoveNode(elem);
                     }, this);
 
                     break;
@@ -1297,7 +1292,7 @@
                           options,
                         })).url;
                       });
-                      captureRewriteUri(elem, "srcset", response);
+                      captureRewriteAttr(elem, "srcset", response);
                       return response;
                     });
                   }, this);
@@ -1324,13 +1319,13 @@
                   break;
                 case "blank":
                   if (elem.hasAttribute("src")) {
-                    captureRewriteUri(elem, "src", "about:blank");
+                    captureRewriteAttr(elem, "src", "about:blank");
                   }
 
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // The src attribute must be present and be a valid non-empty URL.
                   Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-                    captureRewriteUri(elem, "src", "about:blank");
+                    captureRewriteAttr(elem, "src", "about:blank");
                   }, this);
 
                   break;
@@ -1342,7 +1337,7 @@
                     if (elemOrig && elemOrig.currentSrc) {
                       const url = elemOrig.currentSrc;
                       Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                        captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRewrittenNode"]);
+                        captureRemoveNode(elem);
                       }, this);
                       tasks[tasks.length] = halter.then(async () => {
                         const response = await capturer.invoke("downloadFile", {
@@ -1351,7 +1346,7 @@
                           settings,
                           options,
                         });
-                        captureRewriteUri(elem, "src", response.url);
+                        captureRewriteAttr(elem, "src", response.url);
                         return response;
                       });
                     }
@@ -1364,7 +1359,7 @@
                           settings,
                           options,
                         });
-                        captureRewriteUri(elem, "src", response.url);
+                        captureRewriteAttr(elem, "src", response.url);
                         return response;
                       });
                     }, this);
@@ -1382,7 +1377,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "src", response.url);
+                      captureRewriteAttr(elem, "src", response.url);
                       return response;
                     });
                   }
@@ -1395,7 +1390,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "src", response.url);
+                      captureRewriteAttr(elem, "src", response.url);
                       return response;
                     });
                   }, this);
@@ -1430,17 +1425,17 @@
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // The attribute, if present, must contain a valid non-empty URL.
                   if (elem.hasAttribute("poster")) {
-                    captureRewriteUri(elem, "poster", null);
+                    captureRewriteAttr(elem, "poster", null);
                   }
 
                   if (elem.hasAttribute("src")) {
-                    captureRewriteUri(elem, "src", "about:blank");
+                    captureRewriteAttr(elem, "src", "about:blank");
                   }
 
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // The src attribute must be present and be a valid non-empty URL.
                   Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-                    captureRewriteUri(elem, "src", "about:blank");
+                    captureRewriteAttr(elem, "src", "about:blank");
                   }, this);
 
                   break;
@@ -1457,7 +1452,7 @@
                           settings,
                           options,
                         });
-                        captureRewriteUri(elem, "poster", response.url);
+                        captureRewriteAttr(elem, "poster", response.url);
                         return response;
                       });
                     }
@@ -1465,7 +1460,7 @@
                     if (elemOrig && elemOrig.currentSrc) {
                       const url = elemOrig.currentSrc;
                       Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                        captureRemoveNode(elem, options["capture.recordSourceUri"] || options["capture.recordRewrittenNode"]);
+                        captureRemoveNode(elem);
                       }, this);
                       tasks[tasks.length] = halter.then(async () => {
                         const response = await capturer.invoke("downloadFile", {
@@ -1474,7 +1469,7 @@
                           settings,
                           options,
                         })
-                        captureRewriteUri(elem, "src", response.url);
+                        captureRewriteAttr(elem, "src", response.url);
                         return response;
                       });
                     }
@@ -1487,7 +1482,7 @@
                           settings,
                           options,
                         });
-                        captureRewriteUri(elem, "src", response.url);
+                        captureRewriteAttr(elem, "src", response.url);
                         return response;
                       });
                     }, this);
@@ -1505,7 +1500,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "poster", response.url);
+                      captureRewriteAttr(elem, "poster", response.url);
                       return response;
                     });
                   }
@@ -1518,7 +1513,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "src", response.url);
+                      captureRewriteAttr(elem, "src", response.url);
                       return response;
                     });
                   }
@@ -1531,7 +1526,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "src", response.url);
+                      captureRewriteAttr(elem, "src", response.url);
                       return response;
                     });
                   }, this);
@@ -1556,7 +1551,7 @@
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // The src attribute, if present, must contain a valid non-empty URL.
                   if (elem.hasAttribute("src")) {
-                    captureRewriteUri(elem, "src", null);
+                    captureRewriteAttr(elem, "src", null);
                   }
                   break;
                 case "remove":
@@ -1572,7 +1567,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "src", response.url);
+                      captureRewriteAttr(elem, "src", response.url);
                       return response;
                     });
                   }
@@ -1596,7 +1591,7 @@
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // The data attribute, if present, must be a valid non-empty URL.
                   if (elem.hasAttribute("data")) {
-                    captureRewriteUri(elem, "data", null);
+                    captureRewriteAttr(elem, "data", null);
                   }
                   break;
                 case "remove":
@@ -1612,7 +1607,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "data", response.url);
+                      captureRewriteAttr(elem, "data", response.url);
                       return response;
                     });
                   }
@@ -1639,11 +1634,11 @@
                   break;
                 case "blank":
                   if (elem.hasAttribute("code")) {
-                    captureRewriteUri(elem, "code", null);
+                    captureRewriteAttr(elem, "code", null);
                   }
 
                   if (elem.hasAttribute("archive")) {
-                    captureRewriteUri(elem, "archive", null);
+                    captureRewriteAttr(elem, "archive", null);
                   }
                   break;
                 case "remove":
@@ -1659,7 +1654,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "code", response.url);
+                      captureRewriteAttr(elem, "code", response.url);
                       return response;
                     });
                   }
@@ -1672,7 +1667,7 @@
                         settings,
                         options,
                       });
-                      captureRewriteUri(elem, "archive", response.url);
+                      captureRewriteAttr(elem, "archive", response.url);
                       return response;
                     });
                   }
@@ -1732,7 +1727,7 @@
                     case "blank":
                       // HTML 5.1 2nd Edition / W3C Recommendation:
                       // The src attribute must be present, and must contain a valid non-empty URL.
-                      captureRewriteUri(elem, "src", "about:blank");
+                      captureRewriteAttr(elem, "src", "about:blank");
                       break;
                     case "remove":
                       captureRemoveNode(elem);
@@ -1748,7 +1743,7 @@
                           settings,
                           options,
                         });
-                        captureRewriteUri(elem, "src", response.url);
+                        captureRewriteAttr(elem, "src", response.url);
                         return response;
                       });
                       break;
@@ -3622,7 +3617,7 @@
 
         return {
           url,
-          recordUrl: options["capture.recordSourceUri"] ? url : "",
+          recordUrl: options["capture.recordRewrites"] ? url : "",
           valid,
         };
       };

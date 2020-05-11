@@ -40,9 +40,7 @@ const baseOptions = {
   "capture.downLink.urlFilter": "",
   "capture.removeIntegrity": true,
   "capture.recordDocumentMeta": true,
-  "capture.recordRewrittenNode": false,
-  "capture.recordRewrittenAttr": false,
-  "capture.recordSourceUri": false,
+  "capture.recordRewrites": false,
   "capture.helpersEnabled": false,
   "capture.helpers": "",
   "capture.deleteErasedOnCapture": false,
@@ -6658,7 +6656,7 @@ async function test_capture_record_meta() {
 /**
  * Check if option works
  *
- * capture.recordRewrittenNode
+ * capture.recordRewrites
  * capturer.captureDocument
  */
 async function test_capture_record_nodes() {
@@ -6678,8 +6676,8 @@ async function test_capture_record_nodes() {
     "capture.base": "remove",
   };
 
-  /* +capture.recordRewrittenNode */
-  options["capture.recordRewrittenNode"] = true;
+  /* +capture.recordRewrites */
+  options["capture.recordRewrites"] = true;
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_record/nodes.html`,
@@ -6762,8 +6760,8 @@ async function test_capture_record_nodes() {
     `<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\\s\\S]*?</noscript>-->`
   ).test(body.innerHTML));
 
-  /* -capture.recordRewrittenNode */  
-  options["capture.recordRewrittenNode"] = false;
+  /* -capture.recordRewrites */  
+  options["capture.recordRewrites"] = false;
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_record/nodes.html`,
@@ -6849,11 +6847,8 @@ async function test_capture_record_nodes() {
 
 /**
  * Check handling of removal of source nodes in picture, audio, and video
- * The removed source nodes should be recorded when 
- * either recordRewrittenNode or recordSourceUri is set.
  *
- * capture.recordRewrittenNode
- * capture.recordSourceUri
+ * capture.recordRewrites
  * capturer.captureDocument
  */
 async function test_capture_record_nodes2() {
@@ -6863,9 +6858,8 @@ async function test_capture_record_nodes2() {
     "capture.video": "save-current",
   };
 
-  /* +capture.recordRewrittenNode */
-  options["capture.recordRewrittenNode"] = true;
-  options["capture.recordSourceUri"] = false;
+  /* +capture.recordRewrites */
+  options["capture.recordRewrites"] = true;
 
   var blob = await capture({
     url: `${localhost}/capture_record/nodes2.html`,
@@ -6889,35 +6883,8 @@ async function test_capture_record_nodes2() {
     `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
   ).test(doc.querySelector('video').innerHTML));
 
-  /* +capture.recordSourceUri */
-  options["capture.recordRewrittenNode"] = false;
-  options["capture.recordSourceUri"] = true;
-
-  var blob = await capture({
-    url: `${localhost}/capture_record/nodes2.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-  var zip = await new JSZip().loadAsync(blob);
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
-
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ).test(doc.querySelector('picture').innerHTML));
-
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ).test(doc.querySelector('audio').innerHTML));
-
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ).test(doc.querySelector('video').innerHTML));
-
-  /* -capture.recordSourceUri */
-  options["capture.recordRewrittenNode"] = false;
-  options["capture.recordSourceUri"] = false;
+  /* -capture.recordRewrites */
+  options["capture.recordRewrites"] = false;
 
   var blob = await capture({
     url: `${localhost}/capture_record/nodes2.html`,
@@ -6945,7 +6912,7 @@ async function test_capture_record_nodes2() {
 /**
  * Check added nodes are recorded.
  *
- * capture.recordRewrittenNode
+ * capture.recordRewrites
  * capturer.captureDocument
  */
 async function test_capture_record_nodes3() {
@@ -6955,8 +6922,8 @@ async function test_capture_record_nodes3() {
     "capture.video": "save-current",
   };
 
-  /* +capture.recordRewrittenNode */
-  options["capture.recordRewrittenNode"] = true;
+  /* +capture.recordRewrites */
+  options["capture.recordRewrites"] = true;
 
   var blob = await capture({
     url: `${localhost}/capture_record/nodes3.html`,
@@ -6982,8 +6949,8 @@ async function test_capture_record_nodes3() {
   assert(doc.querySelector(`head[data-scrapbook-orig-null-node-${timeId}]`));
   assert(doc.querySelector(`meta[charset="UTF-8"][data-scrapbook-orig-null-node-${timeId}]`));
 
-  /* -capture.recordSourceUri */
-  options["capture.recordRewrittenNode"] = false;
+  /* -capture.recordRewrites */
+  options["capture.recordRewrites"] = false;
 
   var blob = await capture({
     url: `${localhost}/capture_record/nodes3.html`,
@@ -7013,7 +6980,7 @@ async function test_capture_record_nodes3() {
 /**
  * Check if option works
  *
- * capture.recordRewrittenAttr
+ * capture.recordRewrites
  * capturer.captureDocument
  */
 async function test_capture_record_attrs() {
@@ -7026,8 +6993,8 @@ async function test_capture_record_attrs() {
     "capture.removeIntegrity": true,
   };
 
-  /* +capture.recordRewrittenAttr */
-  options["capture.recordRewrittenAttr"] = true;
+  /* +capture.recordRewrites */
+  options["capture.recordRewrites"] = true;
 
   var blob = await capture({
     url: `${localhost}/capture_record/attrs.html`,
@@ -7052,8 +7019,8 @@ async function test_capture_record_attrs() {
   assert(doc.querySelector('textarea').getAttribute(`data-scrapbook-orig-textcontent-${timeId}`) === ``);
   assert(doc.querySelector('select option').getAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`) === ``);
 
-  /* -capture.recordRewrittenAttr */
-  options["capture.recordRewrittenAttr"] = false;
+  /* -capture.recordRewrites */
+  options["capture.recordRewrites"] = false;
 
   var blob = await capture({
     url: `${localhost}/capture_record/attrs.html`,
@@ -7082,7 +7049,7 @@ async function test_capture_record_attrs() {
 /**
  * Check if option works: save cases
  *
- * capture.recordSourceUri
+ * capture.recordRewrites
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
@@ -7107,8 +7074,8 @@ async function test_capture_record_urls() {
     "capture.downLink.urlFilter": "",
   };
 
-  /* +capture.recordSourceUri */
-  options["capture.recordSourceUri"] = true;
+  /* +capture.recordRewrites */
+  options["capture.recordRewrites"] = true;
 
   var blob = await capture({
     url: `${localhost}/capture_record/urls.html`,
@@ -7153,8 +7120,8 @@ async function test_capture_record_urls() {
 p { background-image: /*scrapbook-orig-url="${localhost}/capture_record/null.bmp"*/url("null.bmp"); }`);
   assert(doc.querySelector('div').getAttribute('style') === `background: /*scrapbook-orig-url="${localhost}/capture_record/null.bmp"*/url("null.bmp");`);
 
-  /* -capture.recordSourceUri */
-  options["capture.recordSourceUri"] = false;
+  /* -capture.recordRewrites */
+  options["capture.recordRewrites"] = false;
 
   var blob = await capture({
     url: `${localhost}/capture_record/urls.html`,
@@ -7204,7 +7171,7 @@ p { background-image: url("null.bmp"); }`);
  * Check if option works: blank cases
  * (save styles to save CSS and check image background and font)
  *
- * capture.recordSourceUri
+ * capture.recordRewrites
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
@@ -7226,8 +7193,8 @@ async function test_capture_record_urls2() {
     "capture.script": "blank",
   };
 
-  /* +capture.recordSourceUri */
-  options["capture.recordSourceUri"] = true;
+  /* +capture.recordRewrites */
+  options["capture.recordRewrites"] = true;
 
   var blob = await capture({
     url: `${localhost}/capture_record/urls.html`,
@@ -7269,8 +7236,8 @@ async function test_capture_record_urls2() {
 p { background-image: /*scrapbook-orig-url="${localhost}/capture_record/null.bmp"*/url(""); }`);
   assert(doc.querySelector('div').getAttribute('style') === `background: /*scrapbook-orig-url="${localhost}/capture_record/null.bmp"*/url("");`);
 
-  /* -capture.recordSourceUri */
-  options["capture.recordSourceUri"] = false;
+  /* -capture.recordRewrites */
+  options["capture.recordRewrites"] = false;
 
   var blob = await capture({
     url: `${localhost}/capture_record/urls.html`,
@@ -7317,7 +7284,7 @@ p { background-image: url(""); }`);
  * Check if option works: save-current cases
  * (and blank style)
  *
- * capture.recordSourceUri
+ * capture.recordRewrites
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
@@ -7329,8 +7296,8 @@ async function test_capture_record_urls3() {
     "capture.style": "blank",
   };
 
-  /* +capture.recordSourceUri */
-  options["capture.recordSourceUri"] = true;
+  /* +capture.recordRewrites */
+  options["capture.recordRewrites"] = true;
 
   var blob = await capture({
     url: `${localhost}/capture_record/urls.html`,
@@ -7356,8 +7323,8 @@ async function test_capture_record_urls3() {
   assert(doc.querySelectorAll('video')[1].getAttribute(`data-scrapbook-orig-null-attr-src-${timeId}`) === ``);
   assert(!doc.querySelectorAll('video')[1].getAttribute(`data-scrapbook-orig-attr-src-${timeId}`)); // double record bug
 
-  /* +capture.recordSourceUri */
-  options["capture.recordSourceUri"] = false;
+  /* +capture.recordRewrites */
+  options["capture.recordRewrites"] = false;
 
   var blob = await capture({
     url: `${localhost}/capture_record/urls.html`,
@@ -7388,13 +7355,13 @@ async function test_capture_record_urls3() {
 /**
  * Check if option works: for base
  *
- * capture.recordSourceUri
+ * capture.recordRewrites
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
 async function test_capture_record_urls4() {
   var options = {
-    "capture.recordSourceUri": true,
+    "capture.recordRewrites": true,
   };
 
   /* save */

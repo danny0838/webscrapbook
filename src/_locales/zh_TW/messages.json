@@ -755,23 +755,11 @@
   "OptionCapturePageSizeLimitTooltip": {
     "message": "系統不會擷取超出此限制的頁面。空白表示不設限制。"
   },
-  "OptionCaptureRecordRewrittenAttrLabel": {
-    "message": "記錄改寫的屬性"
+  "OptionCaptureRecordRewritesLabel": {
+    "message": "記錄改寫的內容"
   },
-  "OptionCaptureRecordRewrittenAttrTooltip": {
-    "message": "擷取網頁時若有改寫元素的屬性，則建立對應的 data-* 屬性記錄原始值。"
-  },
-  "OptionCaptureRecordRewrittenNodeLabel": {
-    "message": "記錄改寫的元素"
-  },
-  "OptionCaptureRecordRewrittenNodeTooltip": {
-    "message": "擷取網頁時若有新增或移除的元素，則建立 HTML 註解記錄原始內容。"
-  },
-  "OptionCaptureRecordSourceUriLabel": {
-    "message": "記錄原始的 URL"
-  },
-  "OptionCaptureRecordSourceUriTooltip": {
-    "message": "擷取網頁時若有改寫元素或樣式表的超連結，則建立註解或 data-* 屬性記錄原始 URL 位址。"
+  "OptionCaptureRecordRewritesTooltip": {
+    "message": "擷取網頁時若有改寫的元素、屬性或樣式表，則用 data-* 屬性、HTML 註解、CSS 註解等方式記錄原始內容。"
   },
   "OptionCaptureRemoveHiddenLabel": {
     "message": "移除隱藏元素:"
@@ -928,9 +916,6 @@
   },
   "OptionGroupIndexer": {
     "message": "索引器"
-  },
-  "OptionGroupMetadata": {
-    "message": "擷取 - 元資料"
   },
   "OptionGroupSave": {
     "message": "擷取 - 儲存"
