@@ -1942,6 +1942,7 @@
         if (docOrShadowRoot.adoptedStyleSheets) {
           for (const refCss of docOrShadowRoot.adoptedStyleSheets) {
             const css = root.appendChild(newDoc.createElement("style"));
+            captureRecordAddedNode(css);
             css.textContent = Array.prototype.map.call(
               refCss.cssRules,
               cssRule => cssRule.cssText,
