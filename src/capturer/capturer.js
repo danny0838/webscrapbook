@@ -644,7 +644,7 @@
 
       for (const task of tasks) {
         const {
-          tabId, frameId, full,
+          tabId, frameId, fullPage,
           url, refUrl, title, favIconUrl,
           mode, options,
         } = task;
@@ -656,7 +656,7 @@
             result = await capturer.captureTab({
               tabId,
               frameId,
-              saveBeyondSelection: full,
+              fullPage,
               mode,
               options,
               parentId,
@@ -705,7 +705,7 @@
    * @param {Object} params
    * @param {integer} params.tabId
    * @param {integer} params.frameId
-   * @param {boolean} params.saveBeyondSelection
+   * @param {boolean} params.fullPage
    * @param {string} params.title - overriding title
    * @param {string} params.mode - "source", "bookmark", "resave", "internalize"
    * @param {string} params.options - preset options that overwrites default
@@ -715,7 +715,7 @@
    */
   capturer.captureTab = async function (params) {
     try {
-      const {tabId, frameId, saveBeyondSelection, title: title0, mode, options, parentId, index} = params;
+      const {tabId, frameId, fullPage, title: title0, mode, options, parentId, index} = params;
       let {url, title, favIconUrl, discarded} = await browser.tabs.get(tabId);
 
       // redirect headless capture
@@ -740,7 +740,7 @@
           timeId,
           frameIsMain: true,
           documentName: "index",
-          saveBeyondSelection,
+          fullPage,
           recurseChain: [],
           favIconUrl,
         },
@@ -841,7 +841,7 @@
 
         const response = await capturer.captureTab({
           tabId: tab.id,
-          saveBeyondSelection: true,
+          fullPage: true,
           title, 
           options,
         });

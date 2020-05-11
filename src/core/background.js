@@ -168,7 +168,7 @@
       onclick: (info, tab) => {
         return scrapbook.invokeCapture([{
           tabId: tab.id,
-          full: true,
+          fullPage: true,
         }]);
       }
     });
@@ -217,7 +217,7 @@
         return scrapbook.invokeCapture([{
           tabId: tab.id,
           frameId: info.frameId,
-          full: true,
+          fullPage: true,
         }]);
       }
     });
@@ -254,7 +254,7 @@
         return scrapbook.invokeCapture([{
           tabId: tab.id,
           frameId: info.frameId,
-          full: false,
+          fullPage: false,
         }]);
       }
     });

@@ -265,7 +265,7 @@
             return urlHash;
           }
 
-          // For full capture (no selection), relink to the captured page.
+          // For fullPage capture (no selection), relink to the captured page.
           // For partial capture, the captured page could be incomplete,
           // relink to the captured page only when the target node is included in the selected fragment.
           let hasLocalTarget = !selection;
@@ -1995,7 +1995,7 @@
       const specialContentMap = new Map();
       const shadowRootList = [];
       let rootNode, headNode;
-      let selection = settings.saveBeyondSelection ? null : doc.getSelection();
+      let selection = settings.fullPage ? null : doc.getSelection();
       {
         if (selection && selection.isCollapsed) { selection = null; }
         // capture selection: clone selected ranges
