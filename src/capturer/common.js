@@ -1995,11 +1995,9 @@
       const specialContentMap = new Map();
       const shadowRootList = [];
       let rootNode, headNode;
-      let selection = doc.getSelection();
+      let selection = settings.saveBeyondSelection ? null : doc.getSelection();
       {
         if (selection && selection.isCollapsed) { selection = null; }
-        if (selection && options["capture.saveBeyondSelection"]) { selection = null; }
-
         // capture selection: clone selected ranges
         if (selection) {
           const cloneNodeAndAncestors = (node) => {

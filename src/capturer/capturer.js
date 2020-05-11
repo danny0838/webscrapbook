@@ -740,14 +740,12 @@
           timeId,
           frameIsMain: true,
           documentName: "index",
+          saveBeyondSelection,
           recurseChain: [],
           favIconUrl,
         },
         options: Object.assign(scrapbook.getOptions("capture"), options),
       };
-
-      // save whole page beyond selection?
-      message.options["capture.saveBeyondSelection"] = !!saveBeyondSelection;
 
       capturer.log(`Capturing (document) ${source} ...`);
 

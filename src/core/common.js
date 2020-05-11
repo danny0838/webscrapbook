@@ -40,7 +40,6 @@
     "capture.saveAs": "folder", // "folder", "zip", "maff", "singleHtml"
     "capture.saveFilename": "%ID%",
     "capture.saveAsciiFilename": false,
-    "capture.saveBeyondSelection": false,
     "capture.saveFileAsHtml": false,
     "capture.saveDataUriAsFile": true,
     "capture.saveDataUriAsSrcdoc": true,
