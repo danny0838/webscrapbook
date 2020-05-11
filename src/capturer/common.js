@@ -671,7 +671,7 @@
                   case "link":
                     if (disableCss) {
                       captureRewriteAttr(elem, "href", null);
-                      elem.setAttribute("data-scrapbook-css-disabled", "");
+                      captureRewriteAttr(elem, "data-scrapbook-css-disabled", "");
                       break;
                     }
                     break;
@@ -687,7 +687,7 @@
                   default:
                     if (disableCss) {
                       captureRewriteAttr(elem, "href", null);
-                      elem.setAttribute("data-scrapbook-css-disabled", "");
+                      captureRewriteAttr(elem, "data-scrapbook-css-disabled", "");
                       break;
                     }
 
@@ -788,7 +788,7 @@
                 default:
                   if (disableCss) {
                     captureRewriteTextContent(elem, "");
-                    elem.setAttribute("data-scrapbook-css-disabled", "");
+                    captureRewriteAttr(elem, "data-scrapbook-css-disabled", "");
                     break;
                   }
                   tasks[tasks.length] = halter.then(async () => {
