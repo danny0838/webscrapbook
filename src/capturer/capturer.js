@@ -641,6 +641,7 @@
     try {
       let {tasks, parentId, index} = params;
       const results = [];
+      const globalOptions = scrapbook.getOptions("capture");
 
       for (const task of tasks) {
         const {
@@ -658,7 +659,7 @@
               frameId,
               fullPage,
               mode,
-              options,
+              options: Object.assign(globalOptions, options),
               parentId,
               index,
             });
@@ -670,7 +671,7 @@
               title,
               favIconUrl,
               mode,
-              options,
+              options: Object.assign(globalOptions, options),
               parentId,
               index,
             });
@@ -708,7 +709,7 @@
    * @param {boolean} params.fullPage
    * @param {string} params.title - overriding title
    * @param {string} params.mode - "source", "bookmark", "resave", "internalize"
-   * @param {string} params.options - preset options that overwrites default
+   * @param {string} params.options
    * @param {string} params.parentId - parent item ID for the captured item
    * @param {integer} params.index - position index for the captured item
    * @return {Promise<Object>}
@@ -744,7 +745,7 @@
           recurseChain: [],
           favIconUrl,
         },
-        options: Object.assign(scrapbook.getOptions("capture"), options),
+        options,
       };
 
       capturer.log(`Capturing (document) ${source} ...`);
@@ -803,7 +804,7 @@
    * @param {string} params.title - overriding title
    * @param {string} params.favIconUrl - fallback favicon
    * @param {string} params.mode - "source", "bookmark"
-   * @param {string} params.options - preset options that overwrites default
+   * @param {string} params.options
    * @param {string} params.parentId - parent item ID for the captured item
    * @param {integer} params.index - position index for the captured item
    * @return {Promise<Object>}
@@ -867,7 +868,7 @@
           recurseChain: [],
           favIconUrl,
         },
-        options: Object.assign(scrapbook.getOptions("capture"), options),
+        options,
       };
 
       isDebug && console.debug("(main) capture", source, message);
