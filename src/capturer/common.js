@@ -1958,7 +1958,6 @@
         docUrl = scrapbook.splitUrlByAnchor(doc.URL)[0],
         refUrl = scrapbook.splitUrlByAnchor(doc.baseURI)[0],
       } = params;
-      let {documentName} = settings;
       const {contentType: mime, documentElement: htmlNode} = doc;
 
       // create a new document to replicate nodes via import
