@@ -39,8 +39,7 @@
   /**
    * @typedef {Object} missionCaptureInfo
    * @property {Set<string>} files
-   * @property {Map<string, Promise>} accessMap
-   * @property {JSZip} zip
+   * @property {Map<string~token, Promise>} accessMap
    */
 
   /**
@@ -117,7 +116,7 @@
   };
 
   /**
-   * Get a unique (deduplicated) filename for downloading
+   * Get a unique (deduplicated) filename for saving
    *
    * @param {Object} params
    * @param {string} params.filename - may contain directory
@@ -255,11 +254,11 @@
    *
    * @param {Object} params
    * @param {string} params.url
-   * @param {string} params.role
-   * @param {string} params.refUrl - the referrer URL
-   * @param {string} params.responseType
-   * @param {integer} params.timeout
-   * @param {Objet} params.hooks
+   * @param {string} [params.role]
+   * @param {string} [params.refUrl] - the referrer URL
+   * @param {string} [params.responseType]
+   * @param {integer} [params.timeout]
+   * @param {Objet} [params.hooks]
    * @param {Objet} params.settings
    * @param {Objet} params.options
    */
@@ -276,17 +275,15 @@
     /**
      * @param {Object} params
      * @param {Object} params.headers
-     * @param {string} params.refUrl
      * @param {string} params.targetUrl
-     * @param {Object} params.options
+     * @param {string} [params.refUrl]
+     * @param {Object} [params.options]
      */
-    const setReferrer = function ({headers, refUrl, targetUrl, options = {}}) {
+    const setReferrer = function ({headers, targetUrl, refUrl, options = {}}) {
       if (!refUrl) { return; }
       if (!refUrl.startsWith('http:') && !refUrl.startsWith('https:')) { return; }
       if (refUrl.startsWith('https:') && (!targetUrl || !targetUrl.startsWith('https:'))) { return; }
 
-      // cannot assign "referer" header directly
-      // the prefix will be removed by the onBeforeSendHeaders listener
       let referrer;
       let mode = options["capture.requestReferrer"];
 
@@ -320,6 +317,9 @@
       }
 
       if (referrer) {
+        // Browser does not allow assigning "Referer" header directly.
+        // Set a placeholder header, whose prefix will be removed by the
+        // listener of browser.webRequest.onBeforeSendHeaders later on.
         headers["X-WebScrapBook-Referer"] = referrer;
       }
       return headers;
@@ -705,13 +705,13 @@
   /**
    * @param {Object} params
    * @param {integer} params.tabId
-   * @param {integer} params.frameId
-   * @param {boolean} params.fullPage
-   * @param {string} params.title - overriding title
-   * @param {string} params.mode - "source", "bookmark", "resave", "internalize"
+   * @param {integer} [params.frameId]
+   * @param {boolean} [params.fullPage]
+   * @param {string} [params.title] - an overriding title
+   * @param {string} [params.mode] - "source", "bookmark", "resave", "internalize"
    * @param {string} params.options
-   * @param {string} params.parentId - parent item ID for the captured item
-   * @param {integer} params.index - position index for the captured item
+   * @param {string} [params.parentId] - parent item ID for the captured item
+   * @param {integer} [params.index] - position index for the captured item
    * @return {Promise<Object>}
    */
   capturer.captureTab = async function (params) {
@@ -800,13 +800,13 @@
   /**
    * @param {Object} params
    * @param {string} params.url
-   * @param {string} params.refUrl
-   * @param {string} params.title - overriding title
-   * @param {string} params.favIconUrl - fallback favicon
-   * @param {string} params.mode - "source", "bookmark"
+   * @param {string} [params.refUrl]
+   * @param {string} [params.title] - an overriding title
+   * @param {string} [params.favIconUrl] - fallback favicon
+   * @param {string} [params.mode] - "source", "bookmark"
    * @param {string} params.options
-   * @param {string} params.parentId - parent item ID for the captured item
-   * @param {integer} params.index - position index for the captured item
+   * @param {string} [params.parentId] - parent item ID for the captured item
+   * @param {integer} [params.index] - position index for the captured item
    * @return {Promise<Object>}
    */
   capturer.captureRemote = async function (params) {
@@ -921,8 +921,8 @@
   /**
    * @param {Object} params
    * @param {string} params.url - may include hash
-   * @param {string} params.refUrl
-   * @param {string} params.title
+   * @param {string} [params.refUrl]
+   * @param {string} [params.title] - an overriding title
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -1014,8 +1014,8 @@
   /**
    * @param {Object} params
    * @param {string} params.url - may include hash
-   * @param {string} params.refUrl
-   * @param {string} params.title
+   * @param {string} [params.refUrl]
+   * @param {string} [params.title] - an overriding title
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -1201,9 +1201,9 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
    * @kind invokable
    * @param {Object} params
    * @param {string} params.url - may include hash
-   * @param {string} params.refUrl - the referrer URL
-   * @param {string} params.title
-   * @param {string} params.charset
+   * @param {string} [params.refUrl] - the referrer URL
+   * @param {string} [params.title] - an overriding title
+   * @param {string} [params.charset]
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -1292,9 +1292,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   /**
    * @param {Object} params
    * @param {integer} params.tabId
-   * @param {integer} params.frameId
-   * @param {string} params.options - preset options that overwrites default
-   * @param {boolean} params.internalize
+   * @param {integer} [params.frameId]
+   * @param {string} [params.options] - preset options that overwrites default
+   * @param {boolean} [params.internalize]
    * @return {Promise<Object>}
    */
   capturer.resaveTab = async function (params) {
@@ -1545,6 +1545,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {string} params.docUrl
    * @param {string} params.mime
    * @param {Object} params.settings
+   * @param {string} params.settings.documentName
    * @param {Object} params.options
    * @return {Promise<Object>}
    */
@@ -2086,7 +2087,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @kind invokable
    * @param {Object} params
    * @param {string} params.url - may include hash
-   * @param {string} params.refUrl - the referrer URL
+   * @param {string} [params.refUrl] - the referrer URL
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -2243,7 +2244,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @kind invokable
    * @param {Object} params
    * @param {string} params.url
-   * @param {string} params.refUrl
+   * @param {string} [params.refUrl]
    * @param {string} params.options
    * @return {string} File extension of the URL.
    */
@@ -2297,7 +2298,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @kind invokable
    * @param {Object} params
    * @param {string} params.url
-   * @param {string} params.refUrl
+   * @param {string} [params.refUrl]
    * @param {string} params.settings
    * @param {string} params.options
    * @return {Promise<Object>}
@@ -2405,7 +2406,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @kind invokable
    * @param {string} params.filename - validated, not uniquified
    * @param {string} params.sourceUrl
-   * @param {string} params.accessId - ID of the bound access
+   * @param {string|null} params.accessId - ID of the bound access
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -2453,7 +2454,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.mime - may include parameters like charset
    * @param {string} params.filename - validated and unique
    * @param {string} params.sourceUrl - may include hash
-   * @param {string} params.accessId - ID of the bound access
+   * @param {string|null} params.accessId - ID of the bound access
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -2491,7 +2492,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @kind invokable
    * @param {Object} params
    * @param {string} params.sourceUrl
-   * @param {string} params.accessId - ID of the bound access
+   * @param {string|null} params.accessId - ID of the bound access
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -2666,7 +2667,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   /**
    * @param {Object} params
    * @param {Blob} params.blob
-   * @return {Promise}
+   * @return {Promise<{type: string, data: string}>}
    */
   capturer.saveBlobInMemory = async function (params) {
     isDebug && console.debug("call: saveBlobInMemory", params);

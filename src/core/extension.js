@@ -26,8 +26,8 @@
   /**
    * Add a message listener, with optional filter and errorHandler.
    *
-   * @param {Function} filter
-   * @param {Function} errorHandler
+   * @param {Function} [filter]
+   * @param {Function} [errorHandler]
    * @return {Function}
    */
   scrapbook.addMessageListener = function (filter, errorHandler = ex => {
@@ -120,8 +120,8 @@
 
   /**
    * @param {string} url
-   * @param {boolean} newTab
-   * @param {string|array|boolean} singleton - URL match pattern for singleton;
+   * @param {boolean} [newTab]
+   * @param {string|array|boolean} [singleton] - URL match pattern for singleton;
    *     true: match url with any query; false: not singleton
    */
   scrapbook.visitLink = async function ({url, newTab = false, singleton = false}) {
@@ -159,10 +159,10 @@
    *
    * @param {Object} params
    * @param {Array} params.tasks
-   * @param {string} params.parentId - parent item ID for the captured items
-   * @param {integer} params.index - position index for the captured items
-   * @param {Object} params.windowCreateData
-   * @param {boolean} params.waitForResponse
+   * @param {string} [params.parentId] - parent item ID for the captured items
+   * @param {integer} [params.index] - position index for the captured items
+   * @param {Object} [params.windowCreateData]
+   * @param {boolean} [params.waitForResponse]
    * @return {Promise<(Object|Window|Tab)>}
    */
   scrapbook.invokeCaptureEx = async function ({
@@ -242,8 +242,9 @@
    *
    * @param {Object} params
    * @param {Array} params.tasks
-   * @param {boolean} params.useJson
-   * @param {boolean} params.customTitle
+   * @param {boolean} [params.useJson]
+   * @param {boolean} [params.customTitle]
+   * @param {boolean} [params.uniquify]
    * @return {Promise<Tab>}
    */
   scrapbook.invokeBatchCapture = async function (params) {
@@ -256,7 +257,7 @@
   };
 
   /**
-   * @param {boolean} newTab - Whether to open in a new tab.
+   * @param {boolean} [newTab] - Whether to open in a new tab.
    * @return {undefined|Window|Tab}
    */
   scrapbook.openScrapBook = async function ({newTab = true}) {

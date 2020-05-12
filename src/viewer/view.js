@@ -92,7 +92,7 @@
     /**
      * @param {Object} params
      * @param {string} params.inZipPath
-     * @param {fetchFileRewriteFunc} params.rewriteFunc
+     * @param {fetchFileRewriteFunc} [params.rewriteFunc]
      * @param {Array} params.recurseChain
      * @return {Promise<string>} The object URL of the file.
      */

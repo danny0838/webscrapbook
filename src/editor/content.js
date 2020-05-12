@@ -2163,7 +2163,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
       /**
        * @kind invokable
-       * @param {Node|false|undefined} - The ref node to create a sticky note around.
+       * @param {boolean} [richText] - Whether content is rich text.
+       * @param {Node|false} [refNode] - The ref node to create a sticky note around.
        *     Auto-detected by selection when unspecified. False to not create a relative note.
        */
       createSticky({richText, refNode}) {

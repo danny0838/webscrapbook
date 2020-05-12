@@ -552,7 +552,7 @@ svg, math`;
     /**
      * Main index generating process of an individual directory or ZIP file
      *
-     * @param {object} inputData - processed structured files
+     * @param {Object} inputData - processed structured files
      */
     async import(inputData) {
       try {

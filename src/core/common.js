@@ -822,7 +822,7 @@
    * @param {Object} params
    * @param {string} params.id
    * @param {string} params.cmd
-   * @param {Object} params.args
+   * @param {Object} [params.args]
    * @return {Promise<Object>}
    */
   scrapbook.invokeExtensionScript = async function (params) {
@@ -841,7 +841,7 @@
    * @param {integer} params.tabId
    * @param {integer} params.frameId
    * @param {string} params.cmd
-   * @param {Object} params.args
+   * @param {Object} [params.args]
    * @return {Promise<Object>}
    */
   scrapbook.invokeContentScript = async function (params) {
@@ -859,7 +859,7 @@
    * @param {Object} params
    * @param {integer} params.frameWindow
    * @param {string} params.cmd
-   * @param {Object} params.args
+   * @param {Object} [params.args]
    * @return {Promise<Object>}
    */
   scrapbook.invokeFrameScript = async function (params) {
@@ -913,7 +913,7 @@
    * see also: escapeFileName
    *
    * @param {string} filename
-   * @param {boolean} forceAscii - also escapes all non-ASCII chars
+   * @param {boolean} [forceAscii] - also escapes all non-ASCII chars
    */
   scrapbook.validateFilename = function (filename, forceAscii) {
     let fn = filename
@@ -937,7 +937,7 @@
   /**
    * Returns the ScrapBook ID from a given Date object
    *
-   * @param  {Date|undefined} date - Given day, or now if undefined
+   * @param  {Date} [date] - Given day, or now if not provided.
    * @return {string} the ScrapBook ID
    */
   scrapbook.dateToId = function (date) {
@@ -970,7 +970,7 @@
    * Returns the legacy ScrapBook ID from a given Date object
    *
    * @deprecated Used by legacy ScrapBook. Inaccurate when used across timezone. Same seconds issue.
-   * @param {Date|undefined} date - Given day, or now if undefined
+   * @param {Date} [date] - Given day, or now if not provided.
    * @return {string} the ScrapBook ID
    */
   scrapbook.dateToIdOld = function (date) {
@@ -1000,7 +1000,7 @@
 
   /**
    * @param {string} url
-   * @param {boolean} allowFileAccess - Optional for better accuracy.
+   * @param {boolean} [allowFileAccess] - Optional for better accuracy.
    * @return {string} Whether the page url is allowed for content scripts.
    */
   scrapbook.isContentPage = function (url, allowFileAccess = !scrapbook.userAgent.is('gecko')) {
@@ -1180,9 +1180,9 @@
   /**
    * Crops the given string
    *
-   * @param {integer} charLimit - UTF-16 chars limit, beyond which will be cropped. 0 means no crop.
-   * @param {integer} byteLimit - UTF-8 bytes limit, beyond which will be cropped. 0 means no crop.
-   * @param {string} ellipsis - string for ellipsis
+   * @param {integer} [charLimit] - UTF-16 chars limit, beyond which will be cropped. 0 means no crop.
+   * @param {integer} [byteLimit] - UTF-8 bytes limit, beyond which will be cropped. 0 means no crop.
+   * @param {string} [ellipsis] - string for ellipsis
    */
   scrapbook.crop = function (str, charLimit, byteLimit, ellipsis = '...') {
     if (charLimit) {
@@ -1836,7 +1836,7 @@
 
   /**
    * @param {Blob} blob - The Blob of File object to be read.
-   * @param {string|false} charset - Read as UTF-8 if undefined and as raw bytes if falsy.
+   * @param {string|false} [charset] - Read as UTF-8 if undefined and as raw bytes if falsy.
    * @return {Promise<string>}
    */
   scrapbook.readFileAsText = async function (blob, charset = "UTF-8") {
@@ -1958,7 +1958,7 @@
    * the user has a chance to correct the encoding manually.
    *
    * @param {Blob} data - The CSS file blob.
-   * @param {string} charset - Charset of the CSS file blob.
+   * @param {string} [charset] - Charset of the CSS file blob.
    * @return {{text: string, charset: string|null}}
    */
   scrapbook.parseCssFile = async function (data, charset) {
@@ -2018,7 +2018,7 @@
    * Process a CSS file and rewrite it
    *
    * @param {Blob} data - The CSS file blob.
-   * @param {string} charset - Charset of the CSS file blob.
+   * @param {string} [charset] - Charset of the CSS file blob.
    * @param {rewriteCssFileRewriter} rewriter
    * @return {Promise<Blob>} The rewritten CSS file blob.
    */
@@ -2057,7 +2057,7 @@
    * @param {rewriteCssTextRewriter} options.rewriteImportUrl
    * @param {rewriteCssTextRewriter} options.rewriteFontFaceUrl
    * @param {rewriteCssTextRewriter} options.rewriteBackgroundUrl
-   * @param {Object} options.resourceMap
+   * @param {Object} [options.resourceMap] - A Map to group same resources.
    */
   scrapbook.rewriteCssText = function (cssText, options) {
     const pCm = `(?:/\\*[\\s\\S]*?(?:\\*/|$))`; // comment
@@ -2341,8 +2341,8 @@
    * Get primary meta refresh target URL.
    *
    * @param {Document} doc
-   * @param {string} refUrl - An arbitarary reference URL. Use document.URL if not set.
-   * @param {boolean} ignoreDelayedRefresh - Only consider meta refresh with 0 refresh time.
+   * @param {string} [refUrl] - An arbitarary reference URL. Use document.URL if not set.
+   * @param {boolean} [ignoreDelayedRefresh] - Only consider meta refresh with 0 refresh time.
    * @return {string|undefined} Absolute URL of the meta refresh target.
    */
   scrapbook.getMetaRefreshTarget = (doc, refUrl, ignoreDelayedRefresh = false) => {
@@ -2366,10 +2366,10 @@
    *
    * @param {Object} params
    * @param {Window} params.win - The Window to operate on.
-   * @param {Range} params.range - The Range object to get selected nodes within.
-   * @param {integer} params.whatToShow - Filter for allowed node types.
-   * @param {Function} params.nodeFilter - A function to filter allowed nodes.
-   * @param {boolean} params.fuzzy - Include partially selected nodes.
+   * @param {Range} [params.range] - The Range object to get selected nodes within.
+   * @param {integer} [params.whatToShow] - Filter for allowed node types.
+   * @param {Function} [params.nodeFilter] - A function to filter allowed nodes.
+   * @param {boolean} [params.fuzzy] - Include partially selected nodes.
    * @return {Array<Element>} Elements in the selected range(s).
    */
   scrapbook.getSelectedNodes = function ({win = window, range, whatToShow = -1, nodeFilter, fuzzy = false}) {
@@ -2558,15 +2558,15 @@
    *
    * @param {Object} params
    * @param {string} params.url
-   * @param {string} params.user
-   * @param {string} params.password
-   * @param {string} params.method
-   * @param {string} params.responseType
-   * @param {integer} params.timeout
-   * @param {Object} params.requestHeaders
-   * @param {Object} params.formData
-   * @param {function} params.onreadystatechange
-   * @param {boolean} params.onload - resolve with xhr object for custom handler
+   * @param {string} [params.user]
+   * @param {string} [params.password]
+   * @param {string} [params.method]
+   * @param {string} [params.responseType]
+   * @param {integer} [params.timeout]
+   * @param {Object} [params.requestHeaders]
+   * @param {Object} [params.formData]
+   * @param {function} [params.onreadystatechange]
+   * @param {boolean} [params.onload] - resolve with xhr object for custom handler
    */
   scrapbook.xhr = async function (params = {}) {
     return new Promise((resolve, reject) => {
