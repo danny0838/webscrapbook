@@ -95,6 +95,8 @@
    * @kind invokable
    * @param {Object} params
    * @param {Document} params.doc
+   * @param {string} [params.docUrl] - an overriding document URL
+   * @param {string} [params.baseUrl] - an overriding document base URL
    * @param {string} [params.refUrl] - the referrer URL
    * @param {string} [params.title] - an overriding title
    * @param {Object} params.settings
@@ -104,7 +106,7 @@
   capturer.captureDocumentOrFile = async function (params) {
     isDebug && console.debug("call: captureDocumentOrFile");
 
-    const {doc = document, refUrl, title, settings, options} = params;
+    const {doc = document, docUrl, baseUrl, refUrl, title, settings, options} = params;
 
     // if not HTML|SVG document, capture as file
     if (!["text/html", "application/xhtml+xml", "image/svg+xml"].includes(doc.contentType)) {
@@ -124,6 +126,8 @@
     // otherwise, capture as document
     return await capturer.captureDocument({
       doc,
+      docUrl,
+      baseUrl,
       title,
       settings,
       options,
@@ -136,7 +140,7 @@
    * @param {Document} params.doc
    * @param {string} [params.title] - an overriding title
    * @param {string} [params.docUrl] - an overriding document URL
-   * @param {string} [params.refUrl] - an overriding URL for resolving links (i.e. base URL)
+   * @param {string} [params.baseUrl] - an overriding document base URL
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -981,7 +985,7 @@
                       const response = await capturer.captureDocument({
                         doc,
                         docUrl: 'about:srcdoc',
-                        refUrl,
+                        baseUrl,
                         settings: frameSettings,
                         options: frameOptions,
                       });
@@ -1095,7 +1099,7 @@
                       return capturer.captureDocument({
                         doc,
                         docUrl: 'about:srcdoc',
-                        refUrl,
+                        baseUrl,
                         settings: frameSettings,
                         options,
                       }).then(captureFrameCallback);
@@ -1954,11 +1958,30 @@
 
       const {doc = document, title, settings, options} = params;
       const {timeId, isHeadless} = settings;
-      const {
-        docUrl = scrapbook.splitUrlByAnchor(doc.URL)[0],
-        refUrl = scrapbook.splitUrlByAnchor(doc.baseURI)[0],
-      } = params;
       const {contentType: mime, documentElement: htmlNode} = doc;
+
+      // determine docUrl and baseUrl
+      let {docUrl, baseUrl} = params;
+      if (!baseUrl) {
+        if (docUrl) {
+          baseUrl = docUrl;
+          for (const baseElem of doc.querySelectorAll('base[href]')) {
+            if (!baseElem.closest('svg, math')) {
+              baseUrl = new URL(baseElem.getAttribute('href'), docUrl).href;
+              break;
+            }
+          }
+        } else {
+          baseUrl = doc.baseURI;
+        }
+        baseUrl = scrapbook.splitUrlByAnchor(baseUrl)[0];
+      }
+      if (!docUrl) {
+        docUrl = scrapbook.splitUrlByAnchor(doc.URL)[0];
+      }
+
+      // alias of baseUrl for resolving links and resources
+      const refUrl = baseUrl;
 
       // create a new document to replicate nodes via import
       const newDoc = (new DOMParser()).parseFromString(
