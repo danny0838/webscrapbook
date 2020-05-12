@@ -1563,13 +1563,18 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     let documentFileName;
     if (options["capture.frameRename"]) {
-      let newDocumentName = scrapbook.validateFilename(documentName, options["capture.saveAsciiFilename"]);
+      let documentNameBase = scrapbook.validateFilename(documentName, options["capture.saveAsciiFilename"]);
+
+      // see capturer.getUniqueFilename for filename limitation
+      documentNameBase = scrapbook.crop(documentNameBase, 128, 240);
+
+      let newDocumentName = documentNameBase;
       let newDocumentNameCI = newDocumentName.toLowerCase();
       let count = 0;
       while (files.has(newDocumentNameCI + ".html") || 
           files.has(newDocumentNameCI + ".xhtml") || 
           files.has(newDocumentNameCI + ".svg")) {
-        newDocumentName = documentName + "_" + (++count);
+        newDocumentName = documentNameBase + "_" + (++count);
         newDocumentNameCI = newDocumentName.toLowerCase();
       }
       files.add(newDocumentNameCI + ".html");
