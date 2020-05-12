@@ -122,11 +122,12 @@
     }
 
     // otherwise, capture as document
-    // don't pass docUrl and refUrl
-    const p = Object.assign({}, params);
-    delete p.docUrl;
-    delete p.refUrl;
-    return await capturer.captureDocument(p);
+    return await capturer.captureDocument({
+      doc,
+      title,
+      settings,
+      options,
+    });
   };
 
   /**
