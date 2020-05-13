@@ -1156,7 +1156,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
           // deprecated; normally we won't get here
           [targetDir, filename] = scrapbook.filepathParts(settings.filename + ext);
           savePrompt = false;
-          saveMethod = "saveToServer";
+          saveMethod = "saveBlobToServer";
           break;
         }
         case 'folder':
@@ -1762,7 +1762,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             case 'server': {
               [targetDir, filename] = scrapbook.filepathParts(settings.filename + "." + ext);
               savePrompt = false;
-              saveMethod = "saveToServer";
+              saveMethod = "saveBlobToServer";
               break;
             }
             case 'folder':
@@ -1829,7 +1829,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             case 'server': {
               [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".htz");
               savePrompt = false;
-              saveMethod = "saveToServer";
+              saveMethod = "saveBlobToServer";
               break;
             }
             case 'folder':
@@ -1916,7 +1916,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             case 'server': {
               [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".maff");
               savePrompt = false;
-              saveMethod = "saveToServer";
+              saveMethod = "saveBlobToServer";
               break;
             }
             case 'folder':
@@ -1979,7 +1979,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           switch (options["capture.saveTo"]) {
             case 'server': {
               targetDir = settings.filename;
-              saveMethod = "saveToServer";
+              saveMethod = "saveBlobToServer";
 
               let workers = options["capture.serverUploadWorkers"];
               if (!(workers >= 1)) { workers = Infinity; }
@@ -2768,8 +2768,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {Object} params.options
    * @return {Promise<string>} Filename of the saved blob.
    */
-  capturer.saveToServer = async function (params) {
-    isDebug && console.debug("call: saveToServer", params);
+  capturer.saveBlobToServer = async function (params) {
+    isDebug && console.debug("call: saveBlobToServer", params);
 
     const {timeId, blob, directory, filename, sourceUrl, options} = params;
     await server.init();
