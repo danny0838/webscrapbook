@@ -2127,7 +2127,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       const {url: sourceUrl, refUrl, settings, options} = params;
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-      const {timeId, recurseChain} = settings;
+      const {timeId} = settings;
 
       try {
         // fail out if sourceUrl is empty.
