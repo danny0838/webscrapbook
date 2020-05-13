@@ -4111,11 +4111,10 @@
 
         // special management for data URI
         if (fetchResult.url.startsWith("data:")) {
-          const [, hash] = scrapbook.splitUrlByAnchor(fetchResult.url);
           const dataUri = charset ? 
               scrapbook.unicodeToDataUri(cssText, "text/css") : 
               scrapbook.byteStringToDataUri(cssText, "text/css;charset=UTF-8");
-          const response = {url: dataUri + hash};
+          const response = {url: dataUri};
           await callback(elem, response);
           return;
         }
