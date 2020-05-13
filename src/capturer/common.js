@@ -1990,7 +1990,7 @@
       );
 
       if (settings.frameIsMain) {
-        settings.filename = await capturer.getSaveFilename({
+        settings.filename = await capturer.formatIndexFilename({
           title: title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
           sourceUrl: docUrl,
           isFolder: options["capture.saveAs"] === "folder",
@@ -2811,7 +2811,7 @@
   };
 
   /**
-   * Format the filename to save.
+   * Format filename of the main item file to save.
    *
    * @param {Object} params
    * @param {string} params.title
@@ -2821,7 +2821,7 @@
    * @param {Object} params.options
    * @return {string} The formatted filename.
    */
-  capturer.getSaveFilename = async function (params) {
+  capturer.formatIndexFilename = async function (params) {
     const {title, sourceUrl, isFolder, settings, options} = params;
 
     const time = scrapbook.idToDate(settings.timeId);

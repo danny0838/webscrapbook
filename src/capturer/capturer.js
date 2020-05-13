@@ -1128,7 +1128,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       const blob = new Blob([html], {type: "text/html"});
       const ext = ".htm";
 
-      settings.filename = await capturer.getSaveFilename({
+      settings.filename = await capturer.formatIndexFilename({
         title: title || scrapbook.filenameParts(scrapbook.urlToFilename(sourceUrl))[0] || "untitled",
         sourceUrl,
         isFolder: false,
@@ -1216,7 +1216,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       const {timeId} = settings;
 
       if (settings.frameIsMain) {
-        settings.filename = await capturer.getSaveFilename({
+        settings.filename = await capturer.formatIndexFilename({
           title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
           sourceUrl,
           isFolder: options["capture.saveAs"] === "folder",
