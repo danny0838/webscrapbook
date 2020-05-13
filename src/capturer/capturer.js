@@ -1079,7 +1079,7 @@
             settings,
             options,
           });
-          favIconUrl = (await scrapbook.readFileAsDataURL(xhr.response)) + favIconUrlHash;
+          favIconUrl = await scrapbook.readFileAsDataURL(xhr.response);
         } catch (ex) {
           console.error(ex);
         }
