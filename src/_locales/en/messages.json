@@ -749,12 +749,6 @@
   "OptionCaptureObjectTooltip": {
     "message": "This determines how OBJECT elements, which are typically used to include plugins, and sometimes images, media, or frames, are handled. NOTE: Plugins may not work without original server environment, and could cause a security hazard.\n\n• Save: Save the referenced resources to local.\n• Link: Link the OBJECT element to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the OBJECT element.\n• Remove: Remove the OBJECT element. Note that this could alter the web page layout."
   },
-  "OptionCapturePageSizeLimitLabel": {
-    "message": "Size limit for each page:"
-  },
-  "OptionCapturePageSizeLimitTooltip": {
-    "message": "A page exceeding the limit will not be captured. Empty for no limit."
-  },
   "OptionCaptureRecordRewritesLabel": {
     "message": "Record rewrites"
   },
@@ -1267,14 +1261,6 @@
       },
       "size": {
         "content": "$2"
-      }
-    }
-  },
-  "WarnPageSizeLimitExceeded": {
-    "message": "Skip page exceeding size limit: '$SOURCE$'",
-    "placeholders": {
-      "source": {
-        "content": "$1"
       }
     }
   },

@@ -749,12 +749,6 @@
   "OptionCaptureObjectTooltip": {
     "message": "此选项决定 OBJECT 元素的处理方式。OBJECT 元素多用于嵌入外挂程式，也可嵌入图片、多媒体、或框架页。注意：外挂程式脱离原服务器环境可能无法正常运作，且可能造成安全风险。\n\n• 保存：将 OBJECT 元素参照的文件保存至本地。\n• 链接：将 OBJECT 元素连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将 OBJECT 元素无效化。\n• 移除：将 OBJECT 元素移除。注意这可能会影响网页排版。"
   },
-  "OptionCapturePageSizeLimitLabel": {
-    "message": "单个页面的大小限制:"
-  },
-  "OptionCapturePageSizeLimitTooltip": {
-    "message": "系统不会获取超出此限制的页面。空白表示不设限制。"
-  },
   "OptionCaptureRecordRewritesLabel": {
     "message": "记录改写的內容"
   },
@@ -1267,14 +1261,6 @@
       },
       "size": {
         "content": "$2"
-      }
-    }
-  },
-  "WarnPageSizeLimitExceeded": {
-    "message": "略过超出大小限制的页面: '$SOURCE$'",
-    "placeholders": {
-      "source": {
-        "content": "$1"
       }
     }
   },

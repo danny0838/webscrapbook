@@ -10,7 +10,6 @@ const baseOptions = {
   "capture.saveFileAsHtml": false,
   "capture.saveDataUriAsFile": true,
   "capture.saveDataUriAsSrcdoc": true,
-  "capture.pageSizeLimit": null,
   "capture.resourceSizeLimit": null,
   "capture.image": "save",
   "capture.imageBackground": "save",
@@ -8031,7 +8030,6 @@ async function test_capture_sizeLimit() {
   };
 
   /* sizeLimit = null */
-  options["capture.pageSizeLimit"] = null;
   options["capture.resourceSizeLimit"] = null;
 
   var blob = await capture({
@@ -8061,7 +8059,6 @@ async function test_capture_sizeLimit() {
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
 
   /* sizeLimit = 1; linkUnsavedUri = false */
-  options["capture.pageSizeLimit"] = 1 / 1024;
   options["capture.resourceSizeLimit"] = 1 / 1024;
   options["capture.linkUnsavedUri"] = false;
 
@@ -8091,7 +8088,6 @@ async function test_capture_sizeLimit() {
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `urn:scrapbook:download:skip:${localhost}/capture_sizeLimit/iframe2.html`);
 
   /* sizeLimit = 1; linkUnsavedUri = true */
-  options["capture.pageSizeLimit"] = 1 / 1024;
   options["capture.resourceSizeLimit"] = 1 / 1024;
   options["capture.linkUnsavedUri"] = true;
 
