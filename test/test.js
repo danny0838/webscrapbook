@@ -7896,9 +7896,9 @@ async function test_capture_singleHtml_encoding() {
 #internal { background: url("data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA"); }
 #internal::after { content: "內部"; }`);
   assert(doc.querySelector('link').getAttribute('href') === `\
-data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background:%20url(%22data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22);%20%7D%0D%0A%23external::after%20%7B%20content:%20%22外部%22;%20%7D%0D%0A`);
+data:text/css;charset=UTF-8;filename=link.css,%23external%20%7B%20background%3A%20url%28%22data%3Aimage/bmp%3Bfilename%3Dgreen.bmp%3Bbase64%2CQk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22%29%3B%20%7D%0D%0A%23external%3A%3Aafter%20%7B%20content%3A%20%22%E5%A4%96%E9%83%A8%22%3B%20%7D%0D%0A`);
   assert(doc.querySelectorAll('style')[1].textContent.trim() === `\
-@import "data:text/css;charset=UTF-8;filename=import.css,%23import%20%7B%20background:%20url(%22data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22);%20%7D%0D%0A%23import::after%20%7B%20content:%20%22匯入%22;%20%7D%0D%0A";`);
+@import "data:text/css;charset=UTF-8;filename=import.css,%23import%20%7B%20background%3A%20url%28%22data%3Aimage/bmp%3Bfilename%3Dgreen.bmp%3Bbase64%2CQk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA%22%29%3B%20%7D%0D%0A%23import%3A%3Aafter%20%7B%20content%3A%20%22%E5%8C%AF%E5%85%A5%22%3B%20%7D%0D%0A";`);
   assert(doc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `data:text/plain;filename=big5.txt,Big5%A4%A4%A4%E5%A4%BA%AEe`);
 
