@@ -2566,7 +2566,6 @@
    * @param {Object} [params.requestHeaders]
    * @param {Object} [params.formData]
    * @param {function} [params.onreadystatechange]
-   * @param {boolean} [params.onload] - resolve with xhr object for custom handler
    */
   scrapbook.xhr = async function (params = {}) {
     return new Promise((resolve, reject) => {
@@ -2579,9 +2578,6 @@
       }
 
       xhr.onload = function (event) {
-        if (params.onload) {
-          resolve(xhr);
-        }
         if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 0) {
           // we only care about real loading success
           resolve(xhr);
