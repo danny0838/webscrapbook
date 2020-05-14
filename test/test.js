@@ -8020,6 +8020,27 @@ async function test_capture_singleHtml_mergeCss() {
 }
 
 /**
+ * Generated filename parameter of data URL should use non-uniquified filename.
+ */
+async function test_capture_singleHtml_filename() {
+  var options = {
+    "capture.saveAs": "singleHtml",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_singleHtml_filename/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  var imgs = doc.querySelectorAll('img');
+
+  assert(imgs[0].getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+  assert(imgs[1].getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+  assert(imgs[2].getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+}
+
+/**
  * Escape bad tags for security
  *
  * capturer.captureDocument
@@ -8471,6 +8492,7 @@ async function runTests() {
   await test(test_capture_recursive);
   await test(test_capture_singleHtml_encoding);
   await test(test_capture_singleHtml_mergeCss);
+  await test(test_capture_singleHtml_filename);
   await test(test_capture_invalid_tags);
   await test(test_capture_sizeLimit);
   await test(test_capture_helpers);
