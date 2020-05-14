@@ -7868,11 +7868,15 @@ async function test_capture_recursive() {
 }
 
 /**
- * Check generated data URI for singleHtml
+ * Check encoding and charset for getnerated data URLs.
+ *
+ * - Don't use Base64 encoding for text-like files.
+ * - CSS should always use UTF-8 charset.
  *
  * capturer.captureDocument
+ * capturer.downloadBlob
  */
-async function test_capture_singleHtml_charset() {
+async function test_capture_singleHtml_encoding() {
   var options = {
     "capture.saveAs": "singleHtml",
     "capture.mergeCssResources": false,
@@ -7882,7 +7886,7 @@ async function test_capture_singleHtml_charset() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_singleHtml_charset/index.html`,
+    url: `${localhost}/capture_singleHtml_encoding/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8463,7 +8467,7 @@ async function runTests() {
   await test(test_capture_svg);
   await test(test_capture_mathml);
   await test(test_capture_recursive);
-  await test(test_capture_singleHtml_charset);
+  await test(test_capture_singleHtml_encoding);
   await test(test_capture_singleHtml_mergeCss);
   await test(test_capture_invalid_tags);
   await test(test_capture_sizeLimit);
