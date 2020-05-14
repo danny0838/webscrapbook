@@ -1246,6 +1246,67 @@ async function test_capture_dataUri3() {
 }
 
 /**
+ * Check support of parameters in a data URL
+ *
+ * capture.saveDataUriAsFile
+ */
+async function test_capture_dataUri4() {
+  var blob = await capture({
+    url: `${localhost}/capture_dataUri4/index.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index.rdf.css"]);
+  assert(zip.files["index.dat.css"]);
+  assert(zip.files["^metadata^.css"]);
+
+  assert(zip.files["abc.html"]);
+  assert(zip.files["abc.xml"]);
+  assert(zip.files["abc.bmp"]);
+  assert(zip.files["abc.jpeg"]);
+  assert(zip.files["abc.gif"]);
+  assert(zip.files["abc.png"]);
+  assert(zip.files["abc.svg"]);
+  assert(zip.files["abc.wav"]);
+  assert(zip.files["abcd.wav"]);
+  assert(zip.files["abc.mp3"]);
+  assert(zip.files["abc.oga"]);
+  assert(zip.files["abc.ogx"]);
+  assert(zip.files["abc.mpga"]);
+  assert(zip.files["abc.mp4"]);
+  assert(zip.files["abc.webm"]);
+  assert(zip.files["abc.ogv"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var links = doc.querySelectorAll('link');
+  assert(links[0].getAttribute('href') === "index.rdf.css");
+  assert(links[1].getAttribute('href') === "index.dat.css");
+  assert(links[2].getAttribute('href') === "^metadata^.css");
+
+  var imgs = doc.querySelectorAll('img');
+  assert(imgs[0].getAttribute('src') === "abc.html");
+  assert(imgs[1].getAttribute('src') === "abc.xml");
+  assert(imgs[2].getAttribute('src') === "abc.bmp");
+  assert(imgs[3].getAttribute('src') === "abc.jpeg");
+  assert(imgs[4].getAttribute('src') === "abc.gif");
+  assert(imgs[5].getAttribute('src') === "abc.png");
+  assert(imgs[6].getAttribute('src') === "abc.svg");
+  assert(imgs[7].getAttribute('src') === "abc.wav");
+  assert(imgs[8].getAttribute('src') === "abcd.wav");
+  assert(imgs[9].getAttribute('src') === "abc.mp3");
+  assert(imgs[10].getAttribute('src') === "abc.oga");
+  assert(imgs[11].getAttribute('src') === "abc.ogx");
+  assert(imgs[12].getAttribute('src') === "abc.mpga");
+  assert(imgs[13].getAttribute('src') === "abc.mp4");
+  assert(imgs[14].getAttribute('src') === "abc.webm");
+  assert(imgs[15].getAttribute('src') === "abc.ogv");
+}
+
+/**
  * Check if capture selection works
  *
  * capturer.captureDocument
@@ -8404,6 +8465,7 @@ async function runTests() {
   await test(test_capture_dataUri);
   await test(test_capture_dataUri2);
   await test(test_capture_dataUri3);
+  await test(test_capture_dataUri4);
   await test(test_capture_selection);
   await test(test_capture_headless);
   await test(test_capture_bookmark);
