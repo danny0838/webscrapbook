@@ -1390,7 +1390,7 @@
   };
 
   scrapbook.byteStringToDataUri = function (str, mime, charset) {
-    return `data:${mime || ""}${charset ? ";" + encodeURIComponent(charset) : ""},${escape(str)}`;
+    return `data:${mime || ""}${charset ? ";charset=" + encodeURIComponent(charset) : ""},${escape(str)}`;
   };
 
   scrapbook.unicodeToUtf8 = function (chars) {
