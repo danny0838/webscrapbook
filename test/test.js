@@ -991,7 +991,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
  * capturer.downloadFile
  * capturer.DocumentCssHandler
  */
-async function test_capture_dataUri_resolve() {
+async function test_capture_dataUri2() {
   var options = {
     "capture.style": "save",
     "capture.font": "save",
@@ -1003,7 +1003,7 @@ async function test_capture_dataUri_resolve() {
   options["capture.saveDataUriAsFile"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri/resolve-css-1.html`,
+    url: `${localhost}/capture_dataUri2/resolve-css-1.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1026,7 +1026,7 @@ async function test_capture_dataUri_resolve() {
   options["capture.saveDataUriAsFile"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri/resolve-css-2.html`,
+    url: `${localhost}/capture_dataUri2/resolve-css-2.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1049,7 +1049,7 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
   options["capture.saveDataUriAsFile"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri/resolve-css-1.html`,
+    url: `${localhost}/capture_dataUri2/resolve-css-1.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1073,7 +1073,7 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
   options["capture.saveDataUriAsFile"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri/resolve-css-2.html`,
+    url: `${localhost}/capture_dataUri2/resolve-css-2.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1101,7 +1101,7 @@ p { background-image: url("red.bmp"); }`);
  * capture.saveDataUriAsFile
  * capturer.captureDocument
  */
-async function test_capture_dataUri_resolve2() {
+async function test_capture_dataUri3() {
   var options = {
     "capture.frame": "save",
     "capture.downLink.mode": "url",
@@ -1115,7 +1115,7 @@ async function test_capture_dataUri_resolve2() {
   options["capture.saveDataUriAsFile"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri/resolve-frame-1.html`,
+    url: `${localhost}/capture_dataUri3/resolve-frame-1.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1157,7 +1157,7 @@ async function test_capture_dataUri_resolve2() {
   options["capture.saveDataUriAsFile"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri/resolve-frame-2.html`,
+    url: `${localhost}/capture_dataUri3/resolve-frame-2.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1180,7 +1180,7 @@ async function test_capture_dataUri_resolve2() {
   options["capture.saveDataUriAsFile"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri/resolve-frame-1.html`,
+    url: `${localhost}/capture_dataUri3/resolve-frame-1.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1223,7 +1223,7 @@ async function test_capture_dataUri_resolve2() {
   options["capture.saveDataUriAsFile"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri/resolve-frame-2.html`,
+    url: `${localhost}/capture_dataUri3/resolve-frame-2.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8375,8 +8375,8 @@ async function runTests() {
   await test(test_capture_saveAsciiFilename);
   await test(test_capture_saveFileAsHtml);
   await test(test_capture_dataUri);
-  await test(test_capture_dataUri_resolve);
-  await test(test_capture_dataUri_resolve2);
+  await test(test_capture_dataUri2);
+  await test(test_capture_dataUri3);
   await test(test_capture_selection);
   await test(test_capture_headless);
   await test(test_capture_bookmark);
