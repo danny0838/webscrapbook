@@ -2520,7 +2520,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {Object} params
    * @param {Blob} params.blob
    * @param {string} params.filename - validated and unique
-   * @param {string} params.sourceUrl - must not include hash
+   * @param {string} params.sourceUrl - may include hash
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -2529,11 +2529,12 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     isDebug && console.debug("call: downloadBlob", params);
 
     const {blob, filename, sourceUrl, settings, options} = params;
+    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
     if (typeof options["capture.resourceSizeLimit"] === "number" && blob.size >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
-      capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
-      return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Resource size limit exceeded."}};
+      capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrlMain, 128)]));
+      return {url: capturer.getSkipUrl(sourceUrlMain, options), error: {message: "Resource size limit exceeded."}};
     }
 
     switch (options["capture.saveAs"]) {
@@ -2561,6 +2562,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(filename) + m);
         }
 
+        // don't add hash to data URL as some browsers don't support it
         return {filename, url: dataUri};
       }
 
@@ -2568,20 +2570,20 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         await capturer.saveCache({
           timeId,
           path: filename,
-          source: sourceUrl,
+          source: sourceUrlMain,
           data: blob,
         });
-        return {filename, url: scrapbook.escapeFilename(filename)};
+        return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       }
 
       case "maff": {
         await capturer.saveCache({
           timeId,
           path: timeId + "/" + filename,
-          source: sourceUrl,
+          source: sourceUrlMain,
           data: blob,
         });
-        return {filename, url: scrapbook.escapeFilename(filename)};
+        return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       }
 
       case "folder":
@@ -2589,10 +2591,10 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         await capturer.saveCache({
           timeId,
           path: filename,
-          source: sourceUrl,
+          source: sourceUrlMain,
           data: blob,
         });
-        return {filename, url: scrapbook.escapeFilename(filename)};
+        return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
       }
     }
   };
