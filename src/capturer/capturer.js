@@ -1001,8 +1001,13 @@
           },
         },
       });
+
+      if (!response.url || response.url.startsWith('data:')) {
+        return response;
+      }
+
       return Object.assign({}, response, {
-        url: response.url ? response.url + sourceUrlHash : response.url,
+        url: response.url + sourceUrlHash,
       });
     } catch (ex) {
       console.warn(ex);
