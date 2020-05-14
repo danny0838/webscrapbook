@@ -928,9 +928,9 @@ async function test_capture_dataUri() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === "data:text/css;charset=UTF-8,body%7Bfont-size%3A20px%3B%7D");
+  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === "data:text/css;charset=UTF-8,body%7Bfont-size:20px;%7D");
   assert(doc.querySelector('style').textContent.trim() === `\
-@import url("data:text/css;charset=UTF-8,body%7Bfont-size%3A20px%3B%7D");
+@import url("data:text/css;charset=UTF-8,body%7Bfont-size:20px;%7D");
 @font-face { font-family: myFont; src: url("data:font/woff;base64,"); }
 p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
   assert(doc.querySelector('img').getAttribute('src') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
@@ -975,9 +975,9 @@ p { background-image: url("ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp"); }`);
   });
 
   var doc = await readFileAsDocument(blob);
-  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === "data:text/css;charset=UTF-8,body%7Bfont-size%3A20px%3B%7D");
+  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === "data:text/css;charset=UTF-8,body%7Bfont-size:20px;%7D");
   assert(doc.querySelector('style').textContent.trim() === `\
-@import url("data:text/css;charset=UTF-8,body%7Bfont-size%3A20px%3B%7D");
+@import url("data:text/css;charset=UTF-8,body%7Bfont-size:20px;%7D");
 @font-face { font-family: myFont; src: url("data:font/woff;base64,"); }
 p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
   assert(doc.querySelector('img').getAttribute('src') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
