@@ -1780,6 +1780,57 @@ async function test_capture_frame3() {
 }
 
 /**
+ * Check duplication and hash handling
+ *
+ * capture.frame
+ */
+async function test_capture_frame4() {
+  /* capture.frame = save */
+  var options = {
+    "capture.frame": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_frame/duplicate.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var frames = doc.querySelectorAll('iframe');
+
+  assert(frames[0].getAttribute('src').match(/^index_\d+\.html$/));
+  assert(frames[1].getAttribute('src').match(/^index_\d+\.html$/));
+  assert(frames[2].getAttribute('src').match(/^index_\d+\.html#abc$/));
+  assert(frames[3].getAttribute('src').match(/^text\.txt$/));
+  assert(frames[4].getAttribute('src').match(/^text\.txt$/));
+
+  /* capture.frame = link */
+  var options = {
+    "capture.frame": "link",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_frame/duplicate.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var frames = doc.querySelectorAll('iframe');
+
+  assert(frames[0].getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html`);
+  assert(frames[1].getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html`);
+  assert(frames[2].getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html#abc`);
+  assert(frames[3].getAttribute('src') === `${localhost}/capture_frame/frames/text.txt`);
+  assert(frames[4].getAttribute('src') === `${localhost}/capture_frame/frames/text.txt`);
+}
+
+/**
  * Check headless frame save if same origin
  *
  * capture.frame
@@ -1982,6 +2033,36 @@ async function test_capture_frame_headless3() {
   assert(!frames[0].hasAttribute('src'));
   assert(frames[1].getAttribute('src') === "");
   assert(frames[2].getAttribute('src') === "#123");
+}
+
+/**
+ * Check duplication and hash handling
+ *
+ * capture.frame
+ */
+async function test_capture_frame_headless4() {
+  /* capture.frame = save */
+  var options = {
+    "capture.frame": "save",
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frame/duplicate.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var frames = doc.querySelectorAll('iframe');
+
+  assert(frames[0].getAttribute('src') === "index_1.html");
+  assert(frames[1].getAttribute('src') === "index_1.html");
+  assert(frames[2].getAttribute('src') === "index_1.html#abc");
+  assert(frames[3].getAttribute('src') === "text.txt");
+  assert(frames[4].getAttribute('src') === "text.txt");
 }
 
 /**
@@ -8835,9 +8916,11 @@ async function runTests() {
   await test(test_capture_frame);
   await test(test_capture_frame2);
   await test(test_capture_frame3);
+  await test(test_capture_frame4);
   await test(test_capture_frame_headless);
   await test(test_capture_frame_headless2);
   await test(test_capture_frame_headless3);
+  await test(test_capture_frame_headless4);
   await test(test_capture_frame_singleHtml);
   await test(test_capture_frame_singleHtml2);
   await test(test_capture_frame_circular);
