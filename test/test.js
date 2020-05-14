@@ -678,6 +678,8 @@ async function test_capture_header() {
 /**
  * If filename by URL path or header doesn't match its MIME type,
  * a fixing extension should be appended.
+ *
+ * capturer.downloadFile
  */
 async function test_capture_header_mime() {
   var blob = await capture({
@@ -707,7 +709,7 @@ async function test_capture_header_mime() {
   assert(doc.querySelectorAll('img')[4].getAttribute("src") === "noext.doc")
   assert(zip.files["noext.doc"]);
 
-  // except for certain universal MIMEs, e.g. application/octet-stream
+  // allow empty extension for universal MIME types, e.g. application/octet-stream
   assert(doc.querySelectorAll('img')[5].getAttribute("src") === "noextoctet")
   assert(zip.files["noextoctet"]);
 
@@ -7815,12 +7817,11 @@ async function test_capture_mathml() {
 }
 
 /**
- * This issue happens when a child is "captured" after its parent is removed.
+ * Check if no error when parent is to be removed and child is to be captured.
  *
  * capturer.captureDocument
  */
 async function test_capture_recursive() {
-  /* embed.html */
   var options = {
     "capture.image": "remove",
     "capture.script": "save",
