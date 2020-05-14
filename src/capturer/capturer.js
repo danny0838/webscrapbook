@@ -39,7 +39,8 @@
   /**
    * @typedef {Object} missionCaptureInfo
    * @property {Set<string>} files
-   * @property {Map<string~token, Promise>} accessMap
+   * @property {Map<string~token, Promise<fetchResult>>} fetchMap
+   * @property {Map<string~token, Object>} urlToFilenameMap
    */
 
   /**
@@ -51,7 +52,8 @@
     // http://maf.mozdev.org/maff-specification.html
     files: new Set(["index.dat", "index.rdf", "^metadata^"]),
 
-    accessMap: new Map(),
+    fetchMap: new Map(),
+    urlToFilenameMap: new Map(),
   }));
 
   /**
@@ -248,26 +250,27 @@
   };
 
   /**
-   * Attempt to access a resource from the web and returns the result.
-   *
-   * An algorithm to prevent duplicated requests is implemented.
+   * @typedef {Object} fetchResult
+   * @property {string} url
+   * @property {integer} status
+   * @property {Object} headers
+   * @property {Blob} blob
+   */
+
+  /**
+   * Uniquely fetch a resource from the web.
    *
    * @param {Object} params
    * @param {string} params.url
-   * @param {string} [params.role]
    * @param {string} [params.refUrl] - the referrer URL
-   * @param {string} [params.responseType]
-   * @param {integer} [params.timeout]
-   * @param {Objet} [params.hooks]
+   * @param {boolean} [params.headerOnly] - fetch HTTP header only
    * @param {Objet} params.settings
    * @param {Objet} params.options
+   * @return {Promise<fetchResult>}
    */
-  capturer.access = async function (params) {
-    /**
-     * Get a unique token for an access.
-     */
-    const getAccessToken = function (url, role) {
-      let token = [scrapbook.normalizeUrl(url), role || "blob"].join("\t");
+  capturer.fetch = async function (params) {
+    const getFetchToken = function (url, role) {
+      let token = `${scrapbook.normalizeUrl(url)}\t${role}`;
       token = scrapbook.sha1(token, "TEXT");
       return token;
     };
@@ -278,6 +281,7 @@
      * @param {string} params.targetUrl
      * @param {string} [params.refUrl]
      * @param {Object} [params.options]
+     * @return {Object} The modified headers object.
      */
     const setReferrer = function ({headers, targetUrl, refUrl, options = {}}) {
       if (!refUrl) { return; }
@@ -324,188 +328,152 @@
       }
       return headers;
     };
-    
-    const access = async function (params) {
-      isDebug && console.debug("call: access", params);
 
-      const {role, url: sourceUrl, refUrl, responseType = 'blob', timeout, hooks = {}, settings, options} = params;
+    const fetch = capturer.fetch = async function (params) {
+      isDebug && console.debug("call: fetch", params);
+
+      const {url: sourceUrl, refUrl, headerOnly = false, settings, options} = params;
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
       const {timeId} = settings;
-      const accessMap = capturer.captureInfo.get(timeId).accessMap;
-      const accessToken = getAccessToken(sourceUrlMain, role);
+      const fetchMap = capturer.captureInfo.get(timeId).fetchMap;
+      const fetchRole = headerOnly ? 'head' : 'blob';
+      const fetchToken = getFetchToken(sourceUrlMain, fetchRole);
 
-      // check for previous access
+      // check for previous fetch
       {
-        const accessPrevious = accessMap.get(accessToken);
-
-        if (accessPrevious) {
-          let response;
-          if (hooks.duplicate) {
-            response = await hooks.duplicate({
-              access: accessPrevious,
-              url: sourceUrlMain,
-              hash: sourceUrlHash,
-            });
-          } else {
-            response = await accessPrevious;
-          }
-          return response;
+        const fetchPrevious = fetchMap.get(fetchToken);
+        if (fetchPrevious) {
+          return fetchPrevious;
         }
       }
 
       const deferred = new Deferred();
-      const accessCurrent = deferred.promise;
+      const fetchCurrent = deferred.promise;
       (async () => {
         let response;
-        try {
-          if (hooks.preRequest) {
-            const response = await hooks.preRequest({
-              access: accessCurrent,
-              url: sourceUrlMain,
-              hash: sourceUrlHash,
-            });
-            if (typeof response !== "undefined") {
-              return response;
-            }
-          }
+        let headers = {};
 
-          const requestHeaders = setReferrer({
+        // special handling for data URI
+        if (sourceUrlMain.startsWith("data:")) {
+          const file = scrapbook.dataUriToFile(sourceUrlMain);
+          if (!file) { throw new Error("Malformed data URL."); }
+
+          // simulate headers from data URI parameters
+          headers.filename = file.name;
+          headers.contentLength = file.size;
+          const contentType = scrapbook.parseHeaderContentType(file.type);
+          headers.contentType = contentType.type;
+          headers.charset = contentType.parameters.charset;
+
+          return {
+            url: sourceUrlMain,
+            status: 200,
+            headers,
+            blob: new Blob([file], {type: file.type}),
+          };
+        }
+
+        // special handling for about:blank or about:srcdoc
+        if (sourceUrlMain.startsWith("about:")) {
+          return {
+            url: sourceUrlMain,
+            status: 200,
+            headers,
+            blob: new Blob([], {type: 'text/html'}),
+          };
+        }
+
+        const xhr = await scrapbook.xhr({
+          url: sourceUrlMain,
+          responseType: 'blob',
+          requestHeaders: setReferrer({
             headers: {},
             refUrl,
             targetUrl: sourceUrlMain,
             options,
-          });
+          }),
+          onreadystatechange(xhr) {
+            if (xhr.readyState !== 2) { return; }
 
-          let isIntendedAbort = false;
-          let headers = {};
-          const xhr = await scrapbook.xhr({
-            url: sourceUrlMain,
-            responseType,
-            requestHeaders,
-            timeout,
-            onreadystatechange(xhr) {
-              if (xhr.readyState !== 2) { return; }
+            // check for previous fetch if redirected
+            const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
+            if (responseUrlMain !== sourceUrlMain) {
+              const responseFetchToken = getFetchToken(responseUrlMain, fetchRole);
+              const responseFetchPrevious = fetchMap.get(responseFetchToken);
 
-              // check for previous access if redirected
-              const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
-              if (responseUrlMain !== sourceUrlMain) {
-                const responseAccessToken = getAccessToken(responseUrlMain, role);
-                const responseAccessPrevious = accessMap.get(responseAccessToken);
-                if (responseAccessPrevious) {
-                  isIntendedAbort = true;
-                  if (hooks.duplicate) {
-                    response = hooks.duplicate({
-                      access: responseAccessPrevious,
-                      url: sourceUrlMain,
-                      hash: sourceUrlHash,
-                    });
-                  } else {
-                    response = responseAccessPrevious;
-                  }
-                  xhr.abort();
-                  return;
-                }
-
-                accessMap.set(responseAccessToken, accessCurrent);
+              // a fetch to the redirected URL exists, abort the request and return it
+              if (responseFetchPrevious) {
+                response = responseFetchPrevious;
+                xhr.abort();
+                return;
               }
 
-              // get headers
-              if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-                if (hooks.preHeaders) {
-                  // synchronous only
-                  const _response = hooks.preHeaders({
-                    access: accessCurrent,
-                    xhr,
-                    url: sourceUrlMain,
-                    hash: sourceUrlHash,
-                    headers,
-                  });
-                  if (typeof _response !== "undefined") {
-                    isIntendedAbort = true;
-                    response = _response;
-                    xhr.abort();
-                    return;
-                  }
-                } else {
-                  const headerContentType = xhr.getResponseHeader("Content-Type");
-                  if (headerContentType) {
-                    const contentType = scrapbook.parseHeaderContentType(headerContentType);
-                    headers.contentType = contentType.type;
-                    headers.charset = contentType.parameters.charset;
-                  }
-                  const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-                  if (headerContentDisposition) {
-                    const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-                    headers.isAttachment = (contentDisposition.type === "attachment");
-                    headers.filename = contentDisposition.parameters.filename;
-                  }
-                  const headerContentLength = xhr.getResponseHeader("Content-Length");
-                  if (headerContentLength) {
-                    headers.contentLength = parseInt(headerContentLength, 10);
-                  }
-                }
+              // otherwise, map the redirected URL to the same fetch promise
+              fetchMap.set(responseFetchToken, fetchCurrent);
+              if (!headerOnly) {
+                const responseFetchToken = getFetchToken(responseUrlMain, 'head');
+                fetchMap.set(responseFetchToken, fetchCurrent);
               }
+            }
 
-              if (hooks.postHeaders) {
-                // synchronous only
-                const _response = hooks.postHeaders({
-                  access: accessCurrent,
-                  xhr,
-                  url: sourceUrlMain,
-                  hash: sourceUrlHash,
-                  headers,
-                });
-                if (typeof _response !== "undefined") {
-                  isIntendedAbort = true;
-                  response = _response;
-                  xhr.abort();
-                  return;
-                }
+            // get headers
+            if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+              const headerContentType = xhr.getResponseHeader("Content-Type");
+              if (headerContentType) {
+                const contentType = scrapbook.parseHeaderContentType(headerContentType);
+                headers.contentType = contentType.type;
+                headers.charset = contentType.parameters.charset;
               }
-            },
-          });
+              const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+              if (headerContentDisposition) {
+                const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+                headers.isAttachment = (contentDisposition.type === "attachment");
+                headers.filename = contentDisposition.parameters.filename;
+              }
+              const headerContentLength = xhr.getResponseHeader("Content-Length");
+              if (headerContentLength) {
+                headers.contentLength = parseInt(headerContentLength, 10);
+              }
+            }
 
-          // This xhr is resolved to undefined when aborted.
-          if (!xhr && isIntendedAbort) {
-            return response;
-          }
+            // skip loading body for a headerOnly fetch
+            if (headerOnly) {
+              response = {
+                url: xhr.responseURL,
+                status: xhr.status,
+                headers,
+                blob: null,
+              };
+              xhr.abort();
+              return;
+            }
+          },
+        });
 
-          response = {
-            access: accessCurrent,
-            xhr,
-            url: sourceUrlMain,
-            hash: sourceUrlHash,
-            headers,
-          };
-
-          if (hooks.response) {
-            response = await hooks.response(response);
-          }
-        } catch (ex) {
-          // something wrong with the XMLHttpRequest
-          if (hooks.error) {
-            response = await hooks.error({
-              ex,
-              access: accessCurrent,
-              url: sourceUrlMain,
-              hash: sourceUrlHash,
-            });
-          } else {
-            throw ex;
-          }
+        // xhr is resolved to undefined when aborted.
+        if (!xhr && response) {
+          return response;
         }
-        return response;
+
+        return {
+          url: xhr.responseURL,
+          status: xhr.status,
+          headers,
+          blob: xhr.response,
+        };
       })().then(deferred.resolve, deferred.reject);
 
-      accessMap.set(accessToken, accessCurrent);
-      accessCurrent.id = accessToken;
+      fetchMap.set(fetchToken, fetchCurrent);
+      if (!headerOnly) {
+        const fetchToken = getFetchToken(sourceUrlMain, 'head');
+        fetchMap.set(fetchToken, fetchCurrent);
+      }
 
-      return accessCurrent;
+      return fetchCurrent;
     };
 
-    capturer.access = access;
-    return await access(params);
+    return await fetch(params);
   };
 
   /**
@@ -945,64 +913,41 @@
         throw new Error(`Requires an absolute URL.`);
       }
 
-      const response = await capturer.access({
+      const fetchResponse = await capturer.fetch({
         url: sourceUrlMain,
         refUrl,
-        role: "captureUrl",
-        responseType: "document",
         settings,
         options,
-        hooks: {
-          async response({xhr, headers}) {
-            // use the filename if it has been defined by header Content-Disposition
-            const filename = sourceUrlMain.startsWith("data:") ? 
-                scrapbook.dataUriToFile(sourceUrlMain).name : 
-                headers.filename || scrapbook.urlToFilename(xhr.responseURL);
-
-            const doc = xhr.response;
-            if (doc) {
-              // generate a documentName if not specified
-              if (!settings.documentName) {
-                let documentName = filename;
-
-                // remove corresponding file extension for true documents
-                const mime = doc.contentType;
-                if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(mime)) {
-                  const fn = documentName.toLowerCase();
-                  for (let ext of Mime.allExtensions(mime)) {
-                    ext = "." + ext.toLowerCase();
-                    if (fn.endsWith(ext)) {
-                      documentName = documentName.slice(0, -ext.length);
-                      break;
-                    }
-                  }
-                }
-
-                settings.documentName = documentName;
-              }
-
-              return await capturer.captureDocumentOrFile({
-                doc,
-                refUrl,
-                title,
-                settings,
-                options,
-              });
-            } else {
-              return await capturer.captureFile({
-                url: xhr.responseURL,
-                refUrl,
-                title,
-                charset: headers.charset,
-                settings,
-                options,
-              });
-            }
-          },
-        },
       });
 
+      let response;
+      const doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
+      if (doc) {
+        response = await capturer.captureDocumentOrFile({
+          doc,
+          docUrl: fetchResponse.url,
+          refUrl,
+          title,
+          settings,
+          options,
+        });
+      } else {
+        response = await capturer.captureFile({
+          url: fetchResponse.url,
+          refUrl,
+          title,
+          charset: fetchResponse.headers.charset,
+          settings,
+          options,
+        });
+      }
+
       if (!response.url || response.url.startsWith('data:')) {
+        return response;
+      }
+
+      // don't add hash if redirected
+      if (scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(fetchResponse.url)) {
         return response;
       }
 
@@ -1039,16 +984,14 @@
       // attempt to retrieve title and favicon from source page
       if (!title || !favIconUrl) {
         try {
-          const {xhr} = await capturer.access({
+          const fetchResponse = await capturer.fetch({
             url: sourceUrlMain,
             refUrl,
-            role: "captureBookmark.document",
-            responseType: "document",
             settings,
             options,
           });
 
-          const doc = xhr.response;
+          const doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
 
           // specified sourceUrl may not be a document, maybe a malformed xhtml?
           if (doc) {
@@ -1064,7 +1007,7 @@
               // not including "-icon" or "_icon".
               let elem = doc.querySelector('link[rel~="icon"][href]');
               if (elem) {
-                favIconUrl = elem.href;
+                favIconUrl = new URL(elem.getAttribute('href'), fetchResponse.url).href;
               }
             }
           }
@@ -1077,14 +1020,13 @@
       if (favIconUrl && !favIconUrl.startsWith('data:')) {
         try {
           const [favIconUrlMain, favIconUrlHash] = scrapbook.splitUrlByAnchor(favIconUrl);
-          const {xhr} = await capturer.access({
+          const fetchResponse = await capturer.fetch({
             url: favIconUrlMain,
             refUrl: sourceUrl,
-            role: "captureBookmark.favicon",
             settings,
             options,
           });
-          favIconUrl = await scrapbook.readFileAsDataURL(xhr.response);
+          favIconUrl = await scrapbook.readFileAsDataURL(fetchResponse.blob);
         } catch (ex) {
           console.error(ex);
         }
@@ -1545,57 +1487,298 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   };
 
   /**
+   * @param {string} url
+   * @param {string} role
+   * @return {string}
+   */
+  capturer.getRegisterToken = function (url, role) {
+      let token = `${scrapbook.normalizeUrl(url)}\t${role}`;
+      token = scrapbook.sha1(token, "TEXT");
+      return token;
+  };
+
+  /**
+   * Register a document filename uniquified for the specified docUrl and role.
+   *
+   * - If role is not provided, return a non-uniquified document filename
+   *   without registration.
+   *
    * @kind invokable
    * @param {Object} params
    * @param {string} params.docUrl
    * @param {string} params.mime
+   * @param {string} [params.role] - "document-*", "document" (headless)
    * @param {Object} params.settings
+   * @param {boolean} params.settings.frameIsMain
    * @param {string} params.settings.documentName
    * @param {Object} params.options
    * @return {Promise<Object>}
    */
   capturer.registerDocument = async function (params) {
-    isDebug && console.debug("call: registerDocument", params);
+    const MIME_EXT_MAP = {
+      "text/html": "html",
+      "application/xhtml+xml": "xhtml",
+      "image/svg+xml": "svg",
+    };
 
-    const {docUrl, mime, settings, options} = params;
-    const {timeId, documentName} = settings;
+    const getExtFromMime = (mime) => {
+      return MIME_EXT_MAP[mime] || "html";
+    };
 
-    const files = capturer.captureInfo.get(timeId).files;
+    const getDocumentFileName = (params) => {
+      const {url: sourceUrl, mime, headers = {}, settings, options} = params;
 
-    const ext = mime === "application/xhtml+xml" ? "xhtml" : 
-      mime === "image/svg+xml" ? "svg" : 
-      "html";
+      let documentFileName = headers.filename || scrapbook.urlToFilename(sourceUrl);
 
-    let documentFileName;
-    if (options["capture.frameRename"]) {
-      let documentNameBase = scrapbook.validateFilename(documentName, options["capture.saveAsciiFilename"]);
-
-      // see capturer.getUniqueFilename for filename limitation
-      documentNameBase = scrapbook.crop(documentNameBase, 128, 240);
-
-      let newDocumentName = documentNameBase;
-      let newDocumentNameCI = newDocumentName.toLowerCase();
-      let count = 0;
-      while (files.has(newDocumentNameCI + ".html") || 
-          files.has(newDocumentNameCI + ".xhtml") || 
-          files.has(newDocumentNameCI + ".svg")) {
-        newDocumentName = documentNameBase + "_" + (++count);
-        newDocumentNameCI = newDocumentName.toLowerCase();
+      // fix extension
+      const fn = documentFileName.toLowerCase();
+      for (let ext of Mime.allExtensions(mime)) {
+        ext = "." + ext.toLowerCase();
+        if (fn.endsWith(ext)) {
+          documentFileName = documentFileName.slice(0, -ext.length);
+          break;
+        }
       }
-      files.add(newDocumentNameCI + ".html");
-      files.add(newDocumentNameCI + ".xhtml");
-      files.add(newDocumentNameCI + ".svg");
-      documentFileName = newDocumentName + "." + ext;
-    } else {
-      let newDocumentName = documentName || scrapbook.urlToFilename(docUrl);
-      if (!newDocumentName.endsWith("." + ext)) {
-        newDocumentName += "." + ext;
-      }
-      newDocumentName = scrapbook.validateFilename(newDocumentName, options["capture.saveAsciiFilename"]);
-      documentFileName = capturer.getUniqueFilename(timeId, newDocumentName);
-    }
+      documentFileName += "." + getExtFromMime(mime);
 
-    return {documentFileName};
+      documentFileName = scrapbook.validateFilename(documentFileName, options["capture.saveAsciiFilename"]);
+
+      return documentFileName;
+    };
+
+    const registerDocument = capturer.registerDocument = async function (params) {
+      isDebug && console.debug("call: registerDocument", params);
+
+      const {docUrl: sourceUrl, mime, role, settings, options} = params;
+      const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+
+      const {timeId, frameIsMain, documentName} = settings;
+      const urlToFilenameMap = capturer.captureInfo.get(timeId).urlToFilenameMap;
+
+      const fetchResponse = await capturer.fetch({
+        url: sourceUrl,
+        headerOnly: true,
+        settings,
+        options,
+      });
+
+      // XHR response URL doesn't contain a hash
+      const redirectedUrl = fetchResponse.url;
+      const redirected = scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(redirectedUrl);
+
+      let response;
+      if (role || frameIsMain) {
+        const token = capturer.getRegisterToken(sourceUrlMain, role);
+
+        // if a previous registry exists, return it
+        const previousRegistry = urlToFilenameMap.get(token);
+        if (previousRegistry) {
+          return Object.assign({}, previousRegistry, {
+            url: previousRegistry.url + (redirected ? '' : sourceUrlHash),
+            isDuplicate: true,
+          });
+        }
+
+        let documentFileName;
+        if (options["capture.frameRename"] || frameIsMain) {
+          let documentNameBase = scrapbook.validateFilename(documentName, options["capture.saveAsciiFilename"]);
+
+          // see capturer.getUniqueFilename for filename limitation
+          documentNameBase = scrapbook.crop(documentNameBase, 128, 240);
+
+          const files = capturer.captureInfo.get(timeId).files;
+          let newDocumentName = documentNameBase;
+          let newDocumentNameCI = newDocumentName.toLowerCase();
+          let count = 0;
+          while (files.has(newDocumentNameCI + ".html") || 
+              files.has(newDocumentNameCI + ".xhtml") || 
+              files.has(newDocumentNameCI + ".svg")) {
+            newDocumentName = documentNameBase + "_" + (++count);
+            newDocumentNameCI = newDocumentName.toLowerCase();
+          }
+          files.add(newDocumentNameCI + ".html");
+          files.add(newDocumentNameCI + ".xhtml");
+          files.add(newDocumentNameCI + ".svg");
+          documentFileName = newDocumentName + "." + getExtFromMime(mime);
+        } else {
+          documentFileName = getDocumentFileName({
+            url: redirectedUrl,
+            mime,
+            headers: fetchResponse.headers,
+            settings,
+            options,
+          });
+
+          documentFileName = capturer.getUniqueFilename(settings.timeId, documentFileName);
+        }
+
+        response = {filename: documentFileName, url: scrapbook.escapeFilename(documentFileName)};
+
+        // update registry
+        urlToFilenameMap.set(token, response);
+      } else {
+        let documentFileName = getDocumentFileName({
+          url: redirectedUrl,
+          mime,
+          headers: fetchResponse.headers,
+          settings,
+          options,
+        });
+
+        response = {filename: documentFileName, url: scrapbook.escapeFilename(documentFileName)};
+      }
+
+      return Object.assign({}, response, {
+        url: response.url + (redirected ? '' : sourceUrlHash),
+      });
+    };
+
+    return await registerDocument(params);
+  };
+
+  /**
+   * Register a filename uniquified for the specifiied url and role.
+   *
+   * - If role is not provided, return a non-uniquified filename without
+   *   registration.
+   *
+   * @kind invokable
+   * @param {string} params.url
+   * @param {string} [params.role] - "resource", "css", "css-*" (dynamic)
+   * @param {Object} params.settings
+   * @param {Object} params.options
+   * @return {Promise<Object>}
+   */
+  capturer.registerFile = async function (params) {
+    const MIMES_NO_EXT_OK = new Set([
+      "application/octet-stream",
+    ]);
+
+    const MIMES_NEED_MATCH = new Set([
+      "text/html",
+      "text/xml",
+      "text/css",
+      "text/javascript",
+      "application/javascript",
+      "application/x-javascript",
+      "text/ecmascript",
+      "application/ecmascript",
+      "image/bmp",
+      "image/jpeg",
+      "image/gif",
+      "image/png",
+      "image/svg+xml",
+      "audio/wav",
+      "audio/x-wav",
+      "audio/mp3",
+      "audio/ogg",
+      "application/ogg",
+      "audio/mpeg",
+      "video/mp4",
+      "video/webm",
+      "video/ogg",
+    ]);
+
+    const getFilename = (params) => {
+      const {url: sourceUrl, headers = {}, settings, options} = params;
+      
+      // use the filename if it has been defined by header Content-Disposition
+      let filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
+
+      // if header Content-Type (MIME) is defined:
+      // 1. If the file has no extension, assign one according to MIME,
+      //    except for certain MIMEs.
+      //    (For example, "application/octet-stream" can be anything,
+      //    and guessing a "bin" is meaningless.)
+      // 2. For several usual MIMEs, if the file extension doesn't match
+      //    MIME, append a matching extension to prevent the file be
+      //    assigned a bad MIME when served via HTTP, which could cause
+      //    the browser to reject it.  For example, a CSS file named 
+      //    "foo.php" may be served as "application/x-httpd-php", and
+      //    modern browsers would refuse loading the CSS).
+      //
+      // Basic MIMEs listed in MAFF spec should be included:
+      // http://maf.mozdev.org/maff-specification.html
+      if (headers.contentType) {
+        const mime = headers.contentType;
+        let [base, ext] = scrapbook.filenameParts(filename);
+        if ((!ext && !MIMES_NO_EXT_OK.has(mime)) || 
+            (MIMES_NEED_MATCH.has(mime) && !Mime.allExtensions(mime).includes(ext.toLowerCase()))) {
+          ext = Mime.extension(mime);
+          if (ext) {
+            filename += "." + ext;
+          }
+        }
+      }
+
+      filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+
+      return filename;
+    };
+
+    const registerFile = capturer.registerFile = async function (params) {
+      isDebug && console.debug("call: registerFile", params);
+
+      const {url: sourceUrl, role, settings, options} = params;
+      const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+
+      const {timeId} = settings;
+      const urlToFilenameMap = capturer.captureInfo.get(timeId).urlToFilenameMap;
+
+      const fetchResponse = await capturer.fetch({
+        url: sourceUrl,
+        headerOnly: true,
+        settings,
+        options,
+      });
+
+      // XHR response URL doesn't contain a hash
+      const redirectedUrl = fetchResponse.url;
+      const redirected = scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(redirectedUrl);
+
+      let response;
+      if (role) {
+        const token = capturer.getRegisterToken(redirectedUrl, role);
+
+        // if a previous registry exists, return it
+        const previousRegistry = urlToFilenameMap.get(token);
+        if (previousRegistry) {
+          return Object.assign({}, previousRegistry, {
+            url: previousRegistry.url + (redirected ? '' : sourceUrlHash),
+            isDuplicate: true,
+          });
+        }
+
+        let filename = getFilename({
+          url: redirectedUrl,
+          headers: fetchResponse.headers,
+          settings,
+          options,
+        });
+
+        filename = capturer.getUniqueFilename(settings.timeId, filename);
+
+        response = {filename, url: scrapbook.escapeFilename(filename)};
+
+        // update registry
+        urlToFilenameMap.set(token, response);
+      } else {
+        let filename = getFilename({
+          url: redirectedUrl,
+          headers: fetchResponse.headers,
+          settings,
+          options,
+        });
+
+        response = {filename, url: scrapbook.escapeFilename(filename)};
+      }
+
+      return Object.assign({}, response, {
+        url: response.url + (redirected ? '' : sourceUrlHash),
+      });
+    };
+
+    return await registerFile(params);
   };
 
   /**
@@ -2098,151 +2281,105 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @return {Promise<Object>}
    */
   capturer.downloadFile = async function (params) {
-    const MIMES_NO_EXT_OK = new Set([
-      "application/octet-stream",
-    ]);
+    isDebug && console.debug("call: downloadFile", params);
 
-    const MIMES_NEED_MATCH = new Set([
-      "text/html",
-      "text/xml",
-      "text/css",
-      "text/javascript",
-      "application/javascript",
-      "application/x-javascript",
-      "text/ecmascript",
-      "application/ecmascript",
-      "image/bmp",
-      "image/jpeg",
-      "image/gif",
-      "image/png",
-      "image/svg+xml",
-      "audio/wav",
-      "audio/x-wav",
-      "audio/mp3",
-      "audio/ogg",
-      "application/ogg",
-      "audio/mpeg",
-      "video/mp4",
-      "video/webm",
-      "video/ogg",
-    ]);
+    const {url: sourceUrl, refUrl, settings, options} = params;
+    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const {timeId} = settings;
 
-    const downloadFile = async (params) => {
-      isDebug && console.debug("call: downloadFile", params);
+    try {
+      // fail out if sourceUrl is empty.
+      if (!sourceUrlMain) {
+        throw new Error(`Source URL is empty.`);
+      }
 
-      const {url: sourceUrl, refUrl, settings, options} = params;
-      const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-      const {timeId} = settings;
+      // fail out if sourceUrl is relative,
+      // or it will be treated as relative to this extension page.
+      if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+        throw new Error(`Requires an absolute URL.`);
+      }
 
-      try {
-        // fail out if sourceUrl is empty.
-        if (!sourceUrlMain) {
-          throw new Error(`Source URL is empty.`);
+      // special handling for data URI
+      // if not saved as file, save as-is regardless of its MIME type
+      if (sourceUrlMain.startsWith("data:")) {
+        if (!(options["capture.saveDataUriAsFile"] && !["singleHtml"].includes(options["capture.saveAs"]))) {
+          return {url: sourceUrlMain};
         }
+      }
 
-        // fail out if sourceUrl is relative,
-        // or it will be treated as relative to this extension page.
-        if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
-          throw new Error(`Requires an absolute URL.`);
-        }
+      // fetch first to ensure refUrl be handled
+      const fetchResponse = await capturer.fetch({
+        url: sourceUrlMain,
+        refUrl,
+        settings,
+        options,
+      });
 
-        const response = await capturer.access({
-          url: sourceUrlMain,
-          refUrl,
-          role: "downloadFile",
+      // special handling for saving file as data URI
+      if (["singleHtml"].includes(options["capture.saveAs"])) {
+        const registry = await capturer.registerFile({
+          url: sourceUrl,
           settings,
           options,
-          hooks: {
-            async preRequest({url, hash}) {
-              // special management for data URI
-              if (url.startsWith("data:")) {
-                /* save data URI as file? */
-                if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
-                  const file = scrapbook.dataUriToFile(url);
-                  if (!file) { throw new Error("Malformed data URL."); }
-
-                  let filename = file.name;
-                  filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-                  filename = capturer.getUniqueFilename(timeId, filename);
-
-                  return await capturer.downloadBlob({
-                    settings,
-                    options,
-                    blob: file,
-                    filename,
-                    sourceUrl: sourceUrlMain,
-                  });
-                }
-
-                return {url: sourceUrlMain};
-              }
-            },
-
-            postHeaders({access, xhr, headers}) {
-              // abort fetching body for a size exceeding resource
-              if (typeof options["capture.resourceSizeLimit"] === "number" && 
-                  headers.contentLength >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
-                capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
-                return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Resource size limit exceeded."}};
-              }
-            },
-
-            async response({access, xhr, hash, headers}) {
-              // determine the filename
-              // use the filename if it has been defined by header Content-Disposition
-              let filename = headers.filename || scrapbook.urlToFilename(xhr.responseURL);
-
-              // if header Content-Type (MIME) is defined:
-              // 1. If the file has no extension, assign one according to MIME,
-              //    except for certain MIMEs.
-              //    (For example, "application/octet-stream" can be anything,
-              //    and guessing a "bin" is meaningless.)
-              // 2. For several usual MIMEs, if the file extension doesn't match
-              //    MIME, append a matching extension to prevent the file be
-              //    assigned a bad MIME when served via HTTP, which could cause
-              //    the browser to reject it.  For example, a CSS file named 
-              //    "foo.php" may be served as "application/x-httpd-php", and
-              //    modern browsers would refuse loading the CSS).
-              //
-              // Basic MIMEs listed in MAFF spec should be included:
-              // http://maf.mozdev.org/maff-specification.html
-              if (headers.contentType) {
-                const mime = headers.contentType;
-                let [base, ext] = scrapbook.filenameParts(filename);
-                if ((!ext && !MIMES_NO_EXT_OK.has(mime)) || 
-                    (MIMES_NEED_MATCH.has(mime) && !Mime.allExtensions(mime).includes(ext.toLowerCase()))) {
-                  ext = Mime.extension(mime);
-                  if (ext) {
-                    filename += "." + ext;
-                  }
-                }
-              }
-
-              filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-              filename = capturer.getUniqueFilename(timeId, filename);
-
-              return await capturer.downloadBlob({
-                settings,
-                options,
-                blob: xhr.response,
-                filename,
-                sourceUrl: sourceUrlMain,
-              });
-            },
-          },
         });
-        return Object.assign({}, response, {
-          url: response.url + sourceUrlHash,
-        });
-      } catch (ex) {
-        console.warn(ex);
-        capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-        return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+        const filename = registry.filename;
+
+        const blob = fetchResponse.blob;
+        const mime = blob.type;
+        const {parameters: {charset}} = scrapbook.parseHeaderContentType(fetchResponse.headers.contentType);
+
+        let dataUri;
+        if (charset || scrapbook.mimeIsText(mime)) {
+          if (charset && /utf-?8/i.test(charset)) {
+            const str = await scrapbook.readFileAsText(blob, "UTF-8");
+            dataUri = scrapbook.unicodeToDataUri(str, mime);
+          } else {
+            const str = await scrapbook.readFileAsText(blob, false);
+            dataUri = scrapbook.byteStringToDataUri(str, mime, charset);
+          }
+        } else {
+          dataUri = await scrapbook.readFileAsDataURL(blob);
+          if (dataUri === "data:") {
+            // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
+            dataUri = `data:${mime};base64,`;
+          }
+        }
+
+        if (filename) {
+          dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(filename) + m);
+        }
+
+        // don't add hash to data URL as some browsers don't support it
+        return {filename, url: dataUri};
       }
-    };
 
-    capturer.downloadFile = downloadFile;
-    return await downloadFile(params);
+      const registry = await capturer.registerFile({
+        url: sourceUrl,
+        role: 'resource',
+        settings,
+        options,
+      });
+
+      if (registry.isDuplicate) {
+        return registry;
+      }
+
+      const response = await capturer.downloadBlob({
+        blob: fetchResponse.blob,
+        filename: registry.filename,
+        sourceUrl,
+        settings,
+        options,
+      });
+
+      return Object.assign({}, response, {
+        url: response.url + scrapbook.splitUrlByAnchor(registry.url)[1],
+      });
+    } catch (ex) {
+      console.warn(ex);
+      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+    }
   };
 
   /**
@@ -2260,38 +2397,29 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     try {
-      return await capturer.access({
+      const fetchResponse = await capturer.fetch({
         url: sourceUrlMain,
         refUrl,
-        role: "downLinkFetchHeader",
-        responseType: "blob",
-        timeout: 8000,
-        settings,
+        headerOnly: true,
         options,
-        hooks: {
-          postHeaders({xhr}) {
-            xhr.abort();
-          },
-
-          async response({xhr, headers}) {
-            if (headers.filename) {
-              let [, ext] = scrapbook.filenameParts(headers.filename);
-
-              if (!ext && headers.contentType) {
-                ext = Mime.extension(headers.contentType);
-              }
-
-              return ext;
-            } else if (headers.contentType) {
-              return Mime.extension(headers.contentType);
-            } else {
-              const filename = scrapbook.urlToFilename(sourceUrl);
-              const [, ext] = scrapbook.filenameParts(filename);
-              return ext;
-            }
-          },
-        },
+        settings,
       });
+      const headers = fetchResponse.headers;
+      if (headers.filename) {
+        let [, ext] = scrapbook.filenameParts(headers.filename);
+
+        if (!ext && headers.contentType) {
+          ext = Mime.extension(headers.contentType);
+        }
+
+        return ext;
+      } else if (headers.contentType) {
+        return Mime.extension(headers.contentType);
+      } else {
+        const filename = scrapbook.urlToFilename(sourceUrl);
+        const [, ext] = scrapbook.filenameParts(filename);
+        return ext;
+      }
     } catch (ex) {
       console.warn(ex);
       capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
@@ -2327,78 +2455,19 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         throw new Error(`Requires an absolute URL.`);
       }
 
-      let filename;
-      return await capturer.access({
+      const fetchResponse = await capturer.fetch({
         url: sourceUrlMain,
         refUrl,
-        role: "fetchCss",
         settings,
         options,
-        hooks: {
-          async preRequest({access, url, hash}) {
-            // special management for data URI
-            if (url.startsWith("data:")) {
-              const file = scrapbook.dataUriToFile(url);
-              if (!file) { throw new Error("Malformed data URL."); }
-
-              let filename;
-
-              // save data URI as file?
-              if (options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml") {
-                filename = file.name;
-                filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-                url = scrapbook.escapeFilename(filename) + hash;
-              } else {
-                url += hash;
-              }
-
-              const {parameters: {fileCharset}} = scrapbook.parseHeaderContentType(file.type);
-              const {text, charset} = await scrapbook.parseCssFile(file, fileCharset);
-              return {
-                accessId: access.id,
-                text,
-                charset,
-                filename,
-                url,
-              };
-            }
-          },
-
-          postHeaders({access, headers}) {
-            // abort fetching body for a size exceeding resource
-            if (typeof options["capture.resourceSizeLimit"] === "number" && 
-                headers.contentLength >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
-              capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
-              return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Resource size limit exceeded."}};
-            }
-
-            // determine the filename
-            filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
-            if (scrapbook.filenameParts(filename)[1].toLowerCase() !== 'css') {
-              filename += ".css";
-            }
-
-            filename = scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
-          },
-          async response({xhr, hash, headers, access}) {
-            const {text, charset} = await scrapbook.parseCssFile(xhr.response, headers.charset);
-            return {
-              accessId: access.id,
-              text,
-              charset,
-              filename,
-              url: scrapbook.escapeFilename(filename) + hash,
-            };
-          },
-          async duplicate({access, url, hash}) {
-            const response = await access;
-            return Object.assign({}, response, {
-              url: scrapbook.splitUrlByAnchor(response.url)[0] + hash,
-              isDuplicate: true,
-            });
-          },
-        },
       });
+
+      const {text, charset} = await scrapbook.parseCssFile(fetchResponse.blob, fetchResponse.headers.charset);
+      return {
+        url: sourceUrl,
+        text,
+        charset,
+      };
     } catch (ex) {
       // something wrong for the XMLHttpRequest
       console.warn(ex);
@@ -2409,118 +2478,10 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
   /**
    * @kind invokable
-   * @param {string} params.filename - validated, not uniquified
-   * @param {string} params.sourceUrl
-   * @param {string|null} params.accessId - ID of the bound access
-   * @param {Object} params.settings
-   * @param {Object} params.options
-   * @return {Promise<Object>}
-   */
-  capturer.registerFile = async function (params) {
-    isDebug && console.debug("call: registerFile", params);
-
-    const {filename, sourceUrl, accessId, settings, options} = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
-
-    // obtain a unique filename for each boundAccess
-    // (if no boundAccess, always obtain one)
-    let newFilename;
-    const boundAccess = capturer.captureInfo.get(timeId).accessMap.get(accessId);
-    if (boundAccess) {
-      newFilename = boundAccess.newFilename;
-    }
-
-    if (!newFilename) {
-      newFilename = capturer.getUniqueFilename(timeId, filename);
-
-      if (boundAccess) {
-        boundAccess.newFilename = newFilename;
-        boundAccess.deferred = new Deferred();
-      }
-
-      return {
-        filename: newFilename,
-        url: scrapbook.escapeFilename(newFilename) + sourceUrlHash,
-      };
-    }
-
-    return {
-      filename: newFilename,
-      url: scrapbook.escapeFilename(newFilename) + sourceUrlHash,
-      isDuplicate: true,
-    };
-  };
-
-  /**
-   * @kind invokable
    * @param {Object} params
-   * @param {string} params.bytes - as byte string
-   * @param {string} params.mime - may include parameters like charset
+   * @param {Blob|{data: string, type: string}} params.blob
    * @param {string} params.filename - validated and unique
-   * @param {string} params.sourceUrl - may include hash
-   * @param {string|null} params.accessId - ID of the bound access
-   * @param {Object} params.settings
-   * @param {Object} params.options
-   * @return {Promise<Object>}
-   */
-  capturer.downloadBytes = async function (params) {
-    isDebug && console.debug("call: downloadBytes", params);
-
-    const {bytes, mime, filename, sourceUrl, accessId, settings, options} = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
-
-    const ab = scrapbook.byteStringToArrayBuffer(bytes);
-    const blob = new Blob([ab], {type: mime});
-    const access = capturer.downloadBlob({
-      blob,
-      filename,
-      sourceUrl: sourceUrlMain,
-      settings,
-      options,
-    }).then((response) => {
-      return Object.assign({}, response, {
-        url: response.url + sourceUrlHash,
-      });
-    });
-
-    const boundAccess = capturer.captureInfo.get(timeId).accessMap.get(accessId);
-    if (boundAccess) {
-      access.then(boundAccess.deferred.resolve, boundAccess.deferred.reject);
-    }
-
-    return await access;
-  };
-
-  /**
-   * @kind invokable
-   * @param {Object} params
    * @param {string} params.sourceUrl
-   * @param {string|null} params.accessId - ID of the bound access
-   * @param {Object} params.settings
-   * @param {Object} params.options
-   * @return {Promise<Object>}
-   */
-  capturer.getAccessResult = async function (params) {
-    isDebug && console.debug("call: getAccessResult", params);
-
-    const {sourceUrl, accessId, settings, options} = params;
-    const [, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
-
-    const boundAccess = capturer.captureInfo.get(timeId).accessMap.get(accessId);
-    const response = await boundAccess.deferred.promise;
-    return Object.assign({}, response, {
-      url: scrapbook.splitUrlByAnchor(response.url)[0] + sourceUrlHash,
-    });
-  };
-
-  /**
-   * @param {Object} params
-   * @param {Blob} params.blob
-   * @param {string} params.filename - validated and unique
-   * @param {string} params.sourceUrl - may include hash
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
@@ -2528,9 +2489,15 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   capturer.downloadBlob = async function (params) {
     isDebug && console.debug("call: downloadBlob", params);
 
-    const {blob, filename, sourceUrl, settings, options} = params;
+    const {filename, sourceUrl, settings, options} = params;
+    let {blob} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
+
+    if (!(blob instanceof Blob)) {
+      const ab = scrapbook.byteStringToArrayBuffer(blob.data);
+      blob = new Blob([ab], {type: blob.type});
+    }
 
     if (typeof options["capture.resourceSizeLimit"] === "number" && blob.size >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
       capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrlMain, 128)]));
@@ -2539,31 +2506,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
-        let dataUri;
-        const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(blob.type);
-
-        if (charset || scrapbook.mimeIsText(mime)) {
-          if (charset && /utf-?8/i.test(charset)) {
-            const str = await scrapbook.readFileAsText(blob, "UTF-8");
-            dataUri = scrapbook.unicodeToDataUri(str, mime);
-          } else {
-            const str = await scrapbook.readFileAsText(blob, false);
-            dataUri = scrapbook.byteStringToDataUri(str, mime, charset);
-          }
-        } else {
-          dataUri = await scrapbook.readFileAsDataURL(blob);
-          if (dataUri === "data:") {
-            // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
-            dataUri = `data:${blob.type};base64,`;
-          }
-        }
-
-        if (filename) {
-          dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(filename) + m);
-        }
-
-        // don't add hash to data URL as some browsers don't support it
-        return {filename, url: dataUri};
+        // this should not happen
+        return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: "Unable to save as data URL."}};
       }
 
       case "zip": {
@@ -2573,7 +2517,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           source: sourceUrlMain,
           data: blob,
         });
-        return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        return {filename, url: scrapbook.escapeFilename(filename)};
       }
 
       case "maff": {
@@ -2583,7 +2527,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           source: sourceUrlMain,
           data: blob,
         });
-        return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        return {filename, url: scrapbook.escapeFilename(filename)};
       }
 
       case "folder":
@@ -2594,7 +2538,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           source: sourceUrlMain,
           data: blob,
         });
-        return {filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
+        return {filename, url: scrapbook.escapeFilename(filename)};
       }
     }
   };

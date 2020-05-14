@@ -947,10 +947,6 @@
                     delete frameSettings.usedCssFontUrl;
                     delete frameSettings.usedCssImageUrl;
 
-                    if (!options["capture.frameRename"]) {
-                      delete frameSettings.documentName;
-                    }
-
                     // save resources in srcdoc as data URL
                     const frameOptions = JSON.parse(JSON.stringify(options));
                     frameOptions["capture.saveAs"] = "singleHtml";
@@ -1038,10 +1034,6 @@
                   frameSettings.fullPage = true;
                   delete frameSettings.usedCssFontUrl;
                   delete frameSettings.usedCssImageUrl;
-
-                  if (!options["capture.frameRename"]) {
-                    delete frameSettings.documentName;
-                  }
 
                   let frameDoc;
                   try {
@@ -2001,12 +1993,32 @@
 
       // register the main document before parsing so that it goes before
       // sub-frame documents.
-      const documentFileName = (await capturer.invoke("registerDocument", {
-        docUrl,
-        mime,
-        settings,
-        options,
-      })).documentFileName;
+      let documentFileName;
+      if (["singleHtml"].includes(options["capture.saveAs"])) {
+        const registry = await capturer.invoke("registerDocument", {
+          docUrl,
+          mime,
+          settings,
+          options,
+        });
+
+        documentFileName = registry.filename;
+      } else {
+        const registry = await capturer.invoke("registerDocument", {
+          docUrl,
+          mime,
+          role: isHeadless ? "document" : `document-${scrapbook.getUuid()}`,
+          settings,
+          options,
+        });
+
+        // if a previous registry exists, return it
+        if (registry.isDuplicate) {
+          return registry;
+        }
+
+        documentFileName = registry.filename;
+      }
 
       // construct the cloned node tree
       const origNodeMap = new WeakMap();
@@ -3912,11 +3924,11 @@
      */
     async rewriteCss({elem, url, refCss, refUrl, callback, settings = this.settings, options = this.options}) {
       let sourceUrl;
-      let fetchResult;
       let cssText = "";
       let cssRules;
       let charset;
-      let newFilename;
+      let newFilename = "";
+      let newUrl = "";
       let isCircular = false;
 
       if (!elem || elem.nodeName.toLowerCase() == 'link') {
@@ -3943,7 +3955,6 @@
         }
 
         isCircular = settings.recurseChain.includes(scrapbook.splitUrlByAnchor(sourceUrl)[0]);
-        fetchResult = response;
         cssText = response.text;
         charset = response.charset;
       } else {
@@ -3995,45 +4006,44 @@
 
       // register the filename to save (for imported or external CSS)
       if (!elem || elem.nodeName.toLowerCase() == 'link') {
-        if (!fetchResult.url.startsWith("data:")) {
-          let response = await capturer.invoke("registerFile", {
-            filename: fetchResult.filename,
-            sourceUrl,
-            accessId: isDynamicCss ? null : fetchResult.accessId,
-            settings,
-            options,
-          });
-
-          // handle duplicated accesses
-          if (response.isDuplicate) {
-            if (isCircular) {
-              if (["singleHtml"].includes(options["capture.saveAs"])) {
-                const target = sourceUrl;
-                const source = settings.recurseChain[settings.recurseChain.length - 1];
-                console.warn(scrapbook.lang("WarnCaptureCircular", [source, target]));
-                response.url = `urn:scrapbook:download:circular:filename:${response.url}`;
-              }
-
-              await callback(elem, response);
-              return;
-            }
-
-            response = await capturer.invoke("getAccessResult", {
-              sourceUrl,
-              accessId: fetchResult.accessId,
-              settings,
-              options,
-            });
-            await callback(elem, response);
-            return;
-          }
-
-          newFilename = response.filename;
-        } else {
+        if (sourceUrl.startsWith("data:") &&
+            !(options["capture.saveDataUriAsFile"] && !["singleHtml"].includes(options["capture.saveAs"]))) {
+          // special management for data URI
           // Save inner URLs as data URL since data URL is null origin
           // and no relative URLs are allowed in it.
           options = JSON.parse(JSON.stringify(options));
           options["capture.saveAs"] = "singleHtml";
+        } else {
+          const registry = await capturer.invoke("registerFile", {
+            url: sourceUrl,
+            role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined :
+                isDynamicCss ? `css-${scrapbook.getUuid()}` : 'css',
+            settings,
+            options,
+          });
+
+          // handle circular CSS
+          if (isCircular) {
+            if (["singleHtml"].includes(options["capture.saveAs"])) {
+              const target = sourceUrl;
+              const source = settings.recurseChain[settings.recurseChain.length - 1];
+              console.warn(scrapbook.lang("WarnCaptureCircular", [source, target]));
+              const response = Object.assign({}, registry, {
+                url: `urn:scrapbook:download:circular:filename:${registry.filename}`,
+              });
+              await callback(elem, response);
+              return;
+            }
+          }
+
+          // handle duplicated CSS
+          if (registry.isDuplicate) {
+            await callback(elem, registry);
+            return;
+          }
+
+          newFilename = registry.filename;
+          newUrl = registry.url;
         }
       }
 
@@ -4109,25 +4119,34 @@
         // imported or external CSS
         // force UTF-8 for rewritten CSS
 
-        // special management for data URI
-        if (fetchResult.url.startsWith("data:")) {
-          const dataUri = charset ? 
+        // special handling for saving as data URI
+        if (["singleHtml"].includes(options["capture.saveAs"]) ||
+            (sourceUrl.startsWith("data:") && !options["capture.saveDataUriAsFile"])) {
+          let dataUri = charset ? 
               scrapbook.unicodeToDataUri(cssText, "text/css") : 
               scrapbook.byteStringToDataUri(cssText, "text/css;charset=UTF-8");
+
+          if (newFilename) {
+            dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(newFilename) + m);
+          }
+
           const response = {url: dataUri};
           await callback(elem, response);
           return;
         }
 
-        const response = await capturer.invoke("downloadBytes", {
-          bytes: charset ? scrapbook.unicodeToUtf8(cssText) : cssText,
-          mime: "text/css;charset=UTF-8",
+        const response = await capturer.invoke("downloadBlob", {
+          blob: {
+            __type__: "Blob",
+            type: "text/css;charset=UTF-8",
+            data: charset ? scrapbook.unicodeToUtf8(cssText) : cssText,
+          },
           filename: newFilename,
           sourceUrl,
-          accessId: isDynamicCss ? null : fetchResult.accessId,
           settings,
           options,
         });
+        response.url += scrapbook.splitUrlByAnchor(newUrl)[1];
         await callback(elem, response);
       } else {
         // internal CSS
