@@ -4124,7 +4124,7 @@
             (sourceUrl.startsWith("data:") && !options["capture.saveDataUriAsFile"])) {
           let dataUri = charset ? 
               scrapbook.unicodeToDataUri(cssText, "text/css") : 
-              scrapbook.byteStringToDataUri(cssText, "text/css;charset=UTF-8");
+              scrapbook.byteStringToDataUri(cssText, "text/css");
 
           if (newFilename) {
             dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(newFilename) + m);
@@ -4138,7 +4138,7 @@
         const response = await capturer.invoke("downloadBlob", {
           blob: {
             __type__: "Blob",
-            type: "text/css;charset=UTF-8",
+            type: charset ? "text/css;charset=UTF-8" : "text/css",
             data: charset ? scrapbook.unicodeToUtf8(cssText) : cssText,
           },
           filename: newFilename,
