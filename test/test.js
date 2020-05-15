@@ -8359,6 +8359,7 @@ async function runTests() {
   await test(test_capture_frame_circular);
   await test(test_capture_frame_circular2);
   await test(test_capture_frame_singleHtml);
+  await test(test_capture_frameRename);
   await test(test_capture_css_style);
   await test(test_capture_css_styleInline);
   await test(test_capture_css_disabled);
