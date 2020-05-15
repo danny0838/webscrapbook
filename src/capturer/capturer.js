@@ -124,8 +124,8 @@
    * @param {string} params.options
    * @return {string} The deduplicated filename.
    */
-  capturer.getAvailableFilename = async function (params) {
-    isDebug && console.debug("call: getAvailableFilename", params);
+  capturer.getAvailableSaveFilename = async function (params) {
+    isDebug && console.debug("call: getAvailableSaveFilename", params);
 
     const {filename, isFile, options} = params;
 
@@ -1972,7 +1972,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
           {
             const dir = scrapbook.filepathParts(settings.filename)[0];
-            const newFilename = await capturer.invoke("getAvailableFilename", {
+            const newFilename = await capturer.invoke("getAvailableSaveFilename", {
               filename: settings.filename,
               settings,
               options,
@@ -2780,7 +2780,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
     const {timeId, blob, directory, filename, sourceUrl, options} = params;
     await server.init();
-    let newFilename = await capturer.getAvailableFilename({
+    let newFilename = await capturer.getAvailableSaveFilename({
       filename: (directory ? directory + '/' : '') + filename,
       isFile: true,
       options,
