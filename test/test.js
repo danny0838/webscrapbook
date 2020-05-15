@@ -2102,6 +2102,56 @@ async function test_capture_frame_singleHtml() {
 }
 
 /**
+ * Check data URI output for duplicated references
+ *
+ * - Filename parameter of data URL should not be uniquified.
+ * - data URL should not contain a hash.
+ *
+ * capture.frame
+ */
+async function test_capture_frame_singleHtml2() {
+  /* capture.saveDataUriAsSrcdoc = true */
+  var options = {
+    "capture.saveAs": "singleHtml",
+    "capture.frame": "save",
+    "capture.saveDataUriAsSrcdoc": true,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frame/duplicate.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  var frames = doc.querySelectorAll('iframe');
+
+  assert(frames[0].getAttribute('srcdoc') === frames[1].getAttribute('srcdoc'));
+  assert(frames[0].getAttribute('srcdoc') === frames[2].getAttribute('srcdoc'));
+  assert(frames[3].getAttribute('srcdoc') === frames[4].getAttribute('srcdoc'));
+
+  /* capture.saveDataUriAsSrcdoc = false */
+  var options = {
+    "capture.saveAs": "singleHtml",
+    "capture.frame": "save",
+    "capture.saveDataUriAsSrcdoc": false,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frame/duplicate.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  var frames = doc.querySelectorAll('iframe');
+
+  assert(frames[0].getAttribute('src') === frames[1].getAttribute('src'));
+  assert(frames[0].getAttribute('src') === frames[2].getAttribute('src'));
+  assert(frames[3].getAttribute('src') === frames[4].getAttribute('src'));
+}
+
+/**
  * Check if circular frame referencing is handled correctly
  *
  * capture.frame
@@ -8589,6 +8639,7 @@ async function runTests() {
   await test(test_capture_frame_headless2);
   await test(test_capture_frame_headless3);
   await test(test_capture_frame_singleHtml);
+  await test(test_capture_frame_singleHtml2);
   await test(test_capture_frame_circular);
   await test(test_capture_frame_circular2);
   await test(test_capture_frameRename);
