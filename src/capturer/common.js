@@ -1105,34 +1105,38 @@
                     }
 
                     // otherwise, headlessly capture src
-                    // (take care of circular reference)
+                    let frameOptions = options;
+
+                    // special handling for data URL
+                    if (frame.src.startsWith("data:") &&
+                        !options["capture.saveDataUriAsFile"] &&
+                        options["capture.saveAs"] !== "singleHtml") {
+                      // Save frame document and inner URLs as data URL since data URL
+                      // is null origin and no relative URL is allowed in it.
+                      frameOptions = JSON.parse(JSON.stringify(options));
+                      frameOptions["capture.saveAs"] = "singleHtml";
+                    }
+
                     const [sourceUrl] = scrapbook.splitUrlByAnchor(refUrl);
                     const [targetUrl] = scrapbook.splitUrlByAnchor(frame.src);
                     frameSettings.isHeadless = true;
                     frameSettings.recurseChain.push(sourceUrl);
-                    if (!frameSettings.recurseChain.includes(targetUrl)) {
-                      let frameOptions = options;
 
-                      // special handling of data URL
-                      if (frame.src.startsWith("data:") && 
-                          options["capture.saveAs"] !== "singleHtml" && 
-                          !options["capture.saveDataUriAsFile"]) {
-                        // Save frame document and inner URLs as data URL since data URL
-                        // is null origin and no relative URL is allowed in it.
-                        frameOptions = JSON.parse(JSON.stringify(options));
-                        frameOptions["capture.saveAs"] = "singleHtml";
+                    // check circular reference if saving as data URL
+                    if (frameOptions["capture.saveAs"] === "singleHtml") {
+                      if (frameSettings.recurseChain.includes(targetUrl)) {
+                        console.warn(scrapbook.lang("WarnCaptureCircular", [sourceUrl, targetUrl]));
+                        captureRewriteAttr(frame, "src", `urn:scrapbook:download:circular:url:${frame.src}`);
+                        return;
                       }
-
-                      return capturer.invoke("captureUrl", {
-                        url: frame.src,
-                        refUrl,
-                        settings: frameSettings,
-                        options: frameOptions,
-                      }).then(captureFrameCallback);
-                    } else {
-                      console.warn(scrapbook.lang("WarnCaptureCircular", [sourceUrl, targetUrl]));
-                      captureRewriteAttr(frame, "src", `urn:scrapbook:download:circular:url:${frame.src}`);
                     }
+
+                    return capturer.invoke("captureUrl", {
+                      url: frame.src,
+                      refUrl,
+                      settings: frameSettings,
+                      options: frameOptions,
+                    }).then(captureFrameCallback);
                   });
                   break;
                 }

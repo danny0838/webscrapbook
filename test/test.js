@@ -2157,10 +2157,11 @@ async function test_capture_frame_singleHtml2() {
  * capture.frame
  */
 async function test_capture_frame_circular() {
-  /* capture.frame = save */
-  // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
+  /* capture.saveAs = zip */
+  // link to corresponding downloaded frame file
   var options = {
     "capture.frame": "save",
+    "capture.saveAs": "zip",
   };
 
   var blob = await captureHeadless({
@@ -2177,18 +2178,86 @@ async function test_capture_frame_circular() {
 
   // frame1.html
   var frame = doc.querySelector('iframe');
-  var frameFile = zip.file(frame.getAttribute('src'));
+  var frameSrc = frame.getAttribute('src');
+  assert(frameSrc === 'index_1.html');
+  var frameFile = zip.file(frameSrc);
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
 
   // frame2.html
   var frame = frameDoc.querySelector('iframe');
-  var frameFile = zip.file(frame.getAttribute('src'));
+  var frameSrc = frame.getAttribute('src');
+  assert(frameSrc === 'index_2.html');
+  var frameFile = zip.file(frameSrc);
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
 
+  // index.html
   var frame = frameDoc.querySelector('iframe');
-  assert(frame.src === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular/index.html`);
+  var frameSrc = frame.getAttribute('src');
+  assert(frameSrc === 'index.html');
+
+  /* capture.saveAs = singleHtml; srcdoc = true */
+  // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
+  var options = {
+    "capture.frame": "save",
+    "capture.saveAs": "singleHtml",
+    "capture.saveDataUriAsSrcdoc": true,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frame_circular/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  // frame1.html
+  var frame = doc.querySelector('iframe');
+  var frameSrc = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute('srcdoc'))}`;
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+
+  // frame2.html
+  var frame = frameDoc.querySelector('iframe');
+  var frameSrc = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute('srcdoc'))}`;
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+
+  // index.html
+  var frame = frameDoc.querySelector('iframe');
+  assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular/index.html`);
+  assert(!frame.hasAttribute('srcdoc'));
+
+  /* capture.saveAs = singleHtml; srcdoc = false */
+  // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
+  var options = {
+    "capture.frame": "save",
+    "capture.saveAs": "singleHtml",
+    "capture.saveDataUriAsSrcdoc": false,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frame_circular/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  // frame1.html
+  var frame = doc.querySelector('iframe');
+  var frameSrc = frame.getAttribute('src');
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+
+  // frame2.html
+  var frame = frameDoc.querySelector('iframe');
+  var frameSrc = frame.getAttribute('src');
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+
+  // index.html
+  var frame = frameDoc.querySelector('iframe');
+  assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular/index.html`);
+  assert(!frame.hasAttribute('srcdoc'));
 }
 
 /**
@@ -2198,7 +2267,7 @@ async function test_capture_frame_circular() {
  */
 async function test_capture_frame_circular2() {
   /* capture.frame = save */
-  // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
+  // link to corresponding downloaded frame file
   var options = {
     "capture.frame": "save",
   };
@@ -2216,7 +2285,48 @@ async function test_capture_frame_circular2() {
   var doc = await readFileAsDocument(indexBlob);
 
   var frame = doc.querySelector('iframe');
-  assert(frame.src === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular2/index.html`);
+  var frameSrc = frame.getAttribute('src');
+  assert(frameSrc === 'index.html');
+
+  /* capture.saveAs = singleHtml; srcdoc = true */
+  // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
+  var options = {
+    "capture.frame": "save",
+    "capture.saveAs": "singleHtml",
+    "capture.saveDataUriAsSrcdoc": true,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frame_circular2/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  var frame = doc.querySelector('iframe');
+  assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular2/index.html`);
+  assert(!frame.hasAttribute('srcdoc'));
+
+  /* capture.saveAs = singleHtml; srcdoc = false */
+  // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
+  var options = {
+    "capture.frame": "save",
+    "capture.saveAs": "singleHtml",
+    "capture.saveDataUriAsSrcdoc": false,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frame_circular2/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  var frame = doc.querySelector('iframe');
+  assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular2/index.html`);
+  assert(!frame.hasAttribute('srcdoc'));
 }
 
 /**
