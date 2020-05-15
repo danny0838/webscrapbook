@@ -2221,6 +2221,119 @@ async function test_capture_frameRename() {
 }
 
 /**
+ * Check if header filename is taken for frameRename
+ *
+ * capture.frameRename
+ */
+async function test_capture_frameRename2() {
+  /* capture.frameRename = false */
+  var options = {
+    "capture.frame": "save",
+    "capture.frameRename": false,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_frameRename2/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(zip.files["frame1.html"]);
+  assert(zip.files["frame2.html"]);
+  assert(zip.files["frame3.py.html"]);
+  assert(zip.files["a中b#c.php.html"]);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `frame1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `frame2.html`);
+  assert(doc.querySelectorAll('iframe')[2].getAttribute('src') === `frame3.py.html`);
+  assert(doc.querySelectorAll('iframe')[3].getAttribute('src') === `a中b%23c.php.html`);
+
+  /* capture.frameRename = false; headless */
+  var options = {
+    "capture.frame": "save",
+    "capture.frameRename": false,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frameRename2/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(zip.files["frame1.html"]);
+  assert(zip.files["frame2.html"]);
+  assert(zip.files["frame3.py.html"]);
+  assert(zip.files["a中b#c.php.html"]);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `frame1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `frame2.html`);
+  assert(doc.querySelectorAll('iframe')[2].getAttribute('src') === `frame3.py.html`);
+  assert(doc.querySelectorAll('iframe')[3].getAttribute('src') === `a中b%23c.php.html`);
+
+  /* capture.saveAs = singleHtml; srcdoc = false */
+  var options = {
+    "capture.frame": "save",
+    "capture.saveAs": "singleHtml",
+    "capture.saveDataUriAsSrcdoc": false,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_frameRename2/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  var frameSrc = doc.querySelectorAll('iframe')[0].getAttribute('src');
+  assert(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/.test(frameSrc));
+
+  var frameSrc = doc.querySelectorAll('iframe')[1].getAttribute('src');
+  assert(/^data:text\/html;charset=UTF-8;filename=frame2\.html,/.test(frameSrc));
+
+  var frameSrc = doc.querySelectorAll('iframe')[2].getAttribute('src');
+  assert(/^data:text\/html;charset=UTF-8;filename=frame3\.py\.html,/.test(frameSrc));
+
+  var frameSrc = doc.querySelectorAll('iframe')[3].getAttribute('src');
+  assert(/^data:text\/html;charset=UTF-8;filename=a%E4%B8%ADb%23c\.php\.html,/.test(frameSrc));
+
+  /* capture.saveAs = singleHtml; srcdoc = false; headless */
+  var options = {
+    "capture.frame": "save",
+    "capture.saveAs": "singleHtml",
+    "capture.saveDataUriAsSrcdoc": false,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frameRename2/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  var frameSrc = doc.querySelectorAll('iframe')[0].getAttribute('src');
+  assert(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/.test(frameSrc));
+
+  var frameSrc = doc.querySelectorAll('iframe')[1].getAttribute('src');
+  assert(/^data:text\/html;charset=UTF-8;filename=frame2\.html,/.test(frameSrc));
+
+  var frameSrc = doc.querySelectorAll('iframe')[2].getAttribute('src');
+  assert(/^data:text\/html;charset=UTF-8;filename=frame3\.py\.html,/.test(frameSrc));
+
+  var frameSrc = doc.querySelectorAll('iframe')[3].getAttribute('src');
+  assert(/^data:text\/html;charset=UTF-8;filename=a%E4%B8%ADb%23c\.php\.html,/.test(frameSrc));
+}
+
+/**
  * Check if option works
  *
  * capture.style
@@ -8479,6 +8592,7 @@ async function runTests() {
   await test(test_capture_frame_circular2);
   await test(test_capture_frame_singleHtml);
   await test(test_capture_frameRename);
+  await test(test_capture_frameRename2);
   await test(test_capture_css_style);
   await test(test_capture_css_styleInline);
   await test(test_capture_css_disabled);
