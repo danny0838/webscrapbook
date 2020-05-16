@@ -38,6 +38,7 @@
 
   /**
    * @typedef {Object} missionCaptureInfo
+   * @property {boolean} useDiskCache
    * @property {Set<string>} files
    * @property {Map<string~token, Promise<fetchResult>>} fetchMap
    * @property {Map<string~token, Object>} urlToFilenameMap
@@ -47,6 +48,8 @@
    * @type {MapWithDefault<string~timeId, missionCaptureInfo>}
    */
   capturer.captureInfo = new MapWithDefault(() => ({
+    useDiskCache: false,
+
     // index.dat is used in legacy ScrapBook
     // index.rdf and ^metadata^ are used in MAFF
     // http://maf.mozdev.org/maff-specification.html
@@ -244,9 +247,11 @@
   };
 
   capturer.clearCache = async function ({timeId}) {
-    const key = {table: "pageCache", id: timeId};
-    const entries = await scrapbook.cache.getAll(key);
-    await scrapbook.cache.remove(Object.keys(entries));
+    const tableSet = new Set(["pageCache", "fetchCache"]);
+    const items = await scrapbook.cache.getAll((obj) => {
+      return tableSet.has(obj.table) && obj.id === timeId;
+    });
+    await scrapbook.cache.remove(Object.keys(items));
   };
 
   /**
@@ -329,6 +334,12 @@
       return headers;
     };
 
+    const setCache = async (id, token, data) => {
+      const key = {table: "fetchCache", id, token};
+      await scrapbook.cache.set(key, data);
+      return await scrapbook.cache.get(key);
+    };
+
     const fetch = capturer.fetch = async function (params) {
       isDebug && console.debug("call: fetch", params);
 
@@ -366,11 +377,16 @@
           headers.contentType = contentType.type;
           headers.charset = contentType.parameters.charset;
 
+          let blob = new Blob([file], {type: file.type});
+          if (capturer.captureInfo.get(timeId).useDiskCache) {
+            blob = await setCache(timeId, fetchToken, blob);
+          }
+
           return {
             url: sourceUrlMain,
             status: 200,
             headers,
-            blob: new Blob([file], {type: file.type}),
+            blob,
           };
         }
 
@@ -456,11 +472,16 @@
           return response;
         }
 
+        let blob = xhr.response;
+        if (capturer.captureInfo.get(timeId).useDiskCache) {
+          blob = await setCache(timeId, fetchToken, blob);
+        }
+
         return {
           url: xhr.responseURL,
           status: xhr.status,
           headers,
-          blob: xhr.response,
+          blob,
         };
       })().then(deferred.resolve, deferred.reject);
 
