@@ -871,6 +871,7 @@
         refUrl,
         title,
         settings: {
+          missionId: capturer.missionId,
           timeId,
           isHeadless: true,
           frameIsMain: true,
