@@ -747,6 +747,7 @@
         settings: {
           missionId: capturer.missionId,
           timeId,
+          indexFilename: null,
           frameIsMain: true,
           documentName: "index",
           fullPage,
@@ -874,6 +875,7 @@
           missionId: capturer.missionId,
           timeId,
           isHeadless: true,
+          indexFilename: null,
           frameIsMain: true,
           documentName: "index",
           recurseChain: [],
@@ -1120,7 +1122,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       const blob = new Blob([html], {type: "text/html"});
       const ext = ".htm";
 
-      settings.filename = await capturer.formatIndexFilename({
+      settings.indexFilename = await capturer.formatIndexFilename({
         title: title || scrapbook.filenameParts(scrapbook.urlToFilename(sourceUrl))[0] || "untitled",
         sourceUrl,
         isFolder: false,
@@ -1140,20 +1142,20 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
           return await capturer.saveBlobInMemory({blob});
         }
         case 'file': {
-          filename = settings.filename + ext;
+          filename = settings.indexFilename + ext;
           saveMethod = "saveBlobNaturally";
           break;
         }
         case 'server': {
           // deprecated; normally we won't get here
-          [targetDir, filename] = scrapbook.filepathParts(settings.filename + ext);
+          [targetDir, filename] = scrapbook.filepathParts(settings.indexFilename + ext);
           savePrompt = false;
           saveMethod = "saveBlobToServer";
           break;
         }
         case 'folder':
         default: {
-          [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ext);
+          [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.indexFilename + ext);
           savePrompt = false;
           saveMethod = "saveBlob";
           break;
@@ -1208,7 +1210,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       const {timeId} = settings;
 
       if (settings.frameIsMain) {
-        settings.filename = await capturer.formatIndexFilename({
+        settings.indexFilename = await capturer.formatIndexFilename({
           title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
           sourceUrl,
           isFolder: options["capture.saveAs"] === "folder",
@@ -2008,19 +2010,19 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               return await capturer.saveBlobInMemory({blob});
             }
             case 'file': {
-              filename = settings.filename + "." + ext;
+              filename = settings.indexFilename + "." + ext;
               saveMethod = "saveBlobNaturally";
               break;
             }
             case 'server': {
-              [targetDir, filename] = scrapbook.filepathParts(settings.filename + "." + ext);
+              [targetDir, filename] = scrapbook.filepathParts(settings.indexFilename + "." + ext);
               savePrompt = false;
               saveMethod = "saveBlobToServer";
               break;
             }
             case 'folder':
             default: {
-              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + "." + ext);
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.indexFilename + "." + ext);
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -2075,19 +2077,19 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               return await capturer.saveBlobInMemory({blob});
             }
             case 'file': {
-              filename = settings.filename + ".htz";
+              filename = settings.indexFilename + ".htz";
               saveMethod = "saveBlobNaturally";
               break;
             }
             case 'server': {
-              [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".htz");
+              [targetDir, filename] = scrapbook.filepathParts(settings.indexFilename + ".htz");
               savePrompt = false;
               saveMethod = "saveBlobToServer";
               break;
             }
             case 'folder':
             default: {
-              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ".htz");
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.indexFilename + ".htz");
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -2160,19 +2162,19 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               return await capturer.saveBlobInMemory({blob});
             }
             case 'file': {
-              filename = settings.filename + ".maff";
+              filename = settings.indexFilename + ".maff";
               saveMethod = "saveBlobNaturally";
               break;
             }
             case 'server': {
-              [targetDir, filename] = scrapbook.filepathParts(settings.filename + ".maff");
+              [targetDir, filename] = scrapbook.filepathParts(settings.indexFilename + ".maff");
               savePrompt = false;
               saveMethod = "saveBlobToServer";
               break;
             }
             case 'folder':
             default: {
-              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.filename + ".maff");
+              [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + settings.indexFilename + ".maff");
               savePrompt = false;
               saveMethod = "saveBlob";
               break;
@@ -2215,19 +2217,19 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           let saveMethod;
 
           {
-            const dir = scrapbook.filepathParts(settings.filename)[0];
+            const dir = scrapbook.filepathParts(settings.indexFilename)[0];
             const newFilename = await capturer.invoke("getAvailableSaveFilename", {
-              filename: settings.filename,
+              filename: settings.indexFilename,
               settings,
               options,
             });
-            settings.filename = (dir ? dir + '/' : '') + newFilename;
+            settings.indexFilename = (dir ? dir + '/' : '') + newFilename;
           }
 
           const entries = await capturer.loadFileCache({timeId});
           switch (options["capture.saveTo"]) {
             case 'server': {
-              targetDir = settings.filename;
+              targetDir = settings.indexFilename;
               saveMethod = "saveBlobToServer";
 
               let workers = options["capture.serverUploadWorkers"];
@@ -2273,7 +2275,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             case 'file': // not supported, fallback to folder
             case 'memory': // not supported, fallback to folder
             default: {
-              targetDir = options["capture.saveFolder"] + "/" + settings.filename;
+              targetDir = options["capture.saveFolder"] + "/" + settings.indexFilename;
               saveMethod = "saveBlob";
               let errorUrl = sourceUrl;
               try {

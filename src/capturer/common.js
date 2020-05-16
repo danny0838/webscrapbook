@@ -1986,7 +1986,7 @@
       );
 
       if (settings.frameIsMain) {
-        settings.filename = await capturer.formatIndexFilename({
+        settings.indexFilename = await capturer.formatIndexFilename({
           title: title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
           sourceUrl: docUrl,
           isFolder: options["capture.saveAs"] === "folder",
