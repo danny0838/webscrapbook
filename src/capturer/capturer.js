@@ -39,7 +39,7 @@
   /**
    * @typedef {Object} missionCaptureInfo
    * @property {boolean} useDiskCache
-   * @property {Set<string>} files
+   * @property {Map<string~filename, Object>} files
    * @property {Map<string~token, Promise<fetchResult>>} fetchMap
    * @property {Map<string~token, Object>} urlToFilenameMap
    */
@@ -53,7 +53,11 @@
     // index.dat is used in legacy ScrapBook
     // index.rdf and ^metadata^ are used in MAFF
     // http://maf.mozdev.org/maff-specification.html
-    files: new Set(["index.dat", "index.rdf", "^metadata^"]),
+    files: new Map([
+      ["index.dat", {}],
+      ["index.rdf", {}],
+      ["^metadata^", {}],
+    ]),
 
     fetchMap: new Map(),
     urlToFilenameMap: new Map(),
@@ -116,7 +120,7 @@
       newFilename = newFilenameBase + "-" + (++count) + newFilenameExt;
       newFilenameCI = newFilename.toLowerCase(); 
     }
-    files.add(newFilenameCI);
+    files.set(newFilenameCI, {});
     return newFilename;
   };
 
@@ -209,28 +213,43 @@
     return path;
   };
 
-  capturer.saveFileCache = async function ({timeId, path, url, blob}) {
-    const key = {table: "pageCache", id: timeId, path, url};
-    await scrapbook.cache.set(key, blob);
+  capturer.saveFileCache = async function ({timeId, path, blob}) {
+    if (capturer.captureInfo.get(timeId).useDiskCache) {
+      const key = {table: "pageCache", id: timeId, path};
+      await scrapbook.cache.set(key, blob);
+      blob = await scrapbook.cache.get(key);
+    }
+
+    const files = capturer.captureInfo.get(timeId).files;
+    const filename = scrapbook.filepathParts(path)[1].toLowerCase();
+    Object.assign(files.get(filename), {
+      path,
+      blob,
+    });
   };
 
   capturer.loadFileCache = async function ({timeId}) {
-    const key = {table: "pageCache", id: timeId};
-    const entries = await scrapbook.cache.getAll(key);
+    const files = capturer.captureInfo.get(timeId).files;
+    const result = [];
+    let indexEntry;
 
-    let mainIdx = -1;
-    const result = Object.entries(entries).map(([entry, blob], idx) => {
-      const {path, url} = JSON.parse(entry);
+    for (const [filename, {path, url, blob}] of files) {
+      if (!blob) { continue; }
+
+      const entry = [path, url, blob];
+
+      // Move index page to last because the browser may not be able to show it
+      // if it's flooded over by other downloads.
       if (path === 'index.html') {
-        mainIdx = idx;
+        indexEntry = entry;
+        continue;
       }
-      return [path, url, blob];
-    });
 
-    // move index page to the last one because the browser may not be able to
-    // show it if it's flooded over by other downloads
-    if (mainIdx >= 0) {
-      return result.concat(result.splice(mainIdx, 1));
+      result.push(entry);
+    }
+
+    if (indexEntry) {
+      result.push(indexEntry);
     }
 
     return result;
@@ -238,10 +257,10 @@
 
   capturer.loadFileCacheAsZip = async function ({timeId}) {
     const zip = new JSZip();
-    const key = {table: "pageCache", id: timeId};
-    const entries = await scrapbook.cache.getAll(key);
-    for (const [entry, blob] of Object.entries(entries)) {
-      scrapbook.zipAddFile(zip, JSON.parse(entry).path, blob, true);
+    const files = capturer.captureInfo.get(timeId).files;
+    for (const [filename, {path, url, blob}] of files) {
+      if (!blob) { continue; }
+      scrapbook.zipAddFile(zip, path, blob, true);
     }
     return zip;
   };
@@ -1590,6 +1609,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
       const {timeId, frameIsMain, documentName} = settings;
       const urlToFilenameMap = capturer.captureInfo.get(timeId).urlToFilenameMap;
+      const files = capturer.captureInfo.get(timeId).files;
 
       const fetchResponse = await capturer.fetch({
         url: sourceUrl,
@@ -1622,7 +1642,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           // see capturer.getUniqueFilename for filename limitation
           documentNameBase = scrapbook.crop(documentNameBase, 128, 240);
 
-          const files = capturer.captureInfo.get(timeId).files;
           let newDocumentName = documentNameBase;
           let newDocumentNameCI = newDocumentName.toLowerCase();
           let count = 0;
@@ -1632,9 +1651,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             newDocumentName = documentNameBase + "_" + (++count);
             newDocumentNameCI = newDocumentName.toLowerCase();
           }
-          files.add(newDocumentNameCI + ".html");
-          files.add(newDocumentNameCI + ".xhtml");
-          files.add(newDocumentNameCI + ".svg");
+          files.set(newDocumentNameCI + ".html", {url: 'about:blank', role});
+          files.set(newDocumentNameCI + ".xhtml", {url: 'about:blank', role});
+          files.set(newDocumentNameCI + ".svg", {url: 'about:blank', role});
           documentFileName = newDocumentName + "." + getExtFromMime(mime);
         } else {
           documentFileName = getDocumentFileName({
@@ -1652,6 +1671,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
         // update registry
         urlToFilenameMap.set(token, response);
+        Object.assign(files.get(documentFileName.toLowerCase()), {
+          url: redirectedUrl,
+          role,
+        });
       } else {
         let documentFileName = getDocumentFileName({
           url: redirectedUrl,
@@ -1760,6 +1783,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
       const {timeId} = settings;
       const urlToFilenameMap = capturer.captureInfo.get(timeId).urlToFilenameMap;
+      const files = capturer.captureInfo.get(timeId).files;
 
       const fetchResponse = await capturer.fetch({
         url: sourceUrl,
@@ -1798,6 +1822,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
         // update registry
         urlToFilenameMap.set(token, response);
+        Object.assign(files.get(filename.toLowerCase()), {
+          url: redirectedUrl,
+          role,
+        });
       } else {
         let filename = getFilename({
           url: redirectedUrl,
