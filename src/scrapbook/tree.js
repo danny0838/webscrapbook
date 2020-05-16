@@ -106,7 +106,7 @@
           if (target.endsWith('/index.html')) {
             const redirectedTarget = await server.getMetaRefreshTarget(target);
             if (redirectedTarget) {
-              target = redirectedTarget;
+              target = scrapbook.splitUrlByAnchor(redirectedTarget)[0];
             }
           }
 
@@ -127,7 +127,7 @@
           if (target.endsWith('/index.html')) {
             const redirectedTarget = await server.getMetaRefreshTarget(target);
             if (redirectedTarget) {
-              target = redirectedTarget;
+              target = scrapbook.splitUrlByAnchor(redirectedTarget)[0];
             }
           }
 

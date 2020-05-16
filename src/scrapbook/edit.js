@@ -62,7 +62,7 @@
           if (checkMetaRefresh && target.endsWith('.html')) {
             const redirectedTarget = await server.getMetaRefreshTarget(target);
             if (redirectedTarget) {
-              target = this.target = redirectedTarget;
+              target = this.target = scrapbook.splitUrlByAnchor(redirectedTarget)[0];
             }
           }
 
