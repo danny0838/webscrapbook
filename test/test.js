@@ -3433,7 +3433,7 @@ async function test_capture_css_circular() {
   assert(text === `@import "style1.css";\nbody { color: blue; }`);
 
   /* singleHtml */
-  // rewrite a circular referencing with urn:scrapbook:download:circular:filename:...
+  // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
   var options = {
     "capture.saveAs": "singleHtml",
     "capture.style": "save",
@@ -3459,7 +3459,7 @@ async function test_capture_css_circular() {
   // style3.css
   var url = RegExp.$1;
   var text = (await xhr({url, responseType: "text"})).response;
-  assert(text.trim() === `@import "urn:scrapbook:download:circular:filename:style1.css";
+  assert(text.trim() === `@import "urn:scrapbook:download:circular:url:${localhost}/capture_css_circular/style1.css";
 body { color: blue; }`);
 }
 
@@ -3468,7 +3468,7 @@ body { color: blue; }`);
  */
 async function test_capture_css_circular2() {
   /* singleHtml */
-  // rewrite a circular referencing with urn:scrapbook:download:circular:filename:...
+  // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
   var options = {
     "capture.saveAs": "singleHtml",
     "capture.style": "save",
@@ -3484,7 +3484,7 @@ async function test_capture_css_circular2() {
   // style1.css
   var url = doc.querySelector('link').getAttribute('href');
   var text = (await xhr({url, responseType: "text"})).response;
-  assert(text.trim() === `@import "urn:scrapbook:download:circular:filename:style1.css";
+  assert(text.trim() === `@import "urn:scrapbook:download:circular:url:${localhost}/capture_css_circular2/style1.css";
 body { color: red; }`);
 }
 

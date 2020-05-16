@@ -4033,7 +4033,7 @@
               const source = settings.recurseChain[settings.recurseChain.length - 1];
               console.warn(scrapbook.lang("WarnCaptureCircular", [source, target]));
               const response = Object.assign({}, registry, {
-                url: `urn:scrapbook:download:circular:filename:${registry.filename}`,
+                url: `urn:scrapbook:download:circular:url:${sourceUrl}`,
               });
               await callback(elem, response);
               return;
