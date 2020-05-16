@@ -1958,6 +1958,10 @@
 
       // determine docUrl and baseUrl
       let {docUrl, baseUrl} = params;
+      let docUrlHash;
+      if (docUrl) {
+        [docUrl, docUrlHash] = scrapbook.splitUrlByAnchor(docUrl);
+      }
       if (!baseUrl) {
         if (docUrl) {
           baseUrl = docUrl;
@@ -1973,7 +1977,7 @@
         baseUrl = scrapbook.splitUrlByAnchor(baseUrl)[0];
       }
       if (!docUrl) {
-        docUrl = scrapbook.splitUrlByAnchor(doc.URL)[0];
+        [docUrl, docUrlHash] = scrapbook.splitUrlByAnchor(doc.URL);
       }
 
       // alias of baseUrl for resolving links and resources
@@ -2276,7 +2280,12 @@
 
       // record source URL
       if (options["capture.recordDocumentMeta"]) {
-        const url = docUrl.startsWith("data:") ? "data:" : docUrl;
+        let url = docUrl.startsWith("data:") ? "data:" : docUrl;
+
+        // add hash only for the main document as subframes with different hash
+        // must share the same file and record (e.g. foo.html and foo.html#bar)
+        if (settings.frameIsMain) { url += docUrlHash; }
+
         rootNode.setAttribute("data-scrapbook-source", url);
         rootNode.setAttribute("data-scrapbook-create", timeId);
       }
@@ -2412,7 +2421,7 @@
       });
 
       return await capturer.invoke("saveDocument", {
-        sourceUrl: docUrl,
+        sourceUrl: docUrl + docUrlHash,
         documentFileName,
         settings,
         options,

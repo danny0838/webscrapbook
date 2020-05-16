@@ -967,12 +967,16 @@
         options,
       });
 
+      // XHR response URL doesn't contain a hash
+      const redirectedUrl = fetchResponse.url;
+      const redirected = scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(redirectedUrl);
+
       let response;
       const doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
       if (doc) {
         response = await capturer.captureDocumentOrFile({
           doc,
-          docUrl: fetchResponse.url,
+          docUrl: redirectedUrl + (redirected ? '' : sourceUrlHash),
           refUrl,
           title,
           settings,
@@ -980,7 +984,7 @@
         });
       } else {
         response = await capturer.captureFile({
-          url: fetchResponse.url,
+          url: redirectedUrl + (redirected ? '' : sourceUrlHash),
           refUrl,
           title,
           charset: fetchResponse.headers.charset,
@@ -993,13 +997,8 @@
         return response;
       }
 
-      // don't add hash if redirected
-      if (scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(fetchResponse.url)) {
-        return response;
-      }
-
       return Object.assign({}, response, {
-        url: response.url + sourceUrlHash,
+        url: response.url + (redirected ? '' : sourceUrlHash),
       });
     } catch (ex) {
       console.warn(ex);

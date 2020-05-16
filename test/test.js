@@ -7013,6 +7013,96 @@ async function test_capture_record_meta() {
 }
 
 /**
+ * Check if hash is recorded in main document and NOT in frames
+ *
+ * capture.recordDocumentMeta
+ * capturer.captureDocument
+ * capturer.captureFile
+ * capturer.captureBookmark
+ */
+async function test_capture_record_meta2() {
+  /* html */
+  var options = {
+    "capture.recordDocumentMeta": true,
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_record/frame.html#abc`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/frame.html#abc`);
+
+  var frameFile = zip.file('index_1.html');
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(frameBlob);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html`);
+
+  /* html; headless */
+  var options = {
+    "capture.recordDocumentMeta": true,
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_record/frame.html#abc`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/frame.html#abc`);
+
+  var frameFile = zip.file('index_1.html');
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(frameBlob);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html`);
+
+  /* file */
+  var options = {
+    "capture.recordDocumentMeta": true,
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_record/text.py#abc`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/text.py#abc`);
+
+  /* file; headless */
+  var options = {
+    "capture.recordDocumentMeta": true,
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_record/text.py#abc`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/text.py#abc`);
+
+  /* bookmark */
+  var options = {
+    "capture.recordDocumentMeta": true,
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_record/meta.html#abc`,
+    mode: "bookmark",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var doc = await readFileAsDocument(blob);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html#abc`);
+}
+
+/**
  * Check if option works
  *
  * capture.recordRewrites
@@ -8816,6 +8906,7 @@ async function runTests() {
   await test(test_capture_linkUnsavedUri6);
   await test(test_capture_referrer);
   await test(test_capture_record_meta);
+  await test(test_capture_record_meta2);
   await test(test_capture_record_nodes);
   await test(test_capture_record_nodes2);
   await test(test_capture_record_nodes3);
