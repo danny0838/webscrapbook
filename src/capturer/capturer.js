@@ -756,6 +756,8 @@
         });
       }
 
+      await capturer.clearCache({timeId});
+
       return response;
     } catch (ex) {
       console.error(ex);
@@ -876,6 +878,8 @@
           index,
         });
       }
+
+      await capturer.clearCache({timeId});
 
       return response;
     } catch(ex) {
@@ -2041,8 +2045,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             options,
           });
 
-          await capturer.clearCache({timeId});
-
           return {
             timeId,
             title,
@@ -2127,8 +2129,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             settings,
             options,
           });
-
-          await capturer.clearCache({timeId});
 
           return {
             timeId,
@@ -2250,7 +2250,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               break;
             }
           }
-          await capturer.clearCache({timeId});
 
           return {
             timeId,
