@@ -19,12 +19,10 @@
 
   // clear capturer caches
   {
-    const items = await scrapbook.cache.getAll({table: "captureMissionCache"});
-    await scrapbook.cache.remove(Object.keys(items));
-  }
-
-  {
-    const items = await scrapbook.cache.getAll({table: "batchCaptureMissionCache"});
+    const tableSet = new Set(["captureMissionCache", "batchCaptureMissionCache"]);
+    const items = await scrapbook.cache.getAll((obj) => {
+      return tableSet.has(obj.table);
+    });
     await scrapbook.cache.remove(Object.keys(items));
   }
 
