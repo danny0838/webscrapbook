@@ -482,6 +482,15 @@
       return obj;
     },
 
+    _filterByObject(filter, obj) {
+      for (let cond in filter) {
+        if (obj[cond] !== filter[cond]) {
+          return false;
+        }
+      }
+      return true;
+    },
+
     /**
      * @param {string|Object} key
      */
@@ -491,9 +500,19 @@
     },
 
     /**
-     * @param {Object} filter - an object filter that each item key must match
+     * @param {Object|Function|string} filter
      */
     async getAll(filter, cache = this.current) {
+      if (typeof filter === 'function') {
+        // use unchanged filter
+      } else if (typeof filter === 'object') {
+        filter = this._filterByObject.bind(this, filter);
+      } else if (typeof filter === 'string') {
+        filter = this._filterByObject.bind(this, JSON.parse(filter));
+      } else {
+        // unsupported type
+        filter = this._filterByObject.bind(this, {});
+      }
       return this[cache].getAll(filter);
     },
 
@@ -550,10 +569,8 @@
         for (let key in items) {
           try {
             let obj = JSON.parse(key);
-            for (let cond in filter) {
-              if (obj[cond] !== filter[cond]) {
-                throw new Error("filter not matched");
-              }
+            if (!filter(obj)) {
+              throw new Error("filter not matched");
             }
             items[key] = this._unescapeObject(items[key]);
           } catch (ex) {
@@ -629,10 +646,8 @@
             for (let item of items) {
               try {
                 let obj = JSON.parse(item.key);
-                for (let cond in filter) {
-                  if (obj[cond] !== filter[cond]) {
-                    throw new Error("filter not matched");
-                  }
+                if (!filter(obj)) {
+                  throw new Error("filter not matched");
                 }
                 result[item.key] = item.value;
               } catch (ex) {
@@ -706,10 +721,8 @@
           const key = sessionStorage.key(i);
           try {
             let obj = JSON.parse(key);
-            for (let cond in filter) {
-              if (obj[cond] !== filter[cond]) {
-                throw new Error("filter not matched");
-              }
+            if (!filter(obj)) {
+              throw new Error("filter not matched");
             }
             items[key] = this._unescapeObject(JSON.parse(sessionStorage.getItem(key)));
           } catch (ex) {
