@@ -1214,7 +1214,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
             (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
             "";
 
-        const html = `<!DOCTYPE html>
+        const content = `<!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
@@ -1225,15 +1225,26 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 </body>
 </html>`;
 
+        const mime = "text/html";
+        const documentFileName = settings.documentName + ".html";
+
+        const registry = await capturer.invoke("registerDocument", {
+          docUrl: 'about:blank',
+          mime,
+          role: `document-${scrapbook.getUuid()}`,
+          settings,
+          options,
+        });
+
         return await capturer.saveDocument({
           sourceUrl,
-          documentFileName: settings.documentName + ".html",
+          documentFileName,
           settings,
           options,
           data: {
             title,
-            mime: "text/html",
-            content: html,
+            mime,
+            content,
           }
         }).then((response) => {
           // special handling
