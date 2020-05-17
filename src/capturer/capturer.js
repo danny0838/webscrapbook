@@ -1874,15 +1874,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         if (settings.frameIsMain) {
           return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
         }
-
-        const {content, mime, charset} = data;
-        let url = charset ?
-            scrapbook.byteStringToDataUri(content, mime, charset) :
-            scrapbook.unicodeToDataUri(content, mime);
-        url = url.replace(",", ";filename=" + encodeURIComponent(documentFileName) + ",");
-
-        // do not add sourceUrlHash as data URL with a hash could cause an error in some browsers
-        return {filename: documentFileName, url};
       }
 
       let {content, mime, charset} = data;
@@ -1902,6 +1893,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
       if (settings.frameIsMain) {
         return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
+      }
+
+      if (response.url.startsWith('data:')) {
+        return response;
       }
 
       return Object.assign({}, response, {
