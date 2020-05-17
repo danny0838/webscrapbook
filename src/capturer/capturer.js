@@ -1867,71 +1867,38 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     const {data, documentFileName, sourceUrl, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
 
     try {
-      let filename = documentFileName;
-      switch (options["capture.saveAs"]) {
-        case "singleHtml": {
-          if (settings.frameIsMain) {
-            return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
-          }
-
-          let url = data.charset === "UTF-8" ? 
-              scrapbook.unicodeToDataUri(data.content, data.mime) :
-              scrapbook.byteStringToDataUri(scrapbook.unicodeToUtf8(data.content), data.mime, data.charset);
-          url = url.replace(",", ";filename=" + encodeURIComponent(filename) + ",");
-
-          // do not add sourceUrlHash as data URL with a hash could cause an error in some browsers
-          return {timeId, sourceUrl, filename, url};
+      // special handling for saving file as data URI
+      if (options["capture.saveAs"] === "singleHtml") {
+        if (settings.frameIsMain) {
+          return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
         }
 
-        case "zip": {
-          await capturer.saveFileCache({
-            timeId,
-            path: filename,
-            url: sourceUrlMain,
-            blob: new Blob([data.content], {type: data.mime}),
-          });
+        let url = data.charset === "UTF-8" ? 
+            scrapbook.unicodeToDataUri(data.content, data.mime) :
+            scrapbook.byteStringToDataUri(scrapbook.unicodeToUtf8(data.content), data.mime, data.charset);
+        url = url.replace(",", ";filename=" + encodeURIComponent(documentFileName) + ",");
 
-          if (settings.frameIsMain) {
-            return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
-          }
-
-          return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-        }
-
-        case "maff": {
-          await capturer.saveFileCache({
-            timeId,
-            path: timeId + "/" + filename,
-            url: sourceUrlMain,
-            blob: new Blob([data.content], {type: data.mime}),
-          });
-
-          if (settings.frameIsMain) {
-            return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
-          }
-
-          return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-        }
-
-        case "folder":
-        default: {
-          await capturer.saveFileCache({
-            timeId,
-            path: filename,
-            url: sourceUrlMain,
-            blob: new Blob([data.content], {type: data.mime}),
-          });
-
-          if (settings.frameIsMain) {
-            return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
-          }
-
-          return {timeId, sourceUrl, filename, url: scrapbook.escapeFilename(filename) + sourceUrlHash};
-        }
+        // do not add sourceUrlHash as data URL with a hash could cause an error in some browsers
+        return {filename: documentFileName, url};
       }
+
+      const response = await capturer.downloadBlob({
+        blob: new Blob([data.content], {type: data.mime}),
+        filename: documentFileName,
+        sourceUrl,
+        settings,
+        options,
+      });
+
+      if (settings.frameIsMain) {
+        return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
+      }
+
+      return Object.assign({}, response, {
+        url: response.url + sourceUrlHash,
+      });
     } catch (ex) {
       console.warn(ex);
       capturer.warn(scrapbook.lang("ErrorFileSaveError", [sourceUrl, ex.message]));
