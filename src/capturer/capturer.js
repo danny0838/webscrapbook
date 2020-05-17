@@ -2376,47 +2376,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         options,
       });
 
-      // special handling for saving file as data URI
-      if (["singleHtml"].includes(options["capture.saveAs"])) {
-        const registry = await capturer.registerFile({
-          url: sourceUrl,
-          settings,
-          options,
-        });
-        const filename = registry.filename;
-
-        const blob = fetchResponse.blob;
-        const mime = blob.type;
-        const {parameters: {charset}} = scrapbook.parseHeaderContentType(fetchResponse.headers.contentType);
-
-        let dataUri;
-        if (charset || scrapbook.mimeIsText(mime)) {
-          if (charset && /utf-?8/i.test(charset)) {
-            const str = await scrapbook.readFileAsText(blob, "UTF-8");
-            dataUri = scrapbook.unicodeToDataUri(str, mime);
-          } else {
-            const str = await scrapbook.readFileAsText(blob, false);
-            dataUri = scrapbook.byteStringToDataUri(str, mime, charset);
-          }
-        } else {
-          dataUri = await scrapbook.readFileAsDataURL(blob);
-          if (dataUri === "data:") {
-            // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
-            dataUri = `data:${mime};base64,`;
-          }
-        }
-
-        if (filename) {
-          dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(filename) + m);
-        }
-
-        // don't add hash to data URL as some browsers don't support it
-        return {filename, url: dataUri};
-      }
-
       const registry = await capturer.registerFile({
         url: sourceUrl,
-        role: 'resource',
+        role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined : 'resource',
         settings,
         options,
       });
@@ -2425,13 +2387,23 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         return registry;
       }
 
+      let blob = fetchResponse.blob;
+      const {parameters: {charset}} = scrapbook.parseHeaderContentType(fetchResponse.headers.contentType);
+      if (charset) {
+        blob = new Blob([blob], {type: `${blob.type};charset=${charset}`});
+      }
+
       const response = await capturer.downloadBlob({
-        blob: fetchResponse.blob,
+        blob,
         filename: registry.filename,
         sourceUrl,
         settings,
         options,
       });
+
+      if (!response.url || response.url.startsWith('data:')) {
+        return response;
+      }
 
       return Object.assign({}, response, {
         url: response.url + scrapbook.splitUrlByAnchor(registry.url)[1],
@@ -2538,10 +2510,18 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   };
 
   /**
+   * @typedef {Object} blobObject
+   * @property {string} __type__ - "Blob", "File"
+   * @property {string} type
+   * @property {string} data - byte string
+   */
+
+  /**
    * @kind invokable
    * @param {Object} params
-   * @param {Blob|{data: string, type: string}} params.blob
-   * @param {string} params.filename - validated and unique
+   * @param {Blob|blobObject} params.blob - may include charset
+   * @param {string} [params.filename] - validated and unique;
+   *     may be absent when saveAs = singleHtml
    * @param {string} params.sourceUrl
    * @param {Object} params.settings
    * @param {Object} params.options
@@ -2567,8 +2547,30 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
-        // this should not happen
-        return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: "Unable to save as data URL."}};
+        const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(blob.type);
+
+        let dataUri;
+        if (charset || scrapbook.mimeIsText(mime)) {
+          if (charset && /utf-?8/i.test(charset)) {
+            const str = await scrapbook.readFileAsText(blob, "UTF-8");
+            dataUri = scrapbook.unicodeToDataUri(str, mime);
+          } else {
+            const str = await scrapbook.readFileAsText(blob, false);
+            dataUri = scrapbook.byteStringToDataUri(str, mime, charset);
+          }
+        } else {
+          dataUri = await scrapbook.readFileAsDataURL(blob);
+          if (dataUri === "data:") {
+            // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
+            dataUri = `data:${mime};base64,`;
+          }
+        }
+
+        if (filename) {
+          dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(filename) + m);
+        }
+
+        return {filename, url: dataUri};
       }
 
       case "zip": {

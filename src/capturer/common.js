@@ -2001,32 +2001,21 @@
 
       // register the main document before parsing so that it goes before
       // sub-frame documents.
-      let documentFileName;
-      if (["singleHtml"].includes(options["capture.saveAs"])) {
-        const registry = await capturer.invoke("registerDocument", {
-          docUrl,
-          mime,
-          settings,
-          options,
-        });
+      const registry = await capturer.invoke("registerDocument", {
+        docUrl,
+        mime,
+        role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined :
+            isHeadless ? "document" : `document-${scrapbook.getUuid()}`,
+        settings,
+        options,
+      });
 
-        documentFileName = registry.filename;
-      } else {
-        const registry = await capturer.invoke("registerDocument", {
-          docUrl,
-          mime,
-          role: isHeadless ? "document" : `document-${scrapbook.getUuid()}`,
-          settings,
-          options,
-        });
-
-        // if a previous registry exists, return it
-        if (registry.isDuplicate) {
-          return registry;
-        }
-
-        documentFileName = registry.filename;
+      // if a previous registry exists, return it
+      if (registry.isDuplicate) {
+        return registry;
       }
+
+      const documentFileName = registry.filename;
 
       // construct the cloned node tree
       const origNodeMap = new WeakMap();
@@ -4131,22 +4120,6 @@
       if (!elem || elem.nodeName.toLowerCase() == 'link') {
         // imported or external CSS
         // force UTF-8 for rewritten CSS
-
-        // special handling for saving as data URI
-        if (["singleHtml"].includes(options["capture.saveAs"]) ||
-            (sourceUrl.startsWith("data:") && !options["capture.saveDataUriAsFile"])) {
-          let dataUri = charset ? 
-              scrapbook.unicodeToDataUri(cssText, "text/css") : 
-              scrapbook.byteStringToDataUri(cssText, "text/css");
-
-          if (newFilename) {
-            dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(newFilename) + m);
-          }
-
-          const response = {url: dataUri};
-          await callback(elem, response);
-          return;
-        }
 
         const response = await capturer.invoke("downloadBlob", {
           blob: {
