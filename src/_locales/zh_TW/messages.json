@@ -767,12 +767,6 @@
   "OptionCaptureRemoveHiddenUndisplayedLabel": {
     "message": "移除不顯示的元素"
   },
-  "OptionCaptureResourceSizeLimitLabel": {
-    "message": "單個資源檔案的大小限制:"
-  },
-  "OptionCaptureResourceSizeLimitTooltip": {
-    "message": "系統不會下載超出此限制的資源檔案。空白表示不設限制。"
-  },
   "OptionCaptureRewriteCssLabel": {
     "message": "改寫樣式表:"
   },
@@ -1261,14 +1255,6 @@
       },
       "size": {
         "content": "$2"
-      }
-    }
-  },
-  "WarnResourceSizeLimitExceeded": {
-    "message": "略過超出大小限制的資源: '$SOURCE$'",
-    "placeholders": {
-      "source": {
-        "content": "$1"
       }
     }
   },

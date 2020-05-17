@@ -1870,12 +1870,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     const {timeId} = settings;
 
     try {
-      if (!settings.frameIsMain &&
-          typeof options["capture.resourceSizeLimit"] === "number" && data.content.length >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
-        capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrl, 128)]));
-        return {url: capturer.getSkipUrl(sourceUrl, options), error: {message: "Resource size limit exceeded."}};
-      }
-
       let filename = documentFileName;
       switch (options["capture.saveAs"]) {
         case "singleHtml": {
@@ -2538,11 +2532,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     if (!(blob instanceof Blob)) {
       const ab = scrapbook.byteStringToArrayBuffer(blob.data);
       blob = new Blob([ab], {type: blob.type});
-    }
-
-    if (typeof options["capture.resourceSizeLimit"] === "number" && blob.size >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
-      capturer.warn(scrapbook.lang("WarnResourceSizeLimitExceeded", [scrapbook.crop(sourceUrlMain, 128)]));
-      return {url: capturer.getSkipUrl(sourceUrlMain, options), error: {message: "Resource size limit exceeded."}};
     }
 
     switch (options["capture.saveAs"]) {

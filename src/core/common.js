@@ -44,7 +44,6 @@
     "capture.saveDataUriAsFile": true,
     "capture.saveDataUriAsSrcdoc": true,
     "capture.autoCloseDialog": false,
-    "capture.resourceSizeLimit": null,
     "capture.image": "save", // "save", "save-current", "link", "blank", "remove"
     "capture.imageBackground": "save-used", // "save", "save-used", "link", "blank"
     "capture.favicon": "save", // "save", "link", "blank", "remove"
