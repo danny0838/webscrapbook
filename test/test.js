@@ -8572,7 +8572,7 @@ async function test_capture_invalid_tags() {
 }
 
 /**
- * Check whether size limit works correctly.
+ * Size limit should be applied to normal resource and CSS.
  *
  * capturer.captureDocument
  * capturer.linkUnsavedUri
@@ -8581,7 +8581,6 @@ async function test_capture_sizeLimit() {
   var options = {
     "capture.style": "save",
     "capture.image": "save",
-    "capture.frame": "save",
   };
 
   /* sizeLimit = null */
@@ -8597,8 +8596,6 @@ async function test_capture_sizeLimit() {
   assert(zip.files['link2.css']);
   assert(zip.files['img.bmp']);
   assert(zip.files['img2.bmp']);
-  assert(zip.files['f3c161973c06d37459e1fa3e14b78387fd4216f7.svg']);
-  assert(zip.files['5aa9b03760d4bac901b27efe48a29b210d0bc6ec.svg']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8608,12 +8605,8 @@ async function test_capture_sizeLimit() {
   assert(doc.querySelectorAll('link')[1].getAttribute('href') === `link2.css`);
   assert(doc.querySelectorAll('img')[0].getAttribute('src') === `img.bmp`);
   assert(doc.querySelectorAll('img')[1].getAttribute('src') === `img2.bmp`);
-  assert(doc.querySelectorAll('img')[2].getAttribute('src') === `f3c161973c06d37459e1fa3e14b78387fd4216f7.svg`);
-  assert(doc.querySelectorAll('img')[3].getAttribute('src') === `5aa9b03760d4bac901b27efe48a29b210d0bc6ec.svg`);
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
 
-  /* sizeLimit = 1; linkUnsavedUri = false */
+  /* sizeLimit = 1KB; linkUnsavedUri = false */
   options["capture.resourceSizeLimit"] = 1 / 1024;
   options["capture.linkUnsavedUri"] = false;
 
@@ -8627,22 +8620,17 @@ async function test_capture_sizeLimit() {
   assert(!zip.files['link2.css']);
   assert(zip.files['img.bmp']);
   assert(!zip.files['img2.bmp']);
-  assert(zip.files['f3c161973c06d37459e1fa3e14b78387fd4216f7.svg']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelectorAll('link')[0].getAttribute('href') === `link.css`);
-  assert(doc.querySelectorAll('link')[1].getAttribute('href') === `urn:scrapbook:download:skip:${localhost}/capture_sizeLimit/link2.css`);
+  assert(doc.querySelectorAll('link')[1].getAttribute('href') === `urn:scrapbook:download:error:${localhost}/capture_sizeLimit/link2.css`);
   assert(doc.querySelectorAll('img')[0].getAttribute('src') === `img.bmp`);
-  assert(doc.querySelectorAll('img')[1].getAttribute('src') === `urn:scrapbook:download:skip:${localhost}/capture_sizeLimit/img2.bmp`);
-  assert(doc.querySelectorAll('img')[2].getAttribute('src') === `f3c161973c06d37459e1fa3e14b78387fd4216f7.svg`);
-  assert(doc.querySelectorAll('img')[3].getAttribute('src') === `urn:scrapbook:download:skip:data:`); // record data: for data URL
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `urn:scrapbook:download:skip:${localhost}/capture_sizeLimit/iframe2.html`);
+  assert(doc.querySelectorAll('img')[1].getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_sizeLimit/img2.bmp`);
 
-  /* sizeLimit = 1; linkUnsavedUri = true */
+  /* sizeLimit = 1KB; linkUnsavedUri = true */
   options["capture.resourceSizeLimit"] = 1 / 1024;
   options["capture.linkUnsavedUri"] = true;
 
@@ -8656,7 +8644,6 @@ async function test_capture_sizeLimit() {
   assert(!zip.files['link2.css']);
   assert(zip.files['img.bmp']);
   assert(!zip.files['img2.bmp']);
-  assert(zip.files['f3c161973c06d37459e1fa3e14b78387fd4216f7.svg']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8666,10 +8653,290 @@ async function test_capture_sizeLimit() {
   assert(doc.querySelectorAll('link')[1].getAttribute('href') === `${localhost}/capture_sizeLimit/link2.css`);
   assert(doc.querySelectorAll('img')[0].getAttribute('src') === `img.bmp`);
   assert(doc.querySelectorAll('img')[1].getAttribute('src') === `${localhost}/capture_sizeLimit/img2.bmp`);
-  assert(doc.querySelectorAll('img')[2].getAttribute('src') === `f3c161973c06d37459e1fa3e14b78387fd4216f7.svg`);
-  assert(doc.querySelectorAll('img')[3].getAttribute('src').match(/^data:image\/svg\+xml,/));
+}
+
+/**
+ * Size limit should be applied to headless frames.
+ *
+ * capturer.captureDocument
+ * capturer.linkUnsavedUri
+ */
+async function test_capture_sizeLimit2() {
+  var options = {
+    "capture.frame": "save",
+  };
+
+  /* sizeLimit = null */
+  options["capture.resourceSizeLimit"] = null;
+
+  var blob = await capture({
+    url: `${localhost}/capture_sizeLimit2/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['index_1.html']);
+  assert(zip.files['index_2.html']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
   assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `${localhost}/capture_sizeLimit/iframe2.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+
+  /* sizeLimit = 1KB; linkUnsavedUri = false */
+  options["capture.resourceSizeLimit"] = 1 / 1024;
+  options["capture.linkUnsavedUri"] = false;
+
+  var blob = await capture({
+    url: `${localhost}/capture_sizeLimit2/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['index_1.html']);
+  assert(zip.files['index_2.html']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+
+  /* sizeLimit = 1KB; linkUnsavedUri = true */
+  options["capture.resourceSizeLimit"] = 1 / 1024;
+  options["capture.linkUnsavedUri"] = true;
+
+  var blob = await capture({
+    url: `${localhost}/capture_sizeLimit2/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['index_1.html']);
+  assert(zip.files['index_2.html']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+
+  /* sizeLimit = null; headless */
+  options["capture.resourceSizeLimit"] = null;
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_sizeLimit2/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['index_1.html']);
+  assert(zip.files['index_2.html']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+
+  /* sizeLimit = 1KB; linkUnsavedUri = false; headless */
+  options["capture.resourceSizeLimit"] = 1 / 1024;
+  options["capture.linkUnsavedUri"] = false;
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_sizeLimit2/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['index_1.html']);
+  assert(!zip.files['index_2.html']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_sizeLimit2/iframe2.html`);
+
+  /* sizeLimit = 1KB; linkUnsavedUri = true; headless */
+  options["capture.resourceSizeLimit"] = 1 / 1024;
+  options["capture.linkUnsavedUri"] = true;
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_sizeLimit2/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['index_1.html']);
+  assert(!zip.files['index_2.html']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `${localhost}/capture_sizeLimit2/iframe2.html`);
+}
+
+/**
+ * Size limit should NOT be applied to data URL.
+ *
+ * capturer.captureDocument
+ * capturer.linkUnsavedUri
+ */
+async function test_capture_sizeLimit3() {
+  var options = {
+    "capture.style": "save",
+    "capture.image": "save",
+  };
+
+  /* sizeLimit = 1KB */
+  options["capture.resourceSizeLimit"] = 1 / 1024;
+  options["capture.linkUnsavedUri"] = false;
+  options["capture.saveDataUriAsFile"] = true;
+
+  var blob = await capture({
+    url: `${localhost}/capture_sizeLimit3/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('link')[0].getAttribute('href') === `e06bed7af2c6b885afd226014f801aaba2e355f7.css`);
+  assert(doc.querySelectorAll('link')[1].getAttribute('href') === `275502e8b8f6089c3b23980127a4b237c92ebd91.css`);
+  assert(doc.querySelectorAll('img')[0].getAttribute('src') === `f3c161973c06d37459e1fa3e14b78387fd4216f7.svg`);
+  assert(doc.querySelectorAll('img')[1].getAttribute('src') === `5aa9b03760d4bac901b27efe48a29b210d0bc6ec.svg`);
+
+  /* sizeLimit = 1KB; headless */
+  options["capture.resourceSizeLimit"] = 1 / 1024;
+  options["capture.linkUnsavedUri"] = false;
+  options["capture.saveDataUriAsFile"] = true;
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_sizeLimit3/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('link')[0].getAttribute('href') === `e06bed7af2c6b885afd226014f801aaba2e355f7.css`);
+  assert(doc.querySelectorAll('link')[1].getAttribute('href') === `275502e8b8f6089c3b23980127a4b237c92ebd91.css`);
+  assert(doc.querySelectorAll('img')[0].getAttribute('src') === `f3c161973c06d37459e1fa3e14b78387fd4216f7.svg`);
+  assert(doc.querySelectorAll('img')[1].getAttribute('src') === `5aa9b03760d4bac901b27efe48a29b210d0bc6ec.svg`);
+}
+
+/**
+ * Size limit should NOT be applied to data URL (for frames).
+ *
+ * capturer.captureDocument
+ * capturer.linkUnsavedUri
+ */
+async function test_capture_sizeLimit4() {
+  var options = {
+    "capture.frame": "save",
+  };
+
+  /* sizeLimit = 1KB */
+  options["capture.resourceSizeLimit"] = 1 / 1024;
+  options["capture.linkUnsavedUri"] = false;
+  options["capture.saveDataUriAsFile"] = true;
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_sizeLimit4/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+
+  /* sizeLimit = 1KB; headless */
+  options["capture.resourceSizeLimit"] = 1 / 1024;
+  options["capture.linkUnsavedUri"] = false;
+  options["capture.saveDataUriAsFile"] = true;
+
+  var blob = await capture({
+    url: `${localhost}/capture_sizeLimit4/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+}
+
+/**
+ * Size limit should NOT be applied to srcdoc.
+ *
+ * capturer.captureDocument
+ * capturer.linkUnsavedUri
+ */
+async function test_capture_sizeLimit5() {
+  var options = {
+    "capture.frame": "save",
+  };
+
+  /* sizeLimit = 1KB */
+  options["capture.resourceSizeLimit"] = 1 / 1024;
+  options["capture.linkUnsavedUri"] = false;
+
+  var blob = await capture({
+    url: `${localhost}/capture_sizeLimit5/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+
+  /* sizeLimit = 1KB; headless */
+  options["capture.resourceSizeLimit"] = 1 / 1024;
+  options["capture.linkUnsavedUri"] = false;
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_sizeLimit5/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
 }
 
 /**
@@ -9006,6 +9273,10 @@ async function runTests() {
   await test(test_capture_singleHtml_filename);
   await test(test_capture_invalid_tags);
   await test(test_capture_sizeLimit);
+  await test(test_capture_sizeLimit2);
+  await test(test_capture_sizeLimit3);
+  await test(test_capture_sizeLimit4);
+  await test(test_capture_sizeLimit5);
   await test(test_capture_helpers);
   await test(test_capture_helpers2);
 }
