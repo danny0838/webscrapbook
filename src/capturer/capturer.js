@@ -1266,7 +1266,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             title,
             mime,
             content,
-          }
+          },
         }).then((response) => {
           // special handling
           if (options["capture.saveTo"] === 'memory') {
@@ -1851,11 +1851,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @kind invokable
    * @param {Object} params
    * @param {Object} params.data
-   *         - {string} params.data.mime
-   *         - {string} params.data.charset
-   *         - {string} params.data.content
-   *         - {string} params.data.title
-   *         - {string} params.data.favIconUrl
+   * @param {string} params.data.mime
+   * @param {string} params.data.content - USVString or byte string
+   * @param {string} [params.data.charset] - save USVString as UTF-8 if omitted
+   * @param {string} [params.data.title]
+   * @param {string} [params.data.favIconUrl]
    * @param {string} params.documentFileName
    * @param {string} params.sourceUrl - may include hash
    * @param {Object} params.settings
@@ -1875,17 +1875,25 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
         }
 
-        let url = data.charset === "UTF-8" ? 
-            scrapbook.unicodeToDataUri(data.content, data.mime) :
-            scrapbook.byteStringToDataUri(scrapbook.unicodeToUtf8(data.content), data.mime, data.charset);
+        const {content, mime, charset} = data;
+        let url = charset ?
+            scrapbook.byteStringToDataUri(content, mime, charset) :
+            scrapbook.unicodeToDataUri(content, mime);
         url = url.replace(",", ";filename=" + encodeURIComponent(documentFileName) + ",");
 
         // do not add sourceUrlHash as data URL with a hash could cause an error in some browsers
         return {filename: documentFileName, url};
       }
 
+      let {content, mime, charset} = data;
+      if (charset) {
+        content = scrapbook.byteStringToArrayBuffer(content);
+      } else {
+        charset = 'UTF-8';
+      }
+      const blob = new Blob([content], {type: `${mime};charset=${charset}`});
       const response = await capturer.downloadBlob({
-        blob: new Blob([data.content], {type: data.mime}),
+        blob,
         filename: documentFileName,
         sourceUrl,
         settings,
@@ -1910,11 +1918,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @kind invokable
    * @param {Object} params
    * @param {Object} params.data
-   *         - {string} params.data.mime
-   *         - {string} params.data.charset
-   *         - {string} params.data.content
-   *         - {string} params.data.title
-   *         - {string} params.data.favIconUrl
+   * @param {string} params.data.mime
+   * @param {string} params.data.content - USVString or byte string
+   * @param {string} [params.data.charset] - save USVString as UTF-8 if omitted
+   * @param {string} [params.data.title]
+   * @param {string} [params.data.favIconUrl]
    * @param {string} params.sourceUrl - may include hash
    * @param {string} params.documentFileName
    * @param {Object} params.settings
@@ -1959,7 +1967,14 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       let [, ext] = scrapbook.filenameParts(documentFileName);
       switch (options["capture.saveAs"]) {
         case "singleHtml": {
-          const blob = new Blob([data.content], {type: data.mime});
+          let {content, mime, charset} = data;
+          if (charset) {
+            content = scrapbook.byteStringToArrayBuffer(content);
+          } else {
+            charset = 'UTF-8';
+          }
+          const blob = new Blob([content], {type: `${mime};charset=${charset}`});
+
           let targetDir;
           let savePrompt;
           let saveMethod;

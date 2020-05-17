@@ -175,7 +175,7 @@ async function test_capture_html() {
     url: `${localhost}/capture_html/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
-  assert(blob.type === "text/html");
+  assert(blob.type.match(/^text\/html(?:;|$)/));
 
   var doc = await readFileAsDocument(blob);
   assert(doc);
@@ -453,7 +453,7 @@ async function test_capture_xhtml() {
     url: `${localhost}/capture_xhtml/index.xhtml`,
     options: Object.assign({}, baseOptions, options),
   });
-  assert(blob.type === "application/xhtml+xml");
+  assert(blob.type.match(/^application\/xhtml\+xml(?:;|$)/));
 
   var doc = await readFileAsDocument(blob);
   assert(doc);

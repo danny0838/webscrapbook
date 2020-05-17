@@ -2416,11 +2416,10 @@
         options,
         data: {
           mime,
-          charset: "UTF-8",
           content,
           title: title || doc.title,
           favIconUrl,
-        }
+        },
       });
     } catch(ex) {
       console.error(ex);
