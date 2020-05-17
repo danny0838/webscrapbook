@@ -8168,7 +8168,7 @@ p { background-image: url("nonexist.bmp"); }`);
 
 /**
  * Test for other protocol URL:
- * Don't generate error URL if the protocol is not http, https, or file
+ * Don't generate error URL if the protocol is not http, https, file, or about
  *
  * capture.linkUnsavedUri
  * capturer.captureDocument

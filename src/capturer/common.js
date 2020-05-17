@@ -2968,7 +2968,7 @@
 
   capturer.getErrorUrl = function (sourceUrl, options) {
     if (!options || !options["capture.linkUnsavedUri"]) {
-      if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("file:")) {
+      if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("file:") || sourceUrl.startsWith("about:")) {
         return `urn:scrapbook:download:error:${sourceUrl}`;
       } else if (sourceUrl.startsWith("data:")) {
         return `urn:scrapbook:download:error:data:`;
@@ -2981,7 +2981,7 @@
 
   capturer.getSkipUrl = function (sourceUrl, options) {
     if (!options || !options["capture.linkUnsavedUri"]) {
-      if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("file:")) {
+      if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("file:") || sourceUrl.startsWith("about:")) {
         return `urn:scrapbook:download:skip:${sourceUrl}`;
       } else if (sourceUrl.startsWith("data:")) {
         return `urn:scrapbook:download:skip:data:`;
