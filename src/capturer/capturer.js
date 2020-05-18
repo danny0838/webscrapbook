@@ -689,17 +689,15 @@
               index,
             });
           }
+          index++;
+          capturer.log(`Done.`);
         } catch (ex) {
           console.error(ex);
-          const err = `Unexpected error: ${ex.message}`;
+          const err = `Fatal error: ${ex.message}`;
           capturer.error(err);
           result = {error: {message: err}};
         }
 
-        if (!result.error) {
-          index++;
-          capturer.log(`Done.`);
-        }
         results.push(result);
 
         // short delay before next task
@@ -728,89 +726,82 @@
    * @return {Promise<Object>}
    */
   capturer.captureTab = async function (params) {
-    try {
-      const {tabId, frameId, fullPage, title: title0, mode, options, parentId, index} = params;
-      let {url, title, favIconUrl, discarded} = await browser.tabs.get(tabId);
+    const {tabId, frameId, fullPage, title: title0, mode, options, parentId, index} = params;
+    let {url, title, favIconUrl, discarded} = await browser.tabs.get(tabId);
 
-      // redirect headless capture
-      // if frameId not provided, use current tab title and favIcon
-      if (mode === "bookmark" || mode === "source") {
-        if (typeof frameId === "number") {
-          ({url, title, favIconUrl} = await browser.webNavigation.getFrame({tabId, frameId}));
-        }
-        return await capturer.captureRemote({url, title, favIconUrl, mode, options});
-      } else if (mode === "resave") {
-        return await capturer.resaveTab({tabId, frameId, options});
-      } else if (mode === "internalize") {
-        return await capturer.resaveTab({tabId, frameId, options, internalize: true});
+    // redirect headless capture
+    // if frameId not provided, use current tab title and favIcon
+    if (mode === "bookmark" || mode === "source") {
+      if (typeof frameId === "number") {
+        ({url, title, favIconUrl} = await browser.webNavigation.getFrame({tabId, frameId}));
       }
-
-      const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
-      const timeId = scrapbook.dateToId();
-      const message = {
-        title: title0,
-        settings: {
-          missionId: capturer.missionId,
-          timeId,
-          indexFilename: null,
-          frameIsMain: true,
-          documentName: "index",
-          fullPage,
-          recurseChain: [],
-          favIconUrl,
-        },
-        options,
-      };
-
-      capturer.log(`Capturing (document) ${source} ...`);
-
-      // throw error for a discarded tab
-      // note that tab.discarded is undefined in older Firefox version
-      if (discarded === true) {
-        throw new Error(scrapbook.lang("ErrorTabDiscarded"));
-      }
-
-      (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
-        if (error) {
-          const source = `[${tabId}:${frameId}] ${url}`;
-          const err = scrapbook.lang("ErrorContentScriptExecute", [source, error]);
-          capturer.error(err);
-        }
-      });
-
-      isDebug && console.debug("(main) send", source, message);
-      const response = await capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
-      isDebug && console.debug("(main) response", source, response);
-      capturer.captureInfo.delete(timeId);
-      if (!response) { throw new Error(`Response not received.`); }
-      if (response.error) { throw new Error(response.error.message); }
-
-      if (message.options["capture.saveTo"] === "server") {
-        await capturer.addItemToServer({
-          item: {
-            id: response.timeId,
-            index: (response.targetDir ? response.targetDir + '/' : '') + response.filename,
-            title: response.title,
-            type: response.type,
-            create: response.timeId,
-            source: response.sourceUrl,
-            icon: response.favIconUrl,
-            charset: response.charset,
-          },
-          parentId,
-          index,
-        });
-      }
-
-      await capturer.clearFileCache({timeId});
-
-      return response;
-    } catch (ex) {
-      console.error(ex);
-      const err = `Fatal error: ${ex.message}`;
-      capturer.error(err);
-      return {error: {message: err}};
+      return await capturer.captureRemote({url, title, favIconUrl, mode, options});
+    } else if (mode === "resave") {
+      return await capturer.resaveTab({tabId, frameId, options});
+    } else if (mode === "internalize") {
+      return await capturer.resaveTab({tabId, frameId, options, internalize: true});
     }
+
+    const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
+    const timeId = scrapbook.dateToId();
+    const message = {
+      title: title0,
+      settings: {
+        missionId: capturer.missionId,
+        timeId,
+        indexFilename: null,
+        frameIsMain: true,
+        documentName: "index",
+        fullPage,
+        recurseChain: [],
+        favIconUrl,
+      },
+      options,
+    };
+
+    capturer.log(`Capturing (document) ${source} ...`);
+
+    // throw error for a discarded tab
+    // note that tab.discarded is undefined in older Firefox version
+    if (discarded === true) {
+      throw new Error(scrapbook.lang("ErrorTabDiscarded"));
+    }
+
+    (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
+      if (error) {
+        const source = `[${tabId}:${frameId}] ${url}`;
+        const err = scrapbook.lang("ErrorContentScriptExecute", [source, error]);
+        capturer.error(err);
+      }
+    });
+
+    isDebug && console.debug("(main) send", source, message);
+    const response = await capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
+    isDebug && console.debug("(main) response", source, response);
+    capturer.captureInfo.delete(timeId);
+    if (!response) { throw new Error(`Response not received.`); }
+    if (response.error) { throw new Error(response.error.message); }
+
+    if (message.options["capture.saveTo"] === "server") {
+      await capturer.addItemToServer({
+        item: {
+          id: response.timeId,
+          index: (response.targetDir ? response.targetDir + '/' : '') + response.filename,
+          title: response.title,
+          type: response.type,
+          create: response.timeId,
+          source: response.sourceUrl,
+          icon: response.favIconUrl,
+          charset: response.charset,
+        },
+        parentId,
+        index,
+      });
+    }
+
+    await capturer.clearFileCache({timeId});
+
+    return response;
   };
 
   /**
@@ -826,116 +817,109 @@
    * @return {Promise<Object>}
    */
   capturer.captureRemote = async function (params) {
-    try {
-      const {url, refUrl, title, favIconUrl, mode, options, parentId, index} = params;
+    const {url, refUrl, title, favIconUrl, mode, options, parentId, index} = params;
 
-      // default mode => launch a tab to capture
-      if (!mode) {
-        capturer.log(`Launching remote tab ...`);
+    // default mode => launch a tab to capture
+    if (!mode) {
+      capturer.log(`Launching remote tab ...`);
 
-        const tab = await browser.tabs.create({
-          url,
-          active: false,
-        });
-
-        // wait until tab loading complete
-        await new Promise((resolve, reject) => {
-          const listener = (tabId, changeInfo, t) => {
-            if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-            browser.tabs.onUpdated.removeListener(listener);
-            browser.tabs.onRemoved.removeListener(listener2);
-            resolve(t);
-          };
-          const listener2 = (tabId, removeInfo) => {
-            if (!(tabId === tab.id)) { return; }
-            browser.tabs.onUpdated.removeListener(listener);
-            browser.tabs.onRemoved.removeListener(listener2);
-            reject({message: `Tab removed before loading complete.`});
-          };
-          browser.tabs.onUpdated.addListener(listener);
-          browser.tabs.onRemoved.addListener(listener2);
-        });
-
-        const response = await capturer.captureTab({
-          tabId: tab.id,
-          fullPage: true,
-          title, 
-          options,
-        });
-
-        try {
-          await browser.tabs.remove(tab.id);
-        } catch (ex) {}
-
-        return response;
-      }
-
-      const source = `${url}`;
-      const timeId = scrapbook.dateToId();
-      const message = {
+      const tab = await browser.tabs.create({
         url,
-        refUrl,
-        title,
-        settings: {
-          missionId: capturer.missionId,
-          timeId,
-          isHeadless: true,
-          indexFilename: null,
-          frameIsMain: true,
-          documentName: "index",
-          recurseChain: [],
-          favIconUrl,
-        },
+        active: false,
+      });
+
+      // wait until tab loading complete
+      await new Promise((resolve, reject) => {
+        const listener = (tabId, changeInfo, t) => {
+          if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
+          browser.tabs.onUpdated.removeListener(listener);
+          browser.tabs.onRemoved.removeListener(listener2);
+          resolve(t);
+        };
+        const listener2 = (tabId, removeInfo) => {
+          if (!(tabId === tab.id)) { return; }
+          browser.tabs.onUpdated.removeListener(listener);
+          browser.tabs.onRemoved.removeListener(listener2);
+          reject({message: `Tab removed before loading complete.`});
+        };
+        browser.tabs.onUpdated.addListener(listener);
+        browser.tabs.onRemoved.addListener(listener2);
+      });
+
+      const response = await capturer.captureTab({
+        tabId: tab.id,
+        fullPage: true,
+        title, 
         options,
-      };
+      });
 
-      isDebug && console.debug("(main) capture", source, message);
-      capturer.log(`Capturing (${mode}) ${source} ...`);
-
-      let response;
-      switch (mode) {
-        case "bookmark": {
-          response = await capturer.captureBookmark(message);
-          break;
-        }
-        case "source":
-        default: {
-          response = await capturer.captureUrl(message);
-          break;
-        }
-      }
-
-      isDebug && console.debug("(main) response", source, response);
-      capturer.captureInfo.delete(timeId);
-      if (!response) { throw new Error(`Response not received.`); }
-      if (response.error) { throw new Error(response.error.message); }
-
-      if (message.options["capture.saveTo"] === "server") {
-        await capturer.addItemToServer({
-          item: {
-            id: response.timeId,
-            index: (response.targetDir ? response.targetDir + '/' : '') + response.filename,
-            title: response.title,
-            type: response.type,
-            create: response.timeId,
-            source: response.sourceUrl,
-            icon: response.favIconUrl,
-            charset: response.charset,
-          },
-          parentId,
-          index,
-        });
-      }
-
-      await capturer.clearFileCache({timeId});
+      try {
+        await browser.tabs.remove(tab.id);
+      } catch (ex) {}
 
       return response;
-    } catch(ex) {
-      console.error(ex);
-      const err = `Fatal error: ${ex.message}`;
-      capturer.error(err);
-      return {error: {message: err}};
     }
+
+    const source = `${url}`;
+    const timeId = scrapbook.dateToId();
+    const message = {
+      url,
+      refUrl,
+      title,
+      settings: {
+        missionId: capturer.missionId,
+        timeId,
+        isHeadless: true,
+        indexFilename: null,
+        frameIsMain: true,
+        documentName: "index",
+        recurseChain: [],
+        favIconUrl,
+      },
+      options,
+    };
+
+    isDebug && console.debug("(main) capture", source, message);
+    capturer.log(`Capturing (${mode}) ${source} ...`);
+
+    let response;
+    switch (mode) {
+      case "bookmark": {
+        response = await capturer.captureBookmark(message);
+        break;
+      }
+      case "source":
+      default: {
+        response = await capturer.captureUrl(message);
+        break;
+      }
+    }
+
+    isDebug && console.debug("(main) response", source, response);
+    capturer.captureInfo.delete(timeId);
+    if (!response) { throw new Error(`Response not received.`); }
+    if (response.error) { throw new Error(response.error.message); }
+
+    if (message.options["capture.saveTo"] === "server") {
+      await capturer.addItemToServer({
+        item: {
+          id: response.timeId,
+          index: (response.targetDir ? response.targetDir + '/' : '') + response.filename,
+          title: response.title,
+          type: response.type,
+          create: response.timeId,
+          source: response.sourceUrl,
+          icon: response.favIconUrl,
+          charset: response.charset,
+        },
+        parentId,
+        index,
+      });
+    }
+
+    await capturer.clearFileCache({timeId});
+
+    return response;
   };
 
   /**
