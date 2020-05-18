@@ -1113,7 +1113,7 @@
   /**
    * @return {integer} Scrapbook object remove type of the element.
    *     -1: not a scrapbook object
-   *      0: not removable
+   *      0: not removable as a scrapbook object
    *      1: should remove
    *      2: should unwrap
    *      3: should uncomment
@@ -1121,11 +1121,10 @@
   scrapbook.getScrapBookObjectRemoveType = function (elem) {
     let type = scrapbook.getScrapbookObjectType(elem);
     if (!type) { return -1; }
-    if (["title", "title-src", "stylesheet", "stylesheet-temp", "todo"].includes(type)) { return 0; }
+    if (["annotation", "freenote", "sticky", "block-comment", "custom"].includes(type)) { return 1; }
     if (["linemarker", "inline", "link-url", "link-inner", "link-file", "custom-wrapper"].includes(type)) { return 2; }
     if (["erased"].includes(type)) { return 3; }
-    if (elem.nodeType === 8) { return 0; }
-    return 1;
+    return 0;
   };
 
   /**
