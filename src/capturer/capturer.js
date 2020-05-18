@@ -651,66 +651,59 @@
    * @return {Promise<Array|Object>} - list of task results (or error), or an object of error
    */
   capturer.runTasks = async function (params) {
-    try {
-      let {tasks, parentId, index} = params;
-      const results = [];
-      const globalOptions = scrapbook.getOptions("capture");
+    let {tasks, parentId, index} = params;
+    const results = [];
+    const globalOptions = scrapbook.getOptions("capture");
 
-      for (const task of tasks) {
-        const {
-          tabId, frameId, fullPage,
-          url, refUrl, title, favIconUrl,
-          mode, options,
-        } = task;
+    for (const task of tasks) {
+      const {
+        tabId, frameId, fullPage,
+        url, refUrl, title, favIconUrl,
+        mode, options,
+      } = task;
 
-        let result;
-        try {
-          if (typeof tabId === 'number') {
-            // capture tab
-            result = await capturer.captureTab({
-              tabId,
-              frameId,
-              fullPage,
-              mode,
-              options: Object.assign(globalOptions, options),
-              parentId,
-              index,
-            });
-          } else if (typeof url === 'string') {
-            // capture headless
-            result = await capturer.captureRemote({
-              url,
-              refUrl,
-              title,
-              favIconUrl,
-              mode,
-              options: Object.assign(globalOptions, options),
-              parentId,
-              index,
-            });
-          }
-          index++;
-          capturer.log(`Done.`);
-        } catch (ex) {
-          console.error(ex);
-          const err = `Fatal error: ${ex.message}`;
-          capturer.error(err);
-          result = {error: {message: err}};
+      let result;
+      try {
+        if (typeof tabId === 'number') {
+          // capture tab
+          result = await capturer.captureTab({
+            tabId,
+            frameId,
+            fullPage,
+            mode,
+            options: Object.assign(globalOptions, options),
+            parentId,
+            index,
+          });
+        } else if (typeof url === 'string') {
+          // capture headless
+          result = await capturer.captureRemote({
+            url,
+            refUrl,
+            title,
+            favIconUrl,
+            mode,
+            options: Object.assign(globalOptions, options),
+            parentId,
+            index,
+          });
         }
-
-        results.push(result);
-
-        // short delay before next task
-        await scrapbook.delay(5);
+        index++;
+        capturer.log(`Done.`);
+      } catch (ex) {
+        console.error(ex);
+        const err = `Fatal error: ${ex.message}`;
+        capturer.error(err);
+        result = {error: {message: err}};
       }
 
-      return results;
-    } catch (ex) {
-      console.error(ex);
-      const err = `Fatal error: ${ex.message}`;
-      capturer.error(err);
-      return {error: {message: err}};
+      results.push(result);
+
+      // short delay before next task
+      await scrapbook.delay(5);
     }
+
+    return results;
   };
 
   /**
@@ -2884,7 +2877,12 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         } else if (!data.tasks.length) {
           capturer.error(`Error: nothing to capture.`);
         } else {
-          results = await capturer.runTasks(data);
+          try {
+            results = await capturer.runTasks(data);
+          } catch (ex) {
+            console.error(ex);
+            capturer.error(`Unexpected error: ${ex.message}`);
+          }
         }
       } else {
         capturer.error(`Error: Mission ID not set.`);
@@ -2894,7 +2892,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       // do not autoclose if there's no adequate results
       if (autoClose) {
-        if (!results || results.error || results.some(x => x.error)) {
+        if (!results || results.some(x => x.error)) {
           autoClose = false;
         }
       }
