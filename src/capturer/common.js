@@ -3912,22 +3912,28 @@
      */
     async rewriteCss({elem, url, refCss, refUrl, callback, settings = this.settings, options = this.options}) {
       let sourceUrl;
+      let cssType = !elem ? 'imported' : elem.nodeName.toLowerCase() === 'link' ? 'external' : 'internal';
       let cssText = "";
       let cssRules;
       let charset;
       let newFilename = "";
       let newUrl = "";
       let isCircular = false;
+      let isDynamic = false;
 
-      if (!elem || elem.nodeName.toLowerCase() == 'link') {
-        // imported or external CSS
-        if (!elem) {
-          // imported CSS
-          sourceUrl = url;
-        } else {
-          // external CSS
+      init: {
+        if (cssType === 'internal') {
+          refCss = this.getElemCss(elem);
+          cssText = elem.textContent;
+          charset = "UTF-8";
+          break init;
+        }
+
+        if (cssType === 'external') {
           refCss = this.getElemCss(elem);
           sourceUrl = elem.getAttribute("href");
+        } else if (cssType === 'imported') {
+          sourceUrl = url;
         }
 
         const response = await capturer.invoke("fetchCss", {
@@ -3942,97 +3948,113 @@
           return;
         }
 
-        isCircular = settings.recurseChain.includes(scrapbook.splitUrlByAnchor(sourceUrl)[0]);
         cssText = response.text;
         charset = response.charset;
-      } else {
-        // internal CSS
-        refCss = this.getElemCss(elem);
-        cssText = elem.textContent;
-        charset = "UTF-8";
+
+        isCircular = settings.recurseChain.includes(scrapbook.splitUrlByAnchor(sourceUrl)[0]);
       }
 
-      // Capture dynamic stylesheet content instead if the stylesheet has been
-      // dynamically modified.
-      let isDynamicCss = false;
+      checkDynamicCss: {
+        // Ignore refCss if sourceUrl is circularly referenced, as we cannot get
+        // original cssRules from CSSOM in this case and thus cannot reliably
+        // determine whether it's dynamic.
+        //
+        // If style1.css => style2.css => style3.css => style1.css
+        // - Chromium: styleSheet of StyleSheet "style3.css" is null
+        // - Firefox: cssRules of the circularly referenced StyleSheet "style1.css"
+        //            is empty, but can be modified by scripts.
+        if (isCircular) {
+          break checkDynamicCss;
+        }
 
-      // Ignore refCss if sourceUrl is circularly referenced, as we cannot get
-      // original cssRules from CSSOM and cannot determine whether it's dynamic
-      // reliably.
-      //
-      // If style1.css => style2.css => style3.css => style1.css
-      // - Chromium: styleSheet of StyleSheet "style3.css" is null
-      // - Firefox: cssRules of the circularly referenced StyleSheet "style1.css"
-      //            is empty, but can be modified by scripts.
-      if (refCss && !isCircular) {
+        if (!refCss) {
+          break checkDynamicCss;
+        }
+
+        // real rules from CSSOM
         cssRules = await this.getRulesFromCss({
           css: refCss,
           refUrl,
           crossOrigin: false,
           errorWithNull: true,
         });
-        if (cssRules) {
-          // scrapbook.utf8ToUnicode throws an error if cssText contains a UTF-8 invalid char
-          const cssTextUnicode = charset ? cssText : await scrapbook.readFileAsText(new Blob([scrapbook.byteStringToArrayBuffer(cssText)]));
 
-          const cssRulesSource = await this.getRulesFromCssText(cssTextUnicode);
+        if (!cssRules) {
+          break checkDynamicCss;
+        }
 
-          if (cssRulesSource.length !== cssRules.length ||
-              !Array.prototype.every.call(
-                cssRulesSource,
-                (cssRule, i) => (cssRule.cssText === cssRules[i].cssText),
-              )) {
-            isDynamicCss = true;
-            charset = "UTF-8";
-            cssText = Array.prototype.map.call(
-              cssRules,
-              cssRule => cssRule.cssText,
-            ).join("\n");
-          }
+        // if charset is not known, force conversion to UTF-8
+        // scrapbook.utf8ToUnicode throws an error if cssText contains a UTF-8 invalid char
+        const cssTextUnicode = charset ? cssText : await scrapbook.readFileAsText(new Blob([scrapbook.byteStringToArrayBuffer(cssText)]));
+
+        // rules from source CSS text
+        const cssRulesSource = await this.getRulesFromCssText(cssTextUnicode);
+
+        // difference between cssRulesSource and cssRules is considered dynamic
+        // use CSSOM rules instead
+        if (cssRulesSource.length !== cssRules.length ||
+            !Array.prototype.every.call(
+              cssRulesSource,
+              (cssRule, i) => (cssRule.cssText === cssRules[i].cssText),
+            )) {
+          isDynamic = true;
+
+          // Force UTF-8 charset since rules from CSSOM is already parsed by JS
+          // and cannot be converted to other charset even if it's gibberish.
+          charset = "UTF-8";
+
+          cssText = Array.prototype.map.call(
+            cssRules,
+            cssRule => cssRule.cssText,
+          ).join("\n");
         }
       }
 
       // register the filename to save (for imported or external CSS)
-      if (!elem || elem.nodeName.toLowerCase() == 'link') {
+      // and store in newFilename and newUrl
+      registerFilename: {
+        if (cssType === 'internal') {
+          break registerFilename;
+        }
+
+        // special management for a data URI to be saved as data URI
         if (sourceUrl.startsWith("data:") &&
-            !(options["capture.saveDataUriAsFile"] && !["singleHtml"].includes(options["capture.saveAs"]))) {
-          // special management for data URI
+            (!options["capture.saveDataUriAsFile"] || options["capture.saveAs"] === "singleHtml")) {
           // Save inner URLs as data URL since data URL is null origin
           // and no relative URLs are allowed in it.
           options = JSON.parse(JSON.stringify(options));
           options["capture.saveAs"] = "singleHtml";
-        } else {
-          const registry = await capturer.invoke("registerFile", {
-            url: sourceUrl,
-            role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined :
-                isDynamicCss ? `css-${scrapbook.getUuid()}` : 'css',
-            settings,
-            options,
-          });
-
-          // handle circular CSS
-          if (isCircular) {
-            if (["singleHtml"].includes(options["capture.saveAs"])) {
-              const target = sourceUrl;
-              const source = settings.recurseChain[settings.recurseChain.length - 1];
-              console.warn(scrapbook.lang("WarnCaptureCircular", [source, target]));
-              const response = Object.assign({}, registry, {
-                url: `urn:scrapbook:download:circular:url:${sourceUrl}`,
-              });
-              await callback(elem, response);
-              return;
-            }
-          }
-
-          // handle duplicated CSS
-          if (registry.isDuplicate) {
-            await callback(elem, registry);
-            return;
-          }
-
-          newFilename = registry.filename;
-          newUrl = registry.url;
+          break registerFilename;
         }
+
+        const registry = await capturer.invoke("registerFile", {
+          url: sourceUrl,
+          role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined :
+              isDynamic ? `css-${scrapbook.getUuid()}` : 'css',
+          settings,
+          options,
+        });
+
+        // handle circular CSS if it's a file to be saved as data URI
+        if (isCircular && options["capture.saveAs"] === "singleHtml") {
+          const target = sourceUrl;
+          const source = settings.recurseChain[settings.recurseChain.length - 1];
+          console.warn(scrapbook.lang("WarnCaptureCircular", [source, target]));
+          const response = Object.assign({}, registry, {
+            url: `urn:scrapbook:download:circular:url:${sourceUrl}`,
+          });
+          await callback(elem, response);
+          return;
+        }
+
+        // handle duplicated CSS
+        if (registry.isDuplicate) {
+          await callback(elem, registry);
+          return;
+        }
+
+        newFilename = registry.filename;
+        newUrl = registry.url;
       }
 
       // do the rewriting according to options
@@ -4048,7 +4070,7 @@
           break;
         }
         case "tidy": {
-          if (!isDynamicCss) {
+          if (!isDynamic) {
             charset = "UTF-8";
             if (refCss && !isCircular) {
               const cssRulesCssom = await this.getRulesFromCss({
@@ -4103,10 +4125,15 @@
       }
 
       // save result back
-      if (!elem || elem.nodeName.toLowerCase() == 'link') {
-        // imported or external CSS
-        // force UTF-8 for rewritten CSS
+      {
+        if (cssType === 'internal') {
+          await callback(elem, {cssText});
+          return;
+        }
 
+        // imported or external CSS
+        // Save as byte string when charset is unknown so that the user can
+        // convert the saved CSS file if the assumed charset is incorrect.
         const response = await capturer.invoke("downloadBlob", {
           blob: {
             __type__: "Blob",
@@ -4119,12 +4146,6 @@
           options,
         });
         response.url += scrapbook.splitUrlByAnchor(newUrl)[1];
-        await callback(elem, response);
-      } else {
-        // internal CSS
-        const response = {
-          cssText,
-        };
         await callback(elem, response);
       }
     }
