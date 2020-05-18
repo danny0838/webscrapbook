@@ -2827,6 +2827,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     console.error(ex);
     const err = `Unexpected error: ${ex.message}`;
     capturer.error(err);
+    return {error: {message: ex.message}};
   });
 
   browser.downloads.onCreated.addListener((downloadItem) => {
