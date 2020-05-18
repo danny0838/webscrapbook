@@ -275,7 +275,8 @@
 
   /**
    * @typedef {Object} fetchResult
-   * @property {string} url
+   * @property {string} url - The response URL (without hash).
+   * @property {boolean} redirected
    * @property {integer} status
    * @property {Object} headers
    * @property {Blob} blob
@@ -403,6 +404,7 @@
 
           return {
             url: sourceUrlMain,
+            redirected: false,
             status: 200,
             headers,
             blob,
@@ -413,6 +415,7 @@
         if (sourceUrlMain.startsWith("about:")) {
           return {
             url: sourceUrlMain,
+            redirected: false,
             status: 200,
             headers,
             blob: new Blob([], {type: 'text/html'}),
@@ -476,6 +479,7 @@
             if (headerOnly) {
               response = {
                 url: xhr.responseURL,
+                redirected: scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(xhr.responseURL),
                 status: xhr.status,
                 headers,
                 blob: null,
@@ -498,6 +502,7 @@
 
         return {
           url: xhr.responseURL,
+          redirected: scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(xhr.responseURL),
           status: xhr.status,
           headers,
           blob,
@@ -967,16 +972,12 @@
         options,
       });
 
-      // XHR response URL doesn't contain a hash
-      const redirectedUrl = fetchResponse.url;
-      const redirected = scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(redirectedUrl);
-
       let response;
       const doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
       if (doc) {
         response = await capturer.captureDocumentOrFile({
           doc,
-          docUrl: redirectedUrl + (redirected ? '' : sourceUrlHash),
+          docUrl: fetchResponse.url + (fetchResponse.redirected ? '' : sourceUrlHash),
           refUrl,
           title,
           settings,
@@ -984,7 +985,7 @@
         });
       } else {
         response = await capturer.captureFile({
-          url: redirectedUrl + (redirected ? '' : sourceUrlHash),
+          url: fetchResponse.url + (fetchResponse.redirected ? '' : sourceUrlHash),
           refUrl,
           title,
           charset: fetchResponse.headers.charset,
@@ -998,7 +999,7 @@
       }
 
       return Object.assign({}, response, {
-        url: response.url + (redirected ? '' : sourceUrlHash),
+        url: response.url + (fetchResponse.redirected ? '' : sourceUrlHash),
       });
     } catch (ex) {
       console.warn(ex);
@@ -1620,10 +1621,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         options,
       });
 
-      // XHR response URL doesn't contain a hash
-      const redirectedUrl = fetchResponse.url;
-      const redirected = scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(redirectedUrl);
-
       let response;
       if (role || frameIsMain) {
         const token = capturer.getRegisterToken(sourceUrlMain, role);
@@ -1632,7 +1629,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         const previousRegistry = urlToFilenameMap.get(token);
         if (previousRegistry) {
           return Object.assign({}, previousRegistry, {
-            url: previousRegistry.url + (redirected ? '' : sourceUrlHash),
+            url: previousRegistry.url + (fetchResponse.redirected ? '' : sourceUrlHash),
             isDuplicate: true,
           });
         }
@@ -1659,7 +1656,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           documentFileName = newDocumentName + "." + getExtFromMime(mime);
         } else {
           documentFileName = getDocumentFileName({
-            url: redirectedUrl,
+            url: fetchResponse.url,
             mime,
             headers: fetchResponse.headers,
             settings,
@@ -1674,12 +1671,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         // update registry
         urlToFilenameMap.set(token, response);
         Object.assign(files.get(documentFileName.toLowerCase()), {
-          url: redirectedUrl,
+          url: fetchResponse.url,
           role,
         });
       } else {
         let documentFileName = getDocumentFileName({
-          url: redirectedUrl,
+          url: fetchResponse.url,
           mime,
           headers: fetchResponse.headers,
           settings,
@@ -1690,7 +1687,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       }
 
       return Object.assign({}, response, {
-        url: response.url + (redirected ? '' : sourceUrlHash),
+        url: response.url + (fetchResponse.redirected ? '' : sourceUrlHash),
       });
     };
 
@@ -1794,25 +1791,21 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         options,
       });
 
-      // XHR response URL doesn't contain a hash
-      const redirectedUrl = fetchResponse.url;
-      const redirected = scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(redirectedUrl);
-
       let response;
       if (role) {
-        const token = capturer.getRegisterToken(redirectedUrl, role);
+        const token = capturer.getRegisterToken(fetchResponse.url, role);
 
         // if a previous registry exists, return it
         const previousRegistry = urlToFilenameMap.get(token);
         if (previousRegistry) {
           return Object.assign({}, previousRegistry, {
-            url: previousRegistry.url + (redirected ? '' : sourceUrlHash),
+            url: previousRegistry.url + (fetchResponse.redirected ? '' : sourceUrlHash),
             isDuplicate: true,
           });
         }
 
         let filename = getFilename({
-          url: redirectedUrl,
+          url: fetchResponse.url,
           headers: fetchResponse.headers,
           settings,
           options,
@@ -1825,12 +1818,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         // update registry
         urlToFilenameMap.set(token, response);
         Object.assign(files.get(filename.toLowerCase()), {
-          url: redirectedUrl,
+          url: fetchResponse.url,
           role,
         });
       } else {
         let filename = getFilename({
-          url: redirectedUrl,
+          url: fetchResponse.url,
           headers: fetchResponse.headers,
           settings,
           options,
@@ -1840,7 +1833,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       }
 
       return Object.assign({}, response, {
-        url: response.url + (redirected ? '' : sourceUrlHash),
+        url: response.url + (fetchResponse.redirected ? '' : sourceUrlHash),
       });
     };
 
