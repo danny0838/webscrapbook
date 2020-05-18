@@ -1007,9 +1007,9 @@
                     isDebug && console.debug("captureFrameCallback", response);
                     handler: {
                       // use srcdoc for data URL document for iframe
-                      if (options["capture.saveDataUriAsSrcdoc"] &&
-                          response.url.startsWith('data:') &&
-                          frame.nodeName.toLowerCase() === 'iframe') {
+                      if (response.url.startsWith('data:') &&
+                          frame.nodeName.toLowerCase() === 'iframe' &&
+                          options["capture.saveDataUriAsSrcdoc"]) {
                         const file = scrapbook.dataUriToFile(response.url);
                         const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(file.type);
                         if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(mime)) {
