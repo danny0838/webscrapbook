@@ -36,7 +36,14 @@
    * Return frameId of the frame of this content script.
    */
   window.addEventListener("message", async (event) => {
-    if (event.data !== browser.runtime.getURL('')) { return; }
+    try {
+      if (event.data !== browser.runtime.getURL('')) { 
+        throw new Error('Not extension context.');
+      }
+    } catch (ex) {
+      // browser.runtime.getURL() may trigger an error if extension is reloaded
+      return;
+    }
 
     event.ports[0].postMessage({frameId: core.frameId});
   }, false);
