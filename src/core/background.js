@@ -517,7 +517,7 @@
       return Promise.resolve(result)
         .catch((ex) => {
           console.error(ex);
-          return {error: {message: ex.message}};
+          throw ex;
         });
     });
   }

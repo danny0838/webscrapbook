@@ -32,7 +32,7 @@
    */
   scrapbook.addMessageListener = function (filter, errorHandler = ex => {
     console.error(ex);
-    return {error: {message: ex.message}};
+    throw ex;
   }) {
     const listener = (message, sender) => {
       if (filter && !filter(message, sender)) { return; }
