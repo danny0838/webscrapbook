@@ -160,7 +160,7 @@
       const {url, options} = params;
       return capturer.invoke("downloadFile", params)
         .catch((ex) => {
-          console.warn(ex);
+          console.error(ex);
           warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
           return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
         });
@@ -347,7 +347,7 @@
                   settings,
                 });
               } catch (ex) {
-                console.warn(ex);
+                console.error(ex);
                 warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
                 return null;
               }
@@ -966,7 +966,7 @@
                   };
 
                   const captureFrameErrorHandler = async (ex) => {
-                    console.warn(ex);
+                    console.error(ex);
                     warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
                     // don't rewrite srcdoc if error
                   };
@@ -1055,7 +1055,7 @@
                 };
 
                 const captureFrameErrorHandler = async (ex) => {
-                  console.warn(ex);
+                  console.error(ex);
                   warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
                   return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
                 };
@@ -3314,7 +3314,7 @@
               });
               rules = await this.getRulesFromCssText(response.text);
             } catch (ex) {
-              console.warn(ex);
+              console.error(ex);
             }
           }
         }
@@ -3692,7 +3692,7 @@
           settings,
           options,
         }).catch((ex) => {
-          console.warn(ex);
+          console.error(ex);
           this.warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
           return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
         });
@@ -3988,7 +3988,7 @@
             options,
           });
         } catch (ex) {
-          console.warn(ex);
+          console.error(ex);
           this.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
           response = {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
           await callback(elem, response);
