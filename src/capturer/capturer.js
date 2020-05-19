@@ -2345,34 +2345,28 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const {url: sourceUrl, refUrl, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-    try {
-      const fetchResponse = await capturer.fetch({
-        url: sourceUrlMain,
-        refUrl,
-        headerOnly: true,
-        options,
-        settings,
-      });
-      const headers = fetchResponse.headers;
-      if (headers.filename) {
-        let [, ext] = scrapbook.filenameParts(headers.filename);
+    const fetchResponse = await capturer.fetch({
+      url: sourceUrlMain,
+      refUrl,
+      headerOnly: true,
+      options,
+      settings,
+    });
+    const headers = fetchResponse.headers;
+    if (headers.filename) {
+      let [, ext] = scrapbook.filenameParts(headers.filename);
 
-        if (!ext && headers.contentType) {
-          ext = Mime.extension(headers.contentType);
-        }
-
-        return ext;
-      } else if (headers.contentType) {
-        return Mime.extension(headers.contentType);
-      } else {
-        const filename = scrapbook.urlToFilename(sourceUrl);
-        const [, ext] = scrapbook.filenameParts(filename);
-        return ext;
+      if (!ext && headers.contentType) {
+        ext = Mime.extension(headers.contentType);
       }
-    } catch (ex) {
-      console.warn(ex);
-      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return null;
+
+      return ext;
+    } else if (headers.contentType) {
+      return Mime.extension(headers.contentType);
+    } else {
+      const filename = scrapbook.urlToFilename(sourceUrl);
+      const [, ext] = scrapbook.filenameParts(filename);
+      return ext;
     }
   };
 
