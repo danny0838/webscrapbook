@@ -2392,37 +2392,30 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
-    try {
-      // fail out if sourceUrl is empty.
-      if (!sourceUrlMain) {
-        throw new Error(`Source URL is empty.`);
-      }
-
-      // fail out if sourceUrl is relative,
-      // or it will be treated as relative to this extension page.
-      if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
-        throw new Error(`Requires an absolute URL.`);
-      }
-
-      const fetchResponse = await capturer.fetch({
-        url: sourceUrlMain,
-        refUrl,
-        settings,
-        options,
-      });
-
-      const {text, charset} = await scrapbook.parseCssFile(fetchResponse.blob, fetchResponse.headers.charset);
-      return {
-        url: sourceUrl,
-        text,
-        charset,
-      };
-    } catch (ex) {
-      // something wrong for the XMLHttpRequest
-      console.warn(ex);
-      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+    // fail out if sourceUrl is empty.
+    if (!sourceUrlMain) {
+      throw new Error(`Source URL is empty.`);
     }
+
+    // fail out if sourceUrl is relative,
+    // or it will be treated as relative to this extension page.
+    if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+      throw new Error(`Requires an absolute URL.`);
+    }
+
+    const fetchResponse = await capturer.fetch({
+      url: sourceUrlMain,
+      refUrl,
+      settings,
+      options,
+    });
+
+    const {text, charset} = await scrapbook.parseCssFile(fetchResponse.blob, fetchResponse.headers.charset);
+    return {
+      url: sourceUrl,
+      text,
+      charset,
+    };
   };
 
   /**

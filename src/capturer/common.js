@@ -3093,6 +3093,14 @@
       this.resourceMap = ((options['capture.saveAs'] === 'singleHtml') && options['capture.mergeCssResources']) ? {} : null;
     }
 
+    warn(msg) {
+      return capturer.invoke("remoteMsg", {
+        msg,
+        type: 'warn',
+        settings: this.settings, // for missionId
+      });
+    }
+
     /**
      * Check whether the current status of document stylesheets can be resulted
      * from normal browser pick mechanism.
@@ -3280,14 +3288,17 @@
             rules = await this.getRulesFromCssText(css.ownerNode.textContent);
           } else {
             const {settings, options} = this;
-            const response = await capturer.invoke("fetchCss", {
-              url: url || css.href,
-              refUrl,
-              settings,
-              options,
-            });
-            if (!response.error) {
+
+            try {
+              const response = await capturer.invoke("fetchCss", {
+                url: url || css.href,
+                refUrl,
+                settings,
+                options,
+              });
               rules = await this.getRulesFromCssText(response.text);
+            } catch (ex) {
+              console.warn(ex);
             }
           }
         }
@@ -3948,14 +3959,18 @@
           sourceUrl = url;
         }
 
-        const response = await capturer.invoke("fetchCss", {
-          url: sourceUrl,
-          refUrl,
-          settings,
-          options,
-        });
-
-        if (response.error) {
+        let response;
+        try {
+          response = await capturer.invoke("fetchCss", {
+            url: sourceUrl,
+            refUrl,
+            settings,
+            options,
+          });
+        } catch (ex) {
+          console.warn(ex);
+          this.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+          response = {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
           await callback(elem, response);
           return;
         }
