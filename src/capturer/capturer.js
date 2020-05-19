@@ -644,6 +644,17 @@
   };
 
   /**
+   * @kind invokable
+   */
+  capturer.remoteMsg = async function ({msg, type}) {
+    if (['log', 'warn', 'error'].includes(type)) {
+      capturer[type](msg);
+      return true;
+    }
+    return false;
+  };
+
+  /**
    * @param {Object} params
    * @param {Array} params.tasks
    * @param {string} params.parentId - parent item ID for the captured items

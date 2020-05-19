@@ -149,6 +149,14 @@
     try {
       isDebug && console.debug("call: captureDocument");
 
+      const warn = async (msg) => {
+        return capturer.invoke("remoteMsg", {
+          msg,
+          type: 'warn',
+          settings, // for missionId
+        });
+      };
+
       // Map cloned nodes and the original for later reference
       // since cloned nodes may lose some information,
       // e.g. cloned iframes has no content, cloned canvas has no image,
@@ -942,6 +950,12 @@
                       return response;
                     };
 
+                    const captureFrameErrorHandler = async (ex) => {
+                      console.warn(ex);
+                      warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+                      // don't rewrite srcdoc if error
+                    };
+
                     const frameSettings = JSON.parse(JSON.stringify(settings));
                     frameSettings.frameIsMain = false;
                     frameSettings.fullPage = true;
@@ -968,20 +982,21 @@
                           refUrl,
                           settings: frameSettings,
                           options: frameOptions,
-                        }).then(captureFrameCallback);
+                        }).then(captureFrameCallback).catch(captureFrameErrorHandler);
                       }
 
                       // frame document inaccessible (headless capture):
                       // contentType of srcdoc is always text/html
-                      sourceUrl = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute("srcdoc"))}`;
-                      const doc = await scrapbook.readFileAsDocument(scrapbook.dataUriToFile(sourceUrl));
+                      sourceUrl = 'about:srcdoc';
+                      const url = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute("srcdoc"))}`;
+                      const doc = await scrapbook.readFileAsDocument(scrapbook.dataUriToFile(url));
                       return capturer.captureDocument({
                         doc,
                         docUrl: 'about:srcdoc',
                         baseUrl,
                         settings: frameSettings,
                         options: frameOptions,
-                      }).then(captureFrameCallback);
+                      }).then(captureFrameCallback).catch(captureFrameErrorHandler);
                     });
                   }
                   break;
@@ -1024,6 +1039,12 @@
                     return response;
                   };
 
+                  const captureFrameErrorHandler = async (ex) => {
+                    console.warn(ex);
+                    warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+                    return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+                  };
+
                   const frameSettings = JSON.parse(JSON.stringify(settings));
                   frameSettings.frameIsMain = false;
                   frameSettings.fullPage = true;
@@ -1043,12 +1064,13 @@
                     // frame document accessible:
                     // capture the content document directly
                     if (frameDoc) {
+                      sourceUrl = sourceUrl || frameDoc.URL;
                       return capturer.captureDocumentOrFile({
                         doc: frameDoc,
                         refUrl,
                         settings: frameSettings,
                         options,
-                      }).then(captureFrameCallback);
+                      }).catch(captureFrameErrorHandler).then(captureFrameCallback);
                     }
 
                     let frameWindow;
@@ -1061,11 +1083,12 @@
                     // frame window accessible:
                     // capture the content document through messaging if viable
                     if (frameWindow) {
+                      sourceUrl = frame.src;
                       const response = await capturer.invoke("captureDocumentOrFile", {
                         refUrl,
                         settings: frameSettings,
                         options,
-                      }, {frameWindow});
+                      }, {frameWindow}).catch(captureFrameErrorHandler);
                       // undefined for data URL, sandboxed blob URL, etc.
                       if (response) {
                         return captureFrameCallback(response);
@@ -1079,8 +1102,9 @@
                     if (frame.nodeName.toLowerCase() === 'iframe' &&
                         frame.hasAttribute("srcdoc")) {
                       // contentType of srcdoc is always text/html
-                      sourceUrl = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute("srcdoc"))}`;
-                      const doc = await scrapbook.readFileAsDocument(scrapbook.dataUriToFile(sourceUrl));
+                      sourceUrl = 'about:srcdoc';
+                      const url = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute("srcdoc"))}`;
+                      const doc = await scrapbook.readFileAsDocument(scrapbook.dataUriToFile(url));
 
                       return capturer.captureDocument({
                         doc,
@@ -1088,7 +1112,7 @@
                         baseUrl,
                         settings: frameSettings,
                         options,
-                      }).then(captureFrameCallback);
+                      }).catch(captureFrameErrorHandler).then(captureFrameCallback);
                     }
 
                     // if the frame src is not absolute,
@@ -1129,7 +1153,7 @@
                       refUrl,
                       settings: frameSettings,
                       options: frameOptions,
-                    }).then(captureFrameCallback);
+                    }).catch(captureFrameErrorHandler).then(captureFrameCallback);
                   });
                   break;
                 }
