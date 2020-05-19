@@ -156,6 +156,16 @@
       });
     };
 
+    const downloadFile = async (params) => {
+      const {url, options} = params;
+      return capturer.invoke("downloadFile", params)
+        .catch((ex) => {
+          console.warn(ex);
+          warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
+          return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
+        });
+    };
+
     // Map cloned nodes and the original for later reference
     // since cloned nodes may lose some information,
     // e.g. cloned iframes has no content, cloned canvas has no image,
@@ -343,7 +353,7 @@
               }
               if (!capturer.downLinkExtFilter(ext, options)) { return null; }
 
-              const response = await capturer.invoke("downloadFile", {
+              const response = await downloadFile({
                 url,
                 refUrl,
                 settings,
@@ -364,7 +374,7 @@
             if (!capturer.downLinkExtFilter(ext, options)) { break; }
 
             tasks[tasks.length] = halter.then(async () => {
-              const response = await capturer.invoke("downloadFile", {
+              const response = await downloadFile({
                 url,
                 refUrl,
                 settings,
@@ -413,7 +423,7 @@
           }
 
           tasks[tasks.length] = halter.then(async () => {
-            const response = await capturer.invoke("downloadFile", {
+            const response = await downloadFile({
               url,
               refUrl,
               settings,
@@ -524,7 +534,7 @@
               default:
                 if (elem.hasAttribute("href")) {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("href"),
                       refUrl,
                       settings,
@@ -536,7 +546,7 @@
                 }
                 if (elem.hasAttribute("xlink:href")) {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("xlink:href"),
                       refUrl,
                       settings,
@@ -751,7 +761,7 @@
                     useFavIcon = true;
                   }
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("href"),
                       refUrl,
                       settings,
@@ -852,7 +862,7 @@
               default:
                 if (elem.hasAttribute("src")) {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
                       settings,
@@ -917,7 +927,7 @@
                 case "save":
                 default:
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: rewriteUrl,
                       refUrl,
                       settings,
@@ -1211,7 +1221,7 @@
                     const url = elemOrig.currentSrc;
                     captureRewriteAttr(elem, "srcset", null);
                     tasks[tasks.length] = halter.then(async () => {
-                      const response = await capturer.invoke("downloadFile", {
+                      const response = await downloadFile({
                         url,
                         refUrl,
                         settings,
@@ -1228,7 +1238,7 @@
               default:
                 if (elem.hasAttribute("src")) {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
                       settings,
@@ -1242,7 +1252,7 @@
                 if (elem.hasAttribute("srcset")) {
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
-                      return (await capturer.invoke("downloadFile", {
+                      return (await downloadFile({
                         url,
                         refUrl,
                         settings,
@@ -1304,7 +1314,7 @@
                   tasks[tasks.length] = halter.then(async () => {
                     const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
                       const rewriteUrl = capturer.resolveRelativeUrl(url, refUrl);
-                      return (await capturer.invoke("downloadFile", {
+                      return (await downloadFile({
                         url: rewriteUrl,
                         refUrl,
                         settings,
@@ -1359,7 +1369,7 @@
                       captureRemoveNode(elem);
                     }, this);
                     tasks[tasks.length] = halter.then(async () => {
-                      const response = await capturer.invoke("downloadFile", {
+                      const response = await downloadFile({
                         url,
                         refUrl,
                         settings,
@@ -1372,7 +1382,7 @@
 
                   Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
                     tasks[tasks.length] = halter.then(async () => {
-                      const response = await capturer.invoke("downloadFile", {
+                      const response = await downloadFile({
                         url: elem.getAttribute("src"),
                         refUrl,
                         settings,
@@ -1390,7 +1400,7 @@
               default:
                 if (elem.hasAttribute("src")) {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
                       settings,
@@ -1403,7 +1413,7 @@
 
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
                       settings,
@@ -1465,7 +1475,7 @@
                 if (!isHeadless) {
                   if (elem.hasAttribute("poster")) {
                     tasks[tasks.length] = halter.then(async () => {
-                      const response = await capturer.invoke("downloadFile", {
+                      const response = await downloadFile({
                         url: elem.getAttribute("poster"),
                         refUrl,
                         settings,
@@ -1482,7 +1492,7 @@
                       captureRemoveNode(elem);
                     }, this);
                     tasks[tasks.length] = halter.then(async () => {
-                      const response = await capturer.invoke("downloadFile", {
+                      const response = await downloadFile({
                         url,
                         refUrl,
                         settings,
@@ -1495,7 +1505,7 @@
 
                   Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
                     tasks[tasks.length] = halter.then(async () => {
-                      const response = await capturer.invoke("downloadFile", {
+                      const response = await downloadFile({
                         url: elem.getAttribute("src"),
                         refUrl,
                         settings,
@@ -1513,7 +1523,7 @@
               default:
                 if (elem.hasAttribute("poster")) {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("poster"),
                       refUrl,
                       settings,
@@ -1526,7 +1536,7 @@
 
                 if (elem.hasAttribute("src")) {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
                       settings,
@@ -1539,7 +1549,7 @@
 
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
                       settings,
@@ -1580,7 +1590,7 @@
               default:
                 if (elem.hasAttribute("src")) {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
                       settings,
@@ -1620,7 +1630,7 @@
               default:
                 if (elem.hasAttribute("data")) {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("data"),
                       refUrl,
                       settings,
@@ -1667,7 +1677,7 @@
               default:
                 if (elem.hasAttribute("code")) {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("code"),
                       refUrl,
                       settings,
@@ -1680,7 +1690,7 @@
 
                 if (elem.hasAttribute("archive")) {
                   tasks[tasks.length] = halter.then(async () => {
-                    const response = await capturer.invoke("downloadFile", {
+                    const response = await downloadFile({
                       url: elem.getAttribute("archive"),
                       refUrl,
                       settings,
@@ -1756,7 +1766,7 @@
                   case "save":
                   default:
                     tasks[tasks.length] = halter.then(async () => {
-                      const response = await capturer.invoke("downloadFile", {
+                      const response = await downloadFile({
                         url: elem.getAttribute("src"),
                         refUrl,
                         settings,
@@ -2357,7 +2367,7 @@
               case "save":
               default: {
                 icon = favIconUrl = settings.favIconUrl;
-                const response = await capturer.invoke("downloadFile", {
+                const response = await downloadFile({
                   url: settings.favIconUrl,
                   refUrl,
                   settings,
@@ -3681,6 +3691,10 @@
           refUrl,
           settings,
           options,
+        }).catch((ex) => {
+          console.warn(ex);
+          this.warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
+          return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
         });
         return response.url;
       };

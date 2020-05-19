@@ -2264,71 +2264,65 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
-    try {
-      // fail out if sourceUrl is empty.
-      if (!sourceUrlMain) {
-        throw new Error(`Source URL is empty.`);
-      }
-
-      // fail out if sourceUrl is relative,
-      // or it will be treated as relative to this extension page.
-      if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
-        throw new Error(`Requires an absolute URL.`);
-      }
-
-      // special handling for data URI
-      // if not saved as file, save as-is regardless of its MIME type
-      if (sourceUrlMain.startsWith("data:")) {
-        if (!(options["capture.saveDataUriAsFile"] && !["singleHtml"].includes(options["capture.saveAs"]))) {
-          return {url: sourceUrlMain};
-        }
-      }
-
-      // fetch first to ensure refUrl be handled
-      const fetchResponse = await capturer.fetch({
-        url: sourceUrlMain,
-        refUrl,
-        settings,
-        options,
-      });
-
-      const registry = await capturer.registerFile({
-        url: sourceUrl,
-        role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined : 'resource',
-        settings,
-        options,
-      });
-
-      if (registry.isDuplicate) {
-        return registry;
-      }
-
-      let blob = fetchResponse.blob;
-      const {parameters: {charset}} = scrapbook.parseHeaderContentType(fetchResponse.headers.contentType);
-      if (charset) {
-        blob = new Blob([blob], {type: `${blob.type};charset=${charset}`});
-      }
-
-      const response = await capturer.downloadBlob({
-        blob,
-        filename: registry.filename,
-        sourceUrl,
-        settings,
-        options,
-      });
-
-      if (!response.url || response.url.startsWith('data:')) {
-        return response;
-      }
-
-      return Object.assign({}, response, {
-        url: response.url + scrapbook.splitUrlByAnchor(registry.url)[1],
-      });
-    } catch (ex) {
-      console.warn(ex);
-      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
-      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+    // fail out if sourceUrl is empty.
+    if (!sourceUrlMain) {
+      throw new Error(`Source URL is empty.`);
     }
+
+    // fail out if sourceUrl is relative,
+    // or it will be treated as relative to this extension page.
+    if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+      throw new Error(`Requires an absolute URL.`);
+    }
+
+    // special handling for data URI
+    // if not saved as file, save as-is regardless of its MIME type
+    if (sourceUrlMain.startsWith("data:")) {
+      if (!(options["capture.saveDataUriAsFile"] && !["singleHtml"].includes(options["capture.saveAs"]))) {
+        return {url: sourceUrlMain};
+      }
+    }
+
+    // fetch first to ensure refUrl be handled
+    const fetchResponse = await capturer.fetch({
+      url: sourceUrlMain,
+      refUrl,
+      settings,
+      options,
+    });
+
+    const registry = await capturer.registerFile({
+      url: sourceUrl,
+      role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined : 'resource',
+      settings,
+      options,
+    });
+
+    if (registry.isDuplicate) {
+      return registry;
+    }
+
+    let blob = fetchResponse.blob;
+    const {parameters: {charset}} = scrapbook.parseHeaderContentType(fetchResponse.headers.contentType);
+    if (charset) {
+      blob = new Blob([blob], {type: `${blob.type};charset=${charset}`});
+    }
+
+    const response = await capturer.downloadBlob({
+      blob,
+      filename: registry.filename,
+      sourceUrl,
+      settings,
+      options,
+    });
+
+    if (!response.url || response.url.startsWith('data:')) {
+      return response;
+    }
+
+    return Object.assign({}, response, {
+      url: response.url + scrapbook.splitUrlByAnchor(registry.url)[1],
+    });
   };
 
   /**
