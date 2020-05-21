@@ -330,38 +330,11 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               if (elem.hasAttribute("src")) {
                 elem.setAttribute("src", rewriteUrl(elem.getAttribute("src"), refUrl));
 
-                // External scripts are not allowed by extension CSP, retrieve and 
-                // convert them into blob URLs as a shim.
-                if (!elem.src.startsWith('blob:') && viewer.hasCsp) {
-                  tasks[tasks.length] = 
-                  scrapbook.xhr({
-                    url: elem.src,
-                    responseType: 'blob',
-                  }).then((xhr) => {
-                    return xhr.response;
-                  }).then((blob) => {
-                    if (!blob) { return; }
-                    elem.src = URL.createObjectURL(blob); 
-                  }).catch((ex) => {
-                    console.error(ex);
-                  });
-                }
-
                 // In Chromium, "blob:" is still allowed even if it's not set in the
                 // content_security_policy, and thus offensive scripts could run.
                 // Replace the src with a dummy URL so that scripts are never loaded.
-                if (elem.src.startsWith('blob:') && !viewer.hasCsp) {
+                if (elem.src.startsWith('blob:')) {
                   elem.setAttribute("src", "blob:");
-                }
-              } else {
-                // Inline scripts are not allowed by extension CSP, convert them into
-                // blob URLs as a shim.
-                if (viewer.hasCsp) {
-                  const text = elem.textContent;
-                  if (text) {
-                    elem.src = URL.createObjectURL(new Blob([text], {type: "application/javascript"}));
-                    elem.textContent = "";
-                  }
                 }
               }
               break;
@@ -489,24 +462,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                   // In Firefox < 53, an error could be thrown here.
                   // The modification still take effect, though.
                 }
-
-                // External resources are not allowed by extension CSP, retrieve and 
-                // convert them into blob URLs as a shim.
-                const url = elem.getAttribute("src");
-                if (!url.startsWith('blob:') && viewer.hasCsp) {
-                  tasks[tasks.length] = 
-                  scrapbook.xhr({
-                    url,
-                    responseType: 'blob',
-                  }).then((xhr) => {
-                    return xhr.response;
-                  }).then((blob) => {
-                    if (!blob) { return; }
-                    elem.setAttribute("src", URL.createObjectURL(blob));
-                  }).catch((ex) => {
-                    console.error(ex);
-                  });
-                }
               }
               break;
             }
@@ -518,24 +473,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                 } catch (ex) {
                   // In Firefox < 53, an error could be thrown here.
                   // The modification still take effect, though.
-                }
-
-                // External resources are not allowed by extension CSP, retrieve and 
-                // convert them into blob URLs as a shim.
-                const url = elem.getAttribute("data");
-                if (!url.startsWith('blob:') && viewer.hasCsp) {
-                  tasks[tasks.length] = 
-                  scrapbook.xhr({
-                    url,
-                    responseType: 'blob',
-                  }).then((xhr) => {
-                    return xhr.response;
-                  }).then((blob) => {
-                    if (!blob) { return; }
-                    elem.setAttribute("data", URL.createObjectURL(blob));
-                  }).catch((ex) => {
-                    console.error(ex);
-                  });
                 }
               }
               break;
@@ -549,24 +486,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                   // In Firefox < 53, an error could be thrown here.
                   // The modification still take effect, though.
                 }
-
-                // External resources are not allowed by extension CSP, retrieve and 
-                // convert them into blob URLs as a shim.
-                const url = elem.getAttribute("code");
-                if (!url.startsWith('blob:') && viewer.hasCsp) {
-                  tasks[tasks.length] = 
-                  scrapbook.xhr({
-                    url,
-                    responseType: 'blob',
-                  }).then((xhr) => {
-                    return xhr.response;
-                  }).then((blob) => {
-                    if (!blob) { return; }
-                    elem.setAttribute("code", URL.createObjectURL(blob));
-                  }).catch((ex) => {
-                    console.error(ex);
-                  });
-                }
               }
 
               if (elem.hasAttribute("archive")) {
@@ -575,24 +494,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
                 } catch (ex) {
                   // In Firefox < 53, an error could be thrown here.
                   // The modification still take effect, though.
-                }
-
-                // External resources are not allowed by extension CSP, retrieve and 
-                // convert them into blob URLs as a shim.
-                const url = elem.getAttribute("archive");
-                if (!url.startsWith('blob:') && viewer.hasCsp) {
-                  tasks[tasks.length] = 
-                  scrapbook.xhr({
-                    url,
-                    responseType: 'blob',
-                  }).then((xhr) => {
-                    return xhr.response;
-                  }).then((blob) => {
-                    if (!blob) { return; }
-                    elem.setAttribute("archive", URL.createObjectURL(blob));
-                  }).catch((ex) => {
-                    console.error(ex);
-                  });
                 }
               }
               break;
