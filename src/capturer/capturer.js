@@ -792,8 +792,7 @@
     (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
       if (error) {
         const source = `[${tabId}:${frameId}] ${url}`;
-        const err = scrapbook.lang("ErrorContentScriptExecute", [source, error]);
-        capturer.error(err);
+        capturer.warn(scrapbook.lang("ErrorContentScriptExecute", [source, error]));
       }
     });
 
@@ -1373,8 +1372,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
       if (error) {
         const source = `[${tabId}:${frameId}] ${url}`;
-        const err = scrapbook.lang("ErrorContentScriptExecute", [source, error]);
-        capturer.error(err);
+        capturer.warn(scrapbook.lang("ErrorContentScriptExecute", [source, error]));
       }
     });
 
