@@ -2577,6 +2577,7 @@
    * @param {Object} [params.requestHeaders]
    * @param {Object} [params.formData]
    * @param {function} [params.onreadystatechange]
+   * @param {boolean} [params.allowAnyStatus] - whether to allow non-2xx response
    */
   scrapbook.xhr = async function (params = {}) {
     return new Promise((resolve, reject) => {
@@ -2589,7 +2590,7 @@
       }
 
       xhr.onload = function (event) {
-        if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 0) {
+        if (params.allowAnyStatus || (xhr.status >= 200 && xhr.status < 300) || xhr.status == 0) {
           // we only care about real loading success
           resolve(xhr);
         } else {
