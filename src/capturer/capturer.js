@@ -964,7 +964,7 @@
     if (doc) {
       response = await capturer.captureDocumentOrFile({
         doc,
-        docUrl: fetchResponse.url + (fetchResponse.redirected ? '' : sourceUrlHash),
+        docUrl: fetchResponse.url + (fetchResponse.url.startsWith('data:') ? '' : sourceUrlHash),
         refUrl,
         title,
         settings,
@@ -972,7 +972,7 @@
       });
     } else {
       response = await capturer.captureFile({
-        url: fetchResponse.url + (fetchResponse.redirected ? '' : sourceUrlHash),
+        url: fetchResponse.url + (fetchResponse.url.startsWith('data:') ? '' : sourceUrlHash),
         refUrl,
         title,
         charset: fetchResponse.headers.charset,
@@ -981,13 +981,7 @@
       });
     }
 
-    if (!response.url || response.url.startsWith('data:')) {
-      return response;
-    }
-
-    return Object.assign({}, response, {
-      url: response.url + (fetchResponse.redirected ? '' : sourceUrlHash),
-    });
+    return response;
   };
 
   /**
@@ -1182,6 +1176,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
     isDebug && console.debug("call: captureFile", params);
 
     const {url: sourceUrl, refUrl, title, charset, settings, options} = params;
+    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
     if (settings.frameIsMain) {
@@ -1233,35 +1228,34 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         options,
       });
 
-      return await capturer.saveDocument({
-        sourceUrl,
-        documentFileName,
-        settings,
-        options,
-        data: {
-          title,
-          mime,
-          content,
-        },
-      }).then((response) => {
-        // special handling
-        if (options["capture.saveTo"] === 'memory') {
+      {
+        const response = await capturer.saveDocument({
+          sourceUrl,
+          documentFileName,
+          settings,
+          options,
+          data: {
+            title,
+            mime,
+            content,
+          },
+        });
+
+        // special handling for blob response
+        if (response.__type__ === 'Blob') {
           return response;
         }
 
-        return Object.assign(response, {
+        return Object.assign({}, response, {
           type: "file",
           charset: charset || undefined,
+          url: response.url + (response.url.startsWith('data:') ? '' : sourceUrlHash),
         });
-      });
+      }
     } else {
-      return {
-        timeId,
-        sourceUrl,
-        targetDir: response.targetDir,
-        filename: response.filename,
-        url: response.url,
-      };
+      return Object.assign({}, response, {
+        url: response.url + (response.url.startsWith('data:') ? '' : sourceUrlHash),
+      });
     }
   };
 
@@ -1520,6 +1514,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   };
 
   /**
+   * @typedef {Object} registerDocumentResponse
+   * @property {string} filename - The registered filename.
+   * @property {string} url - URL of the registered filename (without hash).
+   */
+
+  /**
    * Register a document filename uniquified for the specified docUrl and role.
    *
    * - If role is not provided, return a non-uniquified document filename
@@ -1534,7 +1534,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {boolean} params.settings.frameIsMain
    * @param {string} params.settings.documentName
    * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @return {Promise<registerDocumentResponse>}
    */
   capturer.registerDocument = async function (params) {
     const MIME_EXT_MAP = {
@@ -1593,7 +1593,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         const previousRegistry = urlToFilenameMap.get(token);
         if (previousRegistry) {
           return Object.assign({}, previousRegistry, {
-            url: previousRegistry.url + (fetchResponse.redirected ? '' : sourceUrlHash),
             isDuplicate: true,
           });
         }
@@ -1650,13 +1649,17 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         response = {filename: documentFileName, url: scrapbook.escapeFilename(documentFileName)};
       }
 
-      return Object.assign({}, response, {
-        url: response.url + (fetchResponse.redirected ? '' : sourceUrlHash),
-      });
+      return response;
     };
 
     return await registerDocument(params);
   };
+
+  /**
+   * @typedef {Object} registerFileResponse
+   * @property {string} filename - The registered filename.
+   * @property {string} url - URL of the registered filename (without hash).
+   */
 
   /**
    * Register a filename uniquified for the specifiied url and role.
@@ -1669,7 +1672,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {string} [params.role] - "resource", "css", "css-*" (dynamic)
    * @param {Object} params.settings
    * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @return {Promise<registerFileResponse>}
    */
   capturer.registerFile = async function (params) {
     const MIMES_NO_EXT_OK = new Set([
@@ -1763,7 +1766,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         const previousRegistry = urlToFilenameMap.get(token);
         if (previousRegistry) {
           return Object.assign({}, previousRegistry, {
-            url: previousRegistry.url + (fetchResponse.redirected ? '' : sourceUrlHash),
             isDuplicate: true,
           });
         }
@@ -1796,13 +1798,17 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         response = {filename, url: scrapbook.escapeFilename(filename)};
       }
 
-      return Object.assign({}, response, {
-        url: response.url + (fetchResponse.redirected ? '' : sourceUrlHash),
-      });
+      return response;
     };
 
     return await registerFile(params);
   };
+
+  /**
+   * @typedef {Object} saveDocumentResponse
+   * @property {string} filename - The saved filename.
+   * @property {string} url - URL of the saved filename (without hash).
+   */
 
   /**
    * @kind invokable
@@ -1817,13 +1823,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {string} params.sourceUrl - may include hash
    * @param {Object} params.settings
    * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @return {Promise<saveDocumentResponse>}
    */
   capturer.saveDocument = async function (params) {
     isDebug && console.debug("call: saveDocument", params);
 
     const {data, documentFileName, sourceUrl, settings, options} = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     // special handling for saving file as data URI
     if (options["capture.saveAs"] === "singleHtml") {
@@ -1851,14 +1856,14 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
     }
 
-    if (response.url.startsWith('data:')) {
-      return response;
-    }
-
-    return Object.assign({}, response, {
-      url: response.url + sourceUrlHash,
-    });
+    return response;
   };
+
+  /**
+   * @typedef {Object} saveMainDocumentResponse
+   * @property {string} filename - The saved filename.
+   * @property {string} url - URL of the saved filename (without hash).
+   */
 
   /**
    * @kind invokable
@@ -1873,7 +1878,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {string} params.documentFileName
    * @param {Object} params.settings
    * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @return {Promise<saveMainDocumentResponse>}
    */
   capturer.saveMainDocument = async function (params) {
     isDebug && console.debug("call: saveMainDocument", params);
@@ -1973,7 +1978,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           sourceUrl,
           targetDir,
           filename,
-          url: scrapbook.escapeFilename(documentFileName) + sourceUrlHash,
+          url: scrapbook.escapeFilename(documentFileName),
           favIconUrl: data.favIconUrl,
         };
       }
@@ -2035,7 +2040,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           sourceUrl,
           targetDir,
           filename,
-          url: scrapbook.escapeFilename(documentFileName) + sourceUrlHash,
+          url: scrapbook.escapeFilename(documentFileName),
           favIconUrl: data.favIconUrl,
         };
       }
@@ -2120,7 +2125,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           sourceUrl,
           targetDir,
           filename,
-          url: scrapbook.escapeFilename(documentFileName) + sourceUrlHash,
+          url: scrapbook.escapeFilename(documentFileName),
           favIconUrl: data.favIconUrl,
         };
       }
@@ -2241,12 +2246,18 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           sourceUrl,
           targetDir,
           filename: documentFileName,
-          url: scrapbook.escapeFilename(documentFileName) + sourceUrlHash,
+          url: scrapbook.escapeFilename(documentFileName),
           favIconUrl: data.favIconUrl,
         };
       }
     }
   };
+
+  /**
+   * @typedef {Object} downloadFileResponse
+   * @property {string} filename - The downloaded filename.
+   * @property {string} url - URL of the downloaded filename (without hash).
+   */
 
   /**
    * @kind invokable
@@ -2255,7 +2266,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} [params.refUrl] - the referrer URL
    * @param {Object} params.settings
    * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @return {Promise<downloadFileResponse>}
    */
   capturer.downloadFile = async function (params) {
     isDebug && console.debug("call: downloadFile", params);
@@ -2308,20 +2319,12 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       blob = new Blob([blob], {type: `${blob.type};charset=${charset}`});
     }
 
-    const response = await capturer.downloadBlob({
+    return await capturer.downloadBlob({
       blob,
       filename: registry.filename,
       sourceUrl,
       settings,
       options,
-    });
-
-    if (!response.url || response.url.startsWith('data:')) {
-      return response;
-    }
-
-    return Object.assign({}, response, {
-      url: response.url + scrapbook.splitUrlByAnchor(registry.url)[1],
     });
   };
 
@@ -2365,13 +2368,21 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   };
 
   /**
+   * @typedef {Object} fetchCssResponse
+   * @property {string} text - The CSS text .
+   * @property {string} charset - The CSS charset.
+   */
+
+  /**
+   * Fetch a remote CSS and resolve its charset and text.
+   *
    * @kind invokable
    * @param {Object} params
    * @param {string} params.url
    * @param {string} [params.refUrl]
    * @param {string} params.settings
    * @param {string} params.options
-   * @return {Promise<Object>}
+   * @return {Promise<fetchCssResponse>}
    */
   capturer.fetchCss = async function (params) {
     isDebug && console.debug("call: fetchCss", params);
@@ -2398,12 +2409,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       options,
     });
 
-    const {text, charset} = await scrapbook.parseCssFile(fetchResponse.blob, fetchResponse.headers.charset);
-    return {
-      url: sourceUrl,
-      text,
-      charset,
-    };
+    return await scrapbook.parseCssFile(fetchResponse.blob, fetchResponse.headers.charset);
   };
 
   /**
@@ -2411,6 +2417,12 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @property {string} __type__ - "Blob", "File"
    * @property {string} type
    * @property {string} data - byte string
+   */
+
+  /**
+   * @typedef {Object} downloadBlobResponse
+   * @property {string} filename - The downloaded filename.
+   * @property {string} url - URL of the downloaded filename (without hash).
    */
 
   /**
@@ -2422,7 +2434,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.sourceUrl
    * @param {Object} params.settings
    * @param {Object} params.options
-   * @return {Promise<Object>}
+   * @return {Promise<downloadBlobResponse>}
    */
   capturer.downloadBlob = async function (params) {
     isDebug && console.debug("call: downloadBlob", params);
@@ -2573,7 +2585,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   /**
    * @param {Object} params
    * @param {Blob} params.blob
-   * @return {Promise<{type: string, data: string}>}
+   * @return {Promise<blobObject>}
    */
   capturer.saveBlobInMemory = async function (params) {
     isDebug && console.debug("call: saveBlobInMemory", params);
@@ -2582,6 +2594,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
     // convert BLOB data to byte string so that it can be sent via messaging
     return {
+      __type__: 'Blob',
       type: blob.type,
       data: await scrapbook.readFileAsText(blob, false),
     };

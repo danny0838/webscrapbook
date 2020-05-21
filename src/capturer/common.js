@@ -156,9 +156,15 @@
       });
     };
 
+    // add hash and error handling
     const downloadFile = async (params) => {
       const {url, options} = params;
       return capturer.invoke("downloadFile", params)
+        .then(response => {
+          return Object.assign({}, response, {
+            url: response.url + (response.url.startsWith('data:') ? '' : scrapbook.splitUrlByAnchor(url)[1]),
+          });
+        })
         .catch((ex) => {
           console.error(ex);
           warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
@@ -2044,7 +2050,9 @@
 
     // if a previous registry exists, return it
     if (registry.isDuplicate) {
-      return registry;
+      return Object.assign({}, registry, {
+        url: registry.url + (registry.url.startsWith('data:') ? '' : docUrlHash),
+      });
     }
 
     const documentFileName = registry.filename;
@@ -2441,8 +2449,8 @@
       return match;
     });
 
-    return await capturer.invoke("saveDocument", {
-      sourceUrl: docUrl + docUrlHash,
+    const response = await capturer.invoke("saveDocument", {
+      sourceUrl: docUrl,
       documentFileName,
       settings,
       options,
@@ -2452,6 +2460,15 @@
         title: title || doc.title,
         favIconUrl,
       },
+    });
+
+    // special handling for blob response
+    if (response.__type__ === 'Blob') {
+      return response;
+    }
+
+    return Object.assign({}, response, {
+      url: response.url + (response.url.startsWith('data:') ? '' : docUrlHash),
     });
   };
 
@@ -3960,7 +3977,6 @@
       let cssRules;
       let charset;
       let newFilename = "";
-      let newUrl = "";
       let isCircular = false;
       let isDynamic = false;
 
@@ -4058,7 +4074,7 @@
       }
 
       // register the filename to save (for imported or external CSS)
-      // and store in newFilename and newUrl
+      // and store in newFilename
       registerFilename: {
         if (cssType === 'internal') {
           break registerFilename;
@@ -4087,21 +4103,21 @@
           const target = sourceUrl;
           const source = settings.recurseChain[settings.recurseChain.length - 1];
           console.warn(scrapbook.lang("WarnCaptureCircular", [source, target]));
-          const response = Object.assign({}, registry, {
+          await callback(elem, Object.assign({}, registry, {
             url: `urn:scrapbook:download:circular:url:${sourceUrl}`,
-          });
-          await callback(elem, response);
+          }));
           return;
         }
 
         // handle duplicated CSS
         if (registry.isDuplicate) {
-          await callback(elem, registry);
+          await callback(elem, Object.assign({}, registry, {
+            url: registry.url + scrapbook.splitUrlByAnchor(sourceUrl)[1],
+          }));
           return;
         }
 
         newFilename = registry.filename;
-        newUrl = registry.url;
       }
 
       // do the rewriting according to options
@@ -4192,8 +4208,10 @@
           settings,
           options,
         });
-        response.url += scrapbook.splitUrlByAnchor(newUrl)[1];
-        await callback(elem, response);
+
+        await callback(elem, Object.assign({}, response, {
+          url: response.url + scrapbook.splitUrlByAnchor(sourceUrl)[1],
+        }));
       }
     }
   };
