@@ -276,7 +276,6 @@
   /**
    * @typedef {Object} fetchResult
    * @property {string} url - The response URL (without hash).
-   * @property {boolean} redirected
    * @property {integer} status
    * @property {Object} headers
    * @property {Blob} blob
@@ -404,7 +403,6 @@
 
           return {
             url: sourceUrlMain,
-            redirected: false,
             status: 200,
             headers,
             blob,
@@ -415,7 +413,6 @@
         if (sourceUrlMain.startsWith("about:")) {
           return {
             url: sourceUrlMain,
-            redirected: false,
             status: 200,
             headers,
             blob: new Blob([], {type: 'text/html'}),
@@ -479,7 +476,6 @@
             if (headerOnly) {
               response = {
                 url: xhr.responseURL,
-                redirected: scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(xhr.responseURL),
                 status: xhr.status,
                 headers,
                 blob: null,
@@ -502,7 +498,6 @@
 
         return {
           url: xhr.responseURL,
-          redirected: scrapbook.normalizeUrl(sourceUrlMain) !== scrapbook.normalizeUrl(xhr.responseURL),
           status: xhr.status,
           headers,
           blob,
