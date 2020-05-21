@@ -344,19 +344,13 @@
             }
 
             tasks[tasks.length] = halter.then(async () => {
-              let ext;
-              try {
-                ext = await capturer.invoke("downLinkFetchHeader", {
-                  url,
-                  refUrl,
-                  options,
-                  settings,
-                });
-              } catch (ex) {
-                console.error(ex);
-                warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
-                return null;
-              }
+              const ext = await capturer.invoke("downLinkFetchHeader", {
+                url,
+                refUrl,
+                options,
+                settings,
+              });
+              if (ext === null) { return null; }
               if (!capturer.downLinkExtFilter(ext, options)) { return null; }
 
               const response = await downloadFile({

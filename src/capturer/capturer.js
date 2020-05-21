@@ -279,6 +279,7 @@
    * @property {integer} status
    * @property {Object} headers
    * @property {Blob} blob
+   * @property {string} error - The error message for the request.
    */
 
   /**
@@ -419,89 +420,111 @@
           };
         }
 
-        const xhr = await scrapbook.xhr({
-          url: sourceUrlMain,
-          responseType: 'blob',
-          requestHeaders: setReferrer({
-            headers: {},
-            refUrl,
-            targetUrl: sourceUrlMain,
-            options,
-          }),
-          onreadystatechange(xhr) {
-            if (xhr.readyState !== 2) { return; }
+        try {
+          const xhr = await scrapbook.xhr({
+            url: sourceUrlMain,
+            responseType: 'blob',
+            allowAnyStatus: true,
+            requestHeaders: setReferrer({
+              headers: {},
+              refUrl,
+              targetUrl: sourceUrlMain,
+              options,
+            }),
+            onreadystatechange(xhr) {
+              if (xhr.readyState !== 2) { return; }
 
-            // check for previous fetch if redirected
-            const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
-            if (responseUrlMain !== sourceUrlMain) {
-              const responseFetchToken = getFetchToken(responseUrlMain, fetchRole);
-              const responseFetchPrevious = fetchMap.get(responseFetchToken);
+              // check for previous fetch if redirected
+              const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
+              if (responseUrlMain !== sourceUrlMain) {
+                const responseFetchToken = getFetchToken(responseUrlMain, fetchRole);
+                const responseFetchPrevious = fetchMap.get(responseFetchToken);
 
-              // a fetch to the redirected URL exists, abort the request and return it
-              if (responseFetchPrevious) {
-                response = responseFetchPrevious;
+                // a fetch to the redirected URL exists, abort the request and return it
+                if (responseFetchPrevious) {
+                  response = responseFetchPrevious;
+                  xhr.abort();
+                  return;
+                }
+
+                // otherwise, map the redirected URL to the same fetch promise
+                fetchMap.set(responseFetchToken, fetchCurrent);
+                if (!headerOnly) {
+                  const responseFetchToken = getFetchToken(responseUrlMain, 'head');
+                  fetchMap.set(responseFetchToken, fetchCurrent);
+                }
+              }
+
+              // get headers
+              if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+                const headerContentType = xhr.getResponseHeader("Content-Type");
+                if (headerContentType) {
+                  const contentType = scrapbook.parseHeaderContentType(headerContentType);
+                  headers.contentType = contentType.type;
+                  headers.charset = contentType.parameters.charset;
+                }
+                const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
+                if (headerContentDisposition) {
+                  const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
+                  headers.isAttachment = (contentDisposition.type === "attachment");
+                  headers.filename = contentDisposition.parameters.filename;
+                }
+                const headerContentLength = xhr.getResponseHeader("Content-Length");
+                if (headerContentLength) {
+                  headers.contentLength = parseInt(headerContentLength, 10);
+                }
+              }
+
+              // skip loading body for a headerOnly fetch
+              if (headerOnly) {
+                response = {
+                  url: xhr.responseURL,
+                  status: xhr.status,
+                  headers,
+                  blob: null,
+                };
+
+                if (!(xhr.status >= 200 && xhr.status < 300)) {
+                  response.error = `${xhr.status} ${xhr.statusText}`;
+                }
+
                 xhr.abort();
                 return;
               }
+            },
+          });
 
-              // otherwise, map the redirected URL to the same fetch promise
-              fetchMap.set(responseFetchToken, fetchCurrent);
-              if (!headerOnly) {
-                const responseFetchToken = getFetchToken(responseUrlMain, 'head');
-                fetchMap.set(responseFetchToken, fetchCurrent);
-              }
-            }
+          // xhr is resolved to undefined when aborted.
+          if (!xhr && response) {
+            return response;
+          }
 
-            // get headers
-            if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
-              const headerContentType = xhr.getResponseHeader("Content-Type");
-              if (headerContentType) {
-                const contentType = scrapbook.parseHeaderContentType(headerContentType);
-                headers.contentType = contentType.type;
-                headers.charset = contentType.parameters.charset;
-              }
-              const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-              if (headerContentDisposition) {
-                const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-                headers.isAttachment = (contentDisposition.type === "attachment");
-                headers.filename = contentDisposition.parameters.filename;
-              }
-              const headerContentLength = xhr.getResponseHeader("Content-Length");
-              if (headerContentLength) {
-                headers.contentLength = parseInt(headerContentLength, 10);
-              }
-            }
+          let blob = xhr.response;
+          if (capturer.captureInfo.get(timeId).useDiskCache) {
+            blob = await setCache(timeId, fetchToken, blob);
+          }
 
-            // skip loading body for a headerOnly fetch
-            if (headerOnly) {
-              response = {
-                url: xhr.responseURL,
-                status: xhr.status,
-                headers,
-                blob: null,
-              };
-              xhr.abort();
-              return;
-            }
-          },
-        });
+          response = {
+            url: xhr.responseURL,
+            status: xhr.status,
+            headers,
+            blob,
+          };
 
-        // xhr is resolved to undefined when aborted.
-        if (!xhr && response) {
+          if (!(xhr.status >= 200 && xhr.status < 300)) {
+            response.error = `${xhr.status} ${xhr.statusText}`;
+          }
+
           return response;
+        } catch (ex) {
+          return {
+            url: sourceUrlMain,
+            status: 0,
+            headers,
+            blob: null,
+            error: ex.message,
+          };
         }
-
-        let blob = xhr.response;
-        if (capturer.captureInfo.get(timeId).useDiskCache) {
-          blob = await setCache(timeId, fetchToken, blob);
-        }
-
-        return {
-          url: xhr.responseURL,
-          status: xhr.status,
-          headers,
-          blob,
-        };
       })().then(deferred.resolve, deferred.reject);
 
       fetchMap.set(fetchToken, fetchCurrent);
@@ -954,6 +977,10 @@
       options,
     });
 
+    if (fetchResponse.error) {
+      throw new Error(fetchResponse.error);
+    }
+
     let response;
     const doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
     if (doc) {
@@ -1008,6 +1035,10 @@
           options,
         });
 
+        if (fetchResponse.error) {
+          throw new Error(fetchResponse.error);
+        }
+
         const doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
 
         // specified sourceUrl may not be a document, maybe a malformed xhtml?
@@ -1043,6 +1074,11 @@
           settings,
           options,
         });
+
+        if (fetchResponse.error) {
+          throw new Error(fetchResponse.error);
+        }
+
         favIconUrl = await scrapbook.readFileAsDataURL(fetchResponse.blob);
       } catch (ex) {
         console.error(ex);
@@ -2297,6 +2333,10 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       options,
     });
 
+    if (fetchResponse.error) {
+      throw new Error(fetchResponse.error);
+    }
+
     const registry = await capturer.registerFile({
       url: sourceUrl,
       role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined : 'resource',
@@ -2403,6 +2443,10 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       settings,
       options,
     });
+
+    if (fetchResponse.error) {
+      throw new Error(fetchResponse.error);
+    }
 
     return await scrapbook.parseCssFile(fetchResponse.blob, fetchResponse.headers.charset);
   };
