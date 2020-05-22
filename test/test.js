@@ -122,7 +122,7 @@ async function test_capture_html() {
   assert(zip);
   var topdir = Object.keys(zip.files)[0];
   assert(zip.files[topdir].dir);
-  assert(/^\d{17}\/$/.test(topdir));
+  assert(topdir.match(/^\d{17}\/$/));
 
   var rdfFile = zip.file(topdir + 'index.rdf');
   assert(rdfFile);
@@ -1478,7 +1478,7 @@ async function test_capture_bookmark() {
 
   var html = doc.documentElement;
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_bookmark/index.html`);
-  assert(/^\d{17}$/.test(html.getAttribute('data-scrapbook-create')));
+  assert(html.getAttribute('data-scrapbook-create').match(/^\d{17}$/));
   assert(html.getAttribute('data-scrapbook-type') === 'bookmark');
 
   assert(doc.querySelector(`meta[http-equiv="refresh"][content="0;url=${localhost}/capture_bookmark/index.html"]`));
@@ -1511,7 +1511,7 @@ async function test_capture_frame() {
 
   // frame1.html
   var frame = frames[0];
-  assert(/^index_\d+\.html$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1525,7 +1525,7 @@ async function test_capture_frame() {
 
   // frame2.xhtml
   var frame = frames[1];
-  assert(/^index_\d+\.xhtml$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.xhtml$/));
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "application/xhtml+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1534,7 +1534,7 @@ async function test_capture_frame() {
 
   // frame3.svg
   var frame = frames[2];
-  assert(/^index_\d+\.svg$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.svg$/));
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1639,7 +1639,7 @@ async function test_capture_frame2() {
 
   // frame1.html
   var frame = frames[0];
-  assert(/^index_\d+\.html$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1653,7 +1653,7 @@ async function test_capture_frame2() {
 
   // frame2.xhtml
   var frame = frames[1];
-  assert(/^index_\d+\.xhtml$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.xhtml$/));
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "application/xhtml+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1662,7 +1662,7 @@ async function test_capture_frame2() {
 
   // frame3.svg
   var frame = frames[2];
-  assert(/^index_\d+\.svg$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.svg$/));
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1711,7 +1711,7 @@ async function test_capture_frame3() {
 
   var frame = doc.querySelector('iframe');
   assert(!frame.hasAttribute('srcdoc'));
-  assert(/^index_\d+\.html$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1855,7 +1855,7 @@ async function test_capture_frame_headless() {
   var frames = doc.querySelectorAll('iframe');
 
   var frame = frames[0];
-  assert(/^index_\d+\.html$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1868,7 +1868,7 @@ async function test_capture_frame_headless() {
   assert(imgData === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
   var frame = frames[1];
-  assert(/^index_\d+\.xhtml$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.xhtml$/));
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "application/xhtml+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1876,7 +1876,7 @@ async function test_capture_frame_headless() {
   assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
 
   var frame = frames[2];
-  assert(/^index_\d+\.svg$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.svg$/));
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1915,7 +1915,7 @@ async function test_capture_frame_headless2() {
 
   var frame = doc.querySelector('iframe');
   assert(!frame.hasAttribute('srcdoc'));
-  assert(/^index_\d+\.html$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1950,7 +1950,7 @@ async function test_capture_frame_headless2() {
 <script>
 document.querySelector('p').textContent = 'srcdoc content modified';
 </script>`);
-  assert(/^index_\d+\.html$/.test(frame.getAttribute('src')));
+  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
 
   /* capture.frame = link */
   // record resolved src and save rewritten srcdoc
@@ -2103,7 +2103,7 @@ async function test_capture_frame_singleHtml() {
   assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
 
   var frameSrc = frames[3].getAttribute('src');
-  assert(/^data:text\/plain;filename=text\.txt,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/plain;filename=text\.txt,/));
   var text = (await xhr({url: frameSrc, responseType: "text"})).response;
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
 
@@ -2117,12 +2117,12 @@ async function test_capture_frame_singleHtml() {
   var frames = doc.querySelectorAll('frame');
 
   var frameSrc = frames[0].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
 
   var frameSrc = frames[1].getAttribute('src');
-  assert(/^data:application\/xhtml\+xml;charset=UTF-8;filename=frame2\.xhtml,/.test(frameSrc));
+  assert(frameSrc.match(/^data:application\/xhtml\+xml;charset=UTF-8;filename=frame2\.xhtml,/));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
 
@@ -2143,22 +2143,22 @@ async function test_capture_frame_singleHtml() {
   var frames = doc.querySelectorAll('iframe');
 
   var frameSrc = frames[0].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
 
   var frameSrc = frames[1].getAttribute('src');
-  assert(/^data:application\/xhtml\+xml;charset=UTF-8;filename=frame2\.xhtml,/.test(frameSrc));
+  assert(frameSrc.match(/^data:application\/xhtml\+xml;charset=UTF-8;filename=frame2\.xhtml,/));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
 
   var frameSrc = frames[2].getAttribute('src');
-  assert(/^data:image\/svg\+xml;charset=UTF-8;filename=frame3\.svg,/.test(frameSrc));
+  assert(frameSrc.match(/^data:image\/svg\+xml;charset=UTF-8;filename=frame3\.svg,/));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
 
   var frameSrc = frames[3].getAttribute('src');
-  assert(/^data:text\/plain;filename=text\.txt,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/plain;filename=text\.txt,/));
   var text = (await xhr({url: frameSrc, responseType: "text"})).response;
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
 
@@ -2172,12 +2172,12 @@ async function test_capture_frame_singleHtml() {
   var frames = doc.querySelectorAll('frame');
 
   var frameSrc = frames[0].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
 
   var frameSrc = frames[1].getAttribute('src');
-  assert(/^data:application\/xhtml\+xml;charset=UTF-8;filename=frame2\.xhtml,/.test(frameSrc));
+  assert(frameSrc.match(/^data:application\/xhtml\+xml;charset=UTF-8;filename=frame2\.xhtml,/));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
 }
@@ -2535,16 +2535,16 @@ async function test_capture_frameRename2() {
   var doc = await readFileAsDocument(blob);
 
   var frameSrc = doc.querySelectorAll('iframe')[0].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/));
 
   var frameSrc = doc.querySelectorAll('iframe')[1].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=frame2\.html,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame2\.html,/));
 
   var frameSrc = doc.querySelectorAll('iframe')[2].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=frame3\.py\.html,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame3\.py\.html,/));
 
   var frameSrc = doc.querySelectorAll('iframe')[3].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=a%E4%B8%ADb%23c\.php\.html,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=a%E4%B8%ADb%23c\.php\.html,/));
 
   /* capture.saveAs = singleHtml; srcdoc = false; headless */
   var options = {
@@ -2562,16 +2562,16 @@ async function test_capture_frameRename2() {
   var doc = await readFileAsDocument(blob);
 
   var frameSrc = doc.querySelectorAll('iframe')[0].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/));
 
   var frameSrc = doc.querySelectorAll('iframe')[1].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=frame2\.html,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame2\.html,/));
 
   var frameSrc = doc.querySelectorAll('iframe')[2].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=frame3\.py\.html,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame3\.py\.html,/));
 
   var frameSrc = doc.querySelectorAll('iframe')[3].getAttribute('src');
-  assert(/^data:text\/html;charset=UTF-8;filename=a%E4%B8%ADb%23c\.php\.html,/.test(frameSrc));
+  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=a%E4%B8%ADb%23c\.php\.html,/));
 }
 
 /**
@@ -3530,12 +3530,12 @@ async function test_capture_css_circular() {
   // style1.css
   var url = doc.querySelector('link').getAttribute('href');
   var text = (await xhr({url, responseType: "text"})).response;
-  assert(/^@import "(data:text\/css;filename=style2.css,[^"#]*)(?:#[^"]*)?";/.test(text));
+  assert(text.match(/^@import "(data:text\/css;filename=style2.css,[^"#]*)(?:#[^"]*)?";/));
 
   // style2.css
   var url = RegExp.$1;
   var text = (await xhr({url, responseType: "text"})).response;
-  assert(/^@import "(data:text\/css;filename=style3.css,[^"#]*)(?:#[^"]*)?";/.test(text));
+  assert(text.match(/^@import "(data:text\/css;filename=style3.css,[^"#]*)(?:#[^"]*)?";/));
 
   // style3.css
   var url = RegExp.$1;
@@ -4636,10 +4636,10 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
 
   assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
-  assert(/^data:image\/png;base64,/.test(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas")));
+  assert(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas").match(/^data:image\/png;base64,/));
 
   // canvas in the shadow root
   var blob = await capture({
@@ -4654,13 +4654,13 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
   
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
   frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
   var shadow = frag.content;
-  assert(/^data:image\/png;base64,/.test(shadow.querySelector('canvas').getAttribute('data-scrapbook-canvas')));
+  assert(shadow.querySelector('canvas').getAttribute('data-scrapbook-canvas').match(/^data:image\/png;base64,/));
 
   /* capture.canvas = blank */
   var options = {
@@ -4695,7 +4695,7 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
 
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
@@ -4736,7 +4736,7 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
 
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
@@ -5987,7 +5987,7 @@ async function test_capture_shadowRoot() {
   assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
 
   /* capture.shadowDom = remove */
   var options = {
@@ -6046,7 +6046,7 @@ async function test_capture_shadowRoot2() {
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(/^\(function \(\) \{.+\}\)\(\)$/.test(loader.textContent.trim()));
+  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
 
   /* mode: closed */
   var blob = await capture({
@@ -6189,9 +6189,9 @@ async function test_capture_rewrite2() {
 
   var imgs = doc.querySelectorAll('img');
   assert(imgs[0].getAttribute('src') === ``);
-  assert(/^(?:|#123)$/i.test(imgs[1].getAttribute('src'))); // the browser may clear the hash for <img> when getting outerHTML
-  assert(/^index-\d+\.html$/i.test(imgs[2].getAttribute('src'))); // html page saved as img
-  assert(/^index-\d+\.html$/i.test(imgs[3].getAttribute('src'))); // html page saved as img
+  assert(imgs[1].getAttribute('src').match(/^(?:|#123)$/i)); // the browser may clear the hash for <img> when getting outerHTML
+  assert(imgs[2].getAttribute('src').match(/^index-\d+\.html$/i)); // html page saved as img
+  assert(imgs[3].getAttribute('src').match(/^index-\d+\.html$/i)); // html page saved as img
 }
 
 /**
@@ -7003,7 +7003,7 @@ async function test_capture_record_meta() {
   var html = doc.documentElement;
 
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html`);
-  assert(/^\d{17}$/.test(html.getAttribute('data-scrapbook-create')));
+  assert(html.getAttribute('data-scrapbook-create').match(/^\d{17}$/));
 
   /* html; -capture.recordDocumentMeta */
   var options = {
@@ -7037,7 +7037,7 @@ async function test_capture_record_meta() {
   var html = doc.documentElement;
 
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/text.py`);
-  assert(/^\d{17}$/.test(html.getAttribute('data-scrapbook-create')));
+  assert(html.getAttribute('data-scrapbook-create').match(/^\d{17}$/));
   assert(html.getAttribute('data-scrapbook-type') === 'file');
   assert(html.getAttribute('data-scrapbook-charset') === 'Big5');
 
@@ -7073,7 +7073,7 @@ async function test_capture_record_meta() {
   var html = doc.documentElement;
 
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html`);
-  assert(/^\d{17}$/.test(html.getAttribute('data-scrapbook-create')));
+  assert(html.getAttribute('data-scrapbook-create').match(/^\d{17}$/));
   assert(html.getAttribute('data-scrapbook-type') === 'bookmark');
 
   /* bookmark; -capture.recordDocumentMeta */
@@ -8447,11 +8447,11 @@ async function test_capture_singleHtml_mergeCss() {
 
   // @import cannot use CSS variable
   var cssText = styles[0].textContent.trim();
-  assert(/^@import "data:[^"]+";$/.test(cssText));
+  assert(cssText.match(/^@import "data:[^"]+";$/));
 
   // @font-face src cannot use CSS variable
   var cssText = styles[1].textContent.trim();
-  assert(/src: url\("data:[^")]+"\);/.test(cssText));
+  assert(cssText.match(/src: url\("data:[^")]+"\);/));
 
   // link
   var cssText = (await xhr({
@@ -8498,11 +8498,11 @@ async function test_capture_singleHtml_mergeCss() {
 
   // @import cannot use CSS variable
   var cssText = styles[0].textContent.trim();
-  assert(/^@import "data:[^"]+";$/.test(cssText));
+  assert(cssText.match(/^@import "data:[^"]+";$/));
 
   // @font-face src cannot use CSS variable
   var cssText = styles[1].textContent.trim();
-  assert(/src: url\("data:[^")]+"\);/.test(cssText));
+  assert(cssText.match(/src: url\("data:[^")]+"\);/));
 
   // link
   var cssText = (await xhr({
