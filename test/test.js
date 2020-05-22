@@ -6189,7 +6189,7 @@ async function test_capture_rewrite2() {
 
   var imgs = doc.querySelectorAll('img');
   assert(imgs[0].getAttribute('src') === ``);
-  assert(imgs[1].getAttribute('src').match(/^(?:|#123)$/i)); // the browser may clear the hash for <img> when getting outerHTML
+  assert(imgs[1].getAttribute('src') === `#123`);
   assert(imgs[2].getAttribute('src').match(/^index-\d+\.html$/i)); // html page saved as img
   assert(imgs[3].getAttribute('src').match(/^index-\d+\.html$/i)); // html page saved as img
 }
