@@ -4535,13 +4535,13 @@ async function test_capture_imageBackground_used5() {
  *
  * capture.favicon
  */
-async function test_capture_favicon() {
+async function test_capture_image_favicon() {
   /* capture.favicon = save */
   var options = {
     "capture.favicon": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image/favicon.html`,
+    url: `${localhost}/capture_image_favicon/favicon.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4560,7 +4560,7 @@ async function test_capture_favicon() {
     "capture.favicon": "link",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image/favicon.html`,
+    url: `${localhost}/capture_image_favicon/favicon.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4572,14 +4572,14 @@ async function test_capture_favicon() {
   var doc = await readFileAsDocument(indexBlob);
 
   var iconElem = doc.querySelector('link[rel~="icon"]');
-  assert(iconElem.getAttribute('href') === `${localhost}/capture_image/red.bmp`);
+  assert(iconElem.getAttribute('href') === `${localhost}/capture_image_favicon/red.bmp`);
 
   /* capture.favicon = blank */
   var options = {
     "capture.favicon": "blank",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image/favicon.html`,
+    url: `${localhost}/capture_image_favicon/favicon.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4598,7 +4598,7 @@ async function test_capture_favicon() {
     "capture.favicon": "remove",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image/favicon.html`,
+    url: `${localhost}/capture_image_favicon/favicon.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9218,7 +9218,7 @@ async function runTests() {
   await test(test_capture_imageBackground_used3);
   await test(test_capture_imageBackground_used4);
   await test(test_capture_imageBackground_used5);
-  await test(test_capture_favicon);
+  await test(test_capture_image_favicon);
   await test(test_capture_canvas);
   await test(test_capture_audio);
   await test(test_capture_video);
