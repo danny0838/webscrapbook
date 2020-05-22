@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="../../common.css">
+<script src="../../t.js"></script>
+</head>
+<body>
+<pre>
+1. Visit <a data-path="/viewer-csp/viewer-csp.py">viewer-csp.py</a>.
+   - No scripts (inline, internal, external) should load. Confirm that no JavaScript alert is shown, and additionally see the browser console.
+
+2. Visit <a data-path="/viewer-csp/viewer-csp2.py">viewer-csp2.py</a>.
+   - Frames should load.
+   - SVGs should load but may fail in some browsers.
+   - Flash and JAVA applets should not load.
+</pre>
+</body>
+</html>

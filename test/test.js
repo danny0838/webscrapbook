@@ -8358,6 +8358,17 @@ async function test_viewer_archive_in_frame() {
   });
 }
 
+async function test_viewer_csp() {
+  return await openTestTab({
+    url: browser.runtime.getURL('t/viewer-csp/index.html'),
+    active: true,
+  }, (message, port, resolve) => {
+    if (message.cmd == 'result') {
+      resolve(message.args.value);
+    }
+  });
+}
+
 async function runTests() {
   await test(test_capture_html);
   await test(test_capture_metaCharset);
@@ -8473,6 +8484,7 @@ async function runManualTests() {
   await test(test_viewer_css_rules);
   await test(test_viewer_metaRefresh);
   await test(test_viewer_archive_in_frame);
+  await test(test_viewer_csp);
 }
 
 /**

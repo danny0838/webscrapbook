@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body style="background: #aaa;">
+<p>
+<iframe src="frame.html" width="300" height="300"></iframe>
+<embed src="image.svg" width="300" height="300"></embed>
+<object data="image.svg" width="300" height="300"></object>
+</p>
+
+<p>
+<embed src="helloworld.swf" width="300" height="300"></embed>
+<object data="helloworld.swf" width="300" height="300"></object>
+<applet alt="Dynamic Tree Applet Demo" code="appletComponentArch.DynamicTreeApplet" archive="DynamicTreeDemo.jar" width="300" height="300">
+  <param name="permissions" value="sandbox">
+</applet>
+</p>
+
+<p>
+<iframe src="http://localhost{port}/viewer-csp/viewer-csp2/frame.html" width="300" height="300"></iframe>
+<embed src="http://localhost{port}/viewer-csp/viewer-csp2/image.svg" width="300" height="300"></embed>
+<object data="http://localhost{port}/viewer-csp/viewer-csp2/image.svg" width="300" height="300"></object>
+</p>
+
+<p>
+<embed src="http://localhost{port}/viewer-csp/viewer-csp2/helloworld.swf" width="300" height="300"></embed>
+<object data="http://localhost{port}/viewer-csp/viewer-csp2/helloworld.swf" width="300" height="300"></object>
+<applet alt="Dynamic Tree Applet Demo" code="appletComponentArch.DynamicTreeApplet" archive="http://localhost{port}/viewer-csp/viewer-csp2/DynamicTreeDemo.jar" width="300" height="300">
+  <param name="permissions" value="sandbox">
+</applet>
+</p>
+</body>
+</html>
