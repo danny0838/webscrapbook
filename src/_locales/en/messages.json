@@ -767,6 +767,12 @@
   "OptionCaptureRemoveHiddenUndisplayedLabel": {
     "message": "Remove undisplayed elements"
   },
+  "OptionCaptureResourceSizeLimitLabel": {
+    "message": "Size limit for each resource file:"
+  },
+  "OptionCaptureResourceSizeLimitTooltip": {
+    "message": "A resource file exceeding the limit will not be saved. Empty for no limit."
+  },
   "OptionCaptureRewriteCssLabel": {
     "message": "Rewrite styles:"
   },

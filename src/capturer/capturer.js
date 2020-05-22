@@ -289,6 +289,7 @@
    * @param {string} params.url
    * @param {string} [params.refUrl] - the referrer URL
    * @param {boolean} [params.headerOnly] - fetch HTTP header only
+   * @param {boolean} [params.ignoreSizeLimit]
    * @param {Objet} params.settings
    * @param {Objet} params.options
    * @return {Promise<fetchResult>}
@@ -363,7 +364,7 @@
     const fetch = capturer.fetch = async function (params) {
       isDebug && console.debug("call: fetch", params);
 
-      const {url: sourceUrl, refUrl, headerOnly = false, settings, options} = params;
+      const {url: sourceUrl, refUrl, headerOnly = false, ignoreSizeLimit = false, settings, options} = params;
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
       const {timeId} = settings;
@@ -475,15 +476,29 @@
                 }
               }
 
-              // skip loading body for a headerOnly fetch
               if (headerOnly) {
+                // skip loading body for a headerOnly fetch
                 response = {
                   url: xhr.responseURL,
                   status: xhr.status,
                   headers,
                   blob: null,
                 };
+              } else if (!ignoreSizeLimit &&
+                  typeof options["capture.resourceSizeLimit"] === "number" &&
+                  typeof headers.contentLength === "number" &&
+                  headers.contentLength >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
+                // apply size limit if header contentLength is known
+                response = {
+                  url: xhr.responseURL,
+                  status: xhr.status,
+                  headers,
+                  blob: null,
+                  error: `Resource size limit exceeded.`,
+                };
+              }
 
+              if (response) {
                 if (!(xhr.status >= 200 && xhr.status < 300)) {
                   response.error = `${xhr.status} ${xhr.statusText}`;
                 }
@@ -510,6 +525,14 @@
             headers,
             blob,
           };
+
+          // apply size limit
+          if (!ignoreSizeLimit &&
+              typeof options["capture.resourceSizeLimit"] === "number" &&
+              blob.size >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
+            response.blob = null;
+            response.error = `Resource size limit exceeded.`;
+          }
 
           if (!(xhr.status >= 200 && xhr.status < 300)) {
             response.error = `${xhr.status} ${xhr.statusText}`;
@@ -972,6 +995,7 @@
     const fetchResponse = await capturer.fetch({
       url: sourceUrlMain,
       refUrl,
+      ignoreSizeLimit: settings.frameIsMain,
       settings,
       options,
     });
