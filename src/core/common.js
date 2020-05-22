@@ -1586,13 +1586,7 @@
   };
 
   scrapbook.urlToFilename = function (url) {
-    let name = url, pos;
-    pos = name.indexOf("?");
-    if (pos !== -1) { name = name.substring(0, pos); }
-    pos = name.indexOf("#");
-    if (pos !== -1) { name = name.substring(0, pos); }
-    pos = name.lastIndexOf("/");
-    if (pos !== -1) { name = name.substring(pos + 1); }
+    let name = scrapbook.filepathParts(new URL(url).pathname)[1];
 
     // decode %xx%xx%xx only if it's correctly UTF-8 encoded
     // @TODO: decode using a specified charset
