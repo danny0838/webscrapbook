@@ -6195,6 +6195,64 @@ async function test_capture_rewrite2() {
 }
 
 /**
+ * Check if redirection is handled correctly.
+ *
+ * - Filename should based on the redirected URL.
+ *
+ * - Hash should be the source hash.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_redirect() {
+  var options = {
+    "capture.frameRename": false,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_redirect/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('link').getAttribute('href') === `style.css#abc`);
+  assert(doc.querySelector('img').getAttribute('src') === `green.bmp#abc`);
+  assert(doc.querySelector('iframe').getAttribute('src') === `frame.html#abc`);
+}
+
+/**
+ * Hash in the "Location" header should be ignored.
+ *
+ * @TODO: Browser usually use the "Location" header hash if it exists and use
+ * the source URL hash if not. As the response URL of XMLHttpRequest and
+ * fetch API doesn't contain hash, we use the source URL hash any currently.
+ */
+async function test_capture_redirect2() {
+  var options = {
+    "capture.frameRename": false,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_redirect2/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('link').getAttribute('href') === `style.css#abc`);
+  assert(doc.querySelector('img').getAttribute('src') === `green.bmp#abc`);
+  assert(doc.querySelector('iframe').getAttribute('src') === `frame.html#abc`);
+}
+
+/**
  * Check if the URL in an anchor (link) is rewritten correctly
  *
  * capturer.captureDocument
@@ -6336,10 +6394,11 @@ async function test_capture_downLink() {
   assert(zip.files["file.txt"]);
   assert(zip.files["file2.txt"]);
   assert(zip.files["file3.txt"]);
+  assert(zip.files["file4.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
   assert(zip.files["page.html"]);
-  assert(Object.keys(zip.files).length === 7);
+  assert(Object.keys(zip.files).length === 8);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6352,6 +6411,7 @@ async function test_capture_downLink() {
   assert(anchors[3].getAttribute('href') === `page.html`);
   assert(anchors[4].getAttribute('href') === `file2.txt`);
   assert(anchors[5].getAttribute('href') === `file3.txt`);
+  assert(anchors[6].getAttribute('href') === `file4.txt`);
 
   // page should be saved as file (not rewritten)
   var file = zip.file('page.html');
@@ -6384,6 +6444,7 @@ async function test_capture_downLink() {
   assert(zip.files["file.txt"]);
   assert(!zip.files["file2.txt"]);
   assert(!zip.files["file3.txt"]);
+  assert(!zip.files["file4.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
   assert(zip.files["page.html"]);
@@ -6400,6 +6461,7 @@ async function test_capture_downLink() {
   assert(anchors[3].getAttribute('href') === `page.html`);
   assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink/filename.py`);
   assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink/mime.py`);
+  assert(anchors[6].getAttribute('href') === `${localhost}/capture_downLink/redirect.pyr`);
 
   // page should be saved as file (not rewritten)
   var file = zip.file('page.html');
@@ -6442,6 +6504,7 @@ async function test_capture_downLink() {
   assert(anchors[3].getAttribute('href') === `${localhost}/capture_downLink/page.html`);
   assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink/filename.py`);
   assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink/mime.py`);
+  assert(anchors[6].getAttribute('href') === `${localhost}/capture_downLink/redirect.pyr`);
 }
 
 /**
@@ -6642,10 +6705,12 @@ async function test_capture_downLink3() {
     // 1. should match
     // 2. should match (hash in rule and URL are stripped)
     // 3. should match (hash in rule is stripped)
+    // 4. should match (match source URL rather then redirected URL)
     "capture.downLink.urlFilter": `\
 ${localhost}/capture_downLink/file.bmp
 ${localhost}/capture_downLink/file.css#whatever
-${localhost}/capture_downLink/mime.py#foo`,
+${localhost}/capture_downLink/mime.py#foo
+${localhost}/capture_downLink/redirect.pyr#bar`,
   };
 
   var blob = await captureHeadless({
@@ -6680,8 +6745,9 @@ ${localhost}/capture_downLink/file.css`,
   assert(zip.files["file.txt"]);
   assert(zip.files["file2.txt"]);
   assert(zip.files["file3.txt"]);
+  assert(zip.files["file4.txt"]);
   assert(zip.files["file.bmp"]);
-  assert(Object.keys(zip.files).length === 5);
+  assert(Object.keys(zip.files).length === 6);
 
   // RegExp rule
   // match original URL
@@ -6705,9 +6771,10 @@ ${localhost}/capture_downLink/file.css`,
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files["file.txt"]);
+  assert(zip.files["file4.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
-  assert(Object.keys(zip.files).length === 4);
+  assert(Object.keys(zip.files).length === 5);
 }
 
 /**
@@ -7181,6 +7248,33 @@ async function test_capture_record_meta2() {
   });
   var doc = await readFileAsDocument(blob);
   assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html#abc`);
+}
+
+/**
+ * The recorded URL should be the redirected one.
+ *
+ * capture.recordDocumentMeta
+ * capturer.captureDocument
+ * capturer.captureFile
+ * capturer.captureBookmark
+ */
+async function test_capture_record_meta3() {
+  /* html; +capture.recordDocumentMeta */
+  var options = {
+    "capture.recordDocumentMeta": true,
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_record/meta.pyr#abc`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var html = doc.documentElement;
+
+  assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html#abc`);
 }
 
 /**
@@ -9238,6 +9332,8 @@ async function runTests() {
   await test(test_capture_removeHidden);
   await test(test_capture_rewrite);
   await test(test_capture_rewrite2);
+  await test(test_capture_redirect);
+  await test(test_capture_redirect2);
   await test(test_capture_anchor);
   await test(test_capture_anchor2);
   await test(test_capture_anchor3);
@@ -9257,6 +9353,7 @@ async function runTests() {
   await test(test_capture_referrer);
   await test(test_capture_record_meta);
   await test(test_capture_record_meta2);
+  await test(test_capture_record_meta3);
   await test(test_capture_record_nodes);
   await test(test_capture_record_nodes2);
   await test(test_capture_record_nodes3);

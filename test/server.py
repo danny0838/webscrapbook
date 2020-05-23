@@ -6,12 +6,35 @@ from threading import Thread
 import time
 
 class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
-    """
-        Modified default CGIHTTPRequestHandler:
+    def send_head(self):
+        """Modified default CGIHTTPRequestHandler:
+
+        - Output .pyr file as HTTP redirection.
+        """
+        if self.is_cgi():
+            return self.run_cgi()
+
+        path = self.translate_path(self.path)
+        if os.path.isfile(path):
+            head, tail = os.path.splitext(path)
+            if tail.lower() in (".pyr",):
+                port = json.loads(os.environ['wsb.config'])['server_port2']
+                port = '' if port == 80 else ':' + str(port)            
+                new_url = open(path, "r").read().format(port=port)
+
+                self.send_response(302, "Found")
+                self.send_header("Location", new_url)
+                self.end_headers()
+                return
+
+        return http.server.SimpleHTTPRequestHandler.send_head(self)
+
+    def is_cgi(self):
+        """Modified default CGIHTTPRequestHandler:
+
         - Any .py or .pyw file in any subdirectory is a CGI script.
         - Any non-CGI script path is handled by SimpleHTTPRequestHandler.
-    """
-    def is_cgi(self):
+        """
         path = self.translate_path(self.path)
         if os.path.isfile(path) and self.is_python(path):
             collapsed_path = http.server._url_collapse_path(self.path)
