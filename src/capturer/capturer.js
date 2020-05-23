@@ -2418,7 +2418,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     } else if (headers.contentType) {
       return Mime.extension(headers.contentType);
     } else {
-      const filename = scrapbook.urlToFilename(sourceUrl);
+      const filename = scrapbook.urlToFilename(fetchResponse.url);
       const [, ext] = scrapbook.filenameParts(filename);
       return ext;
     }
