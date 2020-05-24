@@ -295,6 +295,12 @@
    * @return {Promise<fetchResult>}
    */
   capturer.fetch = async function (params) {
+    const REGEX_SCHEMES = /^([^:]+):/;
+    const ALLOWED_SCHEMES = new Set(['http', 'https', 'file', 'data', 'blob', 'about']);
+    if (!await browser.extension.isAllowedFileSchemeAccess()) {
+      ALLOWED_SCHEMES.delete('file');
+    }
+
     const getFetchToken = function (url, role) {
       let token = `${scrapbook.normalizeUrl(url)}\t${role}`;
       token = scrapbook.sha1(token, "TEXT");
@@ -397,8 +403,13 @@
           throw new Error(`Requires an absolute URL.`);
         }
 
+        const scheme = sourceUrlMain.match(REGEX_SCHEMES)[1];
+        if (!ALLOWED_SCHEMES.has(scheme)) {
+          throw new Error(`URI scheme "${scheme}" is not supported.`);
+        }
+
         // special handling for data URI
-        if (sourceUrlMain.startsWith("data:")) {
+        if (scheme === "data") {
           const file = scrapbook.dataUriToFile(sourceUrlMain);
           if (!file) { throw new Error("Malformed data URL."); }
 
@@ -423,7 +434,7 @@
         }
 
         // special handling for about:blank or about:srcdoc
-        if (sourceUrlMain.startsWith("about:")) {
+        if (scheme === "about") {
           return {
             url: sourceUrlMain,
             status: 200,
