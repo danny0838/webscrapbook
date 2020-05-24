@@ -386,6 +386,17 @@
         let response;
         let headers = {};
 
+        // fail out if sourceUrl is empty.
+        if (!sourceUrlMain) {
+          throw new Error(`Source URL is empty.`);
+        }
+
+        // fail out if sourceUrl is relative,
+        // or it will be treated as relative to this extension page.
+        if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+          throw new Error(`Requires an absolute URL.`);
+        }
+
         // special handling for data URI
         if (sourceUrlMain.startsWith("data:")) {
           const file = scrapbook.dataUriToFile(sourceUrlMain);
@@ -980,17 +991,6 @@
 
     const {url: sourceUrl, refUrl, title, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-
-    // fail out if sourceUrl is empty.
-    if (!sourceUrlMain) {
-      throw new Error(`Source URL is empty.`);
-    }
-
-    // fail out if sourceUrl is relative,
-    // or it will be treated as relative to this extension page.
-    if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
-      throw new Error(`Requires an absolute URL.`);
-    }
 
     const fetchResponse = await capturer.fetch({
       url: sourceUrlMain,
@@ -2328,17 +2328,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
-    // fail out if sourceUrl is empty.
-    if (!sourceUrlMain) {
-      throw new Error(`Source URL is empty.`);
-    }
-
-    // fail out if sourceUrl is relative,
-    // or it will be treated as relative to this extension page.
-    if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
-      throw new Error(`Requires an absolute URL.`);
-    }
-
     // special handling for data URI
     // if not saved as file, save as-is regardless of its MIME type
     if (sourceUrlMain.startsWith("data:")) {
@@ -2447,17 +2436,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const {url: sourceUrl, refUrl, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
-
-    // fail out if sourceUrl is empty.
-    if (!sourceUrlMain) {
-      throw new Error(`Source URL is empty.`);
-    }
-
-    // fail out if sourceUrl is relative,
-    // or it will be treated as relative to this extension page.
-    if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
-      throw new Error(`Requires an absolute URL.`);
-    }
 
     const fetchResponse = await capturer.fetch({
       url: sourceUrlMain,
