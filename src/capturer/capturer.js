@@ -1000,23 +1000,50 @@
   capturer.captureUrl = async function (params) {
     isDebug && console.debug("call: captureUrl", params);
 
-    const {url: sourceUrl, refUrl, title, settings, options} = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const {title, settings, options} = params;
+    let {url: sourceUrl, refUrl} = params;
+    let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    let fetchResponse;
+    let doc;
 
-    const fetchResponse = await capturer.fetch({
-      url: sourceUrlMain,
-      refUrl,
-      ignoreSizeLimit: settings.frameIsMain,
-      settings,
-      options,
-    });
+    // resolve meta refresh
+    const metaRefreshChain = [];
+    while (true) {
+      fetchResponse = await capturer.fetch({
+        url: sourceUrlMain,
+        refUrl,
+        ignoreSizeLimit: settings.frameIsMain,
+        settings,
+        options,
+      });
 
-    if (fetchResponse.error) {
-      throw new Error(fetchResponse.error);
+      if (fetchResponse.error) {
+        throw new Error(fetchResponse.error);
+      }
+
+      doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
+
+      if (!doc) {
+        break;
+      }
+
+      const metaRefreshTarget = scrapbook.getMetaRefreshTarget(doc, fetchResponse.url);
+
+      if (!metaRefreshTarget) {
+        break;
+      }
+
+      if (metaRefreshChain.includes(metaRefreshTarget)) {
+        throw new Error(`Circular meta refresh.`);
+      }
+
+      metaRefreshChain.push(fetchResponse.url);
+      refUrl = fetchResponse.url;
+      sourceUrl = metaRefreshTarget;
+      [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     }
 
     let response;
-    const doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
     if (doc) {
       response = await capturer.captureDocumentOrFile({
         doc,
@@ -1052,45 +1079,69 @@
   capturer.captureBookmark = async function (params) {
     isDebug && console.debug("call: captureBookmark", params);
 
-    const {url: sourceUrl, refUrl, settings, options} = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    const {settings, options} = params;
+    let {url: sourceUrl, refUrl} = params;
+    let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    let fetchResponse;
+    let doc;
+
+    // resolve meta refresh
+    const metaRefreshChain = [];
+    while (true) {
+      fetchResponse = await capturer.fetch({
+        url: sourceUrlMain,
+        refUrl,
+        settings,
+        options,
+      });
+
+      if (fetchResponse.error) {
+        throw new Error(fetchResponse.error);
+      }
+
+      doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
+
+      if (!doc) {
+        break;
+      }
+
+      const metaRefreshTarget = scrapbook.getMetaRefreshTarget(doc, fetchResponse.url);
+
+      if (!metaRefreshTarget) {
+        break;
+      }
+
+      if (metaRefreshChain.includes(metaRefreshTarget)) {
+        throw new Error(`Circular meta refresh.`);
+      }
+
+      metaRefreshChain.push(fetchResponse.url);
+      refUrl = fetchResponse.url;
+      sourceUrl = metaRefreshTarget;
+      [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+    }
+
     const {timeId} = settings;
 
     let {title} = params;
     let {favIconUrl} = settings;
 
     // attempt to retrieve title and favicon from source page
-    if (!title || !favIconUrl) {
+    if (doc && (!title || !favIconUrl)) {
       try {
-        const fetchResponse = await capturer.fetch({
-          url: sourceUrlMain,
-          refUrl,
-          settings,
-          options,
-        });
-
-        if (fetchResponse.error) {
-          throw new Error(fetchResponse.error);
+        // use the document title if not provided
+        if (!title) {
+          title = doc.title;
         }
 
-        const doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
-
-        // specified sourceUrl may not be a document, maybe a malformed xhtml?
-        if (doc) {
-          // use the document title if not provided
-          if (!title) {
-            title = doc.title;
-          }
-
-          // use the document favIcon if not provided
-          if (!favIconUrl) {
-            // "rel" is matched case-insensitively
-            // The "~=" selector checks for "icon" separated by space,
-            // not including "-icon" or "_icon".
-            let elem = doc.querySelector('link[rel~="icon"][href]');
-            if (elem) {
-              favIconUrl = new URL(elem.getAttribute('href'), fetchResponse.url).href;
-            }
+        // use the document favIcon if not provided
+        if (!favIconUrl) {
+          // "rel" is matched case-insensitively
+          // The "~=" selector checks for "icon" separated by space,
+          // not including "-icon" or "_icon".
+          let elem = doc.querySelector('link[rel~="icon"][href]');
+          if (elem) {
+            favIconUrl = new URL(elem.getAttribute('href'), fetchResponse.url).href;
           }
         }
       } catch (ex) {

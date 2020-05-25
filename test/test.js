@@ -6897,6 +6897,102 @@ async function test_capture_metaRefresh3() {
 }
 
 /**
+ * Check meta refresh resolve for source/bookmark.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_metaRefresh4() {
+  /* source */
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_metaRefresh4/refresh.html`,
+    mode: 'source',
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh4/target.html#abc`);
+
+  /* bookmark */
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_metaRefresh4/refresh.html`,
+    mode: 'bookmark',
+    options: baseOptions,
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh4/target.html#abc`);
+}
+
+/**
+ * Check meta refresh resolve to file for source/bookmark.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_metaRefresh5() {
+  /* source */
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_metaRefresh5/refresh.html`,
+    mode: 'source',
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh5/target.txt#abc`);
+
+  /* bookmark */
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_metaRefresh5/refresh.html`,
+    mode: 'bookmark',
+    options: baseOptions,
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh5/target.txt#abc`);
+}
+
+/**
+ * Meta refresh in <noscript> should be ignored.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_metaRefresh6() {
+  /* source */
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_metaRefresh6/refresh.html`,
+    mode: 'source',
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh6/refresh.html`);
+
+  /* bookmark */
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_metaRefresh6/refresh.html`,
+    mode: 'bookmark',
+    options: baseOptions,
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh6/refresh.html`);
+}
+
+/**
  * Check if option works
  *
  * capture.removeIntegrity
@@ -9343,6 +9439,9 @@ async function runTests() {
   await test(test_capture_metaRefresh);
   await test(test_capture_metaRefresh2);
   await test(test_capture_metaRefresh3);
+  await test(test_capture_metaRefresh4);
+  await test(test_capture_metaRefresh5);
+  await test(test_capture_metaRefresh6);
   await test(test_capture_integrity);
   await test(test_capture_linkUnsavedUri);
   await test(test_capture_linkUnsavedUri2);
