@@ -2346,19 +2346,34 @@
   /**
    * Get primary meta refresh target URL.
    *
+   * For a document with multiple meta refresh, Firefox and Chromium both take
+   * the last one of those with least refresh time.
+   *
    * @param {Document} doc
    * @param {string} [refUrl] - An arbitarary reference URL. Use document.URL if not set.
    * @param {boolean} [ignoreDelayedRefresh] - Only consider meta refresh with 0 refresh time.
+   * @param {boolean} [includeNoscript] - Also consider meta refresh in <noscript>.
    * @return {string|undefined} Absolute URL of the meta refresh target.
    */
-  scrapbook.getMetaRefreshTarget = function (doc, refUrl = doc.URL, ignoreDelayedRefresh = false) {
+  scrapbook.getMetaRefreshTarget = function (doc, refUrl = doc.URL,
+      ignoreDelayedRefresh = false, includeNoscript = false) {
+    let lastMetaRefreshTime = Infinity;
+    let lastMetaRefreshUrl;
     for (const elem of doc.querySelectorAll('meta[http-equiv="refresh"][content]')) {
       const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
-      if (metaRefresh.url) {
+      if (metaRefresh.url && metaRefresh.url !== refUrl) {
         if (!ignoreDelayedRefresh || metaRefresh.time === 0) {
-          return new URL(metaRefresh.url, refUrl).href;
+          if (includeNoscript || !elem.closest('noscript')) {
+            if (metaRefresh.time <= lastMetaRefreshTime) {
+              lastMetaRefreshTime = metaRefresh.time;
+              lastMetaRefreshUrl = metaRefresh.url;
+            }
+          }
         }
       }
+    }
+    if (lastMetaRefreshUrl) {
+      return new URL(lastMetaRefreshUrl, refUrl).href;
     }
   };
 
