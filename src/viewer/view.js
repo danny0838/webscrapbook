@@ -245,8 +245,7 @@
         } else {
           switch (elem.nodeName.toLowerCase()) {
             case "meta": {
-              if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content") &&
-                  elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
+              if (elem.matches('meta[http-equiv="refresh"][content]')) {
                 const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
                 if (metaRefresh.url) {
                   const info = viewer.parseUrl(metaRefresh.url, refUrl);
