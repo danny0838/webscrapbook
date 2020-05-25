@@ -405,7 +405,7 @@
 
         const scheme = sourceUrlMain.match(REGEX_SCHEMES)[1];
         if (!ALLOWED_SCHEMES.has(scheme)) {
-          throw new Error(`URI scheme "${scheme}" is not supported.`);
+          throw new Error(`URI scheme not supported.`);
         }
 
         // special handling for data URI
