@@ -1872,7 +1872,7 @@
   };
 
   scrapbook.dataUriToFile = function (dataUri, useFilename = true) {
-    const regexFields = /^data:([^,]*?)(;base64)?,(.*?)$/i;
+    const regexFields = /^data:([^,]*?)(;base64)?,([^#]*)/i;
     const regexFieldValue = /^(.*?)=(.*?)$/;
     const regexUtf8 = /[^\x00-\x7F]+/g;
     const fnUtf8 = m => encodeURIComponent(m);
