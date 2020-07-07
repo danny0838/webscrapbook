@@ -7,6 +7,22 @@
  * @public {Object} scrapbook
  *****************************************************************************/
 
+/**
+ * Polyfills
+ */
+
+// Polyfill for Firefox < 53
+// As shadowRoot is not supported, we can simply skip implementing options.
+if (Node && !Node.prototype.getRootNode) {
+  Node.prototype.getRootNode = function getRootNode(options) {
+    var current = this, parent;
+    while (parent = current.parentNode) {
+      current = parent;
+    }
+    return current;
+  };
+}
+
 (function (root, factory) {
   // Browser globals
   if (root.hasOwnProperty('scrapbook')) { return; }
