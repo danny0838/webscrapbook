@@ -493,27 +493,30 @@
 
       if (useLock) {
         await this.lockTree();
+      }
 
-        // validate tree
-        if (!await this.validateTree()) {
-          await this.unlockTree();
-          throw new Error(scrapbook.lang('ScrapBookErrorServerTreeChanged'));
+      try {
+        if (useLock) {
+          // validate tree
+          if (!await this.validateTree()) {
+            throw new Error(scrapbook.lang('ScrapBookErrorServerTreeChanged'));
+          }
         }
-      }
 
-      // save requested tree files
-      if (meta) {
-        await this.saveMeta();
-      }
-      if (toc) {
-        await this.saveToc();
-      }
+        // save requested tree files
+        if (meta) {
+          await this.saveMeta();
+        }
+        if (toc) {
+          await this.saveToc();
+        }
 
-      // update this.treeLastModified
-      await this.loadTreeFiles(true);
-
-      if (useLock) {
-        await this.unlockTree();
+        // update this.treeLastModified
+        await this.loadTreeFiles(true);
+      } finally {
+        if (useLock) {
+          await this.unlockTree();
+        }
       }
     }
 

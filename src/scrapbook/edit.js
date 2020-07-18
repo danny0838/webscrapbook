@@ -124,13 +124,10 @@
           // update item
           item.modify = scrapbook.dateToId();
           await book.saveMeta();
-        } catch (ex) {
+        } finally {
+          // release the lock
           await server.unlockTree();
-          throw ex;
         }
-
-        // release the lock
-        await server.unlockTree();
       } catch (ex) {
         console.error(ex);
         alert(`Unable to save document: ${ex.message}`);

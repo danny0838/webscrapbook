@@ -1952,28 +1952,10 @@ svg, math`;
 
         await server.lockTree();
 
-        // delete previous backup folder
         try {
-          const target = book.topUrl + scrapbook.escapeFilename(this.treeBakDir);
-
-          const formData = new FormData();
-          formData.append('token', await server.acquireToken());
-
-          await server.request({
-            url: target + '?a=delete&f=json',
-            method: 'POST',
-            body: formData,
-          });
-        } catch (ex) {
-          // ignore
-        }
-
-        for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
-          if (zipObj.dir) { continue; }
-
-          // delete emptying favicons
-          if (inZipPath.startsWith(this.faviconDir) && zipObj.comment === "emptying") {
-            const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
+          // delete previous backup folder
+          try {
+            const target = book.topUrl + scrapbook.escapeFilename(this.treeBakDir);
 
             const formData = new FormData();
             formData.append('token', await server.acquireToken());
@@ -1983,27 +1965,48 @@ svg, math`;
               method: 'POST',
               body: formData,
             });
-            continue;
+          } catch (ex) {
+            // ignore
           }
 
-          const file = new File(
-            [await zipObj.async('blob')],
-            inZipPath.split('/').pop(),
-            {type: "application/octet-stream"}
-          );
-          const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
+          for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
+            if (zipObj.dir) { continue; }
 
-          const formData = new FormData();
-          formData.append('token', await server.acquireToken());
-          formData.append('upload', file);
+            // delete emptying favicons
+            if (inZipPath.startsWith(this.faviconDir) && zipObj.comment === "emptying") {
+              const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
 
-          await server.request({
-            url: target + '?a=save&f=json',
-            method: 'POST',
-            body: formData,
-          });
+              const formData = new FormData();
+              formData.append('token', await server.acquireToken());
+
+              await server.request({
+                url: target + '?a=delete&f=json',
+                method: 'POST',
+                body: formData,
+              });
+              continue;
+            }
+
+            const file = new File(
+              [await zipObj.async('blob')],
+              inZipPath.split('/').pop(),
+              {type: "application/octet-stream"}
+            );
+            const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
+
+            const formData = new FormData();
+            formData.append('token', await server.acquireToken());
+            formData.append('upload', file);
+
+            await server.request({
+              url: target + '?a=save&f=json',
+              method: 'POST',
+              body: formData,
+            });
+          }
+        } finally {
+          await server.unlockTree();
         }
-        await server.unlockTree();
 
         return;
       }

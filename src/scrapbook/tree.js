@@ -776,13 +776,10 @@ Redirecting to file <a href="index.md">index.md</a>
 
           // upload changes to server
           await this.book.saveTreeFiles({meta: hasRemovedItems, toc: true, useLock: false});
-        } catch (ex) {
+        } finally {
+          // release the lock
           await this.book.unlockTree();
-          throw ex;
         }
-
-        // release the lock
-        await this.book.unlockTree();
       },
 
       async view_recycle(selectedItemElems) {
@@ -1812,13 +1809,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
         // save meta and TOC
         await this.book.saveTreeFiles({meta: true, toc: true, useLock: false});
-      } catch (ex) {
+      } finally {
+        // release the lock
         await this.book.unlockTree();
-        throw ex;
       }
-
-      // release the lock
-      await this.book.unlockTree();
     },
 
     onWindowItemDragEnter(event) {

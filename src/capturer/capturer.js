@@ -686,16 +686,19 @@
 
     // lock tree before loading to avoid a conflict due to parallel captures
     await book.lockTree({timeout: 60, staleThreshold: 120});
-    await book.loadTreeFiles(true);
-    await book.loadMeta(true);
-    await book.loadToc(true);
-    await book.addItem({
-      item: Object.assign({}, item, {icon}),
-      parentId,
-      index,
-    });
-    await book.saveTreeFiles({meta: true, toc: true, useLock: false});
-    await book.unlockTree();
+    try {
+      await book.loadTreeFiles(true);
+      await book.loadMeta(true);
+      await book.loadToc(true);
+      await book.addItem({
+        item: Object.assign({}, item, {icon}),
+        parentId,
+        index,
+      });
+      await book.saveTreeFiles({meta: true, toc: true, useLock: false});
+    } finally {
+      await book.unlockTree();
+    }
   };
 
   /**
@@ -1601,13 +1604,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       } else {
         capturer.warn(scrapbook.lang("ErrorSaveUnknownItem"));
       }
-    } catch (ex) {
+    } finally {
+      // release the lock
       await book.unlockTree();
-      throw ex;
     }
-
-    // release the lock
-    await book.unlockTree();
 
     return {
       timeId,
