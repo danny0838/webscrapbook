@@ -1308,9 +1308,10 @@ if (Node && !Node.prototype.getRootNode) {
   };
 
   scrapbook.escapeRegExp = function (str) {
-    // Escaping "-" allows the result to be inserted into a character class.
-    // Escaping "/" allow the result to be used in a JS regex literal.
-    const regex = /[-/\\^$*+?.|()[\]{}]/g;
+    // Don't escape "-" as it causes an error for a RegExp with unicode flag.
+    // Escaping "-" allows the result be embedded in a character class.
+    // Escaping "/" allows the result be embedded in a JS regex literal.
+    const regex = /[/\\^$*+?.|()[\]{}]/g;
     const fn = scrapbook.escapeRegExp = function (str) {
       return str.replace(regex, "\\$&");
     };
