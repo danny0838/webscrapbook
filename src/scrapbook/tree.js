@@ -2249,7 +2249,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
     onSearchButtonClick(event) {
       event.preventDefault();
-      this.openLink(browser.runtime.getURL(`scrapbook/search.html?id=${this.bookId}&root=${this.rootId}`), "search");
+      const url = new URL(browser.runtime.getURL(`scrapbook/search.html`));
+      url.searchParams.set('id', this.bookId);
+      if (this.rootId !== 'root') { url.searchParams.set('root', this.rootId); }
+      this.openLink(url.href, "search");
     },
 
     onRefreshButtonClick(event) {
