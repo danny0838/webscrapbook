@@ -1501,7 +1501,7 @@ if (Node && !Node.prototype.getRootNode) {
    * Ensure normalizeUrl(url1) === normalizeUrl(url2)
    *
    * - All upper case for percent encoding.
-   * - Decode sub-delims !'()~, which are encoded in XHTML files an in some server APP.
+   * - Decode sub-delims !'()~, which are encoded in XHTML files and in some server APP.
    * - Encode single "%", which can cause error for decodeURIComponent().
    * - Encode non-encoded chars in path, such as +,;=@[]^`{}
    * - e.g. normalizeUrl("http://abc/?中文!def%") === normalizeUrl("http://ab%63/?%E4%B8%AD%E6%96%87%21def%25")
