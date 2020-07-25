@@ -42,6 +42,7 @@
         // parse URL params
         // id: book(s) to select and load. Pick current book if not specified.
         // root: root id to search for.
+        // q: query to search.
         const urlParams = new URL(document.URL).searchParams;
 
         const usedBookIds = new Set(urlParams.getAll('id'));
@@ -53,6 +54,8 @@
         if (rootId !== 'root') {
           this.defaultSearch = `${this.defaultSearch} root:"${rootId.replace(/"/g, '""')}"`;
         }
+
+        const query = urlParams.get('q'); 
 
         // init UI
         const booksSelectElem = document.getElementById("books");
@@ -86,6 +89,11 @@
         await Promise.all(usedBooks.map(book => this.loadBook(book)));
 
         document.getElementById('search').disabled = false;
+
+        if (query !== null) {
+          document.getElementById('keyword').value = query;
+          await this.search();
+        }
       } catch (ex) {
         console.error(ex);
         alert(`Error: ${ex.message}`);
