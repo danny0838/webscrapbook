@@ -73,6 +73,9 @@
             booksSelectElem.appendChild(opt);
           }
         }
+        if (booksSelectElem.childNodes.length <= 1) {
+          booksSelectElem.multiple = false;
+        }
 
         if (book) {
           await this.loadBook(book);
