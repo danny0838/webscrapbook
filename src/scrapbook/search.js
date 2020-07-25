@@ -40,37 +40,30 @@
         await server.init();
 
         // parse URL params
+        // id: book(s) to select and load. Pick current book if not specified.
+        // root: root id to search for.
         const urlParams = new URL(document.URL).searchParams;
-        let bookId = urlParams.get('id');
-        if (bookId === null) {
-          bookId = server.bookId;
-        }
-        if (!server.books[bookId] || server.books[bookId].config.no_tree) {
-          bookId = null;
-        }
-        const book = server.books[bookId];
 
-        let rootId = urlParams.get('root') || 'root';
+        const usedBookIds = new Set(urlParams.getAll('id'));
+        if (!usedBookIds.size) {
+          usedBookIds.add(server.bookId);
+        }
+
+        const rootId = urlParams.get('root') || 'root';
         if (rootId !== 'root') {
           this.defaultSearch = `${this.defaultSearch} root:"${rootId.replace(/"/g, '""')}"`;
         }
 
         // init UI
-        if (rootId === 'root') {
-          document.title = scrapbook.lang('SearchTitle', [book ? book.name : '']);
-        } else {
-          document.title = scrapbook.lang('SearchTitleWithRoot', [book ? book.name : '', rootId]);
-        }
-
         const booksSelectElem = document.getElementById("books");
         for (const key of Object.keys(server.books).sort()) {
           const book = server.books[key];
           if (book.config.no_tree) { continue; }
-          if (key === bookId || rootId === 'root') {
+          if (usedBookIds.has(key) || rootId === 'root') {
             this.books.push(book);
             const opt = document.createElement('option');
             opt.value = opt.textContent = book.name;
-            if (key === bookId) { opt.selected = true; }
+            if (usedBookIds.has(key)) { opt.selected = true; }
             booksSelectElem.appendChild(opt);
           }
         }
@@ -78,9 +71,19 @@
           booksSelectElem.multiple = false;
         }
 
-        if (book) {
-          await this.loadBook(book);
+        const usedBooks = this.books.filter(book => usedBookIds.has(book.id));
+
+        const book = usedBooks[0];
+        {
+          const bookName = book ? usedBooks.map(x => x.name).join(' | ') : '';
+          if (rootId === 'root') {
+            document.title = scrapbook.lang('SearchTitle', bookName);
+          } else {
+            document.title = scrapbook.lang('SearchTitleWithRoot', [bookName, rootId]);
+          }
         }
+
+        await Promise.all(usedBooks.map(book => this.loadBook(book)));
 
         document.getElementById('search').disabled = false;
       } catch (ex) {
