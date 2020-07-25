@@ -65,6 +65,11 @@ a:focus {
   vertical-align: middle;
 }
 
+.tree [data-id] > div {
+  padding-__MSG_@@bidi_start_edge__: 1.4em;
+  text-indent: -1.4em;
+}
+
 .tree [data-id] > div:hover {
   background-color: rgba(196, 221, 252, 0.3);
 }
