@@ -22,7 +22,7 @@
     // load languages
     scrapbook.loadLanguages(document);
 
-    const generateActionButtonForTabs = async function (baseElem, action) {
+    const selectTabFromDom = async function (baseElem) {
       let selector = baseElem.nextSibling;
       if (selector && selector.className === "selector") {
         while (selector.firstChild) { selector.firstChild.remove(); }
@@ -31,19 +31,20 @@
         selector.className = "selector";
         baseElem.parentNode.insertBefore(selector, baseElem.nextSibling);
       }
-      (await scrapbook.getContentTabs()).forEach((tab) => {
-        const elem = document.createElement("button");
-        elem.className = "sub";
-        elem.textContent = (tab.index + 1) + ": " + tab.title;
-        elem.addEventListener('click', (event) => {
-          event.preventDefault;
-          event.stopPropagation;
-          action(tab);
-          selector.remove();
+      return await new Promise(async (resolve, reject) => {
+        (await scrapbook.getContentTabs()).forEach((tab) => {
+          const elem = document.createElement("button");
+          elem.className = "sub";
+          elem.textContent = (tab.index + 1) + ": " + tab.title;
+          elem.addEventListener('click', (event) => {
+            event.preventDefault;
+            event.stopPropagation;
+            resolve(tab);
+            selector.remove();
+          });
+          selector.appendChild(elem);
         });
-        selector.appendChild(elem);
       });
-      return selector;
     };
 
     const {isPrompt, activeTab, targetTab} = await (async () => {
@@ -77,37 +78,22 @@
     }
 
     document.getElementById("captureTab").addEventListener('click', async (event) => {
-      if (!targetTab) {
-        return await generateActionButtonForTabs(
-          document.getElementById("captureTab"),
-          async (tab) => {
-            return await scrapbook.invokeCapture([{
-              tabId: tab.id,
-            }]);
-          });
-      }
-
+      const tabs = targetTab ? 
+          await scrapbook.getHighlightedTabs() : 
+          [await selectTabFromDom(document.getElementById("captureTab"))];
       return await scrapbook.invokeCapture(
-        (await scrapbook.getHighlightedTabs()).map(tab => ({
+        tabs.map(tab => ({
           tabId: tab.id,
         }))
       );
     });
 
     document.getElementById("captureTabSource").addEventListener('click', async (event) => {
-      if (!targetTab) {
-        return await generateActionButtonForTabs(
-          document.getElementById("captureTabSource"),
-          async (tab) => {
-            return await scrapbook.invokeCapture([{
-              tabId: tab.id,
-              mode: "source",
-            }]);
-          });
-      }
-
+      const tabs = targetTab ? 
+          await scrapbook.getHighlightedTabs() : 
+          [await selectTabFromDom(document.getElementById("captureTabSource"))];
       return await scrapbook.invokeCapture(
-        (await scrapbook.getHighlightedTabs()).map(tab => ({
+        tabs.map(tab => ({
           tabId: tab.id,
           mode: "source",
         }))
@@ -115,19 +101,11 @@
     });
 
     document.getElementById("captureTabBookmark").addEventListener('click', async (event) => {
-      if (!targetTab) {
-        return await generateActionButtonForTabs(
-          document.getElementById("captureTabBookmark"),
-          async (tab) => {
-            return await scrapbook.invokeCapture([{
-              tabId: tab.id,
-              mode: "bookmark",
-            }]);
-          });
-      }
-
+      const tabs = targetTab ? 
+          await scrapbook.getHighlightedTabs() : 
+          [await selectTabFromDom(document.getElementById("captureTabBookmark"))];
       return await scrapbook.invokeCapture(
-        (await scrapbook.getHighlightedTabs()).map(tab => ({
+        tabs.map(tab => ({
           tabId: tab.id,
           mode: "bookmark",
         }))
@@ -144,30 +122,16 @@
     });
 
     document.getElementById("editTab").addEventListener('click', async (event) => {
-      if (!targetTab) {
-        return await generateActionButtonForTabs(
-          document.getElementById("editTab"),
-          async (tab) => {
-            await scrapbook.editTab({
-              tabId: tab.id,
-              force: true,
-            });
-            return await browser.tabs.update(tab.id, {
-              active: true,
-            });
-          });
-      }
-
-      return await scrapbook.editTab({
-        tabId: targetTab.id,
+      const tab = targetTab || await selectTabFromDom(document.getElementById("editTab"));
+      await scrapbook.editTab({
+        tabId: tab.id,
         force: true,
-      }).then(() => {
-        if (!isPrompt) {
-          return browser.tabs.update(targetTab.id, {
-            active: true,
-          });
-        }
       });
+      if (!targetTab || !isPrompt) {
+        return browser.tabs.update(tab.id, {
+          active: true,
+        });
+      }
     });
 
     document.getElementById("batchCapture").addEventListener('click', async (event) => {
