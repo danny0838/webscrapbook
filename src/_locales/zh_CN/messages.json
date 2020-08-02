@@ -1253,7 +1253,7 @@
       }
     }
   },
-  "WarnFulltextCacheBlocked": {
+  "WarnSearchCacheBlocked": {
     "message": "已停止载入远程剪贴簿“$BOOK$”的全文搜索缓存，因超出大小限制（共 $SIZE$）。",
     "placeholders": {
       "book": {

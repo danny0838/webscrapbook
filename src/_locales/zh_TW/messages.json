@@ -1253,7 +1253,7 @@
       }
     }
   },
-  "WarnFulltextCacheBlocked": {
+  "WarnSearchCacheBlocked": {
     "message": "已停止載入遠端剪貼簿「$BOOK$」的全文搜尋快取，因超出大小限制（共 $SIZE$）。",
     "placeholders": {
       "book": {

@@ -260,7 +260,7 @@
         size = size > 0.1 ? size.toFixed(1) + ' MiB' :
             size * 1024 > 0.1 ? (size * 1024).toFixed(1) + ' KiB' :
             fulltextSize + ' B';
-        this.addMsg(scrapbook.lang('WarnFulltextCacheBlocked', [book.name, size]), 'warn');
+        this.addMsg(scrapbook.lang('WarnSearchCacheBlocked', [book.name, size]), 'warn');
         book.fulltext = {};
       } else {
         tasks.push(book.loadFulltext());

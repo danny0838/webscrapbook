@@ -1253,7 +1253,7 @@
       }
     }
   },
-  "WarnFulltextCacheBlocked": {
+  "WarnSearchCacheBlocked": {
     "message": "Skipped loading remote fulltext cache for book “$BOOK$” due to exceeding size limit (totally $SIZE$).",
     "placeholders": {
       "book": {
