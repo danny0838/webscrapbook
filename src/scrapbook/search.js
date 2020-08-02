@@ -88,9 +88,9 @@
           }
         }
 
-        await Promise.all(usedBooks.map(book => this.loadBook(book)));
-
         document.getElementById('search').disabled = false;
+
+        await Promise.all(usedBooks.map(book => this.loadBook(book)));
 
         if (query !== null) {
           document.getElementById('keyword').value = query;
@@ -218,80 +218,90 @@
     },
 
     async loadBook(book) {
-      await book.loadTreeFiles();
+      const tasks = new Map();
+      const loadBook = this.loadBook = async (book) => {
+        let task = tasks.get(book.id);
+        if (task) { return task; }
+        task = (async () => {
+          await book.loadTreeFiles();
 
-      // check fulltext cache
-      let regexFulltext = /^fulltext\d*\.js$/;
-      let regexMeta = /^(?:meta|toc)\d*\.js$/;
-      let fulltextMtime = -Infinity;
-      let fulltextSize = 0;
-      let metaMtime = -Infinity;
-      let metaSize = 0;
-      for (const file of book.treeFiles.values()) {
-        if (regexFulltext.test(file.name)) {
-          fulltextMtime = Math.max(fulltextMtime, file.last_modified);
-          if (file.size !== null) { fulltextSize += file.size; }
-        } else if (regexMeta.test(file.name)) {
-          metaMtime = Math.max(metaMtime, file.last_modified);
-          if (file.size !== null) { metaSize += file.size; }
-        }
-      }
-      fulltextMtime = Math.floor(fulltextMtime) * 1000;
-      metaMtime = Math.floor(metaMtime) * 1000;
-
-      if (fulltextMtime === -Infinity) {
-        const a = document.createElement('a');
-        a.textContent = scrapbook.lang('WarnSearchCacheMissing', [book.name]);
-
-        const u = new URL(browser.runtime.getURL('scrapbook/cache.html'));
-        u.searchParams.append('book', book.id);
-        u.searchParams.append('fulltext', 1);
-        if (this.inclusiveFrames) {
-          u.searchParams.append('inclusive_frames', 1);
-        }
-        a.href = u.href;
-        a.target = '_blank';
-
-        this.addMsg(a, 'warn');
-      } else if (metaMtime > fulltextMtime) {
-        const threshold = this.fulltextCacheUpdateThreshold;
-        if (typeof threshold === 'number' && Date.now() > fulltextMtime + threshold) {
-          const a = document.createElement('a');
-          a.textContent = scrapbook.lang('WarnSearchCacheOutdated', [book.name]);
-
-          const u = new URL(browser.runtime.getURL('scrapbook/cache.html'));
-          u.searchParams.append('book', book.id);
-          u.searchParams.append('fulltext', 1);
-          if (this.inclusiveFrames) {
-            u.searchParams.append('inclusive_frames', 1);
+          // check fulltext cache
+          let regexFulltext = /^fulltext\d*\.js$/;
+          let regexMeta = /^(?:meta|toc)\d*\.js$/;
+          let fulltextMtime = -Infinity;
+          let fulltextSize = 0;
+          let metaMtime = -Infinity;
+          let metaSize = 0;
+          for (const file of book.treeFiles.values()) {
+            if (regexFulltext.test(file.name)) {
+              fulltextMtime = Math.max(fulltextMtime, file.last_modified);
+              if (file.size !== null) { fulltextSize += file.size; }
+            } else if (regexMeta.test(file.name)) {
+              metaMtime = Math.max(metaMtime, file.last_modified);
+              if (file.size !== null) { metaSize += file.size; }
+            }
           }
-          a.href = u.href;
-          a.target = '_blank';
+          fulltextMtime = Math.floor(fulltextMtime) * 1000;
+          metaMtime = Math.floor(metaMtime) * 1000;
 
-          this.addMsg(a, 'warn');
-        }
-      }
+          if (fulltextMtime === -Infinity) {
+            const a = document.createElement('a');
+            a.textContent = scrapbook.lang('WarnSearchCacheMissing', [book.name]);
 
-      // check size
-      const tasks = [
-        book.loadMeta(),
-        book.loadToc(),
-      ];
-      if (!server.config.app.is_local
-          && typeof this.fulltextCacheRemoteSizeLimit === 'number'
-          && fulltextSize > this.fulltextCacheRemoteSizeLimit * 1024 * 1024) {
-        let size = fulltextSize / (1024 * 1024);
-        size = size > 0.1 ? size.toFixed(1) + ' MiB' :
-            size * 1024 > 0.1 ? (size * 1024).toFixed(1) + ' KiB' :
-            fulltextSize + ' B';
-        this.addMsg(scrapbook.lang('WarnSearchCacheBlocked', [book.name, size]), 'warn');
-        book.fulltext = {};
-      } else {
-        tasks.push(book.loadFulltext());
-      }
+            const u = new URL(browser.runtime.getURL('scrapbook/cache.html'));
+            u.searchParams.append('book', book.id);
+            u.searchParams.append('fulltext', 1);
+            if (this.inclusiveFrames) {
+              u.searchParams.append('inclusive_frames', 1);
+            }
+            a.href = u.href;
+            a.target = '_blank';
 
-      // load index
-      await Promise.all(tasks);
+            this.addMsg(a, 'warn');
+          } else if (metaMtime > fulltextMtime) {
+            const threshold = this.fulltextCacheUpdateThreshold;
+            if (typeof threshold === 'number' && Date.now() > fulltextMtime + threshold) {
+              const a = document.createElement('a');
+              a.textContent = scrapbook.lang('WarnSearchCacheOutdated', [book.name]);
+
+              const u = new URL(browser.runtime.getURL('scrapbook/cache.html'));
+              u.searchParams.append('book', book.id);
+              u.searchParams.append('fulltext', 1);
+              if (this.inclusiveFrames) {
+                u.searchParams.append('inclusive_frames', 1);
+              }
+              a.href = u.href;
+              a.target = '_blank';
+
+              this.addMsg(a, 'warn');
+            }
+          }
+
+          // check size
+          const tasks = [
+            book.loadMeta(),
+            book.loadToc(),
+          ];
+          if (!server.config.app.is_local
+              && typeof this.fulltextCacheRemoteSizeLimit === 'number'
+              && fulltextSize > this.fulltextCacheRemoteSizeLimit * 1024 * 1024) {
+            let size = fulltextSize / (1024 * 1024);
+            size = size > 0.1 ? size.toFixed(1) + ' MiB' :
+                size * 1024 > 0.1 ? (size * 1024).toFixed(1) + ' KiB' :
+                fulltextSize + ' B';
+            this.addMsg(scrapbook.lang('WarnSearchCacheBlocked', [book.name, size]), 'warn');
+            book.fulltext = {};
+          } else {
+            tasks.push(book.loadFulltext());
+          }
+
+          // load index
+          await Promise.all(tasks);
+        })();
+        tasks.set(book.id, task);
+        return task;
+      };
+      return await loadBook(book);
     },
 
     addMsg(msg, className) {
@@ -506,10 +516,7 @@
       }
 
       for (const book of books) {
-        if (!book.meta) {
-          await search.loadBook(book);
-        }
-
+        await search.loadBook(book);
         const results = this.searchBook(query, book);
         search.showResults(results, book);
       }
