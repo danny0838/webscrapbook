@@ -190,7 +190,7 @@
       try {
         const json = await this.request({
           url: (url || this._serverRoot) + '?a=token&f=json',
-          method: "GET",
+          method: "POST",
         }).then(r => r.json());
         return json.data;
       } catch (ex) {
