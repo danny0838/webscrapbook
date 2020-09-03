@@ -240,17 +240,18 @@
         }
       }
 
-      if (this.pageList.length) {
-        this.log('Done.');
-        this.log('');
-        return await this.openUrls(this.pageList);
-      } else {
+      if (!this.pageList.length) {
         this.autoLoading = false;
         this.initEvents();
         this.filesSelector.disabled = false;
         this.filesSelector.value = null;
         this.loadmask.hidden = true;
+        return;
       }
+
+      this.log('Done.');
+      this.log('');
+      return await this.openUrls(this.pageList);
     },
 
     async processZipFile(zipFile) {
