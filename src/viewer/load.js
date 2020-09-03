@@ -208,6 +208,7 @@
             files.push(file);
           } catch (ex) {
             this.error(`Unable to fetch specified ZIP file '${zipSourceUrl}'`);
+            return;
           }
         }
         return await this.loadFiles(files);
