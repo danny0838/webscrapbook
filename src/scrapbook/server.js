@@ -323,7 +323,7 @@
         });
         data = (await response.json()).data;
       } catch (ex) {
-        if (ex.status === 400) {
+        if (ex.status === 404) {
           // tree folder not exist, create one
           const formData = new FormData();
           formData.append('token', await this.server.acquireToken());
