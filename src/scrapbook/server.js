@@ -164,6 +164,22 @@
           if (scrapbook.versionCompare(this._config.VERSION, scrapbook.BACKEND_MIN_VERSION) < 0) {
             throw new Error(`Require server app version >= ${scrapbook.BACKEND_MIN_VERSION}.`);
           }
+
+          // if min extension version is set, validate it
+          if (this._config.WSB_EXTENSION_MIN_VERSION) {
+            let version;
+            try {
+              version = browser.runtime.getManifest().version;
+            } catch (ex) {
+              // skip if failed to get extension version
+              console.error(ex);
+            }
+            if (version) {
+              if (scrapbook.versionCompare(version, this._config.WSB_EXTENSION_MIN_VERSION) < 0) {
+                throw new Error(`Server app requires extension version >= ${this._config.WSB_EXTENSION_MIN_VERSION}.`);
+              }
+            }
+          }
         }
 
         // revise server root URL
