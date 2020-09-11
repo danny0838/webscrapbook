@@ -963,7 +963,7 @@
     "message": "Password:"
   },
   "OptionServerPasswordTooltip": {
-    "message": "If the backend server is configured to require HTTP authorization, the password can be provided here to prevent being asked for repeatedly."
+    "message": "If the backend server is configured to require HTTP authorization, the password can be provided here to prevent being asked for repeatedly.\n\n• NOTE: Credentials stored in a browser extension is unprotected and could be stolen by a skilled attacker. Using password-protected built-in browser password manager is generally more preferable."
   },
   "OptionServerUrlLabel": {
     "message": "Address:"
@@ -980,7 +980,7 @@
     "message": "User:"
   },
   "OptionServerUserTooltip": {
-    "message": "If the backend server is configured to require HTTP authorization, the user name can be provided here to prevent being asked for repeatedly."
+    "message": "If the backend server is configured to require HTTP authorization, the user name can be provided here to prevent being asked for repeatedly.\n\n• NOTE: Credentials stored in a browser extension is unprotected and could be stolen by a skilled attacker. Using password-protected built-in browser password manager is generally more preferable."
   },
   "OptionUiShowContextMenuLabel": {
     "message": "Enable context menu"

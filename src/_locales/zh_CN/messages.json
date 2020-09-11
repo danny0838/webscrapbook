@@ -963,7 +963,7 @@
     "message": "密码:"
   },
   "OptionServerPasswordTooltip": {
-    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的密码，以免浏览器询问。"
+    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的密码，以免浏览器反覆询问；或用于更换用户。\n\n• 注意：保存在浏览器套件的认证资讯未受保护且遭竊风险，一般建议优先使用有密码保护机制的浏览器内置密码保存功能。"
   },
   "OptionServerUrlLabel": {
     "message": "网址:"
@@ -980,7 +980,7 @@
     "message": "用户:"
   },
   "OptionServerUserTooltip": {
-    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的用户名，以免浏览器询问。"
+    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的用户名，以免浏览器反覆询问；或用于更换用户。\n\n• 注意：保存在浏览器套件的认证资讯未受保护且遭竊风险，一般建议优先使用有密码保护机制的浏览器内置密码保存功能。"
   },
   "OptionUiShowContextMenuLabel": {
     "message": "启用右键菜单"

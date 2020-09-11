@@ -963,7 +963,7 @@
     "message": "密碼:"
   },
   "OptionServerPasswordTooltip": {
-    "message": "若後端伺服器有設定 HTTP 認證機制，可在這裡填入認證所需的密碼，以免瀏覽器詢問。"
+    "message": "若後端伺服器有設定 HTTP 認證機制，可在這裡填入認證所需的密碼，以免瀏覽器反覆詢問；或用於更換使用者。\n\n• 注意：儲存在瀏覽器套件的認證資訊未受保護且有遭竊風險，一般建議優先使用有密碼保護機制的瀏覽器內建密碼儲存功能。"
   },
   "OptionServerUrlLabel": {
     "message": "網址:"
@@ -980,7 +980,7 @@
     "message": "使用者:"
   },
   "OptionServerUserTooltip": {
-    "message": "若後端伺服器有設定 HTTP 認證機制，可在這裡填入認證所需的使用者名稱，以免瀏覽器詢問。"
+    "message": "若後端伺服器有設定 HTTP 認證機制，可在這裡填入認證所需的使用者名稱，以免瀏覽器反覆詢問；或用於更換使用者。\n\n• 注意：儲存在瀏覽器套件的認證資訊未受保護且有遭竊風險，一般建議優先使用有密碼保護機制的瀏覽器內建密碼儲存功能。"
   },
   "OptionUiShowContextMenuLabel": {
     "message": "啟用右鍵選單"
