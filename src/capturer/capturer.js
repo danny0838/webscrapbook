@@ -666,14 +666,13 @@
         // save favicon if nonexistent or emptied
         if (json.data.type === null || 
             (file.size > 0 && json.data.type === 'file' && json.data.size === 0)) {
-          const formData = new FormData();
-          formData.append('token', await server.acquireToken());
-          formData.append('upload', file);
-
           await server.request({
             url: target + '?a=save&f=json',
             method: "POST",
-            body: formData,
+            body: {
+              token: await server.acquireToken(),
+              upload: file,
+            },
           });
         }
 
@@ -1561,13 +1560,13 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           });
           
           const blob = new Blob([content], {type: "text/html"});
-          const formData = new FormData();
-          formData.append('token', await server.acquireToken());
-          formData.append('upload', blob);
           await server.request({
             url: target + '?a=save&f=json',
             method: "POST",
-            body: formData,
+            body: {
+              token: await server.acquireToken(),
+              upload: blob,
+            },
           });
           capturer.log(`Updated ${target}`);
         } catch (ex) {
@@ -1585,13 +1584,13 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       for (const [url, file] of resourceMap.entries()) {
         if (!file) { continue; }
         const target = internalizePrefix + file.name;
-        const formData = new FormData();
-        formData.append('token', await server.acquireToken());
-        formData.append('upload', file);
         await server.request({
           url: target + '?a=save&f=json',
           method: "POST",
-          body: formData,
+          body: {
+            token: await server.acquireToken(),
+            upload: file,
+          },
         });
         capturer.log(`Internalized resource ${target}`);
       }
@@ -2808,14 +2807,13 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       let tried = 0;
       while (true) {
         try {
-          const formData = new FormData();
-          formData.append('token', await server.acquireToken());
-          formData.append('upload', blob);
-
           await server.request({
             url: target + '?a=save&f=json',
             method: "POST",
-            body: formData,
+            body: {
+              token: await server.acquireToken(),
+              upload: blob,
+            },
           });
           break;
         } catch (ex) {

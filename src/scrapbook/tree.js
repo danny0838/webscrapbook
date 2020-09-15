@@ -383,13 +383,13 @@
 </html>
 `;
               const blob = new Blob([template_text], {type: "text/html"});
-              const formData = new FormData();
-              formData.append('token', await server.acquireToken());
-              formData.append('upload', blob);
               await server.request({
                 url: url + '?a=save&f=json',
                 method: "POST",
-                body: formData,
+                body: {
+                  token: await server.acquireToken(),
+                  upload: blob,
+                },
               });
             }
 
@@ -411,13 +411,13 @@
               // template file not exist, generate default one
               template_text = `%NOTE_TITLE%`;
               const blob = new Blob([template_text], {type: "text/markdown"});
-              const formData = new FormData();
-              formData.append('token', await server.acquireToken());
-              formData.append('upload', blob);
               await server.request({
                 url: url + '?a=save&f=json',
                 method: "POST",
-                body: formData,
+                body: {
+                  token: await server.acquireToken(),
+                  upload: blob,
+                },
               });
             }
 
@@ -445,13 +445,13 @@
         await this.book.saveTreeFiles({meta: true, toc: true});
 
         // save data files
-        const formData = new FormData();
-        formData.append('token', await server.acquireToken());
-        formData.append('upload', blob);
         await server.request({
           url: target + '?a=save&f=json',
           method: "POST",
-          body: formData,
+          body: {
+            token: await server.acquireToken(),
+            upload: blob,
+          },
         });
 
         if (type === 'markdown') {
@@ -467,13 +467,13 @@ Redirecting to file <a href="index.md">index.md</a>
 </body>
 </html>`;
           const blob = new Blob([content], {type: 'text/plain'});
-          const formData = new FormData();
-          formData.append('token', await server.acquireToken());
-          formData.append('upload', blob);
           await server.request({
             url: target + '?a=save&f=json',
             method: "POST",
-            body: formData,
+            body: {
+              token: await server.acquireToken(),
+              upload: blob,
+            },
           });
         }
 
@@ -707,14 +707,12 @@ Redirecting to file <a href="index.md">index.md</a>
           if (!itemIndexFile) { return; }
           const index = itemIndexFile.replace(/\/index.[^.]+$/, '');
           const target = this.book.dataUrl + scrapbook.escapeFilename(index);
-
-          const formData = new FormData();
-          formData.append('token', await server.acquireToken());
-
           await server.request({
             url: target + '?a=delete&f=json',
             method: "POST",
-            body: formData,
+            body: {
+              token: await server.acquireToken(),
+            },
           });
         };
 
@@ -1752,13 +1750,13 @@ Redirecting to file <a href="index.md">index.md</a>
             // upload file
             {
               const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/' + filename);
-              const formData = new FormData();
-              formData.append('token', await server.acquireToken());
-              formData.append('upload', file);
               await server.request({
                 url: target + '?a=save&f=json',
                 method: "POST",
-                body: formData,
+                body: {
+                  token: await server.acquireToken(),
+                  upload: file,
+                },
               });
             }
 
@@ -1779,13 +1777,13 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 `;
               const file = new File([html], 'index.html', {type: 'text/html'});
               const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
-              const formData = new FormData();
-              formData.append('token', await server.acquireToken());
-              formData.append('upload', file);
               await server.request({
                 url: target + '?a=save&f=json',
                 method: "POST",
-                body: formData,
+                body: {
+                  token: await server.acquireToken(),
+                  upload: file,
+                },
               });
             }
 

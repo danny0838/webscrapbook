@@ -1956,14 +1956,12 @@ svg, math`;
           // delete previous backup folder
           try {
             const target = book.topUrl + scrapbook.escapeFilename(this.treeBakDir);
-
-            const formData = new FormData();
-            formData.append('token', await server.acquireToken());
-
             await server.request({
               url: target + '?a=delete&f=json',
               method: 'POST',
-              body: formData,
+              body: {
+                token: await server.acquireToken(),
+              },
             });
           } catch (ex) {
             // ignore
@@ -1975,14 +1973,12 @@ svg, math`;
             // delete emptying favicons
             if (inZipPath.startsWith(this.faviconDir) && zipObj.comment === "emptying") {
               const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
-
-              const formData = new FormData();
-              formData.append('token', await server.acquireToken());
-
               await server.request({
                 url: target + '?a=delete&f=json',
                 method: 'POST',
-                body: formData,
+                body: {
+                  token: await server.acquireToken(),
+                },
               });
               continue;
             }
@@ -1993,15 +1989,13 @@ svg, math`;
               {type: "application/octet-stream"}
             );
             const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
-
-            const formData = new FormData();
-            formData.append('token', await server.acquireToken());
-            formData.append('upload', file);
-
             await server.request({
               url: target + '?a=save&f=json',
               method: 'POST',
-              body: formData,
+              body: {
+                token: await server.acquireToken(),
+                upload: file,
+              },
             });
           }
         } finally {

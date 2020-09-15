@@ -113,13 +113,13 @@
 
           // upload text content
           const content = document.getElementById("editor").value;
-          const formData = new FormData();
-          formData.append('token', await server.acquireToken());
-          formData.append('text', scrapbook.unicodeToUtf8(content));
           await server.request({
             url: this.target + '?a=save&f=json',
             method: "POST",
-            body: formData,
+            body: {
+              token: await server.acquireToken(),
+              text: scrapbook.unicodeToUtf8(content),
+            },
           });
 
           // update item

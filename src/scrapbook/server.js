@@ -55,7 +55,7 @@
      * @param {string} params.url
      * @param {string} [params.method]
      * @param {Object|Headers} [params.headers]
-     * @param {FormData} [params.body]
+     * @param {Object|FormData} [params.body]
      * @param {string} [params.credentials]
      * @param {string} [params.cache]
      */
@@ -77,6 +77,16 @@
           }
         }
         headers = h;
+      }
+
+      if (body && !(body instanceof FormData)) {
+        const b = new FormData();
+        for (const [key, value] of Object.entries(body)) {
+          if (typeof value !== "undefined") {
+            b.append(key, value);
+          }
+        }
+        body = b;
       }
 
       let response;
@@ -311,13 +321,12 @@
       } catch (ex) {
         if (ex.status === 404) {
           // tree folder not exist, create one
-          const formData = new FormData();
-          formData.append('token', await this.server.acquireToken());
-
           await this.server.request({
             url: this.treeUrl + '?a=mkdir&f=json',
             method: "POST",
-            body: formData,
+            body: {
+              token: await this.server.acquireToken(),
+            },
           });
 
           // load again
@@ -453,33 +462,26 @@
 
     async lockTree(params = {}) {
       const {timeout = 5, staleThreshold = 60} = params;
-
-      const formData = new FormData();
-      formData.append('token', await this.server.acquireToken());
-      formData.append('name', `book-${this.id}-tree`);
-      if (timeout !== undefined) {
-        formData.append('chkt', timeout);
-      }
-      if (staleThreshold !== undefined) {
-        formData.append('chks', staleThreshold);
-      }
-
       await this.server.request({
         url: this.topUrl + '?a=lock&f=json',
         method: "POST",
-        body: formData,
+        body: {
+          token: await this.server.acquireToken(),
+          name: `book-${this.id}-tree`,
+          chkt: timeout,
+          chks: staleThreshold,
+        },
       });
     }
 
     async unlockTree() {
-      const formData = new FormData();
-      formData.append('token', await this.server.acquireToken());
-      formData.append('name', `book-${this.id}-tree`);
-
       await this.server.request({
         url: this.topUrl + '?a=unlock&f=json',
         method: "POST",
-        body: formData,
+        body: {
+          token: await this.server.acquireToken(),
+          name: `book-${this.id}-tree`,
+        },
       });
     }
 
@@ -538,15 +540,13 @@
         const content = this.generateMetaFile(meta);
         const file = new File([content], `meta${i || ""}.js`, {type: "application/javascript"});
         const target = this.treeUrl + file.name;
-
-        const formData = new FormData();
-        formData.append('token', await this.server.acquireToken());
-        formData.append('upload', file);
-
         await this.server.request({
           url: target + '?a=save&f=json',
           method: "POST",
-          body: formData,
+          body: {
+            token: await this.server.acquireToken(),
+            upload: file,
+          },
         });
       };
 
@@ -584,14 +584,12 @@
         if (!treeFiles.has(path)) { break; }
 
         const target = this.treeUrl + path;
-
-        const formData = new FormData();
-        formData.append('token', await this.server.acquireToken());
-
         await this.server.request({
           url: target + '?a=delete&f=json',
           method: "POST",
-          body: formData,
+          body: {
+            token: await this.server.acquireToken(),
+          },
         });
       }
     }
@@ -604,15 +602,13 @@
         const content = this.generateTocFile(toc);
         const file = new File([content], `toc${i || ""}.js`, {type: "application/javascript"});
         const target = this.treeUrl + file.name;
-
-        const formData = new FormData();
-        formData.append('token', await this.server.acquireToken());
-        formData.append('upload', file);
-
         await this.server.request({
           url: target + '?a=save&f=json',
           method: "POST",
-          body: formData,
+          body: {
+            token: await this.server.acquireToken(),
+            upload: file,
+          },
         });
       };
 
@@ -649,14 +645,12 @@
         if (!treeFiles.has(path)) { break; }
 
         const target = this.treeUrl + path;
-
-        const formData = new FormData();
-        formData.append('token', await this.server.acquireToken());
-
         await this.server.request({
           url: target + '?a=delete&f=json',
           method: "POST",
-          body: formData,
+          body: {
+            token: await this.server.acquireToken(),
+          },
         });
       }
     }
