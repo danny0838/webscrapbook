@@ -9,4 +9,4 @@ sys.stdout.buffer.write("""Content-Type: text/html
 Content-Disposition: inline; filename="inexe.html"
 
 """.encode("ASCII"))
-sys.stdout.buffer.write(open(os.path.join(os.path.dirname(__file__), "index.htm"), "r").read().format(port=port).encode("UTF-8"))
+sys.stdout.buffer.write(open(os.path.join(os.path.dirname(__file__), "index.html"), "r").read().format(port=port).encode("UTF-8"))
