@@ -62,12 +62,16 @@
     async request(params = {}) {
       let {
         url,
-        method = 'GET',
+        method,
         headers,
         body,
         credentials = 'include',
         cache = 'no-cache',
       } = params;
+
+      if (!method) {
+        method = body ? 'POST' : 'GET';
+      }
 
       if (headers && !(headers instanceof Headers)) {
         const h = new Headers();
