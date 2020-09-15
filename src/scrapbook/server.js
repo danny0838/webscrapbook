@@ -55,9 +55,9 @@
      * @param {string} params.url
      * @param {string} [params.method]
      * @param {Object} [params.headers]
-     * @param {Object} [params.body]
-     * @param {Object} [params.credentials]
-     * @param {Object} [params.cache]
+     * @param {FormData} [params.body]
+     * @param {string} [params.credentials]
+     * @param {string} [params.cache]
      */
     async request(params = {}) {
       let {
