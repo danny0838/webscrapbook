@@ -10,3 +10,4 @@
 *.md text eol=lf
 *.vtt text eol=lf
 *.py text eol=lf
+*.pyr text eol=lf
