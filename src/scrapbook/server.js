@@ -214,38 +214,6 @@
       }
     }
 
-    async lockTree(params = {}) {
-      const {timeout = 5, staleThreshold = 60} = params;
-
-      const formData = new FormData();
-      formData.append('token', await this.acquireToken());
-      formData.append('name', 'tree.lock');
-      if (timeout !== undefined) {
-        formData.append('chkt', timeout);
-      }
-      if (staleThreshold !== undefined) {
-        formData.append('chks', staleThreshold);
-      }
-
-      await this.request({
-        url: this._serverRoot + '?a=lock&f=json',
-        method: "POST",
-        body: formData,
-      });
-    }
-
-    async unlockTree() {
-      const formData = new FormData();
-      formData.append('token', await this.acquireToken());
-      formData.append('name', 'tree.lock');
-
-      await this.request({
-        url: this._serverRoot + '?a=unlock&f=json',
-        method: "POST",
-        body: formData,
-      });
-    }
-
     async getMetaRefreshTarget(refUrl) {
       const doc = await server.request({
         url: refUrl,
@@ -481,12 +449,36 @@
       return this.fulltext = Object.assign.apply(this, objList);
     }
 
-    async lockTree(...args) {
-      await this.server.lockTree(...args);
+    async lockTree(params = {}) {
+      const {timeout = 5, staleThreshold = 60} = params;
+
+      const formData = new FormData();
+      formData.append('token', await this.server.acquireToken());
+      formData.append('name', `book-${this.id}-tree`);
+      if (timeout !== undefined) {
+        formData.append('chkt', timeout);
+      }
+      if (staleThreshold !== undefined) {
+        formData.append('chks', staleThreshold);
+      }
+
+      await this.server.request({
+        url: this.topUrl + '?a=lock&f=json',
+        method: "POST",
+        body: formData,
+      });
     }
 
-    async unlockTree(...args) {
-      await this.server.unlockTree(...args);
+    async unlockTree() {
+      const formData = new FormData();
+      formData.append('token', await this.server.acquireToken());
+      formData.append('name', `book-${this.id}-tree`);
+
+      await this.server.request({
+        url: this.topUrl + '?a=unlock&f=json',
+        method: "POST",
+        body: formData,
+      });
     }
 
     /**

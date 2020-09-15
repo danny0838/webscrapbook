@@ -1950,7 +1950,7 @@ svg, math`;
         this.log(`Uploading changed files to server...`);
         const book = this.serverData.book;
 
-        await server.lockTree();
+        await book.lockTree();
 
         try {
           // delete previous backup folder
@@ -2005,7 +2005,7 @@ svg, math`;
             });
           }
         } finally {
-          await server.unlockTree();
+          await book.unlockTree();
         }
 
         return;

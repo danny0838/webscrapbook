@@ -90,9 +90,10 @@
     async save() {
       try {
         const {id, bookId} = this;
+        const book = server.books[bookId];
 
         // acquire a lock
-        await server.lockTree();
+        await book.lockTree();
 
         try {
           // reload and check whether context is still valid
@@ -126,7 +127,7 @@
           await book.saveMeta();
         } finally {
           // release the lock
-          await server.unlockTree();
+          await book.unlockTree();
         }
       } catch (ex) {
         console.error(ex);
