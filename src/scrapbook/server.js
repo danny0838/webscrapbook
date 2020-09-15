@@ -71,7 +71,7 @@
 
       if (headers) {
         const h = new Headers();
-        for (const [key, value] in Object.entries(headers)) {
+        for (const [key, value] of Object.entries(headers)) {
           h.set(key, value);
         }
         headers = h;
