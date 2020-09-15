@@ -54,7 +54,7 @@
      * @param {Object} params
      * @param {string} params.url
      * @param {string} [params.method]
-     * @param {Object} [params.headers]
+     * @param {Object|Headers} [params.headers]
      * @param {FormData} [params.body]
      * @param {string} [params.credentials]
      * @param {string} [params.cache]
@@ -69,7 +69,7 @@
         cache = 'no-cache',
       } = params;
 
-      if (headers) {
+      if (headers && !(headers instanceof Headers)) {
         const h = new Headers();
         for (const [key, value] of Object.entries(headers)) {
           if (typeof value !== "undefined") {
