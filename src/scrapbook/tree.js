@@ -386,8 +386,8 @@
               await server.request({
                 url: url + '?a=save&f=json',
                 method: "POST",
+                csrfToken: true,
                 body: {
-                  token: await server.acquireToken(),
                   upload: blob,
                 },
               });
@@ -414,8 +414,8 @@
               await server.request({
                 url: url + '?a=save&f=json',
                 method: "POST",
+                csrfToken: true,
                 body: {
-                  token: await server.acquireToken(),
                   upload: blob,
                 },
               });
@@ -448,8 +448,8 @@
         await server.request({
           url: target + '?a=save&f=json',
           method: "POST",
+          csrfToken: true,
           body: {
-            token: await server.acquireToken(),
             upload: blob,
           },
         });
@@ -470,8 +470,8 @@ Redirecting to file <a href="index.md">index.md</a>
           await server.request({
             url: target + '?a=save&f=json',
             method: "POST",
+            csrfToken: true,
             body: {
-              token: await server.acquireToken(),
               upload: blob,
             },
           });
@@ -710,9 +710,7 @@ Redirecting to file <a href="index.md">index.md</a>
           await server.request({
             url: target + '?a=delete&f=json',
             method: "POST",
-            body: {
-              token: await server.acquireToken(),
-            },
+            csrfToken: true,
           });
         };
 
@@ -1753,8 +1751,8 @@ Redirecting to file <a href="index.md">index.md</a>
               await server.request({
                 url: target + '?a=save&f=json',
                 method: "POST",
+                csrfToken: true,
                 body: {
-                  token: await server.acquireToken(),
                   upload: file,
                 },
               });
@@ -1780,8 +1778,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
               await server.request({
                 url: target + '?a=save&f=json',
                 method: "POST",
+                csrfToken: true,
                 body: {
-                  token: await server.acquireToken(),
                   upload: file,
                 },
               });

@@ -669,8 +669,8 @@
           await server.request({
             url: target + '?a=save&f=json',
             method: "POST",
+            csrfToken: true,
             body: {
-              token: await server.acquireToken(),
               upload: file,
             },
           });
@@ -1563,8 +1563,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           await server.request({
             url: target + '?a=save&f=json',
             method: "POST",
+            csrfToken: true,
             body: {
-              token: await server.acquireToken(),
               upload: blob,
             },
           });
@@ -1587,8 +1587,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         await server.request({
           url: target + '?a=save&f=json',
           method: "POST",
+          csrfToken: true,
           body: {
-            token: await server.acquireToken(),
             upload: file,
           },
         });
@@ -2810,8 +2810,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           await server.request({
             url: target + '?a=save&f=json',
             method: "POST",
+            csrfToken: true,
             body: {
-              token: await server.acquireToken(),
               upload: blob,
             },
           });

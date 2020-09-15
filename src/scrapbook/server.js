@@ -58,6 +58,7 @@
      * @param {Object|FormData} [params.body]
      * @param {string} [params.credentials]
      * @param {string} [params.cache]
+     * @param {boolean} [params.csrfToken]
      */
     async request(params = {}) {
       let {
@@ -67,10 +68,11 @@
         body,
         credentials = 'include',
         cache = 'no-cache',
+        csrfToken = false,
       } = params;
 
       if (!method) {
-        method = body ? 'POST' : 'GET';
+        method = (body || csrfToken) ? 'POST' : 'GET';
       }
 
       if (headers && !(headers instanceof Headers)) {
@@ -91,6 +93,13 @@
           }
         }
         body = b;
+      }
+
+      if (csrfToken) {
+        if (!body) {
+          body = new FormData();
+        }
+        body.append('token', await this.acquireToken());
       }
 
       let response;
@@ -223,6 +232,7 @@
         const json = await this.request({
           url: (url || this._serverRoot) + '?a=token&f=json',
           method: "POST",
+          csrfToken: false, // avoid recursion
         }).then(r => r.json());
         return json.data;
       } catch (ex) {
@@ -328,9 +338,7 @@
           await this.server.request({
             url: this.treeUrl + '?a=mkdir&f=json',
             method: "POST",
-            body: {
-              token: await this.server.acquireToken(),
-            },
+            csrfToken: true,
           });
 
           // load again
@@ -469,8 +477,8 @@
       await this.server.request({
         url: this.topUrl + '?a=lock&f=json',
         method: "POST",
+        csrfToken: true,
         body: {
-          token: await this.server.acquireToken(),
           name: `book-${this.id}-tree`,
           chkt: timeout,
           chks: staleThreshold,
@@ -482,8 +490,8 @@
       await this.server.request({
         url: this.topUrl + '?a=unlock&f=json',
         method: "POST",
+        csrfToken: true,
         body: {
-          token: await this.server.acquireToken(),
           name: `book-${this.id}-tree`,
         },
       });
@@ -547,8 +555,8 @@
         await this.server.request({
           url: target + '?a=save&f=json',
           method: "POST",
+          csrfToken: true,
           body: {
-            token: await this.server.acquireToken(),
             upload: file,
           },
         });
@@ -591,9 +599,7 @@
         await this.server.request({
           url: target + '?a=delete&f=json',
           method: "POST",
-          body: {
-            token: await this.server.acquireToken(),
-          },
+          csrfToken: true,
         });
       }
     }
@@ -609,8 +615,8 @@
         await this.server.request({
           url: target + '?a=save&f=json',
           method: "POST",
+          csrfToken: true,
           body: {
-            token: await this.server.acquireToken(),
             upload: file,
           },
         });
@@ -652,9 +658,7 @@
         await this.server.request({
           url: target + '?a=delete&f=json',
           method: "POST",
-          body: {
-            token: await this.server.acquireToken(),
-          },
+          csrfToken: true,
         });
       }
     }

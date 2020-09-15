@@ -116,8 +116,8 @@
           await server.request({
             url: this.target + '?a=save&f=json',
             method: "POST",
+            csrfToken: true,
             body: {
-              token: await server.acquireToken(),
               text: scrapbook.unicodeToUtf8(content),
             },
           });

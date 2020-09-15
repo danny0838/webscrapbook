@@ -1959,9 +1959,7 @@ svg, math`;
             await server.request({
               url: target + '?a=delete&f=json',
               method: 'POST',
-              body: {
-                token: await server.acquireToken(),
-              },
+              csrfToken: true,
             });
           } catch (ex) {
             // ignore
@@ -1976,9 +1974,7 @@ svg, math`;
               await server.request({
                 url: target + '?a=delete&f=json',
                 method: 'POST',
-                body: {
-                  token: await server.acquireToken(),
-                },
+                csrfToken: true,
               });
               continue;
             }
@@ -1992,8 +1988,8 @@ svg, math`;
             await server.request({
               url: target + '?a=save&f=json',
               method: 'POST',
+              csrfToken: true,
               body: {
-                token: await server.acquireToken(),
                 upload: file,
               },
             });
