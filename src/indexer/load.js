@@ -456,6 +456,7 @@ svg, math`;
 
         const loadEntry = async (book, inputData) => {
           const target = book.topUrl;
+          // TODO drop "f=sse" since new backend obtains format from Accept header
           const evtSource = new EventSource(target + '?a=list&f=sse&recursive=1');
 
           return await new Promise((resolve, reject) => {
@@ -1973,8 +1974,9 @@ svg, math`;
           try {
             const target = book.topUrl + scrapbook.escapeFilename(this.treeBakDir);
             await server.request({
-              url: target + '?a=delete&f=json',
+              url: target + '?a=delete',
               method: 'POST',
+              format: 'json',
               csrfToken: true,
             });
           } catch (ex) {
@@ -1988,8 +1990,9 @@ svg, math`;
             if (inZipPath.startsWith(this.faviconDir) && zipObj.comment === "emptying") {
               const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
               await server.request({
-                url: target + '?a=delete&f=json',
+                url: target + '?a=delete',
                 method: 'POST',
+                format: 'json',
                 csrfToken: true,
               });
               continue;
@@ -2002,8 +2005,9 @@ svg, math`;
             );
             const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
             await server.request({
-              url: target + '?a=save&f=json',
+              url: target + '?a=save',
               method: 'POST',
+              format: 'json',
               csrfToken: true,
               body: {
                 upload: file,

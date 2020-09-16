@@ -52,9 +52,10 @@
      * Wrapped API for a general request to backend server
      *
      * @param {Object} params
-     * @param {string} params.url
+     * @param {URL|string} params.url
      * @param {string} [params.method]
      * @param {Object|Headers} [params.headers]
+     * @param {string} [params.format]
      * @param {Object|FormData} [params.body]
      * @param {string} [params.credentials]
      * @param {string} [params.cache]
@@ -65,6 +66,7 @@
         url,
         method,
         headers,
+        format,
         body,
         credentials = 'include',
         cache = 'no-cache',
@@ -75,6 +77,19 @@
         method = (body || csrfToken) ? 'POST' : 'GET';
       }
 
+      if (format) {
+        if (!(url instanceof URL)) {
+          url = new URL(url);
+        }
+        const params = url.searchParams;
+        params.set('f', format);
+        url.search = params.toString();
+      }
+
+      if (format && format.toLowerCase() == 'json') {
+        format = 'application/json, */*;q=0.1 ';
+      }
+
       if (headers && !(headers instanceof Headers)) {
         const h = new Headers();
         for (const [key, value] of Object.entries(headers)) {
@@ -83,6 +98,17 @@
           }
         }
         headers = h;
+      }
+      if (format) {
+        if (!headers) {
+          headers = new Headers();
+        }
+        const acceptHeader = headers.get("Accept");
+        if (!acceptHeader) {
+          headers.set('Accept', format);
+        } else if (format != acceptHeader) {
+          console.warn(`Accept header value ${acceptHeader} inconsistent with argument ${format}`);
+        }
       }
 
       if (body && !(body instanceof FormData)) {
@@ -161,10 +187,14 @@
           let xhr;
           try {
             xhr = await scrapbook.xhr({
+              // f=json is mandatory here since backend could ignore Accept header
               url: rootUrl + '?a=config&f=json&ts=' + Date.now(), // ignore cache
               user: this._user,
               password: this._password,
               responseType: 'json',
+              requestHeaders: {
+                format: 'application/json',
+              },
               method: "GET",
               onload: true,
             });
@@ -230,8 +260,9 @@
     async acquireToken(url) {
       try {
         const json = await this.request({
-          url: (url || this._serverRoot) + '?a=token&f=json',
+          url: (url || this._serverRoot) + '?a=token',
           method: "POST",
+          format: 'json',
           csrfToken: false, // avoid recursion
         }).then(r => r.json());
         return json.data;
@@ -328,23 +359,26 @@
       let response, data;
       try {
         response = await this.server.request({
-          url: this.treeUrl + '?a=list&f=json',
+          url: this.treeUrl + '?a=list',
           method: "GET",
+          format: 'json',
         });
         data = (await response.json()).data;
       } catch (ex) {
         if (ex.status === 404) {
           // tree folder not exist, create one
           await this.server.request({
-            url: this.treeUrl + '?a=mkdir&f=json',
+            url: this.treeUrl + '?a=mkdir',
             method: "POST",
+            format: 'json',
             csrfToken: true,
           });
 
           // load again
           response = await this.server.request({
-            url: this.treeUrl + '?a=list&f=json',
+            url: this.treeUrl + '?a=list',
             method: "GET",
+            format: 'json',
           });
           data = (await response.json()).data;
         } else {
@@ -475,8 +509,9 @@
     async lockTree(params = {}) {
       const {timeout = 5, staleThreshold = 60} = params;
       await this.server.request({
-        url: this.topUrl + '?a=lock&f=json',
+        url: this.topUrl + '?a=lock',
         method: "POST",
+        format: 'json',
         csrfToken: true,
         body: {
           name: `book-${this.id}-tree`,
@@ -488,8 +523,9 @@
 
     async unlockTree() {
       await this.server.request({
-        url: this.topUrl + '?a=unlock&f=json',
+        url: this.topUrl + '?a=unlock',
         method: "POST",
+        format: 'json',
         csrfToken: true,
         body: {
           name: `book-${this.id}-tree`,
@@ -553,8 +589,9 @@
         const file = new File([content], `meta${i || ""}.js`, {type: "application/javascript"});
         const target = this.treeUrl + file.name;
         await this.server.request({
-          url: target + '?a=save&f=json',
+          url: target + '?a=save',
           method: "POST",
+          format: 'json',
           csrfToken: true,
           body: {
             upload: file,
@@ -597,8 +634,9 @@
 
         const target = this.treeUrl + path;
         await this.server.request({
-          url: target + '?a=delete&f=json',
+          url: target + '?a=delete',
           method: "POST",
+          format: 'json',
           csrfToken: true,
         });
       }
@@ -613,8 +651,9 @@
         const file = new File([content], `toc${i || ""}.js`, {type: "application/javascript"});
         const target = this.treeUrl + file.name;
         await this.server.request({
-          url: target + '?a=save&f=json',
+          url: target + '?a=save',
           method: "POST",
+          format: 'json',
           csrfToken: true,
           body: {
             upload: file,
@@ -656,8 +695,9 @@
 
         const target = this.treeUrl + path;
         await this.server.request({
-          url: target + '?a=delete&f=json',
+          url: target + '?a=delete',
           method: "POST",
+          format: 'json',
           csrfToken: true,
         });
       }

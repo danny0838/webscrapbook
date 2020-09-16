@@ -43,8 +43,9 @@
       async exec_book(selectedItemElems) {
         const target = this.book.topUrl;
         await server.request({
-          url: target + '?a=exec&f=json',
+          url: target + '?a=exec',
           method: "GET",
+          format: 'json',
         });
       },
 
@@ -111,8 +112,9 @@
           }
 
           await server.request({
-            url: target + '?a=exec&f=json',
+            url: target + '?a=exec',
             method: "GET",
+            format: 'json',
           });
         }
       },
@@ -132,8 +134,9 @@
           }
 
           await server.request({
-            url: target + '?a=browse&f=json',
+            url: target + '?a=browse',
             method: "GET",
+            format: 'json',
           });
         }
       },
@@ -384,8 +387,9 @@
 `;
               const blob = new Blob([template_text], {type: "text/html"});
               await server.request({
-                url: url + '?a=save&f=json',
+                url: url + '?a=save',
                 method: "POST",
+                format: 'json',
                 csrfToken: true,
                 body: {
                   upload: blob,
@@ -412,8 +416,9 @@
               template_text = `%NOTE_TITLE%`;
               const blob = new Blob([template_text], {type: "text/markdown"});
               await server.request({
-                url: url + '?a=save&f=json',
+                url: url + '?a=save',
                 method: "POST",
+                format: 'json',
                 csrfToken: true,
                 body: {
                   upload: blob,
@@ -446,8 +451,9 @@
 
         // save data files
         await server.request({
-          url: target + '?a=save&f=json',
+          url: target + '?a=save',
           method: "POST",
+          format: 'json',
           csrfToken: true,
           body: {
             upload: blob,
@@ -468,8 +474,9 @@ Redirecting to file <a href="index.md">index.md</a>
 </html>`;
           const blob = new Blob([content], {type: 'text/plain'});
           await server.request({
-            url: target + '?a=save&f=json',
+            url: target + '?a=save',
             method: "POST",
+            format: 'json',
             csrfToken: true,
             body: {
               upload: blob,
@@ -708,8 +715,9 @@ Redirecting to file <a href="index.md">index.md</a>
           const index = itemIndexFile.replace(/\/index.[^.]+$/, '');
           const target = this.book.dataUrl + scrapbook.escapeFilename(index);
           await server.request({
-            url: target + '?a=delete&f=json',
+            url: target + '?a=delete',
             method: "POST",
+            format: 'json',
             csrfToken: true,
           });
         };
@@ -1749,8 +1757,9 @@ Redirecting to file <a href="index.md">index.md</a>
             {
               const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/' + filename);
               await server.request({
-                url: target + '?a=save&f=json',
+                url: target + '?a=save',
                 method: "POST",
+                format: 'json',
                 csrfToken: true,
                 body: {
                   upload: file,
@@ -1776,8 +1785,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
               const file = new File([html], 'index.html', {type: 'text/html'});
               const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
               await server.request({
-                url: target + '?a=save&f=json',
+                url: target + '?a=save',
                 method: "POST",
+                format: 'json',
                 csrfToken: true,
                 body: {
                   upload: file,
