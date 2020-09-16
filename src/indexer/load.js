@@ -511,6 +511,17 @@ svg, math`;
             continue;
           }
 
+          // load tree for reference
+          // To prevent too easy deadlock when the user interrupts indexing,
+          // we don't lock the tree during whole indexing process. Instead,
+          // load tree data in prior and check afterwards.
+          await book.lockTree();
+          try {
+            await book.loadTreeFiles(true);
+          } finally {
+            await book.unlockTree();
+          }
+
           const inputData = {
             name: book.name,
             base: book.topUrl,
@@ -1953,6 +1964,11 @@ svg, math`;
         await book.lockTree();
 
         try {
+          // ensure tree not changed during the indexing
+          if (!await book.validateTree()) {
+            throw new Error("Tree data in the server has been changed. Run indexer again and do not modify the scrapbook during the indexing process.");
+          }
+
           // delete previous backup folder
           try {
             const target = book.topUrl + scrapbook.escapeFilename(this.treeBakDir);
