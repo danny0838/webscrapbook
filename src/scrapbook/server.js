@@ -79,7 +79,7 @@
         const h = new Headers();
         for (const [key, value] of Object.entries(headers)) {
           if (typeof value !== "undefined") {
-            h.set(key, value);
+            h.append(key, value);
           }
         }
         headers = h;
