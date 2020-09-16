@@ -150,7 +150,8 @@
         isFilenameTaken = async (path) => {
           const target = prefix + scrapbook.escapeFilename(path);
           const info = await server.request({
-            url: target + '?f=json',
+            url: target,
+            format: 'json',
             method: "GET",
           }).then(r => r.json()).then(r => r.data);
           return info.type !== null;
@@ -659,16 +660,18 @@
         const target = book.treeUrl + 'favicon/' + file.name;
 
         const json = await server.request({
-          url: target + '?f=json',
+          url: target,
           method: "GET",
+          format: 'json',
         }).then(r => r.json());
 
         // save favicon if nonexistent or emptied
         if (json.data.type === null || 
             (file.size > 0 && json.data.type === 'file' && json.data.size === 0)) {
           await server.request({
-            url: target + '?a=save&f=json',
+            url: target + '?a=save',
             method: "POST",
+            format: 'json',
             csrfToken: true,
             body: {
               upload: file,
@@ -1561,8 +1564,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           
           const blob = new Blob([content], {type: "text/html"});
           await server.request({
-            url: target + '?a=save&f=json',
+            url: target + '?a=save',
             method: "POST",
+            format: 'json',
             csrfToken: true,
             body: {
               upload: blob,
@@ -1585,8 +1589,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         if (!file) { continue; }
         const target = internalizePrefix + file.name;
         await server.request({
-          url: target + '?a=save&f=json',
+          url: target + '?a=save',
           method: "POST",
+          format: 'json',
           csrfToken: true,
           body: {
             upload: file,
@@ -2808,8 +2813,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       while (true) {
         try {
           await server.request({
-            url: target + '?a=save&f=json',
+            url: target + '?a=save',
             method: "POST",
+            format: 'json',
             csrfToken: true,
             body: {
               upload: blob,
