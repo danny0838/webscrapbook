@@ -678,11 +678,11 @@ svg, math`;
 
         /* We are done! */
         this.log(`Done.`);
-        this.log(``);
       } catch (ex) {
         console.error(ex);
         this.error(`Unexpected error: ${ex.message}`);
       }
+      this.log(``);
     },
 
     /* Import legacy ScrapBook RDF (metadata and toc) */
