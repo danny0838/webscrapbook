@@ -5,6 +5,9 @@ import http.server
 from threading import Thread
 import time
 
+http.server.SimpleHTTPRequestHandler.extensions_map[".md"] = "text/markdown"
+
+
 class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
     def send_head(self):
         """Modified default CGIHTTPRequestHandler:
@@ -44,7 +47,6 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
             return True
         return False
 
-    http.server.SimpleHTTPRequestHandler.extensions_map[".md"] = "text/markdown"
 
 def main():
     # load config.json
