@@ -5,10 +5,16 @@ import http.server
 from threading import Thread
 import time
 
-http.server.SimpleHTTPRequestHandler.extensions_map[".md"] = "text/markdown"
-# "image/x-ms-bmp" is used on linux by default, but test asserts check for "image/bmp"
-http.server.SimpleHTTPRequestHandler.extensions_map[".bmp"] = "image/bmp"
-http.server.SimpleHTTPRequestHandler.extensions_map[".woff"] = "application/octet-stream"
+
+http.server.SimpleHTTPRequestHandler.extensions_map.update({
+    '.md': 'text/markdown',
+
+    # On Linux it's default to 'image/x-ms-bmp'
+    # see also: https://bugs.python.org/issue37529
+    '.bmp': 'image/bmp',
+
+    '.woff': 'application/octet-stream',
+    })
 
 
 class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
