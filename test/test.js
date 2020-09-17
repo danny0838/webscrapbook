@@ -1041,7 +1041,7 @@ async function test_capture_dataUri2() {
   var text = (await xhr({url, responseType: "text"})).response;
   assert(text === `\
 @import "data:text/css;filename=null.css,";
-@font-face { font-family: myFont; src: url("data:application/octet-stream;filename=null.woff;base64,"); }
+@font-face { font-family: myFont; src: url("data:font/woff;filename=null.woff;base64,"); }
 p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
 
   /* +saveDataUriAsFile; relative link in data URL CSS */

@@ -13,7 +13,7 @@ http.server.SimpleHTTPRequestHandler.extensions_map.update({
     # see also: https://bugs.python.org/issue37529
     '.bmp': 'image/bmp',
 
-    '.woff': 'application/octet-stream',
+    '.woff': 'font/woff',
     })
 
 
