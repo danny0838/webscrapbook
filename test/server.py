@@ -5,6 +5,18 @@ import http.server
 from threading import Thread
 import time
 
+
+http.server.SimpleHTTPRequestHandler.extensions_map.update({
+    '.md': 'text/markdown',
+
+    # On Linux it's default to 'image/x-ms-bmp'
+    # see also: https://bugs.python.org/issue37529
+    '.bmp': 'image/bmp',
+
+    '.woff': 'font/woff',
+    })
+
+
 class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
     def send_head(self):
         """Modified default CGIHTTPRequestHandler:
@@ -44,7 +56,6 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
             return True
         return False
 
-    http.server.SimpleHTTPRequestHandler.extensions_map[".md"] = "text/markdown"
 
 def main():
     # load config.json
