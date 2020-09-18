@@ -23,7 +23,7 @@
   const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);
 
   const FULLTEXT_NO_INDEX_SELECTOR = `
-head,
+title,
 style, script,
 frame, iframe,
 embed, object, applet,
