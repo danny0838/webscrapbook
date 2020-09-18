@@ -52,42 +52,33 @@
      * Wrapped API for a general request to backend server
      *
      * @param {Object} params
-     * @param {URL|string} params.url
+     * @param {string|URL} params.url
      * @param {string} [params.method]
      * @param {Object|Headers} [params.headers]
-     * @param {string} [params.format]
      * @param {Object|FormData} [params.body]
      * @param {string} [params.credentials]
      * @param {string} [params.cache]
      * @param {boolean} [params.csrfToken]
+     * @param {string} [params.format]
      */
     async request(params = {}) {
       let {
         url,
         method,
         headers,
-        format,
         body,
         credentials = 'include',
         cache = 'no-cache',
         csrfToken = false,
+        format,
       } = params;
 
       if (!method) {
         method = (body || csrfToken) ? 'POST' : 'GET';
       }
 
-      if (format) {
-        if (!(url instanceof URL)) {
-          url = new URL(url);
-        }
-        const params = url.searchParams;
-        params.set('f', format);
-        url.search = params.toString();
-      }
-
-      if (format && format.toLowerCase() == 'json') {
-        format = 'application/json, */*;q=0.1 ';
+      if (!(url instanceof URL)) {
+        url = new URL(url);
       }
 
       if (headers && !(headers instanceof Headers)) {
@@ -99,16 +90,22 @@
         }
         headers = h;
       }
+
       if (format) {
-        if (!headers) {
-          headers = new Headers();
+        // set Accept header
+        const acceptHeader = {
+          'json': 'application/json, */*;q=0.1',
+        }[format.toLowerCase()];
+
+        if (acceptHeader) {
+          if (!headers) {
+            headers = new Headers();
+          }
+          headers.set('Accept', acceptHeader);
         }
-        const acceptHeader = headers.get("Accept");
-        if (!acceptHeader) {
-          headers.set('Accept', format);
-        } else if (format != acceptHeader) {
-          console.warn(`Accept header value ${acceptHeader} inconsistent with argument ${format}`);
-        }
+
+        // set format param
+        url.searchParams.set('f', format);
       }
 
       if (body && !(body instanceof FormData)) {
@@ -187,13 +184,12 @@
           let xhr;
           try {
             xhr = await scrapbook.xhr({
-              // f=json is mandatory here since backend could ignore Accept header
               url: rootUrl + '?a=config&f=json&ts=' + Date.now(), // ignore cache
               user: this._user,
               password: this._password,
               responseType: 'json',
               requestHeaders: {
-                format: 'application/json',
+                Accept: 'application/json, */*;q=0.1',
               },
               method: "GET",
               onload: true,

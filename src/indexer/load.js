@@ -456,7 +456,6 @@ svg, math`;
 
         const loadEntry = async (book, inputData) => {
           const target = book.topUrl;
-          // TODO drop "f=sse" since new backend obtains format from Accept header
           const evtSource = new EventSource(target + '?a=list&f=sse&recursive=1');
 
           return await new Promise((resolve, reject) => {
