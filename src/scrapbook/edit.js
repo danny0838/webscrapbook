@@ -114,8 +114,9 @@
           // upload text content
           const content = document.getElementById("editor").value;
           await server.request({
-            url: this.target + '?a=save&f=json',
+            url: this.target + '?a=save',
             method: "POST",
+            format: 'json',
             csrfToken: true,
             body: {
               text: scrapbook.unicodeToUtf8(content),

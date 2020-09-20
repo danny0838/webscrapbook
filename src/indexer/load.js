@@ -1973,8 +1973,9 @@ svg, math`;
           try {
             const target = book.topUrl + scrapbook.escapeFilename(this.treeBakDir);
             await server.request({
-              url: target + '?a=delete&f=json',
+              url: target + '?a=delete',
               method: 'POST',
+              format: 'json',
               csrfToken: true,
             });
           } catch (ex) {
@@ -1988,8 +1989,9 @@ svg, math`;
             if (inZipPath.startsWith(this.faviconDir) && zipObj.comment === "emptying") {
               const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
               await server.request({
-                url: target + '?a=delete&f=json',
+                url: target + '?a=delete',
                 method: 'POST',
+                format: 'json',
                 csrfToken: true,
               });
               continue;
@@ -2002,8 +2004,9 @@ svg, math`;
             );
             const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
             await server.request({
-              url: target + '?a=save&f=json',
+              url: target + '?a=save',
               method: 'POST',
+              format: 'json',
               csrfToken: true,
               body: {
                 upload: file,
