@@ -936,6 +936,13 @@ if (Node && !Node.prototype.getRootNode) {
   };
 
   /**
+   * Escapes the given filename (may contain '/') string to be used in a canonical URI
+   */
+  scrapbook.quote = function (filename) {
+    return filename.replace(/[^\/]+/g, m => encodeURIComponent(m));
+  };
+
+  /**
    * Transliterates the given string to be a safe filename
    *
    * see also: escapeFileName

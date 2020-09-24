@@ -302,13 +302,13 @@
       }
 
       this.topUrl = server.serverRoot +
-        (this.config.top_dir ? scrapbook.escapeFilename(this.config.top_dir) + '/' : '');
+        (this.config.top_dir ? scrapbook.quote(this.config.top_dir) + '/' : '');
 
       this.dataUrl = this.topUrl +
-          (this.config.data_dir ? scrapbook.escapeFilename(this.config.data_dir) + '/' : '');
+          (this.config.data_dir ? scrapbook.quote(this.config.data_dir) + '/' : '');
 
       this.treeUrl = this.topUrl +
-          (this.config.tree_dir ? scrapbook.escapeFilename(this.config.tree_dir) + '/' : '');
+          (this.config.tree_dir ? scrapbook.quote(this.config.tree_dir) + '/' : '');
 
       this.indexUrl = this.topUrl + this.config.index;
 
