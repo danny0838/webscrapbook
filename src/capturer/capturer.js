@@ -687,7 +687,7 @@
     }
 
     // lock tree before loading to avoid a conflict due to parallel captures
-    await book.lockTree({timeout: 60, staleThreshold: 120});
+    let lockId = await book.lockTree({timeout: 60, staleThreshold: 120});
     try {
       await book.loadTreeFiles(true);
       await book.loadMeta(true);
@@ -699,7 +699,7 @@
       });
       await book.saveTreeFiles({meta: true, toc: true, useLock: false});
     } finally {
-      await book.unlockTree();
+      await book.unlockTree({id: lockId});
     }
   };
 
@@ -1520,7 +1520,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     }
 
     // acquire a lock
-    await book.lockTree();
+    let lockId = await book.lockTree();
 
     try {
       // validate if we can modify the tree
@@ -1610,7 +1610,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       }
     } finally {
       // release the lock
-      await book.unlockTree();
+      await book.unlockTree({id: lockId});
     }
 
     return {

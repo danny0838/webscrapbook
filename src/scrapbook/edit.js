@@ -93,7 +93,7 @@
         const book = server.books[bookId];
 
         // acquire a lock
-        await book.lockTree();
+        let lockId = await book.lockTree();
 
         try {
           // reload and check whether context is still valid
@@ -128,7 +128,7 @@
           await book.saveMeta();
         } finally {
           // release the lock
-          await book.unlockTree();
+          await book.unlockTree({id: lockId});
         }
       } catch (ex) {
         console.error(ex);

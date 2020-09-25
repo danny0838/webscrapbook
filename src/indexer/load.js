@@ -515,11 +515,11 @@ svg, math`;
           // To prevent too easy deadlock when the user interrupts indexing,
           // we don't lock the tree during whole indexing process. Instead,
           // load tree data in prior and check afterwards.
-          await book.lockTree();
+          let lockId = await book.lockTree();
           try {
             await book.loadTreeFiles(true);
           } finally {
-            await book.unlockTree();
+            await book.unlockTree({id: lockId});
           }
 
           const inputData = {
@@ -1961,7 +1961,7 @@ svg, math`;
         this.log(`Uploading changed files to server...`);
         const book = this.serverData.book;
 
-        await book.lockTree();
+        let lockId = await book.lockTree();
 
         try {
           // ensure tree not changed during the indexing
@@ -2014,7 +2014,7 @@ svg, math`;
             });
           }
         } finally {
-          await book.unlockTree();
+          await book.unlockTree({id: lockId});
         }
 
         return;

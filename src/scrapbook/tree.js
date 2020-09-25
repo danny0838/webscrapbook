@@ -723,7 +723,7 @@ Redirecting to file <a href="index.md">index.md</a>
         };
 
         // acquire a lock
-        await this.book.lockTree();
+        let lockId = await this.book.lockTree();
 
         try {
           // validate if we can modify the tree
@@ -782,7 +782,7 @@ Redirecting to file <a href="index.md">index.md</a>
           await this.book.saveTreeFiles({meta: hasRemovedItems, toc: true, useLock: false});
         } finally {
           // release the lock
-          await this.book.unlockTree();
+          await this.book.unlockTree({id: lockId});
         }
       },
 
@@ -1728,7 +1728,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
     async uploadItems(files, targetId, targetIndex) {
       // acquire a lock
-      await this.book.lockTree();
+      let lockId = await this.book.lockTree();
 
       try {
         // validate if we can modify the tree
@@ -1817,7 +1817,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         await this.book.saveTreeFiles({meta: true, toc: true, useLock: false});
       } finally {
         // release the lock
-        await this.book.unlockTree();
+        await this.book.unlockTree({id: lockId});
       }
     },
 

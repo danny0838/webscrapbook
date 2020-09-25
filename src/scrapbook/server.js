@@ -503,21 +503,24 @@
     }
 
     async lockTree(params = {}) {
-      const {timeout = 5, staleThreshold = 60} = params;
-      await this.server.request({
+      const {id, timeout = 5, staleThreshold = 60} = params;
+      const json = await this.server.request({
         url: this.topUrl + '?a=lock',
         method: "POST",
         format: 'json',
         csrfToken: true,
         body: {
           name: `book-${this.id}-tree`,
+          id,
           chkt: timeout,
           chks: staleThreshold,
         },
-      });
+      }).then(r => r.json());
+      return json.data;
     }
 
-    async unlockTree() {
+    async unlockTree(params = {}) {
+      const {id} = params;
       await this.server.request({
         url: this.topUrl + '?a=unlock',
         method: "POST",
@@ -525,6 +528,7 @@
         csrfToken: true,
         body: {
           name: `book-${this.id}-tree`,
+          id,
         },
       });
     }
@@ -546,9 +550,10 @@
      */
     async saveTreeFiles(params = {}) {
       const {meta = false, toc = false, useLock = true} = params;
+      let lockId;
 
       if (useLock) {
-        await this.lockTree();
+        lockId = await this.lockTree();
       }
 
       try {
@@ -571,7 +576,7 @@
         await this.loadTreeFiles(true);
       } finally {
         if (useLock) {
-          await this.unlockTree();
+          await this.unlockTree({id: lockId});
         }
       }
     }
