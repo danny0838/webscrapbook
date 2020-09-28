@@ -25,6 +25,18 @@
   // this should correspond with the lock stale time in the backend server
   const LOCK_STALE_TIME = 60 * 1000;
 
+  class RequestError extends Error {
+    constructor(message, response) {
+      super(message);
+      this.name = 'RequestError';
+      if (response) {
+        this.url = response.url;
+        this.status = response.status;
+        this.headers = response.headers;
+      }
+    }
+  }
+
   class Server {
     constructor () {
       this._config = null;
@@ -138,7 +150,7 @@
           cache,
         });
       } catch (ex) {
-        throw new Error('Unable to connect to backend server.');
+        throw new RequestError('Unable to connect to backend server.');
       }
 
       if (!response.ok) {
@@ -147,10 +159,10 @@
           json = await response.json();
         } catch (ex) {
           const statusText = response.status + (response.statusText ? " " + response.statusText : "");
-          throw new Error(statusText);
+          throw new RequestError(statusText, response);
         }
         if (json.error) {
-          throw json.error;
+          throw new RequestError(json.error.message, response);
         }
       }
       return response;
