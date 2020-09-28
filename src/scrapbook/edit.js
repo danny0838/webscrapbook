@@ -92,44 +92,33 @@
         const {id, bookId} = this;
         const book = server.books[bookId];
 
-        // acquire a lock
-        let lockId = await book.lockTree();
+        await book.transaction({
+          callback: async (book) => {
+            await book.loadTreeFiles(true);
+            const meta = await book.loadMeta(true);
 
-        try {
-          // reload and check whether context is still valid
-          await server.init(true);
+            const item = meta[id];
+            if (!item) {
+              throw new Error(`Specified item "${id}" does not exist.`);
+            }
 
-          const book = server.books[bookId];
-          if (!book) {
-            throw new Error(`Specified book "${bookId}" does not exist.`);
-          }
+            // upload text content
+            const content = document.getElementById("editor").value;
+            await server.request({
+              url: this.target + '?a=save',
+              method: "POST",
+              format: 'json',
+              csrfToken: true,
+              body: {
+                text: scrapbook.unicodeToUtf8(content),
+              },
+            });
 
-          const meta = await book.loadMeta(true);
-
-          const item = meta[id];
-          if (!item) {
-            throw new Error(`Specified item "${id}" does not exist.`);
-          }
-
-          // upload text content
-          const content = document.getElementById("editor").value;
-          await server.request({
-            url: this.target + '?a=save',
-            method: "POST",
-            format: 'json',
-            csrfToken: true,
-            body: {
-              text: scrapbook.unicodeToUtf8(content),
-            },
-          });
-
-          // update item
-          item.modify = scrapbook.dateToId();
-          await book.saveMeta();
-        } finally {
-          // release the lock
-          await book.unlockTree({id: lockId});
-        }
+            // update item
+            item.modify = scrapbook.dateToId();
+            await book.saveMeta();
+          },
+        });
       } catch (ex) {
         console.error(ex);
         alert(`Unable to save document: ${ex.message}`);

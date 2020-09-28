@@ -515,12 +515,11 @@ svg, math`;
           // To prevent too easy deadlock when the user interrupts indexing,
           // we don't lock the tree during whole indexing process. Instead,
           // load tree data in prior and check afterwards.
-          let lockId = await book.lockTree();
-          try {
-            await book.loadTreeFiles(true);
-          } finally {
-            await book.unlockTree({id: lockId});
-          }
+          await book.transaction({
+            callback: async (book) => {
+              await book.loadTreeFiles(true);
+            },
+          });
 
           const inputData = {
             name: book.name,
@@ -1961,61 +1960,59 @@ svg, math`;
         this.log(`Uploading changed files to server...`);
         const book = this.serverData.book;
 
-        let lockId = await book.lockTree();
+        await book.transaction({
+          callback: async (book) => {
+            // ensure tree not changed during the indexing
+            if (!await book.validateTree()) {
+              throw new Error("Tree data in the server has been changed. Run indexer again and do not modify the scrapbook during the indexing process.");
+            }
 
-        try {
-          // ensure tree not changed during the indexing
-          if (!await book.validateTree()) {
-            throw new Error("Tree data in the server has been changed. Run indexer again and do not modify the scrapbook during the indexing process.");
-          }
-
-          // delete previous backup folder
-          try {
-            const target = book.topUrl + scrapbook.escapeFilename(this.treeBakDir);
-            await server.request({
-              url: target + '?a=delete',
-              method: 'POST',
-              format: 'json',
-              csrfToken: true,
-            });
-          } catch (ex) {
-            // ignore
-          }
-
-          for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
-            if (zipObj.dir) { continue; }
-
-            // delete emptying favicons
-            if (inZipPath.startsWith(this.faviconDir) && zipObj.comment === "emptying") {
-              const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
+            // delete previous backup folder
+            try {
+              const target = book.topUrl + scrapbook.escapeFilename(this.treeBakDir);
               await server.request({
                 url: target + '?a=delete',
                 method: 'POST',
                 format: 'json',
                 csrfToken: true,
               });
-              continue;
+            } catch (ex) {
+              // ignore
             }
 
-            const file = new File(
-              [await zipObj.async('blob')],
-              inZipPath.split('/').pop(),
-              {type: "application/octet-stream"}
-            );
-            const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
-            await server.request({
-              url: target + '?a=save',
-              method: 'POST',
-              format: 'json',
-              csrfToken: true,
-              body: {
-                upload: file,
-              },
-            });
-          }
-        } finally {
-          await book.unlockTree({id: lockId});
-        }
+            for (const [inZipPath, zipObj] of Object.entries(zip.files)) {
+              if (zipObj.dir) { continue; }
+
+              // delete emptying favicons
+              if (inZipPath.startsWith(this.faviconDir) && zipObj.comment === "emptying") {
+                const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
+                await server.request({
+                  url: target + '?a=delete',
+                  method: 'POST',
+                  format: 'json',
+                  csrfToken: true,
+                });
+                continue;
+              }
+
+              const file = new File(
+                [await zipObj.async('blob')],
+                inZipPath.split('/').pop(),
+                {type: "application/octet-stream"}
+              );
+              const target = book.topUrl + scrapbook.escapeFilename(inZipPath);
+              await server.request({
+                url: target + '?a=save',
+                method: 'POST',
+                format: 'json',
+                csrfToken: true,
+                body: {
+                  upload: file,
+                },
+              });
+            }
+          },
+        });
 
         return;
       }

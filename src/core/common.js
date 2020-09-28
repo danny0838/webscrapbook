@@ -41,7 +41,7 @@ if (Node && !Node.prototype.getRootNode) {
 
   'use strict';
 
-  const BACKEND_MIN_VERSION = '0.17.0';
+  const BACKEND_MIN_VERSION = '0.23.0';
 
   const DEFAULT_OPTIONS = {
     "ui.showContextMenu": true,

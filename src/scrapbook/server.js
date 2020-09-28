@@ -22,6 +22,9 @@
 
   const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);
 
+  // this should correspond with the lock stale time in the backend server
+  const LOCK_STALE_TIME = 60 * 1000;
+
   class Server {
     constructor () {
       this._config = null;
@@ -537,7 +540,7 @@
      */
     async validateTree() {
       const treeLastModified = this.treeLastModified;
-      const treeFiles = await this.loadTreeFiles(true);
+      await this.loadTreeFiles(true);
       if (this.treeLastModified > treeLastModified) {
         return false;
       }
@@ -545,43 +548,7 @@
     }
 
     /**
-     * Validate this.treeLastModified and update it afterwards.
-     */
-    async saveTreeFiles(params = {}) {
-      const {meta = false, toc = false, useLock = true} = params;
-      let lockId;
-
-      if (useLock) {
-        lockId = await this.lockTree();
-      }
-
-      try {
-        if (useLock) {
-          // validate tree
-          if (!await this.validateTree()) {
-            throw new Error(scrapbook.lang('ScrapBookErrorServerTreeChanged'));
-          }
-        }
-
-        // save requested tree files
-        if (meta) {
-          await this.saveMeta();
-        }
-        if (toc) {
-          await this.saveToc();
-        }
-
-        // update this.treeLastModified
-        await this.loadTreeFiles(true);
-      } finally {
-        if (useLock) {
-          await this.unlockTree({id: lockId});
-        }
-      }
-    }
-
-    /**
-     * This API does not validate. Use saveTreeFiles for safety.
+     * Low-level API. Wrap in a transaction for safety.
      */
     async saveMeta() {
       const exportFile = async (meta, i) => {
@@ -643,7 +610,7 @@
     }
 
     /**
-     * This API does not validate. Use saveTreeFiles for safety.
+     * Low-level API. Wrap in a transaction for safety.
      */
     async saveToc() {
       const exportFile = async (toc, i) => {
@@ -700,6 +667,57 @@
           format: 'json',
           csrfToken: true,
         });
+      }
+    }
+
+    /**
+     * A high-level wrapper for common request series.
+     *
+     * - Acquire a lock.
+     * - Do a series of requests.
+     * - Spawns a timer to refresh the lock automatically.
+     * - Release the lock on success or fail.
+     *
+     * NOTE: this is NOT a true transaction, which supports atomic and rollback.
+     *
+     * @param {Object} params
+     * @param {Function} params.callback - the callback function for requests
+     *     to perform.
+     * @param {integer} [params.timeout] - timeout for lock.
+     * @param {string} [params.mode] - mode for the transaction:
+     *     - "validate": validate tree before the request and fail out if
+     *       remote tree has been updated.
+     */
+    async transaction(params = {}) {
+      const {
+          callback,
+          mode,
+          timeout = 5,
+        } = params;
+      const lockId = await this.lockTree({timeout});
+      let keeper;
+
+      try {
+        // keeper setup
+        const refreshInterval = LOCK_STALE_TIME * 0.2;
+        const refreshAcquireTimeout = 1;
+        keeper = setInterval(async () => {
+          await this.lockTree({id: lockId, timeout: refreshAcquireTimeout});
+        }, refreshInterval);
+
+        // request
+        switch (mode) {
+          case 'validate': {
+            if (!await this.validateTree()) {
+              throw new Error(scrapbook.lang('ScrapBookErrorServerTreeChanged'));
+            }
+            break;
+          }
+        }
+        await callback.call(this, this);
+      } finally {
+        clearInterval(keeper);
+        await this.unlockTree({id: lockId});
       }
     }
 

@@ -687,20 +687,21 @@
     }
 
     // lock tree before loading to avoid a conflict due to parallel captures
-    let lockId = await book.lockTree({timeout: 60});
-    try {
-      await book.loadTreeFiles(true);
-      await book.loadMeta(true);
-      await book.loadToc(true);
-      await book.addItem({
-        item: Object.assign({}, item, {icon}),
-        parentId,
-        index,
-      });
-      await book.saveTreeFiles({meta: true, toc: true, useLock: false});
-    } finally {
-      await book.unlockTree({id: lockId});
-    }
+    await book.transaction({
+      timeout: 60,
+      callback: async (book) => {
+        await book.loadTreeFiles(true);
+        await book.loadMeta(true);
+        await book.loadToc(true);
+        await book.addItem({
+          item: Object.assign({}, item, {icon}),
+          parentId,
+          index,
+        });
+        await book.saveMeta();
+        await book.saveToc();
+      },
+    });
   };
 
   /**
@@ -1519,99 +1520,91 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       }
     }
 
-    // acquire a lock
-    let lockId = await book.lockTree();
+    await book.transaction({
+      mode: 'validate',
+      callback: async (book) => {
+        // documents
+        for (const [fileUrl, data] of Object.entries(response)) {
+          const target = scrapbook.splitUrl(fileUrl)[0];
 
-    try {
-      // validate if we can modify the tree
-      if (!await book.validateTree()) {
-        throw new Error(scrapbook.lang('ScrapBookMainErrorServerTreeChanged'));
-      }
+          // only save files under dataDir
+          if (!fileUrl.startsWith(book.dataUrl)) {
+            capturer.warn(scrapbook.lang("ErrorSaveNotUnderDataDir", [target]));
+            continue;
+          }
 
-      // documents
-      for (const [fileUrl, data] of Object.entries(response)) {
-        const target = scrapbook.splitUrl(fileUrl)[0];
+          // forbid non-UTF-8 for data safety
+          if (data.charset !== "UTF-8") {
+            capturer.warn(scrapbook.lang("ErrorSaveNonUTF8", [target]));
+            continue;
+          }
 
-        // only save files under dataDir
-        if (!fileUrl.startsWith(book.dataUrl)) {
-          capturer.warn(scrapbook.lang("ErrorSaveNotUnderDataDir", [target]));
-          continue;
-        }
+          // save document
+          try {
+            let content = data.content;
 
-        // forbid non-UTF-8 for data safety
-        if (data.charset !== "UTF-8") {
-          capturer.warn(scrapbook.lang("ErrorSaveNonUTF8", [target]));
-          continue;
-        }
-
-        // save document
-        try {
-          let content = data.content;
-
-          // replace resource URLs
-          content = content.replace(/urn:scrapbook:url:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
-            if (data.resources[key]) {
-              if (data.resources[key].file) {
-                const resUrl = internalizePrefix + data.resources[key].file.name;
-                const u = scrapbook.getRelativeUrl(resUrl, fileUrl);
-                return scrapbook.escapeHtml(u);
-              } else {
-                return scrapbook.escapeHtml(data.resources[key].url);
+            // replace resource URLs
+            content = content.replace(/urn:scrapbook:url:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
+              if (data.resources[key]) {
+                if (data.resources[key].file) {
+                  const resUrl = internalizePrefix + data.resources[key].file.name;
+                  const u = scrapbook.getRelativeUrl(resUrl, fileUrl);
+                  return scrapbook.escapeHtml(u);
+                } else {
+                  return scrapbook.escapeHtml(data.resources[key].url);
+                }
               }
-            }
-            return match;
-          });
-          
-          const blob = new Blob([content], {type: "text/html"});
+              return match;
+            });
+            
+            const blob = new Blob([content], {type: "text/html"});
+            await server.request({
+              url: target + '?a=save',
+              method: "POST",
+              format: 'json',
+              csrfToken: true,
+              body: {
+                upload: blob,
+              },
+            });
+            capturer.log(`Updated ${target}`);
+          } catch (ex) {
+            console.error(ex);
+            capturer.error(scrapbook.lang("ErrorSaveUploadFailure", [target, ex.message]));
+          }
+
+          // update item for main frame
+          if (frameIsMain && url === fileUrl) {
+            item.title = data.info.title;
+          }
+        }
+
+        // resources
+        for (const [url, file] of resourceMap.entries()) {
+          if (!file) { continue; }
+          const target = internalizePrefix + file.name;
           await server.request({
             url: target + '?a=save',
             method: "POST",
             format: 'json',
             csrfToken: true,
             body: {
-              upload: blob,
+              upload: file,
             },
           });
-          capturer.log(`Updated ${target}`);
-        } catch (ex) {
-          console.error(ex);
-          capturer.error(scrapbook.lang("ErrorSaveUploadFailure", [target, ex.message]));
+          capturer.log(`Internalized resource ${target}`);
         }
 
-        // update item for main frame
-        if (frameIsMain && url === fileUrl) {
-          item.title = data.info.title;
+        // update item
+        if (item) {
+          item.modify = modify;
+          book.meta[item.id] = item;
+          await book.saveMeta();
+        } else {
+          capturer.warn(scrapbook.lang("ErrorSaveUnknownItem"));
         }
-      }
-
-      // resources
-      for (const [url, file] of resourceMap.entries()) {
-        if (!file) { continue; }
-        const target = internalizePrefix + file.name;
-        await server.request({
-          url: target + '?a=save',
-          method: "POST",
-          format: 'json',
-          csrfToken: true,
-          body: {
-            upload: file,
-          },
-        });
-        capturer.log(`Internalized resource ${target}`);
-      }
-
-      // update item
-      if (item) {
-        item.modify = modify;
-        book.meta[item.id] = item;
-        await book.saveMeta();
-      } else {
-        capturer.warn(scrapbook.lang("ErrorSaveUnknownItem"));
-      }
-    } finally {
-      // release the lock
-      await book.unlockTree({id: lockId});
-    }
+      },
+    });
 
     return {
       timeId,

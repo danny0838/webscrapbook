@@ -219,7 +219,14 @@
         }
 
         // save meta
-        await this.book.saveTreeFiles({meta: true});
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            await book.saveMeta();
+            await book.saveToc();
+            await book.loadTreeFiles(true);
+          },
+        });
 
         // update DOM
         Array.prototype.filter.call(
@@ -264,7 +271,14 @@
         });
 
         // save meta and TOC
-        await this.book.saveTreeFiles({meta: true, toc: true});
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            await book.saveMeta();
+            await book.saveToc();
+            await book.loadTreeFiles(true);  // update treeLastModified
+          },
+        });
 
         // update DOM
         Array.prototype.filter.call(
@@ -303,7 +317,14 @@
         });
 
         // save meta and TOC
-        await this.book.saveTreeFiles({meta: true, toc: true});
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            await book.saveMeta();
+            await book.saveToc();
+            await book.loadTreeFiles(true);  // update treeLastModified
+          },
+        });
 
         // update DOM
         Array.prototype.filter.call(
@@ -447,7 +468,14 @@
         const blob = new Blob([content], {type: 'text/plain'});
 
         // save meta and TOC
-        await this.book.saveTreeFiles({meta: true, toc: true});
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            await book.saveMeta();
+            await book.saveToc();
+            await book.loadTreeFiles(true);  // update treeLastModified
+          },
+        });
 
         // save data files
         await server.request({
@@ -575,7 +603,13 @@ Redirecting to file <a href="index.md">index.md</a>
         });
 
         // upload changes to server
-        await this.book.saveTreeFiles({toc: true});
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            await book.saveToc();
+            await book.loadTreeFiles(true);  // update treeLastModified
+          },
+        });
       },
 
       async move_down(selectedItemElems) {
@@ -614,7 +648,13 @@ Redirecting to file <a href="index.md">index.md</a>
         });
 
         // upload changes to server
-        await this.book.saveTreeFiles({toc: true});
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            await book.saveToc();
+            await book.loadTreeFiles(true);  // update treeLastModified
+          },
+        });
       },
 
       async move_into(selectedItemElems) {
@@ -704,7 +744,13 @@ Redirecting to file <a href="index.md">index.md</a>
         }
 
         // upload changes to server
-        await this.book.saveTreeFiles({toc: true});
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            await book.saveToc();
+            await book.loadTreeFiles(true);  // update treeLastModified
+          },
+        });
       },
 
       async delete(selectedItemElems) {
@@ -722,68 +768,64 @@ Redirecting to file <a href="index.md">index.md</a>
           });
         };
 
-        // acquire a lock
-        let lockId = await this.book.lockTree();
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            // Reverse the order to always move an item before its parent so that
+            // its parent is in the DOM and gets children updated correctly.
+            const itemElems = [...selectedItemElems].reverse();
 
-        try {
-          // validate if we can modify the tree
-          if (!await this.book.validateTree()) {
-            throw new Error(scrapbook.lang('ScrapBookErrorServerTreeChanged'));
-          }
+            let hasRemovedItems = false;
+            for (const itemElem of itemElems) {
+              const itemId = itemElem.getAttribute('data-id');
 
-          // Reverse the order to always move an item before its parent so that
-          // its parent is in the DOM and gets children updated correctly.
-          const itemElems = [...selectedItemElems].reverse();
+              const parentItemElem = itemElem.parentNode.parentNode;
+              const parentItemId = parentItemElem.getAttribute('data-id');
+              const siblingItems = parentItemElem.container.children;
+              const index = Array.prototype.indexOf.call(siblingItems, itemElem);
 
-          let hasRemovedItems = false;
-          for (const itemElem of itemElems) {
-            const itemId = itemElem.getAttribute('data-id');
+              // the operated item element is missing due to an unexpected reason
+              if (index === -1) { continue; }
 
-            const parentItemElem = itemElem.parentNode.parentNode;
-            const parentItemId = parentItemElem.getAttribute('data-id');
-            const siblingItems = parentItemElem.container.children;
-            const index = Array.prototype.indexOf.call(siblingItems, itemElem);
+              // remove this and descendant items from Book
+              const removedItems = this.book.removeItemTree({
+                id: itemId,
+                parentId: parentItemId,
+                index,
+              });
+              if (removedItems.size > 0) { hasRemovedItems = true; }
 
-            // the operated item element is missing due to an unexpected reason
-            if (index === -1) { continue; }
+              // update DOM
+              Array.prototype.filter.call(
+                document.getElementById('items').querySelectorAll('[data-id]'),
+                x => x.getAttribute('data-id') === parentItemId
+              ).forEach((parentElem) => {
+                if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
+                const itemElem = parentElem.container.children[index];
+                itemElem.remove();
+                this.itemReduceContainer(parentElem);
+              });
 
-            // remove this and descendant items from Book
-            const removedItems = this.book.removeItemTree({
-              id: itemId,
-              parentId: parentItemId,
-              index,
-            });
-            if (removedItems.size > 0) { hasRemovedItems = true; }
-
-            // update DOM
-            Array.prototype.filter.call(
-              document.getElementById('items').querySelectorAll('[data-id]'),
-              x => x.getAttribute('data-id') === parentItemId
-            ).forEach((parentElem) => {
-              if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
-              const itemElem = parentElem.container.children[index];
-              itemElem.remove();
-              this.itemReduceContainer(parentElem);
-            });
-
-            // remove data files
-            for (const removedItem of removedItems) {
-              if (!removedItem.index) { continue; }
-              try {
-                await removeDataFiles(removedItem.index);
-              } catch (ex) {
-                console.error(ex);
-                this.warn(`Unable to delete '${removedItem.index}': ${ex.message}`);
+              // remove data files
+              for (const removedItem of removedItems) {
+                if (!removedItem.index) { continue; }
+                try {
+                  await removeDataFiles(removedItem.index);
+                } catch (ex) {
+                  console.error(ex);
+                  this.warn(`Unable to delete '${removedItem.index}': ${ex.message}`);
+                }
               }
             }
-          }
 
-          // upload changes to server
-          await this.book.saveTreeFiles({meta: hasRemovedItems, toc: true, useLock: false});
-        } finally {
-          // release the lock
-          await this.book.unlockTree({id: lockId});
-        }
+            // upload changes to server
+            if (hasRemovedItems) {
+              await book.saveMeta();
+            }
+            await book.saveToc();
+            await book.loadTreeFiles(true);  // update treeLastModified
+          },
+        });
       },
 
       async view_recycle(selectedItemElems) {
@@ -1693,7 +1735,13 @@ Redirecting to file <a href="index.md">index.md</a>
       }
 
       // upload changes to server
-      await this.book.saveTreeFiles({toc: true});
+      await this.book.transaction({
+        mode: 'validate',
+        callback: async (book) => {
+          await book.saveToc();
+          await book.loadTreeFiles(true);  // update treeLastModified
+        },
+      });
     },
 
     async linkItems(sourceItemElems, targetId, targetIndex) {
@@ -1723,55 +1771,55 @@ Redirecting to file <a href="index.md">index.md</a>
       }
 
       // upload changes to server
-      await this.book.saveTreeFiles({toc: true});
+      await this.book.transaction({
+        mode: 'validate',
+        callback: async (book) => {
+          await book.saveToc();
+          await book.loadTreeFiles(true);  // update treeLastModified
+        },
+      });
     },
 
     async uploadItems(files, targetId, targetIndex) {
-      // acquire a lock
-      let lockId = await this.book.lockTree();
-
-      try {
-        // validate if we can modify the tree
-        if (!await this.book.validateTree()) {
-          throw new Error(scrapbook.lang('ScrapBookErrorServerTreeChanged'));
-        }
-
-        for (const file of files) {
-          try {
-            // create new item
-            const newItem = this.book.addItem({
-              item: {
-                "title": file.name,
-                "type": "file",
-              },
-              parentId: targetId,
-              index: targetIndex,
-            });
-            newItem.index = newItem.id + '/index.html';
-
-            let filename = file.name;
-            if (filename === 'index.html') { filename = 'index-1.html'; }
-            filename = scrapbook.validateFilename(filename, scrapbook.getOption("capture.saveAsciiFilename"));
-
-            // upload file
-            {
-              const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/' + filename);
-              await server.request({
-                url: target + '?a=save',
-                method: "POST",
-                format: 'json',
-                csrfToken: true,
-                body: {
-                  upload: file,
+      await this.book.transaction({
+        mode: 'validate',
+        callback: async (book) => {
+          for (const file of files) {
+            try {
+              // create new item
+              const newItem = this.book.addItem({
+                item: {
+                  "title": file.name,
+                  "type": "file",
                 },
+                parentId: targetId,
+                index: targetIndex,
               });
-            }
+              newItem.index = newItem.id + '/index.html';
 
-            // upload index.html
-            {
-              const title = newItem.title;
-              const url = scrapbook.escapeFilename(filename);
-              const html = `<!DOCTYPE html>
+              let filename = file.name;
+              if (filename === 'index.html') { filename = 'index-1.html'; }
+              filename = scrapbook.validateFilename(filename, scrapbook.getOption("capture.saveAsciiFilename"));
+
+              // upload file
+              {
+                const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/' + filename);
+                await server.request({
+                  url: target + '?a=save',
+                  method: "POST",
+                  format: 'json',
+                  csrfToken: true,
+                  body: {
+                    upload: file,
+                  },
+                });
+              }
+
+              // upload index.html
+              {
+                const title = newItem.title;
+                const url = scrapbook.escapeFilename(filename);
+                const html = `<!DOCTYPE html>
 <html data-scrapbook-type="file">
 <head>
 <meta charset="UTF-8">
@@ -1782,43 +1830,43 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 </body>
 </html>
 `;
-              const file = new File([html], 'index.html', {type: 'text/html'});
-              const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
-              await server.request({
-                url: target + '?a=save',
-                method: "POST",
-                format: 'json',
-                csrfToken: true,
-                body: {
-                  upload: file,
-                },
+                const file = new File([html], 'index.html', {type: 'text/html'});
+                const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
+                await server.request({
+                  url: target + '?a=save',
+                  method: "POST",
+                  format: 'json',
+                  csrfToken: true,
+                  body: {
+                    upload: file,
+                  },
+                });
+              }
+
+              // update DOM
+              Array.prototype.filter.call(
+                document.getElementById('items').querySelectorAll('[data-id]'),
+                x => x.getAttribute('data-id') === targetId
+              ).forEach((parentElem) => {
+                if (!(parentElem.parentNode)) { return; }
+                this.itemMakeContainer(parentElem);
+                if (!parentElem.container.hasAttribute('data-loaded')) { return; }
+                this.addItem(newItem.id, parentElem, targetIndex);
               });
+
+              targetIndex++;
+            } catch (ex) {
+              console.error(ex);
+              this.warn(`Unable to upload '${file.name}': ${ex.message}`);
             }
-
-            // update DOM
-            Array.prototype.filter.call(
-              document.getElementById('items').querySelectorAll('[data-id]'),
-              x => x.getAttribute('data-id') === targetId
-            ).forEach((parentElem) => {
-              if (!(parentElem.parentNode)) { return; }
-              this.itemMakeContainer(parentElem);
-              if (!parentElem.container.hasAttribute('data-loaded')) { return; }
-              this.addItem(newItem.id, parentElem, targetIndex);
-            });
-
-            targetIndex++;
-          } catch (ex) {
-            console.error(ex);
-            this.warn(`Unable to upload '${file.name}': ${ex.message}`);
           }
-        }
 
-        // save meta and TOC
-        await this.book.saveTreeFiles({meta: true, toc: true, useLock: false});
-      } finally {
-        // release the lock
-        await this.book.unlockTree({id: lockId});
-      }
+          // save meta and TOC
+          await book.saveMeta();
+          await book.saveToc();
+          await book.loadTreeFiles(true);  // update treeLastModified
+        },
+      });
     },
 
     onWindowItemDragEnter(event) {
