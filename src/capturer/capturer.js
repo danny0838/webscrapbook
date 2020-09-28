@@ -687,7 +687,7 @@
     }
 
     // lock tree before loading to avoid a conflict due to parallel captures
-    let lockId = await book.lockTree({timeout: 60, staleThreshold: 120});
+    let lockId = await book.lockTree({timeout: 60});
     try {
       await book.loadTreeFiles(true);
       await book.loadMeta(true);

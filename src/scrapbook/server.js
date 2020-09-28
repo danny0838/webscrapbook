@@ -503,7 +503,7 @@
     }
 
     async lockTree(params = {}) {
-      const {id, timeout = 5, staleThreshold = 60} = params;
+      const {id, timeout = 5} = params;
       const json = await this.server.request({
         url: this.topUrl + '?a=lock',
         method: "POST",
@@ -513,7 +513,6 @@
           name: `book-${this.id}-tree`,
           id,
           chkt: timeout,
-          chks: staleThreshold,
         },
       }).then(r => r.json());
       return json.data;
