@@ -197,9 +197,10 @@
           // Use xhr for the first time for authentication as fetch API doesn't
           // support a URL with user/password.
           let xhr;
+          const url = rootUrl + '?a=config&f=json&ts=' + Date.now(); // ignore cache
           try {
             xhr = await scrapbook.xhr({
-              url: rootUrl + '?a=config&f=json&ts=' + Date.now(), // ignore cache
+              url, // ignore cache
               user: this._user,
               password: this._password,
               responseType: 'json',
@@ -210,11 +211,14 @@
               onload: true,
             });
           } catch (ex) {
-            throw new Error('Unable to connect to backend server.');
+            throw new RequestError('Unable to connect to backend server.', {url});
           }
 
           if (xhr.status === 401) {
-            throw new Error('HTTP authentication failed.');
+            throw new RequestError('HTTP authentication failed.', {
+              url: xhr.responseURL,
+              status: xhr.status,
+            });
           }
 
           if (!(xhr.status >= 200 && xhr.status < 300 &&
@@ -706,8 +710,18 @@
           mode,
           timeout = 5,
         } = params;
-      const lockId = await this.lockTree({timeout});
+      let lockId;
       let keeper;
+
+      try {
+        lockId = await this.lockTree({timeout});
+      } catch (ex) {
+        if (ex.status === 503) {
+          throw new Error(`Tree of remote book "${this.id}" has been locked by another process. Try again later.`);
+        } else {
+          throw new Error(`Failed to lock tree for remote book "${this.id}".`);
+        }
+      }
 
       try {
         // keeper setup
@@ -729,7 +743,11 @@
         await callback.call(this, this);
       } finally {
         clearInterval(keeper);
-        await this.unlockTree({id: lockId});
+        try {
+          await this.unlockTree({id: lockId});
+        } catch (ex) {
+          throw new Error(`Failed to unlock tree for remote book "${this.id}".`);
+        }
       }
     }
 
