@@ -4226,6 +4226,10 @@
       const {helpers, rootNode, docUrl} = this;
 
       for (const helper of helpers) {
+        if (helper.disabled) {
+          continue;
+        }
+
         if (typeof helper.pattern === 'string') {
           const regex = this.parseRegexStr(helper.pattern);
           if (regex) {
