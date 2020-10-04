@@ -127,7 +127,10 @@
   scrapbook.visitLink = async function ({url, newTab = false, singleton = false}) {
     if (singleton) {
       if (singleton === true) {
-        singleton = [url, url + "?*"];
+        const u = new URL(url);
+        u.search = '';
+        u.hash = '';
+        singleton = [u.href, u.href + "?*"];
       }
 
       const existedTab = (await browser.tabs.query({url: singleton}))[0];
