@@ -109,6 +109,12 @@ a {
         }
         case "content-disposition": {
           const contentDisposition = scrapbook.parseHeaderContentDisposition(headers[i].value);
+
+          // do not launch viewer if the file is marked to be downloaded
+          if (contentDisposition.type === 'attachment') {
+            return;
+          }
+
           filename = contentDisposition.parameters.filename;
           break;
         }
