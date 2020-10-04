@@ -29,26 +29,6 @@
       </div>
     </div>
   </details>
-  <details id="group_server" open>
-    <summary>__MSG_OptionGroupServer__</summary>
-    <div>
-      <div>
-        <label for="opt_server.url">__MSG_OptionServerUrlLabel__</label>
-        <input type="url" id="opt_server.url" autocomplete="url" pattern="https?://[^?#]+/">
-        <a id="optionServerUrlTooltip" href="javascript:" data-tooltip="__MSG_OptionServerUrlTooltip__"></a>
-      </div>
-      <div>
-        <label for="opt_server.user">__MSG_OptionServerUserLabel__</label>
-        <input type="text" id="opt_server.user" autocomplete="username">
-        <a href="javascript:" data-tooltip="__MSG_OptionServerUserTooltip__"></a>
-      </div>
-      <div>
-        <label for="opt_server.password">__MSG_OptionServerPasswordLabel__</label>
-        <input type="password" id="opt_server.password" autocomplete="current-password">
-        <a href="javascript:" data-tooltip="__MSG_OptionServerPasswordTooltip__"></a>
-      </div>
-    </div>
-  </details>
   <details id="group_save" open>
     <summary>__MSG_OptionGroupSave__</summary>
     <div>
@@ -450,6 +430,43 @@
       </div>
     </div>
   </details>
+  <details id="group_server" open>
+    <summary>__MSG_OptionGroupServer__</summary>
+    <div>
+      <div>
+        <label for="opt_server.url">__MSG_OptionServerUrlLabel__</label>
+        <input type="url" id="opt_server.url" autocomplete="url" pattern="https?://[^?#]+/">
+        <a id="optionServerUrlTooltip" href="javascript:" data-tooltip="__MSG_OptionServerUrlTooltip__"></a>
+      </div>
+      <div>
+        <label for="opt_server.user">__MSG_OptionServerUserLabel__</label>
+        <input type="text" id="opt_server.user" autocomplete="username">
+        <a href="javascript:" data-tooltip="__MSG_OptionServerUserTooltip__"></a>
+      </div>
+      <div>
+        <label for="opt_server.password">__MSG_OptionServerPasswordLabel__</label>
+        <input type="password" id="opt_server.password" autocomplete="current-password">
+        <a href="javascript:" data-tooltip="__MSG_OptionServerPasswordTooltip__"></a>
+      </div>
+    </div>
+  </details>
+  <details id="group_scrapbook" open>
+    <summary>__MSG_OptionGroupScrapbook__</summary>
+    <div>
+      <div>
+        <label for="opt_scrapbook.defaultSearch">__MSG_OptionScrapbookDefaultSearchLabel__</label>
+        <input type="text" size="40" id="opt_scrapbook.defaultSearch" list="scrapbook.defaultSearch.preset">
+        <datalist id="scrapbook.defaultSearch.preset">
+          <option value="-type:folder -type:separator">
+        </datalist>
+      </div>
+      <div>
+        <label for="opt_scrapbook.fulltextCacheRemoteSizeLimit">__MSG_OptionScrapbookFulltextCacheRemoteSizeLimitLabel__</label>
+        <input type="number" min="0" step="any" id="opt_scrapbook.fulltextCacheRemoteSizeLimit">
+        <label for="opt_scrapbook.fulltextCacheRemoteSizeLimit">MiB</label>
+      </div>
+    </div>
+  </details>
   <details id="group_indexer" open>
     <summary>__MSG_OptionGroupIndexer__</summary>
     <div>
@@ -475,23 +492,6 @@
       <div>
         <input type="checkbox" id="opt_indexer.fulltextCacheFrameAsPageContent">
         <label for="opt_indexer.fulltextCacheFrameAsPageContent">__MSG_OptionIndexerFulltextCacheFrameAsPageContentLabel__</label>
-      </div>
-    </div>
-  </details>
-  <details id="group_scrapbook" open>
-    <summary>__MSG_OptionGroupScrapbook__</summary>
-    <div>
-      <div>
-        <label for="opt_scrapbook.defaultSearch">__MSG_OptionScrapbookDefaultSearchLabel__</label>
-        <input type="text" size="40" id="opt_scrapbook.defaultSearch" list="scrapbook.defaultSearch.preset">
-        <datalist id="scrapbook.defaultSearch.preset">
-          <option value="-type:folder -type:separator">
-        </datalist>
-      </div>
-      <div>
-        <label for="opt_scrapbook.fulltextCacheRemoteSizeLimit">__MSG_OptionScrapbookFulltextCacheRemoteSizeLimitLabel__</label>
-        <input type="number" min="0" step="any" id="opt_scrapbook.fulltextCacheRemoteSizeLimit">
-        <label for="opt_scrapbook.fulltextCacheRemoteSizeLimit">MiB</label>
       </div>
     </div>
   </details>

@@ -909,13 +909,13 @@
     "message": "Capture - Capture Helpers"
   },
   "OptionGroupIndexer": {
-    "message": "Indexer"
+    "message": "Backend server - Indexer"
   },
   "OptionGroupSave": {
     "message": "Capture - saving"
   },
   "OptionGroupScrapbook": {
-    "message": "Scrapbook"
+    "message": "Backend server - Scrapbook"
   },
   "OptionGroupServer": {
     "message": "Backend server"

@@ -909,13 +909,13 @@
     "message": "获取 - 获取助手"
   },
   "OptionGroupIndexer": {
-    "message": "索引器"
+    "message": "后端服务器 - 索引器"
   },
   "OptionGroupSave": {
     "message": "获取 - 保存"
   },
   "OptionGroupScrapbook": {
-    "message": "剪贴簿"
+    "message": "后端服务器 - 剪贴簿"
   },
   "OptionGroupServer": {
     "message": "后端服务器"
