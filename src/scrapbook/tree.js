@@ -2176,8 +2176,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       event.preventDefault();
       event.stopPropagation();
       const itemElem = event.currentTarget.parentNode.parentNode;
-      const reselect = this.mode !== 'manage' && !event.ctrlKey && !event.shiftKey;
-      if (reselect) {
+      const toggling = !event.ctrlKey && !event.shiftKey;
+      if (toggling) {
         this.toggleItem(itemElem);
         this.saveViewStatus();
       } else {
