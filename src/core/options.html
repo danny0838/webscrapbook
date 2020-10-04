@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="options.css">
 <script src="../lib/browser-polyfill.js"></script>
 <script src="common.js"></script>
+<script src="extension.js"></script>
 <script src="options.js"></script>
 </head>
 <body>
@@ -471,6 +472,22 @@
     <summary>__MSG_OptionGroupIndexer__</summary>
     <div>
       <div>
+        <input type="checkbox" id="opt_indexer.fulltextCache">
+        <label for="opt_indexer.fulltextCache">__MSG_OptionIndexerFulltextCacheLabel__</label>
+      </div>
+      <div>
+        <input type="checkbox" id="opt_indexer.fulltextCacheFrameAsPageContent">
+        <label for="opt_indexer.fulltextCacheFrameAsPageContent">__MSG_OptionIndexerFulltextCacheFrameAsPageContentLabel__</label>
+      </div>
+      <div>
+        <input type="checkbox" id="opt_indexer.fulltextCacheRecreate">
+        <label for="opt_indexer.fulltextCacheRecreate">__MSG_OptionIndexerFulltextCacheRecreateLabel__</label>
+      </div>
+      <div>
+        <input type="checkbox" id="opt_indexer.createStaticSite">
+        <label for="opt_indexer.createStaticSite">__MSG_OptionIndexerCreateStaticSiteLabel__</label>
+      </div>
+      <div>
         <input type="checkbox" id="opt_indexer.createStaticIndex">
         <label for="opt_indexer.createStaticIndex">__MSG_OptionIndexerCreateStaticIndexLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionIndexerCreateStaticIndexTooltip__"></a>
@@ -486,13 +503,10 @@
         <a href="javascript:" data-tooltip="__MSG_OptionIndexerCreateRssFeedBaseTooltip__"></a>
       </div>
       <div>
-        <input type="checkbox" id="opt_indexer.fulltextCache">
-        <label for="opt_indexer.fulltextCache">__MSG_OptionIndexerFulltextCacheLabel__</label>
+        <input type="checkbox" id="opt_indexer.makeBackup">
+        <label for="opt_indexer.makeBackup">__MSG_OptionIndexerMakeBackupLabel__</label>
       </div>
-      <div>
-        <input type="checkbox" id="opt_indexer.fulltextCacheFrameAsPageContent">
-        <label for="opt_indexer.fulltextCacheFrameAsPageContent">__MSG_OptionIndexerFulltextCacheFrameAsPageContentLabel__</label>
-      </div>
+      <input id="openIndexer" type="button" value="__MSG_OpenIndexer__">
     </div>
   </details>
 </div>

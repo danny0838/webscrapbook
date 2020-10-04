@@ -502,9 +502,6 @@
     "description": "Name of the extension as it's visible to the outside world",
     "message": "網頁剪貼簿"
   },
-  "IndexerDesc": {
-    "message": "指定剪貼簿資料夾後即會開始建立索引，並打包成 ZIP 壓縮檔供下載，將其內容解壓縮放入原剪貼簿資料夾，並開啟產生的 map.html 或 frame.html，即可檢視產生的頁面列表。\n\n• 擷取新頁面或修改資料檔後可再次執行此索引器以加入新項目或檢查潛在錯誤，之後重新整理 map.html 或 frame.html 即可檢視更新結果。\n• 索引器相關選項可到選項頁面設定。"
-  },
   "IndexerHeader": {
     "message": "選擇網頁剪貼簿資料夾或其 ZIP 壓縮檔。你可以拖放它們至此頁，或使用以下按鈕："
   },
@@ -523,34 +520,11 @@
   "IndexerTitle": {
     "message": "建立站台索引"
   },
-  "IndexerTreeSearchLinkTitle": {
-    "message": "搜尋"
-  },
-  "IndexerTreeSearchStart": {
-    "message": "查"
-  },
-  "IndexerTreeSearchTitle": {
-    "message": "$BOOK$ :: 搜尋",
-    "placeholders": {
-      "book": {
-        "content": "$1"
-      }
-    }
-  },
-  "IndexerTreeSearchViewInMap": {
-    "message": "在索引頁中檢視"
-  },
-  "IndexerTreeSourceLinkTitle": {
-    "message": "來源連結"
-  },
-  "IndexerTreeToggleAll": {
-    "message": "全部展開或收合"
-  },
   "OK": {
     "message": "確定"
   },
   "OpenIndexer": {
-    "message": "建立站台索引"
+    "message": "執行索引器"
   },
   "OpenOptions": {
     "message": "選項"
@@ -930,25 +904,34 @@
     "message": "RSS 摘要根網址:"
   },
   "OptionIndexerCreateRssFeedBaseTooltip": {
-    "message": "RSS 摘要的網址須為絕對路徑，透過後端伺服器建立索引時會自動偵測，此項可空白。若不是透過後端伺服器建立索引，或要轉發布至其他伺服器，則須在此提供發布剪貼簿的網址根目錄，例如「https://example.com/wsb/」。"
+    "message": "RSS 摘要的網址須為絕對路徑，一般空白即可，系統會自動使用後端伺服器的網址。若要轉發布至其他網址，則須在此提供發布剪貼簿的網址根目錄，例如「https://example.com/wsb/」。"
   },
   "OptionIndexerCreateRssFeedLabel": {
-    "message": "更新 RSS 摘要 (feed.atom)"
+    "message": "生成 RSS 摘要 (feed.atom)"
   },
   "OptionIndexerCreateRssFeedTooltip": {
     "message": "RSS 摘要會列出最近更動的資料項目，以告知訂閱者近期更新情形。"
   },
   "OptionIndexerCreateStaticIndexLabel": {
-    "message": "更新靜態索引頁 (index.html)"
+    "message": "生成靜態索引頁 (index.html)"
   },
   "OptionIndexerCreateStaticIndexTooltip": {
     "message": "靜態索引頁提供靜態的資料項目列表，供搜尋引擎檢索及不支援 JavaScript 的客戶端瀏覽，但此頁面載入較 map.html 慢。"
+  },
+  "OptionIndexerCreateStaticSiteLabel": {
+    "message": "生成靜態站台頁面"
   },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
     "message": "將框架頁內容快取為主頁內容"
   },
   "OptionIndexerFulltextCacheLabel": {
-    "message": "更新全文搜尋快取"
+    "message": "生成全文搜尋快取"
+  },
+  "OptionIndexerFulltextCacheRecreateLabel": {
+    "message": "重建全文快取"
+  },
+  "OptionIndexerMakeBackupLabel": {
+    "message": "更動檔案時建立備份"
   },
   "OptionPageTitle": {
     "message": "選項設定"

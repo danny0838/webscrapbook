@@ -502,9 +502,6 @@
     "description": "Name of the extension as it's visible to the outside world",
     "message": "WebScrapBook"
   },
-  "IndexerDesc": {
-    "message": "After selecting the scrapbook folder(s), the index will be generated and packed in a ZIP file for downloading. Extract its contents to the original scrapbook folder and open the generated map.html or frame.html to view the list of captured pages.\n\n• After new pages are captured or metadata is edited, run this indexer repeatedly to add newly captured pages and to check for potential errors, and refresh map.html or frame.html to view the updated result.\n• Additional settings for the indexer can be configured in the options page."
-  },
   "IndexerHeader": {
     "message": "Pick directories or ZIP archive files of scrapbook folders, via dropping them into this page, or using the buttons below:"
   },
@@ -523,34 +520,11 @@
   "IndexerTitle": {
     "message": "Generate site index"
   },
-  "IndexerTreeSearchLinkTitle": {
-    "message": "Search"
-  },
-  "IndexerTreeSearchStart": {
-    "message": "go"
-  },
-  "IndexerTreeSearchTitle": {
-    "message": "$BOOK$ :: Search",
-    "placeholders": {
-      "book": {
-        "content": "$1"
-      }
-    }
-  },
-  "IndexerTreeSearchViewInMap": {
-    "message": "View in map"
-  },
-  "IndexerTreeSourceLinkTitle": {
-    "message": "Source link"
-  },
-  "IndexerTreeToggleAll": {
-    "message": "Toggle all"
-  },
   "OK": {
     "message": "OK"
   },
   "OpenIndexer": {
-    "message": "Generate site index"
+    "message": "Run indexer"
   },
   "OpenOptions": {
     "message": "Options"
@@ -930,25 +904,34 @@
     "message": "Root URL of RSS feed:"
   },
   "OptionIndexerCreateRssFeedBaseTooltip": {
-    "message": "The address of an RSS feed must be an absolute URL. When the site index is generated via the backend server it will be automatically detected and this field can be left blank. If the site index is not generated via the backend server or the static site is to be distributed on another server, the root URL path of the scrapbook (which looks like “https://example.com/wsb/”) must be provided explicitly."
+    "message": "The address of an RSS feed must be an absolute URL. Generally this field can be left blank, and the URL of the backend server will be automatically used. If the static site is to be distributed on another server, the root URL path of the scrapbook (which looks like “https://example.com/wsb/”) must be provided explicitly here."
   },
   "OptionIndexerCreateRssFeedLabel": {
-    "message": "Update RSS feed (feed.atom)"
+    "message": "Generate RSS feed (feed.atom)"
   },
   "OptionIndexerCreateRssFeedTooltip": {
     "message": "The RSS feed lists recently modified data items, to inform the subscribers about recent updates."
   },
   "OptionIndexerCreateStaticIndexLabel": {
-    "message": "Update static index page (index.html)"
+    "message": "Generate static index page (index.html)"
   },
   "OptionIndexerCreateStaticIndexTooltip": {
     "message": "The static index page provides a static list of data items, for the search engine to index and for a client not supporting JavaScript to browse. This page is loads slower than map.html, though."
+  },
+  "OptionIndexerCreateStaticSiteLabel": {
+    "message": "Generate static site pages"
   },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
     "message": "Cache frame content as main document content"
   },
   "OptionIndexerFulltextCacheLabel": {
-    "message": "Update fulltext cache"
+    "message": "Generate fulltext cache"
+  },
+  "OptionIndexerFulltextCacheRecreateLabel": {
+    "message": "Recreate fulltext cache"
+  },
+  "OptionIndexerMakeBackupLabel": {
+    "message": "Backup changed files"
   },
   "OptionPageTitle": {
     "message": "Options"

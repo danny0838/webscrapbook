@@ -502,9 +502,6 @@
     "description": "Name of the extension as it's visible to the outside world",
     "message": "网页剪贴簿"
   },
-  "IndexerDesc": {
-    "message": "指定剪贴簿文件夹后即会开始建立索引，并打包成 ZIP 压缩文件供下载，将其内容解压缩放入原剪贴簿文件夹，并开启产生的 map.html 或 frame.html，即可检视产生的页面列表。\n\n• 获取新页面或修改数据文件后可再次执行此索引器以加入新项目或检查潜在错误，之后刷新 map.html 或 frame.html 即可检视更新结果。\n• 索引器相关选项可到选项页面设定。"
-  },
   "IndexerHeader": {
     "message": "选择网页剪贴簿文件夹或其 ZIP 压缩文件。你可以拖放它们至此页，或使用以下按钮："
   },
@@ -523,34 +520,11 @@
   "IndexerTitle": {
     "message": "创建网站索引"
   },
-  "IndexerTreeSearchLinkTitle": {
-    "message": "搜索"
-  },
-  "IndexerTreeSearchStart": {
-    "message": "查"
-  },
-  "IndexerTreeSearchTitle": {
-    "message": "$BOOK$ :: 搜索",
-    "placeholders": {
-      "book": {
-        "content": "$1"
-      }
-    }
-  },
-  "IndexerTreeSearchViewInMap": {
-    "message": "在索引页中检视"
-  },
-  "IndexerTreeSourceLinkTitle": {
-    "message": "来源链接"
-  },
-  "IndexerTreeToggleAll": {
-    "message": "全部展开或收合"
-  },
   "OK": {
     "message": "确定"
   },
   "OpenIndexer": {
-    "message": "创建网站索引"
+    "message": "运行索引器"
   },
   "OpenOptions": {
     "message": "选项"
@@ -930,25 +904,34 @@
     "message": "RSS 摘要根网址:"
   },
   "OptionIndexerCreateRssFeedBaseTooltip": {
-    "message": "RSS 摘要的网址须为绝对路径，透过后端伺服器建立索引时会自动侦测，此项可空白。若不是透过后端伺服器建立索引，或要转发布至其他伺服器，则须在此提供发布剪贴簿的网址根目录，例如“https://example.com/wsb/”。"
+    "message": "RSS 摘要的网址须为绝对路径，一般空白即可，系统会自动使用后端服务器的网址。若要转发布至其他网址，则须在此提供发布剪贴簿的网址根目录，例如“https://example.com/wsb/”。"
   },
   "OptionIndexerCreateRssFeedLabel": {
-    "message": "更新 RSS 摘要 (feed.atom)"
+    "message": "产生 RSS 摘要 (feed.atom)"
   },
   "OptionIndexerCreateRssFeedTooltip": {
     "message": "RSS 摘要会列出最近更动的资料项目，以告知订阅者近期更新情形。"
   },
   "OptionIndexerCreateStaticIndexLabel": {
-    "message": "更新静态索引页 (index.html)"
+    "message": "产生静态索引页 (index.html)"
   },
   "OptionIndexerCreateStaticIndexTooltip": {
     "message": "静态索引页提供静态的资料项目列表，供搜寻引擎检索及不支援 JavaScript 的客户端浏览，但此页面载入较 map.html 慢。"
+  },
+  "OptionIndexerCreateStaticSiteLabel": {
+    "message": "产生静态站台页面"
   },
   "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
     "message": "将框架页内容缓存为主页内容"
   },
   "OptionIndexerFulltextCacheLabel": {
-    "message": "更新全文搜索缓存"
+    "message": "产生全文搜索缓存"
+  },
+  "OptionIndexerFulltextCacheRecreateLabel": {
+    "message": "重建全文缓存"
+  },
+  "OptionIndexerMakeBackupLabel": {
+    "message": "更动文件时建立备份"
   },
   "OptionPageTitle": {
     "message": "选项设定"

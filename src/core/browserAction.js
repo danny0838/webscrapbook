@@ -152,13 +152,6 @@
       });
     });
 
-    document.getElementById("openIndexer").addEventListener('click', async (event) => {
-      return await scrapbook.visitLink({
-        url: browser.runtime.getURL("indexer/load.html"),
-        newTab: !!targetTab,
-      });
-    });
-
     document.getElementById("openOptions").addEventListener('click', async (event) => {
       return await scrapbook.visitLink({
         url: browser.runtime.getURL("core/options.html"),

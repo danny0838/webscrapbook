@@ -169,6 +169,77 @@
     }
 
     /**
+     * Wrapped API for SSE request to backend server
+     *
+     * @param {Object} params
+     * @param {string|URL} [params.url]
+     * @param {Object} [params.query]
+     * @param {string} [params.credentials]
+     * @param {string} [params.cache]
+     * @param {boolean} [params.csrfToken]
+     * @param {Function} [params.onMessage]
+     */
+    async requestSse(params = {}) {
+      let {
+        url = this.serverRoot,
+        query,
+        credentials = 'include',
+        cache = 'no-cache',
+        csrfToken = true,
+        onMessage,
+      } = params;
+
+      if (!(url instanceof URL)) {
+        url = new URL(url);
+      }
+
+      url.searchParams.set('f', 'sse');
+
+      if (query) {
+        for (const [key, value] of Object.entries(query)) {
+          if (typeof value !== "undefined") {
+            url.searchParams.append(key, value);
+          }
+        }
+      }
+
+      if (csrfToken) {
+        url.searchParams.set('token', await this.acquireToken());
+      }
+
+      return await new Promise(async (resolve, reject) => {
+        const evtSource = new EventSource(url.href);
+
+        evtSource.addEventListener('complete', (event) => {
+          evtSource.close();
+          resolve();
+        });
+
+        evtSource.addEventListener('error', (event) => {
+          evtSource.close();
+          const msg = 'Connection failed.';
+          if (onMessage) {
+            onMessage({type: 'error', msg});
+          }
+          resolve();
+        });
+
+        evtSource.addEventListener('message', (event) => {
+          let info;
+          try {
+            info = JSON.parse(event.data);
+          } catch (ex) {
+            console.error(ex);
+            info = {type: 'error', msg: `${ex.message}`};
+          }
+          if (onMessage) {
+            onMessage(info);
+          }
+        });
+      });
+    }
+
+    /**
      * Load the config of the backend server
      */
     async init(refresh = false) {

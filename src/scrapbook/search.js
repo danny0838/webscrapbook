@@ -35,6 +35,7 @@
         this.defaultSearch = scrapbook.getOption("scrapbook.defaultSearch");
         this.fulltextCacheUpdateThreshold = scrapbook.getOption('scrapbook.fulltextCacheUpdateThreshold');
         this.fulltextCacheRemoteSizeLimit = scrapbook.getOption('scrapbook.fulltextCacheRemoteSizeLimit');
+        this.inclusiveFrames = scrapbook.getOption('indexer.fulltextCacheFrameAsPageContent');
 
         await server.init();
 
@@ -226,24 +227,34 @@
       metaMtime = Math.floor(metaMtime) * 1000;
 
       if (fulltextMtime === -Infinity) {
-        let a = document.createElement('a');
+        const a = document.createElement('a');
         a.textContent = scrapbook.lang('WarnSearchCacheMissing', [book.name]);
-        let u = new URL(browser.runtime.getURL('indexer/load.html'));
-        u.searchParams.set('a', 'load_server');
-        u.searchParams.set('bookId', book.id);
+
+        const u = new URL(browser.runtime.getURL('scrapbook/cache.html'));
+        u.searchParams.append('book', book.id);
+        u.searchParams.append('fulltext', 1);
+        if (this.inclusiveFrames) {
+          u.searchParams.append('inclusive_frames', 1);
+        }
         a.href = u.href;
         a.target = '_blank';
+
         this.addMsg(a, 'warn');
       } else if (metaMtime > fulltextMtime) {
         const threshold = this.fulltextCacheUpdateThreshold;
         if (typeof threshold === 'number' && Date.now() > fulltextMtime + threshold) {
-          let a = document.createElement('a');
+          const a = document.createElement('a');
           a.textContent = scrapbook.lang('WarnSearchCacheOutdated', [book.name]);
-          let u = new URL(browser.runtime.getURL('indexer/load.html'));
-          u.searchParams.set('a', 'load_server');
-          u.searchParams.set('bookId', book.id);
+
+          const u = new URL(browser.runtime.getURL('scrapbook/cache.html'));
+          u.searchParams.append('book', book.id);
+          u.searchParams.append('fulltext', 1);
+          if (this.inclusiveFrames) {
+            u.searchParams.append('inclusive_frames', 1);
+          }
           a.href = u.href;
           a.target = '_blank';
+
           this.addMsg(a, 'warn');
         }
       }

@@ -285,6 +285,40 @@
     });
   }
 
+  async function openIndexer() {
+    const u = new URL(browser.runtime.getURL("scrapbook/cache.html"));
+    const params = u.searchParams;
+    if (getOptionFromDocument('indexer.fulltextCache')) {
+      params.append('fulltext', 1);
+    }
+    if (getOptionFromDocument('indexer.fulltextCacheFrameAsPageContent')) {
+      params.append('inclusive_frames', 1);
+    }
+    if (getOptionFromDocument('indexer.fulltextCacheRecreate')) {
+      params.append('recreate', 1);
+    }
+    if (getOptionFromDocument('indexer.createStaticSite')) {
+      params.append('static_site', 1);
+    }
+    if (getOptionFromDocument('indexer.createStaticIndex')) {
+      params.append('static_index', 1);
+    }
+    if (getOptionFromDocument('indexer.createRssFeed')) {
+      const rssRoot = getOptionFromDocument('indexer.createRssFeedBase') ||
+          getOptionFromDocument('server.url');
+      params.append('rss_root', rssRoot);
+    }
+    if (!getOptionFromDocument('indexer.makeBackup')) {
+      params.append('no_backup', 1);
+    }
+
+    return await scrapbook.visitLink({
+      url: u.href,
+      newTab: true,
+      singleton: true,
+    });
+  }
+
   function onToggleTooltip(elem) {
     if (!onToggleTooltip.tooltipMap) {
       onToggleTooltip.tooltipMap = new WeakMap();
@@ -350,6 +384,11 @@
       }
       await scrapbook.saveOptions();
       return closeWindow();
+    });
+
+    document.getElementById("openIndexer").addEventListener("click", (event) => {
+      event.preventDefault();
+      openIndexer();
     });
 
     document.getElementById("reset").addEventListener("click", (event) => {
