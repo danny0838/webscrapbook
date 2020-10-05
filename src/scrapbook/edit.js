@@ -117,6 +117,22 @@
             // update item
             item.modify = scrapbook.dateToId();
             await book.saveMeta();
+
+            await server.requestSse({
+              query: {
+                "a": "cache",
+                "book": book.id,
+                "item": item.id,
+                "no_lock": 1,
+                "fulltext": 1,
+                "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+              },
+              onMessage(info) {
+                if (['error', 'critical'].includes(info.type)) {
+                  alert(`Error when updating fulltext cache: ${info.msg}`);
+                }
+              },
+            });
           },
         });
       } catch (ex) {

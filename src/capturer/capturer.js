@@ -700,6 +700,22 @@
         });
         await book.saveMeta();
         await book.saveToc();
+
+        await server.requestSse({
+          query: {
+            "a": "cache",
+            "book": book.id,
+            "item": item.id,
+            "no_lock": 1,
+            "fulltext": 1,
+            "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+          },
+          onMessage(info) {
+            if (['error', 'critical'].includes(info.type)) {
+              capturer.error(`Error when generating fulltext cache: ${info.msg}`);
+            }
+          },
+        });
       },
     });
   };
@@ -1600,6 +1616,22 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           item.modify = modify;
           book.meta[item.id] = item;
           await book.saveMeta();
+
+          await server.requestSse({
+            query: {
+              "a": "cache",
+              "book": book.id,
+              "item": item.id,
+              "no_lock": 1,
+              "fulltext": 1,
+              "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+            },
+            onMessage(info) {
+              if (['error', 'critical'].includes(info.type)) {
+                capturer.error(`Error when updating fulltext cache: ${info.msg}`);
+              }
+            },
+          });
         } else {
           capturer.warn(scrapbook.lang("ErrorSaveUnknownItem"));
         }
