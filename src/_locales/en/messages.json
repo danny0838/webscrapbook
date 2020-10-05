@@ -89,6 +89,9 @@
   "CapturerTitle": {
     "message": "Capture page"
   },
+  "CheckerTitle": {
+    "message": "Check data"
+  },
   "EditConfirmScriptedDocument": {
     "message": "This page has scripts, which could conflict with the editor causing permanent data loss. Save anyway?"
   },
@@ -523,6 +526,9 @@
   "OK": {
     "message": "OK"
   },
+  "OpenChecker": {
+    "message": "Run checker"
+  },
   "OpenIndexer": {
     "message": "Run indexer"
   },
@@ -852,6 +858,45 @@
   "OptionCaptureVideoTooltip": {
     "message": "This determines how video elements are handled.\n\n• Save: Save the referenced video resource to local.\n• Save current: Save the playing video resource to local and ignore alternatives for other browsers. This considerably reduces size but the video may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all video resources are saved.\n• Link: Link the video to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the video.\n• Remove: Remove the video element. Note that this could alter the web page layout."
   },
+  "OptionCheckerMakeBackupLabel": {
+    "message": "Backup changed files"
+  },
+  "OptionCheckerResolveAbsoluteIconLabel": {
+    "message": "Automatically cache icons with absolute URL"
+  },
+  "OptionCheckerResolveInvalidIconLabel": {
+    "message": "Automatically cache icons not correctly cached"
+  },
+  "OptionCheckerResolveInvalidIdLabel": {
+    "message": "Automatically remove items with invalid ID"
+  },
+  "OptionCheckerResolveMissingDateLabel": {
+    "message": "Automatically fix items with missing create or modify time"
+  },
+  "OptionCheckerResolveMissingIndexFileLabel": {
+    "message": "Automatically remove items with missing index file"
+  },
+  "OptionCheckerResolveMissingIndexLabel": {
+    "message": "Automatically remove items with missing index property"
+  },
+  "OptionCheckerResolveOlderMtimeLabel": {
+    "message": "Automatically update item modify time if index file has newer last modified time"
+  },
+  "OptionCheckerResolveTocEmptySubtreeLabel": {
+    "message": "Automatically remove empty sub lists from TOC"
+  },
+  "OptionCheckerResolveTocInvalidLabel": {
+    "message": "Automatically remove invalid items from TOC"
+  },
+  "OptionCheckerResolveTocUnreachableLabel": {
+    "message": "Automatically add items unreachable from TOC"
+  },
+  "OptionCheckerResolveUnindexedFilesLabel": {
+    "message": "Automatically generate metadata for detected new pages and add them to root TOC"
+  },
+  "OptionCheckerResolveUnusedIconLabel": {
+    "message": "Automatically remove unused favicon cache"
+  },
   "OptionEditorAutoInit": {
     "message": "Automatically load editor toolbar when visiting a page in the scrapbook"
   },
@@ -872,6 +917,9 @@
   },
   "OptionGroupCapture": {
     "message": "Capture - content"
+  },
+  "OptionGroupChecker": {
+    "message": "Backend server - Checker"
   },
   "OptionGroupDownLink": {
     "message": "Capture - Download linked files"

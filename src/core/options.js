@@ -319,6 +319,56 @@
     });
   }
 
+  async function openChecker() {
+    const u = new URL(browser.runtime.getURL("scrapbook/check.html"));
+    const params = u.searchParams;
+    if (getOptionFromDocument('checker.resolveInvalidId')) {
+      params.append('resolve_invalid_id', 1);
+    }
+    if (getOptionFromDocument('checker.resolveMissingIndex')) {
+      params.append('resolve_missing_index', 1);
+    }
+    if (getOptionFromDocument('checker.resolveMissingIndexFile')) {
+      params.append('resolve_missing_index_file', 1);
+    }
+    if (getOptionFromDocument('checker.resolveMissingDate')) {
+      params.append('resolve_missing_date', 1);
+    }
+    if (getOptionFromDocument('checker.resolveOlderMtime')) {
+      params.append('resolve_older_mtime', 1);
+    }
+    if (getOptionFromDocument('resolveTocUnreachable')) {
+      params.append('resolve_toc_unreachable', 1);
+    }
+    if (getOptionFromDocument('checker.resolveTocInvalid')) {
+      params.append('resolve_toc_invalid', 1);
+    }
+    if (getOptionFromDocument('checker.resolveTocEmptySubtree')) {
+      params.append('resolve_toc_empty_subtree', 1);
+    }
+    if (getOptionFromDocument('checker.resolveUnindexedFiles')) {
+      params.append('resolve_unindexed_files', 1);
+    }
+    if (getOptionFromDocument('checker.resolveInvalidIcon')) {
+      params.append('resolve_invalid_icon', 1);
+    }
+    if (getOptionFromDocument('checker.resolveAbsoluteIcon')) {
+      params.append('resolve_absolute_icon', 1);
+    }
+    if (getOptionFromDocument('checker.resolveUnusedIcon')) {
+      params.append('resolve_unused_icon', 1);
+    }
+    if (!getOptionFromDocument('checker.makeBackup')) {
+      params.append('no_backup', 1);
+    }
+
+    return await scrapbook.visitLink({
+      url: u.href,
+      newTab: true,
+      singleton: true,
+    });
+  }
+
   function onToggleTooltip(elem) {
     if (!onToggleTooltip.tooltipMap) {
       onToggleTooltip.tooltipMap = new WeakMap();
@@ -389,6 +439,11 @@
     document.getElementById("openIndexer").addEventListener("click", (event) => {
       event.preventDefault();
       openIndexer();
+    });
+
+    document.getElementById("openChecker").addEventListener("click", (event) => {
+      event.preventDefault();
+      openChecker();
     });
 
     document.getElementById("reset").addEventListener("click", (event) => {

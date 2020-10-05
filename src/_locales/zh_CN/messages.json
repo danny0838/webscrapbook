@@ -89,6 +89,9 @@
   "CapturerTitle": {
     "message": "获取页面"
   },
+  "CheckerTitle": {
+    "message": "检测数据"
+  },
   "EditConfirmScriptedDocument": {
     "message": "此页面含有脚本，可能与编辑工具冲突，造成永久的信息遗失。确定要保存吗？"
   },
@@ -523,6 +526,9 @@
   "OK": {
     "message": "确定"
   },
+  "OpenChecker": {
+    "message": "运行检测器"
+  },
   "OpenIndexer": {
     "message": "运行索引器"
   },
@@ -852,6 +858,45 @@
   "OptionCaptureVideoTooltip": {
     "message": "此选项决定视频（VIDEO 元素）的处理方式。\n\n• 保存：将视频保存至本地。\n• 保存现用：将播放的视频保存至本地，忽略供其他浏览器使用的备用视频。这可以有效缩小容量，但在其他平台可能无法播放。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有视频。\n• 链接：将视频连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将视频无效化。\n• 移除：将视频元素移除。注意这可能会影响网页排版。"
   },
+  "OptionCheckerMakeBackupLabel": {
+    "message": "更动文件时建立备份"
+  },
+  "OptionCheckerResolveAbsoluteIconLabel": {
+    "message": "自动为使用绝对网址的图示建立缓存"
+  },
+  "OptionCheckerResolveInvalidIconLabel": {
+    "message": "自动修正未正确建立缓存的图示"
+  },
+  "OptionCheckerResolveInvalidIdLabel": {
+    "message": "自动移除含有错误 ID 的项目"
+  },
+  "OptionCheckerResolveMissingDateLabel": {
+    "message": "自动修正遗失建立与修改时间的项目"
+  },
+  "OptionCheckerResolveMissingIndexFileLabel": {
+    "message": "自动移除遗失索引文件的项目"
+  },
+  "OptionCheckerResolveMissingIndexLabel": {
+    "message": "自动移除遗失索引文件设定的项目"
+  },
+  "OptionCheckerResolveOlderMtimeLabel": {
+    "message": "索引文件修改时间晚于项目修改时间时，自动更新项目的修改时间"
+  },
+  "OptionCheckerResolveTocEmptySubtreeLabel": {
+    "message": "自动移除空的子目录表"
+  },
+  "OptionCheckerResolveTocInvalidLabel": {
+    "message": "自动从目录表移除错误的项目"
+  },
+  "OptionCheckerResolveTocUnreachableLabel": {
+    "message": "自动把未存在于目录表的项目加入根目录"
+  },
+  "OptionCheckerResolveUnindexedFilesLabel": {
+    "message": "自动为侦测到的新页面建立元资料并加入根目录"
+  },
+  "OptionCheckerResolveUnusedIconLabel": {
+    "message": "自动移除未使用的图示缓存"
+  },
   "OptionEditorAutoInit": {
     "message": "浏览剪贴簿中的页面时，自动载入编辑工具列"
   },
@@ -872,6 +917,9 @@
   },
   "OptionGroupCapture": {
     "message": "获取 - 内容"
+  },
+  "OptionGroupChecker": {
+    "message": "后端服务器 - 检测器"
   },
   "OptionGroupDownLink": {
     "message": "获取 - 下载链接文件"

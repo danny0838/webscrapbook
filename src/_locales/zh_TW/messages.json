@@ -89,6 +89,9 @@
   "CapturerTitle": {
     "message": "擷取頁面"
   },
+  "CheckerTitle": {
+    "message": "檢測資料"
+  },
   "EditConfirmScriptedDocument": {
     "message": "此頁面含有腳本，可能與編輯工具衝突，造成永久的資訊遺失。確定要儲存嗎？"
   },
@@ -523,6 +526,9 @@
   "OK": {
     "message": "確定"
   },
+  "OpenChecker": {
+    "message": "執行檢測器"
+  },
   "OpenIndexer": {
     "message": "執行索引器"
   },
@@ -852,6 +858,45 @@
   "OptionCaptureVideoTooltip": {
     "message": "此選項決定視訊（VIDEO 元素）的處理方式。\n\n• 儲存：將視訊儲存至本地。\n• 儲存現用：將播放的視訊儲存至本地，忽略供其他瀏覽器使用的備用視訊。這可以有效縮小容量，但在其他平台可能無法播放。若擷取的頁面並未顯示於瀏覽器（例如擷取原貌），則仍儲存所有視訊。\n• 連結：將視訊連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n• 清空：將視訊無效化。\n• 移除：將視訊元素移除。注意這可能會影響網頁排版。"
   },
+  "OptionCheckerMakeBackupLabel": {
+    "message": "更動檔案時建立備份"
+  },
+  "OptionCheckerResolveAbsoluteIconLabel": {
+    "message": "自動為使用絕對網址的圖示建立快取"
+  },
+  "OptionCheckerResolveInvalidIconLabel": {
+    "message": "自動修正未正確建立快取的圖示"
+  },
+  "OptionCheckerResolveInvalidIdLabel": {
+    "message": "自動移除含有錯誤 ID 的項目"
+  },
+  "OptionCheckerResolveMissingDateLabel": {
+    "message": "自動修正遺失建立與修改時間的項目"
+  },
+  "OptionCheckerResolveMissingIndexFileLabel": {
+    "message": "自動移除遺失索引檔的項目"
+  },
+  "OptionCheckerResolveMissingIndexLabel": {
+    "message": "自動移除遺失索引檔設定的項目"
+  },
+  "OptionCheckerResolveOlderMtimeLabel": {
+    "message": "索引檔修改時間晚於項目修改時間時，自動更新項目的修改時間"
+  },
+  "OptionCheckerResolveTocEmptySubtreeLabel": {
+    "message": "自動移除空的子目錄表"
+  },
+  "OptionCheckerResolveTocInvalidLabel": {
+    "message": "自動從目錄表移除錯誤的項目"
+  },
+  "OptionCheckerResolveTocUnreachableLabel": {
+    "message": "自動把未存在於目錄表的項目加入根目錄"
+  },
+  "OptionCheckerResolveUnindexedFilesLabel": {
+    "message": "自動為偵測到的新頁面建立元資料並加入根目錄"
+  },
+  "OptionCheckerResolveUnusedIconLabel": {
+    "message": "自動移除未使用的圖示快取"
+  },
   "OptionEditorAutoInit": {
     "message": "瀏覽剪貼簿中的頁面時，自動載入編輯工具列"
   },
@@ -872,6 +917,9 @@
   },
   "OptionGroupCapture": {
     "message": "擷取 - 內容"
+  },
+  "OptionGroupChecker": {
+    "message": "後端伺服器 - 檢測器"
   },
   "OptionGroupDownLink": {
     "message": "擷取 - 下載連結檔案"
