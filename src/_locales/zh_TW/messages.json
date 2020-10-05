@@ -864,9 +864,6 @@
   "OptionCheckerResolveAbsoluteIconLabel": {
     "message": "自動為使用絕對網址的圖示建立快取"
   },
-  "OptionCheckerResolveInvalidIconLabel": {
-    "message": "自動修正未正確建立快取的圖示"
-  },
   "OptionCheckerResolveInvalidIdLabel": {
     "message": "自動移除含有錯誤 ID 的項目"
   },

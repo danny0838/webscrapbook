@@ -864,9 +864,6 @@
   "OptionCheckerResolveAbsoluteIconLabel": {
     "message": "Automatically cache icons with absolute URL"
   },
-  "OptionCheckerResolveInvalidIconLabel": {
-    "message": "Automatically cache icons not correctly cached"
-  },
   "OptionCheckerResolveInvalidIdLabel": {
     "message": "Automatically remove items with invalid ID"
   },

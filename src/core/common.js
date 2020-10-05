@@ -129,7 +129,6 @@ if (Node && !Node.prototype.getRootNode) {
     "checker.resolveTocInvalid": true,
     "checker.resolveTocEmptySubtree": true,
     "checker.resolveUnindexedFiles": true,
-    "checker.resolveInvalidIcon": true,
     "checker.resolveAbsoluteIcon": true,
     "checker.resolveUnusedIcon": true,
     "checker.makeBackup": true,

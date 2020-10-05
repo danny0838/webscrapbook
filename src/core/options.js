@@ -349,9 +349,6 @@
     if (getOptionFromDocument('checker.resolveUnindexedFiles')) {
       params.append('resolve_unindexed_files', 1);
     }
-    if (getOptionFromDocument('checker.resolveInvalidIcon')) {
-      params.append('resolve_invalid_icon', 1);
-    }
     if (getOptionFromDocument('checker.resolveAbsoluteIcon')) {
       params.append('resolve_absolute_icon', 1);
     }

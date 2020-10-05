@@ -864,9 +864,6 @@
   "OptionCheckerResolveAbsoluteIconLabel": {
     "message": "自动为使用绝对网址的图示建立缓存"
   },
-  "OptionCheckerResolveInvalidIconLabel": {
-    "message": "自动修正未正确建立缓存的图示"
-  },
   "OptionCheckerResolveInvalidIdLabel": {
     "message": "自动移除含有错误 ID 的项目"
   },
