@@ -6,11 +6,8 @@ body {
 
 #logger {
   padding: .5em;
-  white-space: pre;
-}
-
-#logger.wrap {
   white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .debug {
