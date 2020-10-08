@@ -1,60 +1,104 @@
-## General notes
+# Changelog
 * This project generally follows [semantic versioning](https://semver.org/). For a version `x.y.z`, `x` means a major (backward incompatible) change, `y` means a minor (backward compatible) change, and `z` means a patch (bug fix). Few versions may not strictly follow this rule due to historical reasons, though.
-* Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial significant changes are summarized in this document. See full commit history in the source repository for details.
+* Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
-## Version 0.79.0
+## [0.79.0] - 2020-10-06
 * Bumped server requirement to >= 0.23.
 * Reworked site indexer:
   * Moved site indexer button from browser action to options page.
-  * Added data checker.
-  * Dropped support of site indexing through dragging and dropping folders.
+  * Shifted site indexer to server-side, with greatly improved performance, and minor format change. (Consider recreate fulltext cache.)
+  * Automatically update fulltext cache when a web page or note is captured or edited.
+  * Added data checker. Moved the feature of importing non-indexed web page files through site indexer to data checker.
+  * Dropped support of site indexing through dragging and dropping local filesystem folders or ZIP files.
+  * Dropped support of importing legacy ScrapBook data through site indexer. (Use `wsb convert sb2wsb` of PyWebScrapBook instead.)
 
-## Version 0.78.0
+## [0.78.0] - 2020-09-20
 * Added `Accept` header for requests to the backend server. This allows the reverse proxy server or upper server to response with a more appropriate format to the client.
 
-## Version 0.76.0
+## [0.76.0] - 2020-09-06
 * Added support of self version checking. An error will now be thrown if the extension version is too old to work with the corresponding backend server.
-
-## Version 0.76.0
 * A request for acquiring an access token now uses a POST rather than GET method.
 
-## Version 0.75.6
+## [0.75.6] - 2020-09-05
 * Bumped server requirement to >= 0.17.
 
-## Version 0.68.0
+## [0.75.0] - 2020-05-25
+* Merged record related capture options.
+
+## [0.73.0] - 2020-05-08
+* Added support of GUI editor of annotated marker for page editor.
+
+## [0.70.0] - 2020-04-27
+* Added support of annotated marker for page editor.
+* Added support of sticky note for page editor.
+
+## [0.68.0] - 2020-04-17
 * Dropped support of using filesystem API for viewing a page archive.
 
-## Version 0.60.0
+## [0.63.0] - 2020-04-04
+* Added search and edit to the sidebar.
+
+## [0.62.0] - 2020-03-22
+* Added capture helper, in place of the preclude option.
+
+## [0.60.0] - 2020-01-25
 * Bumped server requirement to >= 0.12.
 * Implemented new transferring protocol to improve the performance of indexing through the backend server.
 
-## Version 0.52.0
+## [0.59.0] - 2020-01-18
+* Added support of context menu for the sidebar.
+
+## [0.53.0] - 2019-09-27
+* Added capture option to remove hidden elements.
+* Added capture option to preclude elements.
+* Added capture option to limit resource size to download.
+
+## [0.52.0] - 2019-09-15
 * Dropped support of `scripted single html` format for a page capture.
 
-## Version 0.41.0
+## [0.51.0] - 2019-09-13
+* Added support to capture shadowRoot content.
+
+## [0.49.0] - 2019-09-07
+* Added page editor.
+
+## [0.48.0] - 2019-09-01
 * Bumped server requirement to >= 0.8.
 * Added support for `no_tree` scrapbooks.
 
-## Version 0.41.0
+## [0.46.0] - 2019-08-25
+* Added support of drag and drop to manage scrapbook items.
+
+## [0.45.0] - 2019-07-01
+* Added support to capture dynamic CSS.
+
+## [0.41.0] - 2019-04-15
 * Bumped server requirement to >= 0.6.
 * Now use `save` instead of `upload` action to upload a file.
 
-## Version 0.39.2
+## [0.39.2] - 2019-03-31
 * Bumped server requirement to >= 0.3.
 
-## Version 0.37.0
+## [0.37.0] - 2019-03-18
 * Bumped server requirement to >= 0.2.
 * Added support of backend server version checking. An error will now be thrown if the backend server version is too old to work with this extension.
 
-## Version 0.36.0
+## [0.36.0] - 2019-03-14
 * Added support for sidebar and backend server.
 
-## Version 0.27.0
+## [0.32.0] - 2019-02-23
+* Dropped support of Firefox < 52 and Chromium < 55.
+* Refactor the code to work with async function.
+
+## [0.27.0] - 2018-08-25
 * Dropped support of JavaScript when viewing a page archive, due to a security concern.
 
-## Version 0.25.0
+## [0.25.0] - 2017-12-29
 * Added unit tests.
 
-## Version 0.17.0
+## [0.17.0] - 2017-11-15
 * Added site indexer.
+
+## [0.1.0] - 2017-07-11
+* First public release.
