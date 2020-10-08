@@ -649,7 +649,7 @@
       return;
     }
 
-    capturer.log(`Updating server index...`);
+    capturer.log(`Updating server index for item "${item.id}"...`);
 
     // cache favicon
     let icon = item.icon;
@@ -1255,12 +1255,19 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
         return await capturer.saveBlobInMemory({blob});
       }
       case 'file': {
-        filename = await capturer.saveBlobNaturally({
+        const downloadItem = await capturer.saveBlobNaturally({
           timeId,
           blob,
           filename,
           sourceUrl,
         });
+        if (typeof downloadItem === 'object') {
+          capturer.log(`Saved to "${downloadItem.filename}"`);
+          filename = scrapbook.filepathParts(downloadItem.filename)[1];
+        } else {
+          // save failed (possibly user cancel)
+          filename = downloadItem;
+        }
         break;
       }
       case 'server': {
@@ -1280,7 +1287,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       case 'folder':
       default: {
         [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + filename);
-        filename = await capturer.saveBlob({
+        const downloadItem = await capturer.saveBlob({
           timeId,
           blob,
           directory: targetDir,
@@ -1291,6 +1298,8 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
           settings,
           options,
         });
+        capturer.log(`Saved to "${downloadItem.filename}"`);
+        filename = scrapbook.filepathParts(downloadItem.filename)[1];
         break;
       }
     }
@@ -2090,12 +2099,19 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             return await capturer.saveBlobInMemory({blob});
           }
           case 'file': {
-            filename = await capturer.saveBlobNaturally({
+            const downloadItem = await capturer.saveBlobNaturally({
               timeId,
               blob,
               filename,
               sourceUrl,
             });
+            if (typeof downloadItem === 'object') {
+              capturer.log(`Saved to "${downloadItem.filename}"`);
+              filename = scrapbook.filepathParts(downloadItem.filename)[1];
+            } else {
+              // save failed (possibly user cancel)
+              filename = downloadItem;
+            }
             break;
           }
           case 'server': {
@@ -2114,7 +2130,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           case 'folder':
           default: {
             [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + filename);
-            filename = await capturer.saveBlob({
+            const downloadItem = await capturer.saveBlob({
               timeId,
               blob,
               directory: targetDir,
@@ -2125,6 +2141,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               settings,
               options,
             });
+            capturer.log(`Saved to "${downloadItem.filename}"`);
+            filename = scrapbook.filepathParts(downloadItem.filename)[1];
             break;
           }
         }
@@ -2159,12 +2177,19 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             return await capturer.saveBlobInMemory({blob});
           }
           case 'file': {
-            filename = await capturer.saveBlobNaturally({
+            const downloadItem = await capturer.saveBlobNaturally({
               timeId,
               blob,
               filename,
               sourceUrl,
             });
+            if (typeof downloadItem === 'object') {
+              capturer.log(`Saved to "${downloadItem.filename}"`);
+              filename = scrapbook.filepathParts(downloadItem.filename)[1];
+            } else {
+              // save failed (possibly user cancel)
+              filename = downloadItem;
+            }
             break;
           }
           case 'server': {
@@ -2183,7 +2208,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           case 'folder':
           default: {
             [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + filename);
-            filename = await capturer.saveBlob({
+            const downloadItem = await capturer.saveBlob({
               timeId,
               blob,
               directory: targetDir,
@@ -2194,6 +2219,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               settings,
               options,
             });
+            capturer.log(`Saved to "${downloadItem.filename}"`);
+            filename = scrapbook.filepathParts(downloadItem.filename)[1];
             break;
           }
         }
@@ -2251,12 +2278,19 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             return await capturer.saveBlobInMemory({blob});
           }
           case 'file': {
-            filename = await capturer.saveBlobNaturally({
+            const downloadItem = await capturer.saveBlobNaturally({
               timeId,
               blob,
               filename,
               sourceUrl,
             });
+            if (typeof downloadItem === 'object') {
+              capturer.log(`Saved to "${downloadItem.filename}"`);
+              filename = scrapbook.filepathParts(downloadItem.filename)[1];
+            } else {
+              // save failed (possibly user cancel)
+              filename = downloadItem;
+            }
             break;
           }
           case 'server': {
@@ -2275,7 +2309,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           case 'folder':
           default: {
             [targetDir, filename] = scrapbook.filepathParts(options["capture.saveFolder"] + "/" + filename);
-            filename = await capturer.saveBlob({
+            const downloadItem = await capturer.saveBlob({
               timeId,
               blob,
               directory: targetDir,
@@ -2286,6 +2320,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               settings,
               options,
             });
+            capturer.log(`Saved to "${downloadItem.filename}"`);
+            filename = scrapbook.filepathParts(downloadItem.filename)[1];
             break;
           }
         }
@@ -2320,6 +2356,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           });
           settings.indexFilename = (dir ? dir + '/' : '') + newFilename;
         }
+
+        filename = 'index.html';
 
         const entries = await capturer.loadFileCache({timeId});
         switch (options["capture.saveTo"]) {
@@ -2372,7 +2410,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             targetDir = options["capture.saveFolder"] + "/" + settings.indexFilename;
             let errorUrl = sourceUrl;
             try {
-              await Promise.all(entries.map(([path, sourceUrl, blob]) => {
+              const downloadItems = await Promise.all(entries.map(([path, sourceUrl, blob]) => {
                 return capturer.saveBlob({
                   timeId,
                   blob,
@@ -2397,6 +2435,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
                   throw ex;
                 });
               }));
+              const downloadItem = downloadItems.pop();
+              capturer.log(`Saved to "${downloadItem.filename}"`);
+              filename = scrapbook.filepathParts(downloadItem.filename)[1];
             } catch (ex) {
               // error out for individual file saving error
               console.error(ex);
@@ -2413,7 +2454,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           type: "",
           sourceUrl,
           targetDir,
-          filename: documentFileName,
+          filename,
           url: scrapbook.escapeFilename(documentFileName),
           favIconUrl: data.favIconUrl,
         };
@@ -2672,7 +2713,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {Blob} params.blob
    * @param {string} params.filename
    * @param {string} params.sourceUrl
-   * @return {Promise<Object>}
+   * @return {Promise<DownloadItem|string>} DownloadItem for the saved blob,
+   *     or filename if error.
    */
   capturer.saveBlobNaturally = async function (params) {
     const {timeId, blob, filename, sourceUrl} = params;
@@ -2763,7 +2805,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.sourceUrl
    * @param {boolean} params.autoErase
    * @param {boolean} params.savePrompt
-   * @return {Promise<string>} Filename of the saved blob.
+   * @return {Promise<DownloadItem>} DownloadItem for the saved blob.
    */
   capturer.saveBlob = async function (params) {
     isDebug && console.debug("call: saveBlob", params);
@@ -2796,7 +2838,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.sourceUrl
    * @param {boolean} params.autoErase
    * @param {boolean} params.savePrompt
-   * @return {Promise<string>} Filename of the saved URL.
+   * @return {Promise<DownloadItem>} DownloadItem for the saved URL..
    */
   capturer.saveUrl = async function (params) {
     isDebug && console.debug("call: saveUrl", params);
@@ -2917,7 +2959,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     // We wait until the user clicks save (or cancel in Chromium) to resolve
     // the Promise (and then the window may close).
     if (scrapbook.userAgent.is('gecko')) {
-      downloadHooks.get(url).onComplete(scrapbook.filepathParts(filename)[1]);
+      downloadHooks.get(url).onComplete(downloadItem);
     } else {
       downloadHooks.set(id, downloadHooks.get(url));
     }
@@ -2933,10 +2975,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     let erase = true;
     try {
       if (downloadDelta.state && downloadDelta.state.current === "complete") {
-        const result = (await browser.downloads.search({id: downloadId}))[0];
-        if (result) {
-          const [dir, filename] = scrapbook.filepathParts(result.filename);
-          downloadHooks.get(downloadId).onComplete(filename);
+        const downloadItem = (await browser.downloads.search({id: downloadId}))[0];
+        if (downloadItem) {
+          downloadHooks.get(downloadId).onComplete(downloadItem);
         } else {
           // Firefox < 65 has a bug that a zero-sized file is never found by
           // browser.downloads.search.
