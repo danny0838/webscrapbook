@@ -775,7 +775,7 @@ Redirecting to file <a href="index.md">index.md</a>
             // its parent is in the DOM and gets children updated correctly.
             const itemElems = [...selectedItemElems].reverse();
 
-            let hasRemovedItems = false;
+            let allRemovedItems = [];
             for (const itemElem of itemElems) {
               const itemId = itemElem.getAttribute('data-id');
 
@@ -793,7 +793,9 @@ Redirecting to file <a href="index.md">index.md</a>
                 parentId: parentItemId,
                 index,
               });
-              if (removedItems.size > 0) { hasRemovedItems = true; }
+              for (const i of removedItems) {
+                allRemovedItems.push(i.id);
+              }
 
               // update DOM
               Array.prototype.filter.call(
@@ -819,10 +821,35 @@ Redirecting to file <a href="index.md">index.md</a>
             }
 
             // upload changes to server
-            if (hasRemovedItems) {
+            if (allRemovedItems.length > 0) {
               await book.saveMeta();
             }
             await book.saveToc();
+
+            if (allRemovedItems.length > 0) {
+              // Due to a concern of URL length and performance, skip cache
+              // update if too many items are affected. Cache update for
+              // deleted items can be safely deferred as deleted items aren't
+              // shown in the search result anyway.
+              if (allRemovedItems.length <= 20) {
+                await server.requestSse({
+                  query: {
+                    "a": "cache",
+                    "book": book.id,
+                    "item": allRemovedItems,
+                    "no_lock": 1,
+                    "fulltext": 1,
+                    "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+                  },
+                  onMessage(info) {
+                    if (['error', 'critical'].includes(info.type)) {
+                      this.error(`Error when updating fulltext cache: ${info.msg}`);
+                    }
+                  },
+                });
+              }
+            }
+
             await book.loadTreeFiles(true);  // update treeLastModified
           },
         });
