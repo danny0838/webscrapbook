@@ -784,7 +784,9 @@
             index,
           });
         }
-        index++;
+        if (typeof index !== 'undefined') {
+          index++;
+        }
         capturer.log(`Done.`);
       } catch (ex) {
         console.error(ex);
