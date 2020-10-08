@@ -100,7 +100,13 @@
         const h = new Headers();
         for (const [key, value] of Object.entries(headers)) {
           if (typeof value !== "undefined") {
-            h.append(key, value);
+            if (Array.isArray(value)) {
+              for (const v of value) {
+                h.append(key, v);
+              }
+            } else {
+              h.append(key, value);
+            }
           }
         }
         headers = h;
@@ -127,7 +133,13 @@
         const b = new FormData();
         for (const [key, value] of Object.entries(body)) {
           if (typeof value !== "undefined") {
-            b.append(key, value);
+            if (Array.isArray(value)) {
+              for (const v of value) {
+                b.append(key, v);
+              }
+            } else {
+              b.append(key, value);
+            }
           }
         }
         body = b;
@@ -198,7 +210,13 @@
       if (query) {
         for (const [key, value] of Object.entries(query)) {
           if (typeof value !== "undefined") {
-            url.searchParams.append(key, value);
+            if (Array.isArray(value)) {
+              for (const v of value) {
+                url.searchParams.append(key, v);
+              }
+            } else {
+              url.searchParams.append(key, value);
+            }
           }
         }
       }
