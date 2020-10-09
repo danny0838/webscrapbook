@@ -26,6 +26,7 @@
     '': browser.runtime.getURL('resources/item.png'),
     'folder': browser.runtime.getURL('resources/fclose.png'),
     'file': browser.runtime.getURL('resources/file.png'),
+    'image': browser.runtime.getURL('resources/file.png'),
     'note': browser.runtime.getURL('resources/note.png'),
     'postit': browser.runtime.getURL('resources/postit.png'),
   };
