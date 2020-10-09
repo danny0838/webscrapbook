@@ -951,6 +951,9 @@
   "OptionIndexerCreateRssFeedBaseTooltip": {
     "message": "RSS 摘要的網址須為絕對路徑，一般空白即可，系統會自動使用後端伺服器的網址。若要轉發布至其他網址，則須在此提供發布剪貼簿的網址根目錄，例如「https://example.com/wsb/」。"
   },
+  "OptionIndexerCreateRssFeedCountLabel": {
+    "message": "RSS 項目數量:"
+  },
   "OptionIndexerCreateRssFeedLabel": {
     "message": "生成 RSS 摘要 (feed.atom)"
   },

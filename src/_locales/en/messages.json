@@ -951,6 +951,9 @@
   "OptionIndexerCreateRssFeedBaseTooltip": {
     "message": "The address of an RSS feed must be an absolute URL. Generally this field can be left blank, and the URL of the backend server will be automatically used. If the static site is to be distributed on another server, the root URL path of the scrapbook (which looks like “https://example.com/wsb/”) must be provided explicitly here."
   },
+  "OptionIndexerCreateRssFeedCountLabel": {
+    "message": "RSS item number:"
+  },
   "OptionIndexerCreateRssFeedLabel": {
     "message": "Generate RSS feed (feed.atom)"
   },

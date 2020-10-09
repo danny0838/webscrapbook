@@ -116,6 +116,7 @@ if (Node && !Node.prototype.getRootNode) {
     "indexer.createStaticIndex": false,
     "indexer.createRssFeed": false,
     "indexer.createRssFeedBase": "",
+    "indexer.createRssFeedCount": 50,
     "indexer.fulltextCache": true,
     "indexer.fulltextCacheFrameAsPageContent": true,
     "indexer.fulltextCacheRecreate": false,

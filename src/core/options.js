@@ -307,6 +307,7 @@
       const rssRoot = getOptionFromDocument('indexer.createRssFeedBase') ||
           getOptionFromDocument('server.url');
       params.append('rss_root', rssRoot);
+      params.append('rss_item_count', getOptionFromDocument('indexer.createRssFeedCount'));
     }
     if (!getOptionFromDocument('indexer.makeBackup')) {
       params.append('no_backup', 1);

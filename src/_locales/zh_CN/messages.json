@@ -951,6 +951,9 @@
   "OptionIndexerCreateRssFeedBaseTooltip": {
     "message": "RSS 摘要的网址须为绝对路径，一般空白即可，系统会自动使用后端服务器的网址。若要转发布至其他网址，则须在此提供发布剪贴簿的网址根目录，例如“https://example.com/wsb/”。"
   },
+  "OptionIndexerCreateRssFeedCountLabel": {
+    "message": "RSS 项目数量:"
+  },
   "OptionIndexerCreateRssFeedLabel": {
     "message": "产生 RSS 摘要 (feed.atom)"
   },
