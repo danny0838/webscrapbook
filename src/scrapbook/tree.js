@@ -22,6 +22,14 @@
 
   'use strict';
 
+  const ITEM_TYPE_ICON = {
+    '': browser.runtime.getURL('resources/item.png'),
+    'folder': browser.runtime.getURL('resources/fclose.png'),
+    'file': browser.runtime.getURL('resources/file.png'),
+    'note': browser.runtime.getURL('resources/note.png'),
+    'postit': browser.runtime.getURL('resources/postit.png'),
+  };
+
   const tree = {
     bookId: null,
     book: null,
@@ -1563,12 +1571,7 @@ Redirecting to file <a href="index.md">index.md</a>
               meta.icon : 
               (this.book.dataUrl + scrapbook.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon;
         } else {
-          icon.src = {
-            'folder': browser.runtime.getURL('resources/fclose.png'),
-            'file': browser.runtime.getURL('resources/file.png'),
-            'note': browser.runtime.getURL('resources/note.png'),
-            'postit': browser.runtime.getURL('resources/postit.png'),
-          }[meta.type] || browser.runtime.getURL('resources/item.png');
+          icon.src = ITEM_TYPE_ICON[meta.type] || ITEM_TYPE_ICON[''];
         }
         icon.alt = "";
       } else {
