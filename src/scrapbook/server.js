@@ -1108,13 +1108,21 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
       await this.loadTreeFiles();
       await this.loadMeta();
 
+      let matchedIndexUrl = ''; // last seen valid */index.html
+      let matchedItem; // item for the above
       const u = scrapbook.normalizeUrl(scrapbook.splitUrl(url)[0]);
       for (const [id, item] of Object.entries(this.meta)) {
         if (!item.index) { continue; }
         const indexUrl = scrapbook.normalizeUrl(scrapbook.splitUrl(this.dataUrl + scrapbook.escapeFilename(item.index))[0]);
+        // foo/page.html should not belong to an item with index foo/index.html
+        // if an item with index foo/page.html exists.
+        // record the longest match as the item candidate
         if (indexUrl.endsWith('/index.html')) {
           if (u.startsWith(indexUrl.slice(0, -10))) {
-            return item;
+            if (indexUrl.length > matchedIndexUrl.length) {
+              matchedIndexUrl = indexUrl;
+              matchedItem = item;
+            }
           }
         }
         if (/\.(htz|maff)$/i.test(indexUrl)) {
@@ -1127,7 +1135,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
         }
       }
 
-      return null;
+      return matchedItem;
     }
 
     findItemPaths(id, rootId) {
