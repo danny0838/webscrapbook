@@ -1630,6 +1630,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
         // update item
         if (item) {
+          capturer.log(`Updating server index for item "${item.id}"...`);
           item.modify = modify;
           book.meta[item.id] = item;
           await book.saveMeta();
