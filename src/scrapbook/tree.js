@@ -720,15 +720,14 @@ Redirecting to file <a href="index.md">index.md</a>
 
         let targetIndex = Infinity;
         for (const itemElem of itemElems) {
+          if (this.isDetached(itemElem)) { continue; }
+
           const itemId = itemElem.getAttribute('data-id');
 
           const parentItemElem = itemElem.parentNode.parentNode;
           const parentItemId = parentItemElem.getAttribute('data-id');
           const siblingItems = parentItemElem.container.children;
           const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-
-          // the operated item element is missing due to an unexpected reason
-          if (index === -1) { continue; }
 
           // remove this and descendant items from Book
           const newIndex = this.book.recycleItemTree({
@@ -786,15 +785,14 @@ Redirecting to file <a href="index.md">index.md</a>
 
             let allRemovedItems = [];
             for (const itemElem of itemElems) {
+              if (this.isDetached(itemElem)) { continue; }
+
               const itemId = itemElem.getAttribute('data-id');
 
               const parentItemElem = itemElem.parentNode.parentNode;
               const parentItemId = parentItemElem.getAttribute('data-id');
               const siblingItems = parentItemElem.container.children;
               const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-
-              // the operated item element is missing due to an unexpected reason
-              if (index === -1) { continue; }
 
               // remove this and descendant items from Book
               const removedItems = this.book.removeItemTree({
@@ -1324,6 +1322,13 @@ Redirecting to file <a href="index.md">index.md</a>
     },
 
     /**
+     * Check if the element or its ancestor is removed from document DOM
+     */
+    isDetached(node) {
+      return node.getRootNode().nodeType !== 9;
+    },
+
+    /**
      * @kind invokable
      */
     async locate({bookId, id, url, root = 'root'}) {
@@ -1719,6 +1724,8 @@ Redirecting to file <a href="index.md">index.md</a>
       const itemElems = [...sourceItemElems].reverse();
 
       for (const itemElem of itemElems) {
+        if (this.isDetached(itemElem)) { continue; }
+
         const itemId = itemElem.getAttribute('data-id');
 
         // forbid moving self to a decendant as it will become non-reachagble
@@ -1728,9 +1735,6 @@ Redirecting to file <a href="index.md">index.md</a>
         const parentItemId = parentItemElem.getAttribute('data-id');
         const siblingItems = parentItemElem.container.children;
         const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-
-        // the operated item element is missing due to an unexpected reason
-        if (index === -1) { continue; }
 
         // update TOC
         const newIndex = this.book.moveItem({
