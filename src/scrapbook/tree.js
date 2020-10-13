@@ -1189,6 +1189,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
         const isLocal = server.config.app.is_local;
         const isNoTree = !!this.book.config.no_tree;
+        const isRecycle = this.rootId === 'recycle';
 
         document.getElementById('search').disabled = isNoTree;
 
@@ -1201,21 +1202,21 @@ Redirecting to file <a href="index.md">index.md</a>
         menuElem.querySelector('button[value="source"]').disabled = isNoTree;
         menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
 
-        menuElem.querySelector('button[value="mkfolder"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="mksep"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="mknote"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="upload"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
+        menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
+        menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
+        menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
 
-        menuElem.querySelector('button[value="edit"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="move_up"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="move_down"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="edit"]').disabled = !(!isNoTree && !isRecycle);
+        menuElem.querySelector('button[value="move_up"]').disabled = !(!isNoTree && !isRecycle);
+        menuElem.querySelector('button[value="move_down"]').disabled = !(!isNoTree && !isRecycle);
         menuElem.querySelector('button[value="move_into"]').disabled = isNoTree;
         menuElem.querySelector('button[value="move_drag"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="recycle"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="delete"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="recycle"]').disabled = !(!isNoTree && !isRecycle);
+        menuElem.querySelector('button[value="delete"]').disabled = !(!isNoTree && isRecycle);
 
         menuElem.querySelector('button[value="meta"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="view_recycle"]').disabled = isNoTree;
+        menuElem.querySelector('button[value="view_recycle"]').disabled = !(!isNoTree && !isRecycle);
 
         if (!keepLogs) {
           document.getElementById('logger').textContent = '';
