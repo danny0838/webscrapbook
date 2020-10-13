@@ -2332,6 +2332,44 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
           buttons[idx].focus();
         }
         return;
+      } else {
+        // skip if a modifier is pressed
+        if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+          return;
+        }
+
+        // skip if command is diabled
+        if (document.querySelector('#command:disabled')) {
+          return;
+        }
+
+        let cmd;
+        switch (event.code) {
+          case 'Delete':
+            cmd = 'recycle';
+            break;
+          case 'F2':
+            cmd = 'meta';
+            break;
+        }
+
+        if (!cmd) {
+          return;
+        }
+
+        // skip if cmd disabled
+        if (document.querySelector(`#command-popup button[value="${cmd}"]:disabled`)) {
+          return;
+        }
+
+        event.preventDefault();
+
+        const evt = new CustomEvent("command", {
+          detail: {
+            cmd,
+          },
+        });
+        window.dispatchEvent(evt);
       }
     },
 
