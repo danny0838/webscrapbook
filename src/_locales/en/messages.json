@@ -1097,6 +1097,12 @@
   "ScrapBookCommandMetaDialogIndex": {
     "message": "Index:"
   },
+  "ScrapBookCommandMetaDialogLocked": {
+    "message": "Locked:"
+  },
+  "ScrapBookCommandMetaDialogMarked": {
+    "message": "Marked:"
+  },
   "ScrapBookCommandMetaDialogModify": {
     "message": "Modify:"
   },

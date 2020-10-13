@@ -1097,6 +1097,12 @@
   "ScrapBookCommandMetaDialogIndex": {
     "message": "索引檔:"
   },
+  "ScrapBookCommandMetaDialogLocked": {
+    "message": "鎖定:"
+  },
+  "ScrapBookCommandMetaDialogMarked": {
+    "message": "強調標示:"
+  },
   "ScrapBookCommandMetaDialogModify": {
     "message": "修改時間:"
   },

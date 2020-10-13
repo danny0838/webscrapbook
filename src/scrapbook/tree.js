@@ -191,6 +191,8 @@
         dialog.querySelector('[name="source"]').value = item.source || "";
         dialog.querySelector('[name="icon"]').value = item.icon || "";
         dialog.querySelector('[name="type"]').value = item.type || "";
+        dialog.querySelector('[name="marked"]').checked = item.marked;
+        dialog.querySelector('[name="locked"]').checked = item.locked;
         dialog.querySelector('[name="charset"]').value = item.charset || "";
         dialog.querySelector('[name="create"]').value = item.create ? scrapbook.idToDate(item.create).toLocaleString() : "";
         dialog.querySelector('[name="modify"]').value = item.modify ? scrapbook.idToDate(item.modify).toLocaleString() : "";
@@ -199,6 +201,8 @@
         dialog.querySelector('[name="index"]').parentNode.parentNode.hidden = ['folder', 'separator'].includes(item.type);
         dialog.querySelector('[name="source"]').parentNode.parentNode.hidden = ['folder', 'separator'].includes(item.type);
         dialog.querySelector('[name="icon"]').parentNode.parentNode.hidden = ['separator'].includes(item.type);
+        dialog.querySelector('[name="marked"]').parentNode.parentNode.hidden = ['separator'].includes(item.type);
+        dialog.querySelector('[name="locked"]').parentNode.parentNode.hidden = ['folder', 'separator'].includes(item.type);
         dialog.querySelector('[name="charset"]').parentNode.parentNode.hidden = ['folder', 'separator', 'bookmark'].includes(item.type);
 
         dialog.addEventListener('dialogShow', (event) => {
@@ -210,6 +214,8 @@
         }
 
         const dialogData = {
+          marked: dialog.querySelector('[name="marked"]').checked,
+          locked: dialog.querySelector('[name="locked"]').checked,
           title: dialog.querySelector('[name="title"]').value,
           index: dialog.querySelector('[name="index"]').value,
           source: dialog.querySelector('[name="source"]').value,
@@ -222,7 +228,7 @@
           parentId: null,
         });
         for (const [key, value] of Object.entries(dialogData)) {
-          if (value.length || typeof item[key] !== 'undefined') {
+          if (value || typeof item[key] !== 'undefined') {
             newItem[key] = value;
           }
         }

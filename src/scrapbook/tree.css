@@ -203,6 +203,10 @@ body {
   flex: 999 1 14em;
 }
 
+#dialog-wrapper form.meta dl > div > dd.short {
+  flex: 999 1 2em;
+}
+
 /* tree */
 .tree {
   flex: 1 1 auto;
