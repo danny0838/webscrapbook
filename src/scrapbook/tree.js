@@ -1989,6 +1989,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         return;
       }
 
+      // disallow when drag disabled
+      if (document.querySelector('#command-popup button[value="move_drag"]:disabled')) {
+        event.dataTransfer.dropEffect = 'none';
+        return;
+      }
+
       // return for non-allowed cases
       if (!(
         (this.lastDraggedElem && !wholeWindow) ||
