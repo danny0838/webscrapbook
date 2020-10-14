@@ -464,6 +464,12 @@
           case "modify":
             addRule("modify", pos ? "include" : "exclude", parseDate(term));
             break;
+          case "marked":
+            addRule("marked", pos ? "include" : "exclude", true);
+            break;
+          case "locked":
+            addRule("locked", pos ? "include" : "exclude", true);
+            break;
         }
 
         return "";
@@ -603,6 +609,30 @@
 
     _match_modify(rule, item) {
       return this.matchDate(rule, item.meta.modify);
+    },
+
+    _match_marked(rule, item) {
+      return this.matchBool(rule, item.meta.marked);
+    },
+
+    _match_locked(rule, item) {
+      return this.matchBool(rule, item.meta.locked);
+    },
+
+    matchBool(rule, bool) {
+      if (rule.exclude.length) {
+        if (bool) {
+          return false;
+        }
+      }
+
+      if (rule.include.length) {
+        if (!bool) {
+          return false;
+        }
+      }
+
+      return true;
     },
 
     matchText(rule, text) {
