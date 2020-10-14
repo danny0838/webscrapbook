@@ -904,6 +904,63 @@ Redirecting to file <a href="index.md">index.md</a>
       document.getElementById('search').disabled = !(willEnable && !this.book.config.no_tree);
     },
 
+    showBookCommands(willShow = document.getElementById('command-popup-book').hidden, pos = {}) {
+      const menuElem = document.getElementById('command-popup-book');
+
+      if (!willShow) {
+        menuElem.hidden = true;
+        return;
+      }
+
+      const isRecycle = this.rootId === 'recycle';
+
+      menuElem.querySelector('button[value="index"]').hidden = false;
+      menuElem.querySelector('button[value="exec_book"]').hidden = false;
+      menuElem.querySelector('button[value="manage"]').hidden = false;
+
+      menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
+      menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
+      menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
+      menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
+
+      menuElem.querySelector('button[value="view_recycle"]').hidden = !(!isRecycle);
+
+      // show/hide each separator if there are shown items around it
+      let hasShownItem = false;
+      let lastSep = null;
+      for (const elem of menuElem.querySelectorAll('button, hr')) {
+        if (elem.localName === 'hr') {
+          elem.hidden = true;
+          if (hasShownItem) { lastSep = elem; }
+          hasShownItem = false;
+        } else {
+          if (!elem.hidden) {
+            hasShownItem = true;
+            if (lastSep) {
+              lastSep.hidden = false;
+              lastSep = null;
+            }
+          }
+        }
+      }
+
+      // show menu and fix position
+      menuElem.style.setProperty('max-width', '95vw');
+      menuElem.style.setProperty('max-height', '95vh');
+      menuElem.hidden = false;
+
+      const {clientX = 0, clientY = 0} = pos;
+      const viewport = scrapbook.getViewport(window);
+      const anchorPos = scrapbook.getAnchoredPosition(menuElem, {
+        clientX: Math.min(Math.max(clientX, 0), viewport.width - menuElem.offsetWidth),
+        clientY: Math.min(Math.max(clientY, 0), viewport.height - menuElem.offsetHeight),
+      }, viewport);
+      menuElem.style.setProperty('left', anchorPos.left + 'px');
+      menuElem.style.setProperty('top', anchorPos.top + 'px');
+
+      menuElem.focus();
+    },
+
     showCommands(willShow = document.getElementById('command-popup').hidden, pos = {}) {
       const menuElem = document.getElementById('command-popup');
 
@@ -921,8 +978,6 @@ Redirecting to file <a href="index.md">index.md</a>
 
       switch (selectedItemElems.length) {
         case 0: {
-          menuElem.querySelector('button[value="index"]').hidden = false;
-          menuElem.querySelector('button[value="exec_book"]').hidden = false;
           menuElem.querySelector('button[value="opentab"]').hidden = true;
           menuElem.querySelector('button[value="view_text"]').hidden = true;
           menuElem.querySelector('button[value="exec"]').hidden = true;
@@ -943,15 +998,12 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="delete"]').hidden = true;
 
           menuElem.querySelector('button[value="meta"]').hidden = true;
-          menuElem.querySelector('button[value="view_recycle"]').hidden = !(!isRecycle);
           break;
         }
 
         case 1: {
           const item = this.book.meta[selectedItemElems[0].getAttribute('data-id')];
 
-          menuElem.querySelector('button[value="index"]').hidden = true;
-          menuElem.querySelector('button[value="exec_book"]').hidden = true;
           menuElem.querySelector('button[value="opentab"]').hidden = ['folder', 'separator'].includes(item.type);
           menuElem.querySelector('button[value="view_text"]').hidden = !(item.type === 'file' && item.index);
           menuElem.querySelector('button[value="exec"]').hidden = !(item.type === 'file' && item.index);
@@ -972,13 +1024,10 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
 
           menuElem.querySelector('button[value="meta"]').hidden = false;
-          menuElem.querySelector('button[value="view_recycle"]').hidden = true;
           break;
         }
 
         default: {
-          menuElem.querySelector('button[value="index"]').hidden = true;
-          menuElem.querySelector('button[value="exec_book"]').hidden = true;
           menuElem.querySelector('button[value="opentab"]').hidden = false;
           menuElem.querySelector('button[value="view_text"]').hidden = true;
           menuElem.querySelector('button[value="exec"]').hidden = true;
@@ -999,7 +1048,6 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
 
           menuElem.querySelector('button[value="meta"]').hidden = true;
-          menuElem.querySelector('button[value="view_recycle"]').hidden = true;
           break;
         }
       }
@@ -1192,30 +1240,43 @@ Redirecting to file <a href="index.md">index.md</a>
 
         document.getElementById('search').disabled = isNoTree;
 
-        const menuElem = document.getElementById('command-popup');
-        menuElem.querySelector('button[value="exec_book"]').disabled = !isLocal;
-        menuElem.querySelector('button[value="opentab"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="view_text"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="exec"]').disabled = !(!isNoTree && isLocal);
-        menuElem.querySelector('button[value="browse"]').disabled = !(!isNoTree && isLocal);
-        menuElem.querySelector('button[value="source"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
+        {
+          const menuElem = document.getElementById('command-popup-book');
+          menuElem.querySelector('button[value="exec_book"]').disabled = !(!isNoTree && isLocal);
+          menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
 
-        menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
-        menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
-        menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
-        menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
 
-        menuElem.querySelector('button[value="edit"]').disabled = !(!isNoTree && !isRecycle);
-        menuElem.querySelector('button[value="move_up"]').disabled = !(!isNoTree && !isRecycle);
-        menuElem.querySelector('button[value="move_down"]').disabled = !(!isNoTree && !isRecycle);
-        menuElem.querySelector('button[value="move_into"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="move_drag"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="recycle"]').disabled = !(!isNoTree && !isRecycle);
-        menuElem.querySelector('button[value="delete"]').disabled = !(!isNoTree && isRecycle);
+          menuElem.querySelector('button[value="view_recycle"]').hidden = !(!isRecycle);
+        }
 
-        menuElem.querySelector('button[value="meta"]').disabled = isNoTree;
-        menuElem.querySelector('button[value="view_recycle"]').disabled = !(!isNoTree && !isRecycle);
+        {
+          const menuElem = document.getElementById('command-popup');
+          menuElem.querySelector('button[value="opentab"]').disabled = isNoTree;
+          menuElem.querySelector('button[value="view_text"]').disabled = isNoTree;
+          menuElem.querySelector('button[value="exec"]').disabled = !(!isNoTree && isLocal);
+          menuElem.querySelector('button[value="browse"]').disabled = !(!isNoTree && isLocal);
+          menuElem.querySelector('button[value="source"]').disabled = isNoTree;
+          menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
+
+          menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
+
+          menuElem.querySelector('button[value="edit"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="move_up"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="move_down"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="move_into"]').disabled = isNoTree;
+          menuElem.querySelector('button[value="move_drag"]').disabled = isNoTree;
+          menuElem.querySelector('button[value="recycle"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="delete"]').disabled = !(!isNoTree && isRecycle);
+
+          menuElem.querySelector('button[value="meta"]').disabled = isNoTree;
+        }
 
         if (!keepLogs) {
           document.getElementById('logger').textContent = '';
@@ -2311,27 +2372,67 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     },
 
     onKeyDown(event) {
+      if (!document.getElementById('command-popup-book').hidden) {
+        if (event.code === "Escape") {
+          event.preventDefault();
+          this.showBookCommands(false);
+          return;
+        }
+
+        if (event.code === "ArrowUp") {
+          event.preventDefault();
+          const buttons = Array.from(document.querySelectorAll('#command-popup-book button:enabled:not([hidden])'));
+          let idx = buttons.indexOf(document.querySelector('#command-popup-book button:focus'));
+          idx--;
+          if (idx < 0) { idx = buttons.length - 1; }
+          buttons[idx].focus();
+          return;
+        }
+
+        if (event.code === "ArrowDown") {
+          event.preventDefault();
+          const buttons = Array.from(document.querySelectorAll('#command-popup-book button:enabled:not([hidden])'));
+          let idx = buttons.indexOf(document.querySelector('#command-popup-book button:focus'));
+          idx++;
+          if (idx > buttons.length - 1) { idx = 0; }
+          buttons[idx].focus();
+          return;
+        }
+
+        return;
+      }
+
       if (!document.getElementById('command-popup').hidden) {
         if (event.code === "Escape") {
           event.preventDefault();
           this.showCommands(false);
-        } else if (event.code === "ArrowUp") {
+          return;
+        }
+
+        if (event.code === "ArrowUp") {
           event.preventDefault();
           const buttons = Array.from(document.querySelectorAll('#command-popup button:enabled:not([hidden])'));
           let idx = buttons.indexOf(document.querySelector('#command-popup button:focus'));
           idx--;
           if (idx < 0) { idx = buttons.length - 1; }
           buttons[idx].focus();
-        } else if (event.code === "ArrowDown") {
+          return;
+        }
+
+        if (event.code === "ArrowDown") {
           event.preventDefault();
           const buttons = Array.from(document.querySelectorAll('#command-popup button:enabled:not([hidden])'));
           let idx = buttons.indexOf(document.querySelector('#command-popup button:focus'));
           idx++;
           if (idx > buttons.length - 1) { idx = 0; }
           buttons[idx].focus();
+          return;
         }
+
         return;
-      } else {
+      }
+
+      {
         // skip if a modifier is pressed
         if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
           return;
@@ -2406,7 +2507,44 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         clientX = rect.left;
         clientY = rect.top;
       }
-      this.showCommands(true, {clientX, clientY});
+      this.showBookCommands(true, {clientX, clientY});
+    },
+
+    async onBookCommandClick(event) {
+      if (event.target.localName !== 'button') { return; }
+
+      this.showBookCommands(false);
+
+      const command = event.target.value;
+
+      switch (command) {
+        case 'upload': {
+          const elem = document.getElementById('upload-file-selector');
+          elem.removeAttribute('data-item-elems');
+          elem.value = '';
+          elem.click();
+          break;
+        }
+
+        default: {
+          const evt = new CustomEvent("command", {
+            detail: {
+              command,
+              itemElems: [],
+            },
+          });
+          window.dispatchEvent(evt);
+        }
+      }
+    },
+
+    async onBookCommandFocusOut(event) {
+      // skip when focusing another descendant of the wrapper
+      if (document.getElementById('command-popup-book').contains(event.relatedTarget)) {
+        return;
+      }
+
+      this.showBookCommands(false);
     },
 
     async onCommandClick(event) {
@@ -2419,6 +2557,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       switch (command) {
         case 'upload': {
           const elem = document.getElementById('upload-file-selector');
+          elem.setAttribute('data-item-elems', '');
           elem.value = '';
           elem.click();
           break;
@@ -2483,7 +2622,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       const evt = new CustomEvent("command", {
         detail: {
           command: 'upload',
-          itemElems: true,
+          itemElems: event.target.hasAttribute('data-item-elems') || [],
           files: event.target.files,
         },
       });
@@ -2524,8 +2663,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     document.getElementById("refresh").addEventListener('click', tree.onRefreshButtonClick.bind(tree));
     document.getElementById("command").addEventListener('click', tree.onCommandButtonClick.bind(tree));
 
-    document.getElementById("command-popup").addEventListener('click', tree.onCommandClick.bind(tree));
+    document.getElementById("command-popup-book").addEventListener('click', tree.onBookCommandClick.bind(tree));
+    document.getElementById("command-popup-book").addEventListener('focusout', tree.onBookCommandFocusOut.bind(tree));
 
+    document.getElementById("command-popup").addEventListener('click', tree.onCommandClick.bind(tree));
     document.getElementById("command-popup").addEventListener('focusout', tree.onCommandFocusOut.bind(tree));
 
     // file selector

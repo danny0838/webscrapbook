@@ -52,7 +52,8 @@ body {
   background-color: rgba(202, 202, 202, 0.8);
 }
 
-#command-popup {
+#command-popup,
+#command-popup-book {
   position: absolute;
   z-index: 20000;
   overflow: auto;
@@ -67,7 +68,8 @@ body {
   background: white;
 }
 
-#command-popup button {
+#command-popup button,
+#command-popup-book button {
   display: block;
   outline: none;
   border: none;
@@ -79,26 +81,31 @@ body {
   white-space: nowrap;
 }
 
-#command-popup button:disabled {
+#command-popup button:disabled,
+#command-popup-book button:disabled {
   filter: grayscale(100%);
   opacity: 0.3;
 }
 
-#command-popup button:enabled:focus {
+#command-popup button:enabled:focus,
+#command-popup-book button:enabled:focus {
   outline: 1px solid rgba(125, 162, 206, 0.8);
   background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.8));
 }
 
-#command-popup button:enabled:hover {
+#command-popup button:enabled:hover,
+#command-popup-book button:enabled:hover {
   background-color: rgba(202, 202, 202, 0.8);
 }
 
-#command-popup button:enabled:active {
+#command-popup button:enabled:active,
+#command-popup-book button:enabled:active {
   background-image: radial-gradient(rgba(0, 0, 0, 0.9), rgba(64, 64, 64, 0.9));
   color: #FFFFFF;
 }
 
-#command-popup button[hidden] {
+#command-popup button[hidden],
+#command-popup-book button[hidden] {
   display: none;
 }
 
