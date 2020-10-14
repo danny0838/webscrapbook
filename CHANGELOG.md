@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.81.0] - 2020-10-14
+* Reworked editor toolbar:
+  * Added context menu in place of sub-menu buttons. This prevents toolbar overflow on mobile browsers.
+  * Enlarged toolbar and buttons.
+
 ## [0.79.0] - 2020-10-06
 * Bumped server requirement to >= 0.23.
 * Reworked site indexer:
