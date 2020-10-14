@@ -503,7 +503,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       event.preventDefault();
       const elem = event.currentTarget;
       await editor.updateLineMarkers();
-      editor.showContextMenu(elem.parentElement.querySelector('ul'));
+      editor.showContextMenu(elem.parentElement.querySelector('ul'), event);
     });
 
     for (const elem of wrapper.querySelectorAll('.toolbar-marker ul button')) {
@@ -525,7 +525,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     }, {passive: true});
     elem.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
+      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'), event);
     });
 
     var elem = wrapper.querySelector('.toolbar-annotation-sticky');
@@ -555,7 +555,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     });
     elem.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
+      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'), event);
     });
 
     var elem = wrapper.querySelector('.toolbar-eraser-eraseSelection');
@@ -605,7 +605,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       for (const el of menuElem.querySelectorAll('button')) {
         el.disabled = !elem.hasAttribute('checked');
       }
-      editor.showContextMenu(menuElem);
+      editor.showContextMenu(menuElem, event);
     });
 
     var elem = wrapper.querySelector('.toolbar-domEraser-expand');
@@ -632,7 +632,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       for (const el of menuElem.querySelectorAll('button')) {
         el.disabled = !elem.hasAttribute('checked');
       }
-      editor.showContextMenu(menuElem);
+      editor.showContextMenu(menuElem, event);
     });
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor-strong');
@@ -747,7 +747,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     }, {passive: true});
     elem.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
+      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'), event);
     });
 
     var elem = wrapper.querySelector('.toolbar-save-deleteErased');
@@ -1332,7 +1332,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
    *
    * @param {HTMLElement} elem - The context menu element.
    */
-  editor.showContextMenu = function (elem) {
+  editor.showContextMenu = function (elem, pos = {}) {
     const onFocusOut = (event) => {
       // skip when focusing another descendant of the context menu element
       if (elem.contains(event.relatedTarget)) {
@@ -1374,6 +1374,21 @@ scrapbook-toolbar, scrapbook-toolbar *,
     window.addEventListener("click", onClick, {passive: true, capture: true});
     window.addEventListener("keydown", onKeyDown, true);
     elem.hidden = false;
+
+    // adjust horizonital position to avoid wrapping
+    {
+      const toolbarBorderPadding = 2;
+      const toolbarButtonWidth = 36;
+      const toolbarHeight = 40;
+      const {clientX = 0, clientY = 0} = pos;
+      const viewport = scrapbook.getViewport(window);
+
+      // reposition to leftmost to get correct offsetWidth
+      elem.style.setProperty('left', 0 + 'px', 'important');
+
+      const offsetX = Math.min(Math.max(clientX - toolbarButtonWidth, 0), viewport.width - toolbarBorderPadding - elem.offsetWidth);
+      elem.style.setProperty('left', offsetX + 'px', 'important');
+    }
 
     // Focus on the context menu element for focusout event to work when the user
     // clicks outside.
