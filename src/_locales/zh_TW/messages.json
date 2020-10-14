@@ -1151,6 +1151,9 @@
   "ScrapBookCommandSearch": {
     "message": "搜尋"
   },
+  "ScrapBookCommandSearchIn": {
+    "message": "搜尋下層項目"
+  },
   "ScrapBookCommandSource": {
     "message": "開啟原始網址"
   },

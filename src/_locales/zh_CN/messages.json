@@ -1151,6 +1151,9 @@
   "ScrapBookCommandSearch": {
     "message": "搜索"
   },
+  "ScrapBookCommandSearchIn": {
+    "message": "搜索下层项目"
+  },
   "ScrapBookCommandSource": {
     "message": "开启原始网址"
   },

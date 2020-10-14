@@ -174,6 +174,17 @@
         }
       },
 
+      async search_in({itemElems}) {
+        const urlObj = new URL(browser.runtime.getURL("scrapbook/search.html"));
+        urlObj.searchParams.set('id', this.bookId);
+        for (const elem of itemElems) {
+          const id = elem.getAttribute('data-id');
+          urlObj.searchParams.append('root', id);
+        }
+        const target = urlObj.href;
+        await this.openLink(target, true);
+      },
+
       async meta({itemElems}) {
         if (!itemElems.length) { return; }
 
@@ -984,6 +995,7 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="browse"]').hidden = true;
           menuElem.querySelector('button[value="source"]').hidden = true;
           menuElem.querySelector('button[value="manage"]').hidden = false;
+          menuElem.querySelector('button[value="search_in"]').hidden = true;
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
@@ -1010,6 +1022,7 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="browse"]').hidden = !(item.index);
           menuElem.querySelector('button[value="source"]').hidden = !(item.source);
           menuElem.querySelector('button[value="manage"]').hidden = !(item.type === 'folder' || this.book.toc[item.id]);
+          menuElem.querySelector('button[value="search_in"]').hidden = !(item.type === 'folder' || this.book.toc[item.id]);
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
@@ -1034,6 +1047,7 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="browse"]').hidden = false;
           menuElem.querySelector('button[value="source"]').hidden = false;
           menuElem.querySelector('button[value="manage"]').hidden = true;
+          menuElem.querySelector('button[value="search_in"]').hidden = false;
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = true;
           menuElem.querySelector('button[value="mksep"]').hidden = true;
@@ -1261,6 +1275,7 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="browse"]').disabled = !(!isNoTree && isLocal);
           menuElem.querySelector('button[value="source"]').disabled = isNoTree;
           menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
+          menuElem.querySelector('button[value="search_in"]').disabled = isNoTree;
 
           menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);

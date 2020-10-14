@@ -1151,6 +1151,9 @@
   "ScrapBookCommandSearch": {
     "message": "Search"
   },
+  "ScrapBookCommandSearchIn": {
+    "message": "Search within"
+  },
   "ScrapBookCommandSource": {
     "message": "View source"
   },
