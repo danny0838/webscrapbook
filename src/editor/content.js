@@ -552,6 +552,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       editor.eraseNodes();
     }, {passive: true});
     elem.addEventListener("mousedown", (event) => {
+      // middle click
       if (event.button !== 1) { return; }
       event.preventDefault();
       editor.removeEdits(true);
@@ -605,7 +606,6 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     var elem = wrapper.querySelector('.toolbar-domEraser > button:last-of-type');
     elem.addEventListener("click", (event) => {
-      editor.updateHtmlEditorMenu();
       editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
     }, {passive: true});
 
