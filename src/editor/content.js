@@ -246,11 +246,6 @@ ${sRoot}.toolbar > div > button[hidden] {
   display: none !important;
 }
 
-${sRoot}.toolbar > div > button:nth-of-type(2) {
-  background-image: url("${browser.runtime.getURL("resources/caret-down.svg")}") !important;
-  width: 20px !important;
-}
-
 ${sRoot}.toolbar .toolbar-locate > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-locate.svg")}") !important;
 }
@@ -382,7 +377,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     <button></button>
   </div>
   <div class="toolbar-marker" title="${scrapbook.lang('EditorButtonMarker')}">
-    <button></button><button></button>
+    <button></button>
     <ul hidden="" title="">
       <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [1])}</scrapbook-toolbar-samp></button></li>
       <li><button><scrapbook-toolbar-samp data-scrapbook-elem="toolbar-samp">${scrapbook.lang('EditorButtonMarkerItem', [2])}</scrapbook-toolbar-samp></button></li>
@@ -399,14 +394,14 @@ ${sRoot}.toolbar .toolbar-close:hover {
     </ul>
   </div>
   <div class="toolbar-annotation" title="${scrapbook.lang('EditorButtonAnnotation')}">
-    <button></button><button></button>
+    <button></button>
     <ul hidden="" title="">
       <li><button class="toolbar-annotation-sticky">${scrapbook.lang('EditorButtonAnnotationSticky')}</button></li>
       <li><button class="toolbar-annotation-sticky-richtext">${scrapbook.lang('EditorButtonAnnotationStickyRichText')}</button></li>
     </ul>
   </div>
   <div class="toolbar-eraser" title="${scrapbook.lang('EditorButtonEraser')}">
-    <button></button><button></button>
+    <button></button>
     <ul hidden="" title="">
       <li><button class="toolbar-eraser-eraseSelection">${scrapbook.lang('EditorButtonEraserSelection')}</button></li>
       <li><button class="toolbar-eraser-eraseSelector">${scrapbook.lang('EditorButtonEraserSelector')}</button></li>
@@ -420,7 +415,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     </ul>
   </div>
   <div class="toolbar-domEraser" title="${scrapbook.lang('EditorButtonDOMEraser')}">
-    <button></button><button disabled=""></button>
+    <button></button>
     <ul hidden="" title="">
       <li><button class="toolbar-domEraser-expand">${scrapbook.lang('EditorButtonDOMEraserExpand', ['W'])}</button></li>
       <li><button class="toolbar-domEraser-shrink">${scrapbook.lang('EditorButtonDOMEraserShrink', ['N'])}</button></li>
@@ -429,7 +424,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     </ul>
   </div>
   <div class="toolbar-htmlEditor" title="${scrapbook.lang('EditorButtonHtmlEditor')}">
-    <button></button><button disabled=""></button>
+    <button></button>
     <ul hidden="" title="">
       <li><button class="toolbar-htmlEditor-strong">${scrapbook.lang('EditorButtonHtmlEditorStrong')}</button></li>
       <li><button class="toolbar-htmlEditor-em">${scrapbook.lang('EditorButtonHtmlEditorEm')}</button></li>
@@ -477,7 +472,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     <button></button>
   </div>
   <div class="toolbar-save" title="${scrapbook.lang('EditorButtonSave')}">
-    <button></button><button></button>
+    <button></button>
     <ul hidden="" title="">
       <li><button class="toolbar-save-deleteErased">${scrapbook.lang('EditorButtonSaveDeleteErased')}</button></li>
       <li><button class="toolbar-save-internalize">${scrapbook.lang('EditorButtonSaveInternalize')}</button></li>
@@ -492,6 +487,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
     elem.addEventListener("click", (event) => {
       editor.locate();
     }, {passive: true});
+    elem.addEventListener("contextmenu", async (event) => {
+      event.preventDefault();
+    });
     elem.disabled = elem.hidden = !editor.inScrapBook;
 
     // marker
@@ -501,13 +499,12 @@ ${sRoot}.toolbar .toolbar-close:hover {
       const marker = wrapper.querySelector('.toolbar-marker ul button[checked] scrapbook-toolbar-samp');
       editor.lineMarker(marker.getAttribute('style'));
     }, {passive: true});
-
-    var elem = wrapper.querySelector('.toolbar-marker > button:last-of-type');
-    elem.addEventListener("click", async (event) => {
+    elem.addEventListener("contextmenu", async (event) => {
+      event.preventDefault();
       const elem = event.currentTarget;
       await editor.updateLineMarkers();
       editor.showContextMenu(elem.parentElement.querySelector('ul'));
-    }, {passive: true});
+    });
 
     for (const elem of wrapper.querySelectorAll('.toolbar-marker ul button')) {
       elem.addEventListener("click", (event) => {
@@ -526,11 +523,10 @@ ${sRoot}.toolbar .toolbar-close:hover {
     elem.addEventListener("click", (event) => {
       editor.createSticky();
     }, {passive: true});
-
-    var elem = wrapper.querySelector('.toolbar-annotation > button:last-of-type');
-    elem.addEventListener("click", (event) => {
+    elem.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
       editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
-    }, {passive: true});
+    });
 
     var elem = wrapper.querySelector('.toolbar-annotation-sticky');
     elem.addEventListener("click", (event) => {
@@ -557,11 +553,10 @@ ${sRoot}.toolbar .toolbar-close:hover {
       event.preventDefault();
       editor.removeEdits(true);
     });
-
-    var elem = wrapper.querySelector('.toolbar-eraser > button:last-of-type');
-    elem.addEventListener("click", (event) => {
+    elem.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
       editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
-    }, {passive: true});
+    });
 
     var elem = wrapper.querySelector('.toolbar-eraser-eraseSelection');
     elem.addEventListener("click", (event) => {
@@ -603,11 +598,11 @@ ${sRoot}.toolbar .toolbar-close:hover {
     elem.addEventListener("click", (event) => {
       editor.toggleDomEraser();
     }, {passive: true});
-
-    var elem = wrapper.querySelector('.toolbar-domEraser > button:last-of-type');
-    elem.addEventListener("click", (event) => {
+    elem.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      if (!event.currentTarget.hasAttribute('checked')) { return; }
       editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
-    }, {passive: true});
+    });
 
     var elem = wrapper.querySelector('.toolbar-domEraser-expand');
     elem.addEventListener("click", domEraser.expandTarget.bind(domEraser), {passive: true});
@@ -626,12 +621,12 @@ ${sRoot}.toolbar .toolbar-close:hover {
     elem.addEventListener("click", (event) => {
       editor.toggleHtmlEditor();
     }, {passive: true});
-
-    var elem = wrapper.querySelector('.toolbar-htmlEditor > button:last-of-type');
-    elem.addEventListener("click", (event) => {
+    elem.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      if (!event.currentTarget.hasAttribute('checked')) { return; }
       editor.updateHtmlEditorMenu();
       editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
-    }, {passive: true});
+    });
 
     var elem = wrapper.querySelector('.toolbar-htmlEditor-strong');
     elem.addEventListener("click", htmlEditor.strong, {passive: true});
@@ -734,17 +729,19 @@ ${sRoot}.toolbar .toolbar-close:hover {
     elem.addEventListener("click", (event) => {
       editor.undo();
     }, {passive: true});
+    elem.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+    });
 
     // save
     var elem = wrapper.querySelector('.toolbar-save > button:first-of-type');
     elem.addEventListener("click", (event) => {
       editor.save();
     }, {passive: true});
-
-    var elem = wrapper.querySelector('.toolbar-save > button:last-of-type');
-    elem.addEventListener("click", (event) => {
+    elem.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
       editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'));
-    }, {passive: true});
+    });
 
     var elem = wrapper.querySelector('.toolbar-save-deleteErased');
     elem.addEventListener("click", (event) => {
@@ -1159,7 +1156,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
       editElem.removeAttribute("checked");
     }
 
-    editor.internalElement.querySelector('.toolbar-domEraser > button:last-of-type').disabled = !willActive;
     for (const elem of editor.internalElement.querySelectorAll([
           '.toolbar-locate > button',
           '.toolbar-marker > button',
@@ -1210,7 +1206,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
       editElem.removeAttribute("checked");
     }
 
-    editor.internalElement.querySelector('.toolbar-htmlEditor > button:last-of-type').disabled = !willActive;
     for (const elem of editor.internalElement.querySelectorAll([
           '.toolbar-marker > button',
           '.toolbar-annotation > button',
