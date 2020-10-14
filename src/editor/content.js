@@ -197,6 +197,7 @@ ${sRoot}.toolbar {
   width: 100% !important;
   height: 100% !important;
   font-family: sans-serif !important;
+  white-space: nowrap !important;
 }
 
 ${sRoot}.toolbar > div {
