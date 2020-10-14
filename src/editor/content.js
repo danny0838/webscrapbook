@@ -148,7 +148,7 @@ ${sHost} {
   ${scrapbook.lang('@@bidi_start_edge')}: 0px !important;
   bottom: 0px !important;
   width: 100% !important;
-  height: 32px !important;
+  height: 40px !important;
   z-index: 2147483645 !important;
 }
 
@@ -212,9 +212,9 @@ ${sRoot}.toolbar > div > button {
   margin: 0 !important;
   padding: 0 !important;
   border: 1px solid transparent !important;
-  width: 28px !important;
-  height: 28px !important;
-  background-size: 16px 16px !important;
+  width: 36px !important;
+  height: 36px !important;
+  background-size: 24px 24px !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
 }
@@ -284,14 +284,14 @@ ${sRoot}.toolbar > div > ul {
   overflow: auto !important;
   box-sizing: border-box !important;
   list-style: none !important;
-  bottom: 32px !important;
+  bottom: 40px !important;
   margin: 0 !important;
   border: 1px solid #999 !important;
   border-radius: 2px !important;
   box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.3) !important;
   padding: 1px !important;
   background: white !important;
-  max-height: calc(100vh - 32px - ${editor.scrollbar.vWidth}px - 2px) !important;
+  max-height: calc(100vh - 40px - ${editor.scrollbar.vWidth}px - 2px) !important;
 }
 
 ${sRoot}.toolbar > div > ul[hidden] {
@@ -344,8 +344,8 @@ ${sRoot}.toolbar .toolbar-close {
   top: 0 !important;
   ${scrapbook.lang('@@bidi_end_edge')}: 0 !important;
   margin: 3px !important;
-  width: 24px !important;
-  height: 24px !important;
+  width: 32px !important;
+  height: 32px !important;
   opacity: 0.3 !important;
 }
 
