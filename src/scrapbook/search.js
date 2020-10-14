@@ -443,6 +443,9 @@
           case "source":
             addRule("source", pos ? "include" : "exclude", parseStr(term));
             break;
+          case "icon":
+            addRule("icon", pos ? "include" : "exclude", parseStr(term));
+            break;
           case "tcc":
             addRule("tcc", pos ? "include" : "exclude", parseStr(term));
             break;
@@ -584,6 +587,10 @@
 
     _match_source(rule, item) {
       return this.matchText(rule, item.meta.source);
+    },
+
+    _match_icon(rule, item) {
+      return this.matchText(rule, item.meta.icon);
     },
 
     _match_type(rule, item) {
