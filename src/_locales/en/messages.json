@@ -336,6 +336,15 @@
   "EditorButtonSaveInternalize": {
     "message": "Internalize external resources"
   },
+  "EditorButtonSaveSetViewport": {
+    "message": "Edit page viewport"
+  },
+  "EditorButtonSaveSetViewportPromptCreate": {
+    "message": "Create page viewport as"
+  },
+  "EditorButtonSaveSetViewportPromptModify": {
+    "message": "Modify page viewport to"
+  },
   "EditorButtonUndo": {
     "message": "Undo"
   },

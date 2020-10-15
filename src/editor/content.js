@@ -485,6 +485,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       <li><button class="toolbar-save-createSubPage">${scrapbook.lang('EditorButtonSaveCreateSubPage')}</button></li>
       <hr/>
       <li><button class="toolbar-save-editTitle">${scrapbook.lang('EditorButtonSaveEditTitle')}</button></li>
+      <li><button class="toolbar-save-setViewport">${scrapbook.lang('EditorButtonSaveSetViewport')}</button></li>
     </ul>
   </div>
   <a class="toolbar-close" href="javascript:" title="${scrapbook.lang('EditorButtonClose')}"></a>
@@ -781,6 +782,11 @@ ${sRoot}.toolbar .toolbar-close:hover {
       editor.editTitle();
     }, {passive: true});
 
+    var elem = wrapper.querySelector('.toolbar-save-setViewport');
+    elem.addEventListener("click", (event) => {
+      editor.setViewport();
+    }, {passive: true});
+
     // close
     var elem = wrapper.querySelector('.toolbar-close');
     elem.addEventListener("click", (event) => {
@@ -1030,6 +1036,43 @@ scrapbook-toolbar, scrapbook-toolbar *,
     let title = prompt(scrapbook.lang('EditorButtonSaveEditTitlePrompt'), document.title);
     if (title === null) { return; }
     document.title = title;
+  };
+
+  /**
+   * @kind invokable
+   */
+  editor.setViewportInternal = function ({}) {
+    let viewportElem = document.querySelector('meta[name="viewport"i]');
+    let viewportDeclaration = viewportElem ? viewportElem.getAttribute('content') : 'width=device-width, initial-scale=1.0';
+    if (viewportElem) {
+      viewportDeclaration = prompt(scrapbook.lang('EditorButtonSaveSetViewportPromptModify'), viewportDeclaration);
+    } else {
+      viewportDeclaration = prompt(scrapbook.lang('EditorButtonSaveSetViewportPromptCreate'), viewportDeclaration);
+    }
+
+    // cancel
+    if (viewportDeclaration === null) {
+      return;
+    }
+
+    if (viewportElem) {
+      if (viewportDeclaration) {
+        viewportElem.setAttribute('content', viewportDeclaration);
+      } else {
+        viewportElem.remove();
+      }
+
+      return;
+    }
+
+    // no value
+    if (!viewportDeclaration) {
+      return;
+    }
+
+    viewportElem = document.head.appendChild(document.createElement('meta'));
+    viewportElem.setAttribute('name', 'viewport');
+    viewportElem.setAttribute('content', viewportDeclaration);
   };
 
 
@@ -1348,6 +1391,17 @@ scrapbook-toolbar, scrapbook-toolbar *,
       args: {
         frameId: await editor.getFocusedFrameId(),
         cmd: "editor.editTitleInternal",
+        args: {},
+      },
+    });
+  };
+
+  editor.setViewport = async function () {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId(),
+        cmd: "editor.setViewportInternal",
         args: {},
       },
     });

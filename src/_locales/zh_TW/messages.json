@@ -336,6 +336,15 @@
   "EditorButtonSaveInternalize": {
     "message": "儲存內嵌的外部資源"
   },
+  "EditorButtonSaveSetViewport": {
+    "message": "修改頁面視圖"
+  },
+  "EditorButtonSaveSetViewportPromptCreate": {
+    "message": "建立頁面視圖為"
+  },
+  "EditorButtonSaveSetViewportPromptModify": {
+    "message": "修改頁面視圖為"
+  },
   "EditorButtonUndo": {
     "message": "復原"
   },
