@@ -196,7 +196,11 @@
         const dialog = frag.children[0];
         scrapbook.loadLanguages(dialog);
 
+        const isRecycle = this.rootId === 'recycle';
+
         dialog.querySelector('[name="id"]').value = id || "";
+        dialog.querySelector('[name="parent"]').value = item.parent || "";
+        dialog.querySelector('[name="recycled"]').value = item.recycled ? scrapbook.idToDate(item.recycled).toLocaleString() : "";
         dialog.querySelector('[name="title"]').value = item.title || "";
         dialog.querySelector('[name="index"]').value = item.index || "";
         dialog.querySelector('[name="source"]').value = item.source || "";
@@ -209,6 +213,8 @@
         dialog.querySelector('[name="modify"]').value = item.modify ? scrapbook.idToDate(item.modify).toLocaleString() : "";
         dialog.querySelector('[name="comment"]').value = item.comment || "";
 
+        dialog.querySelector('[name="parent"]').parentNode.parentNode.hidden = !(isRecycle);
+        dialog.querySelector('[name="recycled"]').parentNode.parentNode.hidden = !(isRecycle);
         dialog.querySelector('[name="index"]').parentNode.parentNode.hidden = ['folder', 'separator'].includes(item.type);
         dialog.querySelector('[name="source"]').parentNode.parentNode.hidden = ['folder', 'separator'].includes(item.type);
         dialog.querySelector('[name="icon"]').parentNode.parentNode.hidden = ['separator'].includes(item.type);
@@ -771,6 +777,7 @@ Redirecting to file <a href="index.md">index.md</a>
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
+            await book.saveMeta();
             await book.saveToc();
             await book.loadTreeFiles(true);  // update treeLastModified
           },
@@ -873,6 +880,78 @@ Redirecting to file <a href="index.md">index.md</a>
               }
             }
 
+            await book.loadTreeFiles(true);  // update treeLastModified
+          },
+        });
+      },
+
+      async recover({itemElems}) {
+        if (!itemElems.length) { return; }
+
+        // Handle items in order so that the order of recovered items is
+        // preserved if they have same parent.
+        // If a recycled item A has a child B, B will be removed from the DOM
+        // when A is removed, and its moving will be skipped.
+        for (const itemElem of itemElems) {
+          if (this.isDetached(itemElem)) { continue; }
+
+          const itemId = itemElem.getAttribute('data-id');
+
+          const parentItemElem = itemElem.parentNode.parentNode;
+          const parentItemId = parentItemElem.getAttribute('data-id');
+          const siblingItems = parentItemElem.container.children;
+          const index = Array.prototype.indexOf.call(siblingItems, itemElem);
+
+          let targetId = this.book.meta[itemId].parent || 'root';
+
+          // move to root instead if the original parent no more exists
+          if (!(this.book.meta[targetId] || this.book.isSpecialItem(targetId))) {
+            targetId = 'root';
+          }
+
+          if (targetId !== parentItemId) {
+            // update TOC
+            const newIndex = this.book.moveItem({
+              id: itemId,
+              currentParentId: parentItemId,
+              currentIndex: index,
+              targetParentId: targetId,
+              targetIndex: Infinity,
+            });
+
+            // remove parent and recycled time record
+            delete this.book.meta[itemId].parent;
+            delete this.book.meta[itemId].recycled;
+
+            // update DOM
+            Array.prototype.filter.call(
+              document.getElementById('items').querySelectorAll('[data-id]'),
+              x => x.getAttribute('data-id') === parentItemId
+            ).forEach((parentElem) => {
+              if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
+              const itemElem = parentElem.container.children[index];
+              itemElem.remove();
+              this.itemReduceContainer(parentElem);
+            });
+
+            Array.prototype.filter.call(
+              document.getElementById('items').querySelectorAll('[data-id]'),
+              x => x.getAttribute('data-id') === targetId
+            ).forEach((parentElem) => {
+              if (!(parentElem.parentNode)) { return; }
+              this.itemMakeContainer(parentElem);
+              if (!parentElem.container.hasAttribute('data-loaded')) { return; }
+              this.addItem(itemId, parentElem, newIndex);
+            });
+          }
+        }
+
+        // upload changes to server
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            await book.saveMeta();
+            await book.saveToc();
             await book.loadTreeFiles(true);  // update treeLastModified
           },
         });
@@ -1003,6 +1082,7 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
 
           menuElem.querySelector('button[value="edit"]').hidden = true;
+          menuElem.querySelector('button[value="recover"]').hidden = true;
           menuElem.querySelector('button[value="move_up"]').hidden = true;
           menuElem.querySelector('button[value="move_down"]').hidden = true;
           menuElem.querySelector('button[value="move_into"]').hidden = true;
@@ -1030,6 +1110,7 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
 
           menuElem.querySelector('button[value="edit"]').hidden = !(!isRecycle && ['note'].includes(item.type) && item.index);
+          menuElem.querySelector('button[value="recover"]').hidden = !(isRecycle);
           menuElem.querySelector('button[value="move_up"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="move_down"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="move_into"]').hidden = false;
@@ -1055,6 +1136,7 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="upload"]').hidden = true;
 
           menuElem.querySelector('button[value="edit"]').hidden = true;
+          menuElem.querySelector('button[value="recover"]').hidden = !(isRecycle);
           menuElem.querySelector('button[value="move_up"]').hidden = true;
           menuElem.querySelector('button[value="move_down"]').hidden = true;
           menuElem.querySelector('button[value="move_into"]').hidden = false;
@@ -1283,6 +1365,7 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
 
           menuElem.querySelector('button[value="edit"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="recover"]').disabled = !(!isNoTree && isRecycle);
           menuElem.querySelector('button[value="move_up"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="move_down"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="move_into"]').disabled = isNoTree;

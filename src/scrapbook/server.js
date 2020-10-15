@@ -1007,6 +1007,10 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
         if (!isFinite(targetIndex)) {
           targetIndex = this.toc[targetParentId].length - 1;
         }
+
+        // record recycled time and original parent ID and in meta
+        this.meta[id].parent = currentParentId;
+        this.meta[id].recycled = scrapbook.dateToId();
       }
 
       return targetIndex;

@@ -1109,6 +1109,12 @@
   "ScrapBookCommandMetaDialogModify": {
     "message": "修改时间:"
   },
+  "ScrapBookCommandMetaDialogParent": {
+    "message": "移除自:"
+  },
+  "ScrapBookCommandMetaDialogRecycled": {
+    "message": "移除时间:"
+  },
   "ScrapBookCommandMetaDialogSource": {
     "message": "来源:"
   },
@@ -1144,6 +1150,9 @@
   },
   "ScrapBookCommandOpenTab": {
     "message": "开启在新分页"
+  },
+  "ScrapBookCommandRecover": {
+    "message": "还原"
   },
   "ScrapBookCommandRecycle": {
     "message": "移除"
