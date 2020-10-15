@@ -244,36 +244,30 @@
           fulltextMtime = Math.floor(fulltextMtime) * 1000;
           metaMtime = Math.floor(metaMtime) * 1000;
 
-          if (fulltextMtime === -Infinity) {
-            const a = document.createElement('a');
-            a.textContent = scrapbook.lang('WarnSearchCacheMissing', [book.name]);
-
-            const u = new URL(browser.runtime.getURL('scrapbook/cache.html'));
-            u.searchParams.append('book', book.id);
-            u.searchParams.append('fulltext', 1);
-            if (this.inclusiveFrames) {
-              u.searchParams.append('inclusive_frames', 1);
+          cacheOutdatedWarning: {
+            let cacheOutdatedMessage;
+            if (fulltextMtime === -Infinity) {
+              cacheOutdatedMessage = scrapbook.lang('WarnSearchCacheMissing', [book.name]);
+            } else if (metaMtime > fulltextMtime) {
+              const threshold = this.fulltextCacheUpdateThreshold;
+              if (typeof threshold === 'number' && Date.now() > fulltextMtime + threshold) {
+                cacheOutdatedMessage = scrapbook.lang('WarnSearchCacheOutdated', [book.name]);
+              }
             }
-            a.href = u.href;
-            a.target = '_blank';
 
-            this.addMsg(a, 'warn');
-          } else if (metaMtime > fulltextMtime) {
-            const threshold = this.fulltextCacheUpdateThreshold;
-            if (typeof threshold === 'number' && Date.now() > fulltextMtime + threshold) {
-              const a = document.createElement('a');
-              a.textContent = scrapbook.lang('WarnSearchCacheOutdated', [book.name]);
-
+            if (cacheOutdatedMessage) {
               const u = new URL(browser.runtime.getURL('scrapbook/cache.html'));
               u.searchParams.append('book', book.id);
               u.searchParams.append('fulltext', 1);
               if (this.inclusiveFrames) {
                 u.searchParams.append('inclusive_frames', 1);
               }
+
+              const a = document.createElement('a');
+              a.textContent = cacheOutdatedMessage;
               a.href = u.href;
               a.target = '_blank';
-
-              this.addMsg(a, 'warn');
+              this.addMsg(a, 'warn', document.getElementById('messages'));
             }
           }
 
@@ -289,7 +283,8 @@
             size = size > 0.1 ? size.toFixed(1) + ' MiB' :
                 size * 1024 > 0.1 ? (size * 1024).toFixed(1) + ' KiB' :
                 fulltextSize + ' B';
-            this.addMsg(scrapbook.lang('WarnSearchCacheBlocked', [book.name, size]), 'warn');
+            const msg = scrapbook.lang('WarnSearchCacheBlocked', [book.name, size]);
+            this.addMsg(msg, 'warn', document.getElementById('messages'));
             book.fulltext = {};
           } else {
             tasks.push(book.loadFulltext());
@@ -304,9 +299,8 @@
       return await loadBook(book);
     },
 
-    addMsg(msg, className) {
-      let wrapper = document.getElementById("result");
-      let div = document.createElement("div");
+    addMsg(msg, className, wrapper = document.getElementById("result")) {
+      const div = document.createElement("div");
       if (typeof msg === 'string') {
         div.textContent = msg;
       } else {

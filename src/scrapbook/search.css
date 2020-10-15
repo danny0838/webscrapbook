@@ -32,10 +32,14 @@ body {
   white-space: pre-wrap;
 }
 
+#messages,
 #result {
   margin: 0;
-  margin-top: 1em;
   padding: 0;
+}
+
+#messages {
+  margin-top: 1em;
 }
 
 a {
