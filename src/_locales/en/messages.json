@@ -1089,7 +1089,7 @@
     "message": "Comment:"
   },
   "ScrapBookCommandMetaDialogCreate": {
-    "message": "Create:"
+    "message": "Created:"
   },
   "ScrapBookCommandMetaDialogIcon": {
     "message": "Icon:"
@@ -1107,7 +1107,7 @@
     "message": "Marked:"
   },
   "ScrapBookCommandMetaDialogModify": {
-    "message": "Modify:"
+    "message": "Modified:"
   },
   "ScrapBookCommandMetaDialogSource": {
     "message": "Source:"
