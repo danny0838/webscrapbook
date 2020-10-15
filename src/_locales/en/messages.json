@@ -748,7 +748,7 @@
     "message": "Remove undisplayed elements"
   },
   "OptionCaptureResourceSizeLimitLabel": {
-    "message": "Size limit for each resource file:"
+    "message": "Size limit for each resource file (MiB):"
   },
   "OptionCaptureResourceSizeLimitTooltip": {
     "message": "A resource file exceeding the limit will not be saved. Empty for no limit."
@@ -988,7 +988,7 @@
     "message": "Default search condiiton:"
   },
   "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
-    "message": "Size limit for remote fulltext cache:"
+    "message": "Size limit for remote fulltext cache (MiB):"
   },
   "OptionServerPasswordLabel": {
     "message": "Password:"

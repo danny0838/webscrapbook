@@ -748,7 +748,7 @@
     "message": "移除不顯示的元素"
   },
   "OptionCaptureResourceSizeLimitLabel": {
-    "message": "單個資源檔案的大小限制:"
+    "message": "單個資源檔案的大小限制 (MiB):"
   },
   "OptionCaptureResourceSizeLimitTooltip": {
     "message": "系統不會下載超出此限制的資源檔案。空白表示不設限制。"
@@ -988,7 +988,7 @@
     "message": "預設搜尋條件:"
   },
   "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
-    "message": "遠端全文搜尋快取大小限制:"
+    "message": "遠端全文搜尋快取大小限制 (MiB):"
   },
   "OptionServerPasswordLabel": {
     "message": "密碼:"
