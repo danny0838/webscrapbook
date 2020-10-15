@@ -1021,8 +1021,8 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="exec"]').hidden = !(item.type === 'file' && item.index);
           menuElem.querySelector('button[value="browse"]').hidden = !(item.index);
           menuElem.querySelector('button[value="source"]').hidden = !(item.source);
-          menuElem.querySelector('button[value="manage"]').hidden = !(item.type === 'folder' || this.book.toc[item.id]);
-          menuElem.querySelector('button[value="search_in"]').hidden = !(item.type === 'folder' || this.book.toc[item.id]);
+          menuElem.querySelector('button[value="manage"]').hidden = !(!isRecycle && (item.type === 'folder' || this.book.toc[item.id]));
+          menuElem.querySelector('button[value="search_in"]').hidden = !(!isRecycle && (item.type === 'folder' || this.book.toc[item.id]));
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
@@ -1047,7 +1047,7 @@ Redirecting to file <a href="index.md">index.md</a>
           menuElem.querySelector('button[value="browse"]').hidden = false;
           menuElem.querySelector('button[value="source"]').hidden = false;
           menuElem.querySelector('button[value="manage"]').hidden = true;
-          menuElem.querySelector('button[value="search_in"]').hidden = false;
+          menuElem.querySelector('button[value="search_in"]').hidden = !(!isRecycle);
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = true;
           menuElem.querySelector('button[value="mksep"]').hidden = true;
