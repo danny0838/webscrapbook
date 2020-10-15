@@ -2330,6 +2330,10 @@ scrapbook-toolbar, scrapbook-toolbar *,
   resize: none;
   font: inherit;
 }
+:host > form > textarea:focus,
+:host > form > article:focus {
+  outline: none;
+}
 :host > form > .resizer {
   position: absolute;
   box-sizing: border-box;
