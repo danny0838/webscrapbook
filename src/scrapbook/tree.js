@@ -40,7 +40,7 @@
     lastDraggedElem: null,
     lastHighlightElem: null,
     commands: {
-      async index(selectedItemElems) {
+      async index() {
         if (this.book.config.no_tree) {
           await this.openLink(this.book.dataUrl, true);
           return;
@@ -49,7 +49,7 @@
         await this.openLink(this.book.indexUrl, true);
       },
 
-      async exec_book(selectedItemElems) {
+      async exec_book() {
         const target = this.book.topUrl;
         await server.request({
           url: target + '?a=exec',
@@ -58,8 +58,8 @@
         });
       },
 
-      async opentab(selectedItemElems) {
-        for (const elem of selectedItemElems) {
+      async opentab({itemElems}) {
+        for (const elem of itemElems) {
           const id = elem.getAttribute('data-id');
           const item = this.book.meta[id];
           switch (item.type) {
@@ -85,8 +85,8 @@
         }
       },
 
-      async view_text(selectedItemElems) {
-        for (const elem of selectedItemElems) {
+      async view_text({itemElems}) {
+        for (const elem of itemElems) {
           const id = elem.getAttribute('data-id');
           const item = this.book.meta[id];
           if (!item.index) { continue; }
@@ -106,8 +106,8 @@
         }
       },
 
-      async exec(selectedItemElems) {
-        for (const elem of selectedItemElems) {
+      async exec({itemElems}) {
+        for (const elem of itemElems) {
           const id = elem.getAttribute('data-id');
           const item = this.book.meta[id];
           if (!item.index) { continue; }
@@ -128,8 +128,8 @@
         }
       },
 
-      async browse(selectedItemElems) {
-        for (const elem of selectedItemElems) {
+      async browse({itemElems}) {
+        for (const elem of itemElems) {
           const id = elem.getAttribute('data-id');
           const item = this.book.meta[id];
           if (!item.index) { continue; }
@@ -150,8 +150,8 @@
         }
       },
 
-      async source(selectedItemElems) {
-        for (const elem of selectedItemElems) {
+      async source({itemElems}) {
+        for (const elem of itemElems) {
           const id = elem.getAttribute('data-id');
           const item = this.book.meta[id];
           if (item.source) {
@@ -161,8 +161,8 @@
         }
       },
 
-      async manage(selectedItemElems) {
-        const id = selectedItemElems.length ? selectedItemElems[0].getAttribute('data-id') : 'root';
+      async manage({itemElems}) {
+        const id = itemElems.length ? itemElems[0].getAttribute('data-id') : 'root';
         const urlObj = new URL(browser.runtime.getURL("scrapbook/manage.html"));
         urlObj.searchParams.set('id', this.bookId);
         urlObj.searchParams.set('root', id);
@@ -174,10 +174,10 @@
         }
       },
 
-      async meta(selectedItemElems) {
-        if (!selectedItemElems.length) { return; }
+      async meta({itemElems}) {
+        if (!itemElems.length) { return; }
 
-        const itemElem = selectedItemElems[0];
+        const itemElem = itemElems[0];
         const id = itemElem.getAttribute('data-id');
         const item = this.book.meta[id];
 
@@ -261,12 +261,12 @@
         });
       },
 
-      async mkfolder(selectedItemElems) {
+      async mkfolder({itemElems}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
-        if (selectedItemElems.length) {
-          const itemElem = selectedItemElems[0];
+        if (itemElems.length) {
+          const itemElem = itemElems[0];
           const itemId = itemElem.getAttribute('data-id');
 
           const parentItemElem = itemElem.parentNode.parentNode;
@@ -307,12 +307,12 @@
         });
       },
 
-      async mksep(selectedItemElems) {
+      async mksep({itemElems}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
-        if (selectedItemElems.length) {
-          const itemElem = selectedItemElems[0];
+        if (itemElems.length) {
+          const itemElem = itemElems[0];
           const itemId = itemElem.getAttribute('data-id');
 
           const parentItemElem = itemElem.parentNode.parentNode;
@@ -353,12 +353,12 @@
         });
       },
 
-      async mknote(selectedItemElems) {
+      async mknote({itemElems}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
-        if (selectedItemElems.length) {
-          const itemElem = selectedItemElems[0];
+        if (itemElems.length) {
+          const itemElem = itemElems[0];
           const itemId = itemElem.getAttribute('data-id');
 
           const parentItemElem = itemElem.parentNode.parentNode;
@@ -554,12 +554,12 @@ Redirecting to file <a href="index.md">index.md</a>
         }
       },
 
-      async upload(selectedItemElems, detail) {
+      async upload({itemElems, files}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
-        if (selectedItemElems.length) {
-          const itemElem = selectedItemElems[0];
+        if (itemElems.length) {
+          const itemElem = itemElems[0];
           const itemId = itemElem.getAttribute('data-id');
 
           const parentItemElem = itemElem.parentNode.parentNode;
@@ -568,23 +568,23 @@ Redirecting to file <a href="index.md">index.md</a>
           index = Array.prototype.indexOf.call(siblingItems, itemElem) + 1;
         }
 
-        await this.uploadItems(detail.files, parentItemId, index);
+        await this.uploadItems(files, parentItemId, index);
       },
 
-      async edit(selectedItemElems) {
-        if (!selectedItemElems.length) { return; }
+      async edit({itemElems}) {
+        if (!itemElems.length) { return; }
 
-        const id = selectedItemElems[0].getAttribute('data-id');
+        const id = itemElems[0].getAttribute('data-id');
         const urlObj = new URL(browser.runtime.getURL("scrapbook/edit.html"));
         urlObj.searchParams.set('id', id);
         urlObj.searchParams.set('bookId', this.bookId);
         await this.openLink(urlObj.href, true);
       },
 
-      async move_up(selectedItemElems) {
-        if (!selectedItemElems.length) { return; }
+      async move_up({itemElems}) {
+        if (!itemElems.length) { return; }
 
-        const itemElem = selectedItemElems[0];
+        const itemElem = itemElems[0];
         const itemId = itemElem.getAttribute('data-id');
 
         const parentItemElem = itemElem.parentNode.parentNode;
@@ -626,10 +626,10 @@ Redirecting to file <a href="index.md">index.md</a>
         });
       },
 
-      async move_down(selectedItemElems) {
-        if (!selectedItemElems.length) { return; }
+      async move_down({itemElems}) {
+        if (!itemElems.length) { return; }
 
-        const itemElem = selectedItemElems[0];
+        const itemElem = itemElems[0];
         const itemId = itemElem.getAttribute('data-id');
 
         const parentItemElem = itemElem.parentNode.parentNode;
@@ -671,8 +671,8 @@ Redirecting to file <a href="index.md">index.md</a>
         });
       },
 
-      async move_into(selectedItemElems) {
-        if (!selectedItemElems.length) { return; }
+      async move_into({itemElems}) {
+        if (!itemElems.length) { return; }
 
         let targetId;
         let targetIndex;
@@ -705,23 +705,23 @@ Redirecting to file <a href="index.md">index.md</a>
 
         switch (mode) {
           case "link": {
-            await this.linkItems(selectedItemElems, targetId, targetIndex);
+            await this.linkItems(itemElems, targetId, targetIndex);
             break;
           }
           case "move":
           default: {
-            await this.moveItems(selectedItemElems, targetId, targetIndex);
+            await this.moveItems(itemElems, targetId, targetIndex);
             break;
           }
         }
       },
 
-      async recycle(selectedItemElems) {
-        if (!selectedItemElems.length) { return; }
+      async recycle({itemElems}) {
+        if (!itemElems.length) { return; }
 
         // Reverse the order to always move an item before its parent so that
         // its parent is in the DOM and gets children updated correctly.
-        const itemElems = [...selectedItemElems].reverse();
+        itemElems = [...itemElems].reverse();
 
         let targetIndex = Infinity;
         for (const itemElem of itemElems) {
@@ -766,8 +766,8 @@ Redirecting to file <a href="index.md">index.md</a>
         });
       },
 
-      async delete(selectedItemElems) {
-        if (!selectedItemElems.length) { return; }
+      async delete({itemElems}) {
+        if (!itemElems.length) { return; }
 
         const removeDataFiles = async (itemIndexFile) => {
           if (!itemIndexFile) { return; }
@@ -781,13 +781,13 @@ Redirecting to file <a href="index.md">index.md</a>
           });
         };
 
+        // Reverse the order to always move an item before its parent so that
+        // its parent is in the DOM and gets children updated correctly.
+        itemElems = [...itemElems].reverse();
+
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
-            // Reverse the order to always move an item before its parent so that
-            // its parent is in the DOM and gets children updated correctly.
-            const itemElems = [...selectedItemElems].reverse();
-
             let allRemovedItems = [];
             for (const itemElem of itemElems) {
               if (this.isDetached(itemElem)) { continue; }
@@ -867,7 +867,7 @@ Redirecting to file <a href="index.md">index.md</a>
         });
       },
 
-      async view_recycle(selectedItemElems) {
+      async view_recycle() {
         const urlObj = new URL(browser.runtime.getURL("scrapbook/manage.html"));
         urlObj.searchParams.set('id', this.bookId);
         urlObj.searchParams.set('root', 'recycle');
@@ -2342,30 +2342,27 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
           return;
         }
 
-        let cmd;
-        switch (event.code) {
-          case 'Delete':
-            cmd = 'recycle';
-            break;
-          case 'F2':
-            cmd = 'meta';
-            break;
-        }
+        // execute the corresponding command
+        const command = {
+          'F2': 'meta',
+          'Delete': 'recycle',
+        }[event.code];
 
-        if (!cmd) {
+        if (!command) {
           return;
         }
 
-        // skip if cmd disabled
-        if (document.querySelector(`#command-popup button[value="${cmd}"]:disabled`)) {
+        // skip if command disabled
+        if (document.querySelector(`#command-popup button[value="${command}"]:disabled`)) {
           return;
         }
 
+        // execute command
         event.preventDefault();
-
         const evt = new CustomEvent("command", {
           detail: {
-            cmd,
+            command,
+            itemElems: true,
           },
         });
         window.dispatchEvent(evt);
@@ -2430,7 +2427,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         default: {
           const evt = new CustomEvent("command", {
             detail: {
-              cmd: command,
+              command,
+              itemElems: true,
             },
           });
           window.dispatchEvent(evt);
@@ -2447,17 +2445,26 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       this.showCommands(false);
     },
 
+    /***
+     * @param {Object} event.detail
+     * @param {string} event.detail.command - the command being run
+     * @param {(HTMLElement|true)[]} [event.detail.itemElems] - selected item
+     *     elements, or simply true to query from current document.
+     * @param {File[]} [event.detail.files] - files being uploaded
+     */
     async onCommandRun(event) {
-      const command = event.detail.cmd;
-      const selectedItemElems = Array.prototype.map.call(
-        document.querySelectorAll('#item-root .highlight'),
-        x => x.parentNode
-      );
+      const detail = event.detail;
+      if (detail.itemElems === true) {
+        detail.itemElems = Array.prototype.map.call(
+          document.querySelectorAll('#item-root .highlight'),
+          x => x.parentNode
+        );
+      }
 
       this.enableUi(false);
 
       try {
-        await this.commands[command](selectedItemElems, event.detail);
+        await this.commands[detail.command](detail);
       } catch (ex) {
         console.error(ex);
         this.error(ex.message);
@@ -2475,7 +2482,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       event.preventDefault();
       const evt = new CustomEvent("command", {
         detail: {
-          cmd: 'upload',
+          command: 'upload',
+          itemElems: true,
           files: event.target.files,
         },
       });
