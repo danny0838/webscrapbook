@@ -413,7 +413,7 @@
 
         // create file
         let target;
-        let template_text;
+        let templateText;
         switch (type) {
           case 'html': {
             newItem.index = newItem.id + '/index.html';
@@ -422,13 +422,13 @@
             // attempt to load template
             const url = this.book.treeUrl + '/templates/note_template.html';
             try {
-              template_text = await server.request({
+              templateText = await server.request({
                 url: url + '?a=source',
                 method: "GET",
               }).then(r => r.text());
             } catch (ex) {
               // template file not exist, generate default one
-              template_text = `<!DOCTYPE html>
+              templateText = `<!DOCTYPE html>
 <html data-scrapbook-type="note">
 <head>
 <meta charset="UTF-8">
@@ -438,7 +438,7 @@
 <body>%NOTE_TITLE%</body>
 </html>
 `;
-              const blob = new Blob([template_text], {type: "text/html"});
+              const blob = new Blob([templateText], {type: "text/html"});
               await server.request({
                 url: url + '?a=save',
                 method: "POST",
@@ -460,14 +460,14 @@
             // attempt to load template
             const url = this.book.treeUrl + '/templates/note_template.md';
             try {
-              template_text = await server.request({
+              templateText = await server.request({
                 url: url + '?a=source',
                 method: "GET",
               }).then(r => r.text());
             } catch (ex) {
               // template file not exist, generate default one
-              template_text = `%NOTE_TITLE%`;
-              const blob = new Blob([template_text], {type: "text/markdown"});
+              templateText = `%NOTE_TITLE%`;
+              const blob = new Blob([templateText], {type: "text/markdown"});
               await server.request({
                 url: url + '?a=save',
                 method: "POST",
@@ -492,7 +492,7 @@
           TREE_DIR: scrapbook.getRelativeUrl(this.book.treeUrl, target),
           ITEM_DIR: './',
         };
-        const content = template_text.replace(/%([^%]*)%/gu, (_, key) => {
+        const content = templateText.replace(/%([^%]*)%/gu, (_, key) => {
           return scrapbook.escapeHtml(dict[key] || '');
         });
 
