@@ -1531,16 +1531,16 @@ if (Node && !Node.prototype.getRootNode) {
   scrapbook.normalizeUrl = function (url) {
     // ref: https://url.spec.whatwg.org/#percent-encoded-bytes
     // reserved = :/?#[]@!$&'()*+,;=
-    const percent_encoding_regex = /%(?:[0-9A-F]{2}(?:%[0-9A-F]{2})*)?/gi;
-    const fix_pathname_regex = /[^:\/[\]@!$&'()*+,;=]+/g;
+    const percentEncodingRegex = /%(?:[0-9A-F]{2}(?:%[0-9A-F]{2})*)?/gi;
+    const fixPathnameRegex = /[^:\/[\]@!$&'()*+,;=]+/g;
 
-    const fix_pathname_replace = str => str.replace(percent_encoding_regex, fix_pathname_replace2);
-    const fix_pathname_replace2 = m => {
+    const fixPathnameReplace = str => str.replace(percentEncodingRegex, fixPathnameReplace2);
+    const fixPathnameReplace2 = m => {
       if (m.length === 1) { return encodeURIComponent(m); }
-      return decodeURIComponent(m).replace(fix_pathname_regex, encodeURIComponent);
+      return decodeURIComponent(m).replace(fixPathnameRegex, encodeURIComponent);
     };
-    const fix_search_replace = str => str.replace(percent_encoding_regex, fix_search_replace2);
-    const fix_search_replace2 = m => {
+    const fixSearchReplace = str => str.replace(percentEncodingRegex, fixSearchReplace2);
+    const fixSearchReplace2 = m => {
       if (m.length === 1) { return encodeURIComponent(m); }
       return encodeURIComponent(decodeURIComponent(m));
     };
@@ -1548,9 +1548,9 @@ if (Node && !Node.prototype.getRootNode) {
     const fn = scrapbook.normalizeUrl = (url) => {
       const u = new URL(url);
       try {
-        u.pathname = fix_pathname_replace(u.pathname);
-        u.search = fix_search_replace(u.search);
-        u.hash = fix_search_replace(u.hash);
+        u.pathname = fixPathnameReplace(u.pathname);
+        u.search = fixSearchReplace(u.search);
+        u.hash = fixSearchReplace(u.hash);
       } catch (ex) {
         // @FIXME:
         // This URL gets decodeURIComponent error since it's not encoded as
