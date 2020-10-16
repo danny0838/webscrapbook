@@ -1361,6 +1361,9 @@ async function test_capture_selection() {
  * When a headless capture (source, bookmark) is initialized from a
  * tab, the tab information (e.g. title and favicon) should be used.
  *
+ * A delay time for tab capture is required to wait for favicon loading
+ * complete.
+ *
  * capturer.captureTab
  * capturer.captureHeadless
  */
@@ -1370,7 +1373,7 @@ async function test_capture_headless() {
     url: `${localhost}/capture_headless/tab-info.html`,
     mode: "source",
     options: baseOptions,
-  });
+  }, {delay: 500});
 
   var zip = await new JSZip().loadAsync(blob);
 
@@ -1398,7 +1401,7 @@ async function test_capture_headless() {
     url: `${localhost}/capture_headless/tab-info.html`,
     mode: "bookmark",
     options: baseOptions,
-  });
+  }, {delay: 100});
 
   var doc = await readFileAsDocument(blob);
   assert(doc.querySelector(`title`).textContent.trim() === `My Title`);
@@ -1410,7 +1413,7 @@ async function test_capture_headless() {
     frameId: 0,
     mode: "source",
     options: baseOptions,
-  });
+  }, {delay: 100});
 
   var zip = await new JSZip().loadAsync(blob);
 
@@ -1428,7 +1431,7 @@ async function test_capture_headless() {
     frameId: 0,
     mode: "bookmark",
     options: baseOptions,
-  });
+  }, {delay: 100});
 
   var doc = await readFileAsDocument(blob);
   assert(!doc.querySelector(`title`));
