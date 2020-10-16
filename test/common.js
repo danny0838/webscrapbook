@@ -176,9 +176,17 @@ async function openTestTab(createProperties, handler) {
  * @param {string} params.url
  * @param {string} params.mode
  * @param {Object} params.options
+ * @param {Object} options
+ * @param {boolean} options.headless
+ * @param {float} options.delay
  */
-async function capture(params, headless = false) {
+async function capture(params, options = {}) {
+  const {headless = false, delay: delayTime} = options;
   const pageTab = !headless && await openCapturerTab(params.url);
+
+  if (typeof delayTime === 'number') {
+    await delay(delayTime);
+  }
 
   const windowCreateData = {
     focused: false,
@@ -215,10 +223,10 @@ async function capture(params, headless = false) {
 }
 
 /**
- * Shortcut for capture(params, true)
+ * Shortcut for capture(params, {headless: true})
  */
 async function captureHeadless(params) {
-  return await capture(params, true);
+  return await capture(params, {headless: true});
 }
 
 function readFileAsArrayBuffer(blob) {
