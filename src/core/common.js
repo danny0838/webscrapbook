@@ -1525,7 +1525,8 @@ if (Node && !Node.prototype.getRootNode) {
    *
    * - Encode chars that requires percent encoding with all upper case.
    * - Encode standalone "%"s, which can cause error for decodeURIComponent().
-   * - Decode over-encoded chars, such as [0-9a-z:!()+,;=] in pathname.
+   * - Decode over-encoded chars, such as [0-9a-z:!()+,;=], in pathname.
+   * - Decode unreserved chars [0-9A-Za-z\-_.~] in search and hash.
    * - e.g. normalizeUrl("http://abc/def:中!%") === normalizeUrl("http://ab%63/def%3A%E4%B8%AD%21%25")
    */
   scrapbook.normalizeUrl = function (url) {
@@ -1533,6 +1534,7 @@ if (Node && !Node.prototype.getRootNode) {
     // reserved = :/?#[]@!$&'()*+,;=
     const percentEncodingRegex = /%(?:[0-9A-F]{2}(?:%[0-9A-F]{2})*)?/gi;
     const fixPathnameRegex = /[^:\/[\]@!$&'()*+,;=]+/g;
+    const extraReservedCharsRegex = /[!*'()]+/g;  // these are not covered by encodeURIComponent
 
     const fixPathnameReplace = str => str.replace(percentEncodingRegex, fixPathnameReplace2);
     const fixPathnameReplace2 = m => {
@@ -1542,7 +1544,10 @@ if (Node && !Node.prototype.getRootNode) {
     const fixSearchReplace = str => str.replace(percentEncodingRegex, fixSearchReplace2);
     const fixSearchReplace2 = m => {
       if (m.length === 1) { return encodeURIComponent(m); }
-      return encodeURIComponent(decodeURIComponent(m));
+      return encodeURIComponent(decodeURIComponent(m)).replace(extraReservedCharsRegex, fixSearchReplace3);
+    };
+    const fixSearchReplace3 = m => {
+      return `%${m.charCodeAt(0).toString(16).toUpperCase()}`;
     };
 
     const fn = scrapbook.normalizeUrl = (url) => {
