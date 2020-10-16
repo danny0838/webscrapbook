@@ -17,8 +17,6 @@
 
   'use strict';
 
-  const urlMatch = await scrapbook.getContentPagePattern();
-
   browser.webNavigation.onCompleted.addListener((details) => {
     if (details.frameId !== 0) { return; }
 
