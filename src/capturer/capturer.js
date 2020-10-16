@@ -881,7 +881,7 @@
           title: response.title,
           type: response.type,
           create: response.timeId,
-          source: response.sourceUrl,
+          source: scrapbook.normalizeUrl(response.sourceUrl),
           icon: response.favIconUrl,
           charset: response.charset,
         },
@@ -1007,7 +1007,7 @@
           title: response.title,
           type: response.type,
           create: response.timeId,
-          source: response.sourceUrl,
+          source: scrapbook.normalizeUrl(response.sourceUrl),
           icon: response.favIconUrl,
           charset: response.charset,
         },
@@ -1225,7 +1225,7 @@
     {
       const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
       const meta = params.options["capture.recordDocumentMeta"] ? 
-          ' data-scrapbook-source="' + scrapbook.escapeHtml(url) + '"' + 
+          ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' + 
           ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
           ' data-scrapbook-type="bookmark"' : 
           "";
@@ -1364,7 +1364,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       // for the main frame, create a index.html that redirects to the file
       const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
       const meta = params.options["capture.recordDocumentMeta"] ? 
-          ' data-scrapbook-source="' + scrapbook.escapeHtml(url) + '"' + 
+          ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(url)) + '"' + 
           ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
           ' data-scrapbook-type="file"' + 
           (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
@@ -2060,7 +2060,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     const addIndexHtml = async (path, target, title) => {
       const meta = options["capture.recordDocumentMeta"] ? 
-          ' data-scrapbook-source="' + scrapbook.escapeHtml(sourceUrl) + '"' + 
+          ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(sourceUrl)) + '"' + 
           ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' : 
           "";
 
