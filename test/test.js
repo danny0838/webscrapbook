@@ -9350,141 +9350,18 @@ async function test_viewer_csp() {
   });
 }
 
-async function runTests() {
-  await test(test_capture_html);
-  await test(test_capture_metaCharset);
-  await test(test_capture_rename);
-  await test(test_capture_rename2);
-  await test(test_capture_xhtml);
-  await test(test_capture_file);
-  await test(test_capture_file_charset);
-  await test(test_capture_header);
-  await test(test_capture_header_mime);
-  await test(test_capture_filename);
-  await test(test_capture_filename2);
-  await test(test_capture_saveAsciiFilename);
-  await test(test_capture_saveFileAsHtml);
-  await test(test_capture_dataUri);
-  await test(test_capture_dataUri2);
-  await test(test_capture_dataUri3);
-  await test(test_capture_dataUri4);
-  await test(test_capture_selection);
-  await test(test_capture_headless);
-  await test(test_capture_bookmark);
-  await test(test_capture_frame);
-  await test(test_capture_frame2);
-  await test(test_capture_frame3);
-  await test(test_capture_frame4);
-  await test(test_capture_frame_headless);
-  await test(test_capture_frame_headless2);
-  await test(test_capture_frame_headless3);
-  await test(test_capture_frame_headless4);
-  await test(test_capture_frame_singleHtml);
-  await test(test_capture_frame_singleHtml2);
-  await test(test_capture_frame_circular);
-  await test(test_capture_frame_circular2);
-  await test(test_capture_frameRename);
-  await test(test_capture_frameRename2);
-  await test(test_capture_css_style);
-  await test(test_capture_css_styleInline);
-  await test(test_capture_css_disabled);
-  await test(test_capture_css_rewriteCss);
-  await test(test_capture_css_rewriteCss2);
-  await test(test_capture_css_syntax);
-  await test(test_capture_css_charset);
-  await test(test_capture_css_rewrite);
-  await test(test_capture_css_rewrite2);
-  await test(test_capture_css_rewrite3);
-  await test(test_capture_css_rewrite4);
-  await test(test_capture_css_circular);
-  await test(test_capture_css_circular2);
-  await test(test_capture_css_cross_origin);
-  await test(test_capture_css_dynamic);
-  await test(test_capture_css_dynamic2);
-  await test(test_capture_css_adoptedStyleSheets);
-  await test(test_capture_image);
-  await test(test_capture_imageBackground);
-  await test(test_capture_imageBackground_used);
-  await test(test_capture_imageBackground_used2);
-  await test(test_capture_imageBackground_used3);
-  await test(test_capture_imageBackground_used4);
-  await test(test_capture_imageBackground_used5);
-  await test(test_capture_image_favicon);
-  await test(test_capture_canvas);
-  await test(test_capture_audio);
-  await test(test_capture_video);
-  await test(test_capture_font);
-  await test(test_capture_font_used);
-  await test(test_capture_font_used2);
-  await test(test_capture_font_used3);
-  await test(test_capture_script);
-  await test(test_capture_noscript);
-  await test(test_capture_embed);
-  await test(test_capture_object);
-  await test(test_capture_applet);
-  await test(test_capture_base);
-  await test(test_capture_formStatus);
-  await test(test_capture_shadowRoot);
-  await test(test_capture_shadowRoot2);
-  await test(test_capture_removeHidden);
-  await test(test_capture_rewrite);
-  await test(test_capture_rewrite2);
-  await test(test_capture_redirect);
-  await test(test_capture_redirect2);
-  await test(test_capture_anchor);
-  await test(test_capture_anchor2);
-  await test(test_capture_anchor3);
-  await test(test_capture_downLink);
-  await test(test_capture_downLink2);
-  await test(test_capture_downLink3);
-  await test(test_capture_metaRefresh);
-  await test(test_capture_metaRefresh2);
-  await test(test_capture_metaRefresh3);
-  await test(test_capture_metaRefresh4);
-  await test(test_capture_metaRefresh5);
-  await test(test_capture_metaRefresh6);
-  await test(test_capture_integrity);
-  await test(test_capture_linkUnsavedUri);
-  await test(test_capture_linkUnsavedUri2);
-  await test(test_capture_linkUnsavedUri3);
-  await test(test_capture_linkUnsavedUri4);
-  await test(test_capture_linkUnsavedUri5);
-  await test(test_capture_linkUnsavedUri6);
-  await test(test_capture_referrer);
-  await test(test_capture_record_meta);
-  await test(test_capture_record_meta2);
-  await test(test_capture_record_meta3);
-  await test(test_capture_record_nodes);
-  await test(test_capture_record_nodes2);
-  await test(test_capture_record_nodes3);
-  await test(test_capture_record_attrs);
-  await test(test_capture_record_urls);
-  await test(test_capture_record_urls2);
-  await test(test_capture_record_urls3);
-  await test(test_capture_record_urls4);
-  await test(test_capture_svg);
-  await test(test_capture_mathml);
-  await test(test_capture_recursive);
-  await test(test_capture_singleHtml_encoding);
-  await test(test_capture_singleHtml_mergeCss);
-  await test(test_capture_singleHtml_filename);
-  await test(test_capture_invalid_tags);
-  await test(test_capture_sizeLimit);
-  await test(test_capture_sizeLimit2);
-  await test(test_capture_sizeLimit3);
-  await test(test_capture_sizeLimit4);
-  await test(test_capture_sizeLimit5);
-  await test(test_capture_helpers);
-  await test(test_capture_helpers2);
+async function runTests(prefix = 'test_') {
+  for (const t of Object.keys(window).filter(x => x.startsWith(prefix))) {
+    await test(window[t]);
+  }
+}
+
+async function runAutomatedTests() {
+  await runTests('test_capture_');
 }
 
 async function runManualTests() {
-  await test(test_viewer_validate);
-  await test(test_viewer_interlink);
-  await test(test_viewer_css_rules);
-  await test(test_viewer_metaRefresh);
-  await test(test_viewer_archive_in_frame);
-  await test(test_viewer_csp);
+  await runTests('test_viewer_');
 }
 
 /**
@@ -9499,7 +9376,7 @@ async function main() {
   if (mode == 1 || !mode) {
     testTotal = testPass = 0;
     await log(`Starting automated tests...\n`);
-    await runTests();
+    await runAutomatedTests();
     await showTestResult();
     log(`\n`);
   }
