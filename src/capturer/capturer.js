@@ -742,12 +742,13 @@
   /**
    * @param {Object} params
    * @param {Array} params.tasks
-   * @param {string} params.parentId - parent item ID for the captured items
-   * @param {integer} params.index - position index for the captured items
+   * @param {string} [params.parentId] - parent item ID for the captured items
+   * @param {integer} [params.index] - position index for the captured items
+   * @param {float} [params.delay=5] - delay between tasks (ms)
    * @return {Promise<Array|Object>} - list of task results (or error), or an object of error
    */
   capturer.runTasks = async function (params) {
-    let {tasks, parentId, index} = params;
+    let {tasks, parentId, index, delay = 5} = params;
     const results = [];
     const globalOptions = scrapbook.getOptions("capture");
 
@@ -798,7 +799,7 @@
       results.push(result);
 
       // short delay before next task
-      await scrapbook.delay(5);
+      await scrapbook.delay(delay);
     }
 
     return results;

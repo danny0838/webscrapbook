@@ -164,6 +164,7 @@
    * @param {Array} params.tasks
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
+   * @param {float} [params.delay] - delay between tasks (ms)
    * @param {Object} [params.windowCreateData]
    * @param {boolean} [params.waitForResponse]
    * @return {Promise<(Object|Window|Tab)>}
@@ -172,12 +173,13 @@
     tasks,
     parentId,
     index,
+    delay,
     windowCreateData,
     waitForResponse = true,
   }) {
     const missionId = scrapbook.getUuid();
     const key = {table: "captureMissionCache", id: missionId};
-    await scrapbook.cache.set(key, {tasks, parentId, index});
+    await scrapbook.cache.set(key, {tasks, parentId, index, delay});
     const url = browser.runtime.getURL("capturer/capturer.html") + `?mid=${missionId}`;
 
     // launch capturer
