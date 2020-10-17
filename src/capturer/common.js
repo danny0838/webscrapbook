@@ -1984,9 +1984,12 @@
       }
     };
 
-    const {doc = document, title, settings, options} = params;
+    const {doc = document, title, settings} = params;
     const {timeId, isHeadless} = settings;
     const {contentType: mime, documentElement: htmlNode} = doc;
+
+    // allow overwriting by capture helpers
+    let {options} = params;
 
     // determine docUrl and baseUrl
     let {docUrl, baseUrl} = params;
@@ -2278,11 +2281,23 @@
       }
 
       if (helpers) {
-        const parser = new capturer.CaptureHelperHandler(helpers, rootNode, docUrl, origNodeMap);
-        const errors = parser.run();
-        if (errors.length) {
+        const parser = new capturer.CaptureHelperHandler({
+          helpers,
+          rootNode,
+          docUrl,
+          origNodeMap,
+          options,
+        });
+        const result = parser.run();
+
+        // replace options with merged ones
+        if (Object.keys(result.options).length) {
+          options = Object.assign({}, options, result.options);
+        }
+
+        if (result.errors.length) {
           (async () => {
-            for (const error of errors) {
+            for (const error of result.errors) {
               await warn(error);
             }
           })();
@@ -4310,11 +4325,12 @@
    ***************************************************************************/
 
   capturer.CaptureHelperHandler = class CaptureHelperHandler {
-    constructor(helpers, rootNode, docUrl, origNodeMap) {
+    constructor({helpers, rootNode, docUrl, origNodeMap}) {
       this.helpers = helpers;
       this.rootNode = rootNode;
       this.docUrl = docUrl;
       this.origNodeMap = origNodeMap;
+      this.options = {};
       this.commandId = 0;
       this.debugging = false;
     }
@@ -4374,7 +4390,10 @@
         this.debugging = false;
       }
 
-      return errors;
+      return {
+        options: this.options,
+        errors,
+      };
     }
 
     parseRegexStr(str) {
@@ -4655,6 +4674,53 @@
               elem.style.removeProperty(key);
             }
           }
+        }
+      }
+    }
+
+    cmd_insert(rootNode, selector, name, attrs, text, mode, index) {
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
+      for (const elem of elems) {
+        const newElem = rootNode.ownerDocument.createElement(this.resolve(name, elem));
+
+        const attrs_ = this.resolve(attrs, elem);
+        for (const key in attrs_) {
+          const value = this.resolve(attrs_[key], elem);
+          newElem.setAttribute(key, value);
+        }
+
+        newElem.textContent = this.resolve(text, elem);
+
+        switch (this.resolve(mode, elem)) {
+          case 'before': {
+            elem.parentNode.insertBefore(newElem, elem);
+            break;
+          }
+          case 'after': {
+            elem.parentNode.insertBefore(newElem, elem.nextSibling);
+            break;
+          }
+          case 'insert': {
+            elem.insertBefore(newElem, elem.childNodes[this.resolve(index, elem)]);
+            break;
+          }
+          case 'append': {
+            elem.appendChild(newElem);
+            break;
+          }
+        }
+      }
+    }
+
+    cmd_options(rootNode, nameOrDict, valueOrNull) {
+      const nameOrDict_ = this.resolve(nameOrDict, rootNode);
+      if (typeof nameOrDict_ === "string") {
+        const value = this.resolve(valueOrNull, rootNode);
+        this.options[nameOrDict_] = value;
+      } else {
+        for (const key in nameOrDict_) {
+          const value = this.resolve(nameOrDict_[key], rootNode);
+          this.options[key] = value;
         }
       }
     }
