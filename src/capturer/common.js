@@ -4526,37 +4526,56 @@
 
     cmd_has_elem(rootNode, selector) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
-      if (elems.length) {
-        return true;
-      }
-      return false;
+      return elems.length > 0;
     }
 
     cmd_has_attr(rootNode, selector, attr) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
-      return (elems[0] && elems[0].hasAttribute || false) && elems[0].hasAttribute(this.resolve(attr, rootNode));
+      try {
+        return elems[0].hasAttribute(this.resolve(attr, rootNode));
+      } catch (ex) {
+        return false;
+      }
     }
 
     cmd_get_html(rootNode, selector) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
-      return (elems[0] || null) && elems[0].innerHTML;
+      try {
+        return elems[0].innerHTML;
+      } catch (ex) {
+        return null;
+      }
     }
 
     cmd_get_text(rootNode, selector) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
-      return (elems[0] || null) && elems[0].textContent;
+      try {
+        return elems[0].textContent;
+      } catch (ex) {
+        return null;
+      }
     }
 
     cmd_get_attr(rootNode, selector, attr) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
-      return (elems[0] && elems[0].getAttribute || null) && elems[0].getAttribute(this.resolve(attr, rootNode));
+      try {
+        return elems[0].getAttribute(this.resolve(attr, rootNode));
+      } catch (ex) {
+        return null;
+      }
     }
 
     cmd_get_css(rootNode, selector, style, getPriority) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
-      return (elems[0] && elems[0].style || null) && this.resolve(getPriority, rootNode) ?
-          elems[0].style.getPropertyPriority(this.resolve(style, rootNode)) :
-          elems[0].style.getPropertyValue(this.resolve(style, rootNode));
+      try {
+        if (this.resolve(getPriority, rootNode)) {
+          return elems[0].style.getPropertyPriority(this.resolve(style, rootNode));
+        } else {
+          return elems[0].style.getPropertyValue(this.resolve(style, rootNode));
+        }
+      } catch (ex) {
+        return null;
+      }
     }
 
     cmd_remove(rootNode, selector) {
