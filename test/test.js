@@ -40,6 +40,7 @@ const baseOptions = {
   "capture.removeIntegrity": true,
   "capture.recordDocumentMeta": true,
   "capture.recordRewrites": false,
+  "capture.insertInfoBar": false,
   "capture.helpersEnabled": false,
   "capture.helpers": "",
   "capture.remoteTabDelay": null,
@@ -8452,6 +8453,43 @@ async function test_capture_linkUnsavedUri6() {
   assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === `urn:scrapbook:download:error:blob:`);
   assert(doc.querySelector('script').getAttribute('src') === `urn:scrapbook:download:error:blob:`);
   assert(doc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:blob:`);
+}
+
+/**
+ * Test if option works.
+ *
+ * capture.insertInfoBar
+ */
+async function test_capture_insertInfoBar() {
+  var options = {};
+
+  /* +capture.insertInfoBar */
+  options["capture.insertInfoBar"] = true;
+
+  var blob = await capture({
+    url: `${localhost}/capture_insertInfoBar/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('script[data-scrapbook-elem="infobar-loader"]'));
+
+  /* -capture.insertInfoBar */
+  options["capture.insertInfoBar"] = false;
+
+  var blob = await capture({
+    url: `${localhost}/capture_insertInfoBar/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector('script[data-scrapbook-elem="infobar-loader"]'));
 }
 
 /**

@@ -711,6 +711,12 @@
   "OptionCaptureImageTooltip": {
     "message": "此选项决定图片（IMG、PICTURE、及一些 INPUT 元素）的处理方式。\n\n• 保存：将图片保存至本地。\n• 保存现用：将显示的图片保存至本地，忽略其他萤幕大小或解析度的备用图片。这可以有效缩小容量，但可能影响在其他设备的显示效果。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有图片。\n• 链接：将图片连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将图片无效化。\n• 移除：将图片元素移除。注意这可能会影响网页排版。"
   },
+  "OptionCaptureInsertInfoBarLabel": {
+    "message": "获取或保存页面时加入网页信息条"
+  },
+  "OptionCaptureInsertInfoBarTooltip": {
+    "message": "勾选后会在获取或保存的页面加入脚本，使浏览器在页面顶部显示信息条（须启用 JavaScript）。\n\n注意：封存页面检视器由于不支援 JavaScript，无法显示信息条。若要用于封存页面，须改用支援 JavaScript 的检视方法，例如解压缩后开启。"
+  },
   "OptionCaptureLinkUnsavedUriLabel": {
     "message": "将无法储存的资源连往原始位址"
   },

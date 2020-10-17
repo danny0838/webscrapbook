@@ -91,6 +91,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.requestReferrer": "auto", // "none", "auto", "origin", "all"
     "capture.recordDocumentMeta": true,
     "capture.recordRewrites": false,
+    "capture.insertInfoBar": false,
     "capture.helpersEnabled": false,
     "capture.helpers": "",
     "capture.remoteTabDelay": null,
@@ -1099,6 +1100,7 @@ if (Node && !Node.prototype.getRootNode) {
    *   toolbar (since WSB)
    *   toolbar-* (since WSB)
    *   fulltext (for 1.12.0a37 <= SBX)
+   *   infobar (since WSB)
    *  
    * - CSS and JS
    *   adoptedStyleSheet (since 0.56.4 <= WSB)
@@ -1106,6 +1108,7 @@ if (Node && !Node.prototype.getRootNode) {
    *   basic-loader (since 0.69.0 <= WSB)
    *   annotation-css (since 0.70.0 <= WSB)
    *   annotation-loader (since 0.70.0 <= WSB)
+   *   infobar-loader (since 0.82.0 <= WSB)
    *   canvas-loader (for 0.51 <= WSB < 0.69)
    *   shadowroot-loader (for 0.51 <= WSB < 0.69)
    *   stylesheet (link, style) (for SBX)

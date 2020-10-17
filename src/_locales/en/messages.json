@@ -711,6 +711,12 @@
   "OptionCaptureImageTooltip": {
     "message": "This determines how images (IMG, PICTURE, and some INPUT elements) are handled.\n\n• Save: Save the referenced image resources to local.\n• Save current: Save the displayed image resource to local and ignore alternatives for another screen viewport or resolution. This considerably reduces size but may affect the display effect on another device. If the captured page is not displayed in the browser (such as capture source), all images are saved.\n• Link: Link the image to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the image.\n• Remove: Remove the image element. Note that this could alter the web page layout."
   },
+  "OptionCaptureInsertInfoBarLabel": {
+    "message": "Add infobar when a page is captured or saved"
+  },
+  "OptionCaptureInsertInfoBarTooltip": {
+    "message": "If checked, a script will be inserted in a captured or saved page to show an infobar at page top (requires JavaScript).\n\nNOTE: Archive page viewer cannot show the infobar as it does not support JavaScript. Use a viewing technique that supports JavaScript to work with an archive page, such as opening the index page after unzipping."
+  },
   "OptionCaptureLinkUnsavedUriLabel": {
     "message": "Link uncaptured resource to source"
   },

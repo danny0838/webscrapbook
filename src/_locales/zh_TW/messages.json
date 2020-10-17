@@ -711,6 +711,12 @@
   "OptionCaptureImageTooltip": {
     "message": "此選項決定圖片（IMG、PICTURE、及一些 INPUT 元素）的處理方式。\n\n• 儲存：將圖片儲存至本地。\n• 儲存現用：將顯示的圖片儲存至本地，忽略其他螢幕大小或解析度的備用圖片。這可以有效縮小容量，但可能影響在其他設備的顯示效果。若擷取的頁面並未顯示於瀏覽器（例如擷取原貌），則仍儲存所有圖片。\n• 連結：將圖片連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n• 清空：將圖片無效化。\n• 移除：將圖片元素移除。注意這可能會影響網頁排版。"
   },
+  "OptionCaptureInsertInfoBarLabel": {
+    "message": "擷取或儲存頁面時加入資訊條"
+  },
+  "OptionCaptureInsertInfoBarTooltip": {
+    "message": "勾選後會在擷取或儲存的頁面加入腳本，使瀏覽器在頁面頂部顯示資訊條（須啟用 JavaScript）。\n\n注意：封存頁面檢視器由於不支援 JavaScript，無法顯示資訊條。若要用於封存頁面，須改用支援 JavaScript 的檢視方法，例如解壓縮後開啟。"
+  },
   "OptionCaptureLinkUnsavedUriLabel": {
     "message": "將無法儲存的資源連往原始位址"
   },

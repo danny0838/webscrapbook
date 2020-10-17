@@ -2432,8 +2432,10 @@
     // common pre-save process
     await capturer.preSaveProcess({
       rootNode,
+      frameIsMain: settings.frameIsMain,
       deleteErased: options["capture.deleteErasedOnCapture"],
       requireBasicLoader,
+      insertInfoBar: options["capture.insertInfoBar"],
     });
 
     // save document
@@ -2707,8 +2709,10 @@
       // common pre-save process
       await capturer.preSaveProcess({
         rootNode,
+        frameIsMain: frameIsMain && i === 0,
         deleteErased: options["capture.deleteErasedOnSave"],
         requireBasicLoader,
+        insertInfoBar: options["capture.insertInfoBar"],
       });
 
       const content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
@@ -2729,14 +2733,16 @@
    *
    * @param {Object} params
    * @param {Document} params.rootNode
+   * @param {boolean} params.frameIsMain
    * @param {boolean} params.deleteErased
    * @param {boolean} params.requireBasicLoader
+   * @param {boolean} params.insertInfoBar
    * @return {Promise<Object>}
    */
   capturer.preSaveProcess = async function (params) {
     isDebug && console.debug("call: preSaveProcess");
 
-    const {rootNode, deleteErased, requireBasicLoader} = params;
+    const {rootNode, frameIsMain, deleteErased, requireBasicLoader, insertInfoBar} = params;
     const doc = rootNode.ownerDocument;
 
     // delete all erased contents
@@ -2765,6 +2771,8 @@
           'script[data-scrapbook-elem="annotation-loader"]',
           'script[data-scrapbook-elem="canvas-loader"]', // WebScrapBook < 0.69
           'script[data-scrapbook-elem="shadowroot-loader"]', // WebScrapBook < 0.69
+          '[data-scrapbook-elem="infobar"]',
+          'script[data-scrapbook-elem="infobar-loader"]',
         ].join(','))) {
       elem.remove();
     }
@@ -2806,6 +2814,84 @@
             };
         fn(document);
       }) + ")()";
+    }
+    if (insertInfoBar && frameIsMain) {
+      insertInfoBar: {
+        let data;
+        try {
+          const itemSource = rootNode.getAttribute('data-scrapbook-source');
+          const itemCreate = rootNode.getAttribute('data-scrapbook-create');
+
+          const url = scrapbook.normalizeUrl(itemSource);
+          const domain = new URL(url).origin;
+          const date = scrapbook.idToDate(itemCreate).toString();
+          data = {url, domain, date};
+        } catch (ex) {
+          console.error(ex);
+          break insertInfoBar;
+        }
+
+        const loader = rootNode.appendChild(doc.createElement("script"));
+        loader.setAttribute("data-scrapbook-elem", "infobar-loader");
+
+        // This is compatible with IE5 (though position: fixed doesn't work in IE < 7).
+        // setAttribute('style', ...) doesn't work for IE < 8
+        loader.textContent = ("(" + scrapbook.compressJsFunc(function () {
+          var d = document, b = d.body,
+              i = d.createElement('scrapbook-infobar'),
+              c = i.appendChild(d.createElement('span')),
+              t = i.appendChild(d.createElement('span')),
+              a = i.appendChild(d.createElement('a'));
+
+          i.setAttribute('data-scrapbook-elem', 'infobar');
+          i.style.position = 'fixed';
+          i.style.display = 'block';
+          i.style.clear = 'both';
+          i.style.zIndex = '2147483640';
+          i.style.top = '0';
+          i.style.left = '0';
+          i.style.right = '0';
+          i.style.margin = '0';
+          i.style.border = '0';
+          i.style.padding = '0';
+          i.style.width = '100%';
+          i.style.backgroundColor = '#FFFFE1';
+          i.style.fontSize = '14px';
+
+          a.style.display = 'block';
+          a.style.float = '%@@bidi_start_edge%';
+          a.style.margin = '0';
+          a.style.border = '0';
+          a.style.padding = '.35em';
+          a.style.color = 'black';
+          a.style.fontSize = '1em';
+          a.style.textDecoration = 'none';
+          a.href = "%url%";
+          a.appendChild(d.createTextNode("%domain%"));
+
+          t.style.display = 'block';
+          t.style.float = '%@@bidi_end_edge%';
+          t.style.margin = '0';
+          t.style.border = '0';
+          t.style.padding = '.35em';
+          t.style.color = 'black';
+          t.style.fontSize = '1em';
+          t.appendChild(d.createTextNode("%date%"));
+
+          c.style.display = 'block';
+          c.style.float = '%@@bidi_end_edge%';
+          c.style.margin = '0';
+          c.style.border = '0';
+          c.style.padding = '.35em';
+          c.style.color = 'black';
+          c.style.fontSize = '1em';
+          c.style.cursor = 'pointer';
+          c.appendChild(d.createTextNode('✕'));
+          c.onclick = function () { i.parentNode.removeChild(i); };
+
+          b.insertBefore(i, b.firstChild);
+        }) + ")()").replace(/%([\w@]*)%/g, (_, key) => data[key] || scrapbook.lang(key) || '');
+      }
     }
     if (rootNode.querySelector('[data-scrapbook-elem="linemarker"], [data-scrapbook-elem="sticky"]')) {
       const css = rootNode.appendChild(doc.createElement("style"));
