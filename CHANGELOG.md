@@ -3,6 +3,19 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.82.0] - 2020-10-17
+* Added capture option to specify delay time before capturing an auto-launching tab.
+* Added capture option to insert an infobar.
+* Improved capture helpers:
+  * Added "name" and "debug" properties.
+  * Added "options" and "insert" commands.
+  * Added support to debug a capture helper commands using "*" prefix.
+  * Improved error reporting.
+* Improved sidebar and manage dialog:
+  * Adjusted command button to show scrapbook-related commands rather than echo the context menu.
+  * Added "search within" command.
+  * Added "recover" command for recycling bin.
+
 ## [0.81.0] - 2020-10-14
 * Reworked editor toolbar:
   * Added context menu in place of sub-menu buttons. This prevents toolbar overflow on mobile browsers.
@@ -17,6 +30,7 @@
   * Added data checker. Moved the feature of importing non-indexed web page files through site indexer to data checker.
   * Dropped support of site indexing through dragging and dropping local filesystem folders or ZIP files.
   * Dropped support of importing legacy ScrapBook data through site indexer. (Use `wsb convert sb2wsb` of PyWebScrapBook instead.)
+* Added "disabled" capture helper property.
 
 ## [0.78.0] - 2020-09-20
 * Added `Accept` header for requests to the backend server. This allows the reverse proxy server or upper server to response with a more appropriate format to the client.
