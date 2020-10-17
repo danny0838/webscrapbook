@@ -492,7 +492,7 @@
           TREE_DIR: scrapbook.getRelativeUrl(this.book.treeUrl, target),
           ITEM_DIR: './',
         };
-        const content = templateText.replace(/%([^%]*)%/gu, (_, key) => {
+        const content = templateText.replace(/%(\w*)%/gu, (_, key) => {
           return scrapbook.escapeHtml(dict[key] || '');
         });
 

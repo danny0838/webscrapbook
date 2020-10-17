@@ -2836,7 +2836,7 @@
             }
           }
         }, true);
-      }) + ")()").replace(/%(\w+)%/g, (_, key) => scrapbook.lang(key));
+      }) + ")()").replace(/%(\w*)%/g, (_, key) => scrapbook.lang(key) || '');
     }
   };
 
@@ -2886,7 +2886,7 @@
       return fn;
     };
 
-    let filename = options["capture.saveFilename"].replace(/%([^%]*)%/g, (_, key) => {
+    let filename = options["capture.saveFilename"].replace(/%(\w*)%/g, (_, key) => {
       switch (key.toUpperCase()) {
         case "": {
           // escape "%" with "%%"
@@ -2978,7 +2978,7 @@
           return scrapbook.intToFixedStr(time.getUTCSeconds(), 2);
         }
         default: {
-          return _;
+          return '';
         }
       }
     });
