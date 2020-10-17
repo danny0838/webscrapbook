@@ -504,42 +504,63 @@
       return this.treeFiles = treeFiles;
     }
 
+    /**
+     * Load files with specific tree file name.
+     *
+     * e.g. meta.js, meta1.js, ...
+     *
+     * @return {Object}
+     */
+    async loadTreeFile(name) {
+      const rv = {};
+      const treeFiles = await this.loadTreeFiles();
+      const prefix = this.treeUrl;
+      for (let i = 0; ; i++) {
+        const file = `${name}${i || ""}.js`;
+        const fileObj = treeFiles.get(file);
+        if (!(fileObj && fileObj.type === 'file' && fileObj.size > 0)) {
+          break;
+        }
+
+        const url = prefix + encodeURIComponent(file);
+        try {
+          const text = await this.server.request({
+            url,
+            method: "GET",
+          }).then(r => r.text());
+
+          if (!/^(?:\/\*.*\*\/|[^(])+\(([\s\S]*)\)(?:\/\*.*\*\/|[\s;])*$/.test(text)) {
+            throw new Error(`Error loading '${url}': unable to retrieve JSON data.`);
+          }
+
+          Object.assign(rv, JSON.parse(RegExp.$1));
+        } catch (ex) {
+          throw new Error(`Error loading '${url}': ${ex.message}`);
+        }
+      }
+
+      // remove top-level null values to allow quick clear by appending file
+      // e.g. add meta1.js with {id1: null} to quickly delete id1 in meta.js
+      for (const key in rv) {
+        if (!rv[key]) { delete rv[key]; }
+      }
+
+      return rv;
+    }
+
     async loadMeta(refresh = false) {
       if (this.meta && !refresh) {
         return this.meta;
       }
 
-      const objList = [{}];
-      const treeFiles = await this.loadTreeFiles();
-      const prefix = this.treeUrl;
-      for (let i = 0; ; i++) {
-        const file = `meta${i || ""}.js`;
-        const fileObj = treeFiles.get(file);
-        if (fileObj && fileObj.type === 'file' && fileObj.size > 0) {
-          const url = prefix + encodeURIComponent(file);
-          try {
-            const text = await this.server.request({
-              url,
-              method: "GET",
-            }).then(r => r.text());
+      const obj = this.meta = await this.loadTreeFile('meta');
 
-            if (!/^(?:\/\*.*\*\/|[^(])+\(([\s\S]*)\)(?:\/\*.*\*\/|[\s;])*$/.test(text)) {
-              throw new Error(`Unable to retrieve JSON data.`);
-            }
-
-            const obj = JSON.parse(RegExp.$1);
-            for (const key in obj) {
-              obj[key].id = key;
-            }
-            objList.push(obj);
-          } catch (ex) {
-            throw new Error(`Error loading '${url}': ${ex.message}`);
-          }
-        } else {
-          break;
-        }
+      // add id for all items
+      for (const key in obj) {
+        obj[key].id = key;
       }
-      return this.meta = Object.assign.apply(this, objList);
+
+      return obj;
     }
 
     async loadToc(refresh = false) {
@@ -547,33 +568,7 @@
         return this.toc;
       }
 
-      const objList = [{}];
-      const treeFiles = await this.loadTreeFiles();
-      const prefix = this.treeUrl;
-      for (let i = 0; ; i++) {
-        const file = `toc${i || ""}.js`;
-        const fileObj = treeFiles.get(file);
-        if (fileObj && fileObj.type === 'file' && fileObj.size > 0) {
-          const url = prefix + encodeURIComponent(file);
-          try {
-            const text = await this.server.request({
-              url,
-              method: "GET",
-            }).then(r => r.text());
-
-            if (!/^(?:\/\*.*\*\/|[^(])+\(([\s\S]*)\)(?:\/\*.*\*\/|[\s;])*$/.test(text)) {
-              throw new Error(`Unable to retrieve JSON data.`);
-            }
-
-            objList.push(JSON.parse(RegExp.$1));
-          } catch (ex) {
-            throw new Error(`Error loading '${url}': ${ex.message}`);
-          }
-        } else {
-          break;
-        }
-      }
-      return this.toc = Object.assign.apply(this, objList);
+      return this.toc = await this.loadTreeFile('toc');
     }
 
     async loadFulltext(refresh = false) {
@@ -581,33 +576,7 @@
         return this.fulltext;
       }
 
-      const objList = [{}];
-      const treeFiles = await this.loadTreeFiles();
-      const prefix = this.treeUrl;
-      for (let i = 0; ; i++) {
-        const file = `fulltext${i || ""}.js`;
-        const fileObj = treeFiles.get(file);
-        if (fileObj && fileObj.type === 'file' && fileObj.size > 0) {
-          const url = prefix + encodeURIComponent(file);
-          try {
-            const text = await this.server.request({
-              url,
-              method: "GET",
-            }).then(r => r.text());
-
-            if (!/^(?:\/\*.*\*\/|[^(])+\(([\s\S]*)\)(?:\/\*.*\*\/|[\s;])*$/.test(text)) {
-              throw new Error(`Unable to retrieve JSON data.`);
-            }
-
-            objList.push(JSON.parse(RegExp.$1));
-          } catch (ex) {
-            throw new Error(`Error loading '${url}': ${ex.message}`);
-          }
-        } else {
-          break;
-        }
-      }
-      return this.fulltext = Object.assign.apply(this, objList);
+      return this.fulltext = await this.loadTreeFile('fulltext');
     }
 
     async lockTree(params = {}) {
@@ -683,8 +652,9 @@
       let size = 1;
       let meta = {};
       for (const id in this.meta) {
-        meta[id] = Object.assign({}, this.meta[id]);
-        delete meta[id].id;
+        const value = this.meta[id];
+        if (!value) { continue; }
+        meta[id] = Object.assign({}, value, {id: undefined}); // remove id
         size += 1;
 
         if (size >= sizeThreshold) {
@@ -745,8 +715,10 @@
       let size = 1;
       let toc = {};
       for (const id in this.toc) {
-        toc[id] = this.toc[id];
-        size += 1 + toc[id].length;
+        const value = this.toc[id];
+        if (!value) { continue; }
+        toc[id] = value;
+        size += 1 + value.length;
 
         if (size >= sizeThreshold) {
           await exportFile(toc, i);
