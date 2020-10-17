@@ -2278,7 +2278,7 @@
       }
 
       if (helpers) {
-        const parser = new capturer.CaptureHelperHandler(helpers, rootNode, docUrl);
+        const parser = new capturer.CaptureHelperHandler(helpers, rootNode, docUrl, origNodeMap);
         const errors = parser.run();
         if (errors.length) {
           (async () => {
@@ -4310,19 +4310,28 @@
    ***************************************************************************/
 
   capturer.CaptureHelperHandler = class CaptureHelperHandler {
-    constructor(helpers, rootNode, docUrl) {
+    constructor(helpers, rootNode, docUrl, origNodeMap) {
       this.helpers = helpers;
       this.rootNode = rootNode;
       this.docUrl = docUrl;
+      this.origNodeMap = origNodeMap;
+      this.commandId = 0;
+      this.debugging = false;
     }
 
     run() {
       const {helpers, rootNode, docUrl} = this;
       const errors = [];
 
-      for (const helper of helpers) {
+      for (let i = 0, I = helpers.length; i < I; ++i) {
+        const helper = helpers[i];
+
         if (helper.disabled) {
           continue;
+        }
+
+        if (helper.debug) {
+          this.debugging = true;
         }
 
         if (typeof helper.pattern === 'string') {
@@ -4339,6 +4348,11 @@
         }
 
         if (Array.isArray(helper.commands)) {
+          if (this.debugging) {
+            const nameStr = helper.name ? ` (${helper.name})` : '';
+            console.debug(`WebScrapBook: Running capture helper[${i}]${nameStr} for ${this.docUrl}`);
+          }
+
           for (const command of helper.commands) {
             if (!this.isCommand(command)) {
               const msg = `Skipped running invalid capture helper command: ${JSON.stringify(command)}`;
@@ -4356,6 +4370,8 @@
             }
           }
         }
+        
+        this.debugging = false;
       }
 
       return errors;
@@ -4419,11 +4435,24 @@
     }
 
     runCommand(command, rootNode) {
-      const cmd = this.resolve(command[0], rootNode);
+      let debug = false;
+      let cmd = this.resolve(command[0], rootNode);
+      if (cmd.startsWith('*')) {
+        if (this.debugging) { debug = true; }
+        cmd = cmd.slice(1);
+      }
       if (!this['cmd_' + cmd]) {
         throw new Error(`Unknown helper command: ${cmd}`);
       }
-      return this['cmd_' + cmd].apply(this, [rootNode, ...command.slice(1)]);
+      const id = this.commandId++;
+      if (debug) {
+        console.debug(`WebScrapBook: Running helper (${id}) ${JSON.stringify(command)} at`, this.origNodeMap.get(rootNode) || rootNode);
+      }
+      const rv = this['cmd_' + cmd].apply(this, [rootNode, ...command.slice(1)]);
+      if (debug) {
+        console.debug(`WebScrapBook: Running helper (${id}) returns`, rv);
+      }
+      return rv;
     }
 
     resolve(obj, rootNode) {
