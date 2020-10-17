@@ -2274,11 +2274,19 @@
         helpers = JSON.parse(options["capture.helpers"]);
       } catch (ex) {
         // skip invalid helpers
+        warn(`Skipped running capture handler due to invalid definition: ${ex.message}`);
       }
 
       if (helpers) {
         const parser = new capturer.CaptureHelperHandler(helpers, rootNode, docUrl);
-        parser.run();
+        const errors = parser.run();
+        if (errors.length) {
+          (async () => {
+            for (const error of errors) {
+              await warn(error);
+            }
+          })();
+        }
       }
     }
 
@@ -4310,6 +4318,7 @@
 
     run() {
       const {helpers, rootNode, docUrl} = this;
+      const errors = [];
 
       for (const helper of helpers) {
         if (helper.disabled) {
@@ -4332,18 +4341,24 @@
         if (Array.isArray(helper.commands)) {
           for (const command of helper.commands) {
             if (!this.isCommand(command)) {
-              console.error(`WebScrapBook: Invalid capture helper command: ${JSON.stringify(command)}`);
+              const msg = `Skipped running invalid capture helper command: ${JSON.stringify(command)}`;
+              console.error(`WebScrapBook: ${msg}`);
+              errors.push(msg);
               continue;
             }
             try {
               this.runCommand(command, rootNode);
             } catch (ex) {
-              console.error(`WebScrapBook: Error running capture helper command: ${JSON.stringify(command)}`);
+              const msg = `Error running capture helper command: ${JSON.stringify(command)}`
+              console.error(`WebScrapBook: ${msg}`);
               console.error(ex);
+              errors.push(`${msg}: ${ex.message}`);
             }
           }
         }
       }
+
+      return errors;
     }
 
     parseRegexStr(str) {
