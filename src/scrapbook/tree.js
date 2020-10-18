@@ -1311,6 +1311,34 @@ Redirecting to file <a href="index.md">index.md</a>
         this.commands[cmd] = this.commands[cmd].bind(this);
       }
 
+      // init UI event handlers
+      window.addEventListener('keydown', this.onKeyDown.bind(this));
+      window.addEventListener('contextmenu', this.onContextMenu.bind(this));
+
+      window.addEventListener('dragenter', this.onWindowItemDragEnter.bind(this));
+      window.addEventListener('dragover', this.onWindowItemDragOver.bind(this));
+      window.addEventListener('drop', this.onWindowItemDrop.bind(this));
+
+      document.getElementById("book").addEventListener('change', this.onBookChange.bind(this));
+
+      document.getElementById("search").addEventListener('click', this.onSearchButtonClick.bind(this));
+      document.getElementById("refresh").addEventListener('click', this.onRefreshButtonClick.bind(this));
+      document.getElementById("command").addEventListener('click', this.onCommandButtonClick.bind(this));
+
+      document.getElementById("command-popup-book").addEventListener('click', this.onBookCommandClick.bind(this));
+      document.getElementById("command-popup-book").addEventListener('focusout', this.onBookCommandFocusOut.bind(this));
+
+      document.getElementById("command-popup").addEventListener('click', this.onCommandClick.bind(this));
+      document.getElementById("command-popup").addEventListener('focusout', this.onCommandFocusOut.bind(this));
+
+      // file selector
+      document.getElementById('upload-file-selector').addEventListener('change', this.onClickFileSelector.bind(this));
+
+      // command handler
+      window.addEventListener('command', this.onCommandRun.bind(this));
+
+      document.getElementById('item-root').addEventListener('click', this.onClickAnchor.bind(this));
+
       await this.refresh(undefined, true);
     },
 
@@ -2752,34 +2780,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
   document.addEventListener('DOMContentLoaded', async () => {
     scrapbook.loadLanguages(document);
-
-    window.addEventListener('keydown', tree.onKeyDown.bind(tree));
-    window.addEventListener('contextmenu', tree.onContextMenu.bind(tree));
-
-    window.addEventListener('dragenter', tree.onWindowItemDragEnter.bind(tree));
-    window.addEventListener('dragover', tree.onWindowItemDragOver.bind(tree));
-    window.addEventListener('drop', tree.onWindowItemDrop.bind(tree));
-
-    document.getElementById("book").addEventListener('change', tree.onBookChange.bind(tree));
-
-    document.getElementById("search").addEventListener('click', tree.onSearchButtonClick.bind(tree));
-    document.getElementById("refresh").addEventListener('click', tree.onRefreshButtonClick.bind(tree));
-    document.getElementById("command").addEventListener('click', tree.onCommandButtonClick.bind(tree));
-
-    document.getElementById("command-popup-book").addEventListener('click', tree.onBookCommandClick.bind(tree));
-    document.getElementById("command-popup-book").addEventListener('focusout', tree.onBookCommandFocusOut.bind(tree));
-
-    document.getElementById("command-popup").addEventListener('click', tree.onCommandClick.bind(tree));
-    document.getElementById("command-popup").addEventListener('focusout', tree.onCommandFocusOut.bind(tree));
-
-    // file selector
-    document.getElementById('upload-file-selector').addEventListener('change', tree.onClickFileSelector.bind(tree));
-
-    // command handler
-    window.addEventListener('command', tree.onCommandRun.bind(tree));
-
-    document.getElementById('item-root').addEventListener('click', tree.onClickAnchor.bind(tree));
-
     await tree.init();
   });
 
