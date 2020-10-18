@@ -31,6 +31,11 @@
     'postit': browser.runtime.getURL('resources/postit.png'),
   };
 
+  const TOGGLER_ICON = {
+    collapsed: browser.runtime.getURL('resources/collapse.png'),
+    expanded: browser.runtime.getURL('resources/expand.png'),
+  };
+
   const tree = {
     bookId: null,
     book: null,
@@ -1673,7 +1678,7 @@ Redirecting to file <a href="index.md">index.md</a>
       div.insertBefore(toggle, div.firstChild);
 
       const toggleImg = document.createElement('img');
-      toggleImg.src = browser.runtime.getURL('resources/collapse.png');
+      toggleImg.src = TOGGLER_ICON.collapsed;
       toggleImg.alt = '';
       toggle.appendChild(toggleImg);
 
@@ -1785,12 +1790,12 @@ Redirecting to file <a href="index.md">index.md</a>
 
       container.hidden = !willOpen;
 
-      // toggle the twisty
+      // toggle the toggler (twisty)
       // root item container's previousSibling is undefined
       if (container.previousSibling) {
         container.previousSibling.firstChild.firstChild.src = willOpen ?
-        browser.runtime.getURL('resources/expand.png') :
-        browser.runtime.getURL('resources/collapse.png');
+        TOGGLER_ICON.expanded :
+        TOGGLER_ICON.collapsed;
       }
     },
 
