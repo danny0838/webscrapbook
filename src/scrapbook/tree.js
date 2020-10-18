@@ -748,7 +748,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
         let targetIndex = Infinity;
         for (const itemElem of itemElems) {
-          if (this.isDetached(itemElem)) { continue; }
+          if (!this.treeElem.contains(itemElem)) { continue; }
 
           const itemId = itemElem.getAttribute('data-id');
 
@@ -814,7 +814,7 @@ Redirecting to file <a href="index.md">index.md</a>
           callback: async (book) => {
             let allRemovedItems = [];
             for (const itemElem of itemElems) {
-              if (this.isDetached(itemElem)) { continue; }
+              if (!this.treeElem.contains(itemElem)) { continue; }
 
               const itemId = itemElem.getAttribute('data-id');
 
@@ -899,7 +899,7 @@ Redirecting to file <a href="index.md">index.md</a>
         // If a recycled item A has a child B, B will be removed from the DOM
         // when A is removed, and its moving will be skipped.
         for (const itemElem of itemElems) {
-          if (this.isDetached(itemElem)) { continue; }
+          if (!this.treeElem.contains(itemElem)) { continue; }
 
           const itemId = itemElem.getAttribute('data-id');
 
@@ -1522,13 +1522,6 @@ Redirecting to file <a href="index.md">index.md</a>
     },
 
     /**
-     * Check if the element or its ancestor is removed from document DOM
-     */
-    isDetached(node) {
-      return node.getRootNode().nodeType !== 9;
-    },
-
-    /**
      * @kind invokable
      */
     async locate({bookId, id, url, root = 'root'}) {
@@ -1924,7 +1917,7 @@ Redirecting to file <a href="index.md">index.md</a>
       const itemElems = [...sourceItemElems].reverse();
 
       for (const itemElem of itemElems) {
-        if (this.isDetached(itemElem)) { continue; }
+        if (!this.treeElem.contains(itemElem)) { continue; }
 
         const itemId = itemElem.getAttribute('data-id');
 
