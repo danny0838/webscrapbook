@@ -41,6 +41,7 @@
     book: null,
     rootId: 'root',
     mode: 'normal',
+    treeElem: null,
     sidebarWindowId: null,
     lastDraggedElem: null,
     lastHighlightElem: null,
@@ -267,7 +268,7 @@
 
         // update DOM
         Array.prototype.filter.call(
-          document.getElementById('items').querySelectorAll('[data-id]'),
+          this.treeElem.querySelectorAll('[data-id]'),
           x => x.getAttribute('data-id') === id
         ).forEach((itemElem) => {
           const parentItemElem = itemElem.parentNode.parentNode;
@@ -319,7 +320,7 @@
 
         // update DOM
         Array.prototype.filter.call(
-          document.getElementById('items').querySelectorAll('[data-id]'),
+          this.treeElem.querySelectorAll('[data-id]'),
           x => x.getAttribute('data-id') === parentItemId
         ).forEach((parentElem) => {
           if (!(parentElem.parentNode)) { return; }
@@ -365,7 +366,7 @@
 
         // update DOM
         Array.prototype.filter.call(
-          document.getElementById('items').querySelectorAll('[data-id]'),
+          this.treeElem.querySelectorAll('[data-id]'),
           x => x.getAttribute('data-id') === parentItemId
         ).forEach((parentElem) => {
           if (!(parentElem.parentNode)) { return; }
@@ -550,7 +551,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
         // update DOM
         Array.prototype.filter.call(
-          document.getElementById('items').querySelectorAll('[data-id]'),
+          this.treeElem.querySelectorAll('[data-id]'),
           x => x.getAttribute('data-id') === parentItemId
         ).forEach((parentElem) => {
           if (!(parentElem.parentNode)) { return; }
@@ -630,7 +631,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
         // update DOM
         Array.prototype.filter.call(
-          document.getElementById('items').querySelectorAll('[data-id]'),
+          this.treeElem.querySelectorAll('[data-id]'),
           x => x.getAttribute('data-id') === parentItemId
         ).forEach((parentElem) => {
           if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
@@ -675,7 +676,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
         // update DOM
         Array.prototype.filter.call(
-          document.getElementById('items').querySelectorAll('[data-id]'),
+          this.treeElem.querySelectorAll('[data-id]'),
           x => x.getAttribute('data-id') === parentItemId
         ).forEach((parentElem) => {
           if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
@@ -766,7 +767,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
           // update DOM
           Array.prototype.filter.call(
-            document.getElementById('items').querySelectorAll('[data-id]'),
+            this.treeElem.querySelectorAll('[data-id]'),
             x => x.getAttribute('data-id') === parentItemId
           ).forEach((parentElem) => {
             if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
@@ -834,7 +835,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
               // update DOM
               Array.prototype.filter.call(
-                document.getElementById('items').querySelectorAll('[data-id]'),
+                this.treeElem.querySelectorAll('[data-id]'),
                 x => x.getAttribute('data-id') === parentItemId
               ).forEach((parentElem) => {
                 if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
@@ -930,7 +931,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
             // update DOM
             Array.prototype.filter.call(
-              document.getElementById('items').querySelectorAll('[data-id]'),
+              this.treeElem.querySelectorAll('[data-id]'),
               x => x.getAttribute('data-id') === parentItemId
             ).forEach((parentElem) => {
               if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
@@ -940,7 +941,7 @@ Redirecting to file <a href="index.md">index.md</a>
             });
 
             Array.prototype.filter.call(
-              document.getElementById('items').querySelectorAll('[data-id]'),
+              this.treeElem.querySelectorAll('[data-id]'),
               x => x.getAttribute('data-id') === targetId
             ).forEach((parentElem) => {
               if (!(parentElem.parentNode)) { return; }
@@ -1311,6 +1312,9 @@ Redirecting to file <a href="index.md">index.md</a>
         this.commands[cmd] = this.commands[cmd].bind(this);
       }
 
+      // init root tree container
+      this.treeElem = document.getElementById('items');
+
       // init UI event handlers
       window.addEventListener('keydown', this.onKeyDown.bind(this));
       window.addEventListener('contextmenu', this.onContextMenu.bind(this));
@@ -1478,11 +1482,10 @@ Redirecting to file <a href="index.md">index.md</a>
       };
 
       const saveViewStatus = async () => {
-        const itemsElem = document.getElementById('items');
         const selects = {};
         const map = new Map();
         Array.prototype.forEach.call(
-          itemsElem.querySelectorAll('ul.container:not([hidden])'),
+          this.treeElem.querySelectorAll('ul.container:not([hidden])'),
           x => getXpaths(x.parentElement, map)
         );
         for (const [k, v] of map.entries()) {
@@ -1508,9 +1511,8 @@ Redirecting to file <a href="index.md">index.md</a>
 
         if (!data) { return; }
 
-        const itemsElem = document.getElementById('items');
         for (const [xpath, willOpen] of Object.entries(data.selects)) {
-          const elem = document.evaluate(xpath, itemsElem).iterateNext();
+          const elem = document.evaluate(xpath, this.treeElem).iterateNext();
           if (!elem) { continue; }
           if (willOpen) { this.toggleItem(elem, true); }
         }
@@ -1839,7 +1841,7 @@ Redirecting to file <a href="index.md">index.md</a>
       if (willHighlight) {
         if (reselect) {
           if (this.lastHighlightElem) {
-            Array.prototype.forEach.call(document.querySelectorAll('#items .highlight'), (elem) => {
+            Array.prototype.forEach.call(this.treeElem.querySelectorAll('.highlight'), (elem) => {
               elem.classList.remove("highlight");
             });
           }
@@ -1860,7 +1862,7 @@ Redirecting to file <a href="index.md">index.md</a>
                 if (!start) {
                   if (node === itemElem) {
                     start = true;
-                    endItem = this.lastHighlightElem && this.lastHighlightElem.closest("#items") ? this.lastHighlightElem : itemElem;
+                    endItem = this.treeElem.contains(this.lastHighlightElem) ? this.lastHighlightElem : itemElem;
                   } else if (node === this.lastHighlightElem) {
                     start = true;
                     endItem = itemElem;
@@ -1878,7 +1880,7 @@ Redirecting to file <a href="index.md">index.md</a>
       } else {
         if (reselect) {
           if (this.lastHighlightElem) {
-            Array.prototype.forEach.call(document.querySelectorAll('#items .highlight'), (elem) => {
+            Array.prototype.forEach.call(this.treeElem.querySelectorAll('.highlight'), (elem) => {
               elem.classList.remove("highlight");
             });
             this.lastHighlightElem = null;
@@ -1898,7 +1900,7 @@ Redirecting to file <a href="index.md">index.md</a>
                 if (!start) {
                   if (node === itemElem) {
                     start = true;
-                    endItem = this.lastHighlightElem && this.lastHighlightElem.closest("#items") ? this.lastHighlightElem : itemElem;
+                    endItem = this.treeElem.contains(this.lastHighlightElem) ? this.lastHighlightElem : itemElem;
                   } else if (node === this.lastHighlightElem) {
                     start = true;
                     endItem = itemElem;
@@ -1945,7 +1947,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
         // update DOM
         Array.prototype.filter.call(
-          document.getElementById('items').querySelectorAll('[data-id]'),
+          this.treeElem.querySelectorAll('[data-id]'),
           x => x.getAttribute('data-id') === parentItemId
         ).forEach((parentElem) => {
           if (!(parentElem.parentNode && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
@@ -1955,7 +1957,7 @@ Redirecting to file <a href="index.md">index.md</a>
         });
 
         Array.prototype.filter.call(
-          document.getElementById('items').querySelectorAll('[data-id]'),
+          this.treeElem.querySelectorAll('[data-id]'),
           x => x.getAttribute('data-id') === targetId
         ).forEach((parentElem) => {
           if (!(parentElem.parentNode)) { return; }
@@ -1991,7 +1993,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
         // update DOM
         Array.prototype.filter.call(
-          document.getElementById('items').querySelectorAll('[data-id]'),
+          this.treeElem.querySelectorAll('[data-id]'),
           x => x.getAttribute('data-id') === targetId
         ).forEach((parentElem) => {
           if (!(parentElem.parentNode)) { return; }
@@ -2078,7 +2080,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
               // update DOM
               Array.prototype.filter.call(
-                document.getElementById('items').querySelectorAll('[data-id]'),
+                this.treeElem.querySelectorAll('[data-id]'),
                 x => x.getAttribute('data-id') === targetId
               ).forEach((parentElem) => {
                 if (!(parentElem.parentNode)) { return; }
@@ -2159,7 +2161,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         }
 
         let cur = wrapper.parentNode;
-        while (cur && cur.closest('#items')) {
+        while (this.treeElem.contains(cur)) {
           if (!cur.classList.contains('dragover-within')) {
             cur.classList.add('dragover-within');
           }
@@ -2239,10 +2241,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         // determine the drop effect according to modifiers
         if (event.ctrlKey && this.rootId !== 'recycle') {
           event.dataTransfer.dropEffect = 'link';
-          document.getElementById('items').classList.remove('moving');
+          this.treeElem.classList.remove('moving');
         } else {
           event.dataTransfer.dropEffect = 'move';
-          document.getElementById('items').classList.add('moving');
+          this.treeElem.classList.add('moving');
         }
       } else if (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle') {
         event.dataTransfer.dropEffect = 'copy';
@@ -2278,7 +2280,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       wrapper.classList.remove('within');
 
       let cur = wrapper.parentNode;
-      while (cur && cur.closest('#items')) {
+      while (this.treeElem.contains(cur)) {
         cur.classList.remove('dragover-within');
         cur = cur.parentNode.parentNode;
       }
@@ -2309,7 +2311,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         wrapper.classList.remove('within');
 
         let cur = wrapper.parentNode;
-        while (cur && cur.closest('#items')) {
+        while (this.treeElem.contains(cur)) {
           cur.classList.remove('dragover-within');
           cur = cur.parentNode.parentNode;
         }
@@ -2603,7 +2605,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 
     onContextMenu(event) {
       // for mouse right click, skip if not in the tree area
-      if (event.button === 2 && !event.target.closest('#items')) { return; }
+      if (event.button === 2 && !this.treeElem.contains(event.target)) { return; }
 
       // disallow when commands disabled
       if (document.querySelector('#command:disabled')) {
