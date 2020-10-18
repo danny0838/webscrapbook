@@ -1449,7 +1449,7 @@ Redirecting to file <a href="index.md">index.md</a>
     },
 
     getViewStatusKey() {
-      return {table: "scrapbookTreeView", bookId: this.bookId};
+      return {table: "scrapbookTreeView", serverRoot: server.serverRoot, bookId: this.bookId, rootId: this.rootId};
     },
 
     async saveViewStatus() {
