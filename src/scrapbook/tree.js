@@ -1066,7 +1066,7 @@ Redirecting to file <a href="index.md">index.md</a>
       }
 
       const selectedItemElems = Array.prototype.map.call(
-        document.querySelectorAll('#item-root .highlight'),
+        this.treeElem.querySelectorAll('.highlight'),
         x => x.parentNode
       );
 
@@ -1341,7 +1341,7 @@ Redirecting to file <a href="index.md">index.md</a>
       // command handler
       window.addEventListener('command', this.onCommandRun.bind(this));
 
-      document.getElementById('item-root').addEventListener('click', this.onClickAnchor.bind(this));
+      this.treeElem.addEventListener('click', this.onClickAnchor.bind(this));
 
       await this.refresh(undefined, true);
     },
@@ -1428,17 +1428,16 @@ Redirecting to file <a href="index.md">index.md</a>
             throw new Error(`specified root item "${rootId}" does not exist.`);
           }
 
-          const rootElem = document.getElementById('item-root');
+
+          this.treeElem.textContent = '';
+          const rootElem = this.treeElem.appendChild(document.createElement('div'));
           rootElem.setAttribute('data-id', rootId);
-          rootElem.textContent = '';
-          rootElem.container = document.createElement('ul');
+          rootElem.container = rootElem.appendChild(document.createElement('ul'));
           rootElem.container.classList.add('container');
-          rootElem.appendChild(rootElem.container);
           this.toggleItem(rootElem, true);
           await this.loadViewStatus();
         } else {
-          const rootElem = document.getElementById('item-root');
-          rootElem.textContent = '';
+          this.treeElem.textContent = '';
         }
       } catch (ex) {
         console.error(ex);
@@ -1467,7 +1466,7 @@ Redirecting to file <a href="index.md">index.md</a>
       const getXpaths = (elem, map) => {
         const path = [];
         let cur = elem;
-        while (cur && cur.closest('#item-root')) {
+        while (this.treeElem.contains(cur)) {
           path.unshift(`*[@data-id=${scrapbook.quoteXPath(cur.getAttribute('data-id'))}][${getXpathPos(cur)}]`);
           cur = cur.parentElement.parentElement;
         }
@@ -1548,7 +1547,7 @@ Redirecting to file <a href="index.md">index.md</a>
       // Attempt to find a match from currently visible items; othwise lookup in
       // the whole tree.
       let curElem;
-      for (const elem of document.getElementById('item-root').querySelectorAll(`[data-id="${scrapbook.escapeQuotes(item.id)}"]`)) {
+      for (const elem of this.treeElem.querySelectorAll(`[data-id="${scrapbook.escapeQuotes(item.id)}"]`)) {
         if (elem.offsetParent) {
           curElem = elem;
           break;
@@ -1556,7 +1555,7 @@ Redirecting to file <a href="index.md">index.md</a>
       }
 
       if (!curElem) {
-        curElem = document.getElementById('item-root');
+        curElem = this.treeElem.querySelector(`[data-id="${scrapbook.escapeQuotes(paths[0][0].id)}"]`);
         for (let i = 1, I = paths[0].length; i < I; ++i) {
           const {pos} = paths[0][i];
           this.toggleItem(curElem, true);
@@ -1846,7 +1845,7 @@ Redirecting to file <a href="index.md">index.md</a>
             this.lastHighlightElem = itemElem;
           } else {
             const nodeIterator = document.createNodeIterator(
-              document.getElementById('item-root'),
+              this.treeElem,
               NodeFilter.SHOW_ELEMENT
             );
             let node, start = false, endItem;
@@ -1884,7 +1883,7 @@ Redirecting to file <a href="index.md">index.md</a>
             this.lastHighlightElem = itemElem;
           } else {
             const nodeIterator = document.createNodeIterator(
-              document.getElementById('item-root'),
+              this.treeElem,
               NodeFilter.SHOW_ELEMENT
             );
             let node, start = false, endItem;
@@ -2116,7 +2115,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       }
 
       const selectedItemElems = Array.prototype.map.call(
-        document.querySelectorAll('#item-root .highlight'),
+        this.treeElem.querySelectorAll('.highlight'),
         x => x.parentNode
       );
 
@@ -2341,7 +2340,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       // handle action
       if (this.lastDraggedElem && !wholeWindow) {
         const selectedItemElems = Array.prototype.map.call(
-          document.querySelectorAll('#item-root .highlight'),
+          this.treeElem.querySelectorAll('.highlight'),
           x => x.parentNode
         );
         if (!selectedItemElems.length) {
@@ -2721,7 +2720,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       const detail = event.detail;
       if (detail.itemElems === true) {
         detail.itemElems = Array.prototype.map.call(
-          document.querySelectorAll('#item-root .highlight'),
+          this.treeElem.querySelectorAll('.highlight'),
           x => x.parentNode
         );
       }
