@@ -2452,7 +2452,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
           if (browser.windows) {
             // for desktop browsers, open link in the same tab of the main window
             event.preventDefault();
-            await tree.openLink(elem.href);
+            await this.openLink(elem.href);
           } else {
             // for Firefox Android (browser.windows not supported)
             // use default action to open in the "webscrapbook" tab
