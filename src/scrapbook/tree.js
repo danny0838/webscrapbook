@@ -1523,7 +1523,7 @@ Redirecting to file <a href="index.md">index.md</a>
     /**
      * @kind invokable
      */
-    async locate({bookId, id, url, root = 'root'}) {
+    async locate({bookId, id, url}) {
       if (this.mode !== 'normal') { return null; }
 
       if (url && typeof bookId === 'undefined') {
