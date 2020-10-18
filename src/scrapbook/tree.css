@@ -332,10 +332,6 @@ body {
   opacity: 0.5;
 }
 
-.tree.moving li.dragover-within {
-  opacity: unset;
-}
-
 .tree li > div.dragover.above {
   border-top-color: #3399FF;
 }

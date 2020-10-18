@@ -2151,14 +2151,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         if (!wrapper.classList.contains('dragover')) {
           wrapper.classList.add('dragover');
         }
-
-        let cur = wrapper.parentNode;
-        while (this.treeElem.contains(cur)) {
-          if (!cur.classList.contains('dragover-within')) {
-            cur.classList.add('dragover-within');
-          }
-          cur = cur.parentNode.parentNode;
-        }
       }
 
       this.onItemDragOver(event, wholeWindow);
@@ -2270,12 +2262,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       wrapper.classList.remove('above');
       wrapper.classList.remove('below');
       wrapper.classList.remove('within');
-
-      let cur = wrapper.parentNode;
-      while (this.treeElem.contains(cur)) {
-        cur.classList.remove('dragover-within');
-        cur = cur.parentNode.parentNode;
-      }
     },
 
     async onItemDrop(event, wholeWindow = false) {
