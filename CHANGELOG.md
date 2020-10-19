@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.83.0] - 2020-10-19
+* Changed view status caching format for sidebar to avoid a comflict within different views.
+* Added support of top-level null value for *.js tree files.
+
 ## [0.82.0] - 2020-10-17
 * Added capture option to specify delay time before capturing an auto-launching tab.
 * Added capture option to insert an infobar.
