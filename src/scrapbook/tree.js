@@ -2288,12 +2288,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         wrapper.classList.remove('below');
         wrapper.classList.remove('within');
 
-        let cur = wrapper.parentNode;
-        while (this.treeElem.contains(cur)) {
-          cur.classList.remove('dragover-within');
-          cur = cur.parentNode.parentNode;
-        }
-
         const wrapperRect = wrapper.getBoundingClientRect();
         const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
         const itemElem = wrapper.parentNode;
