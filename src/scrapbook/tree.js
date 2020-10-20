@@ -1761,7 +1761,7 @@ Redirecting to file <a href="index.md">index.md</a>
             if (meta.index) { a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index); }
           }
         }
-        if (meta.type === 'folder') { a.addEventListener('onclick', this.onFolderClick.bind(this)); }
+        if (meta.type === 'folder') { a.addEventListener('click', this.onFolderClick.bind(this)); }
 
         var icon = a.insertBefore(document.createElement('img'), a.firstChild);
         if (meta.icon) {
