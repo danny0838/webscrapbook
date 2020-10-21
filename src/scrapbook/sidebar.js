@@ -567,7 +567,7 @@
 
       if (lastDraggedElems && isOnItem) {
         // determine the drop effect according to modifiers
-        if (event.ctrlKey && this.rootId !== 'recycle') {
+        if (event.altKey && this.rootId !== 'recycle') {
           event.dataTransfer.dropEffect = 'link';
         } else {
           event.dataTransfer.dropEffect = 'move';
@@ -582,7 +582,7 @@
 
       if (event.dataTransfer.types.includes('text/uri-list') && this.rootId !== 'recycle') {
         // determine the drop effect according to modifiers
-        if (event.ctrlKey) {
+        if (event.altKey) {
           event.dataTransfer.dropEffect = 'link';
         } else {
           event.dataTransfer.dropEffect = 'copy';
@@ -609,7 +609,7 @@
         this.enableUi(false);
 
         try {
-          if (event.ctrlKey && this.rootId !== 'recycle') {
+          if (event.altKey && this.rootId !== 'recycle') {
             await this.linkItems(selectedItemElems, targetId, targetIndex);
           } else {
             await this.moveItems(selectedItemElems, targetId, targetIndex);
@@ -662,7 +662,7 @@
       if (event.dataTransfer.types.includes('text/uri-list') && this.rootId !== 'recycle') {
         this.enableUi(false);
 
-        const mode = event.ctrlKey ? 'bookmark' : event.altKey ? '' : 'source';
+        const mode = event.altKey ? 'bookmark' : event.shiftKey ? '' : 'source';
         try {
           const tasks = event.dataTransfer.getData('text/uri-list')
             .split('\r\n')
