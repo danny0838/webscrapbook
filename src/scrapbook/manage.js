@@ -3,7 +3,7 @@
  * Script for manage.html.
  *
  * @require {Object} scrapbook
- * @require {Object} tree
+ * @require {Object} sidebar
  *****************************************************************************/
 
 (function (root, factory) {
@@ -12,14 +12,14 @@
     root.isDebug,
     root.browser,
     root.scrapbook,
-    root.tree,
+    root.sidebar,
     window,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, tree, window, console) {
+}(this, function (isDebug, browser, scrapbook, sidebar, window, console) {
 
   'use strict';
 
-  tree.mode = "manage";
+  sidebar.mode = "manage";
 
 }));

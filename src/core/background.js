@@ -347,7 +347,7 @@
    *     - false: no sidebar opened
    */
   background.locateItem = async function (params, sender) {
-    const cmd = 'tree.locate';
+    const cmd = 'sidebar.locate';
     const args = params;
     const sidebarUrl = browser.runtime.getURL("scrapbook/sidebar.html");
 
