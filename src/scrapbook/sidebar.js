@@ -329,7 +329,8 @@
         const evt = new CustomEvent("command", {
           detail: {
             command,
-            itemElems: true,
+            itemElem: this.tree.getLastSelectedItemElem(),
+            itemElems: this.tree.getSelectedItemElems(),
           },
         });
         window.dispatchEvent(evt);
@@ -377,7 +378,7 @@
       switch (command) {
         case 'upload': {
           const elem = document.getElementById('upload-file-selector');
-          elem.removeAttribute('data-item-elems');
+          elem.removeAttribute('data-item-elem');
           elem.value = '';
           elem.click();
           break;
@@ -387,6 +388,7 @@
           const evt = new CustomEvent("command", {
             detail: {
               command,
+              itemElem: null,
               itemElems: [],
             },
           });
@@ -414,7 +416,7 @@
       switch (command) {
         case 'upload': {
           const elem = document.getElementById('upload-file-selector');
-          elem.setAttribute('data-item-elems', '');
+          elem.setAttribute('data-item-elem', '');
           elem.value = '';
           elem.click();
           break;
@@ -424,7 +426,8 @@
           const evt = new CustomEvent("command", {
             detail: {
               command,
-              itemElems: true,
+              itemElem: this.tree.getLastSelectedItemElem(),
+              itemElems: this.tree.getSelectedItemElems(),
             },
           });
           window.dispatchEvent(evt);
@@ -444,15 +447,11 @@
     /***
      * @param {Object} event.detail
      * @param {string} event.detail.command - the command being run
-     * @param {(HTMLElement|true)[]} [event.detail.itemElems] - selected item
-     *     elements, or simply true to query from current document.
+     * @param {(HTMLElement)[]} [event.detail.itemElems] - selected item elements
      * @param {File[]} [event.detail.files] - files being uploaded
      */
     async onCommandRun(event) {
       const detail = event.detail;
-      if (detail.itemElems === true) {
-        detail.itemElems = this.tree.getSelectedItemElems();
-      }
 
       this.enableUi(false);
 
@@ -476,7 +475,7 @@
       const evt = new CustomEvent("command", {
         detail: {
           command: 'upload',
-          itemElems: event.target.hasAttribute('data-item-elems') || [],
+          itemElem: event.target.hasAttribute('data-item-elem') ? this.tree.getLastSelectedItemElem() : null,
           files: event.target.files,
         },
       });
@@ -1397,10 +1396,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         await this.openLink(target, true);
       },
 
-      async meta({itemElems}) {
-        if (!itemElems.length) { return; }
+      async meta({itemElem}) {
+        if (!itemElem) { return; }
 
-        const itemElem = itemElems[0];
         const id = itemElem.getAttribute('data-id');
         const item = this.book.meta[id];
 
@@ -1476,12 +1474,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         this.tree.refreshItem(id);
       },
 
-      async mkfolder({itemElems}) {
+      async mkfolder({itemElem}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
-        if (itemElems.length) {
-          const itemElem = itemElems[0];
+        if (itemElem) {
           ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
           // insert after the selected one
@@ -1512,12 +1509,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         this.tree.insertItem(newItem.id, parentItemId, index);
       },
 
-      async mksep({itemElems}) {
+      async mksep({itemElem}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
-        if (itemElems.length) {
-          const itemElem = itemElems[0];
+        if (itemElem) {
           ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
           // insert after the selected one
@@ -1548,12 +1544,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
         this.tree.insertItem(newItem.id, parentItemId, index);
       },
 
-      async mknote({itemElems}) {
+      async mknote({itemElem}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
-        if (itemElems.length) {
-          const itemElem = itemElems[0];
+        if (itemElem) {
           ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
           // insert after the selected one
@@ -1739,12 +1734,11 @@ Redirecting to file <a href="index.md">index.md</a>
         }
       },
 
-      async upload({itemElems, files}) {
+      async upload({itemElem, files}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
-        if (itemElems.length) {
-          const itemElem = itemElems[0];
+        if (itemElem) {
           ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
           // insert after the selected one
@@ -1754,20 +1748,17 @@ Redirecting to file <a href="index.md">index.md</a>
         await this.uploadItems(files, parentItemId, index);
       },
 
-      async edit({itemElems}) {
-        if (!itemElems.length) { return; }
+      async edit({itemElem}) {
+        if (!itemElem) { return; }
 
-        const id = itemElems[0].getAttribute('data-id');
+        const id = itemElem.getAttribute('data-id');
         const urlObj = new URL(browser.runtime.getURL("scrapbook/edit.html"));
         urlObj.searchParams.set('id', id);
         urlObj.searchParams.set('bookId', this.bookId);
         await this.openLink(urlObj.href, true);
       },
 
-      async move_up({itemElems}) {
-        if (!itemElems.length) { return; }
-
-        const itemElem = itemElems[0];
+      async move_up({itemElem}) {
         if (!this.treeElem.contains(itemElem)) { return; }
 
         const itemId = itemElem.getAttribute('data-id');
@@ -1796,10 +1787,7 @@ Redirecting to file <a href="index.md">index.md</a>
         });
       },
 
-      async move_down({itemElems}) {
-        if (!itemElems.length) { return; }
-
-        const itemElem = itemElems[0];
+      async move_down({itemElem}) {
         if (!this.treeElem.contains(itemElem)) { return; }
 
         const itemId = itemElem.getAttribute('data-id');
