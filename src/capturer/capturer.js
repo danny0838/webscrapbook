@@ -827,7 +827,7 @@
       if (typeof frameId === "number") {
         ({url, title, favIconUrl} = await browser.webNavigation.getFrame({tabId, frameId}));
       }
-      return await capturer.captureRemote({url, title, favIconUrl, mode, options});
+      return await capturer.captureRemote({url, title, favIconUrl, mode, options, parentId, index});
     } else if (mode === "resave") {
       return await capturer.resaveTab({tabId, frameId, options});
     } else if (mode === "internalize") {
@@ -950,6 +950,8 @@
         fullPage: true,
         title, 
         options,
+        parentId,
+        index,
       });
 
       try {
