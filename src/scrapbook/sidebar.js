@@ -595,6 +595,16 @@
         return;
       }
 
+      if (event.dataTransfer.types.includes('text/html') && this.rootId !== 'recycle') {
+        event.dataTransfer.dropEffect = 'copy';
+        return;
+      }
+
+      if (event.dataTransfer.types.includes('text/plain') && this.rootId !== 'recycle') {
+        event.dataTransfer.dropEffect = 'copy';
+        return;
+      }
+
       event.dataTransfer.dropEffect = 'none';
     },
 
@@ -689,6 +699,50 @@
           });
 
           await this.rebuild();
+        } catch (ex) {
+          console.error(ex);
+          this.error(ex.message);
+          // when any error happens, the UI is possibility in an inconsistent status.
+          // lock the UI to avoid further manipulation and damage.
+          return;
+        }
+
+        this.enableUi(true);
+        return;
+      }
+
+      if (event.dataTransfer.types.includes('text/html') && this.rootId !== 'recycle') {
+        this.enableUi(false);
+
+        try {
+          await this.captureNote({
+            targetId,
+            targetIndex,
+            type: 'html',
+            content: event.dataTransfer.getData('text/html'),
+          });
+        } catch (ex) {
+          console.error(ex);
+          this.error(ex.message);
+          // when any error happens, the UI is possibility in an inconsistent status.
+          // lock the UI to avoid further manipulation and damage.
+          return;
+        }
+
+        this.enableUi(true);
+        return;
+      }
+
+      if (event.dataTransfer.types.includes('text/plain') && this.rootId !== 'recycle') {
+        this.enableUi(false);
+
+        try {
+          await this.captureNote({
+            targetId,
+            targetIndex,
+            type: 'text',
+            content: event.dataTransfer.getData('text/plain'),
+          });
         } catch (ex) {
           console.error(ex);
           this.error(ex.message);
@@ -1270,6 +1324,105 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
           await book.loadTreeFiles(true);  // update treeLastModified
         },
       });
+    },
+
+    async captureNote({
+      targetId,
+      targetIndex,
+      type,
+      content,
+    }) {
+      let parentItemId = targetId;
+      let index = targetIndex;
+
+      // create new item
+      const newItem = this.book.addItem({
+        item: {
+          "type": "note",
+        },
+        parentId: parentItemId,
+        index,
+      });
+      newItem.index = newItem.id + '/index.html';
+
+      // create file
+      let target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
+
+      // prepare html content
+      switch (type) {
+        case 'html': {
+          const doc = (new DOMParser()).parseFromString('<!DOCTYPE html>' + content, 'text/html');
+          setMetaCharset: {
+            let metaCharsetNode = doc.querySelector('meta[charset]');
+            if (metaCharsetNode) {
+              metaCharsetNode.setAttribute('charset', 'UTF-8');
+              break setMetaCharset;
+            }
+
+            metaCharsetNode = doc.querySelector('meta[http-equiv="content-type"i][content]');
+            if (metaCharsetNode) {
+              metaCharsetNode.setAttribute('content', 'text/html; charset=UTF-8');
+              break setMetaCharset;
+            }
+
+            metaCharsetNode = doc.head.appendChild(doc.createElement('meta'));
+            metaCharsetNode.setAttribute('charset', 'UTF-8');
+          }
+          setMetaViewport: {
+            let metaViewportNode = doc.querySelector('meta[name="viewport"i]');
+            if (metaViewportNode) {
+              break setMetaViewport;
+            }
+
+            metaViewportNode = doc.head.appendChild(doc.createElement('meta'));
+            metaViewportNode.setAttribute('name', 'viewport');
+            metaViewportNode.setAttribute('content', 'width=device-width');
+          }
+          content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
+          break;
+        }
+        default: {
+          content = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+</head>
+<body>
+<pre style="white-space: pre-wrap;">
+${scrapbook.escapeHtml(content)}
+</pre>
+</body>
+</html>`;
+          break;
+        }
+      }
+
+      // upload data
+      await this.book.transaction({
+        mode: 'validate',
+        callback: async (book) => {
+          // save data file
+          const blob = new Blob([content], {type: 'text/plain'});
+          await server.request({
+            url: target + '?a=save',
+            method: "POST",
+            format: 'json',
+            csrfToken: true,
+            body: {
+              upload: blob,
+            },
+          });
+
+          // save meta and TOC
+          await book.saveMeta();
+          await book.saveToc();
+          await book.loadTreeFiles(true);  // update treeLastModified
+        },
+      });
+
+      // update DOM
+      this.tree.insertItem(newItem.id, parentItemId, index);
     },
 
     commands: {
