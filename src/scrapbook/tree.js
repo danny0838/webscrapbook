@@ -535,12 +535,20 @@
 
       // Firefox requires at least one data to get dragging work
       event.dataTransfer.setData(
+        'application/scrapbook.items+json',
+        JSON.stringify({
+          book: this.book.id,
+          items: selectedItemElems.map(x => x.getAttribute('data-id')),
+        })
+      );
+      event.dataTransfer.setData(
         'text/plain',
         selectedItemElems.map(x => x.getAttribute('data-id')).join('\r\n')
       );
 
       // prevent mis-intereprated as a regular link
       event.dataTransfer.clearData('text/uri-list');
+      event.dataTransfer.clearData('text/html');
 
       event.dataTransfer.effectAllowed = 'all';
       this.lastDraggedElems = selectedItemElems;

@@ -565,13 +565,18 @@
         return;
       }
 
-      if (lastDraggedElems && isOnItem) {
-        // determine the drop effect according to modifiers
-        if (event.altKey && this.rootId !== 'recycle') {
-          event.dataTransfer.dropEffect = 'link';
-        } else {
-          event.dataTransfer.dropEffect = 'move';
+      if (event.dataTransfer.types.includes('application/scrapbook.items+json')) {
+        if (lastDraggedElems && isOnItem) {
+          // determine the drop effect according to modifiers
+          if (event.altKey && this.rootId !== 'recycle') {
+            event.dataTransfer.dropEffect = 'link';
+          } else {
+            event.dataTransfer.dropEffect = 'move';
+          }
+          return;
         }
+
+        event.dataTransfer.dropEffect = 'none';
         return;
       }
 
@@ -599,30 +604,32 @@
       targetIndex,
       isOnItem = true,
     }) {
-      if (lastDraggedElems && isOnItem) {
-        const selectedItemElems = lastDraggedElems;
-        if (!selectedItemElems.length) {
-          // this shouldn't happen as lastDraggedElems should be all selected
-          return;
-        }
-
-        this.enableUi(false);
-
-        try {
-          if (event.altKey && this.rootId !== 'recycle') {
-            await this.linkItems(selectedItemElems, targetId, targetIndex);
-          } else {
-            await this.moveItems(selectedItemElems, targetId, targetIndex);
+      if (event.dataTransfer.types.includes('application/scrapbook.items+json')) {
+        if (lastDraggedElems && isOnItem) {
+          const selectedItemElems = lastDraggedElems;
+          if (!selectedItemElems.length) {
+            // this shouldn't happen as lastDraggedElems should be all selected
+            return;
           }
-        } catch (ex) {
-          console.error(ex);
-          this.error(ex.message);
-          // when any error happens, the UI is possibility in an inconsistent status.
-          // lock the UI to avoid further manipulation and damage.
-          return;
-        }
 
-        this.enableUi(true);
+          this.enableUi(false);
+
+          try {
+            if (event.altKey && this.rootId !== 'recycle') {
+              await this.linkItems(selectedItemElems, targetId, targetIndex);
+            } else {
+              await this.moveItems(selectedItemElems, targetId, targetIndex);
+            }
+          } catch (ex) {
+            console.error(ex);
+            this.error(ex.message);
+            // when any error happens, the UI is possibility in an inconsistent status.
+            // lock the UI to avoid further manipulation and damage.
+            return;
+          }
+
+          this.enableUi(true);
+        }
         return;
       }
 
