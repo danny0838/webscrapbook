@@ -134,6 +134,9 @@
       await this.refresh(undefined, true);
     },
 
+    /**
+     * Switch UI to match the given bookId.
+     */
     async refresh(bookId, keepLogs = false) {
       this.enableUi(false);
 
@@ -235,6 +238,16 @@
       }
 
       this.enableUi(true);
+    },
+
+    /**
+     * Reload tree data and rebuild the item tree.
+     */
+    async rebuild() {
+      await this.book.loadTreeFiles(true);
+      await this.book.loadToc(true);
+      await this.book.loadMeta(true);
+      await this.tree.rebuild();
     },
 
     onKeyDown(event) {
@@ -667,6 +680,8 @@
             index: targetIndex,
             waitForResponse: true,
           });
+
+          await this.rebuild();
         } catch (ex) {
           console.error(ex);
           this.error(ex.message);
