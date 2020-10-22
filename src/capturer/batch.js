@@ -163,7 +163,11 @@
       try {
         tasks = parseInputText(inputText, !useJson);
       } catch (ex) {
+        // error out if the input is not convertable to prevent missing
         console.error(ex);
+        alert(`Error: ${ex.message}`);
+        event.target.checked = !useJson;
+        event.preventDefault();
         return;
       }
 
