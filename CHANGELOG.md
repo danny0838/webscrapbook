@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.84.0] - 2020-10-22
+* Reworked "batch capture" as "batch capture all tabs", and remove "capture all tabs".
+* Fixed an issue that backup files are generated for auto fulltext cache.
+
 ## [0.83.0] - 2020-10-19
 * Changed view status caching format for sidebar to avoid a comflict within different views.
 * Added support of top-level null value for *.js tree files.
@@ -83,6 +87,9 @@
 ## [0.51.0] - 2019-09-13
 * Added support to capture shadowRoot content.
 
+## [0.50.0] - 2019-09-08
+* Fixed an issue that page editor is loaded for every page if backend server URL is not set.
+
 ## [0.49.0] - 2019-09-07
 * Added page editor.
 
@@ -95,6 +102,9 @@
 
 ## [0.45.0] - 2019-07-01
 * Added support to capture dynamic CSS.
+
+## [0.44.1] - 2019-05-30
+* Fixed a packaging error for 0.44.0.
 
 ## [0.41.0] - 2019-04-15
 * Bumped server requirement to >= 0.6.
