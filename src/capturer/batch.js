@@ -54,11 +54,13 @@
     if (uniquify) {
       const urls = new Set();
       tasks = tasks.filter((task) => {
-        const normalizedUrl = scrapbook.normalizeUrl(task.url);
-        if (urls.has(normalizedUrl)) {
-          return false;
+        if (task.url) {
+          const normalizedUrl = scrapbook.normalizeUrl(task.url);
+          if (urls.has(normalizedUrl)) {
+            return false;
+          }
+          urls.add(normalizedUrl);
         }
-        urls.add(normalizedUrl);
         return true;
       });
     }
