@@ -91,16 +91,16 @@
 
     return inputText
       .split('\n')
-      .map(line => {
-        const [_, url, title] = line.match(/^(\S*)(?:\s+(.*))?$/mu);
-        if (!url) { return null; }
-        if (!title) { return {url}; }
-        return {url, title};
-      })
-      .filter(x => x !== null)
-      .map(x => {
-        x.mode = 'source';
-        return x;
+      .reduce((tasks, line) => {
+        let [_, url, title] = line.match(/^(\S*)(?:\s+(.*))?$/mu);
+        if (!url) { return tasks; }
+        if (!title) { title = undefined; }
+        tasks.push({url, title});
+        return tasks;
+      }, [])
+      .map(task => {
+        task.mode = 'source';
+        return task;
       });
   }
 
@@ -111,13 +111,19 @@
 
     if (tasks) {
       return tasks
-        .filter(x => x && x.url)
-        .map(x => {
-          if (x.title) {
-            return x.url + ' ' + x.title;
+        .reduce((lines, task) => {
+          let line;
+          if (task.url) {
+            line = task.url;
+          } else {
+            return lines;
           }
-          return x.url;
-        })
+          if (task.title) {
+            line += ' ' + task.title;
+          }
+          lines.push(line);
+          return lines;
+        }, [])
         .join('\n');
     }
     return '';
