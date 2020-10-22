@@ -2958,13 +2958,19 @@
   capturer.retrieveSelectedLinks = async function (params = {}) {
     const {doc = document} = params;
 
-    const nodes = scrapbook.getSelectedNodes({
-      whatToShow: NodeFilter.SHOW_ELEMENT,
-      nodeFilter: (node) => {
-        return node.matches('a[href], area[href]');
-      },
-      fuzzy: true,
-    });
+    let nodes;
+    if (!document.getSelection().isCollapsed) {
+      nodes = scrapbook.getSelectedNodes({
+        whatToShow: NodeFilter.SHOW_ELEMENT,
+        nodeFilter: (node) => {
+          return node.matches('a[href], area[href]');
+        },
+        fuzzy: true,
+      });
+    } else {
+      nodes = doc.querySelectorAll('a[href], area[href]');
+    }
+
     return Array.prototype.map.call(nodes, a => ({
      url: a.href,
      title: a.textContent,
