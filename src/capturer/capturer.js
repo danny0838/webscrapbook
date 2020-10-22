@@ -769,7 +769,7 @@
             fullPage,
             title,
             mode,
-            options: Object.assign(globalOptions, options),
+            options: Object.assign({}, globalOptions, options),
             parentId,
             index,
           });
@@ -781,7 +781,7 @@
             title,
             favIconUrl,
             mode,
-            options: Object.assign(globalOptions, options),
+            options: Object.assign({}, globalOptions, options),
             parentId,
             index,
           });
