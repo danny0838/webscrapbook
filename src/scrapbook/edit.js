@@ -123,9 +123,10 @@
                 "a": "cache",
                 "book": book.id,
                 "item": item.id,
-                "no_lock": 1,
                 "fulltext": 1,
                 "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+                "no_lock": 1,
+                "no_backup": 1,
               },
               onMessage(info) {
                 if (['error', 'critical'].includes(info.type)) {
