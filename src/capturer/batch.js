@@ -55,11 +55,15 @@
       const urls = new Set();
       tasks = tasks.filter((task) => {
         if (task.url) {
-          const normalizedUrl = scrapbook.normalizeUrl(task.url);
-          if (urls.has(normalizedUrl)) {
-            return false;
+          try {
+            const normalizedUrl = scrapbook.normalizeUrl(task.url);
+            if (urls.has(normalizedUrl)) {
+              return false;
+            }
+            urls.add(normalizedUrl);
+          } catch (ex) {
+            throw Error(`Failed to uniquify invalid URL: ${task.url}`);
           }
-          urls.add(normalizedUrl);
         }
         return true;
       });
