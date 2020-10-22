@@ -204,7 +204,9 @@ async function capture(params, options = {}) {
   }
 
   const args = {
-    tasks: [!headless ? Object.assign({tabId: pageTab.id}, params) : params],
+    taskInfo: {
+      tasks: [!headless ? Object.assign({tabId: pageTab.id}, params) : params],
+    },
     windowCreateData,
     waitForResponse: true,
   };

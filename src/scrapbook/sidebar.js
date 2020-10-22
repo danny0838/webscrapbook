@@ -692,9 +692,11 @@
               },
             }));
           await scrapbook.invokeCaptureEx({
-            tasks,
-            parentId: targetId,
-            index: targetIndex,
+            taskInfo: {
+              tasks,
+              parentId: targetId,
+              index: targetIndex,
+            },
             waitForResponse: true,
           });
 

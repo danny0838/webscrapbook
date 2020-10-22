@@ -82,10 +82,12 @@
       async batchCapture() {
         const tabs = await scrapbook.getContentTabs();
         return await scrapbook.invokeBatchCapture({
-          tasks: tabs.map(tab => ({
-            tabId: tab.id,
-            title: tab.title,
-          })),
+          taskInfo: {
+            tasks: tabs.map(tab => ({
+              tabId: tab.id,
+              title: tab.title,
+            })),
+          },
         });
       },
     },
@@ -276,7 +278,7 @@
             });
           })
           .then((tasks) => {
-            return scrapbook.invokeBatchCapture({tasks});
+            return scrapbook.invokeBatchCapture({taskInfo: {tasks}});
           });
       }
     });

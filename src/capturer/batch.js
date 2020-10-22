@@ -42,18 +42,18 @@
     if (typeof data.uniquify !== 'undefined') {
       document.getElementById('opt-uniquify').checked = data.uniquify;
     }
-    if (typeof data.tasks !== 'undefined') {
-      document.getElementById('urls').value = stringifyTasks(data.tasks, document.getElementById('opt-useJson').checked);
+    if (typeof data.taskInfo !== 'undefined') {
+      document.getElementById('urls').value = stringifyTasks(data.taskInfo, document.getElementById('opt-useJson').checked);
     }
   }
 
   async function capture({inputText, customTitle, useJson, uniquify}) {
-    let tasks = parseInputText(inputText, useJson);
+    const taskInfo = parseInputText(inputText, useJson);
 
     // remove duplicated URLs
     if (uniquify) {
       const urls = new Set();
-      tasks = tasks.filter((task) => {
+      taskInfo.tasks = taskInfo.tasks.filter((task) => {
         if (task.url) {
           try {
             const normalizedUrl = scrapbook.normalizeUrl(task.url);
@@ -71,25 +71,27 @@
 
     // remove title if customTitle is not set
     if (!customTitle) {
-      for (const i in tasks) {
-        delete(tasks[i].title);
+      for (const i in taskInfo.tasks) {
+        delete(taskInfo.tasks[i].title);
       }
     }
 
-    await scrapbook.invokeCapture(tasks);
+    await scrapbook.invokeCaptureEx({taskInfo});
     window.close();
   }
 
   function parseInputText(inputText, useJson = false) {
     if (useJson) {
-      const tasks = JSON.parse(inputText);
-      if (!Array.isArray(tasks)) {
-        throw new Error('JSON data is not an Array.');
+      const taskInfo = JSON.parse(inputText);
+      if (typeof taskInfo !== 'object') {
+        throw new Error('JSON data is not a valid object.');
+      } else if (!Array.isArray(taskInfo.tasks)) {
+        throw new Error('"tasks" property of JSON data is not an Array.');
       }
-      return tasks;
+      return taskInfo;
     }
 
-    return inputText
+    const tasks = inputText
       .split('\n')
       .reduce((tasks, line) => {
         let [_, url, title] = line.match(/^(\S*)(?:\s+(.*))?$/mu);
@@ -107,15 +109,16 @@
         }
         return tasks;
       }, []);
+    return {tasks};
   }
 
-  function stringifyTasks(tasks, useJson = false) {
+  function stringifyTasks(taskInfo, useJson = false) {
     if (useJson) {
-      return JSON.stringify(tasks, null, 2);
+      return JSON.stringify(taskInfo, null, 2);
     }
 
-    if (tasks) {
-      return tasks
+    if (taskInfo) {
+      return taskInfo.tasks
         .reduce((lines, task) => {
           let line;
           if (task.url) {

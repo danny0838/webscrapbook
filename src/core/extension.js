@@ -154,32 +154,26 @@
    * @return {Promise<(Window|Tab)>}
    */
   scrapbook.invokeCapture = async function (tasks) {
-    return await scrapbook.invokeCaptureEx({tasks, waitForResponse: false});
+    return await scrapbook.invokeCaptureEx({taskInfo: {tasks}, waitForResponse: false});
   };
 
   /**
    * Advanced API to invoke a capture.
    *
    * @param {Object} params
-   * @param {Array} params.tasks
-   * @param {string} [params.parentId] - parent item ID for the captured items
-   * @param {integer} [params.index] - position index for the captured items
-   * @param {float} [params.delay] - delay between tasks (ms)
+   * @param {Object} params.taskInfo
    * @param {Object} [params.windowCreateData]
    * @param {boolean} [params.waitForResponse]
    * @return {Promise<(Object|Window|Tab)>}
    */
   scrapbook.invokeCaptureEx = async function ({
-    tasks,
-    parentId,
-    index,
-    delay,
+    taskInfo,
     windowCreateData,
     waitForResponse = true,
   }) {
     const missionId = scrapbook.getUuid();
     const key = {table: "captureMissionCache", id: missionId};
-    await scrapbook.cache.set(key, {tasks, parentId, index, delay});
+    await scrapbook.cache.set(key, taskInfo);
     const url = browser.runtime.getURL("capturer/capturer.html") + `?mid=${missionId}`;
 
     // launch capturer
@@ -246,7 +240,7 @@
    * Invoke batch capture with preset params.
    *
    * @param {Object} params
-   * @param {Array} params.tasks
+   * @param {Object} params.taskInfo
    * @param {boolean} [params.useJson]
    * @param {boolean} [params.customTitle]
    * @param {boolean} [params.uniquify]
