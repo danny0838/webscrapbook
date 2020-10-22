@@ -767,6 +767,7 @@
             tabId,
             frameId,
             fullPage,
+            title,
             mode,
             options: Object.assign(globalOptions, options),
             parentId,
