@@ -33,6 +33,46 @@
     sidebarWindowId: null,
 
     async init() {
+      // Init event handlers first so that the refresh button works if there's
+      // an error during further init.
+
+      // bind "this" variable for command callbacks functions
+      for (const cmd in this.commands) {
+        this.commands[cmd] = this.commands[cmd].bind(this);
+      }
+
+      // bind on* event callbacks
+      for (const funcName of Object.getOwnPropertyNames(this)) {
+        if (funcName.startsWith('on')) {
+          this[funcName] = this[funcName].bind(this);
+        }
+      }
+
+      // init event handlers
+      window.addEventListener('keydown', this.onKeyDown);
+
+      window.addEventListener('dragenter', this.onWindowItemDragEnter);
+      window.addEventListener('dragover', this.onWindowItemDragOver);
+      window.addEventListener('drop', this.onWindowItemDrop);
+
+      this.treeElem = document.getElementById('items');
+      this.treeElem.addEventListener('contextmenu', this.onTreeContextMenu);
+
+      document.getElementById("book").addEventListener('change', this.onBookChange);
+      document.getElementById("search").addEventListener('click', this.onSearchButtonClick);
+      document.getElementById("refresh").addEventListener('click', this.onRefreshButtonClick);
+      document.getElementById("command").addEventListener('click', this.onCommandButtonClick);
+
+      document.getElementById("command-popup-book").addEventListener('click', this.onBookCommandClick);
+      document.getElementById("command-popup-book").addEventListener('focusout', this.onBookCommandFocusOut);
+
+      document.getElementById("command-popup").addEventListener('click', this.onCommandClick);
+      document.getElementById("command-popup").addEventListener('focusout', this.onCommandFocusOut);
+
+      document.getElementById('upload-file-selector').addEventListener('change', this.onClickFileSelector);
+
+      window.addEventListener('command', this.onCommandRun);
+
       // load config
       await scrapbook.loadOptions();
 
@@ -85,45 +125,6 @@
         this.error(scrapbook.lang('ScrapBookErrorLoadBooks', [ex.message]));
         return;
       }
-      
-      // bind "this" variable for command callbacks functions
-      for (const cmd in this.commands) {
-        this.commands[cmd] = this.commands[cmd].bind(this);
-      }
-
-      // bind on* event callbacks
-      for (const funcName of Object.getOwnPropertyNames(this)) {
-        if (funcName.startsWith('on')) {
-          this[funcName] = this[funcName].bind(this);
-        }
-      }
-
-      // init event handlers
-      window.addEventListener('keydown', this.onKeyDown);
-
-      window.addEventListener('dragenter', this.onWindowItemDragEnter);
-      window.addEventListener('dragover', this.onWindowItemDragOver);
-      window.addEventListener('drop', this.onWindowItemDrop);
-
-      this.treeElem = document.getElementById('items');
-      this.treeElem.addEventListener('contextmenu', this.onTreeContextMenu);
-
-      document.getElementById("book").addEventListener('change', this.onBookChange);
-      document.getElementById("search").addEventListener('click', this.onSearchButtonClick);
-      document.getElementById("refresh").addEventListener('click', this.onRefreshButtonClick);
-      document.getElementById("command").addEventListener('click', this.onCommandButtonClick);
-
-      document.getElementById("command-popup-book").addEventListener('click', this.onBookCommandClick);
-      document.getElementById("command-popup-book").addEventListener('focusout', this.onBookCommandFocusOut);
-
-      document.getElementById("command-popup").addEventListener('click', this.onCommandClick);
-      document.getElementById("command-popup").addEventListener('focusout', this.onCommandFocusOut);
-
-      // -- file selector
-      document.getElementById('upload-file-selector').addEventListener('change', this.onClickFileSelector);
-
-      // -- command handler
-      window.addEventListener('command', this.onCommandRun);
 
       // init tree instance
       this.tree = new Tree({
