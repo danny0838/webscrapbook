@@ -828,7 +828,7 @@
       if (typeof frameId === "number") {
         ({url, title, favIconUrl} = await browser.webNavigation.getFrame({tabId, frameId}));
       }
-      return await capturer.captureRemote({url, title, favIconUrl, mode, options, parentId, index});
+      return await capturer.captureRemote({url, title: title0 || title, favIconUrl, mode, options, parentId, index});
     } else if (mode === "resave") {
       return await capturer.resaveTab({tabId, frameId, options});
     } else if (mode === "internalize") {
