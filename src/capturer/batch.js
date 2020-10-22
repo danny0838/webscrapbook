@@ -171,6 +171,7 @@
       const uniquify = document.getElementById('opt-uniquify').checked;
 
       capture({inputText, customTitle, useJson, uniquify}).catch((ex) => {
+        console.error(ex);
         alert(`Error: ${ex.message}`);
       });
     });
