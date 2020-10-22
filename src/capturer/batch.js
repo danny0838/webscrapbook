@@ -95,13 +95,18 @@
         let [_, url, title] = line.match(/^(\S*)(?:\s+(.*))?$/mu);
         if (!url) { return tasks; }
         if (!title) { title = undefined; }
-        tasks.push({url, title});
+        if (url.startsWith('tab:')) {
+          let [_, tabId, frameId] = url.split(':');
+          tabId = parseInt(tabId, 10);
+          if (!Number.isInteger(tabId)) { return tasks; }
+          frameId = parseInt(frameId, 10);
+          if (!Number.isInteger(frameId)) { frameId = undefined; }
+          tasks.push({tabId, frameId, title});
+        } else {
+          tasks.push({url, title, mode: 'source'});
+        }
         return tasks;
-      }, [])
-      .map(task => {
-        task.mode = 'source';
-        return task;
-      });
+      }, []);
   }
 
   function stringifyTasks(tasks, useJson = false) {
@@ -115,6 +120,12 @@
           let line;
           if (task.url) {
             line = task.url;
+          } else if (Number.isInteger(task.tabId)) {
+            if (Number.isInteger(task.frameId)) {
+              line = `tab:${task.tabId}:${task.frameId}`;
+            } else {
+              line = `tab:${task.tabId}`;
+            }
           } else {
             return lines;
           }

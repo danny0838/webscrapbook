@@ -24,7 +24,7 @@
     "message": "URL list:"
   },
   "BatchCaptureUrlsTooltip": {
-    "message": "Input a list of URLs to capture. One URL per line, with optionally a title separated by spaces.\n\nIf “Use JSON format” is checked, the list should be an array of objects with following properties:\n• url: The URL to capture.\n• title: A custom title (works only when “Overwrite title” is checked).\n• mode: Capture mode. Omit for launching a new tab; “source” to capture source, and “bookmark” to capture as a bookmark.\n• options: overriding capture options, as a JSON object, with the same format as the exported options (limited to “capture.*”)."
+    "message": "Input a list of URLs to capture. One URL per line, with optionally a title separated by spaces.\n\nIf “Use JSON format” is checked, the list should be an array of objects with following properties:\n• tabId: The tab ID to capture. Either tabId or url is required.\n• frameId: The frame ID of the tab to capture. Capture the main frame if omitted.\n• fullPage: Capture whole page if truthy; otherwise capture the selected area.\n• url: The URL to capture.\n• title: A custom overriding title (if “Overwrite title” is checked).\n• mode: Capture mode. Omit to capture tab (auto-launch a new one for url capture); “source” to capture source, and “bookmark” to capture as a bookmark.\n• options: Overriding capture options, as a JSON object, with the same format as the exported options (limited to “capture.*”)."
   },
   "Cancel": {
     "message": "Cancel"
