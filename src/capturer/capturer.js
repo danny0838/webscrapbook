@@ -745,18 +745,20 @@
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
    * @param {float} [params.delay=5] - delay between tasks (ms)
+   * @param {string} [params.mode] - base capture mode
+   * @param {Object} [params.options] - base capture options, overwriting default
    * @return {Promise<Array|Object>} - list of task results (or error), or an object of error
    */
   capturer.runTasks = async function (params) {
-    let {tasks, parentId, index, delay = 5} = params;
+    let {tasks, parentId, index, delay = 5, mode: baseMode, options: baseOptions} = params;
     const results = [];
-    const globalOptions = scrapbook.getOptions("capture");
+    baseOptions = Object.assign(scrapbook.getOptions("capture"), baseOptions);
 
     for (const task of tasks) {
       const {
         tabId, frameId, fullPage,
         url, refUrl, title, favIconUrl,
-        mode, options,
+        mode = baseMode, options,
       } = task;
 
       let result;
@@ -769,7 +771,7 @@
             fullPage,
             title,
             mode,
-            options: Object.assign({}, globalOptions, options),
+            options: Object.assign({}, baseOptions, options),
             parentId,
             index,
           });
@@ -781,7 +783,7 @@
             title,
             favIconUrl,
             mode,
-            options: Object.assign({}, globalOptions, options),
+            options: Object.assign({}, baseOptions, options),
             parentId,
             index,
           });
