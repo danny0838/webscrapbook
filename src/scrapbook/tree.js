@@ -100,7 +100,7 @@
     }
 
     getViewStatusKey() {
-      return {table: 'scrapbookTreeView', serverRoot: server.serverRoot, bookId: this.bookId, rootId: this.rootId};
+      return {table: 'scrapbookTreeView', serverRoot: server.serverRoot, bookId: this.book.id, rootId: this.rootId};
     }
 
     async saveViewStatus() {
