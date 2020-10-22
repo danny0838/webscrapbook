@@ -1,6 +1,6 @@
 {
   "BatchCapture": {
-    "message": "批量获取网页"
+    "message": "批量获取所有分页"
   },
   "BatchCaptureAbortLabel": {
     "message": "取消"
@@ -28,9 +28,6 @@
   },
   "Cancel": {
     "message": "取消"
-  },
-  "CaptureAllTabs": {
-    "message": "获取所有分页"
   },
   "CaptureFrame": {
     "message": "获取框架"

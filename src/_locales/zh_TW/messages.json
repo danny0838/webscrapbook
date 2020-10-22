@@ -1,6 +1,6 @@
 {
   "BatchCapture": {
-    "message": "批次擷取網頁"
+    "message": "批次擷取所有分頁"
   },
   "BatchCaptureAbortLabel": {
     "message": "取消"
@@ -28,9 +28,6 @@
   },
   "Cancel": {
     "message": "取消"
-  },
-  "CaptureAllTabs": {
-    "message": "擷取所有分頁"
   },
   "CaptureFrame": {
     "message": "擷取框架頁"

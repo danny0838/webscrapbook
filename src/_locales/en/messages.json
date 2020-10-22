@@ -1,6 +1,6 @@
 {
   "BatchCapture": {
-    "message": "Batch capture"
+    "message": "Batch capture all tabs"
   },
   "BatchCaptureAbortLabel": {
     "message": "Abort"
@@ -28,9 +28,6 @@
   },
   "Cancel": {
     "message": "Cancel"
-  },
-  "CaptureAllTabs": {
-    "message": "Capture all tabs"
   },
   "CaptureFrame": {
     "message": "Capture frame"

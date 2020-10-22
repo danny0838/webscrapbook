@@ -80,9 +80,12 @@
       },
 
       async batchCapture() {
-        return await scrapbook.visitLink({
-          url: browser.runtime.getURL("capturer/batch.html"),
-          newTab: true,
+        const tabs = await scrapbook.getContentTabs();
+        return await scrapbook.invokeBatchCapture({
+          tasks: tabs.map(tab => ({
+            tabId: tab.id,
+            title: tab.title,
+          })),
         });
       },
     },
