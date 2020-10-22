@@ -8,6 +8,9 @@
   "BatchCaptureCaptureLabel": {
     "message": "擷取"
   },
+  "BatchCaptureLinks": {
+    "message": "批次擷取選取的超連結"
+  },
   "BatchCaptureOptionCustomTitleLabel": {
     "message": "覆寫網頁標題"
   },

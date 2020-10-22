@@ -8,6 +8,9 @@
   "BatchCaptureCaptureLabel": {
     "message": "Capture"
   },
+  "BatchCaptureLinks": {
+    "message": "Batch capture selected links"
+  },
   "BatchCaptureOptionCustomTitleLabel": {
     "message": "Overwrite title"
   },

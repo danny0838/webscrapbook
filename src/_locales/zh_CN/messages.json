@@ -8,6 +8,9 @@
   "BatchCaptureCaptureLabel": {
     "message": "获取"
   },
+  "BatchCaptureLinks": {
+    "message": "批量获取选择的链接"
+  },
   "BatchCaptureOptionCustomTitleLabel": {
     "message": "覆写网页标题"
   },

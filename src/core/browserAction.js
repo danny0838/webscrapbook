@@ -72,6 +72,7 @@
         document.getElementById("captureTab").disabled = true;
         document.getElementById("captureTabSource").disabled = true;
         document.getElementById("captureTabBookmark").disabled = true;
+        document.getElementById("batchCaptureLinks").disabled = true;
         document.getElementById("editTab").disabled = true;
       }
     }
@@ -119,6 +120,21 @@
           title: tab.title,
         })),
       });
+    });
+
+    document.getElementById("batchCaptureLinks").addEventListener('click', async (event) => {
+      const tab = targetTab || await selectTabFromDom(document.getElementById("batchCaptureLinks"));
+      return scrapbook.initContentScripts(tab.id)
+        .then(() => {
+          return scrapbook.invokeContentScript({
+            tabId: tab.id,
+            frameId: 0,
+            cmd: "capturer.retrieveSelectedLinks",
+          });
+        })
+        .then((tasks) => {
+          return scrapbook.invokeBatchCapture({tasks});
+        });
     });
 
     document.getElementById("editTab").addEventListener('click', async (event) => {
