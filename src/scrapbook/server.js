@@ -261,99 +261,101 @@
      * Load the config of the backend server
      */
     async init(refresh = false) {
-      if (!this._config || refresh) {
-        if (!scrapbook.hasServer()) {
-          throw new Error('Backend server not configured.');
-        }
+      if (this._config && !refresh) {
+        return;
+      }
 
-        // record configs
-        this._user = scrapbook.getOption("server.user");
-        this._password = scrapbook.getOption("server.password");
-        this._bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+      if (!scrapbook.hasServer()) {
+        throw new Error('Backend server not configured.');
+      }
 
-        let rootUrlObj;
+      // record configs
+      this._user = scrapbook.getOption("server.user");
+      this._password = scrapbook.getOption("server.password");
+      this._bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+
+      let rootUrlObj;
+      try {
+        rootUrlObj = new URL(scrapbook.getOption("server.url"));
+        if (!rootUrlObj.pathname.endsWith('/')) { rootUrlObj.pathname += '/'; }
+        rootUrlObj.search = rootUrlObj.hash = '';
+      } catch (ex) {
+        throw new Error('Malformed server address.');
+      }
+      const rootUrl = rootUrlObj.href;
+
+      // load config from server
+      {
+        // Use xhr for the first time for authentication as fetch API doesn't
+        // support a URL with user/password.
+        let xhr;
+        const url = rootUrl + '?a=config&f=json&ts=' + Date.now(); // ignore cache
         try {
-          rootUrlObj = new URL(scrapbook.getOption("server.url"));
-          if (!rootUrlObj.pathname.endsWith('/')) { rootUrlObj.pathname += '/'; }
-          rootUrlObj.search = rootUrlObj.hash = '';
+          xhr = await scrapbook.xhr({
+            url, // ignore cache
+            user: this._user,
+            password: this._password,
+            responseType: 'json',
+            requestHeaders: {
+              Accept: 'application/json, */*;q=0.1',
+            },
+            method: "GET",
+            onload: true,
+          });
         } catch (ex) {
-          throw new Error('Malformed server address.');
+          throw new RequestError('Unable to connect to backend server.', {url});
         }
-        const rootUrl = rootUrlObj.href;
 
-        // load config from server
-        {
-          // Use xhr for the first time for authentication as fetch API doesn't
-          // support a URL with user/password.
-          let xhr;
-          const url = rootUrl + '?a=config&f=json&ts=' + Date.now(); // ignore cache
+        if (xhr.status === 401) {
+          throw new RequestError('HTTP authentication failed.', {
+            url: xhr.responseURL,
+            status: xhr.status,
+          });
+        }
+
+        if (!(xhr.status >= 200 && xhr.status < 300 &&
+            xhr.response && xhr.response.data)) {
+          throw new Error('The server does not support WebScrapBook protocol.');
+        }
+
+        this._config = xhr.response.data;
+      }
+
+      // validate if the server version is compatible
+      {
+        if (scrapbook.versionCompare(this._config.VERSION, scrapbook.BACKEND_MIN_VERSION) < 0) {
+          throw new Error(`Require server app version >= ${scrapbook.BACKEND_MIN_VERSION}.`);
+        }
+
+        // if min extension version is set, validate it
+        if (this._config.WSB_EXTENSION_MIN_VERSION) {
+          let version;
           try {
-            xhr = await scrapbook.xhr({
-              url, // ignore cache
-              user: this._user,
-              password: this._password,
-              responseType: 'json',
-              requestHeaders: {
-                Accept: 'application/json, */*;q=0.1',
-              },
-              method: "GET",
-              onload: true,
-            });
+            version = browser.runtime.getManifest().version;
           } catch (ex) {
-            throw new RequestError('Unable to connect to backend server.', {url});
+            // skip if failed to get extension version
+            console.error(ex);
           }
-
-          if (xhr.status === 401) {
-            throw new RequestError('HTTP authentication failed.', {
-              url: xhr.responseURL,
-              status: xhr.status,
-            });
-          }
-
-          if (!(xhr.status >= 200 && xhr.status < 300 &&
-              xhr.response && xhr.response.data)) {
-            throw new Error('The server does not support WebScrapBook protocol.');
-          }
-
-          this._config = xhr.response.data;
-        }
-
-        // validate if the server version is compatible
-        {
-          if (scrapbook.versionCompare(this._config.VERSION, scrapbook.BACKEND_MIN_VERSION) < 0) {
-            throw new Error(`Require server app version >= ${scrapbook.BACKEND_MIN_VERSION}.`);
-          }
-
-          // if min extension version is set, validate it
-          if (this._config.WSB_EXTENSION_MIN_VERSION) {
-            let version;
-            try {
-              version = browser.runtime.getManifest().version;
-            } catch (ex) {
-              // skip if failed to get extension version
-              console.error(ex);
-            }
-            if (version) {
-              if (scrapbook.versionCompare(version, this._config.WSB_EXTENSION_MIN_VERSION) < 0) {
-                throw new Error(`Server app requires extension version >= ${this._config.WSB_EXTENSION_MIN_VERSION}.`);
-              }
+          if (version) {
+            if (scrapbook.versionCompare(version, this._config.WSB_EXTENSION_MIN_VERSION) < 0) {
+              throw new Error(`Server app requires extension version >= ${this._config.WSB_EXTENSION_MIN_VERSION}.`);
             }
           }
         }
+      }
 
-        // revise server root URL
-        // rootUrl may be too deep, replace with server configured base path
-        {
-          rootUrlObj.pathname = this._config.app.base + '/';
-          this._serverRoot = rootUrlObj.href;
-        }
+      // revise server root URL
+      // rootUrl may be too deep, replace with server configured base path
+      {
+        rootUrlObj.pathname = this._config.app.base + '/';
+        this._serverRoot = rootUrlObj.href;
+      }
 
-        // load books
-        {
-          this._books = {};
-          for (const bookId in server.config.book) {
-            this._books[bookId] = new Book(bookId, this);
-          }
+      // load books
+      {
+        this._books = {};
+        for (const bookId in server.config.book) {
+          this._books[bookId] = new Book(bookId, this);
         }
       }
     }
