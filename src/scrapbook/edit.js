@@ -35,14 +35,14 @@
         let checkMetaRefresh = !file;
 
         await scrapbook.loadOptions();
-        await server.init(true);
+        await server.init();
 
         const book = server.books[bookId];
         if (!book) {
           throw new Error(`Specified book "${bookId}" does not exist.`);
         }
 
-        const meta = await book.loadMeta(true);
+        const meta = await book.loadMeta();
 
         const item = meta[id];
         if (!item) {
@@ -94,8 +94,8 @@
 
         await book.transaction({
           callback: async (book) => {
-            await book.loadTreeFiles(true);
-            const meta = await book.loadMeta(true);
+            const refresh = !await book.validateTree();
+            const meta = await book.loadMeta(refresh);
 
             const item = meta[id];
             if (!item) {
@@ -134,6 +134,8 @@
                 }
               },
             });
+
+            await book.loadTreeFiles(true);  // update treeLastModified
           },
         });
       } catch (ex) {

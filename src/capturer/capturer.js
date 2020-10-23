@@ -690,9 +690,9 @@
     await book.transaction({
       timeout: 60,
       callback: async (book) => {
-        await book.loadTreeFiles(true);
-        await book.loadMeta(true);
-        await book.loadToc(true);
+        const refresh = !await book.validateTree();
+        await book.loadMeta(refresh);
+        await book.loadToc(refresh);
         await book.addItem({
           item: Object.assign({}, item, {icon}),
           parentId,
@@ -717,6 +717,8 @@
             }
           },
         });
+
+        await book.loadTreeFiles(true);  // update treeLastModified
       },
     });
   };
@@ -1679,6 +1681,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               }
             },
           });
+
+          await book.loadTreeFiles(true);  // update treeLastModified
         } else {
           capturer.warn(scrapbook.lang("ErrorSaveUnknownItem"));
         }
