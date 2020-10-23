@@ -996,6 +996,9 @@
   "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
     "message": "遠端全文搜尋快取大小限制 (MiB):"
   },
+  "OptionScrapbookNotifyPageCapturedLabel": {
+    "message": "瀏覽擷取過的頁面時顯示提示"
+  },
   "OptionServerPasswordLabel": {
     "message": "密碼:"
   },

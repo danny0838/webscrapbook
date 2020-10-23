@@ -40,6 +40,8 @@
       "core/extension.js",
       "core/background.js",
       "capturer/background.js",
+      "scrapbook/server.js",
+      "scrapbook/background.js",
       "editor/background.js",
       "viewer/background.js"
     ]

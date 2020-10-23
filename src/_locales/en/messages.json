@@ -996,6 +996,9 @@
   "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
     "message": "Size limit for remote fulltext cache (MiB):"
   },
+  "OptionScrapbookNotifyPageCapturedLabel": {
+    "message": "Show hint when browsing a page having been captured"
+  },
   "OptionServerPasswordLabel": {
     "message": "Password:"
   },

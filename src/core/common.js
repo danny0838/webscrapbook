@@ -135,6 +135,7 @@ if (Node && !Node.prototype.getRootNode) {
     "checker.resolveAbsoluteIcon": true,
     "checker.resolveUnusedIcon": true,
     "checker.makeBackup": true,
+    "scrapbook.notifyPageCaptured": false,
     "scrapbook.defaultSearch": "-type:folder -type:separator",
     "scrapbook.fulltextCacheRemoteSizeLimit": null,
     "scrapbook.fulltextCacheUpdateThreshold": 5 * 24 * 60 * 60 * 1000,
