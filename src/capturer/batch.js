@@ -114,7 +114,7 @@
 
   function stringifyTasks(taskInfo, useJson = false) {
     if (useJson) {
-      return JSON.stringify(taskInfo, null, 2);
+      return JSON.stringify(taskInfo, null, 1);
     }
 
     if (taskInfo) {
