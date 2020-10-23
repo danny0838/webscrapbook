@@ -274,22 +274,21 @@
       this._password = scrapbook.getOption("server.password");
       this._bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
 
-      let rootUrlObj;
-      try {
-        rootUrlObj = new URL(scrapbook.getOption("server.url"));
-        if (!rootUrlObj.pathname.endsWith('/')) { rootUrlObj.pathname += '/'; }
-        rootUrlObj.search = rootUrlObj.hash = '';
-      } catch (ex) {
-        throw new Error('Malformed server address.');
-      }
-      const rootUrl = rootUrlObj.href;
-
       // load config from server
       {
+        let rootUrlObj;
+        try {
+          rootUrlObj = new URL(scrapbook.getOption("server.url"));
+          if (!rootUrlObj.pathname.endsWith('/')) { rootUrlObj.pathname += '/'; }
+          rootUrlObj.search = rootUrlObj.hash = '';
+        } catch (ex) {
+          throw new Error('Malformed server address.');
+        }
+
         // Use xhr for the first time for authentication as fetch API doesn't
         // support a URL with user/password.
         let xhr;
-        const url = rootUrl + '?a=config&f=json&ts=' + Date.now(); // ignore cache
+        const url = rootUrlObj.href + '?a=config&f=json&ts=' + Date.now(); // ignore cache
         try {
           xhr = await scrapbook.xhr({
             url, // ignore cache
@@ -318,7 +317,22 @@
           throw new Error('The server does not support WebScrapBook protocol.');
         }
 
-        this._config = xhr.response.data;
+        const config = xhr.response.data;
+
+        // revise server root URL
+        // rootUrlObj.href may be too deep, replace with server base path
+        rootUrlObj.pathname = config.app.base + '/';
+        const serverRoot = rootUrlObj.href;
+
+        // return if server root and config are both set and not changed
+        if (this._config &&
+            this._serverRoot === serverRoot &&
+            JSON.stringify(this._config) === JSON.stringify(config)) {
+          return;
+        }
+
+        this._serverRoot = serverRoot;
+        this._config = config;
       }
 
       // validate if the server version is compatible
@@ -342,13 +356,6 @@
             }
           }
         }
-      }
-
-      // revise server root URL
-      // rootUrl may be too deep, replace with server configured base path
-      {
-        rootUrlObj.pathname = this._config.app.base + '/';
-        this._serverRoot = rootUrlObj.href;
       }
 
       // load books
