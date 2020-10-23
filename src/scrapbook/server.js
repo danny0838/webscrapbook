@@ -617,7 +617,10 @@
     async validateTree() {
       const treeLastModified = this.treeLastModified;
       await this.loadTreeFiles(true);
-      if (this.treeLastModified > treeLastModified) {
+
+      // Check for equality as it's possible that the server has been switched
+      // to another root directory that happens to have same config and book ID
+      if (this.treeLastModified !== treeLastModified) {
         return false;
       }
       return true;
