@@ -1,0 +1,8 @@
+.tree-book a.toggle {
+  position: absolute;
+  margin-__MSG_@@bidi_start_edge__: -1em;
+}
+
+.tree-book a.toggle > img {
+  margin: 0;
+}

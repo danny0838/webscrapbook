@@ -14,12 +14,12 @@
     root.browser,
     root.scrapbook,
     root.server,
-    root.Tree,
+    root.BookTree,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, server, Tree, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, server, BookTree, window, document, console) {
 
   'use strict';
 
@@ -127,7 +127,7 @@
       }
 
       // init tree instance
-      this.tree = new Tree({
+      this.tree = new BookTree({
         treeElem: this.treeElem,
         cacheType: this.mode === 'normal' ? 'storage' : 'sessionStorage',
       });

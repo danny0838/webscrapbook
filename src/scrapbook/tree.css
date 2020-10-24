@@ -65,15 +65,6 @@
   height: 1em;
 }
 
-.tree a.toggle {
-  position: absolute;
-  margin-__MSG_@@bidi_start_edge__: -1em;
-}
-
-.tree a.toggle > img {
-  margin: 0;
-}
-
 .tree [data-type="bookmark"] > div > a {
   color: rgb(32,192,32);
 }
