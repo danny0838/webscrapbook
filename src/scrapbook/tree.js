@@ -231,8 +231,12 @@
       // create element
       const elem = document.createElement('li');
       const div = elem.controller = elem.appendChild(document.createElement('div'));
-      div.addEventListener('click', this.onItemClick);
-      div.addEventListener('mousedown', this.onItemMiddleClick);
+
+      if (this.allowSelect) {
+        div.addEventListener('click', this.onItemClick);
+        div.addEventListener('mousedown', this.onItemMiddleClick);
+      }
+
       div.addEventListener('contextmenu', this.onItemContextMenu);
 
       if (this.allowDrag) {
@@ -353,6 +357,8 @@
       reselect = true,
       ranged = false,
     ) {
+      if (!this.allowSelect) { return; }
+
       if (willHighlight) {
         if (reselect) {
           if (this.lastHighlightElem) {
