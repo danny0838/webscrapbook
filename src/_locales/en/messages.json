@@ -994,7 +994,7 @@
     "message": "Options"
   },
   "OptionScrapbookDefaultSearchLabel": {
-    "message": "Default search condiiton:"
+    "message": "Default search condition:"
   },
   "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
     "message": "Size limit for remote fulltext cache (MiB):"
