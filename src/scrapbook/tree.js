@@ -514,9 +514,10 @@
       }
 
       if (!curElem) {
-        curElem = this.treeElem.querySelector(`[data-id="${scrapbook.escapeQuotes(paths[0][0].id)}"]`);
-        for (let i = 1, I = paths[0].length; i < I; ++i) {
-          const {pos} = paths[0][i];
+        const path = paths[0];
+        curElem = this.treeElem.querySelector(`[data-id="${scrapbook.escapeQuotes(path[0].id)}"]`);
+        for (let i = 1, I = path.length; i < I; ++i) {
+          const {pos} = path[i];
           this.toggleItem(curElem, true);
           curElem = curElem.container.children[pos];
         }
