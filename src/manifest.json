@@ -79,10 +79,10 @@
       "suggested_key": {
         "default": "Alt+V"
       },
-      "description": "__MSG_OpenViewer__"
+      "description": "__MSG_OpenViewer__..."
     },
     "openSearch": {
-      "description": "__MSG_OpenSearch__"
+      "description": "__MSG_OpenSearch__..."
     },
     "captureTab": {
       "suggested_key": {
@@ -103,7 +103,7 @@
       "description": "__MSG_EditTab__"
     },
     "batchCapture": {
-      "description": "__MSG_BatchCapture__"
+      "description": "__MSG_BatchCapture__..."
     }
   }
 }

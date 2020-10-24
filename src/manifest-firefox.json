@@ -92,10 +92,10 @@
       "description": "__MSG_OpenOptions__"
     },
     "openViewer": {
-      "description": "__MSG_OpenViewer__"
+      "description": "__MSG_OpenViewer__..."
     },
     "openSearch": {
-      "description": "__MSG_OpenSearch__"
+      "description": "__MSG_OpenSearch__..."
     },
     "captureTab": {
       "description": "__MSG_CaptureTab__"
@@ -110,7 +110,7 @@
       "description": "__MSG_EditTab__"
     },
     "batchCapture": {
-      "description": "__MSG_BatchCapture__"
+      "description": "__MSG_BatchCapture__..."
     }
   }
 }

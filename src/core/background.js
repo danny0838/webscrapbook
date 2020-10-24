@@ -265,7 +265,7 @@
     });
 
     browser.contextMenus.create({
-      title: scrapbook.lang("CaptureSelectedLinks"),
+      title: scrapbook.lang("CaptureSelectedLinks") + '...',
       contexts: ["selection"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
