@@ -3,7 +3,8 @@
  * Scrapbook tree UI controller.
  *
  * @require {Object} scrapbook
- * @public {Object} tree
+ * @require {Object} server
+ * @public {Class} Tree
  *****************************************************************************/
 
 (function (root, factory) {

@@ -4,7 +4,7 @@
  *
  * @require {Object} scrapbook
  * @require {Object} server
- * @require {Object} tree
+ * @require {Class} Tree
  *****************************************************************************/
 
 (function (root, factory) {
@@ -14,12 +14,12 @@
     root.browser,
     root.scrapbook,
     root.server,
-    root.tree,
+    root.Tree,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, server, tree, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, server, Tree, window, document, console) {
 
   'use strict';
 
