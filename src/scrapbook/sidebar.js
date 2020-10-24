@@ -535,12 +535,6 @@
     async onTreeItemAnchorClick(event, {
       tree,
     }) {
-      if (event.ctrlKey || event.altKey || event.shiftKey || event.metaKey) {
-        // suppress link if there's a modifier
-        event.preventDefault();
-        return;
-      }
-
       if (browser.windows) {
         // for desktop browsers, open link in the same tab of the main window
         event.preventDefault();

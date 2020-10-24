@@ -764,6 +764,15 @@
         return;
       }
 
+      // Suppress link effect if there's a modifier when select is allowed
+      // so that the user can select without linking with a modifier.
+      if (this.allowSelect) {
+        if (event.ctrlKey || event.altKey || event.shiftKey || event.metaKey) {
+          event.preventDefault();
+          return;
+        }
+      }
+
       // invoke callback
       if (this.itemAnchorClickCallback) {
         this.itemAnchorClickCallback.call(this, event, {
