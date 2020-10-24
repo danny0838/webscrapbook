@@ -48,7 +48,7 @@
       this.lastHighlightElem = null;
 
       // bind on* event callbacks
-      for (const funcName of Object.getOwnPropertyNames(Object.getPrototypeOf(this))) {
+      for (const funcName of Object.getOwnPropertyNames(Tree.prototype)) {
         if (funcName.startsWith('on')) {
           this[funcName] = this[funcName].bind(this);
         }
@@ -230,7 +230,7 @@
 
       // create element
       const elem = document.createElement('li');
-      const div = elem.appendChild(document.createElement('div'));
+      const div = elem.controller = elem.appendChild(document.createElement('div'));
       div.setAttribute('draggable', true);
       div.addEventListener('click', this.onItemClick);
       div.addEventListener('mousedown', this.onItemMiddleClick);
@@ -274,7 +274,7 @@
         elem.removeAttribute('data-marked');
       }
 
-      const div = elem.firstChild;
+      const div = elem.controller;
       div.textContent = '';
       if (elem.toggle) { div.appendChild(elem.toggle); }
 
@@ -346,13 +346,8 @@
       }
     }
 
-    getHighlightElem(itemElem) {
-      let elem = itemElem.firstChild;
-      return elem;
-    }
-
     highlightItem(itemElem,
-      willHighlight = !this.getHighlightElem(itemElem).classList.contains('highlight'),
+      willHighlight = !itemElem.controller.classList.contains('highlight'),
       reselect = true,
       ranged = false,
     ) {
@@ -363,11 +358,11 @@
               elem.classList.remove('highlight');
             });
           }
-          this.getHighlightElem(itemElem).classList.add('highlight');
+          itemElem.controller.classList.add('highlight');
           this.lastHighlightElem = itemElem;
         } else {
           if (!ranged) {
-            this.getHighlightElem(itemElem).classList.add('highlight');
+            itemElem.controller.classList.add('highlight');
             this.lastHighlightElem = itemElem;
           } else {
             const nodeIterator = document.createNodeIterator(
@@ -387,7 +382,7 @@
                   }
                 }
                 if (start) {
-                  this.getHighlightElem(node).classList.add('highlight');
+                  node.controller.classList.add('highlight');
                   if (node === endItem) { break; }
                 }
               }
@@ -405,7 +400,7 @@
           }
         } else {
           if (!ranged) {
-            this.getHighlightElem(itemElem).classList.remove('highlight');
+            itemElem.controller.classList.remove('highlight');
             this.lastHighlightElem = itemElem;
           } else {
             const nodeIterator = document.createNodeIterator(
@@ -425,7 +420,7 @@
                   }
                 }
                 if (start) {
-                  this.getHighlightElem(node).classList.remove('highlight');
+                  node.controller.classList.remove('highlight');
                   if (node === endItem) { break; }
                 }
               }
@@ -524,7 +519,7 @@
 
     onItemDragStart(event) {
       const itemElem = event.currentTarget.parentNode;
-      if (!this.getHighlightElem(itemElem).classList.contains('highlight')) {
+      if (!itemElem.controller.classList.contains('highlight')) {
         this.highlightItem(event.currentTarget.parentNode, true, true);
       }
 
@@ -719,7 +714,7 @@
 
     onItemContextMenu(event) {
       const itemElem = event.currentTarget.parentNode;
-      if (!this.getHighlightElem(itemElem).classList.contains('highlight')) {
+      if (!itemElem.controller.classList.contains('highlight')) {
         this.highlightItem(event.currentTarget.parentNode, true, true);
       }
 
