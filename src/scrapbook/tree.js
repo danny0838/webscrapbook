@@ -55,7 +55,7 @@
       }
     }
 
-    async init({
+    init({
       book,
       rootId = 'root',
       allowSelect = true,
@@ -81,8 +81,6 @@
       this.itemAnchorClickCallback = itemAnchorClickCallback;
       this.itemDragOverCallback = itemDragOverCallback;
       this.itemDropCallback = itemDropCallback;
-
-      await this.rebuild();
     }
 
     async rebuild() {

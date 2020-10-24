@@ -219,7 +219,7 @@
           }
         }
 
-        await this.tree.init({
+        this.tree.init({
           book: this.book,
           rootId: this.rootId,
           allowSelect: true,
@@ -232,6 +232,7 @@
           itemDragOverCallback: this.onTreeItemDragOver,
           itemDropCallback: this.onTreeItemDrop,
         });
+        await this.tree.rebuild();
       } catch (ex) {
         console.error(ex);
         this.error(scrapbook.lang('ScrapBookErrorInitTree', [ex.message]));
