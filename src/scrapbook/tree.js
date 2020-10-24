@@ -23,6 +23,7 @@
   'use strict';
 
   const TREE_CLASS = 'tree';
+  const TREE_CLASS_SELECTABLE = 'selectable';
 
   const ITEM_TYPE_ICON = {
     '': browser.runtime.getURL('resources/item.png'),
@@ -88,6 +89,14 @@
       this.itemAnchorClickCallback = itemAnchorClickCallback;
       this.itemDragOverCallback = itemDragOverCallback;
       this.itemDropCallback = itemDropCallback;
+
+      if (this.allowSelect) {
+        if (!this.treeElem.classList.contains(TREE_CLASS_SELECTABLE)) {
+          this.treeElem.classList.add(TREE_CLASS_SELECTABLE);
+        }
+      } else {
+        this.treeElem.classList.remove(TREE_CLASS_SELECTABLE);
+      }
     }
 
     async rebuild() {

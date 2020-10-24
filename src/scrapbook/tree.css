@@ -30,6 +30,9 @@
   border: solid transparent;
   border-width: 2px 0;
   white-space: nowrap;
+}
+
+.tree.selectable li > div {
   cursor: cell;
 }
 
