@@ -62,9 +62,6 @@
   "CapturePageSource": {
     "message": "Capture page (source)"
   },
-  "CaptureSelectedLinks": {
-    "message": "Capture selected links"
-  },
   "CaptureSelection": {
     "message": "Capture selected range(s)"
   },

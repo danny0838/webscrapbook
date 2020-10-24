@@ -62,9 +62,6 @@
   "CapturePageSource": {
     "message": "获取页面 (原样)"
   },
-  "CaptureSelectedLinks": {
-    "message": "获取选择的链接"
-  },
   "CaptureSelection": {
     "message": "获取选择范围"
   },

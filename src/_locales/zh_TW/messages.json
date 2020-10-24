@@ -62,9 +62,6 @@
   "CapturePageSource": {
     "message": "擷取頁面 (原貌)"
   },
-  "CaptureSelectedLinks": {
-    "message": "擷取選取的超連結"
-  },
   "CaptureSelection": {
     "message": "擷取選取範圍"
   },
