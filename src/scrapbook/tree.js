@@ -22,6 +22,8 @@
 
   'use strict';
 
+  const TREE_CLASS = 'tree';
+
   const ITEM_TYPE_ICON = {
     '': browser.runtime.getURL('resources/item.png'),
     'folder': browser.runtime.getURL('resources/fclose.png'),
@@ -46,6 +48,11 @@
 
       this.lastDraggedElems = null;
       this.lastHighlightElem = null;
+
+      // add TREE_CLASS to treeElem
+      if (!treeElem.classList.contains(TREE_CLASS)) {
+        treeElem.classList.add(TREE_CLASS);
+      }
 
       // bind on* event callbacks
       for (const funcName of Object.getOwnPropertyNames(Tree.prototype)) {
