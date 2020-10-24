@@ -59,8 +59,7 @@
 
 .tree a > img {
   display: inline-block;
-  margin-left: .2em;
-  margin-right: .2em;
+  margin: 0 .2em;
   border: none;
   width: 1em;
   height: 1em;
