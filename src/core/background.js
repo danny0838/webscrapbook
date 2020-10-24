@@ -290,6 +290,7 @@
       onclick: (info, tab) => {
         return scrapbook.invokeCapture([{
           url: info.linkUrl,
+          mode: "tab",
         }]);
       }
     });

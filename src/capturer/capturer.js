@@ -815,7 +815,7 @@
    * @param {integer} [params.frameId]
    * @param {boolean} [params.fullPage]
    * @param {string} [params.title] - an overriding title
-   * @param {string} [params.mode] - "source", "bookmark", "resave", "internalize"
+   * @param {string} [params.mode] - "tab", "source", "bookmark", "resave", "internalize"
    * @param {string} params.options
    * @param {string} [params.parentId] - parent item ID for the captured item
    * @param {integer} [params.index] - position index for the captured item
@@ -827,15 +827,21 @@
 
     // redirect headless capture
     // if frameId not provided, use current tab title and favIcon
-    if (mode === "bookmark" || mode === "source") {
-      if (typeof frameId === "number") {
-        ({url, title, favIconUrl} = await browser.webNavigation.getFrame({tabId, frameId}));
+    switch (mode) {
+      case "source":
+      case "bookmark": {
+        if (Number.isInteger(frameId)) {
+          ({url, title, favIconUrl} = await browser.webNavigation.getFrame({tabId, frameId}));
+        }
+        title = title0 || title;
+        return await capturer.captureRemote({url, title, favIconUrl, mode, options, parentId, index});
       }
-      return await capturer.captureRemote({url, title: title0 || title, favIconUrl, mode, options, parentId, index});
-    } else if (mode === "resave") {
-      return await capturer.resaveTab({tabId, frameId, options});
-    } else if (mode === "internalize") {
-      return await capturer.resaveTab({tabId, frameId, options, internalize: true});
+      case "resave": {
+        return await capturer.resaveTab({tabId, frameId, options});
+      }
+      case "internalize": {
+        return await capturer.resaveTab({tabId, frameId, options, internalize: true});
+      }
     }
 
     const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
@@ -905,7 +911,7 @@
    * @param {string} [params.refUrl]
    * @param {string} [params.title] - an overriding title
    * @param {string} [params.favIconUrl] - fallback favicon
-   * @param {string} [params.mode] - "source", "bookmark"
+   * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {string} params.options
    * @param {string} [params.parentId] - parent item ID for the captured item
    * @param {integer} [params.index] - position index for the captured item
@@ -915,7 +921,7 @@
     const {url, refUrl, title, favIconUrl, mode, options, parentId, index} = params;
 
     // default mode => launch a tab to capture
-    if (!mode) {
+    if (mode === "tab") {
       capturer.log(`Launching remote tab ...`);
 
       const tab = await browser.tabs.create({
@@ -985,20 +991,27 @@
     };
 
     isDebug && console.debug("(main) capture", source, message);
-    capturer.log(`Capturing (${mode}) ${source} ...`);
 
-    let response;
+    let captureMode = mode;
+    let captureFunc;
     switch (mode) {
       case "bookmark": {
-        response = await capturer.captureBookmark(message);
+        captureFunc = capturer.captureBookmark;
         break;
       }
-      case "source":
+      case "source": {
+        captureFunc = capturer.captureUrl;
+        break;
+      }
       default: {
-        response = await capturer.captureUrl(message);
+        captureMode = "source";
+        captureFunc = capturer.captureUrl;
         break;
       }
     }
+
+    capturer.log(`Capturing (${captureMode}) ${source} ...`);
+    const response = await captureFunc(message);
 
     isDebug && console.debug("(main) response", source, response);
     capturer.captureInfo.delete(timeId);

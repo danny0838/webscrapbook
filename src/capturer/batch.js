@@ -105,7 +105,7 @@
           if (!Number.isInteger(frameId)) { frameId = undefined; }
           tasks.push({tabId, frameId, title});
         } else {
-          tasks.push({url, title, mode: 'source'});
+          tasks.push({url, title});
         }
         return tasks;
       }, []);
