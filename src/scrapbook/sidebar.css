@@ -213,3 +213,10 @@ body {
 #dialog-wrapper form.meta dl > div > dd.short {
   flex: 999 1 2em;
 }
+
+/* tree */
+#items {
+  flex: 1 1 auto;
+  overflow: auto;
+  font-size: 0.875em;
+}

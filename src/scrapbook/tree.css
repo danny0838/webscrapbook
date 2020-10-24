@@ -1,8 +1,5 @@
 .tree {
-  flex: 1 1 auto;
-  overflow: auto;
   position: relative;
-  font-size: 0.875em;
   line-height: 1;
 }
 
