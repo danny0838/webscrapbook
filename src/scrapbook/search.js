@@ -4,6 +4,7 @@
  *
  * @require {Object} scrapbook
  * @require {Object} server
+ * @require {Class} CustomTree
  *****************************************************************************/
 
 (function (root, factory) {
@@ -13,13 +14,29 @@
     root.browser,
     root.scrapbook,
     root.server,
+    root.CustomTree,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, server, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, server, CustomTree, window, document, console) {
 
   'use strict';
+
+  class SearchTree extends CustomTree {
+    addItem(item) {
+      const elem = this._addItem(item);
+      const div = elem.controller;
+
+      var a = div.appendChild(document.createElement('a'));
+      a.href = "#";
+      a.addEventListener('click', search.onClickLocate);
+      var img = a.appendChild(document.createElement('img'));
+      img.src = browser.runtime.getURL("resources/edit-locate.svg");
+      img.title = scrapbook.lang('SearchLocateTitle');
+      img.alt = "";
+    }
+  }
 
   const search = {
     defaultSearch: "",
@@ -141,76 +158,32 @@
       this.addMsg(scrapbook.lang('SearchFound', [book.name, results.length]));
 
       const wrapper = document.createElement("div");
-      wrapper.classList.add("tree");
-      wrapper.setAttribute('data-bookId', book.id);
-      for (const item of results) {
-        this.addResult(item, book, wrapper);        
+
+      const tree = new SearchTree({
+        treeElem: wrapper,
+        bookId: book.id,
+      });
+      tree.init({
+        book: {dataUrl: book.dataUrl},
+        allowSelect: false,
+        allowMultiSelect: false,
+        allowMultiSelectOnClick: false,
+        allowAnchorClick: true,
+        allowDrag: false,
+        allowDrop: false,
+      });
+      tree.rebuild();
+
+      for (const result of results) {
+        const {id, file, meta, fulltext} = result;
+        tree.addItem(meta);
       }
+
+      // Add a <br> for spacing between books, and adds a spacing when the user
+      // selects and the search results and copy and paste as plain text.
       wrapper.appendChild(document.createElement('br'));
+
       document.getElementById("result").appendChild(wrapper);
-    },
-
-    addResult(item, book, wrapper) {
-      const {id, file, meta, fulltext} = item;
-
-      const elem = document.createElement("div");
-      elem.setAttribute('data-id', id);
-      if (meta.type) { elem.setAttribute('data-type', meta.type); };
-      if (meta.marked) { elem.setAttribute('data-marked', ''); }
-
-      var div = elem.appendChild(document.createElement('div'));
-
-      var a = div.appendChild(document.createElement('a'));
-      a.appendChild(document.createTextNode(meta.title || id));
-      a.title = (meta.title || id) + (meta.source ? "\n" + meta.source : "");
-      if (meta.type !== 'bookmark') {
-        if (meta.index) {
-          let subpath = 
-              (!file || file === '.' || this.isZipFile(meta.index)) ? 
-              meta.index : 
-              meta.index.replace(/[^/]+$/, '') + file;
-          subpath = scrapbook.escapeFilename(subpath || "");
-          if (subpath) { a.href = book.dataUrl + subpath; }
-        }
-      } else {
-        if (meta.source) {
-          a.href = meta.source;
-        }
-      }
-
-      if (file && !(
-          file === "." || 
-          (this.isZipFile(meta.index) && file === "index.html") || 
-          (!this.isZipFile(meta.index) && file === meta.index.replace(/^.*[/]/, ''))
-          )) {
-        const span = div.appendChild(document.createElement("span"));
-        span.textContent = " (" + file + ")";
-      }
-
-      var icon = a.insertBefore(document.createElement('img'), a.firstChild);
-      if (meta.icon) {
-        icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || "") ? 
-            meta.icon : 
-            (book.dataUrl + scrapbook.escapeFilename(meta.index || "")).replace(/[/][^/]+$/, '/') + meta.icon;
-      } else {
-        icon.src = {
-          'folder': browser.runtime.getURL('resources/fclose.png'),
-          'file': browser.runtime.getURL('resources/file.png'),
-          'note': browser.runtime.getURL('resources/note.png'),
-          'postit': browser.runtime.getURL('resources/postit.png'),
-        }[meta.type] || browser.runtime.getURL('resources/item.png');
-      }
-      icon.alt = "";
-
-      var a = div.appendChild(document.createElement('a'));
-      a.href = "#";
-      a.addEventListener('click', this.onClickLocate);
-      var img = a.appendChild(document.createElement('img'));
-      img.src = browser.runtime.getURL("resources/edit-locate.svg");
-      img.title = scrapbook.lang('SearchLocateTitle');
-      img.alt = "";
-
-      wrapper.appendChild(elem);
     },
 
     clearResult() {
