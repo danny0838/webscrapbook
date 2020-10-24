@@ -231,11 +231,12 @@
       // create element
       const elem = document.createElement('li');
       const div = elem.controller = elem.appendChild(document.createElement('div'));
-      div.setAttribute('draggable', true);
       div.addEventListener('click', this.onItemClick);
       div.addEventListener('mousedown', this.onItemMiddleClick);
       div.addEventListener('contextmenu', this.onItemContextMenu);
+
       if (this.allowDrag) {
+        div.setAttribute('draggable', true);
         div.addEventListener('dragstart', this.onItemDragStart);
         div.addEventListener('dragend', this.onItemDragEnd);
       }
@@ -245,6 +246,7 @@
         div.addEventListener('dragleave', this.onItemDragLeave);
         div.addEventListener('drop', this.onItemDrop);
       }
+
       this.refreshItemElem(elem, meta);
 
       // set child container
