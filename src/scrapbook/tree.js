@@ -736,11 +736,11 @@
 
     onItemTogglerClick(event) {
       event.preventDefault();
-      const itemElem = event.currentTarget.parentNode.parentNode;
       const toggling = !event.ctrlKey && !event.shiftKey;
       if (!toggling) { return; }
 
       event.stopPropagation();
+      const itemElem = event.currentTarget.parentNode.parentNode;
       this.toggleItem(itemElem);
       this.saveViewStatus();
     }
