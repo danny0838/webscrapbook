@@ -539,7 +539,7 @@
           }).then(r => r.text());
 
           if (!/^(?:\/\*.*\*\/|[^(])+\(([\s\S]*)\)(?:\/\*.*\*\/|[\s;])*$/.test(text)) {
-            throw new Error(`Error loading '${url}': unable to retrieve JSON data.`);
+            throw new Error(`unable to retrieve JSON data.`);
           }
 
           Object.assign(rv, JSON.parse(RegExp.$1));
