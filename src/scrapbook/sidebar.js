@@ -789,12 +789,25 @@
       }
       if (!item) { return null; }
 
-      const paths = book.findItemPaths(item.id, this.rootId);
-      if (!paths.length) { return null; }
+      let rootId = this.rootId;
+      let paths = book.findItemPaths(item.id, this.rootId);
+      if (!paths.length) {
+        // attempt to search under other special root ID
+        for (rootId of book.specialItems) {
+          if (rootId === this.rootId) { continue; }
+          paths = book.findItemPaths(item.id, rootId);
+          if (paths.length) { break; }
+        }
 
-      // switch if bookId is not current
-      if (bookId !== this.bookId) {
-        await this.refresh(bookId);
+        // return if still not found
+        if (!paths.length) {
+          return null;
+        }
+      }
+
+      // switch if bookId or rootId is not current
+      if (bookId !== this.bookId || rootId !== this.rootId) {
+        await this.refresh(bookId, rootId);
       }
 
       if (this.tree.locate(item.id, paths)) {
