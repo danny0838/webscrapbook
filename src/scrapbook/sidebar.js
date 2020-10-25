@@ -357,7 +357,7 @@
 
     async onBookChange(event) {
       const bookId = event.target.value;
-      await this.refresh(bookId);
+      await this.refresh(bookId, 'root');
     },
 
     onSearchButtonClick(event) {
