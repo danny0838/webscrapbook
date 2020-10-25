@@ -1786,92 +1786,23 @@ ${scrapbook.escapeHtml(content)}
           parentId: parentItemId,
           index,
         });
+        newItem.index = newItem.id + '/index.html';
 
         // create file
         let target;
-        let templateText;
         switch (type) {
           case 'html': {
-            newItem.index = newItem.id + '/index.html';
             target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
-
-            // attempt to load template
-            const url = this.book.treeUrl + '/templates/note_template.html';
-            try {
-              templateText = await server.request({
-                url: url + '?a=source',
-                method: "GET",
-              }).then(r => r.text());
-            } catch (ex) {
-              // template file not exist, generate default one
-              templateText = `<!DOCTYPE html>
-<html data-scrapbook-type="note">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title data-scrapbook-elem="title">%NOTE_TITLE%</title>
-</head>
-<body>%NOTE_TITLE%</body>
-</html>
-`;
-              const blob = new Blob([templateText], {type: "text/html"});
-              await server.request({
-                url: url + '?a=save',
-                method: "POST",
-                format: 'json',
-                csrfToken: true,
-                body: {
-                  upload: blob,
-                },
-              });
-            }
-
             break;
           }
-
           case 'markdown': {
-            newItem.index = newItem.id + '/index.html';
             target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.md');
-
-            // attempt to load template
-            const url = this.book.treeUrl + '/templates/note_template.md';
-            try {
-              templateText = await server.request({
-                url: url + '?a=source',
-                method: "GET",
-              }).then(r => r.text());
-            } catch (ex) {
-              // template file not exist, generate default one
-              templateText = `%NOTE_TITLE%`;
-              const blob = new Blob([templateText], {type: "text/markdown"});
-              await server.request({
-                url: url + '?a=save',
-                method: "POST",
-                format: 'json',
-                csrfToken: true,
-                body: {
-                  upload: blob,
-                },
-              });
-            }
-
             break;
           }
         }
 
         // generate content
-        const dict = {
-          '': '%',
-          NOTE_TITLE: newItem.title,
-          SCRAPBOOK_DIR: scrapbook.getRelativeUrl(this.book.topUrl, target),
-          DATA_DIR: scrapbook.getRelativeUrl(this.book.dataUrl, target),
-          TREE_DIR: scrapbook.getRelativeUrl(this.book.treeUrl, target),
-          ITEM_DIR: './',
-        };
-        const content = templateText.replace(/%(\w*)%/gu, (_, key) => {
-          return scrapbook.escapeHtml(dict[key] || '');
-        });
-
+        const content = await this.book.renderTemplate(target, newItem, type);
         const blob = new Blob([content], {type: 'text/plain'});
 
         // save meta and TOC
