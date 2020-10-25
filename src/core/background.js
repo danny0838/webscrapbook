@@ -431,6 +431,53 @@
   /**
    * @kind invokable
    */
+  background.createSubPage = async function ({url}, sender) {
+    await server.init(true);
+
+    // reject if file exists
+    const fileInfo = await server.request({
+      url: url + '?a=info',
+      method: "GET",
+      format: 'json',
+    }).then(r => r.json());
+    if (fileInfo.data.type !== null) {
+      throw new Error(`File already exists at "${url}".`);
+    }
+
+    // search for bookId and item
+    // reject if not found
+    const bookId = await server.findBookIdFromUrl(url);
+    if (typeof bookId !== 'string') {
+      throw new Error(`Unable to find a valid book.`);
+    }
+    const book = server.books[bookId];
+
+    const item = await book.findItemFromUrl(url);
+    if (!item) {
+      throw new Error(`Unable to find a valid item.`);
+    }
+
+    if (!item.index.endsWith('/index.html')) {
+      throw new Error(`Index page is not "*/index.html".`);
+    }
+
+    // generate content and upload
+    const content = await book.renderTemplate(url, item);
+    const file = new File([content], scrapbook.urlToFilename(url), {type: 'text/html'});
+    await server.request({
+      url: url + '?a=save',
+      method: "POST",
+      format: 'json',
+      csrfToken: true,
+      body: {
+        upload: file,
+      },
+    });
+  };
+
+  /**
+   * @kind invokable
+   */
   background.invokeEditorCommand = async function ({code, cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
     const tabId = sender.tab.id;
     if (frameId !== -1) {

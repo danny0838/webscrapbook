@@ -318,6 +318,12 @@
   "EditorButtonSave": {
     "message": "儲存頁面"
   },
+  "EditorButtonSaveCreateSubPage": {
+    "message": "建立子頁面"
+  },
+  "EditorButtonSaveCreateSubPagePrompt": {
+    "message": "請輸入子頁面名稱（不含 .html）"
+  },
   "EditorButtonSaveDeleteErased": {
     "message": "永久刪除所有擦除內容（所有框架頁）"
   },

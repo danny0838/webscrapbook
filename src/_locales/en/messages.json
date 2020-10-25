@@ -318,6 +318,12 @@
   "EditorButtonSave": {
     "message": "Save page"
   },
+  "EditorButtonSaveCreateSubPage": {
+    "message": "Create sub page"
+  },
+  "EditorButtonSaveCreateSubPagePrompt": {
+    "message": "Input sub page name (without .html)"
+  },
   "EditorButtonSaveDeleteErased": {
     "message": "Permanently delete all erases (all frames)"
   },

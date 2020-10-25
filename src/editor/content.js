@@ -482,6 +482,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     <ul hidden="" title="">
       <li><button class="toolbar-save-deleteErased">${scrapbook.lang('EditorButtonSaveDeleteErased')}</button></li>
       <li><button class="toolbar-save-internalize">${scrapbook.lang('EditorButtonSaveInternalize')}</button></li>
+      <li><button class="toolbar-save-createSubPage">${scrapbook.lang('EditorButtonSaveCreateSubPage')}</button></li>
     </ul>
   </div>
   <a class="toolbar-close" href="javascript:" title="${scrapbook.lang('EditorButtonClose')}"></a>
@@ -764,6 +765,12 @@ ${sRoot}.toolbar .toolbar-close:hover {
     var elem = wrapper.querySelector('.toolbar-save-internalize');
     elem.addEventListener("click", (event) => {
       editor.save({internalize: true});
+    }, {passive: true});
+    elem.disabled = !editor.inScrapBook;
+
+    var elem = wrapper.querySelector('.toolbar-save-createSubPage');
+    elem.addEventListener("click", (event) => {
+      editor.createSubPage();
     }, {passive: true});
     elem.disabled = !editor.inScrapBook;
 
@@ -1299,6 +1306,24 @@ scrapbook-toolbar, scrapbook-toolbar *,
         args: {},
       },
     });
+  };
+
+  editor.createSubPage = async function () {
+    let filename = prompt(scrapbook.lang('EditorButtonSaveCreateSubPagePrompt'));
+    if (!filename) { return; }
+    
+    filename = scrapbook.validateFilename(filename + '.html');
+    const url = new URL(scrapbook.escapeFilename(filename), location.href).href;
+
+    try {
+      await scrapbook.invokeExtensionScript({
+        cmd: "background.createSubPage",
+        args: {url},
+      });
+    } catch (ex) {
+      console.error(ex);
+      alert(ex.message);
+    }
   };
 
   editor.open = async function () {
