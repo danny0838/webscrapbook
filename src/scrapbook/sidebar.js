@@ -132,22 +132,25 @@
         cacheType: this.mode === 'normal' ? 'storage' : 'sessionStorage',
       });
 
-      await this.refresh(undefined, true);
+      await this.refresh(undefined, undefined, true);
     },
 
     /**
-     * Switch UI to match the given bookId.
+     * Update UI to match the given bookId and rootId.
      */
-    async refresh(bookId, keepLogs = false) {
+    async refresh(bookId, rootId, keepLogs = false) {
       this.enableUi(false);
 
       try {
-        // reset variables
-        if (typeof bookId !== 'undefined' && bookId !== this.bookId) {
+        // update bookId and rootId
+        if (typeof bookId === 'string' && bookId !== this.bookId) {
           await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
           this.bookId = bookId;
           this.book = server.books[bookId];
           document.getElementById('book').value = bookId;
+        }
+        if (typeof rootId === 'string' && rootId !== this.rootId) {
+          this.rootId = rootId;
         }
 
         // refresh UI
