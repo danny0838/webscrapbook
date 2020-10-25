@@ -1169,7 +1169,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
           path.pop();
         }
       };
-      
+
       const result = [];
       tracePath([{id: rootId, pos: 1}]);
       return result;

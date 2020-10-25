@@ -79,7 +79,7 @@
       try {
         const file = await new Promise((resolve, reject) => {
           entry.file(resolve, reject);
-        });    
+        });
         files.push(file);
       } catch (ex) {
         // this should never happen
@@ -134,7 +134,7 @@
 
     async openUrl(url, inNewTab = false) {
       if (inNewTab) {
-        // In Firefox, a window.open popup is blocked by default, and the 
+        // In Firefox, a window.open popup is blocked by default, and the
         // user has to manually add an exception to the popup blocker.
         // Morever, a bug causes the notification not shown for the
         // blocked popup.

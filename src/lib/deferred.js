@@ -29,7 +29,7 @@
           this.reject = reject;
       });
       this.then = this.promise.then.bind(p);
-      this.catch = this.promise.catch.bind(p);    
+      this.catch = this.promise.catch.bind(p);
     }
   };
 

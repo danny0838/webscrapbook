@@ -1074,7 +1074,7 @@
 
       const result = await new Promise((resolve, reject) => {
         elem.addEventListener('dialogSubmit', (event) => {
-         resolve(event.detail); 
+         resolve(event.detail);
         });
         elem.dispatchEvent(new CustomEvent('dialogShow', {detail: null}));
       });
@@ -1970,7 +1970,7 @@ Redirecting to file <a href="index.md">index.md</a>
           dialog.addEventListener('dialogShow', (event) => {
             dialog.querySelector('[name="id"]').focus();
           });
-          
+
           if (!await this.showDialog(dialog)) {
             return;
           }

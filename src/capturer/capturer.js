@@ -118,7 +118,7 @@
     let count = 0;
     while (files.has(newFilenameCI)) {
       newFilename = newFilenameBase + "-" + (++count) + newFilenameExt;
-      newFilenameCI = newFilename.toLowerCase(); 
+      newFilenameCI = newFilename.toLowerCase();
     }
     files.set(newFilenameCI, {});
     return newFilename;
@@ -960,7 +960,7 @@
       const response = await capturer.captureTab({
         tabId: tab.id,
         fullPage: true,
-        title, 
+        title,
         options,
         parentId,
         index,
@@ -1619,7 +1619,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               }
               return match;
             });
-            
+
             const blob = new Blob([content], {type: "text/html"});
             await server.request({
               url: target + '?a=save',
@@ -1901,7 +1901,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     const getFilename = (params) => {
       const {url: sourceUrl, headers = {}, settings, options} = params;
-      
+
       // use the filename if it has been defined by header Content-Disposition
       let filename = headers.filename || scrapbook.urlToFilename(sourceUrl);
 
@@ -1913,7 +1913,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       // 2. For several usual MIMEs, if the file extension doesn't match
       //    MIME, append a matching extension to prevent the file be
       //    assigned a bad MIME when served via HTTP, which could cause
-      //    the browser to reject it.  For example, a CSS file named 
+      //    the browser to reject it.  For example, a CSS file named
       //    "foo.php" may be served as "application/x-httpd-php", and
       //    modern browsers would refuse loading the CSS).
       //

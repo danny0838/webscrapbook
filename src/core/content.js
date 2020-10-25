@@ -37,7 +37,7 @@
    */
   window.addEventListener("message", async (event) => {
     try {
-      if (event.data !== browser.runtime.getURL('')) { 
+      if (event.data !== browser.runtime.getURL('')) {
         throw new Error('Not extension context.');
       }
     } catch (ex) {

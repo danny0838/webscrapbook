@@ -74,7 +74,7 @@
           this.defaultSearch += ` ${q}`;
         }
 
-        const query = urlParams.get('q'); 
+        const query = urlParams.get('q');
 
         // init UI
         const booksSelectElem = document.getElementById("books");
@@ -642,7 +642,7 @@
 
     matchTextOr(rule, text) {
       text = text || "";
-      
+
       for (const key of rule.exclude) {
         if (key.test(text)) {
           return false;
@@ -707,7 +707,7 @@
       event.preventDefault();
       search.search();
     });
- 
+
     document.getElementById('helper').addEventListener('change', (event) => {
       event.preventDefault();
       let helper = event.currentTarget;

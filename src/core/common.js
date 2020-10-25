@@ -364,7 +364,7 @@ if (Node && !Node.prototype.getRootNode) {
    * - Firefox >= 53: webextensions.storage.sync.enabled is default to true,
    *   and browser.storage.sync.*() works.
    *
-   * An error would occur if the user manually sets 
+   * An error would occur if the user manually sets
    * webextensions.storage.sync.enabled to false without restarting Firefox.
    * We don't (and probably cannot) support such user operation since we
    * cannot migrate configs from storage.sync to storage.local when it gets
@@ -1101,7 +1101,7 @@ if (Node && !Node.prototype.getRootNode) {
    *   toolbar-* (since WSB)
    *   fulltext (for 1.12.0a37 <= SBX)
    *   infobar (since WSB)
-   *  
+   *
    * - CSS and JS
    *   adoptedStyleSheet (since 0.56.4 <= WSB)
    *   css-resource-map (since 0.52.0 <= WSB)
@@ -2199,7 +2199,7 @@ if (Node && !Node.prototype.getRootNode) {
           return handleRewritten(rewritten, pre, post, noResMap);
         });
       };
-      
+
       const {rewriteImportUrl, rewriteFontFaceUrl, rewriteBackgroundUrl, resourceMap} = options;
       const response = cssText.replace(
         REGEX_REWRITE_CSS,
@@ -2621,7 +2621,7 @@ if (Node && !Node.prototype.getRootNode) {
 
   /**
    * A simple XMLHttpRequest wrapper for most common tasks.
-   * 
+   *
    * Don't use fetch() since it doen't support file: protocol.
    *
    * @param {Object} params

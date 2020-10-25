@@ -1311,7 +1311,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   editor.createSubPage = async function () {
     let filename = prompt(scrapbook.lang('EditorButtonSaveCreateSubPagePrompt'));
     if (!filename) { return; }
-    
+
     filename = scrapbook.validateFilename(filename + '.html');
     const url = new URL(scrapbook.escapeFilename(filename), location.href).href;
 
@@ -2183,7 +2183,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         if (y + popupElem.offsetHeight > window.innerHeight) {
           y = pos.clientY - POINTER_SIZE - popupElem.offsetHeight;
         }
-        
+
         popupElem.style.setProperty('left', (window.scrollX + x) + 'px');
         popupElem.style.setProperty('top', (window.scrollY + y) + 'px');
 

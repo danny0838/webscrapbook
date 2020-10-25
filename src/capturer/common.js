@@ -1716,7 +1716,7 @@
                 return;
               case "save":
               default:
-                // we get only blank canvas in headless capture 
+                // we get only blank canvas in headless capture
                 if (isHeadless || !elemOrig) { break; }
 
                 try {
@@ -2190,7 +2190,7 @@
 
                 continue;
               }
-              
+
               if (node === lastNode) {
                 if (node !== firstNode) {
                   // handle end container
@@ -2420,7 +2420,7 @@
     // map used background images and fonts
     if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
       const {usedCssFontUrl, usedCssImageUrl} = await cssHandler.getCssResources();
-      
+
       // expose filter to settings
       if (options["capture.imageBackground"] === "save-used") {
         settings.usedCssImageUrl = usedCssImageUrl;
@@ -3580,7 +3580,7 @@
             }
           }
         },
-        
+
         addFontUrl(fontFamilyText, url) {
           if (!url) { return; }
           for (const ff of this.parseNames(fontFamilyText)) {
@@ -4392,7 +4392,7 @@
             }
           }
         }
-        
+
         this.debugging = false;
       }
 

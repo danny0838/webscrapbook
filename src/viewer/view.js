@@ -36,7 +36,7 @@
     inZipFiles: new Map(),
     blobUrlToInZipPath: new Map(),
     rewrittenBlobUrl: new Set(),
-    
+
     inZipPathToUrl(inZipPath) {
       return viewerData.virtualBase + (inZipPath || "").split("/").map(x => encodeURIComponent(x)).join("/");
     },
