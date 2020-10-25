@@ -107,15 +107,20 @@ height: 100vh;`;
     // more accurately check whether the current document is really under dataDir of a book
     if (editor.inScrapBook) {
       try {
-        await server.init(true);
-        const bookId = await server.findBookIdFromUrl(document.URL);
-        if (typeof bookId === 'undefined') {
+        const bookId = await scrapbook.invokeExtensionScript({
+          cmd: "background.findBookIdFromUrl",
+          args: {url: document.URL},
+        });
+
+        if (typeof bookId !== 'string') {
           editor.inScrapBook = false;
           if (!force) {
             return;
           }
         }
-      } catch (ex) {}
+      } catch (ex) {
+        console.error(ex);
+      }
     }
 
     // generate toolbar content

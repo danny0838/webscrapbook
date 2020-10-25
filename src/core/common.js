@@ -152,7 +152,6 @@ if (Node && !Node.prototype.getRootNode) {
     "/core/optionsAuto.js",
     "/core/content.js",
     "/capturer/common.js",
-    "/scrapbook/server.js",
     "/editor/content.js",
     ];
 

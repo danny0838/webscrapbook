@@ -352,6 +352,14 @@
   };
 
   /**
+   * @kind invokable
+   */
+  background.findBookIdFromUrl = async function ({url}, sender) {
+    await server.init(true);
+    return await server.findBookIdFromUrl(url);
+  };
+
+  /**
    * Attempt to locate an item in the sidebar.
    *
    * @kind invokable
