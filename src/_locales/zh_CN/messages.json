@@ -1224,6 +1224,27 @@
     "description": "Default name of a new note",
     "message": "新笔记"
   },
+  "SearchCaptures": {
+    "message": "检视已获取的页面"
+  },
+  "SearchCapturesFoundFull": {
+    "message": "相同网址："
+  },
+  "SearchCapturesFoundOrigin": {
+    "message": "相同网站："
+  },
+  "SearchCapturesFoundPath": {
+    "message": "相同网站路径："
+  },
+  "SearchCapturesFoundSimilar": {
+    "message": "相同网域："
+  },
+  "SearchCapturesNotFound": {
+    "message": "找不到相关页面"
+  },
+  "SearchCapturesTitle": {
+    "message": "寻找已获取的页面"
+  },
   "SearchFound": {
     "message": "【$BOOK$】找到 $RESULTS$ 笔结果：",
     "placeholders": {

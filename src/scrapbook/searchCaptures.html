@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html dir="__MSG_@@bidi_dir__">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__MSG_SearchCapturesTitle__</title>
+<base target="search_result">
+<link rel="stylesheet" href="tree.css">
+<link rel="stylesheet" href="searchCaptures.css">
+<script src="../lib/browser-polyfill.js"></script>
+<script src="../lib/map-with-default.js"></script>
+<script src="../core/common.js"></script>
+<script src="server.js"></script>
+<script src="tree.js"></script>
+<script src="customTree.js"></script>
+<script src="searchCaptures.js"></script>
+</head>
+<body>
+<form id="searchForm">
+  <select id="books" multiple size="1"></select>
+  <input id="keyword" type="text">
+  <input id="search" type="submit" value="🔍" disabled autocomplete="off">
+</form>
+<div id="messages"></div>
+<div id="result"></div>
+</body>
+</html>

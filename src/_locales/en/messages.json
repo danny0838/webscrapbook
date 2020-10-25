@@ -1224,6 +1224,27 @@
     "description": "Default name of a new note",
     "message": "New Note"
   },
+  "SearchCaptures": {
+    "message": "View captured pages"
+  },
+  "SearchCapturesFoundFull": {
+    "message": "Same URL:"
+  },
+  "SearchCapturesFoundOrigin": {
+    "message": "Same web site:"
+  },
+  "SearchCapturesFoundPath": {
+    "message": "Same web site path:"
+  },
+  "SearchCapturesFoundSimilar": {
+    "message": "Same domain:"
+  },
+  "SearchCapturesNotFound": {
+    "message": "No match found"
+  },
+  "SearchCapturesTitle": {
+    "message": "Find captured pages"
+  },
   "SearchFound": {
     "message": "[$BOOK$] Found $RESULTS$ results:",
     "placeholders": {

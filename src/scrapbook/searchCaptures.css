@@ -1,0 +1,33 @@
+body {
+  font-size: 16px;
+  line-height: 1.35em;
+}
+
+#searchForm {
+  display: flex;
+  flex-direction: row;
+  padding: .25em;
+}
+
+#searchForm *:disabled {
+  filter: grayscale(100%);
+  opacity: 0.3;
+}
+
+#keyword {
+  flex: auto;
+  min-width: 150px;
+}
+
+#result {
+  margin: 0;
+  padding: 0;
+}
+
+.warn {
+  color: #f0ad4e;
+}
+
+.error {
+  color: red;
+}

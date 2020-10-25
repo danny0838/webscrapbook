@@ -74,6 +74,7 @@
         document.getElementById("captureTabBookmark").disabled = true;
         document.getElementById("batchCaptureLinks").disabled = true;
         document.getElementById("editTab").disabled = true;
+        document.getElementById("searchCaptures").disabled = true;
       }
     }
 
@@ -150,6 +151,16 @@
           active: true,
         });
       }
+    });
+
+    document.getElementById("searchCaptures").addEventListener('click', async (event) => {
+      const tabs = targetTab ? 
+          await scrapbook.getHighlightedTabs() : 
+          [await selectTabFromDom(document.getElementById("searchCaptures"))];
+      return await scrapbook.searchCaptures({
+        tabs,
+        newTab: !!targetTab,
+      });
     });
 
     document.getElementById("openScrapBook").addEventListener('click', async (event) => {

@@ -84,6 +84,9 @@
     "openSearch": {
       "description": "__MSG_OpenSearch__..."
     },
+    "searchCaptures": {
+      "description": "__MSG_SearchCaptures__"
+    },
     "captureTab": {
       "suggested_key": {
         "default": "Ctrl+Shift+K"

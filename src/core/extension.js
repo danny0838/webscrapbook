@@ -342,4 +342,15 @@
     });
   };
 
+  scrapbook.searchCaptures = async function ({tabs, newTab = true}) {
+    const url = new URL(browser.runtime.getURL(`scrapbook/searchCaptures.html`));
+    for (const tab of tabs) {
+      url.searchParams.append('q', tab.url);
+    }
+    return await scrapbook.visitLink({
+      url: url.href,
+      newTab,
+    });
+  };
+
 }));

@@ -45,6 +45,14 @@
         });
       },
 
+      async searchCaptures() {
+        const tabs = await scrapbook.getHighlightedTabs();
+        return scrapbook.searchCaptures({
+          tabs,
+          newTab: true,
+        });
+      },
+
       async captureTab() {
         return await scrapbook.invokeCapture(
           (await scrapbook.getHighlightedTabs()).map(tab => ({

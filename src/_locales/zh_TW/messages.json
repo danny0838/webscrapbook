@@ -1224,6 +1224,27 @@
     "description": "Default name of a new note",
     "message": "新筆記"
   },
+  "SearchCaptures": {
+    "message": "檢視已擷取的頁面"
+  },
+  "SearchCapturesFoundFull": {
+    "message": "相同網址："
+  },
+  "SearchCapturesFoundOrigin": {
+    "message": "相同網站："
+  },
+  "SearchCapturesFoundPath": {
+    "message": "相同網站路徑："
+  },
+  "SearchCapturesFoundSimilar": {
+    "message": "相同網域："
+  },
+  "SearchCapturesNotFound": {
+    "message": "找不到相關頁面"
+  },
+  "SearchCapturesTitle": {
+    "message": "尋找已擷取的頁面"
+  },
   "SearchFound": {
     "message": "【$BOOK$】找到 $RESULTS$ 筆結果：",
     "placeholders": {
