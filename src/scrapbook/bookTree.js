@@ -272,24 +272,29 @@
         });
     }
 
-    moveUpItem(parentId, index) {
-      Array.prototype.filter.call(
-        this.treeElem.querySelectorAll(`[data-id="${CSS.escape(parentId)}"]`),
-        (parentElem) => {
-          if (!(this.treeElem.contains(parentElem) && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
-          const itemElem = parentElem.container.children[index];
-          itemElem.parentNode.insertBefore(itemElem, itemElem.previousSibling);
-        });
-    }
-
-    moveDownItem(parentId, index) {
-      Array.prototype.filter.call(
-        this.treeElem.querySelectorAll(`[data-id="${CSS.escape(parentId)}"]`),
-        (parentElem) => {
-          if (!(this.treeElem.contains(parentElem) && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
-          const itemElem = parentElem.container.children[index];
-          itemElem.parentNode.insertBefore(itemElem, itemElem.nextSibling.nextSibling);
-        });
+    moveItem(id, currentParentId, currentIndex, targetParentId, targetIndex) {
+      if (currentParentId === targetParentId) {
+        // Don't use removeItem and insertItem to prevent parent toggler be
+        // closed.
+        // When moving inside the same parent, we can simply re-insert each
+        // item element to the new position since the number of parent elements
+        // must match.
+        Array.prototype.filter.call(
+          this.treeElem.querySelectorAll(`[data-id="${CSS.escape(currentParentId)}"]`),
+          (parentElem) => {
+            if (!(this.treeElem.contains(parentElem) && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
+            const container = parentElem.container;
+            const itemElem = container.children[currentIndex];
+            itemElem.remove();  // remove itemElem to get container.children recalculated
+            container.insertBefore(itemElem, container.children[targetIndex]);
+          });
+      } else {
+        // We can't simply insert elements to target parent since the number
+        // of elements for currentParentId and targetParentId may not match.
+        // A side effect is that the toggler of the moved item will be closed.
+        this.removeItem(currentParentId, currentIndex);
+        this.insertItem(id, targetParentId, targetIndex);
+      }
     }
 
     async locate(id, paths) {

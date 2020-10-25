@@ -1231,8 +1231,7 @@
         });
 
         // update DOM
-        this.tree.removeItem(parentItemId, index);
-        this.tree.insertItem(itemId, targetId, newIndex);
+        this.tree.moveItem(itemId, parentItemId, index, targetId, newIndex);
 
         targetIndex = newIndex;
       }
@@ -1911,7 +1910,7 @@ Redirecting to file <a href="index.md">index.md</a>
         });
 
         // update DOM
-        this.tree.moveUpItem(parentItemId, index);
+        this.tree.moveItem(itemId, parentItemId, index, parentItemId, newIndex);
 
         // upload changes to server
         await this.book.transaction({
@@ -1940,7 +1939,7 @@ Redirecting to file <a href="index.md">index.md</a>
         });
 
         // update DOM
-        this.tree.moveDownItem(parentItemId, index);
+        this.tree.moveItem(itemId, parentItemId, index, parentItemId, newIndex);
 
         // upload changes to server
         await this.book.transaction({
