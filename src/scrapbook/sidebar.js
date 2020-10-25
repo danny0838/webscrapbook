@@ -755,28 +755,44 @@
     },
 
     /**
+     * Locate item position in the sidebar.
+     *
+     * Provide {bookId, id}, {url}, or {bookId, url}.
+     *
      * @kind invokable
      */
     async locate({bookId, id, url}) {
       if (this.mode !== 'normal') { return null; }
 
+      // if url is provided and bookId not specified, find bookId from url.
       if (url && typeof bookId === 'undefined') {
         bookId = await server.findBookIdFromUrl(url);
       }
-      if (typeof bookId !== 'undefined' && bookId !== this.bookId) {
-        await this.refresh(bookId);
-      }
+
+      // search for the item
+      const book = server.books[bookId];
+      if (!book || book.config.no_tree) { return null; }
+
+      // -- load (on demand) as book could have been changed
+      await book.loadTreeFiles();
+      await book.loadToc();
+      await book.loadMeta();
 
       let item;
       if (id) {
-        item = this.book.meta[id];
+        item = book.meta[id];
       } else if (url) {
-        item = await this.book.findItemFromUrl(url);
+        item = await book.findItemFromUrl(url);
       }
       if (!item) { return null; }
 
-      const paths = this.book.findItemPaths(item.id, this.rootId);
+      const paths = book.findItemPaths(item.id, this.rootId);
       if (!paths.length) { return null; }
+
+      // switch if bookId is not current
+      if (bookId !== this.bookId) {
+        await this.refresh(bookId);
+      }
 
       if (this.tree.locate(item.id, paths)) {
         return item;
