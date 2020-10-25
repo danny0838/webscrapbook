@@ -98,7 +98,7 @@
         }
       } catch (ex) {
         console.error(ex);
-        alert(`Error: ${ex.message}`);
+        this.addMsg(`Error: ${ex.message}`, 'error');
       }
     },
 
