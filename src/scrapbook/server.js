@@ -20,6 +20,7 @@
 
   'use strict';
 
+  // order is relevant
   const SPECIAL_ITEM_ID = new Set(['root', 'hidden', 'recycle']);
 
   // this should correspond with the lock stale time in the backend server
@@ -412,7 +413,6 @@
       this.server = server;
       this.config = server.config.book[bookId];
       this.treeLastModified = Infinity;
-      this.specialItems = new Set(['root', 'hidden', 'recycle']);
 
       if (!this.config) {
         throw new Error(`unknown scrapbook: ${bookId}`);
@@ -451,6 +451,10 @@
         folder: undefined,
         exported: undefined,
       };
+    }
+
+    get specialItems() {
+      return SPECIAL_ITEM_ID;
     }
 
     isSpecialItem(id) {
