@@ -254,7 +254,6 @@
       Array.prototype.forEach.call(
         this.treeElem.querySelectorAll(`[data-id="${CSS.escape(parentId)}"]`),
         (parentElem) => {
-          if (!this.treeElem.contains(parentElem)) { return; }
           this.itemMakeContainer(parentElem);
           if (!parentElem.container.hasAttribute('data-loaded')) { return; }
           this.addItem(id, parentElem, index);
