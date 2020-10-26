@@ -996,6 +996,9 @@
   "OptionPageTitle": {
     "message": "Options"
   },
+  "OptionScrapbookBackupForRecaptureLabel": {
+    "message": "Backup when capturing again"
+  },
   "OptionScrapbookDefaultSearchLabel": {
     "message": "Default search condition:"
   },
@@ -1162,6 +1165,9 @@
   },
   "ScrapBookCommandOpenTab": {
     "message": "Open in new tab"
+  },
+  "ScrapBookCommandRecapture": {
+    "message": "Capture again"
   },
   "ScrapBookCommandRecover": {
     "message": "Recover"

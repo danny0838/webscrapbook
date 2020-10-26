@@ -996,6 +996,9 @@
   "OptionPageTitle": {
     "message": "選項設定"
   },
+  "OptionScrapbookBackupForRecaptureLabel": {
+    "message": "重新擷取時建立備份"
+  },
   "OptionScrapbookDefaultSearchLabel": {
     "message": "預設搜尋條件:"
   },
@@ -1162,6 +1165,9 @@
   },
   "ScrapBookCommandOpenTab": {
     "message": "開啟於新分頁"
+  },
+  "ScrapBookCommandRecapture": {
+    "message": "重新擷取"
   },
   "ScrapBookCommandRecover": {
     "message": "還原"

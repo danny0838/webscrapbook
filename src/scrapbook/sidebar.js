@@ -203,6 +203,7 @@
           menuElem.querySelector('button[value="recycle"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="delete"]').disabled = !(!isNoTree && isRecycle);
 
+          menuElem.querySelector('button[value="recapture"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="meta"]').disabled = isNoTree;
         }
 
@@ -931,6 +932,7 @@
           menuElem.querySelector('button[value="recycle"]').hidden = true;
           menuElem.querySelector('button[value="delete"]').hidden = true;
 
+          menuElem.querySelector('button[value="recapture"]').hidden = true;
           menuElem.querySelector('button[value="meta"]').hidden = true;
           break;
         }
@@ -959,6 +961,7 @@
           menuElem.querySelector('button[value="recycle"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
 
+          menuElem.querySelector('button[value="recapture"]').hidden = !(!isRecycle && ['', 'site', 'file', 'image', 'bookmark'].includes(item.type) && item.source);
           menuElem.querySelector('button[value="meta"]').hidden = false;
           break;
         }
@@ -985,6 +988,7 @@
           menuElem.querySelector('button[value="recycle"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
 
+          menuElem.querySelector('button[value="recapture"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="meta"]').hidden = true;
           break;
         }
@@ -1906,6 +1910,42 @@ Redirecting to file <a href="index.md">index.md</a>
         urlObj.searchParams.set('id', id);
         urlObj.searchParams.set('bookId', this.bookId);
         await this.openLink(urlObj.href, true);
+      },
+
+      async recapture({itemElems}) {
+        if (!itemElems.length) { return; }
+
+        const tasks = [];
+        for (const itemElem of itemElems) {
+          const id = itemElem.getAttribute('data-id');
+          const item = this.book.meta[id];
+
+          if (!['', 'site', 'file', 'image', 'bookmark'].includes(item.type)) {
+            continue;
+          }
+
+          const url = item.source;
+          if (!scrapbook.isContentPage(url, false)) {
+            continue;
+          }
+
+          tasks.push({
+            url,
+            title: item.title || item.id,
+            recaptureInfo: {
+              bookId: this.book.id,
+              itemId: id,
+            },
+          });
+        }
+
+        await scrapbook.invokeBatchCapture({
+          taskInfo: {
+            tasks,
+          },
+          useJson: true,
+          uniquify: false,
+        });
       },
 
       async move_up({itemElem}) {

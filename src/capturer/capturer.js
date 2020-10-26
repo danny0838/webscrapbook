@@ -781,6 +781,7 @@
         tabId, frameId, fullPage,
         url, refUrl, title, favIconUrl,
         mode = baseMode, options: taskOptions,
+        recaptureInfo,
       } = task;
 
       const options = Object.assign({}, baseOptions, taskOptions);
@@ -793,6 +794,17 @@
           }
 
           result = await capturer.resaveTab({tabId, frameId, options, internalize: mode === "internalize"});
+        } else if (recaptureInfo) {
+          // recapture
+          result = await capturer.recapture({
+            url,
+            refUrl,
+            title,
+            favIconUrl,
+            mode,
+            options,
+            recaptureInfo,
+          });
         } else {
           const timeId = scrapbook.dateToId();
           if (typeof tabId === 'number') {
@@ -1691,6 +1703,120 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       sourceUrl: url,
       favIconUrl,
     };
+  };
+
+  /**
+   * @param {Object} params
+   * @return {Promise<Object>}
+   */
+  capturer.recapture = async function (params) {
+    const {
+      url, refUrl, title, favIconUrl,
+      mode, options, recaptureInfo,
+    } = params;
+
+    const {bookId, itemId} = recaptureInfo;
+
+    await server.init(true);
+    const book = server.books[bookId];
+    if (!book || book.config.no_tree) {
+      throw new Error(`Recapture reference book invalid: "${bookId}".`);
+    }
+
+    const timeId = scrapbook.dateToId();
+
+    let result;
+    await book.transaction({
+      callback: async (book) => {
+        const refresh = !await book.validateTree();
+        await book.loadMeta(refresh);
+        const item = book.meta[itemId];
+        if (!item) {
+          throw new Error(`Recapture reference item invalid: "${itemId}".`);
+        }
+
+        // record original index
+        const oldIndex = item.index;
+
+        // enforce capture to server
+        options["capture.saveTo"] = "server";
+
+        const sourceUrl = url || item.source;
+        result = await capturer.captureRemote({
+          timeId,
+          url: sourceUrl,
+          refUrl,
+          title,
+          favIconUrl,
+          mode,
+          options,
+        });
+
+        if (title) { item.title = title; }
+        item.index = (result.targetDir ? result.targetDir + '/' : '') + result.filename;
+        item.type = result.type;
+        item.modify = timeId;
+        item.source = sourceUrl;
+        item.icon = await capturer.cacheFavIcon({
+          book,
+          item,
+          icon: result.favIconUrl,
+        });
+
+        capturer.log(`Updating server index for item "${itemId}"...`);
+        await book.saveMeta();
+
+        await server.requestSse({
+          query: {
+            "a": "cache",
+            "book": bookId,
+            "item": itemId,
+            "fulltext": 1,
+            "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+            "no_lock": 1,
+            "no_backup": 1,
+          },
+          onMessage(info) {
+            if (['error', 'critical'].includes(info.type)) {
+              capturer.error(`Error when generating fulltext cache: ${info.msg}`);
+            }
+          },
+        });
+
+        await book.loadTreeFiles(true);  // update treeLastModified
+
+        await capturer.clearFileCache({timeId});
+
+        // move current data files to backup
+        let index = oldIndex;
+        if (index) {
+          if (index.endsWith('/index.html')) {
+            index = index.slice(0, -11);
+          }
+          const target = book.dataUrl + scrapbook.escapeFilename(index);
+
+          if (options["capture.backupForRecapture"]) {
+            capturer.log(`Moving old data files "${index}" to backup directory "${timeId}"...`);
+            await server.request({
+              url: target + `?a=backup&ts=${timeId}&move=1`,
+              method: "POST",
+              format: 'json',
+              csrfToken: true,
+            });
+          } else {
+            capturer.log(`Deleting old data files "${index}"...`);
+            await server.request({
+              url: target + `?a=delete`,
+              method: "POST",
+              format: 'json',
+              csrfToken: true,
+            });
+          }
+        }
+      },
+    });
+
+    return result;
   };
 
   /**

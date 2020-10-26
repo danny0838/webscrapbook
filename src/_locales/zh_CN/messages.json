@@ -996,6 +996,9 @@
   "OptionPageTitle": {
     "message": "选项设定"
   },
+  "OptionScrapbookBackupForRecaptureLabel": {
+    "message": "重新获取时建立备份"
+  },
   "OptionScrapbookDefaultSearchLabel": {
     "message": "默认搜索条件:"
   },
@@ -1162,6 +1165,9 @@
   },
   "ScrapBookCommandOpenTab": {
     "message": "开启在新分页"
+  },
+  "ScrapBookCommandRecapture": {
+    "message": "重新获取"
   },
   "ScrapBookCommandRecover": {
     "message": "还原"
