@@ -1636,14 +1636,20 @@ ${scrapbook.escapeHtml(content)}
         dialog.querySelector('[name="modify"]').value = item.modify ? scrapbook.idToDate(item.modify).toLocaleString() : "";
         dialog.querySelector('[name="comment"]').value = item.comment || "";
 
+        if (['postit'].includes(item.type)) {
+          dialog.querySelector('[name="title"]').setAttribute('readonly', '');
+        } else {
+          dialog.querySelector('[name="title"]').removeAttribute('readonly');
+        }
+
         dialog.querySelector('[name="parent"]').parentNode.parentNode.hidden = !(isRecycle);
         dialog.querySelector('[name="recycled"]').parentNode.parentNode.hidden = !(isRecycle);
-        dialog.querySelector('[name="index"]').parentNode.parentNode.hidden = ['folder', 'separator'].includes(item.type);
-        dialog.querySelector('[name="source"]').parentNode.parentNode.hidden = ['folder', 'separator'].includes(item.type);
-        dialog.querySelector('[name="icon"]').parentNode.parentNode.hidden = ['separator'].includes(item.type);
+        dialog.querySelector('[name="index"]').parentNode.parentNode.hidden = ['folder', 'separator', 'postit'].includes(item.type);
+        dialog.querySelector('[name="source"]').parentNode.parentNode.hidden = ['folder', 'separator', 'postit'].includes(item.type);
+        dialog.querySelector('[name="icon"]').parentNode.parentNode.hidden = ['separator', 'postit'].includes(item.type);
         dialog.querySelector('[name="marked"]').parentNode.parentNode.hidden = ['separator'].includes(item.type);
-        dialog.querySelector('[name="locked"]').parentNode.parentNode.hidden = ['folder', 'separator'].includes(item.type);
-        dialog.querySelector('[name="charset"]').parentNode.parentNode.hidden = ['folder', 'separator', 'bookmark'].includes(item.type);
+        dialog.querySelector('[name="locked"]').parentNode.parentNode.hidden = ['folder', 'separator', 'bookmark', 'postit'].includes(item.type);
+        dialog.querySelector('[name="charset"]').parentNode.parentNode.hidden = ['folder', 'separator', 'bookmark', 'postit'].includes(item.type);
 
         dialog.addEventListener('dialogShow', (event) => {
           dialog.querySelector('[name="title"]').focus();
