@@ -59,6 +59,7 @@
     /**
      * @param {Object} params
      * @param {Object} params.book
+     * @param {string} params.book.id
      * @param {string} params.book.dataUrl
      */
     init({
@@ -171,14 +172,21 @@
         var a = elem.anchor = div.appendChild(document.createElement('a'));
         a.appendChild(document.createTextNode(meta.title || meta.id));
         a.title = (meta.title || meta.id) + (meta.source ? '\n' + meta.source : '') + (meta.comment ? '\n\n' + meta.comment : '');
-        if (meta.type !== 'bookmark') {
-          if (meta.index) { a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index); }
-        } else {
+        if (meta.type === 'bookmark') {
           if (meta.source) {
             a.href = meta.source;
           } else {
             if (meta.index) { a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index); }
           }
+        } else if (meta.type === 'postit') {
+          if (meta.index) {
+            const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
+            u.searchParams.append('id', meta.id);
+            u.searchParams.append('bookId', this.book.id);
+            a.href = u.href;
+          }
+        } else {
+          if (meta.index) { a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index); }
         }
         if (meta.type === 'folder') {
           a.addEventListener('click', this.onItemFolderClick);

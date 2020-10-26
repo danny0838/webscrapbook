@@ -1488,6 +1488,15 @@ ${scrapbook.escapeHtml(content)}
               }
               break;
             }
+            case 'postit': {
+              if (item.index) {
+                const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
+                u.searchParams.append('id', id);
+                u.searchParams.append('bookId', this.book.id);
+                await this.openLink(u.href, true);
+              }
+              break;
+            }
             case 'file':
             default: {
               if (item.index) {

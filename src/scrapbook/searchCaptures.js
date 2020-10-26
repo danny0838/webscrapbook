@@ -200,7 +200,7 @@
           bookId,
         });
         tree.init({
-          book: {dataUrl: book.dataUrl},
+          book,
           allowSelect: false,
           allowMultiSelect: false,
           allowMultiSelectOnClick: false,
