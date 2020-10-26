@@ -73,7 +73,7 @@
   color: rgb(80,0,32);
 }
 
-.tree [data-type="site"] > div > a {
+.tree [data-type="combine"] > div > a {
   color: blue;
 }
 
