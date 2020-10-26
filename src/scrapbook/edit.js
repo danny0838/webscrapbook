@@ -8,7 +8,7 @@
 
 (function (root, factory) {
   // Browser globals
-  root.tree = factory(
+  root.editor = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,
