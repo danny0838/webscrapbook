@@ -768,34 +768,62 @@
 
       let result;
       try {
-        if (typeof tabId === 'number') {
-          // capture tab
-          result = await capturer.captureTab({
-            tabId,
-            frameId,
-            fullPage,
-            title,
-            mode,
-            options,
-            parentId,
-            index,
-          });
-        } else if (typeof url === 'string') {
-          // capture headless
-          result = await capturer.captureRemote({
-            url,
-            refUrl,
-            title,
-            favIconUrl,
-            mode,
-            options,
-            parentId,
-            index,
-          });
+        if (["resave", "internalize"].includes(mode)) {
+          if (typeof tabId !== 'number') {
+            throw new Error(`Invalid tabId for ${mode} mode.`);
+          }
+
+          result = await capturer.resaveTab({tabId, frameId, options, internalize: mode === "internalize"});
+        } else {
+          const timeId = scrapbook.dateToId();
+          if (typeof tabId === 'number') {
+            // capture tab
+            result = await capturer.captureTab({
+              timeId,
+              tabId,
+              frameId,
+              fullPage,
+              title,
+              mode,
+              options,
+            });
+          } else if (typeof url === 'string') {
+            // capture headless
+            result = await capturer.captureRemote({
+              timeId,
+              url,
+              refUrl,
+              title,
+              favIconUrl,
+              mode,
+              options,
+            });
+          }
+
+          if (options["capture.saveTo"] === "server") {
+            await capturer.addItemToServer({
+              item: {
+                id: result.timeId,
+                index: (result.targetDir ? result.targetDir + '/' : '') + result.filename,
+                title: result.title,
+                type: result.type,
+                create: result.timeId,
+                source: scrapbook.normalizeUrl(result.sourceUrl),
+                icon: result.favIconUrl,
+                charset: result.charset,
+              },
+              parentId,
+              index,
+            });
+          }
+
+          await capturer.clearFileCache({timeId});
+
+          if (typeof index !== 'undefined') {
+            index++;
+          }
         }
-        if (typeof index !== 'undefined') {
-          index++;
-        }
+
         capturer.log(`Done.`);
       } catch (ex) {
         console.error(ex);
@@ -815,18 +843,17 @@
 
   /**
    * @param {Object} params
+   * @param {string} params.timeId
    * @param {integer} params.tabId
    * @param {integer} [params.frameId]
    * @param {boolean} [params.fullPage]
    * @param {string} [params.title] - an overriding title
    * @param {string} [params.mode] - "tab", "source", "bookmark", "resave", "internalize"
    * @param {string} params.options
-   * @param {string} [params.parentId] - parent item ID for the captured item
-   * @param {integer} [params.index] - position index for the captured item
    * @return {Promise<Object>}
    */
   capturer.captureTab = async function (params) {
-    const {tabId, frameId, fullPage, title: title0, mode, options, parentId, index} = params;
+    const {timeId, tabId, frameId, fullPage, title: title0, mode, options} = params;
     let {url, title, favIconUrl, discarded} = await browser.tabs.get(tabId);
 
     // redirect headless capture
@@ -838,18 +865,11 @@
           ({url, title, favIconUrl} = await browser.webNavigation.getFrame({tabId, frameId}));
         }
         title = title0 || title;
-        return await capturer.captureRemote({url, title, favIconUrl, mode, options, parentId, index});
-      }
-      case "resave": {
-        return await capturer.resaveTab({tabId, frameId, options});
-      }
-      case "internalize": {
-        return await capturer.resaveTab({tabId, frameId, options, internalize: true});
+        return await capturer.captureRemote({timeId, url, title, favIconUrl, mode, options});
       }
     }
 
     const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
-    const timeId = scrapbook.dateToId();
     const message = {
       title: title0,
       settings: {
@@ -886,43 +906,22 @@
     capturer.captureInfo.delete(timeId);
     if (!response) { throw new Error(`Response not received.`); }
     if (response.error) { throw new Error(response.error.message); }
-
-    if (message.options["capture.saveTo"] === "server") {
-      await capturer.addItemToServer({
-        item: {
-          id: response.timeId,
-          index: (response.targetDir ? response.targetDir + '/' : '') + response.filename,
-          title: response.title,
-          type: response.type,
-          create: response.timeId,
-          source: scrapbook.normalizeUrl(response.sourceUrl),
-          icon: response.favIconUrl,
-          charset: response.charset,
-        },
-        parentId,
-        index,
-      });
-    }
-
-    await capturer.clearFileCache({timeId});
-
     return response;
   };
 
   /**
    * @param {Object} params
+   * @param {string} params.timeId
    * @param {string} params.url
    * @param {string} [params.refUrl]
    * @param {string} [params.title] - an overriding title
    * @param {string} [params.favIconUrl] - fallback favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {string} params.options
-   * @param {string} [params.parentId] - parent item ID for the captured item
-   * @param {integer} [params.index] - position index for the captured item
    * @return {Promise<Object>}
    */
   capturer.captureRemote = async function (params) {
-    const {url, refUrl, title, favIconUrl, mode, options, parentId, index} = params;
+    const {timeId, url, refUrl, title, favIconUrl, mode, options} = params;
 
     // default mode => launch a tab to capture
     if (mode === "tab") {
@@ -960,12 +959,11 @@
       }
 
       const response = await capturer.captureTab({
+        timeId,
         tabId: tab.id,
         fullPage: true,
         title,
         options,
-        parentId,
-        index,
       });
 
       try {
@@ -976,7 +974,6 @@
     }
 
     const source = `${url}`;
-    const timeId = scrapbook.dateToId();
     const message = {
       url,
       refUrl,
@@ -1021,26 +1018,6 @@
     capturer.captureInfo.delete(timeId);
     if (!response) { throw new Error(`Response not received.`); }
     if (response.error) { throw new Error(response.error.message); }
-
-    if (message.options["capture.saveTo"] === "server") {
-      await capturer.addItemToServer({
-        item: {
-          id: response.timeId,
-          index: (response.targetDir ? response.targetDir + '/' : '') + response.filename,
-          title: response.title,
-          type: response.type,
-          create: response.timeId,
-          source: scrapbook.normalizeUrl(response.sourceUrl),
-          icon: response.favIconUrl,
-          charset: response.charset,
-        },
-        parentId,
-        index,
-      });
-    }
-
-    await capturer.clearFileCache({timeId});
-
     return response;
   };
 
@@ -1460,7 +1437,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     let {url, title, favIconUrl, discarded} = await browser.tabs.get(tabId);
 
     const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
-    const timeId = scrapbook.dateToId();
 
     capturer.log(`Saving (document) ${source} ...`);
 
@@ -1692,7 +1668,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     });
 
     return {
-      timeId,
       title,
       sourceUrl: url,
       favIconUrl,
