@@ -761,8 +761,10 @@
       const {
         tabId, frameId, fullPage,
         url, refUrl, title, favIconUrl,
-        mode = baseMode, options,
+        mode = baseMode, options: taskOptions,
       } = task;
+
+      const options = Object.assign({}, baseOptions, taskOptions);
 
       let result;
       try {
@@ -774,7 +776,7 @@
             fullPage,
             title,
             mode,
-            options: Object.assign({}, baseOptions, options),
+            options,
             parentId,
             index,
           });
@@ -786,7 +788,7 @@
             title,
             favIconUrl,
             mode,
-            options: Object.assign({}, baseOptions, options),
+            options,
             parentId,
             index,
           });
