@@ -3188,15 +3188,15 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       let results;
       if (missionId) {
         const key = {table: "captureMissionCache", id: missionId};
-        const data = await scrapbook.cache.get(key);
+        const taskInfo = await scrapbook.cache.get(key);
         await scrapbook.cache.remove(key);
-        if (!data || !data.tasks) {
+        if (!taskInfo || !taskInfo.tasks) {
           capturer.error(`Error: missing task data for mission "${missionId}".`);
-        } else if (!data.tasks.length) {
+        } else if (!taskInfo.tasks.length) {
           capturer.error(`Error: nothing to capture.`);
         } else {
           try {
-            results = await capturer.runTasks(data);
+            results = await capturer.runTasks(taskInfo);
           } catch (ex) {
             console.error(ex);
             capturer.error(`Unexpected error: ${ex.message}`);
