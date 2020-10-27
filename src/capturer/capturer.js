@@ -586,13 +586,17 @@
   };
 
   /**
-   * @kind invokable
+   * Cache a favicon.
+   *
    * @param {Object} params
+   * @param {Object} params.book
    * @param {Object} params.item
-   * @param {string} params.parentId
-   * @param {integer} params.index
+   * @param {string} params.icon - icon URL to cache
+   * @return {Promise<string>} the new icon URL
    */
-  capturer.addItemToServer = async function (params) {
+  capturer.cacheFavIcon = async function (params) {
+    const {book, item, icon} = params;
+
     const getShaFile = (data) => {
       if (!data) { throw new Error(`Unable to fetch a file for this favicon URL.`); }
 
@@ -641,6 +645,52 @@
       return getShaFile({ab, mime, ext});
     };
 
+    if (!scrapbook.isUrlAbsolute(icon)) {
+      return icon;
+    }
+
+    try {
+      const base = book.dataUrl + item.index;
+      const file = await getFavIcon(icon);
+      const target = book.treeUrl + 'favicon/' + file.name;
+
+      const json = await server.request({
+        url: target,
+        method: "GET",
+        format: 'json',
+      }).then(r => r.json());
+
+      // save favicon if nonexistent or emptied
+      if (json.data.type === null || 
+          (file.size > 0 && json.data.type === 'file' && json.data.size === 0)) {
+        await server.request({
+          url: target + '?a=save',
+          method: "POST",
+          format: 'json',
+          csrfToken: true,
+          body: {
+            upload: file,
+          },
+        });
+      }
+
+      return scrapbook.getRelativeUrl(target, base);
+    } catch (ex) {
+      console.warn(ex);
+      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [icon, ex.message]));
+    }
+
+    return icon;
+  };
+
+  /**
+   * @kind invokable
+   * @param {Object} params
+   * @param {Object} params.item
+   * @param {string} params.parentId
+   * @param {integer} params.index
+   */
+  capturer.addItemToServer = async function (params) {
     const {item, parentId, index} = params;
 
     await server.init();
@@ -653,38 +703,7 @@
 
     // cache favicon
     let icon = item.icon;
-    if (scrapbook.isUrlAbsolute(icon)) {
-      try {
-        const base = book.dataUrl + item.index;
-        const file = await getFavIcon(icon);
-        const target = book.treeUrl + 'favicon/' + file.name;
-
-        const json = await server.request({
-          url: target,
-          method: "GET",
-          format: 'json',
-        }).then(r => r.json());
-
-        // save favicon if nonexistent or emptied
-        if (json.data.type === null || 
-            (file.size > 0 && json.data.type === 'file' && json.data.size === 0)) {
-          await server.request({
-            url: target + '?a=save',
-            method: "POST",
-            format: 'json',
-            csrfToken: true,
-            body: {
-              upload: file,
-            },
-          });
-        }
-
-        icon = scrapbook.getRelativeUrl(target, base);
-      } catch (ex) {
-        console.warn(ex);
-        capturer.warn(scrapbook.lang("ErrorFileDownloadError", [icon, ex.message]));
-      }
-    }
+    icon = await capturer.cacheFavIcon({book, item ,icon});
 
     // lock tree before loading to avoid a conflict due to parallel captures
     await book.transaction({
