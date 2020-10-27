@@ -104,6 +104,10 @@
       this.lastHighlightElem = null;
     }
 
+    getRootElem() {
+      return this.treeElem.firstChild;
+    }
+
     getLastSelectedItemElem() {
       return this.lastHighlightElem;
     }
@@ -118,7 +122,7 @@
     /**
      * An internal method to add an item to DOM
      */
-    _addItem(item, parent = this.treeElem.firstChild.container, index = Infinity) {
+    _addItem(item, parent = this.getRootElem().container, index = Infinity) {
       // create element
       const elem = document.createElement('li');
       const div = elem.controller = elem.appendChild(document.createElement('div'));
