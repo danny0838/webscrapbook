@@ -1181,6 +1181,54 @@
   "ScrapBookCommandSearchIn": {
     "message": "Search within"
   },
+  "ScrapBookCommandSort": {
+    "message": "Sort"
+  },
+  "ScrapBookCommandSortDialogAdvanced": {
+    "message": "Advanced:"
+  },
+  "ScrapBookCommandSortDialogDirection": {
+    "message": "Direction:"
+  },
+  "ScrapBookCommandSortDialogDirectionAsc": {
+    "message": "Ascending"
+  },
+  "ScrapBookCommandSortDialogDirectionDesc": {
+    "message": "Descending"
+  },
+  "ScrapBookCommandSortDialogKey": {
+    "message": "Sort by:"
+  },
+  "ScrapBookCommandSortDialogKeyCreate": {
+    "message": "Created"
+  },
+  "ScrapBookCommandSortDialogKeyId": {
+    "message": "ID"
+  },
+  "ScrapBookCommandSortDialogKeyIndex": {
+    "message": "Index"
+  },
+  "ScrapBookCommandSortDialogKeyMarked": {
+    "message": "Marked"
+  },
+  "ScrapBookCommandSortDialogKeyModify": {
+    "message": "Modified"
+  },
+  "ScrapBookCommandSortDialogKeyReverse": {
+    "message": "Reverse"
+  },
+  "ScrapBookCommandSortDialogKeySource": {
+    "message": "Source"
+  },
+  "ScrapBookCommandSortDialogKeyTitle": {
+    "message": "Title"
+  },
+  "ScrapBookCommandSortDialogKeyType": {
+    "message": "Type"
+  },
+  "ScrapBookCommandSortDialogRecursive": {
+    "message": "Also sort descendant items"
+  },
   "ScrapBookCommandSource": {
     "message": "View source"
   },

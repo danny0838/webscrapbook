@@ -1181,6 +1181,54 @@
   "ScrapBookCommandSearchIn": {
     "message": "搜索下层项目"
   },
+  "ScrapBookCommandSort": {
+    "message": "排序"
+  },
+  "ScrapBookCommandSortDialogAdvanced": {
+    "message": "高级:"
+  },
+  "ScrapBookCommandSortDialogDirection": {
+    "message": "排序方向:"
+  },
+  "ScrapBookCommandSortDialogDirectionAsc": {
+    "message": "递增"
+  },
+  "ScrapBookCommandSortDialogDirectionDesc": {
+    "message": "递减"
+  },
+  "ScrapBookCommandSortDialogKey": {
+    "message": "排序方式:"
+  },
+  "ScrapBookCommandSortDialogKeyCreate": {
+    "message": "建立时间"
+  },
+  "ScrapBookCommandSortDialogKeyId": {
+    "message": "ID"
+  },
+  "ScrapBookCommandSortDialogKeyIndex": {
+    "message": "索引文件"
+  },
+  "ScrapBookCommandSortDialogKeyMarked": {
+    "message": "强调标示"
+  },
+  "ScrapBookCommandSortDialogKeyModify": {
+    "message": "修改时间"
+  },
+  "ScrapBookCommandSortDialogKeyReverse": {
+    "message": "反序"
+  },
+  "ScrapBookCommandSortDialogKeySource": {
+    "message": "来源"
+  },
+  "ScrapBookCommandSortDialogKeyTitle": {
+    "message": "标题"
+  },
+  "ScrapBookCommandSortDialogKeyType": {
+    "message": "类型"
+  },
+  "ScrapBookCommandSortDialogRecursive": {
+    "message": "一并排序下层项目"
+  },
   "ScrapBookCommandSource": {
     "message": "开启原始网址"
   },

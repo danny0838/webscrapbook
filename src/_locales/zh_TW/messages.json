@@ -1181,6 +1181,54 @@
   "ScrapBookCommandSearchIn": {
     "message": "搜尋下層項目"
   },
+  "ScrapBookCommandSort": {
+    "message": "排序"
+  },
+  "ScrapBookCommandSortDialogAdvanced": {
+    "message": "進階:"
+  },
+  "ScrapBookCommandSortDialogDirection": {
+    "message": "排序方向:"
+  },
+  "ScrapBookCommandSortDialogDirectionAsc": {
+    "message": "遞增"
+  },
+  "ScrapBookCommandSortDialogDirectionDesc": {
+    "message": "遞減"
+  },
+  "ScrapBookCommandSortDialogKey": {
+    "message": "排序方式:"
+  },
+  "ScrapBookCommandSortDialogKeyCreate": {
+    "message": "建立時間"
+  },
+  "ScrapBookCommandSortDialogKeyId": {
+    "message": "ID"
+  },
+  "ScrapBookCommandSortDialogKeyIndex": {
+    "message": "索引檔"
+  },
+  "ScrapBookCommandSortDialogKeyMarked": {
+    "message": "強調標示"
+  },
+  "ScrapBookCommandSortDialogKeyModify": {
+    "message": "修改時間"
+  },
+  "ScrapBookCommandSortDialogKeyReverse": {
+    "message": "反序"
+  },
+  "ScrapBookCommandSortDialogKeySource": {
+    "message": "來源"
+  },
+  "ScrapBookCommandSortDialogKeyTitle": {
+    "message": "標題"
+  },
+  "ScrapBookCommandSortDialogKeyType": {
+    "message": "類型"
+  },
+  "ScrapBookCommandSortDialogRecursive": {
+    "message": "一併排序下層項目"
+  },
   "ScrapBookCommandSource": {
     "message": "開啟原始網址"
   },

@@ -39,6 +39,7 @@
   <button value="index" hidden>__MSG_ScrapBookCommandIndex__</button>
   <button value="exec_book" hidden>__MSG_ScrapBookCommandExecBook__</button>
   <button value="manage" hidden>__MSG_ScrapBookCommandManage__</button>
+  <button value="sort" hidden>__MSG_ScrapBookCommandSort__...</button>
   <hr>
   <button value="mkfolder" hidden>__MSG_ScrapBookCommandCreatefolder__</button>
   <button value="mksep" hidden>__MSG_ScrapBookCommandCreateSeparator__</button>
@@ -56,6 +57,7 @@
   <button value="source" hidden>__MSG_ScrapBookCommandSource__</button>
   <button value="manage" hidden>__MSG_ScrapBookCommandManage__</button>
   <button value="search_in" hidden>__MSG_ScrapBookCommandSearchIn__...</button>
+  <button value="sort" hidden>__MSG_ScrapBookCommandSort__...</button>
   <hr>
   <button value="mkfolder" hidden>__MSG_ScrapBookCommandCreatefolder__</button>
   <button value="mksep" hidden>__MSG_ScrapBookCommandCreateSeparator__</button>
@@ -176,6 +178,44 @@
       <dd>
         <label><input type="radio" name="mode" value="move" checked><span>__MSG_ScrapBookCommandMoveDialogModeMove__</span></label>
         <label><input type="radio" name="mode" value="link"><span>__MSG_ScrapBookCommandMoveDialogModeLink__</span></label>
+      </dd>
+    </div>
+  </dl>
+  <div class="buttons">
+    <input type="submit" value="__MSG_OK__">
+    <input type="button" class="cancel" value="__MSG_Cancel__">
+  </div>
+</form>
+</template>
+
+<template id="tpl-sort">
+<form class="sort">
+  <dl>
+    <div>
+      <dt>__MSG_ScrapBookCommandSortDialogKey__</dt>
+      <dd>
+        <label><input type="radio" name="key" value="reverse"><span>__MSG_ScrapBookCommandSortDialogKeyReverse__</span></label>
+        <label><input type="radio" name="key" value="id" checked><span>__MSG_ScrapBookCommandSortDialogKeyId__</span></label>
+        <label><input type="radio" name="key" value="title"><span>__MSG_ScrapBookCommandSortDialogKeyTitle__</span></label>
+        <label><input type="radio" name="key" value="index"><span>__MSG_ScrapBookCommandSortDialogKeyIndex__</span></label>
+        <label><input type="radio" name="key" value="source"><span>__MSG_ScrapBookCommandSortDialogKeySource__</span></label>
+        <label><input type="radio" name="key" value="create"><span>__MSG_ScrapBookCommandSortDialogKeyCreate__</span></label>
+        <label><input type="radio" name="key" value="modify"><span>__MSG_ScrapBookCommandSortDialogKeyModify__</span></label>
+        <label><input type="radio" name="key" value="type"><span>__MSG_ScrapBookCommandSortDialogKeyType__</span></label>
+        <label><input type="radio" name="key" value="marked"><span>__MSG_ScrapBookCommandSortDialogKeyMarked__</span></label>
+      </dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookCommandSortDialogDirection__</dt>
+      <dd>
+        <label><input type="radio" name="direction" value="asc" checked><span>__MSG_ScrapBookCommandSortDialogDirectionAsc__</span></label>
+        <label><input type="radio" name="direction" value="desc"><span>__MSG_ScrapBookCommandSortDialogDirectionDesc__</span></label>
+      </dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookCommandSortDialogAdvanced__</dt>
+      <dd>
+        <label><input type="checkbox" name="recursive"><span>__MSG_ScrapBookCommandSortDialogRecursive__</span></label>
       </dd>
     </div>
   </dl>

@@ -170,6 +170,7 @@
           const menuElem = document.getElementById('command-popup-book');
           menuElem.querySelector('button[value="exec_book"]').disabled = !(!isNoTree && isLocal);
           menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
+          menuElem.querySelector('button[value="sort"]').disabled = isNoTree;
 
           menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
@@ -188,6 +189,7 @@
           menuElem.querySelector('button[value="source"]').disabled = isNoTree;
           menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
           menuElem.querySelector('button[value="search_in"]').disabled = isNoTree;
+          menuElem.querySelector('button[value="sort"]').disabled = isNoTree;
 
           menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
@@ -853,6 +855,7 @@
       menuElem.querySelector('button[value="index"]').hidden = false;
       menuElem.querySelector('button[value="exec_book"]').hidden = false;
       menuElem.querySelector('button[value="manage"]').hidden = false;
+      menuElem.querySelector('button[value="sort"]').hidden = !(!isRecycle);
 
       menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
       menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
@@ -918,6 +921,7 @@
           menuElem.querySelector('button[value="source"]').hidden = true;
           menuElem.querySelector('button[value="manage"]').hidden = false;
           menuElem.querySelector('button[value="search_in"]').hidden = true;
+          menuElem.querySelector('button[value="sort"]').hidden = true;
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
@@ -947,6 +951,7 @@
           menuElem.querySelector('button[value="source"]').hidden = !(item.source);
           menuElem.querySelector('button[value="manage"]').hidden = !(!isRecycle && (item.type === 'folder' || this.book.toc[item.id]));
           menuElem.querySelector('button[value="search_in"]').hidden = !(!isRecycle && (item.type === 'folder' || this.book.toc[item.id]));
+          menuElem.querySelector('button[value="sort"]').hidden = !(!isRecycle && (item.type === 'folder' || this.book.toc[item.id]));
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
@@ -974,6 +979,7 @@
           menuElem.querySelector('button[value="source"]').hidden = false;
           menuElem.querySelector('button[value="manage"]').hidden = true;
           menuElem.querySelector('button[value="search_in"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="sort"]').hidden = !(!isRecycle);
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = true;
           menuElem.querySelector('button[value="mksep"]').hidden = true;
@@ -1611,6 +1617,95 @@ ${scrapbook.escapeHtml(content)}
         }
         const target = urlObj.href;
         await this.openLink(target, true);
+      },
+
+      async sort({itemElems}) {
+        const frag = document.importNode(document.getElementById('tpl-sort').content, true);
+        const dialog = frag.children[0];
+        scrapbook.loadLanguages(dialog);
+
+        if (!await this.showDialog(dialog)) {
+          return;
+        }
+
+        const key = dialog.key.value;
+        const direction = dialog.direction.value;
+        const recursive = dialog.recursive.checked;
+
+        if (!(itemElems && itemElems.length)) {
+          itemElems = [this.tree.getRootElem()];
+        }
+        const itemIds = itemElems.reduce((set, itemElem) => {
+          const id = itemElem.getAttribute('data-id');
+          if (recursive) {
+            this.book.getReachableItems(id, set);
+          } else {
+            set.add(id);
+          }
+          return set;
+        }, new Set());
+
+        const meta = this.book.meta;
+        const toc = this.book.toc;
+        const order = (direction === 'desc') ? -1 : 1;
+
+        let compareFunc;
+        if (key === 'reverse') {
+          for (const itemId of itemIds) {
+            const subToc = toc[itemId];
+            if (!(subToc && subToc.length)) { continue; }
+            subToc.reverse();
+          }
+        } else {
+          if (key === 'type') {
+            const mapTypeValue = {
+              folder: -1,
+              bookmark: 1,
+              postit: 2,
+              note: 3,
+            };
+            compareFunc = (a, b) => {
+              const va = mapTypeValue[meta[a].type] || 0;
+              const vb = mapTypeValue[meta[b].type] || 0;
+              if (va > vb) { return order; }
+              if (va < vb) { return -order; }
+              return 0;
+            };
+          } else if (key === 'marked') {
+            compareFunc = (a, b) => {
+              const va = meta[a].marked ? 0 : 1;
+              const vb = meta[b].marked ? 0 : 1;
+              if (va > vb) { return order; }
+              if (va < vb) { return -order; }
+              return 0;
+            };
+          } else {
+            compareFunc = (a, b) => {
+              const va = meta[a][key] || '';
+              const vb = meta[b][key] || '';
+              if (va > vb) { return order; }
+              if (va < vb) { return -order; }
+              return 0;
+            };
+          }
+
+          for (const itemId of itemIds) {
+            const subToc = toc[itemId];
+            if (!(subToc && subToc.length)) { continue; }
+            subToc.sort(compareFunc);
+          }
+        }
+
+        // upload changes to server
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            await book.saveToc();
+            await book.loadTreeFiles(true);  // update treeLastModified
+          },
+        });
+
+        await this.tree.rebuild();
       },
 
       async meta({itemElem}) {
