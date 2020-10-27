@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.87.0] - 2020-10-27
+* Bumped server requirement to >= 0.29.
+* Added "sort" command to sidebar.
+* Added "capture again" command to sidebar.
+
 ## [0.86.0] - 2020-10-26
 * Fixed styling error for "site" and "combine" types.
 
