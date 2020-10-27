@@ -249,9 +249,9 @@
      * Reload tree data and rebuild the item tree.
      */
     async rebuild() {
-      await this.book.loadTreeFiles(true);
-      await this.book.loadToc(true);
-      await this.book.loadMeta(true);
+      const refresh = !await this.book.validateTree();
+      await this.book.loadMeta(refresh);
+      await this.book.loadToc(refresh);
       await this.tree.rebuild();
     },
 
