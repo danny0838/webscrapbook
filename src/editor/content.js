@@ -381,6 +381,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
 <div class="toolbar">
   <div class="toolbar-locate" title="${scrapbook.lang('EditorButtonLocate')}">
     <button></button>
+    <ul hidden="" title="">
+      <li><button class="toolbar-locate-viewDirectory">${scrapbook.lang('EditorButtonLocateViewDirectory')}</button></li>
+    </ul>
   </div>
   <div class="toolbar-marker" title="${scrapbook.lang('EditorButtonMarker')}">
     <button></button>
@@ -499,8 +502,15 @@ ${sRoot}.toolbar .toolbar-close:hover {
     }, {passive: true});
     elem.addEventListener("contextmenu", async (event) => {
       event.preventDefault();
+      const elem = event.currentTarget;
+      editor.showContextMenu(elem.parentElement.querySelector('ul'), event);
     });
     elem.disabled = elem.hidden = !editor.inScrapBook;
+
+    var elem = wrapper.querySelector('.toolbar-locate-viewDirectory');
+    elem.addEventListener("click", (event) => {
+      document.location.assign('.');
+    }, {passive: true});
 
     // marker
     var elem = wrapper.querySelector('.toolbar-marker > button:first-of-type');

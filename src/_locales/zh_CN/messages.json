@@ -298,6 +298,9 @@
   "EditorButtonLocate": {
     "message": "定位工具 - 在剪贴簿显示此项目的位置。"
   },
+  "EditorButtonLocateViewDirectory": {
+    "message": "检视页面所在目录"
+  },
   "EditorButtonMarker": {
     "message": "标示工具 - 点击以标示选取的文字。点击标示可创建或编辑批注。"
   },

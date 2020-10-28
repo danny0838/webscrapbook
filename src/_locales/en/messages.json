@@ -298,6 +298,9 @@
   "EditorButtonLocate": {
     "message": "Locater - Locate this item in scrapbook."
   },
+  "EditorButtonLocateViewDirectory": {
+    "message": "View page directory"
+  },
   "EditorButtonMarker": {
     "message": "Marker - Click to mark the selected text. Click on a mark to create or edit annotation."
   },
