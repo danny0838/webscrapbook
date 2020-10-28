@@ -448,6 +448,9 @@
           case "content":
             addRule("content", pos ? "include" : "exclude", parseStr(term));
             break;
+          case "index":
+            addRule("index", pos ? "include" : "exclude", parseStr(term));
+            break;
           case "create":
             addRule("create", pos ? "include" : "exclude", parseDate(term));
             break;
@@ -576,6 +579,10 @@
 
     _match_comment(rule, item) {
       return this.matchText(rule, item.meta.comment);
+    },
+
+    _match_index(rule, item) {
+      return this.matchText(rule, item.meta.index);
     },
 
     _match_source(rule, item) {
