@@ -1763,6 +1763,232 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           icon: result.favIconUrl,
         });
 
+        // attempt to migrate annotations
+        // @TODO:
+        // - Handle more legacy annotations?
+        // - Handle annotations in frame or shadow root?
+        // - Handle more special annotations?
+        // - Detect moved text content.
+        migrateAnnotations: {
+          if (!(oldIndex && item.index)) { break migrateAnnotations; }
+
+          let oldDoc;
+          try {
+            oldDoc = (await scrapbook.xhr({
+              url: book.dataUrl + scrapbook.escapeFilename(oldIndex),
+              responseType: 'document',
+            })).response;
+          } catch (ex) {
+            console.error(ex);
+            capturer.warn(`Failed to read old page. Skipped migrating annotations.`);
+            break migrateAnnotations;
+          }
+
+          const newXhr = await scrapbook.xhr({
+            url: book.dataUrl + scrapbook.escapeFilename(item.index),
+            responseType: 'document',
+          });
+          const newIndexUrl = newXhr.responseURL;
+          const newDoc = newXhr.response;
+
+          const getOffset = (elem) => {
+            const parent = elem.parentElement;
+            let pos = 0;
+            for (const sibling of parent.childNodes) {
+              if (sibling === elem) {
+                return pos;
+              }
+              pos++;
+            }
+            return null;
+          };
+
+          const getXPath = (elem, root) => {
+            if (elem.nodeType === 3) {
+              const parent = elem.parentElement;
+              return `${getXPath(parent, root)}/node()[${getOffset(elem) + 1}]`;
+            }
+
+            if (elem.id) {
+              return `//*[@id=${scrapbook.quoteXPath(elem.id)}]`;
+            }
+
+            const tag = elem.nodeName.toLowerCase();
+            if (elem === root) {
+              return `/${tag}[1]`;
+            }
+
+            const parent = elem.parentElement;
+            let pos = 0;
+            for (const sibling of parent.children) {
+              if (sibling === elem) {
+                return `${getXPath(parent, root)}/${tag}[${pos + 1}]`;
+              }
+              if (sibling.nodeName.toLowerCase() === tag) {
+                pos++;
+              }
+            }
+          };
+
+          const oldRootNode = oldDoc.documentElement;
+          const annotations = new Map();
+          for (const elem of oldRootNode.querySelectorAll([
+                '[data-scrapbook-elem="linemarker"]',
+                '[data-scrapbook-elem="sticky"]',
+                '[data-scrapbook-elem="custom"]',
+                '[data-scrapbook-elem="custom-wrapper"]',
+              ].join(', '))) {
+            const removeType = scrapbook.getScrapBookObjectRemoveType(elem);
+            if (![1, 2].includes(removeType)) { continue; }
+            annotations.set(elem, {
+              elemPath: getXPath(elem, oldRootNode),
+              removeType,
+            });
+          }
+          for (const [elem, annotation] of annotations) {
+            switch (annotation.removeType) {
+              case 1: {
+                let startContainer = elem.parentElement;
+                let startOffset = getOffset(elem);
+
+                elem.remove();
+
+                Object.assign(annotation, {
+                  startContainerPath: getXPath(startContainer, oldRootNode),
+                  startOffset,
+                });
+                break;
+              }
+              case 2: {
+                let startContainer = elem.parentElement;
+                let startOffset = getOffset(elem);
+                let endContainer = elem.parentElement;
+                let endOffset = startOffset + elem.childNodes.length;
+
+                fixStartEnd: {
+                  const firstChild = elem.firstChild;
+                  const lastChild = elem.lastChild;
+
+                  if (firstChild.nodeType === 3) {
+                    const prev = elem.previousSibling;
+                    if (prev && prev.nodeType === 3) {
+                      startContainer = prev;
+                      startOffset = prev.nodeValue.length;
+                    }
+                  }
+
+                  if (lastChild.nodeType === 3) {
+                    // lastChild will be merged into startContainer after normaliz() in this case
+                    if (lastChild === firstChild && startContainer.nodeType === 3) {
+                      endContainer = startContainer;
+                      endOffset = startOffset + lastChild.nodeValue.length;
+                    } else {
+                      const next = elem.nextSibling;
+                      if (next && next.nodeType === 3) {
+                        endContainer = lastChild;
+                        endOffset = lastChild.nodeValue.length;
+                      }
+                    }
+                  }
+                }
+
+                const text = elem.textContent;
+                const startCheck = text.slice(0, 3);
+                const endCheck = text.slice(-3);
+
+                scrapbook.unwrapElement(elem);
+
+                Object.assign(annotation, {
+                  startContainerPath: getXPath(startContainer, oldRootNode),
+                  startOffset,
+                  endContainerPath: getXPath(endContainer, oldRootNode),
+                  endOffset,
+                  startCheck,
+                  endCheck,
+                });
+                break;
+              }
+            }
+          }
+
+          const errors = [];
+
+          // Apply annotations in reverse order so that the latter annotation
+          // won't fail to apply due to DOM change by former annotation.
+          for (const [refElem, annotation] of [...annotations].reverse()) {
+            switch (annotation.removeType) {
+              case 1: {
+                let {elemPath, startContainerPath, startOffset} = annotation;
+                const startContainer = newDoc.evaluate(startContainerPath, newDoc, null).iterateNext();
+                try {
+                  if (!startContainer) {
+                    throw new Error(`startContainer "${startContainerPath}" not found: ${elemPath}`);
+                  }
+                  startContainer.insertBefore(refElem.cloneNode(true), startContainer.childNodes[startOffset]);
+                } catch (ex) {
+                  console.error(ex);
+                  errors.push(`Unable to apply annotation: ${elemPath}`);
+                }
+                break;
+              }
+              case 2: {
+                let {elemPath, startContainerPath, startOffset, endContainerPath, endOffset, startCheck, endCheck} = annotation;
+                const startContainer = newDoc.evaluate(startContainerPath, newDoc, null).iterateNext();
+                const endContainer = newDoc.evaluate(endContainerPath, newDoc, null).iterateNext();
+                try {
+                  if (!startContainer) {
+                    throw new Error(`startContainer "${startContainerPath}" not found: ${elemPath}`);
+                  }
+                  if (!endContainer) {
+                    throw new Error(`endContainer "${endContainerPath}" not found: ${elemPath}`);
+                  }
+
+                  const range = new Range();
+                  range.setStart(startContainer, startOffset);
+                  range.setEnd(endContainer, endOffset);
+                  const text = range.toString();
+                  if (!text.startsWith(startCheck)) {
+                    throw new Error(`startCheck "${startCheck}" not match: ${elemPath}`);
+                  }
+                  if (!text.endsWith(endCheck)) {
+                    throw new Error(`endCheck "${endCheck}" not match: ${elemPath}`);
+                  }
+
+                  range.surroundContents(refElem.cloneNode(false));
+                } catch (ex) {
+                  console.error(ex);
+                  errors.push(`Unable to apply annotation: ${elemPath}`);
+                }
+                break;
+              }
+            }
+          }
+          for (const error of errors.reverse()) {
+            capturer.warn(`Failed to migrate annotation: ${error}`);
+          }
+
+          await capturer.preSaveProcess({
+            rootNode: newDoc.documentElement,
+            frameIsMain: true,
+            deleteErased: false,
+            requireBasicLoader: !!newDoc.querySelector('script[data-scrapbook-elem="basic-loader"]'),
+            insertInfoBar: !!newDoc.querySelector('script[data-scrapbook-elem="infobar-loader"]'),
+          });
+
+          const content = scrapbook.doctypeToString(newDoc.doctype) + newDoc.documentElement.outerHTML;
+          const blob = new Blob([content], {type: "text/html"});
+          await server.request({
+            url: newIndexUrl + '?a=save',
+            method: "POST",
+            format: 'json',
+            csrfToken: true,
+            body: {
+              upload: blob,
+            },
+          });
+        }
+
+        // update item meta
         capturer.log(`Updating server index for item "${itemId}"...`);
         await book.saveMeta();
 
