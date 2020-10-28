@@ -1783,13 +1783,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           },
         });
 
-        await book.loadTreeFiles(true);  // update treeLastModified
-
-        await capturer.clearFileCache({timeId});
-
         // move current data files to backup
-        let index = oldIndex;
-        if (index) {
+        if (oldIndex) {
+          let index = oldIndex;
           if (index.endsWith('/index.html')) {
             index = index.slice(0, -11);
           }
@@ -1813,6 +1809,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             });
           }
         }
+
+        await capturer.clearFileCache({timeId});
+
+        await book.loadTreeFiles(true);  // update treeLastModified
       },
     });
 
