@@ -483,6 +483,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
       <li><button class="toolbar-save-deleteErased">${scrapbook.lang('EditorButtonSaveDeleteErased')}</button></li>
       <li><button class="toolbar-save-internalize">${scrapbook.lang('EditorButtonSaveInternalize')}</button></li>
       <li><button class="toolbar-save-createSubPage">${scrapbook.lang('EditorButtonSaveCreateSubPage')}</button></li>
+      <hr/>
+      <li><button class="toolbar-save-editTitle">${scrapbook.lang('EditorButtonSaveEditTitle')}</button></li>
     </ul>
   </div>
   <a class="toolbar-close" href="javascript:" title="${scrapbook.lang('EditorButtonClose')}"></a>
@@ -774,6 +776,11 @@ ${sRoot}.toolbar .toolbar-close:hover {
     }, {passive: true});
     elem.disabled = !editor.inScrapBook;
 
+    var elem = wrapper.querySelector('.toolbar-save-editTitle');
+    elem.addEventListener("click", (event) => {
+      editor.editTitle();
+    }, {passive: true});
+
     // close
     var elem = wrapper.querySelector('.toolbar-close');
     elem.addEventListener("click", (event) => {
@@ -1014,6 +1021,15 @@ scrapbook-toolbar, scrapbook-toolbar *,
     for (const elem of selectedNodes.reverse()) {
       elem.remove();
     }
+  };
+
+  /**
+   * @kind invokable
+   */
+  editor.editTitleInternal = function ({}) {
+    let title = prompt(scrapbook.lang('EditorButtonSaveEditTitlePrompt'), document.title);
+    if (title === null) { return; }
+    document.title = title;
   };
 
 
@@ -1324,6 +1340,17 @@ scrapbook-toolbar, scrapbook-toolbar *,
       console.error(ex);
       alert(ex.message);
     }
+  };
+
+  editor.editTitle = async function () {
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId: await editor.getFocusedFrameId(),
+        cmd: "editor.editTitleInternal",
+        args: {},
+      },
+    });
   };
 
   editor.open = async function () {

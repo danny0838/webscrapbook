@@ -327,6 +327,12 @@
   "EditorButtonSaveDeleteErased": {
     "message": "永久刪除所有擦除內容（所有框架頁）"
   },
+  "EditorButtonSaveEditTitle": {
+    "message": "修改頁面標題"
+  },
+  "EditorButtonSaveEditTitlePrompt": {
+    "message": "請輸入新標題"
+  },
   "EditorButtonSaveInternalize": {
     "message": "儲存內嵌的外部資源"
   },

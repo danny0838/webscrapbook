@@ -327,6 +327,12 @@
   "EditorButtonSaveDeleteErased": {
     "message": "Permanently delete all erases (all frames)"
   },
+  "EditorButtonSaveEditTitle": {
+    "message": "Edit page title"
+  },
+  "EditorButtonSaveEditTitlePrompt": {
+    "message": "Input new title"
+  },
   "EditorButtonSaveInternalize": {
     "message": "Internalize external resources"
   },
