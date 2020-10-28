@@ -503,7 +503,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     elem.addEventListener("contextmenu", async (event) => {
       event.preventDefault();
       const elem = event.currentTarget;
-      editor.showContextMenu(elem.parentElement.querySelector('ul'), event);
+      editor.showContextMenu(elem.nextElementSibling, event);
     });
     elem.disabled = elem.hidden = !editor.inScrapBook;
 
@@ -523,7 +523,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       event.preventDefault();
       const elem = event.currentTarget;
       await editor.updateLineMarkers();
-      editor.showContextMenu(elem.parentElement.querySelector('ul'), event);
+      editor.showContextMenu(elem.nextElementSibling, event);
     });
 
     for (const elem of wrapper.querySelectorAll('.toolbar-marker ul button')) {
@@ -545,7 +545,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     }, {passive: true});
     elem.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'), event);
+      editor.showContextMenu(event.currentTarget.nextElementSibling, event);
     });
 
     var elem = wrapper.querySelector('.toolbar-annotation-sticky');
@@ -575,7 +575,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     });
     elem.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'), event);
+      editor.showContextMenu(event.currentTarget.nextElementSibling, event);
     });
 
     var elem = wrapper.querySelector('.toolbar-eraser-eraseSelection');
@@ -621,7 +621,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     elem.addEventListener("contextmenu", (event) => {
       event.preventDefault();
       const elem = event.currentTarget;
-      const menuElem = elem.parentElement.querySelector('ul');
+      const menuElem = elem.nextElementSibling;
       for (const el of menuElem.querySelectorAll('button')) {
         el.disabled = !elem.hasAttribute('checked');
       }
@@ -648,7 +648,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     elem.addEventListener("contextmenu", (event) => {
       event.preventDefault();
       const elem = event.currentTarget;
-      const menuElem = elem.parentElement.querySelector('ul');
+      const menuElem = elem.nextElementSibling;
       for (const el of menuElem.querySelectorAll('button')) {
         el.disabled = !elem.hasAttribute('checked');
       }
@@ -767,7 +767,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     }, {passive: true});
     elem.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      editor.showContextMenu(event.currentTarget.parentElement.querySelector('ul'), event);
+      editor.showContextMenu(event.currentTarget.nextElementSibling, event);
     });
 
     var elem = wrapper.querySelector('.toolbar-save-deleteErased');
