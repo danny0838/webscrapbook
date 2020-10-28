@@ -374,8 +374,8 @@
           addError(scrapbook.lang('ErrorSearchInvalidDate', [term]));
           return null;
         }
-        const since = match[1] ? this.dateUtcToLocal(pad(match[1], 17)) : pad("", 17);
-        const until = match[2] ? this.dateUtcToLocal(pad(match[2], 17)) : pad("", 17, "9");
+        const since = match[1] ? this.idLocalToUtc(pad(match[1], 17)) : pad("", 17);
+        const until = match[2] ? this.idLocalToUtc(pad(match[2], 17)) : pad("", 17, "9");
         return [since, until];
       };
 
@@ -683,8 +683,8 @@
       return true;
     },
 
-    dateUtcToLocal(dateStr) {
-      if (/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})$/.test(dateStr)) {
+    idLocalToUtc(id) {
+      if (/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})$/.test(id)) {
         const dd = new Date(
             parseInt(RegExp.$1, 10), Math.max(parseInt(RegExp.$2, 10), 1) - 1, Math.max(parseInt(RegExp.$3, 10), 1),
             parseInt(RegExp.$4, 10), parseInt(RegExp.$5, 10), parseInt(RegExp.$6, 10), parseInt(RegExp.$7, 10)
