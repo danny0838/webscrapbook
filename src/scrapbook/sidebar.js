@@ -1718,44 +1718,98 @@ ${scrapbook.escapeHtml(content)}
         const dialog = frag.children[0];
         scrapbook.loadLanguages(dialog);
 
-        const isRecycle = this.rootId === 'recycle';
+        // show dialog
+        {
+          const editDate = (elem) => {
+            const id = elem.getAttribute('data-id');
+            if (id) {
+              const date = scrapbook.idToDate(id);
+              date.setTime(date.valueOf() - date.getTimezoneOffset() * 60 * 1000);
+              elem.value = scrapbook.dateToId(date);
+            } else {
+              elem.value = '';
+            }
+            elem.setAttribute('data-editing', '');
+          };
+          const uneditDate = (elem) => {
+            if (!elem.hasAttribute('data-editing')) { return; }
 
-        dialog.querySelector('[name="id"]').value = id || "";
-        dialog.querySelector('[name="parent"]').value = item.parent || "";
-        dialog.querySelector('[name="recycled"]').value = item.recycled ? scrapbook.idToDate(item.recycled).toLocaleString() : "";
-        dialog.querySelector('[name="title"]').value = item.title || "";
-        dialog.querySelector('[name="index"]').value = item.index || "";
-        dialog.querySelector('[name="source"]').value = item.source || "";
-        dialog.querySelector('[name="icon"]').value = item.icon || "";
-        dialog.querySelector('[name="type"]').value = item.type || "";
-        dialog.querySelector('[name="marked"]').checked = item.marked;
-        dialog.querySelector('[name="locked"]').checked = item.locked;
-        dialog.querySelector('[name="charset"]').value = item.charset || "";
-        dialog.querySelector('[name="create"]').value = item.create ? scrapbook.idToDate(item.create).toLocaleString() : "";
-        dialog.querySelector('[name="modify"]').value = item.modify ? scrapbook.idToDate(item.modify).toLocaleString() : "";
-        dialog.querySelector('[name="comment"]').value = item.comment || "";
+            const date = scrapbook.idToDate(elem.value);
 
-        if (['postit'].includes(item.type)) {
-          dialog.querySelector('[name="title"]').setAttribute('readonly', '');
-        } else {
-          dialog.querySelector('[name="title"]').removeAttribute('readonly');
-        }
+            // if new date is valid, re-convert to id;
+            // otherwise revert to previous value
+            if (date) {
+              date.setTime(date.valueOf() + date.getTimezoneOffset() * 60 * 1000);
+              elem.setAttribute('data-id', scrapbook.dateToId(date));
+              elem.value = date.toLocaleString();
+            } else {
+              const id = elem.getAttribute('data-id');
+              elem.value = id ? scrapbook.idToDate(id).toLocaleString() : '';
+            }
 
-        dialog.querySelector('[name="parent"]').parentNode.parentNode.hidden = !(isRecycle);
-        dialog.querySelector('[name="recycled"]').parentNode.parentNode.hidden = !(isRecycle);
-        dialog.querySelector('[name="index"]').parentNode.parentNode.hidden = ['folder', 'separator', 'postit'].includes(item.type);
-        dialog.querySelector('[name="source"]').parentNode.parentNode.hidden = ['folder', 'separator', 'postit'].includes(item.type);
-        dialog.querySelector('[name="icon"]').parentNode.parentNode.hidden = ['separator', 'postit'].includes(item.type);
-        dialog.querySelector('[name="marked"]').parentNode.parentNode.hidden = ['separator'].includes(item.type);
-        dialog.querySelector('[name="locked"]').parentNode.parentNode.hidden = ['folder', 'separator', 'bookmark', 'postit'].includes(item.type);
-        dialog.querySelector('[name="charset"]').parentNode.parentNode.hidden = ['folder', 'separator', 'bookmark', 'postit'].includes(item.type);
+            elem.removeAttribute('data-editing');
+          };
+          const onDateFocus = (event) => {
+            editDate(event.target);
+          };
+          const onDateBlur = (event) => {
+            uneditDate(event.target);
+          };
 
-        dialog.addEventListener('dialogShow', (event) => {
-          dialog.querySelector('[name="title"]').focus();
-        });
+          const isRecycle = this.rootId === 'recycle';
 
-        if (!await this.showDialog(dialog)) {
-          return;
+          dialog.querySelector('[name="id"]').value = id || "";
+          dialog.querySelector('[name="parent"]').value = item.parent || "";
+          dialog.querySelector('[name="recycled"]').value = item.recycled ? scrapbook.idToDate(item.recycled).toLocaleString() : "";
+          dialog.querySelector('[name="title"]').value = item.title || "";
+          dialog.querySelector('[name="index"]').value = item.index || "";
+          dialog.querySelector('[name="source"]').value = item.source || "";
+          dialog.querySelector('[name="icon"]').value = item.icon || "";
+          dialog.querySelector('[name="type"]').value = item.type || "";
+          dialog.querySelector('[name="marked"]').checked = item.marked;
+          dialog.querySelector('[name="locked"]').checked = item.locked;
+          dialog.querySelector('[name="charset"]').value = item.charset || "";
+          dialog.querySelector('[name="comment"]').value = item.comment || "";
+
+          var elem = dialog.querySelector('[name="create"]');
+          elem.value = item.create ? scrapbook.idToDate(item.create).toLocaleString() : "";
+          elem.setAttribute('data-id', item.create || "");
+          elem.addEventListener('focus', onDateFocus);
+          elem.addEventListener('blur', onDateBlur);
+
+          var elem = dialog.querySelector('[name="modify"]');
+          elem.value = item.modify ? scrapbook.idToDate(item.modify).toLocaleString() : "";
+          elem.setAttribute('data-id', item.modify || "");
+          elem.addEventListener('focus', onDateFocus);
+          elem.addEventListener('blur', onDateBlur);
+
+          if (['postit'].includes(item.type)) {
+            dialog.querySelector('[name="title"]').setAttribute('readonly', '');
+          } else {
+            dialog.querySelector('[name="title"]').removeAttribute('readonly');
+          }
+
+          dialog.querySelector('[name="parent"]').parentNode.parentNode.hidden = !(isRecycle);
+          dialog.querySelector('[name="recycled"]').parentNode.parentNode.hidden = !(isRecycle);
+          dialog.querySelector('[name="index"]').parentNode.parentNode.hidden = ['folder', 'separator', 'postit'].includes(item.type);
+          dialog.querySelector('[name="source"]').parentNode.parentNode.hidden = ['folder', 'separator', 'postit'].includes(item.type);
+          dialog.querySelector('[name="icon"]').parentNode.parentNode.hidden = ['separator', 'postit'].includes(item.type);
+          dialog.querySelector('[name="marked"]').parentNode.parentNode.hidden = ['separator'].includes(item.type);
+          dialog.querySelector('[name="locked"]').parentNode.parentNode.hidden = ['folder', 'separator', 'bookmark', 'postit'].includes(item.type);
+          dialog.querySelector('[name="charset"]').parentNode.parentNode.hidden = ['folder', 'separator', 'bookmark', 'postit'].includes(item.type);
+
+          dialog.addEventListener('dialogShow', (event) => {
+            dialog.querySelector('[name="title"]').focus();
+          });
+
+          if (!await this.showDialog(dialog)) {
+            return;
+          }
+
+          // onblur may have not been triggered if the user submitted the form
+          // via enter without blurring focus.
+          uneditDate(dialog.querySelector('[name="create"]'));
+          uneditDate(dialog.querySelector('[name="modify"]'));
         }
 
         const dialogData = {
@@ -1765,6 +1819,8 @@ ${scrapbook.escapeHtml(content)}
           index: dialog.querySelector('[name="index"]').value,
           source: dialog.querySelector('[name="source"]').value,
           icon: dialog.querySelector('[name="icon"]').value,
+          create: dialog.querySelector('[name="create"]').getAttribute('data-id'),
+          modify: dialog.querySelector('[name="modify"]').getAttribute('data-id'),
           charset: dialog.querySelector('[name="charset"]').value,
           comment: dialog.querySelector('[name="comment"]').value,
         };
