@@ -24,9 +24,36 @@
   'use strict';
 
   class SearchTree extends CustomTree {
-    addItem(item) {
+    addItem(item, file) {
       const elem = this._addItem(item);
       const div = elem.controller;
+
+      handleSubFile: {
+        if (!file || file === '.') {
+          break handleSubFile;
+        }
+
+        const a = elem.anchor;
+        const p = item.index.toLowerCase();
+
+        if (p.endsWith('.htz')) {
+          if (file === 'index.html') {
+            break handleSubFile;
+          }
+          a.href = new URL(file, a.href + '!/').href;
+        } else if (p.endsWith('.maff')) {
+          a.href = new URL(file, a.href + '!/').href;
+        } else {
+          if (file === item.index.replace(/^.*\//, '')) {
+            break handleSubFile;
+          }
+          a.href = new URL(file, a.href).href;
+        }
+
+        const span = document.createElement('span');
+        span.textContent = ' (' + file + ')';
+        a.parentNode.insertBefore(span, a.nextSibling);
+      }
 
       var a = div.appendChild(document.createElement('a'));
       a.href = "#";
@@ -176,7 +203,7 @@
 
       for (const result of results) {
         const {id, file, meta, fulltext} = result;
-        tree.addItem(meta);
+        tree.addItem(meta, file);
       }
 
       // Add a <br> for spacing between books, and adds a spacing when the user
@@ -282,11 +309,6 @@
       div.classList.add('msg');
       if (className) { div.classList.add(className); }
       wrapper.appendChild(div);
-    },
-
-    isZipFile(path) {
-      const p = path.toLowerCase();
-      return p.endsWith('.htz') || p.endsWith('.maff');
     },
 
     async onClickLocate(event) {
