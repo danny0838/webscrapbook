@@ -1801,12 +1801,20 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             });
           } else {
             capturer.log(`Deleting old data files "${index}"...`);
-            await server.request({
-              url: target + `?a=delete`,
-              method: "POST",
-              format: 'json',
-              csrfToken: true,
-            });
+            try {
+              await server.request({
+                url: target + `?a=delete`,
+                method: "POST",
+                format: 'json',
+                csrfToken: true,
+              });
+            } catch (ex) {
+              if (ex.status === 404) {
+                console.error(ex);
+              } else {
+                throw ex;
+              }
+            }
           }
         }
 
