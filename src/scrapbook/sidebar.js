@@ -681,7 +681,7 @@
       if (event.dataTransfer.types.includes('text/uri-list') && this.rootId !== 'recycle') {
         this.enableUi(false);
 
-        const mode = event.altKey ? 'bookmark' : event.shiftKey ? '' : 'source';
+        const mode = event.altKey ? 'bookmark' : event.shiftKey ? 'tab' : 'source';
         try {
           const tasks = event.dataTransfer.getData('text/uri-list')
             .split('\r\n')
