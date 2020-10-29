@@ -242,14 +242,6 @@
       }
     }
 
-    getParentAndIndex(itemElem) {
-      const parentItemElem = itemElem.parentNode.parentNode;
-      const parentItemId = parentItemElem.getAttribute('data-id');
-      const siblingItems = parentItemElem.container.children;
-      const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-      return {parentItemElem, parentItemId, siblingItems, index}
-    }
-
     refreshItem(id) {
       Array.prototype.forEach.call(
         this.treeElem.querySelectorAll(`[data-id="${CSS.escape(id)}"]`),
