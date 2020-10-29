@@ -329,8 +329,19 @@
       event.dataTransfer.setData(
         'application/scrapbook.items+json',
         JSON.stringify({
-          book: this.book.id,
-          items: selectedItemElems.map(x => x.getAttribute('data-id')),
+          bookId: this.book.id,
+
+          // may be undefined if not implemented or initialized
+          treeLastModified: this.book.treeLastModified,
+
+          items: selectedItemElems.map(elem => {
+            const {parentItemId, index} = this.getParentAndIndex(elem);
+            return {
+              id: elem.getAttribute('data-id'),
+              parentId: parentItemId,
+              index,
+            };
+          }),
         })
       );
       event.dataTransfer.setData(
