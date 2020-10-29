@@ -568,9 +568,11 @@
       }
 
       if (event.dataTransfer.types.includes('application/scrapbook.items+json')) {
-        if (lastDraggedElems && isOnItem) {
-          // determine the drop effect according to modifiers
-          if (event.altKey && this.rootId !== 'recycle') {
+        if (isOnItem) {
+          if (!lastDraggedElems) {
+            // dragged from a different window
+            event.dataTransfer.dropEffect = 'copy';
+          } else if (event.altKey && this.rootId !== 'recycle') {
             event.dataTransfer.dropEffect = 'link';
           } else if (event.shiftKey && this.rootId !== 'recycle') {
             event.dataTransfer.dropEffect = 'copy';
@@ -619,23 +621,24 @@
       isOnItem = true,
     }) {
       if (event.dataTransfer.types.includes('application/scrapbook.items+json')) {
-        if (lastDraggedElems && isOnItem) {
-          const selectedItemElems = lastDraggedElems;
-          if (!selectedItemElems.length) {
-            // this shouldn't happen as lastDraggedElems should be all selected
+        if (isOnItem) {
+          const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.items+json'));
+          if (!data.items) {
             return;
           }
 
           this.enableUi(false);
 
           try {
-            if (event.altKey && this.rootId !== 'recycle') {
-              await this.linkItems(selectedItemElems, targetId, targetIndex);
+            if (!lastDraggedElems) {
+              // drag from a different window
+              await this.copyItems(data, targetId, targetIndex);
+            } else if (event.altKey && this.rootId !== 'recycle') {
+              await this.linkItems(lastDraggedElems, targetId, targetIndex);
             } else if (event.shiftKey && this.rootId !== 'recycle') {
-              const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.items+json'));
               await this.copyItems(data, targetId, targetIndex);
             } else {
-              await this.moveItems(selectedItemElems, targetId, targetIndex);
+              await this.moveItems(lastDraggedElems, targetId, targetIndex);
             }
           } catch (ex) {
             console.error(ex);
