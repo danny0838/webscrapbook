@@ -1226,10 +1226,13 @@
 
         const itemId = itemElem.getAttribute('data-id');
 
-        // forbid moving self to a decendant as it will become non-reachagble
-        if (this.book.getReachableItems(itemId).has(targetId)) { continue; }
-
         const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+
+        // Forbid moving self to a descendant as it will become non-reachagble
+        // (unless move within the same parent).
+        if (this.book.getReachableItems(itemId).has(targetId) && targetId !== parentItemId) {
+          continue;
+        }
 
         // update TOC
         const newIndex = this.book.moveItem({
