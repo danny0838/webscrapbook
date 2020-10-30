@@ -962,7 +962,14 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
       // clear stale data for items no longer reachable
       const removedItems = new Set();
       for (const id of allItems) {
-        if (curItems.has(id)) { continue; }
+        if (curItems.has(id)) {
+          // still reachable
+          continue;
+        }
+        if (!this.meta[id]) {
+          // already deleted, but repeatedly called due to some reason
+          continue;
+        }
         removedItems.add(this.meta[id]);
         delete this.meta[id];
         delete this.toc[id];
