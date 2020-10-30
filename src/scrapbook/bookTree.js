@@ -338,9 +338,10 @@
 
     onItemFolderClick(event) {
       event.preventDefault();
-      const target = event.currentTarget.previousSibling;
-      target.focus();
-      target.click();
+      const toggler = event.currentTarget.previousSibling;
+      if (!toggler) { return; }
+      toggler.focus();
+      toggler.click();
     }
   }
 
