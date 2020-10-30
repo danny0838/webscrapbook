@@ -433,7 +433,7 @@
       this.name = server.config.book[bookId].name;
       this.server = server;
       this.config = server.config.book[bookId];
-      this.treeLastModified = Infinity;
+      this.treeLastModified = undefined;
 
       if (!this.config) {
         throw new Error(`unknown scrapbook: ${bookId}`);
@@ -652,7 +652,7 @@
 
       // Check for equality as it's possible that the server has been switched
       // to another root directory that happens to have same config and book ID
-      if (this.treeLastModified !== treeLastModified) {
+      if (this.treeLastModified !== treeLastModified && typeof treeLastModified !== 'undefined') {
         return false;
       }
       return true;
