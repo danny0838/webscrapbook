@@ -338,7 +338,7 @@
     if (getOptionFromDocument('checker.resolveOlderMtime')) {
       params.append('resolve_older_mtime', 1);
     }
-    if (getOptionFromDocument('resolveTocUnreachable')) {
+    if (getOptionFromDocument('checker.resolveTocUnreachable')) {
       params.append('resolve_toc_unreachable', 1);
     }
     if (getOptionFromDocument('checker.resolveTocInvalid')) {
