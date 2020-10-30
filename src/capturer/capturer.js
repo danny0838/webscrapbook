@@ -586,104 +586,6 @@
   };
 
   /**
-   * Cache a favicon.
-   *
-   * @param {Object} params
-   * @param {Object} params.book
-   * @param {Object} params.item
-   * @param {string} params.icon - icon URL to cache
-   * @return {Promise<string>} the new icon URL
-   */
-  capturer.cacheFavIcon = async function (params) {
-    const {book, item, icon} = params;
-
-    const getShaFile = (data) => {
-      if (!data) { throw new Error(`Unable to fetch a file for this favicon URL.`); }
-
-      let {ab, mime, ext} = data;
-
-      // validate that we have a correct image mimetype
-      if (!mime.startsWith('image/') && mime !== 'application/octet-stream') {
-        throw new Error(`Invalid image mimetype '${mime}'.`);
-      }
-
-      // if no extension, generate one according to mime
-      if (!ext) { ext = Mime.extension(mime); }
-
-      const sha = scrapbook.sha1(ab, 'ARRAYBUFFER');
-      return new File([ab], `${sha}${ext ? '.' + ext : ''}`, {type: mime});
-    };
-
-    const getFavIcon = async (favIconUrl) => {
-      if (favIconUrl.startsWith("data:")) {
-        return scrapbook.dataUriToFile(favIconUrl, false);
-      }
-
-      const headers = {};
-      const xhr = await scrapbook.xhr({
-        url: favIconUrl,
-        responseType: 'blob',
-        timeout: 5000,
-        onreadystatechange(xhr) {
-          if (xhr.readyState !== 2) { return; }
-          if (xhr.status === 0) { return; }
-
-          // get headers
-          const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
-          if (headerContentDisposition) {
-            const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-            headers.filename = contentDisposition.parameters.filename;
-          }
-        },
-      });
-
-      const [, ext] = scrapbook.filenameParts(headers.filename || scrapbook.urlToFilename(xhr.responseURL));
-      const blob = xhr.response;
-      const mime = blob.type;
-
-      const ab = await scrapbook.readFileAsArrayBuffer(blob);
-      return getShaFile({ab, mime, ext});
-    };
-
-    if (!scrapbook.isUrlAbsolute(icon)) {
-      return icon;
-    }
-
-    try {
-      const base = book.dataUrl + item.index;
-      const file = await getFavIcon(icon);
-      const target = book.treeUrl + 'favicon/' + file.name;
-
-      const json = await server.request({
-        url: target,
-        method: "GET",
-        format: 'json',
-      }).then(r => r.json());
-
-      // save favicon if nonexistent or emptied
-      if (json.data.type === null || 
-          (file.size > 0 && json.data.type === 'file' && json.data.size === 0)) {
-        await server.request({
-          url: target + '?a=save',
-          method: "POST",
-          format: 'json',
-          csrfToken: true,
-          body: {
-            upload: file,
-          },
-        });
-      }
-
-      return scrapbook.getRelativeUrl(target, base);
-    } catch (ex) {
-      console.warn(ex);
-      capturer.warn(scrapbook.lang("ErrorFileDownloadError", [icon, ex.message]));
-    }
-
-    return icon;
-  };
-
-  /**
    * @kind invokable
    * @param {Object} params
    * @param {Object} params.item
@@ -703,7 +605,7 @@
 
     // cache favicon
     let icon = item.icon;
-    icon = await capturer.cacheFavIcon({book, item ,icon});
+    icon = await book.cacheFavIcon({item, icon});
 
     // lock tree before loading to avoid a conflict due to parallel captures
     await book.transaction({
@@ -1757,8 +1659,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         item.type = result.type;
         item.modify = timeId;
         item.source = sourceUrl;
-        item.icon = await capturer.cacheFavIcon({
-          book,
+        item.icon = await book.cacheFavIcon({
           item,
           icon: result.favIconUrl,
         });
