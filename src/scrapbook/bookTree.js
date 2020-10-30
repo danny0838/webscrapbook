@@ -233,6 +233,13 @@
           TOGGLER_ICON.expanded :
           TOGGLER_ICON.collapsed;
       }
+
+      // deselect descendants to avoid a suprise due to unexpected selection
+      if (!willOpen) {
+        for (const elem of container.querySelectorAll('.highlight')) {
+          elem.classList.remove('highlight');
+        }
+      }
     }
 
     getParentAndIndex(itemElem) {
