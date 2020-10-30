@@ -170,7 +170,7 @@
 
       const div = elem.controller;
       div.textContent = '';
-      if (elem.toggle) { div.appendChild(elem.toggle); }
+      if (elem.toggler) { div.appendChild(elem.toggler); }
 
       if (meta.type !== 'separator') {
         var a = elem.anchor = div.appendChild(document.createElement('a'));

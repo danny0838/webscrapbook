@@ -152,16 +152,16 @@
 
       const div = elem.controller;
 
-      const toggle = elem.toggle = document.createElement('a');
-      toggle.href = '#';
-      toggle.className = 'toggle';
-      toggle.addEventListener('click', this.onItemTogglerClick);
-      div.insertBefore(toggle, div.firstChild);
+      const toggler = elem.toggler = document.createElement('a');
+      toggler.href = '#';
+      toggler.className = 'toggle';
+      toggler.addEventListener('click', this.onItemTogglerClick);
+      div.insertBefore(toggler, div.firstChild);
 
-      const toggleImg = document.createElement('img');
-      toggleImg.src = TOGGLER_ICON.collapsed;
-      toggleImg.alt = '';
-      toggle.appendChild(toggleImg);
+      const togglerImg = document.createElement('img');
+      togglerImg.src = TOGGLER_ICON.collapsed;
+      togglerImg.alt = '';
+      toggler.appendChild(togglerImg);
 
       const container = elem.container = document.createElement('ul');
       container.className = 'container';
@@ -172,9 +172,9 @@
     itemReduceContainer(elem) {
       if (!elem.container) { return; }
       if (elem.container.hasAttribute('data-loaded') && !elem.container.hasChildNodes()) {
-        // remove toggle
-        if (elem.toggle && elem.toggle.parentNode) {
-          elem.toggle.remove();
+        // remove toggler
+        if (this.treeElem.contains(elem.toggler)) {
+          elem.toggler.remove();
         }
 
         // remove container
@@ -226,11 +226,12 @@
       container.hidden = !willOpen;
 
       // toggle the toggler (twisty)
-      // root item container's previousSibling is undefined
-      if (container.previousSibling) {
-        container.previousSibling.firstChild.firstChild.src = willOpen ?
-        TOGGLER_ICON.expanded :
-        TOGGLER_ICON.collapsed;
+      // note that root item does not have a toggler
+      const toggler = elem.toggler;
+      if (toggler) {
+        toggler.firstChild.src = willOpen ?
+          TOGGLER_ICON.expanded :
+          TOGGLER_ICON.collapsed;
       }
     }
 
