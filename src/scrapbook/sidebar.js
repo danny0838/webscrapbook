@@ -1218,11 +1218,11 @@
       }
     },
 
-    itemIsValidTarget(itemId) {
-      return itemId && (!!this.book.meta[itemId] || this.book.isSpecialItem(itemId));
-    },
-
     async moveItems(sourceItemElems, targetId, targetIndex) {
+      if (!targetId || !(!!this.book.meta[targetId] || this.book.isSpecialItem(targetId))) {
+        return;
+      }
+
       // Reverse the order to always move an item before its parent so that
       // its parent is in the DOM and gets children updated correctly.
       const itemElems = [...sourceItemElems].reverse();
@@ -1266,6 +1266,10 @@
     },
 
     async linkItems(sourceItemElems, targetId, targetIndex) {
+      if (!targetId || !(!!this.book.meta[targetId] || this.book.isSpecialItem(targetId))) {
+        return;
+      }
+
       for (const itemElem of sourceItemElems) {
         const itemId = itemElem.getAttribute('data-id');
 
@@ -2195,8 +2199,6 @@ Redirecting to file <a href="index.md">index.md</a>
           targetIndex = isNaN(targetIndex) ? Infinity : Math.max(targetIndex, 0);
           mode = dialog['mode'].value;
         }
-
-        if (!this.itemIsValidTarget(targetId)) { return; }
 
         switch (mode) {
           case "link": {
