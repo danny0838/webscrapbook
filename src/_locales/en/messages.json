@@ -1157,6 +1157,9 @@
   "ScrapBookCommandMetaDialogType": {
     "message": "Type:"
   },
+  "ScrapBookCommandMoveDialogId": {
+    "message": "Move into the item of this ID:"
+  },
   "ScrapBookCommandMoveDialogIndex": {
     "message": "Position (start from 0, empty for last):"
   },
@@ -1168,9 +1171,6 @@
   },
   "ScrapBookCommandMoveDialogModeMove": {
     "message": "Move"
-  },
-  "ScrapBookCommandMoveDialogTitle": {
-    "message": "Move into the item of this ID:"
   },
   "ScrapBookCommandMoveDown": {
     "message": "Move down"

@@ -1157,8 +1157,11 @@
   "ScrapBookCommandMetaDialogType": {
     "message": "類型:"
   },
+  "ScrapBookCommandMoveDialogId": {
+    "message": "移動到這個 ID 的項目下:"
+  },
   "ScrapBookCommandMoveDialogIndex": {
-    "message": "位置 (從 0 開始，空白則移至最後):"
+    "message": "位置 (從 0 開始，留空則置於最後):"
   },
   "ScrapBookCommandMoveDialogMode": {
     "message": "模式:"
@@ -1169,14 +1172,11 @@
   "ScrapBookCommandMoveDialogModeMove": {
     "message": "移動"
   },
-  "ScrapBookCommandMoveDialogTitle": {
-    "message": "移動到這個 ID 的項目下:"
-  },
   "ScrapBookCommandMoveDown": {
     "message": "下移"
   },
   "ScrapBookCommandMoveTo": {
-    "message": "移動至"
+    "message": "移動到"
   },
   "ScrapBookCommandMoveUp": {
     "message": "上移"
