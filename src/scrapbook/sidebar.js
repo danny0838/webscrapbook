@@ -1333,28 +1333,6 @@
           const item = sourceBook.meta[itemId];
           if (!item) { return; }
 
-          targetParentId = idMapping.get(targetParentId) || targetParentId;
-
-          // link if itemId is already copied
-          if (idMapping.has(itemId)) {
-            itemId = idMapping.get(itemId);
-
-            // update TOC
-            const newIndex = targetBook.moveItem({
-              id: itemId,
-              currentParentId: null,
-              targetParentId,
-              targetIndex,
-            });
-
-            // update DOM
-            if (targetBook === this.book) {
-              this.tree.insertItem(itemId, targetParentId, newIndex);
-            }
-
-            return;
-          }
-
           const targetId = targetBook.meta[itemId] ? targetBook.generateId() : itemId;
           const newItem = Object.assign({}, item, {id: targetId});
           idMapping.set(itemId, targetId);
@@ -1431,24 +1409,65 @@
           return newIndex;
         };
 
-        for (const {id: itemId, parentId, index} of sourceItems) {
-          const descInfos = sourceBook.getReachableItemPos(itemId, parentId, index);
+        const _linkItem = (itemId, targetParentId, targetIndex) => {
+          // update TOC
+          const newIndex = targetBook.moveItem({
+            id: itemId,
+            currentParentId: null,
+            targetParentId,
+            targetIndex,
+          });
 
-          // skip if invalid item ID or position
-          if (!descInfos.length) {
-            continue;
+          // update DOM
+          if (targetBook === this.book) {
+            this.tree.insertItem(itemId, targetParentId, targetIndex);
           }
 
-          idMapping.clear();
-          const newIndex = await _copyItem(itemId, targetParentId, targetIndex);
+          return newIndex;
+        };
 
-          // copy descendant items (excluding self)
-          descInfos.shift();
-          for (const {id: descItemId, parentId: descParentId, index: descIndex} of descInfos) {
-            await _copyItem(descItemId, descParentId, descIndex);
+        const _addDecendingItems = async (id, parentId, index, idChain) => {
+          // this id is already copied, link to it and do not add descendants
+          if (idMapping.has(id)) {
+            return _linkItem(idMapping.get(id), parentId, index);
           }
 
-          targetIndex = newIndex + 1;
+          const newIndex = await _copyItem(id, parentId, index);
+
+          // failed to add id
+          if (!Number.isInteger(newIndex)) { return newIndex; }
+
+          // this is a recursive node, do not add descendants
+          if (idChain.has(id)) { return newIndex; }
+
+          // recursively add descendants to the generated item copy
+          const toc = sourceBook.toc[id];
+          if (toc) {
+            idChain.add(id);
+            for (let i = 0, I = toc.length; i < I; ++i) {
+              await _addDecendingItems(toc[i], idMapping.get(id), i, idChain);
+            }
+            idChain.delete(id);
+          }
+
+          return newIndex;
+        };
+
+        for (const {id, parentId, index} of sourceItems) {
+          // copy item and descendants
+          const idChain = new Set();
+
+          // validate that id matches the provided parentId and index
+          const toc = sourceBook.toc[parentId];
+          if (!toc || toc[index] !== id) {
+            return;
+          }
+
+          const newIndex = await _addDecendingItems(id, targetParentId, targetIndex, idChain);
+
+          if (Number.isInteger(newIndex)) {
+            targetIndex = newIndex + 1;
+          }
         }
 
         // upload changes to server
