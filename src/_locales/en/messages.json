@@ -1082,6 +1082,18 @@
   "ScrapBookCommandBrowse": {
     "message": "Browse locally"
   },
+  "ScrapBookCommandCopyDialogBook": {
+    "message": "Copy to scrapbook:"
+  },
+  "ScrapBookCommandCopyDialogIndex": {
+    "message": "Position (start from 0, empty for last):"
+  },
+  "ScrapBookCommandCopyDialogRoot": {
+    "message": "Copy into the item of this ID:"
+  },
+  "ScrapBookCommandCopyTo": {
+    "message": "Copy to"
+  },
   "ScrapBookCommandCreateNote": {
     "message": "New Note"
   },
@@ -1266,6 +1278,9 @@
         "content": "$1"
       }
     }
+  },
+  "ScrapBookErrorDraggedTreeOutdated": {
+    "message": "Tree data of the source page of this drag is outdated. Refresh that page and try again."
   },
   "ScrapBookErrorInitTree": {
     "message": "Unable to init tree: $REASON$",

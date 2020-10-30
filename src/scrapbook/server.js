@@ -1101,6 +1101,41 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
     }
 
     /**
+     * Get a flattened array of reachable items and their toc position, including
+     * self.
+     *
+     * @param {string} id
+     * @param {string} parentId
+     * @param {integer} index
+     * @return {Array}
+     */
+    getReachableItemPos(id, parentId, index) {
+      const idChain = new Set();
+      const rv = [];
+
+      const _addDecendingItems = (id, parentId, index) => {
+        rv.push({id, parentId, index});
+        if (idChain.has(id)) { return; }
+        const toc = this.toc[id];
+        if (toc) {
+          idChain.add(id);
+          for (let i = 0, I = toc.length; i < I; ++i) {
+            const childId = toc[i];
+            _addDecendingItems(childId, id, i);
+          }
+          idChain.delete(id);
+        }
+      };
+
+      const toc = this.toc[parentId];
+      if (toc && toc[index] === id) {
+        _addDecendingItems(id, parentId, index);
+      }
+
+      return rv;
+    }
+
+    /**
      * Check whether url is a valid index file for item.
      *
      * - Currently any ~/inde.html in a MAFF archive is considered true as

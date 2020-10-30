@@ -1082,6 +1082,18 @@
   "ScrapBookCommandBrowse": {
     "message": "在文件管理员检视"
   },
+  "ScrapBookCommandCopyDialogBook": {
+    "message": "复制到剪贴簿:"
+  },
+  "ScrapBookCommandCopyDialogIndex": {
+    "message": "位置 (从 0 开始，留空则置于最后):"
+  },
+  "ScrapBookCommandCopyDialogRoot": {
+    "message": "复制到这个 ID 的项目下:"
+  },
+  "ScrapBookCommandCopyTo": {
+    "message": "複製到"
+  },
   "ScrapBookCommandCreateNote": {
     "message": "添加笔记"
   },
@@ -1266,6 +1278,9 @@
         "content": "$1"
       }
     }
+  },
+  "ScrapBookErrorDraggedTreeOutdated": {
+    "message": "拖放来源页面的目录树资料已过时，请刷新该页面再尝试。"
   },
   "ScrapBookErrorInitTree": {
     "message": "无法初始化目录树: $REASON$",

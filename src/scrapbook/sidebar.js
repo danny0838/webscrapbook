@@ -201,6 +201,7 @@
           menuElem.querySelector('button[value="move_up"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="move_down"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="move_into"]').disabled = isNoTree;
+          menuElem.querySelector('button[value="copy_into"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="drag"]').disabled = isNoTree;
           menuElem.querySelector('button[value="recycle"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="delete"]').disabled = !(!isNoTree && isRecycle);
@@ -571,6 +572,8 @@
           // determine the drop effect according to modifiers
           if (event.altKey && this.rootId !== 'recycle') {
             event.dataTransfer.dropEffect = 'link';
+          } else if (event.shiftKey && this.rootId !== 'recycle') {
+            event.dataTransfer.dropEffect = 'copy';
           } else {
             event.dataTransfer.dropEffect = 'move';
           }
@@ -628,6 +631,9 @@
           try {
             if (event.altKey && this.rootId !== 'recycle') {
               await this.linkItems(selectedItemElems, targetId, targetIndex);
+            } else if (event.shiftKey && this.rootId !== 'recycle') {
+              const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.items+json'));
+              await this.copyItems(data, targetId, targetIndex);
             } else {
               await this.moveItems(selectedItemElems, targetId, targetIndex);
             }
@@ -932,6 +938,7 @@
           menuElem.querySelector('button[value="move_up"]').hidden = true;
           menuElem.querySelector('button[value="move_down"]').hidden = true;
           menuElem.querySelector('button[value="move_into"]').hidden = true;
+          menuElem.querySelector('button[value="copy_into"]').hidden = true;
           menuElem.querySelector('button[value="recycle"]').hidden = true;
           menuElem.querySelector('button[value="delete"]').hidden = true;
 
@@ -962,6 +969,7 @@
           menuElem.querySelector('button[value="move_up"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="move_down"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="move_into"]').hidden = false;
+          menuElem.querySelector('button[value="copy_into"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="recycle"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
 
@@ -990,6 +998,7 @@
           menuElem.querySelector('button[value="move_up"]').hidden = true;
           menuElem.querySelector('button[value="move_down"]').hidden = true;
           menuElem.querySelector('button[value="move_into"]').hidden = false;
+          menuElem.querySelector('button[value="copy_into"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="recycle"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
 
@@ -1295,6 +1304,209 @@
           await book.loadTreeFiles(true);  // update treeLastModified
         },
       });
+    },
+
+    async copyItems({bookId: sourceBookId, treeLastModified, items: sourceItems},
+        targetParentId, targetIndex, targetBookId = this.bookId) {
+      const sourceBook = server.books[sourceBookId];
+      if (!sourceBook || sourceBook.config.no_tree) { return; }
+
+      const targetBook = server.books[targetBookId];
+      if (!targetBook || targetBook.config.no_tree) { return; }
+
+      const _copyItems = async (book) => {
+        await book.loadMeta();
+        await book.loadToc();
+
+        const sourceBookFaviconPrefix = scrapbook.normalizeUrl(sourceBook.treeUrl + 'favicon/');
+        const targetBookFaviconPrefix = scrapbook.normalizeUrl(targetBook.treeUrl + 'favicon/');
+
+        const itemsToCache = [];
+
+        // a mapping for item descendants be attached to the newly created parent
+        const idMapping = new Map();
+
+        const _copyItem = async (itemId, targetParentId, targetIndex) => {
+          const item = sourceBook.meta[itemId];
+          if (!item) { return; }
+
+          targetParentId = idMapping.get(targetParentId) || targetParentId;
+
+          // link if itemId is already copied
+          if (idMapping.has(itemId)) {
+            itemId = idMapping.get(itemId);
+
+            // update TOC
+            const newIndex = targetBook.moveItem({
+              id: itemId,
+              currentParentId: null,
+              targetParentId,
+              targetIndex,
+            });
+
+            // update DOM
+            if (targetBook === this.book) {
+              this.tree.insertItem(itemId, targetParentId, newIndex);
+            }
+
+            return;
+          }
+
+          const targetId = targetBook.meta[itemId] ? targetBook.generateId() : itemId;
+          const newItem = Object.assign({}, item, {id: targetId});
+          idMapping.set(itemId, targetId);
+
+          // copy data files
+          let oldIndexFile;
+          let newIndexFile;
+          if (item.index) {
+            if (item.index.endsWith('/index.html')) {
+              oldIndexFile = item.index.replace(/[/][^/]*$/, '');
+              newIndexFile = `${targetId}`;
+              newItem.index = `${targetId}/index.html`;
+            } else {
+              let [, ext] = scrapbook.filenameParts(item.index);
+              ext = ext ? '.' + ext : '';
+              oldIndexFile = item.index;
+              newIndexFile = `${targetId}${ext}`;
+              newItem.index = `${targetId}${ext}`;
+            }
+
+            const source = sourceBook.dataUrl + scrapbook.escapeFilename(oldIndexFile);
+            const target = '/' + (targetBook.dataUrl + scrapbook.escapeFilename(newIndexFile)).slice(server.serverRoot.length);
+            const u = new URL(source);
+            u.searchParams.append('a', 'copy');
+            u.searchParams.append('target', decodeURIComponent(target));
+            await server.request({
+              url: u,
+              method: "POST",
+              format: 'json',
+              csrfToken: true,
+            });
+
+            itemsToCache.push(newItem.id);
+          }
+
+          // copy cached favicon
+          if (sourceBook !== targetBook && item.icon) {
+            let oldIcon = new URL(item.icon, sourceBook.dataUrl + scrapbook.escapeFilename(item.index || ''));
+            oldIcon = scrapbook.normalizeUrl(oldIcon.href);
+            if (oldIcon.startsWith(sourceBookFaviconPrefix)) {
+              const [oldIconMain, oldIconSearch, oldIconHash] = scrapbook.splitUrl(oldIcon);
+              const newIcon = targetBookFaviconPrefix + oldIconMain.replace(/^.*[/]/, '');
+              newItem.icon = scrapbook.getRelativeUrl(newIcon, targetBook.dataUrl + scrapbook.escapeFilename(newItem.index || ''));
+
+              const u = new URL(oldIconMain);
+              u.searchParams.append('a', 'copy');
+              u.searchParams.append('target', decodeURIComponent(newIcon.slice(server.serverRoot.length)));
+              try {
+                await server.request({
+                  url: u,
+                  method: "POST",
+                  format: 'json',
+                  csrfToken: true,
+                });
+              } catch (ex) {
+                console.error(ex);
+              }
+            }
+          }
+
+          // update TOC
+          targetBook.addItem({
+            item: newItem,
+            parentId: targetParentId,
+            index: targetIndex,
+          });
+          const newIndex = Number.isInteger(targetIndex) ? targetIndex : targetBook.toc[targetParentId].length - 1;
+
+          // update DOM
+          if (targetBook === this.book) {
+            this.tree.insertItem(targetId, targetParentId, newIndex);
+          }
+
+          return newIndex;
+        };
+
+        for (const {id: itemId, parentId, index} of sourceItems) {
+          const descInfos = sourceBook.getReachableItemPos(itemId, parentId, index);
+
+          // skip if invalid item ID or position
+          if (!descInfos.length) {
+            continue;
+          }
+
+          idMapping.clear();
+          const newIndex = await _copyItem(itemId, targetParentId, targetIndex);
+
+          // copy descendant items (excluding self)
+          descInfos.shift();
+          for (const {id: descItemId, parentId: descParentId, index: descIndex} of descInfos) {
+            await _copyItem(descItemId, descParentId, descIndex);
+          }
+
+          targetIndex = newIndex + 1;
+        }
+
+        // upload changes to server
+        await book.saveMeta();
+        await book.saveToc();
+
+        if (itemsToCache.length > 0) {
+          // Due to a concern of URL length and performance, skip cache
+          // update if too many items are affected.
+          await server.requestSse({
+            query: {
+              "a": "cache",
+              "book": book.id,
+              "item": itemsToCache.slice(0, 10),
+              "fulltext": 1,
+              "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+              "no_lock": 1,
+              "no_backup": 1,
+            },
+            onMessage(info) {
+              if (['error', 'critical'].includes(info.type)) {
+                this.error(`Error when updating fulltext cache: ${info.msg}`);
+              }
+            },
+          });
+        }
+
+        await book.loadTreeFiles(true);  // update treeLastModified
+      };
+
+      if (sourceBook !== targetBook) {
+        await sourceBook.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            // validate if the dragging source is up to date
+            if (treeLastModified !== book.treeLastModified) {
+              throw new Error(scrapbook.lang('ScrapBookErrorDraggedTreeOutdated'));
+            }
+
+            await book.loadMeta();
+            await book.loadToc();
+
+            await targetBook.transaction({
+              mode: 'validate',
+              callback: _copyItems,
+            });
+          },
+        });
+      } else {
+        await targetBook.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            // validate if the dragging source is up to date
+            if (treeLastModified !== book.treeLastModified) {
+              throw new Error(scrapbook.lang('ScrapBookErrorDraggedTreeOutdated'));
+            }
+
+            await _copyItems(book);
+          },
+        });
+      }
     },
 
     async uploadItems(files, targetId, targetIndex) {
@@ -2211,6 +2423,58 @@ Redirecting to file <a href="index.md">index.md</a>
             break;
           }
         }
+      },
+
+      async copy_into({itemElems}) {
+        if (!itemElems.length) { return; }
+
+        let targetBookId;
+        let targetId;
+        let targetIndex;
+        let mode;
+        {
+          const frag = document.importNode(document.getElementById('tpl-copy-into').content, true);
+          const dialog = frag.children[0];
+          scrapbook.loadLanguages(dialog);
+
+          const bookSelector = dialog.querySelector('select');
+          for (const key of Object.keys(server.books).sort()) {
+            const book = server.books[key];
+            if (book.config.no_tree) { continue; }
+            const opt = document.createElement('option');
+            opt.value = book.id;
+            opt.textContent = book.name;
+            bookSelector.appendChild(opt);
+          }
+          bookSelector.value = this.bookId;
+
+          dialog.addEventListener('dialogShow', (event) => {
+            dialog.querySelector('[name="id"]').focus();
+          });
+
+          if (!await this.showDialog(dialog)) {
+            return;
+          }
+
+          targetBookId = bookSelector.value;
+          targetId = dialog.querySelector('[name="id"]').value;
+          targetIndex = parseInt(dialog.querySelector('[name="index"]').value, 10);
+          targetIndex = isNaN(targetIndex) ? Infinity : Math.max(targetIndex, 0);
+        }
+
+        const items = itemElems.reduce((list, itemElem) => {
+          const id = itemElem.getAttribute('data-id');
+          const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+          list.push({
+            id,
+            parentId: parentItemId,
+            index,
+          });
+
+          return list;
+        }, []);
+        await this.copyItems({bookId: this.bookId, treeLastModified: this.book.treeLastModified, items},
+          targetId, targetIndex, targetBookId);
       },
 
       async recycle({itemElems}) {

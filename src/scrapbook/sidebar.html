@@ -68,6 +68,7 @@
   <button value="move_up" hidden>__MSG_ScrapBookCommandMoveUp__</button>
   <button value="move_down" hidden>__MSG_ScrapBookCommandMoveDown__</button>
   <button value="move_into" hidden>__MSG_ScrapBookCommandMoveTo__...</button>
+  <button value="copy_into" hidden>__MSG_ScrapBookCommandCopyTo__...</button>
   <button value="drag" hidden></button>
   <button value="recycle" hidden>__MSG_ScrapBookCommandRecycle__</button>
   <button value="delete" hidden>__MSG_ScrapBookCommandDelete__</button>
@@ -178,6 +179,29 @@
         <label><input type="radio" name="mode" value="move" checked><span>__MSG_ScrapBookCommandMoveDialogModeMove__</span></label>
         <label><input type="radio" name="mode" value="link"><span>__MSG_ScrapBookCommandMoveDialogModeLink__</span></label>
       </dd>
+    </div>
+  </dl>
+  <div class="buttons">
+    <input type="submit" value="__MSG_OK__">
+    <input type="button" class="cancel" value="__MSG_Cancel__">
+  </div>
+</form>
+</template>
+
+<template id="tpl-copy-into">
+<form>
+  <dl>
+    <div>
+      <dt>__MSG_ScrapBookCommandCopyDialogBook__</dt>
+      <dd><select name="book"></select></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookCommandCopyDialogRoot__</dt>
+      <dd><input type="text" name="id" value="root"></dd>
+    </div>
+    <div>
+      <dt>__MSG_ScrapBookCommandCopyDialogIndex__</dt>
+      <dd><input type="number" name="index" min="0" value=""></dd>
     </div>
   </dl>
   <div class="buttons">

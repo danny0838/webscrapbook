@@ -1082,6 +1082,18 @@
   "ScrapBookCommandBrowse": {
     "message": "在檔案管理員檢視"
   },
+  "ScrapBookCommandCopyDialogBook": {
+    "message": "複製到剪貼簿:"
+  },
+  "ScrapBookCommandCopyDialogIndex": {
+    "message": "位置 (從 0 開始，留空則置於最後):"
+  },
+  "ScrapBookCommandCopyDialogRoot": {
+    "message": "複製到這個 ID 的項目下:"
+  },
+  "ScrapBookCommandCopyTo": {
+    "message": "複製到"
+  },
   "ScrapBookCommandCreateNote": {
     "message": "新增筆記"
   },
@@ -1266,6 +1278,9 @@
         "content": "$1"
       }
     }
+  },
+  "ScrapBookErrorDraggedTreeOutdated": {
+    "message": "拖放來源頁面的目錄樹資料已過時，請重新整理該頁面再嘗試。"
   },
   "ScrapBookErrorInitTree": {
     "message": "無法初始化目錄樹: $REASON$",
