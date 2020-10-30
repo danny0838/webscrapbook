@@ -201,7 +201,7 @@
           menuElem.querySelector('button[value="move_up"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="move_down"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="move_into"]').disabled = isNoTree;
-          menuElem.querySelector('button[value="move_drag"]').disabled = isNoTree;
+          menuElem.querySelector('button[value="drag"]').disabled = isNoTree;
           menuElem.querySelector('button[value="recycle"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="delete"]').disabled = !(!isNoTree && isRecycle);
 
@@ -561,7 +561,7 @@
       }
 
       // disallow when drag disabled
-      if (document.querySelector('#command-popup button[value="move_drag"]:disabled')) {
+      if (document.querySelector('#command-popup button[value="drag"]:disabled')) {
         event.dataTransfer.dropEffect = 'none';
         return;
       }
