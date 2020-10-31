@@ -1329,11 +1329,18 @@
         // a mapping for item descendants be attached to the newly created parent
         const idMapping = new Map();
 
+        const _tidyFilename = (name) => {
+          name = scrapbook.validateFilename(name);
+          name = scrapbook.crop(name, 128, 240);
+          return name;
+        };
+
         const _copyItem = async (itemId, targetParentId, targetIndex) => {
           const item = sourceBook.meta[itemId];
           if (!item) { return; }
 
           const targetId = targetBook.meta[itemId] ? targetBook.generateId() : itemId;
+          const targetFilename = _tidyFilename(targetId);
           const newItem = Object.assign({}, item, {id: targetId});
           idMapping.set(itemId, targetId);
 
@@ -1343,14 +1350,14 @@
           if (item.index) {
             if (item.index.endsWith('/index.html')) {
               oldIndexFile = item.index.replace(/[/][^/]*$/, '');
-              newIndexFile = `${targetId}`;
-              newItem.index = `${targetId}/index.html`;
+              newIndexFile = `${targetFilename}`;
+              newItem.index = `${targetFilename}/index.html`;
             } else {
               let [, ext] = scrapbook.filenameParts(item.index);
               ext = ext ? '.' + ext : '';
               oldIndexFile = item.index;
-              newIndexFile = `${targetId}${ext}`;
-              newItem.index = `${targetId}${ext}`;
+              newIndexFile = `${targetFilename}${ext}`;
+              newItem.index = `${targetFilename}${ext}`;
             }
 
             const source = sourceBook.dataUrl + scrapbook.escapeFilename(oldIndexFile);
