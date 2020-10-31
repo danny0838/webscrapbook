@@ -530,7 +530,6 @@
     onTreeContextMenu(event) {
       // disallow when commands disabled
       if (document.querySelector('#command:disabled')) {
-        event.dataTransfer.dropEffect = 'none';
         return;
       }
 
