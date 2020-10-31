@@ -1335,6 +1335,26 @@
           return name;
         };
 
+        const _uniquifyFilename = async (name) => {
+          const isFilenameTaken = async (path) => {
+            const target = targetBook.dataUrl + scrapbook.escapeFilename(path);
+            const info = await server.request({
+              url: target + '?a=info',
+              format: 'json',
+              method: "GET",
+            }).then(r => r.json()).then(r => r.data);
+            return info.type !== null;
+          };
+
+          let [base, ext] = scrapbook.filenameParts(name);
+          let index = 0;
+          while (await isFilenameTaken(name)) {
+            name = base + '(' + (++index) + ')' + (ext ? '.' + ext : '');
+          }
+
+          return name;
+        };
+
         const _copyItem = async (itemId, targetParentId, targetIndex) => {
           const item = sourceBook.meta[itemId];
           if (!item) { return; }
@@ -1350,14 +1370,14 @@
           if (item.index) {
             if (item.index.endsWith('/index.html')) {
               oldIndexFile = item.index.replace(/[/][^/]*$/, '');
-              newIndexFile = `${targetFilename}`;
-              newItem.index = `${targetFilename}/index.html`;
+              newIndexFile = await _uniquifyFilename(`${targetFilename}`);
+              newItem.index = `${newIndexFile}/index.html`;
             } else {
               let [, ext] = scrapbook.filenameParts(item.index);
               ext = ext ? '.' + ext : '';
               oldIndexFile = item.index;
-              newIndexFile = `${targetFilename}${ext}`;
-              newItem.index = `${targetFilename}${ext}`;
+              newIndexFile = await _uniquifyFilename(`${targetFilename}${ext}`);
+              newItem.index = `${newIndexFile}`;
             }
 
             const source = sourceBook.dataUrl + scrapbook.escapeFilename(oldIndexFile);
