@@ -3,6 +3,16 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.89.0] - 2020-10-31
+* Added "copy" command to sidebar.
+* Added support for cross-scrapbook drag-and-drop.
+* The descendant items are now automatically deselected when an item is toggled collapsed.
+* Fixed an issue that the sidebar is unlocked when a dialog is dismissed, even though the command is still running.
+
+## [0.88.0] - 2020-10-29
+* Added support of editing created and modified time in the sidebar.
+* Added suport of `index:` command for the search page.
+
 ## [0.87.0] - 2020-10-27
 * Bumped server requirement to >= 0.29.
 * Added "sort" command to sidebar.
