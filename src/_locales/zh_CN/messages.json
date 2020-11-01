@@ -1017,6 +1017,9 @@
   "OptionScrapbookBackupForRecaptureLabel": {
     "message": "重新获取时建立备份"
   },
+  "OptionScrapbookBackupForRecaptureTooltip": {
+    "message": "重新获取会在获取成功后将旧版本移到后端服务器设定的备份目录，若取消勾选则删除文件不留备份。\n\n• 注意：重新获取时会尝试复制旧获取页面中的批注，但可能有批注无法顺利复制或程序侦测不到，因此一般建议保留备份以防万一。"
+  },
   "OptionScrapbookDefaultSearchLabel": {
     "message": "默认搜索条件:"
   },

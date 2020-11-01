@@ -1017,6 +1017,9 @@
   "OptionScrapbookBackupForRecaptureLabel": {
     "message": "重新擷取時建立備份"
   },
+  "OptionScrapbookBackupForRecaptureTooltip": {
+    "message": "重新擷取會在擷取成功後將舊版本移到後端伺服器設定的備份目錄，若取消勾選則刪除檔案不留備份。\n\n• 注意：重新擷取時會嘗試複製舊擷取頁面中的批註，但可能有批註無法順利複製或程式偵測不到，因此一般建議保留備份以防萬一。"
+  },
   "OptionScrapbookDefaultSearchLabel": {
     "message": "預設搜尋條件:"
   },
