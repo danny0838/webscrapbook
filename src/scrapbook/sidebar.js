@@ -1310,7 +1310,7 @@
     },
 
     async copyItems({bookId: sourceBookId, treeLastModified, items: sourceItems},
-        targetParentId, targetIndex, targetBookId = this.bookId) {
+        targetParentId, targetIndex, targetBookId = this.bookId, recursively = true) {
       const sourceBook = server.books[sourceBookId];
       if (!sourceBook || sourceBook.config.no_tree) { return; }
 
@@ -1468,13 +1468,15 @@
           if (idChain.has(id)) { return newIndex; }
 
           // recursively add descendants to the generated item copy
-          const toc = sourceBook.toc[id];
-          if (toc) {
-            idChain.add(id);
-            for (let i = 0, I = toc.length; i < I; ++i) {
-              await _addDecendingItems(toc[i], idMapping.get(id), i, idChain);
+          if (recursively) {
+            const toc = sourceBook.toc[id];
+            if (toc) {
+              idChain.add(id);
+              for (let i = 0, I = toc.length; i < I; ++i) {
+                await _addDecendingItems(toc[i], idMapping.get(id), i, idChain);
+              }
+              idChain.delete(id);
             }
-            idChain.delete(id);
           }
 
           return newIndex;
@@ -2480,7 +2482,7 @@ Redirecting to file <a href="index.md">index.md</a>
         let targetBookId;
         let targetId;
         let targetIndex;
-        let mode;
+        let recursively;
         {
           const frag = document.importNode(document.getElementById('tpl-copy-into').content, true);
           const dialog = frag.children[0];
@@ -2509,6 +2511,7 @@ Redirecting to file <a href="index.md">index.md</a>
           targetId = dialog.querySelector('[name="id"]').value;
           targetIndex = parseInt(dialog.querySelector('[name="index"]').value, 10);
           targetIndex = isNaN(targetIndex) ? Infinity : Math.max(targetIndex, 0);
+          recursively = dialog.querySelector('[name="recursive"]').checked;
         }
 
         const items = itemElems.reduce((list, itemElem) => {
@@ -2523,7 +2526,7 @@ Redirecting to file <a href="index.md">index.md</a>
           return list;
         }, []);
         await this.copyItems({bookId: this.bookId, treeLastModified: this.book.treeLastModified, items},
-          targetId, targetIndex, targetBookId);
+          targetId, targetIndex, targetBookId, recursively);
       },
 
       async recycle({itemElems}) {

@@ -1085,11 +1085,17 @@
   "ScrapBookCommandBrowse": {
     "message": "在文件管理员检视"
   },
+  "ScrapBookCommandCopyDialogAdvanced": {
+    "message": "高级:"
+  },
   "ScrapBookCommandCopyDialogBook": {
     "message": "复制到剪贴簿:"
   },
   "ScrapBookCommandCopyDialogIndex": {
     "message": "位置 (从 0 开始，留空则置于最后):"
+  },
+  "ScrapBookCommandCopyDialogRecursive": {
+    "message": "一并复制下层项目"
   },
   "ScrapBookCommandCopyDialogRoot": {
     "message": "复制到这个 ID 的项目下:"

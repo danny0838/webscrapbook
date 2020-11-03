@@ -1085,11 +1085,17 @@
   "ScrapBookCommandBrowse": {
     "message": "Browse locally"
   },
+  "ScrapBookCommandCopyDialogAdvanced": {
+    "message": "Advanced:"
+  },
   "ScrapBookCommandCopyDialogBook": {
     "message": "Copy to scrapbook:"
   },
   "ScrapBookCommandCopyDialogIndex": {
     "message": "Position (start from 0, empty for last):"
+  },
+  "ScrapBookCommandCopyDialogRecursive": {
+    "message": "Also copy descendants"
   },
   "ScrapBookCommandCopyDialogRoot": {
     "message": "Copy into the item of this ID:"

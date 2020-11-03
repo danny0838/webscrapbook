@@ -1085,11 +1085,17 @@
   "ScrapBookCommandBrowse": {
     "message": "在檔案管理員檢視"
   },
+  "ScrapBookCommandCopyDialogAdvanced": {
+    "message": "進階:"
+  },
   "ScrapBookCommandCopyDialogBook": {
     "message": "複製到剪貼簿:"
   },
   "ScrapBookCommandCopyDialogIndex": {
     "message": "位置 (從 0 開始，留空則置於最後):"
+  },
+  "ScrapBookCommandCopyDialogRecursive": {
+    "message": "一併複製下層項目"
   },
   "ScrapBookCommandCopyDialogRoot": {
     "message": "複製到這個 ID 的項目下:"
