@@ -1266,7 +1266,7 @@
     "message": "Type"
   },
   "ScrapBookCommandSortDialogRecursive": {
-    "message": "Also sort descendant items"
+    "message": "Also sort descendants"
   },
   "ScrapBookCommandSource": {
     "message": "View source"
