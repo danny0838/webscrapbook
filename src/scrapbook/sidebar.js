@@ -1161,34 +1161,40 @@
           return;
         }
 
-        if (scrapbook.userAgent.is('gecko') && browser.windows) {
-          // Firefox < 60 (?) allows multiple tabs in a popup window,
-          // but the user cannot switch between them.
-          // Open the newTab in the last-focused window instead.
-          if ((await browser.windows.getCurrent()).type !== 'normal') {
-            const win = await getLastFocusedWindow();
-            if (!win) {
-              await browser.windows.create({
-                url,
-              });
-              return;
-            }
-
-            await browser.tabs.create({
-              windowId: win.id,
+        // If current window is not normal, create tab in the last focused window.
+        //
+        // Firefox < 60 (?) allows multiple tabs in a popup window,
+        // but the user cannot switch between them.
+        //
+        // Chromium allows only one tab in a popup window.
+        // If the current tab is already in a popup, tabs.create without
+        // windowId creates a new tab in the window the user last activates
+        // a tab within, which is different from window.getLastFocusedWindow,
+        // which is the last opened window (the window "on top"). This is most
+        // ideal but not consistent with the newTab === false case, and the
+        // behavior is different in some Chromium forks (e.g. Vivaldi creates
+        // the tab in the current window, overwriting the current tab).
+        if (browser.windows && (await browser.windows.getCurrent()).type !== 'normal') {
+          const win = await getLastFocusedWindow();
+          if (!win) {
+            await browser.windows.create({
               url,
             });
             return;
           }
+
+          await browser.tabs.create({
+            windowId: win.id,
+            url,
+          });
+          return;
         }
 
-        // Chromium allows only one tab in a popup window.
-        // If the current tab is already in a popup, the newly created tab
-        // will be in the most recently focused window, which does not work
-        // same as window.getCurrentWindow or window.getLastFocusedWindow.
+        // Otherwise, create tab in the current window.
         const tab = await browser.tabs.create({
           url,
         });
+
         return;
       }
 
