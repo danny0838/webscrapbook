@@ -1131,51 +1131,28 @@
     },
 
     async openLink(url, newTab) {
-      const getLastFocusedWindow = async (windowTypes = ['normal']) => {
-        let win;
-        try {
-          win = await browser.windows.getLastFocused({
-            populate: true,
-            windowTypes,
-          });
-          if (!windowTypes.includes(win.type)) {
-            // Firefox deprecates windowTypes argument and may get a last focused
-            // window of a bad type. Attempt to get another window instead.
-            win = (await browser.windows.getAll({
-              populate: true,
-            })).find(x => windowTypes.includes(x.type));
-          }
-          if (!win) {
-            throw new Error('no last-focused window');
-          }
-        } catch (ex) {
-          // no last-focused window
-          return null;
-        }
-        return win;
-      };
-
       if (newTab) {
         if (typeof newTab === 'string') {
           window.open(url, newTab);
           return;
         }
 
-        // If current window is not normal, create tab in the last focused window.
+        // If current window is not normal, create tab in the last focused
+        // window.
         //
-        // Firefox < 60 (?) allows multiple tabs in a popup window,
-        // but the user cannot switch between them.
+        // Firefox < 60 (?) allows multiple tabs in a popup window, but the
+        // user cannot switch between them.
         //
-        // Chromium allows only one tab in a popup window.
-        // If the current tab is already in a popup, tabs.create without
-        // windowId creates a new tab in the window the user last activates
-        // a tab within, which is different from window.getLastFocusedWindow,
-        // which is the last opened window (the window "on top"). This is most
-        // ideal but not consistent with the newTab === false case, and the
-        // behavior is different in some Chromium forks (e.g. Vivaldi creates
-        // the tab in the current window, overwriting the current tab).
+        // Chromium allows only one tab in a popup window. Although
+        // tabs.create without windowId creates a new tab in the last focused
+        // window, some Chromium forks has an inconsistent behavior (e.g.
+        // Vivaldi creates the tab in the current window, overwriting the
+        // current tab).
         if (browser.windows && (await browser.windows.getCurrent()).type !== 'normal') {
-          const win = await getLastFocusedWindow();
+          const win = await scrapbook.invokeExtensionScript({
+            cmd: "background.getLastFocusedWindow",
+            args: {populate: true, windowTypes: ['normal']},
+          });
           if (!win) {
             await browser.windows.create({
               url,
@@ -1199,7 +1176,10 @@
       }
 
       if (browser.windows) {
-        const win = await getLastFocusedWindow();
+        const win = await scrapbook.invokeExtensionScript({
+          cmd: "background.getLastFocusedWindow",
+          args: {populate: true, windowTypes: ['normal']},
+        });
         if (!win) {
           await browser.windows.create({
             url,

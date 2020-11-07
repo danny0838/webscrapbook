@@ -18,6 +18,7 @@
   'use strict';
 
   const background = {
+    focusedWindow: new Map(),
     commands: {
       async openScrapBook() {
         return await scrapbook.openScrapBook({});
@@ -342,6 +343,36 @@
   }
 
   /**
+   * Get real last focused window.
+   *
+   * Native window.getLastFocusedWindow gets the last created window (the
+   * window "on top"), rather than the window the user last activates a tab
+   * within.
+   *
+   * @kind invokable
+   * @param {Object} params
+   * @param {boolean} [params.populate]
+   * @param {WindowType[]} [params.windowTypes]
+   */
+  background.getLastFocusedWindow = async function (params = {}) {
+    const {populate = false, windowTypes = ['normal', 'popup']} = params;
+
+    const wins = (await browser.windows.getAll({populate}))
+      // Firefox does not support windowTypes for windows.getAll,
+      // so use filter instead.
+      .filter(win => windowTypes.includes(win.type))
+      .sort((a, b) => {
+        const va = background.focusedWindow.get(a.id) || a.id;
+        const vb = background.focusedWindow.get(b.id) || b.id;
+        if (va > vb) { return 1; }
+        if (vb > va) { return -1; }
+        return 0;
+      });
+
+    return wins.pop();
+  };
+
+  /**
    * @kind invokable
    */
   background.invokeFrameScript = async function ({frameId, cmd, args}, sender) {
@@ -536,6 +567,34 @@
   if (browser.commands) {
     browser.commands.onCommand.addListener((cmd) => {
       return background.commands[cmd]();
+    });
+  }
+
+  /* record last focused window */
+  if (browser.windows) {
+    function onFocusChanged(windowId) {
+      if (windowId === browser.windows.WINDOW_ID_NONE) {
+        return;
+      }
+
+      background.focusedWindow.set(windowId, Date.now());
+    }
+
+    function onRemoved(windowId) {
+      background.focusedWindow.delete(windowId);
+    }
+
+    browser.windows.onFocusChanged.addListener(onFocusChanged);
+    browser.windows.onRemoved.addListener(onRemoved);
+
+    browser.windows.getAll().then(wins => {
+      wins.forEach(win => {
+        if (!win.focused) {
+          return;
+        }
+
+        background.focusedWindow.set(win.id, Date.now());
+      });
     });
   }
 
