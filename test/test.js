@@ -6381,7 +6381,8 @@ async function test_capture_anchor3() {
 /**
  * Check if option works
  *
- * capture.downLink
+ * capture.downLink.mode
+ * capture.downLink.extFilter
  */
 async function test_capture_downLink() {
   /* header */
