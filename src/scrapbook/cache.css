@@ -5,9 +5,11 @@ body {
 }
 
 #logger {
+  margin: 0;
   padding: .5em;
   white-space: pre-wrap;
   word-break: break-all;
+  font-family: inherit;
 }
 
 .debug {

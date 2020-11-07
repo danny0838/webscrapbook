@@ -115,8 +115,10 @@ body {
   max-height: 200px;
   overflow: auto;
   white-space: pre-wrap;
+  margin: 0;
   padding: 3px;
   font-size: 0.75em;
+  font-family: inherit;
 }
 
 #logger .warn {

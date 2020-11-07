@@ -62,8 +62,10 @@ body {
 }
 
 #logger {
+  margin: 0;
   padding: .5em;
   white-space: pre;
+  font-family: inherit;
 }
 
 .error {
