@@ -8208,12 +8208,12 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
  */
 async function test_capture_linkUnsavedUri2() {
   var options = {
-    "capture.downLink.mode": "url",
     "capture.downLink.extFilter": "txt",
     "capture.downLink.urlFilter": "",
   };
 
   /* -capture.linkUnsavedUri */
+  options["capture.downLink.mode"] = "url";
   options["capture.linkUnsavedUri"] = false;
 
   var blob = await captureHeadless({
@@ -8227,10 +8227,35 @@ async function test_capture_linkUnsavedUri2() {
   var doc = await readFileAsDocument(indexBlob);
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  assert(doc.querySelector('a').getAttribute('href') === `urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.txt`);
-  assert(doc.querySelector('a[name]').getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.css`); // no downLink, no error
+  // downLink, error
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `urn:scrapbook:download:error:${localhost}/capture_linkUnsavedUri/nonexist.txt`);
+
+  // no downLink, no error
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.css`);
+
+  /* -capture.linkUnsavedUri */
+  options["capture.downLink.mode"] = "header";
+  options["capture.linkUnsavedUri"] = false;
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_linkUnsavedUri/error2.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
+
+  // text/html => no downLink, no error
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.txt`);
+
+  // no downLink, no error
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.css`);
 
   /* +capture.linkUnsavedUri */
+  options["capture.downLink.mode"] = "url";
   options["capture.linkUnsavedUri"] = true;
 
   var blob = await captureHeadless({
@@ -8244,8 +8269,8 @@ async function test_capture_linkUnsavedUri2() {
   var doc = await readFileAsDocument(indexBlob);
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.txt`);
-  assert(doc.querySelector('a[name]').getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.css`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.txt`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.css`);
 }
 
 /**
