@@ -1213,21 +1213,21 @@
         await browser.tabs.update(targetTab.id, {
           url,
         });
-      } else {
-        const activeTab = (await browser.tabs.query({
-          active: true,
-        }))[0];
-        if (!activeTab || activeTab.id === (await browser.tabs.getCurrent()).id) {
-          await browser.tabs.create({
-            url,
-          });
-          return;
-        }
 
-        await browser.tabs.update(activeTab.id, {
+        return;
+      }
+
+      const activeTab = (await browser.tabs.query({active: true}))[0];
+      if (!activeTab || activeTab.id === (await browser.tabs.getCurrent()).id) {
+        await browser.tabs.create({
           url,
         });
+        return;
       }
+
+      await browser.tabs.update(activeTab.id, {
+        url,
+      });
     },
 
     async moveItems(sourceItemElems, targetId, targetIndex) {
