@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet">
+<script></script>
+</head>
+<body>
+<img>
+</body>
+<script>
+document.currentScript.remove();
+
+var blob = new Blob(['#external{color:green;}'], {type: 'text/css'});
+var url = URL.createObjectURL(blob);
+document.querySelector('link[rel~="stylesheet"]').href = url;
+URL.revokeObjectURL(url);
+
+var blob = new Blob(['console.debug("test");'], {type: 'text/javascript'});
+var url = URL.createObjectURL(blob);
+document.querySelector('script').src = url;
+URL.revokeObjectURL(url);
+
+var blob = new Blob(['<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"><circle cx="25" cy="25" r="10" fill="#EB7B2D"/></svg>'], {type: 'image/svg+xml'});
+var url = URL.createObjectURL(blob);
+document.querySelector('img').src = url;
+URL.revokeObjectURL(url);
+</script>
+</html>
