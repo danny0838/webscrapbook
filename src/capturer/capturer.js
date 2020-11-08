@@ -1395,7 +1395,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
     }
 
-    const isMainFrame = book.isItemIndexUrl(item, url);
+    const isMainDocument = book.isItemIndexUrl(item, url);
 
     let internalizePrefix;
     if (internalize) {
@@ -1436,10 +1436,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     const message = {
       internalize,
-      settings: {
-        item,
-        isMainFrame,
-      },
+      isMainPage: isMainDocument,
+      item,
       options: Object.assign(scrapbook.getOptions("capture"), options),
     };
 
@@ -1539,8 +1537,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             capturer.error(scrapbook.lang("ErrorSaveUploadFailure", [target, ex.message]));
           }
 
-          // update item for main frame
-          if (isMainFrame && url === fileUrl) {
+          // update item for main document
+          if (isMainDocument && url === fileUrl) {
             item.title = data.info.title;
           }
         }
@@ -1862,7 +1860,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
           await capturer.preSaveProcess({
             rootNode: newDoc.documentElement,
-            isMainFrame: true,
+            isMainDocument: true,
             deleteErased: false,
             requireBasicLoader: !!newDoc.querySelector('script[data-scrapbook-elem="basic-loader"]'),
             insertInfoBar: !!newDoc.querySelector('script[data-scrapbook-elem="infobar-loader"]'),

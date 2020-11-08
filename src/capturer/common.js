@@ -2455,7 +2455,7 @@
     // common pre-save process
     await capturer.preSaveProcess({
       rootNode,
-      isMainFrame,
+      isMainDocument: isMainFrame,
       deleteErased: options["capture.deleteErasedOnCapture"],
       requireBasicLoader,
       insertInfoBar: options["capture.insertInfoBar"],
@@ -2494,17 +2494,17 @@
   /**
    * @kind invokable
    * @param {Object} params
-   * @param {Document} params.doc
+   * @param {Document} [params.doc]
    * @param {boolean} [params.internalize]
-   * @param {Object} params.settings
+   * @param {boolean} params.isMainPage
+   * @param {Object} params.item
    * @param {Object} params.options
    * @return {Promise<Object>}
    */
   capturer.retrieveDocumentContent = async function (params) {
     isDebug && console.debug("call: retrieveDocumentContent");
 
-    const {doc = document, internalize, settings, options} = params;
-    const {item, isMainFrame} = settings;
+    const {doc = document, internalize = false, isMainPage, item, options} = params;
 
     const data = {};
     const docs = scrapbook.flattenFrames(doc);
@@ -2715,7 +2715,7 @@
       const clonedNodeMap = new WeakMap();
       const rootNode = cloneNodeMapping(htmlNode, true);
       const info = {
-        title: (isMainFrame && i === 0 ? item && item.title : doc.title) || "",
+        title: (isMainPage && i === 0 ? item && item.title : doc.title) || "",
       };
       const resources = {};
       const shadowRootSupported = !!rootNode.attachShadow;
@@ -2732,7 +2732,7 @@
       // common pre-save process
       await capturer.preSaveProcess({
         rootNode,
-        isMainFrame: isMainFrame && i === 0,
+        isMainDocument: isMainPage && i === 0,
         deleteErased: options["capture.deleteErasedOnSave"],
         requireBasicLoader,
         insertInfoBar: options["capture.insertInfoBar"],
@@ -2756,7 +2756,7 @@
    *
    * @param {Object} params
    * @param {Document} params.rootNode
-   * @param {boolean} params.isMainFrame
+   * @param {boolean} params.isMainDocument
    * @param {boolean} params.deleteErased
    * @param {boolean} params.requireBasicLoader
    * @param {boolean} params.insertInfoBar
@@ -2765,7 +2765,7 @@
   capturer.preSaveProcess = async function (params) {
     isDebug && console.debug("call: preSaveProcess");
 
-    const {rootNode, isMainFrame, deleteErased, requireBasicLoader, insertInfoBar} = params;
+    const {rootNode, isMainDocument, deleteErased, requireBasicLoader, insertInfoBar} = params;
     const doc = rootNode.ownerDocument;
 
     // delete all erased contents
@@ -2838,7 +2838,7 @@
         fn(document);
       }) + ")()";
     }
-    if (insertInfoBar && isMainFrame) {
+    if (insertInfoBar && isMainDocument) {
       insertInfoBar: {
         let data;
         try {
