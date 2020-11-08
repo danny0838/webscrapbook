@@ -1960,9 +1960,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @return {string}
    */
   capturer.getRegisterToken = function (url, role) {
-      let token = `${scrapbook.normalizeUrl(url)}\t${role}`;
-      token = scrapbook.sha1(token, "TEXT");
-      return token;
+    let token = `${scrapbook.normalizeUrl(url)}\t${role}`;
+    token = scrapbook.sha1(token, "TEXT");
+    return token;
   };
 
   /**
