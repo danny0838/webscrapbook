@@ -1268,9 +1268,9 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
 
     const {url: sourceUrl, refUrl, title, charset, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
+    const {timeId, frameIsMain, documentName} = settings;
 
-    if (settings.frameIsMain) {
+    if (frameIsMain) {
       settings.indexFilename = await capturer.formatIndexFilename({
         title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
         sourceUrl,
@@ -1287,7 +1287,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       options,
     });
 
-    if (settings.frameIsMain) {
+    if (frameIsMain) {
       // for the main frame, create a index.html that redirects to the file
       const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
       const meta = params.options["capture.recordDocumentMeta"] ? 
@@ -1309,7 +1309,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 </html>`;
 
       const mime = "text/html";
-      const documentFileName = settings.documentName + ".html";
+      const documentFileName = documentName + ".html";
 
       const registry = await capturer.invoke("registerDocument", {
         docUrl: 'about:blank',
