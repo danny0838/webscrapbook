@@ -774,6 +774,7 @@ async function test_capture_filename2() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index-1.json"]);
   assert(zip.files["index-1.dat"]);
   assert(zip.files["index-1.rdf"]);
   assert(zip.files["^metadata^-1"]);
@@ -783,9 +784,10 @@ async function test_capture_filename2() {
   var doc = await readFileAsDocument(indexBlob);
 
   var imgs = doc.querySelectorAll('img');
-  assert(imgs[0].getAttribute('src') === "index-1.dat");
-  assert(imgs[1].getAttribute('src') === "index-1.rdf");
-  assert(imgs[2].getAttribute('src') === "^metadata^-1");
+  assert(imgs[0].getAttribute('src') === "index-1.json");
+  assert(imgs[1].getAttribute('src') === "index-1.dat");
+  assert(imgs[2].getAttribute('src') === "index-1.rdf");
+  assert(imgs[3].getAttribute('src') === "^metadata^-1");
 }
 
 /**
@@ -6817,6 +6819,8 @@ async function test_capture_downLink04() {
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink2/linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink2/linked1-4.html#444`);
 
+  assert(!zip.file('index.json'));
+
   /* depth = 1 */
   var options = {
     "capture.downLink.doc.depth": 1,
@@ -6871,6 +6875,73 @@ async function test_capture_downLink04() {
   assert(!zip.file('linked2-1.html'));
 
   assert(!zip.file('linked2-2.html'));
+
+  var sitemapFile = zip.file('index.json');
+  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var expectedData = {
+    "version": 1,
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_downLink2/in-depth.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "index.xhtml",
+        "url": "about:blank",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "url": "about:blank",
+        "role": "document"
+      },
+      {
+        "path": "linked1-1.html",
+        "url": `${localhost}/capture_downLink2/linked1-1.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "linked1-2.html",
+        "url": `${localhost}/capture_downLink2/linked1-2.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "linked1-3.html",
+        "url": `${localhost}/capture_downLink2/linked1-3.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "linked1-4.html",
+        "url": `${localhost}/capture_downLink2/linked1-4.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "linked1-5.html",
+        "url": `${localhost}/capture_downLink2/linked1-5.html`,
+        "role": "document",
+        "primary": true
+      }
+    ]
+  };
+  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
 
   /* depth = 2 */
   var options = {
@@ -6932,6 +7003,85 @@ async function test_capture_downLink04() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/linked3-1.html#111`);
+
+  var sitemapFile = zip.file('index.json');
+  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var expectedData = {
+    "version": 1,
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_downLink2/in-depth.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "index.xhtml",
+        "url": "about:blank",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "url": "about:blank",
+        "role": "document"
+      },
+      {
+        "path": "linked1-1.html",
+        "url": `${localhost}/capture_downLink2/linked1-1.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "linked1-2.html",
+        "url": `${localhost}/capture_downLink2/linked1-2.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "linked1-3.html",
+        "url": `${localhost}/capture_downLink2/linked1-3.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "linked1-4.html",
+        "url": `${localhost}/capture_downLink2/linked1-4.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "linked1-5.html",
+        "url": `${localhost}/capture_downLink2/linked1-5.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "linked2-1.html",
+        "url": `${localhost}/capture_downLink2/linked2-1.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "linked2-2.html",
+        "url": `${localhost}/capture_downLink2/linked2-2.html`,
+        "role": "document",
+        "primary": true
+      }
+    ]
+  };
+  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
 }
 
 /**

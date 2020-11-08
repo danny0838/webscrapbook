@@ -51,10 +51,12 @@
   capturer.captureInfo = new MapWithDefault(() => ({
     useDiskCache: false,
 
+    // index.json is for site map
     // index.dat is used in legacy ScrapBook
     // index.rdf and ^metadata^ are used in MAFF
     // http://maf.mozdev.org/maff-specification.html
     files: new Map([
+      ["index.json", {}],
       ["index.dat", {}],
       ["index.rdf", {}],
       ["^metadata^", {}],
@@ -2832,6 +2834,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       capturer.log('Rebuilding links...');
       await capturer.rebuildLinks({timeId});
+      await capturer.generateSiteMap({timeId, path});
     };
 
     capturer.log(`Saving data...`);
@@ -2867,7 +2870,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       case "zip": {
         // handle deep capture
-        await handleDeepCapture();
+        await handleDeepCapture(`index.json`);
 
         // create index.html that redirects to index.xhtml|.svg
         if (ext !== "html") {
@@ -2887,7 +2890,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       case "maff": {
         // handle deep capture
-        await handleDeepCapture();
+        await handleDeepCapture(`${timeId}/index.json`);
 
         // create index.html that redirects to index.xhtml|.svg
         if (ext !== "html") {
@@ -2929,7 +2932,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       case "folder":
       default: {
         // handle deep capture
-        await handleDeepCapture();
+        await handleDeepCapture(`index.json`);
 
         // create index.html that redirects to index.xhtml|.svg
         if (ext !== "html") {
@@ -3489,6 +3492,48 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     };
 
     return await rebuildLinks(params);
+  };
+
+  /**
+   * @param {Object} params
+   * @param {string} params.timeId
+   * @param {string} params.path
+   */
+  capturer.generateSiteMap = async function ({timeId, path}) {
+    const info = capturer.captureInfo.get(timeId);
+    const files = info.files;
+    const urlToFilenameMap = info.urlToFilenameMap;
+
+    const sitemap = {
+      version: 1,
+      files: [],
+    };
+
+    for (const [path, {url, role}] of files.entries()) {
+      let primary;
+      try {
+        const token = capturer.getRegisterToken(url, role);
+        const p = urlToFilenameMap.get(token);
+        if (p) { primary = true; }
+      } catch (ex) {
+        // skip special or undefined URL
+      }
+
+      sitemap.files.push({
+        path,
+        url,
+        role,
+        primary,
+      });
+    }
+
+    const data = JSON.stringify(sitemap, null, 1);
+    const blob = new Blob([data], {type: 'application/json'});
+    await capturer.saveFileCache({
+      timeId,
+      path,
+      blob,
+    });
   };
 
 
