@@ -704,7 +704,7 @@ if (Node && !Node.prototype.getRootNode) {
         return await new Promise((resolve, reject) => {
           const transaction = db.transaction("cache", "readwrite");
           const objectStore = transaction.objectStore(["cache"]);
-          const request = objectStore.add({key, value});
+          const request = objectStore.put({key, value});
           transaction.oncomplete = (event) => {
             resolve();
           };
