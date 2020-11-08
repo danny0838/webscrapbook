@@ -2008,7 +2008,7 @@
       docUrl,
       mime,
       role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined :
-          isHeadless ? "document" : `document-${scrapbook.getUuid()}`,
+          (isMainFrame || isHeadless) ? "document" : `document-${scrapbook.getUuid()}`,
       settings,
       options,
     });
