@@ -963,6 +963,7 @@
     const {title, settings, options} = params;
     let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+
     let fetchResponse;
     let doc;
 
@@ -1003,9 +1004,8 @@
       [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     }
 
-    let response;
     if (doc) {
-      response = await capturer.captureDocumentOrFile({
+      return await capturer.captureDocumentOrFile({
         doc,
         docUrl: fetchResponse.url + (fetchResponse.url.startsWith('data:') ? '' : sourceUrlHash),
         refUrl,
@@ -1013,18 +1013,16 @@
         settings,
         options,
       });
-    } else {
-      response = await capturer.captureFile({
-        url: fetchResponse.url + (fetchResponse.url.startsWith('data:') ? '' : sourceUrlHash),
-        refUrl,
-        title,
-        charset: fetchResponse.headers.charset,
-        settings,
-        options,
-      });
     }
 
-    return response;
+    return await capturer.captureFile({
+      url: fetchResponse.url + (fetchResponse.url.startsWith('data:') ? '' : sourceUrlHash),
+      refUrl,
+      title,
+      charset: fetchResponse.headers.charset,
+      settings,
+      options,
+    });
   };
 
   /**
