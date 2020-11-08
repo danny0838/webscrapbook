@@ -885,7 +885,7 @@
 
       {
         const delay = options["capture.remoteTabDelay"];
-        if (typeof delay === 'number') {
+        if (delay > 0) {
           capturer.log(`Waiting for ${delay} ms...`);
           await scrapbook.delay(delay);
         }
