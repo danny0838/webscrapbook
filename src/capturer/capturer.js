@@ -674,9 +674,15 @@
    * @return {Promise<Array|Object>} - list of task results (or error), or an object of error
    */
   capturer.runTasks = async function (params) {
-    let {tasks, parentId, index, delay = 5, mode: baseMode, options: baseOptions} = params;
-    const results = [];
+    let {
+      tasks,
+      parentId, index, delay = 5,
+      mode: baseMode, options: baseOptions,
+    } = params;
+
     baseOptions = Object.assign(scrapbook.getOptions("capture"), baseOptions);
+
+    const results = [];
 
     for (const task of tasks) {
       const {
@@ -691,45 +697,34 @@
       let result;
       try {
         if (["resave", "internalize"].includes(mode)) {
-          if (typeof tabId !== 'number') {
-            throw new Error(`Invalid tabId for ${mode} mode.`);
-          }
-
-          result = await capturer.resaveTab({tabId, frameId, options, internalize: mode === "internalize"});
+          result = await capturer.resaveTab({
+            tabId, frameId,
+            options,
+            internalize: mode === "internalize",
+          });
         } else if (recaptureInfo) {
           // recapture
           result = await capturer.recapture({
-            url,
-            refUrl,
-            title,
-            favIconUrl,
-            mode,
-            options,
+            url, refUrl, title, favIconUrl,
+            mode, options,
             recaptureInfo,
           });
         } else {
           const timeId = scrapbook.dateToId();
-          if (typeof tabId === 'number') {
+          if (Number.isInteger(tabId)) {
             // capture tab
             result = await capturer.captureTab({
               timeId,
-              tabId,
-              frameId,
-              fullPage,
+              tabId, frameId, fullPage,
               title,
-              mode,
-              options,
+              mode, options,
             });
           } else if (typeof url === 'string') {
             // capture headless
             result = await capturer.captureRemote({
               timeId,
-              url,
-              refUrl,
-              title,
-              favIconUrl,
-              mode,
-              options,
+              url, refUrl, title, favIconUrl,
+              mode, options,
             });
           }
 
@@ -752,7 +747,7 @@
 
           await capturer.clearFileCache({timeId});
 
-          if (typeof index !== 'undefined') {
+          if (Number.isInteger(index)) {
             index++;
           }
         }
