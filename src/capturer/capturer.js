@@ -2313,8 +2313,14 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
   /**
    * @typedef {Object} saveMainDocumentResponse
+   * @property {string} timeId
+   * @property {string} title
+   * @property {string} type
+   * @property {string} sourceUrl
+   * @property {string} [targetDir]
    * @property {string} filename - The saved filename.
    * @property {string} url - URL of the saved filename (without hash).
+   * @property {string} [favIconUrl]
    */
 
   /**
