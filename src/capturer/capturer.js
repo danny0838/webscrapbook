@@ -371,10 +371,9 @@
     const fetch = capturer.fetch = async function (params) {
       isDebug && console.debug("call: fetch", params);
 
-      const {url: sourceUrl, refUrl, headerOnly = false, ignoreSizeLimit = false, settings, options} = params;
+      const {url: sourceUrl, refUrl, headerOnly = false, ignoreSizeLimit = false, settings: {timeId}, options} = params;
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-      const {timeId} = settings;
       const fetchMap = capturer.captureInfo.get(timeId).fetchMap;
       const fetchRole = headerOnly ? 'head' : 'blob';
       const fetchToken = getFetchToken(sourceUrlMain, fetchRole);
