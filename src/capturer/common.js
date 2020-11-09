@@ -1985,7 +1985,7 @@
     };
 
     const {doc = document, title, settings} = params;
-    const {timeId, isHeadless} = settings;
+    const {timeId, isHeadless, frameIsMain} = settings;
     const {contentType: mime, documentElement: htmlNode} = doc;
 
     // allow overwriting by capture helpers
@@ -2024,7 +2024,7 @@
       DOMPARSER_SUPPORT_TYPES.has(mime) ? mime : 'text/html'
     );
 
-    if (settings.frameIsMain) {
+    if (frameIsMain) {
       settings.indexFilename = await capturer.formatIndexFilename({
         title: title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
         sourceUrl: docUrl,
@@ -2330,7 +2330,7 @@
 
       // add hash only for the main document as subframes with different hash
       // must share the same file and record (e.g. foo.html and foo.html#bar)
-      if (settings.frameIsMain) { url += docUrlHash; }
+      if (frameIsMain) { url += docUrlHash; }
 
       rootNode.setAttribute("data-scrapbook-source", url);
       rootNode.setAttribute("data-scrapbook-create", timeId);
@@ -2376,7 +2376,7 @@
       // in an extra downloading of possibly duplicated image, which is not
       // desired.
       if (typeof favIconUrl === 'undefined') {
-        if (settings.frameIsMain && settings.favIconUrl) {
+        if (frameIsMain && settings.favIconUrl) {
           let icon;
           tasks[tasks.length] = (async () => {
             switch (options["capture.favicon"]) {
@@ -2455,7 +2455,7 @@
     // common pre-save process
     await capturer.preSaveProcess({
       rootNode,
-      frameIsMain: settings.frameIsMain,
+      frameIsMain,
       deleteErased: options["capture.deleteErasedOnCapture"],
       requireBasicLoader,
       insertInfoBar: options["capture.insertInfoBar"],
