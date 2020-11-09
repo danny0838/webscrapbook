@@ -338,7 +338,7 @@
       // check downLink
       if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
         if (["header", "url"].includes(options["capture.downLink.file.mode"])) {
-          tasks[tasks.length] = halter.then(async () => {
+          downLinkTasks = downLinkTasks.then(async () => {
             const response = await capturer.invoke("captureUrl", {
               url,
               refUrl,
@@ -2285,6 +2285,8 @@
     // finalize
     const halter = new Deferred();
     const tasks = [];
+    const downLinkHalter = new Deferred();
+    let downLinkTasks = downLinkHalter;
 
     // inspect nodes
     let metaCharsetNode;
@@ -2401,6 +2403,10 @@
     // resolve the halter and wait for all async downloading tasks to complete
     halter.resolve();
     await Promise.all(tasks);
+
+    // run downLink tasks sequentially
+    downLinkHalter.resolve();
+    await downLinkTasks;
 
     // record after the content of all nested shadow roots have been processed
     for (const {host, shadowRoot} of shadowRootList) {
