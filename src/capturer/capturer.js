@@ -709,42 +709,13 @@
             recaptureInfo,
           });
         } else {
-          const timeId = scrapbook.dateToId();
-          if (Number.isInteger(tabId)) {
-            // capture tab
-            result = await capturer.captureTab({
-              timeId,
-              tabId, frameId, fullPage,
-              title,
-              mode, options,
-            });
-          } else if (typeof url === 'string') {
-            // capture headless
-            result = await capturer.captureRemote({
-              timeId,
-              url, refUrl, title, favIconUrl,
-              mode, options,
-            });
-          }
-
-          if (options["capture.saveTo"] === "server") {
-            await capturer.addItemToServer({
-              item: {
-                id: result.timeId,
-                index: (result.targetDir ? result.targetDir + '/' : '') + result.filename,
-                title: result.title,
-                type: result.type,
-                create: result.timeId,
-                source: scrapbook.normalizeUrl(result.sourceUrl),
-                icon: result.favIconUrl,
-                charset: result.charset,
-              },
-              parentId,
-              index,
-            });
-          }
-
-          await capturer.clearFileCache({timeId});
+          // capture general
+          result = await capturer.captureGeneral({
+            tabId, frameId, fullPage,
+            url, refUrl, title, favIconUrl,
+            mode, options,
+            parentId, index,
+          });
 
           if (Number.isInteger(index)) {
             index++;
@@ -766,6 +737,83 @@
     }
 
     return results;
+  };
+
+  /**
+   * @param {Object} params
+   * @param {string} [params.timeId] - an overriding timeId
+   * @param {integer} [params.tabId]
+   * @param {integer} [params.frameId]
+   * @param {boolean} [params.fullPage]
+   * @param {string} [params.url]
+   * @param {string} [params.refUrl]
+   * @param {string} [params.title] - an overriding title
+   * @param {string} [params.favIconUrl] - fallback favicon
+   * @param {string} [params.mode] - "tab", "source", "bookmark", "resave", "internalize"
+   * @param {string} params.options
+   * @param {string} [params.parentId] - parent item ID for the captured items
+   * @param {integer} [params.index] - position index for the captured items
+   * @return {Promise<Object>}
+   */
+  capturer.captureGeneral = async function (params) {
+    const {
+      timeId = scrapbook.dateToId(),
+      tabId, frameId, fullPage,
+      url, refUrl, title, favIconUrl,
+      mode, options,
+      parentId, index,
+    } = params;
+
+    let response;
+    if (Number.isInteger(tabId)) {
+      // capture tab
+      response = await capturer.captureTab({
+        timeId,
+        tabId,
+        frameId,
+        fullPage,
+        title,
+        mode,
+        options,
+      });
+    } else if (typeof url === 'string') {
+      // capture headless
+      response = await capturer.captureRemote({
+        timeId,
+        url,
+        refUrl,
+        title,
+        favIconUrl,
+        mode,
+        options,
+      });
+    } else {
+      // nothing to capture
+      throw new Error(`Bad parameters.`);
+    }
+
+    if (options["capture.saveTo"] === "server") {
+      await capturer.addItemToServer({
+        item: {
+          id: response.timeId,
+          index: (response.targetDir ? response.targetDir + '/' : '') + response.filename,
+          title: response.title,
+          type: response.type,
+          create: response.timeId,
+          source: scrapbook.normalizeUrl(response.sourceUrl),
+          icon: response.favIconUrl,
+          charset: response.charset,
+        },
+        parentId,
+        index,
+      });
+    }
+
+    // preserve info if error out
+    capturer.captureInfo.delete(timeId);
+    await capturer.clearFileCache({timeId});
+
+    return response;
   };
 
   /**
@@ -831,7 +879,6 @@
     isDebug && console.debug("(main) send", source, message);
     const response = await capturer.invoke("captureDocumentOrFile", message, {tabId, frameId});
     isDebug && console.debug("(main) response", source, response);
-    capturer.captureInfo.delete(timeId);
     if (!response) { throw new Error(`Response not received.`); }
     if (response.error) { throw new Error(response.error.message); }
     return response;
@@ -942,9 +989,7 @@
 
     capturer.log(`Capturing (${captureMode}) ${source} ...`);
     const response = await captureFunc(message);
-
     isDebug && console.debug("(main) response", source, response);
-    capturer.captureInfo.delete(timeId);
     if (!response) { throw new Error(`Response not received.`); }
     if (response.error) { throw new Error(response.error.message); }
     return response;
@@ -1998,6 +2043,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           }
         }
 
+        // preserve info if error out
+        capturer.captureInfo.delete(timeId);
         await capturer.clearFileCache({timeId});
 
         await book.loadTreeFiles(true);  // update treeLastModified
