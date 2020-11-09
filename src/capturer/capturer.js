@@ -803,7 +803,7 @@
         missionId: capturer.missionId,
         timeId,
         indexFilename: null,
-        frameIsMain: true,
+        isMainFrame: true,
         documentName: "index",
         fullPage,
         recurseChain: [],
@@ -910,7 +910,7 @@
         timeId,
         isHeadless: true,
         indexFilename: null,
-        frameIsMain: true,
+        isMainFrame: true,
         documentName: "index",
         recurseChain: [],
         favIconUrl,
@@ -973,7 +973,7 @@
       fetchResponse = await capturer.fetch({
         url: sourceUrlMain,
         refUrl,
-        ignoreSizeLimit: settings.frameIsMain,
+        ignoreSizeLimit: settings.isMainFrame,
         settings,
         options,
       });
@@ -1266,9 +1266,9 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
 
     const {url: sourceUrl, refUrl, title, charset, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId, frameIsMain, documentName} = settings;
+    const {timeId, isMainFrame, documentName} = settings;
 
-    if (frameIsMain) {
+    if (isMainFrame) {
       settings.indexFilename = await capturer.formatIndexFilename({
         title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
         sourceUrl,
@@ -1285,7 +1285,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       options,
     });
 
-    if (frameIsMain) {
+    if (isMainFrame) {
       // for the main frame, create a index.html that redirects to the file
       const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
       const meta = params.options["capture.recordDocumentMeta"] ? 
@@ -1395,7 +1395,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
     }
 
-    const frameIsMain = book.isItemIndexUrl(item, url);
+    const isMainFrame = book.isItemIndexUrl(item, url);
 
     let internalizePrefix;
     if (internalize) {
@@ -1438,7 +1438,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       internalize,
       settings: {
         item,
-        frameIsMain,
+        isMainFrame,
       },
       options: Object.assign(scrapbook.getOptions("capture"), options),
     };
@@ -1540,7 +1540,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           }
 
           // update item for main frame
-          if (frameIsMain && url === fileUrl) {
+          if (isMainFrame && url === fileUrl) {
             item.title = data.info.title;
           }
         }
@@ -1862,7 +1862,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
           await capturer.preSaveProcess({
             rootNode: newDoc.documentElement,
-            frameIsMain: true,
+            isMainFrame: true,
             deleteErased: false,
             requireBasicLoader: !!newDoc.querySelector('script[data-scrapbook-elem="basic-loader"]'),
             insertInfoBar: !!newDoc.querySelector('script[data-scrapbook-elem="infobar-loader"]'),
@@ -1975,7 +1975,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {string} params.mime
    * @param {string} [params.role] - "document-*", "document" (headless)
    * @param {Object} params.settings
-   * @param {boolean} params.settings.frameIsMain
+   * @param {boolean} params.settings.isMainFrame
    * @param {string} params.settings.documentName
    * @param {Object} params.options
    * @return {Promise<registerDocumentResponse>}
@@ -2018,7 +2018,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       const {docUrl: sourceUrl, mime, role, settings, options} = params;
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-      const {timeId, frameIsMain, documentName} = settings;
+      const {timeId, isMainFrame, documentName} = settings;
       const urlToFilenameMap = capturer.captureInfo.get(timeId).urlToFilenameMap;
       const files = capturer.captureInfo.get(timeId).files;
 
@@ -2030,7 +2030,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       });
 
       let response;
-      if (role || frameIsMain) {
+      if (role || isMainFrame) {
         const token = capturer.getRegisterToken(sourceUrlMain, role);
 
         // if a previous registry exists, return it
@@ -2042,7 +2042,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         }
 
         let documentFileName;
-        if (options["capture.frameRename"] || frameIsMain) {
+        if (options["capture.frameRename"] || isMainFrame) {
           let documentNameBase = scrapbook.validateFilename(documentName, options["capture.saveAsciiFilename"]);
 
           // see capturer.getUniqueFilename for filename limitation
@@ -2276,7 +2276,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     // special handling for saving file as data URI
     if (options["capture.saveAs"] === "singleHtml") {
-      if (settings.frameIsMain) {
+      if (settings.isMainFrame) {
         return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
       }
     }
@@ -2296,7 +2296,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       options,
     });
 
-    if (settings.frameIsMain) {
+    if (settings.isMainFrame) {
       return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
     }
 

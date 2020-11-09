@@ -972,7 +972,7 @@
                   };
 
                   const frameSettings = JSON.parse(JSON.stringify(settings));
-                  frameSettings.frameIsMain = false;
+                  frameSettings.isMainFrame = false;
                   frameSettings.fullPage = true;
                   delete frameSettings.usedCssFontUrl;
                   delete frameSettings.usedCssImageUrl;
@@ -1061,7 +1061,7 @@
                 };
 
                 const frameSettings = JSON.parse(JSON.stringify(settings));
-                frameSettings.frameIsMain = false;
+                frameSettings.isMainFrame = false;
                 frameSettings.fullPage = true;
                 delete frameSettings.usedCssFontUrl;
                 delete frameSettings.usedCssImageUrl;
@@ -1985,7 +1985,7 @@
     };
 
     const {doc = document, title, settings} = params;
-    const {timeId, isHeadless, frameIsMain} = settings;
+    const {timeId, isHeadless, isMainFrame} = settings;
     const {contentType: mime, documentElement: htmlNode} = doc;
 
     // allow overwriting by capture helpers
@@ -2024,7 +2024,7 @@
       DOMPARSER_SUPPORT_TYPES.has(mime) ? mime : 'text/html'
     );
 
-    if (frameIsMain) {
+    if (isMainFrame) {
       settings.indexFilename = await capturer.formatIndexFilename({
         title: title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
         sourceUrl: docUrl,
@@ -2330,7 +2330,7 @@
 
       // add hash only for the main document as subframes with different hash
       // must share the same file and record (e.g. foo.html and foo.html#bar)
-      if (frameIsMain) { url += docUrlHash; }
+      if (isMainFrame) { url += docUrlHash; }
 
       rootNode.setAttribute("data-scrapbook-source", url);
       rootNode.setAttribute("data-scrapbook-create", timeId);
@@ -2376,7 +2376,7 @@
       // in an extra downloading of possibly duplicated image, which is not
       // desired.
       if (typeof favIconUrl === 'undefined') {
-        if (frameIsMain && settings.favIconUrl) {
+        if (isMainFrame && settings.favIconUrl) {
           let icon;
           tasks[tasks.length] = (async () => {
             switch (options["capture.favicon"]) {
@@ -2455,7 +2455,7 @@
     // common pre-save process
     await capturer.preSaveProcess({
       rootNode,
-      frameIsMain,
+      isMainFrame,
       deleteErased: options["capture.deleteErasedOnCapture"],
       requireBasicLoader,
       insertInfoBar: options["capture.insertInfoBar"],
@@ -2504,7 +2504,7 @@
     isDebug && console.debug("call: retrieveDocumentContent");
 
     const {doc = document, internalize, settings, options} = params;
-    const {item, frameIsMain} = settings;
+    const {item, isMainFrame} = settings;
 
     const data = {};
     const docs = scrapbook.flattenFrames(doc);
@@ -2715,7 +2715,7 @@
       const clonedNodeMap = new WeakMap();
       const rootNode = cloneNodeMapping(htmlNode, true);
       const info = {
-        title: (frameIsMain && i === 0 ? item && item.title : doc.title) || "",
+        title: (isMainFrame && i === 0 ? item && item.title : doc.title) || "",
       };
       const resources = {};
       const shadowRootSupported = !!rootNode.attachShadow;
@@ -2732,7 +2732,7 @@
       // common pre-save process
       await capturer.preSaveProcess({
         rootNode,
-        frameIsMain: frameIsMain && i === 0,
+        isMainFrame: isMainFrame && i === 0,
         deleteErased: options["capture.deleteErasedOnSave"],
         requireBasicLoader,
         insertInfoBar: options["capture.insertInfoBar"],
@@ -2756,7 +2756,7 @@
    *
    * @param {Object} params
    * @param {Document} params.rootNode
-   * @param {boolean} params.frameIsMain
+   * @param {boolean} params.isMainFrame
    * @param {boolean} params.deleteErased
    * @param {boolean} params.requireBasicLoader
    * @param {boolean} params.insertInfoBar
@@ -2765,7 +2765,7 @@
   capturer.preSaveProcess = async function (params) {
     isDebug && console.debug("call: preSaveProcess");
 
-    const {rootNode, frameIsMain, deleteErased, requireBasicLoader, insertInfoBar} = params;
+    const {rootNode, isMainFrame, deleteErased, requireBasicLoader, insertInfoBar} = params;
     const doc = rootNode.ownerDocument;
 
     // delete all erased contents
@@ -2838,7 +2838,7 @@
         fn(document);
       }) + ")()";
     }
-    if (insertInfoBar && frameIsMain) {
+    if (insertInfoBar && isMainFrame) {
       insertInfoBar: {
         let data;
         try {
