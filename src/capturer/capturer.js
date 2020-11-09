@@ -803,6 +803,7 @@
         missionId: capturer.missionId,
         timeId,
         indexFilename: null,
+        isMainPage: true,
         isMainFrame: true,
         documentName: "index",
         fullPage,
@@ -910,6 +911,7 @@
         timeId,
         isHeadless: true,
         indexFilename: null,
+        isMainPage: true,
         isMainFrame: true,
         documentName: "index",
         recurseChain: [],
@@ -973,7 +975,7 @@
       fetchResponse = await capturer.fetch({
         url: sourceUrlMain,
         refUrl,
-        ignoreSizeLimit: settings.isMainFrame,
+        ignoreSizeLimit: settings.isMainPage && settings.isMainFrame,
         settings,
         options,
       });
@@ -1266,9 +1268,9 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
 
     const {url: sourceUrl, refUrl, title, charset, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId, isMainFrame, documentName} = settings;
+    const {timeId, isMainPage, isMainFrame, documentName} = settings;
 
-    if (isMainFrame) {
+    if (isMainPage && isMainFrame) {
       settings.indexFilename = await capturer.formatIndexFilename({
         title: title || scrapbook.urlToFilename(sourceUrl) || "untitled",
         sourceUrl,
@@ -1285,7 +1287,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
       options,
     });
 
-    if (isMainFrame) {
+    if (isMainPage && isMainFrame) {
       // for the main frame, create a index.html that redirects to the file
       const url = sourceUrl.startsWith("data:") ? "data:" : sourceUrl;
       const meta = params.options["capture.recordDocumentMeta"] ? 
@@ -1973,6 +1975,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {string} params.mime
    * @param {string} [params.role] - "document-*", "document" (headless)
    * @param {Object} params.settings
+   * @param {boolean} params.settings.isMainPage
    * @param {boolean} params.settings.isMainFrame
    * @param {string} params.settings.documentName
    * @param {Object} params.options
@@ -2016,7 +2019,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       const {docUrl: sourceUrl, mime, role, settings, options} = params;
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-      const {timeId, isMainFrame, documentName} = settings;
+      const {timeId, isMainPage, isMainFrame, documentName} = settings;
       const urlToFilenameMap = capturer.captureInfo.get(timeId).urlToFilenameMap;
       const files = capturer.captureInfo.get(timeId).files;
 
@@ -2028,7 +2031,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       });
 
       let response;
-      if (role || isMainFrame) {
+      if (role || (isMainPage && isMainFrame)) {
         const token = capturer.getRegisterToken(sourceUrlMain, role);
 
         // if a previous registry exists, return it
@@ -2040,7 +2043,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         }
 
         let documentFileName;
-        if (options["capture.frameRename"] || isMainFrame) {
+        if ((isMainPage && isMainFrame) || (options["capture.frameRename"] && !isMainFrame)) {
           let documentNameBase = scrapbook.validateFilename(documentName, options["capture.saveAsciiFilename"]);
 
           // see capturer.getUniqueFilename for filename limitation
@@ -2274,7 +2277,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     // special handling for saving file as data URI
     if (options["capture.saveAs"] === "singleHtml") {
-      if (settings.isMainFrame) {
+      if (settings.isMainPage && settings.isMainFrame) {
         return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
       }
     }
@@ -2294,7 +2297,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       options,
     });
 
-    if (settings.isMainFrame) {
+    if (settings.isMainPage && settings.isMainFrame) {
       return capturer.saveMainDocument({data, sourceUrl, documentFileName, settings, options});
     }
 
