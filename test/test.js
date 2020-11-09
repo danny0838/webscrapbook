@@ -2038,6 +2038,7 @@ async function test_capture_frame_headless3() {
   assert(!frames[0].hasAttribute('src'));
   assert(frames[1].getAttribute('src') === "");
   assert(frames[2].getAttribute('src') === "#123");
+  assert(frames[3].getAttribute('src') === "index.html");
 }
 
 /**
