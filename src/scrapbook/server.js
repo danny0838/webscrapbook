@@ -1103,7 +1103,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
     /**
      * Check whether url is a valid index file for item.
      *
-     * - Currently any ~/inde.html in a MAFF archive is considered true as
+     * - Currently any ~/index.html in a MAFF archive is considered true as
      *   there's no good way to determine which subdirectory corresponds to
      *   the item.
      */
