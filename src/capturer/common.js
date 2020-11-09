@@ -60,8 +60,8 @@
    * @return {Promise<Object>}
    */
   capturer.invoke = async function (method, args, details = {}) {
-    const {tabId = -1, frameId = 0, frameWindow, missionId} = details;
-    if (tabId !== -1) {
+    const {tabId, frameId = 0, frameWindow, missionId} = details;
+    if (Number.isInteger(tabId)) {
       // to content script (or content script call self)
       if (!capturer.isContentScript) {
         const cmd = "capturer." + method;
