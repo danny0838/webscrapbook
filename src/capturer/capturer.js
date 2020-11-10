@@ -717,7 +717,7 @@
         tabId, frameId, fullPage,
         url, refUrl, title, favIconUrl,
         mode = baseMode, options: taskOptions,
-        recaptureInfo,
+        recaptureInfo, mergeCaptureInfo,
       } = task;
 
       const options = Object.assign({}, baseOptions, taskOptions);
@@ -737,6 +737,14 @@
             url, refUrl, title, favIconUrl,
             mode, options,
             recaptureInfo,
+          });
+        } else if (mergeCaptureInfo) {
+          // merge capture
+          result = await capturer.mergeCapture({
+            tabId, frameId, fullPage,
+            url, refUrl, title, favIconUrl,
+            mode, options,
+            mergeCaptureInfo,
           });
         } else {
           // capture general
@@ -2126,6 +2134,188 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             }
           }
         }
+
+        // preserve info if error out
+        capturer.captureInfo.delete(timeId);
+        await capturer.clearFileCache({timeId});
+
+        await book.loadTreeFiles(true);  // update treeLastModified
+      },
+    });
+
+    return result;
+  };
+
+  /**
+   * @param {Object} params
+   * @return {Promise<Object>}
+   */
+  capturer.mergeCapture = async function (params) {
+    const {
+      tabId, frameId, fullPage,
+      url, refUrl, title, favIconUrl,
+      mode, options,
+      mergeCaptureInfo,
+    } = params;
+
+    const {bookId, itemId} = mergeCaptureInfo;
+
+    capturer.log(`Preparing a merge capture for item "${itemId}" of book "${bookId}"...`);
+
+    if (mode === "bookmark") {
+      throw new Error(`Invalid mode for merge capture: "${mode}"`);
+    }
+
+    await server.init(true);
+    const book = server.books[bookId];
+    if (!book || book.config.no_tree) {
+      throw new Error(`Merge capture reference book invalid: "${bookId}".`);
+    }
+
+    let result;
+    await book.transaction({
+      callback: async (book) => {
+        const refresh = !await book.validateTree();
+        await book.loadMeta(refresh);
+        const item = book.meta[itemId];
+        if (!item) {
+          throw new Error(`Merge capture reference item invalid: "${itemId}".`);
+        }
+        if (item.type !== 'site') {
+          throw new Error(`Merge capture supports only site items.`);
+        }
+
+        const timeId = item.id;
+        const info = capturer.captureInfo.get(timeId);
+
+        // load indexUrl for reference
+        if (!item.index.endsWith('/index.html')) {
+          throw new Error(`Index page is not "*/index.html".`);
+        }
+
+        let indexUrl;
+        try {
+          indexUrl = (await server.request({
+            method: 'HEAD',
+            url: book.dataUrl + scrapbook.escapeFilename(item.index),
+          })).url;
+        } catch (ex) {
+          throw new Error(`Unable to locate index file for item "${itemId}".`);
+        }
+
+        // load sitemap and merge to info
+        let sitemap;
+        try {
+          sitemap = await server.request({
+            url: new URL('index.json', indexUrl).href,
+          }).then(r => r.json());
+        } catch (ex) {
+          throw new Error(`Unable to access "index.json" for item "${itemId}".`);
+        }
+
+        switch (sitemap.version) {
+          case 1: {
+            for (const {path, url, role, primary} of sitemap.files) {
+              info.files.set(path, {
+                url,
+                role,
+              });
+
+              if (primary) {
+                let token;
+                try {
+                  token = capturer.getRegisterToken(url, role);
+                } catch (ex) {
+                  // skip special or undefined URL
+                }
+
+                info.urlToFilenameMap.set(token, {
+                  filename: path,
+                  url: scrapbook.escapeFilename(path),
+                });
+
+                // load previously captured pages to blob
+                if (REBUILD_LINK_SUPPORT_TYPES.has(Mime.lookup(path))) {
+                  const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
+                  try {
+                    const response = await server.request({
+                      url: fileUrl,
+                    });
+                    if (!response.ok) {
+                      throw new Error(`Bad status: ${response.status}`);
+                    }
+                    const blob = await response.blob();
+                    await capturer.saveFileCache({
+                      timeId,
+                      path,
+                      url,
+                      blob,
+                    });
+                  } catch (ex) {
+                    // skip special or undefined URL
+                  }
+                }
+              }
+            }
+            break;
+          }
+          default: {
+            throw new Error(`Sitemap version ${sitemap.version} not supported.`);
+            break;
+          }
+        }
+
+        // enforce some capture options
+        Object.assign(options, {
+          // capture to server
+          "capture.saveTo": "server",
+          // only saving as folder can be effectively merged,
+          // and prevents a conflict of different types
+          "capture.saveAs": "folder",
+          // save to the same directory
+          "capture.saveOverwrite": true,
+          // rebuild links and update index.json
+          "capture.downLink.doc.depth": 0,
+        });
+
+        // enforce disk cache
+        info.useDiskCache = true;
+
+        const modified = scrapbook.dateToId();
+
+        result = await capturer.captureGeneral({
+          timeId,
+          tabId, frameId, fullPage,
+          url, refUrl, title, favIconUrl,
+          mode, options,
+          documentName: null,
+          captureOnly: true,
+        });
+
+        if (title) { item.title = title; }
+        if (favIconUrl) { item.icon = favIconUrl; }
+        item.modify = modified;
+
+        // update item meta
+        capturer.log(`Updating server index for item "${itemId}"...`);
+        await book.saveMeta();
+
+        await server.requestSse({
+          query: {
+            "a": "cache",
+            "book": bookId,
+            "item": itemId,
+            "fulltext": 1,
+            "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+            "no_lock": 1,
+            "no_backup": 1,
+          },
+          onMessage(info) {
+            if (['error', 'critical'].includes(info.type)) {
+              capturer.error(`Error when generating fulltext cache: ${info.msg}`);
+            }
+          },
+        });
 
         // preserve info if error out
         capturer.captureInfo.delete(timeId);
