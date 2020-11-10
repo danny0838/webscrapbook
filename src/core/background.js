@@ -462,7 +462,7 @@
   /**
    * @kind invokable
    */
-  background.createSubPage = async function ({url}, sender) {
+  background.createSubPage = async function ({url, title}, sender) {
     await server.init(true);
 
     // reject if file exists
@@ -493,7 +493,7 @@
     }
 
     // generate content and upload
-    const content = await book.renderTemplate(url, item);
+    const content = await book.renderTemplate(url, item, 'html', title);
     const file = new File([content], scrapbook.urlToFilename(url), {type: 'text/html'});
     await server.request({
       url: url + '?a=save',

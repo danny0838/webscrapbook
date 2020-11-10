@@ -1210,7 +1210,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
       return templateText;
     }
 
-    async renderTemplate(target, item, type = 'html') {
+    async renderTemplate(target, item, type = 'html', subPageTitle) {
       const templateText = await this.getTemplate(type);
       return templateText.replace(/%(\w*)%/gu, (_, key) => {
         let value;
@@ -1219,7 +1219,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
             value = '%';
             break;
           case 'NOTE_TITLE':
-            value = item.title;
+            value = (typeof subPageTitle === 'string') ? subPageTitle : item.title;
             break;
           case 'SCRAPBOOK_DIR':
             value = scrapbook.getRelativeUrl(this.topUrl, target);

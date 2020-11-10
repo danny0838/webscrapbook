@@ -1378,16 +1378,16 @@ scrapbook-toolbar, scrapbook-toolbar *,
   };
 
   editor.createSubPage = async function () {
-    let filename = prompt(scrapbook.lang('EditorButtonSaveCreateSubPagePrompt'));
-    if (!filename) { return; }
+    const title = prompt(scrapbook.lang('EditorButtonSaveCreateSubPagePrompt'));
+    if (!title) { return; }
 
-    filename = scrapbook.validateFilename(filename + '.html');
+    const filename = scrapbook.validateFilename(title + '.html');
     const url = new URL(scrapbook.escapeFilename(filename), location.href).href;
 
     try {
       await scrapbook.invokeExtensionScript({
         cmd: "background.createSubPage",
-        args: {url},
+        args: {url, title},
       });
     } catch (ex) {
       console.error(ex);
