@@ -2404,26 +2404,29 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   };
 
   capturer.downLinkFileExtFilter = function (ext, options) {
+    const REGEX_LINEFEEDS = /[\r\n]+/;
+    const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
+    const REGEX_EXT_SEP = /[,;\s]+/;
     const compileFilters = (source) => {
       const ret = [];
-      source.split(/[\r\n]/).forEach((line) => {
+      for (let line of source.split(REGEX_LINEFEEDS)) {
         line = line.trim();
-        if (!line || line.startsWith("#")) { return; }
+        if (!line || line.startsWith("#")) { continue; }
 
-        if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+        if (REGEX_PATTERN.test(line)) {
           try {
             ret.push(new RegExp(`^(?:${RegExp.$1})$`, RegExp.$2));
           } catch (ex) {
             console.error(ex);
           }
         } else {
-          const regex = line.split(/[,;\s]+/)
+          const regex = line.split(REGEX_EXT_SEP)
             .filter(x => !!x)
             .map(x => scrapbook.escapeRegExp(x))
             .join('|');
           ret.push(new RegExp(`^(?:${regex})$`, 'i'));
         }
-      });
+      }
       return ret;
     };
     let filterText;
@@ -2444,22 +2447,27 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   };
 
   capturer.downLinkDocUrlFilter = function (url, options) {
+    const REGEX_LINEFEEDS = /[\r\n]+/;
+    const REGEX_SPACES = /\s+/;
+    const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
     const compileFilters = (source) => {
       const ret = [];
-      source.split(/[\r\n]/).forEach((line) => {
+      for (let line of source.split(REGEX_LINEFEEDS)) {
         line = line.trim();
-        if (!line || line.startsWith("#")) { return; }
+        if (!line || line.startsWith("#")) { continue; }
 
-        if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+        if (REGEX_PATTERN.test(line)) {
           try {
             ret.push(new RegExp(RegExp.$1, RegExp.$2));
           } catch (ex) {
             console.error(ex);
           }
         } else {
-          ret.push(scrapbook.splitUrlByAnchor(line)[0]);
+          line = line.split(REGEX_SPACES)[0];
+          line = scrapbook.splitUrlByAnchor(line)[0];
+          ret.push(line);
         }
-      });
+      }
       return ret;
     };
     let filterText;
@@ -2493,22 +2501,27 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   };
 
   capturer.downLinkUrlFilter = function (url, options) {
+    const REGEX_LINEFEEDS = /[\r\n]+/;
+    const REGEX_SPACES = /\s+/;
+    const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
     const compileFilters = (source) => {
       const ret = [];
-      source.split(/[\r\n]/).forEach((line) => {
+      for (let line of source.split(REGEX_LINEFEEDS)) {
         line = line.trim();
-        if (!line || line.startsWith("#")) { return; }
+        if (!line || line.startsWith("#")) { continue; }
 
-        if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+        if (REGEX_PATTERN.test(line)) {
           try {
             ret.push(new RegExp(RegExp.$1, RegExp.$2));
           } catch (ex) {
             console.error(ex);
           }
         } else {
-          ret.push(scrapbook.splitUrlByAnchor(line)[0]);
+          line = line.split(REGEX_SPACES)[0];
+          line = scrapbook.splitUrlByAnchor(line)[0];
+          ret.push(line);
         }
-      });
+      }
       return ret;
     };
     let filterText;

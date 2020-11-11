@@ -6761,6 +6761,31 @@ ${localhost}/capture_downLink/file.css`,
   assert(zip.files["file.bmp"]);
   assert(Object.keys(zip.files).length === 6);
 
+  // chars after spaces should be stripped for a plain text rule
+  var options = {
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `txt, bmp, css`,
+    // 1. should not match
+    // 2. should match (hash in URL is stripped)
+    "capture.downLink.urlFilter": `\
+capture_downLink/mime.py  foo
+${localhost}/capture_downLink/file.css\tbar`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink/basic.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["file.txt"]);
+  assert(zip.files["file2.txt"]);
+  assert(zip.files["file3.txt"]);
+  assert(zip.files["file4.txt"]);
+  assert(zip.files["file.bmp"]);
+  assert(Object.keys(zip.files).length === 6);
+
   // RegExp rule
   // match original URL
   // match partial URL
