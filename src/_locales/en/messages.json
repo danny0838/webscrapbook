@@ -650,7 +650,7 @@
     "message": "Include these URLs:"
   },
   "OptionCaptureDownLinkDocUrlFilterTooltip": {
-    "message": "This determines what links are for capturing according to full URL (with the “#” part stripped).\n\n• Each following line is a full URL (with chars following a “#” or space stripped) or a regular expression (e.g. “/http://example.com/.*/”). \n• Whichever matches a rule at any line is included for downloading. All URLs are included if no rule exist in any line.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
+    "message": "This determines what links are for capturing according to full URL (with the “#” part stripped).\n\n• Each following line is a full URL (with chars following a “#” or space stripped) or a regular expression (e.g. “/^http://example\\.com//”). \n• Whichever matches a rule at any line is included for downloading. All URLs are included if no rule exist in any line.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkFileExtFilterError": {
     "message": "The following regular expressions in file extension filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
