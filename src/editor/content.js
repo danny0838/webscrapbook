@@ -114,13 +114,16 @@ height: 100vh;`;
 
         if (typeof bookId !== 'string') {
           editor.inScrapBook = false;
-          if (!force) {
-            return;
-          }
         }
       } catch (ex) {
         console.error(ex);
+        editor.inScrapBook = false;
       }
+    }
+
+    // if not in scrapbook, don't load unless forced
+    if (!editor.inScrapBook && !force) {
+      return;
     }
 
     // generate toolbar content
