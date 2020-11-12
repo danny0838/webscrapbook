@@ -970,12 +970,13 @@
 
                     // frame document inaccessible (headless capture):
                     // contentType of srcdoc is always text/html
-                    sourceUrl = 'about:srcdoc';
                     const url = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute("srcdoc"))}`;
                     const doc = await scrapbook.readFileAsDocument(scrapbook.dataUriToFile(url));
+                    const docUrl = 'about:srcdoc';
+
                     return capturer.captureDocument({
                       doc,
-                      docUrl: 'about:srcdoc',
+                      docUrl,
                       baseUrl,
                       settings: frameSettings,
                       options: frameOptions,
@@ -1085,13 +1086,16 @@
                   if (frame.nodeName.toLowerCase() === 'iframe' &&
                       frame.hasAttribute("srcdoc")) {
                     // contentType of srcdoc is always text/html
-                    sourceUrl = 'about:srcdoc';
-                    const url = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute("srcdoc"))}`;
+                    const content = frame.getAttribute("srcdoc");
+                    const url = `data:text/html;charset=UTF-8,${encodeURIComponent(content)}`;
                     const doc = await scrapbook.readFileAsDocument(scrapbook.dataUriToFile(url));
+
+                    // assign a unique checksum for deduplication
+                    const docUrl = `about:srcdoc?sha1=${scrapbook.sha1(content, "TEXT")}`;
 
                     return capturer.captureDocument({
                       doc,
-                      docUrl: 'about:srcdoc',
+                      docUrl,
                       baseUrl,
                       settings: frameSettings,
                       options,

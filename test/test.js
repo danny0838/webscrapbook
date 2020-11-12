@@ -1909,7 +1909,7 @@ async function test_capture_frame_headless2() {
   };
 
   /* capture.frame = save */
-  // srcdoc content should be rewritten
+  // srcdoc content should be rewritten, with source URL with an SHA checksum
   options["capture.frame"]  = "save";
 
   var blob = await captureHeadless({
@@ -1930,7 +1930,7 @@ async function test_capture_frame_headless2() {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
+  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc?sha1=d5b4a943636aa76ec3822ea02bac52a7bef28cce"]'));
   assert(frameDoc.querySelector('p').textContent.trim() === `srcdoc content`);
   assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
 
@@ -9907,7 +9907,7 @@ async function test_capture_sizeLimit5() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_2.html`);
 }
 
 /**
