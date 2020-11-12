@@ -10,6 +10,7 @@ const baseOptions = {
   "capture.saveFileAsHtml": false,
   "capture.saveDataUriAsFile": true,
   "capture.saveDataUriAsSrcdoc": true,
+  "capture.saveResourcesSequentially": false,
   "capture.resourceSizeLimit": null,
   "capture.image": "save",
   "capture.imageBackground": "save",
@@ -1502,10 +1503,12 @@ async function test_capture_bookmark() {
  * capture.frame
  */
 async function test_capture_frame() {
-  /* capture.frame = save */
   var options = {
-    "capture.frame": "save",
+    "capture.saveResourcesSequentially": true,
   };
+
+  /* capture.frame = save */
+  options["capture.frame"]  = "save";
 
   var blob = await capture({
     url: `${localhost}/capture_frame/same-origin.html`,
@@ -1521,7 +1524,7 @@ async function test_capture_frame() {
 
   // frame1.html
   var frame = frames[0];
-  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
+  assert(frame.getAttribute('src') === `index_1.html`);
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1535,7 +1538,7 @@ async function test_capture_frame() {
 
   // frame2.xhtml
   var frame = frames[1];
-  assert(frame.getAttribute('src').match(/^index_\d+\.xhtml$/));
+  assert(frame.getAttribute('src') === `index_2.xhtml`);
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "application/xhtml+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1544,7 +1547,7 @@ async function test_capture_frame() {
 
   // frame3.svg
   var frame = frames[2];
-  assert(frame.getAttribute('src').match(/^index_\d+\.svg$/));
+  assert(frame.getAttribute('src') === `index_3.svg`);
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1558,9 +1561,7 @@ async function test_capture_frame() {
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
 
   /* capture.frame = link */
-  var options = {
-    "capture.frame": "link",
-  };
+  options["capture.frame"]  = "link";
 
   var blob = await capture({
     url: `${localhost}/capture_frame/same-origin.html`,
@@ -1581,9 +1582,7 @@ async function test_capture_frame() {
   assert(frames[3].getAttribute('src') === `${localhost}/capture_frame/frames/text.txt`);
 
   /* capture.frame = blank */
-  var options = {
-    "capture.frame": "blank",
-  };
+  options["capture.frame"]  = "blank";
 
   var blob = await capture({
     url: `${localhost}/capture_frame/same-origin.html`,
@@ -1604,9 +1603,7 @@ async function test_capture_frame() {
   assert(!frames[3].hasAttribute('src'));
 
   /* capture.frame = remove */
-  var options = {
-    "capture.frame": "remove",
-  };
+  options["capture.frame"]  = "remove";
 
   var blob = await capture({
     url: `${localhost}/capture_frame/same-origin.html`,
@@ -1628,12 +1625,14 @@ async function test_capture_frame() {
  * capture.frame
  */
 async function test_capture_frame2() {
+  var options = {
+    "capture.saveResourcesSequentially": true,
+  };
+
   /* capture.frame = save */
   // Capture the frame content via content script and messaging.
   // The result should be same as same origin if it works normally.
-  var options = {
-    "capture.frame": "save",
-  };
+  options["capture.frame"]  = "save";
 
   var blob = await capture({
     url: `${localhost}/capture_frame/cross-origin.py`,
@@ -1649,7 +1648,7 @@ async function test_capture_frame2() {
 
   // frame1.html
   var frame = frames[0];
-  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
+  assert(frame.getAttribute('src') === `index_1.html`);
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1663,7 +1662,7 @@ async function test_capture_frame2() {
 
   // frame2.xhtml
   var frame = frames[1];
-  assert(frame.getAttribute('src').match(/^index_\d+\.xhtml$/));
+  assert(frame.getAttribute('src') === `index_2.xhtml`);
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "application/xhtml+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1672,7 +1671,7 @@ async function test_capture_frame2() {
 
   // frame3.svg
   var frame = frames[2];
-  assert(frame.getAttribute('src').match(/^index_\d+\.svg$/));
+  assert(frame.getAttribute('src') === `index_3.svg`);
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1701,12 +1700,14 @@ async function test_capture_frame2() {
  * capture.frame
  */
 async function test_capture_frame3() {
+  var options = {
+    "capture.saveResourcesSequentially": true,
+  };
+
   /* capture.frame = save */
   // srcdoc should be removed
   // otherwise same as same origin
-  var options = {
-    "capture.frame": "save",
-  };
+  options["capture.frame"]  = "save";
 
   var blob = await capture({
     url: `${localhost}/capture_frame/srcdoc.html`,
@@ -1721,7 +1722,7 @@ async function test_capture_frame3() {
 
   var frame = doc.querySelector('iframe');
   assert(!frame.hasAttribute('srcdoc'));
-  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
+  assert(frame.getAttribute('src') === `index_1.html`);
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1737,9 +1738,7 @@ async function test_capture_frame3() {
   /* capture.frame = link */
   // record resolved src and save rewritten srcdoc
   // resources in srcdoc should be saved as data URL
-  var options = {
-    "capture.frame": "link",
-  };
+  options["capture.frame"]  = "link";
 
   var blob = await capture({
     url: `${localhost}/capture_frame/srcdoc.html`,
@@ -1765,9 +1764,7 @@ async function test_capture_frame3() {
 
   /* capture.frame = blank */
   // srcdoc should be removed
-  var options = {
-    "capture.frame": "blank",
-  };
+  options["capture.frame"]  = "blank";
 
   var blob = await capture({
     url: `${localhost}/capture_frame/srcdoc.html`,
@@ -1795,10 +1792,12 @@ async function test_capture_frame3() {
  * capture.frame
  */
 async function test_capture_frame4() {
-  /* capture.frame = save */
   var options = {
-    "capture.frame": "save",
+    "capture.saveResourcesSequentially": true,
   };
+
+  /* capture.frame = save */
+  options["capture.frame"]  = "save";
 
   var blob = await capture({
     url: `${localhost}/capture_frame/duplicate.html`,
@@ -1811,16 +1810,14 @@ async function test_capture_frame4() {
   var doc = await readFileAsDocument(indexBlob);
   var frames = doc.querySelectorAll('iframe');
 
-  assert(frames[0].getAttribute('src').match(/^index_\d+\.html$/));
-  assert(frames[1].getAttribute('src').match(/^index_\d+\.html$/));
-  assert(frames[2].getAttribute('src').match(/^index_\d+\.html#abc$/));
-  assert(frames[3].getAttribute('src').match(/^text\.txt$/));
-  assert(frames[4].getAttribute('src').match(/^text\.txt$/));
+  assert(frames[0].getAttribute('src') === `index_1.html`);
+  assert(frames[1].getAttribute('src') === `index_2.html`);
+  assert(frames[2].getAttribute('src') === `index_3.html#abc`);
+  assert(frames[3].getAttribute('src') === `text.txt`);
+  assert(frames[4].getAttribute('src') === `text.txt`);
 
   /* capture.frame = link */
-  var options = {
-    "capture.frame": "link",
-  };
+  options["capture.frame"]  = "link";
 
   var blob = await capture({
     url: `${localhost}/capture_frame/duplicate.html`,
@@ -1846,11 +1843,13 @@ async function test_capture_frame4() {
  * capture.frame
  */
 async function test_capture_frame_headless() {
+  var options = {
+    "capture.saveResourcesSequentially": true,
+  };
+
   /* capture.frame = save */
   // frame contents are source (not modified by scripts) due to headless capture
-  var options = {
-    "capture.frame": "save",
-  };
+  options["capture.frame"]  = "save";
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/same-origin.html`,
@@ -1865,7 +1864,7 @@ async function test_capture_frame_headless() {
   var frames = doc.querySelectorAll('iframe');
 
   var frame = frames[0];
-  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
+  assert(frame.getAttribute('src') === `index_1.html`);
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1878,7 +1877,7 @@ async function test_capture_frame_headless() {
   assert(imgData === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
   var frame = frames[1];
-  assert(frame.getAttribute('src').match(/^index_\d+\.xhtml$/));
+  assert(frame.getAttribute('src') === `index_2.xhtml`);
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "application/xhtml+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1886,7 +1885,7 @@ async function test_capture_frame_headless() {
   assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
 
   var frame = frames[2];
-  assert(frame.getAttribute('src').match(/^index_\d+\.svg$/));
+  assert(frame.getAttribute('src') === `index_3.svg`);
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1905,11 +1904,13 @@ async function test_capture_frame_headless() {
  * capture.frame
  */
 async function test_capture_frame_headless2() {
+  var options = {
+    "capture.saveResourcesSequentially": true,
+  };
+
   /* capture.frame = save */
   // srcdoc content should be rewritten
-  var options = {
-    "capture.frame": "save",
-  };
+  options["capture.frame"]  = "save";
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/srcdoc.html`,
@@ -1925,7 +1926,7 @@ async function test_capture_frame_headless2() {
 
   var frame = doc.querySelector('iframe');
   assert(!frame.hasAttribute('srcdoc'));
-  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
+  assert(frame.getAttribute('src') === `index_1.html`);
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
@@ -1960,14 +1961,12 @@ async function test_capture_frame_headless2() {
 <script>
 document.querySelector('p').textContent = 'srcdoc content modified';
 </script>`);
-  assert(frame.getAttribute('src').match(/^index_\d+\.html$/));
+  assert(frame.getAttribute('src') === `index_1.html`);
 
   /* capture.frame = link */
   // record resolved src and save rewritten srcdoc
   // resources in srcdoc should be saved as data URL
-  var options = {
-    "capture.frame": "link",
-  };
+  options["capture.frame"]  = "link";
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/srcdoc.html`,
@@ -2427,11 +2426,15 @@ async function test_capture_frame_circular2() {
  * capture.frameRename
  */
 async function test_capture_frameRename() {
-  /* capture.frameRename = true */
   var options = {
+    "capture.saveResourcesSequentially": true,
+  };
+
+  /* capture.frameRename = true */
+  Object.assign(options, {
     "capture.frameRename": true,
     "capture.frame": "save",
-  };
+  });
 
   var blob = await capture({
     url: `${localhost}/capture_frameRename/index.html`,
@@ -2443,17 +2446,17 @@ async function test_capture_frameRename() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/^index_\d\.html$/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/^index_\d\.xhtml$/));
-  assert(doc.querySelectorAll('iframe')[2].getAttribute('src').match(/^index_\d\.svg$/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_2.xhtml`);
+  assert(doc.querySelectorAll('iframe')[2].getAttribute('src') === `index_3.svg`);
   assert(doc.querySelectorAll('iframe')[3].getAttribute('src') === `text.txt`);
   assert(doc.querySelectorAll('iframe')[4].getAttribute('src') === `red.bmp`);
 
   /* capture.frameRename = false */
-  var options = {
+  Object.assign(options, {
     "capture.frameRename": false,
     "capture.frame": "save",
-  };
+  });
 
   var blob = await capture({
     url: `${localhost}/capture_frameRename/index.html`,
@@ -6185,9 +6188,13 @@ async function test_capture_rewrite() {
  * capturer.captureDocument
  */
 async function test_capture_rewrite2() {
+  var options = {
+    "capture.saveResourcesSequentially": true,
+  };
+
   var blob = await capture({
     url: `${localhost}/capture_rewrite2/index.html`,
-    options: baseOptions,
+    options: Object.assign({}, baseOptions, options),
   });
 
   var zip = await new JSZip().loadAsync(blob);
@@ -6201,8 +6208,8 @@ async function test_capture_rewrite2() {
   var imgs = doc.querySelectorAll('img');
   assert(imgs[0].getAttribute('src') === ``);
   assert(imgs[1].getAttribute('src') === `#123`);
-  assert(imgs[2].getAttribute('src').match(/^index-\d+\.html$/i)); // html page saved as img
-  assert(imgs[3].getAttribute('src').match(/^index-\d+\.html$/i)); // html page saved as img
+  assert(imgs[2].getAttribute('src') === `index-1.html`); // html page saved as img
+  assert(imgs[3].getAttribute('src') === `index-2.html`); // html page saved as img
 }
 
 /**
@@ -7359,6 +7366,7 @@ async function test_capture_downLink08() {
  */
 async function test_capture_downLink09() {
   var options = {
+    "capture.saveResourcesSequentially": true,
     "capture.downLink.doc.depth": 1,
   };
 
@@ -7381,8 +7389,8 @@ async function test_capture_downLink09() {
   var indexFile = zip.file('linked1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/^linked1_\d+\.html$/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/^linked1_\d+\.html$/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `linked1_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `linked1_2.html`);
 
   /* frameRename = false */
   options["capture.frameRename"] = false;
@@ -9623,6 +9631,7 @@ async function test_capture_sizeLimit() {
  */
 async function test_capture_sizeLimit2() {
   var options = {
+    "capture.saveResourcesSequentially": true,
     "capture.frame": "save",
   };
 
@@ -9642,8 +9651,8 @@ async function test_capture_sizeLimit2() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_2.html`);
 
   /* sizeLimit = 1KB; linkUnsavedUri = false */
   options["capture.resourceSizeLimit"] = 1 / 1024;
@@ -9662,8 +9671,8 @@ async function test_capture_sizeLimit2() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_2.html`);
 
   /* sizeLimit = 1KB; linkUnsavedUri = true */
   options["capture.resourceSizeLimit"] = 1 / 1024;
@@ -9682,8 +9691,8 @@ async function test_capture_sizeLimit2() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_2.html`);
 
   /* sizeLimit = null; headless */
   options["capture.resourceSizeLimit"] = null;
@@ -9702,8 +9711,8 @@ async function test_capture_sizeLimit2() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_2.html`);
 
   /* sizeLimit = 1KB; linkUnsavedUri = false; headless */
   options["capture.resourceSizeLimit"] = 1 / 1024;
@@ -9723,7 +9732,7 @@ async function test_capture_sizeLimit2() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_sizeLimit2/iframe2.html`);
 
   /* sizeLimit = 1KB; linkUnsavedUri = true; headless */
@@ -9744,7 +9753,7 @@ async function test_capture_sizeLimit2() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `${localhost}/capture_sizeLimit2/iframe2.html`);
 }
 
@@ -9810,6 +9819,7 @@ async function test_capture_sizeLimit3() {
  */
 async function test_capture_sizeLimit4() {
   var options = {
+    "capture.saveResourcesSequentially": true,
     "capture.frame": "save",
   };
 
@@ -9829,8 +9839,8 @@ async function test_capture_sizeLimit4() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_2.html`);
 
   /* sizeLimit = 1KB; headless */
   options["capture.resourceSizeLimit"] = 1 / 1024;
@@ -9848,8 +9858,8 @@ async function test_capture_sizeLimit4() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_2.html`);
 }
 
 /**
@@ -9860,6 +9870,7 @@ async function test_capture_sizeLimit4() {
  */
 async function test_capture_sizeLimit5() {
   var options = {
+    "capture.saveResourcesSequentially": true,
     "capture.frame": "save",
   };
 
@@ -9877,8 +9888,8 @@ async function test_capture_sizeLimit5() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_2.html`);
 
   /* sizeLimit = 1KB; headless */
   options["capture.resourceSizeLimit"] = 1 / 1024;
@@ -9895,8 +9906,8 @@ async function test_capture_sizeLimit5() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src').match(/index_\d+\.html/));
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src').match(/index_\d+\.html/));
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_1.html`);
 }
 
 /**

@@ -2411,8 +2411,14 @@
       }
     }
 
-    // run async downloading tasks parallelly
-    await Promise.all(tasks.map(task => task()));
+    // run async downloading tasks
+    if (options["capture.saveResourcesSequentially"]) {
+      await tasks.reduce((prevTask, curTask) => {
+        return prevTask.then(curTask);
+      }, Promise.resolve());
+    } else {
+      await Promise.all(tasks.map(task => task()));
+    }
 
     // run downLink tasks sequentially
     await downLinkTasks.reduce((prevTask, curTask) => {

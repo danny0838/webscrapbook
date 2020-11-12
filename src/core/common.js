@@ -60,6 +60,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.saveDataUriAsFile": true,
     "capture.saveDataUriAsSrcdoc": true,
     "capture.autoCloseDialog": "none",
+    "capture.saveResourcesSequentially": false,
     "capture.resourceSizeLimit": null,
     "capture.image": "save", // "save", "save-current", "link", "blank", "remove"
     "capture.imageBackground": "save-used", // "save", "save-used", "link", "blank"
