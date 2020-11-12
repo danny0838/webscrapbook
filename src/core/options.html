@@ -21,8 +21,14 @@
         <label for="opt_ui.showContextMenu">__MSG_OptionUiShowContextMenuLabel__</label>
       </div>
       <div>
-        <input type="checkbox" id="opt_capture.autoCloseDialog">
         <label for="opt_capture.autoCloseDialog">__MSG_OptionCaptureAutoCloseDialogLabel__</label>
+        <select id="opt_capture.autoCloseDialog">
+          <option value="none">__MSG_OptionCaptureAutoCloseDialogNoneLabel__</option>
+          <option value="nowarn">__MSG_OptionCaptureAutoCloseDialogNoWarnLabel__</option>
+          <option value="noerror">__MSG_OptionCaptureAutoCloseDialogNoErrorLabel__</option>
+          <option value="nofailure">__MSG_OptionCaptureAutoCloseDialogNoFailureLabel__</option>
+          <option value="always">__MSG_OptionCaptureAutoCloseDialogAlwaysLabel__</option>
+        </select>
       </div>
     </div>
   </details>

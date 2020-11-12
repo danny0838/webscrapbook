@@ -3633,6 +3633,18 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     // use missionId provided from URL params to read task data
     const missionId = capturer.missionId = s.get('mid');
 
+    const closeWindow = async () => {
+      await scrapbook.delay(1000);
+
+      if (browser.windows) {
+        const win = await browser.windows.getCurrent();
+        return await browser.windows.remove(win.id);
+      }
+
+      const tab = await browser.tabs.getCurrent();
+      return await browser.tabs.remove(tab.id);
+    };
+
     document.addEventListener("DOMContentLoaded", async function () {
       scrapbook.loadLanguages(document);
 
@@ -3666,21 +3678,31 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       resolve(results);
 
-      // do not autoclose if there's no adequate results
-      if (autoClose) {
-        if (!results || results.some(x => x.error)) {
-          autoClose = false;
-        }
-      }
+      const hasFailure = !results || results.some(x => x.error);
 
-      if (autoClose && !isDebug) {
-        await scrapbook.delay(1000);
-        if (browser.windows) {
-          const win = await browser.windows.getCurrent();
-          return browser.windows.remove(win.id);
-        } else {
-          const tab = await browser.tabs.getCurrent();
-          return browser.tabs.remove(tab.id);
+      switch (autoClose) {
+        case "nowarn": {
+          if (capturer.logger.querySelector('.warn, .error')) {
+            break;
+          }
+        }
+        case "noerror": {
+          if (capturer.logger.querySelector('.error')) {
+            break;
+          }
+        }
+        case "nofailure": {
+          if (hasFailure) {
+            break;
+          }
+        }
+        case "always": {
+          await closeWindow();
+          break;
+        }
+        case "none":
+        default: {
+          break;
         }
       }
     });

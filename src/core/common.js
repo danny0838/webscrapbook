@@ -59,7 +59,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.saveFileAsHtml": false,
     "capture.saveDataUriAsFile": true,
     "capture.saveDataUriAsSrcdoc": true,
-    "capture.autoCloseDialog": false,
+    "capture.autoCloseDialog": "none",
     "capture.resourceSizeLimit": null,
     "capture.image": "save", // "save", "save-current", "link", "blank", "remove"
     "capture.imageBackground": "save-used", // "save", "save-used", "link", "blank"

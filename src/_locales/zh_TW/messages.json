@@ -580,8 +580,23 @@
   "OptionCaptureAudioTooltip": {
     "message": "此選項決定音訊（AUDIO 元素）的處理方式。\n\n• 儲存：將音訊儲存至本地。\n• 儲存現用：將目前播放的音訊儲存至本地，忽略供其他瀏覽器使用的備用音訊。這可以有效縮小容量，但在其他平台可能無法播放。若擷取的頁面並未顯示於瀏覽器（例如擷取原貌），則仍儲存所有音訊。\n• 連結：將音訊元素連往原始位址。注意這會導致瀏覽擷取頁面時觸發網路傳輸。\n• 清空：將音訊無效化。\n• 移除：將音訊元素移除。注意這可能會影響網頁排版。"
   },
+  "OptionCaptureAutoCloseDialogAlwaysLabel": {
+    "message": "總是"
+  },
   "OptionCaptureAutoCloseDialogLabel": {
-    "message": "擷取成功時自動關閉對話視窗"
+    "message": "擷取完成時自動關閉對話視窗:"
+  },
+  "OptionCaptureAutoCloseDialogNoErrorLabel": {
+    "message": "無錯誤或擷取失敗時"
+  },
+  "OptionCaptureAutoCloseDialogNoFailureLabel": {
+    "message": "無擷取失敗時"
+  },
+  "OptionCaptureAutoCloseDialogNoWarnLabel": {
+    "message": "無警告、錯誤、或擷取失敗時"
+  },
+  "OptionCaptureAutoCloseDialogNoneLabel": {
+    "message": "停用"
   },
   "OptionCaptureCanvasBlankLabel": {
     "message": "儲存初始狀態"
