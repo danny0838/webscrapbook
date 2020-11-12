@@ -14,13 +14,12 @@
     root.isDebug,
     root.browser,
     root.scrapbook,
-    root.Deferred,
     root.MapWithDefault,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, Deferred, MapWithDefault, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, MapWithDefault, window, document, console) {
 
   'use strict';
 
@@ -339,7 +338,7 @@
       if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
         if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
             options["capture.downLink.doc.depth"] > 0) {
-          downLinkTasks = downLinkTasks.then(async () => {
+          downLinkTasks.push(async () => {
             const response = await capturer.invoke("captureUrl", {
               url,
               refUrl,
@@ -391,7 +390,7 @@
             break;
           }
 
-          tasks[tasks.length] = halter.then(async () => {
+          tasks.push(async () => {
             const response = await downloadFile({
               url,
               refUrl,
@@ -502,7 +501,7 @@
               case "save":
               default:
                 if (elem.hasAttribute("href")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("href"),
                       refUrl,
@@ -514,7 +513,7 @@
                   });
                 }
                 if (elem.hasAttribute("xlink:href")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("xlink:href"),
                       refUrl,
@@ -543,7 +542,7 @@
               case "save":
               case "link":
               default:
-                tasks[tasks.length] = halter.then(async () => {
+                tasks.push(async () => {
                   await cssHandler.rewriteCss({
                     elem,
                     refUrl,
@@ -687,7 +686,7 @@
                     break;
                   }
 
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     await cssHandler.rewriteCss({
                       elem,
                       refUrl,
@@ -729,7 +728,7 @@
                     favIconUrl = rewriteUrl;
                     useFavIcon = true;
                   }
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("href"),
                       refUrl,
@@ -787,7 +786,7 @@
                   captureRewriteAttr(elem, "data-scrapbook-css-disabled", "");
                   break;
                 }
-                tasks[tasks.length] = halter.then(async () => {
+                tasks.push(async () => {
                   await cssHandler.rewriteCss({
                     elem,
                     refUrl,
@@ -830,7 +829,7 @@
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
@@ -895,7 +894,7 @@
                 case "save-used":
                 case "save":
                 default:
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: rewriteUrl,
                       refUrl,
@@ -950,7 +949,7 @@
                   const frameOptions = JSON.parse(JSON.stringify(options));
                   frameOptions["capture.saveAs"] = "singleHtml";
 
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     let frameDoc;
                     try {
                       frameDoc = frameSrc.contentDocument;
@@ -1037,7 +1036,7 @@
 
                 sourceUrl = frame.getAttribute("src");
 
-                tasks[tasks.length] = halter.then(async () => {
+                tasks.push(async () => {
                   let frameDoc;
                   try {
                     frameDoc = frameSrc.contentDocument;
@@ -1189,7 +1188,7 @@
                   if (elemOrig && elemOrig.currentSrc) {
                     const url = elemOrig.currentSrc;
                     captureRewriteAttr(elem, "srcset", null);
-                    tasks[tasks.length] = halter.then(async () => {
+                    tasks.push(async () => {
                       const response = await downloadFile({
                         url,
                         refUrl,
@@ -1206,7 +1205,7 @@
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
@@ -1219,7 +1218,7 @@
                 }
 
                 if (elem.hasAttribute("srcset")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
                       return (await downloadFile({
                         url,
@@ -1280,7 +1279,7 @@
               case "save":
               default:
                 Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
                       const rewriteUrl = capturer.resolveRelativeUrl(url, refUrl);
                       return (await downloadFile({
@@ -1337,7 +1336,7 @@
                     Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                       captureRemoveNode(elem);
                     }, this);
-                    tasks[tasks.length] = halter.then(async () => {
+                    tasks.push(async () => {
                       const response = await downloadFile({
                         url,
                         refUrl,
@@ -1350,7 +1349,7 @@
                   }
 
                   Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
-                    tasks[tasks.length] = halter.then(async () => {
+                    tasks.push(async () => {
                       const response = await downloadFile({
                         url: elem.getAttribute("src"),
                         refUrl,
@@ -1368,7 +1367,7 @@
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
@@ -1381,7 +1380,7 @@
                 }
 
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
@@ -1443,7 +1442,7 @@
               case "save-current":
                 if (!isHeadless) {
                   if (elem.hasAttribute("poster")) {
-                    tasks[tasks.length] = halter.then(async () => {
+                    tasks.push(async () => {
                       const response = await downloadFile({
                         url: elem.getAttribute("poster"),
                         refUrl,
@@ -1460,7 +1459,7 @@
                     Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
                       captureRemoveNode(elem);
                     }, this);
-                    tasks[tasks.length] = halter.then(async () => {
+                    tasks.push(async () => {
                       const response = await downloadFile({
                         url,
                         refUrl,
@@ -1473,7 +1472,7 @@
                   }
 
                   Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
-                    tasks[tasks.length] = halter.then(async () => {
+                    tasks.push(async () => {
                       const response = await downloadFile({
                         url: elem.getAttribute("src"),
                         refUrl,
@@ -1491,7 +1490,7 @@
               case "save":
               default:
                 if (elem.hasAttribute("poster")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("poster"),
                       refUrl,
@@ -1504,7 +1503,7 @@
                 }
 
                 if (elem.hasAttribute("src")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
@@ -1517,7 +1516,7 @@
                 }
 
                 Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
@@ -1558,7 +1557,7 @@
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
@@ -1598,7 +1597,7 @@
               case "save":
               default:
                 if (elem.hasAttribute("data")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("data"),
                       refUrl,
@@ -1645,7 +1644,7 @@
               case "save":
               default:
                 if (elem.hasAttribute("code")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("code"),
                       refUrl,
@@ -1658,7 +1657,7 @@
                 }
 
                 if (elem.hasAttribute("archive")) {
-                  tasks[tasks.length] = halter.then(async () => {
+                  tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("archive"),
                       refUrl,
@@ -1734,7 +1733,7 @@
                     // srcset and currentSrc are not supported, do the same as save
                   case "save":
                   default:
-                    tasks[tasks.length] = halter.then(async () => {
+                    tasks.push(async () => {
                       const response = await downloadFile({
                         url: elem.getAttribute("src"),
                         refUrl,
@@ -1883,7 +1882,7 @@
           default:
             switch (options["capture.rewriteCss"]) {
               case "url": {
-                tasks[tasks.length] = halter.then(async () => {
+                tasks.push(async () => {
                   const response = await cssHandler.rewriteCssText({
                     cssText: elem.getAttribute("style"),
                     refUrl,
@@ -1896,7 +1895,7 @@
               }
               case "tidy":
               case "match": {
-                tasks[tasks.length] = halter.then(async () => {
+                tasks.push(async () => {
                   const response = await cssHandler.rewriteCssText({
                     cssText: elem.style.cssText,
                     refUrl,
@@ -2286,13 +2285,10 @@
 
     // inspect all nodes (and register async tasks) -->
     // some additional tasks that requires some data after nodes are inspected -->
-    // resolve the halter -->
-    // await for all async tasks to complete -->
+    // start async tasks and wait form them to complete -->
     // finalize
-    const halter = new Deferred();
     const tasks = [];
-    const downLinkHalter = new Deferred();
-    let downLinkTasks = downLinkHalter;
+    const downLinkTasks = [];
 
     // inspect nodes
     let metaCharsetNode;
@@ -2359,7 +2355,9 @@
       if (typeof favIconUrl === 'undefined') {
         if (isMainPage && isMainFrame && settings.favIconUrl) {
           let icon;
-          tasks[tasks.length] = (async () => {
+
+          // run this immediately to handle icon URL
+          const p = (async () => {
             switch (options["capture.favicon"]) {
               case "link": {
                 icon = favIconUrl = settings.favIconUrl;
@@ -2394,6 +2392,8 @@
               captureRecordAddedNode(favIconNode);
             }
           })();
+
+          tasks.push(() => p);
         }
       }
     }
@@ -2411,13 +2411,13 @@
       }
     }
 
-    // resolve the halter and wait for all async downloading tasks to complete
-    halter.resolve();
-    await Promise.all(tasks);
+    // run async downloading tasks parallelly
+    await Promise.all(tasks.map(task => task()));
 
     // run downLink tasks sequentially
-    downLinkHalter.resolve();
-    await downLinkTasks;
+    await downLinkTasks.reduce((prevTask, curTask) => {
+      return prevTask.then(curTask);
+    }, Promise.resolve());
 
     // record after the content of all nested shadow roots have been processed
     for (const {host, shadowRoot} of shadowRootList) {
