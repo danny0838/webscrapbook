@@ -3633,9 +3633,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     // use missionId provided from URL params to read task data
     const missionId = capturer.missionId = s.get('mid');
 
-    // pending for special handling and prevents auto-closing
-    const pendingMode = s.has('p');
-
     document.addEventListener("DOMContentLoaded", async function () {
       scrapbook.loadLanguages(document);
 
@@ -3645,9 +3642,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       await scrapbook.loadOptions();
 
       let autoClose = scrapbook.getOption("capture.autoCloseDialog");
-      if (pendingMode) {
-        autoClose = false;
-      }
 
       let results;
       if (missionId) {
