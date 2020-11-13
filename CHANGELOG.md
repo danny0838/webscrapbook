@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.93.0] - 2020-11-13
+* Added a capture option to save resources sequentially.
+* Reworked auto-close dialog option to support more modes.
+
 ## [0.92.0] - 2020-11-11
 * Added support of in-depth capture.
 * Changed internal identifier for some capture links (download linked files) related options.
@@ -37,8 +41,8 @@
 * Added support of top-level null value for *.js tree files.
 
 ## [0.82.0] - 2020-10-17
-* Added capture option to specify delay time before capturing an auto-launching tab.
-* Added capture option to insert an infobar.
+* Added a capture option to specify delay time before capturing an auto-launching tab.
+* Added a capture option to insert an infobar.
 * Improved capture helpers:
   * Added "name" and "debug" properties.
   * Added "options" and "insert" commands.
@@ -102,9 +106,9 @@
 * Added support of context menu for the sidebar.
 
 ## [0.53.0] - 2019-09-27
-* Added capture option to remove hidden elements.
-* Added capture option to preclude elements.
-* Added capture option to limit resource size to download.
+* Added a capture option to remove hidden elements.
+* Added a capture option to preclude elements.
+* Added a capture option to limit resource size to download.
 
 ## [0.52.0] - 2019-09-15
 * Dropped support of `scripted single html` format for a page capture.
