@@ -769,7 +769,7 @@
     "message": "擷取或儲存頁面時加入資訊條"
   },
   "OptionCaptureInsertInfoBarTooltip": {
-    "message": "勾選後會在擷取或儲存的頁面加入腳本，使瀏覽器在頁面頂部顯示資訊條（須啟用 JavaScript）。\n\n注意：封存頁面檢視器由於不支援 JavaScript，無法顯示資訊條。若要用於封存頁面，須改用支援 JavaScript 的檢視方法，例如解壓縮後開啟。"
+    "message": "勾選時會在擷取或儲存的頁面加入腳本，使瀏覽器在頁面頂部顯示資訊條（須啟用 JavaScript）。\n\n注意：封存頁面檢視器由於不支援 JavaScript，無法顯示資訊條。若要用於封存頁面，須改用支援 JavaScript 的檢視方法，例如解壓縮後開啟。"
   },
   "OptionCaptureLinkUnsavedUriLabel": {
     "message": "將無法儲存的資源連往原始位址"

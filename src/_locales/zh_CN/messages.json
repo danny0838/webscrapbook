@@ -769,7 +769,7 @@
     "message": "获取或保存页面时加入网页信息条"
   },
   "OptionCaptureInsertInfoBarTooltip": {
-    "message": "勾选后会在获取或保存的页面加入脚本，使浏览器在页面顶部显示信息条（须启用 JavaScript）。\n\n注意：封存页面检视器由于不支援 JavaScript，无法显示信息条。若要用于封存页面，须改用支援 JavaScript 的检视方法，例如解压缩后开启。"
+    "message": "勾选时会在获取或保存的页面加入脚本，使浏览器在页面顶部显示信息条（须启用 JavaScript）。\n\n注意：封存页面检视器由于不支援 JavaScript，无法显示信息条。若要用于封存页面，须改用支援 JavaScript 的检视方法，例如解压缩后开启。"
   },
   "OptionCaptureLinkUnsavedUriLabel": {
     "message": "将无法储存的资源连往原始位址"
