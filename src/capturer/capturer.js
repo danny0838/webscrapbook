@@ -266,7 +266,7 @@
     const files = capturer.captureInfo.get(timeId).files;
     for (const [filename, {path, url, blob}] of files) {
       if (!blob) { continue; }
-      scrapbook.zipAddFile(zip, path, blob, true);
+      scrapbook.zipAddFile(zip, path, blob);
     }
     return zip;
   };
