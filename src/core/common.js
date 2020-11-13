@@ -102,6 +102,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.deleteErasedOnCapture": true,
     "capture.deleteErasedOnSave": false,
     "capture.backupForRecapture": true,
+    "capture.zipCompressLevel": null,
     "editor.autoInit": true,
     "editor.useNativeTags": false,
     "editor.lineMarker.style.1": "background: #FFFF00; background: linear-gradient(transparent 40%, rgba(255,255,0,0.9) 90%, transparent 100%);",
@@ -2758,16 +2759,23 @@ if (Node && !Node.prototype.getRootNode) {
    * @require JSZip
    ***************************************************************************/
 
-  scrapbook.zipAddFile = function (zipObj, filename, blob, isText, options = {}) {
-    if (typeof isText === 'undefined' || isText === null) {
-      isText = /^text\/|\b(?:xml|json|javascript)\b/.test(blob.type);
-    }
+  scrapbook.zipAddFile = function (zipObj, filename, blob, options) {
+    const zipOptions = Object.assign({}, options);
 
-    // Binary and small text data usually have poor compression rate.
-    const zipOptions = (isText && blob.size >= 128) ?
-        {compression: "DEFLATE", compressionOptions: {level: 9}} :
-        {compression: "STORE"};
-    Object.assign(zipOptions, options);
+    // auto-determine compression method if not defined
+    if (typeof zipOptions.compression === 'undefined') {
+      const isText = /^text\/|\b(?:xml|json|javascript)\b/.test(blob.type);
+
+      // Binary and small text data usually have poor compression rate.
+      if (isText && blob.size >= 128) {
+        zipOptions.compression = "DEFLATE";
+        if (!zipOptions.compressionOptions) {
+          zipOptions.compressionOptions = {level: 9};
+        }
+      } else {
+        zipOptions.compression = "STORE";
+      }
+    }
 
     // The timestamp field of zip usually use local time, while JSZip writes UTC
     // time for compatibility purpose since it does not support extended UTC
@@ -2775,7 +2783,7 @@ if (Node && !Node.prototype.getRootNode) {
     // timestamp 00:00. We fix this by ourselves.
     // https://github.com/Stuk/jszip/issues/369
     const _defaultDate = JSZip.defaults.date;
-    const d = options.date || new Date();
+    const d = zipOptions.date || new Date();
     d.setTime(d.valueOf() - d.getTimezoneOffset() * 60 * 1000);
     JSZip.defaults.date = d;
     delete zipOptions.date;

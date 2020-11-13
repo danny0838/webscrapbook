@@ -261,12 +261,27 @@
     return result;
   };
 
-  capturer.loadFileCacheAsZip = async function ({timeId}) {
+  capturer.loadFileCacheAsZip = async function ({timeId, options}) {
+    let zipOptions;
+    const compressLevel = options["capture.zipCompressLevel"];
+    if (Number.isInteger(compressLevel)) {
+      if (compressLevel > 0) {
+        zipOptions = {
+          compression: "DEFLATE",
+          compressionOptions: {level: compressLevel},
+        };
+      } else {
+        zipOptions = {
+          compression: "STORE",
+        };
+      }
+    }
+
     const zip = new JSZip();
     const files = capturer.captureInfo.get(timeId).files;
     for (const [filename, {path, url, blob}] of files) {
       if (!blob) { continue; }
-      scrapbook.zipAddFile(zip, path, blob);
+      scrapbook.zipAddFile(zip, path, blob, zipOptions);
     }
     return zip;
   };
@@ -2891,7 +2906,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         }
 
         // generate and download the zip file
-        const zip = await capturer.loadFileCacheAsZip({timeId});
+        const zip = await capturer.loadFileCacheAsZip({timeId, options});
         const blob = await zip.generateAsync({type: "blob", mimeType: "application/html+zip"});
         filename = settings.indexFilename + ".htz";
 
@@ -2932,7 +2947,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         });
 
         // generate and download the zip file
-        const zip = await capturer.loadFileCacheAsZip({timeId});
+        const zip = await capturer.loadFileCacheAsZip({timeId, options});
         const blob = await zip.generateAsync({type: "blob", mimeType: "application/x-maff"});
         filename = settings.indexFilename + ".maff";
 
