@@ -2754,8 +2754,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
                 directory: targetDir,
                 filename: path,
                 sourceUrl,
-                autoErase: path !== "index.html",
-                savePrompt: false,
                 settings,
                 options,
               });
