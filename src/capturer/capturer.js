@@ -1384,7 +1384,6 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
           blob,
           directory: targetDir,
           filename,
-          sourceUrl,
           settings,
           options,
         });
@@ -2707,7 +2706,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             blob,
             directory: targetDir,
             filename,
-            sourceUrl,
             settings,
             options,
           });
@@ -2753,7 +2751,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
                 blob,
                 directory: targetDir,
                 filename: path,
-                sourceUrl,
                 settings,
                 options,
               });
@@ -3380,14 +3377,13 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.blob
    * @param {string} params.directory - URL of the server
    * @param {string} params.filename
-   * @param {string} params.sourceUrl
    * @param {Object} params.options
    * @return {Promise<string>} Filename of the saved blob.
    */
   capturer.saveBlobToServer = async function (params) {
     isDebug && console.debug("call: saveBlobToServer", params);
 
-    const {timeId, blob, directory, filename, sourceUrl, options} = params;
+    const {timeId, blob, directory, filename, options} = params;
     await server.init();
     let newFilename = await capturer.getAvailableSaveFilename({
       filename: (directory ? directory + '/' : '') + filename,
