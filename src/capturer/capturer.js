@@ -1377,7 +1377,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
         break;
       }
       case 'server': {
-        // deprecated; normally we won't get here
+        // we get here only if the book is no_tree
         [targetDir, filename] = scrapbook.filepathParts(filename);
         filename = await capturer.saveBlobToServer({
           timeId,
