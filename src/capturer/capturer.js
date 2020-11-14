@@ -767,8 +767,8 @@
    * @param {boolean} [params.fullPage]
    * @param {string} [params.url]
    * @param {string} [params.refUrl]
-   * @param {string} [params.title] - an overriding title
-   * @param {string} [params.favIconUrl] - fallback favicon
+   * @param {string} [params.title] - item title
+   * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark", "resave", "internalize"
    * @param {string} params.options
    * @param {string} [params.parentId] - parent item ID for the captured items
@@ -842,7 +842,7 @@
    * @param {integer} params.tabId
    * @param {integer} [params.frameId]
    * @param {boolean} [params.fullPage]
-   * @param {string} [params.title] - an overriding title
+   * @param {string} [params.title] - item title
    * @param {string} [params.mode] - "tab", "source", "bookmark", "resave", "internalize"
    * @param {string} params.options
    * @return {Promise<Object>}
@@ -866,7 +866,6 @@
 
     const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
     const message = {
-      title: title0,
       settings: {
         missionId: capturer.missionId,
         timeId,
@@ -877,6 +876,7 @@
         documentName: "index",
         fullPage,
         recurseChain: [],
+        title: title0,
         favIconUrl,
       },
       options,
@@ -913,8 +913,8 @@
    * @param {string} params.timeId
    * @param {string} params.url
    * @param {string} [params.refUrl]
-   * @param {string} [params.title] - an overriding title
-   * @param {string} [params.favIconUrl] - fallback favicon
+   * @param {string} [params.title] - item title
+   * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {string} params.options
    * @return {Promise<Object>}
@@ -976,7 +976,6 @@
     const message = {
       url,
       refUrl,
-      title,
       settings: {
         missionId: capturer.missionId,
         timeId,
@@ -987,6 +986,7 @@
         isMainFrame: true,
         documentName: "index",
         recurseChain: [],
+        title,
         favIconUrl,
       },
       options,
@@ -1027,7 +1027,6 @@
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl]
-   * @param {string} [params.title] - an overriding title
    * @param {boolean} [params.downLink] - is downLink mode (check filter, download as file)
    * @param {Object} params.settings
    * @param {Object} params.options
@@ -1036,7 +1035,7 @@
   capturer.captureUrl = async function (params) {
     isDebug && console.debug("call: captureUrl", params);
 
-    const {title, downLink = false, settings, options} = params;
+    const {downLink = false, settings, options} = params;
     let {timeId, depth} = settings;
     let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
@@ -1178,7 +1177,6 @@
         doc,
         docUrl: fetchResponse.url + (fetchResponse.url.startsWith('data:') ? '' : sourceUrlHash),
         refUrl,
-        title,
         settings,
         options,
       });
@@ -1187,7 +1185,6 @@
     return await capturer.captureFile({
       url: fetchResponse.url + (fetchResponse.url.startsWith('data:') ? '' : sourceUrlHash),
       refUrl,
-      title,
       charset: fetchResponse.headers.charset,
       settings,
       options,
@@ -1198,8 +1195,10 @@
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl]
-   * @param {string} [params.title] - an overriding title
    * @param {Object} params.settings
+   * @param {string} params.settings.timeId
+   * @param {string} [params.settings.title] - item title (also used as index page title)
+   * @param {string} [params.settings.favIconUrl] - item favicon (also used as index page favicon)
    * @param {Object} params.options
    * @return {Promise<Object>}
    */
@@ -1249,9 +1248,7 @@
     }
 
     const {timeId} = settings;
-
-    let {title} = params;
-    let {favIconUrl} = settings;
+    let {title, favIconUrl} = settings;
 
     // attempt to retrieve title and favicon from source page
     if (doc && (!title || !favIconUrl)) {
@@ -1424,18 +1421,18 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl] - the referrer URL
-   * @param {string} [params.title] - an overriding title
-   * @param {string} [params.charset]
+   * @param {string} [params.charset] - charset for the text file
    * @param {Object} params.settings
+   * @param {string} [params.settings.title] - item title (also used as index page title)
    * @param {Object} params.options
    * @return {Promise<Object>}
    */
   capturer.captureFile = async function (params) {
     isDebug && console.debug("call: captureFile", params);
 
-    const {url: sourceUrl, refUrl, title, charset, settings, options} = params;
+    const {url: sourceUrl, refUrl, charset, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId, isMainPage, isMainFrame, documentName} = settings;
+    const {timeId, isMainPage, isMainFrame, documentName, title} = settings;
 
     if (isMainPage && isMainFrame) {
       settings.indexFilename = await capturer.formatIndexFilename({

@@ -97,15 +97,15 @@
    * @param {string} [params.docUrl] - an overriding document URL
    * @param {string} [params.baseUrl] - an overriding document base URL
    * @param {string} [params.refUrl] - the referrer URL
-   * @param {string} [params.title] - an overriding title
    * @param {Object} params.settings
+   * @param {string} [params.settings.title] - item title
    * @param {Object} params.options
    * @return {Promise<Object>}
    */
   capturer.captureDocumentOrFile = async function (params) {
     isDebug && console.debug("call: captureDocumentOrFile");
 
-    const {doc = document, docUrl, baseUrl, refUrl, title, settings, options} = params;
+    const {doc = document, docUrl, baseUrl, refUrl, settings, options} = params;
 
     // if not HTML|SVG document, capture as file
     if (!["text/html", "application/xhtml+xml", "image/svg+xml"].includes(doc.contentType)) {
@@ -114,9 +114,10 @@
         return await capturer.invoke("captureFile", {
           url: doc.URL,
           refUrl,
-          title: title || doc.title,
           charset: doc.characterSet,
-          settings,
+          settings: Object.assign({}, settings, {
+            title: settings.title || doc.title,
+          }),
           options,
         });
       }
@@ -127,7 +128,6 @@
       doc,
       docUrl,
       baseUrl,
-      title,
       settings,
       options,
     });
@@ -137,10 +137,11 @@
    * @kind invokable
    * @param {Object} params
    * @param {Document} params.doc
-   * @param {string} [params.title] - an overriding title
    * @param {string} [params.docUrl] - an overriding document URL
    * @param {string} [params.baseUrl] - an overriding document base URL
    * @param {Object} params.settings
+   * @param {string} [params.settings.title] - item title
+   * @param {string} [params.settings.favIconUrl] - item favicon
    * @param {Object} params.options
    * @return {Promise<Object>}
    */
@@ -1956,7 +1957,7 @@
       }
     };
 
-    const {doc = document, title, settings} = params;
+    const {doc = document, settings} = params;
     const {timeId, isHeadless, isMainPage, isMainFrame} = settings;
     const {contentType: mime, documentElement: htmlNode} = doc;
 
@@ -1998,7 +1999,7 @@
 
     if (isMainPage && isMainFrame) {
       settings.indexFilename = await capturer.formatIndexFilename({
-        title: title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
+        title: settings.title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
         sourceUrl: docUrl,
         isFolder: options["capture.saveAs"] === "folder",
         settings,
@@ -2318,7 +2319,7 @@
     }
 
     // force title if a preset title is given
-    if (title) {
+    if (settings.title) {
       if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
         let titleElem = Array.prototype.find.call(
           rootNode.querySelectorAll('title'),
@@ -2328,7 +2329,7 @@
           titleElem = headNode.insertBefore(newDoc.createElement('title'), headNode.firstChild);
           captureRecordAddedNode(titleElem);
         }
-        titleElem.textContent = title;
+        titleElem.textContent = settings.title;
       } else if (doc.contentType === "image/svg+xml") {
         let titleElem = rootNode.querySelector('title');
         if (!titleElem) {
@@ -2336,7 +2337,7 @@
           titleElem = rootNode.insertBefore(newDoc.createElementNS(xmlns, 'title'), rootNode.firstChild);
           captureRecordAddedNode(titleElem);
         }
-        titleElem.textContent = title;
+        titleElem.textContent = settings.title;
       }
     }
 
@@ -2471,7 +2472,7 @@
       data: {
         mime,
         content,
-        title: title || doc.title,
+        title: settings.title || doc.title,
         favIconUrl,
       },
     });
