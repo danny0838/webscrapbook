@@ -1387,6 +1387,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
           settings,
           options,
         });
+        capturer.log(`Saved to "${(targetDir ? targetDir + '/' : '') + filename}"`);
         break;
       }
       case 'folder':
@@ -2709,6 +2710,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             settings,
             options,
           });
+          capturer.log(`Saved to "${(targetDir ? targetDir + '/' : '') + filename}"`);
           break;
         }
         case 'folder':
@@ -2771,6 +2773,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             const message = scrapbook.lang("ErrorFileSaveError", [errorUrl, ex.message]);
             return {url: capturer.getErrorUrl(errorUrl, options), error: {message}};
           }
+
+          capturer.log(`Saved to "${targetDir}"`);
+
           break;
         }
         case 'folder':
