@@ -7,6 +7,7 @@ const baseOptions = {
   "capture.saveTo": "memory",
   "capture.saveAs": "zip",
   "capture.saveAsciiFilename": false,
+  "capture.saveOverwrite": false,
   "capture.saveFileAsHtml": false,
   "capture.saveDataUriAsFile": true,
   "capture.saveDataUriAsSrcdoc": true,

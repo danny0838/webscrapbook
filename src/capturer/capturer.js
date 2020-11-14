@@ -144,6 +144,11 @@
     const {filename, isFile, options} = params;
 
     const [dir, base] = scrapbook.filepathParts(filename);
+
+    if (options["capture.saveOverwrite"]) {
+      return base;
+    }
+
     const [basename, ext] = isFile ? scrapbook.filenameParts(base) : [base, ""];
 
     let isFilenameTaken;
@@ -1401,6 +1406,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
           sourceUrl,
           autoErase: false,
           savePrompt: false,
+          conflictAction: options["capture.saveOverwrite"] ? "overwrite" : "uniquify",
           settings,
           options,
         });
@@ -2726,6 +2732,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             sourceUrl,
             autoErase: false,
             savePrompt: false,
+            conflictAction: options["capture.saveOverwrite"] ? "overwrite" : "uniquify",
             settings,
             options,
           });
@@ -2796,6 +2803,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
                 sourceUrl,
                 autoErase: path !== "index.html",
                 savePrompt: false,
+                conflictAction: options["capture.saveOverwrite"] ? "overwrite" : "uniquify",
                 settings,
                 options,
               }).catch((ex) => {
@@ -3310,12 +3318,13 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.sourceUrl
    * @param {boolean} params.autoErase
    * @param {boolean} params.savePrompt
+   * @param {string} params.conflictAction
    * @return {Promise<DownloadItem>} DownloadItem for the saved blob.
    */
   capturer.saveBlob = async function (params) {
     isDebug && console.debug("call: saveBlob", params);
 
-    const {timeId, blob, directory, filename, sourceUrl, autoErase, savePrompt} = params;
+    const {timeId, blob, directory, filename, sourceUrl, autoErase, savePrompt, conflictAction} = params;
 
     // In Chromium >= 78, the file extension downloaded by chrome.downloads.download
     // is altered to match the content type. Create a new blob with a safe MIME type
@@ -3331,6 +3340,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       sourceUrl,
       autoErase,
       savePrompt,
+      conflictAction,
     });
   };
 
@@ -3343,17 +3353,18 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.sourceUrl
    * @param {boolean} params.autoErase
    * @param {boolean} params.savePrompt
+   * @param {string} params.conflictAction
    * @return {Promise<DownloadItem>} DownloadItem for the saved URL..
    */
   capturer.saveUrl = async function (params) {
     isDebug && console.debug("call: saveUrl", params);
 
-    const {timeId, url, directory, filename, sourceUrl, autoErase, savePrompt} = params;
+    const {timeId, url, directory, filename, sourceUrl, autoErase, savePrompt, conflictAction} = params;
 
     const downloadParams = {
       url,
       filename: (directory ? directory + "/" : "") + filename,
-      conflictAction: "uniquify",
+      conflictAction,
       saveAs: savePrompt,
     };
 
