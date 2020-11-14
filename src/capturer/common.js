@@ -2329,7 +2329,7 @@
         }
 
         // mark type as "site" for in-depth capture
-        if (options["capture.downLink.doc.depth"] > 0) {
+        if (options["capture.downLink.doc.depth"] > 0 && options['capture.saveAs'] !== 'singleHtml') {
           rootNode.setAttribute("data-scrapbook-type", "site");
         }
       }
