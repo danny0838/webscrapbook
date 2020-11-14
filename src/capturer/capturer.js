@@ -724,6 +724,7 @@
         } else if (recaptureInfo) {
           // recapture
           result = await capturer.recapture({
+            tabId, frameId, fullPage,
             url, refUrl, title, favIconUrl,
             mode, options,
             recaptureInfo,
@@ -773,6 +774,7 @@
    * @param {string} params.options
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
+   * @param {boolean} [params.captureOnly] - skip adding item and clean up (for special modes)
    * @return {Promise<Object>}
    */
   capturer.captureGeneral = async function (params) {
@@ -782,6 +784,7 @@
       url, refUrl, title, favIconUrl,
       mode, options,
       parentId, index,
+      captureOnly = false,
     } = params;
 
     let response;
@@ -813,26 +816,28 @@
       throw new Error(`Bad parameters.`);
     }
 
-    if (options["capture.saveTo"] === "server") {
-      await capturer.addItemToServer({
-        item: {
-          id: response.timeId,
-          index: (response.targetDir ? response.targetDir + '/' : '') + response.filename,
-          title: response.title,
-          type: response.type,
-          create: response.timeId,
-          source: scrapbook.normalizeUrl(response.sourceUrl),
-          icon: response.favIconUrl,
-          charset: response.charset,
-        },
-        parentId,
-        index,
-      });
-    }
+    if (!captureOnly) {
+      if (options["capture.saveTo"] === "server") {
+        await capturer.addItemToServer({
+          item: {
+            id: response.timeId,
+            index: (response.targetDir ? response.targetDir + '/' : '') + response.filename,
+            title: response.title,
+            type: response.type,
+            create: response.timeId,
+            source: scrapbook.normalizeUrl(response.sourceUrl),
+            icon: response.favIconUrl,
+            charset: response.charset,
+          },
+          parentId,
+          index,
+        });
+      }
 
-    // preserve info if error out
-    capturer.captureInfo.delete(timeId);
-    await capturer.clearFileCache({timeId});
+      // preserve info if error out
+      capturer.captureInfo.delete(timeId);
+      await capturer.clearFileCache({timeId});
+    }
 
     return response;
   };
@@ -1770,6 +1775,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    */
   capturer.recapture = async function (params) {
     const {
+      tabId, frameId, fullPage,
       url, refUrl, title, favIconUrl,
       mode, options, recaptureInfo,
     } = params;
@@ -1800,22 +1806,19 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         // enforce capture to server
         options["capture.saveTo"] = "server";
 
-        const sourceUrl = url || item.source;
-        result = await capturer.captureRemote({
+        result = await capturer.captureGeneral({
           timeId,
-          url: sourceUrl,
-          refUrl,
-          title,
-          favIconUrl,
-          mode,
-          options,
+          tabId, frameId, fullPage,
+          url: url || item.source, refUrl, title, favIconUrl,
+          mode, options,
+          captureOnly: true,
         });
 
         if (title) { item.title = title; }
         item.index = (result.targetDir ? result.targetDir + '/' : '') + result.filename;
         item.type = result.type;
         item.modify = timeId;
-        item.source = sourceUrl;
+        item.source = scrapbook.normalizeUrl(result.sourceUrl);
         item.icon = await book.cacheFavIcon({
           item,
           icon: result.favIconUrl,
