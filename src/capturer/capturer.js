@@ -779,6 +779,7 @@
    * @param {string} params.options
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
+   * @param {string|null} [params.documentName] - default filename for the main document
    * @param {boolean} [params.captureOnly] - skip adding item and clean up (for special modes)
    * @return {Promise<Object>}
    */
@@ -789,6 +790,7 @@
       url, refUrl, title, favIconUrl,
       mode, options,
       parentId, index,
+      documentName = 'index',
       captureOnly = false,
     } = params;
 
@@ -797,24 +799,18 @@
       // capture tab
       response = await capturer.captureTab({
         timeId,
-        tabId,
-        frameId,
-        fullPage,
-        title,
-        favIconUrl,
-        mode,
-        options,
+        tabId, frameId, fullPage,
+        title, favIconUrl,
+        mode, options,
+        documentName,
       });
     } else if (typeof url === 'string') {
       // capture headless
       response = await capturer.captureRemote({
         timeId,
-        url,
-        refUrl,
-        title,
-        favIconUrl,
-        mode,
-        options,
+        url, refUrl, title, favIconUrl,
+        mode, options,
+        documentName,
       });
     } else {
       // nothing to capture
@@ -857,10 +853,17 @@
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark", "resave", "internalize"
    * @param {string} params.options
+   * @param {string|null} [params.documentName]
    * @return {Promise<Object>}
    */
   capturer.captureTab = async function (params) {
-    const {timeId, tabId, frameId, fullPage, title, favIconUrl, mode, options} = params;
+    const {
+      timeId,
+      tabId, frameId, fullPage,
+      title, favIconUrl,
+      mode, options,
+      documentName,
+    } = params;
     let {url, discarded} = await browser.tabs.get(tabId);
 
     // redirect headless capture
@@ -871,7 +874,7 @@
         if (Number.isInteger(frameId)) {
           ({url} = await browser.webNavigation.getFrame({tabId, frameId}));
         }
-        return await capturer.captureRemote({timeId, url, mode, options});
+        return await capturer.captureRemote({timeId, url, mode, options, documentName});
       }
     }
 
@@ -880,13 +883,13 @@
       settings: {
         missionId: capturer.missionId,
         timeId,
+        documentName,
+        recurseChain: [],
         depth: 0,
         indexFilename: null,
         isMainPage: true,
         isMainFrame: true,
-        documentName: "index",
         fullPage,
-        recurseChain: [],
         title,
         favIconUrl,
       },
@@ -928,10 +931,16 @@
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {string} params.options
+   * @param {string|null} [params.documentName]
    * @return {Promise<Object>}
    */
   capturer.captureRemote = async function (params) {
-    const {timeId, url, refUrl, title, favIconUrl, mode, options} = params;
+    const {
+      timeId,
+      url, refUrl, title, favIconUrl,
+      mode, options,
+      documentName,
+    } = params;
 
     // default mode => launch a tab to capture
     if (mode === "tab") {
@@ -974,6 +983,7 @@
         fullPage: true,
         title,
         options,
+        documentName,
       });
 
       try {
@@ -990,13 +1000,13 @@
       settings: {
         missionId: capturer.missionId,
         timeId,
+        documentName,
+        recurseChain: [],
         depth: 0,
         isHeadless: true,
         indexFilename: null,
         isMainPage: true,
         isMainFrame: true,
-        documentName: "index",
-        recurseChain: [],
         title,
         favIconUrl,
       },
