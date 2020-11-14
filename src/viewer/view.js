@@ -581,10 +581,10 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
   };
 
   class ComplexUrlFetcher {
-    constructor(refUrl, recurseChain) {
+    constructor(refUrl, recurseChain = []) {
       this.urlHash = {};
       this.urlRewrittenCount = 0;
-      this.recurseChain = JSON.parse(JSON.stringify(recurseChain || []));
+      this.recurseChain = [...recurseChain];
       if (refUrl) {
         // if a refUrl is specified, record the recurse chain
         // for future check of circular referencing
