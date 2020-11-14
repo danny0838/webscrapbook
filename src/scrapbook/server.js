@@ -1169,7 +1169,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
 
           path.push({id: child, pos: i});
           if (child === id) {
-            result.push(path.slice());
+            result.push([...path]);
           } else {
             tracePath(path);
           }
