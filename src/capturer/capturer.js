@@ -2832,22 +2832,25 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       const delay = options["capture.downLink.doc.delay"];
       const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
 
-      const subSettings = JSON.parse(JSON.stringify(settings));
-      subSettings.isMainPage = false;
-      subSettings.isMainFrame = true;
-      subSettings.fullPage = true;
-      subSettings.isHeadless = true;
+      const subSettings = Object.assign({}, settings, {
+        isMainPage: false,
+        isMainFrame: true,
+        fullPage: true,
+        isHeadless: true,
+      });
 
       for (const [sourceUrl, info] of linkedPages.entries()) {
         const {url, refUrl, depth} = info;
 
         capturer.log(`Capturing linked page (${depth}) ${sourceUrl} ...`);
 
-        subSettings.depth = depth;
-        subSettings.recurseChain = [];
-        delete subSettings.documentName;
-        delete subSettings.usedCssFontUrl;
-        delete subSettings.usedCssImageUrl;
+        Object.assign(subSettings, {
+          recurseChain: [],
+          depth,
+          documentName: undefined,
+          usedCssFontUrl: undefined,
+          usedCssImageUrl: undefined,
+        });
 
         const response = await capturer.captureUrl({
           url,

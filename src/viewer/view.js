@@ -258,13 +258,11 @@
                       break;
                     }
                     if (info.inZip) {
-                      const metaRecurseChain = JSON.parse(JSON.stringify(recurseChain));
-                      metaRecurseChain.push(refUrl);
                       tasks[tasks.length] = 
                       viewer.fetchPage({
                         inZipPath: info.inZipPath,
                         url: info.url,
-                        recurseChain: metaRecurseChain,
+                        recurseChain: [...recurseChain, refUrl],
                       }).then((fetchedUrl) => {
                         const url = fetchedUrl || info.url;
                         elem.setAttribute("content", metaRefresh.time + ";url=" + url);
@@ -354,8 +352,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
             case "frame":
             case "iframe": {
               if (elem.hasAttribute("src")) {
-                const frameRecurseChain = JSON.parse(JSON.stringify(recurseChain));
-                frameRecurseChain.push(refUrl);
+                const frameRecurseChain = [...recurseChain, refUrl];
                 const info = viewer.parseUrl(elem.getAttribute("src"), refUrl);
                 if (info.inZip) {
                   const targetUrl = viewer.inZipPathToUrl(info.inZipPath);

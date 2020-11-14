@@ -940,15 +940,18 @@
                     // don't rewrite srcdoc if error
                   };
 
-                  const frameSettings = JSON.parse(JSON.stringify(settings));
-                  frameSettings.isMainFrame = false;
-                  frameSettings.fullPage = true;
-                  delete frameSettings.usedCssFontUrl;
-                  delete frameSettings.usedCssImageUrl;
+                  const frameSettings = Object.assign({}, settings, {
+                    recurseChain: [...settings.recurseChain],
+                    isMainFrame: false,
+                    fullPage: true,
+                    usedCssFontUrl: undefined,
+                    usedCssImageUrl: undefined,
+                  });
 
                   // save resources in srcdoc as data URL
-                  const frameOptions = JSON.parse(JSON.stringify(options));
-                  frameOptions["capture.saveAs"] = "singleHtml";
+                  const frameOptions = Object.assign({}, options, {
+                    "capture.saveAs": "singleHtml",
+                  });
 
                   tasks.push(async () => {
                     let frameDoc;
@@ -1030,11 +1033,13 @@
                   return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
                 };
 
-                const frameSettings = JSON.parse(JSON.stringify(settings));
-                frameSettings.isMainFrame = false;
-                frameSettings.fullPage = true;
-                delete frameSettings.usedCssFontUrl;
-                delete frameSettings.usedCssImageUrl;
+                const frameSettings = Object.assign({}, settings, {
+                  recurseChain: [...settings.recurseChain],
+                  isMainFrame: false,
+                  fullPage: true,
+                  usedCssFontUrl: undefined,
+                  usedCssImageUrl: undefined,
+                });
 
                 sourceUrl = frame.getAttribute("src");
 
@@ -1119,8 +1124,9 @@
                       options["capture.saveAs"] !== "singleHtml") {
                     // Save frame document and inner URLs as data URL since data URL
                     // is null origin and no relative URL is allowed in it.
-                    frameOptions = JSON.parse(JSON.stringify(options));
-                    frameOptions["capture.saveAs"] = "singleHtml";
+                    frameOptions = Object.assign({}, options, {
+                      "capture.saveAs": "singleHtml",
+                    });
                   }
 
                   const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
@@ -3638,8 +3644,9 @@
      * @param {Object} [options]
      */
     async rewriteCssText({cssText, refUrl, refCss = null, isInline = false, settings = this.settings, options = this.options}) {
-      settings = JSON.parse(JSON.stringify(settings));
-      settings.recurseChain.push(scrapbook.splitUrlByAnchor(refUrl)[0]);
+      settings = Object.assign({}, settings, {
+        recurseChain: [...settings.recurseChain, scrapbook.splitUrlByAnchor(refUrl)[0]],
+      });
       const {usedCssFontUrl, usedCssImageUrl} = settings;
 
       const resolveCssUrl = (sourceUrl, refUrl) => {
@@ -4041,8 +4048,9 @@
             (!options["capture.saveDataUriAsFile"] || options["capture.saveAs"] === "singleHtml")) {
           // Save inner URLs as data URL since data URL is null origin
           // and no relative URLs are allowed in it.
-          options = JSON.parse(JSON.stringify(options));
-          options["capture.saveAs"] = "singleHtml";
+          options = Object.assign({}, options, {
+            "capture.saveAs": "singleHtml",
+          });
           break registerFilename;
         }
 
