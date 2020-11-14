@@ -2213,7 +2213,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         }
 
         let documentFileName;
-        if ((isMainPage && isMainFrame) || (options["capture.frameRename"] && !isMainFrame)) {
+        if (documentName && ((isMainPage && isMainFrame) || options["capture.frameRename"])) {
           let documentNameBase = scrapbook.validateFilename(documentName, options["capture.saveAsciiFilename"]);
 
           // see capturer.getUniqueFilename for filename limitation
@@ -2845,6 +2845,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
         subSettings.depth = depth;
         subSettings.recurseChain = [];
+        delete subSettings.documentName;
         delete subSettings.usedCssFontUrl;
         delete subSettings.usedCssImageUrl;
 
