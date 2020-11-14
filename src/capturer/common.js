@@ -2301,7 +2301,7 @@
     let requireBasicLoader = false;
     rewriteRecursively(rootNode, rootNode.nodeName.toLowerCase(), rewriteNode);
 
-    // record source URL
+    // record metadata
     if (options["capture.recordDocumentMeta"]) {
       let url = docUrl.startsWith("data:") ? "data:" : docUrl;
 
@@ -2312,32 +2312,20 @@
       rootNode.setAttribute("data-scrapbook-source", url);
       rootNode.setAttribute("data-scrapbook-create", timeId);
 
-      // mark type as "site" for in-depth capture
-      if (options["capture.downLink.doc.depth"] > 0 && isMainPage && isMainFrame) {
-        rootNode.setAttribute("data-scrapbook-type", "site");
-      }
-    }
+      // record item metadata for the main document
+      if (isMainPage && isMainFrame) {
+        if (settings.title) {
+          rootNode.setAttribute("data-scrapbook-title", settings.title);
+        }
 
-    // force title if a preset title is given
-    if (settings.title) {
-      if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
-        let titleElem = Array.prototype.find.call(
-          rootNode.querySelectorAll('title'),
-          x => !x.closest('html svg'),
-        );
-        if (!titleElem) {
-          titleElem = headNode.insertBefore(newDoc.createElement('title'), headNode.firstChild);
-          captureRecordAddedNode(titleElem);
+        if (settings.favIconUrl) {
+          rootNode.setAttribute("data-scrapbook-icon", settings.favIconUrl);
         }
-        titleElem.textContent = settings.title;
-      } else if (doc.contentType === "image/svg+xml") {
-        let titleElem = rootNode.querySelector('title');
-        if (!titleElem) {
-          const xmlns = "http://www.w3.org/2000/svg";
-          titleElem = rootNode.insertBefore(newDoc.createElementNS(xmlns, 'title'), rootNode.firstChild);
-          captureRecordAddedNode(titleElem);
+
+        // mark type as "site" for in-depth capture
+        if (options["capture.downLink.doc.depth"] > 0) {
+          rootNode.setAttribute("data-scrapbook-type", "site");
         }
-        titleElem.textContent = settings.title;
       }
     }
 
@@ -2347,59 +2335,6 @@
         metaCharsetNode = headNode.insertBefore(newDoc.createElement("meta"), headNode.firstChild);
         metaCharsetNode.setAttribute("charset", "UTF-8");
         captureRecordAddedNode(metaCharsetNode);
-      }
-    }
-
-    if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
-      // handle tab favicon
-      // 1. Use DOM favicon if presented.
-      // 2. Use tab favicon (from favicon.ico or browser extension).
-      // Prefer DOM favicon since tab favicon is data URL in Firefox, and results
-      // in an extra downloading of possibly duplicated image, which is not
-      // desired.
-      if (typeof favIconUrl === 'undefined') {
-        if (isMainPage && isMainFrame && settings.favIconUrl) {
-          let icon;
-
-          // run this immediately to handle icon URL
-          const p = (async () => {
-            switch (options["capture.favicon"]) {
-              case "link": {
-                icon = favIconUrl = settings.favIconUrl;
-                break;
-              }
-              case "blank":
-              case "remove": {
-                // do nothing
-                break;
-              }
-              case "save":
-              default: {
-                icon = favIconUrl = settings.favIconUrl;
-                const response = await downloadFile({
-                  url: settings.favIconUrl,
-                  refUrl,
-                  settings,
-                  options,
-                });
-                icon = response.url;
-                if (options["capture.saveAs"] === 'folder') {
-                  favIconUrl = icon;
-                }
-                break;
-              }
-            }
-
-            if (icon) {
-              const favIconNode = headNode.appendChild(newDoc.createElement("link"));
-              favIconNode.rel = "shortcut icon";
-              favIconNode.href = icon;
-              captureRecordAddedNode(favIconNode);
-            }
-          })();
-
-          tasks.push(() => p);
-        }
       }
     }
 
@@ -2473,7 +2408,7 @@
         mime,
         content,
         title: settings.title || doc.title,
-        favIconUrl,
+        favIconUrl: settings.favIconUrl || favIconUrl,
       },
     });
 
