@@ -2328,8 +2328,8 @@
           rootNode.setAttribute("data-scrapbook-icon", settings.favIconUrl);
         }
 
-        // mark type as "site" for in-depth capture
-        if (options["capture.downLink.doc.depth"] > 0 && options['capture.saveAs'] !== 'singleHtml') {
+        // mark type as "site" if depth is set
+        if (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options['capture.saveAs'] !== 'singleHtml') {
           rootNode.setAttribute("data-scrapbook-type", "site");
         }
       }

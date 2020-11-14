@@ -2835,7 +2835,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     };
 
     const handleDeepCapture = async (path) => {
-      if (!(options["capture.downLink.doc.depth"] > 0 && options["capture.saveAs"] !== "singleHtml")) {
+      if (!(parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options["capture.saveAs"] !== "singleHtml")) {
         return;
       }
 
@@ -2882,7 +2882,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
     capturer.log(`Saving data...`);
     const title = data.title || scrapbook.urlToFilename(sourceUrl);
-    let type = options["capture.downLink.doc.depth"] > 0 ? "site" : "";
+    let type = parseInt(options["capture.downLink.doc.depth"], 10) >= 0 ? "site" : "";
     let targetDir;
     let filename;
     let [, ext] = scrapbook.filenameParts(documentFileName);

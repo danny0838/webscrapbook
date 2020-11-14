@@ -644,7 +644,7 @@
     "message": "Depth to capture linked pages:"
   },
   "OptionCaptureDownLinkDocDepthTooltip": {
-    "message": "Capture linked pages whose depth is no more than the specified value. The main page is depth 0, pages linked by a page with depth 0 is depth 1, pages linked by a page with depth 1 is depth 2, ... and so on.\n\n• NOTE: A deep capture may download a lot of data. It's recommended to set “save captured data as” to “Folder” to prevent a potential performance issue or error. Saving as single HTML is not supported."
+    "message": "Capture linked pages whose depth is not greater than the specified value, and build cross links and record used resources. The main page is depth 0, pages linked by a page with depth 0 is depth 1, pages linked by a page with depth 1 is depth 2, ... and so on.\n\n• Set depth to 0 to record used resources without capturing linked pages. Set depth to blank to not record used resources.\n• NOTE: A deep capture may download a lot of data. It's recommended to set “save captured data as” to “Folder” to prevent a potential performance issue or error. Saving as single HTML is not supported."
   },
   "OptionCaptureDownLinkDocUrlFilterLabel": {
     "message": "Include these URLs:"

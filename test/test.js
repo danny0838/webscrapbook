@@ -38,7 +38,7 @@ const baseOptions = {
   "capture.linkUnsavedUri": false,
   "capture.downLink.file.mode": "none",
   "capture.downLink.file.extFilter": "",
-  "capture.downLink.doc.depth": 0,
+  "capture.downLink.doc.depth": null,
   "capture.downLink.doc.delay": null,
   "capture.downLink.doc.urlFilter": "",
   "capture.downLink.urlFilter": "",
@@ -6814,9 +6814,9 @@ ${localhost}/capture_downLink/file.css\tbar`,
  * capture.downLink.doc.depth
  */
 async function test_capture_downLink04() {
-  /* depth = 0 */
+  /* depth = null */
   var options = {
-    "capture.downLink.doc.depth": 0,
+    "capture.downLink.doc.depth": null,
   };
 
   var blob = await captureHeadless({
@@ -6839,6 +6839,67 @@ async function test_capture_downLink04() {
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink2/linked1-4.html#444`);
 
   assert(!zip.file('index.json'));
+
+  /* depth = 0 */
+  var options = {
+    "capture.downLink.doc.depth": 0,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink2/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(Object.keys(zip.files).length === 2);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'site');
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink2/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink2/linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink2/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink2/linked1-4.html#444`);
+
+  var sitemapFile = zip.file('index.json');
+  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var expectedData = {
+    "version": 1,
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_downLink2/in-depth.html`,
+        "role": "document",
+        "primary": true
+      },
+      {
+        "path": "index.xhtml",
+        "url": "about:blank",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "url": "about:blank",
+        "role": "document"
+      }
+    ]
+  };
+  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
 
   /* depth = 1 */
   var options = {
@@ -7104,13 +7165,61 @@ async function test_capture_downLink04() {
 }
 
 /**
+ * Check no in-depth for singleHtml
+ *
+ * capture.downLink.doc.depth
+ * capture.saveAs
+ */
+async function test_capture_downLink05() {
+  /* depth = 0 */
+  var options = {
+    "capture.downLink.doc.depth": 0,
+    "capture.saveAs": "singleHtml",
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink2/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  assert(!doc.documentElement.hasAttribute('data-scrapbook-type'));
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink2/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink2/linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink2/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink2/linked1-4.html#444`);
+
+  /* depth = 1 */
+  var options = {
+    "capture.downLink.doc.depth": 1,
+    "capture.saveAs": "singleHtml",
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink2/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+  assert(!doc.documentElement.hasAttribute('data-scrapbook-type'));
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink2/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink2/linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink2/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink2/linked1-4.html#444`);
+}
+
+/**
  * Check downLink.file should overwrite downLink.doc
  *
  * capture.downLink.file.mode
  * capture.downLink.file.extFilter
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink05() {
+async function test_capture_downLink06() {
   var options = {
     "capture.downLink.file.mode": "url",
     "capture.downLink.file.extFilter": `bmp, html`,
@@ -7178,7 +7287,7 @@ async function test_capture_downLink05() {
  * capture.downLink.doc.depth
  * capture.downLink.doc.urlFilter
  */
-async function test_capture_downLink06() {
+async function test_capture_downLink07() {
   /* plain URLs */
   var options = {
     "capture.downLink.doc.depth": 2,
@@ -7277,7 +7386,7 @@ ${localhost}/capture_downLink2/linked2-1.html`,
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink07() {
+async function test_capture_downLink08() {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
@@ -7316,7 +7425,7 @@ async function test_capture_downLink07() {
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink08() {
+async function test_capture_downLink09() {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
@@ -7351,7 +7460,7 @@ async function test_capture_downLink08() {
  * capture.downLink.doc.depth
  * capture.frameRename
  */
-async function test_capture_downLink09() {
+async function test_capture_downLink10() {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.downLink.doc.depth": 1,
@@ -7407,7 +7516,7 @@ async function test_capture_downLink09() {
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink10() {
+async function test_capture_downLink11() {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
