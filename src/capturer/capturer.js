@@ -29,6 +29,10 @@
 
   'use strict';
 
+  const SHADOW_ROOT_SUPPORTED = !!document.documentElement.attachShadow;
+  const REBUILD_LINK_SUPPORT_TYPES = new Set(['text/html', 'application/xhtml+xml', 'image/svg+xml']);
+  const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
+
   // overwrite the value of common.js to define this is not a content script
   capturer.isContentScript = false;
 
@@ -3459,10 +3463,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.timeId
    */
   capturer.rebuildLinks = async function (params) {
-    const SUPPORT_TYPES = new Set(['text/html', 'application/xhtml+xml', 'image/svg+xml']);
-    const SVG_HREF_ATTRS = ['href', 'xlink:href'];
-    const SHADOW_ROOT_SUPPORTED = !!document.documentElement.attachShadow;
-
     const rewriteHref = (elem, attr, urlToFilenameMap) => {
       let u;
       try {
@@ -3487,7 +3487,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       switch (rootNode.nodeName.toLowerCase()) {
         case 'svg': {
           for (const elem of rootNode.querySelectorAll('a[*|href]')) {
-            for (const attr of SVG_HREF_ATTRS) {
+            for (const attr of REBUILD_LINK_SVG_HREF_ATTRS) {
               if (!elem.hasAttribute(attr)) { continue; }
               rewriteHref(elem, attr, urlToFilenameMap);
             }
@@ -3530,7 +3530,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         }
 
         const {type} = scrapbook.parseHeaderContentType(blob.type);
-        if (!SUPPORT_TYPES.has(type)) {
+        if (!REBUILD_LINK_SUPPORT_TYPES.has(type)) {
           continue;
         }
 
