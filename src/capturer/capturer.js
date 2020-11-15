@@ -2970,22 +2970,14 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
                 options,
               });
             } catch (ex) {
-              // throw an unexpected error
-              errorUrl = sourceUrl;
-              throw ex;
+              // show message for individual saving error
+              console.error(ex);
+              capturer.error(scrapbook.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
             }
             return runNextTask();
           };
 
-          let errorUrl = sourceUrl;
-          try {
-            await Promise.all(Array.from({length: workers}, _ => runNextTask()));
-          } catch (ex) {
-            // error out for individual file saving error
-            console.error(ex);
-            const message = scrapbook.lang("ErrorFileSaveError", [errorUrl, ex.message]);
-            return {url: capturer.getErrorUrl(errorUrl, options), error: {message}};
-          }
+          await Promise.all(Array.from({length: workers}, _ => runNextTask()));
 
           capturer.log(`Saved to "${targetDir}"`);
 
@@ -2996,43 +2988,36 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         case 'memory': // not supported, fallback to folder
         default: {
           targetDir = options["capture.saveFolder"] + "/" + settings.indexFilename;
-          let errorUrl = sourceUrl;
-          try {
-            const downloadItems = await Promise.all(entries.map(([path, sourceUrl, blob]) => {
-              return capturer.saveBlob({
-                timeId,
-                blob,
-                directory: targetDir,
-                filename: path,
-                sourceUrl,
-                autoErase: path !== "index.html",
-                savePrompt: false,
-                conflictAction: options["capture.saveOverwrite"] ? "overwrite" : "uniquify",
-                settings,
-                options,
-              }).catch((ex) => {
-                // handle bug for zero-sized in Firefox < 65
-                // path should be same as the download filename (though the
-                // value is not acturally used)
-                // see browser.downloads.onChanged handler
-                if (blob.size === 0 && ex.message === "Cannot find downloaded item.") {
-                  return path;
-                }
+          const downloadItems = await Promise.all(entries.map(([path, sourceUrl, blob]) => {
+            return capturer.saveBlob({
+              timeId,
+              blob,
+              directory: targetDir,
+              filename: path,
+              sourceUrl,
+              autoErase: path !== "index.html",
+              savePrompt: false,
+              conflictAction: options["capture.saveOverwrite"] ? "overwrite" : "uniquify",
+              settings,
+              options,
+            }).catch((ex) => {
+              // handle bug for zero-sized in Firefox < 65
+              // path should be same as the download filename (though the
+              // value is not acturally used)
+              // see browser.downloads.onChanged handler
+              if (blob.size === 0 && ex.message === "Cannot find downloaded item.") {
+                return path;
+              }
 
-                // throw an unexpected error
-                errorUrl = sourceUrl;
-                throw ex;
-              });
-            }));
-            const downloadItem = downloadItems.pop();
-            capturer.log(`Saved to "${downloadItem.filename}"`);
-            filename = scrapbook.filepathParts(downloadItem.filename)[1];
-          } catch (ex) {
-            // error out for individual file saving error
-            console.error(ex);
-            const message = scrapbook.lang("ErrorFileSaveError", [errorUrl, ex.message]);
-            return {url: capturer.getErrorUrl(errorUrl, options), error: {message}};
-          }
+              // show message for individual saving error
+              console.error(ex);
+              capturer.error(scrapbook.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
+              return {filename: targetDir + "/" + path};
+            });
+          }));
+          const downloadItem = downloadItems.pop();
+          capturer.log(`Saved to "${downloadItem.filename}"`);
+          filename = scrapbook.filepathParts(downloadItem.filename)[1];
           break;
         }
       }

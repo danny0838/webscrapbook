@@ -423,13 +423,16 @@
     }
   },
   "ErrorFileSaveError": {
-    "message": "Error saving file ($URL$): $REASON$",
+    "message": "Error saving file ($FILENAME$ <= $URL$): $REASON$",
     "placeholders": {
       "url": {
         "content": "$1"
       },
-      "reason": {
+      "filename": {
         "content": "$2"
+      },
+      "reason": {
+        "content": "$3"
       }
     }
   },

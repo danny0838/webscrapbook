@@ -423,13 +423,16 @@
     }
   },
   "ErrorFileSaveError": {
-    "message": "保存文件错误 ($URL$): $REASON$",
+    "message": "保存文件错误 ($FILENAME$ <= $URL$): $REASON$",
     "placeholders": {
       "url": {
         "content": "$1"
       },
-      "reason": {
+      "filename": {
         "content": "$2"
+      },
+      "reason": {
+        "content": "$3"
       }
     }
   },
