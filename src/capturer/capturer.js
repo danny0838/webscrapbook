@@ -1782,6 +1782,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     const {bookId, itemId} = recaptureInfo;
 
+    capturer.log(`Preparing a re-capture for item "${itemId}" of book "${bookId}"...`);
+
     await server.init(true);
     const book = server.books[bookId];
     if (!book || book.config.no_tree) {
