@@ -124,14 +124,90 @@
   }
 
   /* context menu */
-  async function updateContextMenu(willShow = true) {
+  async function updateContextMenu() {
     if (!browser.contextMenus) { return; }
 
     await browser.contextMenus.removeAll();
 
+    await scrapbook.loadOptions();
+    const willShow = scrapbook.getOption("ui.showContextMenu");
+    const hasServer = scrapbook.hasServer();
     if (!willShow) { return; }
 
     const urlMatch = await scrapbook.getContentPagePattern();
+
+    // Available in Chromium and Firefox >= 53.
+    if (browser.contextMenus.ContextType.BROWSER_ACTION) {
+      browser.contextMenus.create({
+        title: scrapbook.lang("CaptureTabAs") + '...',
+        contexts: ["browser_action"],
+        documentUrlPatterns: urlMatch,
+        onclick: async (info, tab) => {
+          const tabs = await scrapbook.getHighlightedTabs();
+          return scrapbook.invokeBatchCapture({
+            taskInfo: {
+              tasks: tabs.map(tab => ({
+                tabId: tab.id,
+                title: tab.title,
+              })),
+              mode: "",
+              delay: null,
+              options: scrapbook.getOptions("capture"),
+            },
+            customTitle: true,
+            useJson: true,
+          });
+        },
+      });
+
+      browser.contextMenus.create({
+        title: scrapbook.lang("EditTab"),
+        contexts: ["browser_action"],
+        documentUrlPatterns: urlMatch,
+        onclick: (info, tab) => {
+          return scrapbook.editTab({
+            tabId: tab.id,
+            force: true,
+          });
+        },
+      });
+
+      browser.contextMenus.create({
+        title: scrapbook.lang("searchCaptures"),
+        contexts: ["browser_action"],
+        documentUrlPatterns: urlMatch,
+        onclick: async (info, tab) => {
+          const tabs = await scrapbook.getHighlightedTabs();
+          return scrapbook.searchCaptures({
+            tabs,
+            newTab: true,
+          });
+        },
+        enabled: hasServer,
+      });
+
+      browser.contextMenus.create({
+        title: scrapbook.lang("openScrapBook"),
+        contexts: ["browser_action"],
+        documentUrlPatterns: urlMatch,
+        onclick: async (info, tab) => {
+          return await scrapbook.openScrapBook({});
+        },
+        enabled: hasServer,
+      });
+
+      browser.contextMenus.create({
+        title: scrapbook.lang("openViewer") + '...',
+        contexts: ["browser_action"],
+        documentUrlPatterns: urlMatch,
+        onclick: async (info, tab) => {
+          return await scrapbook.visitLink({
+            url: browser.runtime.getURL("viewer/load.html"),
+            newTab: true,
+          });
+        },
+      });
+    }
 
     // Available only in Firefox >= 53.
     if (browser.contextMenus.ContextType.TAB) {
@@ -787,15 +863,19 @@
     });
   }
 
-  browser.storage.onChanged.addListener((changes, areaName) => {
-    if (changes["ui.showContextMenu"]) {
-      updateContextMenu(changes["ui.showContextMenu"].newValue); // async
-    }
-  });
+  initContextMenu: {
+    const menuRelatedOptions = new Set(["ui.showContextMenu", "server.url"]);
 
-  scrapbook.loadOptionsAuto.then(() => {
-    updateContextMenu(scrapbook.getOption("ui.showContextMenu")); // async
-  });
+    browser.storage.onChanged.addListener((changes, areaName) => {
+      if (Object.keys(changes).some(k => menuRelatedOptions.has(k))) {
+        updateContextMenu(); // async
+      }
+    });
+
+    scrapbook.loadOptionsAuto.then(() => {
+      updateContextMenu(); // async
+    });
+  }
 
   return background;
 
