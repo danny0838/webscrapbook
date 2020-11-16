@@ -22,6 +22,8 @@
     // load languages
     scrapbook.loadLanguages(document);
 
+    await scrapbook.loadOptions();
+
     const selectTabFromDom = async function (baseElem) {
       let selector = baseElem.nextSibling;
       if (selector && selector.className === "selector") {
@@ -64,6 +66,12 @@
 
       return {isPrompt, activeTab, targetTab};
     })();
+
+    // disable backend server related options if not configured
+    if (!scrapbook.hasServer()) {
+      document.getElementById("searchCaptures").disabled = true;
+      document.getElementById("openScrapBook").disabled = true;
+    }
 
     // disable tab-specific commands if active tab is not a valid content page
     if (targetTab) {
