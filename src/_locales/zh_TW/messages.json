@@ -35,6 +35,9 @@
   "CaptureFrame": {
     "message": "擷取框架頁"
   },
+  "CaptureFrameAs": {
+    "message": "擷取框架頁為"
+  },
   "CaptureFrameBookmark": {
     "message": "擷取框架頁 (書籤)"
   },
@@ -43,6 +46,9 @@
   },
   "CaptureLink": {
     "message": "擷取連結頁面 (新分頁)"
+  },
+  "CaptureLinkAs": {
+    "message": "擷取連結頁面為"
   },
   "CaptureLinkBookmark": {
     "message": "擷取連結頁面 (書籤)"
@@ -53,8 +59,14 @@
   "CaptureMedia": {
     "message": "擷取多媒體"
   },
+  "CaptureMediaAs": {
+    "message": "擷取多媒體為"
+  },
   "CapturePage": {
     "message": "擷取頁面"
+  },
+  "CapturePageAs": {
+    "message": "擷取頁面為"
   },
   "CapturePageBookmark": {
     "message": "擷取頁面 (書籤)"
@@ -64,6 +76,9 @@
   },
   "CaptureSelection": {
     "message": "擷取選取範圍"
+  },
+  "CaptureSelectionAs": {
+    "message": "擷取選取範圍為"
   },
   "CaptureTab": {
     "message": "擷取分頁"

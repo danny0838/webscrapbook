@@ -171,6 +171,27 @@
       });
 
       browser.contextMenus.create({
+        title: scrapbook.lang("CaptureTabAs") + '...',
+        contexts: ["tab"],
+        documentUrlPatterns: urlMatch,
+        onclick: (info, tab) => {
+          return scrapbook.invokeBatchCapture({
+            taskInfo: {
+              tasks: [{
+                tabId: tab.id,
+                title: tab.title,
+              }],
+              mode: "",
+              delay: null,
+              options: scrapbook.getOptions("capture"),
+            },
+            customTitle: true,
+            useJson: true,
+          });
+        },
+      });
+
+      browser.contextMenus.create({
         title: scrapbook.lang("EditTab"),
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
@@ -216,6 +237,28 @@
           tabId: tab.id,
           mode: "bookmark",
         }]);
+      },
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CapturePageAs") + '...',
+      contexts: ["page"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeBatchCapture({
+          taskInfo: {
+            tasks: [{
+              tabId: tab.id,
+              fullPage: true,
+              title: tab.title,
+            }],
+            mode: "",
+            delay: null,
+            options: scrapbook.getOptions("capture"),
+          },
+          customTitle: true,
+          useJson: true,
+        });
       },
     });
 
@@ -269,6 +312,29 @@
     });
 
     browser.contextMenus.create({
+      title: scrapbook.lang("CaptureFrameAs") + '...',
+      contexts: ["frame"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeBatchCapture({
+          taskInfo: {
+            tasks: [{
+              tabId: tab.id,
+              frameId: info.frameId,
+              fullPage: true,
+              title: tab.title,
+            }],
+            mode: "",
+            delay: null,
+            options: scrapbook.getOptions("capture"),
+          },
+          customTitle: true,
+          useJson: true,
+        });
+      },
+    });
+
+    browser.contextMenus.create({
       title: scrapbook.lang("CaptureSelection"),
       contexts: ["selection"],
       documentUrlPatterns: urlMatch,
@@ -278,6 +344,28 @@
           frameId: info.frameId,
           fullPage: false,
         }]);
+      },
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CaptureSelectionAs") + '...',
+      contexts: ["selection"],
+      documentUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeBatchCapture({
+          taskInfo: {
+            tasks: [{
+              tabId: tab.id,
+              frameId: info.frameId,
+              title: tab.title,
+            }],
+            mode: "",
+            delay: null,
+            options: scrapbook.getOptions("capture"),
+          },
+          customTitle: true,
+          useJson: true,
+        });
       },
     });
 
@@ -337,6 +425,26 @@
     });
 
     browser.contextMenus.create({
+      title: scrapbook.lang("CaptureLinkAs") + '...',
+      contexts: ["link"],
+      targetUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeBatchCapture({
+          taskInfo: {
+            tasks: [{
+              url: info.linkUrl,
+            }],
+            mode: "",
+            delay: null,
+            options: scrapbook.getOptions("capture"),
+          },
+          customTitle: true,
+          useJson: true,
+        });
+      },
+    });
+
+    browser.contextMenus.create({
       title: scrapbook.lang("CaptureMedia"),
       contexts: ["image", "audio", "video"],
       targetUrlPatterns: urlMatch,
@@ -346,6 +454,27 @@
           refUrl: info.pageUrl,
           mode: "source",
         }]);
+      },
+    });
+
+    browser.contextMenus.create({
+      title: scrapbook.lang("CaptureMediaAs") + '...',
+      contexts: ["image", "audio", "video"],
+      targetUrlPatterns: urlMatch,
+      onclick: (info, tab) => {
+        return scrapbook.invokeBatchCapture({
+          taskInfo: {
+            tasks: [{
+              url: info.srcUrl,
+              refUrl: info.pageUrl,
+            }],
+            mode: "",
+            delay: null,
+            options: scrapbook.getOptions("capture"),
+          },
+          customTitle: true,
+          useJson: true,
+        });
       },
     });
   }

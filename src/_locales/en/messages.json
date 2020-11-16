@@ -35,6 +35,9 @@
   "CaptureFrame": {
     "message": "Capture frame"
   },
+  "CaptureFrameAs": {
+    "message": "Capture frame as"
+  },
   "CaptureFrameBookmark": {
     "message": "Capture frame (bookmark)"
   },
@@ -43,6 +46,9 @@
   },
   "CaptureLink": {
     "message": "Capture linked page (new tab)"
+  },
+  "CaptureLinkAs": {
+    "message": "Capture linked page as"
   },
   "CaptureLinkBookmark": {
     "message": "Capture linked page (bookmark)"
@@ -53,8 +59,14 @@
   "CaptureMedia": {
     "message": "Capture media"
   },
+  "CaptureMediaAs": {
+    "message": "Capture media as"
+  },
   "CapturePage": {
     "message": "Capture page"
+  },
+  "CapturePageAs": {
+    "message": "Capture page as"
   },
   "CapturePageBookmark": {
     "message": "Capture page (bookmark)"
@@ -64,6 +76,9 @@
   },
   "CaptureSelection": {
     "message": "Capture selected range(s)"
+  },
+  "CaptureSelectionAs": {
+    "message": "Capture selected range(s) as"
   },
   "CaptureTab": {
     "message": "Capture tab(s)"
