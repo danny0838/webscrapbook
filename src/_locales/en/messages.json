@@ -66,16 +66,16 @@
     "message": "Capture selected range(s)"
   },
   "CaptureTab": {
-    "message": "Capture tab"
+    "message": "Capture tab(s)"
   },
   "CaptureTabBookmark": {
-    "message": "Capture tab (bookmark)"
+    "message": "Capture tab(s) (bookmark)"
   },
   "CaptureTabBookmarkTooltip": {
     "message": "Capture each selected tab as a bookmark page or scrapbook item."
   },
   "CaptureTabSource": {
-    "message": "Capture tab (source)"
+    "message": "Capture tab(s) (source)"
   },
   "CaptureTabSourceTooltip": {
     "message": "Capture the original content of each selected tab (before processed by the scripts)."
