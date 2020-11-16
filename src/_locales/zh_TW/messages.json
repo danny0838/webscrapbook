@@ -21,7 +21,7 @@
     "message": "使用 JSON 格式"
   },
   "BatchCaptureTitle": {
-    "message": "批次擷取網頁"
+    "message": "擷取網頁"
   },
   "BatchCaptureUrlsLabel": {
     "message": "網頁列表:"

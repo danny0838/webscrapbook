@@ -21,7 +21,7 @@
     "message": "使用 JSON 格式"
   },
   "BatchCaptureTitle": {
-    "message": "批量获取网页"
+    "message": "获取网页"
   },
   "BatchCaptureUrlsLabel": {
     "message": "网页列表:"

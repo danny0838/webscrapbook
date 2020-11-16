@@ -21,7 +21,7 @@
     "message": "Use JSON format"
   },
   "BatchCaptureTitle": {
-    "message": "Batch capture"
+    "message": "Capture"
   },
   "BatchCaptureUrlsLabel": {
     "message": "URL list:"
