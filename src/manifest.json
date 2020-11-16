@@ -101,14 +101,14 @@
     "captureTabBookmark": {
       "description": "__MSG_CaptureTabBookmark__"
     },
+    "captureTabAs": {
+      "description": "__MSG_CaptureTabAs__..."
+    },
     "editTab": {
       "suggested_key": {
         "default": "Ctrl+Shift+E"
       },
       "description": "__MSG_EditTab__"
-    },
-    "batchCapture": {
-      "description": "__MSG_BatchCapture__..."
     }
   }
 }

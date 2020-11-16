@@ -80,6 +80,7 @@
         document.getElementById("captureTab").disabled = true;
         document.getElementById("captureTabSource").disabled = true;
         document.getElementById("captureTabBookmark").disabled = true;
+        document.getElementById("captureTabAs").disabled = true;
         document.getElementById("batchCaptureLinks").disabled = true;
         document.getElementById("editTab").disabled = true;
         document.getElementById("searchCaptures").disabled = true;
@@ -119,6 +120,26 @@
           mode: "bookmark",
         }))
       );
+    });
+
+    document.getElementById("captureTabAs").addEventListener('click', async (event) => {
+      const tabs = targetTab ? 
+          await scrapbook.getHighlightedTabs() : 
+          [await selectTabFromDom(document.getElementById("captureTabAs"))];
+      await scrapbook.loadOptions();
+      return await scrapbook.invokeBatchCapture({
+        taskInfo: {
+          tasks: tabs.map(tab => ({
+            tabId: tab.id,
+            title: tab.title,
+          })),
+          mode: "",
+          delay: null,
+          options: scrapbook.getOptions("capture"),
+        },
+        customTitle: true,
+        useJson: true,
+      });
     });
 
     document.getElementById("batchCapture").addEventListener('click', async (event) => {

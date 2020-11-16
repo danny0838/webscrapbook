@@ -80,23 +80,28 @@
         );
       },
 
-      async editTab() {
-        const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0];
-        return await scrapbook.editTab({
-          tabId: tab.id,
-          force: true,
-        });
-      },
-
-      async batchCapture() {
-        const tabs = await scrapbook.getContentTabs();
+      async captureTabAs() {
+        const tabs = await scrapbook.getHighlightedTabs();
         return await scrapbook.invokeBatchCapture({
           taskInfo: {
             tasks: tabs.map(tab => ({
               tabId: tab.id,
               title: tab.title,
             })),
+            mode: "",
+            delay: null,
+            options: scrapbook.getOptions("capture"),
           },
+          customTitle: true,
+          useJson: true,
+        });
+      },
+
+      async editTab() {
+        const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0];
+        return await scrapbook.editTab({
+          tabId: tab.id,
+          force: true,
         });
       },
     },

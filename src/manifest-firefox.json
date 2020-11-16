@@ -111,11 +111,11 @@
     "captureTabBookmark": {
       "description": "__MSG_CaptureTabBookmark__"
     },
+    "captureTabAs": {
+      "description": "__MSG_CaptureTabAs__..."
+    },
     "editTab": {
       "description": "__MSG_EditTab__"
-    },
-    "batchCapture": {
-      "description": "__MSG_BatchCapture__..."
     }
   }
 }

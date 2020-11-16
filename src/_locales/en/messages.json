@@ -68,6 +68,9 @@
   "CaptureTab": {
     "message": "Capture tab(s)"
   },
+  "CaptureTabAs": {
+    "message": "Capture tab(s) as"
+  },
   "CaptureTabBookmark": {
     "message": "Capture tab(s) (bookmark)"
   },

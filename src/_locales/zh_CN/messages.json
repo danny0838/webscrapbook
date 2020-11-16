@@ -68,6 +68,9 @@
   "CaptureTab": {
     "message": "获取分页"
   },
+  "CaptureTabAs": {
+    "message": "获取分页为"
+  },
   "CaptureTabBookmark": {
     "message": "获取分页 (书签)"
   },

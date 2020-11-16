@@ -68,6 +68,9 @@
   "CaptureTab": {
     "message": "擷取分頁"
   },
+  "CaptureTabAs": {
+    "message": "擷取分頁為"
+  },
   "CaptureTabBookmark": {
     "message": "擷取分頁 (書籤)"
   },
