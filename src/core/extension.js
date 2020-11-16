@@ -183,7 +183,7 @@
     let tab;
     if (browser.windows) {
       const win = await browser.windows.getCurrent();
-      const captureWinow = await browser.windows.create(Object.assign({
+      const captureWindow = await browser.windows.create(Object.assign({
         url,
         type: 'popup',
         width: 400,
@@ -192,10 +192,10 @@
       }, windowCreateData));
 
       if (!waitForResponse) {
-        return captureWinow;
+        return captureWindow;
       }
 
-      tab = captureWinow.tabs[0];
+      tab = captureWindow.tabs[0];
     } else {
       const captureTab = await browser.tabs.create({
         url,

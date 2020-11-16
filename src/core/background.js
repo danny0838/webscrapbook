@@ -110,8 +110,8 @@
     // shows the pageAction for all tabs
     browser.pageAction.show(0);
   } else if (!browser.browserAction.getPopup) {
-    // Firefox Android >= 55: only browserAction onClick
-    // Open the browserAction page
+    // Firefox Android < 57: only browserAction onClick
+    // Fallback by opening browserAction page
     browser.browserAction.onClicked.addListener((tab) => {
       const url = browser.runtime.getURL("core/browserAction.html");
       browser.tabs.create({url, active: true});
@@ -138,8 +138,9 @@
           return scrapbook.invokeCapture([{
             tabId: tab.id,
           }]);
-        }
+        },
       });
+
       browser.contextMenus.create({
         title: scrapbook.lang("CaptureTabSource"),
         contexts: ["tab"],
@@ -149,8 +150,9 @@
             tabId: tab.id,
             mode: "source",
           }]);
-        }
+        },
       });
+
       browser.contextMenus.create({
         title: scrapbook.lang("CaptureTabBookmark"),
         contexts: ["tab"],
@@ -160,8 +162,9 @@
             tabId: tab.id,
             mode: "bookmark",
           }]);
-        }
+        },
       });
+
       browser.contextMenus.create({
         title: scrapbook.lang("EditTab"),
         contexts: ["tab"],
@@ -171,7 +174,7 @@
             tabId: tab.id,
             force: true,
           });
-        }
+        },
       });
     }
 
@@ -184,7 +187,7 @@
           tabId: tab.id,
           fullPage: true,
         }]);
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -196,7 +199,7 @@
           tabId: tab.id,
           mode: "source",
         }]);
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -208,7 +211,7 @@
           tabId: tab.id,
           mode: "bookmark",
         }]);
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -220,7 +223,7 @@
           tabId: tab.id,
           force: true,
         });
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -233,7 +236,7 @@
           frameId: info.frameId,
           fullPage: true,
         }]);
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -245,7 +248,7 @@
           url: info.frameUrl,
           mode: "source",
         }]);
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -257,7 +260,7 @@
           url: info.frameUrl,
           mode: "bookmark",
         }]);
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -270,7 +273,7 @@
           frameId: info.frameId,
           fullPage: false,
         }]);
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -289,7 +292,7 @@
           .then((tasks) => {
             return scrapbook.invokeBatchCapture({taskInfo: {tasks}});
           });
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -301,7 +304,7 @@
           url: info.linkUrl,
           mode: "tab",
         }]);
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -313,7 +316,7 @@
           url: info.linkUrl,
           mode: "source",
         }]);
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -325,7 +328,7 @@
           url: info.linkUrl,
           mode: "bookmark",
         }]);
-      }
+      },
     });
 
     browser.contextMenus.create({
@@ -338,7 +341,7 @@
           refUrl: info.pageUrl,
           mode: "source",
         }]);
-      }
+      },
     });
   }
 

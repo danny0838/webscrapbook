@@ -780,6 +780,8 @@
   /**
    * @param {Object} params
    * @param {string} [params.timeId] - an overriding timeId
+   * @param {string|null} [params.documentName] - default filename for the main document
+   * @param {boolean} [params.captureOnly] - skip adding item and clean up (for special modes)
    * @param {integer} [params.tabId]
    * @param {integer} [params.frameId]
    * @param {boolean} [params.fullPage]
@@ -787,23 +789,21 @@
    * @param {string} [params.refUrl]
    * @param {string} [params.title] - item title
    * @param {string} [params.favIconUrl] - item favicon
-   * @param {string} [params.mode] - "tab", "source", "bookmark", "resave", "internalize"
+   * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {string} params.options
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
-   * @param {string|null} [params.documentName] - default filename for the main document
-   * @param {boolean} [params.captureOnly] - skip adding item and clean up (for special modes)
    * @return {Promise<Object>}
    */
   capturer.captureGeneral = async function (params) {
     const {
       timeId = scrapbook.dateToId(),
+      documentName = 'index',
+      captureOnly = false,
       tabId, frameId, fullPage,
       url, refUrl, title, favIconUrl,
       mode, options,
       parentId, index,
-      documentName = 'index',
-      captureOnly = false,
     } = params;
 
     let response;
@@ -858,23 +858,23 @@
   /**
    * @param {Object} params
    * @param {string} params.timeId
+   * @param {string|null} [params.documentName]
    * @param {integer} params.tabId
    * @param {integer} [params.frameId]
    * @param {boolean} [params.fullPage]
    * @param {string} [params.title] - item title
    * @param {string} [params.favIconUrl] - item favicon
-   * @param {string} [params.mode] - "tab", "source", "bookmark", "resave", "internalize"
+   * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {string} params.options
-   * @param {string|null} [params.documentName]
    * @return {Promise<Object>}
    */
   capturer.captureTab = async function (params) {
     const {
       timeId,
+      documentName,
       tabId, frameId, fullPage,
       title, favIconUrl,
       mode, options,
-      documentName,
     } = params;
     let {url, discarded} = await browser.tabs.get(tabId);
 
@@ -886,7 +886,12 @@
         if (Number.isInteger(frameId)) {
           ({url} = await browser.webNavigation.getFrame({tabId, frameId}));
         }
-        return await capturer.captureRemote({timeId, url, mode, options, documentName});
+        return await capturer.captureRemote({
+          timeId,
+          documentName,
+          url,
+          mode, options,
+        });
       }
     }
 
@@ -937,21 +942,21 @@
   /**
    * @param {Object} params
    * @param {string} params.timeId
+   * @param {string|null} [params.documentName]
    * @param {string} params.url
    * @param {string} [params.refUrl]
    * @param {string} [params.title] - item title
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {string} params.options
-   * @param {string|null} [params.documentName]
    * @return {Promise<Object>}
    */
   capturer.captureRemote = async function (params) {
     const {
       timeId,
+      documentName,
       url, refUrl, title, favIconUrl,
       mode, options,
-      documentName,
     } = params;
 
     // default mode => launch a tab to capture
@@ -991,11 +996,11 @@
 
       const response = await capturer.captureTab({
         timeId,
+        documentName,
         tabId: tab.id,
         fullPage: true,
         title,
         options,
-        documentName,
       });
 
       try {

@@ -65,8 +65,8 @@
       return {isPrompt, activeTab, targetTab};
     })();
 
+    // disable tab-specific commands if active tab is not a valid content page
     if (targetTab) {
-      // disable capture options if active tab is not a valid content page
       const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
       if (!scrapbook.isContentPage(targetTab.url, allowFileAccess)) {
         document.getElementById("captureTab").disabled = true;
