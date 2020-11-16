@@ -76,7 +76,7 @@
       }
     }
 
-    await scrapbook.invokeCaptureEx({taskInfo});
+    await scrapbook.invokeCaptureEx({taskInfo, waitForResponse: false});
     window.close();
   }
 
