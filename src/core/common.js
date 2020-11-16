@@ -418,7 +418,7 @@ if (Node && !Node.prototype.getRootNode) {
     }
 
     let result = {};
-    let regex = new RegExp("^" + scrapbook.escapeRegExp(keyPrefix) + "\.");
+    let regex = new RegExp("^" + scrapbook.escapeRegExp(keyPrefix) + "\\.");
     for (let key in scrapbook.options) {
       if (regex.test(key)) {
         result[key] = scrapbook.getOption(key);
