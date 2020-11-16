@@ -1115,6 +1115,9 @@
   "OptionUiShowContextMenuLabel": {
     "message": "啟用右鍵選單"
   },
+  "OptionUiToolbarButtonsLabel": {
+    "message": "顯示工具列按鈕指令:"
+  },
   "OptionViewerViewHtzLabel": {
     "message": "檢視 HTZ 檔案"
   },

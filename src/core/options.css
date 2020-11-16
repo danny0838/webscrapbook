@@ -24,6 +24,19 @@ details > div > div:last-child {
   margin-bottom: 0;
 }
 
+details > div > div > div {
+  margin: .5em 0;
+  margin-__MSG_@@bidi_start_edge__: 1.5em;
+}
+
+details > div > div > div:first-child {
+  margin-top: 0;
+}
+
+details > div > div > div:last-child {
+  margin-bottom: 0;
+}
+
 div > textarea {
   box-sizing: border-box;
   width: 100%;

@@ -67,6 +67,13 @@
       return {isPrompt, activeTab, targetTab};
     })();
 
+    // show commands as configured
+    for (const [option, shown] of Object.entries(scrapbook.getOptions("ui.toolbar"))) {
+      const id = option[15].toLowerCase() + option.slice(16);
+      const elem = document.getElementById(id);
+      elem.hidden = !shown;
+    }
+
     // disable backend server related options if not configured
     if (!scrapbook.hasServer()) {
       document.getElementById("searchCaptures").disabled = true;
@@ -126,7 +133,6 @@
       const tabs = targetTab ? 
           await scrapbook.getHighlightedTabs() : 
           [await selectTabFromDom(document.getElementById("captureTabAs"))];
-      await scrapbook.loadOptions();
       return await scrapbook.invokeBatchCapture({
         taskInfo: {
           tasks: tabs.map(tab => ({

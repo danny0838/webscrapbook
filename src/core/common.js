@@ -44,6 +44,17 @@ if (Node && !Node.prototype.getRootNode) {
   const BACKEND_MIN_VERSION = '0.29.0';
 
   const DEFAULT_OPTIONS = {
+    "ui.toolbar.showCaptureTab": true,
+    "ui.toolbar.showCaptureTabSource": true,
+    "ui.toolbar.showCaptureTabBookmark": true,
+    "ui.toolbar.showCaptureTabAs": true,
+    "ui.toolbar.showBatchCapture": false,
+    "ui.toolbar.showBatchCaptureLinks": true,
+    "ui.toolbar.showEditTab": true,
+    "ui.toolbar.showSearchCaptures": true,
+    "ui.toolbar.showOpenScrapBook": true,
+    "ui.toolbar.showOpenViewer": true,
+    "ui.toolbar.showOpenOptions": true,
     "ui.showContextMenu": true,
     "ui.autoCloseCaptureDialog": "none",
     "server.url": "",

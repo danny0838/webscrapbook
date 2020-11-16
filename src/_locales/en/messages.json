@@ -1115,6 +1115,9 @@
   "OptionUiShowContextMenuLabel": {
     "message": "Enable context menu"
   },
+  "OptionUiToolbarButtonsLabel": {
+    "message": "Show toolbar button commands:"
+  },
   "OptionViewerViewHtzLabel": {
     "message": "View HTZ file"
   },
