@@ -583,24 +583,6 @@
   "OptionCaptureAudioTooltip": {
     "message": "This determines how audio elements are handled.\n\n• Save: Save the referenced audio resources to local.\n• Save current: Save the playing audio resource to local and ignore alternatives for other browsers. This considerably reduces size but the audio may be unplayable on another platform. If the captured page is not displayed in the browser (such as capture source), all audio resources are saved.\n• Link: Link the audio to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Disable the audio.\n• Remove: Remove the audio element. Note that this could alter the web page layout."
   },
-  "OptionCaptureAutoCloseDialogAlwaysLabel": {
-    "message": "Always"
-  },
-  "OptionCaptureAutoCloseDialogLabel": {
-    "message": "Auto-close dialog on capture complete:"
-  },
-  "OptionCaptureAutoCloseDialogNoErrorLabel": {
-    "message": "If no error or failure"
-  },
-  "OptionCaptureAutoCloseDialogNoFailureLabel": {
-    "message": "If no failure"
-  },
-  "OptionCaptureAutoCloseDialogNoWarnLabel": {
-    "message": "If no warning, error, or failure"
-  },
-  "OptionCaptureAutoCloseDialogNoneLabel": {
-    "message": "Disable"
-  },
   "OptionCaptureCanvasBlankLabel": {
     "message": "Save initial status"
   },
@@ -1093,6 +1075,24 @@
   },
   "OptionServerUserTooltip": {
     "message": "If the backend server is configured to require HTTP authorization, the user name can be provided here to prevent being asked for repeatedly.\n\n• NOTE: Credentials stored in a browser extension is unprotected and could be stolen by a skilled attacker. Using password-protected built-in browser password manager is generally more preferable."
+  },
+  "OptionUiAutoCloseCaptureDialogAlwaysLabel": {
+    "message": "Always"
+  },
+  "OptionUiAutoCloseCaptureDialogLabel": {
+    "message": "Auto-close dialog on capture complete:"
+  },
+  "OptionUiAutoCloseCaptureDialogNoErrorLabel": {
+    "message": "If no error or failure"
+  },
+  "OptionUiAutoCloseCaptureDialogNoFailureLabel": {
+    "message": "If no failure"
+  },
+  "OptionUiAutoCloseCaptureDialogNoWarnLabel": {
+    "message": "If no warning, error, or failure"
+  },
+  "OptionUiAutoCloseCaptureDialogNoneLabel": {
+    "message": "Disable"
   },
   "OptionUiShowContextMenuLabel": {
     "message": "Enable context menu"

@@ -3875,7 +3875,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       await scrapbook.loadOptions();
 
-      let autoClose = scrapbook.getOption("capture.autoCloseDialog");
+      let autoClose = scrapbook.getOption("ui.autoCloseCaptureDialog");
 
       let results;
       if (missionId) {

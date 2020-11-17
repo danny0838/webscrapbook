@@ -583,24 +583,6 @@
   "OptionCaptureAudioTooltip": {
     "message": "此选项决定音频（AUDIO 元素）的处理方式。\n\n• 保存：将音频保存至本地。\n• 保存现用：将目前播放的音频保存至本地，忽略供其他浏览器使用的备用音频。这可以有效缩小容量，但在其他平台可能无法播放。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有音频。\n• 链接：将音频连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将音频无效化。\n• 移除：将音频元素移除。注意这可能会影响网页排版。"
   },
-  "OptionCaptureAutoCloseDialogAlwaysLabel": {
-    "message": "总是"
-  },
-  "OptionCaptureAutoCloseDialogLabel": {
-    "message": "获取完成时自动关闭对话窗口:"
-  },
-  "OptionCaptureAutoCloseDialogNoErrorLabel": {
-    "message": "无错误或获取失败时"
-  },
-  "OptionCaptureAutoCloseDialogNoFailureLabel": {
-    "message": "无获取失败时"
-  },
-  "OptionCaptureAutoCloseDialogNoWarnLabel": {
-    "message": "无警告、错误、或获取失败时"
-  },
-  "OptionCaptureAutoCloseDialogNoneLabel": {
-    "message": "停用"
-  },
   "OptionCaptureCanvasBlankLabel": {
     "message": "保存初始状态"
   },
@@ -1093,6 +1075,24 @@
   },
   "OptionServerUserTooltip": {
     "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的用户名，以免浏览器反覆询问；或用于更换用户。\n\n• 注意：保存在浏览器套件的认证资讯未受保护且遭竊风险，一般建议优先使用有密码保护机制的浏览器内置密码保存功能。"
+  },
+  "OptionUiAutoCloseCaptureDialogAlwaysLabel": {
+    "message": "总是"
+  },
+  "OptionUiAutoCloseCaptureDialogLabel": {
+    "message": "获取完成时自动关闭对话窗口:"
+  },
+  "OptionUiAutoCloseCaptureDialogNoErrorLabel": {
+    "message": "无错误或获取失败时"
+  },
+  "OptionUiAutoCloseCaptureDialogNoFailureLabel": {
+    "message": "无获取失败时"
+  },
+  "OptionUiAutoCloseCaptureDialogNoWarnLabel": {
+    "message": "无警告、错误、或获取失败时"
+  },
+  "OptionUiAutoCloseCaptureDialogNoneLabel": {
+    "message": "停用"
   },
   "OptionUiShowContextMenuLabel": {
     "message": "启用右键菜单"

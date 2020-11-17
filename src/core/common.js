@@ -45,6 +45,7 @@ if (Node && !Node.prototype.getRootNode) {
 
   const DEFAULT_OPTIONS = {
     "ui.showContextMenu": true,
+    "ui.autoCloseCaptureDialog": "none",
     "server.url": "",
     "server.user": "",
     "server.password": "",
@@ -60,7 +61,6 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.saveFileAsHtml": false,
     "capture.saveDataUriAsFile": true,
     "capture.saveDataUriAsSrcdoc": true,
-    "capture.autoCloseDialog": "none",
     "capture.saveResourcesSequentially": false,
     "capture.resourceSizeLimit": null,
     "capture.image": "save", // "save", "save-current", "link", "blank", "remove"
