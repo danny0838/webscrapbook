@@ -3878,24 +3878,36 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       let autoClose = scrapbook.getOption("ui.autoCloseCaptureDialog");
 
       let results;
-      if (missionId) {
+      runTasks: {
+        if (!missionId) {
+          capturer.error(`Error: Mission ID not set.`);
+          break runTasks;
+        }
+
         const key = {table: "captureMissionCache", id: missionId};
         const taskInfo = await scrapbook.cache.get(key);
         await scrapbook.cache.remove(key);
         if (!taskInfo || !taskInfo.tasks) {
           capturer.error(`Error: missing task data for mission "${missionId}".`);
-        } else if (!taskInfo.tasks.length) {
-          capturer.error(`Error: nothing to capture.`);
-        } else {
-          try {
-            results = await capturer.runTasks(taskInfo);
-          } catch (ex) {
-            console.error(ex);
-            capturer.error(`Unexpected error: ${ex.message}`);
-          }
+          break runTasks;
         }
-      } else {
-        capturer.error(`Error: Mission ID not set.`);
+
+        if (typeof taskInfo.autoClose === 'string') {
+          autoClose = taskInfo.autoClose;
+        }
+
+        if (!taskInfo.tasks.length) {
+          capturer.error(`Error: nothing to capture.`);
+          break runTasks;
+        }
+
+        try {
+          results = await capturer.runTasks(taskInfo);
+        } catch (ex) {
+          console.error(ex);
+          capturer.error(`Unexpected error: ${ex.message}`);
+          break runTasks;
+        }
       }
 
       resolve(results);

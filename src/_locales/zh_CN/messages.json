@@ -27,7 +27,7 @@
     "message": "网页列表:"
   },
   "BatchCaptureUrlsTooltip": {
-    "message": "输入欲获取的网页列表。格式为每行一个网址，网址后可加上网页标题，以空白字元分隔。\n\n若勾选“使用 JSON 格式”，则格式为一个 JSON 物件，包括以下属性：\n• parentId: 保存至后端服务器时，把获取项目插入此 ID 的项目下。省略时插入至根项目。\n• index: 保存至后端服务器时，获取项目的插入位置（从 0 开始）。省略时插入至最后面。\n• delay: 执行下个获取工作前的延迟时间（毫秒）。\n• mode: 获取模式。“tab”为获取分页（获取网址时自动开新分页），“source”为获取原貌，“bookmark”为获取书签。省略时指定 tabId 者默认为“tab”，指定 url 者默认为“source”。\n• options: 覆写获取选项的 JSON 物件，格式同汇出选项（限“capture.*”）。\n• tasks: 获取工作列表，为 JSON 物件数组，其中每个物件包括以下属性：\n  • tabId: 待获取的分页 ID。与 url 择一使用。\n  • frameId: 待获取分页的框架页 ID。省略时获取主框架页。\n  • fullPage: 属真时获取全页，否则获取选择范围。\n  • url: 待获取的网址。\n  • title: 自订项目标题（须勾选“覆写网页标题”）。\n  • favIconUrl: 自订项目图标。\n  • mode: 此获取工作的获取模式。\n  • options: 此获取工作的获取选项。\n  • recaptureInfo: 重新获取设定，为含有 bookId 及 itemId 属性的 JSON 物件。\n  • mergeCaptureInfo: 合并获取设定，为含有 bookId 及 itemId 属性的 JSON 物件。"
+    "message": "输入欲获取的网页列表。格式为每行一个网址，网址后可加上网页标题，以空白字元分隔。\n\n若勾选“使用 JSON 格式”，则格式为一个 JSON 物件，包括以下属性：\n• parentId: 保存至后端服务器时，把获取项目插入此 ID 的项目下。省略时插入至根项目。\n• index: 保存至后端服务器时，获取项目的插入位置（从 0 开始）。省略时插入至最后面。\n• delay: 执行下个获取工作前的延迟时间（毫秒）。\n• autoClose: 获取完成时自动关闭对话窗口的设定，覆写默认项。可用“none”、“nowarn”、“noerror”、“nofailure”、“always”等值。\n• mode: 获取模式。“tab”为获取分页（获取网址时自动开新分页），“source”为获取原貌，“bookmark”为获取书签。省略时指定 tabId 者默认为“tab”，指定 url 者默认为“source”。\n• options: 覆写获取选项的 JSON 物件，格式同汇出选项（限“capture.*”）。\n• tasks: 获取工作列表，为 JSON 物件数组，其中每个物件包括以下属性：\n  • tabId: 待获取的分页 ID。与 url 择一使用。\n  • frameId: 待获取分页的框架页 ID。省略时获取主框架页。\n  • fullPage: 属真时获取全页，否则获取选择范围。\n  • url: 待获取的网址。\n  • title: 自订项目标题（须勾选“覆写网页标题”）。\n  • favIconUrl: 自订项目图标。\n  • mode: 此获取工作的获取模式。\n  • options: 此获取工作的获取选项。\n  • recaptureInfo: 重新获取设定，为含有 bookId 及 itemId 属性的 JSON 物件。\n  • mergeCaptureInfo: 合并获取设定，为含有 bookId 及 itemId 属性的 JSON 物件。"
   },
   "Cancel": {
     "message": "取消"
