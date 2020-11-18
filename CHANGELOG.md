@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.95.0] - 2020-11-18
+* Changed internal identifier for auto-close dialog option.
+* Added support of "Capture as".
+
 ## [0.93.0] - 2020-11-13
 * Added a capture option to save resources sequentially.
 * Reworked auto-close dialog option to support more modes.
