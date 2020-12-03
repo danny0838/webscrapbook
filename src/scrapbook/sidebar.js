@@ -689,28 +689,39 @@
       if (event.dataTransfer.types.includes('text/uri-list') && this.rootId !== 'recycle') {
         this.enableUi(false);
 
-        const mode = event.altKey ? 'bookmark' : event.shiftKey ? 'tab' : 'source';
+        const mode = event.altKey ? 'bookmark' : event.shiftKey ? 'tab' : '';
         try {
           const tasks = event.dataTransfer.getData('text/uri-list')
             .split('\r\n')
             .filter(x => !x.startsWith('#') && x.trim())
             .map(url => ({
               url,
-              mode,
-              options: {
-                "capture.saveTo": "server",
-              },
             }));
-          await scrapbook.invokeCaptureEx({
-            taskInfo: {
-              tasks,
-              parentId: targetId,
-              index: targetIndex,
-            },
-            waitForResponse: true,
-          });
+          const taskInfo = {
+            tasks,
+            parentId: targetId,
+            index: targetIndex,
+            mode,
+            delay: null,
+            options: Object.assign(scrapbook.getOptions("capture"), {
+              "capture.saveTo": "server",
+            }),
+          };
 
-          await this.rebuild();
+          if (event.ctrlKey) {
+            await scrapbook.invokeBatchCapture({
+              taskInfo,
+              customTitle: true,
+              useJson: true,
+            });
+          } else {
+            await scrapbook.invokeCaptureEx({
+              taskInfo,
+              waitForResponse: true,
+            });
+
+            await this.rebuild();
+          }
         } catch (ex) {
           console.error(ex);
           this.error(ex.message);
