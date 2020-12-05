@@ -3639,11 +3639,12 @@
      * @param {string} refUrl - the reference URL for URL resolving.
      * @param {CSSStyleSheet} [refCss] - the reference CSS (which holds the
      *     @import rule(s), for imported CSS).
+     * @param {Node} [rootNode] - the reference root node for an imported CSS
      * @param {boolean} [isInline] - whether cssText is inline.
      * @param {Object} [settings]
      * @param {Object} [options]
      */
-    async rewriteCssText({cssText, refUrl, refCss = null, isInline = false, settings = this.settings, options = this.options}) {
+    async rewriteCssText({cssText, refUrl, refCss = null, rootNode, isInline = false, settings = this.settings, options = this.options}) {
       settings = Object.assign({}, settings, {
         recurseChain: [...settings.recurseChain, scrapbook.splitUrlByAnchor(refUrl)[0]],
       });
@@ -3708,6 +3709,7 @@
                 url,
                 refCss: rule && rule.styleSheet,
                 refUrl,
+                rootNode,
                 settings,
                 options,
                 callback: (elem, response) => {
@@ -3788,14 +3790,7 @@
     async rewriteCssRules({cssRules, refUrl, refCss, rootNode, indent = '', settings, options}) {
       // get rootNode, the cloned <html> or documentElement (shadowRoot)
       if (!rootNode) {
-        let css = refCss;
-        let parent = css.parentStyleSheet;
-        while (parent) {
-          css = parent;
-          parent = css.parentStyleSheet;
-        }
-
-        rootNode = this.clonedNodeMap.get(css.ownerNode).getRootNode();
+        rootNode = this.clonedNodeMap.get(refCss.ownerNode).getRootNode();
 
         // if it's <html>, wrap it with a documentFragment, so that CSS selector "html" can match
         if (rootNode.nodeType === 1) {
@@ -3829,6 +3824,7 @@
               cssText: cssRule.cssText,
               refUrl,
               refCss,
+              rootNode,
               settings,
               options,
             });
@@ -3929,11 +3925,12 @@
      * @param {string} [refCss] - the reference CSS (the imported styleSheet
      *     object) of the imported CSS.
      * @param {string} [refUrl] - the reference URL for URL resolving.
+     * @param {Node} [rootNode] - the reference root node for an imported CSS
      * @param {Function} callback
      * @param {Object} [settings]
      * @param {Object} [options]
      */
-    async rewriteCss({elem, url, refCss, refUrl, callback, settings = this.settings, options = this.options}) {
+    async rewriteCss({elem, url, refCss, refUrl, rootNode, callback, settings = this.settings, options = this.options}) {
       let sourceUrl;
       let cssType = !elem ? 'imported' : elem.nodeName.toLowerCase() === 'link' ? 'external' : 'internal';
       let cssText = "";
@@ -4138,6 +4135,7 @@
               cssRules,
               refUrl: sourceUrl || refUrl,
               refCss,
+              rootNode,
               settings,
               options,
             });
