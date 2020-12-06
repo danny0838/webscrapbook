@@ -4,4 +4,4 @@
 
 For further information and frequently asked questions, visit the [documentation wiki](https://github.com/danny0838/webscrapbook/wiki/Intro).
 
-This extension is available for Chromium-based browsers ([Google Chrome](https://chrome.google.com/webstore/detail/web-scrapbook/oegnpmiddfljlloiklpkeelagaeejfai), Edge, Opera, Vivaldi, etc.), and [Firefox for Desktop and Android](https://addons.mozilla.org/firefox/addon/webscrapbook)
+This extension is available for Chromium-based browsers ([Google Chrome](https://chrome.google.com/webstore/detail/web-scrapbook/oegnpmiddfljlloiklpkeelagaeejfai), [Edge](https://microsoftedge.microsoft.com/addons/detail/lodlipoddpmffbngkadebncbbidnambc), Opera, Vivaldi, etc.), and [Firefox for Desktop and Android](https://addons.mozilla.org/firefox/addon/webscrapbook)
