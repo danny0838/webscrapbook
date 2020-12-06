@@ -4102,6 +4102,7 @@
             if (refCss && !isCircular) {
               const cssRulesCssom = await this.getRulesFromCss({
                 css: refCss,
+                url: sourceUrl,
                 refUrl,
               });
               cssText = Array.prototype.map.call(
@@ -4127,6 +4128,7 @@
             if (refCss && !isCircular) {
               cssRules = await this.getRulesFromCss({
                 css: refCss,
+                url: sourceUrl,
                 refUrl,
               });
             }
