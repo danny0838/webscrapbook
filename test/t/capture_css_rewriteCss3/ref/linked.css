@@ -1,0 +1,3 @@
+@import "../imported.css";
+#linked { background: green; }
+#unused { background: red; }

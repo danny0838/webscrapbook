@@ -3189,6 +3189,71 @@ async function test_capture_css_rewriteCss2() {
 }
 
 /**
+ * Check cross-origin CSS for "tidy" and "match"
+ *
+ * capture.rewriteCss
+ */
+async function test_capture_css_rewriteCss3() {
+  /* capture.rewriteCss = tidy */
+  var options = {
+    "capture.rewriteCss": "tidy",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss3/rewrite.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var cssFile = zip.file('linked.css');
+  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
+  var cssText = (await readFileAsText(cssBlob)).trim();
+  assert(cssText === `\
+@import url("imported.css");
+#linked { background: green; }
+#unused { background: red; }`);
+
+  var cssFile = zip.file('imported.css');
+  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
+  var cssText = (await readFileAsText(cssBlob)).trim();
+  assert(cssText === `\
+#imported { background: green; }
+#unused { background: red; }`);
+
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss3/rewrite.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var cssFile = zip.file('linked.css');
+  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
+  var cssText = (await readFileAsText(cssBlob)).trim();
+  assert(cssText === `\
+@import url("imported.css");
+#linked { background: green; }`);
+
+  var cssFile = zip.file('imported.css');
+  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
+  var cssText = (await readFileAsText(cssBlob)).trim();
+  assert(cssText === `\
+#imported { background: green; }`);
+}
+
+/**
  * Check CSS syntax parsing
  *
  * scrapbook.parseCssText
