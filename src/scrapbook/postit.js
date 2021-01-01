@@ -57,7 +57,7 @@
           throw new Error(`Specified item "${id}" does not exist.`);
         }
 
-        document.title = item.title;
+        document.title = item.title || ' ';
 
         try {
           let target = this.target = book.dataUrl + scrapbook.escapeFilename(item.index);
