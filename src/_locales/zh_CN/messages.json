@@ -1175,6 +1175,9 @@
   "ScrapBookCommandCreateNoteDialogTitle": {
     "message": "新笔记的格式:"
   },
+  "ScrapBookCommandCreatePostit": {
+    "message": "添加便签"
+  },
   "ScrapBookCommandCreateSeparator": {
     "message": "添加分隔线"
   },

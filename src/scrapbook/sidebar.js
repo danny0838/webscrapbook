@@ -174,6 +174,7 @@
 
           menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="mkpostit"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
 
@@ -193,6 +194,7 @@
 
           menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="mkpostit"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
 
@@ -878,6 +880,7 @@
 
       menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
       menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
+      menuElem.querySelector('button[value="mkpostit"]').hidden = !(!isRecycle);
       menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
       menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
 
@@ -944,6 +947,7 @@
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="mkpostit"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
 
@@ -975,6 +979,7 @@
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mksep"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="mkpostit"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
 
@@ -1004,6 +1009,7 @@
 
           menuElem.querySelector('button[value="mkfolder"]').hidden = true;
           menuElem.querySelector('button[value="mksep"]').hidden = true;
+          menuElem.querySelector('button[value="mkpostit"]').hidden = true;
           menuElem.querySelector('button[value="mknote"]').hidden = true;
           menuElem.querySelector('button[value="upload"]').hidden = true;
 
@@ -2189,6 +2195,61 @@ ${scrapbook.escapeHtml(content)}
 
         // update DOM
         this.tree.insertItem(newItem.id, parentItemId, index);
+      },
+
+      async mkpostit({itemElem}) {
+        let parentItemId = this.rootId;
+        let index = Infinity;
+
+        if (itemElem) {
+          ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
+
+          // insert after the selected one
+          index += 1;
+        }
+
+        // create new item
+        const newItem = this.book.addItem({
+          item: {
+            "type": "postit",
+          },
+          parentId: parentItemId,
+          index,
+        });
+        newItem.index = newItem.id + '/index.html';
+
+        // create file
+        const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
+
+        // save meta and TOC
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book) => {
+            await book.saveMeta();
+            await book.saveToc();
+            await book.loadTreeFiles(true);  // update treeLastModified
+          },
+        });
+
+        // save data files
+        await server.request({
+          url: target + '?a=save',
+          method: "POST",
+          format: 'json',
+          csrfToken: true,
+          body: {
+            upload: new Blob([''], {type: 'text/plain'}),
+          },
+        });
+
+        // update DOM
+        this.tree.insertItem(newItem.id, parentItemId, index);
+
+        // open link
+        const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
+        u.searchParams.append('id', newItem.id);
+        u.searchParams.append('bookId', this.book.id);
+        await this.openLink(u.href, true);
       },
 
       async mknote({itemElem}) {

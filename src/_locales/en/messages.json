@@ -1178,6 +1178,9 @@
   "ScrapBookCommandCreateSeparator": {
     "message": "New separator"
   },
+  "ScrapBookCommandCreatePostit": {
+    "message": "New post-it"
+  },
   "ScrapBookCommandDelete": {
     "message": "Delete"
   },
