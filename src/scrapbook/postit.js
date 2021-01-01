@@ -21,14 +21,14 @@
 
   'use strict';
 
-  const REGEX_ITEM_NOTE = new RegExp('^[\\S\\s]*?<pre>\\n?([^<]*(?:<(?!/pre>)[^<]*)*)\\n</pre>[\\S\\s]*$');
-  const ITEM_NOTE_FORMATTER = `\
+  const REGEX_ITEM_POSTIT = new RegExp('^[\\S\\s]*?<pre>\\n?([^<]*(?:<(?!/pre>)[^<]*)*)\\n</pre>[\\S\\s]*$');
+  const ITEM_POSTIT_FORMATTER = `\
 <!DOCTYPE html><html><head>\
 <meta charset="UTF-8">\
 <meta name="viewport" content="width=device-width">\
 <style>pre { white-space: pre-wrap; overflow-wrap: break-word; }</style>\
 </head><body><pre>
-%NOTE_CONTENT%
+%POSTIT_CONTENT%
 </pre></body></html>`;
 
   const editor = {
@@ -67,7 +67,7 @@
             method: "GET",
           }).then(r => r.text());
 
-          const content = this.getNoteContent(text);
+          const content = this.getPostitContent(text);
 
           if (content === null) {
             throw new Error('malformatted note file');
@@ -108,13 +108,13 @@
             // upload text content
             const text = document.getElementById("editor").value;
             const title = text.replace(/\n[\s\S]*$/, '');
-            const content = ITEM_NOTE_FORMATTER.replace(/%(\w*)%/gu, (_, key) => {
+            const content = ITEM_POSTIT_FORMATTER.replace(/%(\w*)%/gu, (_, key) => {
               let value;
               switch (key) {
                 case '':
                   value = '%';
                   break;
-                case 'NOTE_CONTENT':
+                case 'POSTIT_CONTENT':
                   value = text;
                   break;
               }
@@ -165,9 +165,9 @@
       }
     },
 
-    getNoteContent(text) {
+    getPostitContent(text) {
       text = text.replace(/\r\n?/g, '\n');
-      return text.replace(REGEX_ITEM_NOTE, '$1');
+      return text.replace(REGEX_ITEM_POSTIT, '$1');
     },
   };
 
