@@ -1166,6 +1166,9 @@
   "ScrapBookCommandCopyTo": {
     "message": "Copy to"
   },
+  "ScrapBookCommandCreateFolder": {
+    "message": "New folder"
+  },
   "ScrapBookCommandCreateNote": {
     "message": "New Note"
   },
@@ -1174,9 +1177,6 @@
   },
   "ScrapBookCommandCreateSeparator": {
     "message": "New separator"
-  },
-  "ScrapBookCommandCreatefolder": {
-    "message": "New folder"
   },
   "ScrapBookCommandDelete": {
     "message": "Delete"

@@ -1166,6 +1166,9 @@
   "ScrapBookCommandCopyTo": {
     "message": "複製到"
   },
+  "ScrapBookCommandCreateFolder": {
+    "message": "添加文件夹"
+  },
   "ScrapBookCommandCreateNote": {
     "message": "添加笔记"
   },
@@ -1174,9 +1177,6 @@
   },
   "ScrapBookCommandCreateSeparator": {
     "message": "添加分隔线"
-  },
-  "ScrapBookCommandCreatefolder": {
-    "message": "添加文件夹"
   },
   "ScrapBookCommandDelete": {
     "message": "删除"
