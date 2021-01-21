@@ -2807,7 +2807,7 @@
           i.style.position = 'fixed';
           i.style.display = 'block';
           i.style.clear = 'both';
-          i.style.zIndex = '2147483640';
+          i.style.zIndex = '2147483647';
           i.style.top = '0';
           i.style.left = '0';
           i.style.right = '0';
@@ -2849,7 +2849,7 @@
           c.appendChild(d.createTextNode('✕'));
           c.onclick = function () { i.parentNode.removeChild(i); };
 
-          b.insertBefore(i, b.firstChild);
+          b.appendChild(i);
         }) + ")()").replace(/%([\w@]*)%/g, (_, key) => data[key] || scrapbook.lang(key) || '');
       }
     }
