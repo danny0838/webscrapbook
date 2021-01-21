@@ -2854,8 +2854,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @kind invokable
    * @param {Object} params
    * @param {Object} params.data
-   * @param {string} params.data.mime
-   * @param {string} params.data.content - USVString or byte string
+   * @param {string} [params.data.mime]
+   * @param {string} [params.data.content] - USVString or byte string
    * @param {string} [params.data.charset] - save USVString as UTF-8 if omitted
    * @param {string} [params.data.title]
    * @param {string} [params.data.favIconUrl]
