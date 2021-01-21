@@ -2405,6 +2405,12 @@
       return match;
     });
 
+    // pass content as Blob to prevent size limitation of a message
+    // (for a supported browser)
+    if (scrapbook.userAgent.is('gecko')) {
+      content = new Blob([content], {type: 'text/plain'});
+    }
+
     const response = await capturer.invoke("saveDocument", {
       sourceUrl: docUrl,
       documentFileName,
@@ -2675,7 +2681,13 @@
         insertInfoBar: options["capture.insertInfoBar"],
       });
 
-      const content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
+      let content = scrapbook.doctypeToString(doc.doctype) + rootNode.outerHTML;
+
+      // pass content as Blob to prevent size limitation of a message
+      // (for a supported browser)
+      if (scrapbook.userAgent.is('gecko')) {
+        content = new Blob([content], {type: 'text/plain'});
+      }
 
       data[docUrl] = {
         content,

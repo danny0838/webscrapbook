@@ -1501,7 +1501,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
           (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
           "";
 
-      const content = `<!DOCTYPE html>
+      let content =`<!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
@@ -1511,6 +1511,12 @@ ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</h
 Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>
 </body>
 </html>`;
+
+      // pass content as Blob to prevent size limitation of a message
+      // (for a supported browser)
+      if (scrapbook.userAgent.is('gecko')) {
+        content = new Blob([content], {type: 'text/plain'});
+      }
 
       const mime = "text/html";
       const documentFileName = documentName + ".html";
@@ -1712,6 +1718,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           // save document
           try {
             let content = data.content;
+            if (typeof content !== 'string') {
+              content = await scrapbook.readFileAsText(content);
+            }
 
             // replace resource URLs
             content = content.replace(/urn:scrapbook:url:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
@@ -2794,7 +2803,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {Object} params
    * @param {Object} params.data
    * @param {string} params.data.mime
-   * @param {string} params.data.content - USVString or byte string
+   * @param {string|Blob} params.data.content - USVString or byte string
    * @param {string} [params.data.charset] - save USVString as UTF-8 if omitted
    * @param {string} [params.data.title]
    * @param {string} [params.data.favIconUrl]
@@ -2818,7 +2827,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     let {content, mime, charset} = data;
     if (charset) {
-      content = scrapbook.byteStringToArrayBuffer(content);
+      if (typeof content === 'string') {
+        content = scrapbook.byteStringToArrayBuffer(content);
+      }
     } else {
       charset = 'UTF-8';
     }
@@ -2855,7 +2866,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {Object} params
    * @param {Object} params.data
    * @param {string} [params.data.mime]
-   * @param {string} [params.data.content] - USVString or byte string
+   * @param {string|Blob} [params.data.content] - USVString or byte string
    * @param {string} [params.data.charset] - save USVString as UTF-8 if omitted
    * @param {string} [params.data.title]
    * @param {string} [params.data.favIconUrl]
@@ -3088,7 +3099,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
         let {content, mime, charset} = data;
         if (charset) {
-          content = scrapbook.byteStringToArrayBuffer(content);
+          if (typeof content === 'string') {
+            content = scrapbook.byteStringToArrayBuffer(content);
+          }
         } else {
           charset = 'UTF-8';
         }
