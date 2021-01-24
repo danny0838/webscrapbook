@@ -104,7 +104,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.downLink.doc.urlFilter": "",
     "capture.downLink.urlFilter": "###skip common logout URL\n/[/=]logout\\b/i",
     "capture.removeIntegrity": true,
-    "capture.requestReferrer": "auto", // "none", "auto", "origin", "all"
+    "capture.referrerPolicy": "strict-origin-when-cross-origin", // "no-referrer", "no-referrer-when-downgrade", "origin", "origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-url"
     "capture.recordDocumentMeta": true,
     "capture.recordRewrites": false,
     "capture.insertInfoBar": false,

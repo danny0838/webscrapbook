@@ -338,6 +338,8 @@
     };
 
     /**
+     * Set referrer for the request according to the specified referrer policy.
+     *
      * @param {Object} params
      * @param {Object} params.headers
      * @param {string} params.targetUrl
@@ -346,41 +348,7 @@
      * @return {Object} The modified headers object.
      */
     const setReferrer = function ({headers, targetUrl, refUrl, options = {}}) {
-      if (!refUrl) { return; }
-      if (!refUrl.startsWith('http:') && !refUrl.startsWith('https:')) { return; }
-      if (refUrl.startsWith('https:') && (!targetUrl || !targetUrl.startsWith('https:'))) { return; }
-
-      let referrer;
-      let mode = options["capture.requestReferrer"];
-
-      if (mode === "auto") {
-        const u = new URL(refUrl);
-        const t = new URL(targetUrl);
-        if (u.origin !== t.origin) {
-          mode = "origin";
-        } else {
-          mode = "all";
-        }
-      }
-
-      switch (mode) {
-        case "none": {
-          // no referrer
-          break;
-        }
-        case "all": {
-          referrer = scrapbook.splitUrlByAnchor(refUrl)[0];
-          break;
-        }
-        case "origin":
-        default: {
-          const u = new URL(refUrl);
-          u.pathname = "/";
-          u.search = u.hash = "";
-          referrer = u.href;
-          break;
-        }
-      }
+      const referrer = new Referrer(refUrl, targetUrl, options["capture.referrerPolicy"]).getReferrer();
 
       if (referrer) {
         // Browser does not allow assigning "Referer" header directly.
@@ -388,6 +356,7 @@
         // listener of browser.webRequest.onBeforeSendHeaders later on.
         headers["X-WebScrapBook-Referer"] = referrer;
       }
+
       return headers;
     };
 

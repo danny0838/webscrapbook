@@ -43,6 +43,7 @@ const baseOptions = {
   "capture.downLink.doc.urlFilter": "",
   "capture.downLink.urlFilter": "",
   "capture.removeIntegrity": true,
+  "capture.referrerPolicy": "strict-origin-when-cross-origin",
   "capture.recordDocumentMeta": true,
   "capture.recordRewrites": false,
   "capture.insertInfoBar": false,
@@ -7907,72 +7908,139 @@ async function test_capture_integrity() {
 /**
  * Check if option works
  *
- * capture.requestReferrer
+ * capture.referrerPolicy
+ *
+ * @TODO: check for HTTPS->HTTP downgrading
+ * @TODO: check for username, password, local scheme
  */
 async function test_capture_referrer() {
-  /* capture.requestReferrer = auto */
+  /* capture.referrerPolicy = no-referrer */
   var options = {
-    "capture.requestReferrer": "auto",
+    "capture.referrerPolicy": "no-referrer",
   };
   var blob = await capture({
     url: `${localhost}/capture_referrer/index.py`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  var file = zip.file('referrer.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer/index.py`);
-  var file = zip.file('referrer2.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/`);
-
-  /* capture.requestReferrer = all */
-  var options = {
-    "capture.requestReferrer": "all",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_referrer/index.py`,
-    options: Object.assign({}, baseOptions, options),
-  });
-  var zip = await new JSZip().loadAsync(blob);
-  var file = zip.file('referrer.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer/index.py`);
-  var file = zip.file('referrer2.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer/index.py`);
-
-  /* capture.requestReferrer = origin */
-  var options = {
-    "capture.requestReferrer": "origin",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_referrer/index.py`,
-    options: Object.assign({}, baseOptions, options),
-  });
-  var zip = await new JSZip().loadAsync(blob);
-  var file = zip.file('referrer.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/`);
-  var file = zip.file('referrer2.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/`);
-
-  /* capture.requestReferrer = none */
-  var options = {
-    "capture.requestReferrer": "none",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_referrer/index.py`,
-    options: Object.assign({}, baseOptions, options),
-  });
-  var zip = await new JSZip().loadAsync(blob);
-  var file = zip.file('referrer.py.css');
+  var file = zip.file('referrer.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === "");
-  var file = zip.file('referrer2.py.css');
+  var file = zip.file('referrer2.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === "");
+
+  /* capture.referrerPolicy = origin */
+  var options = {
+    "capture.referrerPolicy": "origin",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer/index.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var file = zip.file('referrer.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+  var file = zip.file('referrer2.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  /* capture.referrerPolicy = unsafe-url */
+  var options = {
+    "capture.referrerPolicy": "unsafe-url",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer/index.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var file = zip.file('referrer.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer/index.py`);
+  var file = zip.file('referrer2.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer/index.py`);
+
+  /* capture.referrerPolicy = origin-when-cross-origin */
+  var options = {
+    "capture.referrerPolicy": "origin-when-cross-origin",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer/index.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var file = zip.file('referrer.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer/index.py`);
+  var file = zip.file('referrer2.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  /* capture.referrerPolicy = same-origin */
+  var options = {
+    "capture.referrerPolicy": "same-origin",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer/index.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var file = zip.file('referrer.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer/index.py`);
+  var file = zip.file('referrer2.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === "");
+
+  /* capture.referrerPolicy = no-referrer-when-downgrade */
+  var options = {
+    "capture.referrerPolicy": "no-referrer-when-downgrade",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer/index.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var file = zip.file('referrer.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer/index.py`);
+  var file = zip.file('referrer2.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer/index.py`);
+
+  /* capture.referrerPolicy = strict-origin */
+  var options = {
+    "capture.referrerPolicy": "strict-origin",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer/index.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var file = zip.file('referrer.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+  var file = zip.file('referrer2.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  /* capture.referrerPolicy = strict-origin-when-cross-origin */
+  var options = {
+    "capture.referrerPolicy": "strict-origin-when-cross-origin",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer/index.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var file = zip.file('referrer.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer/index.py`);
+  var file = zip.file('referrer2.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
 }
 
 /**
