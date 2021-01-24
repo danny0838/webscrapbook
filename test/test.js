@@ -3216,15 +3216,15 @@ async function test_capture_css_rewriteCss3() {
   var cssText = (await readFileAsText(cssBlob)).trim();
   assert(cssText === `\
 @import url("imported.css");
-#linked { background: green; }
-#unused { background: red; }`);
+#linked { background-color: green; }
+#unused { background-color: red; }`);
 
   var cssFile = zip.file('imported.css');
   var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
   var cssText = (await readFileAsText(cssBlob)).trim();
   assert(cssText === `\
-#imported { background: green; }
-#unused { background: red; }`);
+#imported { background-color: green; }
+#unused { background-color: red; }`);
 
   /* capture.rewriteCss = match */
   var options = {
@@ -3246,13 +3246,13 @@ async function test_capture_css_rewriteCss3() {
   var cssText = (await readFileAsText(cssBlob)).trim();
   assert(cssText === `\
 @import url("imported.css");
-#linked { background: green; }`);
+#linked { background-color: green; }`);
 
   var cssFile = zip.file('imported.css');
   var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
   var cssText = (await readFileAsText(cssBlob)).trim();
   assert(cssText === `\
-#imported { background: green; }`);
+#imported { background-color: green; }`);
 }
 
 /**
