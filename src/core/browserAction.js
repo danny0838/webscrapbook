@@ -140,6 +140,7 @@
             title: tab.title,
           })),
           mode: "",
+          parentId: "root",
           delay: null,
           options: scrapbook.getOptions("capture"),
         },
