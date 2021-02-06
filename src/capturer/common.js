@@ -2657,8 +2657,10 @@
       const origNodeMap = new WeakMap();
       const clonedNodeMap = new WeakMap();
       const rootNode = cloneNodeMapping(htmlNode, true);
+      const isMainFrame = i === 0;
       const info = {
-        title: (isMainPage && i === 0 ? item && item.title : doc.title) || "",
+        isMainFrame,
+        title: (isMainPage && isMainFrame ? item && item.title : doc.title) || "",
       };
       const resources = {};
       const shadowRootSupported = !!rootNode.attachShadow;
@@ -2675,7 +2677,7 @@
       // common pre-save process
       await capturer.preSaveProcess({
         rootNode,
-        isMainDocument: isMainPage && i === 0,
+        isMainDocument: isMainPage && isMainFrame,
         deleteErased: options["capture.deleteErasedOnSave"],
         requireBasicLoader,
         insertInfoBar: options["capture.insertInfoBar"],
