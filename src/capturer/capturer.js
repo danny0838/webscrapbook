@@ -1562,10 +1562,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     const bookId = await server.findBookIdFromUrl(url);
     const book = server.books[bookId];
 
-    if (!!book.config.no_tree) {
-      throw new Error(scrapbook.lang("ErrorSaveBookNoTree"));
-    }
-
     if (!url.startsWith(book.dataUrl)) {
       throw new Error(scrapbook.lang("ErrorSaveNotUnderDataDir", [url]));
     }
@@ -1769,7 +1765,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
           await book.loadTreeFiles(true);  // update treeLastModified
         } else {
-          capturer.warn(scrapbook.lang("ErrorSaveUnknownItem"));
+          if (!book.config.no_tree) {
+            capturer.warn(scrapbook.lang("ErrorSaveUnknownItem"));
+          }
         }
       },
     });
