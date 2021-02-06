@@ -178,6 +178,8 @@
           menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
 
+          menuElem.querySelector('button[value="view_recycle"]').disabled = isNoTree;
+
           menuElem.querySelector('button[value="view_recycle"]').hidden = !(!isRecycle);
         }
 
