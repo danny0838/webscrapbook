@@ -1747,11 +1747,6 @@ ${scrapbook.escapeHtml(content)}
 
     commands: {
       async index() {
-        if (this.book.config.no_tree) {
-          await this.openLink(this.book.dataUrl, true);
-          return;
-        }
-
         await this.openLink(this.book.indexUrl, true);
       },
 
