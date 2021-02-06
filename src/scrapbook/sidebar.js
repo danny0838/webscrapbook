@@ -168,7 +168,7 @@
 
         {
           const menuElem = document.getElementById('command-popup-book');
-          menuElem.querySelector('button[value="exec_book"]').disabled = !(!isNoTree && isLocal);
+          menuElem.querySelector('button[value="exec_book"]').disabled = !(isLocal);
           menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
           menuElem.querySelector('button[value="sort"]').disabled = isNoTree;
 
