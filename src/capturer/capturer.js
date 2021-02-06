@@ -1670,13 +1670,13 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
           // only save files under dataDir
           if (!fileUrl.startsWith(book.dataUrl)) {
-            capturer.warn(scrapbook.lang("ErrorSaveNotUnderDataDir", [target]));
+            capturer.error(scrapbook.lang("ErrorSaveNotUnderDataDir", [target]));
             continue;
           }
 
           // forbid non-UTF-8 for data safety
           if (data.charset !== "UTF-8") {
-            capturer.warn(scrapbook.lang("ErrorSaveNonUTF8", [target]));
+            capturer.error(scrapbook.lang("ErrorSaveNonUTF8", [target]));
             continue;
           }
 
