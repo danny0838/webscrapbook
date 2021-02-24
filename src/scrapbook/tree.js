@@ -127,6 +127,33 @@
       return {parentItemElem, parentItemId, siblingItems, index};
     }
 
+    getXpathPos(elem) {
+      const id = elem.getAttribute('data-id');
+      let cur = elem, i = 0;
+      while (cur) {
+        if (cur.getAttribute('data-id') === id) { i++; }
+        cur = cur.previousElementSibling;
+      }
+      return i;
+    }
+
+    getXpaths(elem, map) {
+      const path = [];
+      let cur = elem;
+      while (this.treeElem.contains(cur)) {
+        path.unshift(`*[@data-id=${scrapbook.quoteXPath(cur.getAttribute('data-id'))}][${this.getXpathPos(cur)}]`);
+        cur = cur.parentElement.parentElement;
+      }
+
+      for (let i = 0, I = path.length; i < I; ++i) {
+        const subpath = path.slice(0, i + 1);
+        const sel = './' + subpath.join('/ul/');
+        if (!map.has(sel)) {
+          map.set(sel, i === I - 1);
+        }
+      }
+    }
+
     /**
      * An internal method to add an item to DOM
      */

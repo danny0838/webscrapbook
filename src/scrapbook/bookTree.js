@@ -80,54 +80,23 @@
     }
 
     async saveViewStatus() {
-      const getXpathPos = (elem) => {
-        const id = elem.getAttribute('data-id');
-        let cur = elem, i = 0;
-        while (cur) {
-          if (cur.getAttribute('data-id') === id) { i++; }
-          cur = cur.previousElementSibling;
-        }
-        return i;
+      const selects = {};
+      const map = new Map();
+      Array.prototype.forEach.call(
+        this.treeElem.querySelectorAll('ul.container:not([hidden])'),
+        x => this.getXpaths(x.parentElement, map)
+      );
+      for (const [k, v] of map.entries()) {
+        selects[k] = v;
+      }
+
+      const key = this.getViewStatusKey();
+      const data = {
+        time: Date.now(),
+        selects,
       };
 
-      const getXpaths = (elem, map) => {
-        const path = [];
-        let cur = elem;
-        while (this.treeElem.contains(cur)) {
-          path.unshift(`*[@data-id=${scrapbook.quoteXPath(cur.getAttribute('data-id'))}][${getXpathPos(cur)}]`);
-          cur = cur.parentElement.parentElement;
-        }
-
-        for (let i = 0, I = path.length; i < I; ++i) {
-          const subpath = path.slice(0, i + 1);
-          const sel = './' + subpath.join('/ul/');
-          if (!map.has(sel)) {
-            map.set(sel, i === I - 1);
-          }
-        }
-      };
-
-      const saveViewStatus = async () => {
-        const selects = {};
-        const map = new Map();
-        Array.prototype.forEach.call(
-          this.treeElem.querySelectorAll('ul.container:not([hidden])'),
-          x => getXpaths(x.parentElement, map)
-        );
-        for (const [k, v] of map.entries()) {
-          selects[k] = v;
-        }
-
-        const key = this.getViewStatusKey();
-        const data = {
-          time: Date.now(),
-          selects,
-        };
-
-        await scrapbook.cache.set(key, data, this.cacheType);
-      };
-      this.saveViewStatus = saveViewStatus;
-      return await saveViewStatus();
+      await scrapbook.cache.set(key, data, this.cacheType);
     }
 
     async loadViewStatus() {
