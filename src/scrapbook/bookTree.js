@@ -64,6 +64,27 @@
     }
 
     async rebuild() {
+      // save current highlights
+      let lastHighlightElem = this.lastHighlightElem;
+      if (lastHighlightElem) {
+        if (this.treeElem.contains(lastHighlightElem)) {
+          const map = new Map();
+          this.getXpaths(lastHighlightElem, map, {includeParents: false});
+          for (const xpath of map.keys()) {
+            lastHighlightElem = xpath;
+          }
+        } else {
+          lastHighlightElem = null;
+        }
+      }
+
+      const highlights = new Map();
+      Array.prototype.forEach.call(
+        this.treeElem.querySelectorAll('.highlight'),
+        x => this.getXpaths(x.parentElement, highlights, {includeParents: false})
+      );
+
+      // rebuild
       super.rebuild();
       if (this.book.config.no_tree) { return; }
 
@@ -73,6 +94,18 @@
       rootElem.container.classList.add('container');
       this.toggleItem(rootElem, true);
       await this.loadViewStatus();
+
+      // restore highlights
+      for (const xpath of highlights.keys()) {
+        const elem = document.evaluate(xpath, this.treeElem).iterateNext();
+        if (!elem) { continue; }
+        elem.controller.classList.add('highlight');
+      }
+
+      if (lastHighlightElem) {
+        const elem = document.evaluate(lastHighlightElem, this.treeElem).iterateNext();
+        if (elem) { this.lastHighlightElem = elem; }
+      }
     }
 
     getViewStatusKey() {

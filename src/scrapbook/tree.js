@@ -137,7 +137,7 @@
       return i;
     }
 
-    getXpaths(elem, map) {
+    getXpaths(elem, map, {includeParents = true} = {}) {
       const path = [];
       let cur = elem;
       while (this.treeElem.contains(cur)) {
@@ -145,7 +145,7 @@
         cur = cur.parentElement.parentElement;
       }
 
-      for (let i = 0, I = path.length; i < I; ++i) {
+      for (let i = includeParents ? 0 : path.length - 1, I = path.length; i < I; ++i) {
         const subpath = path.slice(0, i + 1);
         const sel = './' + subpath.join('/ul/');
         if (!map.has(sel)) {
