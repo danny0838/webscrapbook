@@ -1326,6 +1326,10 @@
         await book.loadMeta();
         await book.loadToc();
 
+        if (!targetParentId || !(!!book.meta[targetParentId] || book.isSpecialItem(targetParentId))) {
+          return;
+        }
+
         const sourceBookFaviconPrefix = scrapbook.normalizeUrl(sourceBook.treeUrl + 'favicon/');
         const targetBookFaviconPrefix = scrapbook.normalizeUrl(targetBook.treeUrl + 'favicon/');
 
