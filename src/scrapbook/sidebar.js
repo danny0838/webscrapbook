@@ -1488,6 +1488,11 @@
         };
 
         for (const {id, parentId, index} of sourceItems) {
+          // Forbid copying self to a descendant recursively
+          if (recursively && book.getReachableItems(id).has(targetParentId)) {
+            continue;
+          }
+
           // copy item and descendants
           const idChain = new Set();
 
