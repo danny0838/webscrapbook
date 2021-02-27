@@ -1237,6 +1237,7 @@
 
     async moveItems(sourceItemElems, targetId, targetIndex) {
       if (!targetId || !(!!this.book.meta[targetId] || this.book.isSpecialItem(targetId))) {
+        this.warn(`Unable to move: target ID "${targetId}" is invalid.`);
         return;
       }
 
@@ -1284,6 +1285,7 @@
 
     async linkItems(sourceItemElems, targetId, targetIndex) {
       if (!targetId || !(!!this.book.meta[targetId] || this.book.isSpecialItem(targetId))) {
+        this.warn(`Unable to create link: target ID "${targetId}" is invalid.`);
         return;
       }
 
@@ -1327,6 +1329,7 @@
         await book.loadToc();
 
         if (!targetParentId || !(!!book.meta[targetParentId] || book.isSpecialItem(targetParentId))) {
+          this.warn(`Unable to copy: target ID "${targetParentId}" is invalid.`);
           return;
         }
 
