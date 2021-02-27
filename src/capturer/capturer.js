@@ -589,9 +589,7 @@
    * @param {string} params.parentId
    * @param {integer} params.index
    */
-  capturer.addItemToServer = async function (params) {
-    const {item, parentId, index} = params;
-
+  capturer.addItemToServer = async function ({item, parentId, index}) {
     await server.init();
     const book = server.books[server.bookId];
     if (!!book.config.no_tree) {
@@ -670,13 +668,11 @@
    * @param {Object} [params.options] - base capture options, overwriting default
    * @return {Promise<Array|Object>} - list of task results (or error), or an object of error
    */
-  capturer.runTasks = async function (params) {
-    let {
-      tasks,
-      parentId, index, delay,
-      mode: baseMode, options: baseOptions,
-    } = params;
-
+  capturer.runTasks = async function ({
+    tasks,
+    parentId, index, delay,
+    mode: baseMode, options: baseOptions,
+  }) {
     delay = parseFloat(delay) || 5;
     baseOptions = Object.assign(scrapbook.getOptions("capture"), baseOptions);
 
@@ -765,17 +761,15 @@
    * @param {integer} [params.index] - position index for the captured items
    * @return {Promise<Object>}
    */
-  capturer.captureGeneral = async function (params) {
-    const {
-      timeId = scrapbook.dateToId(),
-      documentName = 'index',
-      captureOnly = false,
-      tabId, frameId, fullPage,
-      url, refUrl, title, favIconUrl,
-      mode, options,
-      parentId, index,
-    } = params;
-
+  capturer.captureGeneral = async function ({
+    timeId = scrapbook.dateToId(),
+    documentName = 'index',
+    captureOnly = false,
+    tabId, frameId, fullPage,
+    url, refUrl, title, favIconUrl,
+    mode, options,
+    parentId, index,
+  }) {
     let response;
     if (Number.isInteger(tabId)) {
       // capture tab
@@ -838,14 +832,13 @@
    * @param {string} params.options
    * @return {Promise<Object>}
    */
-  capturer.captureTab = async function (params) {
-    const {
-      timeId,
-      documentName,
-      tabId, frameId, fullPage,
-      title, favIconUrl,
-      mode, options,
-    } = params;
+  capturer.captureTab = async function ({
+    timeId,
+    documentName,
+    tabId, frameId, fullPage,
+    title, favIconUrl,
+    mode, options,
+  }) {
     let {url, discarded} = await browser.tabs.get(tabId);
 
     // redirect headless capture
@@ -921,14 +914,12 @@
    * @param {string} params.options
    * @return {Promise<Object>}
    */
-  capturer.captureRemote = async function (params) {
-    const {
-      timeId,
-      documentName,
-      url, refUrl, title, favIconUrl,
-      mode, options,
-    } = params;
-
+  capturer.captureRemote = async function ({
+    timeId,
+    documentName,
+    url, refUrl, title, favIconUrl,
+    mode, options,
+  }) {
     // default mode => launch a tab to capture
     if (mode === "tab") {
       capturer.log(`Launching remote tab ...`);
@@ -1537,9 +1528,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {boolean} [params.internalize]
    * @return {Promise<Object>}
    */
-  capturer.resaveTab = async function (params) {
-    const {tabId, frameId, options} = params;
-    let {internalize = false} = params;
+  capturer.resaveTab = async function ({
+    tabId, frameId, options,
+    internalize = false,
+  }) {
     let {url, title, favIconUrl, discarded} = await browser.tabs.get(tabId);
 
     const source = `[${tabId}${(frameId ? ':' + frameId : '')}] ${url}`;
@@ -1790,13 +1782,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {Object} params
    * @return {Promise<Object>}
    */
-  capturer.recapture = async function (params) {
-    const {
-      tabId, frameId, fullPage,
-      url, refUrl, title, favIconUrl,
-      mode, options, recaptureInfo,
-    } = params;
-
+  capturer.recapture = async function ({
+    tabId, frameId, fullPage,
+    url, refUrl, title, favIconUrl,
+    mode, options, recaptureInfo,
+  }) {
     const {bookId, itemId} = recaptureInfo;
 
     capturer.log(`Preparing a re-capture for item "${itemId}" of book "${bookId}"...`);
@@ -2139,14 +2129,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {Object} params
    * @return {Promise<Object>}
    */
-  capturer.mergeCapture = async function (params) {
-    const {
-      tabId, frameId, fullPage,
-      url, refUrl, title, favIconUrl,
-      mode, options,
-      mergeCaptureInfo,
-    } = params;
-
+  capturer.mergeCapture = async function ({
+    tabId, frameId, fullPage,
+    url, refUrl, title, favIconUrl,
+    mode, options,
+    mergeCaptureInfo,
+  }) {
     const {bookId, itemId} = mergeCaptureInfo;
 
     capturer.log(`Preparing a merge capture for item "${itemId}" of book "${bookId}"...`);

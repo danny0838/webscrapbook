@@ -103,7 +103,7 @@
    * @return {Promise<Object>}
    */
   capturer.captureDocumentOrFile = async function (params) {
-    isDebug && console.debug("call: captureDocumentOrFile");
+    isDebug && console.debug("call: captureDocumentOrFile", params);
 
     const {doc = document, docUrl, baseUrl, refUrl, settings, options} = params;
 
@@ -146,7 +146,7 @@
    * @return {Promise<Object>}
    */
   capturer.captureDocument = async function (params) {
-    isDebug && console.debug("call: captureDocument");
+    isDebug && console.debug("call: captureDocument", params);
 
     const warn = async (msg) => {
       return capturer.invoke("remoteMsg", {
@@ -2445,7 +2445,7 @@
    * @return {Promise<Object>}
    */
   capturer.retrieveDocumentContent = async function (params) {
-    isDebug && console.debug("call: retrieveDocumentContent");
+    isDebug && console.debug("call: retrieveDocumentContent", params);
 
     const {doc = document, internalize = false, isMainPage, item, options} = params;
 
@@ -2714,7 +2714,7 @@
    * @return {Promise<Object>}
    */
   capturer.preSaveProcess = async function (params) {
-    isDebug && console.debug("call: preSaveProcess");
+    isDebug && console.debug("call: preSaveProcess", params);
 
     const {rootNode, isMainDocument, deleteErased, requireBasicLoader, insertInfoBar} = params;
     const doc = rootNode.ownerDocument;
@@ -2906,9 +2906,7 @@
    * @param {Object} params.doc
    * @return {Promise<Array>}
    */
-  capturer.retrieveSelectedLinks = async function (params = {}) {
-    const {doc = document} = params;
-
+  capturer.retrieveSelectedLinks = async function ({doc = document} = {}) {
     let nodes;
     if (!document.getSelection().isCollapsed) {
       nodes = scrapbook.getSelectedNodes({
@@ -2939,9 +2937,7 @@
    * @param {Object} params.options
    * @return {string} The formatted filename.
    */
-  capturer.formatIndexFilename = async function (params) {
-    const {title, sourceUrl, isFolder, settings, options} = params;
-
+  capturer.formatIndexFilename = async function ({title, sourceUrl, isFolder, settings, options}) {
     const time = scrapbook.idToDate(settings.timeId);
     const u = new URL(sourceUrl);
 

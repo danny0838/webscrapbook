@@ -890,9 +890,7 @@ if (Node && !Node.prototype.getRootNode) {
    * @param {Object} [params.args]
    * @return {Promise<Object>}
    */
-  scrapbook.invokeExtensionScript = async function (params) {
-    const {id, cmd, args} = params;
-
+  scrapbook.invokeExtensionScript = async function ({id, cmd, args}) {
     isDebug && console.debug(cmd, "send to extension page", args);
     const response = await browser.runtime.sendMessage({id, cmd, args});
     isDebug && console.debug(cmd, "response from extension page", response);
@@ -909,9 +907,7 @@ if (Node && !Node.prototype.getRootNode) {
    * @param {Object} [params.args]
    * @return {Promise<Object>}
    */
-  scrapbook.invokeContentScript = async function (params) {
-    const {tabId, frameId, cmd, args} = params;
-
+  scrapbook.invokeContentScript = async function ({tabId, frameId, cmd, args}) {
     isDebug && console.debug(cmd, "send to content script", `[${tabId}:${frameId}]`, args);
     const response = await browser.tabs.sendMessage(tabId, {cmd, args}, {frameId});
     isDebug && console.debug(cmd, "response from content script", `[${tabId}:${frameId}]`, response);
@@ -927,9 +923,7 @@ if (Node && !Node.prototype.getRootNode) {
    * @param {Object} [params.args]
    * @return {Promise<Object>}
    */
-  scrapbook.invokeFrameScript = async function (params) {
-    const {frameWindow, cmd, args} = params;
-
+  scrapbook.invokeFrameScript = async function ({frameWindow, cmd, args}) {
     const frameId = await new Promise((resolve, reject) => {
       const extension = browser.runtime.getURL('');
       const channel = new MessageChannel();
