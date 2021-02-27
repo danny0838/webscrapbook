@@ -609,6 +609,13 @@
         const refresh = !await book.validateTree();
         await book.loadMeta(refresh);
         await book.loadToc(refresh);
+
+        // insert to root if parentId does not exist
+        if (parentId && !book.meta[parentId] && !book.isSpecialItem(parentId)) {
+          capturer.warn(`Specified parent ID "${parentId}" is invalid. Append to root instead.`);
+          parentId = 'root';
+        }
+
         await book.addItem({
           item: Object.assign({}, item, {icon}),
           parentId,
