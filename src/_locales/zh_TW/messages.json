@@ -1220,6 +1220,9 @@
   "ScrapBookCommandMetaDialogIndex": {
     "message": "索引檔:"
   },
+  "ScrapBookCommandMetaDialogLocation": {
+    "message": "地理位置:"
+  },
   "ScrapBookCommandMetaDialogLocked": {
     "message": "鎖定:"
   },

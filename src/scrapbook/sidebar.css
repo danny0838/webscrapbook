@@ -193,6 +193,20 @@ body {
   min-height: 80px;
 }
 
+#dialog-wrapper form.meta [name="location"]  {
+  width: calc(100% - 2.5em - 2px);
+}
+
+#dialog-wrapper form.meta [name="location-view"],
+#dialog-wrapper form.meta [name="location-reset"] {
+  margin: 0 .125em;
+  padding: 0;
+  border: 0;
+  width: 1em;
+  height: 1em;
+  font-size: 1em;
+}
+
 #dialog-wrapper form.meta dl > div {
   display: flex;
   flex-direction: row;

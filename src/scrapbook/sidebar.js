@@ -2043,6 +2043,54 @@ ${scrapbook.escapeHtml(content)}
           const onDateBlur = (event) => {
             uneditDate(event.target);
           };
+          const validateLocation = (elem) => {
+            const value = elem.value;
+            let validity = '';
+            if (value) {
+              try {
+                const c = JSON.parse(value);
+                if (!(typeof c === 'object' && !Array.isArray(c) && c !== null)) {
+                  throw new Error('Must be a JSON object.');
+                }
+                if (!Number.isFinite(c.latitude)) {
+                  throw new Error('Invalid latitude property.');
+                }
+                if (!Number.isFinite(c.longitude)) {
+                  throw new Error('Invalid longitude property.');
+                }
+              } catch (ex) {
+                validity = ex.message;
+              }
+            }
+            elem.setCustomValidity(validity);
+          };
+          const onLocationChange = (event) => {
+            validateLocation(event.target);
+          };
+          const onLocationShow = async (event) => {
+            event.preventDefault();
+            const elem = dialog.querySelector('[name="location"]');
+            if (elem.validity.valid) {
+              const value = elem.value;
+              if (value) {
+                const c = JSON.parse(value);
+                const url = scrapbook.getOption("geolocation.mapUrl")
+                    .replace(/%(\w*)%/g, (_, key) => Number.isFinite(c[key]) ? c[key] : '');
+                await this.openLink(url, true);
+              }
+            }
+          };
+          const onLocationReset = async (event) => {
+            event.preventDefault();
+            const elem = dialog.querySelector('[name="location"]');
+            const location = await scrapbook.getGeoLocation().catch(ex => {
+              this.warn(`Unable to get geolocation: ${ex.message}`);
+            });
+            if (location) {
+              elem.value = JSON.stringify(location);
+            }
+            validateLocation(elem);
+          };
 
           const isRecycle = this.rootId === 'recycle';
 
@@ -2070,6 +2118,17 @@ ${scrapbook.escapeHtml(content)}
           elem.setAttribute('data-id', item.modify || "");
           elem.addEventListener('focus', onDateFocus);
           elem.addEventListener('blur', onDateBlur);
+
+          var elem = dialog.querySelector('[name="location"]');
+          elem.value = item.location ? JSON.stringify(item.location) : "";
+          validateLocation(elem);
+          elem.addEventListener('change', onLocationChange);
+
+          var elem = dialog.querySelector('[name="location-view"]');
+          elem.addEventListener('click', onLocationShow);
+
+          var elem = dialog.querySelector('[name="location-reset"]');
+          elem.addEventListener('click', onLocationReset);
 
           if (['postit'].includes(item.type)) {
             dialog.querySelector('[name="title"]').setAttribute('readonly', '');
@@ -2100,6 +2159,23 @@ ${scrapbook.escapeHtml(content)}
           uneditDate(dialog.querySelector('[name="modify"]'));
         }
 
+        let location;
+        {
+          const locationText = dialog.querySelector('[name="location"]').value;
+          if (locationText) {
+            const c = JSON.parse(locationText);
+            location = {
+              latitude: c.latitude,
+              longitude: c.longitude,
+              accuracy: c.accuracy,
+              altitude: c.altitude,
+              altitudeAccuracy: c.altitudeAccuracy,
+              heading: c.heading,
+              speed: c.speed,
+            };
+          }
+        }
+
         const dialogData = {
           marked: dialog.querySelector('[name="marked"]').checked,
           locked: dialog.querySelector('[name="locked"]').checked,
@@ -2110,6 +2186,7 @@ ${scrapbook.escapeHtml(content)}
           create: dialog.querySelector('[name="create"]').getAttribute('data-id'),
           modify: dialog.querySelector('[name="modify"]').getAttribute('data-id'),
           charset: dialog.querySelector('[name="charset"]').value,
+          location,
           comment: dialog.querySelector('[name="comment"]').value,
         };
         const newItem = this.book.addItem({

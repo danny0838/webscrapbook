@@ -1220,6 +1220,9 @@
   "ScrapBookCommandMetaDialogIndex": {
     "message": "Index:"
   },
+  "ScrapBookCommandMetaDialogLocation": {
+    "message": "Geolocation:"
+  },
   "ScrapBookCommandMetaDialogLocked": {
     "message": "Locked:"
   },

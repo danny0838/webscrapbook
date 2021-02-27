@@ -158,6 +158,10 @@ if (Node && !Node.prototype.getRootNode) {
     "scrapbook.defaultSearch": "-type:folder -type:separator",
     "scrapbook.fulltextCacheRemoteSizeLimit": null,
     "scrapbook.fulltextCacheUpdateThreshold": 5 * 24 * 60 * 60 * 1000,
+    "geolocation.enableHighAccuracy": true,
+    "geolocation.timeout": 3000,
+    "geolocation.maximumAge": 0,
+    "geolocation.mapUrl": "https://maps.google.com/?q=%latitude%,%longitude%",
   };
 
   const CONTENT_SCRIPT_FILES = [
@@ -2758,6 +2762,27 @@ if (Node && !Node.prototype.getRootNode) {
       i++;
     }
     return linesNew.join('\n');
+  };
+
+  scrapbook.getGeoLocation = async function (options) {
+    return await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, Object.assign({
+        timeout: scrapbook.getOption("geolocation.timeout"),
+        maximumAge: scrapbook.getOption("geolocation.maximumAge"),
+        enableHighAccuracy: scrapbook.getOption("geolocation.enableHighAccuracy"),
+      }, options));
+    }).then(r => {
+      const c = r.coords;
+      return {
+        latitude: c.latitude,
+        longitude: c.longitude,
+        accuracy: c.accuracy,
+        altitude: c.altitude,
+        altitudeAccuracy: c.altitudeAccuracy,
+        heading: c.heading,
+        speed: c.speed,
+      };
+    });
   };
 
   /****************************************************************************
