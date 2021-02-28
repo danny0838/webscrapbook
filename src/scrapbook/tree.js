@@ -267,27 +267,15 @@
             itemElem.controller.classList.add('highlight');
             this.lastHighlightElem = itemElem;
           } else {
-            const nodeIterator = document.createNodeIterator(
-              this.treeElem,
-              NodeFilter.SHOW_ELEMENT
-            );
-            let node, start = false, endItem;
-            while (node = nodeIterator.nextNode()) {
-              if (node.matches('li[data-id]')) {
-                if (!start) {
-                  if (node === itemElem) {
-                    start = true;
-                    endItem = this.treeElem.contains(this.lastHighlightElem) ? this.lastHighlightElem : itemElem;
-                  } else if (node === this.lastHighlightElem) {
-                    start = true;
-                    endItem = itemElem;
-                  }
-                }
-                if (start) {
-                  node.controller.classList.add('highlight');
-                  if (node === endItem) { break; }
-                }
-              }
+            const itemElems = this.treeElem.querySelectorAll('li[data-id]');
+            let start = Array.prototype.indexOf.call(itemElems, this.lastHighlightElem);
+            let end = Array.prototype.indexOf.call(itemElems, itemElem);
+            if (start < 0) { start = end; }
+            if (start > end) { [start, end] = [end, start]; }
+            for (let i = start; i <= end; i++) {
+              const elem = itemElems[i];
+              if (elem.closest('[hidden]')) { continue; }
+              elem.controller.classList.add('highlight');
             }
             this.lastHighlightElem = itemElem;
           }
@@ -305,27 +293,15 @@
             itemElem.controller.classList.remove('highlight');
             this.lastHighlightElem = itemElem;
           } else {
-            const nodeIterator = document.createNodeIterator(
-              this.treeElem,
-              NodeFilter.SHOW_ELEMENT
-            );
-            let node, start = false, endItem;
-            while (node = nodeIterator.nextNode()) {
-              if (node.matches('li[data-id]')) {
-                if (!start) {
-                  if (node === itemElem) {
-                    start = true;
-                    endItem = this.treeElem.contains(this.lastHighlightElem) ? this.lastHighlightElem : itemElem;
-                  } else if (node === this.lastHighlightElem) {
-                    start = true;
-                    endItem = itemElem;
-                  }
-                }
-                if (start) {
-                  node.controller.classList.remove('highlight');
-                  if (node === endItem) { break; }
-                }
-              }
+            const itemElems = this.treeElem.querySelectorAll('li[data-id]');
+            let start = Array.prototype.indexOf.call(itemElems, this.lastHighlightElem);
+            let end = Array.prototype.indexOf.call(itemElems, itemElem);
+            if (start < 0) { start = end; }
+            if (start > end) { [start, end] = [end, start]; }
+            for (let i = start; i <= end; i++) {
+              const elem = itemElems[i];
+              if (elem.closest('[hidden]')) { continue; }
+              elem.controller.classList.remove('highlight');
             }
             this.lastHighlightElem = itemElem;
           }
