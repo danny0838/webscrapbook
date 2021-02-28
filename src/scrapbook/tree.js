@@ -39,14 +39,10 @@
       treeElem,
     }) {
       this.treeElem = treeElem;
-
       this.lastDraggedElems = null;
       this.lastHighlightElem = null;
 
-      // add TREE_CLASS to treeElem
-      if (!treeElem.classList.contains(TREE_CLASS)) {
-        treeElem.classList.add(TREE_CLASS);
-      }
+      treeElem.classList.add(TREE_CLASS);
 
       // bind on* event callbacks
       for (const funcName of Object.getOwnPropertyNames(Tree.prototype)) {
@@ -90,9 +86,7 @@
       this.itemDropCallback = itemDropCallback;
 
       if (this.allowSelect) {
-        if (!this.treeElem.classList.contains(TREE_CLASS_SELECTABLE)) {
-          this.treeElem.classList.add(TREE_CLASS_SELECTABLE);
-        }
+        this.treeElem.classList.add(TREE_CLASS_SELECTABLE);
       } else {
         this.treeElem.classList.remove(TREE_CLASS_SELECTABLE);
       }
@@ -395,10 +389,7 @@
 
     onItemDragEnter(event) {
       const wrapper = event.currentTarget;
-      if (!wrapper.classList.contains('dragover')) {
-        wrapper.classList.add('dragover');
-      }
-
+      wrapper.classList.add('dragover');
       this.onItemDragOver(event);
     }
 
@@ -431,35 +422,17 @@
         const pos = (event.clientY - wrapperRect.top) / wrapperRect.height;
 
         if (pos < 1/3) {
-          if (!wrapper.classList.contains('above')) {
-            wrapper.classList.add('above');
-          }
-          if (wrapper.classList.contains('below')) {
-            wrapper.classList.remove('below');
-          }
-          if (wrapper.classList.contains('within')) {
-            wrapper.classList.remove('within');
-          }
+          wrapper.classList.add('above');
+          wrapper.classList.remove('below');
+          wrapper.classList.remove('within');
         } else if (pos > 2/3) {
-          if (wrapper.classList.contains('above')) {
-            wrapper.classList.remove('above');
-          }
-          if (!wrapper.classList.contains('below')) {
-            wrapper.classList.add('below');
-          }
-          if (wrapper.classList.contains('within')) {
-            wrapper.classList.remove('within');
-          }
+          wrapper.classList.remove('above');
+          wrapper.classList.add('below');
+          wrapper.classList.remove('within');
         } else {
-          if (wrapper.classList.contains('above')) {
-            wrapper.classList.remove('above');
-          }
-          if (wrapper.classList.contains('below')) {
-            wrapper.classList.remove('below');
-          }
-          if (!wrapper.classList.contains('within')) {
-            wrapper.classList.add('within');
-          }
+          wrapper.classList.remove('above');
+          wrapper.classList.remove('below');
+          wrapper.classList.add('within');
         }
       }
     }

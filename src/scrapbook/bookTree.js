@@ -41,11 +41,7 @@
     }) {
       super({treeElem});
       this.cacheType = cacheType;
-
-      // add TREE_CLASS to treeElem
-      if (!treeElem.classList.contains(TREE_CLASS)) {
-        treeElem.classList.add(TREE_CLASS);
-      }
+      treeElem.classList.add(TREE_CLASS);
 
       // bind on* event callbacks
       for (const funcName of Object.getOwnPropertyNames(BookTree.prototype)) {

@@ -32,11 +32,7 @@
       bookId,
     }) {
       super({treeElem});
-
-      // add TREE_CLASS to treeElem
-      if (!treeElem.classList.contains(TREE_CLASS)) {
-        treeElem.classList.add(TREE_CLASS);
-      }
+      treeElem.classList.add(TREE_CLASS);
 
       if (typeof bookId === 'string') {
         treeElem.setAttribute('data-bookId', bookId);
