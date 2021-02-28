@@ -24,6 +24,7 @@
 
   const TREE_CLASS = 'tree';
   const TREE_CLASS_SELECTABLE = 'selectable';
+  const TREE_CLASS_KEYNAV = 'keynav';
 
   const ITEM_TYPE_ICON = {
     '': browser.runtime.getURL('resources/item.png'),
@@ -68,9 +69,11 @@
       allowMultiSelectOnClick = false,
       allowAnchorClick = false,
       allowContextMenu = false,
+      allowKeyboardNavigation = false,
       allowDrag = false,
       allowDrop = false,
       contextMenuCallback,
+      keyDownCallback,
       itemAnchorClickCallback,
       itemDragOverCallback,
       itemDropCallback,
@@ -82,9 +85,11 @@
       this.allowMultiSelectOnClick = allowMultiSelectOnClick;
       this.allowAnchorClick = allowAnchorClick;
       this.allowContextMenu = allowContextMenu;
+      this.allowKeyboardNavigation = allowKeyboardNavigation;
       this.allowDrag = allowDrag;
       this.allowDrop = allowDrop;
       this.contextMenuCallback = contextMenuCallback;
+      this.keyDownCallback = keyDownCallback;
       this.itemAnchorClickCallback = itemAnchorClickCallback;
       this.itemDragOverCallback = itemDragOverCallback;
       this.itemDropCallback = itemDropCallback;
@@ -99,6 +104,14 @@
         this.treeElem.addEventListener('contextmenu', this.onContextMenu);
       } else {
         this.treeElem.removeEventListener('contextmenu', this.onContextMenu);
+      }
+
+      if (this.allowKeyboardNavigation) {
+        this.treeElem.classList.add(TREE_CLASS_KEYNAV);
+        this.treeElem.addEventListener('keydown', this.onKeyDown);
+      } else {
+        this.treeElem.classList.remove(TREE_CLASS_KEYNAV);
+        this.treeElem.removeEventListener('keydown', this.onKeyDown);
       }
     }
 
@@ -208,6 +221,9 @@
 
       if (meta.type !== 'separator') {
         var a = elem.anchor = div.appendChild(document.createElement('a'));
+        if (this.allowKeyboardNavigation) {
+          a.setAttribute('tabindex', -1);
+        }
         a.appendChild(document.createTextNode(meta.title || meta.id));
         a.title = (meta.title || meta.id) + (meta.source ? '\n' + meta.source : '') + (meta.comment ? '\n\n' + meta.comment : '');
         if (meta.type === 'bookmark') {
@@ -279,6 +295,10 @@
         });
       }
 
+      if (!this.treeElem.contains(itemElem)) {
+        return;
+      }
+
       if (ranged) {
         const itemElems = this.treeElem.querySelectorAll('li[data-id]');
         let startElem = 
@@ -313,6 +333,140 @@
       this.anchorItem(itemElem);
     }
 
+    keyboardNavigation(event) {
+      if (event.code === "ArrowUp") {
+        event.preventDefault();
+        const itemElems = this.treeElem.querySelectorAll('li[data-id]');
+        const anchorElem = this.anchorElem;
+        if (!this.treeElem.contains(anchorElem) || anchorElem.closest('[hidden]')) {
+          this.highlightItem(itemElems[0], true);
+          return;
+        }
+
+        let target, index = Array.prototype.indexOf.call(itemElems, anchorElem) - 1;
+        while (index >= 0) {
+          if (itemElems[index] && !itemElems[index].closest('[hidden]')) {
+            target = itemElems[index];
+            break;
+          }
+          index--;
+        }
+
+        if (target) {
+          if (event.shiftKey && event.ctrlKey) {
+            this.highlightItem(target, true, {reselect: false, ranged: true});
+          } else if (event.shiftKey) {
+            this.highlightItem(target, true, {reselect: true, ranged: true});
+          } else if (event.ctrlKey) {
+            this.anchorItem(target);
+          } else {
+            this.highlightItem(target, true);
+          }
+          target.scrollIntoView();
+        }
+
+        return;
+      }
+
+      if (event.code === "ArrowDown") {
+        event.preventDefault();
+        const itemElems = this.treeElem.querySelectorAll('li[data-id]');
+        const anchorElem = this.anchorElem;
+        if (!this.treeElem.contains(anchorElem) || anchorElem.closest('[hidden]')) {
+          this.highlightItem(itemElems[0], true);
+          return;
+        }
+
+        let target, index = Array.prototype.indexOf.call(itemElems, anchorElem) + 1;
+        while (index < itemElems.length) {
+          if (itemElems[index] && !itemElems[index].closest('[hidden]')) {
+            target = itemElems[index];
+            break;
+          }
+          index++;
+        }
+
+        if (target) {
+          if (event.shiftKey && event.ctrlKey) {
+            this.highlightItem(target, true, {reselect: false, ranged: true});
+          } else if (event.shiftKey) {
+            this.highlightItem(target, true, {reselect: true, ranged: true});
+          } else if (event.ctrlKey) {
+            this.anchorItem(target);
+          } else {
+            this.highlightItem(target, true);
+          }
+          target.scrollIntoView();
+        }
+
+        return;
+      }
+
+      if (event.code === "Space") {
+        event.preventDefault();
+        const itemElems = this.treeElem.querySelectorAll('li[data-id]');
+        const anchorElem = this.anchorElem;
+        if (!this.treeElem.contains(anchorElem) || anchorElem.closest('[hidden]')) {
+          this.highlightItem(itemElems[0], true);
+          return;
+        }
+
+        let target, index = Array.prototype.indexOf.call(itemElems, anchorElem);
+        while (index < itemElems.length) {
+          if (itemElems[index] && !itemElems[index].closest('[hidden]')) {
+            target = itemElems[index];
+            break;
+          }
+          index++;
+        }
+
+        if (target) {
+          if (event.shiftKey && event.ctrlKey) {
+            this.highlightItem(target, true, {reselect: false, ranged: true});
+          } else if (event.shiftKey) {
+            this.highlightItem(target, true, {reselect: true, ranged: true});
+          } else {
+            this.highlightItem(target, undefined, {reselect: false});
+          }
+          target.scrollIntoView();
+        }
+
+        return;
+      }
+
+      if (event.code === "Enter") {
+        event.preventDefault();
+        const anchorElem = this.anchorElem;
+        if (!this.treeElem.contains(anchorElem) || anchorElem.closest('[hidden]')) {
+          return;
+        }
+
+        let target;
+        if (anchorElem.anchor && anchorElem.anchor.hasAttribute('href')) {
+          target = anchorElem.anchor;
+        } else if (anchorElem.toggler && anchorElem.toggler.hasAttribute('href')) {
+          target = anchorElem.toggler;
+        }
+
+        if (target) {
+          const evt = new MouseEvent('click', {
+            // don't bubble up to trigger item selection
+            bubbles: false,
+
+            cancelable: true,
+            composed: event.composed,
+            ctrlKey: event.ctrlKey,
+            shiftKey: event.shiftKey,
+            altKey: event.altKey,
+            metaKey: event.metaKey,
+          });
+          target.dispatchEvent(evt);
+        }
+
+        return;
+      }
+    }
+
     onContextMenu(event) {
       const itemElem = event.target.closest('li[data-id]');
       if (itemElem && !itemElem.controller.classList.contains('highlight')) {
@@ -322,6 +476,17 @@
       // invoke callback
       if (this.contextMenuCallback) {
         this.contextMenuCallback.call(this, event, {
+          tree: this,
+        });
+      }
+    }
+
+    onKeyDown(event) {
+      this.keyboardNavigation(event);
+
+      // invoke callback
+      if (this.keyDownCallback) {
+        this.keyDownCallback.call(this, event, {
           tree: this,
         });
       }

@@ -239,6 +239,7 @@
           allowMultiSelectOnClick: this.mode === 'manage',
           allowAnchorClick: this.mode !== 'manage',
           allowContextMenu: true,
+          allowKeyboardNavigation: true,
           allowDrag: true,
           allowDrop: true,
           contextMenuCallback: this.onTreeContextMenu,

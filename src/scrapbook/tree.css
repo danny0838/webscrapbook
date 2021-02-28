@@ -69,6 +69,10 @@
   height: 1em;
 }
 
+.tree.keynav a {
+  outline: none;
+}
+
 .tree [data-type="bookmark"] > div > a {
   color: rgb(32,192,32);
 }

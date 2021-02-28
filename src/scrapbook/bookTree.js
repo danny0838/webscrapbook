@@ -176,6 +176,9 @@
       const div = elem.controller;
 
       const toggler = elem.toggler = document.createElement('a');
+      if (this.allowKeyboardNavigation) {
+        toggler.setAttribute('tabindex', -1);
+      }
       toggler.href = '#';
       toggler.className = 'toggle';
       toggler.addEventListener('click', this.onItemTogglerClick);
@@ -316,6 +319,88 @@
         // A side effect is that the toggler of the moved item will be closed.
         this.removeItem(currentParentId, currentIndex);
         this.insertItem(id, targetParentId, targetIndex);
+      }
+    }
+
+    keyboardNavigation(event) {
+      super.keyboardNavigation(event);
+
+      if (event.defaultPrevented) {
+        return;
+      }
+
+      if (event.code === "ArrowLeft") {
+        event.preventDefault();
+        const anchorElem = this.anchorElem;
+        if (!this.treeElem.contains(anchorElem) || anchorElem.closest('[hidden]')) {
+          const itemElems = this.treeElem.querySelectorAll('li[data-id]');
+          this.highlightItem(itemElems[0], true);
+          return;
+        }
+
+        // toogle collapse if expanded
+        if (anchorElem.container && !anchorElem.container.hidden) {
+          this.toggleItem(anchorElem, false);
+          this.saveViewStatus();
+          anchorElem.scrollIntoView();
+          return;
+        }
+
+        // move to closest parent
+        let parent = this.getParentAndIndex(anchorElem).parentItemElem;
+        if (parent === this.getRootElem()) {
+          parent = null;
+        }
+        if (parent) {
+          if (event.shiftKey && event.ctrlKey) {
+            this.highlightItem(parent, true, {reselect: false, ranged: true});
+          } else if (event.shiftKey) {
+            this.highlightItem(parent, true, {reselect: true, ranged: true});
+          } else if (event.ctrlKey) {
+            this.anchorItem(parent);
+          } else {
+            this.highlightItem(parent, true);
+          }
+          parent.scrollIntoView();
+          return;
+        }
+
+        return;
+      }
+
+      if (event.code === "ArrowRight") {
+        event.preventDefault();
+        const anchorElem = this.anchorElem;
+        if (!this.treeElem.contains(anchorElem) || anchorElem.closest('[hidden]')) {
+          const itemElems = this.treeElem.querySelectorAll('li[data-id]');
+          this.highlightItem(itemElems[0], true);
+          return;
+        }
+
+        // toogle expand if collapsed
+        if (anchorElem.container && anchorElem.container.hidden) {
+          this.toggleItem(anchorElem, true);
+          this.saveViewStatus();
+          anchorElem.scrollIntoView();
+          return;
+        }
+
+        // move to first child
+        const child = anchorElem.querySelector('li[data-id]');
+        if (child) {
+          if (event.shiftKey && event.ctrlKey) {
+            this.highlightItem(child, true, {reselect: false, ranged: true});
+          } else if (event.shiftKey) {
+            this.highlightItem(child, true, {reselect: true, ranged: true});
+          } else if (event.ctrlKey) {
+            this.anchorItem(child);
+          } else {
+            this.highlightItem(child, true);
+          }
+          child.scrollIntoView();
+        }
+
+        return;
       }
     }
 
