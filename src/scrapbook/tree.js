@@ -40,7 +40,7 @@
     }) {
       this.treeElem = treeElem;
       this.lastDraggedElems = null;
-      this.lastHighlightElem = null;
+      this.anchorElem = null;
 
       this.treeElem.setAttribute('tabindex', 0);
       treeElem.classList.add(TREE_CLASS);
@@ -104,7 +104,7 @@
     rebuild() {
       this.treeElem.textContent = '';
       this.lastDraggedElems = null;
-      this.lastHighlightElem = null;
+      this.anchorElem = null;
     }
 
     getRootElem() {
@@ -250,6 +250,21 @@
       }
     }
 
+    anchorItem(itemElem) {
+      if (this.anchorElem) {
+        if (itemElem === this.anchorElem) { return; }
+
+        Array.prototype.forEach.call(this.treeElem.querySelectorAll('.anchor'), (elem) => {
+          elem.classList.remove('anchor');
+        });
+      }
+      if (!this.treeElem.contains(itemElem)) {
+        return;
+      }
+      itemElem.controller.classList.add('anchor');
+      this.anchorElem = itemElem;
+    }
+
     highlightItem(itemElem,
       willHighlight = !itemElem.controller.classList.contains('highlight'),
       {reselect = true, ranged = false} = {},
@@ -264,9 +279,9 @@
 
       if (ranged) {
         const itemElems = this.treeElem.querySelectorAll('li[data-id]');
-        let start = Array.prototype.indexOf.call(itemElems, this.lastHighlightElem);
+        let start = Array.prototype.indexOf.call(itemElems, this.anchorElem);
         let end = Array.prototype.indexOf.call(itemElems, itemElem);
-        if (start < 0) { start = end; }
+        if (start < 0) { start = 0; }
         if (start > end) { [start, end] = [end, start]; }
         for (let i = start; i <= end; i++) {
           const elem = itemElems[i];
@@ -277,17 +292,16 @@
             elem.controller.classList.remove('highlight');
           }
         }
-        this.lastHighlightElem = itemElem;
         return;
       }
 
       if (willHighlight) {
         itemElem.controller.classList.add('highlight');
-        this.lastHighlightElem = itemElem;
       } else {
         itemElem.controller.classList.remove('highlight');
-        this.lastHighlightElem = null;
       }
+
+      this.anchorItem(itemElem);
     }
 
     onContextMenu(event) {
@@ -479,9 +493,13 @@
 
     onItemClick(event) {
       const itemElem = event.currentTarget.parentNode;
-      const reselect = !this.allowMultiSelect || !this.allowMultiSelectOnClick && !event.ctrlKey && !event.shiftKey;
+      const willHighlight = event.shiftKey ? true : undefined;
+      const reselect = event.ctrlKey ? false :
+          event.shiftKey ? true :
+          (this.allowMultiSelect && this.allowMultiSelectOnClick) ? false :
+          true;
       const ranged = this.allowMultiSelect && event.shiftKey;
-      this.highlightItem(itemElem, undefined, {reselect, ranged});
+      this.highlightItem(itemElem, willHighlight, {reselect, ranged});
     }
 
     onItemMiddleClick(event) {

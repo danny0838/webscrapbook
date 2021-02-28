@@ -64,16 +64,16 @@
       const {scrollLeft, scrollTop} = this.treeElem;
 
       // save current highlights
-      let lastHighlightElem = this.lastHighlightElem;
-      if (lastHighlightElem) {
-        if (this.treeElem.contains(lastHighlightElem)) {
+      let anchorElem = this.anchorElem;
+      if (anchorElem) {
+        if (this.treeElem.contains(anchorElem)) {
           const map = new Map();
-          this.getXpaths(lastHighlightElem, map, {includeParents: false});
+          this.getXpaths(anchorElem, map, {includeParents: false});
           for (const xpath of map.keys()) {
-            lastHighlightElem = xpath;
+            anchorElem = xpath;
           }
         } else {
-          lastHighlightElem = null;
+          anchorElem = null;
         }
       }
 
@@ -101,9 +101,9 @@
         elem.controller.classList.add('highlight');
       }
 
-      if (lastHighlightElem) {
-        const elem = document.evaluate(lastHighlightElem, this.treeElem).iterateNext();
-        if (elem) { this.lastHighlightElem = elem; }
+      if (anchorElem) {
+        const elem = document.evaluate(anchorElem, this.treeElem).iterateNext();
+        if (elem) { this.anchorElem = elem; }
       }
 
       // restore scrolling

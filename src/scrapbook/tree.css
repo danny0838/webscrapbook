@@ -106,7 +106,12 @@
   background: linear-gradient(rgba(235, 244, 253, .7), rgba(196, 221, 252, .7));
 }
 
-.tree li > div.highlight:hover::before {
+.tree li > div.anchor::before {
+  border: 1px solid rgba(125, 162, 206, .7);
+}
+
+.tree li > div.highlight:hover::before,
+.tree li > div.highlight.anchor::before {
   border: 1px solid rgba(125, 162, 206, .9);
   background: linear-gradient(rgba(235, 244, 253, .9), rgba(196, 221, 252, .9));
 }
