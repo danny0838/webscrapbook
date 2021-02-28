@@ -325,10 +325,17 @@
 
     onItemTogglerClick(event) {
       event.preventDefault();
-      const toggling = !event.ctrlKey && !event.shiftKey;
-      if (!toggling) { return; }
 
+      // Suppress default effect if there's a modifier when select is allowed.
+      if (this.allowSelect) {
+        if (event.ctrlKey || event.altKey || event.shiftKey || event.metaKey) {
+          return;
+        }
+      }
+
+      // Do not bubble up to toggle the item.
       event.stopPropagation();
+
       const itemElem = event.currentTarget.parentNode.parentNode;
       this.toggleItem(itemElem);
       this.saveViewStatus();
@@ -336,6 +343,14 @@
 
     onItemFolderClick(event) {
       event.preventDefault();
+
+      // Suppress default effect if there's a modifier when select is allowed.
+      if (this.allowSelect) {
+        if (event.ctrlKey || event.altKey || event.shiftKey || event.metaKey) {
+          return;
+        }
+      }
+
       const toggler = event.currentTarget.previousSibling;
       if (!toggler) { return; }
       toggler.focus();
