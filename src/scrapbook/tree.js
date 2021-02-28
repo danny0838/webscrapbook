@@ -42,6 +42,7 @@
       this.lastDraggedElems = null;
       this.lastHighlightElem = null;
 
+      this.treeElem.setAttribute('tabindex', 0);
       treeElem.classList.add(TREE_CLASS);
 
       // bind on* event callbacks

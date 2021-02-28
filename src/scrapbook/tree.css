@@ -3,6 +3,10 @@
   line-height: 1;
 }
 
+.tree:focus {
+  outline: none;
+}
+
 .tree ul {
   list-style: none;
   margin: 0;

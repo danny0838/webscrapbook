@@ -926,6 +926,7 @@
 
       if (!willShow) {
         menuElem.hidden = true;
+        this.treeElem.focus();
         return;
       }
 
@@ -1130,6 +1131,7 @@
       if (lockUi) {
         this.enableUi(true);
       }
+      this.treeElem.focus();
 
       return result;
     },
