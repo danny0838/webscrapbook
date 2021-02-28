@@ -249,59 +249,37 @@
     ) {
       if (!this.allowSelect) { return; }
 
+      if (reselect) {
+        Array.prototype.forEach.call(this.treeElem.querySelectorAll('.highlight'), (elem) => {
+          elem.classList.remove('highlight');
+        });
+      }
+
+      if (ranged) {
+        const itemElems = this.treeElem.querySelectorAll('li[data-id]');
+        let start = Array.prototype.indexOf.call(itemElems, this.lastHighlightElem);
+        let end = Array.prototype.indexOf.call(itemElems, itemElem);
+        if (start < 0) { start = end; }
+        if (start > end) { [start, end] = [end, start]; }
+        for (let i = start; i <= end; i++) {
+          const elem = itemElems[i];
+          if (elem.closest('[hidden]')) { continue; }
+          if (willHighlight) {
+            elem.controller.classList.add('highlight');
+          } else {
+            elem.controller.classList.remove('highlight');
+          }
+        }
+        this.lastHighlightElem = itemElem;
+        return;
+      }
+
       if (willHighlight) {
-        if (reselect) {
-          if (this.lastHighlightElem) {
-            Array.prototype.forEach.call(this.treeElem.querySelectorAll('.highlight'), (elem) => {
-              elem.classList.remove('highlight');
-            });
-          }
-          itemElem.controller.classList.add('highlight');
-          this.lastHighlightElem = itemElem;
-        } else {
-          if (!ranged) {
-            itemElem.controller.classList.add('highlight');
-            this.lastHighlightElem = itemElem;
-          } else {
-            const itemElems = this.treeElem.querySelectorAll('li[data-id]');
-            let start = Array.prototype.indexOf.call(itemElems, this.lastHighlightElem);
-            let end = Array.prototype.indexOf.call(itemElems, itemElem);
-            if (start < 0) { start = end; }
-            if (start > end) { [start, end] = [end, start]; }
-            for (let i = start; i <= end; i++) {
-              const elem = itemElems[i];
-              if (elem.closest('[hidden]')) { continue; }
-              elem.controller.classList.add('highlight');
-            }
-            this.lastHighlightElem = itemElem;
-          }
-        }
+        itemElem.controller.classList.add('highlight');
+        this.lastHighlightElem = itemElem;
       } else {
-        if (reselect) {
-          if (this.lastHighlightElem) {
-            Array.prototype.forEach.call(this.treeElem.querySelectorAll('.highlight'), (elem) => {
-              elem.classList.remove('highlight');
-            });
-            this.lastHighlightElem = null;
-          }
-        } else {
-          if (!ranged) {
-            itemElem.controller.classList.remove('highlight');
-            this.lastHighlightElem = itemElem;
-          } else {
-            const itemElems = this.treeElem.querySelectorAll('li[data-id]');
-            let start = Array.prototype.indexOf.call(itemElems, this.lastHighlightElem);
-            let end = Array.prototype.indexOf.call(itemElems, itemElem);
-            if (start < 0) { start = end; }
-            if (start > end) { [start, end] = [end, start]; }
-            for (let i = start; i <= end; i++) {
-              const elem = itemElems[i];
-              if (elem.closest('[hidden]')) { continue; }
-              elem.controller.classList.remove('highlight');
-            }
-            this.lastHighlightElem = itemElem;
-          }
-        }
+        itemElem.controller.classList.remove('highlight');
+        this.lastHighlightElem = null;
       }
     }
 
