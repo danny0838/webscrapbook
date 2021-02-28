@@ -355,7 +355,6 @@
         const evt = new CustomEvent("command", {
           detail: {
             command,
-            itemElem: this.tree.getLastSelectedItemElem(),
             itemElems: this.tree.getSelectedItemElems(),
           },
         });
@@ -414,7 +413,6 @@
           const evt = new CustomEvent("command", {
             detail: {
               command,
-              itemElem: null,
               itemElems: [],
             },
           });
@@ -452,7 +450,6 @@
           const evt = new CustomEvent("command", {
             detail: {
               command,
-              itemElem: this.tree.getLastSelectedItemElem(),
               itemElems: this.tree.getSelectedItemElems(),
             },
           });
@@ -501,7 +498,7 @@
       const evt = new CustomEvent("command", {
         detail: {
           command: 'upload',
-          itemElem: event.target.hasAttribute('data-item-elem') ? this.tree.getLastSelectedItemElem() : null,
+          itemElems: event.target.hasAttribute('data-item-elem') ? this.tree.getSelectedItemElems() : null,
           files: event.target.files,
         },
       });
@@ -1997,7 +1994,7 @@ ${scrapbook.escapeHtml(content)}
         await this.tree.rebuild();
       },
 
-      async meta({itemElem}) {
+      async meta({itemElems: [itemElem]}) {
         if (!itemElem) { return; }
 
         const id = itemElem.getAttribute('data-id');
@@ -2137,7 +2134,7 @@ ${scrapbook.escapeHtml(content)}
         this.tree.refreshItem(id);
       },
 
-      async mkfolder({itemElem}) {
+      async mkfolder({itemElems: [itemElem]}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
@@ -2172,7 +2169,7 @@ ${scrapbook.escapeHtml(content)}
         this.tree.insertItem(newItem.id, parentItemId, index);
       },
 
-      async mksep({itemElem}) {
+      async mksep({itemElems: [itemElem]}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
@@ -2207,7 +2204,7 @@ ${scrapbook.escapeHtml(content)}
         this.tree.insertItem(newItem.id, parentItemId, index);
       },
 
-      async mkpostit({itemElem}) {
+      async mkpostit({itemElems: [itemElem]}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
@@ -2262,7 +2259,7 @@ ${scrapbook.escapeHtml(content)}
         await this.openLink(u.href, true);
       },
 
-      async mknote({itemElem}) {
+      async mknote({itemElems: [itemElem]}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
@@ -2383,7 +2380,7 @@ Redirecting to file <a href="index.md">index.md</a>
         }
       },
 
-      async upload({itemElem, files}) {
+      async upload({itemElems: [itemElem], files}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
@@ -2397,7 +2394,7 @@ Redirecting to file <a href="index.md">index.md</a>
         await this.uploadItems(files, parentItemId, index);
       },
 
-      async edit({itemElem}) {
+      async edit({itemElems: [itemElem]}) {
         if (!itemElem) { return; }
 
         const id = itemElem.getAttribute('data-id');
@@ -2443,7 +2440,7 @@ Redirecting to file <a href="index.md">index.md</a>
         });
       },
 
-      async move_up({itemElem}) {
+      async move_up({itemElems: [itemElem]}) {
         if (!this.treeElem.contains(itemElem)) { return; }
 
         const itemId = itemElem.getAttribute('data-id');
@@ -2472,7 +2469,7 @@ Redirecting to file <a href="index.md">index.md</a>
         });
       },
 
-      async move_down({itemElem}) {
+      async move_down({itemElems: [itemElem]}) {
         if (!this.treeElem.contains(itemElem)) { return; }
 
         const itemId = itemElem.getAttribute('data-id');

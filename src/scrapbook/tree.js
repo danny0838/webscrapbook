@@ -102,10 +102,6 @@
       return this.treeElem.firstChild;
     }
 
-    getLastSelectedItemElem() {
-      return this.lastHighlightElem;
-    }
-
     getSelectedItemElems() {
       return Array.prototype.map.call(
         this.treeElem.querySelectorAll('.highlight'),
