@@ -1070,11 +1070,12 @@
      * @param {HTMLElement} elem - the element to be inserted to the dialog.
      *   - Dispatch 'dialogSubmit' event on elem to resolve the Promise with value.
      *   - Listen to 'dialogShow' event for elem to handle initialization.
-     * @param {boolean} lockUi - whether to lock UI during dialog shown. This
-     *   is generally unneeded if there's already a wrapper context manager
+     * @param {Object} [options]
+     * @param {boolean} [options.lockUi] - whether to lock UI during dialog shown.
+     *   This is generally unneeded if there's already a wrapper context manager
      *   that handles the UI locking.
      */
-    async showDialog(elem, lockUi = false) {
+    async showDialog(elem, {lockUi = false} = {}) {
       const mask = document.getElementById('dialog-mask');
       const wrapper = document.getElementById('dialog-wrapper');
       const cancelElem = elem.querySelector('.cancel');
