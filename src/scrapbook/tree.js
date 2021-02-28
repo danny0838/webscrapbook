@@ -249,8 +249,7 @@
 
     highlightItem(itemElem,
       willHighlight = !itemElem.controller.classList.contains('highlight'),
-      reselect = true,
-      ranged = false,
+      {reselect = true, ranged = false} = {},
     ) {
       if (!this.allowSelect) { return; }
 
@@ -337,7 +336,7 @@
     onItemDragStart(event) {
       const itemElem = event.currentTarget.parentNode;
       if (!itemElem.controller.classList.contains('highlight')) {
-        this.highlightItem(itemElem, true, true);
+        this.highlightItem(itemElem, true, {reselect: true});
       }
 
       const selectedItemElems = this.getSelectedItemElems();
@@ -511,7 +510,7 @@
       const itemElem = event.currentTarget.parentNode;
       const reselect = !this.allowMultiSelect || !this.allowMultiSelectOnClick && !event.ctrlKey && !event.shiftKey;
       const ranged = this.allowMultiSelect && event.shiftKey;
-      this.highlightItem(itemElem, undefined, reselect, ranged);
+      this.highlightItem(itemElem, undefined, {reselect, ranged});
     }
 
     onItemMiddleClick(event) {
@@ -522,7 +521,7 @@
     onItemContextMenu(event) {
       const itemElem = event.currentTarget.parentNode;
       if (!itemElem.controller.classList.contains('highlight')) {
-        this.highlightItem(itemElem, true, true);
+        this.highlightItem(itemElem, true, {reselect: true});
       }
 
       // invoke callback

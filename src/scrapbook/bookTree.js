@@ -317,7 +317,7 @@
 
       // locate the item element
       curElem.scrollIntoView();
-      this.highlightItem(curElem, true, true);
+      this.highlightItem(curElem, true, {reselect: true});
       this.saveViewStatus();
 
       return true;
