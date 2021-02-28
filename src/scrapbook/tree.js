@@ -65,9 +65,10 @@
       allowMultiSelect = false,
       allowMultiSelectOnClick = false,
       allowAnchorClick = false,
+      allowContextMenu = false,
       allowDrag = false,
       allowDrop = false,
-      itemContextMenuCallback,
+      contextMenuCallback,
       itemAnchorClickCallback,
       itemDragOverCallback,
       itemDropCallback,
@@ -78,9 +79,10 @@
       this.allowMultiSelect = allowMultiSelect;
       this.allowMultiSelectOnClick = allowMultiSelectOnClick;
       this.allowAnchorClick = allowAnchorClick;
+      this.allowContextMenu = allowContextMenu;
       this.allowDrag = allowDrag;
       this.allowDrop = allowDrop;
-      this.itemContextMenuCallback = itemContextMenuCallback;
+      this.contextMenuCallback = contextMenuCallback;
       this.itemAnchorClickCallback = itemAnchorClickCallback;
       this.itemDragOverCallback = itemDragOverCallback;
       this.itemDropCallback = itemDropCallback;
@@ -89,6 +91,10 @@
         this.treeElem.classList.add(TREE_CLASS_SELECTABLE);
       } else {
         this.treeElem.classList.remove(TREE_CLASS_SELECTABLE);
+      }
+
+      if (this.allowContextMenu) {
+        this.treeElem.addEventListener('contextmenu', this.onContextMenu);
       }
     }
 
@@ -158,8 +164,6 @@
         div.addEventListener('click', this.onItemClick);
         div.addEventListener('mousedown', this.onItemMiddleClick);
       }
-
-      div.addEventListener('contextmenu', this.onItemContextMenu);
 
       if (this.allowDrag) {
         div.setAttribute('draggable', true);
@@ -280,6 +284,20 @@
       } else {
         itemElem.controller.classList.remove('highlight');
         this.lastHighlightElem = null;
+      }
+    }
+
+    onContextMenu(event) {
+      const itemElem = event.target.closest('li[data-id]');
+      if (itemElem && !itemElem.controller.classList.contains('highlight')) {
+        this.highlightItem(itemElem, true, {reselect: true});
+      }
+
+      // invoke callback
+      if (this.contextMenuCallback) {
+        this.contextMenuCallback.call(this, event, {
+          tree: this,
+        });
       }
     }
 
@@ -466,20 +484,6 @@
     onItemMiddleClick(event) {
       if (event.button !== 1) { return; }
       this.onItemClick(event);
-    }
-
-    onItemContextMenu(event) {
-      const itemElem = event.currentTarget.parentNode;
-      if (!itemElem.controller.classList.contains('highlight')) {
-        this.highlightItem(itemElem, true, {reselect: true});
-      }
-
-      // invoke callback
-      if (this.itemContextMenuCallback) {
-        this.itemContextMenuCallback.call(this, event, {
-          tree: this,
-        });
-      }
     }
 
     onItemFolderClick(event) {

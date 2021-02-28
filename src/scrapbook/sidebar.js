@@ -55,9 +55,6 @@
       window.addEventListener('dragover', this.onWindowItemDragOver);
       window.addEventListener('drop', this.onWindowItemDrop);
 
-      this.treeElem = document.getElementById('items');
-      this.treeElem.addEventListener('contextmenu', this.onTreeContextMenu);
-
       document.getElementById("book").addEventListener('change', this.onBookChange);
       document.getElementById("search").addEventListener('click', this.onSearchButtonClick);
       document.getElementById("refresh").addEventListener('click', this.onRefreshButtonClick);
@@ -127,6 +124,7 @@
       }
 
       // init tree instance
+      this.treeElem = document.getElementById('items');
       this.tree = new BookTree({
         treeElem: this.treeElem,
         cacheType: this.mode === 'normal' ? 'storage' : 'sessionStorage',
@@ -237,8 +235,10 @@
           allowMultiSelect: true,
           allowMultiSelectOnClick: this.mode === 'manage',
           allowAnchorClick: this.mode !== 'manage',
+          allowContextMenu: true,
           allowDrag: true,
           allowDrop: true,
+          contextMenuCallback: this.onTreeContextMenu,
           itemAnchorClickCallback: this.onTreeItemAnchorClick,
           itemDragOverCallback: this.onTreeItemDragOver,
           itemDropCallback: this.onTreeItemDrop,
