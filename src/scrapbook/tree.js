@@ -343,7 +343,7 @@
     onItemDragStart(event) {
       const itemElem = event.currentTarget.parentNode;
       if (!itemElem.controller.classList.contains('highlight')) {
-        this.highlightItem(event.currentTarget.parentNode, true, true);
+        this.highlightItem(itemElem, true, true);
       }
 
       const selectedItemElems = this.getSelectedItemElems();
@@ -549,7 +549,7 @@
     onItemContextMenu(event) {
       const itemElem = event.currentTarget.parentNode;
       if (!itemElem.controller.classList.contains('highlight')) {
-        this.highlightItem(event.currentTarget.parentNode, true, true);
+        this.highlightItem(itemElem, true, true);
       }
 
       // invoke callback
