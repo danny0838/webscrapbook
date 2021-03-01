@@ -2048,16 +2048,8 @@ ${scrapbook.escapeHtml(content)}
             let validity = '';
             if (value) {
               try {
-                const c = JSON.parse(value);
-                if (!(typeof c === 'object' && !Array.isArray(c) && c !== null)) {
-                  throw new Error('Must be a JSON object.');
-                }
-                if (!Number.isFinite(c.latitude)) {
-                  throw new Error('Invalid latitude property.');
-                }
-                if (!Number.isFinite(c.longitude)) {
-                  throw new Error('Invalid longitude property.');
-                }
+                const obj = JSON.parse(value);
+                scrapbook.validateGeoLocation(obj);
               } catch (ex) {
                 validity = ex.message;
               }
@@ -2163,16 +2155,12 @@ ${scrapbook.escapeHtml(content)}
         {
           const locationText = dialog.querySelector('[name="location"]').value;
           if (locationText) {
-            const c = JSON.parse(locationText);
-            location = {
-              latitude: c.latitude,
-              longitude: c.longitude,
-              accuracy: c.accuracy,
-              altitude: c.altitude,
-              altitudeAccuracy: c.altitudeAccuracy,
-              heading: c.heading,
-              speed: c.speed,
-            };
+            const obj = JSON.parse(locationText);
+            try {
+              location = scrapbook.validateGeoLocation(obj);
+            } catch (ex) {
+              // skip error
+            }
           }
         }
 

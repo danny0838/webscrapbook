@@ -2771,18 +2771,33 @@ if (Node && !Node.prototype.getRootNode) {
         maximumAge: scrapbook.getOption("geolocation.maximumAge"),
         enableHighAccuracy: scrapbook.getOption("geolocation.enableHighAccuracy"),
       }, options));
-    }).then(r => {
-      const c = r.coords;
-      return {
-        latitude: c.latitude,
-        longitude: c.longitude,
-        accuracy: c.accuracy,
-        altitude: c.altitude,
-        altitudeAccuracy: c.altitudeAccuracy,
-        heading: c.heading,
-        speed: c.speed,
-      };
-    });
+    }).then(r => scrapbook.validateGeoLocation(r.coords));
+  };
+
+  scrapbook.validateGeoLocation = function (obj) {
+    if (!(typeof obj === 'object' && !Array.isArray(obj) && obj !== null)) {
+      throw new Error('Must be a JSON object.');
+    }
+    if (!Number.isFinite(obj.latitude)) {
+      throw new Error('Invalid latitude property.');
+    }
+    if (!Number.isFinite(obj.longitude)) {
+      throw new Error('Invalid longitude property.');
+    }
+    return [
+      'latitude',
+      'longitude',
+      'accuracy',
+      'altitude',
+      'altitudeAccuracy',
+      'heading',
+      'speed',
+    ].reduce((result, key) => {
+      if (Number.isFinite(obj[key])) {
+        result[key] = obj[key];
+      }
+      return result;
+    }, {});
   };
 
   /****************************************************************************
