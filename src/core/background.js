@@ -89,6 +89,7 @@
               title: tab.title,
             })),
             mode: "",
+            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
             parentId: "root",
             delay: null,
             options: scrapbook.getOptions("capture"),
@@ -251,7 +252,7 @@
         title: scrapbook.lang("CaptureTabAs") + '...',
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
-        onclick: (info, tab) => {
+        onclick: async (info, tab) => {
           return scrapbook.invokeBatchCapture({
             taskInfo: {
               tasks: [{
@@ -259,6 +260,7 @@
                 title: tab.title,
               }],
               mode: "",
+              bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
               parentId: "root",
               delay: null,
               options: scrapbook.getOptions("capture"),
@@ -322,7 +324,7 @@
       title: scrapbook.lang("CapturePageAs") + '...',
       contexts: ["page"],
       documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      onclick: async (info, tab) => {
         return scrapbook.invokeBatchCapture({
           taskInfo: {
             tasks: [{
@@ -331,6 +333,7 @@
               title: tab.title,
             }],
             mode: "",
+            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
             parentId: "root",
             delay: null,
             options: scrapbook.getOptions("capture"),
@@ -394,7 +397,7 @@
       title: scrapbook.lang("CaptureFrameAs") + '...',
       contexts: ["frame"],
       documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      onclick: async (info, tab) => {
         return scrapbook.invokeBatchCapture({
           taskInfo: {
             tasks: [{
@@ -404,6 +407,7 @@
               title: tab.title,
             }],
             mode: "",
+            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
             parentId: "root",
             delay: null,
             options: scrapbook.getOptions("capture"),
@@ -431,7 +435,7 @@
       title: scrapbook.lang("CaptureSelectionAs") + '...',
       contexts: ["selection"],
       documentUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      onclick: async (info, tab) => {
         return scrapbook.invokeBatchCapture({
           taskInfo: {
             tasks: [{
@@ -440,6 +444,7 @@
               title: tab.title,
             }],
             mode: "",
+            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
             parentId: "root",
             delay: null,
             options: scrapbook.getOptions("capture"),
@@ -509,13 +514,14 @@
       title: scrapbook.lang("CaptureLinkAs") + '...',
       contexts: ["link"],
       targetUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      onclick: async (info, tab) => {
         return scrapbook.invokeBatchCapture({
           taskInfo: {
             tasks: [{
               url: info.linkUrl,
             }],
             mode: "",
+            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
             parentId: "root",
             delay: null,
             options: scrapbook.getOptions("capture"),
@@ -543,7 +549,7 @@
       title: scrapbook.lang("CaptureMediaAs") + '...',
       contexts: ["image", "audio", "video"],
       targetUrlPatterns: urlMatch,
-      onclick: (info, tab) => {
+      onclick: async (info, tab) => {
         return scrapbook.invokeBatchCapture({
           taskInfo: {
             tasks: [{
@@ -551,6 +557,7 @@
               refUrl: info.pageUrl,
             }],
             mode: "",
+            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
             parentId: "root",
             delay: null,
             options: scrapbook.getOptions("capture"),

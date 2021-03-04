@@ -140,6 +140,7 @@
             title: tab.title,
           })),
           mode: "",
+          bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
           parentId: "root",
           delay: null,
           options: scrapbook.getOptions("capture"),

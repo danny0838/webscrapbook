@@ -700,6 +700,7 @@
             }));
           const taskInfo = {
             tasks,
+            bookId: this.bookId,
             parentId: targetId,
             index: targetIndex,
             mode,
