@@ -75,25 +75,25 @@
     "message": "Capture page (source)"
   },
   "CaptureSelection": {
-    "message": "Capture selected range(s)"
+    "message": "Capture selected ranges"
   },
   "CaptureSelectionAs": {
-    "message": "Capture selected range(s) as"
+    "message": "Capture selected ranges as"
   },
   "CaptureTab": {
-    "message": "Capture tab(s)"
+    "message": "Capture tabs"
   },
   "CaptureTabAs": {
-    "message": "Capture tab(s) as"
+    "message": "Capture tabs as"
   },
   "CaptureTabBookmark": {
-    "message": "Capture tab(s) (bookmark)"
+    "message": "Capture tabs (bookmark)"
   },
   "CaptureTabBookmarkTooltip": {
     "message": "Capture each selected tab as a bookmark page or scrapbook item."
   },
   "CaptureTabSource": {
-    "message": "Capture tab(s) (source)"
+    "message": "Capture tabs (source)"
   },
   "CaptureTabSourceTooltip": {
     "message": "Capture the original content of each selected tab (before processed by the scripts)."
