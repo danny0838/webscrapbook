@@ -85,6 +85,13 @@
       return this._bookId;
     }
 
+    set bookId(bookId) {
+      if (!this.books[bookId]) {
+        throw new Error(`Invalid book ID "${bookId}".`);
+      }
+      this._bookId = bookId;
+    }
+
     /**
      * Wrapped API for a general request to backend server
      *

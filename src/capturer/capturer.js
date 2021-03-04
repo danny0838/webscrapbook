@@ -668,6 +668,7 @@
   /**
    * @param {Object} params
    * @param {Array} params.tasks
+   * @param {string} [params.bookId] - bookId ID for the captured items
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
    * @param {float} [params.delay] - delay between tasks (ms)
@@ -677,7 +678,7 @@
    */
   capturer.runTasks = async function ({
     tasks,
-    parentId, index, delay,
+    bookId, parentId, index, delay,
     mode: baseMode, options: baseOptions,
   }) {
     delay = parseFloat(delay) || 5;
@@ -725,7 +726,7 @@
             tabId, frameId, fullPage,
             url, refUrl, title, favIconUrl,
             mode, options,
-            parentId, index,
+            bookId, parentId, index,
           });
 
           if (Number.isInteger(index)) {
@@ -764,6 +765,7 @@
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {string} params.options
+   * @param {string} [params.bookId] - bookId ID for the captured items
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
    * @return {Promise<Object>}
@@ -775,8 +777,17 @@
     tabId, frameId, fullPage,
     url, refUrl, title, favIconUrl,
     mode, options,
-    parentId, index,
+    bookId, parentId, index,
   }) {
+    // determine bookId at the start of a capture
+    if (options["capture.saveTo"] === 'server') {
+      if (typeof bookId === 'undefined') {
+        bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+      }
+      await server.init();
+      server.bookId = bookId;
+    }
+
     let response;
     if (Number.isInteger(tabId)) {
       // capture tab
@@ -1827,6 +1838,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           tabId, frameId, fullPage,
           url: url || item.source, refUrl, title, favIconUrl,
           mode, options,
+          bookId,
           captureOnly: true,
         });
 
@@ -2272,6 +2284,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           tabId, frameId, fullPage,
           url, refUrl, title, favIconUrl,
           mode, options,
+          bookId,
           documentName: null,
           captureOnly: true,
         });
