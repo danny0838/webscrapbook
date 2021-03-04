@@ -30,7 +30,7 @@ body {
   flex: 1;
   box-sizing: border-box;
   width: 100%;
-  min-height: 100px;
+  min-height: 150px;
   overflow: auto;
   resize: none;
 }
