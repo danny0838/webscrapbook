@@ -60,6 +60,9 @@
     }
 
     async rebuild() {
+      // save scrolling
+      const {scrollLeft, scrollTop} = this.treeElem;
+
       // save current highlights
       let lastHighlightElem = this.lastHighlightElem;
       if (lastHighlightElem) {
@@ -102,6 +105,10 @@
         const elem = document.evaluate(lastHighlightElem, this.treeElem).iterateNext();
         if (elem) { this.lastHighlightElem = elem; }
       }
+
+      // restore scrolling
+      this.treeElem.scrollLeft = scrollLeft;
+      this.treeElem.scrollTop = scrollTop;
     }
 
     getViewStatusKey() {
