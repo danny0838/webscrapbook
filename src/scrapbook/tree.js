@@ -96,6 +96,8 @@
 
       if (this.allowContextMenu) {
         this.treeElem.addEventListener('contextmenu', this.onContextMenu);
+      } else {
+        this.treeElem.removeEventListener('contextmenu', this.onContextMenu);
       }
     }
 
