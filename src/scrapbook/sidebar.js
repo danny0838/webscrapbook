@@ -2876,7 +2876,7 @@ Redirecting to file <a href="index.md">index.md</a>
     (async () => {
       // Firefox has an issue that getViews({windowId}) does not contain sidebars.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1612390
-      if ((await browser.extension.getViews({type: 'sidebar'})).some(v => v === window)) {
+      if (browser.extension.getViews({type: 'sidebar'}).some(v => v === window)) {
         sidebar.sidebarWindowId = (await browser.windows.getCurrent()).id;
       }
     })();
