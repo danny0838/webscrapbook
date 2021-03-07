@@ -137,6 +137,9 @@
      * Update UI to match the given bookId and rootId.
      */
     async refresh(bookId, rootId, keepLogs = false) {
+      // save current active element
+      const activeElement = document.activeElement;
+
       this.enableUi(false);
 
       try {
@@ -251,6 +254,11 @@
       }
 
       this.enableUi(true);
+
+      // restore active element
+      if (activeElement) {
+        activeElement.focus();
+      }
     },
 
     /**
