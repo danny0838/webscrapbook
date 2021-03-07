@@ -601,6 +601,11 @@
         return;
       }
 
+      if (event.dataTransfer.types.includes('application/scrapbook.capturetabs+json') && this.rootId !== 'recycle') {
+        event.dataTransfer.dropEffect = 'copy';
+        return;
+      }
+
       if (event.dataTransfer.types.includes('text/uri-list') && this.rootId !== 'recycle') {
         // determine the drop effect according to modifiers
         if (event.altKey) {
@@ -684,6 +689,54 @@
           }
 
           await this.uploadItems(files, targetId, targetIndex);
+        } catch (ex) {
+          console.error(ex);
+          this.error(ex.message);
+          // when any error happens, the UI is possibility in an inconsistent status.
+          // lock the UI to avoid further manipulation and damage.
+          return;
+        }
+
+        this.enableUi(true);
+        return;
+      }
+
+      if (event.dataTransfer.types.includes('application/scrapbook.capturetabs+json') && this.rootId !== 'recycle') {
+        this.enableUi(false);
+        try {
+          const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.capturetabs+json'));
+          const targetTab = await browser.tabs.get(data.tabId);
+          const tabs = await scrapbook.getHighlightedTabs({windowId: targetTab.windowId});
+          const mode = event.altKey ? 'bookmark' : event.shiftKey ? 'source' : data.mode;
+          const tasks = tabs.map(tab => ({
+            tabId: tab.id,
+          }));
+          const taskInfo = {
+            tasks,
+            bookId: this.bookId,
+            parentId: targetId,
+            index: targetIndex,
+            mode,
+            delay: null,
+            options: Object.assign(scrapbook.getOptions("capture"), {
+              "capture.saveTo": "server",
+            }),
+          };
+
+          if (event.ctrlKey || data.captureAs) {
+            await scrapbook.invokeBatchCapture({
+              taskInfo,
+              customTitle: true,
+              useJson: true,
+            });
+          } else {
+            await scrapbook.invokeCaptureEx({
+              taskInfo,
+              waitForResponse: true,
+            });
+
+            await this.rebuild();
+          }
         } catch (ex) {
           console.error(ex);
           this.error(ex.message);

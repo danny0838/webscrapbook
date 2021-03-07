@@ -60,6 +60,19 @@
       );
     };
 
+    const onCaptureCommandDragStart = function (event, params) {
+      event.dataTransfer.setData(
+        'application/scrapbook.capturetabs+json',
+        JSON.stringify(Object.assign({
+          tabId: targetTab.id,
+        }, params)),
+      );
+      event.dataTransfer.setData(
+        'text/plain',
+        targetTab.id,
+      );
+    };
+
     const {isPrompt, activeTab, targetTab} = await (async () => {
       const currentTab = await browser.tabs.getCurrent();
       // currentTab === undefined => browserAction.html is a prompt diaglog;
@@ -103,6 +116,28 @@
         document.getElementById("editTab").disabled = true;
         document.getElementById("searchCaptures").disabled = true;
       }
+
+      document.getElementById("captureTab").addEventListener('dragstart', (event) => {
+        onCaptureCommandDragStart(event);
+      });
+
+      document.getElementById("captureTabSource").addEventListener('dragstart', (event) => {
+        onCaptureCommandDragStart(event, {
+          mode: "source",
+        });
+      });
+
+      document.getElementById("captureTabBookmark").addEventListener('dragstart', (event) => {
+        onCaptureCommandDragStart(event, {
+          mode: "bookmark",
+        });
+      });
+
+      document.getElementById("captureTabAs").addEventListener('dragstart', (event) => {
+        onCaptureCommandDragStart(event, {
+          captureAs: true,
+        });
+      });
     }
 
     document.getElementById("captureTab").addEventListener('click', async (event) => {
