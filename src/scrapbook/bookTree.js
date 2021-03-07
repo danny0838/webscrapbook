@@ -77,6 +77,19 @@
         }
       }
 
+      let lastHighlightElem = this.lastHighlightElem;
+      if (lastHighlightElem) {
+        if (this.treeElem.contains(lastHighlightElem)) {
+          const map = new Map();
+          this.getXpaths(lastHighlightElem, map, {includeParents: false});
+          for (const xpath of map.keys()) {
+            lastHighlightElem = xpath;
+          }
+        } else {
+          lastHighlightElem = null;
+        }
+      }
+
       const highlights = new Map();
       Array.prototype.forEach.call(
         this.treeElem.querySelectorAll('.highlight'),
@@ -104,6 +117,11 @@
       if (anchorElem) {
         const elem = document.evaluate(anchorElem, this.treeElem).iterateNext();
         if (elem) { this.anchorElem = elem; }
+      }
+
+      if (lastHighlightElem) {
+        const elem = document.evaluate(lastHighlightElem, this.treeElem).iterateNext();
+        if (elem) { this.lastHighlightElem = elem; }
       }
 
       // restore scrolling

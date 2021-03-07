@@ -41,6 +41,7 @@
       this.treeElem = treeElem;
       this.lastDraggedElems = null;
       this.anchorElem = null;
+      this.lastHighlightElem = null;
 
       this.treeElem.setAttribute('tabindex', 0);
       treeElem.classList.add(TREE_CLASS);
@@ -105,6 +106,7 @@
       this.treeElem.textContent = '';
       this.lastDraggedElems = null;
       this.anchorElem = null;
+      this.lastHighlightElem = null;
     }
 
     getRootElem() {
@@ -279,7 +281,11 @@
 
       if (ranged) {
         const itemElems = this.treeElem.querySelectorAll('li[data-id]');
-        let start = Array.prototype.indexOf.call(itemElems, this.anchorElem);
+        let startElem = 
+            this.treeElem.contains(this.lastHighlightElem) && !this.lastHighlightElem.closest('[hidden]') ? this.lastHighlightElem :
+            this.treeElem.contains(this.anchorElem) && !this.anchorElem.closest('[hidden]') ? this.anchorElem :
+            null;
+        let start = Array.prototype.indexOf.call(itemElems, startElem);
         let end = Array.prototype.indexOf.call(itemElems, itemElem);
         if (start < 0) { start = 0; }
         if (start > end) { [start, end] = [end, start]; }
@@ -292,6 +298,8 @@
             elem.controller.classList.remove('highlight');
           }
         }
+
+        this.anchorItem(itemElem);
         return;
       }
 
@@ -301,6 +309,7 @@
         itemElem.controller.classList.remove('highlight');
       }
 
+      this.lastHighlightElem = itemElem;
       this.anchorItem(itemElem);
     }
 
