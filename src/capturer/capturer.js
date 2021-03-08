@@ -2269,6 +2269,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           // and prevents a conflict of different types
           "capture.saveAs": "folder",
           // save to the same directory
+          "capture.saveFilename": item.index.slice(0, -11),
           "capture.saveOverwrite": true,
           // rebuild links and update index.json
           "capture.downLink.doc.depth": 0,
