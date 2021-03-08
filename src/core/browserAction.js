@@ -49,6 +49,17 @@
       });
     };
 
+    const onCaptureCommandClick = async (event, params) => {
+      const tabs = targetTab ? 
+          await scrapbook.getHighlightedTabs() : 
+          [await selectTabFromDom(document.getElementById("captureTab"))];
+      return await scrapbook.invokeCapture(
+        tabs.map(tab => (Object.assign({
+          tabId: tab.id,
+        }, params)))
+      );
+    };
+
     const {isPrompt, activeTab, targetTab} = await (async () => {
       const currentTab = await browser.tabs.getCurrent();
       // currentTab === undefined => browserAction.html is a prompt diaglog;
@@ -95,38 +106,19 @@
     }
 
     document.getElementById("captureTab").addEventListener('click', async (event) => {
-      const tabs = targetTab ? 
-          await scrapbook.getHighlightedTabs() : 
-          [await selectTabFromDom(document.getElementById("captureTab"))];
-      return await scrapbook.invokeCapture(
-        tabs.map(tab => ({
-          tabId: tab.id,
-        }))
-      );
+      onCaptureCommandClick(event);
     });
 
     document.getElementById("captureTabSource").addEventListener('click', async (event) => {
-      const tabs = targetTab ? 
-          await scrapbook.getHighlightedTabs() : 
-          [await selectTabFromDom(document.getElementById("captureTabSource"))];
-      return await scrapbook.invokeCapture(
-        tabs.map(tab => ({
-          tabId: tab.id,
-          mode: "source",
-        }))
-      );
+      onCaptureCommandClick(event, {
+        mode: "source",
+      });
     });
 
     document.getElementById("captureTabBookmark").addEventListener('click', async (event) => {
-      const tabs = targetTab ? 
-          await scrapbook.getHighlightedTabs() : 
-          [await selectTabFromDom(document.getElementById("captureTabBookmark"))];
-      return await scrapbook.invokeCapture(
-        tabs.map(tab => ({
-          tabId: tab.id,
-          mode: "bookmark",
-        }))
-      );
+      onCaptureCommandClick(event, {
+        mode: "bookmark",
+      });
     });
 
     document.getElementById("captureTabAs").addEventListener('click', async (event) => {
