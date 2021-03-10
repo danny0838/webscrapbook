@@ -2290,8 +2290,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           captureOnly: true,
         });
 
-        if (title) { item.title = title; }
-        if (favIconUrl) { item.icon = favIconUrl; }
         item.modify = modified;
 
         // update item meta
