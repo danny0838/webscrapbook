@@ -674,6 +674,7 @@
    * @param {float} [params.delay] - delay between tasks (ms)
    * @param {string} [params.mode] - base capture mode
    * @param {Object} [params.options] - base capture options, overwriting default
+   * @param {string} [params.comment] - comment for the captured item
    * @return {Promise<Array|Object>} - list of task results (or error), or an object of error
    */
   capturer.runTasks = async function ({
@@ -690,7 +691,7 @@
       const {
         tabId, frameId, fullPage,
         url, refUrl, title, favIconUrl,
-        mode = baseMode, options: taskOptions,
+        mode = baseMode, options: taskOptions, comment,
         recaptureInfo, mergeCaptureInfo,
       } = task;
 
@@ -709,7 +710,7 @@
           result = await capturer.recapture({
             tabId, frameId, fullPage,
             url, refUrl, title, favIconUrl,
-            mode, options,
+            mode, options, comment,
             recaptureInfo,
           });
         } else if (mergeCaptureInfo) {
@@ -725,7 +726,7 @@
           result = await capturer.captureGeneral({
             tabId, frameId, fullPage,
             url, refUrl, title, favIconUrl,
-            mode, options,
+            mode, options, comment,
             bookId, parentId, index,
           });
 
@@ -765,6 +766,7 @@
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {Object} params.options
+   * @param {string} [params.comment] - comment for the captured item
    * @param {string} [params.bookId] - bookId ID for the captured items
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
@@ -776,7 +778,7 @@
     captureOnly = false,
     tabId, frameId, fullPage,
     url, refUrl, title, favIconUrl,
-    mode, options,
+    mode, options, comment,
     bookId, parentId, index,
   }) {
     // determine bookId at the start of a capture
@@ -822,6 +824,7 @@
             create: response.timeId,
             source: scrapbook.normalizeUrl(response.sourceUrl),
             icon: response.favIconUrl,
+            comment: typeof comment === 'string' ? comment : undefined,
             charset: response.charset,
           },
           parentId,
@@ -1803,7 +1806,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   capturer.recapture = async function ({
     tabId, frameId, fullPage,
     url, refUrl, title, favIconUrl,
-    mode, options, recaptureInfo,
+    mode, options, comment, recaptureInfo,
   }) {
     const {bookId, itemId} = recaptureInfo;
 
@@ -1843,6 +1846,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         });
 
         if (title) { item.title = title; }
+        if (comment) { item.comment = comment; }
         item.index = (result.targetDir ? result.targetDir + '/' : '') + result.filename;
         item.type = result.type;
         item.modify = timeId;
