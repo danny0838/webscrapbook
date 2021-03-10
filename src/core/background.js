@@ -82,20 +82,11 @@
 
       async captureTabAs() {
         const tabs = await scrapbook.getHighlightedTabs();
-        return await scrapbook.invokeBatchCapture({
-          taskInfo: {
-            tasks: tabs.map(tab => ({
-              tabId: tab.id,
-              title: tab.title,
-            })),
-            mode: "",
-            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
-            parentId: "root",
-            delay: null,
-            options: scrapbook.getOptions("capture"),
-          },
-          customTitle: true,
-          useJson: true,
+        return await scrapbook.invokeCaptureAs({
+          tasks: tabs.map(tab => ({
+            tabId: tab.id,
+            title: tab.title,
+          })),
         });
       },
 
@@ -146,19 +137,11 @@
         documentUrlPatterns: urlMatch,
         onclick: async (info, tab) => {
           const tabs = await scrapbook.getHighlightedTabs();
-          return scrapbook.invokeBatchCapture({
-            taskInfo: {
-              tasks: tabs.map(tab => ({
-                tabId: tab.id,
-                title: tab.title,
-              })),
-              mode: "",
-              bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
-              delay: null,
-              options: scrapbook.getOptions("capture"),
-            },
-            customTitle: true,
-            useJson: true,
+          return await scrapbook.invokeCaptureAs({
+            tasks: tabs.map(tab => ({
+              tabId: tab.id,
+              title: tab.title,
+            })),
           });
         },
       });
@@ -254,20 +237,11 @@
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
         onclick: async (info, tab) => {
-          return scrapbook.invokeBatchCapture({
-            taskInfo: {
-              tasks: [{
-                tabId: tab.id,
-                title: tab.title,
-              }],
-              mode: "",
-              bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
-              parentId: "root",
-              delay: null,
-              options: scrapbook.getOptions("capture"),
-            },
-            customTitle: true,
-            useJson: true,
+          return await scrapbook.invokeCaptureAs({
+            tasks: [{
+              tabId: tab.id,
+              title: tab.title,
+            }],
           });
         },
       });
@@ -326,21 +300,12 @@
       contexts: ["page"],
       documentUrlPatterns: urlMatch,
       onclick: async (info, tab) => {
-        return scrapbook.invokeBatchCapture({
-          taskInfo: {
-            tasks: [{
-              tabId: tab.id,
-              fullPage: true,
-              title: tab.title,
-            }],
-            mode: "",
-            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
-            parentId: "root",
-            delay: null,
-            options: scrapbook.getOptions("capture"),
-          },
-          customTitle: true,
-          useJson: true,
+        return await scrapbook.invokeCaptureAs({
+          tasks: [{
+            tabId: tab.id,
+            fullPage: true,
+            title: tab.title,
+          }],
         });
       },
     });
@@ -399,22 +364,13 @@
       contexts: ["frame"],
       documentUrlPatterns: urlMatch,
       onclick: async (info, tab) => {
-        return scrapbook.invokeBatchCapture({
-          taskInfo: {
-            tasks: [{
-              tabId: tab.id,
-              frameId: info.frameId,
-              fullPage: true,
-              title: tab.title,
-            }],
-            mode: "",
-            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
-            parentId: "root",
-            delay: null,
-            options: scrapbook.getOptions("capture"),
-          },
-          customTitle: true,
-          useJson: true,
+        return await scrapbook.invokeCaptureAs({
+          tasks: [{
+            tabId: tab.id,
+            frameId: info.frameId,
+            fullPage: true,
+            title: tab.title,
+          }],
         });
       },
     });
@@ -437,21 +393,12 @@
       contexts: ["selection"],
       documentUrlPatterns: urlMatch,
       onclick: async (info, tab) => {
-        return scrapbook.invokeBatchCapture({
-          taskInfo: {
-            tasks: [{
-              tabId: tab.id,
-              frameId: info.frameId,
-              title: tab.title,
-            }],
-            mode: "",
-            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
-            parentId: "root",
-            delay: null,
-            options: scrapbook.getOptions("capture"),
-          },
-          customTitle: true,
-          useJson: true,
+        return await scrapbook.invokeCaptureAs({
+          tasks: [{
+            tabId: tab.id,
+            frameId: info.frameId,
+            title: tab.title,
+          }],
         });
       },
     });
@@ -516,19 +463,10 @@
       contexts: ["link"],
       targetUrlPatterns: urlMatch,
       onclick: async (info, tab) => {
-        return scrapbook.invokeBatchCapture({
-          taskInfo: {
-            tasks: [{
-              url: info.linkUrl,
-            }],
-            mode: "",
-            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
-            parentId: "root",
-            delay: null,
-            options: scrapbook.getOptions("capture"),
-          },
-          customTitle: true,
-          useJson: true,
+        return await scrapbook.invokeCaptureAs({
+          tasks: [{
+            url: info.linkUrl,
+          }],
         });
       },
     });
@@ -551,20 +489,11 @@
       contexts: ["image", "audio", "video"],
       targetUrlPatterns: urlMatch,
       onclick: async (info, tab) => {
-        return scrapbook.invokeBatchCapture({
-          taskInfo: {
-            tasks: [{
-              url: info.srcUrl,
-              refUrl: info.pageUrl,
-            }],
-            mode: "",
-            bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
-            parentId: "root",
-            delay: null,
-            options: scrapbook.getOptions("capture"),
-          },
-          customTitle: true,
-          useJson: true,
+        return await scrapbook.invokeCaptureAs({
+          tasks: [{
+            url: info.srcUrl,
+            refUrl: info.pageUrl,
+          }],
         });
       },
     });

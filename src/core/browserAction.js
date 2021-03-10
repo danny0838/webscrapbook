@@ -160,20 +160,11 @@
       const tabs = targetTab ? 
           await scrapbook.getHighlightedTabs() : 
           [await selectTabFromDom(document.getElementById("captureTabAs"))];
-      return await scrapbook.invokeBatchCapture({
-        taskInfo: {
-          tasks: tabs.map(tab => ({
-            tabId: tab.id,
-            title: tab.title,
-          })),
-          mode: "",
-          bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
-          parentId: "root",
-          delay: null,
-          options: scrapbook.getOptions("capture"),
-        },
-        customTitle: true,
-        useJson: true,
+      return await scrapbook.invokeCaptureAs({
+        tasks: tabs.map(tab => ({
+          tabId: tab.id,
+          title: tab.title,
+        })),
       });
     });
 

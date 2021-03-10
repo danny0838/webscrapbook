@@ -239,6 +239,34 @@
   };
 
   /**
+   * Shortcut for invoking a general "capture as".
+   */
+  scrapbook.invokeCaptureAs = async function ({
+    tasks = {},
+    mode = "",
+    bookId,
+    parentId = "root",
+    delay = null,
+    options = scrapbook.getOptions("capture"),
+  } = {}) {
+    if (typeof bookId === 'undefined') {
+      bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+    }
+    return await scrapbook.invokeBatchCapture({
+      taskInfo: {
+        tasks,
+        mode,
+        bookId,
+        parentId,
+        delay,
+        options,
+      },
+      customTitle: true,
+      useJson: true,
+    });
+  };
+
+  /**
    * Invoke batch capture with preset params.
    *
    * @param {Object} params

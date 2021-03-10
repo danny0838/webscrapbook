@@ -724,11 +724,7 @@
           };
 
           if (event.ctrlKey || data.captureAs) {
-            await scrapbook.invokeBatchCapture({
-              taskInfo,
-              customTitle: true,
-              useJson: true,
-            });
+            await scrapbook.invokeCaptureAs(taskInfo);
           } else {
             await scrapbook.invokeCaptureEx({
               taskInfo,
