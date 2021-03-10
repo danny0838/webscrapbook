@@ -242,6 +242,7 @@
           allowKeyboardNavigation: true,
           allowDrag: true,
           allowDrop: true,
+          allowCopy: true,
           contextMenuCallback: this.onTreeContextMenu,
           itemAnchorClickCallback: this.onTreeItemAnchorClick,
           itemDragOverCallback: this.onTreeItemDragOver,

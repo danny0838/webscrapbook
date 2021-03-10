@@ -80,6 +80,7 @@
       allowKeyboardNavigation = false,
       allowDrag = false,
       allowDrop = false,
+      allowCopy = false,
       contextMenuCallback,
       keyDownCallback,
       itemAnchorClickCallback,
@@ -96,6 +97,7 @@
       this.allowKeyboardNavigation = allowKeyboardNavigation;
       this.allowDrag = allowDrag;
       this.allowDrop = allowDrop;
+      this.allowCopy = allowCopy;
       this.contextMenuCallback = contextMenuCallback;
       this.keyDownCallback = keyDownCallback;
       this.itemAnchorClickCallback = itemAnchorClickCallback;
@@ -120,6 +122,14 @@
       } else {
         this.treeElem.classList.remove(TREE_CLASS_KEYNAV);
         this.treeElem.removeEventListener('keydown', this.onKeyDown);
+      }
+
+      // Binding event on this.treeElem does not work.
+      // Bind event on the document and check if the tree is active (focused) instead.
+      if (this.allowCopy) {
+        document.addEventListener('copy', this.onCopy);
+      } else {
+        document.removeEventListener('copy', this.onCopy);
       }
     }
 
@@ -497,6 +507,42 @@
           tree: this,
         });
       }
+    }
+
+    onCopy(event) {
+      // skip if the tree is not focused
+      if (!this.treeElem.contains(document.activeElement)) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const selectedItemElems = this.getSelectedItemElems();
+
+      event.clipboardData.setData(
+        'application/scrapbook.items+json',
+        JSON.stringify({
+          src: this.book.server.serverRoot,
+
+          bookId: this.book.id,
+
+          // may be undefined if not implemented or initialized
+          treeLastModified: this.book.treeLastModified,
+
+          items: selectedItemElems.map(elem => {
+            const {parentItemId, index} = this.getParentAndIndex(elem);
+            return {
+              id: elem.getAttribute('data-id'),
+              parentId: parentItemId,
+              index,
+            };
+          }),
+        })
+      );
+      event.clipboardData.setData(
+        'text/plain',
+        selectedItemElems.map(x => x.getAttribute('data-id')).join('\r\n')
+      );
     }
 
     onItemDragStart(event) {
