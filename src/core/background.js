@@ -153,6 +153,7 @@
                 title: tab.title,
               })),
               mode: "",
+              bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
               delay: null,
               options: scrapbook.getOptions("capture"),
             },
