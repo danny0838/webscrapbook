@@ -870,7 +870,7 @@
         return await capturer.captureRemote({
           timeId,
           documentName,
-          url,
+          url, title, favIconUrl,
           mode, options,
         });
       }
