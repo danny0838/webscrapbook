@@ -708,11 +708,11 @@
           const targetTab = await browser.tabs.get(data.tabId);
           const tabs = await scrapbook.getHighlightedTabs({windowId: targetTab.windowId});
           const mode = event.altKey ? 'bookmark' : event.shiftKey ? 'source' : data.mode;
-          const tasks = tabs.map(tab => ({
-            tabId: tab.id,
-          }));
           const taskInfo = {
-            tasks,
+            tasks: tabs.map(tab => ({
+              tabId: tab.id,
+              title: tab.title,
+            })),
             bookId: this.bookId,
             parentId: targetId,
             index: targetIndex,
