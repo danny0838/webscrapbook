@@ -2942,10 +2942,7 @@
     const u = new URL(sourceUrl);
 
     const tidy = (filename) => {
-      let fn = filename;
-      fn = scrapbook.validateFilename(fn, options["capture.saveAsciiFilename"]);
-      fn = scrapbook.crop(fn, 120, 200); // see capturer.getUniqueFilename for limitation details
-      return fn;
+      return scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
     };
 
     let filename = options["capture.saveFilename"].replace(/%(\w*)%/g, (_, key) => {
@@ -3049,6 +3046,9 @@
       .split('/')
       .map(x => scrapbook.validateFilename(x, options["capture.saveAsciiFilename"]))
       .join('/');
+
+    // see capturer.getUniqueFilename for limitation details
+    filename = scrapbook.crop(filename, options["capture.saveFilenameMaxLenUtf16"], options["capture.saveFilenameMaxLenUtf8"], "");
 
     return filename;
   };

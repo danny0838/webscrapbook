@@ -876,6 +876,18 @@
   "OptionCaptureSaveFilenameLabel": {
     "message": "儲存檔名:"
   },
+  "OptionCaptureSaveFilenameMaxLenUtf16Label": {
+    "message": "儲存檔名最大長度 (UTF-16 位元組):"
+  },
+  "OptionCaptureSaveFilenameMaxLenUtf16Tooltip": {
+    "message": "截短 UTF-16 編碼下位元組長度超過此值的檔名。\n\n•Windows 系統一般使用 UTF-16 編碼，檔案路徑長度限制為 255 位元組。"
+  },
+  "OptionCaptureSaveFilenameMaxLenUtf8Label": {
+    "message": "儲存檔名最大長度 (UTF-8 位元組):"
+  },
+  "OptionCaptureSaveFilenameMaxLenUtf8Tooltip": {
+    "message": "截短 UTF-8 編碼下位元組長度超過此值的檔名。\n\n•Linux 系統一般使用 UTF-8 編碼，檔名長度限制為 255 位元組，檔案路徑長度限制為 4096 位元組。"
+  },
   "OptionCaptureSaveFilenameTooltip": {
     "message": "指定擷取資料的儲存檔名（不含副檔名）。\n\n可用以下模版語法帶入資訊：\n• %% - 帶入「%」符號。\n• %ID% - 擷取資料的唯一識別碼，如「20190301124533216」。\n• %ID_0% - 傳統 ScrapBook 格式的識別碼，如「20190301204533」。\n• %UUID% - 產生一個亂數 UUID，如「941e4674-d6c7-4709-9703-a1b4359286c6」。\n• %TITLE% - 頁面標題，若無頁面標題，會取網址最後一節作為標題。\n• %HOST% - 資料來源網域，如「example.com」。\n• %PAGE% - 網址最後一節，並去除副檔名。\n• %FILE% - 網址最後一節。\n• %DATE% - 現在日期，格式為 YYYY-MM-DD。\n• %TIME% - 現在時間，格式為 HH-MM-SS。\n• %YEAR% - 現在年份，格式為 YYYY。\n• %MONTH% - 現在月份，格式為 MM。\n• %DAY% - 現在月份中的日數，格式為 DD。\n• %HOURS% - 現在小時數，格式為 HH。\n• %MINUTES% - 現在分鐘數，格式為 MM。\n• %SECONDS% - 現在秒數，格式為 SS。\n• 時間參數皆可在後面加上「_UTC」使用世界協調時間，例如 %TIME_UTC%、%HOURS_UTC%。\n• 可用斜線「/」指定子資料夾，例如「%YEAR%/%MONTH%/%TITLE%」。"
   },

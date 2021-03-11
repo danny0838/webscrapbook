@@ -1402,7 +1402,7 @@
 
         const _tidyFilename = (name) => {
           name = scrapbook.validateFilename(name);
-          name = scrapbook.crop(name, 128, 240);
+          name = scrapbook.crop(name, scrapbook.getOption("capture.saveFilenameMaxLenUtf16"), scrapbook.getOption("capture.saveFilenameMaxLenUtf8"), "");
           return name;
         };
 

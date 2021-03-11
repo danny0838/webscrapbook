@@ -113,14 +113,15 @@
    *
    * @param {string} timeId
    * @param {string} filename - A validated filename (via scrapbook.validateFilename).
+   * @param {Object} params.options
    * @return {string} The uniquified filename.
    */
-  capturer.getUniqueFilename = function (timeId, filename) {
+  capturer.getUniqueFilename = function (timeId, filename, options) {
     const files = capturer.captureInfo.get(timeId).files;
 
     let newFilename = filename || "untitled";
     let [newFilenameBase, newFilenameExt] = scrapbook.filenameParts(newFilename);
-    newFilenameBase = scrapbook.crop(newFilenameBase, 128, 240);
+    newFilenameBase = scrapbook.crop(newFilenameBase, options["capture.saveFilenameMaxLenUtf16"], options["capture.saveFilenameMaxLenUtf8"], "");
     newFilenameExt = newFilenameExt ? "." + newFilenameExt : "";
     newFilename = newFilenameBase + newFilenameExt;
     let newFilenameCI = newFilename.toLowerCase();
@@ -2429,7 +2430,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           let documentNameBase = scrapbook.validateFilename(documentName, options["capture.saveAsciiFilename"]);
 
           // see capturer.getUniqueFilename for filename limitation
-          documentNameBase = scrapbook.crop(documentNameBase, 128, 240);
+          documentNameBase = scrapbook.crop(documentNameBase, options["capture.saveFilenameMaxLenUtf16"], options["capture.saveFilenameMaxLenUtf8"], "");
 
           let newDocumentName = documentNameBase;
           let newDocumentNameCI = newDocumentName.toLowerCase();
@@ -2453,7 +2454,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             options,
           });
 
-          documentFileName = capturer.getUniqueFilename(settings.timeId, documentFileName);
+          documentFileName = capturer.getUniqueFilename(settings.timeId, documentFileName, options);
         }
 
         response = {filename: documentFileName, url: scrapbook.escapeFilename(documentFileName)};
@@ -2604,7 +2605,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           options,
         });
 
-        filename = capturer.getUniqueFilename(settings.timeId, filename);
+        filename = capturer.getUniqueFilename(settings.timeId, filename, options);
 
         response = {filename, url: scrapbook.escapeFilename(filename)};
 
