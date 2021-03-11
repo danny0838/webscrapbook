@@ -57,9 +57,7 @@
 
     /**
      * @param {Object} params
-     * @param {Object} params.book
-     * @param {string} params.book.id
-     * @param {string} params.book.dataUrl
+     * @param {Book} params.book
      */
     init({
       book,

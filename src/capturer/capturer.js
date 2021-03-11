@@ -139,7 +139,7 @@
    * @param {Object} params
    * @param {string} params.filename - may contain directory
    * @param {boolean} params.isFile
-   * @param {string} params.options
+   * @param {Object} params.options
    * @return {string} The deduplicated filename.
    */
   capturer.getAvailableSaveFilename = async function (params) {
@@ -764,7 +764,7 @@
    * @param {string} [params.title] - item title
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
-   * @param {string} params.options
+   * @param {Object} params.options
    * @param {string} [params.bookId] - bookId ID for the captured items
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
@@ -847,7 +847,7 @@
    * @param {string} [params.title] - item title
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
-   * @param {string} params.options
+   * @param {Object} params.options
    * @return {Promise<Object>}
    */
   capturer.captureTab = async function ({
@@ -929,7 +929,7 @@
    * @param {string} [params.title] - item title
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
-   * @param {string} params.options
+   * @param {Object} params.options
    * @return {Promise<Object>}
    */
   capturer.captureRemote = async function ({
@@ -3287,7 +3287,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.url
    * @param {string} [params.refUrl]
    * @param {string} params.settings
-   * @param {string} params.options
+   * @param {Object} params.options
    * @return {Promise<fetchCssResponse>}
    */
   capturer.fetchCss = async function (params) {

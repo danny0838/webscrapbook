@@ -888,7 +888,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
      * @param {Objet|null} params.item - null to generate a default item. Overwrites existed id.
      * @param {string|null} params.parentId - null to not add to any parent
      * @param {integer} params.index - Infinity to insert to last
-     * @return {Objet}
+     * @return {Object}
      */
     addItem(params) {
       let {
