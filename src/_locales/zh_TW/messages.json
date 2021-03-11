@@ -1083,6 +1083,12 @@
   "OptionScrapbookBackupForRecaptureTooltip": {
     "message": "重新擷取會在擷取成功後將舊版本移到後端伺服器設定的備份目錄，若取消勾選則刪除檔案不留備份。\n\n• 注意：重新擷取時會嘗試複製舊擷取頁面中的批註，但可能有批註無法順利複製或程式偵測不到，因此一般建議保留備份以防萬一。"
   },
+  "OptionScrapbookCopyItemInfoFormatPlainLabel": {
+    "message": "複製資訊格式:"
+  },
+  "OptionScrapbookCopyItemInfoFormatPlainTooltip": {
+    "message": "設定複製資訊的格式。\n\n可用以下「%<參數>%」模版語法帶入資訊：\n• %% - 帶入「%」符號。\n• %id% - 項目 ID。\n• %title% - 項目標題。\n• %comment% - 項目評註。\n• %source% - 項目來源網址。\n• %url% - 項目網址。\n• %create% - 項目建立時間。\n• %modify% - 項目修改時間。\n\n%create% 和 %modify% 的 <參數> 可在尾端加上「-<時間格式>」指定時間格式（使用 POSIX strftime 格式），<時間格式> 可在尾端加上「-utc」使用世界協調時間。例如「%create-F-utc%」可輸出如「2020-04-01」格式的時間。\n\n以下列出一部分較常用的 POSIX strftime 格式：\n• Y: 四位數年份\n• y: 二位數年份\n• m: 二位數月份（01 至 12）\n• d: 二位數月中日期（01 至 31）\n• H: 二位數小時數（00 至 23）\n• M: 二位數分鐘數（00 至 59）\n• S: 二位數秒數（00 至 59）\n• F: 日期（YYYY-MM-DD）\n• T: 時間（HH:MM:SS）\n\n<參數> 可在尾端加上一或多次「:<格式>」轉換輸出格式，例如「%title:oneline:escape_html%」。<格式> 可用的值如下：\n• oneline: 截去換行字元及之後的內容。\n• collapse: 壓縮 ASCII 空白字元。\n• url: 脫義處理 URL 特殊字元。\n• escape_html: 脫義處理 HTML 特殊字元，包括「<」、「&」、「>」、「\"」。\n• escape_html_space: 脫義處理 HTML 特殊字元並將連續的半形空白轉為「&nbsp;」。\n• escape_css: 脫義處理 CSS 特殊字元。\n• json: 轉為 JSON 字串。"
+  },
   "OptionScrapbookDefaultSearchLabel": {
     "message": "預設搜尋條件:"
   },
@@ -1186,6 +1192,9 @@
   },
   "ScrapBookCommandCopyDialogRoot": {
     "message": "複製到這個 ID 的項目下:"
+  },
+  "ScrapBookCommandCopyInfo": {
+    "message": "複製資訊"
   },
   "ScrapBookCommandCopyTo": {
     "message": "複製到"

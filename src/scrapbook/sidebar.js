@@ -222,6 +222,7 @@
           menuElem.querySelector('button[value="delete"]').disabled = !(!isNoTree && isRecycle);
 
           menuElem.querySelector('button[value="recapture"]').disabled = !(!isNoTree && !isRecycle);
+          menuElem.querySelector('button[value="copyinfo"]').disabled = isNoTree;
           menuElem.querySelector('button[value="meta"]').disabled = isNoTree;
         }
 
@@ -1084,6 +1085,7 @@
           menuElem.querySelector('button[value="delete"]').hidden = true;
 
           menuElem.querySelector('button[value="recapture"]').hidden = true;
+          menuElem.querySelector('button[value="copyinfo"]').hidden = true;
           menuElem.querySelector('button[value="meta"]').hidden = true;
           break;
         }
@@ -1116,6 +1118,7 @@
           menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
 
           menuElem.querySelector('button[value="recapture"]').hidden = !(!isRecycle && ['', 'site', 'file', 'image', 'bookmark'].includes(item.type) && item.source);
+          menuElem.querySelector('button[value="copyinfo"]').hidden = false;
           menuElem.querySelector('button[value="meta"]').hidden = false;
           break;
         }
@@ -1146,6 +1149,7 @@
           menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
 
           menuElem.querySelector('button[value="recapture"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="copyinfo"]').hidden = false;
           menuElem.querySelector('button[value="meta"]').hidden = true;
           break;
         }
@@ -2035,6 +2039,54 @@ ${scrapbook.escapeHtml(content)}
         });
 
         await this.tree.rebuild();
+      },
+
+      async copyinfo(...args) {
+        const tempTextarea = document.createElement('textarea');
+
+        const copyToClipboard = (plainText, htmlText) => {
+          const _activeElement = document.activeElement;
+
+          const callback = (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (htmlText) {
+              event.clipboardData.setData('text/html', htmlText);
+            }
+            event.clipboardData.setData('text/plain', plainText);
+          };
+
+          tempTextarea.addEventListener('copy', callback);
+          document.documentElement.appendChild(tempTextarea);
+          tempTextarea.select();
+          document.execCommand('copy');
+          tempTextarea.removeEventListener('copy', callback);
+          tempTextarea.remove();
+          _activeElement.focus();
+        };
+
+        const copyinfo = async ({itemElems}) => {
+          if (!itemElems.length) { return; }
+
+          const plainFormat = scrapbook.getOption("scrapbook.copyItemInfoFormatPlain");
+          const plainText = itemElems.map((itemElem) => {
+            const id = itemElem.getAttribute('data-id');
+            const item = this.book.meta[id];
+            return scrapbook.ItemInfoFormatter.format(item, plainFormat, {book: this.book});
+          }).join('\r\n');
+
+          const htmlFormat = scrapbook.getOption("scrapbook.copyItemInfoFormatHtml");
+          const htmlText = htmlFormat ? itemElems.map((itemElem) => {
+            const id = itemElem.getAttribute('data-id');
+            const item = this.book.meta[id];
+            return scrapbook.ItemInfoFormatter.format(item, htmlFormat, {book: this.book});
+          }).join('<br>') : "";
+
+          copyToClipboard(plainText, htmlText);
+        };
+
+        this.copyinfo = copyinfo;
+        return await copyinfo(...args);
       },
 
       async meta({itemElems: [itemElem]}) {

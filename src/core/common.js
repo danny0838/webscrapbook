@@ -159,6 +159,8 @@ if (Node && !Node.prototype.getRootNode) {
     "checker.resolveAbsoluteIcon": true,
     "checker.resolveUnusedIcon": true,
     "checker.makeBackup": true,
+    "scrapbook.copyItemInfoFormatPlain": "%id%",
+    "scrapbook.copyItemInfoFormatHtml": "",
     "scrapbook.notifyPageCaptured": false,
     "scrapbook.transactionAutoBackup": true,
     "scrapbook.defaultSearch": "-type:folder -type:separator",
