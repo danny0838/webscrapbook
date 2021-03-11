@@ -655,6 +655,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       for (const el of menuElem.querySelectorAll('button')) {
         el.disabled = !elem.hasAttribute('checked');
       }
+      editor.updateHtmlEditorMenu();
       editor.showContextMenu(menuElem, event);
     });
 
@@ -1618,12 +1619,10 @@ scrapbook-toolbar, scrapbook-toolbar *,
   };
 
   editor.updateHtmlEditorMenu = function () {
-    {
-      const elem = editor.internalElement.querySelector('.toolbar-htmlEditor-insertDate');
-      const format = scrapbook.getOption("editor.insertDateFormat");
-      const sample = strftime(format);
-      elem.title = format + '\n' + sample;
-    }
+    const elem = editor.internalElement.querySelector('.toolbar-htmlEditor-insertDate');
+    const format = scrapbook.getOption("editor.insertDateFormat");
+    const sample = strftime(format);
+    elem.title = format + '\n' + sample;
   };
 
   editor.getFocusedFrameId = async function () {
