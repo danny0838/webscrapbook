@@ -32,12 +32,13 @@ if (Node && !Node.prototype.getRootNode) {
     root.JSZip,
     root.jsSHA,
     root.Mime,
+    root.Strftime,
     window,
     console,
     crypto,
     navigator,
   );
-}(this, function (isDebug, browser, JSZip, jsSHA, Mime, window, console, crypto, navigator) {
+}(this, function (isDebug, browser, JSZip, jsSHA, Mime, Strftime, window, console, crypto, navigator) {
 
   'use strict';
 
@@ -1076,6 +1077,198 @@ if (Node && !Node.prototype.getRootNode) {
     }
     return dd;
   };
+
+  scrapbook.ItemInfoFormatter = class ItemInfoFormatter {
+    constructor(item, {book} = {}) {
+      this.item = item;
+      this.book = book;
+
+      this._pattern = /%([\w:-]*)%/g;
+      this._formatKey = (_, keyFormat) => {
+        const [key, ...formats] = keyFormat.split(':');
+        let rv = this.formatKey(key);
+        for (const format of formats) {
+          rv = this.formatFormat(rv, format);
+        }
+        return rv;
+      };
+      this._formatters = {};
+    }
+
+    /**
+     * @param {Object} item - A scrapbook item object.
+     * @param {string} template
+     * @param {Object} context
+     * @param {Book} [context.book] - A scrapbook Book object.
+     */
+    static format(item, template, context) {
+      const formatter = new this(item, context);
+      return formatter.format(template);
+    }
+
+    format(template) {
+      return template.replace(this._pattern, this._formatKey);
+    }
+
+    formatKey(key) {
+      const [keyMain, keySub, keySub2] = key.split('-');
+      const fn = this[`format_${keyMain.toLowerCase()}`];
+      if (typeof fn === 'function') { return fn.call(this, keySub, keySub2) || ''; }
+      return '';
+    }
+
+    formatFormat(text, format) {
+      if (typeof format !== 'string') {
+        return text;
+      }
+      switch (format.toLowerCase()) {
+        case "oneline": {
+          return text.replace(/[\r\n][\S\s]+$/, '');
+        }
+        case "collapse": {
+          return text.replace(/[ \t\r\n\v\f]+/g, ' ').replace(/^[ \t\r\n\v\f]+/, '').replace(/[ \t\r\n\v\f]+$/, '');
+        }
+        case "url": {
+          return encodeURIComponent(text);
+        }
+        case "escape_html": {
+          return scrapbook.escapeHtml(text);
+        }
+        case "escape_html_space": {
+          return scrapbook.escapeHtml(text, undefined, undefined, true);
+        }
+        case "escape_css": {
+          return CSS.escape(text);
+        }
+        case "json": {
+          return JSON.stringify(text);
+        }
+      }
+      return text;
+    }
+
+    formatDate(id, key, mode) {
+      const date = scrapbook.idToDate(id);
+      if (!date) {
+        return '';
+      }
+      if (!Strftime || typeof key !== 'string') {
+        return date.toLocaleString();
+      }
+
+      const isUtc = mode && mode.toLowerCase() === 'utc';
+      const k = id + (isUtc ? '-utc' : '');
+      const formatter = this._formatters[k] = this._formatters[k] || new Strftime({date, isUtc});
+      return formatter.formatKey(key);
+    }
+
+    getItemUrl() {
+      const {item, book} = this;
+      try {
+        switch (item.type) {
+          case 'folder': {
+            if (book) {
+              const u = new URL(browser.runtime.getURL("scrapbook/folder.html"));
+              u.searchParams.append('id', item.id);
+              u.searchParams.append('bookId', book.id);
+              return u.href;
+            }
+            break;
+          }
+          case 'postit': {
+            if (book && item.index) {
+              const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
+              u.searchParams.append('id', item.id);
+              u.searchParams.append('bookId', book.id);
+              return u.href;
+            }
+            break;
+          }
+          case 'bookmark': {
+            if (item.source) {
+              return new URL(item.source).href;
+            } else if (book && item.index) {
+              return new URL(book.dataUrl + scrapbook.escapeFilename(item.index)).href;
+            }
+            break;
+          }
+          default: {
+            if (book && item.index) {
+              return new URL(book.dataUrl + scrapbook.escapeFilename(item.index)).href;
+            }
+            break;
+          }
+        }
+      } catch (ex) {
+        console.error(ex);
+      }
+      return '';
+    }
+
+    format_() {
+      return '%';
+    }
+
+    format_id(keySub) {
+      switch (keySub) {
+        case 'legacy': {
+          return scrapbook.dateToIdOld(scrapbook.idToDate(this.item.id));
+        }
+        default: {
+          return this.item.id;
+        }
+      }
+    }
+
+    format_index() {
+      return this.item.index;
+    }
+
+    format_comment() {
+      return this.item.comment;
+    }
+
+    format_title() {
+      return this.item.title;
+    }
+
+    format_source(keySub) {
+      switch (keySub) {
+        case "host": {
+          const u = new URL(this.item.source);
+          if (!u) {
+            return '';
+          }
+          return u.host;
+        }
+        case "file": {
+          return scrapbook.urlToFilename(this.item.source);
+        }
+        case "page": {
+          return scrapbook.filenameParts(scrapbook.urlToFilename(this.item.source))[0];
+        }
+        default: {
+          return this.item.source;
+        }
+      }
+    }
+
+    format_url() {
+      return this.getItemUrl();
+    }
+
+    format_create(keySub, keySub2) {
+      return this.formatDate(this.item.create, keySub, keySub2);
+    }
+
+    format_modify(keySub, keySub2) {
+      return this.formatDate(this.item.modify, keySub, keySub2);
+    }
+
+    format_recycled(keySub, keySub2) {
+      return this.formatDate(this.item.recycled, keySub, keySub2);
+    }
+  }
 
   /**
    * @param {string} url
