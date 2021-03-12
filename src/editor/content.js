@@ -13,11 +13,12 @@
     root.isDebug,
     root.browser,
     root.scrapbook,
+    root.Strftime,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, Strftime, window, document, console) {
 
   'use strict';
 
@@ -1621,7 +1622,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   editor.updateHtmlEditorMenu = function () {
     const elem = editor.internalElement.querySelector('.toolbar-htmlEditor-insertDate');
     const format = scrapbook.getOption("editor.insertDateFormat");
-    const sample = strftime(format);
+    const sample = Strftime.format(format);
     elem.title = format + '\n' + sample;
   };
 
@@ -3207,7 +3208,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
     async insertDate() {
       const format = scrapbook.getOption("editor.insertDateFormat");
-      const dateStr = strftime(format);
+      const dateStr = Strftime.format(format);
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {

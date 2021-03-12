@@ -15,7 +15,7 @@
     module.exports = factory(Date);
   } else {
     // Browser globals
-    root.strftime = factory(Date);
+    root.Strftime = factory(Date);
   }
 }(this, function (Date) {
 
@@ -390,13 +390,13 @@
         return `%${key}`;
       });
     }
+
+    static format(str, options) {
+      const formatter = new Strftime(options);
+      return formatter.format(str);
+    }
   }
 
-  function strftime(str, options) {
-    const formatter = new Strftime(options);
-    return formatter.format(str);
-  }
-
-  return strftime;
+  return Strftime;
 
 }));
