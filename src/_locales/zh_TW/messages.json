@@ -653,7 +653,7 @@
     "message": "包括以下網址:"
   },
   "OptionCaptureDownLinkDocUrlFilterTooltip": {
-    "message": "此過濾器根據完整網址（去除「#」以後的部分）篩選要擷取的連結。\n\n• 以下每行為一個完整網址（「#」或空白以後的部分會自動去除）或一個正規表示式（如「/^http://example\\.com//」）。\n• 符合任何一行的規則即列入下載。若每行皆無規則，則所有網址皆列入下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
+    "message": "此過濾器根據網址篩選要擷取的連結。\n\n• 以下每行為一個完整網址（「#」或空白以後的部分會自動去除）或一個正規表示式（如「/^http://example\\.com//」）。\n• 連結的完整網址（去除「#」以後的部分）符合任何一行的規則即列入下載。例如「http://example.com/subpage#h2」視為符合規則「http://example.com/subpage SubPageTitle」。若每行皆無規則，則任何網址皆列入下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
   },
   "OptionCaptureDownLinkFileExtFilterError": {
     "message": "以下副檔名過濾器的正規表示式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",
@@ -667,7 +667,7 @@
     "message": "包括以下副檔名:"
   },
   "OptionCaptureDownLinkFileExtFilterTooltip": {
-    "message": "此過濾器根據副檔名篩選要下載的連結。\n\n• 以下每行為一個以「,」分隔的副檔名列表（不分大小寫，可含空白，如「jpg, jpeg」）或一個正規表示式（如「/jpe?g|gif|png/i」）。\n• 取全副檔名比對，例如 ~.doc 不視為符合規則「docx」。\n• 符合任何一行的規則即列入下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
+    "message": "此過濾器根據副檔名篩選要下載的連結。\n\n• 以下每行為一個以「,」分隔的副檔名列表（不分大小寫，可含空白，如「jpg, jpeg」）或一個正規表示式（如「/jpe?g|gif|png/i」）。\n• 連結的全副檔名符合任何一行的規則即列入下載。例如「http://example.com/file.doc?token=foo」取「doc」比對，不視為符合規則「docx」。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
   },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "比對 HTTP 標頭及網址副檔名"
@@ -707,7 +707,7 @@
     "message": "網址過濾器:"
   },
   "OptionCaptureDownLinkUrlFilterTooltip": {
-    "message": "此過濾器根據完整網址（去除「#」以後的部分）篩選禁止下載或擷取的連結，優先於其他過濾器。\n\n• 以下每行為一個完整網址（「#」或空白以後的部分會自動去除）或一個正規表示式（如「/[/=]logout\\b/i」）。\n• 符合任何一行的規則即禁止下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
+    "message": "此過濾器根據網址篩選禁止下載或擷取的連結，優先於其他過濾器。\n\n• 以下每行為一個完整網址（「#」或空白以後的部分會自動去除）或一個正規表示式（如「/[/=]logout\\b/i」）。\n• 連結的完整網址（去除「#」以後的部分）符合任何一行的規則即禁止下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
@@ -850,7 +850,7 @@
     "message": "單一 HTML 檔案"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "指定儲存網頁及參照檔案的格式。\n\n• 資料夾：建立一個資料夾並將網頁及資源檔案存入其中。Google Chrome（及部分 Chromium 系瀏覽器）注意：儲存擷取資料至剪貼簿資料夾時，建議到瀏覽器設定（進階 > 下載）取消勾選「下載每個檔案前先詢問儲存位置」，以免擷取時跳出大量下載視窗。有些檔案（如 *.js、*.py）可能會被瀏覽器阻擋，須逐個選擇「保留」才能下載。\n• HTZ 及 MAFF 封存檔：用 ZIP 演算法將網頁及資源檔案打包，可用「檢視封存網頁」功能檢視，或用支援 ZIP 的工具解壓縮後檢視。\n• 單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案以 data URL 等技術嵌入，大部分現代瀏覽器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL 效能較差，且缺乏有效的去重複技術，可能使檔案容量明顯增加。此格式也可能無法保存一些較複雜的資料結構。"
+    "message": "指定儲存網頁及參照檔案的格式。\n\n• 資料夾：建立一個資料夾並將網頁及資源檔案存入其中。Google Chrome（及部分 Chromium 系瀏覽器）注意：儲存擷取資料至剪貼簿資料夾時，建議到瀏覽器設定（進階 > 下載）取消勾選「下載每個檔案前先詢問儲存位置」，以免擷取時跳出大量下載視窗。有些檔案（如 *.js、*.py）可能會被瀏覽器阻擋，須逐個選擇「保留」才能下載。\n• HTZ 及 MAFF 封存檔：用 ZIP 演算法將網頁及資源檔案打包，可用「檢視封存網頁」功能檢視，或透過後端伺服器或用支援 ZIP 的工具解壓縮後檢視。\n• 單一 HTML 檔案：儲存為一個 HTML 檔案，資源檔案以 data URL 等技術嵌入，大部分現代瀏覽器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL 效能較差，且缺乏有效的去重複技術，可能使檔案容量明顯增加。此格式也可能無法保存一些較複雜的資料結構。"
   },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ 封存檔"
@@ -865,7 +865,7 @@
     "message": "將 data URL 儲存為檔案"
   },
   "OptionCaptureSaveDataUriAsFileTooltip": {
-    "message": "會自動根據 data URL 資料的 MIME 類型及內容的 SHA-1 雜湊值產生適當的檔名。原始檔名會以特殊屬性儲存在 data URL 中。"
+    "message": "會自動根據 data URL 資料的 MIME 類型及內容的 SHA-1 雜湊值產生適當的檔名。"
   },
   "OptionCaptureSaveFileAsHtmlLabel": {
     "message": "將檔案儲存為 HTML"
@@ -877,7 +877,7 @@
     "message": "儲存檔名:"
   },
   "OptionCaptureSaveFilenameTooltip": {
-    "message": "指定擷取資料的儲存檔名（不含副檔名），可用以下模版語法帶入參數：\n• %% - 帶入「%」符號。\n• %ID% - 擷取資料的唯一識別碼，如「20190301124533216」。\n• %ID_0% - 傳統 ScrapBook 格式的識別碼，如「20190301204533」。\n• %UUID% - 產生一個亂數 UUID，如「941e4674-d6c7-4709-9703-a1b4359286c6」。\n• %TITLE% - 頁面標題，若無頁面標題，會取網址最後一節作為標題。\n• %HOST% - 資料來源網域，如「example.com」。\n• %PAGE% - 網址最後一節，並去除副檔名。\n• %FILE% - 網址最後一節。\n• %DATE% - 現在日期，格式為 YYYY-MM-DD。\n• %TIME% - 現在時間，格式為 HH-MM-SS。\n• %YEAR% - 現在年份，格式為 YYYY。\n• %MONTH% - 現在月份，格式為 MM。\n• %DAY% - 現在月份中的日數，格式為 DD。\n• %HOURS% - 現在小時數，格式為 HH。\n• %MINUTES% - 現在分鐘數，格式為 MM。\n• %SECONDS% - 現在秒數，格式為 SS。\n• 時間參數皆可在後面加上「_UTC」使用世界協調時間，例如 %TIME_UTC%、%HOURS_UTC%。\n• 可用斜線「/」指定子資料夾，例如「%YEAR%/%MONTH%/%TITLE%」。"
+    "message": "指定擷取資料的儲存檔名（不含副檔名）。\n\n可用以下模版語法帶入資訊：\n• %% - 帶入「%」符號。\n• %ID% - 擷取資料的唯一識別碼，如「20190301124533216」。\n• %ID_0% - 傳統 ScrapBook 格式的識別碼，如「20190301204533」。\n• %UUID% - 產生一個亂數 UUID，如「941e4674-d6c7-4709-9703-a1b4359286c6」。\n• %TITLE% - 頁面標題，若無頁面標題，會取網址最後一節作為標題。\n• %HOST% - 資料來源網域，如「example.com」。\n• %PAGE% - 網址最後一節，並去除副檔名。\n• %FILE% - 網址最後一節。\n• %DATE% - 現在日期，格式為 YYYY-MM-DD。\n• %TIME% - 現在時間，格式為 HH-MM-SS。\n• %YEAR% - 現在年份，格式為 YYYY。\n• %MONTH% - 現在月份，格式為 MM。\n• %DAY% - 現在月份中的日數，格式為 DD。\n• %HOURS% - 現在小時數，格式為 HH。\n• %MINUTES% - 現在分鐘數，格式為 MM。\n• %SECONDS% - 現在秒數，格式為 SS。\n• 時間參數皆可在後面加上「_UTC」使用世界協調時間，例如 %TIME_UTC%、%HOURS_UTC%。\n• 可用斜線「/」指定子資料夾，例如「%YEAR%/%MONTH%/%TITLE%」。"
   },
   "OptionCaptureSaveResourcesSequentiallyLabel": {
     "message": "循序儲存資源檔案"
@@ -973,7 +973,7 @@
     "message": "插入日期格式:"
   },
   "OptionEditorInsertDateFormatTooltip": {
-    "message": "插入本地的目前時間，使用 POSIX strftime 格式。以下列出一小部分較常用的格式：\n\n• %c: 本地日期時間\n• %x: 本地年月日\n• %Y: 四位數年份\n• %y: 二位數年份\n• %m: 二位數月份（01 至 12）\n• %B: 本地月份長名\n• %b: 本地月份短名\n• %d: 二位數月中日期（01 至 31）\n• %A: 本地星期幾長名\n• %a: 本地星期幾短名\n• %X: 本地時分秒\n• %H: 二位數小時數，24 時制（00 至 23）\n• %I: 二位數小時數，12 時制（00 至 12）\n• %p: AM 或 PM\n• %M: 二位數分鐘數（00 至 59）\n• %S: 二位數秒數（00 至 59）\n• %z: 本地時區偏移值\n• %Z: 本地時區名稱\n• %%: % 符號"
+    "message": "插入本地的目前時間，使用 POSIX strftime 格式。\n\n以下列出一小部分較常用的格式：\n• %c: 本地日期時間\n• %x: 本地年月日\n• %Y: 四位數年份\n• %y: 二位數年份\n• %m: 二位數月份（01 至 12）\n• %B: 本地月份長名\n• %b: 本地月份短名\n• %d: 二位數月中日期（01 至 31）\n• %A: 本地星期幾長名\n• %a: 本地星期幾短名\n• %X: 本地時分秒\n• %H: 二位數小時數，24 時制（00 至 23）\n• %I: 二位數小時數，12 時制（00 至 12）\n• %p: AM 或 PM\n• %M: 二位數分鐘數（00 至 59）\n• %S: 二位數秒數（00 至 59）\n• %z: 本地時區偏移值\n• %Z: 本地時區名稱\n• %%: % 符號"
   },
   "OptionEditorLineMarkerStyleLabel": {
     "message": "標示樣式"
