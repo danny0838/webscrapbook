@@ -2961,6 +2961,12 @@
     }));
   };
 
+  class ItemInfoFormatter extends scrapbook.ItemInfoFormatter {
+    format_uuid() {
+      return scrapbook.getUuid();
+    }
+  }
+
   /**
    * Format filename of the main item file to save.
    *
@@ -2972,118 +2978,33 @@
    * @param {Object} params.options
    * @return {string} The formatted filename.
    */
-  capturer.formatIndexFilename = async function ({title, sourceUrl, isFolder, settings, options}) {
-    const time = scrapbook.idToDate(settings.timeId);
-    const u = new URL(sourceUrl);
-
-    const tidy = (filename) => {
-      return scrapbook.validateFilename(filename, options["capture.saveAsciiFilename"]);
+  capturer.formatIndexFilename = async function ({
+    title, sourceUrl, isFolder,
+    settings: {
+      timeId: id,
+    } = {},
+    options: {
+      "capture.saveFilename": template,
+      "capture.saveAsciiFilename": saveAsciiFilename,
+      "capture.saveFilenameMaxLenUtf16": saveFilenameMaxLenUtf16,
+      "capture.saveFilenameMaxLenUtf8": saveFilenameMaxLenUtf8,
+    } = {},
+  }) {
+    // a dummy scrapbook item for formatting
+    const item = {
+      id,
+      create: id,
+      title,
+      source: sourceUrl,
     };
 
-    let filename = options["capture.saveFilename"].replace(/%(\w*)%/g, (_, key) => {
-      switch (key.toUpperCase()) {
-        case "": {
-          // escape "%" with "%%"
-          return "%";
-        }
-        case "ID": {
-          return settings.timeId;
-        }
-        case "ID_0": {
-          return scrapbook.dateToIdOld(scrapbook.idToDate(settings.timeId));
-        }
-        case "UUID": {
-          return scrapbook.getUuid();
-        }
-        case "TITLE": {
-          return tidy(title);
-        }
-        case "HOST": {
-          return tidy(u.host);
-        }
-        case "PAGE": {
-          return tidy(scrapbook.filenameParts(scrapbook.urlToFilename(sourceUrl))[0]);
-        }
-        case "FILE": {
-          return tidy(scrapbook.urlToFilename(sourceUrl));
-        }
-        case "DATE": {
-          return [
-            time.getFullYear(),
-            scrapbook.intToFixedStr(time.getMonth() + 1, 2),
-            scrapbook.intToFixedStr(time.getDate(), 2),
-          ].join('-');
-        }
-        case "DATE_UTC": {
-          return [
-            time.getUTCFullYear(),
-            scrapbook.intToFixedStr(time.getUTCMonth() + 1, 2),
-            scrapbook.intToFixedStr(time.getUTCDate(), 2),
-          ].join('-');
-        }
-        case "TIME": {
-          return [
-            scrapbook.intToFixedStr(time.getHours(), 2),
-            scrapbook.intToFixedStr(time.getMinutes(), 2),
-            scrapbook.intToFixedStr(time.getSeconds(), 2),
-          ].join('-');
-        }
-        case "TIME_UTC": {
-          return [
-            scrapbook.intToFixedStr(time.getUTCHours(), 2),
-            scrapbook.intToFixedStr(time.getUTCMinutes(), 2),
-            scrapbook.intToFixedStr(time.getUTCSeconds(), 2),
-          ].join('-');
-        }
-        case "YEAR": {
-          return time.getFullYear();
-        }
-        case "YEAR_UTC": {
-          return time.getUTCFullYear();
-        }
-        case "MONTH": {
-          return scrapbook.intToFixedStr(time.getMonth() + 1, 2);
-        }
-        case "MONTH_UTC": {
-          return scrapbook.intToFixedStr(time.getUTCMonth() + 1, 2);
-        }
-        case "DAY": {
-          return scrapbook.intToFixedStr(time.getDate(), 2);
-        }
-        case "DAY_UTC": {
-          return scrapbook.intToFixedStr(time.getUTCDate(), 2);
-        }
-        case "HOURS": {
-          return scrapbook.intToFixedStr(time.getHours(), 2);
-        }
-        case "HOURS_UTC": {
-          return scrapbook.intToFixedStr(time.getUTCHours(), 2);
-        }
-        case "MINUTES": {
-          return scrapbook.intToFixedStr(time.getMinutes(), 2);
-        }
-        case "MINUTES_UTC": {
-          return scrapbook.intToFixedStr(time.getUTCMinutes(), 2);
-        }
-        case "SECONDS": {
-          return scrapbook.intToFixedStr(time.getSeconds(), 2);
-        }
-        case "SECONDS_UTC": {
-          return scrapbook.intToFixedStr(time.getUTCSeconds(), 2);
-        }
-        default: {
-          return '';
-        }
-      }
-    });
-
-    filename = filename
+    let filename = ItemInfoFormatter.format(item, template)
       .split('/')
-      .map(x => scrapbook.validateFilename(x, options["capture.saveAsciiFilename"]))
+      .map(x => scrapbook.validateFilename(x, saveAsciiFilename))
       .join('/');
 
     // see capturer.getUniqueFilename for limitation details
-    filename = scrapbook.crop(filename, options["capture.saveFilenameMaxLenUtf16"], options["capture.saveFilenameMaxLenUtf8"], "");
+    filename = scrapbook.crop(filename, saveFilenameMaxLenUtf16, saveFilenameMaxLenUtf8, "");
 
     return filename;
   };

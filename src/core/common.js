@@ -67,7 +67,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.saveTo": "folder", // "server", "folder", "memory"
     "capture.saveFolder": "WebScrapBook/data",
     "capture.saveAs": "folder", // "folder", "zip", "maff", "singleHtml"
-    "capture.saveFilename": "%ID%",
+    "capture.saveFilename": "%id%",
     "capture.saveFilenameMaxLenUtf16": 120,
     "capture.saveFilenameMaxLenUtf8": 240,
     "capture.saveAsciiFilename": false,

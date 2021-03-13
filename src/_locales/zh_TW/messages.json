@@ -898,7 +898,7 @@
     "message": "截短 UTF-8 編碼下位元組長度超過此值的檔名。\n\n• Linux 系統一般使用 UTF-8 編碼，檔名長度限制為 255 位元組，檔案路徑長度限制為 4096 位元組。"
   },
   "OptionCaptureSaveFilenameTooltip": {
-    "message": "指定擷取資料的儲存檔名（不含副檔名）。\n\n可用以下模版語法帶入資訊：\n• %% - 帶入「%」符號。\n• %ID% - 擷取資料的唯一識別碼，如「20190301124533216」。\n• %ID_0% - 傳統 ScrapBook 格式的識別碼，如「20190301204533」。\n• %UUID% - 產生一個亂數 UUID，如「941e4674-d6c7-4709-9703-a1b4359286c6」。\n• %TITLE% - 頁面標題，若無頁面標題，會取網址最後一節作為標題。\n• %HOST% - 資料來源網域，如「example.com」。\n• %PAGE% - 網址最後一節，並去除副檔名。\n• %FILE% - 網址最後一節。\n• %DATE% - 現在日期，格式為 YYYY-MM-DD。\n• %TIME% - 現在時間，格式為 HH-MM-SS。\n• %YEAR% - 現在年份，格式為 YYYY。\n• %MONTH% - 現在月份，格式為 MM。\n• %DAY% - 現在月份中的日數，格式為 DD。\n• %HOURS% - 現在小時數，格式為 HH。\n• %MINUTES% - 現在分鐘數，格式為 MM。\n• %SECONDS% - 現在秒數，格式為 SS。\n• 時間參數皆可在後面加上「_UTC」使用世界協調時間，例如 %TIME_UTC%、%HOURS_UTC%。\n• 可用斜線「/」指定子資料夾，例如「%YEAR%/%MONTH%/%TITLE%」。"
+    "message": "指定擷取資料的儲存檔名（不含副檔名）。可用斜線「/」指定子資料夾，例如「%create-Y%/%create-m%/%title%」。\n\n可用以下「%<參數>%」模版語法帶入資訊：\n• %% - 帶入「%」符號。\n• %id% - 擷取資料的唯一識別碼，如「20190301124533216」。\n• %id-legacy% - 舊版 ScrapBook 格式的識別碼，如「20190301204533」。\n• %uuid% - 產生一個亂數 UUID，如「941e4674-d6c7-4709-9703-a1b4359286c6」。\n• %title% - 頁面標題，若無頁面標題，則取網址最後一節作為標題。\n• %source% - 資料來源網址。\n• %source-host% - 資料來源網域，如「example.com」。\n• %source-file% - 資料來源檔名。一般取網址最後一節。\n• %source-page% - 資料來源頁面。一般取網址最後一節，並去除副檔名。\n• %create% - 建立時間。\n\n%create% 的 <參數> 可在尾端加上「-<時間格式>」指定時間格式（使用 POSIX strftime 格式），<時間格式> 可在尾端加上「-utc」使用世界協調時間。例如「%create-F-utc%」可輸出如「2020-04-01」格式的時間。\n\n以下列出一部分較常用的 POSIX strftime 格式：\n• Y: 四位數年份\n• y: 二位數年份\n• m: 二位數月份（01 至 12）\n• d: 二位數月中日期（01 至 31）\n• H: 二位數小時數（00 至 23）\n• M: 二位數分鐘數（00 至 59）\n• S: 二位數秒數（00 至 59）\n• F: 日期（YYYY-MM-DD）\n• T: 時間（HH:MM:SS）"
   },
   "OptionCaptureSaveResourcesSequentiallyLabel": {
     "message": "循序儲存資源檔案"
