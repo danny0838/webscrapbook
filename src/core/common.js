@@ -133,6 +133,7 @@ if (Node && !Node.prototype.getRootNode) {
     "editor.lineMarker.style.11": "background-color: #EE3311; color: #FFFFFF; font-weight: bold;",
     "editor.lineMarker.style.12": "border-bottom: 2px dotted #FF0000;",
     "editor.insertDateFormat": "%Y-%m-%d %H:%M:%S",
+    "editor.insertDateFormatIsUtc": false,
     "viewer.viewHtz": true,
     "viewer.viewMaff": true,
     "indexer.createStaticSite": false,

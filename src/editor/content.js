@@ -1622,7 +1622,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
   editor.updateHtmlEditorMenu = function () {
     const elem = editor.internalElement.querySelector('.toolbar-htmlEditor-insertDate');
     const format = scrapbook.getOption("editor.insertDateFormat");
-    const sample = Strftime.format(format);
+    const isUtc = scrapbook.getOption("editor.insertDateFormatIsUtc");
+    const sample = Strftime.format(format, {isUtc});
     elem.title = format + '\n' + sample;
   };
 
@@ -3208,7 +3209,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
     async insertDate() {
       const format = scrapbook.getOption("editor.insertDateFormat");
-      const dateStr = Strftime.format(format);
+      const isUtc = scrapbook.getOption("editor.insertDateFormatIsUtc");
+      const dateStr = Strftime.format(format, {isUtc});
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
