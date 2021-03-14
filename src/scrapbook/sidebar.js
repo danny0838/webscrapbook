@@ -1582,22 +1582,24 @@
         if (itemsToCache.length > 0) {
           // Due to a concern of URL length and performance, skip cache
           // update if too many items are affected.
-          await server.requestSse({
-            query: {
-              "a": "cache",
-              "book": book.id,
-              "item": itemsToCache.slice(0, 10),
-              "fulltext": 1,
-              "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-              "no_lock": 1,
-              "no_backup": 1,
-            },
-            onMessage(info) {
-              if (['error', 'critical'].includes(info.type)) {
-                this.error(`Error when updating fulltext cache: ${info.msg}`);
-              }
-            },
-          });
+          if (scrapbook.getOption("indexer.fulltextCache")) {
+            await server.requestSse({
+              query: {
+                "a": "cache",
+                "book": book.id,
+                "item": itemsToCache.slice(0, 10),
+                "fulltext": 1,
+                "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+                "no_lock": 1,
+                "no_backup": 1,
+              },
+              onMessage(info) {
+                if (['error', 'critical'].includes(info.type)) {
+                  this.error(`Error when updating fulltext cache: ${info.msg}`);
+                }
+              },
+            });
+          }
         }
 
         await book.loadTreeFiles(true);  // update treeLastModified
@@ -2825,22 +2827,24 @@ Redirecting to file <a href="index.md">index.md</a>
               // deleted items can be safely deferred as deleted items aren't
               // shown in the search result anyway.
               if (allRemovedItems.length <= 20) {
-                await server.requestSse({
-                  query: {
-                    "a": "cache",
-                    "book": book.id,
-                    "item": allRemovedItems,
-                    "fulltext": 1,
-                    "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-                    "no_lock": 1,
-                    "no_backup": 1,
-                  },
-                  onMessage(info) {
-                    if (['error', 'critical'].includes(info.type)) {
-                      this.error(`Error when updating fulltext cache: ${info.msg}`);
-                    }
-                  },
-                });
+                if (scrapbook.getOption("indexer.fulltextCache")) {
+                  await server.requestSse({
+                    query: {
+                      "a": "cache",
+                      "book": book.id,
+                      "item": allRemovedItems,
+                      "fulltext": 1,
+                      "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+                      "no_lock": 1,
+                      "no_backup": 1,
+                    },
+                    onMessage(info) {
+                      if (['error', 'critical'].includes(info.type)) {
+                        this.error(`Error when updating fulltext cache: ${info.msg}`);
+                      }
+                    },
+                  });
+                }
               }
             }
 

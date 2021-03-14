@@ -625,22 +625,24 @@
         await book.saveMeta();
         await book.saveToc();
 
-        await server.requestSse({
-          query: {
-            "a": "cache",
-            "book": book.id,
-            "item": item.id,
-            "fulltext": 1,
-            "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-            "no_lock": 1,
-            "no_backup": 1,
-          },
-          onMessage(info) {
-            if (['error', 'critical'].includes(info.type)) {
-              capturer.error(`Error when generating fulltext cache: ${info.msg}`);
-            }
-          },
-        });
+        if (scrapbook.getOption("indexer.fulltextCache")) {
+          await server.requestSse({
+            query: {
+              "a": "cache",
+              "book": book.id,
+              "item": item.id,
+              "fulltext": 1,
+              "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+              "no_lock": 1,
+              "no_backup": 1,
+            },
+            onMessage(info) {
+              if (['error', 'critical'].includes(info.type)) {
+                capturer.error(`Error when generating fulltext cache: ${info.msg}`);
+              }
+            },
+          });
+        }
 
         await book.loadTreeFiles(true);  // update treeLastModified
       },
@@ -1767,22 +1769,24 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           book.meta[item.id] = item;
           await book.saveMeta();
 
-          await server.requestSse({
-            query: {
-              "a": "cache",
-              "book": book.id,
-              "item": item.id,
-              "fulltext": 1,
-              "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-              "no_lock": 1,
-              "no_backup": 1,
-            },
-            onMessage(info) {
-              if (['error', 'critical'].includes(info.type)) {
-                capturer.error(`Error when updating fulltext cache: ${info.msg}`);
-              }
-            },
-          });
+          if (scrapbook.getOption("indexer.fulltextCache")) {
+            await server.requestSse({
+              query: {
+                "a": "cache",
+                "book": book.id,
+                "item": item.id,
+                "fulltext": 1,
+                "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+                "no_lock": 1,
+                "no_backup": 1,
+              },
+              onMessage(info) {
+                if (['error', 'critical'].includes(info.type)) {
+                  capturer.error(`Error when updating fulltext cache: ${info.msg}`);
+                }
+              },
+            });
+          }
 
           await book.loadTreeFiles(true);  // update treeLastModified
         } else {
@@ -2086,22 +2090,24 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         capturer.log(`Updating server index for item "${itemId}"...`);
         await book.saveMeta();
 
-        await server.requestSse({
-          query: {
-            "a": "cache",
-            "book": bookId,
-            "item": itemId,
-            "fulltext": 1,
-            "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-            "no_lock": 1,
-            "no_backup": 1,
-          },
-          onMessage(info) {
-            if (['error', 'critical'].includes(info.type)) {
-              capturer.error(`Error when generating fulltext cache: ${info.msg}`);
-            }
-          },
-        });
+        if (scrapbook.getOption("indexer.fulltextCache")) {
+          await server.requestSse({
+            query: {
+              "a": "cache",
+              "book": bookId,
+              "item": itemId,
+              "fulltext": 1,
+              "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+              "no_lock": 1,
+              "no_backup": 1,
+            },
+            onMessage(info) {
+              if (['error', 'critical'].includes(info.type)) {
+                capturer.error(`Error when generating fulltext cache: ${info.msg}`);
+              }
+            },
+          });
+        }
 
         // move current data files to backup
         if (oldIndex) {
@@ -2301,22 +2307,24 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         capturer.log(`Updating server index for item "${itemId}"...`);
         await book.saveMeta();
 
-        await server.requestSse({
-          query: {
-            "a": "cache",
-            "book": bookId,
-            "item": itemId,
-            "fulltext": 1,
-            "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-            "no_lock": 1,
-            "no_backup": 1,
-          },
-          onMessage(info) {
-            if (['error', 'critical'].includes(info.type)) {
-              capturer.error(`Error when generating fulltext cache: ${info.msg}`);
-            }
-          },
-        });
+        if (scrapbook.getOption("indexer.fulltextCache")) {
+          await server.requestSse({
+            query: {
+              "a": "cache",
+              "book": bookId,
+              "item": itemId,
+              "fulltext": 1,
+              "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+              "no_lock": 1,
+              "no_backup": 1,
+            },
+            onMessage(info) {
+              if (['error', 'critical'].includes(info.type)) {
+                capturer.error(`Error when generating fulltext cache: ${info.msg}`);
+              }
+            },
+          });
+        }
 
         // preserve info if error out
         capturer.captureInfo.delete(timeId);
