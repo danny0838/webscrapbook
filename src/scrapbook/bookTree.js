@@ -196,6 +196,7 @@
     }
 
     itemReduceContainer(elem) {
+      if (elem === this.rootElem) { return; }
       if (!elem.container) { return; }
       if (elem.container.hasAttribute('data-loaded') && !elem.container.hasChildNodes()) {
         // remove toggler
