@@ -522,7 +522,7 @@
       event.stopPropagation();
       event.preventDefault();
       return this.onTreeItemDragOver(event, {
-        lastDraggedElems: this.tree.getSelectedItemElems(),
+        lastDraggedElems: this.tree.lastDraggedElems,
         isOnItem: false,
       });
     },
@@ -531,7 +531,7 @@
       event.stopPropagation();
       event.preventDefault();
       return await this.onTreeItemDrop(event, {
-        lastDraggedElems: this.tree.getSelectedItemElems(),
+        lastDraggedElems: this.tree.lastDraggedElems,
         targetId: this.rootId,
         targetIndex: Infinity,
         isOnItem: false,
@@ -578,7 +578,7 @@
       }
 
       if (event.dataTransfer.types.includes('application/scrapbook.items+json')) {
-        if (isOnItem) {
+        if (isOnItem || !lastDraggedElems) {
           if (!lastDraggedElems) {
             // dragged from a different window
             event.dataTransfer.dropEffect = 'copy';
@@ -636,7 +636,7 @@
       isOnItem = true,
     }) {
       if (event.dataTransfer.types.includes('application/scrapbook.items+json')) {
-        if (isOnItem) {
+        if (isOnItem || !lastDraggedElems) {
           const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.items+json'));
           if (!data.items) {
             return;
