@@ -581,7 +581,11 @@
         if (isOnItem || !lastDraggedElems) {
           if (!lastDraggedElems) {
             // dragged from a different window
-            event.dataTransfer.dropEffect = 'copy';
+            if (this.rootId !== 'recycle') {
+              event.dataTransfer.dropEffect = 'copy';
+            } else {
+              event.dataTransfer.dropEffect = 'none';
+            }
           } else if (event.altKey && this.rootId !== 'recycle') {
             event.dataTransfer.dropEffect = 'link';
           } else if (event.shiftKey && this.rootId !== 'recycle') {
@@ -647,7 +651,9 @@
           try {
             if (!lastDraggedElems) {
               // drag from a different window
-              await this.copyItems(data, targetId, targetIndex);
+              if (this.rootId !== 'recycle') {
+                await this.copyItems(data, targetId, targetIndex);
+              }
             } else if (event.altKey && this.rootId !== 'recycle') {
               await this.linkItems(lastDraggedElems, targetId, targetIndex);
             } else if (event.shiftKey && this.rootId !== 'recycle') {
