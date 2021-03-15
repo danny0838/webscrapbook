@@ -667,7 +667,7 @@
     "message": "包括以下扩展名:"
   },
   "OptionCaptureDownLinkFileExtFilterTooltip": {
-    "message": "此过滤器根据扩展名筛选要下载的链接。\n\n• 以下每行为一个以“,”分隔的扩展名列表（不分大小写，可含空白，如“jpg, jpeg”）或一个正则表达式（如“/jpe?g|gif|png/i”）。取全扩展名比对，例如 ~.doc 不视为符合规则“docx”。\n• 符合任何一行的规则即列入下载。\n• 以“#”开头的行皆视为注解，执行时会略过。"
+    "message": "此过滤器根据扩展名筛选要下载的链接。\n\n• 以下每行为一个以“,”分隔的扩展名列表（不分大小写，可含空白，如“jpg, jpeg”）或一个正则表达式（如“/jpe?g|gif|png/i”）。\n• 取全扩展名比对，例如 ~.doc 不视为符合规则“docx”。\n• 符合任何一行的规则即列入下载。\n• 以“#”开头的行皆视为注解，执行时会略过。"
   },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "匹配 HTTP 标头及网址扩展名"
@@ -793,7 +793,7 @@
     "message": "此选项决定 OBJECT 元素的处理方式。OBJECT 元素多用于嵌入外挂程式，也可嵌入图片、多媒体、或框架页。注意：外挂程式脱离原服务器环境可能无法正常运作，且可能造成安全风险。\n\n• 保存：将 OBJECT 元素参照的文件保存至本地。\n• 链接：将 OBJECT 元素连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将 OBJECT 元素无效化。\n• 移除：将 OBJECT 元素移除。注意这可能会影响网页排版。"
   },
   "OptionCaptureRecordRewritesLabel": {
-    "message": "记录改写的內容"
+    "message": "记录改写的内容"
   },
   "OptionCaptureRecordRewritesTooltip": {
     "message": "获取网页时若有改写的元素、属性或样式表，则用 data-* 属性、HTML 注解、CSS 注解等方式记录原始内容。"
@@ -1075,7 +1075,7 @@
     "message": "密码:"
   },
   "OptionServerPasswordTooltip": {
-    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的密码，以免浏览器反覆询问；或用于更换用户。\n\n• 注意：保存在浏览器套件的认证资讯未受保护且遭竊风险，一般建议优先使用有密码保护机制的浏览器内置密码保存功能。"
+    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的密码，以免浏览器反覆询问；或用于更换用户。\n\n• 注意：保存在浏览器套件的认证资讯未受保护且有遭窃风险，一般建议优先使用有密码保护机制的浏览器内置密码保存功能。"
   },
   "OptionServerUrlLabel": {
     "message": "网址:"
@@ -1092,7 +1092,7 @@
     "message": "用户:"
   },
   "OptionServerUserTooltip": {
-    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的用户名，以免浏览器反覆询问；或用于更换用户。\n\n• 注意：保存在浏览器套件的认证资讯未受保护且遭竊风险，一般建议优先使用有密码保护机制的浏览器内置密码保存功能。"
+    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的用户名，以免浏览器反覆询问；或用于更换用户。\n\n• 注意：保存在浏览器套件的认证资讯未受保护且有遭窃风险，一般建议优先使用有密码保护机制的浏览器内置密码保存功能。"
   },
   "OptionUiAutoCloseCaptureDialogAlwaysLabel": {
     "message": "总是"
@@ -1164,7 +1164,7 @@
     "message": "复制到这个 ID 的项目下:"
   },
   "ScrapBookCommandCopyTo": {
-    "message": "複製到"
+    "message": "复制到"
   },
   "ScrapBookCommandCreateFolder": {
     "message": "添加文件夹"

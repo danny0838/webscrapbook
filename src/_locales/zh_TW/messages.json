@@ -667,7 +667,7 @@
     "message": "包括以下副檔名:"
   },
   "OptionCaptureDownLinkFileExtFilterTooltip": {
-    "message": "此過濾器根據副檔名篩選要下載的連結。\n\n• 以下每行為一個以「,」分隔的副檔名列表（不分大小寫，可含空白，如「jpg, jpeg」）或一個正規表示式（如「/jpe?g|gif|png/i」）。\n• 取全副檔名比對，例如 .doc 不視為符合規則「docx」。\n• 符合任何一行的規則即列入下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
+    "message": "此過濾器根據副檔名篩選要下載的連結。\n\n• 以下每行為一個以「,」分隔的副檔名列表（不分大小寫，可含空白，如「jpg, jpeg」）或一個正規表示式（如「/jpe?g|gif|png/i」）。\n• 取全副檔名比對，例如 ~.doc 不視為符合規則「docx」。\n• 符合任何一行的規則即列入下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
   },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "比對 HTTP 標頭及網址副檔名"
