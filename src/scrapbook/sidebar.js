@@ -2729,6 +2729,7 @@ Redirecting to file <a href="index.md">index.md</a>
         // its parent is in the DOM and gets children updated correctly.
         itemElems = [...itemElems].reverse();
 
+        const cachedItemElems = this.tree.treeElem.querySelectorAll('li[data-id]');
         let targetIndex = Infinity;
         for (const itemElem of itemElems) {
           if (!this.treeElem.contains(itemElem)) { continue; }
@@ -2745,7 +2746,7 @@ Redirecting to file <a href="index.md">index.md</a>
           });
 
           // update DOM
-          this.tree.removeItem(parentItemId, index);
+          this.tree.removeItem(parentItemId, index, cachedItemElems);
 
           targetIndex = newIndex;
         }
@@ -2783,6 +2784,7 @@ Redirecting to file <a href="index.md">index.md</a>
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
+            const cachedItemElems = this.tree.treeElem.querySelectorAll('li[data-id]');
             let allRemovedItems = [];
             for (const itemElem of itemElems) {
               if (!this.treeElem.contains(itemElem)) { continue; }
@@ -2801,7 +2803,7 @@ Redirecting to file <a href="index.md">index.md</a>
               }
 
               // update DOM
-              this.tree.removeItem(parentItemId, index);
+              this.tree.removeItem(parentItemId, index, cachedItemElems);
 
               // remove data files
               for (const removedItem of removedItems) {
@@ -2860,6 +2862,7 @@ Redirecting to file <a href="index.md">index.md</a>
         // preserved if they have same parent.
         // If a recycled item A has a child B, B will be removed from the DOM
         // when A is removed, and its moving will be skipped.
+        const cachedItemElems = this.tree.treeElem.querySelectorAll('li[data-id]');
         for (const itemElem of itemElems) {
           if (!this.treeElem.contains(itemElem)) { continue; }
 
@@ -2888,7 +2891,7 @@ Redirecting to file <a href="index.md">index.md</a>
             delete this.book.meta[itemId].recycled;
 
             // update DOM
-            this.tree.removeItem(parentItemId, index);
+            this.tree.removeItem(parentItemId, index, cachedItemElems);
             this.tree.insertItem(itemId, targetId, newIndex);
           }
         }

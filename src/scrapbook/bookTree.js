@@ -287,14 +287,57 @@
         });
     }
 
-    removeItem(parentId, index) {
+    /**
+     * Remove an from the tree DOM
+     *
+     * @param {Array[Element]} itemElems - A cached item elements in the tree for faster access.
+     */
+    removeItem(parentId, index, itemElems) {
       Array.prototype.filter.call(
         this.treeElem.querySelectorAll(`[data-id="${CSS.escape(parentId)}"]`),
         (parentElem) => {
           if (!(this.treeElem.contains(parentElem) && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
           const itemElem = parentElem.container.children[index];
+
+          // prepare for updating anchor elem if needed
+          const updateAnchor = itemElem === this.anchorElem;
+          let anchorIndex;
+          if (updateAnchor) {
+            if (!itemElems) {
+              itemElems = this.treeElem.querySelectorAll('li[data-id]');
+            }
+            anchorIndex = Array.prototype.indexOf.call(itemElems, itemElem);
+          }
+
           itemElem.remove();
           this.itemReduceContainer(parentElem);
+
+          // update anchorElem
+          if (updateAnchor && anchorIndex >= 0) {
+            let anchorElem;
+
+            // look forward for a suitable element
+            for (let i = anchorIndex, I = itemElems.length; i < I; i++) {
+              if (this.treeElem.contains(itemElems[i]) && !itemElems[i].closest('[hidden]')) {
+                anchorElem = itemElems[i];
+                break;
+              }
+            }
+
+            if (!anchorElem) {
+              // look backward for a suitable element if not found
+              for (let i = anchorIndex - 1; i >= 0; i--) {
+                if (this.treeElem.contains(itemElems[i]) && !itemElems[i].closest('[hidden]')) {
+                  anchorElem = itemElems[i];
+                  break;
+                }
+              }
+            }
+
+            if (anchorElem) {
+              this.anchorItem(anchorElem);
+            }
+          }
         });
     }
 
