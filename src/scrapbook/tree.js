@@ -81,8 +81,10 @@
       allowDrag = false,
       allowDrop = false,
       allowCopy = false,
+      allowPaste = false,
       contextMenuCallback,
       keyDownCallback,
+      pasteCallback,
       itemAnchorClickCallback,
       itemDragOverCallback,
       itemDropCallback,
@@ -98,8 +100,10 @@
       this.allowDrag = allowDrag;
       this.allowDrop = allowDrop;
       this.allowCopy = allowCopy;
+      this.allowPaste = allowPaste;
       this.contextMenuCallback = contextMenuCallback;
       this.keyDownCallback = keyDownCallback;
+      this.pasteCallback = pasteCallback;
       this.itemAnchorClickCallback = itemAnchorClickCallback;
       this.itemDragOverCallback = itemDragOverCallback;
       this.itemDropCallback = itemDropCallback;
@@ -130,6 +134,14 @@
         document.addEventListener('copy', this.onCopy);
       } else {
         document.removeEventListener('copy', this.onCopy);
+      }
+
+      // Binding event on this.treeElem does not work.
+      // Bind event on the document and check if the tree is active (focused) instead.
+      if (this.allowPaste) {
+        document.addEventListener('paste', this.onPaste);
+      } else {
+        document.removeEventListener('paste', this.onPaste);
       }
     }
 
@@ -543,6 +555,36 @@
         'text/plain',
         selectedItemElems.map(x => x.getAttribute('data-id')).join('\r\n')
       );
+    }
+
+    onPaste(event) {
+      // skip if the tree is not focused
+      if (!this.treeElem.contains(document.activeElement)) {
+        return;
+      }
+
+      event.preventDefault();
+
+      // calculate position
+      let targetId;
+      let targetIndex;
+      if (this.treeElem.contains(this.anchorElem) && !this.anchorElem.closest('[hidden]')) {
+        const {parentItemId, index} = this.getParentAndIndex(this.anchorElem);
+        targetId = parentItemId;
+        targetIndex = index + 1;
+      } else {
+        targetId = this.rootId;
+        targetIndex = Infinity;
+      }
+
+      // invoke callback
+      if (this.pasteCallback) {
+        this.pasteCallback.call(this, event, {
+          tree: this,
+          targetId,
+          targetIndex,
+        });
+      }
     }
 
     onItemDragStart(event) {

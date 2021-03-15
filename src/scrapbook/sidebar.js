@@ -250,7 +250,9 @@
           allowDrag: true,
           allowDrop: true,
           allowCopy: true,
+          allowPaste: true,
           contextMenuCallback: this.onTreeContextMenu,
+          pasteCallback: this.onTreePaste,
           itemAnchorClickCallback: this.onTreeItemAnchorClick,
           itemDragOverCallback: this.onTreeItemDragOver,
           itemDropCallback: this.onTreeItemDrop,
@@ -554,6 +556,40 @@
 
       event.preventDefault();
       this.showCommands(true, event);
+    },
+
+    async onTreePaste(event, {
+      targetId,
+      targetIndex,
+    }) {
+      // disallow when commands disabled
+      if (document.querySelector('#command:disabled')) {
+        return;
+      }
+
+      if (event.clipboardData.types.includes('application/scrapbook.items+json')) {
+        const data = JSON.parse(event.clipboardData.getData('application/scrapbook.items+json'));
+        if (!data.items) {
+          return;
+        }
+
+        this.enableUi(false);
+
+        try {
+          if (this.rootId !== 'recycle') {
+            await this.copyItems(data, targetId, targetIndex);
+          }
+        } catch (ex) {
+          console.error(ex);
+          this.error(ex.message);
+          // when any error happens, the UI is possibility in an inconsistent status.
+          // lock the UI to avoid further manipulation and damage.
+          return;
+        }
+
+        this.enableUi(true);
+        return;
+      }
     },
 
     async onTreeItemAnchorClick(event, {
