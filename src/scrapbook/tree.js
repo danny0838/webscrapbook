@@ -670,6 +670,11 @@
           targetIndex,
         });
       }
+
+      // focus the tree for smooth keyboard nav
+      if (this.allowKeyboardNavigation) {
+        this.treeElem.focus();
+      }
     }
 
     onItemClick(event) {
