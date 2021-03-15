@@ -1982,7 +1982,7 @@ ${scrapbook.escapeHtml(content)}
         const recursive = dialog.recursive.checked;
 
         if (!(itemElems && itemElems.length)) {
-          itemElems = [this.tree.getRootElem()];
+          itemElems = [this.tree.rootElem];
         }
         const itemIds = itemElems.reduce((set, itemElem) => {
           const id = itemElem.getAttribute('data-id');

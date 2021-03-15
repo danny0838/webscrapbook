@@ -36,6 +36,16 @@
   };
 
   class Tree {
+    get rootElem() {
+      const value = this.treeElem.firstChild;
+      Object.defineProperty(this, 'rootElem', {
+        value,
+        writable: false,
+        configurable: true,
+      });
+      return this.rootElem;
+    }
+
     constructor({
       treeElem,
     }) {
@@ -118,10 +128,9 @@
       this.lastDraggedElems = null;
       this.anchorElem = null;
       this.lastHighlightElem = null;
-    }
 
-    getRootElem() {
-      return this.treeElem.firstChild;
+      // remove overriden rootElem property to reset
+      delete this.rootElem;
     }
 
     getSelectedItemElems() {
@@ -169,7 +178,7 @@
     /**
      * An internal method to add an item to DOM
      */
-    _addItem(item, parent = this.getRootElem().container, index = Infinity) {
+    _addItem(item, parent = this.rootElem.container, index = Infinity) {
       // create element
       const elem = document.createElement('li');
       const div = elem.controller = elem.appendChild(document.createElement('div'));
