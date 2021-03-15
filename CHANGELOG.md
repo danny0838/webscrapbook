@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.102.0] - 2021-03-16
+* Added support of copying item IDs of the tree selection via Ctrl+C.
+* Fulltext cache is now updated automatically only when "Generate fulltext cache" option is checked.
+
 ## [0.101.0] - 2021-03-08
 * Added support of capturing via dragging a browser action command into the sidebar.
 
