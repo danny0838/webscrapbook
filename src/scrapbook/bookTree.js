@@ -220,7 +220,7 @@
 
       // create element and append to parent
       this.itemMakeContainer(parent);
-      const elem = this._addItem(meta, parent.container, index);
+      const elem = super.addItem(meta, parent.container, index);
 
       // set child container
       var childIdList = this.book.toc[meta.id];

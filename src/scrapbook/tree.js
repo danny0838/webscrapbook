@@ -176,9 +176,9 @@
     }
 
     /**
-     * An internal method to add an item to DOM
+     * Add an item to DOM
      */
-    _addItem(item, parent = this.rootElem.container, index = Infinity) {
+    addItem(item, parent = this.rootElem.container, index = Infinity) {
       // create element
       const elem = document.createElement('li');
       const div = elem.controller = elem.appendChild(document.createElement('div'));

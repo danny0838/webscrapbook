@@ -25,7 +25,8 @@
 
   class SearchTree extends CustomTree {
     addItem(item, file) {
-      const elem = this._addItem(item);
+      const elem = super.addItem(item);
+
       const div = elem.controller;
 
       handleSubFile: {

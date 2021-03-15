@@ -47,10 +47,6 @@
       rootElem.container = rootElem.appendChild(document.createElement('ul'));
       rootElem.container.classList.add('container');
     }
-
-    addItem(item, parent, index) {
-      return this._addItem(item, parent, index);
-    }
   }
 
   return CustomTree;
