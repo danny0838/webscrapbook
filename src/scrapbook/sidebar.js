@@ -1375,8 +1375,10 @@
       });
     },
 
-    async copyItems({bookId: sourceBookId, treeLastModified, items: sourceItems},
+    async copyItems({src, bookId: sourceBookId, treeLastModified, items: sourceItems},
         targetParentId, targetIndex, targetBookId = this.bookId, recursively = true) {
+      if (src && src !== this.book.server.serverRoot) { return; }
+
       const sourceBook = server.books[sourceBookId];
       if (!sourceBook || sourceBook.config.no_tree) { return; }
 

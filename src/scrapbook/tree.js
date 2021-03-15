@@ -515,6 +515,8 @@
       event.dataTransfer.setData(
         'application/scrapbook.items+json',
         JSON.stringify({
+          src: this.book.server.serverRoot,
+
           bookId: this.book.id,
 
           // may be undefined if not implemented or initialized
