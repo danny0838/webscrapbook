@@ -1369,9 +1369,6 @@
       }
     }
   },
-  "ScrapBookErrorDraggedTreeOutdated": {
-    "message": "Tree data of the source page of this drag is outdated. Refresh that page and try again."
-  },
   "ScrapBookErrorInitTree": {
     "message": "Unable to init tree: $REASON$",
     "placeholders": {
@@ -1401,6 +1398,9 @@
   },
   "ScrapBookErrorServerTreeChanged": {
     "message": "Tree data in the server has been changed. Refresh the page and try again."
+  },
+  "ScrapBookErrorSourceTreeOutdated": {
+    "message": "Tree data of the source page is outdated. Refresh that page and try again."
   },
   "ScrapBookNewFolderName": {
     "description": "Default name of a new folder",

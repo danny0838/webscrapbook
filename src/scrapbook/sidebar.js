@@ -1628,7 +1628,7 @@
           callback: async (book) => {
             // validate if the dragging source is up to date
             if (treeLastModified !== book.treeLastModified) {
-              throw new Error(scrapbook.lang('ScrapBookErrorDraggedTreeOutdated'));
+              throw new Error(scrapbook.lang('ScrapBookErrorSourceTreeOutdated'));
             }
 
             await book.loadMeta();
@@ -1646,7 +1646,7 @@
           callback: async (book) => {
             // validate if the dragging source is up to date
             if (treeLastModified !== book.treeLastModified) {
-              throw new Error(scrapbook.lang('ScrapBookErrorDraggedTreeOutdated'));
+              throw new Error(scrapbook.lang('ScrapBookErrorSourceTreeOutdated'));
             }
 
             await _copyItems(book);

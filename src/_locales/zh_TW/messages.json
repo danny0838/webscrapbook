@@ -1369,9 +1369,6 @@
       }
     }
   },
-  "ScrapBookErrorDraggedTreeOutdated": {
-    "message": "拖放來源頁面的目錄樹資料已過時，請重新整理該頁面再嘗試。"
-  },
   "ScrapBookErrorInitTree": {
     "message": "無法初始化目錄樹: $REASON$",
     "placeholders": {
@@ -1401,6 +1398,9 @@
   },
   "ScrapBookErrorServerTreeChanged": {
     "message": "伺服器的目錄樹資料已變更，請重新整理此頁面再嘗試。"
+  },
+  "ScrapBookErrorSourceTreeOutdated": {
+    "message": "來源頁面的目錄樹資料已過時，請重新整理該頁面再嘗試。"
   },
   "ScrapBookNewFolderName": {
     "description": "Default name of a new folder",
