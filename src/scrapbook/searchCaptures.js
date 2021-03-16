@@ -29,7 +29,7 @@
 
   class SearchTree extends CustomTree {
     addItem(item) {
-      const elem = this._addItem(item);
+      const elem = super.addItem(item);
       const div = elem.controller;
 
       var a = div.appendChild(document.createElement('a'));
