@@ -3180,55 +3180,222 @@
      * @param {string} selectorText - selectorText of a CSSStyleRule
      */
     verifySelector(root, selectorText) {
-      try {
-        // querySelector of a pseudo selector like a:hover always return null
-        if (root.querySelector(selectorText)) { return true; }
+      // Do not include :not as the semantic is reversed and the rule could be
+      // narrower after rewriting (e.g. :not(:hover) => :not(*)).
+      const ALLOWED_PSEUDO = new Set([
+        'is', 'matches', 'any', 'where', 'has',
+        'first-child', 'first-of-type', 'last-child', 'last-of-type',
+        'nth-child', 'nth-of-type', 'nth-last-child', 'nth-last-of-type',
+        'only-child', 'only-of-type',
+        ]);
 
-        // Preserve a pseudo-class(:*) or pseudo-element(::*) only if:
-        // 1. it's a pure pseudo (e.g. :hover), or
-        // 2. its non-pseudo version (e.g. a for a:hover) exist
-        var hasPseudo = false;
-        var inPseudo = false;
-        var depseudoSelectors = [""];
-        selectorText.replace(
-          /(,\s+)|(\s+)|((?:[\-0-9A-Za-z_\u00A0-\uFFFF]|\\[0-9A-Fa-f]{1,6} ?|\\.)+)|(\[(?:"(?:\\.|[^"])*"|\\.|[^\]])*\])|(.)/g,
-          (m, m1, m2, m3, m4, m5) => {
-            if (m1) {
-              depseudoSelectors.push("");
-              inPseudo = false;
-            } else if (m5 == ":") {
-              hasPseudo = true;
-              inPseudo = true;
-            } else if (inPseudo) {
-              if (!(m3 || m5)) {
-                inPseudo = false;
-                depseudoSelectors[depseudoSelectors.length - 1] += m;
-              }
-            } else {
-              depseudoSelectors[depseudoSelectors.length - 1] += m;
-            }
-            return m;
-          }
-        );
-        if (hasPseudo) {
-          for (let i=0, I=depseudoSelectors.length; i<I; ++i) {
-            if (depseudoSelectors[i] === "" || root.querySelector(depseudoSelectors[i])) return true;
-          };
+      /**
+       * A class that rewrites the given CSS selector to make the rule cover
+       * a reasonably broader range.
+       *
+       * 1. Recursively remove pseudoes (including pseudo-classes(:*) and
+       *    pseudo-elements(::*))) unless it's listed in ALLOWED_PSEUDO. (e.g.
+       *    div:hover => div).
+       * 2. Add * in place if it will be empty after removal (e.g. :hover => *).
+       */
+      class Rewriter {
+        constructor() {
+          this.regexLiteral = /(?:[0-9A-Za-z_\-\u00A0-\uFFFF]|\\(?:[0-9A-Fa-f]{1,6} ?|.))+|(.)/g;
+          this.regexQuote = /[^"]*(?:\\.[^"]*)*"/g;
         }
-      } catch (ex) {
-        // As CSSStyleRule.selectorText is already a valid selector,
-        // an error means it's valid but not supported by querySelector.
-        // One example is a namespaced selector like: svg|a,
-        // as querySelector cannot consume a @namespace rule in prior.
-        // Return true in such case as false positive is safer than false
-        // negative.
-        //
-        // @TODO:
-        // Full implementation of a correct selector match.
-        return true;
+
+        run(selectorText) {
+          this.tokens = [];
+          this.parse(selectorText, 0);
+          return this.tokens.reduce((result, current) => {
+            return result + current.value;
+          }, '');
+        }
+
+        parse(selectorText, start, endSymbol = null) {
+          this.regexLiteral.lastIndex = start;
+          let match;
+          while (match = this.regexLiteral.exec(selectorText)) {
+            switch (match[1]) {
+              case endSymbol: {
+                this.tokens.push({
+                  type: 'operator',
+                  value: match[0],
+                });
+                return this.regexLiteral.lastIndex;
+                break;
+              }
+              case '(': {
+                this.tokens.push({
+                  type: 'operator',
+                  value: match[0],
+                });
+                this.regexLiteral.lastIndex = this.parse(
+                  selectorText,
+                  this.regexLiteral.lastIndex,
+                  ')',
+                );
+                break;
+              }
+              case '[': {
+                const start = this.regexLiteral.lastIndex;
+                const end = this.regexLiteral.lastIndex = this.matchBracket(selectorText, start);
+                this.tokens.push({
+                  type: 'selector',
+                  value: selectorText.slice(start - 1, end),
+                });
+                break;
+              }
+              case ':': {
+                this.regexLiteral.lastIndex = this.parsePseudo(
+                  selectorText,
+                  this.regexLiteral.lastIndex,
+                  selectorText[this.regexLiteral.lastIndex] === ':',
+                );
+                break;
+              }
+              default: {
+                if (match[1]) {
+                  this.tokens.push({
+                    type: 'operator',
+                    value: match[0],
+                  });
+                } else {
+                  this.tokens.push({
+                    type: 'name',
+                    value: match[0],
+                  });
+                }
+                break;
+              }
+            }
+          }
+          return selectorText.length;
+        }
+
+        parsePseudo(selectorText, start, isPseudoElement) {
+          let _tokens = this.tokens;
+          this.tokens = [];
+          let lastIndex = selectorText.length;
+          this.regexLiteral.lastIndex = start + (isPseudoElement ? 1 : 0);
+          let match;
+          while (match = this.regexLiteral.exec(selectorText)) {
+            switch (match[1]) {
+              case '(': {
+                this.tokens.push({
+                  type: 'operator',
+                  value: match[0],
+                });
+                this.regexLiteral.lastIndex = this.parse(
+                  selectorText,
+                  this.regexLiteral.lastIndex,
+                  ')',
+                );
+                break;
+              }
+              default: {
+                if (match[1]) {
+                  lastIndex = this.regexLiteral.lastIndex - 1;
+                  this.regexLiteral.lastIndex = selectorText.length;
+                } else {
+                  this.tokens.push({
+                    type: 'name',
+                    value: match[0],
+                  });
+                }
+                break;
+              }
+            }
+          }
+
+          if (this.tokens[0] && this.tokens[0].type === 'name' && ALLOWED_PSEUDO.has(this.tokens[0].value)) {
+            _tokens.push({
+              type: 'operator',
+              value: isPseudoElement ? '::' : ':',
+            });
+            _tokens = _tokens.concat(this.tokens);
+          } else {
+            addUniversalSelector: {
+              const prevToken = _tokens[_tokens.length - 1];
+              if (prevToken) {
+                if (prevToken.type === 'name' || prevToken.type === 'selector') {
+                  break addUniversalSelector;
+                }
+                if (prevToken.type === 'operator' && prevToken.value === ')') {
+                  break addUniversalSelector;
+                }
+              }
+
+              _tokens.push({
+                type: 'name',
+                value: '*',
+              });
+            }
+          }
+
+          this.tokens = _tokens;
+          return lastIndex;
+        }
+
+        matchBracket(selectorText, start) {
+          this.regexLiteral.lastIndex = start;
+          let match;
+          while (match = this.regexLiteral.exec(selectorText)) {
+            switch (match[1]) {
+              case ']': {
+                return this.regexLiteral.lastIndex;
+                break;
+              }
+              case '"': {
+                this.regexLiteral.lastIndex = this.matchQuote(selectorText, this.regexLiteral.lastIndex);
+                break;
+              }
+            }
+          }
+          return selectorText.length;
+        }
+
+        matchQuote(selectorText, start) {
+          this.regexQuote.lastIndex = start;
+          const m = this.regexQuote.exec(selectorText);
+          if (m) { return this.regexQuote.lastIndex; }
+          return selectorText.length;
+        }
       }
 
-      return false;
+      const verifySelector = (root, selectorText) => {
+        try {
+          // querySelector of a pseudo selector like a:hover always return null
+          if (root.querySelector(selectorText)) { return true; }
+        } catch (ex) {
+          // As CSSStyleRule.selectorText is already a valid selector,
+          // an error means it's valid but not supported by querySelector.
+          // One example is a namespaced selector like: svg|a,
+          // as querySelector cannot consume a @namespace rule in prior.
+          // Return true in such case as false positive is safer than false
+          // negative.
+          //
+          // @TODO:
+          // Full implementation of a correct selector match.
+          return true;
+        }
+
+        let selectorTextRewritten = new Rewriter().run(selectorText);
+        if (selectorTextRewritten !== selectorText) {
+          if (root.querySelector(selectorTextRewritten)) {
+            return true;
+          }
+        }
+
+        return false;
+      };
+
+      Object.defineProperty(this, 'verifySelector', {
+        value: verifySelector,
+        writable: false,
+        configurable: true,
+      });
+      return verifySelector(root, selectorText);
     }
 
     getElemCss(elem) {

@@ -3130,7 +3130,7 @@ svg|a text, text svg|a {
 }
 
 /**
- * Check CSS not matching DOM is correctly removed for capture.rewriteCss = "match"
+ * Check DOM matching for capture.rewriteCss = "match"
  *
  * capture.rewriteCss
  */
@@ -3186,8 +3186,31 @@ async function test_capture_css_rewriteCss2() {
   );
   assert(styleElems[4].textContent.trim().match(regex));
 
-  var regex = new RegExp(`^$`);
-  assert(styleElems[5].textContent.trim().match(regex));
+  assert(styleElems[5].textContent.trim() === ``);
+
+  assert(styleElems[6].textContent.trim() === `:hover { }`);
+
+  assert(styleElems[7].textContent.trim() === `#pseudo1::before { }`);
+
+  assert(styleElems[8].textContent.trim() === `#pseudo2:not([hidden]) { }`);
+
+  assert(styleElems[9].textContent.trim() === `#pseudo3:not(blockquote) { }`);
+
+  assert(styleElems[10].textContent.trim() === `#pseudo4:is(blockquote) { }`);
+
+  assert(styleElems[11].textContent.trim() === ``);
+
+  assert(styleElems[12].textContent.trim() === `:is(#pseudo6):not([hidden]) { }`);
+
+  assert(styleElems[13].textContent.trim() === `:is(#pseudo7):not(blockquote) { }`);
+
+  assert(styleElems[14].textContent.trim() === `[id="pseudo8"]:not([hidden]) { }`);
+
+  assert(styleElems[15].textContent.trim() === `[id="pseudo9"]:not(blockquote) { }`);
+
+  assert(styleElems[16].textContent.trim() === `#pseudo10 :nth-of-type(1) { }`);
+
+  assert(styleElems[17].textContent.trim() === ``);
 }
 
 /**
