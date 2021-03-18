@@ -3179,10 +3179,8 @@ async function test_capture_css_rewriteCss2() {
   );
   assert(styleElems[3].textContent.trim().match(regex));
 
-  // @FIXME: remove style declaration with an unmatched namespaced selector
   var regex = new RegExp(
-    `@namespace\\s*svg\\s*url\\("http://www.w3.org/2000/svg"\\);\\s*` +
-    `svg\\|a\\s*nonexist,\\s*nonexist\\s*svg\\|a\\s*{\\s*fill:\\s*blue;\\s*text-decoration:\\s*underline;\\s*}\\s*`
+    `^@namespace\\s*svg\\s*url\\("http://www.w3.org/2000/svg"\\);\\s*$`
   );
   assert(styleElems[4].textContent.trim().match(regex));
 

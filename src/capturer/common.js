@@ -3193,10 +3193,11 @@
        * A class that rewrites the given CSS selector to make the rule cover
        * a reasonably broader range.
        *
-       * 1. Recursively remove pseudoes (including pseudo-classes(:*) and
+       * 1. Remove namespace in selector (e.g. svg|a => a).
+       * 2. Recursively remove pseudoes (including pseudo-classes(:*) and
        *    pseudo-elements(::*))) unless it's listed in ALLOWED_PSEUDO. (e.g.
        *    div:hover => div).
-       * 2. Add * in place if it will be empty after removal (e.g. :hover => *).
+       * 3. Add * in place if it will be empty after removal (e.g. :hover => *).
        */
       class Rewriter {
         constructor() {
@@ -3252,6 +3253,30 @@
                   this.regexLiteral.lastIndex,
                   selectorText[this.regexLiteral.lastIndex] === ':',
                 );
+                break;
+              }
+              case '|': {
+                // Special handling for || (column combinator in CSS4 draft)
+                // to prevent misinterpreted as double | operator.
+                {
+                  const pos = this.regexLiteral.lastIndex;
+                  const next = selectorText.slice(pos, pos + 1);
+                  if (next === '|') {
+                    this.regexLiteral.lastIndex++;
+                    this.tokens.push({
+                      type: 'operator',
+                      value: match[0] + next,
+                    });
+                    break;
+                  }
+                }
+
+                const prevToken = this.tokens[this.tokens.length - 1];
+                if (prevToken) {
+                  if (prevToken.type === 'name' || (prevToken.type === 'operator' && prevToken.value === '*')) {
+                    this.tokens.pop();
+                  }
+                }
                 break;
               }
               default: {
@@ -3364,6 +3389,7 @@
       }
 
       const verifySelector = (root, selectorText) => {
+        let selectorTextInvalid = false;
         try {
           // querySelector of a pseudo selector like a:hover always return null
           if (root.querySelector(selectorText)) { return true; }
@@ -3372,17 +3398,21 @@
           // an error means it's valid but not supported by querySelector.
           // One example is a namespaced selector like: svg|a,
           // as querySelector cannot consume a @namespace rule in prior.
-          // Return true in such case as false positive is safer than false
-          // negative.
-          //
-          // @TODO:
-          // Full implementation of a correct selector match.
-          return true;
+          // Mark selectorText as invalid and test the rewritten selector text
+          // instead.
+          selectorTextInvalid = true;
         }
 
         let selectorTextRewritten = new Rewriter().run(selectorText);
-        if (selectorTextRewritten !== selectorText) {
-          if (root.querySelector(selectorTextRewritten)) {
+        if (selectorTextInvalid || selectorTextRewritten !== selectorText) {
+          try {
+            if (root.querySelector(selectorTextRewritten)) {
+              return true;
+            }
+          } catch (ex) {
+            // Rewritten rule still not supported by querySelector due to an
+            // unexpected reason.
+            // Return true as false positive is safer than false negative.
             return true;
           }
         }
