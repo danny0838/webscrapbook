@@ -1541,5 +1541,8 @@
         "content": "$1"
       }
     }
+  },
+  "WarnSidebarLoginPromptMissing": {
+    "message": "如果瀏覽器未跳出登入對話框，請點擊我登入再重新整理此頁。"
   }
 }

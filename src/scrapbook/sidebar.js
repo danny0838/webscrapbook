@@ -84,6 +84,13 @@
       } catch (ex) {
         console.error(ex);
         this.error(scrapbook.lang('ScrapBookErrorServerInit', [ex.message]));
+        if (ex.status === 401) {
+          const a = document.createElement('a');
+          a.href = location.href;
+          a.target = 'login';
+          a.textContent = scrapbook.lang('WarnSidebarLoginPromptMissing');
+          this.error(a);
+        }
         return;
       }
 

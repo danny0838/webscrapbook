@@ -1541,5 +1541,8 @@
         "content": "$1"
       }
     }
+  },
+  "WarnSidebarLoginPromptMissing": {
+    "message": "Click me to login and refresh this page if the browser doesn't prompt for login."
   }
 }
