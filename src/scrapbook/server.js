@@ -299,9 +299,16 @@
       }
 
       // record configs
+      this._bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+
+      // Take user and password only when both are non-empty;
+      // otherwise omit both fields for the browser to try cached
+      // auth credentials.
       this._user = scrapbook.getOption("server.user");
       this._password = scrapbook.getOption("server.password");
-      this._bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+      if (!(this._user && this._password)) {
+        this._user = this._password = null;
+      }
 
       // load config from server
       {
