@@ -904,22 +904,23 @@
       }
     },
 
-    log(msg) {
-      document.getElementById("logger").appendChild(document.createTextNode(msg + '\n'));
+    log(msg, type = 'log') {
+      const div = document.createElement("div");
+      div.classList.add(type);
+      if (typeof msg === 'string') {
+        div.textContent = msg;
+      } else {
+        div.appendChild(msg);
+      }
+      document.getElementById("logger").appendChild(div);
     },
 
     warn(msg) {
-      const span = document.createElement('span');
-      span.className = 'warn';
-      span.appendChild(document.createTextNode(msg + '\n'));
-      document.getElementById("logger").appendChild(span);
+      this.log(msg, 'warn');
     },
 
     error(msg) {
-      const span = document.createElement('span');
-      span.className = 'error';
-      span.appendChild(document.createTextNode(msg + '\n'));
-      document.getElementById("logger").appendChild(span);
+      this.log(msg, 'error');
     },
 
     enableUi(willEnable) {
