@@ -328,7 +328,7 @@
               Accept: 'application/json, */*;q=0.1',
             },
             method: "GET",
-            onload: true,
+            allowAnyStatus: true,
           });
         } catch (ex) {
           throw new RequestError('Unable to connect to backend server.', {url});
