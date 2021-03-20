@@ -84,7 +84,10 @@
       } catch (ex) {
         console.error(ex);
         this.error(scrapbook.lang('ScrapBookErrorServerInit', [ex.message]));
-        if (ex.status === 401) {
+
+        // For authentication failure, show alternative login link if user and
+        // password not configured.
+        if (ex.status === 401 && (server._user === null || server._password === null)) {
           const a = document.createElement('a');
           a.href = location.href;
           a.target = 'login';
