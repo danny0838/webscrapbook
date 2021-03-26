@@ -1754,9 +1754,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
               hElem.setAttribute('data-scrapbook-id', scrapbook.dateToId(date));
             }
           }
-          if (!hElem.hasAttribute('data-scrapbook-id')) {
-            hElem.setAttribute('data-scrapbook-id', scrapbook.dateToId());
-          }
           hElem.setAttribute('data-scrapbook-elem', 'linemarker');
           hElem.setAttribute('style', elem.getAttribute('style'));
           if (elem.hasAttribute('title')) {
@@ -2146,6 +2143,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
         this.saveAll();
 
+        // Retrieve element ID. Generate a new one if none.
+        let id = elem.getAttribute('data-scrapbook-id');
+        if (!id) {
+          id = scrapbook.dateToId();
+          elem.setAttribute('data-scrapbook-id', id);
+        }
+
         // fallback to popup if shadow DOM is not supported
         if (!SHADOW_DOM_SUPPORTED) {
           const annotation0 = elem.title;
@@ -2176,7 +2180,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
         const popupElem = document.createElement('scrapbook-toolbar-popup');
         popupElem.setAttribute('data-scrapbook-elem', 'toolbar-popup');
-        popupElem.setAttribute('data-scrapbook-id', elem.getAttribute('data-scrapbook-id'));
+        popupElem.setAttribute('data-scrapbook-id', id);
         popupElem.classList.add('editLineMarker');
         popupElem.addEventListener('keydown', (event) => {
           if (event.code === 'Escape') {
