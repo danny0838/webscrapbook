@@ -2868,7 +2868,7 @@
         }) + ")()").replace(/%([\w@]*)%/g, (_, key) => data[key] || scrapbook.lang(key) || '');
       }
     }
-    if (rootNode.querySelector('[data-scrapbook-elem="linemarker"], [data-scrapbook-elem="sticky"]')) {
+    if (rootNode.querySelector('[data-scrapbook-elem="linemarker"][title], [data-scrapbook-elem="sticky"]')) {
       const css = bodyNode.appendChild(doc.createElement("style"));
       css.setAttribute("data-scrapbook-elem", "annotation-css");
       css.textContent = scrapbook.compressCode(scrapbook.ANNOTATION_CSS);
