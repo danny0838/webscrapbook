@@ -2750,8 +2750,9 @@
         ].join(','))) {
       elem.remove();
     }
+    const bodyNode = rootNode.querySelector('body') || rootNode;
     if (requireBasicLoader) {
-      const loader = rootNode.appendChild(doc.createElement("script"));
+      const loader = bodyNode.appendChild(doc.createElement("script"));
       loader.setAttribute("data-scrapbook-elem", "basic-loader");
       // Keep downward compatibility with IE8.
       // indeterminate checkbox: IE >= 6, getAttribute: IE >= 8
@@ -2805,7 +2806,7 @@
           break insertInfoBar;
         }
 
-        const loader = rootNode.appendChild(doc.createElement("script"));
+        const loader = bodyNode.appendChild(doc.createElement("script"));
         loader.setAttribute("data-scrapbook-elem", "infobar-loader");
 
         // This is compatible with IE5 (though position: fixed doesn't work in IE < 7).
@@ -2868,10 +2869,10 @@
       }
     }
     if (rootNode.querySelector('[data-scrapbook-elem="linemarker"], [data-scrapbook-elem="sticky"]')) {
-      const css = rootNode.appendChild(doc.createElement("style"));
+      const css = bodyNode.appendChild(doc.createElement("style"));
       css.setAttribute("data-scrapbook-elem", "annotation-css");
       css.textContent = scrapbook.compressCode(scrapbook.ANNOTATION_CSS);
-      const loader = rootNode.appendChild(doc.createElement("script"));
+      const loader = bodyNode.appendChild(doc.createElement("script"));
       loader.setAttribute("data-scrapbook-elem", "annotation-loader");
       // Mobile support with showing title on long touch.
       // Firefox >= 52, Chrome >= 22, Edge >= 12
