@@ -254,6 +254,10 @@ if (Node && !Node.prototype.getRootNode) {
     511: "Network Authentication Required",
   };
 
+  const SCRAPBOOK_OBJECT_REMOVE_TYPE_REMOVE = new Set(["annotation", "freenote", "sticky", "block-comment", "custom"]);
+  const SCRAPBOOK_OBJECT_REMOVE_TYPE_UNWRAP = new Set(["linemarker", "inline", "link-url", "link-inner", "link-file", "custom-wrapper"]);
+  const SCRAPBOOK_OBJECT_REMOVE_TYPE_UNCOMMENT = new Set(["erased"]);
+
   const ANNOTATION_CSS = `\
 [data-scrapbook-elem="linemarker"][title] {
   cursor: help;
@@ -1193,9 +1197,9 @@ if (Node && !Node.prototype.getRootNode) {
   scrapbook.getScrapBookObjectRemoveType = function (elem) {
     let type = scrapbook.getScrapbookObjectType(elem);
     if (!type) { return -1; }
-    if (["annotation", "freenote", "sticky", "block-comment", "custom"].includes(type)) { return 1; }
-    if (["linemarker", "inline", "link-url", "link-inner", "link-file", "custom-wrapper"].includes(type)) { return 2; }
-    if (["erased"].includes(type)) { return 3; }
+    if (SCRAPBOOK_OBJECT_REMOVE_TYPE_REMOVE.has(type)) { return 1; }
+    if (SCRAPBOOK_OBJECT_REMOVE_TYPE_UNWRAP.has(type)) { return 2; }
+    if (SCRAPBOOK_OBJECT_REMOVE_TYPE_UNCOMMENT.has(type)) { return 3; }
     return 0;
   };
 
