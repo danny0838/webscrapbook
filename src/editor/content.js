@@ -2768,17 +2768,19 @@ scrapbook-toolbar, scrapbook-toolbar *,
         }
 
         // outline
-        // elements like math doesn't implement the .style property and could throw an error
-        try {
-          mapElemHadStyleAttr.set(elem, elem.hasAttribute('style'));
-          mapElemOutline.set(elem, elem.style.getPropertyValue('outline'));
-          mapElemOutlinePriority.set(elem, elem.style.getPropertyPriority('outline'));
-          mapElemCursor.set(elem, elem.style.getPropertyValue('cursor'));
-          mapElemCursorPriority.set(elem, elem.style.getPropertyPriority('cursor'));
-          elem.style.setProperty('outline', outlineStyle, 'important');
-          elem.style.setProperty('cursor', 'pointer', 'important');
-        } catch (ex) {
-          // pass
+        for (const elem of scrapbook.getScrapBookObjectsById(lastTarget)) {
+          // elements like math doesn't implement the .style property and could throw an error
+          try {
+            mapElemHadStyleAttr.set(elem, elem.hasAttribute('style'));
+            mapElemOutline.set(elem, elem.style.getPropertyValue('outline'));
+            mapElemOutlinePriority.set(elem, elem.style.getPropertyPriority('outline'));
+            mapElemCursor.set(elem, elem.style.getPropertyValue('cursor'));
+            mapElemCursorPriority.set(elem, elem.style.getPropertyPriority('cursor'));
+            elem.style.setProperty('outline', outlineStyle, 'important');
+            elem.style.setProperty('cursor', 'pointer', 'important');
+          } catch (ex) {
+            // pass
+          }
         }
 
         // tooltip
@@ -2821,13 +2823,15 @@ scrapbook-toolbar, scrapbook-toolbar *,
         if (!elem) { return; }
 
         // outline
-        // elements like math doesn't implement the .style property and could throw an error
-        try {
-          elem.style.setProperty('outline', mapElemOutline.get(elem), mapElemOutlinePriority.get(elem));
-          elem.style.setProperty('cursor', mapElemCursor.get(elem), mapElemCursorPriority.get(elem));
-          if (!elem.getAttribute('style') && !mapElemHadStyleAttr.get(elem)) { elem.removeAttribute('style'); }
-        } catch (ex) {
-          // pass
+        for (const elem of scrapbook.getScrapBookObjectsById(lastTarget)) {
+          // elements like math doesn't implement the .style property and could throw an error
+          try {
+            elem.style.setProperty('outline', mapElemOutline.get(elem), mapElemOutlinePriority.get(elem));
+            elem.style.setProperty('cursor', mapElemCursor.get(elem), mapElemCursorPriority.get(elem));
+            if (!elem.getAttribute('style') && !mapElemHadStyleAttr.get(elem)) { elem.removeAttribute('style'); }
+          } catch (ex) {
+            // pass
+          }
         }
 
         // tooltip
