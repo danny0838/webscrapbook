@@ -2986,24 +2986,26 @@ scrapbook-toolbar, scrapbook-toolbar *,
     },
 
     async foreColor() {
+      const frameId = await editor.getFocusedFrameId();
       const color = prompt(scrapbook.lang('EditorButtonHtmlEditorFgColorPrompt'));
       if (!color) { return; }
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId(),
+          frameId,
           code: `document.execCommand('styleWithCSS', false, true); document.execCommand('foreColor', false, "${scrapbook.escapeQuotes(color)}");`,
         },
       });
     },
 
     async hiliteColor() {
+      const frameId = await editor.getFocusedFrameId();
       const color = prompt(scrapbook.lang('EditorButtonHtmlEditorBgColorPrompt'));
       if (!color) { return; }
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId(),
+          frameId,
           code: `document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, "${scrapbook.escapeQuotes(color)}");`,
         },
       });
@@ -3180,12 +3182,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
     },
 
     async createLink() {
+      const frameId = await editor.getFocusedFrameId();
       const url = prompt(scrapbook.lang('EditorButtonHtmlEditorCreateLinkPrompt'));
       if (!url) { return; }
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId(),
+          frameId,
           code: `document.execCommand('createLink', false, "${scrapbook.escapeQuotes(url)}");`,
         },
       });
@@ -3225,12 +3228,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
     },
 
     async insertHtml() {
+      const frameId = await editor.getFocusedFrameId();
       const html = prompt(scrapbook.lang('EditorButtonHtmlEditorInsertHtmlPrompt'));
       if (!html) { return; }
       return await scrapbook.invokeExtensionScript({
         cmd: "background.invokeEditorCommand",
         args: {
-          frameId: await editor.getFocusedFrameId(),
+          frameId,
           code: `document.execCommand('insertHTML', false, "${scrapbook.escapeQuotes(html)}");`,
         },
       });
