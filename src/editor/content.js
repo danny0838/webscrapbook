@@ -409,6 +409,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
   <div class="toolbar-annotation" title="${scrapbook.lang('EditorButtonAnnotation')}">
     <button></button>
     <ul hidden="" title="">
+      <li><button class="toolbar-annotation-link">${scrapbook.lang('EditorButtonAnnotationLink')}</button></li>
       <li><button class="toolbar-annotation-sticky">${scrapbook.lang('EditorButtonAnnotationSticky')}</button></li>
       <li><button class="toolbar-annotation-sticky-richtext">${scrapbook.lang('EditorButtonAnnotationStickyRichText')}</button></li>
     </ul>
@@ -551,6 +552,11 @@ ${sRoot}.toolbar .toolbar-close:hover {
       event.preventDefault();
       editor.showContextMenu(event.currentTarget.nextElementSibling, event);
     });
+
+    var elem = wrapper.querySelector('.toolbar-annotation-link');
+    elem.addEventListener("click", (event) => {
+      editor.createLink();
+    }, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-annotation-sticky');
     elem.addEventListener("click", (event) => {
@@ -1121,6 +1127,28 @@ scrapbook-toolbar, scrapbook-toolbar *,
       cmd: "background.invokeEditorCommand",
       args: {
         frameId: await editor.getFocusedFrameId(),
+        cmd: "editor.lineMarkerInternal",
+        args,
+      },
+    });
+  };
+
+  editor.createLink = async function (style) {
+    const frameId = await editor.getFocusedFrameId();
+    const url = prompt(scrapbook.lang('EditorButtonAnnotationLinkPrompt'));
+    if (!url) { return; }
+    const args = {
+      tagName: 'a',
+      attrs: {
+        'data-scrapbook-id': scrapbook.dateToId(),
+        'data-scrapbook-elem': 'link-url',
+        'href': url,
+      },
+    };
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
         cmd: "editor.lineMarkerInternal",
         args,
       },

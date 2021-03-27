@@ -1096,7 +1096,7 @@ if (Node && !Node.prototype.getRootNode) {
    *   linemarker (span) (since SB, SBX)
    *   inline (span) (for SB, SBX)
    *   annotation (span) (for 1.12.0a <= SBX <= 1.12.0a45)
-   *   link-url (a) (for SBX)
+   *   link-url (a) (since SBX)
    *   link-inner (a) (for SBX)
    *   link-file (a) (for SBX)
    *   freenote (div) (for 1.12.0a35 <= SBX)

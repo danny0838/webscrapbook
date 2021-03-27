@@ -144,6 +144,12 @@
   "EditorButtonAnnotation": {
     "message": "Annotation tool - Click to create a sticky note."
   },
+  "EditorButtonAnnotationLink": {
+    "message": "Attach hyperlink"
+  },
+  "EditorButtonAnnotationLinkPrompt": {
+    "message": "Input the URL to attach the link:"
+  },
   "EditorButtonAnnotationSticky": {
     "message": "Create sticky note"
   },

@@ -144,6 +144,12 @@
   "EditorButtonAnnotation": {
     "message": "批註工具 - 點擊建立便利貼批註。"
   },
+  "EditorButtonAnnotationLink": {
+    "message": "附加超連結"
+  },
+  "EditorButtonAnnotationLinkPrompt": {
+    "message": "請輸入要附加的超連結網址："
+  },
   "EditorButtonAnnotationSticky": {
     "message": "建立便利貼"
   },
