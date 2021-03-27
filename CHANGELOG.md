@@ -3,6 +3,13 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.104.1] - 2021-03-27
+* Fixed an issue that special chars (e.g. `<`, `&`, and `>`) in a postit item are not loaded correctly.
+
+## [0.104.0] - 2021-03-27
+* WebScrapBook loaders are now injected as last elements in `<body>` rather than after `<body>`.
+* No more create loaders for non-annotated highlights.
+
 ## [0.102.0] - 2021-03-16
 * Added support of copying item IDs of the tree selection via Ctrl+C.
 * Fulltext cache is now updated automatically only when "Generate fulltext cache" option is checked.
