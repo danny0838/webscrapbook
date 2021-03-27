@@ -73,7 +73,7 @@
             throw new Error('malformatted note file');
           }
 
-          document.getElementById('editor').value = content;
+          document.getElementById('editor').value = scrapbook.unescapeHtml(content);
         } catch (ex) {
           console.error(ex);
           throw new Error(`Unable to load postit: ${ex.message}`);
