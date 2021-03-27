@@ -3095,7 +3095,6 @@
         if (shadowRootSupported) {
           for (const elem of rootNode.querySelectorAll("*")) {
             elem.removeAttribute("data-scrapbook-shadowdom");
-            elem.removeAttribute("data-scrapbook-shadowroot"); // WebScrapBook < 0.115
             const shadowRoot = elem.shadowRoot;
             if (!shadowRoot) { continue; }
             processRootNode(shadowRoot);
@@ -3107,25 +3106,6 @@
           // Just record whether there's a recorded shadow root.
           if (rootNode.querySelector('[data-scrapbook-shadowdom]')) {
             requireBasicLoader = true;
-          }
-          // convert old data-scrapbook-shadowroot recursively (WebScrapBook < 0.115)
-          {
-            const convert = (rootNode) => {
-              for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowroot]')) {
-                try {
-                  const {data} = JSON.parse(elem.getAttribute('data-scrapbook-shadowroot'));
-                  const t = rootNode.ownerDocument.createElement('template');
-                  t.innerHTML = data;
-                  convert(t.content);
-                  elem.setAttribute("data-scrapbook-shadowdom", t.innerHTML);
-                  requireBasicLoader = true;
-                } catch (ex) {
-                  console.error(ex);
-                }
-                elem.removeAttribute('data-scrapbook-shadowroot');
-              }
-            };
-            convert(rootNode);
           }
         }
       };

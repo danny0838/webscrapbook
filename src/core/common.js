@@ -1746,31 +1746,6 @@ if (Node && !Node.prototype.getRootNode) {
     let type = node.getAttribute("data-scrapbook-elem");
     if (type) { return type; }
 
-    // for downward compatibility with legacy ScrapBook X
-    type = node.getAttribute("data-sb-obj");
-    if (type) { return type; }
-
-    // for downward compatibility with legacy ScrapBook
-    switch (node.className) {
-      case "linemarker-marked-line":
-        return "linemarker";
-      case "scrapbook-inline":
-        return "inline";
-      case "scrapbook-sticky":
-      case "scrapbook-sticky scrapbook-sticky-relative":
-        return "sticky";
-      case "scrapbook-sticky-header":
-        return "sticky-header";
-      case "scrapbook-sticky-footer":
-        return "sticky-footer";
-      case "scrapbook-block-comment":
-        return "block-comment";
-    }
-
-    if (node.id == "scrapbook-sticky-css") {
-      return "stylesheet";
-    }
-
     return false;
   };
 
@@ -1799,12 +1774,6 @@ if (Node && !Node.prototype.getRootNode) {
     let id = node.getAttribute("data-scrapbook-id");
     if (id) {
       return node.ownerDocument.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`);
-    }
-
-    // for downward compatibility with legacy ScrapBook (X)
-    id = node.getAttribute("data-sb-id");
-    if (id) {
-      return node.ownerDocument.querySelectorAll(`[data-sb-id="${CSS.escape(id)}"]`);
     }
 
     return [node];
