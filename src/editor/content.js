@@ -1680,7 +1680,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   editor.removeScrapBookObject = function (elem) {
     try {
       // not in the DOM tree, skip
-      if (!elem.parentNode) { return -1; }
+      if (!elem.isConnected) { return -1; }
     } catch(ex) {
       // not an element or a dead object, skip
       return -1;
