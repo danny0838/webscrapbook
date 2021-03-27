@@ -1135,7 +1135,7 @@ if (Node && !Node.prototype.getRootNode) {
    *   infobar-loader (since 0.82.0 <= WSB)
    *   canvas-loader (for 0.51 <= WSB < 0.69)
    *   shadowroot-loader (for 0.51 <= WSB < 0.69)
-   *   stylesheet (link, style) (for SBX)
+   *   stylesheet (link, style) (for SB, SBX)
    *   stylesheet-temp (link, style) (for SBX)
    *
    *   custom-css (should not be altered by the capturer or editor) (since 0.70 <= WSB)
