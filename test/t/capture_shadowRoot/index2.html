@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test shadowRoot</title>
+</head>
+<body>
+<div><strong>This</strong> is very good.</div>
+</body>
+<script>
+var d = document.querySelector('div');
+var s = d.attachShadow({mode: 'closed'});
+s.innerHTML = `<style>
+:host { background-color: yellow; }
+div { background-color: red; }
+img { width: 60px; height: 60px; }
+</style>
+<div>This is sub-content.</div>
+<img src="resources/green.bmp">
+<p>This is hidden content.</p>`;
+
+var d2 = s.querySelector('p');
+var s2 = d2.attachShadow({mode: 'closed'});
+s2.innerHTML = `<style>
+:host { background-color: gray; }
+img { width: 60px; height: 60px; }
+</style>
+<div>This is deep-sub-content.</div>
+<img src="resources/blue.bmp">`;
+</script>
+</html>
