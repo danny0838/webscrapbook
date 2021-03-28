@@ -27,6 +27,10 @@
 
   const REWRITABLE_SPECIAL_OBJECTS = new Set([false, 'adoptedStyleSheet']);
 
+  const REMOVE_HIDDEN_EXCLUDE_HTML = new Set(["html", "head", "title", "meta", "link", "style", "script", "body", "noscript", "template", "source", "track"]);
+  const REMOVE_HIDDEN_EXCLUDE_SVG = new Set(["svg"]);
+  const REMOVE_HIDDEN_EXCLUDE_MATH = new Set(["math"]);
+
   const capturer = {
     isContentScript: true,
     get isNoscriptEscaped() {
@@ -450,10 +454,10 @@
         switch (options["capture.removeHidden"]) {
           case "undisplayed": {
             const excludeNodes =
-                rootName === "svg" ? ["svg"] : 
-                rootName === "math" ? ["math"] : 
-                ["html", "head", "title", "meta", "link", "style", "script", "body", "noscript", "template", "source", "track"];
-            if (!excludeNodes.includes(elem.nodeName.toLowerCase())) {
+                rootName === "svg" ? REMOVE_HIDDEN_EXCLUDE_SVG : 
+                rootName === "math" ? REMOVE_HIDDEN_EXCLUDE_MATH : 
+                REMOVE_HIDDEN_EXCLUDE_HTML;
+            if (!excludeNodes.has(elem.nodeName.toLowerCase())) {
               const styles = doc.defaultView.getComputedStyle(elemOrig, null);
               if (styles.getPropertyValue("display") === "none") {
                 captureRemoveNode(elem);
