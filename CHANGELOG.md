@@ -3,6 +3,13 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.105.0] - 2021-03-28
+* Fixed an issue that nothing is captured when selecting exactly a single node.
+* Fixed an issue nodes outside the html node are not captured.
+* Improved capture selection to support more special cases, such as a selection outside of the body node.
+* No more generate linefeeds for the capture/save content by default, with a new option `capture.preffyPrint` to tweak the behavior.
+* Added `attach link` to the editor tools.
+
 ## [0.104.1] - 2021-03-27
 * Fixed an issue that special chars (e.g. `<`, `&`, and `>`) in a postit item are not loaded correctly.
 
