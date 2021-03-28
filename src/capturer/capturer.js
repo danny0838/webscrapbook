@@ -2073,7 +2073,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             insertInfoBar: !!newDoc.querySelector('script[data-scrapbook-elem="infobar-loader"]'),
           });
 
-          const content = scrapbook.doctypeToString(newDoc.doctype) + newDoc.documentElement.outerHTML;
+          const content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
           const blob = new Blob([content], {type: "text/html"});
           await server.request({
             url: newIndexUrl + '?a=save',
@@ -3076,7 +3076,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
 
       capturer.log('Rebuilding links...');
-      await capturer.rebuildLinks({timeId});
+      await capturer.rebuildLinks({timeId, options});
       await capturer.generateSiteMap({timeId, path});
     };
 
@@ -3649,6 +3649,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   /**
    * @param {Object} params
    * @param {string} params.timeId
+   * @param {Object} params.options
    */
   capturer.rebuildLinks = async function (params) {
     const rewriteHref = (elem, attr, urlToFilenameMap) => {
@@ -3706,7 +3707,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
     };
 
-    const rebuildLinks = capturer.rebuildLinks = async ({timeId}) => {
+    const rebuildLinks = capturer.rebuildLinks = async ({timeId, options}) => {
       const info = capturer.captureInfo.get(timeId);
       const files = info.files;
       const urlToFilenameMap = info.urlToFilenameMap;
@@ -3725,7 +3726,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         const doc = await scrapbook.readFileAsDocument(blob);
         processRootNode(doc.documentElement, urlToFilenameMap);
 
-        const content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
+        const content = scrapbook.documentToString(doc, options["capture.prettyPrint"]);
         await capturer.saveFileCache({
           timeId,
           path: item.path,

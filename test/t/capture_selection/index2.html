@@ -19,7 +19,7 @@
 <script>
 var sel = window.getSelection();
 var range = document.createRange();
-range.selectNodeContents(document.getElementById("selection"));
+range.selectNode(document.getElementById("selection"));
 sel.addRange(range);
 </script>
 </body>

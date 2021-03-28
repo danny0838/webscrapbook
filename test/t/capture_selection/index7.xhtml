@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8"/>
+<style>img { width: 60px; }</style>
+</head>
+<body>
+<p id="previous">previous content</p>
+<img src="red.bmp"/>
+
+<div id="selection">
+<p id="selected">selected content</p>
+<img src="green.bmp"/>
+</div>
+
+<p id="middle">middle content</p>
+
+<div id="selection2">
+<p id="selected2"><!--comment string--> <![CDATA[x < y > z]]></p>
+<img src="yellow.bmp"/>
+</div>
+
+<p id="next">next content</p>
+<img src="blue.bmp"/>
+
+<script>
+var sel = window.getSelection();
+
+var range = document.createRange();
+range.setStart(document.getElementById("selected").firstChild, 1);
+range.setEnd(document.getElementById("selected").firstChild, 6);
+sel.addRange(range);
+
+var range = document.createRange();
+range.setStart(document.getElementById("selected").firstChild, 9);
+range.setEnd(document.getElementById("selected").firstChild, 12);
+sel.addRange(range);
+
+var range = document.createRange();
+range.setStart(document.getElementById("selected2").firstChild, 3);
+range.setEnd(document.getElementById("selected2").firstChild, 6);
+sel.addRange(range);
+
+var range = document.createRange();
+range.setStart(document.getElementById("selected2").firstChild, 8);
+range.setEnd(document.getElementById("selected2").firstChild, 11);
+sel.addRange(range);
+
+var range = document.createRange();
+range.setStart(document.getElementById("selected2").lastChild, 0);
+range.setEnd(document.getElementById("selected2").lastChild, 1);
+sel.addRange(range);
+
+var range = document.createRange();
+range.setStart(document.getElementById("selected2").lastChild, 8);
+range.setEnd(document.getElementById("selected2").lastChild, 9);
+sel.addRange(range);
+</script>
+</body>
+</html>

@@ -110,6 +110,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.referrerSpoofSource": false,
     "capture.recordDocumentMeta": true,
     "capture.recordRewrites": false,
+    "capture.prettyPrint": false,
     "capture.insertInfoBar": false,
     "capture.helpersEnabled": false,
     "capture.helpers": "",
@@ -2016,13 +2017,42 @@ if (Node && !Node.prototype.getRootNode) {
    * HTML DOM related utilities
    ***************************************************************************/
 
-  scrapbook.doctypeToString = function (doctype) {
-    if (!doctype) { return ""; }
-    let ret = "<!DOCTYPE " + doctype.name;
-    if (doctype.publicId) { ret += ' PUBLIC "' + doctype.publicId + '"'; }
-    if (doctype.systemId) { ret += ' "'        + doctype.systemId + '"'; }
-    ret += ">\n";
-    return ret;
+  scrapbook.documentToString = function (doc, pretty = false) {
+    if (!doc) { return ""; }
+    let afterHtml = false;
+    return Array.prototype.reduce.call(doc.childNodes, (str, node) => {
+      switch (node.nodeType) {
+        // element
+        case 1: {
+          str += node.outerHTML;
+          afterHtml = true;
+          break;
+        }
+        // comment
+        case 8: {
+          str += `<!--${node.nodeValue}-->`;
+          break;
+        }
+        // doctype
+        case 10: {
+          str += '<!DOCTYPE ' + node.name +
+            (node.publicId ? ' PUBLIC "' + node.publicId + '"' : '') +
+            (node.systemId ? ' "' + node.systemId + '"' : '') +
+            '>';
+          break;
+        }
+      }
+
+      // Add a linefeed for pretty output.
+      // Don't do this for a node after <html> as it will be intepreted as
+      // inside <body>.
+      // ref: https://html.spec.whatwg.org/
+      if (pretty && !afterHtml) {
+        str += '\n';
+      }
+
+      return str;
+    }, '');
   };
 
   /**

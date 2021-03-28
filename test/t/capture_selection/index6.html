@@ -13,13 +13,27 @@
 <img src="green.bmp">
 </div>
 
+<p id="middle">middle content</p>
+
+<div id="selection2">
+<p id="selected2">selected2 content</p>
+<img src="yellow.bmp">
+</div>
+
 <p id="next">next content</p>
 <img src="blue.bmp">
 
 <script>
 var sel = window.getSelection();
+
 var range = document.createRange();
-range.selectNodeContents(document.getElementById("selection"));
+range.setStart(document.getElementById("selection"), 0);
+range.setEnd(document.getElementById("selection"), 5);
+sel.addRange(range);
+
+var range = document.createRange();
+range.setStart(document.getElementById("selection2"), 0);
+range.setEnd(document.getElementById("selection2"), 5);
 sel.addRange(range);
 </script>
 </body>

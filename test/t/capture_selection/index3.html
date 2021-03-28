@@ -19,7 +19,8 @@
 <script>
 var sel = window.getSelection();
 var range = document.createRange();
-range.selectNodeContents(document.getElementById("selection"));
+range.setStart(document.getElementById("selected").firstChild, 1);
+range.setEnd(document.getElementById("selected").firstChild, 6);
 sel.addRange(range);
 </script>
 </body>

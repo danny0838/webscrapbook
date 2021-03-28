@@ -9,7 +9,7 @@
 <img src="red.bmp">
 
 <div id="selection">
-<p id="selected">selected content</p>
+<p id="selected">selected <!--comment string--> content</p>
 <img src="green.bmp">
 </div>
 
@@ -19,7 +19,8 @@
 <script>
 var sel = window.getSelection();
 var range = document.createRange();
-range.selectNodeContents(document.getElementById("selection"));
+range.setStart(document.getElementById("selected").childNodes[1], 3);
+range.setEnd(document.getElementById("selected").childNodes[1], 6);
 sel.addRange(range);
 </script>
 </body>

@@ -548,7 +548,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
       await Promise.all(tasks);
 
-      const content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
+      const content = scrapbook.documentToString(doc);
       return new Blob([content], {type: doc.contentType});
     },
 

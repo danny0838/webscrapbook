@@ -1335,25 +1335,218 @@ async function test_capture_selection() {
   var doc = await readFileAsDocument(indexBlob);
 
   // selected elements and resources
+  var selectedParentElem = doc.querySelector('#selection');
+  assert(selectedParentElem);
   assert(doc.querySelector('#selected'));
   assert(doc.querySelector('img[src="green.bmp"]'));
   assert(zip.files["green.bmp"]);
 
-  // the parents should also be included
-  assert(doc.querySelector('#selection'));
+  assert(selectedParentElem.firstChild.nodeType === 8);
+  assert(selectedParentElem.firstChild.nodeValue === 'scrapbook-capture-selected');
+  assert(selectedParentElem.lastChild.nodeType === 8);
+  assert(selectedParentElem.lastChild.nodeValue === '/scrapbook-capture-selected');
 
-  // Some browser supports multiple selection (e.g. Firefox), while some doesn't
-  if (doc.querySelector('#selected2')) {
-    assert(doc.querySelector('#selected2'));
-    assert(doc.querySelector('img[src="yellow.bmp"]'));
-    assert(zip.files["yellow.bmp"]);
-    assert(doc.querySelector('#selection2'));
-  } else {
-    assert(!doc.querySelector('#selected2'));
-    assert(!doc.querySelector('img[src="yellow.bmp"]'));
-    assert(!zip.files["yellow.bmp"]);
-    assert(!doc.querySelector('#selection2'));
+  // non-selected elements and resources
+  assert(!doc.querySelector('#previous'));
+  assert(!doc.querySelector('img[src="red.bmp"]'));
+  assert(!zip.files["red.bmp"]);
+
+  assert(!doc.querySelector('#next'));
+  assert(!doc.querySelector('img[src="blue.bmp"]'));
+  assert(!zip.files["blue.bmp"]);
+}
+
+/**
+ * Test selecting single node
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_selection2() {
+  var blob = await capture({
+    url: `${localhost}/capture_selection/index2.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  // selected elements and resources
+  var selectedElem = doc.querySelector('#selection');
+  assert(selectedElem);
+  assert(doc.querySelector('#selected'));
+  assert(doc.querySelector('img[src="green.bmp"]'));
+  assert(zip.files["green.bmp"]);
+
+  assert(selectedElem.previousSibling.nodeType === 8);
+  assert(selectedElem.previousSibling.nodeValue === 'scrapbook-capture-selected');
+  assert(selectedElem.nextSibling.nodeType === 8);
+  assert(selectedElem.nextSibling.nodeValue === '/scrapbook-capture-selected');
+
+  // non-selected elements and resources
+  assert(!doc.querySelector('#previous'));
+  assert(!doc.querySelector('img[src="red.bmp"]'));
+  assert(!zip.files["red.bmp"]);
+
+  assert(!doc.querySelector('#next'));
+  assert(!doc.querySelector('img[src="blue.bmp"]'));
+  assert(!zip.files["blue.bmp"]);
+}
+
+/**
+ * Test selecting text node
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_selection3() {
+  var blob = await capture({
+    url: `${localhost}/capture_selection/index3.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  // selected elements and resources
+  assert(doc.querySelector('#selection'));
+  assert(doc.querySelector('#selected'));
+  assert(doc.querySelector('#selected').textContent === 'elect');
+  assert(doc.querySelector('#selected').firstChild.nodeType === 8);
+  assert(doc.querySelector('#selected').firstChild.nodeValue === 'scrapbook-capture-selected');
+  assert(doc.querySelector('#selected').lastChild.nodeType === 8);
+  assert(doc.querySelector('#selected').lastChild.nodeValue === '/scrapbook-capture-selected');
+
+  // non-selected elements and resources
+  assert(!doc.querySelector('img[src="green.bmp"]'));
+  assert(!zip.files["green.bmp"]);
+
+  assert(!doc.querySelector('#previous'));
+  assert(!doc.querySelector('img[src="red.bmp"]'));
+  assert(!zip.files["red.bmp"]);
+
+  assert(!doc.querySelector('#next'));
+  assert(!doc.querySelector('img[src="blue.bmp"]'));
+  assert(!zip.files["blue.bmp"]);
+}
+
+/**
+ * Test selecting comment node
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_selection4() {
+  var blob = await capture({
+    url: `${localhost}/capture_selection/index4.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  // selected elements and resources
+  assert(doc.querySelector('#selection'));
+  assert(doc.querySelector('#selected'));
+  assert(doc.querySelector('#selected').childNodes[1].nodeType === 8);
+  assert(doc.querySelector('#selected').childNodes[1].nodeValue === 'men');
+  assert(doc.querySelector('#selected').firstChild.nodeType === 8);
+  assert(doc.querySelector('#selected').firstChild.nodeValue === 'scrapbook-capture-selected');
+  assert(doc.querySelector('#selected').lastChild.nodeType === 8);
+  assert(doc.querySelector('#selected').lastChild.nodeValue === '/scrapbook-capture-selected');
+
+  // non-selected elements and resources
+  assert(!doc.querySelector('img[src="green.bmp"]'));
+  assert(!zip.files["green.bmp"]);
+
+  assert(!doc.querySelector('#previous'));
+  assert(!doc.querySelector('img[src="red.bmp"]'));
+  assert(!zip.files["red.bmp"]);
+
+  assert(!doc.querySelector('#next'));
+  assert(!doc.querySelector('img[src="blue.bmp"]'));
+  assert(!zip.files["blue.bmp"]);
+}
+
+/**
+ * Test selecting CDATA node
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_selection5() {
+  var blob = await capture({
+    url: `${localhost}/capture_selection/index5.xhtml`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.xhtml');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "application/xhtml+xml"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  // selected elements and resources
+  assert(doc.querySelector('#selection'));
+  assert(doc.querySelector('#selected'));
+  assert(doc.querySelector('#selected').childNodes[1].nodeType === 4);
+  assert(doc.querySelector('#selected').childNodes[1].nodeValue === '< y >');
+  assert(doc.querySelector('#selected').firstChild.nodeType === 8);
+  assert(doc.querySelector('#selected').firstChild.nodeValue === 'scrapbook-capture-selected');
+  assert(doc.querySelector('#selected').lastChild.nodeType === 8);
+  assert(doc.querySelector('#selected').lastChild.nodeValue === '/scrapbook-capture-selected');
+
+  // non-selected elements and resources
+  assert(!doc.querySelector('img[src="green.bmp"]'));
+  assert(!zip.files["green.bmp"]);
+
+  assert(!doc.querySelector('#previous'));
+  assert(!doc.querySelector('img[src="red.bmp"]'));
+  assert(!zip.files["red.bmp"]);
+
+  assert(!doc.querySelector('#next'));
+  assert(!doc.querySelector('img[src="blue.bmp"]'));
+  assert(!zip.files["blue.bmp"]);
+}
+
+/**
+ * Test multiple selections
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_selection6() {
+  var blob = await capture({
+    url: `${localhost}/capture_selection/index6.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  // Some browsers support multiple selection (e.g. Firefox), while some don't
+  // Skip test if not support.
+  if (!doc.querySelector('#selection2')) {
+    return;
   }
+
+  // selected elements and resources
+  assert(doc.querySelector('#selection'));
+  assert(doc.querySelector('#selected'));
+  assert(doc.querySelector('img[src="green.bmp"]'));
+  assert(zip.files["green.bmp"]);
+
+  assert(doc.querySelector('#selection2'));
+  assert(doc.querySelector('#selected2'));
+  assert(doc.querySelector('img[src="yellow.bmp"]'));
+  assert(zip.files["yellow.bmp"]);
 
   // non-selected elements and resources
   assert(!doc.querySelector('#previous'));
@@ -1361,6 +1554,106 @@ async function test_capture_selection() {
   assert(!zip.files["red.bmp"]);
 
   assert(!doc.querySelector('#middle'));
+
+  assert(!doc.querySelector('#next'));
+  assert(!doc.querySelector('img[src="blue.bmp"]'));
+  assert(!zip.files["blue.bmp"]);
+}
+
+/**
+ * Test multiple selections of text and comment
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_selection7() {
+  var blob = await capture({
+    url: `${localhost}/capture_selection/index7.xhtml`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.xhtml');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "application/xhtml+xml"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  // Some browsers support multiple selection (e.g. Firefox), while some don't
+  // Skip test if not support.
+  if (!doc.querySelector('#selection2')) {
+    return;
+  }
+
+  // selected elements and resources
+  assert(doc.querySelector('#selection'));
+  assert(doc.querySelector('#selected'));
+
+  assert(doc.querySelector('#selected').childNodes[0].nodeType === 8);
+  assert(doc.querySelector('#selected').childNodes[0].nodeValue === 'scrapbook-capture-selected');
+  assert(doc.querySelector('#selected').childNodes[1].nodeType === 3);
+  assert(doc.querySelector('#selected').childNodes[1].nodeValue === 'elect');
+  assert(doc.querySelector('#selected').childNodes[2].nodeType === 8);
+  assert(doc.querySelector('#selected').childNodes[2].nodeValue === '/scrapbook-capture-selected');
+  assert(doc.querySelector('#selected').childNodes[3].nodeType === 8);
+  assert(doc.querySelector('#selected').childNodes[3].nodeValue === 'scrapbook-capture-selected-splitter');
+  assert(doc.querySelector('#selected').childNodes[4].nodeType === 3);
+  assert(doc.querySelector('#selected').childNodes[4].nodeValue === ' … ');
+  assert(doc.querySelector('#selected').childNodes[5].nodeType === 8);
+  assert(doc.querySelector('#selected').childNodes[5].nodeValue === '/scrapbook-capture-selected-splitter');
+  assert(doc.querySelector('#selected').childNodes[6].nodeType === 8);
+  assert(doc.querySelector('#selected').childNodes[6].nodeValue === 'scrapbook-capture-selected');
+  assert(doc.querySelector('#selected').childNodes[7].nodeType === 3);
+  assert(doc.querySelector('#selected').childNodes[7].nodeValue === 'con');
+  assert(doc.querySelector('#selected').childNodes[8].nodeType === 8);
+  assert(doc.querySelector('#selected').childNodes[8].nodeValue === '/scrapbook-capture-selected');
+
+  assert(doc.querySelector('#selection2'));
+  assert(doc.querySelector('#selected2'));
+
+  assert(doc.querySelector('#selected2').childNodes[0].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[0].nodeValue === 'scrapbook-capture-selected');
+  assert(doc.querySelector('#selected2').childNodes[1].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[1].nodeValue === 'men');
+  assert(doc.querySelector('#selected2').childNodes[2].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[2].nodeValue === '/scrapbook-capture-selected');
+  assert(doc.querySelector('#selected2').childNodes[3].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[3].nodeValue === 'scrapbook-capture-selected-splitter');
+  assert(doc.querySelector('#selected2').childNodes[4].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[4].nodeValue === ' … ');
+  assert(doc.querySelector('#selected2').childNodes[5].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[5].nodeValue === '/scrapbook-capture-selected-splitter');
+  assert(doc.querySelector('#selected2').childNodes[6].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[6].nodeValue === 'scrapbook-capture-selected');
+  assert(doc.querySelector('#selected2').childNodes[7].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[7].nodeValue === 'str');
+  assert(doc.querySelector('#selected2').childNodes[8].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[8].nodeValue === '/scrapbook-capture-selected');
+
+  assert(doc.querySelector('#selected2').childNodes[9].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[9].nodeValue === 'scrapbook-capture-selected');
+  assert(doc.querySelector('#selected2').childNodes[10].nodeType === 4);
+  assert(doc.querySelector('#selected2').childNodes[10].nodeValue === 'x');
+  assert(doc.querySelector('#selected2').childNodes[11].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[11].nodeValue === '/scrapbook-capture-selected');
+  assert(doc.querySelector('#selected2').childNodes[12].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[12].nodeValue === 'scrapbook-capture-selected-splitter');
+  assert(doc.querySelector('#selected2').childNodes[13].nodeType === 3);
+  assert(doc.querySelector('#selected2').childNodes[13].nodeValue === ' … ');
+  assert(doc.querySelector('#selected2').childNodes[14].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[14].nodeValue === '/scrapbook-capture-selected-splitter');
+  assert(doc.querySelector('#selected2').childNodes[15].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[15].nodeValue === 'scrapbook-capture-selected');
+  assert(doc.querySelector('#selected2').childNodes[16].nodeType === 4);
+  assert(doc.querySelector('#selected2').childNodes[16].nodeValue === 'z');
+  assert(doc.querySelector('#selected2').childNodes[17].nodeType === 8);
+  assert(doc.querySelector('#selected2').childNodes[17].nodeValue === '/scrapbook-capture-selected');
+
+  // non-selected elements and resources
+  assert(!doc.querySelector('img[src="green.bmp"]'));
+  assert(!zip.files["green.bmp"]);
+
+  assert(!doc.querySelector('#previous'));
+  assert(!doc.querySelector('img[src="red.bmp"]'));
+  assert(!zip.files["red.bmp"]);
 
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));

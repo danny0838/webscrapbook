@@ -1829,7 +1829,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
             metaViewportNode.setAttribute('name', 'viewport');
             metaViewportNode.setAttribute('content', 'width=device-width');
           }
-          content = scrapbook.doctypeToString(doc.doctype) + doc.documentElement.outerHTML;
+          content = scrapbook.documentToString(doc);
           break;
         }
         default: {
