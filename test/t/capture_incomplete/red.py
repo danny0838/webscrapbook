@@ -4,9 +4,8 @@ import os
 import time
 
 file = os.path.join(os.path.dirname(__file__), "red.bmp")
-with open(file, 'rb') as f:
-    blob = f.read()
-    f.close()
+with open(file, 'rb') as fh:
+    blob = fh.read()
 
 time.sleep(10)
 

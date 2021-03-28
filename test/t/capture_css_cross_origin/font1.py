@@ -7,4 +7,5 @@ Content-Disposition: attachment; filename="font1.woff"
 Access-Control-Allow-Origin: *
 
 """.encode("ASCII"))
-sys.stdout.buffer.write(open("font.woff", 'rb').read())
+with open("font.woff", 'rb') as fh:
+    sys.stdout.buffer.write(fh.read())

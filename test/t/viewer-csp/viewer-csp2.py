@@ -17,8 +17,8 @@ def zip_folder(dir):
                 arcname = (arcname + '/' + file) if arcname else file
                 file = os.path.join(root, file)
                 zip.write(file, arcname)
-        zip.writestr('index.html', open(os.path.join(dir, "index.html"), "r").read().format(port=port))
-        zip.close()
+        with open(os.path.join(dir, "index.html"), "r") as fh:
+            zip.writestr('index.html', fh.read().format(port=port))
     return blob
 
 basename, _ = os.path.splitext(os.path.basename(__file__))

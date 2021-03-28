@@ -31,8 +31,9 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
             head, tail = os.path.splitext(path)
             if tail.lower() in (".pyr",):
                 port = json.loads(os.environ['wsb.config'])['server_port2']
-                port = '' if port == 80 else ':' + str(port)            
-                new_url = open(path, "r").read().format(port=port)
+                port = '' if port == 80 else ':' + str(port)
+                with open(path, "r") as fh:
+                    new_url = fh.read().format(port=port)
 
                 self.send_response(302, "Found")
                 self.send_header("Location", new_url)
@@ -60,17 +61,15 @@ class HTTPRequestHandler(http.server.CGIHTTPRequestHandler):
 def main():
     # load config.json
     config_file = os.path.join(os.path.dirname(__file__), 'config.json')
-    with open(config_file, 'r', encoding='UTF-8') as f:
-        config = json.load(f)
-        f.close()
+    with open(config_file, 'r', encoding='UTF-8') as fh:
+        config = json.load(fh)
 
     # load config.local.json if exist
     try:
         config_file = os.path.join(os.path.dirname(__file__), 'config.local.json')
-        with open(config_file, 'r', encoding='UTF-8') as f:
-            config_local = json.load(f)
+        with open(config_file, 'r', encoding='UTF-8') as fh:
+            config_local = json.load(fh)
             config = {**config, **config_local}
-            f.close()
     except:
         pass
 

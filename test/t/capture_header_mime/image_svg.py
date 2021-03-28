@@ -4,8 +4,8 @@ import sys
 import shutil
 
 os.chdir(os.path.dirname(sys.argv[0]))
-with open("image.svg", "rb") as f:
+with open("image.svg", "rb") as fh:
     sys.stdout.buffer.write(b"""Content-Type: image/svg+xml
 
 """)
-    shutil.copyfileobj(f, sys.stdout.buffer)
+    shutil.copyfileobj(fh, sys.stdout.buffer)

@@ -4,8 +4,8 @@ import sys
 import shutil
 
 os.chdir(os.path.dirname(sys.argv[0]))
-with open("image.bmp", "rb") as f:
+with open("image.bmp", "rb") as fh:
     sys.stdout.buffer.write(b"""Content-Type: image/bmp
 
 """)
-    shutil.copyfileobj(f, sys.stdout.buffer)
+    shutil.copyfileobj(fh, sys.stdout.buffer)
