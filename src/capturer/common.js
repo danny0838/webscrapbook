@@ -1969,7 +1969,7 @@
 
     const {doc = document, settings} = params;
     const {timeId, isHeadless, isMainPage, isMainFrame} = settings;
-    const {contentType: mime, documentElement: htmlNode} = doc;
+    const {contentType: mime, documentElement: docElemNode} = doc;
 
     // allow overwriting by capture helpers
     let {options} = params;
@@ -2003,7 +2003,7 @@
 
     // create a new document to replicate nodes via import
     const newDoc = (new DOMParser()).parseFromString(
-      '<' + htmlNode.nodeName.toLowerCase() + '/>',
+      '<' + docElemNode.nodeName.toLowerCase() + '/>',
       DOMPARSER_SUPPORT_TYPES.has(mime) ? mime : 'text/html'
     );
 
@@ -2098,7 +2098,7 @@
 
           // For the first range, clone html and head.
           if (iRange === 0) {
-            rootNode = cloneNodeMapping(htmlNode, false);
+            rootNode = cloneNodeMapping(docElemNode, false);
 
             if (rootNode.nodeName.toLowerCase() === "html") {
               headNode = doc.querySelector("head");
@@ -2211,7 +2211,7 @@
 
       // not capture selection: clone all nodes
       if (!selection) {
-        rootNode = cloneNodeMapping(htmlNode, true);
+        rootNode = cloneNodeMapping(docElemNode, true);
 
         if (rootNode.nodeName.toLowerCase() === "html") {
           headNode = rootNode.querySelector("head");
@@ -2650,17 +2650,17 @@
         }
       };
 
-      const {contentType: mime, characterSet: charset, documentElement: htmlNode} = doc;
+      const {contentType: mime, characterSet: charset, documentElement: docElemNode} = doc;
 
       // create a new document to replicate nodes via import
       const newDoc = (new DOMParser()).parseFromString(
-        '<' + htmlNode.nodeName.toLowerCase() + '/>',
+        '<' + docElemNode.nodeName.toLowerCase() + '/>',
         DOMPARSER_SUPPORT_TYPES.has(mime) ? mime : 'text/html'
       );
 
       const origNodeMap = new WeakMap();
       const clonedNodeMap = new WeakMap();
-      const rootNode = cloneNodeMapping(htmlNode, true);
+      const rootNode = cloneNodeMapping(docElemNode, true);
       const isMainFrame = i === 0;
       const info = {
         isMainFrame,
