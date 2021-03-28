@@ -21,7 +21,7 @@ os.chdir(os.path.dirname(__file__))
 blob = zip_folder(basename)
 
 sys.stdout.buffer.write("""Content-Type: application/x-maff
-Content-Disposition: attachment; filename="{}.maff"
+Content-Disposition: inline; filename="{}.maff"
 
 """.format(basename).encode("ASCII"))
 sys.stdout.buffer.write(blob.getvalue())

@@ -21,7 +21,7 @@ os.chdir(os.path.dirname(__file__))
 blob = zip_folder(basename)
 
 sys.stdout.buffer.write("""Content-Type: application/html+zip
-Content-Disposition: attachment; filename="{}.htz"
+Content-Disposition: inline; filename="{}.htz"
 
 """.format(basename).encode("ASCII"))
 sys.stdout.buffer.write(blob.getvalue())
