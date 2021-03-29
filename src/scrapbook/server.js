@@ -114,7 +114,7 @@
       cache = 'no-cache',
       csrfToken = false,
       format,
-    } = {}) {
+    }) {
       if (!method) {
         method = (body || csrfToken) ? 'POST' : 'GET';
       }
@@ -817,7 +817,7 @@
       callback,
       mode,
       timeout = 5,
-    } = {}) {
+    }) {
       let lockId;
       let keeper;
 
