@@ -96,9 +96,7 @@
      * @param {Array} params.recurseChain
      * @return {Promise<string>} The object URL of the file.
      */
-    async fetchFile(params) {
-      const {inZipPath, rewriteFunc, recurseChain} = params;
-
+    async fetchFile({inZipPath, rewriteFunc, recurseChain}) {
       const f = viewer.inZipFiles.get(inZipPath);
       if (f) {
         if (rewriteFunc) {
@@ -125,9 +123,7 @@
      * @param {Array} params.recurseChain
      * @return {Promise<string>} The URL of the page.
      */
-    async fetchPage(params) {
-      const {inZipPath, url, recurseChain} = params;
-
+    async fetchPage({inZipPath, url, recurseChain}) {
       let searchAndHash = "";
       if (url) {
         const [base, search, hash] = scrapbook.splitUrl(url);
@@ -135,8 +131,7 @@
       }
       const fetchedUrl = await viewer.fetchFile({
         inZipPath: inZipPath,
-        rewriteFunc: async (params) => {
-          const {data, charset, recurseChain} = params;
+        rewriteFunc: async ({data, charset, recurseChain}) => {
           if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(data.type)) {
             try {
               const doc = await scrapbook.readFileAsDocument(data);
@@ -164,7 +159,7 @@
      * @param {Array} params.recurseChain
      * @return {Promise<Blob>}
      */
-    async parseDocument(params) {
+    async parseDocument({doc, inZipPath, recurseChain}) {
       const rewriteUrl = function (url, refUrlOverwrite) {
         return viewer.parseUrl(url, refUrlOverwrite || refUrl).url;
       };
@@ -528,8 +523,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         return elem;
       };
 
-      const {doc, inZipPath, recurseChain} = params;
-
       const refUrl = viewer.inZipPathToUrl(inZipPath);
       const tasks = [];
 
@@ -552,9 +545,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
       return new Blob([content], {type: doc.contentType});
     },
 
-    async processCssFile(params) {
-      const {data, charset, url: refUrl, recurseChain} = params;
-
+    async processCssFile({data, charset, url: refUrl, recurseChain}) {
       return await scrapbook.rewriteCssFile(data, charset, async (text) => {
         return await viewer.processCssText(text, refUrl, recurseChain);
       });

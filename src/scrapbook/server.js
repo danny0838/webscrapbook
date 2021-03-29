@@ -105,18 +105,16 @@
      * @param {boolean} [params.csrfToken]
      * @param {string} [params.format]
      */
-    async request(params = {}) {
-      let {
-        url,
-        method,
-        headers,
-        body,
-        credentials = 'include',
-        cache = 'no-cache',
-        csrfToken = false,
-        format,
-      } = params;
-
+    async request({
+      url,
+      method,
+      headers,
+      body,
+      credentials = 'include',
+      cache = 'no-cache',
+      csrfToken = false,
+      format,
+    } = {}) {
       if (!method) {
         method = (body || csrfToken) ? 'POST' : 'GET';
       }
@@ -220,16 +218,14 @@
      * @param {boolean} [params.csrfToken]
      * @param {Function} [params.onMessage]
      */
-    async requestSse(params = {}) {
-      let {
-        url = this.serverRoot,
-        query,
-        credentials = 'include',
-        cache = 'no-cache',
-        csrfToken = true,
-        onMessage,
-      } = params;
-
+    async requestSse({
+      url = this.serverRoot,
+      query,
+      credentials = 'include',
+      cache = 'no-cache',
+      csrfToken = true,
+      onMessage,
+    } = {}) {
       if (!(url instanceof URL)) {
         url = new URL(url);
       }
@@ -627,8 +623,10 @@
       return this.fulltext = await this.loadTreeFile('fulltext');
     }
 
-    async lockTree(params = {}) {
-      const {id, timeout = 5} = params;
+    async lockTree({
+      id,
+      timeout = 5,
+    } = {}) {
       const json = await this.server.request({
         url: this.topUrl + '?a=lock',
         method: "POST",
@@ -643,8 +641,7 @@
       return json.data;
     }
 
-    async unlockTree(params = {}) {
-      const {id} = params;
+    async unlockTree({id} = {}) {
       await this.server.request({
         url: this.topUrl + '?a=unlock',
         method: "POST",
@@ -816,12 +813,11 @@
      *     - "validate": validate tree before the request and fail out if
      *       remote tree has been updated.
      */
-    async transaction(params = {}) {
-      const {
-          callback,
-          mode,
-          timeout = 5,
-        } = params;
+    async transaction({
+      callback,
+      mode,
+      timeout = 5,
+    } = {}) {
       let lockId;
       let keeper;
 
@@ -897,13 +893,11 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
      * @param {integer} params.index - Infinity to insert to last
      * @return {Object}
      */
-    addItem(params) {
-      let {
-        item,
-        parentId = 'root',
-        index = Infinity,
-      } = params;
-
+    addItem({
+      item,
+      parentId = 'root',
+      index = Infinity,
+    }) {
       // generate a cloned item, with keys sorted in a predefined order
       item = Object.assign(this.defaultMeta, item);
 
@@ -946,13 +940,11 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
      * @param {integer} params.index
      * @return {Set} a set of removed items
      */
-    removeItemTree(params) {
-      let {
-        id,
-        parentId,
-        index,
-      } = params;
-
+    removeItemTree({
+      id,
+      parentId,
+      index,
+    }) {
       // reachable items
       const allItems = new Set();
       this.getReachableItems('root', allItems);
@@ -1004,15 +996,13 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
      * @param {integer} [params.targetIndex] - Infinity to insert to last
      * @return {integer} the real insertion index
      */
-    recycleItemTree(params) {
-      let {
-        id,
-        currentParentId,
-        currentIndex,
-        targetParentId = 'recycle',
-        targetIndex = Infinity,
-      } = params;
-
+    recycleItemTree({
+      id,
+      currentParentId,
+      currentIndex,
+      targetParentId = 'recycle',
+      targetIndex = Infinity,
+    }) {
       // remove from parent TOC
       if (currentParentId && this.toc[currentParentId]) {
         this.toc[currentParentId].splice(currentIndex, 1);
@@ -1057,15 +1047,13 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
      * @param {integer} [params.targetIndex] - Infinity to insert to last
      * @return {integer} the real insertion index
      */
-    moveItem(params) {
-      let {
-        id,
-        currentParentId,
-        currentIndex,
-        targetParentId,
-        targetIndex = Infinity,
-      } = params;
-
+    moveItem({
+      id,
+      currentParentId,
+      currentIndex,
+      targetParentId,
+      targetIndex = Infinity,
+    }) {
       // fix when moving within the same parent
       // -1 as the current item will be removed from the original position
       if (currentParentId === targetParentId && targetIndex > currentIndex) {
@@ -1260,9 +1248,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
      * @param {string} params.icon - icon URL to cache
      * @return {Promise<string>} the new icon URL
      */
-    async cacheFavIcon(params) {
-      const {book, item, icon} = params;
-
+    async cacheFavIcon({book, item, icon}) {
       const getShaFile = (data) => {
         if (!data) { throw new Error(`Unable to fetch a file for this favicon URL.`); }
 

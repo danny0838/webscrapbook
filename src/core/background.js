@@ -511,9 +511,10 @@
    * @param {boolean} [params.populate]
    * @param {WindowType[]} [params.windowTypes]
    */
-  background.getLastFocusedWindow = async function (params = {}) {
-    const {populate = false, windowTypes = ['normal', 'popup']} = params;
-
+  background.getLastFocusedWindow = async function ({
+    populate = false,
+    windowTypes = ['normal', 'popup'],
+  } = {}) {
     const wins = (await browser.windows.getAll({populate}))
       // Firefox does not support windowTypes for windows.getAll,
       // so use filter instead.
