@@ -2120,7 +2120,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           if (options["capture.backupForRecapture"]) {
             capturer.log(`Moving old data files "${index}" to backup directory "${timeId}"...`);
             await server.request({
-              url: target + `?a=backup&ts=${timeId}&move=1`,
+              url: target + `?a=backup&ts=${timeId}&note=recapture&move=1`,
               method: "POST",
               format: 'json',
               csrfToken: true,
