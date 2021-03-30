@@ -26,6 +26,8 @@
   // this should correspond with the lock stale time in the backend server
   const LOCK_STALE_TIME = 60 * 1000;
 
+  const TRANSCATION_BACKUP_TREE_FILES_REGEX = /^(meta|toc)\d*\.js$/i;
+
   const TEMPLATE_DIR = '/templates/';
   const TEMPLATES = {
     'html': {
@@ -821,15 +823,20 @@
      *       the remote tree has been updated.
      *     - "refresh": refresh the tree before the request and pass an extra
      *        param about whether the remote tree has been updated.
+     * @param {boolean} [params.autoBackup] - whether to automatically create a
+     *     temporary tree backup before a transaction and remove after success.
      */
     async transaction({
       callback,
       mode,
+      autoBackup = true,
       timeout = 5,
     }) {
       let lockId;
       let keeper;
       let updated;
+      let backupTs;
+      let backupNote = 'transaction';
 
       // lock the tree
       try {
@@ -864,8 +871,43 @@
           }
         }
 
+        // auto backup
+        if (autoBackup) {
+          backupTs = scrapbook.dateToId();
+
+          // Load tree files if not done yet.
+          if (!this.treeFiles) {
+            await this.loadTreeFiles();
+          }
+
+          for (const [filename] of this.treeFiles) {
+            if (TRANSCATION_BACKUP_TREE_FILES_REGEX.test(filename)) {
+              await this.server.request({
+                url: this.treeUrl + filename + `?a=backup&ts=${backupTs}&note=${backupNote}`,
+                method: "POST",
+                format: 'json',
+                csrfToken: true,
+              });
+            }
+          }
+        }
+
         // run the callback
         await callback.call(this, this, updated);
+
+        // clear auto backup if transaction successful
+        if (backupTs) {
+          try {
+            await this.server.request({
+              url: this.treeUrl + `?a=unbackup&ts=${backupTs}&note=${backupNote}`,
+              method: "POST",
+              format: 'json',
+              csrfToken: true,
+            });
+          } catch (ex) {
+            console.error(ex);
+          }
+        }
       } finally {
         // clear keeper
         clearInterval(keeper);
