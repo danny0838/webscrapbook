@@ -1661,39 +1661,29 @@
         await book.loadTreeFiles(true);  // update treeLastModified
       };
 
-      if (sourceBook !== targetBook) {
-        await sourceBook.transaction({
-          mode: 'validate',
-          callback: async (book) => {
-            // validate if the dragging source is up to date
-            if (treeLastModified !== book.treeLastModified) {
-              this.warn(scrapbook.lang('ScrapBookErrorSourceTreeOutdated'));
-              return;
-            }
+      await sourceBook.transaction({
+        mode: 'validate',
+        callback: async (sourceBook) => {
+          // validate if the dragging source is up to date
+          if (treeLastModified !== sourceBook.treeLastModified) {
+            this.warn(scrapbook.lang('ScrapBookErrorSourceTreeOutdated'));
+            return;
+          }
 
-            await book.loadMeta();
-            await book.loadToc();
+          if (sourceBook !== targetBook) {
+            await sourceBook.loadMeta();
+            await sourceBook.loadToc();
 
             await targetBook.transaction({
               mode: 'validate',
               callback: _copyItems,
             });
-          },
-        });
-      } else {
-        await targetBook.transaction({
-          mode: 'validate',
-          callback: async (book) => {
-            // validate if the dragging source is up to date
-            if (treeLastModified !== book.treeLastModified) {
-              this.warn(scrapbook.lang('ScrapBookErrorSourceTreeOutdated'));
-              return;
-            }
+            return;
+          }
 
-            await _copyItems(book);
-          },
-        });
-      }
+          await _copyItems(sourceBook);
+        },
+      });
     },
 
     async uploadItems(files, targetId, targetIndex) {
