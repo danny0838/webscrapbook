@@ -96,9 +96,9 @@
         const book = server.books[bookId];
 
         await book.transaction({
-          callback: async (book) => {
-            const refresh = !await book.validateTree();
-            const meta = await book.loadMeta(refresh);
+          mode: 'refresh',
+          callback: async (book, updated) => {
+            const meta = await book.loadMeta(updated);
 
             const item = meta[id];
             if (!item) {

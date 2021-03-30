@@ -605,11 +605,11 @@
 
     // lock tree before loading to avoid a conflict due to parallel captures
     await book.transaction({
+      mode: 'refresh',
       timeout: 60,
-      callback: async (book) => {
-        const refresh = !await book.validateTree();
-        await book.loadMeta(refresh);
-        await book.loadToc(refresh);
+      callback: async (book, updated) => {
+        await book.loadMeta(updated);
+        await book.loadToc(updated);
 
         // insert to root if parentId does not exist
         if (parentId && !book.meta[parentId] && !book.isSpecialItem(parentId)) {
@@ -1827,9 +1827,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     let result;
     await book.transaction({
-      callback: async (book) => {
-        const refresh = !await book.validateTree();
-        await book.loadMeta(refresh);
+      mode: 'refresh',
+      callback: async (book, updated) => {
+        await book.loadMeta(updated);
         const item = book.meta[itemId];
         if (!item) {
           throw new Error(`Recapture reference item invalid: "${itemId}".`);
@@ -2181,9 +2181,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     let result;
     await book.transaction({
-      callback: async (book) => {
-        const refresh = !await book.validateTree();
-        await book.loadMeta(refresh);
+      mode: 'refresh',
+      callback: async (book, updated) => {
+        await book.loadMeta(updated);
         const item = book.meta[itemId];
         if (!item) {
           throw new Error(`Merge capture reference item invalid: "${itemId}".`);

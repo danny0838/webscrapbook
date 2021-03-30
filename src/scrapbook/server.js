@@ -795,8 +795,15 @@
       }
     }
 
+
     /**
-     * A high-level wrapper for common request series.
+     * @callback transactionCallback
+     * @param {Book} book - the Book the transaction is performed on.
+     * @param {boolean} [updated] - whether the server tree has been updated.
+     */
+
+    /**
+     * A high-level wrapper for common tree-releated request series.
      *
      * - Acquire a lock.
      * - Do a series of requests.
@@ -806,12 +813,14 @@
      * NOTE: this is NOT a true transaction, which supports atomic and rollback.
      *
      * @param {Object} params
-     * @param {Function} params.callback - the callback function for requests
-     *     to perform.
+     * @param {transactionCallback} params.callback - the callback function to
+     *     peform the tasks.
      * @param {integer} [params.timeout] - timeout for lock.
      * @param {string} [params.mode] - mode for the transaction:
-     *     - "validate": validate tree before the request and fail out if
-     *       remote tree has been updated.
+     *     - "validate": validate the tree before the request and fail out if
+     *       the remote tree has been updated.
+     *     - "refresh": refresh the tree before the request and pass an extra
+     *        param about whether the remote tree has been updated.
      */
     async transaction({
       callback,
@@ -820,7 +829,9 @@
     }) {
       let lockId;
       let keeper;
+      let updated;
 
+      // lock the tree
       try {
         lockId = await this.lockTree({timeout});
       } catch (ex) {
@@ -839,7 +850,7 @@
           await this.lockTree({id: lockId, timeout: refreshAcquireTimeout});
         }, refreshInterval);
 
-        // request
+        // handle requested settings
         switch (mode) {
           case 'validate': {
             if (!await this.validateTree()) {
@@ -847,10 +858,19 @@
             }
             break;
           }
+          case 'refresh': {
+            updated = !await this.validateTree();
+            break;
+          }
         }
-        await callback.call(this, this);
+
+        // run the callback
+        await callback.call(this, this, updated);
       } finally {
+        // clear keeper
         clearInterval(keeper);
+
+        // unlock the tree
         try {
           await this.unlockTree({id: lockId});
         } catch (ex) {
