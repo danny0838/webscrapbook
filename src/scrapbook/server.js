@@ -829,7 +829,7 @@
     async transaction({
       callback,
       mode,
-      autoBackup = true,
+      autoBackup = scrapbook.getOption("scrapbook.transactionAutoBackup"),
       timeout = 5,
     }) {
       let lockId;
