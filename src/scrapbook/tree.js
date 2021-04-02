@@ -263,12 +263,10 @@
         a.title = (meta.title || meta.id) + (meta.source ? '\n' + meta.source : '') + (meta.comment ? '\n\n' + meta.comment : '');
         switch (meta.type) {
           case 'postit': {
-            if (meta.index) {
-              const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
-              u.searchParams.append('id', meta.id);
-              u.searchParams.append('bookId', this.book.id);
-              a.href = u.href;
-            }
+            const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
+            u.searchParams.append('id', meta.id);
+            u.searchParams.append('bookId', this.book.id);
+            a.href = u.href;
             break;
           }
           case 'bookmark': {

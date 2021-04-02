@@ -57,6 +57,10 @@
           throw new Error(`Specified item "${id}" does not exist.`);
         }
 
+        if (!item.index) {
+          throw new Error(`Index of the specified item "${id}" does not exist.`);
+        }
+
         document.title = item.title || ' ';
 
         try {
