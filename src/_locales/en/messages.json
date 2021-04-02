@@ -659,7 +659,7 @@
     "message": "Include these URLs:"
   },
   "OptionCaptureDownLinkDocUrlFilterTooltip": {
-    "message": "This determines what links are for capturing according to URL.\n\n• Each following line is a full URL (with chars following a “#” or space stripped) or a regular expression (e.g. “/^http://example\\.com//”). \n• A link whose full URL (with chars following a “#” stripped) matches a rule at any line is included for downloading. For example, “http://example.com/subpage#h2” matches the rule “http://example.com/subpage SubPageTitle”. Any URL is included if no rule exist in any line.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
+    "message": "This determines what links are for capturing according to URL.\n\n• Each following line is a full URL (with chars following a “#” or space stripped) or a regular expression (e.g. “/^http://example\\.com//”). \n• A link whose full URL (with chars following a “#” stripped) matches a rule at any line is included for downloading. For example, the link “http://example.com/subpage#h2” matches the full URL rule “http://example.com/subpage SubPageTitle” or the regular expression rule “/^http://example\\.com/SubPage\\d*/i SubPageRuleDescription”. Any URL is included if no rule exists in any line.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkFileExtFilterError": {
     "message": "The following regular expressions in file extension filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
@@ -673,7 +673,7 @@
     "message": "Include these file extensions:"
   },
   "OptionCaptureDownLinkFileExtFilterTooltip": {
-    "message": "This determines what links are to be downloaded according to file extension.\n\n• Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. “jpg, jpeg”) or a regular expression (e.g. “/jpe?g|gif|png/i”).\n• A link whose full extension matches a rule at any line is included for download. For example, “http://example.com/file.doc?token=foo” is taken “doc” for matching and does not match the rule “docx”.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
+    "message": "This determines what links are to be downloaded according to file extension.\n\n• Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. “jpg, jpeg”) or a regular expression (e.g. “/jpe?g|gif|png/i”).\n• A link whose full extension matches a rule at any line is included for download. For example, the link “http://example.com/file.doc?token=foo” is taken “doc” for matching and does not match the extensions rule “docx, do”.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "Match HTTP header and file extension"
@@ -713,7 +713,7 @@
     "message": "URL filter:"
   },
   "OptionCaptureDownLinkUrlFilterTooltip": {
-    "message": "This determines what are forbidden for downloading or capturing according to URL.\n\n• Each following line is a full URL (with chars following a “#” or space stripped) or a regular expression (e.g. “/[/=]logout\\b/i”). \n• A link whose full URL (with chars following a “#” stripped) matches a rule at any line is forbidden for downloading.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
+    "message": "This determines what are forbidden for downloading or capturing according to URL.\n\n• Each following line is a full URL (with chars following a “#” or space stripped) or a regular expression (e.g. “/[/=]logout\\b/i”). \n• A link whose full URL (with chars following a “#” stripped) matches a rule at any line is forbidden for downloading. For example, the links “http://example.com/logout” and “http://example.com/?a=LOGOUT” both match the regular expression rule “/[/=]logout\\b/i”.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBEDs:"

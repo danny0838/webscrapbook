@@ -659,7 +659,7 @@
     "message": "包括以下網址:"
   },
   "OptionCaptureDownLinkDocUrlFilterTooltip": {
-    "message": "此過濾器根據網址篩選要擷取的連結。\n\n• 以下每行為一個完整網址（「#」或空白以後的部分會自動去除）或一個正規表示式（如「/^http://example\\.com//」）。\n• 連結的完整網址（去除「#」以後的部分）符合任何一行的規則即列入下載。例如「http://example.com/subpage#h2」視為符合規則「http://example.com/subpage SubPageTitle」。若每行皆無規則，則任何網址皆列入下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
+    "message": "此過濾器根據網址篩選要擷取的連結。\n\n• 以下每行為一個完整網址（「#」或空白以後的部分會自動去除）或一個正規表示式（如「/^http://example\\.com//」）。\n• 連結的完整網址（去除「#」以後的部分）符合任何一行的規則即列入下載。例如連結「http://example.com/subpage#h2」符合完整網址規則「http://example.com/subpage 子頁面標題」或正規表示式規則「/^http://example\\.com/SubPage\\d*/i 子頁面規則描述」。若每行皆無規則，則任何網址皆列入下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
   },
   "OptionCaptureDownLinkFileExtFilterError": {
     "message": "以下副檔名過濾器的正規表示式語法有誤，執行時會略過它們，要停下來修正嗎？\n\n$LINES$",
@@ -673,7 +673,7 @@
     "message": "包括以下副檔名:"
   },
   "OptionCaptureDownLinkFileExtFilterTooltip": {
-    "message": "此過濾器根據副檔名篩選要下載的連結。\n\n• 以下每行為一個以「,」分隔的副檔名列表（不分大小寫，可含空白，如「jpg, jpeg」）或一個正規表示式（如「/jpe?g|gif|png/i」）。\n• 連結的全副檔名符合任何一行的規則即列入下載。例如「http://example.com/file.doc?token=foo」取「doc」比對，不視為符合規則「docx」。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
+    "message": "此過濾器根據副檔名篩選要下載的連結。\n\n• 以下每行為一個以「,」分隔的副檔名列表（不分大小寫，可含空白，如「jpg, jpeg」）或一個正規表示式（如「/jpe?g|gif|png/i」）。\n• 連結的全副檔名符合任何一行的規則即列入下載。例如連結「http://example.com/file.doc?token=foo」取「doc」比對，不符合副檔名列表規則「docx, do」。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
   },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "比對 HTTP 標頭及網址副檔名"
@@ -713,7 +713,7 @@
     "message": "網址過濾器:"
   },
   "OptionCaptureDownLinkUrlFilterTooltip": {
-    "message": "此過濾器根據網址篩選禁止下載或擷取的連結，優先於其他過濾器。\n\n• 以下每行為一個完整網址（「#」或空白以後的部分會自動去除）或一個正規表示式（如「/[/=]logout\\b/i」）。\n• 連結的完整網址（去除「#」以後的部分）符合任何一行的規則即禁止下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
+    "message": "此過濾器根據網址篩選禁止下載或擷取的連結，優先於其他過濾器。\n\n• 以下每行為一個完整網址（「#」或空白以後的部分會自動去除）或一個正規表示式（如「/[/=]logout\\b/i」）。\n• 連結的完整網址（去除「#」以後的部分）符合任何一行的規則即禁止下載。例如連結「http://example.com/logout」和「http://example.com/?a=LOGOUT」都符合正規表示式規則「/[/=]logout\\b/i」。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
