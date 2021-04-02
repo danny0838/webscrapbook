@@ -1882,37 +1882,9 @@ ${scrapbook.escapeHtml(content)}
 
       async opentab({itemElems}) {
         for (const elem of itemElems) {
-          const id = elem.getAttribute('data-id');
-          const item = this.book.meta[id];
-          switch (item.type) {
-            case 'folder':
-            case 'separator': {
-              break;
-            }
-            case 'bookmark': {
-              if (item.source) {
-                await this.openLink(item.source, true);
-              }
-              break;
-            }
-            case 'postit': {
-              if (item.index) {
-                const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
-                u.searchParams.append('id', id);
-                u.searchParams.append('bookId', this.book.id);
-                await this.openLink(u.href, true);
-              }
-              break;
-            }
-            case 'file':
-            default: {
-              if (item.index) {
-                const target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
-                await this.openLink(target, true);
-              }
-              break;
-            }
-          }
+          const url = this.tree.getItemUrl(elem);
+          if (!url) { continue; }
+          await this.openLink(url, true);
         }
       },
 

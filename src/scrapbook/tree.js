@@ -170,6 +170,12 @@
       return {parentItemElem, parentItemId, siblingItems, index};
     }
 
+    getItemUrl(elem) {
+      const anchor = elem.anchor;
+      if (!anchor) { return ''; }
+      return anchor.href;
+    }
+
     getXpathPos(elem) {
       const id = elem.getAttribute('data-id');
       let cur = elem, i = 0;
