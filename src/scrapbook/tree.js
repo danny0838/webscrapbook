@@ -470,13 +470,12 @@
         }
 
         if (target) {
-          if (event.shiftKey && event.ctrlKey) {
-            this.highlightItem(target, true, {reselect: false, ranged: true});
-          } else if (event.shiftKey) {
-            this.highlightItem(target, true, {reselect: true, ranged: true});
-          } else {
-            this.highlightItem(target, undefined, {reselect: false});
-          }
+          const willHighlight = event.shiftKey ? true : undefined;
+          const reselect = event.ctrlKey ? !this.allowMultiSelect :
+              event.shiftKey ? true :
+              !(this.allowMultiSelect && this.allowMultiSelectOnClick);
+          const ranged = this.allowMultiSelect && event.shiftKey;
+          this.highlightItem(target, willHighlight, {reselect, ranged});
           target.scrollIntoView();
         }
 
@@ -790,10 +789,9 @@
     onItemClick(event) {
       const itemElem = event.currentTarget.parentNode;
       const willHighlight = event.shiftKey ? true : undefined;
-      const reselect = event.ctrlKey ? false :
+      const reselect = event.ctrlKey ? !this.allowMultiSelect :
           event.shiftKey ? true :
-          (this.allowMultiSelect && this.allowMultiSelectOnClick) ? false :
-          true;
+          !(this.allowMultiSelect && this.allowMultiSelectOnClick);
       const ranged = this.allowMultiSelect && event.shiftKey;
       this.highlightItem(itemElem, willHighlight, {reselect, ranged});
     }
