@@ -52,7 +52,7 @@
     const onCaptureCommandClick = async (event, params) => {
       const tabs = targetTab ? 
           await scrapbook.getHighlightedTabs() : 
-          [await selectTabFromDom(document.getElementById("captureTab"))];
+          [await selectTabFromDom(event.currentTarget)];
       return await scrapbook.invokeCapture(
         tabs.map(tab => (Object.assign({
           tabId: tab.id,
@@ -159,7 +159,7 @@
     document.getElementById("captureTabAs").addEventListener('click', async (event) => {
       const tabs = targetTab ? 
           await scrapbook.getHighlightedTabs() : 
-          [await selectTabFromDom(document.getElementById("captureTabAs"))];
+          [await selectTabFromDom(event.currentTarget)];
       return await scrapbook.invokeCaptureAs({
         tasks: tabs.map(tab => ({
           tabId: tab.id,
@@ -181,7 +181,7 @@
     });
 
     document.getElementById("batchCaptureLinks").addEventListener('click', async (event) => {
-      const tab = targetTab || await selectTabFromDom(document.getElementById("batchCaptureLinks"));
+      const tab = targetTab || await selectTabFromDom(event.currentTarget);
       return scrapbook.initContentScripts(tab.id)
         .then(() => {
           return scrapbook.invokeContentScript({
@@ -196,7 +196,7 @@
     });
 
     document.getElementById("editTab").addEventListener('click', async (event) => {
-      const tab = targetTab || await selectTabFromDom(document.getElementById("editTab"));
+      const tab = targetTab || await selectTabFromDom(event.currentTarget);
       await scrapbook.editTab({
         tabId: tab.id,
         force: true,
@@ -211,7 +211,7 @@
     document.getElementById("searchCaptures").addEventListener('click', async (event) => {
       const tabs = targetTab ? 
           await scrapbook.getHighlightedTabs() : 
-          [await selectTabFromDom(document.getElementById("searchCaptures"))];
+          [await selectTabFromDom(event.currentTarget)];
       return await scrapbook.searchCaptures({
         tabs,
         newTab: !!targetTab,
