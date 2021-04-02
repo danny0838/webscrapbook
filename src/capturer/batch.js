@@ -77,7 +77,7 @@
     }
 
     await scrapbook.invokeCaptureEx({taskInfo, waitForResponse: false});
-    window.close();
+    await exit();
   }
 
   function parseInputText(inputText, useJson = false) {
@@ -172,6 +172,11 @@
     }
   }
 
+  async function exit() {
+    const tab = await browser.tabs.getCurrent();
+    return await browser.tabs.remove(tab.id);
+  };
+
   document.addEventListener('DOMContentLoaded', async () => {
     scrapbook.loadLanguages(document);
 
@@ -205,9 +210,8 @@
         alert(`Error: ${ex.message}`);
       });
     });
-    document.getElementById('btn-abort').addEventListener('click', async (event) => {
-      const tab = await browser.tabs.getCurrent();
-      return browser.tabs.remove(tab.id);
+    document.getElementById('btn-abort').addEventListener('click', (event) => {
+      exit();
     });
 
     for (const elem of document.querySelectorAll('a[data-tooltip]')) {
