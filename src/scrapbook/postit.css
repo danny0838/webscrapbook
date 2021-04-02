@@ -7,7 +7,6 @@ html {
 }
 
 body {
-  box-sizing: border-box;
   margin: 0;
   border: 0;
   padding: 0;
@@ -18,6 +17,9 @@ body {
 #wrapper {
   display: flex;
   flex-direction: column;
+  margin: 0;
+  border: 0;
+  padding: 0;
   width: 100%;
   height: 100%;
 }
@@ -36,4 +38,15 @@ body {
   padding: 0.25em;
   min-height: 1.5em;
   background-color: #ffffe1;
+}
+
+#toolbar button img {
+  width: 16px;
+  height: 16px;
+  vertical-align: text-bottom;
+}
+
+#toolbar button:disabled img {
+  filter: grayscale(100%);
+  opacity: 0.3;
 }

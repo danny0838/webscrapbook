@@ -12,13 +12,22 @@
 <script src="postit.js"></script>
 </head>
 <body>
-<div id="wrapper">
+<fieldset id="wrapper" disabled>
 <textarea id="editor"></textarea>
 <div id="toolbar">
-  <div>
-    <input id="btn-save" type="button" value="__MSG_EditSaveLabel__" disabled autocomplete="off">
-  </div>
+  <button id="btn-save" type="button" accesskey="S" autocomplete="off">
+    <img src="../resources/edit-save.png">
+    <label>__MSG_EditSaveLabel__</label>
+  </button>
+  <button id="btn-locate" type="button" accesskey="L" autocomplete="off">
+    <img src="../resources/edit-locate.svg">
+    <label>__MSG_EditLocateLabel__</label>
+  </button>
+  <button id="btn-exit" type="button" accesskey="X" autocomplete="off">
+    <img src="../resources/edit-exit.svg">
+    <label>__MSG_EditExitLabel__</label>
+  </button>
 </div>
-</div>
+</fieldset>
 </body>
 </html>

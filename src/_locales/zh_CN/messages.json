@@ -113,6 +113,9 @@
   "EditExitLabel": {
     "message": "离开"
   },
+  "EditLocateLabel": {
+    "message": "定位"
+  },
   "EditPage": {
     "message": "编辑页面"
   },

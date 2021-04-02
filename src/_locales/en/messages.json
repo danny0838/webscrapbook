@@ -113,6 +113,9 @@
   "EditExitLabel": {
     "message": "Exit"
   },
+  "EditLocateLabel": {
+    "message": "Locate"
+  },
   "EditPage": {
     "message": "Edit page"
   },

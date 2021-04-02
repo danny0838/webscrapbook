@@ -26,6 +26,10 @@
     bookId: null,
     target: null,
 
+    enableUi(willEnable) {
+      document.getElementById('wrapper').disabled = !willEnable;
+    },
+
     async init() {
       try {
         const params = new URL(document.URL).searchParams;
@@ -76,11 +80,9 @@
           throw new Error(`Unable to load specified file "${file}": ${ex.message}`);
         }
 
-        Array.prototype.forEach.call(
-          document.getElementById('toolbar').querySelectorAll(':disabled'),
-          (elem) => {
-            elem.disabled = false;
-          });
+        this.enableUi(true);
+
+        document.getElementById('editor').focus();
       } catch (ex) {
         console.error(ex);
         alert(`Error: ${ex.message}`);
@@ -89,6 +91,8 @@
 
     async save() {
       try {
+        this.enableUi(false);
+
         const {id, bookId} = this;
         const book = server.books[bookId];
 
@@ -143,15 +147,41 @@
       } catch (ex) {
         console.error(ex);
         alert(`Unable to save document: ${ex.message}`);
+      } finally {
+        this.enableUi(true);
+      }
+    },
+
+    async locate() {
+      try {
+        this.enableUi(false);
+        const response = await scrapbook.invokeExtensionScript({
+          cmd: "background.locateItem",
+          args: {url: this.target},
+        });
+        if (response === false) {
+          alert(scrapbook.lang("ErrorLocateSidebarNotOpened"));
+        } else if (response === null) {
+          alert(scrapbook.lang("ErrorLocateNotFound"));
+        }
+        return response;
+      } finally {
+        this.enableUi(true);
       }
     },
 
     async exit() {
-      if (this.target) {
-        location.assign(this.target);
-      } else {
-        const tab = await browser.tabs.getCurrent();
-        return browser.tabs.remove(tab.id);
+      try {
+        this.enableUi(false);
+
+        if (this.target) {
+          location.assign(this.target);
+        } else {
+          const tab = await browser.tabs.getCurrent();
+          return browser.tabs.remove(tab.id);
+        }
+      } finally {
+        this.enableUi(true);
       }
     },
   };
@@ -161,6 +191,9 @@
 
     document.getElementById('btn-save').addEventListener('click', (event) => {
        editor.save();
+    });
+    document.getElementById('btn-locate').addEventListener('click', (event) => {
+       editor.locate();
     });
     document.getElementById('btn-exit').addEventListener('click', (event) => {
        editor.exit();
