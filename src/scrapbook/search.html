@@ -16,31 +16,33 @@
 </head>
 <body>
 <form id="searchForm">
-  <select id="books" multiple size="1"></select>
-  <input id="keyword" type="text">
-  <select id="helper">
-    <option value="" selected="selected"></option>
-    <option value="id:">id:</option>
-    <option value="title:">title:</option>
-    <option value="comment:">comment:</option>
-    <option value="content:">content:</option>
-    <option value="tcc:">tcc:</option>
-    <option value="source:">source:</option>
-    <option value="icon:">icon:</option>
-    <option value="type:">type:</option>
-    <option value="create:">create:</option>
-    <option value="modify:">modify:</option>
-    <option value="re:">re:</option>
-    <option value="mc:">mc:</option>
-    <option value="file:">file:</option>
-    <option value="root:">root:</option>
-    <option value="sort:">sort:</option>
-    <option value="-sort:modify">Last Modified</option>
-    <option value="-sort:create">Last Created</option>
-    <option value="sort:title">Sort by title</option>
-    <option value="sort:id">Sort by ID</option>
-  </select>
-  <input id="search" type="submit" value="🔍" disabled autocomplete="off">
+  <fieldset disabled>
+    <select id="books" multiple size="1" accesskey="B"></select>
+    <input id="keyword" type="text" accesskey="I">
+    <select id="helper" accesskey="H">
+      <option value="" selected="selected"></option>
+      <option value="id:">id:</option>
+      <option value="title:">title:</option>
+      <option value="comment:">comment:</option>
+      <option value="content:">content:</option>
+      <option value="tcc:">tcc:</option>
+      <option value="source:">source:</option>
+      <option value="icon:">icon:</option>
+      <option value="type:">type:</option>
+      <option value="create:">create:</option>
+      <option value="modify:">modify:</option>
+      <option value="re:">re:</option>
+      <option value="mc:">mc:</option>
+      <option value="file:">file:</option>
+      <option value="root:">root:</option>
+      <option value="sort:">sort:</option>
+      <option value="-sort:modify">Last Modified</option>
+      <option value="-sort:create">Last Created</option>
+      <option value="sort:title">Sort by title</option>
+      <option value="sort:id">Sort by ID</option>
+    </select>
+    <input id="search" type="submit" value="🔍" accesskey="S" autocomplete="off">
+  </fieldset>
 </form>
 <details id="help">
 <summary>__MSG_SearchHelpSummary__</summary>

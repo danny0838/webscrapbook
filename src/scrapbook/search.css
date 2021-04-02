@@ -3,15 +3,12 @@ body {
   line-height: 1.35em;
 }
 
-#searchForm {
+#searchForm fieldset {
   display: flex;
   flex-direction: row;
+  margin: 0;
+  border: 0;
   padding: .25em;
-}
-
-#searchForm *:disabled {
-  filter: grayscale(100%);
-  opacity: 0.3;
 }
 
 #keyword {

@@ -72,6 +72,10 @@
     fulltextCacheRemoteSizeLimit: null,
     books: [],
 
+    enableUi(willEnable) {
+      document.querySelector('#searchForm fieldset').disabled = !willEnable;
+    },
+
     async init() {
       try {
         await scrapbook.loadOptions();
@@ -133,7 +137,7 @@
           }
         }
 
-        document.getElementById('search').disabled = false;
+        this.enableUi(true);
 
         await Promise.all(usedBooks.map(book => this.loadBook(book)));
 
