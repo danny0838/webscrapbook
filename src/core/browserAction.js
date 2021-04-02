@@ -71,6 +71,15 @@
         'text/plain',
         targetTab.id,
       );
+
+      // a delay is required or the dragging will be ended immediately
+      setTimeout(() => {
+        document.documentElement.classList.add('dragged-within');
+      }, 0);
+    };
+
+    const onCaptureCommandDragEnd = function (event) {
+      document.documentElement.classList.remove('dragged-within');
     };
 
     const {isPrompt, activeTab, targetTab} = await (async () => {
@@ -120,24 +129,28 @@
       document.getElementById("captureTab").addEventListener('dragstart', (event) => {
         onCaptureCommandDragStart(event);
       });
+      document.getElementById("captureTab").addEventListener('dragend', onCaptureCommandDragEnd);
 
       document.getElementById("captureTabSource").addEventListener('dragstart', (event) => {
         onCaptureCommandDragStart(event, {
           mode: "source",
         });
       });
+      document.getElementById("captureTabSource").addEventListener('dragend', onCaptureCommandDragEnd);
 
       document.getElementById("captureTabBookmark").addEventListener('dragstart', (event) => {
         onCaptureCommandDragStart(event, {
           mode: "bookmark",
         });
       });
+      document.getElementById("captureTabBookmark").addEventListener('dragend', onCaptureCommandDragEnd);
 
       document.getElementById("captureTabAs").addEventListener('dragstart', (event) => {
         onCaptureCommandDragStart(event, {
           captureAs: true,
         });
       });
+      document.getElementById("captureTabAs").addEventListener('dragend', onCaptureCommandDragEnd);
     }
 
     document.getElementById("captureTab").addEventListener('click', async (event) => {

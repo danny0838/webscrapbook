@@ -36,3 +36,9 @@ button[hidden] {
   color: blue;
   text-decoration: underline;
 }
+
+.dragged-within #wrapper {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
