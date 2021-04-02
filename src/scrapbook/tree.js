@@ -262,6 +262,13 @@
         a.appendChild(document.createTextNode(meta.title || meta.id));
         a.title = (meta.title || meta.id) + (meta.source ? '\n' + meta.source : '') + (meta.comment ? '\n\n' + meta.comment : '');
         switch (meta.type) {
+          case 'folder': {
+            const u = new URL(browser.runtime.getURL("scrapbook/folder.html"));
+            u.searchParams.append('id', meta.id);
+            u.searchParams.append('bookId', this.book.id);
+            a.href = u.href;
+            break;
+          }
           case 'postit': {
             const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
             u.searchParams.append('id', meta.id);
