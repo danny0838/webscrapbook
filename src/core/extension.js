@@ -345,7 +345,7 @@
         }
       }
 
-      const axis = {};
+      const axis = {state: 'normal'};
       if (mainLeft !== currentWindow.left) { axis.left = mainLeft; }
       if (mainTop !== currentWindow.top) { axis.top = mainTop; }
       if (mainWidth !== currentWindow.width) { axis.width = mainWidth; }
