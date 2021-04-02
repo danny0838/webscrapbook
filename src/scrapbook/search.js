@@ -463,6 +463,9 @@
           case "icon":
             addRule("icon", pos ? "include" : "exclude", parseStr(term));
             break;
+          case "tc":
+            addRule("tc", pos ? "include" : "exclude", parseStr(term));
+            break;
           case "tcc":
             addRule("tcc", pos ? "include" : "exclude", parseStr(term));
             break;
@@ -478,6 +481,9 @@
           case "index":
             addRule("index", pos ? "include" : "exclude", parseStr(term));
             break;
+          case "charset":
+            addRule("charset", pos ? "include" : "exclude", parseStr(term));
+            break;
           case "create":
             addRule("create", pos ? "include" : "exclude", parseDate(term));
             break;
@@ -489,6 +495,9 @@
             break;
           case "locked":
             addRule("locked", pos ? "include" : "exclude", true);
+            break;
+          case "location":
+            addRule("location", pos ? "include" : "exclude", true);
             break;
         }
 
@@ -584,6 +593,10 @@
       return true;
     },
 
+    _match_tc(rule, item) {
+      return this.matchText(rule, [item.meta.title, item.meta.comment].join("\n"));
+    },
+
     _match_tcc(rule, item) {
       return this.matchText(rule, [item.meta.title, item.meta.comment, item.fulltext.content].join("\n"));
     },
@@ -612,6 +625,10 @@
       return this.matchText(rule, item.meta.index);
     },
 
+    _match_charset(rule, item) {
+      return this.matchText(rule, item.meta.charset);
+    },
+
     _match_source(rule, item) {
       return this.matchText(rule, item.meta.source);
     },
@@ -638,6 +655,10 @@
 
     _match_locked(rule, item) {
       return this.matchBool(rule, item.meta.locked);
+    },
+
+    _match_location(rule, item) {
+      return this.matchBool(rule, item.meta.location);
     },
 
     matchBool(rule, bool) {
