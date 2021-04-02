@@ -417,7 +417,7 @@
     "application/ecmascript": {
       "source": "iana",
       "compressible": true,
-      "extensions": ["ecma","es"]
+      "extensions": ["es","ecma"]
     },
     "application/edi-consent": {
       "source": "iana"
@@ -962,13 +962,11 @@
     },
     "application/mrb-consumer+xml": {
       "source": "iana",
-      "compressible": true,
-      "extensions": ["xdf"]
+      "compressible": true
     },
     "application/mrb-publish+xml": {
       "source": "iana",
-      "compressible": true,
-      "extensions": ["xdf"]
+      "compressible": true
     },
     "application/msc-ivr+xml": {
       "source": "iana",
@@ -2347,6 +2345,9 @@
       "compressible": true
     },
     "application/vnd.crypto-shade-file": {
+      "source": "iana"
+    },
+    "application/vnd.cryptomator.encrypted": {
       "source": "iana"
     },
     "application/vnd.ctc-posml": {
@@ -3813,6 +3814,9 @@
     "application/vnd.nearst.inv+json": {
       "source": "iana",
       "compressible": true
+    },
+    "application/vnd.nebumind.line": {
+      "source": "iana"
     },
     "application/vnd.nervana": {
       "source": "iana"
@@ -6099,8 +6103,7 @@
     },
     "application/xcap-error+xml": {
       "source": "iana",
-      "compressible": true,
-      "extensions": ["xer"]
+      "compressible": true
     },
     "application/xcap-ns+xml": {
       "source": "iana",
@@ -7428,6 +7431,10 @@
     "model/vnd.rosette.annotated-data-model": {
       "source": "iana"
     },
+    "model/vnd.sap.vds": {
+      "source": "iana",
+      "extensions": ["vds"]
+    },
     "model/vnd.usdz+zip": {
       "source": "iana",
       "compressible": false,
@@ -8006,6 +8013,9 @@
       "source": "iana"
     },
     "video/encaprtp": {
+      "source": "iana"
+    },
+    "video/ffv1": {
       "source": "iana"
     },
     "video/flexfec": {
