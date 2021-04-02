@@ -40,7 +40,7 @@
       try {
         const params = new URL(document.URL).searchParams;
         const id = this.id = params.get('id');
-        const bookId = this.bookId = params.get('bookId');
+        const bookId = this.bookId = params.get('bookId') || '';
 
         await scrapbook.loadOptions();
         await server.init();
