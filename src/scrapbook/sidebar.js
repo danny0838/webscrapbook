@@ -598,10 +598,20 @@
     async onTreeItemAnchorClick(event, {
       tree,
     }) {
+      const anchorElem = event.currentTarget;
+      const itemElem = anchorElem.parentNode.parentNode;
+
+      // special handling for postit
+      if (itemElem.getAttribute('data-type') === 'postit') {
+        event.preventDefault();
+        await this.editPostit(itemElem.getAttribute('data-id'));
+        return;
+      }
+
       if (browser.windows) {
         // for desktop browsers, open link in the same tab of the main window
         event.preventDefault();
-        await this.openLink(event.currentTarget.href);
+        await this.openLink(anchorElem.href);
       } else {
         // for Firefox Android (browser.windows not supported)
         // use default action to open in the "webscrapbook" tab
@@ -1864,6 +1874,33 @@ ${scrapbook.escapeHtml(content)}
 
       // update DOM
       this.tree.insertItem(newItem.id, parentItemId, index);
+    },
+
+    async editPostit(id) {
+      const postitElem = document.getElementById('postit');
+
+      // save the currently opened one, if exists
+      try {
+        await postitElem.contentWindow.editor.save();
+        await this.rebuild();
+      } catch (ex) {
+        // skip error
+      }
+
+      const u = new URL(browser.runtime.getURL("scrapbook/postit-frame.html"));
+      u.searchParams.append('id', id);
+      u.searchParams.append('bookId', this.bookId);
+      postitElem.src = u.href;
+
+      postitElem.parentNode.removeAttribute('hidden');
+    },
+
+    async uneditPostit() {
+      const postitElem = document.getElementById('postit');
+      postitElem.parentNode.setAttribute('hidden', '');
+      postitElem.src = '';
+      await this.rebuild();
+      this.treeElem.focus();
     },
 
     commands: {

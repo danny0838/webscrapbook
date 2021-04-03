@@ -231,8 +231,36 @@ body {
 }
 
 /* tree */
-#items {
+#tree {
   flex: 1 1 auto;
   overflow: auto;
   font-size: 0.875em;
+  display: flex;
+  flex-flow: column;
+}
+
+#items {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+#postit-resizer {
+  flex: 0 1 auto;
+  display: flex;
+  resize: vertical;
+  overflow: hidden;
+}
+
+#postit-resizer[hidden] {
+  display: none;
+}
+
+#postit {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+#postit[hidden] {
+  display: none;
 }
