@@ -68,7 +68,7 @@
 
       document.getElementById('upload-file-selector').addEventListener('change', this.onClickFileSelector);
 
-      window.addEventListener('command', this.onCommandRun);
+      window.addEventListener('customCommand', this.onCustomCommandRun);
 
       // load config
       await scrapbook.loadOptions();
@@ -374,7 +374,7 @@
 
         // execute command
         event.preventDefault();
-        const evt = new CustomEvent("command", {
+        const evt = new CustomEvent("customCommand", {
           detail: {
             command,
             itemElems: this.tree.getSelectedItemElems(),
@@ -432,7 +432,7 @@
         }
 
         default: {
-          const evt = new CustomEvent("command", {
+          const evt = new CustomEvent("customCommand", {
             detail: {
               command,
               itemElems: [],
@@ -469,7 +469,7 @@
         }
 
         default: {
-          const evt = new CustomEvent("command", {
+          const evt = new CustomEvent("customCommand", {
             detail: {
               command,
               itemElems: this.tree.getSelectedItemElems(),
@@ -495,7 +495,7 @@
      * @param {(HTMLElement)[]} [event.detail.itemElems] - selected item elements
      * @param {File[]} [event.detail.files] - files being uploaded
      */
-    async onCommandRun(event) {
+    async onCustomCommandRun(event) {
       const detail = event.detail;
 
       this.enableUi(false);
@@ -517,7 +517,7 @@
 
     onClickFileSelector(event) {
       event.preventDefault();
-      const evt = new CustomEvent("command", {
+      const evt = new CustomEvent("customCommand", {
         detail: {
           command: 'upload',
           itemElems: event.target.hasAttribute('data-item-elem') ? this.tree.getSelectedItemElems() : [],
