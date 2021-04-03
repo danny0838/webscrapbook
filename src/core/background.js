@@ -520,10 +520,12 @@
       // so use filter instead.
       .filter(win => windowTypes.includes(win.type))
       .sort((a, b) => {
-        const va = background.focusedWindow.get(a.id) || a.id;
-        const vb = background.focusedWindow.get(b.id) || b.id;
+        const va = background.focusedWindow.get(a.id) || -Infinity;
+        const vb = background.focusedWindow.get(b.id) || -Infinity;
         if (va > vb) { return 1; }
         if (vb > va) { return -1; }
+        if (a.id > b.id) { return 1; }
+        if (b.id > a.id) { return -1; }
         return 0;
       });
 
