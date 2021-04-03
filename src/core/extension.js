@@ -338,8 +338,7 @@
     const key = {table: "batchCaptureMissionCache", id: missionId};
     await scrapbook.cache.set(key, params);
     const url = browser.runtime.getURL("capturer/batch.html") + `?mid=${missionId}`;
-    const tab = await browser.tabs.create({url});
-    return tab;
+    return scrapbook.visitLink({url, newTab: true, inNormalWindow: true});
   };
 
   /**
