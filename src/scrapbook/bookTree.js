@@ -116,7 +116,10 @@
 
       if (anchorElem) {
         const elem = document.evaluate(anchorElem, this.treeElem).iterateNext();
-        if (elem) { this.anchorElem = elem; }
+        if (elem) {
+          this.anchorElem = elem;
+          elem.controller.classList.add('anchor');
+        }
       }
 
       if (lastHighlightElem) {
