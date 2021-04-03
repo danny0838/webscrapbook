@@ -520,7 +520,7 @@
       const evt = new CustomEvent("command", {
         detail: {
           command: 'upload',
-          itemElems: event.target.hasAttribute('data-item-elem') ? this.tree.getSelectedItemElems() : null,
+          itemElems: event.target.hasAttribute('data-item-elem') ? this.tree.getSelectedItemElems() : [],
           files: event.target.files,
         },
       });
