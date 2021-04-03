@@ -122,11 +122,20 @@
 
   /**
    * @param {string} url
-   * @param {boolean} [newTab]
+   * @param {string|boolean} [newTab] - Open in the new tab with the specified
+   *     window name; true to always open in a new tab.
    * @param {string|array|boolean} [singleton] - URL match pattern for singleton;
-   *     true: match url with any query; false: not singleton
+   *     true: match url with any query; false: not singleton.
+   * @param {boolean} [inNormalWindow] - Open in a normal window only.
+   * @return {Promise<(Tab|Window|null)>}
    */
-  scrapbook.visitLink = async function ({url, newTab = false, singleton = false}) {
+  scrapbook.visitLink = async function ({
+    url,
+    newTab = false,
+    singleton = false,
+    inNormalWindow = false,
+  }) {
+    // If a matched singleton tab exists, return it.
     if (singleton) {
       if (singleton === true) {
         const u = new URL(url);
@@ -143,7 +152,59 @@
     }
 
     if (newTab) {
+      // Open in the tab with the specified window name. Note that this may be
+      // blocked by the browser in some cases. This may return a null value.
+      if (typeof newTab === 'string') {
+        return window.open(url, newTab);
+      }
+
+      // If inNormalWindow, create a tab in the last focused window.
+      //
+      // Firefox < 60 (?) allows multiple tabs in a popup window, but the
+      // user cannot switch between them.
+      //
+      // Chromium allows only one tab in a popup window. Although
+      // tabs.create without windowId creates a new tab in the last focused
+      // window, some Chromium forks has an inconsistent behavior (e.g.
+      // Vivaldi creates the tab in the current window, overwriting the
+      // current tab).
+      if (inNormalWindow && browser.windows) {
+        const win = await scrapbook.invokeExtensionScript({
+          cmd: "background.getLastFocusedWindow",
+          args: {populate: true, windowTypes: ['normal']},
+        });
+
+        if (!win) {
+          const {tabs: [tab]} = await browser.windows.create({url});
+          return tab;
+        }
+
+        return await browser.tabs.create({url, windowId: win.id});
+      }
+
+      // Otherwise, create a tab in the current window.
       return await browser.tabs.create({url});
+    }
+
+    // If inNormalWindow, open in the active tab of the last focused window.
+    if (inNormalWindow && browser.windows) {
+      const win = await scrapbook.invokeExtensionScript({
+        cmd: "background.getLastFocusedWindow",
+        args: {populate: true, windowTypes: ['normal']},
+      });
+
+      if (!win) {
+        const {tabs: [tab]} = await browser.windows.create({url});
+        return tab;
+      }
+
+      const targetTab = win.tabs.filter(x => x.active)[0];
+
+      if (!targetTab) {
+        return await browser.tabs.create({url, windowId: win.id});
+      }
+
+      return await browser.tabs.update(targetTab.id, {url});
     }
 
     return await browser.tabs.update({url, active: true});
