@@ -109,13 +109,13 @@
 
       // restore highlights
       for (const xpath of highlights.keys()) {
-        const elem = document.evaluate(xpath, this.treeElem).iterateNext();
+        const elem = document.evaluate(xpath, this.treeElem, null, 0, null).iterateNext();
         if (!elem) { continue; }
         elem.controller.classList.add('highlight');
       }
 
       if (anchorElem) {
-        const elem = document.evaluate(anchorElem, this.treeElem).iterateNext();
+        const elem = document.evaluate(anchorElem, this.treeElem, null, 0, null).iterateNext();
         if (elem) {
           this.anchorElem = elem;
           elem.controller.classList.add('anchor');
@@ -123,7 +123,7 @@
       }
 
       if (lastHighlightElem) {
-        const elem = document.evaluate(lastHighlightElem, this.treeElem).iterateNext();
+        const elem = document.evaluate(lastHighlightElem, this.treeElem, null, 0, null).iterateNext();
         if (elem) { this.lastHighlightElem = elem; }
       }
 
@@ -164,7 +164,7 @@
         if (!data) { return; }
 
         for (const [xpath, willOpen] of Object.entries(data.selects)) {
-          const elem = document.evaluate(xpath, this.treeElem).iterateNext();
+          const elem = document.evaluate(xpath, this.treeElem, null, 0, null).iterateNext();
           if (!elem) { continue; }
           if (willOpen) { this.toggleItem(elem, true); }
         }

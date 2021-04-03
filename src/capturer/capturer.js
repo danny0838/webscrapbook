@@ -2017,7 +2017,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             switch (annotation.removeType) {
               case 1: {
                 let {elemPath, startContainerPath, startOffset} = annotation;
-                const startContainer = newDoc.evaluate(startContainerPath, newDoc, null).iterateNext();
+                const startContainer = newDoc.evaluate(startContainerPath, newDoc, null, 0, null).iterateNext();
                 try {
                   if (!startContainer) {
                     throw new Error(`startContainer "${startContainerPath}" not found: ${elemPath}`);
@@ -2031,8 +2031,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               }
               case 2: {
                 let {elemPath, startContainerPath, startOffset, endContainerPath, endOffset, startCheck, endCheck} = annotation;
-                const startContainer = newDoc.evaluate(startContainerPath, newDoc, null).iterateNext();
-                const endContainer = newDoc.evaluate(endContainerPath, newDoc, null).iterateNext();
+                const startContainer = newDoc.evaluate(startContainerPath, newDoc, null, 0, null).iterateNext();
+                const endContainer = newDoc.evaluate(endContainerPath, newDoc, null, 0, null).iterateNext();
                 try {
                   if (!startContainer) {
                     throw new Error(`startContainer "${startContainerPath}" not found: ${elemPath}`);

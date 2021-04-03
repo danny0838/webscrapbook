@@ -4539,7 +4539,7 @@
         return rootNode.querySelectorAll(selector.css);
       }
       if (typeof selector.xpath === 'string') {
-        const iter = rootNode.ownerDocument.evaluate(selector.xpath, rootNode);
+        const iter = rootNode.ownerDocument.evaluate(selector.xpath, rootNode, null, 0, null);
         let elems = [], elem;
         while (elem = iter.iterateNext()) {
           elems.push(elem);
