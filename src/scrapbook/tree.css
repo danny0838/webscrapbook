@@ -85,9 +85,14 @@
   color: blue;
 }
 
+.tree [data-type="separator"] > div {
+  display: flex;
+}
+
 .tree [data-type="separator"] > div > fieldset {
   position: relative;
   z-index: 1;
+  flex: 1;
   margin: 0;
   border: none;
   border-top: 1px solid #aaa;
