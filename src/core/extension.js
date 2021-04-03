@@ -182,29 +182,25 @@
     let tab;
     if (browser.windows) {
       const win = await browser.windows.getCurrent();
-      const captureWindow = await browser.windows.create(Object.assign({
+      ({tabs: [tab]} = await browser.windows.create(Object.assign({
         url,
         type: 'popup',
         width: 400,
         height: 400,
         incognito: win.incognito,
-      }, windowCreateData));
+      }, windowCreateData)));
 
       if (!waitForResponse) {
-        return captureWindow;
+        return tab;
       }
-
-      tab = captureWindow.tabs[0];
     } else {
-      const captureTab = await browser.tabs.create({
+      tab = await browser.tabs.create({
         url,
       });
 
       if (!waitForResponse) {
-        return captureTab;
+        return tab;
       }
-
-      tab = captureTab;
     }
 
     // wait until tab loading complete
