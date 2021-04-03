@@ -1272,89 +1272,12 @@
       }
     },
 
-    async openLink(url, newTab) {
-      if (newTab) {
-        if (typeof newTab === 'string') {
-          window.open(url, newTab);
-          return;
-        }
-
-        // If current window is not normal, create tab in the last focused
-        // window.
-        //
-        // Firefox < 60 (?) allows multiple tabs in a popup window, but the
-        // user cannot switch between them.
-        //
-        // Chromium allows only one tab in a popup window. Although
-        // tabs.create without windowId creates a new tab in the last focused
-        // window, some Chromium forks has an inconsistent behavior (e.g.
-        // Vivaldi creates the tab in the current window, overwriting the
-        // current tab).
-        if (browser.windows && (await browser.windows.getCurrent()).type !== 'normal') {
-          const win = await scrapbook.invokeExtensionScript({
-            cmd: "background.getLastFocusedWindow",
-            args: {populate: true, windowTypes: ['normal']},
-          });
-          if (!win) {
-            await browser.windows.create({
-              url,
-            });
-            return;
-          }
-
-          await browser.tabs.create({
-            windowId: win.id,
-            url,
-          });
-          return;
-        }
-
-        // Otherwise, create tab in the current window.
-        const tab = await browser.tabs.create({
-          url,
-        });
-
-        return;
-      }
-
-      if (browser.windows) {
-        const win = await scrapbook.invokeExtensionScript({
-          cmd: "background.getLastFocusedWindow",
-          args: {populate: true, windowTypes: ['normal']},
-        });
-        if (!win) {
-          await browser.windows.create({
-            url,
-          });
-          return;
-        }
-
-        const targetTab = win.tabs.filter(x => x.active)[0];
-        if (!targetTab) {
-          await browser.tabs.create({
-            windowId: win.id,
-            url,
-          });
-          return;
-        }
-
-        await browser.tabs.update(targetTab.id, {
-          url,
-        });
-
-        return;
-      }
-
-      const activeTab = (await browser.tabs.query({active: true}))[0];
-      if (!activeTab || activeTab.id === (await browser.tabs.getCurrent()).id) {
-        await browser.tabs.create({
-          url,
-        });
-        return;
-      }
-
-      await browser.tabs.update(activeTab.id, {
+    async openLink(url, newTab = false) {
+      return await scrapbook.visitLink({
         url,
+        newTab,
+        singleton: false,
+        inNormalWindow: true,
       });
     },
 
