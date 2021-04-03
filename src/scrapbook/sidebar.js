@@ -2473,6 +2473,10 @@ Redirecting to file <a href="index.md">index.md</a>
         this.tree.insertItem(newItem.id, parentItemId, index);
 
         // open link
+        if (this.mode !== 'normal') {
+          return;
+        }
+
         switch (type) {
           case 'html': {
             await this.openLink(target, true);
