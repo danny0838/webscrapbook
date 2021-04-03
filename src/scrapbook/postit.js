@@ -21,20 +21,9 @@
 
   'use strict';
 
-  const REGEX_ITEM_POSTIT = new RegExp('^[\\S\\s]*?<pre>\\n?([^<]*(?:<(?!/pre>)[^<]*)*)\\n</pre>[\\S\\s]*$');
-  const ITEM_POSTIT_FORMATTER = `\
-<!DOCTYPE html><html><head>\
-<meta charset="UTF-8">\
-<meta name="viewport" content="width=device-width">\
-<style>pre { white-space: pre-wrap; overflow-wrap: break-word; }</style>\
-</head><body><pre>
-%POSTIT_CONTENT%
-</pre></body></html>`;
-
   const editor = {
     id: null,
     bookId: null,
-    target: null,
 
     enableUi(willEnable) {
       document.getElementById('wrapper').disabled = !willEnable;
@@ -68,20 +57,8 @@
         document.title = item.title || ' ';
 
         try {
-          let target = this.target = book.dataUrl + scrapbook.escapeFilename(item.index);
-
-          const text = await server.request({
-            url: target + '?a=source',
-            method: "GET",
-          }).then(r => r.text());
-
-          const content = this.getPostitContent(text);
-
-          if (content === null) {
-            throw new Error('malformatted note file');
-          }
-
-          document.getElementById('editor').value = scrapbook.unescapeHtml(content);
+          const content = await book.loadPostit(item);
+          document.getElementById('editor').value = content;
         } catch (ex) {
           console.error(ex);
           throw new Error(`Unable to load postit: ${ex.message}`);
@@ -103,72 +80,15 @@
         const {id, bookId} = this;
         const book = server.books[bookId];
 
-        await book.transaction({
-          mode: 'refresh',
-          callback: async (book, updated) => {
-            const meta = await book.loadMeta(updated);
+        const {title, errors} = await book.savePostit(id, document.getElementById("editor").value);
 
-            const item = meta[id];
-            if (!item) {
-              throw new Error(`Specified item "${id}" does not exist.`);
-            }
+        // alert errors
+        for (const error of errors) {
+          alert(error);
+        }
 
-            // upload text content
-            const text = document.getElementById("editor").value;
-            const title = text.replace(/\n[\s\S]*$/, '');
-            const content = ITEM_POSTIT_FORMATTER.replace(/%(\w*)%/gu, (_, key) => {
-              let value;
-              switch (key) {
-                case '':
-                  value = '%';
-                  break;
-                case 'POSTIT_CONTENT':
-                  value = text;
-                  break;
-              }
-              return value ? scrapbook.escapeHtml(value) : '';
-            });
-
-            await server.request({
-              url: this.target + '?a=save',
-              method: "POST",
-              format: 'json',
-              csrfToken: true,
-              body: {
-                text: scrapbook.unicodeToUtf8(content),
-              },
-            });
-
-            // update item
-            item.title = title;
-            item.modify = scrapbook.dateToId();
-            await book.saveMeta();
-
-            if (scrapbook.getOption("indexer.fulltextCache")) {
-              await server.requestSse({
-                query: {
-                  "a": "cache",
-                  "book": book.id,
-                  "item": item.id,
-                  "fulltext": 1,
-                  "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-                  "no_lock": 1,
-                  "no_backup": 1,
-                },
-                onMessage(info) {
-                  if (['error', 'critical'].includes(info.type)) {
-                    alert(`Error when updating fulltext cache: ${info.msg}`);
-                  }
-                },
-              });
-            }
-
-            await book.loadTreeFiles(true);  // update treeLastModified
-
-            // update document title
-            document.title = title;
-          },
-        });
+        // update document title
+        document.title = title;
       } catch (ex) {
         console.error(ex);
         alert(`Unable to save document: ${ex.message}`);
@@ -180,10 +100,16 @@
     async locate() {
       try {
         this.enableUi(false);
+
+        const {id, bookId} = this;
+        const book = server.books[bookId];
+
+        const target = book.dataUrl + scrapbook.escapeFilename(book.meta[id].index);
         const response = await scrapbook.invokeExtensionScript({
           cmd: "background.locateItem",
-          args: {url: this.target},
+          args: {url: target},
         });
+
         if (response === false) {
           alert(scrapbook.lang("ErrorLocateSidebarNotOpened"));
         } else if (response === null) {
@@ -203,11 +129,6 @@
       } finally {
         this.enableUi(true);
       }
-    },
-
-    getPostitContent(text) {
-      text = text.replace(/\r\n?/g, '\n');
-      return text.replace(REGEX_ITEM_POSTIT, '$1');
     },
   };
 

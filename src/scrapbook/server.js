@@ -49,6 +49,16 @@
     },
   };
 
+  const REGEX_ITEM_POSTIT = new RegExp('^[\\S\\s]*?<pre>\\n?([^<]*(?:<(?!/pre>)[^<]*)*)\\n</pre>[\\S\\s]*$');
+  const ITEM_POSTIT_FORMATTER = `\
+<!DOCTYPE html><html><head>\
+<meta charset="UTF-8">\
+<meta name="viewport" content="width=device-width">\
+<style>pre { white-space: pre-wrap; overflow-wrap: break-word; }</style>\
+</head><body><pre>
+%POSTIT_CONTENT%
+</pre></body></html>`;
+
   class RequestError extends Error {
     constructor(message, response) {
       super(message);
@@ -1300,6 +1310,89 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
         }
         return value ? scrapbook.escapeHtml(value) : '';
       });
+    }
+
+    async loadPostit(item) {
+      const target = this.dataUrl + scrapbook.escapeFilename(item.index);
+      let text = await server.request({
+        url: target + '?a=source',
+        method: "GET",
+      }).then(r => r.text());
+      text = text.replace(/\r\n?/g, '\n');
+      text = text.replace(REGEX_ITEM_POSTIT, '$1');
+      return scrapbook.unescapeHtml(text);
+    }
+
+    async savePostit(id, text) {
+      let item;
+      let errors = [];
+      await this.transaction({
+        mode: 'refresh',
+        callback: async (book, updated) => {
+          const meta = await book.loadMeta(updated);
+
+          item = meta[id];
+          if (!item) {
+            throw new Error(`Specified item "${id}" does not exist.`);
+          }
+
+          // upload text content
+          const title = text.replace(/\n[\s\S]*$/, '');
+          const content = ITEM_POSTIT_FORMATTER.replace(/%(\w*)%/gu, (_, key) => {
+            let value;
+            switch (key) {
+              case '':
+                value = '%';
+                break;
+              case 'POSTIT_CONTENT':
+                value = text;
+                break;
+            }
+            return value ? scrapbook.escapeHtml(value) : '';
+          });
+
+          const target = this.dataUrl + scrapbook.escapeFilename(item.index);
+          await this.server.request({
+            url: target + '?a=save',
+            method: "POST",
+            format: 'json',
+            csrfToken: true,
+            body: {
+              text: scrapbook.unicodeToUtf8(content),
+            },
+          });
+
+          // update item
+          item.title = title;
+          item.modify = scrapbook.dateToId();
+          await book.saveMeta();
+
+          if (scrapbook.getOption("indexer.fulltextCache")) {
+            await this.server.requestSse({
+              query: {
+                "a": "cache",
+                "book": book.id,
+                "item": item.id,
+                "fulltext": 1,
+                "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+                "no_lock": 1,
+                "no_backup": 1,
+              },
+              onMessage(info) {
+                if (['error', 'critical'].includes(info.type)) {
+                  errors.push(`Error when updating fulltext cache: ${info.msg}`);
+                }
+              },
+            });
+          }
+
+          await book.loadTreeFiles(true);  // update treeLastModified
+        },
+      });
+      return {
+        title: item.title,
+        errors,
+      };
     }
 
     /**
