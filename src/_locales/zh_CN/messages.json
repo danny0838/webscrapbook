@@ -1460,6 +1460,18 @@
   "SearchLocateTitle": {
     "message": "在剪贴簿显示此项目的位置"
   },
+  "SearchSortId": {
+    "message": "ID 排序"
+  },
+  "SearchSortLastCreated": {
+    "message": "最后建立"
+  },
+  "SearchSortLastModified": {
+    "message": "最后修改"
+  },
+  "SearchSortTitle": {
+    "message": "标题排序"
+  },
   "SearchTitle": {
     "message": "搜索 $BOOK$",
     "placeholders": {

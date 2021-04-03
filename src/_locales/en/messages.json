@@ -1460,6 +1460,18 @@
   "SearchLocateTitle": {
     "message": "Locate this item in scrapbook"
   },
+  "SearchSortId": {
+    "message": "Sort by ID"
+  },
+  "SearchSortLastCreated": {
+    "message": "Last created"
+  },
+  "SearchSortLastModified": {
+    "message": "Last modified"
+  },
+  "SearchSortTitle": {
+    "message": "Sort by title"
+  },
   "SearchTitle": {
     "message": "Search $BOOK$",
     "placeholders": {

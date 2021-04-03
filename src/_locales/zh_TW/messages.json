@@ -1460,6 +1460,18 @@
   "SearchLocateTitle": {
     "message": "在剪貼簿顯示此項目的位置"
   },
+  "SearchSortId": {
+    "message": "ID 排序"
+  },
+  "SearchSortLastCreated": {
+    "message": "最後建立"
+  },
+  "SearchSortLastModified": {
+    "message": "最後修改"
+  },
+  "SearchSortTitle": {
+    "message": "標題排序"
+  },
   "SearchTitle": {
     "message": "搜尋 $BOOK$",
     "placeholders": {
