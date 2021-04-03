@@ -2360,11 +2360,12 @@ ${scrapbook.escapeHtml(content)}
         // update DOM
         this.tree.insertItem(newItem.id, parentItemId, index);
 
-        // open link
-        const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
-        u.searchParams.append('id', newItem.id);
-        u.searchParams.append('bookId', this.book.id);
-        await this.openLink(u.href, true);
+        // edit the postit
+        if (this.mode !== 'normal') {
+          return;
+        }
+
+        await this.editPostit(newItem.id);
       },
 
       async mknote({itemElems: [itemElem]}) {
