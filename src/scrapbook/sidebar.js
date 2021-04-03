@@ -394,7 +394,7 @@
       const url = new URL(browser.runtime.getURL(`scrapbook/search.html`));
       url.searchParams.set('id', this.bookId);
       if (this.rootId !== 'root') { url.searchParams.set('root', this.rootId); }
-      this.openLink(url.href, "search");
+      this.openLink(url.href, true, true);
     },
 
     onRefreshButtonClick(event) {
@@ -1272,11 +1272,11 @@
       }
     },
 
-    async openLink(url, newTab = false) {
+    async openLink(url, newTab = false, singleton = false) {
       return await scrapbook.visitLink({
         url,
         newTab,
-        singleton: false,
+        singleton,
         inNormalWindow: true,
       });
     },

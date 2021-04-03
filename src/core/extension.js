@@ -122,12 +122,11 @@
 
   /**
    * @param {string} url
-   * @param {string|boolean} [newTab] - Open in the new tab with the specified
-   *     window name; true to always open in a new tab.
+   * @param {boolean} [newTab] - Truthy to always open in a new tab.
    * @param {string|array|boolean} [singleton] - URL match pattern for singleton;
    *     true: match url with any query; false: not singleton.
    * @param {boolean} [inNormalWindow] - Open in a normal window only.
-   * @return {Promise<(Tab|Window|null)>}
+   * @return {Promise<Tab>}
    */
   scrapbook.visitLink = async function ({
     url,
@@ -152,12 +151,6 @@
     }
 
     if (newTab) {
-      // Open in the tab with the specified window name. Note that this may be
-      // blocked by the browser in some cases. This may return a null value.
-      if (typeof newTab === 'string') {
-        return window.open(url, newTab);
-      }
-
       // If inNormalWindow, create a tab in the last focused window.
       //
       // Firefox < 60 (?) allows multiple tabs in a popup window, but the
