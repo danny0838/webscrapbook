@@ -33,6 +33,7 @@
       this.date = (date instanceof Date) ? date : new Date();
       this.isUtc = isUtc;
       this.space = space;
+      this._formatKey = (_, key) => (this.formatKey(key) || `%${key}`);
     }
 
     get nSeconds() {
@@ -383,13 +384,15 @@
       return this.isUtc ? 'UTC' : this.date.toTimeString().replace(/[^()]+\(([^()]+)\)$/, '$1');
     }
 
+    formatKey(key) {
+      const fn = this[`format_${key}`];
+      if (typeof fn === 'function') { return fn.call(this).toString(); }
+      if (key === '%') { return '%'; }
+      return '';
+    }
+
     format(str) {
-      return str.replace(MAIN_PATTERN, (_, key) => {
-        const fn = this[`format_${key}`];
-        if (typeof fn === 'function') { return fn.call(this).toString(); }
-        if (key === '%') { return '%'; }
-        return `%${key}`;
-      });
+      return str.replace(MAIN_PATTERN, this._formatKey);
     }
 
     static format(str, options) {
