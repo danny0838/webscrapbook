@@ -27,7 +27,7 @@
     "message": "网页列表:"
   },
   "BatchCaptureUrlsTooltip": {
-    "message": "输入欲获取的网页列表。格式为每行一个网址，网址后可加上网页标题，以空白字元分隔。\n\n若勾选“使用 JSON 格式”，则格式为一个 JSON 物件，包括以下属性：\n• bookId: 保存至后端服务器时，把获取项目保存至此 ID 的剪贴簿。省略时保存至目前剪贴簿。\n• parentId: 保存至后端服务器时，把获取项目插入此 ID 的项目下。省略时插入至根项目。\n• index: 保存至后端服务器时，获取项目的插入位置（从 0 开始）。省略时插入至最后面。\n• delay: 执行下个获取工作前的延迟时间（毫秒）。\n• autoClose: 获取完成时自动关闭对话窗口的设定，覆写默认项。可用“none”、“nowarn”、“noerror”、“nofailure”、“always”等值。\n• mode: 获取模式。“tab”为获取分页（获取网址时自动开新分页），“source”为获取原貌，“bookmark”为获取书签。省略时指定 tabId 者默认为“tab”，指定 url 者默认为“source”。\n• options: 覆写获取选项的 JSON 物件，格式同汇出选项（限“capture.*”）。\n• tasks: 获取工作列表，为 JSON 物件数组，其中每个物件包括以下属性：\n  • tabId: 待获取的分页 ID。与 url 择一使用。\n  • frameId: 待获取分页的框架页 ID。省略时获取主框架页。\n  • fullPage: 属真时获取全页，否则获取选择范围。\n  • url: 待获取的网址。\n  • title: 自订项目标题（须勾选“覆写网页标题”）。\n  • comment: 自订项目评注。\n  • favIconUrl: 自订项目图标。\n  • mode: 此获取工作的获取模式。\n  • options: 此获取工作的获取选项。\n  • recaptureInfo: 重新获取设定，为含有 bookId 及 itemId 属性的 JSON 物件。\n  • mergeCaptureInfo: 合并获取设定，为含有 bookId 及 itemId 属性的 JSON 物件。"
+    "message": "输入欲获取的网页列表。格式为每行一个网址，网址后可加上网页标题，以空白字符分隔。\n\n若勾选“使用 JSON 格式”，则格式为一个 JSON 对象，包括以下属性：\n• bookId: 保存至后端服务器时，把获取项目保存至此 ID 的剪贴簿。省略时保存至目前剪贴簿。\n• parentId: 保存至后端服务器时，把获取项目插入此 ID 的项目下。省略时插入至根项目。\n• index: 保存至后端服务器时，获取项目的插入位置（从 0 开始）。省略时插入至最后面。\n• delay: 执行下个获取工作前的延迟时间（毫秒）。\n• autoClose: 获取完成时自动关闭对话窗口的设置，覆写默认项。可用“none”、“nowarn”、“noerror”、“nofailure”、“always”等值。\n• mode: 获取模式。“tab”为获取分页（获取网址时自动开新分页），“source”为获取原貌，“bookmark”为获取书签。省略时指定 tabId 者默认为“tab”，指定 url 者默认为“source”。\n• options: 覆写获取选项的 JSON 对象，格式同汇出选项（限“capture.*”）。\n• tasks: 获取工作列表，为 JSON 对象数组，其中每个对象包括以下属性：\n  • tabId: 待获取的分页 ID。与 url 择一使用。\n  • frameId: 待获取分页的框架页 ID。省略时获取主框架页。\n  • fullPage: 属真时获取全页，否则获取选择范围。\n  • url: 待获取的网址。\n  • title: 自订项目标题（须勾选“覆写网页标题”）。\n  • comment: 自订项目评注。\n  • favIconUrl: 自订项目图标。\n  • mode: 此获取工作的获取模式。\n  • options: 此获取工作的获取选项。\n  • recaptureInfo: 重新获取设置，为含有 bookId 及 itemId 属性的 JSON 对象。\n  • mergeCaptureInfo: 合并获取设置，为含有 bookId 及 itemId 属性的 JSON 对象。"
   },
   "Cancel": {
     "message": "取消"
@@ -225,10 +225,10 @@
     "message": "HTML 编辑工具 - 点击开启或关闭。开启后可自由编辑页面内容。（保存后无法复原）"
   },
   "EditorButtonHtmlEditorBgColor": {
-    "message": "设定背景颜色"
+    "message": "设置背景颜色"
   },
   "EditorButtonHtmlEditorBgColorPrompt": {
-    "message": "请输入要设定的背景颜色（使用 CSS 颜色语法）："
+    "message": "请输入要设置的背景颜色（使用 CSS 颜色语法）："
   },
   "EditorButtonHtmlEditorCreateLink": {
     "message": "建立链接"
@@ -240,16 +240,16 @@
     "message": "切换斜体"
   },
   "EditorButtonHtmlEditorFgColor": {
-    "message": "设定文字颜色"
+    "message": "设置文字颜色"
   },
   "EditorButtonHtmlEditorFgColorPrompt": {
-    "message": "请输入要设定的文字颜色（使用 CSS 颜色语法）："
+    "message": "请输入要设置的文字颜色（使用 CSS 颜色语法）："
   },
   "EditorButtonHtmlEditorFormatBlockDiv": {
-    "message": "设定为 DIV 区块"
+    "message": "设置为 DIV 区块"
   },
   "EditorButtonHtmlEditorFormatBlockH": {
-    "message": "设定为 $LEVEL$ 级标题",
+    "message": "设置为 $LEVEL$ 级标题",
     "placeholders": {
       "level": {
         "content": "$1"
@@ -257,10 +257,10 @@
     }
   },
   "EditorButtonHtmlEditorFormatBlockP": {
-    "message": "设定为一般段落"
+    "message": "设置为一般段落"
   },
   "EditorButtonHtmlEditorFormatBlockPre": {
-    "message": "设定为 PRE 区块"
+    "message": "设置为 PRE 区块"
   },
   "EditorButtonHtmlEditorHr": {
     "message": "插入水平线"
@@ -290,10 +290,10 @@
     "message": "靠右对齐"
   },
   "EditorButtonHtmlEditorListOrdered": {
-    "message": "设定为有序列表"
+    "message": "设置为有序列表"
   },
   "EditorButtonHtmlEditorListUnordered": {
-    "message": "设定为无序列表"
+    "message": "设置为无序列表"
   },
   "EditorButtonHtmlEditorOutdent": {
     "message": "减少缩排"
@@ -590,7 +590,7 @@
     "message": "打开剪贴簿"
   },
   "OpenScrapBookTooltip": {
-    "message": "本功能需要架设后端服务器并做好相关设定才能运作。"
+    "message": "本功能需要架设后端服务器并做好相关设置才能运作。"
   },
   "OpenSearch": {
     "message": "搜索剪贴簿"
@@ -656,7 +656,7 @@
     "message": "获取链接页面深度:"
   },
   "OptionCaptureDownLinkDocDepthTooltip": {
-    "message": "获取深度未超过此值的链接页面，并建立交互链接及记录资源列表。目前页面为深度 0，深度 0 链接的页面为深度 1，深度 1 链接的页面为深度 2，……依此类推。\n\n• 深度设为 0 时仍会记录资源列表。留空表示不获取链接页面也不记录资源列表。\n• 注意：深层获取可能会下载大量资料，宜设定保存获取数据为文件夹，以避免潜在的效能问题或错误。此功能不支持保存为单一 HTML 文件。"
+    "message": "获取深度未超过此值的链接页面，并建立交互链接及记录资源列表。目前页面为深度 0，深度 0 链接的页面为深度 1，深度 1 链接的页面为深度 2，……依此类推。\n\n• 深度设为 0 时仍会记录资源列表。留空表示不获取链接页面也不记录资源列表。\n• 注意：深层获取可能会下载大量资料，宜设置保存获取数据为文件夹，以避免潜在的效能问题或错误。此功能不支持保存为单一 HTML 文件。"
   },
   "OptionCaptureDownLinkDocUrlFilterLabel": {
     "message": "包括以下网址:"
@@ -734,7 +734,7 @@
     "message": "字体:"
   },
   "OptionCaptureFontTooltip": {
-    "message": "此选项决定字体的处理方式。\n\n• 保存：将所有字体保存至本地。\n• 保存使用：只将获取区域的网页元素使用的字体保存至本地。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有字体。\n• 链接：将字体连往原始位址。注意这会导致浏览获取页面时触发网路传输。注意：跨网域载入字体受同源政策限制，若字体来自未设定跨来源资源共享（CORS）的伺服器，获取的页面将无法载入。\n• 清空：将字体从样式表中清除。"
+    "message": "此选项决定字体的处理方式。\n\n• 保存：将所有字体保存至本地。\n• 保存使用：只将获取区域的网页元素使用的字体保存至本地。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有字体。\n• 链接：将字体连往原始位址。注意这会导致浏览获取页面时触发网路传输。注意：跨网域载入字体受同源政策限制，若字体来自未设置跨来源资源共享（CORS）的服务器，获取的页面将无法载入。\n• 清空：将字体从样式表中清除。"
   },
   "OptionCaptureFormStatusKeepLabel": {
     "message": "保留"
@@ -763,7 +763,7 @@
     "message": "启用获取助手"
   },
   "OptionCaptureHelpersTooltip": {
-    "message": "获取助手可在获取前对网页内容做预先处理，以改善获取效果。获取助手使用 JSON 定义，格式如下：\n\n  [\n    {\n     \"name\": \"AdsRemover\",\n     \"description\": \"Remove unwanted content\",\n     \"pattern\": \"/https?://example.com/i\",\n     \"commands\": [\n       [\"remove\", \"#ad-by-xxx\"],\n       [\"unwrap\", \"#i-want-to-strip-this\"],\n       ...\n     ]\n    },\n    {\n     \"name\": \"DeferredImageFixer\",\n     \"description\": \"Save deferred images defined by data-*\",\n     \"commands\": [\n       [\"attr\", {\"css\": \"img[data-src]\"}, \"src\", [\"get_attr\", null, \"data-src\"]],\n       [\"attr\", {\"css\": \"img[data-srcset]\"}, \"srcset\", [\"get_attr\", null, \"data-srcset\"]],\n       ...\n     ]\n    },\n    ...\n  ]\n\n• name: 字串，标示此助手的名称及用于除错识别，可省略。\n• description: 字串，注记此助手的功能，可省略。\n• disabled: 属真时将停用此助手，可省略。\n• debug: 属真时此助手会启用除错模式，可省略。\n• pattern: 字串，为正则表达式字串（“/表达式/标帜”，下同），用于限定此助手作用的网址。若省略此项则作用于所有网页。\n• commands: 要依序执行的指令列表。\n  • 可用的指令如下：\n    • [\"options\", name, value]: 覆写获取选项 name（字串）的值为 value，格式同汇出选项（限“获取 - 内容”）。\n    • [\"options\", {name: value, ...}]: 覆写多个获取选项。\n    • [\"remove\", selector]: 移除匹配 selector 的元素。\n    • [\"unwrap\", selector]: 移除匹配 selector 的元素，但保留子元素。\n    • [\"html\", selector, htmlText]: 对匹配 selector 的元素设定 HTML 内容为 htmlText（字串）。\n    • [\"text\", selector, text]: 对匹配 selector 的元素设定文字内容为 text（字串）。\n    • [\"attr\", selector, name, value]: 对匹配 selector 的元素设定属性 name（字串）的值为 value（字串，或 null 表示删除属性）。\n    • [\"attr\", selector, {name: value, ...}]: 对匹配 selector 的元素设定多个属性。\n    • [\"css\", selector, name, value, priority]: 对匹配 selector 的元素设定 CSS 属性 name（字串）内容为 value（字串，或 null 表示删除属性），优先权为 priority（\"important\" 或 \"\" 或省略）。\n    • [\"css\", selector, {name: value, ...}]: 对匹配 selector 的元素设定多个 CSS 属性。\n    • [\"insert\", selector, name, attrs, text, mode, index]: 以匹配 selector 的元素为基准插入新元素，新元素以 name（字串）为名称，attrs 为多个属性（{name: value, ...}），text（字串）为文字内容，mode（字串）为插入方式（“before”：基准元素前；“after”：基准元素后；“insert”：插入为基准元素第 index 个字元素；“append”：插入为基准元素最后一个子元素）。\n    • [\"for\", selector, command1, command2, ...]: 对匹配 selector 的元素依序执行 command# 指令。\n  • 指令的参数也可以是指令，可用以下指令取得相关值：\n    • [\"has_elem\", selector]: selector 是否匹配至少一个元素。\n    • [\"has_attr\", selector, name]: selector 匹配的第一个元素是否有 name 属性。\n    • [\"match\", text, pattern, index]: 字串 text 是否匹配正则表达式 pattern。若有指定 index（整数）则传回匹配的字串子群组。\n    • [\"get_html\", selector]: selector 匹配的第一个元素的 HTML 内容。\n    • [\"get_text\", selector]: selector 匹配的第一个元素的文字内容。\n    • [\"get_attr\", selector, name]: selector 匹配的第一个元素的 name 属性值。\n    • [\"get_css\", selector, name, getPriority]: selector 匹配的第一个元素的 name 样式值。若 getPriority 属真则读取样式优先权。\n    • [\"replace\", text, pattern, replacement]: 将字串 text 以正则表达式字串 pattern 替换为字串 replacement 的结果。\n    • [\"if\", cond, thenValue, elseValue]: 若 cond 属真则传回 thenValue，否则传回 elseValue。\n    • [\"and\", value1, value2, ...]: value# 中第一个属假的值，或最后一个值。\n    • [\"or\", value1, value2, ...]: value# 中第一个属真的值，或最后一个值。\n  • 许多指令可用 selector 根据目前的参照元素选择元素，commands 下的指令初始参照元素为获取页面的根节点（通常为 HTML 元素），若甲指令的 selector 之后的参数为乙指令，则甲指令透过 selector 匹配的元素会逐个成为乙指令的参照元素。selector 的值可为：\n    • \"self\" 或 null: 选择目前参照元素。\n    • \"parent\": 选择目前参照元素的父节点。\n    • \"root\": 选择根节点。\n    • \"<CSS 选择器值>\": 用 CSS 选择器选择匹配的元素集合。\n    • {\"css\": \"<CSS 选择器值>\"}: 用 CSS 选择器选择匹配的元素集合。\n    • {\"xpath\": \"<XPath 值>\"}: 用 XPath 选择器选择匹配的元素集合。\n  • 启用除错时，可在指令名称前加上“*”以在控制台记录执行情况。例如：[\"*get_attr\", null, \"data-src\"]\n\n发生错误或启用除错时，可开启获取的分页（若为获取原貌则在获取视窗）的控制台检视详细错误信息。"
+    "message": "获取助手可在获取前对网页内容做预先处理，以改善获取效果。获取助手使用 JSON 定义，格式如下：\n\n  [\n    {\n      \"name\": \"AdsRemover\",\n      \"description\": \"Remove unwanted content\",\n      \"pattern\": \"/https?://example.com/i\",\n      \"commands\": [\n        [\"remove\", \"#ad-by-xxx\"],\n        [\"unwrap\", \"#i-want-to-strip-this\"],\n        ...\n      ]\n    },\n    {\n      \"name\": \"DeferredImageFixer\",\n      \"description\": \"Save deferred images defined by data-*\",\n      \"commands\": [\n        [\"attr\", {\"css\": \"img[data-src]\"}, \"src\", [\"get_attr\", null, \"data-src\"]],\n        [\"attr\", {\"css\": \"img[data-srcset]\"}, \"srcset\", [\"get_attr\", null, \"data-srcset\"]],\n        ...\n      ]\n    },\n    ...\n  ]\n\n• name: 字串，标示此助手的名称及用于除错识别，可省略。\n• description: 字串，注记此助手的功能，可省略。\n• disabled: 属真时将停用此助手，可省略。\n• debug: 属真时此助手会启用除错模式，可省略。\n• pattern: 字串，为正则表达式字串（“/表达式/标帜”，下同），用于限定此助手作用的网址。若省略此项则作用于所有网页。\n• commands: 要依序执行的指令列表。\n  • 可用的指令如下：\n    • [\"options\", name, value]: 覆写获取选项 name（字串）的值为 value，格式同汇出选项（限“获取 - 内容”）。\n    • [\"options\", {name: value, ...}]: 覆写多个获取选项。\n    • [\"remove\", selector]: 移除匹配 selector 的元素。\n    • [\"unwrap\", selector]: 移除匹配 selector 的元素，但保留子元素。\n    • [\"html\", selector, htmlText]: 对匹配 selector 的元素设置 HTML 内容为 htmlText（字串）。\n    • [\"text\", selector, text]: 对匹配 selector 的元素设置文字内容为 text（字串）。\n    • [\"attr\", selector, name, value]: 对匹配 selector 的元素设置属性 name（字串）的值为 value（字串，或 null 表示删除属性）。\n    • [\"attr\", selector, {name: value, ...}]: 对匹配 selector 的元素设置多个属性。\n    • [\"css\", selector, name, value, priority]: 对匹配 selector 的元素设置 CSS 属性 name（字串）内容为 value（字串，或 null 表示删除属性），优先权为 priority（\"important\" 或 \"\" 或省略）。\n    • [\"css\", selector, {name: value, ...}]: 对匹配 selector 的元素设置多个 CSS 属性。\n    • [\"insert\", selector, name, attrs, text, mode, index]: 以匹配 selector 的元素为基准插入新元素，新元素以 name（字串）为名称，attrs 为多个属性（{name: value, ...}），text（字串）为文字内容，mode（字串）为插入方式（“before”：基准元素前；“after”：基准元素后；“insert”：插入为基准元素第 index 个子元素；“append”：插入为基准元素最后一个子元素）。\n    • [\"for\", selector, command1, command2, ...]: 对匹配 selector 的元素依序执行 command# 指令。\n  • 指令的参数也可以是指令，可用以下指令取得相关值：\n    • [\"has_elem\", selector]: selector 是否匹配至少一个元素。\n    • [\"has_attr\", selector, name]: selector 匹配的第一个元素是否有 name 属性。\n    • [\"match\", text, pattern, index]: 字串 text 是否匹配正则表达式 pattern。若有指定 index（整数）则传回匹配的字串子群组。\n    • [\"get_html\", selector]: selector 匹配的第一个元素的 HTML 内容。\n    • [\"get_text\", selector]: selector 匹配的第一个元素的文字内容。\n    • [\"get_attr\", selector, name]: selector 匹配的第一个元素的 name 属性值。\n    • [\"get_css\", selector, name, getPriority]: selector 匹配的第一个元素的 name 样式值。若 getPriority 属真则读取样式优先权。\n    • [\"replace\", text, pattern, replacement]: 将字串 text 以正则表达式字串 pattern 替换为字串 replacement 的结果。\n    • [\"if\", cond, thenValue, elseValue]: 若 cond 属真则传回 thenValue，否则传回 elseValue。\n    • [\"and\", value1, value2, ...]: value# 中第一个属假的值，或最后一个值。\n    • [\"or\", value1, value2, ...]: value# 中第一个属真的值，或最后一个值。\n  • 许多指令可用 selector 根据目前的参照元素选择元素，commands 下的指令初始参照元素为获取页面的根节点（通常为 HTML 元素），若甲指令的 selector 之后的参数为乙指令，则甲指令透过 selector 匹配的元素会逐个成为乙指令的参照元素。selector 的值可为：\n    • \"self\" 或 null: 选择目前参照元素。\n    • \"parent\": 选择目前参照元素的父节点。\n    • \"root\": 选择根节点。\n    • \"<CSS 选择器值>\": 用 CSS 选择器选择匹配的元素集合。\n    • {\"css\": \"<CSS 选择器值>\"}: 用 CSS 选择器选择匹配的元素集合。\n    • {\"xpath\": \"<XPath 值>\"}: 用 XPath 选择器选择匹配的元素集合。\n  • 启用除错时，可在指令名称前加上“*”以在控制台记录执行情况。例如：[\"*get_attr\", null, \"data-src\"]\n\n发生错误或启用除错时，可开启获取的分页（若为获取原貌则在获取视窗）的控制台检视详细错误信息。"
   },
   "OptionCaptureImageBackgroundLabel": {
     "message": "样式图片:"
@@ -859,7 +859,7 @@
     "message": "单一 HTML 文件"
   },
   "OptionCaptureSaveAsTooltip": {
-    "message": "指定保存网页及参照文件的格式。\n\n• 文件夹：建立一个文件夹并将网页及资源文件存入其中。Google Chrome（及部分 Chromium 系浏览器）注意：保存获取数据至剪贴簿文件夹时，建议浏览器设定（高级 > 下载内容）不勾选“下载前询问每个文件的保存位置”，以免获取时跳出大量窗口。有些文件（如 *.js、*.py）可能会被浏览器阻挡，须逐个选择“保留”才能下载。\n• HTZ 及 MAFF 封存文件：用 ZIP 算法将网页及资源文件打包，可用“检视封存网页”功能检视，或透过后端服务器或用支持 ZIP 的工具解压缩后检视。\n• 单一 HTML 文件：保存为一个 HTML 文件，资源文件以 data URL 等技术嵌入，大部分现代浏览器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL 效能较差，且缺乏有效的去重复技术，可能使文件容量明显增加。此格式也可能无法保存一些较复杂的数据结构。"
+    "message": "指定保存网页及参照文件的格式。\n\n• 文件夹：建立一个文件夹并将网页及资源文件存入其中。Google Chrome（及部分 Chromium 系浏览器）注意：保存获取数据至剪贴簿文件夹时，建议浏览器设置（高级 > 下载内容）不勾选“下载前询问每个文件的保存位置”，以免获取时跳出大量窗口。有些文件（如 *.js、*.py）可能会被浏览器阻挡，须逐个选择“保留”才能下载。\n• HTZ 及 MAFF 封存文件：用 ZIP 算法将网页及资源文件打包，可用“检视封存网页”功能检视，或透过后端服务器或用支持 ZIP 的工具解压缩后检视。\n• 单一 HTML 文件：保存为一个 HTML 文件，资源文件以 data URL 等技术嵌入，大部分现代浏览器皆能支援，例如 Chromium > 0、Firefox > 0、Edge > 0、Safari > 0、Opera ≥ 7.2、IE ≥ 8（IE 有更多限制）。注意：data URL 效能较差，且缺乏有效的去重复技术，可能使文件容量明显增加。此格式也可能无法保存一些较复杂的数据结构。"
   },
   "OptionCaptureSaveAsZipLabel": {
     "message": "HTZ 封存文件"
@@ -868,7 +868,7 @@
     "message": "保存为 ASCII 文件名"
   },
   "OptionCaptureSaveAsciiFilenameTooltip": {
-    "message": "文件名中所有非 ASCII 字元会以编码形式保存。"
+    "message": "文件名中所有非 ASCII 字符会以编码形式保存。"
   },
   "OptionCaptureSaveDataUriAsFileLabel": {
     "message": "将 data URL 保存为文件"
@@ -919,7 +919,7 @@
     "message": "后端服务器"
   },
   "OptionCaptureSaveToTooltip": {
-    "message": "指定管理保存数据的方式。\n\n• 后端服务器：将获取页面保存于后端服务器设定的剪贴簿数据目录。\n• 剪贴簿文件夹：将获取页面保存于 <默认下载文件夹> 下的剪贴簿文件夹。\n• 文件：将获取页面保存成文件。"
+    "message": "指定管理保存数据的方式。\n\n• 后端服务器：将获取页面保存于后端服务器设置的剪贴簿数据目录。\n• 剪贴簿文件夹：将获取页面保存于 <默认下载文件夹> 下的剪贴簿文件夹。\n• 文件：将获取页面保存成文件。"
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "剪贴簿文件夹:"
@@ -934,10 +934,10 @@
     "message": "此选项决定所有网页脚本（包括 SCRIPT 元素、javascript: 协定的链接、onclick 之类的动态属性等等）的处理方式。\n\n• 保存：将脚本保存至本地。注意：获取的页面由于离开了原服务器环境且改写了部分内容，保存的脚本可能无法正常执行，且有机会造成隐私泄露或安全风险；此外基于安全性考量，脚本无法在封存网页检视器中执行。一般建议使用获取原貌，并将各获取选项设为“保存”，“画布”设为“保存初始状态”，“表单状态”设为“重设”，“影子元素”设为“移除”，“移除隐藏元素”设为“停用”，“改写样式表”勿设为“进阶整理”，以减低脚本冲突出错的机会。\n• 链接：将脚本连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将脚本无效化。\n• 移除：将脚本元素移除。注意在少数情况下这可能会影响网页排版。"
   },
   "OptionCaptureShadowDomLabel": {
-    "message": "影子物件:"
+    "message": "影子对象:"
   },
   "OptionCaptureShadowDomTooltip": {
-    "message": "此选项决定影子物件（Shadow DOM）的处理方式。影子物件是依附于页面元素的另一套物件，由页面脚本动态产生。\n\n• 储存：将影子物件记录于特殊属性，并产生相应的初始化脚本，在网页载入时重建影子物件。\n• 移除：不记录影子物件。"
+    "message": "此选项决定影子对象（Shadow DOM）的处理方式。影子对象是依附于页面元素的另一套对象，由页面脚本动态产生。\n\n• 储存：将影子对象记录于特殊属性，并产生相应的初始化脚本，在网页载入时重建影子对象。\n• 移除：不记录影子对象。"
   },
   "OptionCaptureStyleLabel": {
     "message": "样式:"
@@ -967,7 +967,7 @@
     "message": "自动移除遗失索引文件的项目"
   },
   "OptionCheckerResolveMissingIndexLabel": {
-    "message": "自动移除遗失索引文件设定的项目"
+    "message": "自动移除遗失索引文件设置的项目"
   },
   "OptionCheckerResolveOlderMtimeLabel": {
     "message": "索引文件修改时间晚于项目修改时间时，自动更新项目的修改时间"
@@ -1075,13 +1075,13 @@
     "message": "更动文件时建立备份"
   },
   "OptionPageTitle": {
-    "message": "选项设定"
+    "message": "选项设置"
   },
   "OptionScrapbookBackupForRecaptureLabel": {
     "message": "重新获取时建立备份"
   },
   "OptionScrapbookBackupForRecaptureTooltip": {
-    "message": "重新获取会在获取成功后将旧版本移到后端服务器设定的备份目录，若取消勾选则删除文件不留备份。\n\n• 注意：重新获取时会尝试复制旧获取页面中的批注，但可能有批注无法顺利复制或程序侦测不到，因此一般建议保留备份以防万一。"
+    "message": "重新获取会在获取成功后将旧版本移到后端服务器设置的备份目录，若取消勾选则删除文件不留备份。\n\n• 注意：重新获取时会尝试复制旧获取页面中的批注，但可能有批注无法顺利复制或程序侦测不到，因此一般建议保留备份以防万一。"
   },
   "OptionScrapbookDefaultSearchLabel": {
     "message": "默认搜索条件:"
@@ -1096,13 +1096,13 @@
     "message": "密码:"
   },
   "OptionServerPasswordTooltip": {
-    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的密码，以免浏览器反覆询问；或用于更换用户。\n\n• 注意：保存在浏览器套件的认证资讯未受保护且有遭窃风险，一般建议优先使用有密码保护机制的浏览器内置密码保存功能。"
+    "message": "若后端服务器有设置 HTTP 认证机制，可在这里填入认证所需的密码，以免浏览器反覆询问；或用于更换用户。\n\n• 注意：保存在浏览器套件的认证资讯未受保护且有遭窃风险，一般建议优先使用有密码保护机制的浏览器内置密码保存功能。"
   },
   "OptionServerUrlLabel": {
     "message": "网址:"
   },
   "OptionServerUrlTooltip": {
-    "message": "后端服务器程序的网址根目录（必须以“/”结尾），例如“http://localhost:8080/”或“https://example.com/wsb/”。\n\n• 后端服务器可用 PyWebScrapBook 套件（最低相容版本：$BACKEND_VERSION$）架设，安装细节参见 https://pypi.org/project/webscrapbook/。\n• 本地架设的 PyWebScrapBook 后端服务器预设网址为“http://localhost:8080/”。",
+    "message": "后端服务器程序的网址根目录（必须以“/”结尾），例如“http://localhost:8080/”或“https://example.com/wsb/”。\n\n• 后端服务器可用 PyWebScrapBook 套件（最低相容版本：$BACKEND_VERSION$）架设，安装细节参见 https://pypi.org/project/webscrapbook/。\n• 本地架设的 PyWebScrapBook 后端服务器默认网址为“http://localhost:8080/”。",
     "placeholders": {
       "backend_version": {
         "content": "$1"
@@ -1113,7 +1113,7 @@
     "message": "用户:"
   },
   "OptionServerUserTooltip": {
-    "message": "若后端服务器有设定 HTTP 认证机制，可在这里填入认证所需的用户名，以免浏览器反覆询问；或用于更换用户。\n\n• 注意：保存在浏览器套件的认证资讯未受保护且有遭窃风险，一般建议优先使用有密码保护机制的浏览器内置密码保存功能。"
+    "message": "若后端服务器有设置 HTTP 认证机制，可在这里填入认证所需的用户名，以免浏览器反覆询问；或用于更换用户。\n\n• 注意：保存在浏览器套件的认证资讯未受保护且有遭窃风险，一般建议优先使用有密码保护机制的浏览器内置密码保存功能。"
   },
   "OptionUiAutoCloseCaptureDialogAlwaysLabel": {
     "message": "总是"
@@ -1403,7 +1403,7 @@
     }
   },
   "ScrapBookErrorServerNotConfigured": {
-    "message": "未设定后端服务器。"
+    "message": "未设置后端服务器。"
   },
   "ScrapBookErrorServerTreeChanged": {
     "message": "服务器的目录树数据已变更，请刷新此页面再尝试。"
@@ -1452,7 +1452,7 @@
     }
   },
   "SearchHelpDesc": {
-    "message": "• 输入的关键词会在标题、内文、评注中查找。\n• 可用半形空白分隔要检索的多个关键词。例如“w3c organization”表示搜索含有“w3c”及“organization”的项目 。\n• 可用半形双引号检索完整关键词，若关键词包含半形双引号，可用连续两个半形双引号表示。例如“\"Tom \"\"loves\"\" Mary.\"”表示搜索含有“Tom \"loves\" Mary.”的项目。\n• 可用负号排除关键词。例如“-virus”表示搜索不含“virus”的项目。\n• 可用“<命令>:<关键词>”指定特殊的检索条件，命令前可加负号表示排除或反向。可用命令如下：\n  • mc：之后的关键词皆比对大小写。加负号则反之。例如“mc: CIA FBI -mc: president”表示搜索含有区分大小写的“CIA”、“FBI”及不分大小写的“president”的项目。\n  • re：之后的关键词皆视为正则表达式。加负号则反之。例如“re: \\bcolou?r\\b -re: 1+1=2”表示搜索匹配正则表达式“\\bcolou?r\\b”且含有关键词“1+1=2”的项目。\n  • id：搜索 ID 等同关键词（或与正则表达式匹配）的项目。多次指定时以“或”连接。例如“id:2020 id:2021”表示搜索 ID 为“2020”或“2021”的项目；“-id:2020”表示搜索 ID 不为“2020”的项目。\n  • type：搜索类型等同关键词（或与正则表达式匹配）的项目。多次指定时以“或”连接。可用的类型有“”（网页）、“bookmark”（书签）、“file”（文件）、“note”（笔记）等等。例如“type: type:bookmark”表示搜索类型为网页或书签的项目。\n  • title：搜索标题含有关键词的项目。\n  • content：搜索全文含有关键词的项目。\n  • comment：搜索评注含有关键词的项目。\n  • tc：搜索标题或评注含有关键词的项目。\n  • tcc：搜索标题、全文或评注含有关键词的项目。\n  • index：搜索索引文件含有关键词的项目。\n  • source：搜索原始网址含有关键词的项目。\n  • icon：搜索图示网址含有关键词的项目。\n  • charset：搜索字元集含有关键词的项目。\n  • create：搜索建立时间匹配条件的项目。时间格式为 0-17 位数字，后面接负号（可略），再接 0-17 位数字，表示时间范围的起始与结束。两个 17 位数字表示本地时间的年（4 位数）、月（01-12）、日（01-31）、时（00-59）、分（00-59）、秒（00-59）、毫秒（000-999），省略的部分视为补 0，唯结束时间全省略时视为“999...”。例如“create:2014-2015”表示 2014 年到 2015 年，“create:-201309”表示 2013 年九月以前，“create:20110825”表示 2011 年八月 25 日以后。\n  • modify：搜索修改时间匹配条件的项目。时间格式同 create。\n  • marked：搜索强调标示的项目。\n  • locked：搜索锁定的项目。\n  • location：搜索含有地理位置信息的项目。\n  • file：搜索文件名含有关键词的项目。\n  • root：搜索此 ID 项目下的子项目。多次指定时以“或”连接。例如可用“root:recycle”搜索回收筒中的项目。\n  • book：搜索指定剪贴簿（依名称）中的项目。多次指定时以“或”连接。\n  • sort：将搜索结果按指定方式排序，负号表示倒序。可填入 id、title、comment、file、content、source、type、create、modify。例如“sort:id -sort:modify”表示先按 ID 递增排序再按修改时间递减排序。"
+    "message": "• 输入的关键词会在标题、内文、评注中查找。\n• 可用半形空白分隔要检索的多个关键词。例如“w3c organization”表示搜索含有“w3c”及“organization”的项目 。\n• 可用半形双引号检索完整关键词，若关键词包含半形双引号，可用连续两个半形双引号表示。例如“\"Tom \"\"loves\"\" Mary.\"”表示搜索含有“Tom \"loves\" Mary.”的项目。\n• 可用负号排除关键词。例如“-virus”表示搜索不含“virus”的项目。\n• 可用“<命令>:<关键词>”指定特殊的检索条件，命令前可加负号表示排除或反向。可用命令如下：\n  • mc：之后的关键词皆比对大小写。加负号则反之。例如“mc: CIA FBI -mc: president”表示搜索含有区分大小写的“CIA”、“FBI”及不分大小写的“president”的项目。\n  • re：之后的关键词皆视为正则表达式。加负号则反之。例如“re: \\bcolou?r\\b -re: 1+1=2”表示搜索匹配正则表达式“\\bcolou?r\\b”且含有关键词“1+1=2”的项目。\n  • id：搜索 ID 等同关键词（或与正则表达式匹配）的项目。多次指定时以“或”连接。例如“id:2020 id:2021”表示搜索 ID 为“2020”或“2021”的项目；“-id:2020”表示搜索 ID 不为“2020”的项目。\n  • type：搜索类型等同关键词（或与正则表达式匹配）的项目。多次指定时以“或”连接。可用的类型有“”（网页）、“bookmark”（书签）、“file”（文件）、“note”（笔记）等等。例如“type: type:bookmark”表示搜索类型为网页或书签的项目。\n  • title：搜索标题含有关键词的项目。\n  • content：搜索全文含有关键词的项目。\n  • comment：搜索评注含有关键词的项目。\n  • tc：搜索标题或评注含有关键词的项目。\n  • tcc：搜索标题、全文或评注含有关键词的项目。\n  • index：搜索索引文件含有关键词的项目。\n  • source：搜索原始网址含有关键词的项目。\n  • icon：搜索图示网址含有关键词的项目。\n  • charset：搜索字符集含有关键词的项目。\n  • create：搜索建立时间匹配条件的项目。时间格式为 0-17 位数字，后面接负号（可略），再接 0-17 位数字，表示时间范围的起始与结束。两个 17 位数字表示本地时间的年（4 位数）、月（01-12）、日（01-31）、时（00-59）、分（00-59）、秒（00-59）、毫秒（000-999），省略的部分视为补 0，唯结束时间全省略时视为“999...”。例如“create:2014-2015”表示 2014 年到 2015 年，“create:-201309”表示 2013 年九月以前，“create:20110825”表示 2011 年八月 25 日以后。\n  • modify：搜索修改时间匹配条件的项目。时间格式同 create。\n  • marked：搜索强调标示的项目。\n  • locked：搜索锁定的项目。\n  • location：搜索含有地理位置信息的项目。\n  • file：搜索文件名含有关键词的项目。\n  • root：搜索此 ID 项目下的子项目。多次指定时以“或”连接。例如可用“root:recycle”搜索回收筒中的项目。\n  • book：搜索指定剪贴簿（依名称）中的项目。多次指定时以“或”连接。\n  • sort：将搜索结果按指定方式排序，负号表示倒序。可填入 id、title、comment、file、content、source、type、create、modify。例如“sort:id -sort:modify”表示先按 ID 递增排序再按修改时间递减排序。"
   },
   "SearchHelpSummary": {
     "message": "搜索语法说明"
@@ -1526,7 +1526,7 @@
     "message": "检视封存页面"
   },
   "WarnCaptureCircular": {
-    "message": "资源 '$SOURCE$' 循环参照至 '$TARGET$'，由于当前的获取设定不支持循环参照，参照目标将转向至空值。",
+    "message": "资源 '$SOURCE$' 循环参照至 '$TARGET$'，由于当前的获取设置不支持循环参照，参照目标将转向至空值。",
     "placeholders": {
       "source": {
         "content": "$1"
