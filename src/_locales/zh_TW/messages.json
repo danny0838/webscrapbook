@@ -1086,6 +1086,9 @@
   "OptionScrapbookDefaultSearchLabel": {
     "message": "預設搜尋條件:"
   },
+  "OptionScrapbookDefaultSearchTooltip": {
+    "message": "設定搜尋欄位預先填入的搜尋條件，例如設定為「-type:separator」，則在搜尋欄位填入「keyword」相當於搜尋「-type:separator keyword」。\n\n• 除一般搜尋指令以外，還可用「default:」指令設定預設指令，例如設定為「default:title」，則在搜尋欄位填入「keyword」相當於搜尋「title:keyword」。（預設為 default:tcc）"
+  },
   "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
     "message": "遠端全文搜尋快取大小限制 (MiB):"
   },
