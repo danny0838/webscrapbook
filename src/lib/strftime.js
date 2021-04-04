@@ -21,6 +21,7 @@
 
   'use strict';
 
+  const MAIN_PATTERN = /%([a-z%])/gi;
   const DAY_COUNT = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
 
   class Strftime {
@@ -383,7 +384,7 @@
     }
 
     format(str) {
-      return str.replace(/%([a-z%])/gi, (_, key) => {
+      return str.replace(MAIN_PATTERN, (_, key) => {
         const fn = this[`format_${key}`];
         if (typeof fn === 'function') { return fn.call(this).toString(); }
         if (key === '%') { return '%'; }
