@@ -68,8 +68,7 @@
       try {
         await browser.tabs.get(tabInfo.id)
       } catch (ex) {
-        let info = autoCaptureInfos.get(tabInfo.id);
-        if (info) { purgeInfo(info); }
+        purgeInfo(tabInfo.id);
         return;
       }
 
@@ -134,8 +133,7 @@
       // reset timer if tab closed
       if (changeInfo.status === 'loading' || changeInfo.discarded || changeInfo.hidden) {
         // note that tab id is changed when a tab is discarded in Chromium
-        const info = autoCaptureInfos.get(tabInfo.id);
-        if (info) { purgeInfo(info); }
+        purgeInfo(tabInfo.id);
         return;
       }
 
@@ -208,8 +206,7 @@
     }
 
     function onRemoved(tabId, removeInfo) {
-      const info = autoCaptureInfos.get(tabId);
-      if (info) { purgeInfo(info); }
+      purgeInfo(tabId);
     }
 
     function enableAutoCapture(willEnable) {
@@ -258,23 +255,27 @@
     }
 
     function purgeInfoAll() {
-      for (const [_, info] of autoCaptureInfos) {
-        purgeInfo(info);
+      for (const [tabId, info] of autoCaptureInfos) {
+        purgeInfo(tabId, info);
       }
     }
 
-    function purgeInfo(info) {
+    function purgeInfo(tabId, info) {
+      info = info || autoCaptureInfos.get(tabId);
+      if (!info) { return; }
+
       let t;
       if (info.delay) {
-        while (t = info.delay.pop()) {
+        for (const t of info.delay) {
           clearTimeout(t);
         }
       }
       if (info.repeat) {
-        while (t = info.repeat.pop()) {
+        for (const t of info.repeat) {
           clearInterval(t);
         }
       }
+      autoCaptureInfos.delete(tabId);
     }
 
     function parseRegexStr(str) {
