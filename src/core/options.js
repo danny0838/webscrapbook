@@ -250,35 +250,39 @@
     elem.setCustomValidity('');
   }
 
-  function verifyDownLinkFilters() {
-    const checkRule = (rules) => {
-      const srcLines = rules.split(/(?:\n|\r\n?)/);
-      for (let i = 0, I = srcLines.length; i < I; i++) {
-        const srcLine = srcLines[i];
-        let line = srcLine.trim();
-        if (!line || line.startsWith("#")) { continue; }
+  function verifyDownLinkRules(srcText) {
+    const srcLines = srcText.split(/(?:\n|\r\n?)/);
+    for (let i = 0, I = srcLines.length; i < I; i++) {
+      const srcLine = srcLines[i];
+      let line = srcLine.trim();
+      if (!line || line.startsWith("#")) { continue; }
 
-        // pass non-RegExp
-        if (!/^\/(.*)\/([a-z]*)$/.test(line)) { continue; }
+      // pass non-RegExp
+      if (!/^\/(.*)\/([a-z]*)$/.test(line)) { continue; }
 
-        try {
-          new RegExp(RegExp.$1, RegExp.$2);
-        } catch (ex) {
-          return `Line ${i + 1}: ${ex.message}`;
-        }
+      try {
+        new RegExp(RegExp.$1, RegExp.$2);
+      } catch (ex) {
+        return `Line ${i + 1}: ${ex.message}`;
       }
+    }
 
-      return '';
-    };
+    return '';
+  }
 
-    var elem = document.getElementById("opt_capture.downLink.file.extFilter");
-    elem.setCustomValidity(checkRule(elem.value));
+  function verifyDownLinkFileExtFilter() {
+    const elem = document.getElementById("opt_capture.downLink.file.extFilter");
+    elem.setCustomValidity(verifyDownLinkRules(elem.value));
+  }
 
-    var elem = document.getElementById("opt_capture.downLink.doc.urlFilter");
-    elem.setCustomValidity(checkRule(elem.value));
+  function verifyDownLinkDocUrlFilter() {
+    const elem = document.getElementById("opt_capture.downLink.doc.urlFilter");
+    elem.setCustomValidity(verifyDownLinkRules(elem.value));
+  }
 
-    var elem = document.getElementById("opt_capture.downLink.urlFilter");
-    elem.setCustomValidity(checkRule(elem.value));
+  function verifyDownLinkUrlFilter() {
+    const elem = document.getElementById("opt_capture.downLink.urlFilter");
+    elem.setCustomValidity(verifyDownLinkRules(elem.value));
   }
 
   function refreshForm() {
@@ -466,9 +470,9 @@
     document.getElementById("opt_capture.downLink.file.mode").addEventListener("change", renewCaptureDownLinkDetails);
     document.getElementById("opt_capture.downLink.doc.depth").addEventListener("change", renewCaptureDownLinkDetails);
 
-    document.getElementById("opt_capture.downLink.file.extFilter").addEventListener("change", verifyDownLinkFilters);
-    document.getElementById("opt_capture.downLink.doc.urlFilter").addEventListener("change", verifyDownLinkFilters);
-    document.getElementById("opt_capture.downLink.urlFilter").addEventListener("change", verifyDownLinkFilters);
+    document.getElementById("opt_capture.downLink.file.extFilter").addEventListener("change", verifyDownLinkFileExtFilter);
+    document.getElementById("opt_capture.downLink.doc.urlFilter").addEventListener("change", verifyDownLinkDocUrlFilter);
+    document.getElementById("opt_capture.downLink.urlFilter").addEventListener("change", verifyDownLinkUrlFilter);
 
     document.getElementById("opt_capture.helpers").addEventListener("change", verifyCaptureHelpers);
     document.getElementById("opt_autocapture.rules").addEventListener("change", verifyAutoCapture);
@@ -477,7 +481,10 @@
       event.preventDefault();
 
       // verify the form
-      verifyDownLinkFilters();
+      verifyDownLinkFileExtFilter();
+      verifyDownLinkDocUrlFilter();
+      verifyDownLinkUrlFilter();
+
       verifyCaptureHelpers();
       verifyAutoCapture();
 
