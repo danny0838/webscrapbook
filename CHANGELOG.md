@@ -3,6 +3,12 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.108.0] - 2021-04-05
+* Improved GUI for options verification.
+* Reworked the syntax of `capture.saveFilename` option.
+* Added support of auto-capture.
+* Added "copyinfo" command to sidebar.
+
 ## [0.107.0] - 2021-04-03
 * Added support of viewing folder items.
 * Added support of editing a postit in the sidebar.
