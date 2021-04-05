@@ -180,6 +180,97 @@
     await scrapbook.cache.set(getDetailStatusKey(), status, 'storage');
   }
 
+  function refreshForm() {
+    renewCaptureSaveToDetails();
+    renewCaptureSaveAsDetails();
+    renewCaptureDownLinkDetails();
+  }
+
+  function renewCaptureSaveToDetails() {
+    const mode = document.getElementById("opt_capture.saveTo").value;
+
+    Array.prototype.forEach.call(document.querySelectorAll('.captureScrapbookFolder'), (elem) => {
+      elem.hidden = mode !== 'folder';
+    });
+
+    {
+      const elem = document.getElementById('opt_capture.saveAs');
+      elem.querySelector('[value="folder"]').disabled = mode === 'file';
+      if (elem.value === 'folder' && mode === 'file') {
+        elem.value = 'zip';
+      }
+    }
+  }
+
+  function renewCaptureSaveAsDetails() {
+    const mode = document.getElementById("opt_capture.saveAs").value;
+
+    Array.prototype.forEach.call(document.querySelectorAll('.captureMergeCssResources'), (elem) => {
+      elem.hidden = mode !== 'singleHtml';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.captureSaveDataUriAsFile'), (elem) => {
+      elem.hidden = mode === 'singleHtml';
+    });
+  }
+
+  function verifySavePath(event) {
+    const elem = event.target;
+    if (elem.value) {
+      // make sure it's a valid path for browser.downloads.download
+      elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
+    } else {
+      // reset value to placeholder
+      elem.value = elem.placeholder;
+    }
+  }
+
+  function renewCaptureDownLinkDetails() {
+    var input = document.getElementById("opt_capture.downLink.file.mode");
+    Array.prototype.forEach.call(document.querySelectorAll('.captureDownLinkFileExtFilter'), (elem) => {
+      elem.hidden = input.value === 'none';
+    });
+
+    var input = document.getElementById("opt_capture.downLink.doc.depth");
+    Array.prototype.forEach.call(document.querySelectorAll('.captureDownLinkDocUrlFilter'), (elem) => {
+      elem.hidden = !(input.valueAsNumber > 0);
+    });
+  }
+
+  function verifyDownLinkRules(srcText) {
+    const srcLines = srcText.split(/(?:\n|\r\n?)/);
+    for (let i = 0, I = srcLines.length; i < I; i++) {
+      const srcLine = srcLines[i];
+      let line = srcLine.trim();
+      if (!line || line.startsWith("#")) { continue; }
+
+      // pass non-RegExp
+      if (!/^\/(.*)\/([a-z]*)$/.test(line)) { continue; }
+
+      try {
+        new RegExp(RegExp.$1, RegExp.$2);
+      } catch (ex) {
+        return `Line ${i + 1}: ${ex.message}`;
+      }
+    }
+
+    return '';
+  }
+
+  function verifyDownLinkFileExtFilter() {
+    const elem = document.getElementById("opt_capture.downLink.file.extFilter");
+    elem.setCustomValidity(verifyDownLinkRules(elem.value));
+  }
+
+  function verifyDownLinkDocUrlFilter() {
+    const elem = document.getElementById("opt_capture.downLink.doc.urlFilter");
+    elem.setCustomValidity(verifyDownLinkRules(elem.value));
+  }
+
+  function verifyDownLinkUrlFilter() {
+    const elem = document.getElementById("opt_capture.downLink.urlFilter");
+    elem.setCustomValidity(verifyDownLinkRules(elem.value));
+  }
+
   function verifyCaptureHelpers() {
     const elem = document.getElementById("opt_capture.helpers");
     const json = elem.value;
@@ -248,97 +339,6 @@
     }
 
     elem.setCustomValidity('');
-  }
-
-  function verifyDownLinkRules(srcText) {
-    const srcLines = srcText.split(/(?:\n|\r\n?)/);
-    for (let i = 0, I = srcLines.length; i < I; i++) {
-      const srcLine = srcLines[i];
-      let line = srcLine.trim();
-      if (!line || line.startsWith("#")) { continue; }
-
-      // pass non-RegExp
-      if (!/^\/(.*)\/([a-z]*)$/.test(line)) { continue; }
-
-      try {
-        new RegExp(RegExp.$1, RegExp.$2);
-      } catch (ex) {
-        return `Line ${i + 1}: ${ex.message}`;
-      }
-    }
-
-    return '';
-  }
-
-  function verifyDownLinkFileExtFilter() {
-    const elem = document.getElementById("opt_capture.downLink.file.extFilter");
-    elem.setCustomValidity(verifyDownLinkRules(elem.value));
-  }
-
-  function verifyDownLinkDocUrlFilter() {
-    const elem = document.getElementById("opt_capture.downLink.doc.urlFilter");
-    elem.setCustomValidity(verifyDownLinkRules(elem.value));
-  }
-
-  function verifyDownLinkUrlFilter() {
-    const elem = document.getElementById("opt_capture.downLink.urlFilter");
-    elem.setCustomValidity(verifyDownLinkRules(elem.value));
-  }
-
-  function refreshForm() {
-    renewCaptureSaveToDetails();
-    renewCaptureSaveAsDetails();
-    renewCaptureDownLinkDetails();
-  }
-
-  function renewCaptureSaveToDetails() {
-    const mode = document.getElementById("opt_capture.saveTo").value;
-
-    Array.prototype.forEach.call(document.querySelectorAll('.captureScrapbookFolder'), (elem) => {
-      elem.hidden = mode !== 'folder';
-    });
-
-    {
-      const elem = document.getElementById('opt_capture.saveAs');
-      elem.querySelector('[value="folder"]').disabled = mode === 'file';
-      if (elem.value === 'folder' && mode === 'file') {
-        elem.value = 'zip';
-      }
-    }
-  }
-
-  function renewCaptureSaveAsDetails() {
-    const mode = document.getElementById("opt_capture.saveAs").value;
-
-    Array.prototype.forEach.call(document.querySelectorAll('.captureMergeCssResources'), (elem) => {
-      elem.hidden = mode !== 'singleHtml';
-    });
-    Array.prototype.forEach.call(document.querySelectorAll('.captureSaveDataUriAsFile'), (elem) => {
-      elem.hidden = mode === 'singleHtml';
-    });
-  }
-
-  function verifySavePath(event) {
-    const elem = event.target;
-    if (elem.value) {
-      // make sure it's a valid path for browser.downloads.download
-      elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
-    } else {
-      // reset value to placeholder
-      elem.value = elem.placeholder;
-    }
-  }
-
-  function renewCaptureDownLinkDetails() {
-    var input = document.getElementById("opt_capture.downLink.file.mode");
-    Array.prototype.forEach.call(document.querySelectorAll('.captureDownLinkFileExtFilter'), (elem) => {
-      elem.hidden = input.value === 'none';
-    });
-
-    var input = document.getElementById("opt_capture.downLink.doc.depth");
-    Array.prototype.forEach.call(document.querySelectorAll('.captureDownLinkDocUrlFilter'), (elem) => {
-      elem.hidden = !(input.valueAsNumber > 0);
-    });
   }
 
   async function openIndexer() {
