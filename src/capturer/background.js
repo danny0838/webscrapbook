@@ -131,7 +131,7 @@
 
     function onUpdated(tabId, changeInfo, tabInfo) {
       // reset timer if tab closed
-      if (changeInfo.status === 'loading' || changeInfo.discarded || changeInfo.hidden) {
+      if (changeInfo.status === 'loading' || changeInfo.discarded) {
         // note that tab id is changed when a tab is discarded in Chromium
         purgeInfo(tabInfo.id);
         return;
