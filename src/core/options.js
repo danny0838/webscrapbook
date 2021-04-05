@@ -438,11 +438,11 @@
     });
   }
 
-  function onToggleTooltip(elem) {
-    if (!onToggleTooltip.tooltipMap) {
-      onToggleTooltip.tooltipMap = new WeakMap();
+  function toggleTooltip(elem) {
+    if (!toggleTooltip.tooltipMap) {
+      toggleTooltip.tooltipMap = new WeakMap();
     }
-    const tooltipMap = onToggleTooltip.tooltipMap;
+    const tooltipMap = toggleTooltip.tooltipMap;
 
     let tooltip = tooltipMap.get(elem);
     if (tooltip) {
@@ -453,6 +453,78 @@
       tooltip.className = "tooltip";
       tooltip.textContent = elem.getAttribute("data-tooltip");
       tooltipMap.set(elem, tooltip);
+    }
+  }
+
+  function onOpenIndexerClick(event) {
+    event.preventDefault();
+    openIndexer();
+  }
+
+  function onOpenCheckerClick(event) {
+    event.preventDefault();
+    openChecker();
+  }
+
+  async function onSubmit(event) {
+    event.preventDefault();
+
+    // verify the form
+    refreshForm();
+
+    // save options
+    for (const id in scrapbook.options) {
+      // Overwrite only keys with a defined value so that
+      // keys not listed in the options page are not nullified.
+      // In Chromium, storageArea.set({key: undefined}) does not store to key.
+      // In Firefox, storageArea.set({key: undefined}) stores null to key.
+      const value = getOptionFromDocument(id);
+      if (typeof value !== "undefined") {
+        scrapbook.options[id] = value;
+      }
+    }
+    await scrapbook.saveOptions();
+    return closeWindow();
+  }
+
+  function onResetClick(event) {
+    event.preventDefault();
+    resetOptions();
+    refreshForm();
+  }
+
+  function onExportClick(event) {
+    event.preventDefault();
+    exportOptions();
+  }
+
+  function onImportClick(event) {
+    event.preventDefault();
+    document.getElementById("import-input").click();
+  }
+
+  async function onImportInputChange(event) {
+    event.preventDefault();
+    const file = event.target.files[0];
+    await importOptions(file);
+    refreshForm();
+  }
+
+  function onDetailsToggle(event) {
+    saveDetailStatus();
+  }
+
+  function onTooltipClick(event) {
+    event.preventDefault();
+    const elem = event.currentTarget;
+    toggleTooltip(elem);
+  }
+
+  function onInvalid(event) {
+    const elem = event.target;
+    const closedParentDetails = elem.closest('details:not([open])');
+    if (closedParentDetails) {
+      closedParentDetails.setAttribute('open', '');
     }
   }
 
@@ -477,13 +549,11 @@
     // event handlers
     document.getElementById("opt_capture.saveTo").addEventListener("change", renewCaptureSaveToDetails);
     document.getElementById("opt_capture.saveAs").addEventListener("change", renewCaptureSaveAsDetails);
-
     document.getElementById("opt_capture.saveFolder").addEventListener("change", verifySaveFolder);
     document.getElementById("opt_capture.saveFilename").addEventListener("change", verifySaveFilename);
 
     document.getElementById("opt_capture.downLink.file.mode").addEventListener("change", renewCaptureDownLinkDetails);
     document.getElementById("opt_capture.downLink.doc.depth").addEventListener("change", renewCaptureDownLinkDetails);
-
     document.getElementById("opt_capture.downLink.file.extFilter").addEventListener("change", verifyDownLinkFileExtFilter);
     document.getElementById("opt_capture.downLink.doc.urlFilter").addEventListener("change", verifyDownLinkDocUrlFilter);
     document.getElementById("opt_capture.downLink.urlFilter").addEventListener("change", verifyDownLinkUrlFilter);
@@ -491,82 +561,25 @@
     document.getElementById("opt_capture.helpers").addEventListener("change", verifyCaptureHelpers);
     document.getElementById("opt_autocapture.rules").addEventListener("change", verifyAutoCapture);
 
-    document.getElementById("options").addEventListener("submit", async (event) => {
-      event.preventDefault();
+    document.getElementById("openIndexer").addEventListener("click", onOpenIndexerClick);
+    document.getElementById("openChecker").addEventListener("click", onOpenCheckerClick);
 
-      // verify the form
-      refreshForm();
-
-      // save options
-      for (const id in scrapbook.options) {
-        // Overwrite only keys with a defined value so that
-        // keys not listed in the options page are not nullified.
-        // In Chromium, storageArea.set({key: undefined}) does not store to key.
-        // In Firefox, storageArea.set({key: undefined}) stores null to key.
-        const value = getOptionFromDocument(id);
-        if (typeof value !== "undefined") {
-          scrapbook.options[id] = value;
-        }
-      }
-      await scrapbook.saveOptions();
-      return closeWindow();
-    });
-
-    document.getElementById("openIndexer").addEventListener("click", (event) => {
-      event.preventDefault();
-      openIndexer();
-    });
-
-    document.getElementById("openChecker").addEventListener("click", (event) => {
-      event.preventDefault();
-      openChecker();
-    });
-
-    document.getElementById("reset").addEventListener("click", (event) => {
-      event.preventDefault();
-      resetOptions();
-      refreshForm();
-    });
-
-    document.getElementById("export").addEventListener("click", (event) => {
-      event.preventDefault();
-      exportOptions();
-    });
-
-    document.getElementById("import").addEventListener("click", (event) => {
-      event.preventDefault();
-      document.getElementById("import-input").click();
-    });
-
-    document.getElementById("import-input").addEventListener("change", async (event) => {
-      event.preventDefault();
-      const file = event.target.files[0];
-      await importOptions(file);
-      refreshForm();
-    });
+    document.getElementById("options").addEventListener("submit", onSubmit);
+    document.getElementById("reset").addEventListener("click", onResetClick);
+    document.getElementById("export").addEventListener("click", onExportClick);
+    document.getElementById("import").addEventListener("click", onImportClick);
+    document.getElementById("import-input").addEventListener("change", onImportInputChange);
 
     for (const elem of document.querySelectorAll('details')) {
-      elem.addEventListener("toggle", (event) => {
-        saveDetailStatus();
-      });
+      elem.addEventListener("toggle", onDetailsToggle);
     }
 
     for (const elem of document.querySelectorAll('a[data-tooltip]')) {
-      elem.addEventListener("click", (event) => {
-        event.preventDefault();
-        const elem = event.currentTarget;
-        onToggleTooltip(elem);
-      });
+      elem.addEventListener("click", onTooltipClick);
     }
 
     for (const elem of document.querySelectorAll(':valid, :invalid')) {
-      elem.addEventListener("invalid", (event) => {
-        const elem = event.target;
-        const closedParentDetails = elem.closest('details:not([open])');
-        if (closedParentDetails) {
-          closedParentDetails.setAttribute('open', '');
-        }
-      });
+      elem.addEventListener("invalid", onInvalid);
     }
 
     // refresh form
