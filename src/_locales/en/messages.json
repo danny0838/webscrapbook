@@ -598,14 +598,6 @@
   "OpenViewer": {
     "message": "View archived page"
   },
-  "OptionAutoCaptureError": {
-    "message": "Auto-capture syntax is invalid. Stop to fix it now?\n\n$MESSAGE$",
-    "placeholders": {
-      "message": {
-        "content": "$1"
-      }
-    }
-  },
   "OptionAutocaptureLabel": {
     "message": "Enable auto-capture:"
   },
@@ -678,14 +670,6 @@
   "OptionCaptureDownLinkDocUrlFilterTooltip": {
     "message": "This determines what links are for capturing according to URL.\n\n• Each following line is a full URL (with chars following a “#” or space stripped) or a regular expression (e.g. “/^http://example\\.com//”). \n• A link whose full URL (with chars following a “#” stripped) matches a rule at any line is included for downloading. For example, the link “http://example.com/subpage#h2” matches the full URL rule “http://example.com/subpage SubPageTitle” or the regular expression rule “/^http://example\\.com/SubPage\\d*/i SubPageRuleDescription”. Any URL is included if no rule exists in any line.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
-  "OptionCaptureDownLinkFileExtFilterError": {
-    "message": "The following regular expressions in file extension filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
-    "placeholders": {
-      "lines": {
-        "content": "$1"
-      }
-    }
-  },
   "OptionCaptureDownLinkFileExtFilterLabel": {
     "message": "Include these file extensions:"
   },
@@ -706,25 +690,6 @@
   },
   "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "Match URL file extension"
-  },
-  "OptionCaptureDownLinkFilterErrorLine": {
-    "message": "Line $LINE$: $ERROR$",
-    "placeholders": {
-      "line": {
-        "content": "$1"
-      },
-      "error": {
-        "content": "$2"
-      }
-    }
-  },
-  "OptionCaptureDownLinkUrlFilterError": {
-    "message": "The following regular expressions in URL filter are invalid and will be skipped on execution. Stop to fix them now?\n\n$LINES$",
-    "placeholders": {
-      "lines": {
-        "content": "$1"
-      }
-    }
   },
   "OptionCaptureDownLinkUrlFilterLabel": {
     "message": "URL filter:"
@@ -764,14 +729,6 @@
   },
   "OptionCaptureFrameTooltip": {
     "message": "This determines how frames (FRAME and IFRAME elements) are handled.\n\n• Save: Save the frame pages to local.\n• Link: Link the frame to its source URL. Note that a network flow will be triggered when browsing the captured document in the future. NOTE: Due to the restriction of SOP, ths font cannot be loaded by the captured page unless CORS has been properly configured by its source server.\n• Blank: Disable the frame elements.\n• Remove: Remove the frame. Note that this could alter the web page layout."
-  },
-  "OptionCaptureHelpersError": {
-    "message": "Capture helper syntax is invalid and will not work when run. Stop to fix them now?\n\n$MESSAGE$",
-    "placeholders": {
-      "message": {
-        "content": "$1"
-      }
-    }
   },
   "OptionCaptureHelpersLabel": {
     "message": "Enable capture helpers"

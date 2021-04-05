@@ -598,14 +598,6 @@
   "OpenViewer": {
     "message": "检视封存网页"
   },
-  "OptionAutoCaptureError": {
-    "message": "自动获取语法错误，要停下来修正吗？\n\n$MESSAGE$",
-    "placeholders": {
-      "message": {
-        "content": "$1"
-      }
-    }
-  },
   "OptionAutocaptureLabel": {
     "message": "启用自动获取:"
   },
@@ -678,14 +670,6 @@
   "OptionCaptureDownLinkDocUrlFilterTooltip": {
     "message": "此过滤器根据网址筛选要获取的链接。\n\n• 以下每行为一个完整网址（“#”或空白以后的部分会自动去除）或一个正则表达式（如“/^http://example\\.com//”）。\n• 链接的完整网址（去除“#”以后的部分）匹配任何一行的规则即列入下载。例如链接“http://example.com/subpage#h2”匹配完整网址规则“http://example.com/subpage 子页面标题”或正则表达式规则“/^http://example\\.com/SubPage\\d*/i 子页面规则描述”。若每行皆无规则，则任何网址皆列入下载。\n• 以“#”开头的行皆视为注解，执行时会略过。"
   },
-  "OptionCaptureDownLinkFileExtFilterError": {
-    "message": "以下扩展名过滤器的正则表达式语法有误，执行时会忽略它们，要停下来修正吗？\n\n$LINES$",
-    "placeholders": {
-      "lines": {
-        "content": "$1"
-      }
-    }
-  },
   "OptionCaptureDownLinkFileExtFilterLabel": {
     "message": "包括以下扩展名:"
   },
@@ -706,25 +690,6 @@
   },
   "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "匹配网址扩展名"
-  },
-  "OptionCaptureDownLinkFilterErrorLine": {
-    "message": "第 $LINE$ 行：$ERROR$",
-    "placeholders": {
-      "line": {
-        "content": "$1"
-      },
-      "error": {
-        "content": "$2"
-      }
-    }
-  },
-  "OptionCaptureDownLinkUrlFilterError": {
-    "message": "以下网址过滤器的正则表达式语法有误，执行时会忽略它们，要停下来修正吗？\n\n$LINES$",
-    "placeholders": {
-      "lines": {
-        "content": "$1"
-      }
-    }
   },
   "OptionCaptureDownLinkUrlFilterLabel": {
     "message": "网址过滤器:"
@@ -764,14 +729,6 @@
   },
   "OptionCaptureFrameTooltip": {
     "message": "此选项决定框架页（FRAME 及 IFRAME 元素）的处理方式。\n\n• 保存：将框架页保存至本地。\n• 链接：将框架页连往原始位址。注意这会导致浏览获取页面时触发网路传输。\n• 清空：将框架页无效化。\n• 移除：将框架页元素移除。注意这可能会影响网页排版。"
-  },
-  "OptionCaptureHelpersError": {
-    "message": "获取助手语法错误，执行时将无作用，要停下来修正吗？\n\n$MESSAGE$",
-    "placeholders": {
-      "message": {
-        "content": "$1"
-      }
-    }
   },
   "OptionCaptureHelpersLabel": {
     "message": "启用获取助手"

@@ -180,73 +180,102 @@
     await scrapbook.cache.set(getDetailStatusKey(), status, 'storage');
   }
 
+  function verifyCaptureHelpers() {
+    const elem = document.getElementById("opt_capture.helpers");
+    const json = elem.value;
+
+    if (json) {
+      try {
+        const configs = JSON.parse(json);
+        if (!Array.isArray(configs)) {
+          throw new Error('Invalid array');
+        }
+
+        for (let i = 0, I = configs.length; i < I; i++) {
+          const config = configs[i];
+          if (typeof config !== 'object' || config === null || Array.isArray(config)) {
+            throw new Error(`Helper[${i}]: invalid object`);
+          }
+          if (config.pattern) {
+            if (/^\/(.*)\/([a-z]*)$/.test(config.pattern)) {
+              try {
+                new RegExp(RegExp.$1, RegExp.$2);
+              } catch (ex) {
+                throw new Error(`Helper[${i}]: invalid pattern: ${ex.message}`);
+              }
+            }
+          }
+        }
+      } catch (ex) {
+        elem.setCustomValidity(ex.message);
+        return;
+      }
+    }
+
+    elem.setCustomValidity('');
+  }
+
   function verifyAutoCapture() {
-    const json = document.getElementById("opt_autocapture.rules").value;
+    const elem = document.getElementById("opt_autocapture.rules");
+    const json = elem.value;
 
     if (json) {
       try {
-        JSON.parse(json);
-      } catch (ex) {
-        if (confirm(scrapbook.lang("OptionAutoCaptureError", [ex.message]))) {
-          return false;
+        const configs = JSON.parse(json);
+        if (!Array.isArray(configs)) {
+          throw new Error('Invalid array');
         }
+
+        for (let i = 0, I = configs.length; i < I; i++) {
+          const config = configs[i];
+          if (typeof config !== 'object' || config === null || Array.isArray(config)) {
+            throw new Error(`Config[${i}]: invalid object`);
+          }
+          if (config.pattern) {
+            if (/^\/(.*)\/([a-z]*)$/.test(config.pattern)) {
+              try {
+                new RegExp(RegExp.$1, RegExp.$2);
+              } catch (ex) {
+                throw new Error(`Config[${i}]: invalid pattern: ${ex.message}`);
+              }
+            }
+          }
+        }
+      } catch (ex) {
+        elem.setCustomValidity(ex.message);
+        return;
       }
     }
 
-    return true;
+    elem.setCustomValidity('');
   }
 
-  function verifyHelpers() {
-    const json = document.getElementById("opt_capture.helpers").value;
-
-    if (json) {
-      try {
-        JSON.parse(json);
-      } catch (ex) {
-        if (confirm(scrapbook.lang("OptionCaptureHelpersError", [ex.message]))) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  }
-
-  function verifyDownLinkFilters(rules) {
+  function verifyDownLinkFilters() {
     const checkRule = (rules) => {
-      rules.split(/(?:\n|\r\n?)/).forEach(function (srcLine, index) {
+      const srcLines = rules.split(/(?:\n|\r\n?)/);
+      for (let i = 0, I = srcLines.length; i < I; i++) {
+        const srcLine = srcLines[i];
         let line = srcLine.trim();
-        if (!line || line.startsWith("#")) { return; }
+        if (!line || line.startsWith("#")) { continue; }
 
         // pass non-RegExp
-        if (!/^\/(.*)\/([a-z]*)$/.test(line)) { return; }
+        if (!/^\/(.*)\/([a-z]*)$/.test(line)) { continue; }
 
         try {
-          new RegExp(`^(?:${RegExp.$1})$`, RegExp.$2);
+          new RegExp(RegExp.$1, RegExp.$2);
         } catch (ex) {
-          line = scrapbook.lang("OptionCaptureDownLinkFilterErrorLine", [index + 1, srcLine]);
-          errors.push(line);
+          return `Line ${i + 1}: ${ex.message}`;
         }
-      });
+      }
+
+      return '';
     };
 
-    var errors = [];
-    checkRule(document.getElementById("opt_capture.downLink.file.extFilter").value);
-    if (errors.length) {
-      if (confirm(scrapbook.lang("OptionCaptureDownLinkFileExtFilterError", [errors.join('\n\n')]))) {
-        return false;
-      }
-    }
+    var elem = document.getElementById("opt_capture.downLink.file.extFilter");
+    elem.setCustomValidity(checkRule(elem.value));
 
-    var errors = [];
-    checkRule(document.getElementById("opt_capture.downLink.urlFilter").value);
-    if (errors.length) {
-      if (confirm(scrapbook.lang("OptionCaptureDownLinkUrlFilterError", [errors.join('\n\n')]))) {
-        return false;
-      }
-    }
-
-    return true;
+    var elem = document.getElementById("opt_capture.downLink.urlFilter");
+    elem.setCustomValidity(checkRule(elem.value));
   }
 
   function refreshForm() {
@@ -426,30 +455,27 @@
 
     // event handlers
     document.getElementById("opt_capture.saveTo").addEventListener("change", renewCaptureSaveToDetails);
-
     document.getElementById("opt_capture.saveAs").addEventListener("change", renewCaptureSaveAsDetails);
 
     document.getElementById("opt_capture.saveFolder").addEventListener("change", verifySavePath);
-
     document.getElementById("opt_capture.saveFilename").addEventListener("change", verifySavePath);
 
     document.getElementById("opt_capture.downLink.file.mode").addEventListener("change", renewCaptureDownLinkDetails);
-
     document.getElementById("opt_capture.downLink.doc.depth").addEventListener("change", renewCaptureDownLinkDetails);
+
+    document.getElementById("opt_capture.downLink.file.extFilter").addEventListener("change", verifyDownLinkFilters);
+    document.getElementById("opt_capture.downLink.urlFilter").addEventListener("change", verifyDownLinkFilters);
+
+    document.getElementById("opt_capture.helpers").addEventListener("change", verifyCaptureHelpers);
+    document.getElementById("opt_autocapture.rules").addEventListener("change", verifyAutoCapture);
 
     document.getElementById("options").addEventListener("submit", async (event) => {
       event.preventDefault();
 
       // verify the form
-      if (!verifyAutoCapture()) {
-        return;
-      }
-      if (!verifyHelpers()) {
-        return;
-      }
-      if (!verifyDownLinkFilters()) {
-        return;
-      }
+      verifyDownLinkFilters();
+      verifyCaptureHelpers();
+      verifyAutoCapture();
 
       // save options
       for (const id in scrapbook.options) {
