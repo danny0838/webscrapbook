@@ -193,12 +193,10 @@
       elem.hidden = mode !== 'folder';
     });
 
-    {
-      const elem = document.getElementById('opt_capture.saveAs');
-      elem.querySelector('[value="folder"]').disabled = mode === 'file';
-      if (elem.value === 'folder' && mode === 'file') {
-        elem.value = 'zip';
-      }
+    var elem = document.getElementById('opt_capture.saveAs');
+    elem.querySelector('[value="folder"]').disabled = mode === 'file';
+    if (elem.value === 'folder' && mode === 'file') {
+      elem.querySelector(':enabled').selected = true;
     }
   }
 
