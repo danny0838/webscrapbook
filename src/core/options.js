@@ -183,7 +183,14 @@
   function refreshForm() {
     renewCaptureSaveToDetails();
     renewCaptureSaveAsDetails();
+    verifySaveFolder();
+    verifySaveFilename();
     renewCaptureDownLinkDetails();
+    verifyDownLinkFileExtFilter();
+    verifyDownLinkDocUrlFilter();
+    verifyDownLinkUrlFilter();
+    verifyCaptureHelpers();
+    verifyAutoCapture();
   }
 
   function renewCaptureSaveToDetails() {
@@ -488,14 +495,7 @@
       event.preventDefault();
 
       // verify the form
-      verifySaveFolder();
-      verifySaveFilename();
-      verifyDownLinkFileExtFilter();
-      verifyDownLinkDocUrlFilter();
-      verifyDownLinkUrlFilter();
-
-      verifyCaptureHelpers();
-      verifyAutoCapture();
+      refreshForm();
 
       // save options
       for (const id in scrapbook.options) {
