@@ -1279,10 +1279,14 @@ if (Node && !Node.prototype.getRootNode) {
    * @param {boolean} [allowFileAccess] - Optional for better accuracy.
    * @return {string} Whether the page url is allowed for content scripts.
    */
-  scrapbook.isContentPage = function (url, allowFileAccess = !scrapbook.userAgent.is('gecko')) {
-    const filter = new RegExp(`^(?:https?${allowFileAccess ? "|file" : ""}):`);
-    if (!filter.test(url)) { return false; }
-    return true;
+  scrapbook.isContentPage = function (...args) {
+    const FILTER = new RegExp(`^https?:`);
+    const FILTER_FILE = new RegExp(`^(?:https?|file):`);
+    const isContentPage = (url, allowFileAccess = !scrapbook.userAgent.is('gecko')) => {
+      return (allowFileAccess ? FILTER_FILE : FILTER).test(url);
+    };
+    scrapbook.isContentPage = isContentPage;
+    return isContentPage(...args);
   };
 
 
