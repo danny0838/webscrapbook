@@ -274,6 +274,9 @@
     var elem = document.getElementById("opt_capture.downLink.file.extFilter");
     elem.setCustomValidity(checkRule(elem.value));
 
+    var elem = document.getElementById("opt_capture.downLink.doc.urlFilter");
+    elem.setCustomValidity(checkRule(elem.value));
+
     var elem = document.getElementById("opt_capture.downLink.urlFilter");
     elem.setCustomValidity(checkRule(elem.value));
   }
@@ -464,6 +467,7 @@
     document.getElementById("opt_capture.downLink.doc.depth").addEventListener("change", renewCaptureDownLinkDetails);
 
     document.getElementById("opt_capture.downLink.file.extFilter").addEventListener("change", verifyDownLinkFilters);
+    document.getElementById("opt_capture.downLink.doc.urlFilter").addEventListener("change", verifyDownLinkFilters);
     document.getElementById("opt_capture.downLink.urlFilter").addEventListener("change", verifyDownLinkFilters);
 
     document.getElementById("opt_capture.helpers").addEventListener("change", verifyCaptureHelpers);
