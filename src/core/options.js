@@ -242,12 +242,12 @@
   function renewCaptureDownLinkDetails() {
     var input = document.getElementById("opt_capture.downLink.file.mode");
     for (const elem of document.querySelectorAll('.captureDownLinkFileExtFilter')) {
-      elem.hidden = input.value === 'none';
+      elem.hidden = elem.disabled = input.value === 'none';
     }
 
     var input = document.getElementById("opt_capture.downLink.doc.depth");
     for (const elem of document.querySelectorAll('.captureDownLinkDocUrlFilter')) {
-      elem.hidden = !(input.valueAsNumber > 0);
+      elem.hidden = elem.disabled = !(input.valueAsNumber > 0);
     }
   }
 

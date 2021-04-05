@@ -16,7 +16,7 @@
   <details id="group_interface" open>
     <summary>__MSG_OptionGroupUi__</summary>
     <div>
-      <div>
+      <fieldset>
         <label>__MSG_OptionUiToolbarButtonsLabel__</label>
         <div>
           <input type="checkbox" id="opt_ui.toolbar.showCaptureTab">
@@ -62,12 +62,12 @@
           <input type="checkbox" id="opt_ui.toolbar.showOpenOptions">
           <label for="opt_ui.toolbar.showOpenOptions">__MSG_OpenOptions__</label>
         </div>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_ui.showContextMenu">
         <label for="opt_ui.showContextMenu">__MSG_OptionUiShowContextMenuLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_ui.autoCloseCaptureDialog">__MSG_OptionUiAutoCloseCaptureDialogLabel__</label>
         <select id="opt_ui.autoCloseCaptureDialog">
           <option value="none">__MSG_OptionUiAutoCloseCaptureDialogNoneLabel__</option>
@@ -76,13 +76,13 @@
           <option value="nofailure">__MSG_OptionUiAutoCloseCaptureDialogNoFailureLabel__</option>
           <option value="always">__MSG_OptionUiAutoCloseCaptureDialogAlwaysLabel__</option>
         </select>
-      </div>
+      </fieldset>
     </div>
   </details>
   <details id="group_save" open>
     <summary>__MSG_OptionGroupSave__</summary>
     <div>
-      <div>
+      <fieldset>
         <label for="opt_capture.saveTo">__MSG_OptionCaptureSaveToLabel__</label>
         <select id="opt_capture.saveTo">
           <option value="server">__MSG_OptionCaptureSaveToServerLabel__</option>
@@ -90,13 +90,13 @@
           <option value="file">__MSG_OptionCaptureSaveToFileLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveToTooltip__"></a>
-      </div>
-      <div class="captureScrapbookFolder" hidden>
+      </fieldset>
+      <fieldset class="captureScrapbookFolder" hidden>
         <label for="opt_capture.saveFolder">__MSG_OptionCaptureScrapbookFolderLabel__</label>
         <input type="text" id="opt_capture.saveFolder" placeholder="WebScrapBook/data">
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureScrapbookFolderTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.saveAs">__MSG_OptionCaptureSaveAsLabel__</label>
         <select id="opt_capture.saveAs">
           <option value="folder">__MSG_OptionCaptureSaveAsFolderLabel__</option>
@@ -105,13 +105,13 @@
           <option value="singleHtml">__MSG_OptionCaptureSaveAsSingleHtmlLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveAsTooltip__"></a>
-      </div>
-      <div class="captureMergeCssResources" hidden>
+      </fieldset>
+      <fieldset class="captureMergeCssResources" hidden>
         <input type="checkbox" id="opt_capture.mergeCssResources">
         <label for="opt_capture.mergeCssResources">__MSG_OptionCaptureMergeCssResourcesLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureMergeCssResourcesTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.saveFilename">__MSG_OptionCaptureSaveFilenameLabel__</label>
         <input type="text" id="opt_capture.saveFilename" placeholder="%id%" list="capture.saveFilename.preset">
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveFilenameTooltip__"></a>
@@ -124,38 +124,38 @@
           <option value="%title% (%create-F% %create-T%)">
           <option value="%create-Y%/%create-m%/%id% %title%">
         </datalist>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.saveFilenameMaxLenUtf16">__MSG_OptionCaptureSaveFilenameMaxLenUtf16Label__</label>
         <input type="number" min="2" step="1" id="opt_capture.saveFilenameMaxLenUtf16">
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveFilenameMaxLenUtf16Tooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.saveFilenameMaxLenUtf8">__MSG_OptionCaptureSaveFilenameMaxLenUtf8Label__</label>
         <input type="number" min="4" step="1" id="opt_capture.saveFilenameMaxLenUtf8">
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveFilenameMaxLenUtf8Tooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_capture.saveAsciiFilename">
         <label for="opt_capture.saveAsciiFilename">__MSG_OptionCaptureSaveAsciiFilenameLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveAsciiFilenameTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_capture.saveFileAsHtml">
         <label for="opt_capture.saveFileAsHtml">__MSG_OptionCaptureSaveFileAsHtmlLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveFileAsHtmlTooltip__"></a>
-      </div>
-      <div class="captureSaveDataUriAsFile" hidden>
+      </fieldset>
+      <fieldset class="captureSaveDataUriAsFile" hidden>
         <input type="checkbox" id="opt_capture.saveDataUriAsFile">
         <label for="opt_capture.saveDataUriAsFile">__MSG_OptionCaptureSaveDataUriAsFileLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveDataUriAsFileTooltip__"></a>
-      </div>
+      </fieldset>
     </div>
   </details>
   <details id="group_capture" open>
     <summary>__MSG_OptionGroupCapture__</summary>
     <div>
-      <div>
+      <fieldset>
         <label for="opt_capture.image">__MSG_OptionCaptureImageLabel__</label>
         <select id="opt_capture.image">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -165,8 +165,8 @@
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureImageTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.imageBackground">__MSG_OptionCaptureImageBackgroundLabel__</label>
         <select id="opt_capture.imageBackground">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -175,8 +175,8 @@
           <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureImageBackgroundTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.favicon">__MSG_OptionCaptureFaviconLabel__</label>
         <select id="opt_capture.favicon">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -185,8 +185,8 @@
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureFaviconTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.canvas">__MSG_OptionCaptureCanvasLabel__</label>
         <select id="opt_capture.canvas">
           <option value="save">__MSG_OptionCaptureCanvasSaveLabel__</option>
@@ -194,8 +194,8 @@
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureCanvasTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.audio">__MSG_OptionCaptureAudioLabel__</label>
         <select id="opt_capture.audio">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -205,8 +205,8 @@
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureAudioTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.video">__MSG_OptionCaptureVideoLabel__</label>
         <select id="opt_capture.video">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -216,8 +216,8 @@
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureVideoTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.frame">__MSG_OptionCaptureFrameLabel__</label>
         <select id="opt_capture.frame">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -226,8 +226,8 @@
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureFrameTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.font">__MSG_OptionCaptureFontLabel__</label>
         <select id="opt_capture.font">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -236,8 +236,8 @@
           <option value="blank">__MSG_OptionCaptureCommonBlankLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureFontTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.style">__MSG_OptionCaptureStyleLabel__</label>
         <select id="opt_capture.style">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -246,8 +246,8 @@
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureStyleTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.rewriteCss">__MSG_OptionCaptureRewriteCssLabel__</label>
         <select id="opt_capture.rewriteCss">
           <option value="none">__MSG_OptionCaptureRewriteCssNoneLabel__</option>
@@ -256,8 +256,8 @@
           <option value="match">__MSG_OptionCaptureRewriteCssMatchLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureRewriteCssTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.script">__MSG_OptionCaptureScriptLabel__</label>
         <select id="opt_capture.script">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -266,8 +266,8 @@
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureScriptTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.embed">__MSG_OptionCaptureEmbedLabel__</label>
         <select id="opt_capture.embed">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -276,8 +276,8 @@
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureEmbedTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.object">__MSG_OptionCaptureObjectLabel__</label>
         <select id="opt_capture.object">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -286,8 +286,8 @@
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureObjectTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.applet">__MSG_OptionCaptureAppletLabel__</label>
         <select id="opt_capture.applet">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
@@ -296,65 +296,65 @@
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureAppletTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.formStatus">__MSG_OptionCaptureFormStatusLabel__</label>
         <select id="opt_capture.formStatus">
           <option value="keep">__MSG_OptionCaptureFormStatusKeepLabel__</option>
           <option value="reset">__MSG_OptionCaptureFormStatusResetLabel__</option>
         </select>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.shadowDom">__MSG_OptionCaptureShadowDomLabel__</label>
         <select id="opt_capture.shadowDom">
           <option value="save">__MSG_OptionCaptureCommonSaveLabel__</option>
           <option value="remove">__MSG_OptionCaptureCommonRemoveLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureShadowDomTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.removeHidden">__MSG_OptionCaptureRemoveHiddenLabel__</label>
         <select id="opt_capture.removeHidden">
           <option value="none">__MSG_OptionCaptureRemoveHiddenNoneLabel__</option>
           <option value="undisplayed">__MSG_OptionCaptureRemoveHiddenUndisplayedLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureRemoveHiddenTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.resourceSizeLimit">__MSG_OptionCaptureResourceSizeLimitLabel__</label>
         <input type="number" min="0" step="any" id="opt_capture.resourceSizeLimit">
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureResourceSizeLimitTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.remoteTabDelay">__MSG_OptionCaptureRemoteTabDelayLabel__</label>
         <input type="number" min="0" step="any" id="opt_capture.remoteTabDelay">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_capture.saveResourcesSequentially">
         <label for="opt_capture.saveResourcesSequentially">__MSG_OptionCaptureSaveResourcesSequentiallyLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureSaveResourcesSequentiallyTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_capture.linkUnsavedUri">
         <label for="opt_capture.linkUnsavedUri">__MSG_OptionCaptureLinkUnsavedUriLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureLinkUnsavedUriTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_capture.recordRewrites">
         <label for="opt_capture.recordRewrites">__MSG_OptionCaptureRecordRewritesLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureRecordRewritesTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_capture.insertInfoBar">
         <label for="opt_capture.insertInfoBar">__MSG_OptionCaptureInsertInfoBarLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureInsertInfoBarTooltip__"></a>
-      </div>
+      </fieldset>
     </div>
   </details>
   <details id="group_downLink" open>
     <summary>__MSG_OptionGroupDownLink__</summary>
     <div>
-      <div>
+      <fieldset>
         <label for="opt_capture.downLink.mode">__MSG_OptionCaptureDownLinkFileModeLabel__</label>
         <select id="opt_capture.downLink.file.mode">
           <option value="none">__MSG_OptionCaptureDownLinkFileModeNoneLabel__</option>
@@ -362,112 +362,116 @@
           <option value="header">__MSG_OptionCaptureDownLinkFileModeHeaderLabel__</option>
         </select>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkFileModeTooltip__"></a>
-      </div>
-      <div class="captureDownLinkFileExtFilter">
+      </fieldset>
+      <fieldset class="captureDownLinkFileExtFilter">
         <label for="opt_capture.downLink.file.extFilter">__MSG_OptionCaptureDownLinkFileExtFilterLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkFileExtFilterTooltip__"></a>
         <div>
           <textarea id="opt_capture.downLink.file.extFilter"></textarea>
         </div>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.downLink.doc.depth">__MSG_OptionCaptureDownLinkDocDepthLabel__</label>
         <input type="number" min="0" step="1" id="opt_capture.downLink.doc.depth">
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkDocDepthTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.downLink.doc.delay">__MSG_OptionCaptureDownLinkDocDelayLabel__</label>
         <input type="number" min="0" step="any" id="opt_capture.downLink.doc.delay">
-      </div>
-      <div class="captureDownLinkDocUrlFilter">
+      </fieldset>
+      <fieldset class="captureDownLinkDocUrlFilter">
         <label for="opt_capture.downLink.doc.urlFilter">__MSG_OptionCaptureDownLinkDocUrlFilterLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkDocUrlFilterTooltip__"></a>
         <div>
           <textarea id="opt_capture.downLink.doc.urlFilter"></textarea>
         </div>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_capture.downLink.urlFilter">__MSG_OptionCaptureDownLinkUrlFilterLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureDownLinkUrlFilterTooltip__"></a>
         <div>
           <textarea id="opt_capture.downLink.urlFilter"></textarea>
         </div>
-      </div>
+      </fieldset>
     </div>
   </details>
   <details id="group_helpers" open>
     <summary>__MSG_OptionGroupHelpers__</summary>
     <div>
-      <input type="checkbox" id="opt_capture.helpersEnabled">
-      <label for="opt_capture.helpersEnabled">__MSG_OptionCaptureHelpersLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionCaptureHelpersTooltip__"></a>
-      <div>
-        <textarea id="opt_capture.helpers"></textarea>
-      </div>
+      <fieldset>
+        <input type="checkbox" id="opt_capture.helpersEnabled">
+        <label for="opt_capture.helpersEnabled">__MSG_OptionCaptureHelpersLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionCaptureHelpersTooltip__"></a>
+        <div>
+          <textarea id="opt_capture.helpers"></textarea>
+        </div>
+      </fieldset>
     </div>
   </details>
   <details id="group_autocapture" open>
     <summary>__MSG_OptionGroupAutocapture__</summary>
     <div>
-      <input type="checkbox" id="opt_autocapture.enabled">
-      <label for="opt_autocapture.enabled">__MSG_OptionAutocaptureLabel__</label>
-      <a href="javascript:" data-tooltip="__MSG_OptionAutocaptureTooltip__"></a>
-      <div>
-        <textarea id="opt_autocapture.rules"></textarea>
-      </div>
+      <fieldset>
+        <input type="checkbox" id="opt_autocapture.enabled">
+        <label for="opt_autocapture.enabled">__MSG_OptionAutocaptureLabel__</label>
+        <a href="javascript:" data-tooltip="__MSG_OptionAutocaptureTooltip__"></a>
+        <div>
+          <textarea id="opt_autocapture.rules"></textarea>
+        </div>
+      </fieldset>
     </div>
   </details>
   <details id="group_editor" open>
     <summary>__MSG_OptionGroupEditor__</summary>
     <div>
-      <div>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.1">__MSG_OptionEditorLineMarkerStyleLabel__ 1:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.1" list="editor.lineMarker.style.preset">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.2">__MSG_OptionEditorLineMarkerStyleLabel__ 2:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.2" list="editor.lineMarker.style.preset">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.3">__MSG_OptionEditorLineMarkerStyleLabel__ 3:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.3" list="editor.lineMarker.style.preset">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.4">__MSG_OptionEditorLineMarkerStyleLabel__ 4:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.4" list="editor.lineMarker.style.preset">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.5">__MSG_OptionEditorLineMarkerStyleLabel__ 5:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.5" list="editor.lineMarker.style.preset">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.6">__MSG_OptionEditorLineMarkerStyleLabel__ 6:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.6" list="editor.lineMarker.style.preset">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.7">__MSG_OptionEditorLineMarkerStyleLabel__ 7:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.7" list="editor.lineMarker.style.preset">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.8">__MSG_OptionEditorLineMarkerStyleLabel__ 8:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.8" list="editor.lineMarker.style.preset">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.9">__MSG_OptionEditorLineMarkerStyleLabel__ 9:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.9" list="editor.lineMarker.style.preset">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.10">__MSG_OptionEditorLineMarkerStyleLabel__ 10:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.10" list="editor.lineMarker.style.preset">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.11">__MSG_OptionEditorLineMarkerStyleLabel__ 11:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.11" list="editor.lineMarker.style.preset">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_editor.lineMarker.style.12">__MSG_OptionEditorLineMarkerStyleLabel__ 12:</label>
         <input type="text" size="40" id="opt_editor.lineMarker.style.12" list="editor.lineMarker.style.preset">
-      </div>
+      </fieldset>
     </div>
     <datalist id="editor.lineMarker.style.preset">
       <option value="background: #FFFF00; background: linear-gradient(transparent 40%, rgba(255,255,0,0.9) 90%, transparent 100%);">WebScrapBook 1 (yellow mark pen)</option>
@@ -490,7 +494,7 @@
       <option value="border-bottom: 2px dotted #FF0000;">ScrapBook 9 (red dotted underline)</option>
     </datalist>
     <div>
-      <div>
+      <fieldset>
         <label for="opt_editor.insertDateFormat">__MSG_OptionEditorInsertDateFormatLabel__</label>
         <input type="text" size="40" id="opt_editor.insertDateFormat" list="editor.insertDateFormat.preset">
         <a href="javascript:" data-tooltip="__MSG_OptionEditorInsertDateFormatTooltip__"></a>
@@ -499,82 +503,82 @@
           <option value="%Y/%m/%d %H:%M:%S">
           <option value="%c">
         </datalist>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_editor.useNativeTags">
         <label for="opt_editor.useNativeTags">__MSG_OptionEditorUseNativeTagsLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionEditorUseNativeTagsTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_capture.deleteErasedOnCapture">
         <label for="opt_capture.deleteErasedOnCapture">__MSG_OptionCaptureDeleteErasedOnCaptureLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionCaptureDeleteErasedOnCaptureTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_capture.deleteErasedOnSave">
         <label for="opt_capture.deleteErasedOnSave">__MSG_OptionCaptureDeleteErasedOnSaveLabel__</label>
-      </div>
+      </fieldset>
     </div>
   </details>
   <details id="group_viewer" open>
     <summary>__MSG_OptionGroupViewer__</summary>
     <div>
-      <div>
+      <fieldset>
         <input type="checkbox" id="opt_viewer.viewHtz">
         <label for="opt_viewer.viewHtz">__MSG_OptionViewerViewHtzLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionViewerViewHtzTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_viewer.viewMaff">
         <label for="opt_viewer.viewMaff">__MSG_OptionViewerViewMaffLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionViewerViewMaffTooltip__"></a>
-      </div>
+      </fieldset>
     </div>
   </details>
   <details id="group_server" open>
     <summary>__MSG_OptionGroupServer__</summary>
     <div>
-      <div>
+      <fieldset>
         <label for="opt_server.url">__MSG_OptionServerUrlLabel__</label>
         <input type="url" id="opt_server.url" autocomplete="url" pattern="https?://[^?#]+/">
         <a id="optionServerUrlTooltip" href="javascript:" data-tooltip="__MSG_OptionServerUrlTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_server.user">__MSG_OptionServerUserLabel__</label>
         <input type="text" id="opt_server.user" autocomplete="username">
         <a href="javascript:" data-tooltip="__MSG_OptionServerUserTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_server.password">__MSG_OptionServerPasswordLabel__</label>
         <input type="password" id="opt_server.password" autocomplete="current-password">
         <a href="javascript:" data-tooltip="__MSG_OptionServerPasswordTooltip__"></a>
-      </div>
+      </fieldset>
     </div>
   </details>
   <details id="group_scrapbook" open>
     <summary>__MSG_OptionGroupScrapbook__</summary>
     <div>
-      <div>
+      <fieldset>
         <input type="checkbox" id="opt_scrapbook.notifyPageCaptured">
         <label for="opt_scrapbook.notifyPageCaptured">__MSG_OptionScrapbookNotifyPageCapturedLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_capture.backupForRecapture">
         <label for="opt_capture.backupForRecapture">__MSG_OptionScrapbookBackupForRecaptureLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionScrapbookBackupForRecaptureTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_editor.autoInit">
         <label for="opt_editor.autoInit">__MSG_OptionEditorAutoInit__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_scrapbook.copyItemInfoFormatPlain">__MSG_OptionScrapbookCopyItemInfoFormatPlainLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionScrapbookCopyItemInfoFormatPlainTooltip__"></a>
         <div>
           <textarea id="opt_scrapbook.copyItemInfoFormatPlain"></textarea>
         </div>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_scrapbook.defaultSearch">__MSG_OptionScrapbookDefaultSearchLabel__</label>
         <input type="text" size="40" id="opt_scrapbook.defaultSearch" list="scrapbook.defaultSearch.preset">
         <a href="javascript:" data-tooltip="__MSG_OptionScrapbookDefaultSearchTooltip__"></a>
@@ -582,109 +586,109 @@
           <option value="-type:folder -type:separator">
           <option value="default:tc -type:folder -type:separator">
         </datalist>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_scrapbook.fulltextCacheRemoteSizeLimit">__MSG_OptionScrapbookFulltextCacheRemoteSizeLimitLabel__</label>
         <input type="number" min="0" step="any" id="opt_scrapbook.fulltextCacheRemoteSizeLimit">
-      </div>
+      </fieldset>
     </div>
   </details>
   <details id="group_indexer" open>
     <summary>__MSG_OptionGroupIndexer__</summary>
     <div>
-      <div>
+      <fieldset>
         <input type="checkbox" id="opt_indexer.fulltextCache">
         <label for="opt_indexer.fulltextCache">__MSG_OptionIndexerFulltextCacheLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_indexer.fulltextCacheFrameAsPageContent">
         <label for="opt_indexer.fulltextCacheFrameAsPageContent">__MSG_OptionIndexerFulltextCacheFrameAsPageContentLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_indexer.fulltextCacheRecreate">
         <label for="opt_indexer.fulltextCacheRecreate">__MSG_OptionIndexerFulltextCacheRecreateLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_indexer.createStaticSite">
         <label for="opt_indexer.createStaticSite">__MSG_OptionIndexerCreateStaticSiteLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_indexer.createStaticIndex">
         <label for="opt_indexer.createStaticIndex">__MSG_OptionIndexerCreateStaticIndexLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionIndexerCreateStaticIndexTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_indexer.createRssFeed">
         <label for="opt_indexer.createRssFeed">__MSG_OptionIndexerCreateRssFeedLabel__</label>
         <a href="javascript:" data-tooltip="__MSG_OptionIndexerCreateRssFeedTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_indexer.createRssFeedBase">__MSG_OptionIndexerCreateRssFeedBaseLabel__</label>
         <input type="url" id="opt_indexer.createRssFeedBase" autocomplete="url" pattern="https?://[^?#]+/">
         <a href="javascript:" data-tooltip="__MSG_OptionIndexerCreateRssFeedBaseTooltip__"></a>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <label for="opt_indexer.createRssFeedCount">__MSG_OptionIndexerCreateRssFeedCountLabel__</label>
         <input type="number" min="0" step="1" id="opt_indexer.createRssFeedCount">
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_indexer.makeBackup">
         <label for="opt_indexer.makeBackup">__MSG_OptionIndexerMakeBackupLabel__</label>
-      </div>
+      </fieldset>
       <input id="openIndexer" type="button" value="__MSG_OpenIndexer__">
     </div>
   </details>
   <details id="group_checker" open>
     <summary>__MSG_OptionGroupChecker__</summary>
     <div>
-      <div>
+      <fieldset>
         <input type="checkbox" id="opt_checker.resolveInvalidId">
         <label for="opt_checker.resolveInvalidId">__MSG_OptionCheckerResolveInvalidIdLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_checker.resolveMissingIndex">
         <label for="opt_checker.resolveMissingIndex">__MSG_OptionCheckerResolveMissingIndexLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_checker.resolveMissingIndexFile">
         <label for="opt_checker.resolveMissingIndexFile">__MSG_OptionCheckerResolveMissingIndexFileLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_checker.resolveMissingDate">
         <label for="opt_checker.resolveMissingDate">__MSG_OptionCheckerResolveMissingDateLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_checker.resolveOlderMtime">
         <label for="opt_checker.resolveOlderMtime">__MSG_OptionCheckerResolveOlderMtimeLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_checker.resolveTocUnreachable">
         <label for="opt_checker.resolveTocUnreachable">__MSG_OptionCheckerResolveTocUnreachableLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_checker.resolveTocInvalid">
         <label for="opt_checker.resolveTocInvalid">__MSG_OptionCheckerResolveTocInvalidLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_checker.resolveTocEmptySubtree">
         <label for="opt_checker.resolveTocEmptySubtree">__MSG_OptionCheckerResolveTocEmptySubtreeLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_checker.resolveUnindexedFiles">
         <label for="opt_checker.resolveUnindexedFiles">__MSG_OptionCheckerResolveUnindexedFilesLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_checker.resolveAbsoluteIcon">
         <label for="opt_checker.resolveAbsoluteIcon">__MSG_OptionCheckerResolveAbsoluteIconLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_checker.resolveUnusedIcon">
         <label for="opt_checker.resolveUnusedIcon">__MSG_OptionCheckerResolveUnusedIconLabel__</label>
-      </div>
-      <div>
+      </fieldset>
+      <fieldset>
         <input type="checkbox" id="opt_checker.makeBackup">
         <label for="opt_checker.makeBackup">__MSG_OptionCheckerMakeBackupLabel__</label>
-      </div>
+      </fieldset>
       <input id="openChecker" type="button" value="__MSG_OpenChecker__">
     </div>
   </details>
