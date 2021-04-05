@@ -57,7 +57,7 @@ if (Node && !Node.prototype.getRootNode) {
     "ui.toolbar.showOpenViewer": true,
     "ui.toolbar.showOpenOptions": true,
     "ui.showContextMenu": true,
-    "ui.autoCloseCaptureDialog": "none",
+    "ui.autoCloseCaptureDialog": "none", // "none", "nowarn", "noerror", "nofailure", "always"
     "server.url": "",
     "server.user": "",
     "server.password": "",
