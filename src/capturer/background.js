@@ -53,8 +53,8 @@
 
     /**
      * @typedef {Object} autoCaptureInfo
-     * @property {timeout} delay
-     * @property {interval} repeat
+     * @property {Array<timeout>} delay
+     * @property {Array<interval>} repeat
      */
 
     /**
@@ -111,9 +111,13 @@
           info = {};
           autoCaptureInfos.set(tabInfo.id, info);
         }
-        info.repeat = setInterval(() => {
+        if (!info.repeat) {
+          info.repeat = [];
+        }
+        const t = setInterval(() => {
           invokeCapture(tabInfo, config, true);
         }, config.repeat);
+        info.repeat.push(t);
       }
     }
 
@@ -176,9 +180,13 @@
               info = {};
               autoCaptureInfos.set(tabInfo.id, info);
             }
-            info.delay = setTimeout(() => {
+            if (!info.delay) {
+              info.delay = [];
+            }
+            const t = setTimeout(() => {
               invokeCapture(tabInfo, config, false);
             }, config.delay);
+            info.delay.push(t);
           } else {
             invokeCapture(tabInfo, config, false);
           }
@@ -246,13 +254,16 @@
     }
 
     function purgeInfo(info) {
+      let t;
       if (info.delay) {
-        clearTimeout(info.delay);
-        info.delay = null;
+        while (t = info.delay.pop()) {
+          clearTimeout(t);
+        }
       }
       if (info.repeat) {
-        clearInterval(info.repeat);
-        info.repeat = null;
+        while (t = info.repeat.pop()) {
+          clearInterval(t);
+        }
       }
     }
 
