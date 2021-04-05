@@ -180,6 +180,22 @@
     await scrapbook.cache.set(getDetailStatusKey(), status, 'storage');
   }
 
+  function verifyAutoCapture() {
+    const json = document.getElementById("opt_autocapture.rules").value;
+
+    if (json) {
+      try {
+        JSON.parse(json);
+      } catch (ex) {
+        if (confirm(scrapbook.lang("OptionAutoCaptureError", [ex.message]))) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   function verifyHelpers() {
     const json = document.getElementById("opt_capture.helpers").value;
 
@@ -425,6 +441,9 @@
       event.preventDefault();
 
       // verify the form
+      if (!verifyAutoCapture()) {
+        return;
+      }
       if (!verifyHelpers()) {
         return;
       }

@@ -598,6 +598,20 @@
   "OpenViewer": {
     "message": "View archived page"
   },
+  "OptionAutoCaptureError": {
+    "message": "Auto-capture syntax is invalid. Stop to fix it now?\n\n$MESSAGE$",
+    "placeholders": {
+      "message": {
+        "content": "$1"
+      }
+    }
+  },
+  "OptionAutocaptureLabel": {
+    "message": "Enable auto-capture:"
+  },
+  "OptionAutocaptureTooltip": {
+    "message": "Auto-capture is defined using JSON syntax with the following format:\n\n  [\n   {\n    \"name\": \"Example#1\",\n    \"description\": \"Auto-capture example.com\",\n    \"pattern\": \"/https?://example.com/i\",\n    \"delay\": 5000,\n    ...\n   },\n   ...\n  ]\n\n• name: a string to name this config and can be used in debugging identification, optional.\n• description: a string to annotate this config, optional.\n• disabled: disables this config when the value is truthy, optional.\n• tabId: a tab ID to restrict this config to work for. Works for any tab when omitted.\n• pattern: a regular expression string (“/expression/flags”) to restrict URLs this config to work for. Works for any URL when omitted.\n• delay: delay time before the auto-capture starts after the page completes loading (ms). No delay if it's omitted or lesser than 0.\n• repeat: repeat interval for the repeated captures after the first auto-capture starts (ms). No repeated capture if omitted or lesser than 0.\n• allowDuplicate: allow identical page be auto-captured repeatedly if the value is truthy, optional.\n• taskInfo: overriding capture settings, with the same format as the main JSON object of “Capture as...”, optional.\n• eachTaskInfo: overriding capture settings for each task, with the same format as each object in the tasks array of “Capture as...”, optional."
+  },
   "OptionCaptureAppletLabel": {
     "message": "APPLETs:"
   },
@@ -1004,6 +1018,9 @@
   },
   "OptionEditorUseNativeTagsTooltip": {
     "message": "Use native HTML tags for markings to be compatible with old browsers (e.g. IE < 9), but are more likely to be intefered by the original web page and results in an abnormal style."
+  },
+  "OptionGroupAutocapture": {
+    "message": "Auto-capture"
   },
   "OptionGroupCapture": {
     "message": "Capture - content"

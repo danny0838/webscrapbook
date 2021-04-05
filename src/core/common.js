@@ -120,6 +120,8 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.deleteErasedOnSave": false,
     "capture.backupForRecapture": true,
     "capture.zipCompressLevel": null,
+    "autocapture.enabled": false,
+    "autocapture.rules": "",
     "editor.autoInit": true,
     "editor.useNativeTags": false,
     "editor.lineMarker.style.1": "background: #FFFF00; background: linear-gradient(transparent 40%, rgba(255,255,0,0.9) 90%, transparent 100%);",
