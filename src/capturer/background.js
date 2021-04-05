@@ -64,6 +64,15 @@
     const autoCapturedUrls = new Set();
 
     async function invokeCapture(tabInfo, config, isRepeat) {
+      // check if the tab still exists
+      try {
+        await browser.tabs.get(tabInfo.id)
+      } catch (ex) {
+        let info = autoCaptureInfos.get(tabInfo.id);
+        if (info) { purgeInfo(info); }
+        return;
+      }
+
       const taskInfo = Object.assign({
         autoClose: "always",
         tasks: [Object.assign({
@@ -124,6 +133,7 @@
     function onUpdated(tabId, changeInfo, tabInfo) {
       // reset timer if tab closed
       if (changeInfo.status === 'loading' || changeInfo.discarded || changeInfo.hidden) {
+        // note that tab id is changed when a tab is discarded in Chromium
         const info = autoCaptureInfos.get(tabInfo.id);
         if (info) { purgeInfo(info); }
         return;
