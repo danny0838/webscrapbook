@@ -191,6 +191,7 @@
     verifyDownLinkUrlFilter();
     verifyCaptureHelpers();
     verifyAutoCapture();
+    document.getElementById('options').reportValidity();
   }
 
   function renewCaptureSaveToDetails() {
@@ -469,7 +470,6 @@
 
     // load default options
     await initDefaultOptions();
-    refreshForm();
 
     // load detail status
     await loadDetailStatus();
@@ -558,6 +558,19 @@
         onToggleTooltip(elem);
       });
     }
+
+    for (const elem of document.querySelectorAll(':valid, :invalid')) {
+      elem.addEventListener("invalid", (event) => {
+        const elem = event.target;
+        const closedParentDetails = elem.closest('details:not([open])');
+        if (closedParentDetails) {
+          closedParentDetails.setAttribute('open', '');
+        }
+      });
+    }
+
+    // refresh form
+    refreshForm();
   });
 
 }));
