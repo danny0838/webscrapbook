@@ -197,9 +197,9 @@
   function renewCaptureSaveToDetails() {
     const mode = document.getElementById("opt_capture.saveTo").value;
 
-    Array.prototype.forEach.call(document.querySelectorAll('.captureScrapbookFolder'), (elem) => {
+    for (const elem of document.querySelectorAll('.captureScrapbookFolder')) {
       elem.hidden = mode !== 'folder';
-    });
+    }
 
     var elem = document.getElementById('opt_capture.saveAs');
     elem.querySelector('[value="folder"]').disabled = mode === 'file';
@@ -211,12 +211,12 @@
   function renewCaptureSaveAsDetails() {
     const mode = document.getElementById("opt_capture.saveAs").value;
 
-    Array.prototype.forEach.call(document.querySelectorAll('.captureMergeCssResources'), (elem) => {
+    for (const elem of document.querySelectorAll('.captureMergeCssResources')) {
       elem.hidden = mode !== 'singleHtml';
-    });
-    Array.prototype.forEach.call(document.querySelectorAll('.captureSaveDataUriAsFile'), (elem) => {
+    }
+    for (const elem of document.querySelectorAll('.captureSaveDataUriAsFile')) {
       elem.hidden = mode === 'singleHtml';
-    });
+    }
   }
 
   function verifySavePath(elem) {
@@ -241,14 +241,14 @@
 
   function renewCaptureDownLinkDetails() {
     var input = document.getElementById("opt_capture.downLink.file.mode");
-    Array.prototype.forEach.call(document.querySelectorAll('.captureDownLinkFileExtFilter'), (elem) => {
+    for (const elem of document.querySelectorAll('.captureDownLinkFileExtFilter')) {
       elem.hidden = input.value === 'none';
-    });
+    }
 
     var input = document.getElementById("opt_capture.downLink.doc.depth");
-    Array.prototype.forEach.call(document.querySelectorAll('.captureDownLinkDocUrlFilter'), (elem) => {
+    for (const elem of document.querySelectorAll('.captureDownLinkDocUrlFilter')) {
       elem.hidden = !(input.valueAsNumber > 0);
-    });
+    }
   }
 
   function verifyDownLinkRules(srcText) {
