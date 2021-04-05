@@ -225,6 +225,7 @@
   scrapbook.invokeCaptureEx = async function ({
     taskInfo,
     windowCreateData,
+    tabCreateData,
     waitForResponse = true,
   }) {
     const missionId = scrapbook.getUuid();
@@ -248,9 +249,9 @@
         return tab;
       }
     } else {
-      tab = await browser.tabs.create({
+      tab = await browser.tabs.create(Object.assign({
         url,
-      });
+      }, tabCreateData));
 
       if (!waitForResponse) {
         return tab;
