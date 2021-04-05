@@ -211,8 +211,7 @@
     });
   }
 
-  function verifySavePath(event) {
-    const elem = event.target;
+  function verifySavePath(elem) {
     if (elem.value) {
       // make sure it's a valid path for browser.downloads.download
       elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
@@ -220,6 +219,16 @@
       // reset value to placeholder
       elem.value = elem.placeholder;
     }
+  }
+
+  function verifySaveFolder() {
+    const elem = document.getElementById("opt_capture.saveFolder");
+    verifySavePath(elem);
+  }
+
+  function verifySaveFilename() {
+    const elem = document.getElementById("opt_capture.saveFilename");
+    verifySavePath(elem);
   }
 
   function renewCaptureDownLinkDetails() {
@@ -462,8 +471,8 @@
     document.getElementById("opt_capture.saveTo").addEventListener("change", renewCaptureSaveToDetails);
     document.getElementById("opt_capture.saveAs").addEventListener("change", renewCaptureSaveAsDetails);
 
-    document.getElementById("opt_capture.saveFolder").addEventListener("change", verifySavePath);
-    document.getElementById("opt_capture.saveFilename").addEventListener("change", verifySavePath);
+    document.getElementById("opt_capture.saveFolder").addEventListener("change", verifySaveFolder);
+    document.getElementById("opt_capture.saveFilename").addEventListener("change", verifySaveFilename);
 
     document.getElementById("opt_capture.downLink.file.mode").addEventListener("change", renewCaptureDownLinkDetails);
     document.getElementById("opt_capture.downLink.doc.depth").addEventListener("change", renewCaptureDownLinkDetails);
@@ -479,6 +488,8 @@
       event.preventDefault();
 
       // verify the form
+      verifySaveFolder();
+      verifySaveFilename();
       verifyDownLinkFileExtFilter();
       verifyDownLinkDocUrlFilter();
       verifyDownLinkUrlFilter();
