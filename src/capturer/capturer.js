@@ -3867,11 +3867,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const closeWindow = async () => {
       await scrapbook.delay(1000);
 
-      if (browser.windows) {
-        const win = await browser.windows.getCurrent();
-        return await browser.windows.remove(win.id);
-      }
-
       const tab = await browser.tabs.getCurrent();
       return await browser.tabs.remove(tab.id);
     };
