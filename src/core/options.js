@@ -287,9 +287,12 @@
   }
 
   function verifyCaptureHelpers() {
-    const elem = document.getElementById("opt_capture.helpers");
-    const json = elem.value;
+    const enabled = document.getElementById("opt_capture.helpersEnabled").checked;
 
+    const elem = document.getElementById("opt_capture.helpers");
+    elem.required = enabled;
+
+    const json = elem.value;
     if (json) {
       try {
         const configs = JSON.parse(json);
@@ -322,9 +325,12 @@
   }
 
   function verifyAutoCapture() {
-    const elem = document.getElementById("opt_autocapture.rules");
-    const json = elem.value;
+    const enabled = document.getElementById("opt_autocapture.enabled").checked;
 
+    const elem = document.getElementById("opt_autocapture.rules");
+    elem.required = enabled;
+
+    const json = elem.value;
     if (json) {
       try {
         const configs = JSON.parse(json);
@@ -558,7 +564,9 @@
     document.getElementById("opt_capture.downLink.doc.urlFilter").addEventListener("change", verifyDownLinkDocUrlFilter);
     document.getElementById("opt_capture.downLink.urlFilter").addEventListener("change", verifyDownLinkUrlFilter);
 
+    document.getElementById("opt_capture.helpersEnabled").addEventListener("change", verifyCaptureHelpers);
     document.getElementById("opt_capture.helpers").addEventListener("change", verifyCaptureHelpers);
+    document.getElementById("opt_autocapture.enabled").addEventListener("change", verifyAutoCapture);
     document.getElementById("opt_autocapture.rules").addEventListener("change", verifyAutoCapture);
 
     document.getElementById("openIndexer").addEventListener("click", onOpenIndexerClick);
