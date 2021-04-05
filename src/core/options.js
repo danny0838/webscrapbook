@@ -258,13 +258,39 @@
       let line = srcLine.trim();
       if (!line || line.startsWith("#")) { continue; }
 
-      // pass non-RegExp
-      if (!/^\/(.*)\/([a-z]*)$/.test(line)) { continue; }
+      if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+        try {
+          new RegExp(RegExp.$1, RegExp.$2);
+        } catch (ex) {
+          return `Line ${i + 1}: ${ex.message}`;
+        }
+      }
+    }
 
-      try {
-        new RegExp(RegExp.$1, RegExp.$2);
-      } catch (ex) {
-        return `Line ${i + 1}: ${ex.message}`;
+    return '';
+  }
+
+  function verifyDownLinkUrlRules(srcText) {
+    const srcLines = srcText.split(/(?:\n|\r\n?)/);
+    for (let i = 0, I = srcLines.length; i < I; i++) {
+      const srcLine = srcLines[i];
+      let line = srcLine.trim();
+      if (!line || line.startsWith("#")) { continue; }
+
+      if (/^\/(.*)\/([a-z]*)$/.test(line)) {
+        try {
+          new RegExp(RegExp.$1, RegExp.$2);
+        } catch (ex) {
+          return `Line ${i + 1}: ${ex.message}`;
+        }
+      } else {
+        try {
+          line = line.split(/\s+/)[0];
+          line = scrapbook.splitUrlByAnchor(line)[0];
+          new URL(line);
+        } catch (ex) {
+          return `Line ${i + 1}: Invalid URL: ${line}`;
+        }
       }
     }
 
@@ -278,12 +304,12 @@
 
   function verifyDownLinkDocUrlFilter() {
     const elem = document.getElementById("opt_capture.downLink.doc.urlFilter");
-    elem.setCustomValidity(verifyDownLinkRules(elem.value));
+    elem.setCustomValidity(verifyDownLinkUrlRules(elem.value));
   }
 
   function verifyDownLinkUrlFilter() {
     const elem = document.getElementById("opt_capture.downLink.urlFilter");
-    elem.setCustomValidity(verifyDownLinkRules(elem.value));
+    elem.setCustomValidity(verifyDownLinkUrlRules(elem.value));
   }
 
   function verifyCaptureHelpers() {
