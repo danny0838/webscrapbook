@@ -826,17 +826,17 @@ if (Node && !Node.prototype.getRootNode) {
   };
 
   scrapbook.loadLanguages = function (rootNode) {
-    Array.prototype.forEach.call(rootNode.querySelectorAll('*'), (elem) => {
+    for (const elem of rootNode.querySelectorAll('*')) {
       if (elem.childNodes.length === 1) {
         let child = elem.firstChild;
         if (child.nodeType === 3) {
           child.nodeValue = child.nodeValue.replace(/__MSG_(.*?)__/, (m, k) => scrapbook.lang(k));
         }
       }
-      Array.prototype.forEach.call(elem.attributes, (attr) => {
+      for (const attr of elem.attributes) {
         attr.nodeValue = attr.nodeValue.replace(/__MSG_(.*?)__/, (m, k) => scrapbook.lang(k));
-      }, this);
-    }, this);
+      }
+    }
   };
 
 

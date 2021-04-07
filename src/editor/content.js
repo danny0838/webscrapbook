@@ -1630,18 +1630,16 @@ scrapbook-toolbar, scrapbook-toolbar *,
   };
 
   editor.updateLineMarkers = async function () {
-    Array.prototype.forEach.call(
-      editor.internalElement.querySelectorAll('.toolbar-marker ul scrapbook-toolbar-samp'),
-      (elem, i) => {
-        let style = scrapbook.getOption(`editor.lineMarker.style.${i + 1}`);
-        elem.setAttribute('style', style);
-        elem.title = style;
-      });
+    for (const [i, elem] of editor.internalElement.querySelectorAll('.toolbar-marker ul scrapbook-toolbar-samp').entries()) {
+      const style = scrapbook.getOption(`editor.lineMarker.style.${i + 1}`);
+      elem.setAttribute('style', style);
+      elem.title = style;
+    }
 
     const buttons = Array.from(editor.internalElement.querySelectorAll('.toolbar-marker ul button'));
-    buttons.forEach((elem) => {
+    for (const elem of buttons) {
       elem.removeAttribute('checked');
-    });
+    }
     let idx = await scrapbook.cache.get(editor.getStatusKey('lineMarkerSelected'), 'storage');
     idx = Math.min(parseInt(idx, 10) || 0, buttons.length - 1);
     buttons[idx].setAttribute('checked', '');
@@ -3335,9 +3333,9 @@ scrapbook-toolbar, scrapbook-toolbar *,
             if (node.matches(frameNodeSelector)) {
               frameAddObserver(node);
             } else {
-              Array.prototype.forEach.call(node.querySelectorAll(frameNodeSelector), (elem) => {
+              for (const elem of node.querySelectorAll(frameNodeSelector)) {
                 frameAddObserver(elem);
-              });
+              }
             }
           }
         }
@@ -3346,9 +3344,9 @@ scrapbook-toolbar, scrapbook-toolbar *,
     const docObserverConf = {childList: true, subtree: true};
 
     docObserver.observe(document.documentElement, docObserverConf);
-    Array.prototype.forEach.call(document.querySelectorAll(frameNodeSelector), (elem) => {
+    for (const elem of document.querySelectorAll(frameNodeSelector)) {
       frameAddObserver(elem);
-    });
+    }
   }
 
   return editor;

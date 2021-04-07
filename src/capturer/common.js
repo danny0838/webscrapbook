@@ -1253,49 +1253,49 @@
 
           // images: picture
           case "picture": {
-            Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-              const rewriteSrcset = scrapbook.rewriteSrcset(elem.getAttribute("srcset"), (url) => {
+            for (const subElem of elem.querySelectorAll('source[srcset]')) {
+              const rewriteSrcset = scrapbook.rewriteSrcset(subElem.getAttribute("srcset"), (url) => {
                 return capturer.resolveRelativeUrl(url, refUrl);
               });
-              captureRewriteAttr(elem, "srcset", rewriteSrcset);
-            }, this);
+              captureRewriteAttr(subElem, "srcset", rewriteSrcset);
+            }
 
             switch (options["capture.image"]) {
               case "link":
                 // do nothing
                 break;
               case "blank":
-                Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                  captureRewriteAttr(elem, "srcset", null);
-                }, this);
+                for (const subElem of elem.querySelectorAll('source[srcset]')) {
+                  captureRewriteAttr(subElem, "srcset", null);
+                }
                 break;
               case "remove":
                 captureRemoveNode(elem);
                 return;
               case "save-current":
                 if (!isHeadless) {
-                  Array.prototype.forEach.call(elem.querySelectorAll('img'), (elem) => {
-                    const elemOrig = origNodeMap.get(elem);
+                  for (const subElem of elem.querySelectorAll('img')) {
+                    const subElemOrig = origNodeMap.get(subElem);
 
-                    if (elemOrig && elemOrig.currentSrc) {
-                      // elem will be further processed in the following loop that handles "img"
-                      captureRewriteAttr(elem, "src", elemOrig.currentSrc);
-                      captureRewriteAttr(elem, "srcset", null);
+                    if (subElemOrig && subElemOrig.currentSrc) {
+                      // subElem will be further processed in the following loop that handles "img"
+                      captureRewriteAttr(subElem, "src", subElemOrig.currentSrc);
+                      captureRewriteAttr(subElem, "srcset", null);
                     }
-                  }, this);
+                  }
 
-                  Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
-                    captureRemoveNode(elem);
-                  }, this);
+                  for (const subElem of elem.querySelectorAll('source[srcset]')) {
+                    captureRemoveNode(subElem);
+                  }
 
                   break;
                 }
                 // Headless capture doesn't support currentSrc, fallback to "save".
               case "save":
               default:
-                Array.prototype.forEach.call(elem.querySelectorAll('source[srcset]'), (elem) => {
+                for (const subElem of elem.querySelectorAll('source[srcset]')) {
                   tasks.push(async () => {
-                    const response = await scrapbook.rewriteSrcset(elem.getAttribute("srcset"), async (url) => {
+                    const response = await scrapbook.rewriteSrcset(subElem.getAttribute("srcset"), async (url) => {
                       const rewriteUrl = capturer.resolveRelativeUrl(url, refUrl);
                       return (await downloadFile({
                         url: rewriteUrl,
@@ -1304,10 +1304,10 @@
                         options,
                       })).url;
                     });
-                    captureRewriteAttr(elem, "srcset", response);
+                    captureRewriteAttr(subElem, "srcset", response);
                     return response;
                   });
-                }, this);
+                }
                 break;
             }
             break;
@@ -1320,10 +1320,10 @@
               captureRewriteAttr(elem, "src", rewriteUrl);
             }
 
-            Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-              captureRewriteAttr(elem, "src", rewriteUrl);
-            }, this);
+            for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+              const rewriteUrl = capturer.resolveRelativeUrl(subElem.getAttribute("src"), refUrl);
+              captureRewriteAttr(subElem, "src", rewriteUrl);
+            }
 
             switch (options["capture.audio"]) {
               case "link":
@@ -1336,9 +1336,9 @@
 
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The src attribute must be present and be a valid non-empty URL.
-                Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-                  captureRewriteAttr(elem, "src", "about:blank");
-                }, this);
+                for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+                  captureRewriteAttr(subElem, "src", "about:blank");
+                }
 
                 break;
               case "remove":
@@ -1348,9 +1348,9 @@
                 if (!isHeadless) {
                   if (elemOrig && elemOrig.currentSrc) {
                     const url = elemOrig.currentSrc;
-                    Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                      captureRemoveNode(elem);
-                    }, this);
+                    for (const subElem of elem.querySelectorAll('source[src]')) {
+                      captureRemoveNode(subElem);
+                    }
                     tasks.push(async () => {
                       const response = await downloadFile({
                         url,
@@ -1363,18 +1363,18 @@
                     });
                   }
 
-                  Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
+                  for (const subElem of elem.querySelectorAll('track[src]')) {
                     tasks.push(async () => {
                       const response = await downloadFile({
-                        url: elem.getAttribute("src"),
+                        url: subElem.getAttribute("src"),
                         refUrl,
                         settings,
                         options,
                       });
-                      captureRewriteAttr(elem, "src", response.url);
+                      captureRewriteAttr(subElem, "src", response.url);
                       return response;
                     });
-                  }, this);
+                  }
 
                   break;
                 }
@@ -1394,18 +1394,18 @@
                   });
                 }
 
-                Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
+                for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
                   tasks.push(async () => {
                     const response = await downloadFile({
-                      url: elem.getAttribute("src"),
+                      url: subElem.getAttribute("src"),
                       refUrl,
                       settings,
                       options,
                     });
-                    captureRewriteAttr(elem, "src", response.url);
+                    captureRewriteAttr(subElem, "src", response.url);
                     return response;
                   });
-                }, this);
+                }
 
                 break;
             }
@@ -1424,10 +1424,10 @@
               captureRewriteAttr(elem, "src", rewriteUrl);
             }
 
-            Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
-              captureRewriteAttr(elem, "src", rewriteUrl);
-            }, this);
+            for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+              const rewriteUrl = capturer.resolveRelativeUrl(subElem.getAttribute("src"), refUrl);
+              captureRewriteAttr(subElem, "src", rewriteUrl);
+            }
 
             switch (options["capture.video"]) {
               case "link":
@@ -1446,9 +1446,9 @@
 
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The src attribute must be present and be a valid non-empty URL.
-                Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
-                  captureRewriteAttr(elem, "src", "about:blank");
-                }, this);
+                for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
+                  captureRewriteAttr(subElem, "src", "about:blank");
+                }
 
                 break;
               case "remove":
@@ -1471,9 +1471,9 @@
 
                   if (elemOrig && elemOrig.currentSrc) {
                     const url = elemOrig.currentSrc;
-                    Array.prototype.forEach.call(elem.querySelectorAll('source[src]'), (elem) => {
-                      captureRemoveNode(elem);
-                    }, this);
+                    for (const subElem of elem.querySelectorAll('source[src]')) {
+                      captureRemoveNode(subElem);
+                    }
                     tasks.push(async () => {
                       const response = await downloadFile({
                         url,
@@ -1486,18 +1486,18 @@
                     });
                   }
 
-                  Array.prototype.forEach.call(elem.querySelectorAll('track[src]'), (elem) => {
+                  for (const subElem of elem.querySelectorAll('track[src]')) {
                     tasks.push(async () => {
                       const response = await downloadFile({
-                        url: elem.getAttribute("src"),
+                        url: subElem.getAttribute("src"),
                         refUrl,
                         settings,
                         options,
                       });
-                      captureRewriteAttr(elem, "src", response.url);
+                      captureRewriteAttr(subElem, "src", response.url);
                       return response;
                     });
-                  }, this);
+                  }
 
                   break;
                 }
@@ -1530,18 +1530,18 @@
                   });
                 }
 
-                Array.prototype.forEach.call(elem.querySelectorAll('source[src], track[src]'), (elem) => {
+                for (const subElem of elem.querySelectorAll('source[src], track[src]')) {
                   tasks.push(async () => {
                     const response = await downloadFile({
-                      url: elem.getAttribute("src"),
+                      url: subElem.getAttribute("src"),
                       refUrl,
                       settings,
                       options,
                     });
-                    captureRewriteAttr(elem, "src", response.url);
+                    captureRewriteAttr(subElem, "src", response.url);
                     return response;
                   });
-                }, this);
+                }
 
                 break;
             }
@@ -3079,17 +3079,17 @@
 
         const groups = new Map();
 
-        Array.prototype.forEach.call(this.doc.styleSheets, (css) => {
+        for (const css of this.doc.styleSheets) {
           // ignore imported CSS
           if (!css.ownerNode) {
-            return;
+            continue;
           }
 
           const title = css.title && css.title.trim();
 
           // ignore persistent CSS
           if (!title) {
-            return;
+            continue;
           }
 
           // preferred or alternate
@@ -3097,7 +3097,7 @@
             groups.set(title, []);
           }
           groups.get(title).push(css);
-        });
+        }
 
         const arr = Array.from(groups.values());
 

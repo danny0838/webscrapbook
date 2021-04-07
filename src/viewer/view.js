@@ -740,9 +740,9 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
         }, false);
 
-        Array.prototype.forEach.call(frameDoc.querySelectorAll('frame, iframe'), (elem) => {
+        for (const elem of frameDoc.querySelectorAll('frame, iframe')) {
           frameRegisterLinkLoader(elem);
-        });
+        }
       };
 
       frame.addEventListener("load", (e) => {

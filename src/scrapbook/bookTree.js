@@ -91,10 +91,9 @@
       }
 
       const highlights = new Map();
-      Array.prototype.forEach.call(
-        this.treeElem.querySelectorAll('.highlight'),
-        x => this.getXpaths(x.parentElement, highlights, {includeParents: false})
-      );
+      for (const elem of this.treeElem.querySelectorAll('.highlight')) {
+        this.getXpaths(elem.parentElement, highlights, {includeParents: false})
+      }
 
       // rebuild
       super.rebuild();
@@ -139,10 +138,9 @@
     async saveViewStatus() {
       const selects = {};
       const map = new Map();
-      Array.prototype.forEach.call(
-        this.treeElem.querySelectorAll('ul.container:not([hidden])'),
-        x => this.getXpaths(x.parentElement, map)
-      );
+      for (const elem of this.treeElem.querySelectorAll('ul.container:not([hidden])')) {
+        this.getXpaths(elem.parentElement, map);
+      }
       for (const [k, v] of map.entries()) {
         selects[k] = v;
       }
@@ -273,21 +271,17 @@
     }
 
     refreshItem(id) {
-      Array.prototype.forEach.call(
-        this.treeElem.querySelectorAll(`[data-id="${CSS.escape(id)}"]`),
-        (itemElem) => {
-          this.refreshItemElem(itemElem, this.book.meta[id]);
-        });
+      for (const itemElem of this.treeElem.querySelectorAll(`[data-id="${CSS.escape(id)}"]`)) {
+        this.refreshItemElem(itemElem, this.book.meta[id]);
+      }
     }
 
     insertItem(id, parentId, index) {
-      Array.prototype.forEach.call(
-        this.treeElem.querySelectorAll(`[data-id="${CSS.escape(parentId)}"]`),
-        (parentElem) => {
-          this.itemMakeContainer(parentElem);
-          if (!parentElem.container.hasAttribute('data-loaded')) { return; }
-          this.addItem(id, parentElem, index);
-        });
+      for (const parentElem of this.treeElem.querySelectorAll(`[data-id="${CSS.escape(parentId)}"]`)) {
+        this.itemMakeContainer(parentElem);
+        if (!parentElem.container.hasAttribute('data-loaded')) { return; }
+        this.addItem(id, parentElem, index);
+      }
     }
 
     /**

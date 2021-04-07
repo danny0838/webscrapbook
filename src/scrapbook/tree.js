@@ -321,9 +321,9 @@
       if (this.anchorElem) {
         if (itemElem === this.anchorElem) { return; }
 
-        Array.prototype.forEach.call(this.treeElem.querySelectorAll('.anchor'), (elem) => {
+        for (const elem of this.treeElem.querySelectorAll('.anchor')) {
           elem.classList.remove('anchor');
-        });
+        }
       }
       if (!this.treeElem.contains(itemElem)) {
         return;
@@ -339,9 +339,9 @@
       if (!this.allowSelect) { return; }
 
       if (reselect) {
-        Array.prototype.forEach.call(this.treeElem.querySelectorAll('.highlight'), (elem) => {
+        for (const elem of this.treeElem.querySelectorAll('.highlight')) {
           elem.classList.remove('highlight');
-        });
+        }
       }
 
       if (!this.treeElem.contains(itemElem)) {
@@ -614,9 +614,9 @@
 
       const selectedItemElems = this.getSelectedItemElems();
 
-      Array.prototype.forEach.call(selectedItemElems, (elem) => {
+      for (const elem of selectedItemElems) {
         elem.classList.add('dragged');
-      });
+      }
 
       // Firefox requires at least one data to get dragging work
       event.dataTransfer.setData(
@@ -655,9 +655,9 @@
     onItemDragEnd(event) {
       if (!this.lastDraggedElems) { return; }
 
-      Array.prototype.forEach.call(this.lastDraggedElems, (elem) => {
+      for (const elem of this.lastDraggedElems) {
         elem.classList.remove('dragged');
-      });
+      }
       this.lastDraggedElems = null;
     }
 
