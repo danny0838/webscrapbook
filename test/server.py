@@ -65,13 +65,15 @@ def main():
         config = json.load(fh)
 
     # load config.local.json if exist
+    config_file = os.path.join(os.path.dirname(__file__), 'config.local.json')
     try:
-        config_file = os.path.join(os.path.dirname(__file__), 'config.local.json')
-        with open(config_file, 'r', encoding='UTF-8') as fh:
+        fh = open(config_file, 'r', encoding='UTF-8')
+    except FileNotFoundError:
+        pass
+    else:
+        with fh as fh:
             config_local = json.load(fh)
             config = {**config, **config_local}
-    except:
-        pass
 
     # start server
     os.chdir(os.path.join(os.path.dirname(__file__), 't'))
