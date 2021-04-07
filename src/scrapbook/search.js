@@ -145,6 +145,8 @@
           document.getElementById('keyword').value = query;
           await this.search();
         }
+
+        document.getElementById('keyword').focus();
       } catch (ex) {
         console.error(ex);
         this.addMsg(`Error: ${ex.message}`, 'error');
