@@ -57,12 +57,13 @@
 
     // index.json is for site map
     // index.dat is used in legacy ScrapBook
-    // index.rdf and ^metadata^ are used in MAFF
+    // index.rdf, history.rdf, and ^metadata^ are used in MAFF
     // http://maf.mozdev.org/maff-specification.html
     files: new Map([
       ["index.json", {}],
       ["index.dat", {}],
       ["index.rdf", {}],
+      ["history.rdf", {}],
       ["^metadata^", {}],
     ]),
 

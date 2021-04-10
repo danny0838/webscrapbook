@@ -7260,6 +7260,9 @@ async function test_capture_downLink04() {
         "path": "index.rdf"
       },
       {
+        "path": "history.rdf"
+      },
+      {
         "path": "^metadata^"
       },
       {
@@ -7350,6 +7353,9 @@ async function test_capture_downLink04() {
       },
       {
         "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
       },
       {
         "path": "^metadata^"
@@ -7478,6 +7484,9 @@ async function test_capture_downLink04() {
       },
       {
         "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
       },
       {
         "path": "^metadata^"
