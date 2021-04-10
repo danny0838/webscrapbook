@@ -842,8 +842,8 @@ ${sRoot}.toolbar .toolbar-close:hover {
         let endNode = range.endContainer;
         if (range.endOffset) {
           endNode.splitText(range.endOffset);
+          range.setEndAfter(endNode);
         }
-        range.setEndAfter(endNode);
       }
 
       const selectedNodes = scrapbook.getSelectedNodes({
