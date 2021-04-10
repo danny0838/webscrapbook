@@ -1075,6 +1075,15 @@
   "OptionScrapbookNotifyPageCapturedLabel": {
     "message": "瀏覽擷取過的頁面時顯示提示"
   },
+  "OptionScrapbookScrapbookSearchCommentLengthLabel": {
+    "message": "搜尋結果顯示評註長度:"
+  },
+  "OptionScrapbookScrapbookSearchContextLengthLabel": {
+    "message": "搜尋結果顯示摘要長度:"
+  },
+  "OptionScrapbookScrapbookSearchSourceLengthLabel": {
+    "message": "搜尋結果顯示來源長度:"
+  },
   "OptionServerPasswordLabel": {
     "message": "密碼:"
   },

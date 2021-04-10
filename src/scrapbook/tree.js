@@ -259,7 +259,7 @@
         if (this.allowKeyboardNavigation) {
           a.setAttribute('tabindex', -1);
         }
-        a.appendChild(document.createTextNode(meta.title || meta.id));
+        elem.label = a.appendChild(document.createTextNode(meta.title || meta.id));
         a.title = (meta.title || meta.id) + (meta.source ? '\n' + meta.source : '') + (meta.comment ? '\n\n' + meta.comment : '');
         switch (meta.type) {
           case 'folder': {
@@ -312,7 +312,11 @@
 
         var legend = line.appendChild(document.createElement('legend'));
         if (meta.title) {
-          legend.appendChild(document.createTextNode('\xA0' + meta.title + '\xA0'));
+          legend.appendChild(document.createTextNode('\xA0'));
+          elem.label = legend.appendChild(document.createTextNode(meta.title));
+          legend.appendChild(document.createTextNode('\xA0'));
+        } else {
+          elem.label = legend.appendChild(document.createTextNode(''));
         }
       }
     }

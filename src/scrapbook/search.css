@@ -56,3 +56,33 @@ a:focus {
 .error {
   color: red;
 }
+
+.tree .details {
+  margin-top: .25em;
+  margin-bottom: .25em;
+  border: 0;
+  padding: 0;
+  font-size: .85em;
+  white-space: normal;
+}
+
+.tree .details::before {
+  display: none;
+}
+
+.tree .details .comment {
+  margin: .4em 0 .2em;
+  border: 1px solid gray;
+  border-radius: 3px;
+  padding: .2em;
+}
+
+.tree .details .context {
+  margin: .5em 0;
+}
+
+.tree .details .source {
+  margin: .4em 0;
+  color: green;
+  word-break: break-all;
+}

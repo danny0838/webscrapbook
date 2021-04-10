@@ -24,7 +24,15 @@
   'use strict';
 
   class SearchTree extends CustomTree {
-    addItem(item, file) {
+    constructor(params) {
+      super(params);
+      this.markers = params.markers;
+      this.commentLength = params.commentLength;
+      this.contextLength = params.contextLength;
+      this.sourceLength = params.sourceLength;
+    }
+
+    addItem(item, file, fulltext) {
       const elem = super.addItem(item);
 
       const div = elem.controller;
@@ -63,8 +71,177 @@
       img.src = browser.runtime.getURL("resources/edit-locate.svg");
       img.title = scrapbook.lang('SearchLocateTitle');
       img.alt = "";
+
+      // mark title
+      nodeMarker.markTextNode(elem.label, this.markers.title);
+
+      // add details if set
+      if (this.commentLength || this.contextLength || this.sourceLength) {
+        const divDetails = document.createElement('div');
+        divDetails.classList.add('details');
+
+        // comment
+        if (this.commentLength && item.comment) {
+          let text = item.comment;
+
+          cropAtHit: {
+            const hits = [];
+            for (const regex of this.markers.comment) {
+              regex.lastIndex = 0;
+              const m = regex.exec(text);
+              if (!m) { continue; }
+              const len = m[0].length;
+              const end = regex.lastIndex;
+              const start = regex.lastIndex - len;
+              hits.push({regex, start, len, end});
+            }
+            if (!hits.length) { break cropAtHit; }
+            hits.sort(nodeMarker.cropTextSort);
+            const cropStart = Math.max(hits[0].start - this.commentLength / 4, 0);
+            text = text.slice(cropStart);
+          }
+          text = scrapbook.crop(text, this.commentLength);
+
+          const div = divDetails.appendChild(document.createElement('div'));
+          div.classList.add('comment');
+          const commentNode = div.appendChild(document.createTextNode(text));
+          nodeMarker.markTextNode(commentNode, this.markers.comment);
+        }
+
+        // context (fulltext)
+        if (this.contextLength && fulltext) {
+          let text = fulltext;
+
+          cropAtHit: {
+            const hits = [];
+            for (const regex of this.markers.content) {
+              regex.lastIndex = 0;
+              const m = regex.exec(text);
+              if (!m) { continue; }
+              const len = m[0].length;
+              const end = regex.lastIndex;
+              const start = regex.lastIndex - len;
+              hits.push({regex, start, len, end});
+            }
+            if (!hits.length) { break cropAtHit; }
+            hits.sort(nodeMarker.cropTextSort);
+            const cropStart = Math.max(hits[0].start - this.contextLength / 4, 0);
+            text = text.slice(cropStart);
+          }
+          text = scrapbook.crop(text, this.contextLength);
+          
+          const div = divDetails.appendChild(document.createElement('div'));
+          div.classList.add('context');
+          const contextNode = div.appendChild(document.createTextNode(text));
+          nodeMarker.markTextNode(contextNode, this.markers.content);
+        }
+
+        // source
+        if (this.sourceLength && item.source) {
+          let text = item.source;
+
+          cropAtHit: {
+            const hits = [];
+            for (const regex of this.markers.source) {
+              regex.lastIndex = 0;
+              const m = regex.exec(text);
+              if (!m) { continue; }
+              const len = m[0].length;
+              const end = regex.lastIndex;
+              const start = regex.lastIndex - len;
+              hits.push({regex, start, len, end});
+            }
+            if (!hits.length) { break cropAtHit; }
+            hits.sort(nodeMarker.cropTextSort);
+            const cropStart = Math.max(hits[0].start - this.sourceLength / 4, 0);
+            text = text.slice(cropStart);
+          }
+          text = scrapbook.crop(text, this.sourceLength);
+
+          const div = divDetails.appendChild(document.createElement('div'));
+          div.classList.add('source');
+          const sourceNode = div.appendChild(document.createTextNode(text));
+          nodeMarker.markTextNode(sourceNode, this.markers.source);
+        }
+
+        div.parentNode.appendChild(divDetails);
+      }
     }
   }
+
+  const nodeMarker = {
+    get template() {
+      const value = document.createElement('mark');
+      Object.defineProperty(nodeMarker, 'template', {
+        value,
+        configurable: true,
+      });
+      return value;
+    },
+
+    markTextNode(node, regexes) {
+      let curNode = node;
+      let nextNode;
+      let s = curNode.nodeValue;
+      for (const regex of regexes) {
+        regex.lastIndex = 0;
+      }
+
+      while (true) {
+        let hits = [];
+        for (const regex of regexes) {
+          const m = regex.exec(s);
+          if (!m) { continue; }
+          const len = m[0].length;
+          const end = regex.lastIndex;
+          const start = regex.lastIndex - len;
+          hits.push({regex, start, len, end});
+        }
+
+        if (!hits.length) { break; }
+
+        hits.sort(this.markTextNodeSort);
+        const hit = hits[0];
+        if (hit.len === 0) {
+          const nextIndex = hit.regex.lastIndex + 1;
+          for (const regex of regexes) {
+            regex.lastIndex = nextIndex;
+          }
+          continue;
+        }
+
+        const newNode = this.template.cloneNode(false);
+        if (curNode.nodeValue.length > hit.end) {
+          nextNode = curNode.splitText(hit.end);
+        }
+        const wordNode = curNode.splitText(hit.start);
+        curNode.parentNode.replaceChild(newNode, wordNode);
+        newNode.appendChild(wordNode);
+
+        if (!nextNode) { break; }
+
+        curNode = nextNode;
+        s = curNode.nodeValue;
+        for (const regex of regexes) {
+          regex.lastIndex = 0;
+        }
+      }
+    },
+
+    markTextNodeSort(a, b) {
+      if (a.start > b.start) { return 1; }
+      if (a.start < b.start) { return -1; }
+      if (a.len < b.len) { return 1; }
+      if (a.len > b.len) { return -1; }
+      return 0;
+    },
+
+    cropTextSort(a, b) {
+      if (a.start > b.start) { return 1; }
+      if (a.start < b.start) { return -1; }
+      return 0;
+    },
+  };
 
   const search = {
     defaultSearch: "",
@@ -181,14 +358,16 @@
         console.log("Search:", query);
 
         // search and get result
-        return await searchEngine.search(query);
+        return await searchEngine.search(query, {
+          resultHandler: this.showResults.bind(this),
+        });
       } catch(ex) {
         console.error(ex);
         this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), 'error');
       };
     },
 
-    showResults(results, book) {
+    showResults(results, {book, markers}) {
       this.addMsg(scrapbook.lang('SearchFound', [book.name, results.length]));
 
       const wrapper = document.createElement("div");
@@ -196,6 +375,10 @@
       const tree = new SearchTree({
         treeElem: wrapper,
         bookId: book.id,
+        markers,
+        commentLength: scrapbook.getOption("scrapbook.searchCommentLength"),
+        contextLength: scrapbook.getOption("scrapbook.searchContextLength"),
+        sourceLength: scrapbook.getOption("scrapbook.searchSourceLength"),
       });
       tree.init({
         book,
@@ -210,7 +393,7 @@
 
       for (const result of results) {
         const {id, file, meta, fulltext} = result;
-        tree.addItem(meta, file);
+        tree.addItem(meta, file, fulltext.content);
       }
 
       // Add a <br> for spacing between books, and adds a spacing when the user
@@ -508,7 +691,56 @@
       return query;
     },
 
-    async search(query) {
+    parseMarkers(query) {
+      const markers = {
+        title: [],
+        comment: [],
+        content: [],
+        source: [],
+      };
+      if (query.rules.tcc) {
+        for (const regex of query.rules.tcc.include) {
+          markers.title.push(regex);
+          markers.comment.push(regex);
+          markers.content.push(regex);
+        }
+      }
+      if (query.rules.tc) {
+        for (const regex of query.rules.tc.include) {
+          markers.title.push(regex);
+          markers.comment.push(regex);
+        }
+      }
+      if (query.rules.title) {
+        for (const regex of query.rules.title.include) {
+          markers.title.push(regex);
+        }
+      }
+      if (query.rules.comment) {
+        for (const regex of query.rules.comment.include) {
+          markers.comment.push(regex);
+        }
+      }
+      if (query.rules.content) {
+        for (const regex of query.rules.content.include) {
+          markers.content.push(regex);
+        }
+      }
+      if (query.rules.source) {
+        for (const regex of query.rules.source.include) {
+          markers.source.push(regex);
+        }
+      }
+
+      markers.title = markers.title.map(r => new RegExp(r.source, `${r.ignoreCase ? 'i': ''}mug`));
+      markers.comment = markers.comment.map(r => new RegExp(r.source, `${r.ignoreCase ? 'i': ''}mug`));
+      markers.content = markers.content.map(r => new RegExp(r.source, `${r.ignoreCase ? 'i': ''}mug`));
+      markers.source = markers.source.map(r => new RegExp(r.source, `${r.ignoreCase ? 'i': ''}mug`));
+
+      return markers;
+    },
+
+    async search(query, {resultHandler}) {
       const books = new Set(search.books);
       if (query.books.include.length) {
         for (const book of books) {
@@ -523,10 +755,12 @@
         }
       }
 
+      const markers = this.parseMarkers(query);
+
       for (const book of books) {
         await search.loadBook(book);
         const results = this.searchBook(query, book);
-        search.showResults(results, book);
+        resultHandler(results, {book, markers});
       }
     },
 

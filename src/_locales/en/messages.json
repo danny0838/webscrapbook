@@ -1075,6 +1075,15 @@
   "OptionScrapbookNotifyPageCapturedLabel": {
     "message": "Show hint when browsing a page having been captured"
   },
+  "OptionScrapbookScrapbookSearchCommentLengthLabel": {
+    "message": "Comment length shown in search results:"
+  },
+  "OptionScrapbookScrapbookSearchContextLengthLabel": {
+    "message": "Context length shown in search results:"
+  },
+  "OptionScrapbookScrapbookSearchSourceLengthLabel": {
+    "message": "Source length shown in search results:"
+  },
   "OptionServerPasswordLabel": {
     "message": "Password:"
   },
