@@ -3,6 +3,12 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.109.0] - 2021-04-11
+* No more save a file named `history.rdf`, which is preserved by MAFF format, when capturing a page.
+* Fixed an issue of occasional unexpected extending of highlight range for the page editor.
+* Fixed an issue that a text crop may cut between a unicode surrogate pair.
+* Added support of context displaying for the search page.
+
 ## [0.108.0] - 2021-04-05
 * Improved GUI for options verification.
 * Reworked the syntax of `capture.saveFilename` option.
