@@ -1075,6 +1075,9 @@
   "OptionScrapbookNotifyPageCapturedLabel": {
     "message": "Show hint when browsing a page having been captured"
   },
+  "OptionScrapbookNotifyPageCapturedTooltip": {
+    "message": "When checked, a badge number of matching items will be shown at the toolbar button, with different color for the matching level: \n• red: same URL (excluding the #-part)\n• yellow: same path (excluding the ?- and #-part)\n• green: same site (same protocol, domain, and port)\n• blue: same domain (e.g. https: and http: or www.example.com and example.com are considered same)"
+  },
   "OptionScrapbookScrapbookSearchCommentLengthLabel": {
     "message": "Comment length shown in search results:"
   },
