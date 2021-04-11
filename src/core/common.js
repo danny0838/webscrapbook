@@ -1472,7 +1472,15 @@ if (Node && !Node.prototype.getRootNode) {
   scrapbook.crop = function (str, charLimit, byteLimit, ellipsis = '...') {
     if (charLimit) {
       if (str.length > charLimit) {
-        str = str.substring(0, charLimit - ellipsis.length) + ellipsis;
+        str = str.substring(0, charLimit - ellipsis.length);
+        const lastCharCode = str.charCodeAt(str.length - 1);
+
+        // prevent cutting a surrogate pair
+        if (0xD800 < lastCharCode && lastCharCode < 0xDBFF) {
+          str = str.slice(0, -1);
+        }
+
+        str += ellipsis;
       }
     }
     if (byteLimit) {
