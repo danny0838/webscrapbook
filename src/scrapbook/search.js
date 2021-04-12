@@ -60,7 +60,10 @@
         }
 
         const span = document.createElement('span');
-        span.textContent = ' (' + file + ')';
+        span.appendChild(document.createTextNode(' ('));
+        const fileNode = span.appendChild(document.createTextNode(file));
+        span.appendChild(document.createTextNode(')'));
+        nodeMarker.markTextNode(fileNode, this.markers.file);
         a.parentNode.insertBefore(span, a.nextSibling);
       }
 
@@ -697,6 +700,7 @@
         comment: [],
         content: [],
         source: [],
+        file: [],
       };
       if (query.rules.tcc) {
         for (const regex of query.rules.tcc.include) {
@@ -729,6 +733,11 @@
       if (query.rules.source) {
         for (const regex of query.rules.source.include) {
           markers.source.push(regex);
+        }
+      }
+      if (query.rules.file) {
+        for (const regex of query.rules.file.include) {
+          markers.file.push(regex);
         }
       }
 
