@@ -732,10 +732,9 @@
         }
       }
 
-      markers.title = markers.title.map(r => new RegExp(r.source, `${r.ignoreCase ? 'i': ''}mug`));
-      markers.comment = markers.comment.map(r => new RegExp(r.source, `${r.ignoreCase ? 'i': ''}mug`));
-      markers.content = markers.content.map(r => new RegExp(r.source, `${r.ignoreCase ? 'i': ''}mug`));
-      markers.source = markers.source.map(r => new RegExp(r.source, `${r.ignoreCase ? 'i': ''}mug`));
+      for (const k in markers) {
+        markers[k] = markers[k].map(r => new RegExp(r.source, `${r.ignoreCase ? 'i': ''}mug`));
+      }
 
       return markers;
     },
