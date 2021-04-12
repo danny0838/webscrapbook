@@ -186,6 +186,7 @@
       let curNode = node;
       let nextNode;
       let s = curNode.nodeValue;
+      let nextIndex = 0;
       for (const regex of regexes) {
         regex.lastIndex = 0;
       }
@@ -206,7 +207,9 @@
         hits.sort(this.markTextNodeSort);
         const hit = hits[0];
         if (hit.len === 0) {
-          const nextIndex = hit.regex.lastIndex + 1;
+          // lastIndex of /(?:)/u decreases from 1 to 0 after exec on '\uD800\uDC00'
+          // also save to nextIndex to ensure increasing for every loop.
+          nextIndex = Math.max(hit.regex.lastIndex, nextIndex) + 1;
           for (const regex of regexes) {
             regex.lastIndex = nextIndex;
           }
@@ -225,6 +228,7 @@
 
         curNode = nextNode;
         s = curNode.nodeValue;
+        nextIndex = 0;
         for (const regex of regexes) {
           regex.lastIndex = 0;
         }
