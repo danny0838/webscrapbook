@@ -85,26 +85,7 @@
 
         // comment
         if (this.commentLength && item.comment) {
-          let text = item.comment;
-
-          cropAtHit: {
-            const hits = [];
-            for (const regex of this.markers.comment) {
-              regex.lastIndex = 0;
-              const m = regex.exec(text);
-              if (!m) { continue; }
-              const len = m[0].length;
-              const end = regex.lastIndex;
-              const start = regex.lastIndex - len;
-              hits.push({regex, start, len, end});
-            }
-            if (!hits.length) { break cropAtHit; }
-            hits.sort(nodeMarker.cropTextSort);
-            const cropStart = Math.max(hits[0].start - this.commentLength / 4, 0);
-            text = text.slice(cropStart);
-          }
-          text = scrapbook.crop(text, this.commentLength);
-
+          const text = nodeMarker.cropSnippets(item.comment, this.markers.comment, this.commentLength);
           const div = divDetails.appendChild(document.createElement('div'));
           div.classList.add('comment');
           const commentNode = div.appendChild(document.createTextNode(text));
@@ -113,26 +94,7 @@
 
         // context (fulltext)
         if (this.contextLength && fulltext) {
-          let text = fulltext;
-
-          cropAtHit: {
-            const hits = [];
-            for (const regex of this.markers.content) {
-              regex.lastIndex = 0;
-              const m = regex.exec(text);
-              if (!m) { continue; }
-              const len = m[0].length;
-              const end = regex.lastIndex;
-              const start = regex.lastIndex - len;
-              hits.push({regex, start, len, end});
-            }
-            if (!hits.length) { break cropAtHit; }
-            hits.sort(nodeMarker.cropTextSort);
-            const cropStart = Math.max(hits[0].start - this.contextLength / 4, 0);
-            text = text.slice(cropStart);
-          }
-          text = scrapbook.crop(text, this.contextLength);
-          
+          const text = nodeMarker.cropSnippets(fulltext, this.markers.content, this.contextLength);
           const div = divDetails.appendChild(document.createElement('div'));
           div.classList.add('context');
           const contextNode = div.appendChild(document.createTextNode(text));
@@ -141,26 +103,7 @@
 
         // source
         if (this.sourceLength && item.source) {
-          let text = item.source;
-
-          cropAtHit: {
-            const hits = [];
-            for (const regex of this.markers.source) {
-              regex.lastIndex = 0;
-              const m = regex.exec(text);
-              if (!m) { continue; }
-              const len = m[0].length;
-              const end = regex.lastIndex;
-              const start = regex.lastIndex - len;
-              hits.push({regex, start, len, end});
-            }
-            if (!hits.length) { break cropAtHit; }
-            hits.sort(nodeMarker.cropTextSort);
-            const cropStart = Math.max(hits[0].start - this.sourceLength / 4, 0);
-            text = text.slice(cropStart);
-          }
-          text = scrapbook.crop(text, this.sourceLength);
-
+          const text = nodeMarker.cropSnippets(item.source, this.markers.source, this.sourceLength);
           const div = divDetails.appendChild(document.createElement('div'));
           div.classList.add('source');
           const sourceNode = div.appendChild(document.createTextNode(text));
@@ -183,6 +126,8 @@
     },
 
     markTextNode(node, regexes) {
+      regexes = new Set(regexes);
+
       let curNode = node;
       let nextNode;
       let s = curNode.nodeValue;
@@ -195,7 +140,10 @@
         let hits = [];
         for (const regex of regexes) {
           const m = regex.exec(s);
-          if (!m) { continue; }
+          if (!m) {
+            regexes.delete(regex);
+            continue;
+          }
           const len = m[0].length;
           const end = regex.lastIndex;
           const start = regex.lastIndex - len;
@@ -204,8 +152,7 @@
 
         if (!hits.length) { break; }
 
-        hits.sort(this.markTextNodeSort);
-        const hit = hits[0];
+        const hit = hits.reduce(this.markTextNodeReducer);
         if (hit.len === 0) {
           // lastIndex of /(?:)/u decreases from 1 to 0 after exec on '\uD800\uDC00'
           // also save to nextIndex to ensure increasing for every loop.
@@ -235,18 +182,38 @@
       }
     },
 
-    markTextNodeSort(a, b) {
-      if (a.start > b.start) { return 1; }
-      if (a.start < b.start) { return -1; }
-      if (a.len < b.len) { return 1; }
-      if (a.len > b.len) { return -1; }
-      return 0;
+    markTextNodeReducer(a, b) {
+      if (a.start < b.start) { return a; }
+      if (a.start > b.start) { return b; }
+      if (a.len > b.len) { return a; }
+      if (a.len < b.len) { return b; }
+      return a;
     },
 
-    cropTextSort(a, b) {
-      if (a.start > b.start) { return 1; }
-      if (a.start < b.start) { return -1; }
-      return 0;
+    cropSnippets(text, regexes, maxLen) {
+      cropAtHit: {
+        const hits = [];
+        for (const regex of regexes) {
+          regex.lastIndex = 0;
+          const m = regex.exec(text);
+          if (!m) { continue; }
+          const len = m[0].length;
+          const end = regex.lastIndex;
+          const start = regex.lastIndex - len;
+          hits.push({regex, start, len, end});
+        }
+        if (!hits.length) { break cropAtHit; }
+        const hit = hits.reduce(this.cropTextReducer);
+        const cropStart = Math.max(hit.start - maxLen / 4, 0);
+        text = text.slice(cropStart);
+      }
+      return scrapbook.crop(text, maxLen);
+    },
+
+    cropTextReducer(a, b) {
+      if (a.start < b.start) { return a; }
+      if (a.start > b.start) { return b; }
+      return a;
     },
   };
 
