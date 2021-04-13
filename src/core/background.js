@@ -340,6 +340,9 @@
       if (("editor.autoInit" in changes) || ("server.url" in changes)) {
         editor.toggleAutoEdit(); // async
       }
+      if (("viewer.viewHtz" in changes) || ("viewer.viewMaff" in changes)) {
+        viewer.toggleViewerListeners(); // async
+      }
     });
   }
 
