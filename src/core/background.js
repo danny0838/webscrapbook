@@ -331,6 +331,12 @@
       if (("ui.showContextMenu" in changes) || ("server.url" in changes)) {
         updateContextMenu(); // async
       }
+      if ("autocapture.rules" in changes) {
+        capturer.configAutoCapture(); // async
+      }
+      if ("autocapture.enabled" in changes) {
+        capturer.toggleAutoCapture(); // async
+      }
     });
   }
 
