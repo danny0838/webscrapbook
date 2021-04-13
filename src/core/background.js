@@ -748,13 +748,13 @@
     browser.windows.onRemoved.addListener(onRemoved);
 
     browser.windows.getAll().then(wins => {
-      wins.forEach(win => {
+      for (const win of wins) {
         if (!win.focused) {
           return;
         }
 
         background.focusedWindow.set(win.id, Date.now());
-      });
+      }
     });
   }
 
@@ -767,11 +767,11 @@
       // Some headers (e.g. "referer") are not allowed to be set via
       // XMLHttpRequest.setRequestHeader directly.  Use a prefix and
       // modify it here to workaround.
-      details.requestHeaders.forEach((header) => {
+      for (const header of details.requestHeaders) {
         if (header.name.slice(0, 15) === "X-WebScrapBook-") {
           header.name = header.name.slice(15);
         }
-      });
+      }
       return {requestHeaders: details.requestHeaders};
     }, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, extraInfoSpec);
   }

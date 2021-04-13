@@ -130,13 +130,13 @@ a {
 
     /* build a set with the ids that are still being viewed */
     const usedIds = new Set();
-    tabs.forEach((tab) => {
+    for (const tab of tabs) {
       const u = new URL(tab.url);
       if (u.href.startsWith(browser.runtime.getURL("viewer/view.html") + '?')) {
         const id = u.searchParams.get('id');
         if (id) { usedIds.add(id); }
       }
-    });
+    }
 
     /* remove cache entry for all IDs that are not being viewed */
     const items = await scrapbook.cache.getAll({table: "pageCache"});

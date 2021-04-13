@@ -2177,11 +2177,11 @@ if (Node && !Node.prototype.getRootNode) {
         const parts = mediatype.split(";");
         const mime = parts.shift();
         const parameters = {};
-        parts.forEach((part) => {
+        for (const part of parts) {
           if (regexFieldValue.test(part)) {
             parameters[RegExp.$1.toLowerCase()] = RegExp.$2;
           }
-        });
+        }
 
         const bstr = base64 ? atob(data) : unescape(data);
         const ab = scrapbook.byteStringToArrayBuffer(bstr);

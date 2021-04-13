@@ -34,7 +34,7 @@
         baseElem.parentNode.insertBefore(selector, baseElem.nextSibling);
       }
       return await new Promise(async (resolve, reject) => {
-        (await scrapbook.getContentTabs()).forEach((tab) => {
+        for (const tab of await scrapbook.getContentTabs()) {
           const elem = document.createElement("button");
           elem.className = "sub";
           elem.textContent = (tab.index + 1) + ": " + tab.title;
@@ -45,7 +45,7 @@
             selector.remove();
           });
           selector.appendChild(elem);
-        });
+        }
       });
     };
 
