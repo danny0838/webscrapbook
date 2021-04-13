@@ -324,17 +324,13 @@
     }
   };
 
-  async function initContextMenu() {
-    const menuRelatedOptions = new Set(["ui.showContextMenu", "server.url"]);
-
+  function initStorageChangeListener() {
+    // Run this after optionsAuto to make sure that scrapbook.options is
+    // up-to-date when the listener is called.
     browser.storage.onChanged.addListener((changes, areaName) => {
-      if (Object.keys(changes).some(k => menuRelatedOptions.has(k))) {
+      if (("ui.showContextMenu" in changes) || ("server.url" in changes)) {
         updateContextMenu(); // async
       }
-    });
-
-    scrapbook.loadOptionsAuto.then(() => {
-      updateContextMenu(); // async
     });
   }
 
@@ -365,11 +361,10 @@
 
     await browser.contextMenus.removeAll();
 
-    await scrapbook.loadOptions();
     const willShow = scrapbook.getOption("ui.showContextMenu");
-    const hasServer = scrapbook.hasServer();
     if (!willShow) { return; }
 
+    const hasServer = scrapbook.hasServer();
     const urlMatch = await scrapbook.getContentPagePattern();
 
     // Available in Chromium and Firefox >= 53.
@@ -836,13 +831,16 @@
   }
 
   async function init() {
+    initStorageChangeListener();
     initBrowserAction();
     initCommands();
     initLastFocusedWindowListener();
     initBeforeSendHeadersListener();
     initMessageListener();
     initExternalMessageListener();
-    initContextMenu();
+
+    await scrapbook.loadOptionsAuto;
+    updateContextMenu();
   }
 
   init();
