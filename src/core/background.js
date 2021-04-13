@@ -337,6 +337,9 @@
       if ("autocapture.enabled" in changes) {
         capturer.toggleAutoCapture(); // async
       }
+      if (("editor.autoInit" in changes) || ("server.url" in changes)) {
+        editor.toggleAutoEdit(); // async
+      }
     });
   }
 

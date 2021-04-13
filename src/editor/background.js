@@ -3,32 +3,26 @@
  * The background script for editor functionality
  *
  * @require {Object} scrapbook
+ * @public {Object} editor
  *****************************************************************************/
 
 (function (root, factory) {
   // Browser globals
-  factory(
+  if (root.hasOwnProperty('editor')) { return; }
+  root.editor = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,
     console,
   );
-}(this, async function (isDebug, browser, scrapbook, console) {
+}(this, function (isDebug, browser, scrapbook, console) {
 
   'use strict';
 
-  browser.webNavigation.onCompleted.addListener((details) => {
+  const AUTO_EDIT_FILTER = {url: [{schemes: ["http", "https"]}]};
+
+  function onNavigationComplete(details) {
     if (details.frameId !== 0) { return; }
-
-    // skip as configured
-    if (!scrapbook.getOption("editor.autoInit")) {
-      return;
-    }
-
-    // skip if backend server is not set
-    if (!scrapbook.getOption("server.url")) {
-      return;
-    }
 
     const {url, tabId} = details;
     const [urlMain, urlSearch, urlHash] = scrapbook.splitUrl(url);
@@ -52,6 +46,24 @@
       tabId,
       willActive: true,
     });
-  }, {url: [{schemes: ["http", "https"]}]});
+  }
+
+  function toggleAutoEdit() {
+    browser.webNavigation.onCompleted.removeListener(onNavigationComplete);
+    if (scrapbook.getOption("editor.autoInit") && scrapbook.hasServer()) {
+      browser.webNavigation.onCompleted.addListener(onNavigationComplete, AUTO_EDIT_FILTER);
+    }
+  }
+
+  async function init() {
+    await scrapbook.loadOptionsAuto;
+    toggleAutoEdit();
+  }
+
+  init();
+
+  return {
+    toggleAutoEdit,
+  };
 
 }));
