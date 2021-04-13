@@ -100,23 +100,266 @@
     },
   };
 
-  /* browser action button and fallback */
-  if (!browser.browserAction) {
-    // Firefox Android < 55: no browserAction
-    // Fallback to pageAction.
-    // Firefox Android ignores the tabId parameter and
-    // shows the pageAction for all tabs
-    browser.pageAction.show(0);
-  } else if (!browser.browserAction.getPopup) {
-    // Firefox Android < 57: only browserAction onClick
-    // Fallback by opening browserAction page
-    browser.browserAction.onClicked.addListener((tab) => {
-      const url = browser.runtime.getURL("core/browserAction.html");
-      browser.tabs.create({url, active: true});
+  /**
+   * Get real last focused window.
+   *
+   * Native window.getLastFocusedWindow gets the last created window (the
+   * window "on top"), rather than the window the user last activates a tab
+   * within.
+   *
+   * @kind invokable
+   * @param {Object} params
+   * @param {boolean} [params.populate]
+   * @param {WindowType[]} [params.windowTypes]
+   */
+  background.getLastFocusedWindow = async function ({
+    populate = false,
+    windowTypes = ['normal', 'popup'],
+  } = {}) {
+    const wins = (await browser.windows.getAll({populate}))
+      // Firefox does not support windowTypes for windows.getAll,
+      // so use filter instead.
+      .filter(win => windowTypes.includes(win.type))
+      .sort((a, b) => {
+        const va = background.focusedWindow.get(a.id) || -Infinity;
+        const vb = background.focusedWindow.get(b.id) || -Infinity;
+        if (va > vb) { return 1; }
+        if (vb > va) { return -1; }
+        if (a.id > b.id) { return 1; }
+        if (b.id > a.id) { return -1; }
+        return 0;
+      });
+
+    return wins.pop();
+  };
+
+  /**
+   * @kind invokable
+   */
+  background.invokeFrameScript = async function ({frameId, cmd, args}, sender) {
+    const tabId = sender.tab.id;
+    return await scrapbook.invokeContentScript({
+      tabId, frameId, cmd, args,
+    });
+  };
+
+  /**
+   * @kind invokable
+   */
+  background.findBookIdFromUrl = async function ({url}, sender) {
+    await server.init(true);
+    return await server.findBookIdFromUrl(url);
+  };
+
+  /**
+   * Attempt to locate an item in the sidebar.
+   *
+   * @kind invokable
+   * @return {Object|null|false} - The located item.
+   *     - Object: the located item
+   *     - null: no item located
+   *     - false: no sidebar opened
+   */
+  background.locateItem = async function (params, sender) {
+    const cmd = 'sidebar.locate';
+    const args = params;
+    const sidebarUrl = browser.runtime.getURL("scrapbook/sidebar.html");
+
+    if (browser.sidebarAction) {
+      // Unfortunately we cannot force open the sidebar from a user gesture
+      // in a content page if it's closed.
+      if (!await browser.sidebarAction.isOpen({})) {
+        return false;
+      }
+
+      // pass windowId to restrict response to the current window sidebar
+      return await scrapbook.invokeExtensionScript({id: (await browser.windows.getCurrent()).id, cmd, args});
+    } else if (browser.windows) {
+      const sidebarWindow = (await browser.windows.getAll({
+        windowTypes: ['popup'],
+        populate: true,
+      })).filter(w => scrapbook.splitUrl(w.tabs[0].url)[0] === sidebarUrl)[0];
+
+      if (!sidebarWindow) {
+        return false;
+      }
+
+      const tabId = sidebarWindow.tabs[0].id;
+      const result = await scrapbook.invokeContentScript({tabId, frameId: 0, cmd, args});
+
+      if (result) {
+        await browser.windows.update(sidebarWindow.id, {drawAttention: true});
+      }
+
+      return result;
+    } else {
+      // Firefox Android does not support windows
+      const sidebarTab = (await browser.tabs.query({}))
+          .filter(t => scrapbook.splitUrl(t.url)[0] === sidebarUrl)[0];
+
+      if (!sidebarTab) {
+        return false;
+      }
+
+      const tabId = sidebarTab.id;
+      const result = await scrapbook.invokeContentScript({tabId, frameId: 0, cmd, args});
+
+      if (result) {
+        await browser.tabs.update(tabId, {active: true});
+      }
+
+      return result;
+    }
+  };
+
+  /**
+   * @kind invokable
+   */
+  background.captureCurrentTab = async function (params = {}, sender) {
+    const task = Object.assign({tabId: sender.tab.id}, params);
+    return await scrapbook.invokeCapture([task]);
+  };
+
+  /**
+   * @kind invokable
+   */
+  background.createSubPage = async function ({url, title}, sender) {
+    await server.init(true);
+
+    // reject if file exists
+    const fileInfo = await server.request({
+      url: url + '?a=info',
+      method: "GET",
+      format: 'json',
+    }).then(r => r.json());
+    if (fileInfo.data.type !== null) {
+      throw new Error(`File already exists at "${url}".`);
+    }
+
+    // search for bookId and item
+    // reject if not found
+    const bookId = await server.findBookIdFromUrl(url);
+    if (typeof bookId !== 'string') {
+      throw new Error(`Unable to find a valid book.`);
+    }
+    const book = server.books[bookId];
+
+    const item = await book.findItemFromUrl(url);
+    if (!item) {
+      throw new Error(`Unable to find a valid item.`);
+    }
+
+    if (!item.index.endsWith('/index.html')) {
+      throw new Error(`Index page is not "*/index.html".`);
+    }
+
+    // generate content and upload
+    const content = await book.renderTemplate(url, item, 'html', title);
+    const file = new File([content], scrapbook.urlToFilename(url), {type: 'text/html'});
+    await server.request({
+      url: url + '?a=save',
+      method: "POST",
+      format: 'json',
+      csrfToken: true,
+      body: {
+        upload: file,
+      },
+    });
+  };
+
+  /**
+   * @kind invokable
+   */
+  background.invokeEditorCommand = async function ({code, cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
+    const tabId = sender.tab.id;
+    if (frameId !== -1) {
+      const response = code ? 
+        await browser.tabs.executeScript(tabId, {
+          frameId,
+          code,
+          runAt: "document_start",
+        }) : 
+        await scrapbook.invokeContentScript({
+          tabId, frameId, cmd, args,
+        });
+      await browser.tabs.executeScript(tabId, {
+        frameId,
+        code: `window.focus();`,
+        runAt: "document_start"
+      });
+      return response;
+    } else if (frameIdExcept !== -1) {
+      const tasks = Array.prototype.map.call(
+        await scrapbook.initContentScripts(tabId),
+        async ({tabId, frameId, error, injected}) => {
+          if (error) { return undefined; }
+          if (frameId === frameIdExcept) { return undefined; }
+          return code ? 
+            await browser.tabs.executeScript(tabId, {
+              frameId,
+              code,
+              runAt: "document_start",
+            }) : 
+            await scrapbook.invokeContentScript({
+              tabId, frameId, cmd, args,
+            });
+        });
+      return Promise.all(tasks);
+    } else {
+      const tasks = Array.prototype.map.call(
+        await scrapbook.initContentScripts(tabId),
+        async ({tabId, frameId, error, injected}) => {
+          if (error) { return undefined; }
+          return code ? 
+            await browser.tabs.executeScript(tabId, {
+              frameId,
+              code,
+              runAt: "document_start",
+            }) : 
+            await scrapbook.invokeContentScript({
+              tabId, frameId, cmd, args,
+            });
+        });
+      return Promise.all(tasks);
+    }
+  };
+
+  async function initContextMenu() {
+    const menuRelatedOptions = new Set(["ui.showContextMenu", "server.url"]);
+
+    browser.storage.onChanged.addListener((changes, areaName) => {
+      if (Object.keys(changes).some(k => menuRelatedOptions.has(k))) {
+        updateContextMenu(); // async
+      }
+    });
+
+    scrapbook.loadOptionsAuto.then(() => {
+      updateContextMenu(); // async
     });
   }
 
-  /* context menu */
+  function initBrowserAction() {
+    /* browser action button and fallback */
+    if (!browser.browserAction) {
+      // Firefox Android < 55: no browserAction
+      // Fallback to pageAction.
+      // Firefox Android ignores the tabId parameter and
+      // shows the pageAction for all tabs
+      browser.pageAction.show(0);
+      return;
+    }
+
+    if (!browser.browserAction.getPopup) {
+      // Firefox Android < 57: only browserAction onClick
+      // Fallback by opening browserAction page
+      browser.browserAction.onClicked.addListener((tab) => {
+        const url = browser.runtime.getURL("core/browserAction.html");
+        browser.tabs.create({url, active: true});
+      });
+      return;
+    }
+  }
+
   async function updateContextMenu() {
     if (!browser.contextMenus) { return; }
 
@@ -499,239 +742,17 @@
     });
   }
 
-  /**
-   * Get real last focused window.
-   *
-   * Native window.getLastFocusedWindow gets the last created window (the
-   * window "on top"), rather than the window the user last activates a tab
-   * within.
-   *
-   * @kind invokable
-   * @param {Object} params
-   * @param {boolean} [params.populate]
-   * @param {WindowType[]} [params.windowTypes]
-   */
-  background.getLastFocusedWindow = async function ({
-    populate = false,
-    windowTypes = ['normal', 'popup'],
-  } = {}) {
-    const wins = (await browser.windows.getAll({populate}))
-      // Firefox does not support windowTypes for windows.getAll,
-      // so use filter instead.
-      .filter(win => windowTypes.includes(win.type))
-      .sort((a, b) => {
-        const va = background.focusedWindow.get(a.id) || -Infinity;
-        const vb = background.focusedWindow.get(b.id) || -Infinity;
-        if (va > vb) { return 1; }
-        if (vb > va) { return -1; }
-        if (a.id > b.id) { return 1; }
-        if (b.id > a.id) { return -1; }
-        return 0;
-      });
+  function initCommands() {
+    if (!browser.commands) { return; }
 
-    return wins.pop();
-  };
-
-  /**
-   * @kind invokable
-   */
-  background.invokeFrameScript = async function ({frameId, cmd, args}, sender) {
-    const tabId = sender.tab.id;
-    return await scrapbook.invokeContentScript({
-      tabId, frameId, cmd, args,
-    });
-  };
-
-  /**
-   * @kind invokable
-   */
-  background.findBookIdFromUrl = async function ({url}, sender) {
-    await server.init(true);
-    return await server.findBookIdFromUrl(url);
-  };
-
-  /**
-   * Attempt to locate an item in the sidebar.
-   *
-   * @kind invokable
-   * @return {Object|null|false} - The located item.
-   *     - Object: the located item
-   *     - null: no item located
-   *     - false: no sidebar opened
-   */
-  background.locateItem = async function (params, sender) {
-    const cmd = 'sidebar.locate';
-    const args = params;
-    const sidebarUrl = browser.runtime.getURL("scrapbook/sidebar.html");
-
-    if (browser.sidebarAction) {
-      // Unfortunately we cannot force open the sidebar from a user gesture
-      // in a content page if it's closed.
-      if (!await browser.sidebarAction.isOpen({})) {
-        return false;
-      }
-
-      // pass windowId to restrict response to the current window sidebar
-      return await scrapbook.invokeExtensionScript({id: (await browser.windows.getCurrent()).id, cmd, args});
-    } else if (browser.windows) {
-      const sidebarWindow = (await browser.windows.getAll({
-        windowTypes: ['popup'],
-        populate: true,
-      })).filter(w => scrapbook.splitUrl(w.tabs[0].url)[0] === sidebarUrl)[0];
-
-      if (!sidebarWindow) {
-        return false;
-      }
-
-      const tabId = sidebarWindow.tabs[0].id;
-      const result = await scrapbook.invokeContentScript({tabId, frameId: 0, cmd, args});
-
-      if (result) {
-        await browser.windows.update(sidebarWindow.id, {drawAttention: true});
-      }
-
-      return result;
-    } else {
-      // Firefox Android does not support windows
-      const sidebarTab = (await browser.tabs.query({}))
-          .filter(t => scrapbook.splitUrl(t.url)[0] === sidebarUrl)[0];
-
-      if (!sidebarTab) {
-        return false;
-      }
-
-      const tabId = sidebarTab.id;
-      const result = await scrapbook.invokeContentScript({tabId, frameId: 0, cmd, args});
-
-      if (result) {
-        await browser.tabs.update(tabId, {active: true});
-      }
-
-      return result;
-    }
-  };
-
-  /**
-   * @kind invokable
-   */
-  background.captureCurrentTab = async function (params = {}, sender) {
-    const task = Object.assign({tabId: sender.tab.id}, params);
-    return await scrapbook.invokeCapture([task]);
-  };
-
-  /**
-   * @kind invokable
-   */
-  background.createSubPage = async function ({url, title}, sender) {
-    await server.init(true);
-
-    // reject if file exists
-    const fileInfo = await server.request({
-      url: url + '?a=info',
-      method: "GET",
-      format: 'json',
-    }).then(r => r.json());
-    if (fileInfo.data.type !== null) {
-      throw new Error(`File already exists at "${url}".`);
-    }
-
-    // search for bookId and item
-    // reject if not found
-    const bookId = await server.findBookIdFromUrl(url);
-    if (typeof bookId !== 'string') {
-      throw new Error(`Unable to find a valid book.`);
-    }
-    const book = server.books[bookId];
-
-    const item = await book.findItemFromUrl(url);
-    if (!item) {
-      throw new Error(`Unable to find a valid item.`);
-    }
-
-    if (!item.index.endsWith('/index.html')) {
-      throw new Error(`Index page is not "*/index.html".`);
-    }
-
-    // generate content and upload
-    const content = await book.renderTemplate(url, item, 'html', title);
-    const file = new File([content], scrapbook.urlToFilename(url), {type: 'text/html'});
-    await server.request({
-      url: url + '?a=save',
-      method: "POST",
-      format: 'json',
-      csrfToken: true,
-      body: {
-        upload: file,
-      },
-    });
-  };
-
-  /**
-   * @kind invokable
-   */
-  background.invokeEditorCommand = async function ({code, cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
-    const tabId = sender.tab.id;
-    if (frameId !== -1) {
-      const response = code ? 
-        await browser.tabs.executeScript(tabId, {
-          frameId,
-          code,
-          runAt: "document_start",
-        }) : 
-        await scrapbook.invokeContentScript({
-          tabId, frameId, cmd, args,
-        });
-      await browser.tabs.executeScript(tabId, {
-        frameId,
-        code: `window.focus();`,
-        runAt: "document_start"
-      });
-      return response;
-    } else if (frameIdExcept !== -1) {
-      const tasks = Array.prototype.map.call(
-        await scrapbook.initContentScripts(tabId),
-        async ({tabId, frameId, error, injected}) => {
-          if (error) { return undefined; }
-          if (frameId === frameIdExcept) { return undefined; }
-          return code ? 
-            await browser.tabs.executeScript(tabId, {
-              frameId,
-              code,
-              runAt: "document_start",
-            }) : 
-            await scrapbook.invokeContentScript({
-              tabId, frameId, cmd, args,
-            });
-        });
-      return Promise.all(tasks);
-    } else {
-      const tasks = Array.prototype.map.call(
-        await scrapbook.initContentScripts(tabId),
-        async ({tabId, frameId, error, injected}) => {
-          if (error) { return undefined; }
-          return code ? 
-            await browser.tabs.executeScript(tabId, {
-              frameId,
-              code,
-              runAt: "document_start",
-            }) : 
-            await scrapbook.invokeContentScript({
-              tabId, frameId, cmd, args,
-            });
-        });
-      return Promise.all(tasks);
-    }
-  };
-
-  /* commands */
-  if (browser.commands) {
     browser.commands.onCommand.addListener((cmd) => {
       return background.commands[cmd]();
     });
   }
 
-  /* record last focused window */
-  if (browser.windows) {
+  function initLastFocusedWindowListener() {
+    if (!browser.windows) { return; }
+
     function onFocusChanged(windowId) {
       if (windowId === browser.windows.WINDOW_ID_NONE) {
         return;
@@ -758,7 +779,7 @@
     });
   }
 
-  {
+  function initBeforeSendHeadersListener() {
     const extraInfoSpec = ["blocking", "requestHeaders"];
     if (browser.webRequest.OnBeforeSendHeadersOptions.hasOwnProperty('EXTRA_HEADERS')) {
       extraInfoSpec.push('extraHeaders');
@@ -776,12 +797,16 @@
     }, {urls: ["<all_urls>"], types: ["xmlhttprequest"]}, extraInfoSpec);
   }
 
-  scrapbook.addMessageListener((message, sender) => {
-    if (!message.cmd.startsWith("background.")) { return false; }
-    return true;
-  });
+  function initMessageListener() {
+    scrapbook.addMessageListener((message, sender) => {
+      if (!message.cmd.startsWith("background.")) { return false; }
+      return true;
+    });
+  }
 
-  if (browser.runtime.onMessageExternal) {
+  function initExternalMessageListener() {
+    if (!browser.runtime.onMessageExternal) { return; }
+
     // Available for Firefox >= 54.
     browser.runtime.onMessageExternal.addListener((message, sender) => {
       const {cmd, args} = message;
@@ -810,19 +835,17 @@
     });
   }
 
-  initContextMenu: {
-    const menuRelatedOptions = new Set(["ui.showContextMenu", "server.url"]);
-
-    browser.storage.onChanged.addListener((changes, areaName) => {
-      if (Object.keys(changes).some(k => menuRelatedOptions.has(k))) {
-        updateContextMenu(); // async
-      }
-    });
-
-    scrapbook.loadOptionsAuto.then(() => {
-      updateContextMenu(); // async
-    });
+  async function init() {
+    initBrowserAction();
+    initCommands();
+    initLastFocusedWindowListener();
+    initBeforeSendHeadersListener();
+    initMessageListener();
+    initExternalMessageListener();
+    initContextMenu();
   }
+
+  init();
 
   return background;
 
