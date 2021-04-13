@@ -2998,9 +2998,10 @@
       source: sourceUrl,
     };
 
-    let filename = ItemInfoFormatter.format(item, template)
+    const formatter = new ItemInfoFormatter(item);
+    let filename = template
       .split('/')
-      .map(x => scrapbook.validateFilename(x, saveAsciiFilename))
+      .map(x => scrapbook.validateFilename(formatter.format(x), saveAsciiFilename))
       .join('/');
 
     // see capturer.getUniqueFilename for limitation details
