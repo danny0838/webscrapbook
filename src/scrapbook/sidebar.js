@@ -935,20 +935,25 @@
       }
       if (!item) { return null; }
 
-      let rootId = this.rootId;
-      let paths = book.findItemPaths(item.id, this.rootId);
-      if (!paths.length) {
-        // attempt to search under other special root ID
-        for (rootId of book.specialItems) {
-          if (rootId === this.rootId) { continue; }
-          paths = book.findItemPaths(item.id, rootId);
-          if (paths.length) { break; }
-        }
+      const rootIds = (bookId === this.bookId) ?
+        (function* () {
+          yield this.rootId;
+          for (const id of book.specialItems) {
+            if (id === this.rootId) { continue; }
+            yield id;
+          }
+        }).call(this) :
+        book.specialItems;
+      let rootId;
+      let paths;
+      for (rootId of rootIds) {
+        paths = book.findItemPaths(item.id, rootId);
+        if (paths.length) { break; }
+      }
 
-        // return if still not found
-        if (!paths.length) {
-          return null;
-        }
+      // return if not found
+      if (!paths.length) {
+        return null;
       }
 
       // switch if bookId or rootId is not current
