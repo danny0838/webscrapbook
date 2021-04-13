@@ -103,15 +103,15 @@ a {
     const headers = details.responseHeaders;
     let mime;
     let filename;
-    for (const i in headers) {
-      switch (headers[i].name.toLowerCase()) {
+    for (const header of headers) {
+      switch (header.name.toLowerCase()) {
         case "content-type": {
-          const contentType = scrapbook.parseHeaderContentType(headers[i].value);
+          const contentType = scrapbook.parseHeaderContentType(header.value);
           mime = contentType.type;
           break;
         }
         case "content-disposition": {
-          const contentDisposition = scrapbook.parseHeaderContentDisposition(headers[i].value);
+          const contentDisposition = scrapbook.parseHeaderContentDisposition(header.value);
 
           // do not launch viewer if the file is marked to be downloaded
           if (contentDisposition.type === 'attachment') {
