@@ -961,9 +961,9 @@
         await this.refresh(bookId, rootId);
       }
 
-      if (this.tree.locate(item.id, paths)) {
-        return item;
-      }
+      this.tree.locate(item.id, paths);
+
+      return true;
     },
 
     log(msg, type = 'log') {

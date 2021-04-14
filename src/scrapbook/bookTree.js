@@ -470,8 +470,6 @@
       curElem.scrollIntoView();
       this.highlightItem(curElem, true, {reselect: true});
       this.saveViewStatus();
-
-      return true;
     }
 
     onItemTogglerClick(event) {
