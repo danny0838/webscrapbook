@@ -176,6 +176,25 @@
     return await browser.tabs.remove(tab.id);
   };
 
+  function onUrlsChange(event) {
+    const useJson = document.getElementById('opt-useJson').checked;
+    if (!useJson) { return; }
+
+    const inputElem = event.target;
+    const inputText = inputElem.value;
+
+    try {
+      parseInputText(inputText, useJson);
+    } catch (ex) {
+      console.error(ex);
+      event.preventDefault();
+      inputElem.setCustomValidity(ex.message);
+      return;
+    }
+
+    inputElem.setCustomValidity('');
+  }
+
   function onUseJsonChange(event) {
     const inputElem = document.getElementById('urls');
     const inputText = inputElem.value;
@@ -231,6 +250,7 @@
   document.addEventListener('DOMContentLoaded', async () => {
     scrapbook.loadLanguages(document);
 
+    document.getElementById('urls').addEventListener('change', onUrlsChange);
     document.getElementById('opt-useJson').addEventListener('change', onUseJsonChange);
     document.getElementById('btn-capture').addEventListener('click', onCaptureClick);
     document.getElementById('btn-abort').addEventListener('click', onAbortClick);
