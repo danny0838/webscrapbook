@@ -177,27 +177,31 @@
   };
 
   function onUseJsonChange(event) {
-    const inputText = document.getElementById('urls').value;
+    const inputElem = document.getElementById('urls');
+    const inputText = inputElem.value;
     const useJson = event.target.checked;
 
     let tasks;
     try {
       tasks = parseInputText(inputText, !useJson);
     } catch (ex) {
-      // error out if the input is not convertable to prevent missing
+      // block invalid input to prevent missing
       console.error(ex);
-      alert(`Error: ${ex.message}`);
       event.target.checked = !useJson;
       event.preventDefault();
+      inputElem.setCustomValidity(ex.message);
+      inputElem.reportValidity();
       return;
     }
 
     const newInputText = stringifyTasks(tasks, useJson);
-    updateInputText(document.getElementById('urls'), newInputText);
+    updateInputText(inputElem, newInputText);
+    inputElem.setCustomValidity('');
   }
 
   async function onCaptureClick(event) {
-    const inputText = document.getElementById('urls').value;
+    const inputElem = document.getElementById('urls');
+    const inputText = inputElem.value;
     const customTitle = document.getElementById('opt-customTitle').checked;
     const useJson = document.getElementById('opt-useJson').checked;
     const uniquify = document.getElementById('opt-uniquify').checked;
@@ -207,7 +211,10 @@
       await exit();
     } catch (ex) {
       console.error(ex);
-      alert(`Error: ${ex.message}`);
+      event.preventDefault();
+      inputElem.setCustomValidity(ex.message);
+      inputElem.reportValidity();
+      return;
     }
   }
 
