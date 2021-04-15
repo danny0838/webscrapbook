@@ -568,7 +568,7 @@
     // disable unsupported options
     // Hiding these options will get following elements shown bad since
     // :first-child doesn't apply to them.
-    if (!browser.browserAction.setBadgeText) {
+    if (!browser.browserAction || !browser.browserAction.setBadgeText) {
       document.getElementById('opt_scrapbook.notifyPageCaptured').disabled = true;
     }
 

@@ -17,8 +17,9 @@
 
   'use strict';
 
+  // Firefox Android < 55: no browserAction
   // Firefox Android < 79 does not support setBadgeText
-  if (!browser.browserAction.setBadgeText) {
+  if (!browser.browserAction || !browser.browserAction.setBadgeText) {
     return;
   }
 
