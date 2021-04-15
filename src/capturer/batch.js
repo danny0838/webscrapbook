@@ -82,7 +82,7 @@
   function parseInputText(inputText, useJson = false) {
     if (useJson) {
       const taskInfo = JSON.parse(inputText);
-      if (typeof taskInfo !== 'object') {
+      if (typeof taskInfo !== 'object' || taskInfo === null || Array.isArray(taskInfo)) {
         throw new Error('JSON data is not a valid object.');
       } else if (!Array.isArray(taskInfo.tasks)) {
         throw new Error('"tasks" property of JSON data is not an Array.');
