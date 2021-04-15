@@ -3,27 +3,24 @@
  * The background script for scrapbook functionality
  *
  * @require {Object} scrapbook
+ * @public {Object} scrapbooks
  *****************************************************************************/
 
 (function (root, factory) {
   // Browser globals
-  factory(
+  if (root.hasOwnProperty('scrapbooks')) { return; }
+  root.scrapbooks = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,
     console,
   );
-}(this, async function (isDebug, browser, scrapbook, console) {
+}(this, function (isDebug, browser, scrapbook, console) {
 
   'use strict';
 
-  // Firefox Android < 55: no browserAction
-  // Firefox Android < 79 does not support setBadgeText
-  if (!browser.browserAction || !browser.browserAction.setBadgeText) {
-    return;
-  }
-
   const ALLOWED_SCHEMES = ['http:', 'https:'];
+  const LISTENER_FILTER = {url: [{schemes: ["http", "https"]}]};
   const REGEX_IPv4 = /^(?:\d{1,3}\.){3}\d{1,3}$/;
 
   const bookCaches = new Map();
@@ -41,9 +38,6 @@
 
   async function onNavigation(details) {
     if (details.frameId !== 0) { return; }
-
-    if (!scrapbook.getOption("scrapbook.notifyPageCaptured")) { return; }
-    if (!scrapbook.hasServer()) { return; }
 
     // prepare regex checkers
     const u = new URL(scrapbook.normalizeUrl(details.url));
@@ -179,7 +173,28 @@
     });
   }
 
-  await scrapbook.loadOptionsAuto;
-  browser.webNavigation.onCommitted.addListener(onNavigation, {url: [{schemes: ["http", "https"]}]});
+  function toggleNotifyPageCaptured() {
+    // Firefox Android < 55: no browserAction
+    // Firefox Android < 79 does not support setBadgeText
+    if (!browser.browserAction || !browser.browserAction.setBadgeText) {
+      return;
+    }
+
+    browser.webNavigation.onCommitted.removeListener(onNavigation);
+    if (scrapbook.getOption("scrapbook.notifyPageCaptured") && scrapbook.hasServer()) {
+      browser.webNavigation.onCommitted.addListener(onNavigation, LISTENER_FILTER);
+    }
+  }
+
+  async function init() {
+    await scrapbook.loadOptionsAuto;
+    toggleNotifyPageCaptured();
+  }
+
+  init();
+
+  return {
+    toggleNotifyPageCaptured,
+  };
 
 }));

@@ -343,6 +343,9 @@
       if (("viewer.viewHtz" in changes) || ("viewer.viewMaff" in changes)) {
         viewer.toggleViewerListeners(); // async
       }
+      if (("scrapbook.notifyPageCaptured" in changes) || ("server.url" in changes)) {
+        scrapbooks.toggleNotifyPageCaptured(); // async
+      }
     });
   }
 
