@@ -77,7 +77,6 @@
     }
 
     await scrapbook.invokeCaptureEx({taskInfo, waitForResponse: false});
-    await exit();
   }
 
   function parseInputText(inputText, useJson = false) {
@@ -154,11 +153,11 @@
     }
   }
 
-  function onToggleTooltip(elem) {
-    if (!onToggleTooltip.tooltipMap) {
-      onToggleTooltip.tooltipMap = new WeakMap();
+  function toggleTooltip(elem) {
+    if (!toggleTooltip.tooltipMap) {
+      toggleTooltip.tooltipMap = new WeakMap();
     }
-    const tooltipMap = onToggleTooltip.tooltipMap;
+    const tooltipMap = toggleTooltip.tooltipMap;
 
     let tooltip = tooltipMap.get(elem);
     if (tooltip) {
@@ -177,49 +176,60 @@
     return await browser.tabs.remove(tab.id);
   };
 
+  function onUseJsonChange(event) {
+    const inputText = document.getElementById('urls').value;
+    const useJson = event.target.checked;
+
+    let tasks;
+    try {
+      tasks = parseInputText(inputText, !useJson);
+    } catch (ex) {
+      // error out if the input is not convertable to prevent missing
+      console.error(ex);
+      alert(`Error: ${ex.message}`);
+      event.target.checked = !useJson;
+      event.preventDefault();
+      return;
+    }
+
+    const newInputText = stringifyTasks(tasks, useJson);
+    updateInputText(document.getElementById('urls'), newInputText);
+  }
+
+  async function onCaptureClick(event) {
+    const inputText = document.getElementById('urls').value;
+    const customTitle = document.getElementById('opt-customTitle').checked;
+    const useJson = document.getElementById('opt-useJson').checked;
+    const uniquify = document.getElementById('opt-uniquify').checked;
+
+    try {
+      await capture({inputText, customTitle, useJson, uniquify});
+      await exit();
+    } catch (ex) {
+      console.error(ex);
+      alert(`Error: ${ex.message}`);
+    }
+  }
+
+  async function onAbortClick(event) {
+    await exit();
+  }
+
+  function onTooltipClick(event) {
+    event.preventDefault();
+    const elem = event.currentTarget;
+    toggleTooltip(elem);
+  }
+
   document.addEventListener('DOMContentLoaded', async () => {
     scrapbook.loadLanguages(document);
 
-    document.getElementById('opt-useJson').addEventListener('change', (event) => {
-      const inputText = document.getElementById('urls').value;
-      const useJson = event.target.checked;
-
-      let tasks;
-      try {
-        tasks = parseInputText(inputText, !useJson);
-      } catch (ex) {
-        // error out if the input is not convertable to prevent missing
-        console.error(ex);
-        alert(`Error: ${ex.message}`);
-        event.target.checked = !useJson;
-        event.preventDefault();
-        return;
-      }
-
-      const newInputText = stringifyTasks(tasks, useJson);
-      updateInputText(document.getElementById('urls'), newInputText);
-    });
-    document.getElementById('btn-capture').addEventListener('click', (event) => {
-      const inputText = document.getElementById('urls').value;
-      const customTitle = document.getElementById('opt-customTitle').checked;
-      const useJson = document.getElementById('opt-useJson').checked;
-      const uniquify = document.getElementById('opt-uniquify').checked;
-
-      capture({inputText, customTitle, useJson, uniquify}).catch((ex) => {
-        console.error(ex);
-        alert(`Error: ${ex.message}`);
-      });
-    });
-    document.getElementById('btn-abort').addEventListener('click', (event) => {
-      exit();
-    });
+    document.getElementById('opt-useJson').addEventListener('change', onUseJsonChange);
+    document.getElementById('btn-capture').addEventListener('click', onCaptureClick);
+    document.getElementById('btn-abort').addEventListener('click', onAbortClick);
 
     for (const elem of document.querySelectorAll('a[data-tooltip]')) {
-      elem.addEventListener("click", (event) => {
-        event.preventDefault();
-        const elem = event.currentTarget;
-        onToggleTooltip(elem);
-      });
+      elem.addEventListener("click", onTooltipClick);
     }
 
     init();
