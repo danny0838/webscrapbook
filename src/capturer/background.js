@@ -52,14 +52,14 @@
    */
 
   /**
-   * @type {Array<autoCaptureConfig>}
+   * @type {autoCaptureConfig[]}
    */
   let autoCaptureConfigs = [];
 
   /**
    * @typedef {Object} autoCaptureInfo
-   * @property {Array<timeout>} delay
-   * @property {Array<interval>} repeat
+   * @property {timeout[]} delay
+   * @property {interval[]} repeat
    */
 
   /**

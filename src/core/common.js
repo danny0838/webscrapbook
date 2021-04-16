@@ -1410,7 +1410,7 @@ if (Node && !Node.prototype.getRootNode) {
   };
 
   /**
-   * @return {Array<Element>} Related elements having the shared ID; or the
+   * @return {Element[]} Related elements having the shared ID; or the
    *     original element.
    */
   scrapbook.getScrapBookObjectsById = function (elem) {
@@ -2705,7 +2705,7 @@ if (Node && !Node.prototype.getRootNode) {
    * @param {integer} [params.whatToShow] - Filter for allowed node types.
    * @param {Function} [params.nodeFilter] - A function to filter allowed nodes.
    * @param {boolean} [params.fuzzy] - Include partially selected nodes.
-   * @return {Array<Element>} Elements in the selected range(s).
+   * @return {Element[]} Elements in the selected range(s).
    */
   scrapbook.getSelectedNodes = function ({win = window, range, whatToShow = -1, nodeFilter, fuzzy = false}) {
     const doc = win.document;

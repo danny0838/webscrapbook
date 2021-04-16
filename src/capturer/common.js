@@ -3422,7 +3422,7 @@
      *     request if it's cross origin.
      * @param {boolean} [params.errorWithNull] - Whether to throw an error if
      *     not retrievable.
-     * @return {Array<CSSStyleRule>|null}
+     * @return {CSSStyleRule[]|null}
      */
     async getRulesFromCss({css, url, refUrl, crossOrigin = true, errorWithNull = false}) {
       let rules = null;
