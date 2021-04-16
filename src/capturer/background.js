@@ -294,11 +294,11 @@
   const autoCaptureInfos = new Map();
 
   /**
-   * @type {Set<string~sourceUrl>}
+   * @type {Map<string~bookId, Set<string~sourceUrl>>}
    */
-  const autoCapturedUrls = new Set();
+  const autoCaptureBookCaches = new Map();
 
-  function autoCaptureTab(tabInfo) {
+  async function autoCaptureTab(tabInfo) {
     // normalize and remove hash from URL
     tabInfo.url = scrapbook.normalizeUrl(scrapbook.splitUrlByAnchor(tabInfo.url)[0]);
 
@@ -312,6 +312,11 @@
     if (serverUrl && tabInfo.url.startsWith(serverUrl)) {
       return;
     }
+
+    // update book caches from backend
+    const bookIds = await updateAutoCaptureBookCaches();
+
+    const isDuplicate = checkDuplicate(tabInfo.url, bookIds);
 
     // check config
     for (let i = 0, I = autoCaptureConfigs.length; i < I; ++i) {
@@ -334,7 +339,7 @@
         }
 
         // skip if duplicated
-        if (!config.allowDuplicate && autoCapturedUrls.has(tabInfo.url)) {
+        if (!config.allowDuplicate && isDuplicate) {
           continue;
         }
 
@@ -355,7 +360,7 @@
           }, config.delay);
           info.delay.push(t);
         } else {
-          invokeCapture(tabInfo, config, false);
+          invokeCapture(tabInfo, config, false, true);
         }
       } catch (ex) {
         const nameStr = (config && config.name) ? ` (${config.name})` : '';
@@ -364,11 +369,99 @@
     }
   }
 
-  async function invokeCapture(tabInfo, config, isRepeat) {
-    // check if the tab is still valid
-    // autoCaptureInfo will be cleared if the tab is removed, discarded, etc.
-    if (!autoCaptureInfos.has(tabInfo.id)) {
-      return;
+  /**
+   * @return {integer[]} ID of books with a valid cache
+   */
+  async function updateAutoCaptureBookCaches() {
+    if (scrapbook.hasServer()) {
+      try {
+        await server.init(true);
+        const bookIds = [];
+        await Promise.all(Object.keys(server.books).map(async (bookId) => {
+          const book = server.books[bookId];
+          if (book.config.no_tree) { return; }
+
+          const refresh = !await book.validateTree();
+          try {
+            await book.loadMeta(refresh);
+            await book.loadToc(refresh);
+          } catch (ex) {
+            // skip book with tree loading error
+            console.error(ex);
+            return;
+          }
+
+          // build cache for faster retrieval
+          let cache = autoCaptureBookCaches.get(bookId);
+          if (refresh || !cache) {
+            cache = new Set();
+            autoCaptureBookCaches.set(bookId, cache);
+
+            for (const id of book.getReachableItems('root')) {
+              const meta = book.meta[id];
+              if (!meta) { continue; }
+
+              const source = meta.source;
+              if (!source) { continue; }
+
+              let u;
+              try {
+                u = new URL(source);
+                u.hash = '';
+              } catch (ex) {
+                continue;
+              }
+
+              cache.add(u.href);
+            }
+          }
+
+          bookIds.push(bookId);
+        }));
+        return bookIds;
+      } catch (ex) {
+        console.error(ex);
+      }
+    }
+    return [];
+  }
+
+  /**
+   * @param {integer[]} [bookIds] - ID of books with a valid cache
+   */
+  function checkDuplicate(url, bookIds) {
+    if (background.getCapturedUrls({urls: [url]})[url]) {
+      return true;
+    }
+
+    if (bookIds) {
+      for (const bookId of bookIds) {
+        const cache = autoCaptureBookCaches.get(bookId);
+        if (cache.has(url)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  async function invokeCapture(tabInfo, config, isRepeat, skipCheck) {
+    if (!skipCheck) {
+      // check if the tab is still valid
+      // autoCaptureInfo will be cleared if the tab is removed, discarded, etc.
+      if (!autoCaptureInfos.has(tabInfo.id)) {
+        return;
+      }
+
+      // skip duplicate for a first autocapture
+      if (!isRepeat) {
+        // Skip checking server books, which have been checked when setting up
+        // the timer.
+        if (!config.allowDuplicate && checkDuplicate(tabInfo.url)) {
+          return;
+        }
+      }
     }
 
     const taskInfo = Object.assign({
@@ -407,8 +500,6 @@
     if (isRepeat) {
       return;
     }
-
-    autoCapturedUrls.add(tabInfo.url);
 
     if (config.repeat >= 0) {
       let info = autoCaptureInfos.get(tabInfo.id);
@@ -471,7 +562,7 @@
       return;
     }
 
-    return autoCaptureTab(tabInfo);
+    return autoCaptureTab(tabInfo); // async
   }
 
   function onRemoved(tabId, removeInfo) {
