@@ -17,12 +17,12 @@
 
   'use strict';
 
-  const background = {
-    /**
-     * @type {Map<integer~windowId, integer~timestamp>}
-     */
-    focusedWindow: new Map(),
+  /**
+   * @type {Map<integer~windowId, integer~timestamp>}
+   */
+  const focusedWindows = new Map();
 
+  const background = {
     commands: {
       async openScrapBook() {
         return await scrapbook.openScrapBook({});
@@ -125,8 +125,8 @@
       // so use filter instead.
       .filter(win => windowTypes.includes(win.type))
       .sort((a, b) => {
-        const va = background.focusedWindow.get(a.id) || -Infinity;
-        const vb = background.focusedWindow.get(b.id) || -Infinity;
+        const va = focusedWindows.get(a.id) || -Infinity;
+        const vb = focusedWindows.get(b.id) || -Infinity;
         if (va > vb) { return 1; }
         if (vb > va) { return -1; }
         if (a.id > b.id) { return 1; }
@@ -772,11 +772,11 @@
         return;
       }
 
-      background.focusedWindow.set(windowId, Date.now());
+      focusedWindows.set(windowId, Date.now());
     }
 
     function onRemoved(windowId) {
-      background.focusedWindow.delete(windowId);
+      focusedWindows.delete(windowId);
     }
 
     browser.windows.onFocusChanged.addListener(onFocusChanged);
@@ -788,7 +788,7 @@
           return;
         }
 
-        background.focusedWindow.set(win.id, Date.now());
+        focusedWindows.set(win.id, Date.now());
       }
     });
   }
