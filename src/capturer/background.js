@@ -182,9 +182,7 @@
       return;
     }
 
-    if (!config.allowDuplicate) {
-      autoCapturedUrls.add(tabInfo.url);
-    }
+    autoCapturedUrls.add(tabInfo.url);
 
     if (config.repeat >= 0) {
       let info = autoCaptureInfos.get(tabInfo.id);
