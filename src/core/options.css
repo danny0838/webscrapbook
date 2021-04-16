@@ -9,21 +9,13 @@ details > summary {
 }
 
 details > div {
-  padding: .5em;
+  margin: .5em;
 }
 
 details > div > fieldset {
   margin: .75em 0;
   border: 0;
   padding: 0;
-}
-
-details > div > fieldset:first-child {
-  margin-top: 0;
-}
-
-details > div > fieldset:last-child {
-  margin-bottom: 0;
 }
 
 details > div > fieldset > div {

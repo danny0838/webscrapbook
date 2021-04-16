@@ -565,11 +565,11 @@
     scrapbook.loadLanguages(document);
     document.getElementById("optionServerUrlTooltip").setAttribute('data-tooltip', scrapbook.lang('OptionServerUrlTooltip', [scrapbook.BACKEND_MIN_VERSION]));
 
-    // disable unsupported options
-    // Hiding these options will get following elements shown bad since
-    // :first-child doesn't apply to them.
+    // hide unsupported options
     if (!browser.browserAction || !browser.browserAction.setBadgeText) {
-      document.getElementById('opt_scrapbook.notifyPageCaptured').disabled = true;
+      for (const elem of document.querySelectorAll('.scrapbookNotifyPageCaptured')) {
+        elem.hidden = true;
+      }
     }
 
     // load default options
