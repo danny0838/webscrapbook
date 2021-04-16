@@ -759,7 +759,7 @@
   /**
    * @param {Object} params
    * @param {string} [params.timeId] - an overriding timeId
-   * @param {string|null} [params.documentName] - default filename for the main document
+   * @param {?string} [params.documentName] - default filename for the main document
    * @param {boolean} [params.captureOnly] - skip adding item and clean up (for special modes)
    * @param {integer} [params.tabId]
    * @param {integer} [params.frameId]
@@ -847,7 +847,7 @@
   /**
    * @param {Object} params
    * @param {string} params.timeId
-   * @param {string|null} [params.documentName]
+   * @param {?string} [params.documentName]
    * @param {integer} params.tabId
    * @param {integer} [params.frameId]
    * @param {boolean} [params.fullPage]
@@ -930,7 +930,7 @@
   /**
    * @param {Object} params
    * @param {string} params.timeId
-   * @param {string|null} [params.documentName]
+   * @param {?string} [params.documentName]
    * @param {string} params.url
    * @param {string} [params.refUrl]
    * @param {string} [params.title] - item title

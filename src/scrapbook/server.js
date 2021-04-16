@@ -960,8 +960,8 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
      * Add (or replace) an item to the Book.
      *
      * @param {Object} params
-     * @param {Objet|null} params.item - null to generate a default item. Overwrites existed id.
-     * @param {string|null} params.parentId - null to not add to any parent
+     * @param {?Objet} params.item - null to generate a default item. Overwrites existed id.
+     * @param {?string} params.parentId - null to not add to any parent
      * @param {integer} params.index - Infinity to insert to last
      * @return {Object}
      */
@@ -1007,7 +1007,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
      *
      * @param {Object} params
      * @param {string} params.id
-     * @param {string|null} params.parentId - null to not removed from certain parent
+     * @param {?string} params.parentId - null to not removed from certain parent
      *         (useful for checking stale items)
      * @param {integer} params.index
      * @return {Set} a set of removed items
@@ -1061,7 +1061,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
      *
      * @param {Object} params
      * @param {string} params.id
-     * @param {string|null} params.currentParentId - null to not removed from certain parent
+     * @param {?string} params.currentParentId - null to not removed from certain parent
      *         (useful for checking stale items)
      * @param {integer} params.currentIndex
      * @param {string} [params.targetParentId] - ID of the recycle bin item
@@ -1113,7 +1113,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
      *
      * @param {Object} params
      * @param {string} params.id
-     * @param {string|null} params.currentParentId - null if none
+     * @param {?string} params.currentParentId - null if none
      * @param {integer} params.currentIndex
      * @param {integer} params.targetParentId
      * @param {integer} [params.targetIndex] - Infinity to insert to last

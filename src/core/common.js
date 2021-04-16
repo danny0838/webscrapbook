@@ -2284,7 +2284,7 @@ if (Node && !Node.prototype.getRootNode) {
    *
    * @param {Blob} data - The CSS file blob.
    * @param {string} [charset] - Charset of the CSS file blob.
-   * @return {{text: string, charset: string|null}}
+   * @return {{text: string, charset: ?string}}
    */
   scrapbook.parseCssFile = async function (data, charset) {
     const regexAtCharset = /^@charset "([^"]*)";/;
