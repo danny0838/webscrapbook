@@ -328,6 +328,13 @@
     }
   };
 
+  /**
+   * @kind invokable
+   */
+  background.updateBadgeForAllTabs = async function (params = {}, sender) {
+    return await scrapbooks.updateBadgeForAllTabs();
+  };
+
   function initStorageChangeListener() {
     // Run this after optionsAuto to make sure that scrapbook.options is
     // up-to-date when the listener is called.

@@ -838,6 +838,10 @@
         });
       }
 
+      await scrapbook.invokeExtensionScript({
+        cmd: "background.updateBadgeForAllTabs",
+      });
+
       // preserve info if error out
       capturer.captureInfo.delete(timeId);
       await capturer.clearFileCache({timeId});

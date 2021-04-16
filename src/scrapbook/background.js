@@ -191,6 +191,20 @@
     }
   }
 
+  async function updateBadgeForAllTabs() {
+    if (!browser.browserAction || !browser.browserAction.setBadgeText) {
+      return;
+    }
+
+    if (!(scrapbook.getOption("scrapbook.notifyPageCaptured") && scrapbook.hasServer())) {
+      return;
+    }
+
+    // Chromium 89 may get an incomplete tab list if currentWindow = false
+    const tabs = await scrapbook.getContentTabs({currentWindow: undefined});
+    return await updateBadgeForTabs(tabs);
+  }
+
   async function onNavigation(details) {
     if (details.frameId !== 0) { return; }
 
@@ -219,6 +233,7 @@
 
   return {
     toggleNotifyPageCaptured,
+    updateBadgeForAllTabs,
   };
 
 }));
