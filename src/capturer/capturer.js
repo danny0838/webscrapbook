@@ -839,6 +839,11 @@
       }
 
       await scrapbook.invokeExtensionScript({
+        cmd: "background.setCapturedUrls",
+        args: {urls: [scrapbook.normalizeUrl(response.sourceUrl)]},
+      });
+
+      await scrapbook.invokeExtensionScript({
         cmd: "background.updateBadgeForAllTabs",
       });
 

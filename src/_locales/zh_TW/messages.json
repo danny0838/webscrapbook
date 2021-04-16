@@ -1076,7 +1076,7 @@
     "message": "瀏覽擷取過的頁面時顯示提示"
   },
   "OptionScrapbookNotifyPageCapturedTooltip": {
-    "message": "勾選後會在工具列按鈕顯示與目前瀏覽頁面相符的項目數，以不同顏色區分相符程度：\n• 紅色：相同網址（去除 # 以後的部分）\n• 黃色：相同路徑（去除 ? 及 # 以後的部分）\n• 綠色：相同網站（相同協定、網域、通訊埠）\n• 藍色：相同網域（如 https: 與 http: 或 www.example.com 與 example.com 皆視為相同）"
+    "message": "勾選後會在工具列按鈕顯示與目前瀏覽頁面相符的項目數，以不同顏色區分相符程度：\n• 紅色：相同網址（去除 # 以後的部分）\n• 黃色：相同路徑（去除 ? 及 # 以後的部分）\n• 綠色：相同網站（相同協定、網域、通訊埠）\n• 藍色：相同網域（如 https: 與 http: 或 www.example.com 與 example.com 皆視為相同）\n• 灰色：目前瀏覽階段擷取過的相同網址"
   },
   "OptionScrapbookScrapbookSearchCommentLengthLabel": {
     "message": "搜尋結果顯示評註長度:"

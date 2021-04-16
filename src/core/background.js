@@ -22,6 +22,11 @@
    */
   const focusedWindows = new Map();
 
+  /**
+   * @type {Map<string~url, integer~count>}
+   */
+  const capturedUrls = new Map();
+
   const background = {
     commands: {
       async openScrapBook() {
@@ -226,6 +231,29 @@
 
   /**
    * @kind invokable
+   * @param {string[]} urls
+   * @return {Object<string~url, integer~count>}
+   */
+  background.getCapturedUrls = function ({urls} = {}, sender) {
+    const rv = {};
+    for (const url of urls) {
+      rv[url] = capturedUrls.get(url) || 0;
+    }
+    return rv;
+  };
+
+  /**
+   * @kind invokable
+   * @param {string[]} urls
+   */
+  background.setCapturedUrls = function ({urls} = {}, sender) {
+    for (const url of urls) {
+      capturedUrls.set(url, (capturedUrls.get(url) || 0) + 1);
+    }
+  };
+
+  /**
+   * @kind invokable
    */
   background.createSubPage = async function ({url, title}, sender) {
     await server.init(true);
@@ -354,7 +382,7 @@
       if (("viewer.viewHtz" in changes) || ("viewer.viewMaff" in changes)) {
         viewer.toggleViewerListeners(); // async
       }
-      if (("scrapbook.notifyPageCaptured" in changes) || ("server.url" in changes)) {
+      if ("scrapbook.notifyPageCaptured" in changes) {
         scrapbooks.toggleNotifyPageCaptured(); // async
       }
     });

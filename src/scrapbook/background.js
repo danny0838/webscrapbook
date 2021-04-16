@@ -40,64 +40,71 @@
    * @return {integer[]} bookIds - id of books with a valid cache
    */
   async function updateBookCaches() {
-    await server.init(true);
-    const bookIds = [];
-    await Promise.all(Object.keys(server.books).map(async (bookId) => {
-      const book = server.books[bookId];
-      if (book.config.no_tree) { return; }
-
-      const refresh = !await book.validateTree();
+    if (scrapbook.hasServer()) {
       try {
-        await book.loadMeta(refresh);
-        await book.loadToc(refresh);
-      } catch (ex) {
-        // skip book with tree loading error
-        console.error(ex);
-        return;
-      }
+        await server.init(true);
+        const bookIds = [];
+        await Promise.all(Object.keys(server.books).map(async (bookId) => {
+          const book = server.books[bookId];
+          if (book.config.no_tree) { return; }
 
-      // build cache for faster retrieval
-      let cache = bookCaches.get(bookId);
-      if (refresh || !cache) {
-        cache = new Map();
-        bookCaches.set(bookId, cache);
-
-        for (const id of book.getReachableItems('root')) {
-          const meta = book.meta[id];
-          if (!meta) { continue; }
-
-          const source = meta.source;
-          if (!source) { continue; }
-
-          let u;
+          const refresh = !await book.validateTree();
           try {
-            u = new URL(source);
+            await book.loadMeta(refresh);
+            await book.loadToc(refresh);
           } catch (ex) {
-            continue;
+            // skip book with tree loading error
+            console.error(ex);
+            return;
           }
 
-          if (!ALLOWED_SCHEMES.includes(u.protocol)) {
-            continue;
+          // build cache for faster retrieval
+          let cache = bookCaches.get(bookId);
+          if (refresh || !cache) {
+            cache = new Map();
+            bookCaches.set(bookId, cache);
+
+            for (const id of book.getReachableItems('root')) {
+              const meta = book.meta[id];
+              if (!meta) { continue; }
+
+              const source = meta.source;
+              if (!source) { continue; }
+
+              let u;
+              try {
+                u = new URL(source);
+              } catch (ex) {
+                continue;
+              }
+
+              if (!ALLOWED_SCHEMES.includes(u.protocol)) {
+                continue;
+              }
+
+              const hostname = u.hostname;
+              if (hostname.startsWith('[') && hostname.endsWith(']')) {
+                // IPv6
+                cacheAddDomainSource(cache, [hostname], source);
+              } else if (REGEX_IPv4.test(hostname)) {
+                // IPv4
+                cacheAddDomainSource(cache, [hostname], source);
+              } else {
+                const hostname1 = hostname.replace(/^www\./, '');
+                const hostname2 = `www.${hostname1}`;
+                cacheAddDomainSource(cache, [hostname1, hostname2], source);
+              }
+            }
           }
 
-          const hostname = u.hostname;
-          if (hostname.startsWith('[') && hostname.endsWith(']')) {
-            // IPv6
-            cacheAddDomainSource(cache, [hostname], source);
-          } else if (REGEX_IPv4.test(hostname)) {
-            // IPv4
-            cacheAddDomainSource(cache, [hostname], source);
-          } else {
-            const hostname1 = hostname.replace(/^www\./, '');
-            const hostname2 = `www.${hostname1}`;
-            cacheAddDomainSource(cache, [hostname1, hostname2], source);
-          }
-        }
+          bookIds.push(bookId);
+        }));
+        return bookIds;
+      } catch (ex) {
+        console.error(ex);
       }
-
-      bookIds.push(bookId);
-    }));
-    return bookIds;
+    }
+    return [];
   }
 
   /**
@@ -110,6 +117,7 @@
       // prepare regex checkers
       const u = new URL(scrapbook.normalizeUrl(url));
       u.hash = '';
+      const urlCheck = u.href;
       const urlCheckFull = new RegExp(`^${scrapbook.escapeRegExp(u.href)}(?:#|$)`);
       u.search = '';
       const urlCheckPath = new RegExp(`^${scrapbook.escapeRegExp(u.href)}(?:\\?.*)?(?:#|$)`);
@@ -121,8 +129,13 @@
         path: 0,
         origin: 0,
         similar: 0,
+        session: 0,
       };
 
+      // check from session
+      matchTypeAndCount.session += background.getCapturedUrls({urls: [urlCheck]})[urlCheck];
+
+      // check from backend
       for (const bookId of bookIds) {
         const cache = bookCaches.get(bookId);
 
@@ -173,9 +186,12 @@
       } else if (matchTypeAndCount.origin) {
         color = '#008000';
         count = matchTypeAndCount.origin;
-      } else {
+      } else if (matchTypeAndCount.similar) {
         color = '#3366C0';
         count = matchTypeAndCount.similar;
+      } else {
+        color = '#AAAAAA';
+        count = matchTypeAndCount.session;
       }
 
       browser.browserAction.setBadgeText({
@@ -196,7 +212,7 @@
       return;
     }
 
-    if (!(scrapbook.getOption("scrapbook.notifyPageCaptured") && scrapbook.hasServer())) {
+    if (!scrapbook.getOption("scrapbook.notifyPageCaptured")) {
       return;
     }
 
@@ -219,7 +235,7 @@
     }
 
     browser.webNavigation.onCommitted.removeListener(onNavigation);
-    if (scrapbook.getOption("scrapbook.notifyPageCaptured") && scrapbook.hasServer()) {
+    if (scrapbook.getOption("scrapbook.notifyPageCaptured")) {
       browser.webNavigation.onCommitted.addListener(onNavigation, LISTENER_FILTER);
     }
   }
