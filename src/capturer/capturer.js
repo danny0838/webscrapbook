@@ -759,8 +759,10 @@
   /**
    * @param {Object} params
    * @param {string} [params.timeId] - an overriding timeId
-   * @param {?string} [params.documentName] - default filename for the main document
-   * @param {boolean} [params.captureOnly] - skip adding item and clean up (for special modes)
+   * @param {?string} [params.documentName] - default filename for the main
+   *     document
+   * @param {boolean} [params.captureOnly] - skip adding item and clean up
+   *     (for special modes like recapture and mergeCapture)
    * @param {integer} [params.tabId]
    * @param {integer} [params.frameId]
    * @param {boolean} [params.fullPage]

@@ -960,7 +960,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
      * Add (or replace) an item to the Book.
      *
      * @param {Object} params
-     * @param {?Objet} params.item - null to generate a default item. Overwrites existed id.
+     * @param {?Object} params.item - null to generate a default item. Overwrites existed id.
      * @param {?string} params.parentId - null to not add to any parent
      * @param {integer} params.index - Infinity to insert to last
      * @return {Object}

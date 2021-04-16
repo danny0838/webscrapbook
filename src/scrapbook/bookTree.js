@@ -287,7 +287,7 @@
     /**
      * Remove an from the tree DOM
      *
-     * @param {Array[Element]} itemElems - A cached item elements in the tree for faster access.
+     * @param {HTMLElement[]} [itemElems] - Cached item elements in the tree for faster access.
      */
     removeItem(parentId, index, itemElems) {
       Array.prototype.filter.call(

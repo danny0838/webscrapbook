@@ -43,7 +43,7 @@
     },
 
     /**
-     * @return {Object<number~hWidth, number~vWidth>}
+     * @return {Object<integer~hWidth, integer~vWidth>}
      */
     get scrollbar() {
       const elem = document.createElement('div');

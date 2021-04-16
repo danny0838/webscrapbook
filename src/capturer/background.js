@@ -38,17 +38,17 @@
 
   /**
    * @typedef {Object} autoCaptureConfig
-   * @property {string} name
-   * @property {string} description
-   * @property {boolean} disabled
-   * @property {boolean} debug
-   * @property {number} tabId
-   * @property {string} pattern
-   * @property {number} delay
-   * @property {number} repeat
-   * @property {boolean} allowDuplicate
-   * @property {Object} taskInfo
-   * @property {Object} eachTaskInfo
+   * @property {string} [name]
+   * @property {string} [description]
+   * @property {boolean} [disabled]
+   * @property {boolean} [debug]
+   * @property {integer} [tabId]
+   * @property {string} [pattern]
+   * @property {number} [delay]
+   * @property {number} [repeat]
+   * @property {boolean} [allowDuplicate]
+   * @property {Object} [taskInfo]
+   * @property {Object} [eachTaskInfo]
    */
 
   /**
@@ -63,9 +63,13 @@
    */
 
   /**
-   * @type {Map<number~tabId, autoCaptureInfo>}
+   * @type {Map<integer~tabId, autoCaptureInfo>}
    */
   const autoCaptureInfos = new Map();
+
+  /**
+   * @type {Set<string~sourceUrl>}
+   */
   const autoCapturedUrls = new Set();
 
   async function invokeCapture(tabInfo, config, isRepeat) {

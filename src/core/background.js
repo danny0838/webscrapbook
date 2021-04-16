@@ -18,7 +18,11 @@
   'use strict';
 
   const background = {
+    /**
+     * @type {Map<integer~windowId, integer~timestamp>}
+     */
     focusedWindow: new Map(),
+
     commands: {
       async openScrapBook() {
         return await scrapbook.openScrapBook({});
