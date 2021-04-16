@@ -18,20 +18,23 @@ details > div > fieldset {
   padding: 0;
 }
 
-details > div > fieldset > div {
+details > div > fieldset > blockquote {
   margin: .5em 0;
   margin-__MSG_@@bidi_start_edge__: 1.5em;
+  border: 0;
+  padding: 0;
 }
 
-details > div > fieldset > div:first-child {
+details > div > fieldset > blockquote:first-child {
   margin-top: 0;
 }
 
-details > div > fieldset > div:last-child {
+details > div > fieldset > blockquote:last-child {
   margin-bottom: 0;
 }
 
-div > textarea {
+details div > textarea,
+details blockquote > textarea {
   box-sizing: border-box;
   width: 100%;
   min-height: 80px;
