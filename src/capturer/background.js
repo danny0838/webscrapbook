@@ -73,8 +73,8 @@
   const autoCapturedUrls = new Set();
 
   function autoCaptureTab(tabInfo) {
-    // remove hash from URL
-    tabInfo.url = scrapbook.splitUrlByAnchor(tabInfo.url)[0];
+    // normalize and remove hash from URL
+    tabInfo.url = scrapbook.normalizeUrl(scrapbook.splitUrlByAnchor(tabInfo.url)[0]);
 
     // skip URLs that are not content page
     if (!scrapbook.isContentPage(tabInfo.url, allowFileAccess)) {
