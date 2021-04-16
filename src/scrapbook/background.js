@@ -36,26 +36,12 @@
     map.set(source, (map.get(source) || 0) + 1);
   }
 
-  async function onNavigation(details) {
-    if (details.frameId !== 0) { return; }
-
-    // prepare regex checkers
-    const u = new URL(scrapbook.normalizeUrl(details.url));
-    u.hash = '';
-    const urlCheckFull = new RegExp(`^${scrapbook.escapeRegExp(u.href)}(?:#|$)`);
-    u.search = '';
-    const urlCheckPath = new RegExp(`^${scrapbook.escapeRegExp(u.href)}(?:\\?.*)?(?:#|$)`);
-    const urlCheckOrigin = new RegExp(`^${scrapbook.escapeRegExp(u.origin)}(?:[/?#]|$)`);
-
-    // calculate match type and count
-    const matchTypeAndCount = {
-      full: 0,
-      path: 0,
-      origin: 0,
-      similar: 0,
-    };
-
+  /**
+   * @return {integer[]} bookIds - id of books with a valid cache
+   */
+  async function updateBookCaches() {
     await server.init(true);
+    const bookIds = [];
     await Promise.all(Object.keys(server.books).map(async (bookId) => {
       const book = server.books[bookId];
       if (book.config.no_tree) { return; }
@@ -109,68 +95,106 @@
         }
       }
 
-      const domainSources = cache.get(u.hostname);
-      if (!domainSources) {
-        return;
-      }
-
-      for (const [source, count] of domainSources) {
-        if (urlCheckFull.test(source)) {
-          matchTypeAndCount.full += count;
-          continue;
-        }
-
-        // early return to reduce RegExp test
-        if (matchTypeAndCount.full) {
-          continue;
-        }
-
-        if (urlCheckPath.test(source)) {
-          matchTypeAndCount.path += count;
-          continue;
-        }
-
-        // early return to reduce RegExp test
-        if (matchTypeAndCount.path) {
-          continue;
-        }
-
-        if (urlCheckOrigin.test(source)) {
-          matchTypeAndCount.origin += count;
-          continue;
-        }
-
-        matchTypeAndCount.similar += count;
-      }
+      bookIds.push(bookId);
     }));
+    return bookIds;
+  }
 
-    // determine color and count by most significant match type
-    let color;
-    let count;
-    if (matchTypeAndCount.full) {
-      color = '#800000';
-      count = matchTypeAndCount.full;
-    } else if (matchTypeAndCount.path) {
-      color = '#9C8855';
-      count = matchTypeAndCount.path;
-    } else if (matchTypeAndCount.origin) {
-      color = '#008000';
-      count = matchTypeAndCount.origin;
-    } else {
-      color = '#3366C0';
-      count = matchTypeAndCount.similar;
+  /**
+   * @param {Tab[]} tabs
+   */
+  async function updateBadgeForTabs(tabs) {
+    const bookIds = await updateBookCaches();
+
+    for (const {id: tabId, url} of tabs) {
+      // prepare regex checkers
+      const u = new URL(scrapbook.normalizeUrl(url));
+      u.hash = '';
+      const urlCheckFull = new RegExp(`^${scrapbook.escapeRegExp(u.href)}(?:#|$)`);
+      u.search = '';
+      const urlCheckPath = new RegExp(`^${scrapbook.escapeRegExp(u.href)}(?:\\?.*)?(?:#|$)`);
+      const urlCheckOrigin = new RegExp(`^${scrapbook.escapeRegExp(u.origin)}(?:[/?#]|$)`);
+
+      // calculate match type and count
+      const matchTypeAndCount = {
+        full: 0,
+        path: 0,
+        origin: 0,
+        similar: 0,
+      };
+
+      for (const bookId of bookIds) {
+        const cache = bookCaches.get(bookId);
+
+        const domainSources = cache.get(u.hostname);
+        if (!domainSources) {
+          continue;
+        }
+
+        for (const [source, count] of domainSources) {
+          if (urlCheckFull.test(source)) {
+            matchTypeAndCount.full += count;
+            continue;
+          }
+
+          // early return to reduce RegExp test
+          if (matchTypeAndCount.full) {
+            continue;
+          }
+
+          if (urlCheckPath.test(source)) {
+            matchTypeAndCount.path += count;
+            continue;
+          }
+
+          // early return to reduce RegExp test
+          if (matchTypeAndCount.path) {
+            continue;
+          }
+
+          if (urlCheckOrigin.test(source)) {
+            matchTypeAndCount.origin += count;
+            continue;
+          }
+
+          matchTypeAndCount.similar += count;
+        }
+      }
+
+      // determine color and count by most significant match type
+      let color;
+      let count;
+      if (matchTypeAndCount.full) {
+        color = '#800000';
+        count = matchTypeAndCount.full;
+      } else if (matchTypeAndCount.path) {
+        color = '#9C8855';
+        count = matchTypeAndCount.path;
+      } else if (matchTypeAndCount.origin) {
+        color = '#008000';
+        count = matchTypeAndCount.origin;
+      } else {
+        color = '#3366C0';
+        count = matchTypeAndCount.similar;
+      }
+
+      browser.browserAction.setBadgeText({
+        tabId,
+        text: count.toString(),
+      });
+
+      // For a set with tabId, badge color will be reset when the tab is navigated
+      browser.browserAction.setBadgeBackgroundColor({
+        tabId,
+        color,
+      });
     }
+  }
 
-    browser.browserAction.setBadgeText({
-      tabId: details.tabId,
-      text: count.toString(),
-    });
+  async function onNavigation(details) {
+    if (details.frameId !== 0) { return; }
 
-    // For a set with tabId, badge color will be reset when the tab is navigated
-    browser.browserAction.setBadgeBackgroundColor({
-      tabId: details.tabId,
-      color,
-    });
+    await updateBadgeForTabs([{id: details.tabId, url: details.url}]);
   }
 
   function toggleNotifyPageCaptured() {
