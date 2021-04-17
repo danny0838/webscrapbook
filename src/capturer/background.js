@@ -72,6 +72,70 @@
    */
   const autoCapturedUrls = new Set();
 
+  function autoCaptureTab(tabInfo) {
+    // remove hash from URL
+    tabInfo.url = scrapbook.splitUrlByAnchor(tabInfo.url)[0];
+
+    // skip URLs that are not content page
+    if (!scrapbook.isContentPage(tabInfo.url, allowFileAccess)) {
+      return;
+    }
+
+    // skip URLs in the backend server
+    const serverUrl = scrapbook.getOption("server.url");
+    if (serverUrl && tabInfo.url.startsWith(serverUrl)) {
+      return;
+    }
+
+    // check config
+    for (let i = 0, I = autoCaptureConfigs.length; i < I; ++i) {
+      const config = autoCaptureConfigs[i];
+
+      try {
+        // skip disabled config
+        if (config.disabled) {
+          continue;
+        }
+
+        // check tabId
+        if (Number.isInteger(config.tabId) && tabInfo.id !== config.tabId) {
+          continue;
+        }
+
+        // check pattern
+        if (config.pattern && !config.pattern.test(tabInfo.url)) {
+          continue;
+        }
+
+        // skip if duplicated
+        if (!config.allowDuplicate && autoCapturedUrls.has(tabInfo.url)) {
+          continue;
+        }
+
+        // setup capture task
+        if (config.delay >= 0) {
+          let info = autoCaptureInfos.get(tabInfo.id);
+          if (!info) {
+            info = {};
+            autoCaptureInfos.set(tabInfo.id, info);
+          }
+          if (!info.delay) {
+            info.delay = [];
+          }
+          const t = setTimeout(() => {
+            invokeCapture(tabInfo, config, false);
+          }, config.delay);
+          info.delay.push(t);
+        } else {
+          invokeCapture(tabInfo, config, false);
+        }
+      } catch (ex) {
+        const nameStr = (config && config.name) ? ` (${config.name})` : '';
+        console.error(`Failed to run auto-capture config[${i}]${nameStr} for tab[${tabInfo.id}] (${tabInfo.url}): ${ex.message}`);
+      }
+    }
+  }
+
   async function invokeCapture(tabInfo, config, isRepeat) {
     // check if the tab still exists
     try {
@@ -138,6 +202,38 @@
     }
   }
 
+  function purgeInfoAll() {
+    for (const [tabId, info] of autoCaptureInfos) {
+      purgeInfo(tabId, info);
+    }
+  }
+
+  function purgeInfo(tabId, info) {
+    info = info || autoCaptureInfos.get(tabId);
+    if (!info) { return; }
+
+    let t;
+    if (info.delay) {
+      for (const t of info.delay) {
+        clearTimeout(t);
+      }
+    }
+    if (info.repeat) {
+      for (const t of info.repeat) {
+        clearInterval(t);
+      }
+    }
+    autoCaptureInfos.delete(tabId);
+  }
+
+  function parseRegexStr(str) {
+    const m = str.match(REGEX_STRING_PATTERN);
+    if (m) {
+      return new RegExp(m[1], m[2]);
+    }
+    return null;
+  }
+
   function onUpdated(tabId, changeInfo, tabInfo) {
     // reset timer if tab closed
     if (changeInfo.status === 'loading' || changeInfo.discarded) {
@@ -151,67 +247,7 @@
       return;
     }
 
-    // remove hash from URL
-    tabInfo.url = scrapbook.splitUrlByAnchor(tabInfo.url)[0];
-
-    // skip URLs that are not content page
-    if (!scrapbook.isContentPage(tabInfo.url, allowFileAccess)) {
-      return;
-    }
-
-    // skip URLs in the backend server
-    const serverUrl = scrapbook.getOption("server.url");
-    if (serverUrl && tabInfo.url.startsWith(serverUrl)) {
-      return;
-    }
-
-    // check config
-    for (let i = 0, I = autoCaptureConfigs.length; i < I; ++i) {
-      const config = autoCaptureConfigs[i];
-
-      try {
-        // skip disabled config
-        if (config.disabled) {
-          continue;
-        }
-
-        // check tabId
-        if (Number.isInteger(config.tabId) && tabInfo.id !== config.tabId) {
-          continue;
-        }
-
-        // check pattern
-        if (config.pattern && !config.pattern.test(tabInfo.url)) {
-          continue;
-        }
-
-        // skip if duplicated
-        if (!config.allowDuplicate && autoCapturedUrls.has(tabInfo.url)) {
-          continue;
-        }
-
-        // setup capture task
-        if (config.delay >= 0) {
-          let info = autoCaptureInfos.get(tabInfo.id);
-          if (!info) {
-            info = {};
-            autoCaptureInfos.set(tabInfo.id, info);
-          }
-          if (!info.delay) {
-            info.delay = [];
-          }
-          const t = setTimeout(() => {
-            invokeCapture(tabInfo, config, false);
-          }, config.delay);
-          info.delay.push(t);
-        } else {
-          invokeCapture(tabInfo, config, false);
-        }
-      } catch (ex) {
-        const nameStr = (config && config.name) ? ` (${config.name})` : '';
-        console.error(`Failed to run auto-capture config[${i}]${nameStr} for tab[${tabInfo.id}] (${tabInfo.url}): ${ex.message}`);
-      }
-    }
+    return autoCaptureTab(tabInfo);
   }
 
   function onRemoved(tabId, removeInfo) {
@@ -263,38 +299,6 @@
         autoCaptureConfigs[i] = {disabled: true};
       }
     }
-  }
-
-  function purgeInfoAll() {
-    for (const [tabId, info] of autoCaptureInfos) {
-      purgeInfo(tabId, info);
-    }
-  }
-
-  function purgeInfo(tabId, info) {
-    info = info || autoCaptureInfos.get(tabId);
-    if (!info) { return; }
-
-    let t;
-    if (info.delay) {
-      for (const t of info.delay) {
-        clearTimeout(t);
-      }
-    }
-    if (info.repeat) {
-      for (const t of info.repeat) {
-        clearInterval(t);
-      }
-    }
-    autoCaptureInfos.delete(tabId);
-  }
-
-  function parseRegexStr(str) {
-    const m = str.match(REGEX_STRING_PATTERN);
-    if (m) {
-      return new RegExp(m[1], m[2]);
-    }
-    return null;
   }
 
 
