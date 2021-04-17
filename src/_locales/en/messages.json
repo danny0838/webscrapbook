@@ -1081,6 +1081,27 @@
   "OptionScrapbookScrapbookSearchSourceLengthLabel": {
     "message": "Source length shown in search results:"
   },
+  "OptionScrapbookSidebarEditNoteInNewTabLabel": {
+    "message": "Edit note"
+  },
+  "OptionScrapbookSidebarEditPostitInNewTabLabel": {
+    "message": "Edit post-it"
+  },
+  "OptionScrapbookSidebarInNewTabLabel": {
+    "message": "Open new tab for sidebar operations:"
+  },
+  "OptionScrapbookSidebarOpenInNewTabLabel": {
+    "message": "Open"
+  },
+  "OptionScrapbookSidebarSearchInNewTabLabel": {
+    "message": "Search"
+  },
+  "OptionScrapbookSidebarSourceInNewTabLabel": {
+    "message": "View source"
+  },
+  "OptionScrapbookSidebarViewTextInNewTabLabel": {
+    "message": "View text"
+  },
   "OptionServerPasswordLabel": {
     "message": "Password:"
   },

@@ -1081,6 +1081,27 @@
   "OptionScrapbookScrapbookSearchSourceLengthLabel": {
     "message": "搜索结果显示来源长度:"
   },
+  "OptionScrapbookSidebarEditNoteInNewTabLabel": {
+    "message": "编辑笔记"
+  },
+  "OptionScrapbookSidebarEditPostitInNewTabLabel": {
+    "message": "编辑便签"
+  },
+  "OptionScrapbookSidebarInNewTabLabel": {
+    "message": "开启于新分页的侧栏操作:"
+  },
+  "OptionScrapbookSidebarOpenInNewTabLabel": {
+    "message": "开启"
+  },
+  "OptionScrapbookSidebarSearchInNewTabLabel": {
+    "message": "搜索"
+  },
+  "OptionScrapbookSidebarSourceInNewTabLabel": {
+    "message": "开启原始网址"
+  },
+  "OptionScrapbookSidebarViewTextInNewTabLabel": {
+    "message": "检视文字"
+  },
   "OptionServerPasswordLabel": {
     "message": "密码:"
   },

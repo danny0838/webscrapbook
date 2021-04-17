@@ -395,7 +395,7 @@
       const url = new URL(browser.runtime.getURL(`scrapbook/search.html`));
       url.searchParams.set('id', this.bookId);
       if (this.rootId !== 'root') { url.searchParams.set('root', this.rootId); }
-      this.openLink(url.href, true);
+      this.openLink(url.href, scrapbook.getOption("scrapbook.sidebarSearchInNewTab"));
     },
 
     onRefreshButtonClick(event) {
@@ -606,11 +606,21 @@
 
       // special handling for postit
       if (itemElem.getAttribute('data-type') === 'postit') {
-        await this.editPostit(itemElem.getAttribute('data-id'));
+        if (scrapbook.getOption("scrapbook.sidebarEditPostitInNewTab")) {
+          await this.openLink(anchorElem.href, true);
+        } else {
+          await this.editPostit(itemElem.getAttribute('data-id'));
+        }
         return;
       }
 
-      await this.openLink(anchorElem.href);
+      // special handling for note
+      if (itemElem.getAttribute('data-type') === 'note') {
+        await this.openLink(anchorElem.href, scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
+        return;
+      }
+
+      await this.openLink(anchorElem.href, scrapbook.getOption("scrapbook.sidebarOpenInNewTab"));
     },
 
     onTreeItemDragOver(event, {
@@ -1873,7 +1883,7 @@ ${scrapbook.escapeHtml(content)}
           const u = new URL(target);
           u.searchParams.set('a', 'source');
           if (item.charset) { u.searchParams.set('e', item.charset); }
-          await this.openLink(u.href, true);
+          await this.openLink(u.href, scrapbook.getOption("scrapbook.sidebarViewTextInNewTab"));
         }
       },
 
@@ -1927,7 +1937,7 @@ ${scrapbook.escapeHtml(content)}
           const item = this.book.meta[id];
           if (item.source) {
             const target = item.source;
-            await this.openLink(target, true);
+            await this.openLink(target, scrapbook.getOption("scrapbook.sidebarSourceInNewTab"));
           }
         }
       },
@@ -1953,7 +1963,7 @@ ${scrapbook.escapeHtml(content)}
           urlObj.searchParams.append('root', id);
         }
         const target = urlObj.href;
-        await this.openLink(target, true);
+        await this.openLink(target, scrapbook.getOption("scrapbook.sidebarSearchInNewTab"));
       },
 
       async sort({itemElems}) {
@@ -2421,7 +2431,14 @@ ${scrapbook.escapeHtml(content)}
           return;
         }
 
-        await this.editPostit(newItem.id);
+        if (scrapbook.getOption("scrapbook.sidebarEditPostitInNewTab")) {
+          const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
+          u.searchParams.append('id', newItem.id);
+          u.searchParams.append('bookId', this.book.id);
+          await this.openLink(u.href, true);
+        } else {
+          await this.editPostit(newItem.id);
+        }
       },
 
       async mknote({itemElems: [itemElem]}) {
@@ -2535,7 +2552,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
         switch (type) {
           case 'html': {
-            await this.openLink(target, true);
+            await this.openLink(target, scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
             break;
           }
 
@@ -2543,7 +2560,7 @@ Redirecting to file <a href="index.md">index.md</a>
             const u = new URL(browser.runtime.getURL("scrapbook/edit.html"));
             u.searchParams.set('id', newItem.id);
             u.searchParams.set('bookId', this.bookId);
-            await this.openLink(u.href, true);
+            await this.openLink(u.href, scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
             break;
           }
         }
@@ -2570,7 +2587,7 @@ Redirecting to file <a href="index.md">index.md</a>
         const urlObj = new URL(browser.runtime.getURL("scrapbook/edit.html"));
         urlObj.searchParams.set('id', id);
         urlObj.searchParams.set('bookId', this.bookId);
-        await this.openLink(urlObj.href, true);
+        await this.openLink(urlObj.href, scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
       },
 
       async recapture({itemElems}) {

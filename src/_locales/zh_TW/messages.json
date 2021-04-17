@@ -1081,6 +1081,27 @@
   "OptionScrapbookScrapbookSearchSourceLengthLabel": {
     "message": "搜尋結果顯示來源長度:"
   },
+  "OptionScrapbookSidebarEditNoteInNewTabLabel": {
+    "message": "編輯筆記"
+  },
+  "OptionScrapbookSidebarEditPostitInNewTabLabel": {
+    "message": "編輯便利貼"
+  },
+  "OptionScrapbookSidebarInNewTabLabel": {
+    "message": "開啟於新分頁的側欄操作:"
+  },
+  "OptionScrapbookSidebarOpenInNewTabLabel": {
+    "message": "開啟"
+  },
+  "OptionScrapbookSidebarSearchInNewTabLabel": {
+    "message": "搜尋"
+  },
+  "OptionScrapbookSidebarSourceInNewTabLabel": {
+    "message": "開啟原始網址"
+  },
+  "OptionScrapbookSidebarViewTextInNewTabLabel": {
+    "message": "檢視文字"
+  },
   "OptionServerPasswordLabel": {
     "message": "密碼:"
   },
