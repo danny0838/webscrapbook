@@ -112,13 +112,15 @@
           continue;
         }
 
+        // set info
+        let info = autoCaptureInfos.get(tabInfo.id);
+        if (!info) {
+          info = {};
+          autoCaptureInfos.set(tabInfo.id, info);
+        }        
+
         // setup capture task
         if (config.delay >= 0) {
-          let info = autoCaptureInfos.get(tabInfo.id);
-          if (!info) {
-            info = {};
-            autoCaptureInfos.set(tabInfo.id, info);
-          }
           if (!info.delay) {
             info.delay = [];
           }
@@ -137,11 +139,9 @@
   }
 
   async function invokeCapture(tabInfo, config, isRepeat) {
-    // check if the tab still exists
-    try {
-      await browser.tabs.get(tabInfo.id)
-    } catch (ex) {
-      purgeInfo(tabInfo.id);
+    // check if the tab is still valid
+    // autoCaptureInfo will be cleared if the tab is removed, discarded, etc.
+    if (!autoCaptureInfos.has(tabInfo.id)) {
       return;
     }
 
