@@ -212,7 +212,7 @@
       return;
     }
 
-    if (!scrapbook.getOption("scrapbook.notifyPageCaptured")) {
+    if (!scrapbook.getOption("ui.notifyPageCaptured")) {
       return;
     }
 
@@ -235,7 +235,7 @@
     }
 
     browser.webNavigation.onCommitted.removeListener(onNavigation);
-    if (scrapbook.getOption("scrapbook.notifyPageCaptured")) {
+    if (scrapbook.getOption("ui.notifyPageCaptured")) {
       browser.webNavigation.onCommitted.addListener(onNavigation, LISTENER_FILTER);
     }
   }

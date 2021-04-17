@@ -567,7 +567,7 @@
 
     // hide unsupported options
     if (!browser.browserAction || !browser.browserAction.setBadgeText) {
-      for (const elem of document.querySelectorAll('.scrapbookNotifyPageCaptured')) {
+      for (const elem of document.querySelectorAll('.uiNotifyPageCaptured')) {
         elem.hidden = true;
       }
     }

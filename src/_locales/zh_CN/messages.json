@@ -1072,12 +1072,6 @@
   "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
     "message": "远程全文搜索缓存大小限制 (MiB):"
   },
-  "OptionScrapbookNotifyPageCapturedLabel": {
-    "message": "浏览获取过的页面时显示提示"
-  },
-  "OptionScrapbookNotifyPageCapturedTooltip": {
-    "message": "勾选后会在工具列按钮显示与目前浏览页面匹配的项目数，以不同颜色区分匹配程度：\n• 红色：相同网址（去除 # 以后的部分）\n• 黄色：相同路径（去除 ? 及 # 以后的部分）\n• 绿色：相同网站（相同协定、网域、通讯埠）\n• 蓝色：相同网域（如 https: 与 http: 或 www.example.com 与 example.com 皆视为相同）\n• 灰色：目前浏览阶段获取过的相同网址"
-  },
   "OptionScrapbookScrapbookSearchCommentLengthLabel": {
     "message": "搜索结果显示评注长度:"
   },
@@ -1127,6 +1121,12 @@
   },
   "OptionUiAutoCloseCaptureDialogNoneLabel": {
     "message": "停用"
+  },
+  "OptionUiNotifyPageCapturedLabel": {
+    "message": "浏览获取过的页面时显示提示"
+  },
+  "OptionUiNotifyPageCapturedTooltip": {
+    "message": "勾选后会在工具列按钮显示与目前浏览页面匹配的项目数，以不同颜色区分匹配程度：\n• 红色：相同网址（去除 # 以后的部分）\n• 黄色：相同路径（去除 ? 及 # 以后的部分）\n• 绿色：相同网站（相同协定、网域、通讯埠）\n• 蓝色：相同网域（如 https: 与 http: 或 www.example.com 与 example.com 皆视为相同）\n• 灰色：目前浏览阶段获取过的相同网址"
   },
   "OptionUiShowContextMenuLabel": {
     "message": "启用右键菜单"

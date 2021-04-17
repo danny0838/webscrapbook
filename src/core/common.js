@@ -58,6 +58,7 @@ if (Node && !Node.prototype.getRootNode) {
     "ui.toolbar.showOpenOptions": true,
     "ui.showContextMenu": true,
     "ui.autoCloseCaptureDialog": "none", // "none", "nowarn", "noerror", "nofailure", "always"
+    "ui.notifyPageCaptured": false,
     "server.url": "",
     "server.user": "",
     "server.password": "",
@@ -163,7 +164,6 @@ if (Node && !Node.prototype.getRootNode) {
     "checker.makeBackup": true,
     "scrapbook.copyItemInfoFormatPlain": "%id%",
     "scrapbook.copyItemInfoFormatHtml": "",
-    "scrapbook.notifyPageCaptured": false,
     "scrapbook.transactionAutoBackup": true,
     "scrapbook.defaultSearch": "-type:folder -type:separator",
     "scrapbook.searchCommentLength": 100,
