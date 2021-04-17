@@ -602,21 +602,15 @@
       const anchorElem = event.currentTarget;
       const itemElem = anchorElem.parentNode.parentNode;
 
+      event.preventDefault();
+
       // special handling for postit
       if (itemElem.getAttribute('data-type') === 'postit') {
-        event.preventDefault();
         await this.editPostit(itemElem.getAttribute('data-id'));
         return;
       }
 
-      if (browser.windows) {
-        // for desktop browsers, open link in the same tab of the main window
-        event.preventDefault();
-        await this.openLink(anchorElem.href);
-      } else {
-        // for Firefox Android (browser.windows not supported)
-        // use default action to open in the "webscrapbook" tab
-      }
+      await this.openLink(anchorElem.href);
     },
 
     onTreeItemDragOver(event, {
@@ -1282,6 +1276,11 @@
     },
 
     async openLink(url, newTab = false, singleton = false) {
+      // prevent open in self tab if window not supported
+      if (!browser.windows) {
+        newTab = true;
+      }
+
       return await scrapbook.visitLink({
         url,
         newTab,
