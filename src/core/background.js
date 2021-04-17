@@ -360,7 +360,7 @@
    * @kind invokable
    */
   background.updateBadgeForAllTabs = async function (params = {}, sender) {
-    return await scrapbooks.updateBadgeForAllTabs();
+    return await capturer.updateBadgeForAllTabs();
   };
 
   function initStorageChangeListener() {
@@ -369,6 +369,9 @@
     browser.storage.onChanged.addListener((changes, areaName) => {
       if (("ui.showContextMenu" in changes) || ("server.url" in changes)) {
         updateContextMenu(); // async
+      }
+      if ("ui.notifyPageCaptured" in changes) {
+        capturer.toggleNotifyPageCaptured(); // async
       }
       if ("autocapture.rules" in changes) {
         capturer.configAutoCapture(); // async
@@ -381,9 +384,6 @@
       }
       if (("viewer.viewHtz" in changes) || ("viewer.viewMaff" in changes)) {
         viewer.toggleViewerListeners(); // async
-      }
-      if ("ui.notifyPageCaptured" in changes) {
-        scrapbooks.toggleNotifyPageCaptured(); // async
       }
     });
   }
