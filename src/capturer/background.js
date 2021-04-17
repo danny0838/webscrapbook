@@ -351,7 +351,7 @@
         }        
 
         // setup capture task
-        if (config.delay >= 0) {
+        if (config.delay > 0) {
           if (!info.delay) {
             info.delay = [];
           }
@@ -501,7 +501,7 @@
       return;
     }
 
-    if (config.repeat >= 0) {
+    if (config.repeat > 0) {
       let info = autoCaptureInfos.get(tabInfo.id);
       if (!info) {
         info = {};
