@@ -242,13 +242,8 @@
       }
 
       // load child nodes if not loaded yet
-      if (willOpen && !container.hasAttribute('data-loaded'))  {
-        if (this.book.toc[elem.getAttribute('data-id')]) {
-          for (const id of this.book.toc[elem.getAttribute('data-id')]) {
-            this.addItem(id, elem);
-          }
-        }
-        container.setAttribute('data-loaded', '');
+      if (willOpen)  {
+        this.loadChildren(elem);
       }
 
       container.hidden = !willOpen;
@@ -268,6 +263,20 @@
           elem.classList.remove('highlight');
         }
       }
+    }
+
+    loadChildren(elem) {
+      const container = elem.container;
+      if (!container) { return; }
+      if (container.hasAttribute('data-loaded')) { return; }
+
+      const toc = this.book.toc[elem.getAttribute('data-id')];
+      if (toc) {
+        for (const id of toc) {
+          this.addItem(id, elem);
+        }
+      }
+      container.setAttribute('data-loaded', '');
     }
 
     refreshItem(id) {
