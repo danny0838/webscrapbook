@@ -279,6 +279,44 @@
       container.setAttribute('data-loaded', '');
     }
 
+    /**
+     * Recursively load non-circular descendant elements
+     */
+    loadDescendants(elem) {
+      const container = elem.container;
+      if (!container) { return; }
+
+      const idPath = [];
+      let cur = elem;
+      while (this.treeElem.contains(cur)) {
+        idPath.unshift(cur.getAttribute('data-id'));
+        cur = this.getParent(cur);
+      }
+      const idPathSet = new Set(idPath);
+      if (idPathSet.size < idPath.length) {
+        // circular
+        return;
+      }
+
+      const loadChildren = (elem) => {
+        const id = elem.getAttribute('data-id');
+        if (idPathSet.has(id)) { return; }
+
+        this.loadChildren(elem);
+        const container = elem.container;
+        if (!container) { return; }
+
+        idPathSet.add(id);
+        for (const child of container.children) {
+          loadChildren(child);
+        }
+        idPathSet.delete(id);
+      };
+
+      idPathSet.delete(elem.getAttribute('data-id'));
+      loadChildren(elem);
+    }
+
     refreshItem(id) {
       for (const itemElem of this.treeElem.querySelectorAll(`[data-id="${CSS.escape(id)}"]`)) {
         this.refreshItemElem(itemElem, this.book.meta[id]);

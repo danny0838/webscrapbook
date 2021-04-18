@@ -2095,20 +2095,35 @@ ${scrapbook.escapeHtml(content)}
           _activeElement.focus();
         };
 
-        const copyinfo = async ({itemElems}) => {
+        const copyinfo = async ({itemElems, modifiers}) => {
           if (!itemElems.length) { return; }
 
+          const items = [];
+          {
+            if (modifiers.shiftKey || modifiers.ctrlKey) {
+              const elems = new Set();
+              for (const itemElem of itemElems) {
+                elems.add(itemElem);
+                this.tree.loadDescendants(itemElem);
+                for (const elem of itemElem.querySelectorAll('li[data-id]')) {
+                  elems.add(elem);
+                }
+              }
+              itemElems = elems;
+            }
+            for (const itemElem of itemElems) {
+              const id = itemElem.getAttribute('data-id');
+              items.push(this.book.meta[id]);
+            }
+          }
+
           const plainFormat = scrapbook.getOption("scrapbook.copyItemInfoFormatPlain");
-          const plainText = itemElems.map((itemElem) => {
-            const id = itemElem.getAttribute('data-id');
-            const item = this.book.meta[id];
+          const plainText = items.map((item) => {
             return scrapbook.ItemInfoFormatter.format(item, plainFormat, {book: this.book});
           }).join('\r\n');
 
           const htmlFormat = scrapbook.getOption("scrapbook.copyItemInfoFormatHtml");
-          const htmlText = htmlFormat ? itemElems.map((itemElem) => {
-            const id = itemElem.getAttribute('data-id');
-            const item = this.book.meta[id];
+          const htmlText = htmlFormat ? items.map((item) => {
             return scrapbook.ItemInfoFormatter.format(item, htmlFormat, {book: this.book});
           }).join('<br>') : "";
 
