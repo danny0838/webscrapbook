@@ -394,10 +394,11 @@
 
     onSearchButtonClick(event) {
       event.preventDefault();
+      const newTab = event.shiftKey || event.ctrlKey || scrapbook.getOption("scrapbook.sidebarSearchInNewTab");
       const url = new URL(browser.runtime.getURL(`scrapbook/search.html`));
       url.searchParams.set('id', this.bookId);
       if (this.rootId !== 'root') { url.searchParams.set('root', this.rootId); }
-      this.openLink(url.href, scrapbook.getOption("scrapbook.sidebarSearchInNewTab"));
+      this.openLink(url.href, newTab);
     },
 
     onRefreshButtonClick(event) {
@@ -1882,7 +1883,8 @@ ${scrapbook.escapeHtml(content)}
         }
       },
 
-      async view_text({itemElems}) {
+      async view_text({itemElems, modifiers}) {
+        const newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarViewTextInNewTab");
         for (const elem of itemElems) {
           const id = elem.getAttribute('data-id');
           const item = this.book.meta[id];
@@ -1899,7 +1901,7 @@ ${scrapbook.escapeHtml(content)}
           const u = new URL(target);
           u.searchParams.set('a', 'source');
           if (item.charset) { u.searchParams.set('e', item.charset); }
-          await this.openLink(u.href, scrapbook.getOption("scrapbook.sidebarViewTextInNewTab"));
+          await this.openLink(u.href, newTab);
         }
       },
 
@@ -1947,13 +1949,14 @@ ${scrapbook.escapeHtml(content)}
         }
       },
 
-      async source({itemElems}) {
+      async source({itemElems, modifiers}) {
+        const newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarSourceInNewTab");
         for (const elem of itemElems) {
           const id = elem.getAttribute('data-id');
           const item = this.book.meta[id];
           if (item.source) {
             const target = item.source;
-            await this.openLink(target, scrapbook.getOption("scrapbook.sidebarSourceInNewTab"));
+            await this.openLink(target, newTab);
           }
         }
       },
@@ -1971,7 +1974,8 @@ ${scrapbook.escapeHtml(content)}
         }
       },
 
-      async search_in({itemElems}) {
+      async search_in({itemElems, modifiers}) {
+        const newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarSearchInNewTab");
         const urlObj = new URL(browser.runtime.getURL("scrapbook/search.html"));
         urlObj.searchParams.set('id', this.bookId);
         for (const elem of itemElems) {
@@ -1979,7 +1983,7 @@ ${scrapbook.escapeHtml(content)}
           urlObj.searchParams.append('root', id);
         }
         const target = urlObj.href;
-        await this.openLink(target, scrapbook.getOption("scrapbook.sidebarSearchInNewTab"));
+        await this.openLink(target, newTab);
       },
 
       async sort({itemElems}) {
@@ -2432,6 +2436,8 @@ ${scrapbook.escapeHtml(content)}
           }
         }
 
+        const newTab = modifiers.shiftKey || modifiers.ctrlKey;
+
         // create new item
         const newItem = this.book.addItem({
           item: {
@@ -2474,7 +2480,7 @@ ${scrapbook.escapeHtml(content)}
           return;
         }
 
-        if (scrapbook.getOption("scrapbook.sidebarEditPostitInNewTab")) {
+        if (newTab || scrapbook.getOption("scrapbook.sidebarEditPostitInNewTab")) {
           const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
           u.searchParams.append('id', newItem.id);
           u.searchParams.append('bookId', this.book.id);
@@ -2498,6 +2504,8 @@ ${scrapbook.escapeHtml(content)}
             index += 1;
           }
         }
+
+        const newTab = modifiers.shiftKey || modifiers.ctrlKey;
 
         let type;
         {
@@ -2599,7 +2607,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
         switch (type) {
           case 'html': {
-            await this.openLink(target, scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
+            await this.openLink(target, newTab || scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
             break;
           }
 
@@ -2607,7 +2615,7 @@ Redirecting to file <a href="index.md">index.md</a>
             const u = new URL(browser.runtime.getURL("scrapbook/edit.html"));
             u.searchParams.set('id', newItem.id);
             u.searchParams.set('bookId', this.bookId);
-            await this.openLink(u.href, scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
+            await this.openLink(u.href, newTab || scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
             break;
           }
         }
@@ -2631,14 +2639,15 @@ Redirecting to file <a href="index.md">index.md</a>
         await this.uploadItems(files, parentItemId, index);
       },
 
-      async edit({itemElems: [itemElem]}) {
+      async edit({itemElems: [itemElem], modifiers}) {
         if (!itemElem) { return; }
 
+        const newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab");
         const id = itemElem.getAttribute('data-id');
         const urlObj = new URL(browser.runtime.getURL("scrapbook/edit.html"));
         urlObj.searchParams.set('id', id);
         urlObj.searchParams.set('bookId', this.bookId);
-        await this.openLink(urlObj.href, scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
+        await this.openLink(urlObj.href, newTab);
       },
 
       async recapture({itemElems}) {
