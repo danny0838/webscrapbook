@@ -2329,7 +2329,7 @@ ${scrapbook.escapeHtml(content)}
         let index = Infinity;
 
         if (itemElem) {
-          if (modifiers.shiftKey || modifiers.ctrlKey) {
+          if (modifiers.altKey) {
             parentItemId = itemElem.getAttribute('data-id');
           } else {
             ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
@@ -2368,7 +2368,7 @@ ${scrapbook.escapeHtml(content)}
         let index = Infinity;
 
         if (itemElem) {
-          if (modifiers.shiftKey || modifiers.ctrlKey) {
+          if (modifiers.altKey) {
             parentItemId = itemElem.getAttribute('data-id');
           } else {
             ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
@@ -2407,7 +2407,7 @@ ${scrapbook.escapeHtml(content)}
         let index = Infinity;
 
         if (itemElem) {
-          if (modifiers.shiftKey || modifiers.ctrlKey) {
+          if (modifiers.altKey) {
             parentItemId = itemElem.getAttribute('data-id');
           } else {
             ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
@@ -2474,7 +2474,7 @@ ${scrapbook.escapeHtml(content)}
         let index = Infinity;
 
         if (itemElem) {
-          if (modifiers.shiftKey || modifiers.ctrlKey) {
+          if (modifiers.altKey) {
             parentItemId = itemElem.getAttribute('data-id');
           } else {
             ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
@@ -2603,7 +2603,7 @@ Redirecting to file <a href="index.md">index.md</a>
         let index = Infinity;
 
         if (itemElem) {
-          if (modifiers.shiftKey || modifiers.ctrlKey) {
+          if (modifiers.altKey) {
             parentItemId = itemElem.getAttribute('data-id');
           } else {
             ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
