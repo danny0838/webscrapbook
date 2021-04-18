@@ -1126,7 +1126,14 @@ if (Node && !Node.prototype.getRootNode) {
     formatKey(key) {
       const [keyMain, keySub, keySub2] = key.split('-');
       const fn = this[`format_${keyMain.toLowerCase()}`];
-      if (typeof fn === 'function') { return fn.call(this, keySub, keySub2) || ''; }
+      if (typeof fn === 'function') {
+        try {
+          return fn.call(this, keySub, keySub2) || '';
+        } catch (ex) {
+          console.error(`Failed to format "${key}": ${ex.message}`, this.item);
+        }
+        return '';
+      }
       return '';
     }
 
@@ -1177,43 +1184,39 @@ if (Node && !Node.prototype.getRootNode) {
 
     getItemUrl() {
       const {item, book} = this;
-      try {
-        switch (item.type) {
-          case 'folder': {
-            if (book) {
-              const u = new URL(browser.runtime.getURL("scrapbook/folder.html"));
-              u.searchParams.append('id', item.id);
-              u.searchParams.append('bookId', book.id);
-              return u.href;
-            }
-            break;
+      switch (item.type) {
+        case 'folder': {
+          if (book) {
+            const u = new URL(browser.runtime.getURL("scrapbook/folder.html"));
+            u.searchParams.append('id', item.id);
+            u.searchParams.append('bookId', book.id);
+            return u.href;
           }
-          case 'postit': {
-            if (book && item.index) {
-              const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
-              u.searchParams.append('id', item.id);
-              u.searchParams.append('bookId', book.id);
-              return u.href;
-            }
-            break;
-          }
-          case 'bookmark': {
-            if (item.source) {
-              return new URL(item.source).href;
-            } else if (book && item.index) {
-              return new URL(book.dataUrl + scrapbook.escapeFilename(item.index)).href;
-            }
-            break;
-          }
-          default: {
-            if (book && item.index) {
-              return new URL(book.dataUrl + scrapbook.escapeFilename(item.index)).href;
-            }
-            break;
-          }
+          break;
         }
-      } catch (ex) {
-        console.error(ex);
+        case 'postit': {
+          if (book && item.index) {
+            const u = new URL(browser.runtime.getURL("scrapbook/postit.html"));
+            u.searchParams.append('id', item.id);
+            u.searchParams.append('bookId', book.id);
+            return u.href;
+          }
+          break;
+        }
+        case 'bookmark': {
+          if (item.source) {
+            return new URL(item.source).href;
+          } else if (book && item.index) {
+            return new URL(book.dataUrl + scrapbook.escapeFilename(item.index)).href;
+          }
+          break;
+        }
+        default: {
+          if (book && item.index) {
+            return new URL(book.dataUrl + scrapbook.escapeFilename(item.index)).href;
+          }
+          break;
+        }
       }
       return '';
     }
@@ -1249,9 +1252,6 @@ if (Node && !Node.prototype.getRootNode) {
       switch (keySub) {
         case "host": {
           const u = new URL(this.item.source);
-          if (!u) {
-            return '';
-          }
           return u.host;
         }
         case "file": {
@@ -1264,6 +1264,7 @@ if (Node && !Node.prototype.getRootNode) {
           return this.item.source;
         }
       }
+      return '';
     }
 
     format_url() {
