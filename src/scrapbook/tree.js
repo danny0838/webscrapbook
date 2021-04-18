@@ -775,7 +775,6 @@
       } else {
         // within
         targetId = itemElem.getAttribute('data-id');
-        targetIndex = Infinity;
       }
 
       // invoke callback

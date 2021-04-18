@@ -564,7 +564,6 @@
       return await this.onTreeItemDrop(event, {
         lastDraggedElems: this.tree.lastDraggedElems,
         targetId: this.rootId,
-        targetIndex: Infinity,
         isOnItem: false,
       });
     },
