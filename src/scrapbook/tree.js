@@ -162,6 +162,10 @@
       );
     }
 
+    getParent(itemElem) {
+      return itemElem.parentNode.parentNode;
+    }
+
     getParentAndIndex(itemElem) {
       const parentItemElem = itemElem.parentNode.parentNode;
       const parentItemId = parentItemElem.getAttribute('data-id');

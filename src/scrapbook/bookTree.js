@@ -388,7 +388,7 @@
         }
 
         // move to closest parent
-        let parent = this.getParentAndIndex(anchorElem).parentItemElem;
+        let parent = this.getParent(anchorElem);
         if (parent === this.rootElem) {
           parent = null;
         }
