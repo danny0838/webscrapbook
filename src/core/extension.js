@@ -293,26 +293,30 @@
   /**
    * Shortcut for invoking a general "capture as".
    */
-  scrapbook.invokeCaptureAs = async function ({
-    tasks = {},
-    mode = "",
-    bookId,
-    parentId = "root",
-    delay = null,
-    options = scrapbook.getOptions("capture"),
-  } = {}) {
-    if (typeof bookId === 'undefined') {
-      bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+  scrapbook.invokeCaptureAs = async function (taskInfo) {
+    const {
+      tasks = [],
+      mode = "",
+      bookId,
+      parentId = "root",
+      index,
+      delay = null,
+      options = scrapbook.getOptions("capture"),
+    } = taskInfo || {};
+    taskInfo = Object.assign({
+      tasks,
+      mode,
+      bookId,
+      parentId,
+      index,
+      delay,
+      options,
+    }, taskInfo);
+    if (typeof taskInfo.bookId === 'undefined') {
+      taskInfo.bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
     }
     return await scrapbook.invokeBatchCapture({
-      taskInfo: {
-        tasks,
-        mode,
-        bookId,
-        parentId,
-        delay,
-        options,
-      },
+      taskInfo,
       customTitle: true,
       useJson: true,
     });
