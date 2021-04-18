@@ -23,6 +23,8 @@
 
   'use strict';
 
+  const customDataMap = new WeakMap();
+
   const sidebar = {
     tree: null,
     treeElem: null,
@@ -422,11 +424,16 @@
       this.showBookCommands(false);
 
       const command = event.target.value;
+      const {ctrlKey, shiftKey, altKey, metaKey} = event;
+      const modifiers = {ctrlKey, shiftKey, altKey, metaKey};
 
       switch (command) {
         case 'upload': {
           const elem = document.getElementById('upload-file-selector');
-          elem.removeAttribute('data-item-elem');
+          customDataMap.set(elem, {
+            items: false,
+            modifiers,
+          });
           elem.value = '';
           elem.click();
           break;
@@ -437,6 +444,7 @@
             detail: {
               command,
               itemElems: [],
+              modifiers,
             },
           });
           window.dispatchEvent(evt);
@@ -459,11 +467,16 @@
       this.showCommands(false);
 
       const command = event.target.value;
+      const {ctrlKey, shiftKey, altKey, metaKey} = event;
+      const modifiers = {ctrlKey, shiftKey, altKey, metaKey};
 
       switch (command) {
         case 'upload': {
           const elem = document.getElementById('upload-file-selector');
-          elem.setAttribute('data-item-elem', '');
+          customDataMap.set(elem, {
+            items: true,
+            modifiers,
+          });
           elem.value = '';
           elem.click();
           break;
@@ -474,6 +487,7 @@
             detail: {
               command,
               itemElems: this.tree.getSelectedItemElems(),
+              modifiers,
             },
           });
           window.dispatchEvent(evt);
@@ -518,11 +532,13 @@
 
     onClickFileSelector(event) {
       event.preventDefault();
+      const detail = customDataMap.get(document.getElementById('upload-file-selector'));
       const evt = new CustomEvent("customCommand", {
         detail: {
           command: 'upload',
-          itemElems: event.target.hasAttribute('data-item-elem') ? this.tree.getSelectedItemElems() : [],
+          itemElems: detail.items ? this.tree.getSelectedItemElems() : [],
           files: event.target.files,
+          modifiers: detail.modifiers,
         },
       });
       window.dispatchEvent(evt);
@@ -2308,15 +2324,19 @@ ${scrapbook.escapeHtml(content)}
         this.tree.refreshItem(id);
       },
 
-      async mkfolder({itemElems: [itemElem]}) {
+      async mkfolder({itemElems: [itemElem], modifiers}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
         if (itemElem) {
-          ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
+          if (modifiers.shiftKey || modifiers.ctrlKey) {
+            parentItemId = itemElem.getAttribute('data-id');
+          } else {
+            ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
-          // insert after the selected one
-          index += 1;
+            // insert after the selected one
+            index += 1;
+          }
         }
 
         // create new item
@@ -2343,15 +2363,19 @@ ${scrapbook.escapeHtml(content)}
         this.tree.insertItem(newItem.id, parentItemId, index);
       },
 
-      async mksep({itemElems: [itemElem]}) {
+      async mksep({itemElems: [itemElem], modifiers}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
         if (itemElem) {
-          ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
+          if (modifiers.shiftKey || modifiers.ctrlKey) {
+            parentItemId = itemElem.getAttribute('data-id');
+          } else {
+            ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
-          // insert after the selected one
-          index += 1;
+            // insert after the selected one
+            index += 1;
+          }
         }
 
         // create new item
@@ -2378,15 +2402,19 @@ ${scrapbook.escapeHtml(content)}
         this.tree.insertItem(newItem.id, parentItemId, index);
       },
 
-      async mkpostit({itemElems: [itemElem]}) {
+      async mkpostit({itemElems: [itemElem], modifiers}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
         if (itemElem) {
-          ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
+          if (modifiers.shiftKey || modifiers.ctrlKey) {
+            parentItemId = itemElem.getAttribute('data-id');
+          } else {
+            ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
-          // insert after the selected one
-          index += 1;
+            // insert after the selected one
+            index += 1;
+          }
         }
 
         // create new item
@@ -2441,15 +2469,19 @@ ${scrapbook.escapeHtml(content)}
         }
       },
 
-      async mknote({itemElems: [itemElem]}) {
+      async mknote({itemElems: [itemElem], modifiers}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
         if (itemElem) {
-          ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
+          if (modifiers.shiftKey || modifiers.ctrlKey) {
+            parentItemId = itemElem.getAttribute('data-id');
+          } else {
+            ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
-          // insert after the selected one
-          index += 1;
+            // insert after the selected one
+            index += 1;
+          }
         }
 
         let type;
@@ -2566,15 +2598,19 @@ Redirecting to file <a href="index.md">index.md</a>
         }
       },
 
-      async upload({itemElems: [itemElem], files}) {
+      async upload({itemElems: [itemElem], files, modifiers}) {
         let parentItemId = this.rootId;
         let index = Infinity;
 
         if (itemElem) {
-          ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
+          if (modifiers.shiftKey || modifiers.ctrlKey) {
+            parentItemId = itemElem.getAttribute('data-id');
+          } else {
+            ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
-          // insert after the selected one
-          index += 1;
+            // insert after the selected one
+            index += 1;
+          }
         }
 
         await this.uploadItems(files, parentItemId, index);
