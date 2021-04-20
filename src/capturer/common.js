@@ -865,12 +865,11 @@
               case "save":
               default:
                 if (capturer.isNoscriptEscaped) {
-                  let key = scrapbook.getUuid();
-                  specialContentMap.set(key, "noscript");
-                  const replaceElem = document.createElement(`jc-${key}`);
-                  replaceElem.innerHTML = elem.textContent;
-                  elem.parentNode.replaceChild(replaceElem, elem);
-                  rewriteRecursively(replaceElem, rootName, rewriteNode);
+                  const newElem = newDoc.createElement('scrapbook-noscript');
+                  escapedNoscriptList.push(newElem);
+                  newElem.innerHTML = elem.textContent;
+                  elem.replaceWith(newElem);
+                  rewriteRecursively(newElem, rootName, rewriteNode);
                   return;
                 }
                 break;
@@ -2048,7 +2047,7 @@
     // construct the cloned node tree
     const origNodeMap = new WeakMap();
     const clonedNodeMap = new WeakMap();
-    const specialContentMap = new Map();
+    const escapedNoscriptList = [];
     const shadowRootList = [];
 
     // add newDoc as the topmost cloned node
@@ -2393,6 +2392,14 @@
       return prevTask.then(curTask);
     }, Promise.resolve());
 
+    // recover escaped noscripts
+    for (const node of escapedNoscriptList) {
+      if (!node.isConnected) { continue; }
+      const newElem = newDoc.createElement('noscript');
+      newElem.innerHTML = node.innerHTML;
+      node.replaceWith(newElem);
+    }
+
     // record after the content of all nested shadow roots have been processed
     for (const {host, shadowRoot} of shadowRootList) {
       captureRewriteAttr(host, "data-scrapbook-shadowroot", JSON.stringify({
@@ -2422,10 +2429,6 @@
 
     // save document
     let content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
-    content = content.replace(/jc-([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
-      if (specialContentMap.has(key)) { return specialContentMap.get(key); }
-      return match;
-    });
 
     // pass content as Blob to prevent size limitation of a message
     // (for a supported browser)
