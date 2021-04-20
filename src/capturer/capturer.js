@@ -819,6 +819,11 @@
       throw new Error(`Bad parameters.`);
     }
 
+    // special handling (for unit test)
+    if (options["capture.saveTo"] === "memory") {
+      return response;
+    }
+
     if (!captureOnly) {
       if (options["capture.saveTo"] === "server") {
         await capturer.addItemToServer({
