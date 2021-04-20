@@ -436,17 +436,18 @@
       return result;
     };
 
-    const rewriteNode = (elem, rootName) => {
+    const rewriteNode = (node, rootName) => {
       // skip non-element nodes
-      if (elem.nodeType !== 1) {
-        return elem;
+      if (node.nodeType !== 1) {
+        return node;
       }
 
-      // skip a special elements and its descendants
-      if (!REWRITABLE_SPECIAL_OBJECTS.has(scrapbook.getScrapbookObjectType(elem))) {
-        return elem;
+      // skip processing a special node
+      if (!REWRITABLE_SPECIAL_OBJECTS.has(scrapbook.getScrapbookObjectType(node))) {
+        return node;
       }
 
+      const elem = node;
       const elemOrig = origNodeMap.get(elem);
 
       // remove hidden elements
