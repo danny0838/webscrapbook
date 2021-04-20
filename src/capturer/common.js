@@ -2769,9 +2769,8 @@
         selectedNodes.push(node);
       }
 
-      // handle descendant node first as it may be altered when handling ancestor
-      for (const elem of selectedNodes.reverse()) {
-        elem.remove();
+      for (const node of selectedNodes) {
+        node.remove();
       }
     }
 
