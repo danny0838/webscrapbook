@@ -545,8 +545,11 @@
     <div>
       <fieldset>
         <label for="opt_server.url">__MSG_OptionServerUrlLabel__</label>
-        <input type="url" id="opt_server.url" autocomplete="url" pattern="https?://[^?#]+/">
+        <input type="url" id="opt_server.url" autocomplete="url" pattern="https?://[^?#]+/" list="opt_server.url.preset">
         <a id="optionServerUrlTooltip" href="javascript:" data-tooltip="__MSG_OptionServerUrlTooltip__"></a>
+        <datalist id="opt_server.url.preset">
+          <option value="http://localhost:8080/">
+        </datalist>
       </fieldset>
       <fieldset>
         <label for="opt_server.user">__MSG_OptionServerUserLabel__</label>
