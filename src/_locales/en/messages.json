@@ -1430,6 +1430,9 @@
     "description": "Default name of a new note",
     "message": "New Note"
   },
+  "ScrapBookNoTree": {
+    "message": "This scrapbook is configured to work without an index tree. Visit the index page using the “View index page” command. Manage data using the file manager or the web interface of the backend server."
+  },
   "SearchCaptures": {
     "message": "View captured pages"
   },

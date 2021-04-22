@@ -1430,6 +1430,9 @@
     "description": "Default name of a new note",
     "message": "新笔记"
   },
+  "ScrapBookNoTree": {
+    "message": "此剪贴簿已设置为不使用目录树。使用「检视主页」命令检视主页，用文件管理器或后端服务器的网页介面管理数据。"
+  },
   "SearchCaptures": {
     "message": "检视已获取的页面"
   },

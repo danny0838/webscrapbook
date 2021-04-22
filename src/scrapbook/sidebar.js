@@ -249,6 +249,8 @@
           if (!this.book.meta[rootId] && !this.book.isSpecialItem(rootId)) {
             throw new Error(`specified root item "${rootId}" does not exist.`);
           }
+        } else {
+          this.log(scrapbook.lang('ScrapBookNoTree'));
         }
 
         this.tree.init({
