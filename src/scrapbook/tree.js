@@ -459,6 +459,74 @@
         return;
       }
 
+      if (event.code === "Home") {
+        event.preventDefault();
+        const itemElems = this.treeElem.querySelectorAll('li[data-id]');
+        const anchorElem = this.anchorElem;
+        if (!this.treeElem.contains(anchorElem) || anchorElem.closest('[hidden]')) {
+          this.highlightItem(itemElems[0], true);
+          return;
+        }
+
+        let target, index = 0;
+        while (index >= 0) {
+          if (itemElems[index] && !itemElems[index].closest('[hidden]')) {
+            target = itemElems[index];
+            break;
+          }
+          index--;
+        }
+
+        if (target) {
+          if (event.shiftKey && event.ctrlKey) {
+            this.highlightItem(target, true, {reselect: false, ranged: true});
+          } else if (event.shiftKey) {
+            this.highlightItem(target, true, {reselect: true, ranged: true});
+          } else if (event.ctrlKey) {
+            this.anchorItem(target);
+          } else {
+            this.highlightItem(target, true);
+          }
+          target.scrollIntoView();
+        }
+
+        return;
+      }
+
+      if (event.code === "End") {
+        event.preventDefault();
+        const itemElems = this.treeElem.querySelectorAll('li[data-id]');
+        const anchorElem = this.anchorElem;
+        if (!this.treeElem.contains(anchorElem) || anchorElem.closest('[hidden]')) {
+          this.highlightItem(itemElems[0], true);
+          return;
+        }
+
+        let target, index = itemElems.length - 1;
+        while (index >= 0) {
+          if (itemElems[index] && !itemElems[index].closest('[hidden]')) {
+            target = itemElems[index];
+            break;
+          }
+          index--;
+        }
+
+        if (target) {
+          if (event.shiftKey && event.ctrlKey) {
+            this.highlightItem(target, true, {reselect: false, ranged: true});
+          } else if (event.shiftKey) {
+            this.highlightItem(target, true, {reselect: true, ranged: true});
+          } else if (event.ctrlKey) {
+            this.anchorItem(target);
+          } else {
+            this.highlightItem(target, true);
+          }
+          target.scrollIntoView();
+        }
+
+        return;
+      }
+
       if (event.code === "Space") {
         event.preventDefault();
         const itemElems = this.treeElem.querySelectorAll('li[data-id]');
