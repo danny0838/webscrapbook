@@ -96,7 +96,7 @@
 
         const sidebar = window.parent.sidebar;
         await sidebar.openLink(u.href, true);
-        await sidebar.uneditPostit();
+        await sidebar.uneditPostit(true);
       } finally {
         this.enableUi(true);
       }
@@ -114,7 +114,7 @@
         }
 
         const sidebar = window.parent.sidebar;
-        await sidebar.uneditPostit();
+        await sidebar.uneditPostit(true);
       } finally {
         this.enableUi(true);
       }

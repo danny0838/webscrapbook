@@ -137,6 +137,9 @@
           if (!initial) {
             await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
 
+            await this.savePostit();
+            await this.uneditPostit();
+
             // reload server config in case there has been a change
             requireUpdateBooks = await server.init(true);
           }
@@ -1839,14 +1842,9 @@ ${scrapbook.escapeHtml(content)}
 
     async editPostit(id) {
       const postitElem = document.getElementById('postit');
+      if (!postitElem) { return; }
 
-      // save the currently opened one, if exists
-      try {
-        await postitElem.contentWindow.editor.save();
-        await this.rebuild();
-      } catch (ex) {
-        // skip error
-      }
+      await this.savePostit();
 
       const u = new URL(browser.runtime.getURL("scrapbook/postit-frame.html"));
       u.searchParams.append('id', id);
@@ -1856,12 +1854,28 @@ ${scrapbook.escapeHtml(content)}
       postitElem.parentNode.removeAttribute('hidden');
     },
 
-    async uneditPostit() {
+    async savePostit() {
       const postitElem = document.getElementById('postit');
+      if (!postitElem) { return; }
+
+      // save the currently opened one, if exists
+      try {
+        await postitElem.contentWindow.editor.save();
+        await this.rebuild();
+      } catch (ex) {
+        // skip error
+      }
+    },
+
+    async uneditPostit(rebuild) {
+      const postitElem = document.getElementById('postit');
+      if (!postitElem) { return; }
       postitElem.parentNode.setAttribute('hidden', '');
       postitElem.src = '';
-      await this.rebuild();
-      this.treeElem.focus();
+      if (rebuild) {
+        await this.rebuild();
+        this.treeElem.focus();
+      }
     },
 
     commands: {
