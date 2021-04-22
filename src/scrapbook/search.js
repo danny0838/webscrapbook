@@ -498,6 +498,7 @@
         error: [],
         rules: {},
         sorts: [],
+        limit: null,
         books: {
           include: [],
           exclude: [],
@@ -529,6 +530,18 @@
           default:
             query.sorts.push({key: "meta", subkey: key, order});
             break;
+        }
+      };
+
+      const setLimit = (value, positive) => {
+        if (!positive) {
+          query.limit = null;
+          return; 
+        }
+
+        const newValue = parseInt(value);
+        if (!Number.isNaN(newValue)) {
+          query.limit = newValue;
         }
       };
 
@@ -606,6 +619,9 @@
             break;
           case "sort":
             addSort(term, pos ? 1 : -1);
+            break;
+          case "limit":
+            setLimit(term, pos);
             break;
           case "type":
             addRule("type", pos ? "include" : "exclude", parseStr(term, true));
@@ -791,6 +807,11 @@
           if (a < b) { return -order; }
           return 0;
         });
+      }
+
+      // limit results
+      if (query.limit) {
+        results.splice(query.limit);
       }
 
       return results;
