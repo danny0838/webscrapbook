@@ -296,10 +296,12 @@
 
     /**
      * Load the config of the backend server
+     *
+     * @return {boolean} whether server config is changed
      */
     async init(refresh = false) {
       if (this._config && !refresh) {
-        return;
+        return false;
       }
 
       if (!scrapbook.hasServer()) {
@@ -372,7 +374,7 @@
         if (this._config &&
             this._serverRoot === serverRoot &&
             JSON.stringify(this._config) === JSON.stringify(config)) {
-          return;
+          return false;
         }
 
         this._serverRoot = serverRoot;
@@ -409,6 +411,8 @@
           this._books[bookId] = new Book(bookId, this);
         }
       }
+
+      return true;
     }
 
     /**

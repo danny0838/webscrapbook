@@ -1405,14 +1405,6 @@
       }
     }
   },
-  "ScrapBookErrorLoadBooks": {
-    "message": "無法載入剪貼簿: $REASON$",
-    "placeholders": {
-      "reason": {
-        "content": "$1"
-      }
-    }
-  },
   "ScrapBookErrorServerInit": {
     "message": "後端伺服器初始化錯誤: $REASON$",
     "placeholders": {

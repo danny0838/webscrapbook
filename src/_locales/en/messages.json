@@ -1405,14 +1405,6 @@
       }
     }
   },
-  "ScrapBookErrorLoadBooks": {
-    "message": "Unable to load scrapbooks: $REASON$",
-    "placeholders": {
-      "reason": {
-        "content": "$1"
-      }
-    }
-  },
   "ScrapBookErrorServerInit": {
     "message": "Backend initilization error: $REASON$",
     "placeholders": {

@@ -30,7 +30,7 @@
     treeElem: null,
     bookId: null,
     book: null,
-    rootId: 'root',
+    rootId: null,
     mode: 'normal',
     sidebarWindowId: null,
 
@@ -96,44 +96,14 @@
           a.textContent = scrapbook.lang('WarnSidebarLoginPromptMissing');
           this.error(a);
         }
+
         return;
       }
 
       // load URL params
       const urlParams = new URL(document.URL).searchParams;
-      this.rootId = urlParams.get('root') || this.rootId;
-
-      // load current scrapbook and scrapbooks list
-      try {
-        let bookId = this.bookId = urlParams.has('id') ? urlParams.get('id') : server.bookId;
-        let book = this.book = server.books[bookId];
-
-        if (!book) {
-          this.warn(scrapbook.lang('ScrapBookErrorBookNotExist', [bookId]));
-          bookId = this.bookId = '';
-          book = this.book = server.books[bookId];
-          await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
-        }
-
-        // init book select
-        if (this.mode === 'normal') {
-          const wrapper = document.getElementById('book');
-          wrapper.hidden = false;
-
-          for (const key of Object.keys(server.books).sort()) {
-            const book = server.books[key];
-            const opt = document.createElement('option');
-            opt.value = book.id;
-            opt.textContent = book.name;
-            wrapper.appendChild(opt);
-          }
-          wrapper.value = bookId;
-        }
-      } catch (ex) {
-        console.error(ex);
-        this.error(scrapbook.lang('ScrapBookErrorLoadBooks', [ex.message]));
-        return;
-      }
+      const bookId = urlParams.has('id') ? urlParams.get('id') : server.bookId;
+      const rootId = urlParams.get('root') || 'root';
 
       // init tree instance
       this.treeElem = document.getElementById('items');
@@ -142,26 +112,64 @@
         cacheType: this.mode === 'normal' ? 'storage' : 'sessionStorage',
       });
 
-      await this.refresh(undefined, undefined, true);
+      await this.refresh(bookId, rootId, true);
     },
 
     /**
      * Update UI to match the given bookId and rootId.
      */
-    async refresh(bookId, rootId, keepLogs = false) {
+    async refresh(bookId, rootId, initial = false) {
       // save current active element
       const activeElement = document.activeElement;
 
       this.enableUi(false);
 
+      // clear logs
+      if (!initial) {
+        document.getElementById('logger').textContent = '';
+      }
+
       try {
-        // update bookId and rootId
+        // update bookId
         if (typeof bookId === 'string' && bookId !== this.bookId) {
-          await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
+          let requireUpdateBooks = true;
+
+          if (!initial) {
+            await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
+
+            // reload server config in case there has been a change
+            requireUpdateBooks = await server.init(true);
+          }
+
+          // update current book
           this.bookId = bookId;
           this.book = server.books[bookId];
+
+          if (!this.book) {
+            this.warn(scrapbook.lang('ScrapBookErrorBookNotExist', [bookId]));
+            bookId = this.bookId = '';
+            this.book = server.books[bookId];
+            await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
+          }
+
+          // update book selector
+          if (this.mode === 'normal' && requireUpdateBooks) {
+            const wrapper = document.getElementById('book');
+            wrapper.textContent = '';
+            for (const bookId of Object.keys(server.books).sort()) {
+              const book = server.books[bookId];
+              const opt = wrapper.appendChild(document.createElement('option'));
+              opt.value = book.id;
+              opt.textContent = book.name;
+            }
+            wrapper.value = bookId;
+            wrapper.hidden = false;
+          }
+
           document.getElementById('book').value = bookId;
         }
+
+        // update rootId
         if (typeof rootId === 'string' && rootId !== this.rootId) {
           this.rootId = rootId;
         }
@@ -226,10 +234,6 @@
           menuElem.querySelector('button[value="recapture"]').disabled = !(!isNoTree && !isRecycle);
           menuElem.querySelector('button[value="copyinfo"]').disabled = isNoTree;
           menuElem.querySelector('button[value="meta"]').disabled = isNoTree;
-        }
-
-        if (!keepLogs) {
-          document.getElementById('logger').textContent = '';
         }
 
         // refresh book tree
