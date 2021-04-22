@@ -1879,8 +1879,9 @@ ${scrapbook.escapeHtml(content)}
     },
 
     commands: {
-      async index() {
-        await this.openLink(this.book.indexUrl, true);
+      async index({modifiers}) {
+        const newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarOpenInNewTab");
+        await this.openLink(this.book.indexUrl, newTab);
       },
 
       async exec_book() {
