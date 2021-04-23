@@ -2885,7 +2885,7 @@ if (Node && !Node.prototype.getRootNode) {
     const pixelBuffer = new Uint32Array(
       context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
     );
-    return !pixelBuffer.some(color => color !== 0);
+    return pixelBuffer.every(color => color === 0);
   };
 
 
