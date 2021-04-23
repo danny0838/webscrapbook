@@ -9,12 +9,14 @@
 <input type="radio" value="a">aaa
 <input type="radio" value="b">bbb
 <input type="radio" value="c" checked>ccc
+<input type="radio" value="d" checked>ddd
 </div>
 <div>
 <input type="checkbox" value="A">AAA
 <input type="checkbox" value="B">BBB
 <input type="checkbox" value="C" checked>CCC
 <input type="checkbox" value="D" checked>DDD
+<input type="checkbox" value="E" checked>EEE
 </div>
 <div>
 <input type="text" placeholder="input name...">
@@ -57,9 +59,11 @@
 </form>
 
 <script>
-document.querySelector('input[type="radio"]').checked = true;
-document.querySelector('input[type="checkbox"]').checked = true;
-document.querySelectorAll('input[type="checkbox"]')[3].indeterminate = true;
+document.querySelectorAll('input[type="radio"]')[0].checked = true;
+document.querySelectorAll('input[type="radio"]')[3].checked = false;
+document.querySelectorAll('input[type="checkbox"]')[0].checked = true;
+document.querySelectorAll('input[type="checkbox"]')[3].checked = false;
+document.querySelectorAll('input[type="checkbox"]')[4].indeterminate = true;
 document.querySelector('input[type="text"]').value = 'myname';
 document.querySelector('input[type="password"]').value = 'mypassword';
 document.querySelector('input[type="number"]').value = 3;

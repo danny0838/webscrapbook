@@ -715,6 +715,15 @@
   "OptionCaptureFontTooltip": {
     "message": "此选项决定字体的处理方式。\n\n• 保存：将所有字体保存至本地。\n• 保存使用：只将获取区域的网页元素使用的字体保存至本地。若获取的页面并未显示于浏览器（例如获取原貌），则仍保存所有字体。\n• 链接：将字体连往原始位址。注意这会导致浏览获取页面时触发网路传输。注意：跨网域载入字体受同源政策限制，若字体来自未设置跨来源资源共享（CORS）的服务器，获取的页面将无法载入。\n• 清空：将字体从样式表中清除。"
   },
+  "OptionCaptureFormStatusHtmlAllLabel": {
+    "message": "保留全部 HTML"
+  },
+  "OptionCaptureFormStatusHtmlLabel": {
+    "message": "保留 HTML"
+  },
+  "OptionCaptureFormStatusKeepAllLabel": {
+    "message": "保留全部"
+  },
   "OptionCaptureFormStatusKeepLabel": {
     "message": "保留"
   },
@@ -723,6 +732,15 @@
   },
   "OptionCaptureFormStatusResetLabel": {
     "message": "重置"
+  },
+  "OptionCaptureFormStatusSaveAllLabel": {
+    "message": "保存全部"
+  },
+  "OptionCaptureFormStatusSaveLabel": {
+    "message": "保存"
+  },
+  "OptionCaptureFormStatusTooltip": {
+    "message": "此选项决定目前表单状态的处理方式。\n\n• 保存全部：产生特殊属性值和初始化脚本记录目前状态，以免破坏重置等功能的运作。\n• 保存：产生特殊属性值和初始化脚本记录目前状态（不包括密码等敏感资讯），以免破坏重置等功能的运作。\n• 保留全部：将目前状态改写为对应的 HTML 属性，无法以 HTML 表达的状态会产生特殊属性值和初始化脚本处理。\n• 保留：将目前状态（不包括密码等敏感资讯）改写为对应的 HTML 属性，无法以 HTML 表达的状态会产生特殊属性值和初始化脚本处理。\n• 保留全部 HTML：将目前状态改写为对应的 HTML 属性，忽略无法以 HTML 表达的状态。\n• 保留 HTML：将目前状态（不包括密码等敏感资讯）改写为对应的 HTML 属性，忽略无法以 HTML 表达的状态。\n• 重置：忽略目前状态。"
   },
   "OptionCaptureFrameLabel": {
     "message": "框架页:"

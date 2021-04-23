@@ -6265,6 +6265,141 @@ async function test_capture_base() {
  * capture.formStatus
  */
 async function test_capture_formStatus() {
+  /* capture.formStatus = save-all */
+  var options = {
+    "capture.formStatus": "save-all",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(!doc.querySelector('input[type="text"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="text"]').getAttribute('data-scrapbook-input-value') === "myname");
+  assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="password"]').getAttribute('data-scrapbook-input-value') === "mypassword");
+  assert(!doc.querySelector('input[type="number"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="number"]').getAttribute('data-scrapbook-input-value') === "3");
+  assert(!doc.querySelector('input[type="search"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="search"]').getAttribute('data-scrapbook-input-value') === "search input");
+  assert(!doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="color"]').hasAttribute('data-scrapbook-input-value'));
+  assert(!doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="range"]').hasAttribute('data-scrapbook-input-value'));
+  assert(doc.querySelector('textarea').textContent === "");
+  assert(doc.querySelector('textarea').getAttribute('data-scrapbook-textarea-value') === "textarea input");
+  assert(!doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(doc.querySelectorAll('option')[0].getAttribute('data-scrapbook-option-selected') === "true");
+  assert(doc.querySelectorAll('option')[1].hasAttribute('selected'));
+  assert(doc.querySelectorAll('option')[1].getAttribute('data-scrapbook-option-selected') === "false");
+
+  /* capture.formStatus = save */
+  var options = {
+    "capture.formStatus": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].getAttribute('data-scrapbook-input-checked') === 'true');
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[3].getAttribute('data-scrapbook-input-checked') === 'false');
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(!doc.querySelector('input[type="text"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="text"]').getAttribute('data-scrapbook-input-value') === "myname");
+  assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
+  assert(!doc.querySelector('input[type="password"]').hasAttribute('data-scrapbook-input-value'));
+  assert(!doc.querySelector('input[type="number"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="number"]').getAttribute('data-scrapbook-input-value') === "3");
+  assert(!doc.querySelector('input[type="search"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="search"]').getAttribute('data-scrapbook-input-value') === "search input");
+  assert(!doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="color"]').hasAttribute('data-scrapbook-input-value'));
+  assert(!doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="range"]').hasAttribute('data-scrapbook-input-value'));
+  assert(doc.querySelector('textarea').textContent === "");
+  assert(doc.querySelector('textarea').getAttribute('data-scrapbook-textarea-value') === "textarea input");
+  assert(!doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(doc.querySelectorAll('option')[0].getAttribute('data-scrapbook-option-selected') === "true");
+  assert(doc.querySelectorAll('option')[1].hasAttribute('selected'));
+  assert(doc.querySelectorAll('option')[1].getAttribute('data-scrapbook-option-selected') === "false");
+
+  /* capture.formStatus = keep-all */
+  var options = {
+    "capture.formStatus": "keep-all",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
+  assert(doc.querySelector('input[type="password"]').getAttribute('value') === "mypassword");
+  assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
+  assert(doc.querySelector('input[type="search"]').getAttribute('value') === "search input");
+  assert(doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('textarea').textContent === "textarea input");
+  assert(doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(!doc.querySelectorAll('option')[1].hasAttribute('selected'));
+
   /* capture.formStatus = keep */
   var options = {
     "capture.formStatus": "keep",
@@ -6273,20 +6408,87 @@ async function test_capture_formStatus() {
     url: `${localhost}/capture_form/form-status.html`,
     options: Object.assign({}, baseOptions, options),
   });
-
   var zip = await new JSZip().loadAsync(blob);
-
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
+
   assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
   assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
   assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
   assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
   assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
   assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
-  assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
-  assert(doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
+  assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
+  assert(doc.querySelector('input[type="search"]').getAttribute('value') === "search input");
+  assert(doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('textarea').textContent === "textarea input");
+  assert(doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(!doc.querySelectorAll('option')[1].hasAttribute('selected'));
+
+  /* capture.formStatus = html-all */
+  var options = {
+    "capture.formStatus": "html-all",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
+  assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
+  assert(doc.querySelector('input[type="password"]').getAttribute('value') === "mypassword");
+  assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
+  assert(doc.querySelector('input[type="search"]').getAttribute('value') === "search input");
+  assert(doc.querySelector('input[type="color"]').hasAttribute('value'));
+  assert(doc.querySelector('input[type="range"]').hasAttribute('value'));
+  assert(doc.querySelector('textarea').textContent === "textarea input");
+  assert(doc.querySelectorAll('option')[0].hasAttribute('selected'));
+  assert(!doc.querySelectorAll('option')[1].hasAttribute('selected'));
+
+  /* capture.formStatus = html */
+  var options = {
+    "capture.formStatus": "html",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_form/form-status.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="radio"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[0].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[1].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[2].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[3].hasAttribute('checked'));
+  assert(doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('checked'));
+  assert(!doc.querySelectorAll('input[type="checkbox"]')[4].hasAttribute('data-scrapbook-input-indeterminate'));
   assert(doc.querySelector('input[type="text"]').getAttribute('value') === "myname");
   assert(!doc.querySelector('input[type="password"]').hasAttribute('value'));
   assert(doc.querySelector('input[type="number"]').getAttribute('value') === "3");
@@ -6305,12 +6507,11 @@ async function test_capture_formStatus() {
     url: `${localhost}/capture_form/form-status.html`,
     options: Object.assign({}, baseOptions, options),
   });
-
   var zip = await new JSZip().loadAsync(blob);
-
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
+
   assert(!doc.querySelectorAll('input[type="radio"]')[0].hasAttribute('checked'));
   assert(!doc.querySelectorAll('input[type="radio"]')[1].hasAttribute('checked'));
   assert(doc.querySelectorAll('input[type="radio"]')[2].hasAttribute('checked'));

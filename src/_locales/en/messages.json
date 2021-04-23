@@ -715,6 +715,15 @@
   "OptionCaptureFontTooltip": {
     "message": "This determines how fonts are handled.\n\n• Save: Save all fonts to local.\n• Save used: Save only the fonts used by elements in the captured web page area. If the captured page is not displayed (such as capture source), all fonts are still saved.\n• Link: Link the font to its source URL. Note that a network flow will be triggered when browsing the captured document in the future.\n• Blank: Clear fonts from the stylesheets."
   },
+  "OptionCaptureFormStatusHtmlAllLabel": {
+    "message": "Keep all HTML"
+  },
+  "OptionCaptureFormStatusHtmlLabel": {
+    "message": "Keep HTML"
+  },
+  "OptionCaptureFormStatusKeepAllLabel": {
+    "message": "Keep all"
+  },
   "OptionCaptureFormStatusKeepLabel": {
     "message": "Keep"
   },
@@ -723,6 +732,15 @@
   },
   "OptionCaptureFormStatusResetLabel": {
     "message": "Reset"
+  },
+  "OptionCaptureFormStatusSaveAllLabel": {
+    "message": "Save all"
+  },
+  "OptionCaptureFormStatusSaveLabel": {
+    "message": "Save"
+  },
+  "OptionCaptureFormStatusTooltip": {
+    "message": "This determines how current form status are handled.\n\n• Save all: Record all current status using a special attribute and an initialization script, to avoid breaking features like reset.\n• Save: Record current status (excluding sensitive information like passwords) using a special attribute and an initialization script, to avoid breaking features like reset.\n• Keep all: Rewrite current status with corresponding HTML attribute. Non-HTML representable status are handled via a special attribute and an initialization script.\n• Keep: Rewrite current status (excluding sensitive information like passwords) with corresponding HTML attribute. Non-HTML representable status are handled via a special attribute and an initialization script.\n• Keep all HTML: Rewrite current status with corresponding HTML attribute. Ignore non-HTML representable status.\n• Keep HTML: Rewrite current status (excluding sensitive information like passwords) with corresponding HTML attribute. Ignore non-HTML representable status.\n• Reset: Ignore current status."
   },
   "OptionCaptureFrameLabel": {
     "message": "Frames:"

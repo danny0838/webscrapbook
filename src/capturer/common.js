@@ -1724,6 +1724,7 @@
             break;
           }
 
+          // form: input
           case "input": {
             switch (elem.type.toLowerCase()) {
               // images: input
@@ -1762,23 +1763,70 @@
                 }
                 break;
               }
-              // form: input (file, password)
-              case "password":
+              // form: input (file)
               case "file": {
-                // always forget
+                break;
+              }
+              // form: input (password)
+              case "password": {
+                switch (options["capture.formStatus"]) {
+                  case "save-all":
+                    if (elemOrig) {
+                      const value = elemOrig.value;
+                      if (value !== elem.getAttribute('value')) {
+                        captureRewriteAttr(elem, "data-scrapbook-input-value", value);
+                        requireBasicLoader = true;
+                      }
+                    }
+                    break;
+                  case "keep-all":
+                  case "html-all":
+                    if (elemOrig) {
+                      captureRewriteAttr(elem, "value", elemOrig.value);
+                    }
+                    break;
+                  case "save":
+                  case "keep":
+                  case "html":
+                  case "reset":
+                  default:
+                    // do nothing
+                    break;
+                }
                 break;
               }
               // form: input (radio, checkbox)
               case "radio":
               case "checkbox": {
                 switch (options["capture.formStatus"]) {
-                  case "keep":
+                  case "save-all":
+                  case "save":
                     if (elemOrig) {
-                      captureRewriteAttr(elem, "checked", elemOrig.checked ? "checked" : null);
-                      if (elemOrig.indeterminate && elem.type.toLowerCase() === 'checkbox') {
+                      const checked = elemOrig.checked;
+                      if (checked !== elem.hasAttribute('checked')) {
+                        captureRewriteAttr(elem, "data-scrapbook-input-checked", checked);
+                        requireBasicLoader = true;
+                      }
+                      const indeterminate = elemOrig.indeterminate;
+                      if (indeterminate && elem.type.toLowerCase() === 'checkbox') {
                         captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", "");
                         requireBasicLoader = true;
                       }
+                    }
+                    break;
+                  case "keep-all":
+                  case "keep":
+                    if (elemOrig) {
+                      const indeterminate = elemOrig.indeterminate;
+                      if (indeterminate && elem.type.toLowerCase() === 'checkbox') {
+                        captureRewriteAttr(elem, "data-scrapbook-input-indeterminate", "");
+                        requireBasicLoader = true;
+                      }
+                    }
+                  case "html-all":
+                  case "html":
+                    if (elemOrig) {
+                      captureRewriteAttr(elem, "checked", elemOrig.checked ? "checked" : null);
                     }
                     break;
                   case "reset":
@@ -1791,7 +1839,20 @@
               // form: input (other)
               default: {
                 switch (options["capture.formStatus"]) {
+                  case "save-all":
+                  case "save":
+                    if (elemOrig) {
+                      const value = elemOrig.value;
+                      if (value !== elem.getAttribute('value')) {
+                        captureRewriteAttr(elem, "data-scrapbook-input-value", value);
+                        requireBasicLoader = true;
+                      }
+                    }
+                    break;
+                  case "keep-all":
                   case "keep":
+                  case "html-all":
+                  case "html":
                     if (elemOrig) {
                       captureRewriteAttr(elem, "value", elemOrig.value);
                     }
@@ -1810,7 +1871,20 @@
           // form: option
           case "option": {
             switch (options["capture.formStatus"]) {
+              case "save-all":
+              case "save":
+                if (elemOrig) {
+                  const selected = elemOrig.selected;
+                  if (selected !== elem.hasAttribute('selected')) {
+                    captureRewriteAttr(elem, "data-scrapbook-option-selected", selected);
+                    requireBasicLoader = true;
+                  }
+                }
+                break;
+              case "keep-all":
               case "keep":
+              case "html-all":
+              case "html":
                 if (elemOrig) {
                   captureRewriteAttr(elem, "selected", elemOrig.selected ? "selected" : null);
                 }
@@ -1826,7 +1900,20 @@
           // form: textarea
           case "textarea": {
             switch (options["capture.formStatus"]) {
+              case "save-all":
+              case "save":
+                if (elemOrig) {
+                  const value = elemOrig.value;
+                  if (value !== elem.textContent) {
+                    captureRewriteAttr(elem, "data-scrapbook-textarea-value", value);
+                    requireBasicLoader = true;
+                  }
+                }
+                break;
+              case "keep-all":
               case "keep":
+              case "html-all":
+              case "html":
                 if (elemOrig) {
                   captureRewriteTextContent(elem, elemOrig.value);
                 }
@@ -2796,31 +2883,53 @@
       // HTMLCanvasElement: Firefox >= 1.5, querySelectorAll: Firefox >= 3.5
       // getElementsByTagName is not implemented for DocumentFragment (shadow root)
       loader.textContent = "(" + scrapbook.compressJsFunc(function () {
-        var k1 = "data-scrapbook-shadowroot", k2 = "data-scrapbook-input-indeterminate", k3 = "data-scrapbook-canvas",
+        var k1 = "data-scrapbook-shadowroot",
+            k2 = "data-scrapbook-canvas",
+            k3 = "data-scrapbook-input-indeterminate",
+            k4 = "data-scrapbook-input-checked",
+            k5 = "data-scrapbook-option-selected",
+            k6 = "data-scrapbook-input-value",
+            k7 = "data-scrapbook-textarea-value",
             fn = function (r) {
               var E = r.querySelectorAll ? r.querySelectorAll("*") : r.getElementsByTagName("*"), i = E.length, e, d, s;
               while (i--) {
                 e = E[i];
-                if (e.hasAttribute(k1) && !e.shadowRoot && e.attachShadow) {
-                  d = JSON.parse(e.getAttribute(k1));
+                if ((d = e.getAttribute(k1)) !== null && !e.shadowRoot && e.attachShadow) {
+                  d = JSON.parse(d);
                   s = e.attachShadow({mode: d.mode});
                   s.innerHTML = d.data;
                   e.removeAttribute(k1);
                 }
-                if (e.shadowRoot) {
-                  fn(e.shadowRoot);
-                }
-                if (e.hasAttribute(k2)) {
-                  e.indeterminate = true;
-                  e.removeAttribute(k2);
-                }
-                if (e.hasAttribute(k3)) {
+                if ((d = e.getAttribute(k2)) !== null) {
                   (function () {
                     var c = e, g = new Image();
                     g.onload = function () { c.getContext('2d').drawImage(g, 0, 0); };
-                    g.src = c.getAttribute(k3);
-                    c.removeAttribute(k3);
+                    g.src = d;
                   })();
+                  e.removeAttribute(k2);
+                }
+                if ((d = e.getAttribute(k3)) !== null) {
+                  e.indeterminate = true;
+                  e.removeAttribute(k3);
+                }
+                if ((d = e.getAttribute(k4)) !== null) {
+                  e.checked = d === 'true';
+                  e.removeAttribute(k4);
+                }
+                if ((d = e.getAttribute(k5)) !== null) {
+                  e.selected = d === 'true';
+                  e.removeAttribute(k5);
+                }
+                if ((d = e.getAttribute(k6)) !== null) {
+                  e.value = d;
+                  e.removeAttribute(k6);
+                }
+                if ((d = e.getAttribute(k7)) !== null) {
+                  e.value = d;
+                  e.removeAttribute(k7);
+                }
+                if (e.shadowRoot) {
+                  fn(e.shadowRoot);
                 }
               }
             };
