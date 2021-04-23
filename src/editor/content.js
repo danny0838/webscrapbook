@@ -1684,18 +1684,11 @@ scrapbook-toolbar, scrapbook-toolbar *,
   };
 
   editor.eraseRange = function (range, timeId = scrapbook.dateToId()) {
-    const doc = range.commonAncestorContainer.ownerDocument;
-    const wrapper = doc.createElement('scrapbook-erased');
-    range.surroundContents(wrapper);
-    const comment = document.createComment(`scrapbook-erased-${timeId}=${scrapbook.escapeHtmlComment(wrapper.innerHTML)}`);
-    editor.erasedContents.set(comment, wrapper);
-    wrapper.parentNode.replaceChild(comment, wrapper);
+    scrapbook.eraseRange(range, {timeId, mapCommentToWrapper: editor.erasedContents});
   };
 
   editor.eraseNode = function (node, timeId = scrapbook.dateToId()) {
-    const range = new Range();
-    range.selectNode(node);
-    return editor.eraseRange(range, timeId);
+    scrapbook.eraseNode(node, {timeId, mapCommentToWrapper: editor.erasedContents});
   };
 
   /**
@@ -1703,50 +1696,33 @@ scrapbook-toolbar, scrapbook-toolbar *,
    *
    * @return {integer} Scrapbook object remove type of the element.
    */
-  editor.removeScrapBookObject = function (elem) {
+  editor.removeScrapBookObject = function (node) {
     try {
       // not in the DOM tree, skip
-      if (!elem.isConnected) { return -1; }
+      if (!node.isConnected) { return -1; }
     } catch(ex) {
       // not an element or a dead object, skip
       return -1;
     }
-    let type = scrapbook.getScrapBookObjectRemoveType(elem);
+    let type = scrapbook.getScrapBookObjectRemoveType(node);
     switch (type) {
       case 1: {
-        for (const part of scrapbook.getScrapBookObjectsById(elem)) {
+        for (const part of scrapbook.getScrapBookObjectsById(node)) {
           part.remove();
         }
         break;
       }
       case 2: {
-        for (const part of scrapbook.getScrapBookObjectsById(elem)) {
+        for (const part of scrapbook.getScrapBookObjectsById(node)) {
           scrapbook.unwrapNode(part);
         }
         break;
       }
       case 3: {
-        let wrapper = editor.erasedContents.get(elem);
-
-        // if the erased nodes are still in the stack, recover it
-        if (wrapper) {
-          const frag = elem.ownerDocument.createDocumentFragment();
-          let child;
-          while (child = wrapper.firstChild) { frag.appendChild(child); }
-          elem.parentNode.replaceChild(frag, elem);
-          break;
-        }
-
-        // otherwise, recover from recorded HTML
-        const m = elem.nodeValue.match(/^.+?=([\s\S]*)$/);
-        if (m) {
-          const doc = elem.ownerDocument;
-          const parent = elem.parentNode;
-          const t = doc.createElement('template');
-          t.innerHTML = scrapbook.unescapeHtmlComment(m[1]);
-          parent.replaceChild(doc.importNode(t.content, true), elem);
-          parent.normalize();
-        } else {
+        const unerased = scrapbook.uneraseNode(node, {
+          mapCommentToWrapper: editor.erasedContents,
+        });
+        if (!unerased) {
           // this shouldn't happen
           return -1;
         }

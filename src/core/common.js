@@ -1435,6 +1435,79 @@ if (Node && !Node.prototype.getRootNode) {
     return [elem];
   };
 
+  /**
+   * Replace nodes in the range with a serialized HTML comment.
+   */
+  scrapbook.eraseRange = function (range, {
+    timeId = scrapbook.dateToId(),
+    mapWrapperToComment,
+    mapCommentToWrapper,
+  } = {}) {
+    const doc = range.commonAncestorContainer.ownerDocument;
+    const wrapper = doc.createElement('scrapbook-erased');
+    range.surroundContents(wrapper);
+    const comment = doc.createComment(`scrapbook-erased${timeId ? '-' + timeId : ''}=${scrapbook.escapeHtmlComment(wrapper.innerHTML)}`);
+    if (mapWrapperToComment) {
+      mapWrapperToComment.set(wrapper, comment);
+    }
+    if (mapCommentToWrapper) {
+      mapCommentToWrapper.set(comment, wrapper);
+    }
+    wrapper.replaceWith(comment);
+  };
+
+  /**
+   * Replace node with a serialized HTML comment.
+   */
+  scrapbook.eraseNode = function (node, options) {
+    const range = node.ownerDocument.createRange();
+    range.selectNode(node);
+    return scrapbook.eraseRange(range, options);
+  };
+
+  /**
+   * Replace a serialized HTML comment with the original nodes.
+   *
+   * @return {boolean} whether the unerase is successful
+   */
+  scrapbook.uneraseNode = function (node, {
+    mapCommentToWrapper,
+    normalize = true,
+  } = {}) {
+    const parent = node.parentNode;
+    if (!parent) { return false; }
+
+    // if the associated source nodes exist, use them
+    let wrapper = mapCommentToWrapper.get(node);
+    if (wrapper) {
+      const frag = node.ownerDocument.createDocumentFragment();
+      let child;
+      while (child = wrapper.firstChild) {
+        frag.appendChild(child);
+      }
+      node.replaceWith(frag);
+      if (normalize) {
+        parent.normalize();
+      }
+      return true;
+    }
+
+    // otherwise, recover from recorded HTML
+    const m = node.nodeValue.match(/^.+?=([\s\S]*)$/);
+    if (m) {
+      const doc = node.ownerDocument;
+      const t = doc.createElement('template');
+      t.innerHTML = scrapbook.unescapeHtmlComment(m[1]);
+      node.replaceWith(doc.importNode(t.content, true));
+      if (normalize) {
+        parent.normalize();
+      }
+      return true;
+    }
+
+    return false;
+  };
+
 
   /****************************************************************************
    * String handling
