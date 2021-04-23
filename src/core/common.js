@@ -2865,16 +2865,20 @@ if (Node && !Node.prototype.getRootNode) {
   };
 
   /**
-   * Remove the element while keeping all children.
+   * Remove the node while keeping all children.
    */
-  scrapbook.unwrapElement = function (elem) {
-    const parent = elem.parentNode;
+  scrapbook.unwrapNode = function (node, normalize = true) {
+    const parent = node.parentNode;
     if (!parent) { return; }
-    const frag = elem.ownerDocument.createDocumentFragment();
+    const frag = node.ownerDocument.createDocumentFragment();
     let child;
-    while (child = elem.firstChild) { frag.appendChild(child); }
-    parent.replaceChild(frag, elem);
-    parent.normalize();
+    while (child = node.firstChild) {
+      frag.appendChild(child);
+    }
+    node.replaceWith(frag);
+    if (normalize) {
+      parent.normalize();
+    }
   };
 
   /**

@@ -1721,7 +1721,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       }
       case 2: {
         for (const part of scrapbook.getScrapBookObjectsById(elem)) {
-          scrapbook.unwrapElement(part);
+          scrapbook.unwrapNode(part);
         }
         break;
       }

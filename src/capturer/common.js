@@ -4635,7 +4635,7 @@
     cmd_unwrap(rootNode, selector) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
-        scrapbook.unwrapElement(elem);
+        scrapbook.unwrapNode(elem);
       }
     }
 
