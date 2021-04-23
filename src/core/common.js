@@ -1436,6 +1436,216 @@ if (Node && !Node.prototype.getRootNode) {
   };
 
   /**
+   * Convert dynamic information into representable HTML attributes for an
+   * element.
+   *
+   * @param {Object} [options]
+   * @param {Map|WeakMap} [options.mapShadowRoot] - mapping from an Element to
+   *     its (possibly closed) shadow root.
+   */
+  scrapbook.htmlifyElem = function (elem, options = {}) {
+    if (elem.nodeType !== 1) { return; }
+
+    const {
+      mapShadowRoot,
+    } = options;
+
+    switch (elem.nodeName.toLowerCase()) {
+      case "canvas": {
+        try {
+          if (!scrapbook.isCanvasBlank(elem)) {
+            elem.setAttribute('data-scrapbook-canvas', elem.toDataURL());
+          }
+        } catch (ex) {
+          console.error(ex);
+        }
+        break;
+      }
+
+      case "input": {
+        const type = elem.type;
+        if (typeof type === 'undefined') { break; }
+        switch (type.toLowerCase()) {
+          case "image":
+          case "file": {
+            break;
+          }
+          case "radio":
+          case "checkbox": {
+            const checked = elem.checked;
+            if (checked !== elem.hasAttribute('checked')) {
+              elem.setAttribute('data-scrapbook-input-checked', checked);
+            }
+
+            const indeterminate = elem.indeterminate;
+            if (indeterminate) {
+              elem.setAttribute('data-scrapbook-input-indeterminate', '');
+            }
+
+            break;
+          }
+          default: {
+            const value = elem.value;
+            if (value !== elem.getAttribute('value')) {
+              elem.setAttribute('data-scrapbook-input-value', value);
+            }
+            break;
+          }
+        }
+        break;
+      }
+
+      case "textarea": {
+        const value = elem.value;
+        if (value !== elem.textContent) {
+          elem.setAttribute('data-scrapbook-textarea-value', value);
+        }
+        break;
+      }
+
+      case "option": {
+        const selected = elem.selected;
+        if (selected !== elem.hasAttribute('selected')) {
+          elem.setAttribute('data-scrapbook-option-selected', selected);
+        }
+        break;
+      }
+    }
+
+    const shadowRoot = mapShadowRoot && mapShadowRoot.get(elem) || elem.shadowRoot;
+    if (shadowRoot) {
+      scrapbook.htmlify(shadowRoot, options);
+      elem.setAttribute('data-scrapbook-shadowroot', JSON.stringify({
+        data: shadowRoot.innerHTML,
+        mode: shadowRoot.mode,
+      }));
+    }
+  };
+
+  /**
+   * Convert dynamic information into representable HTML attributes recursively.
+   */
+  scrapbook.htmlify = function (node, options = {}) {
+    scrapbook.htmlifyElem(node, options);
+    for (const elem of node.querySelectorAll('*')) {
+      scrapbook.htmlifyElem(elem, options);
+    }
+  };
+
+  /**
+   * Reverse htmlify for an element.
+   *
+   * @param {boolean} [options.apply] - true to apply the recorded value to
+   *     the element; otherwise remove the record only.
+   * @param {boolean} [options.canvas] - true to handle canvas.
+   * @param {boolean} [options.form] - true to handle form elements.
+   * @param {boolean} [options.shadowDom] - true to handle shadowDom.
+   */
+  scrapbook.unhtmlifyElem = function (elem, options = {}) {
+    if (elem.nodeType !== 1) { return; }
+
+    const {
+      apply = true,
+      canvas = true,
+      form = true,
+      shadowDom = true,
+    } = options;
+
+    if (canvas) {
+      const canvasData = elem.getAttribute('data-scrapbook-canvas');
+      if (canvasData) {
+        if (apply) {
+          const img = new Image();
+          img.onload = () => { elem.getContext('2d').drawImage(img, 0, 0); };
+          img.src = elem.getAttribute('data-scrapbook-canvas');
+        }
+        elem.removeAttribute('data-scrapbook-canvas');
+      }
+    }
+
+    if (form) {
+      const checked = elem.getAttribute('data-scrapbook-input-checked');
+      if (checked !== null) {
+        if (apply) {
+          elem.checked = checked === 'true';
+        }
+        elem.removeAttribute('data-scrapbook-input-checked');
+      }
+    }
+
+    if (form) {
+      const indeterminate = elem.getAttribute('data-scrapbook-input-indeterminate');
+      if (indeterminate !== null) {
+        if (apply) {
+          elem.indeterminate = true;
+        }
+        elem.removeAttribute('data-scrapbook-input-indeterminate');
+      }
+    }
+
+    if (form) {
+      const value = elem.getAttribute('data-scrapbook-input-value');
+      if (value !== null) {
+        if (apply) {
+          elem.value = value;
+        }
+        elem.removeAttribute('data-scrapbook-input-value');
+      }
+    }
+
+    if (form) {
+      const value = elem.getAttribute('data-scrapbook-textarea-value');
+      if (value !== null) {
+        if (apply) {
+          elem.value = value;
+        }
+        elem.removeAttribute('data-scrapbook-textarea-value');
+      }
+    }
+
+    if (form) {
+      const selected = elem.getAttribute('data-scrapbook-option-selected');
+      if (selected !== null) {
+        if (apply) {
+          elem.selected = selected === 'true';
+        }
+        elem.removeAttribute('data-scrapbook-option-selected');
+      }
+    }
+
+    if (shadowDom) {
+      const shadowRootJson = elem.getAttribute('data-scrapbook-shadowroot');
+      if (shadowRootJson !== null) {
+        if (apply && elem.attachShadow && !elem.shadowRoot) {
+          try {
+            const {data, mode} = JSON.parse(shadowRootJson);
+            const shadowRoot = elem.attachShadow({mode});
+            shadowRoot.innerHTML = data;
+          } catch (ex) {
+            console.error(ex);
+          }
+        }
+        elem.removeAttribute('data-scrapbook-shadowroot');
+      }
+    }
+
+    const shadowRoot = elem.shadowRoot;
+    if (shadowRoot) {
+      scrapbook.unhtmlify(shadowRoot, options);
+    }
+  };
+
+  /**
+   * Reverse htmlify recursively.
+   */
+  scrapbook.unhtmlify = function (node, options = {}) {
+    scrapbook.unhtmlifyElem(node, options);
+    for (const elem of node.querySelectorAll('*')) {
+      scrapbook.unhtmlifyElem(elem, options);
+    }
+  };
+
+  /**
    * Replace nodes in the range with a serialized HTML comment.
    */
   scrapbook.eraseRange = function (range, {
@@ -1446,6 +1656,7 @@ if (Node && !Node.prototype.getRootNode) {
     const doc = range.commonAncestorContainer.ownerDocument;
     const wrapper = doc.createElement('scrapbook-erased');
     range.surroundContents(wrapper);
+    scrapbook.htmlify(wrapper);
     const comment = doc.createComment(`scrapbook-erased${timeId ? '-' + timeId : ''}=${scrapbook.escapeHtmlComment(wrapper.innerHTML)}`);
     if (mapWrapperToComment) {
       mapWrapperToComment.set(wrapper, comment);
@@ -1485,6 +1696,7 @@ if (Node && !Node.prototype.getRootNode) {
       while (child = wrapper.firstChild) {
         frag.appendChild(child);
       }
+      scrapbook.unhtmlify(frag, {apply: false});
       node.replaceWith(frag);
       if (normalize) {
         parent.normalize();
@@ -1498,7 +1710,9 @@ if (Node && !Node.prototype.getRootNode) {
       const doc = node.ownerDocument;
       const t = doc.createElement('template');
       t.innerHTML = scrapbook.unescapeHtmlComment(m[1]);
-      node.replaceWith(doc.importNode(t.content, true));
+      const frag = doc.importNode(t.content, true);
+      scrapbook.unhtmlify(frag);
+      node.replaceWith(frag);
       if (normalize) {
         parent.normalize();
       }
