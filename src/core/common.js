@@ -1357,26 +1357,26 @@ if (Node && !Node.prototype.getRootNode) {
    *
    * @return {false|string} Scrapbook object type of the element; or false.
    */
-  scrapbook.getScrapbookObjectType = function (elem) {
-    if (elem.nodeType === 8) {
-      const m = elem.nodeValue.match(/^scrapbook-(.*?)(?:-\d+)?=/);
+  scrapbook.getScrapbookObjectType = function (node) {
+    if (node.nodeType === 8) {
+      const m = node.nodeValue.match(/^scrapbook-(.*?)(?:-\d+)?=/);
       if (m) {
         return m[1];
       }
       return false;
     }
 
-    if (elem.nodeType !== 1) { return false; }
+    if (node.nodeType !== 1) { return false; }
 
-    let type = elem.getAttribute("data-scrapbook-elem");
+    let type = node.getAttribute("data-scrapbook-elem");
     if (type) { return type; }
 
     // for downward compatibility with legacy ScrapBook X
-    type = elem.getAttribute("data-sb-obj");
+    type = node.getAttribute("data-sb-obj");
     if (type) { return type; }
 
     // for downward compatibility with legacy ScrapBook
-    switch (elem.className) {
+    switch (node.className) {
       case "linemarker-marked-line":
         return "linemarker";
       case "scrapbook-inline":
@@ -1392,7 +1392,7 @@ if (Node && !Node.prototype.getRootNode) {
         return "block-comment";
     }
 
-    if (elem.id == "scrapbook-sticky-css") {
+    if (node.id == "scrapbook-sticky-css") {
       return "stylesheet";
     }
 
@@ -1407,8 +1407,8 @@ if (Node && !Node.prototype.getRootNode) {
    *      2: should unwrap
    *      3: should uncomment
    */
-  scrapbook.getScrapBookObjectRemoveType = function (elem) {
-    let type = scrapbook.getScrapbookObjectType(elem);
+  scrapbook.getScrapBookObjectRemoveType = function (node) {
+    let type = scrapbook.getScrapbookObjectType(node);
     if (!type) { return -1; }
     if (SCRAPBOOK_OBJECT_REMOVE_TYPE_REMOVE.has(type)) { return 1; }
     if (SCRAPBOOK_OBJECT_REMOVE_TYPE_UNWRAP.has(type)) { return 2; }
@@ -1420,19 +1420,19 @@ if (Node && !Node.prototype.getRootNode) {
    * @return {Element[]} Related elements having the shared ID; or the
    *     original element.
    */
-  scrapbook.getScrapBookObjectsById = function (elem) {
-    let id = elem.getAttribute("data-scrapbook-id");
+  scrapbook.getScrapBookObjectsById = function (node) {
+    let id = node.getAttribute("data-scrapbook-id");
     if (id) {
-      return elem.ownerDocument.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`);
+      return node.ownerDocument.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`);
     }
 
     // for downward compatibility with legacy ScrapBook (X)
-    id = elem.getAttribute("data-sb-id");
+    id = node.getAttribute("data-sb-id");
     if (id) {
-      return elem.ownerDocument.querySelectorAll(`[data-sb-id="${CSS.escape(id)}"]`);
+      return node.ownerDocument.querySelectorAll(`[data-sb-id="${CSS.escape(id)}"]`);
     }
 
-    return [elem];
+    return [node];
   };
 
   /**
