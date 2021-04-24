@@ -33,7 +33,6 @@
     isScripted: false,
     serverUrl: null,
     erasedContents: new WeakMap(),
-    history: [],
     lastWindowFocusTime: -1,
     lastWindowBlurTime: -1,
     directToolbarClick: false,
@@ -1020,11 +1019,10 @@ scrapbook-toolbar, scrapbook-toolbar *,
   /**
    * @kind invokable
    */
-  editor.undoInternal = function ({}) {
-    if (!editor.history.length) { return; }
+  editor.undoInternal = function () {
     if (!document.body) { return; }
 
-    document.body.parentNode.replaceChild(editor.history.pop(), document.body);
+    mutationHandler.applyRestorePoint();
   };
 
   /**
@@ -1367,6 +1365,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
   };
 
   editor.save = async function (params = {}) {
+    mutationHandler.addSavePoint();
+
     if (editor.inScrapBook) {
       // prompt a confirm if this page is scripted
       if (editor.isScripted) {
@@ -1733,10 +1733,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   };
 
   editor.addHistory = () => {
-    if (!document.body) { return; }
-
-    const newBody = scrapbook.cloneNode(document.body, true, {includeShadowDom: true});
-    editor.history.push(newBody);
+    mutationHandler.addRestorePoint();
   };
 
 
@@ -2702,11 +2699,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
             window.addEventListener('mousedown', onMouseDown, true);
             window.addEventListener('click', onClick, true);
             window.addEventListener("keydown", onKeyDown, true);
+            mutationHandler.startSpecialMode();
           }
         } else {
           if (this.active) {
             this.active = false;
             domEraser.clearTarget();
+            mutationHandler.endSpecialMode();
             window.removeEventListener('touchstart', onTouchStart, true);
             window.removeEventListener('mouseover', onMouseOver, true);
             window.removeEventListener('mousedown', onMouseDown, true);
@@ -2764,6 +2763,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
           var labelHtml = scrapbook.escapeHtml(scrapbook.lang("EditorButtonDOMEraserRemoveEdit"), false, false, true);
         }
 
+        mutationHandler.addIgnoreStartPoint();
+
         // outline
         for (const elem of scrapbook.getScrapBookObjectsById(lastTarget)) {
           // elements like math doesn't implement the .style property and could throw an error
@@ -2811,6 +2812,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
         labelElem.style.setProperty('left', anchorPos.left + 'px', 'important');
         labelElem.style.setProperty('top', anchorPos.top + 'px', 'important');
 
+        mutationHandler.addIgnoreEndPoint();
+
         tooltipElem = labelElem;
         return lastTarget;
       },
@@ -2818,6 +2821,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
       clearTarget() {
         let elem = lastTarget;
         if (!elem) { return; }
+
+        mutationHandler.addIgnoreStartPoint();
 
         // outline
         for (const [elem, info] of mapMarkedNodes) {
@@ -2835,6 +2840,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
           tooltipElem.remove();
           tooltipElem = null;
         }
+
+        mutationHandler.addIgnoreEndPoint();
 
         // unset lastTarget
         lastTarget = null;
@@ -3260,6 +3267,229 @@ scrapbook-toolbar, scrapbook-toolbar *,
       });
     },
   };
+
+
+  const mutationHandler = editor.mutationHandler = (function () {
+    const MUTATION_COMMAND_NAME = 'scrapbook-command';
+
+    const MUTATION_OBSERVER_OPTIONS = {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeOldValue: true,
+      characterData: true,
+      characterDataOldValue: true,
+    };
+
+    const MUTATION_OBSERVER = new MutationObserver((mutationList, observer) => {
+      for (const mutation of mutationList) {
+        mutationHandler.history.push(mutation);
+      }
+    });
+
+    const mutationHandler = {
+      history: [],
+
+      flushPendingMutations() {
+        for (const entry of MUTATION_OBSERVER.takeRecords()) {
+          this.history.push(entry);
+        }
+      },
+
+      /**
+       * Start the special mode, in which ignored mutations can be defined.
+       *
+       * All ignored mutations should sum up to null mutation when
+       * the special mode ends.
+       */
+      startSpecialMode() {
+        this.flushPendingMutations();
+
+        // start observing since first add
+        if (!this.history.length) {
+          MUTATION_OBSERVER.observe(document.body, MUTATION_OBSERVER_OPTIONS);
+        }
+
+        this.history.push({
+          type: MUTATION_COMMAND_NAME,
+          name: 'special',
+          timestamp: Date.now(),
+        });
+      },
+
+      /**
+       * End special mode and tidy ignored mutations out of the history.
+       */
+      endSpecialMode() {
+        if (!this.history.length) { return; }
+
+        this.flushPendingMutations();
+
+        let i = this.history.length - 1;
+        while (i >= 0) {
+          const entry = this.history[i];
+          if (entry.type === MUTATION_COMMAND_NAME && entry.name === 'special') {
+            break;
+          }
+          i--;
+        }
+        if (i < 0) { return; }
+
+        const targetPoint = i;
+
+        // disconnect mutation observer
+        MUTATION_OBSERVER.disconnect();
+
+        // tidy ignored history during special mode
+        const historyTidied = [];
+        let ignoring = false;
+        for (i = this.history.length - 1; i >= targetPoint; i--) {
+          const entry = this.history.pop();
+          if (entry.type === MUTATION_COMMAND_NAME) {
+            if (entry.name === 'ignore-end') {
+              ignoring = true;
+              continue;
+            }
+            if (entry.name === 'ignore-start') {
+              ignoring = false;
+              continue;
+            }
+            if (entry.name === 'special') {
+              break;
+            }
+          }
+
+          if (!ignoring) {
+            historyTidied.push(entry);
+          }
+        }
+
+        for (const entry of historyTidied.reverse()) {
+          this.history.push(entry);
+        }
+
+        // re-observe if there are still history
+        if (this.history.length) {
+          MUTATION_OBSERVER.observe(document.body, MUTATION_OBSERVER_OPTIONS);
+        }
+      },
+
+      addIgnoreStartPoint() {
+        if (!this.history.length) { return; }
+
+        this.flushPendingMutations();
+
+        this.history.push({
+          type: MUTATION_COMMAND_NAME,
+          name: 'ignore-start',
+          timestamp: Date.now(),
+        });
+      },
+
+      addIgnoreEndPoint() {
+        if (!this.history.length) { return; }
+
+        this.flushPendingMutations();
+
+        this.history.push({
+          type: MUTATION_COMMAND_NAME,
+          name: 'ignore-end',
+          timestamp: Date.now(),
+        });
+      },
+
+      addRestorePoint() {
+        this.flushPendingMutations();
+
+        // start observing since first add
+        if (!this.history.length) {
+          MUTATION_OBSERVER.observe(document.body, MUTATION_OBSERVER_OPTIONS);
+        }
+
+        this.history.push({
+          type: MUTATION_COMMAND_NAME,
+          name: 'point',
+          timestamp: Date.now(),
+        });
+      },
+
+      applyRestorePoint() {
+        if (!this.history.length) { return; }
+
+        this.flushPendingMutations();
+
+        let i = this.history.length - 1;
+        while (i >= 0) {
+          const entry = this.history[i];
+          if (entry.type === MUTATION_COMMAND_NAME && entry.name === 'point') {
+            break;
+          }
+          i--;
+        }
+        if (i < 0) { return; }
+
+        const targetPoint = i;
+
+        // disconnect mutation observer
+        MUTATION_OBSERVER.disconnect();
+
+        // apply restore point
+        for (i = this.history.length - 1; i >= targetPoint; i--) {
+          const entry = this.history.pop();
+          if (entry.type === MUTATION_COMMAND_NAME) { continue; }
+
+          switch (entry.type) {
+            case 'attributes': {
+              if (entry.oldValue === null) {
+                entry.target.removeAttributeNS(entry.attributeNamespace, entry.attributeName);
+              } else {
+                entry.target.setAttributeNS(entry.attributeNamespace, entry.attributeName, entry.oldValue);
+              }
+              break;
+            }
+            case 'characterData': {
+              entry.target.textContent = entry.oldValue;
+              break;
+            }
+            case 'childList': {
+              if (entry.addedNodes.length) {
+                for (const node of entry.addedNodes) {
+                  node.remove();
+                }
+              }
+
+              if (entry.removedNodes.length) {
+                for (const node of entry.removedNodes) {
+                  entry.target.insertBefore(node, entry.nextSibling);
+                }
+              }
+
+              break;
+            }
+          }
+        }
+
+        // re-observe if there are still history
+        if (this.history.length) {
+          MUTATION_OBSERVER.observe(document.body, MUTATION_OBSERVER_OPTIONS);
+        }
+      },
+
+      addSavePoint() {
+        if (!this.history.length) { return; }
+
+        this.flushPendingMutations();
+
+        this.history.push({
+          type: MUTATION_COMMAND_NAME,
+          name: 'save',
+          timestamp: Date.now(),
+        });
+      },
+    };
+
+    return mutationHandler;
+  })();
 
 
   window.addEventListener("focus", (event) => {
