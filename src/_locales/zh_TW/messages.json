@@ -378,6 +378,9 @@
   "EditorButtonUndo": {
     "message": "復原"
   },
+  "EditorButtonUndoToggle": {
+    "message": "啟用復原功能"
+  },
   "EditorDeleteAnnotationConfirm": {
     "message": "刪除這個批註嗎？"
   },

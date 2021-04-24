@@ -483,6 +483,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
   </div>
   <div class="toolbar-undo" title="${scrapbook.lang('EditorButtonUndo')}">
     <button></button>
+    <ul hidden="" title="">
+      <li><button class="toolbar-undo-toggle" checked="">${scrapbook.lang('EditorButtonUndoToggle')}</button></li>
+    </ul>
   </div>
   <div class="toolbar-save" title="${scrapbook.lang('EditorButtonSave')}">
     <button></button>
@@ -768,7 +771,13 @@ ${sRoot}.toolbar .toolbar-close:hover {
     }, {passive: true});
     elem.addEventListener("contextmenu", (event) => {
       event.preventDefault();
+      editor.showContextMenu(event.currentTarget.nextElementSibling, event);
     });
+
+    var elem = wrapper.querySelector('.toolbar-undo-toggle');
+    elem.addEventListener("click", (event) => {
+      editor.toggleMutationHandler();
+    }, {passive: true});
 
     // save
     var elem = wrapper.querySelector('.toolbar-save > button:first-of-type');
@@ -1351,6 +1360,36 @@ scrapbook-toolbar, scrapbook-toolbar *,
     if (!willActive && !ignoreAnnotator) {
       await editor.toggleAnnotator(true);
     }
+  };
+
+  editor.toggleMutationHandler = async function (willActive) {
+    const editElem = editor.internalElement.querySelector('.toolbar-undo-toggle');
+
+    if (typeof willActive === "undefined") {
+      willActive = !editElem.hasAttribute("checked");
+    }
+
+    if (willActive) {
+      if (editElem.hasAttribute("checked")) {
+        // already active or is doing async activating
+        return;
+      }
+      editElem.setAttribute("checked", "");
+    } else {
+      if (!editElem.hasAttribute("checked")) {
+        // already inactive or is doing async deactivating
+        return;
+      }
+      editElem.removeAttribute("checked");
+    }
+
+    await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        cmd: "editor.mutationHandler.toggle",
+        args: {willActive},
+      },
+    });
   };
 
   editor.undo = async function () {
@@ -3288,7 +3327,30 @@ scrapbook-toolbar, scrapbook-toolbar *,
     });
 
     const mutationHandler = {
+      active: true,
       history: [],
+
+      /**
+       * @kind invokable
+       */
+      toggle({willActive}) {
+        if (typeof willActive === 'undefined') {
+          willActive = !this.active;
+        }
+
+        if (willActive) {
+          if (!this.active) {
+            this.active = true;
+          }
+        } else {
+          if (this.active) {
+            this.active = false;
+            this.flushPendingMutations();
+            MUTATION_OBSERVER.disconnect();
+            this.history = [];
+          }
+        }
+      },
 
       flushPendingMutations() {
         for (const entry of MUTATION_OBSERVER.takeRecords()) {
@@ -3303,6 +3365,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
        * the special mode ends.
        */
       startSpecialMode() {
+        if (!this.active) { return; }
+
         this.flushPendingMutations();
 
         // start observing since first add
@@ -3321,6 +3385,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
        * End special mode and tidy ignored mutations out of the history.
        */
       endSpecialMode() {
+        if (!this.active) { return; }
         if (!this.history.length) { return; }
 
         this.flushPendingMutations();
@@ -3375,6 +3440,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       },
 
       addIgnoreStartPoint() {
+        if (!this.active) { return; }
         if (!this.history.length) { return; }
 
         this.flushPendingMutations();
@@ -3387,6 +3453,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       },
 
       addIgnoreEndPoint() {
+        if (!this.active) { return; }
         if (!this.history.length) { return; }
 
         this.flushPendingMutations();
@@ -3399,6 +3466,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
       },
 
       addRestorePoint() {
+        if (!this.active) { return; }
+
         this.flushPendingMutations();
 
         // start observing since first add
@@ -3414,6 +3483,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       },
 
       applyRestorePoint() {
+        if (!this.active) { return; }
         if (!this.history.length) { return; }
 
         this.flushPendingMutations();
@@ -3476,6 +3546,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       },
 
       addSavePoint() {
+        if (!this.active) { return; }
         if (!this.history.length) { return; }
 
         this.flushPendingMutations();

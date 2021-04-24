@@ -378,6 +378,9 @@
   "EditorButtonUndo": {
     "message": "Undo"
   },
+  "EditorButtonUndoToggle": {
+    "message": "Enable undo"
+  },
   "EditorDeleteAnnotationConfirm": {
     "message": "Delete this annotation?"
   },
