@@ -3,6 +3,22 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.113.0] - 2021-04-24
+* Added support of more modes for `Form status` capture option.
+* Added a default option for the backend server URL option.
+* Added support of enabling/disabling undo feature from its context menu.
+* Added support of `Home` and `End` for sidebar key navigation.
+* Added a message for a scrapbook configured as `no_tree` in the sidebar.
+* Added support of `limit:` command for search.
+* Fixed an issue that certain interactive properties, such as form status, canvas, and shadow DOM, are lost after an unerase in a re-loaded document.
+* Fixed an issue that unrelated content in the document be refreshed after an undo.
+* Fixed an issue that certain interactive properties, such as canvas and shadow DOM, are lost after an undo.
+* Fixed missing support of opening in new tab for `View index page` sidebar command.
+* Fixed an issue that the opened postit is not saved when switching scrapbook.
+* Fixed an issue that switching scrapbook after a change of server config can load incorrect tree data.
+* Fixed an error causing the copy item dialog in a manage dialog not working.
+* Fixed an error causing unit tests not working.
+
 ## [0.112.0] - 2021-04-19
 * Added options for whether to open in new tab for sidebar operations. Most operations now defaults to open in the active tab.
 * Added support of opening in new tab by holding Ctrl or Shift for sidebar operations.
