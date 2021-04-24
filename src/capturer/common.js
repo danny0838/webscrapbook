@@ -23,8 +23,6 @@
 
   'use strict';
 
-  const DOMPARSER_SUPPORT_TYPES = new Set(['text/html', 'application/xhtml+xml', 'text/xml', 'application/xml', 'image/svg+xml']);
-
   const REWRITABLE_SPECIAL_OBJECTS = new Set([false, 'adoptedStyleSheet']);
 
   const REMOVE_HIDDEN_EXCLUDE_HTML = new Set(["html", "head", "title", "meta", "link", "style", "script", "body", "noscript", "template", "source", "track"]);
@@ -181,26 +179,12 @@
     // e.g. cloned iframes has no content, cloned canvas has no image,
     // and cloned form elements has no current status.
     const cloneNodeMapping = (node, deep = false) => {
-      const newNode = newDoc.importNode(node, deep);
-      origNodeMap.set(newNode, node);
-      clonedNodeMap.set(node, newNode);
-
-      // map descendants
-      if (deep) {
-        const doc = node.ownerDocument;
-        const walker1 = doc.createNodeIterator(node);
-        const walker2 = newDoc.createNodeIterator(newNode);
-        let node1 = walker1.nextNode();
-        let node2 = walker2.nextNode();
-        while (node1) {
-          origNodeMap.set(node2, node1);
-          clonedNodeMap.set(node1, node2);
-          node1 = walker1.nextNode();
-          node2 = walker2.nextNode();
-        }
-      }
-
-      return newNode;
+      return scrapbook.cloneNode(node, deep, {
+        newDoc,
+        origNodeMap,
+        clonedNodeMap,
+        includeShadowDom: options["capture.shadowDom"] === "save",
+      });
     };
 
     const captureRecordAddedNode = (elem, record = options["capture.recordRewrites"]) => {
@@ -1935,29 +1919,14 @@
         }
 
         // handle shadow DOM
-        switch (options["capture.shadowDom"]) {
-          case "save": {
-            const shadowRootOrig = elemOrig && elemOrig.shadowRoot;
-            if (!shadowRootOrig) { break; }
-
-            const shadowRoot = elem.attachShadow({mode: 'open'});
-            origNodeMap.set(shadowRoot, shadowRootOrig);
-            clonedNodeMap.set(shadowRootOrig, shadowRoot);
-            for (const elem of shadowRootOrig.childNodes) {
-              shadowRoot.appendChild(cloneNodeMapping(elem, true));
-            }
-
+        {
+          const shadowRoot = elem.shadowRoot;
+          if (shadowRoot) {
+            const shadowRootOrig = origNodeMap.get(shadowRoot);
             addAdoptedStyleSheets(shadowRootOrig, shadowRoot);
             rewriteRecursively(shadowRoot, shadowRoot.nodeName.toLowerCase(), rewriteNode);
-            shadowRootList.push({
-              host: elem,
-              shadowRoot,
-            });
+            shadowRootList.push(shadowRoot);
             requireBasicLoader = true;
-            break;
-          }
-          default: {
-            break;
           }
         }
 
@@ -2088,15 +2057,6 @@
     // alias of baseUrl for resolving links and resources
     const refUrl = baseUrl;
 
-    // create a new document to replicate nodes via import
-    const newDoc = (new DOMParser()).parseFromString(
-      '<' + docElemNode.nodeName.toLowerCase() + '/>',
-      DOMPARSER_SUPPORT_TYPES.has(mime) ? mime : 'text/html'
-    );
-    while (newDoc.firstChild) {
-      newDoc.removeChild(newDoc.firstChild);
-    }
-
     if (isMainPage && isMainFrame) {
       settings.indexFilename = await capturer.formatIndexFilename({
         title: settings.title || doc.title || scrapbook.filenameParts(scrapbook.urlToFilename(docUrl))[0] || "untitled",
@@ -2138,9 +2098,8 @@
     const escapedNoscriptList = [];
     const shadowRootList = [];
 
-    // add newDoc as the topmost cloned node
-    origNodeMap.set(newDoc, doc);
-    clonedNodeMap.set(doc, newDoc);
+    // create a new document to replicate nodes via import
+    const newDoc = scrapbook.cloneDocument(doc, {origNodeMap, clonedNodeMap});
 
     let rootNode, headNode;
     let selection = settings.fullPage ? null : doc.getSelection();
@@ -2489,10 +2448,10 @@
     }
 
     // record after the content of all nested shadow roots have been processed
-    for (const {host, shadowRoot} of shadowRootList) {
-      captureRewriteAttr(host, "data-scrapbook-shadowroot", JSON.stringify({
+    for (const shadowRoot of shadowRootList) {
+      captureRewriteAttr(shadowRoot.host, "data-scrapbook-shadowroot", JSON.stringify({
         data: shadowRoot.innerHTML,
-        mode: "open",
+        mode: shadowRoot.mode,
       }));
     }
 
@@ -2575,26 +2534,12 @@
       }
 
       const cloneNodeMapping = (node, deep = false) => {
-        const newNode = newDoc.importNode(node, deep);
-        origNodeMap.set(newNode, node);
-        clonedNodeMap.set(node, newNode);
-
-        // map descendants
-        if (deep) {
-          const doc = node.ownerDocument;
-          const walker1 = doc.createNodeIterator(node);
-          const walker2 = newDoc.createNodeIterator(newNode);
-          let node1 = walker1.nextNode();
-          let node2 = walker2.nextNode();
-          while (node1) {
-            origNodeMap.set(node2, node1);
-            clonedNodeMap.set(node1, node2);
-            node1 = walker1.nextNode();
-            node2 = walker2.nextNode();
-          }
-        }
-
-        return newNode;
+        return scrapbook.cloneNode(node, deep, {
+          newDoc,
+          origNodeMap,
+          clonedNodeMap,
+          includeShadowDom: true,
+        });
       };
 
       const addResource = (url) => {
@@ -2730,23 +2675,12 @@
         if (shadowRootSupported) {
           for (const elem of rootNode.querySelectorAll("*")) {
             elem.removeAttribute("data-scrapbook-shadowroot");
-
-            const elemOrig = origNodeMap.get(elem);
-            if (!elemOrig) { continue; }
-
-            const shadowRootOrig = elemOrig.shadowRoot;
-            if (!shadowRootOrig) { continue; }
-
-            const shadowRoot = elem.attachShadow({mode: 'open'});
-            origNodeMap.set(shadowRoot, shadowRootOrig);
-            clonedNodeMap.set(shadowRootOrig, shadowRoot);
-            for (const elem of shadowRootOrig.childNodes) {
-              shadowRoot.appendChild(cloneNodeMapping(elem, true));
-            }
+            const shadowRoot = elem.shadowRoot;
+            if (!shadowRoot) { continue; }
             processRootNode(shadowRoot);
             elem.setAttribute("data-scrapbook-shadowroot", JSON.stringify({
               data: shadowRoot.innerHTML,
-              mode: "open",
+              mode: shadowRoot.mode,
             }));
             requireBasicLoader = true;
           }
@@ -2761,21 +2695,11 @@
 
       const {contentType: mime, characterSet: charset, documentElement: docElemNode} = doc;
 
-      // create a new document to replicate nodes via import
-      const newDoc = (new DOMParser()).parseFromString(
-        '<' + docElemNode.nodeName.toLowerCase() + '/>',
-        DOMPARSER_SUPPORT_TYPES.has(mime) ? mime : 'text/html'
-      );
-      while (newDoc.firstChild) {
-        newDoc.removeChild(newDoc.firstChild);
-      }
-
       const origNodeMap = new WeakMap();
       const clonedNodeMap = new WeakMap();
 
-      // add newDoc as the topmost cloned node
-      origNodeMap.set(newDoc, doc);
-      clonedNodeMap.set(doc, newDoc);
+      // create a new document to replicate nodes via import
+      const newDoc = scrapbook.cloneDocument(doc, {origNodeMap, clonedNodeMap});
 
       for (const node of doc.childNodes) {
         newDoc.appendChild(cloneNodeMapping(node, true));
