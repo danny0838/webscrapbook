@@ -1735,7 +1735,8 @@ scrapbook-toolbar, scrapbook-toolbar *,
   editor.addHistory = () => {
     if (!document.body) { return; }
 
-    editor.history.push(document.body.cloneNode(true));
+    const newBody = scrapbook.cloneNode(document.body, true, {includeShadowDom: true});
+    editor.history.push(newBody);
   };
 
 
