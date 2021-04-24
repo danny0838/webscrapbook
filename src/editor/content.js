@@ -2590,16 +2590,10 @@ scrapbook-toolbar, scrapbook-toolbar *,
       '.scrapbook-block-comment', // SB < 0.19?
     ].join(', ');
 
-    const mapElemOutline = new WeakMap();
-    const mapElemOutlinePriority = new WeakMap();
-    const mapElemCursor = new WeakMap();
-    const mapElemCursorPriority = new WeakMap();
-    const mapElemHadStyleAttr = new WeakMap();
-    const mapElemTooltip = new WeakMap();
-
     let lastTarget = null;
     let lastTouchTarget = null;
     let tooltipElem = null;
+    const mapMarkedNodes = new Map();
     let mapExpandStack = new WeakMap();
 
     const onTouchStart = (event) => {
@@ -2773,16 +2767,16 @@ scrapbook-toolbar, scrapbook-toolbar *,
         // outline
         for (const elem of scrapbook.getScrapBookObjectsById(lastTarget)) {
           // elements like math doesn't implement the .style property and could throw an error
-          try {
-            mapElemHadStyleAttr.set(elem, elem.hasAttribute('style'));
-            mapElemOutline.set(elem, elem.style.getPropertyValue('outline'));
-            mapElemOutlinePriority.set(elem, elem.style.getPropertyPriority('outline'));
-            mapElemCursor.set(elem, elem.style.getPropertyValue('cursor'));
-            mapElemCursorPriority.set(elem, elem.style.getPropertyPriority('cursor'));
+          if (elem.style) {
+            mapMarkedNodes.set(elem, {
+              hasStyle: elem.hasAttribute('style'),
+              outline: elem.style.getPropertyValue('outline'),
+              outlinePriority: elem.style.getPropertyPriority('outline'),
+              cursor: elem.style.getPropertyValue('cursor'),
+              cursorPriority: elem.style.getPropertyPriority('cursor'),
+            });
             elem.style.setProperty('outline', outlineStyle, 'important');
             elem.style.setProperty('cursor', 'pointer', 'important');
-          } catch (ex) {
-            // pass
           }
         }
 
@@ -2826,16 +2820,15 @@ scrapbook-toolbar, scrapbook-toolbar *,
         if (!elem) { return; }
 
         // outline
-        for (const elem of scrapbook.getScrapBookObjectsById(lastTarget)) {
+        for (const [elem, info] of mapMarkedNodes) {
           // elements like math doesn't implement the .style property and could throw an error
-          try {
-            elem.style.setProperty('outline', mapElemOutline.get(elem), mapElemOutlinePriority.get(elem));
-            elem.style.setProperty('cursor', mapElemCursor.get(elem), mapElemCursorPriority.get(elem));
-            if (!elem.getAttribute('style') && !mapElemHadStyleAttr.get(elem)) { elem.removeAttribute('style'); }
-          } catch (ex) {
-            // pass
+          if (elem.style) {
+            elem.style.setProperty('outline', info.outline, info.outlinePriority);
+            elem.style.setProperty('cursor', info.cursor, info.cursorPriority);
+            if (!elem.getAttribute('style') && !info.hasStyle) { elem.removeAttribute('style'); }
           }
         }
+        mapMarkedNodes.clear();
 
         // tooltip
         if (tooltipElem) {
