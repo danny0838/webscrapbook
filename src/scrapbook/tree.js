@@ -290,7 +290,8 @@
           }
           default: {
             if (meta.index) {
-              a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index);
+              a.href = this.book.dataUrl + scrapbook.escapeFilename(meta.index)
+                  + scrapbook.splitUrlByAnchor(meta.source || '')[1];
             }
             break;
           }
