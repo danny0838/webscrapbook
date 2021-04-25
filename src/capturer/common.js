@@ -2484,7 +2484,7 @@
     }
 
     const response = await capturer.invoke("saveDocument", {
-      sourceUrl: docUrl,
+      sourceUrl: docUrl + (docUrl.startsWith('data:') ? '' : docUrlHash),
       documentFileName,
       settings,
       options,
