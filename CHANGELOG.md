@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.114.0] - 2021-04-27
+* Hash part of source URL is now considered when viewing an item.
+* Fixed an issue that URL hash is not included in the source URL for the captured item.
+* Fixed several issues on handling an item whose index file is an archive.
+
 ## [0.113.0] - 2021-04-24
 * Added support of more modes for `Form status` capture option.
 * Added a default option for the backend server URL option.
