@@ -1129,7 +1129,7 @@
 
           menuElem.querySelector('button[value="opentab"]').hidden = ['folder', 'separator'].includes(item.type);
           menuElem.querySelector('button[value="view_text"]').hidden = !(item.type === 'file' && item.index);
-          menuElem.querySelector('button[value="exec"]').hidden = !(item.type === 'file' && item.index);
+          menuElem.querySelector('button[value="exec"]').hidden = !(item.type === 'file' && item.index && !/\.(?:htz|maff)$/i.test(item.index));
           menuElem.querySelector('button[value="browse"]').hidden = !(item.index);
           menuElem.querySelector('button[value="source"]').hidden = !(item.source);
           menuElem.querySelector('button[value="manage"]').hidden = !(!isRecycle && (item.type === 'folder' || this.book.toc[item.id]));
@@ -1910,14 +1910,7 @@ ${scrapbook.escapeHtml(content)}
           const item = this.book.meta[id];
           if (!item.index) { continue; }
 
-          let target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
-          if (target.endsWith('/index.html')) {
-            const redirectedTarget = await server.getMetaRefreshTarget(target);
-            if (redirectedTarget) {
-              target = redirectedTarget;
-            }
-          }
-
+          const target = await this.book.getItemIndexUrl(item);
           const u = new URL(target);
           u.searchParams.set('a', 'source');
           if (item.charset) { u.searchParams.set('e', item.charset); }
@@ -1931,14 +1924,7 @@ ${scrapbook.escapeHtml(content)}
           const item = this.book.meta[id];
           if (!item.index) { continue; }
 
-          let target = this.book.dataUrl + scrapbook.escapeFilename(item.index);
-          if (target.endsWith('/index.html')) {
-            const redirectedTarget = await server.getMetaRefreshTarget(target);
-            if (redirectedTarget) {
-              target = scrapbook.splitUrlByAnchor(redirectedTarget)[0];
-            }
-          }
-
+          const target = await this.book.getItemIndexUrl(item, {checkArchiveRedirect: false});
           await server.request({
             url: target + '?a=exec',
             method: "GET",

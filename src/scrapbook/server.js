@@ -1179,6 +1179,39 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
     }
 
     /**
+     * Get URL of the real index file of an item.
+     *
+     * - Consider redirection of HTZ or MAFF.
+     * - Consider meta refresh of index.html.
+     */
+    async getItemIndexUrl(item, {
+      checkArchiveRedirect = true,
+      checkMetaRefresh = true,
+    } = {}) {
+      const index = item.index;
+      if (!index) { return; }
+
+      let target = this.dataUrl + scrapbook.escapeFilename(index);
+
+      if (checkArchiveRedirect) {
+        const response = await this.server.request({
+          url: target,
+          method: "HEAD",
+        });
+        target = response.url;
+      }
+
+      if (checkMetaRefresh && target.endsWith('/index.html')) {
+        const redirectedTarget = await this.server.getMetaRefreshTarget(target);
+        if (redirectedTarget) {
+          target = redirectedTarget;
+        }
+      }
+
+      return target;
+    }
+
+    /**
      * Check whether url is a valid index file for item.
      *
      * - Currently any ~/index.html in a MAFF archive is considered true as
@@ -1317,7 +1350,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
     }
 
     async loadPostit(item) {
-      const target = this.dataUrl + scrapbook.escapeFilename(item.index);
+      const target = await this.getItemIndexUrl(item);
       let text = await server.request({
         url: target + '?a=source',
         method: "GET",
@@ -1355,7 +1388,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
             return value ? scrapbook.escapeHtml(value) : '';
           });
 
-          const target = this.dataUrl + scrapbook.escapeFilename(item.index);
+          const target = await this.getItemIndexUrl(item);
           await this.server.request({
             url: target + '?a=save',
             method: "POST",

@@ -36,7 +36,7 @@
         const id = this.id = params.get('id');
         const bookId = this.bookId = params.get('bookId');
         let file = params.get('file');
-        let checkMetaRefresh = !file;
+        let checkRedirect = !file;
 
         await scrapbook.loadOptions();
         await server.init();
@@ -61,14 +61,9 @@
         }
 
         try {
-          let target = this.target = book.dataUrl + scrapbook.escapeFilename(file);
-
-          if (checkMetaRefresh && target.endsWith('.html')) {
-            const redirectedTarget = await server.getMetaRefreshTarget(target);
-            if (redirectedTarget) {
-              target = this.target = scrapbook.splitUrlByAnchor(redirectedTarget)[0];
-            }
-          }
+          let target = this.target = checkRedirect ?
+            await book.getItemIndexUrl(item) : 
+            book.dataUrl + scrapbook.escapeFilename(file);
 
           const text = await server.request({
             url: target + '?a=source',
