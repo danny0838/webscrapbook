@@ -2449,10 +2449,7 @@
 
     // record after the content of all nested shadow roots have been processed
     for (const shadowRoot of shadowRootList) {
-      captureRewriteAttr(shadowRoot.host, "data-scrapbook-shadowroot", JSON.stringify({
-        data: shadowRoot.innerHTML,
-        mode: shadowRoot.mode,
-      }));
+      captureRewriteAttr(shadowRoot.host, "data-scrapbook-shadowdom", shadowRoot.innerHTML);
     }
 
     // attach CSS resource map
@@ -2674,21 +2671,38 @@
         // update shadow root data
         if (shadowRootSupported) {
           for (const elem of rootNode.querySelectorAll("*")) {
-            elem.removeAttribute("data-scrapbook-shadowroot");
+            elem.removeAttribute("data-scrapbook-shadowdom");
+            elem.removeAttribute("data-scrapbook-shadowroot"); // WebScrapBook < 0.115
             const shadowRoot = elem.shadowRoot;
             if (!shadowRoot) { continue; }
             processRootNode(shadowRoot);
-            elem.setAttribute("data-scrapbook-shadowroot", JSON.stringify({
-              data: shadowRoot.innerHTML,
-              mode: shadowRoot.mode,
-            }));
+            elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
             requireBasicLoader = true;
           }
         } else {
           // shadowRoot not supported by the browser.
           // Just record whether there's a recorded shadow root.
-          if (rootNode.querySelector('[data-scrapbook-shadowroot]')) {
+          if (rootNode.querySelector('[data-scrapbook-shadowdom]')) {
             requireBasicLoader = true;
+          }
+          // convert old data-scrapbook-shadowroot recursively (WebScrapBook < 0.115)
+          {
+            const convert = (rootNode) => {
+              for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowroot]')) {
+                try {
+                  const {data} = JSON.parse(elem.getAttribute('data-scrapbook-shadowroot'));
+                  const t = rootNode.ownerDocument.createElement('template');
+                  t.innerHTML = data;
+                  convert(t.content);
+                  elem.setAttribute("data-scrapbook-shadowdom", t.innerHTML);
+                  requireBasicLoader = true;
+                } catch (ex) {
+                  console.error(ex);
+                }
+                elem.removeAttribute('data-scrapbook-shadowroot');
+              }
+            };
+            convert(rootNode);
           }
         }
       };
@@ -2807,7 +2821,7 @@
       // HTMLCanvasElement: Firefox >= 1.5, querySelectorAll: Firefox >= 3.5
       // getElementsByTagName is not implemented for DocumentFragment (shadow root)
       loader.textContent = "(" + scrapbook.compressJsFunc(function () {
-        var k1 = "data-scrapbook-shadowroot",
+        var k1 = "data-scrapbook-shadowdom",
             k2 = "data-scrapbook-canvas",
             k3 = "data-scrapbook-input-indeterminate",
             k4 = "data-scrapbook-input-checked",
@@ -2819,9 +2833,8 @@
               while (i--) {
                 e = E[i];
                 if ((d = e.getAttribute(k1)) !== null && !e.shadowRoot && e.attachShadow) {
-                  d = JSON.parse(d);
-                  s = e.attachShadow({mode: d.mode});
-                  s.innerHTML = d.data;
+                  s = e.attachShadow({mode: 'open'});
+                  s.innerHTML = d;
                   e.removeAttribute(k1);
                 }
                 if ((d = e.getAttribute(k2)) !== null) {

@@ -3711,15 +3711,11 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       // recurse into shadow roots
       if (SHADOW_ROOT_SUPPORTED) {
-        for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowroot]')) {
-          const {mode, data} = JSON.parse(elem.getAttribute('data-scrapbook-shadowroot'));
-          const shadowRoot = elem.attachShadow({mode});
-          shadowRoot.innerHTML = data;
+        for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
+          const shadowRoot = elem.attachShadow({mode: 'open'});
+          shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
           processRootNode(shadowRoot, urlToFilenameMap);
-          elem.setAttribute("data-scrapbook-shadowroot", JSON.stringify({
-            data: shadowRoot.innerHTML,
-            mode,
-          }));
+          elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
         }
       }
     };

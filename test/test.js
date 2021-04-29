@@ -4151,7 +4151,7 @@ async function test_capture_css_adoptedStyleSheets() {
 
   var host1 = doc.querySelector('#shadow1');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   var styleElems = shadow1.querySelectorAll('style');
   assert(styleElems[1].textContent.trim() === `#adopted { background-color: rgb(0, 255, 0); }`);
@@ -4772,7 +4772,7 @@ async function test_capture_imageBackground_used2() {
 }
 
 /**
- * Check if used background images in a shadowRoot are considered
+ * Check if used background images in a shadow DOM are considered
  *
  * capture.imageBackground
  */
@@ -4798,7 +4798,7 @@ async function test_capture_imageBackground_used3() {
 
   var host1 = doc.querySelector('#shadow1');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   assert(shadow1.querySelector('style').textContent.trim() === `\
 :host { background-image: url("yellow.bmp"); }
@@ -4846,7 +4846,7 @@ async function test_capture_imageBackground_used4() {
 
   var host1 = doc.querySelector('#shadow1');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   assert(shadow1.querySelector('style').textContent.trim() === `\
 @keyframes shadow1 {
@@ -4907,7 +4907,7 @@ async function test_capture_imageBackground_used5() {
 
   var host1 = doc.querySelector('#shadow1');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   assert(shadow1.querySelector('style').textContent.trim() === `#adopted { background-image: url("shadow.bmp"); }`);
 }
@@ -5023,7 +5023,7 @@ async function test_capture_canvas() {
   assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
   assert(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas").match(/^data:image\/png;base64,/));
 
-  // canvas in the shadow root
+  // canvas in the shadow DOM
   var blob = await capture({
     url: `${localhost}/capture_canvas/canvas2.html`,
     options: Object.assign({}, baseOptions, options),
@@ -5040,7 +5040,7 @@ async function test_capture_canvas() {
   
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(shadow.querySelector('canvas').getAttribute('data-scrapbook-canvas').match(/^data:image\/png;base64,/));
 
@@ -5064,7 +5064,7 @@ async function test_capture_canvas() {
   assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
   assert(!doc.querySelector('#c2').hasAttribute("data-scrapbook-canvas"));
 
-  // canvas in the shadow root
+  // canvas in the shadow DOM
   var blob = await capture({
     url: `${localhost}/capture_canvas/canvas2.html`,
     options: Object.assign({}, baseOptions, options),
@@ -5081,7 +5081,7 @@ async function test_capture_canvas() {
 
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(!shadow.querySelector('canvas').hasAttribute('data-scrapbook-canvas'));
 
@@ -5105,7 +5105,7 @@ async function test_capture_canvas() {
   assert(!doc.querySelector('#c1'));
   assert(!doc.querySelector('#c2'));
 
-  // canvas in the shadow root
+  // canvas in the shadow DOM
   var blob = await capture({
     url: `${localhost}/capture_canvas/canvas2.html`,
     options: Object.assign({}, baseOptions, options),
@@ -5122,7 +5122,7 @@ async function test_capture_canvas() {
 
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(!shadow.querySelector('canvas'));
 }
@@ -5755,7 +5755,7 @@ async function test_capture_font_used3() {
 
   var host1 = doc.querySelector('#shadow1');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   assert(shadow1.querySelector('style').textContent.trim() === `\
 @font-face { font-family: shadow1; src: url("shadow1.woff"); }
@@ -6532,7 +6532,7 @@ async function test_capture_formStatus() {
 }
 
 /**
- * Check if shadowRoots (possibly nested) can be captured correctly.
+ * Check if shadow DOMs (possibly nested) can be captured correctly.
  *
  * capturer.captureDocument
  */
@@ -6559,13 +6559,13 @@ async function test_capture_shadowRoot() {
 
   var host1 = doc.querySelector('div');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 
   var host2 = shadow1.querySelector('p');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host2.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host2.getAttribute("data-scrapbook-shadowdom");
   var shadow2 = frag.content;
   assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
 
@@ -6597,7 +6597,7 @@ async function test_capture_shadowRoot() {
 }
 
 /**
- * Check for shadowRoot auto-generated via custom elements.
+ * Check for shadow DOM auto-generated via custom elements.
  *
  * capturer.captureDocument
  */
@@ -6624,7 +6624,7 @@ async function test_capture_shadowRoot2() {
 
   var host1 = doc.querySelector('custom-elem');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host1.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 
@@ -8103,7 +8103,7 @@ async function test_capture_downLink10() {
 }
 
 /**
- * Check links in shadow roots are rebuilt
+ * Check links in shadow DOMs are rebuilt
  *
  * capture.downLink.doc.depth
  */
@@ -8125,13 +8125,13 @@ async function test_capture_downLink11() {
 
   var host = doc.querySelector('div');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(shadow.querySelectorAll('a')[0].getAttribute('href') === `linked1.html#111`);
 
   var host = shadow.querySelector('div');
   var frag = doc.createElement("template");
-  frag.innerHTML = JSON.parse(host.getAttribute("data-scrapbook-shadowroot")).data;
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(shadow.querySelectorAll('a')[0].getAttribute('href') === `linked2.html#222`);
 }
