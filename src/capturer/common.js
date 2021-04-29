@@ -2072,7 +2072,7 @@
     const registry = await capturer.invoke("registerDocument", {
       docUrl,
       mime,
-      role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined :
+      role: options["capture.saveAs"] === "singleHtml" ? undefined :
           (isMainFrame || isHeadless) ? "document" : `document-${scrapbook.getUuid()}`,
       settings,
       options,
@@ -4253,7 +4253,7 @@
 
         const registry = await capturer.invoke("registerFile", {
           url: sourceUrl,
-          role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined :
+          role: options["capture.saveAs"] === "singleHtml" ? undefined :
               isDynamic ? `css-${scrapbook.getUuid()}` : 'css',
           settings,
           options,

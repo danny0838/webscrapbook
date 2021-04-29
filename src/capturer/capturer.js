@@ -3258,7 +3258,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     // special handling for data URI
     // if not saved as file, save as-is regardless of its MIME type
     if (sourceUrlMain.startsWith("data:")) {
-      if (!(options["capture.saveDataUriAsFile"] && !["singleHtml"].includes(options["capture.saveAs"]))) {
+      if (!(options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml")) {
         return {url: sourceUrlMain};
       }
     }
@@ -3277,7 +3277,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
     const registry = await capturer.registerFile({
       url: sourceUrl,
-      role: ["singleHtml"].includes(options["capture.saveAs"]) ? undefined : 'resource',
+      role: options["capture.saveAs"] === "singleHtml" ? undefined : 'resource',
       settings,
       options,
     });
