@@ -735,7 +735,7 @@
                   });
                   break;
               }
-            } else if (elem.matches('[rel~="preload"]')) {
+            } else if (elem.matches('[rel~="preload"]') || elem.matches('[rel~="prefetch"]')) {
               // @TODO: handle preloads according to its "as" attribute
               switch (options["capture.preload"]) {
                 case "blank":

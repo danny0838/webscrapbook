@@ -6222,7 +6222,11 @@ async function test_capture_preload() {
   assert(!preloads[1].hasAttribute('href'));
   assert(!preloads[2].hasAttribute('href'));
   assert(!preloads[3].hasAttribute('href'));
-  assert(!preloads[4].hasAttribute('href'));
+  var prefetchs = doc.querySelectorAll('link[rel="prefetch"]');
+  assert(!prefetchs[0].hasAttribute('href'));
+  assert(!prefetchs[1].hasAttribute('href'));
+  assert(!prefetchs[2].hasAttribute('href'));
+  assert(!prefetchs[3].hasAttribute('href'));
 
   /* capture.preload = remove */
   var options = {
@@ -6238,6 +6242,7 @@ async function test_capture_preload() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(!doc.querySelector('link[rel="preload"]'));
+  assert(!doc.querySelector('link[rel="prefetch"]'));
 }
 
 /**
