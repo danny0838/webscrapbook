@@ -737,7 +737,17 @@
               }
             } else if (elem.matches('[rel~="preload"]')) {
               // @TODO: handle preloads according to its "as" attribute
-              captureRewriteAttr(elem, "href", null);
+              switch (options["capture.preload"]) {
+                case "blank":
+                  // HTML 5.1 2nd Edition / W3C Recommendation:
+                  // If the href attribute is absent, then the element does not define a link.
+                  captureRewriteAttr(elem, "href", null);
+                  break;
+                case "remove":
+                default:
+                  captureRemoveNode(elem);
+                  return;
+              }
             }
             break;
           }

@@ -31,6 +31,7 @@ const baseOptions = {
   "capture.mergeCssResources": false,
   "capture.script": "save",
   "capture.noscript": "save",
+  "capture.preload": "remove",
   "capture.base": "blank",
   "capture.formStatus": "keep",
   "capture.shadowDom": "save",
@@ -6200,6 +6201,48 @@ async function test_capture_applet() {
 /**
  * Check if option works
  *
+ * capture.preload
+ */
+async function test_capture_preload() {
+  /* capture.preload = blank */
+  var options = {
+    "capture.preload": "blank",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_preload/preload.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var preloads = doc.querySelectorAll('link[rel="preload"]');
+  assert(!preloads[0].hasAttribute('href'));
+  assert(!preloads[1].hasAttribute('href'));
+  assert(!preloads[2].hasAttribute('href'));
+  assert(!preloads[3].hasAttribute('href'));
+  assert(!preloads[4].hasAttribute('href'));
+
+  /* capture.preload = remove */
+  var options = {
+    "capture.preload": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_preload/preload.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.querySelector('link[rel="preload"]'));
+}
+
+/**
+ * Check if option works
+ *
  * capture.base
  */
 async function test_capture_base() {
@@ -8878,6 +8921,7 @@ async function test_capture_record_nodes() {
     "capture.style": "remove",
     "capture.script": "remove",
     "capture.noscript": "remove",
+    "capture.preload": "remove",
     "capture.base": "remove",
   };
 
@@ -8907,6 +8951,10 @@ async function test_capture_record_nodes() {
 
   assert(new RegExp(
     `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="stylesheet"[^>]*?>-->`
+  ).test(head.innerHTML));
+
+  assert(new RegExp(
+    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="preload"[^>]*?>-->`
   ).test(head.innerHTML));
 
   assert(new RegExp(
@@ -8991,6 +9039,10 @@ async function test_capture_record_nodes() {
 
   assert(!new RegExp(
     `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="stylesheet"[^>]*?>-->`
+  ).test(head.innerHTML));
+
+  assert(!new RegExp(
+    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="preload"[^>]*?>-->`
   ).test(head.innerHTML));
 
   assert(!new RegExp(
@@ -9274,6 +9326,7 @@ async function test_capture_record_urls() {
     "capture.styleInline": "save",
     "capture.rewriteCss": "url",
     "capture.script": "save",
+    "capture.preload": "blank",
     "capture.downLink.file.mode": "url",
     "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
