@@ -397,8 +397,8 @@
     const rewriteRecursively = (elem, rootName, callback) => {
       const nodeName = elem.nodeName.toLowerCase();
 
-      // switch rootName for certain embedded "document"
-      if (["svg", "math"].includes(nodeName)) {
+      // switch rootName for a foreign element
+      if (!rootName && ["svg", "math"].includes(nodeName)) {
         rootName = nodeName;
       }
 
@@ -1934,7 +1934,7 @@
           if (shadowRoot) {
             const shadowRootOrig = origNodeMap.get(shadowRoot);
             addAdoptedStyleSheets(shadowRootOrig, shadowRoot);
-            rewriteRecursively(shadowRoot, shadowRoot.nodeName.toLowerCase(), rewriteNode);
+            rewriteRecursively(shadowRoot, rootName, rewriteNode);
             shadowRootList.push(shadowRoot);
             requireBasicLoader = true;
           }
@@ -2383,7 +2383,7 @@
     let metaCharsetNode;
     let favIconUrl;
     let requireBasicLoader = false;
-    rewriteRecursively(rootNode, rootNode.nodeName.toLowerCase(), rewriteNode);
+    rewriteRecursively(rootNode, null, rewriteNode);
 
     // record metadata
     if (options["capture.recordDocumentMeta"]) {
