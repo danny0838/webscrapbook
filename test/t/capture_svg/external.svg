@@ -4,6 +4,8 @@
 <svg viewBox="0 0 100 100"
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink">
+  <script href="resources/script.js"></script>
+  <script xlink:href="resources/script2.js"></script>
   <style>
   a:link, a:visited {
     cursor: pointer;
@@ -22,13 +24,13 @@
   <a href="resources/green.bmp">
     <circle cx="50" cy="40" r="35"></circle>
   </a>
-  <a xlink:href="resources/green.bmp">
+  <a xlink:href="resources/blue.bmp">
     <text x="50" y="90" text-anchor="middle">
       &lt;circle&gt;
     </text>
   </a>
   <image id="img1" href="resources/green.bmp" x="15" y="5" width="10" height="10"/>
-  <image id="img2" xlink:href="resources/green.bmp" x="75" y="5" width="10" height="10"/>
+  <image id="img2" xlink:href="resources/blue.bmp" x="75" y="5" width="10" height="10"/>
   <use href="#img1" x="20" y="0"/>
   <use xlink:href="#img2" x="-20" y="0"/>
 </svg>

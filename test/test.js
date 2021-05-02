@@ -10118,17 +10118,22 @@ async function test_capture_svg() {
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files["index.html"]);
   assert(zip.files["green.bmp"]);
+  assert(zip.files["blue.bmp"]);
+  assert(zip.files["script.js"]);
+  assert(zip.files["script2.js"]);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `${localhost}/capture_svg/resources/green.bmp`);
-  assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `${localhost}/capture_svg/resources/green.bmp`);
+  assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `${localhost}/capture_svg/resources/blue.bmp`);
   assert(doc.querySelectorAll('svg image')[0].getAttribute('href') === `green.bmp`);
-  assert(doc.querySelectorAll('svg image')[1].getAttribute('xlink:href') === `green.bmp`);
+  assert(doc.querySelectorAll('svg image')[1].getAttribute('xlink:href') === `blue.bmp`);
   assert(doc.querySelectorAll('svg use')[0].getAttribute('href') === `#img1`);
   assert(doc.querySelectorAll('svg use')[1].getAttribute('xlink:href') === `#img2`);
+  assert(doc.querySelectorAll('svg script')[0].getAttribute('href') === `script.js`);
+  assert(doc.querySelectorAll('svg script')[1].getAttribute('xlink:href') === `script2.js`);
 
   /* external.svg */
   var options = {
@@ -10150,11 +10155,13 @@ async function test_capture_svg() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `${localhost}/capture_svg/resources/green.bmp`);
-  assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `${localhost}/capture_svg/resources/green.bmp`);
+  assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `${localhost}/capture_svg/resources/blue.bmp`);
   assert(doc.querySelectorAll('svg image')[0].getAttribute('href') === `green.bmp`);
-  assert(doc.querySelectorAll('svg image')[1].getAttribute('xlink:href') === `green.bmp`);
+  assert(doc.querySelectorAll('svg image')[1].getAttribute('xlink:href') === `blue.bmp`);
   assert(doc.querySelectorAll('svg use')[0].getAttribute('href') === `#img1`);
   assert(doc.querySelectorAll('svg use')[1].getAttribute('xlink:href') === `#img2`);
+  assert(doc.querySelectorAll('svg script')[0].getAttribute('href') === `script.js`);
+  assert(doc.querySelectorAll('svg script')[1].getAttribute('xlink:href') === `script2.js`);
 }
 
 /**
