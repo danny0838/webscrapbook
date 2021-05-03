@@ -2368,17 +2368,20 @@ if (Node && !Node.prototype.getRootNode) {
    * Parse Content-Disposition string from the HTTP Header
    *
    * ref: https://github.com/jshttp/content-disposition/blob/master/index.js
+   *      https://tools.ietf.org/html/rfc5987#section-3.2
    *
    * @param {string} string - The string to parse, not including "Content-Disposition: "
    * @return {{type: ('inline'|'attachment'), parameters: {[filename: string]}}}
    */
   scrapbook.parseHeaderContentDisposition = function (string) {
-    const regexFields = /^(.*?)(?=;|$)/i;
-    const regexDoubleQuotedField = /;((?:"(?:\\.|[^"])*(?:"|$)|[^"])*?)(?=;|$)/i;
-    const regexKeyValue = /\s*(.*?)\s*=\s*("(?:\\.|[^"])*"|[^"]*?)\s*$/i;
-    const regexDoubleQuotedValue = /^"(.*?)"$/;
-    const regexExtField = /^(.*)\*$/;
-    const regexExtValue = /^(.*?)'(.*?)'(.*?)$/;
+    const pOWS = "[\\t ]*";
+    const pToken = "[!#$%&'*+.0-9A-Z^_`a-z|~-]+";
+    const pQuotedString = '(?:"[^"]*(?:\\.[^"]*)*")';
+
+    const regexContentDisposition = new RegExp(`^(${pToken})`);
+    const regexDispExtParam = new RegExp(`^${pOWS};${pOWS}(?:(${pToken})${pOWS}=${pOWS}([^\\t ;"]*(?:${pQuotedString}[^\\t ;"]*)*))`);
+    const regexExtValue = /^([^']*)'([^']*)'([^']*)$/;
+
     const fn = scrapbook.parseHeaderContentDisposition = function (string) {
       const result = {type: undefined, parameters: {}};
 
@@ -2386,41 +2389,46 @@ if (Node && !Node.prototype.getRootNode) {
         return result;
       }
 
-      if (regexFields.test(string)) {
+      if (regexContentDisposition.test(string)) {
         string = RegExp.rightContext;
-        result.type = RegExp.$1.trim();
-        while (regexDoubleQuotedField.test(string)) {
+        result.type = RegExp.$1;
+
+        while (regexDispExtParam.test(string)) {
           string = RegExp.rightContext;
-          let parameter = RegExp.$1;
-          if (regexKeyValue.test(parameter)) {
-            let field = RegExp.$1;
-            let value = RegExp.$2;
+          let field = RegExp.$1;
+          let value = RegExp.$2;
 
-            // manage double quoted value
-            if (regexDoubleQuotedValue.test(value)) {
-              value = scrapbook.unescapeQuotes(RegExp.$1);
-            }
-
-            if (regexExtField.test(field)) {
-              // the field uses an ext-value
-              field = RegExp.$1;
+          try {
+            if (field.endsWith('*')) {
+              // ext-value
+              field = field.slice(0, -1);
               if (regexExtValue.test(value)) {
-                let charset = RegExp.$1.toLowerCase(), lang = RegExp.$2.toLowerCase(), valueEncoded = RegExp.$3;
-                switch (charset) {
+                let charset = RegExp.$1, lang = RegExp.$2, valueEncoded = RegExp.$3;
+                switch (charset.toLowerCase()) {
                   case 'iso-8859-1':
-                    value = decodeURIComponent(valueEncoded).replace(/[^\x20-\x7e\xa0-\xff]/g, "?");
+                    value = unescape(valueEncoded);
                     break;
                   case 'utf-8':
                     value = decodeURIComponent(valueEncoded);
                     break;
                   default:
-                    console.error('Unsupported charset in the extended field of header content-disposition: ' + charset);
+                    console.error(`Unsupported charset in the extended field of header content-disposition: {charset}`);
                     break;
                 }
+              } else {
+                throw new Error(`Bad ext-value`);
+              }
+            } else {
+              if (value.startsWith('"')) {
+                // any valid value with leading '"' must be ".*"
+                value = value.slice(1, -1);
               }
             }
 
             result.parameters[field] = value;
+          } catch (ex) {
+            // skip and log possible error of decodeURIComponent
+            console.error(ex);
           }
         }
       }
