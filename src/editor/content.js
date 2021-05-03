@@ -864,7 +864,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       let firstWrapper = null;
       let lastWrapper = null;
       for (const node of selectedNodes.reverse()) {
-        if (node.nodeType === 3 && /^[ \f\n\r\t\v]*$/.test(node.nodeValue)) {
+        if (node.nodeType === 3 && /^[\t\n\f\r ]*$/.test(node.nodeValue)) {
           continue;
         }
 

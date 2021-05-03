@@ -1149,7 +1149,7 @@ if (Node && !Node.prototype.getRootNode) {
           return text.replace(/[\r\n][\S\s]+$/, '');
         }
         case "collapse": {
-          return text.replace(/[ \t\r\n\v\f]+/g, ' ').replace(/^[ \t\r\n\v\f]+/, '').replace(/[ \t\r\n\v\f]+$/, '');
+          return scrapbook.trim(text).replace(/[\t\n\f\r ]+/g, ' ');
         }
         case "url": {
           return encodeURIComponent(text);
@@ -2143,6 +2143,20 @@ if (Node && !Node.prototype.getRootNode) {
    ***************************************************************************/
 
   /**
+   * Trim leading and trailing ASCII whitespaces.
+   *
+   * Usually used for HTML parsing.
+   */
+  scrapbook.trim = function (str) {
+    const regexLeading = /^[\t\n\f\r ]+/;
+    const regexTrailing = /[\t\n\f\r ]+$/;
+    const trim = scrapbook.trim = (str) => {
+      return str.replace(regexLeading, '').replace(regexTrailing, '');
+    };
+    return trim(str);
+  };
+
+  /**
    * Ensure normalizeUrl(url1) === normalizeUrl(url2)
    *
    * - Encode chars that requires percent encoding with all upper case.
@@ -2766,7 +2780,7 @@ if (Node && !Node.prototype.getRootNode) {
    */
   scrapbook.rewriteCssText = function (cssText, options) {
     const pCm = `(?:/\\*[\\s\\S]*?(?:\\*/|$))`; // comment
-    const pSp = `(?:[ \\t\\r\\n\\v\\f]*)`; // space equivalents
+    const pSp = `(?:[\\t\\n\\f\\r ]*)`; // ASCII whitespaces
     const pCmSp = `(?:(?:${pCm}|${pSp})*)`; // comment or space
     const pCmSp2 = `(?:(?:${pCm}|${pSp})+)`; // comment or space, at least one
     const pChar = `(?:\\\\.|[^\\\\"'])`; // a non-quote char or an escaped char sequence
