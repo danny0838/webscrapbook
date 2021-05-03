@@ -3091,18 +3091,18 @@ if (Node && !Node.prototype.getRootNode) {
    *
    * @param {Document} doc
    * @param {string} [refUrl] - An arbitarary reference URL. Use document.URL if not set.
-   * @param {boolean} [ignoreDelayedRefresh] - Only consider meta refresh with 0 refresh time.
+   * @param {boolean} [includeDelayedRefresh] - Also consider meta refresh with non-0 refresh time.
    * @param {boolean} [includeNoscript] - Also consider meta refresh in <noscript>.
    * @return {string|undefined} Absolute URL of the meta refresh target.
    */
   scrapbook.getMetaRefreshTarget = function (doc, refUrl = doc.URL,
-      ignoreDelayedRefresh = false, includeNoscript = false) {
+      includeDelayedRefresh = false, includeNoscript = false) {
     let lastMetaRefreshTime = Infinity;
     let lastMetaRefreshUrl;
     for (const elem of doc.querySelectorAll('meta[http-equiv="refresh"][content]')) {
       const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
-      if (metaRefresh.url && metaRefresh.url !== refUrl) {
-        if (!ignoreDelayedRefresh || metaRefresh.time === 0) {
+      if (typeof metaRefresh.time !== 'undefined') {
+        if (includeDelayedRefresh || metaRefresh.time === 0) {
           if (includeNoscript || !elem.closest('noscript')) {
             if (metaRefresh.time <= lastMetaRefreshTime) {
               lastMetaRefreshTime = metaRefresh.time;
@@ -3112,7 +3112,7 @@ if (Node && !Node.prototype.getRootNode) {
         }
       }
     }
-    if (lastMetaRefreshUrl) {
+    if (typeof lastMetaRefreshUrl !== 'undefined') {
       return new URL(lastMetaRefreshUrl, refUrl).href;
     }
   };
