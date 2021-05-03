@@ -3,6 +3,13 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.116.0] - 2021-05-03
+* Capture the original page rather than the meta refreshed target page if the meta refresh time is non-zero.
+* Improved the tooltips about autosave.
+* Adjusted handling of some HTTP headers and HTML attributes to conform with the spec better.
+* Fixed some potential errors for ASCII whitespace handling.
+* Fixed a potential error handling for nested svg and math elements.
+
 ## [0.115.0] - 2021-05-01
 * Preloads and prefetches are now removed by default, with a new option `capture.preload` to tweak the behavior.
 * Shadow DOMs are saved as `data-scrapbook-shadowdom` attribute in place of `data-scrapbook-shadowroot`, with simplified data structure and smaller size.
