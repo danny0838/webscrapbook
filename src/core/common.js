@@ -2433,14 +2433,26 @@ if (Node && !Node.prototype.getRootNode) {
   /**
    * Parse Refresh string from the HTTP Header
    *
-   * ref: https://www.w3.org/TR/html5/document-metadata.html
+   * ref: https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv-refresh
    *
    * @return {{time: integer, url: string}}
    */
   scrapbook.parseHeaderRefresh = function (string) {
-    const regexFields = /^\s*(.*?)(?=[;,]|$)/i;
-    const regexFieldValue = /^[;,]\s*url\s*=\s*((["'])?.*)$/i;
-    const regexEscape = /[\t\n\r]+/g;
+    const regex = new RegExp([
+    '^',
+    '[\\t\\n\\f\\r ]*',
+    '(\\d+)',
+    '(?:\\.[\\d.]*)?',
+    '(?:',
+        '(?=[\\t\\n\\f\\r ;,])',
+        '[\\t\\n\\f\\r ]*',
+        '[;,]?',
+        '[\\t\\n\\f\\r ]*',
+        '(?:url[\\t\\n\\f\\r ]*=[\\t\\n\\f\\r ]*)?',
+        '(.*)',
+    ')?',
+    '$',
+    ].join(''), 'i');
     const fn = scrapbook.parseHeaderRefresh = function (string) {
       const result = {time: undefined, url: undefined};
 
@@ -2448,18 +2460,20 @@ if (Node && !Node.prototype.getRootNode) {
         return result;
       }
 
-      if (regexFields.test(string)) {
-        result.time = parseInt(RegExp.$1);
-        string = RegExp.rightContext;
-        if (regexFieldValue.test(string)) {
-          let url = RegExp.$1;
-          let quote = RegExp.$2;
-          if (quote) {
-            let pos = url.indexOf(quote, 1);
-            if (pos !== -1) { url = url.slice(1, pos); }
+      const m = string.match(regex);
+      if (m) {
+        result.time = parseInt(m[1]);
+
+        let url = m[2];
+        if (url) {
+          for (const quote of ['"', "'"]) {
+            if (url.startsWith(quote)) {
+              const pos = url.indexOf(quote, 1);
+              url = url.slice(1, pos !== -1 ? pos : undefined);
+              break;
+            }
           }
-          url = url.trim().replace(regexEscape, "");
-          result.url = url;
+          result.url = scrapbook.trim(url);
         }
       }
 
