@@ -2485,6 +2485,8 @@ if (Node && !Node.prototype.getRootNode) {
             }
           }
           result.url = scrapbook.trim(url);
+        } else {
+          result.url = '';
         }
       }
 
