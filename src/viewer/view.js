@@ -249,7 +249,7 @@
                   if (targetPage !== sourcePage) {
                     if (recurseChain.includes(targetPage)) {
                       // console.warn("Resource '" + sourcePage + "' has a circular reference to '" + targetPage + "'.");
-                      elem.setAttribute("content", metaRefresh.time + ";url=about:blank");
+                      elem.setAttribute("content", metaRefresh.time + "; url=about:blank");
                       break;
                     }
                     if (info.inZip) {
@@ -276,10 +276,10 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 </html>
 `;
                       const url = URL.createObjectURL(new Blob([content], {type: "text/html"})) + targetPageHash;
-                      elem.setAttribute("content", metaRefresh.time + ";url=" + url);
+                      elem.setAttribute("content", metaRefresh.time + "; url=" + url);
                     }
                   } else {
-                    elem.setAttribute("content", metaRefresh.time + (targetPageHash ? ";url=" + targetPageHash : ""));
+                    elem.setAttribute("content", metaRefresh.time + (targetPageHash ? "; url=" + targetPageHash : ""));
                   }
                 }
               }

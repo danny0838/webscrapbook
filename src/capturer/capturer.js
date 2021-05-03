@@ -1366,7 +1366,7 @@
 <html${meta}>
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(sourceUrl)}">
+<meta http-equiv="refresh" content="0; url=${scrapbook.escapeHtml(sourceUrl)}">
 ${titleElem}${favIconElem}</head>
 <body>
 Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml(sourceUrl, false)}</a>
@@ -1506,7 +1506,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
 <html${meta}>
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(response.url)}">
+<meta http-equiv="refresh" content="0; url=${scrapbook.escapeHtml(response.url)}">
 ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
 <body>
 Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>
@@ -2904,7 +2904,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 <html${meta}>
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(target)}">
+<meta http-equiv="refresh" content="0; url=${scrapbook.escapeHtml(target)}">
 ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
 <body>
 Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(target, false)}</a>

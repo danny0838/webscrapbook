@@ -595,7 +595,7 @@
                 if (metaRefresh.url) {
                   // meta refresh is relative to document URL rather than base URL
                   const url = rewriteLocalLink(metaRefresh.url, docUrl);
-                  captureRewriteAttr(elem, "content", metaRefresh.time + (url ? ";url=" + url : ""));
+                  captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
                 }
               } else if (elem.getAttribute("http-equiv").toLowerCase() == "content-security-policy") {
                 // content security policy could make resources not loaded when viewed offline

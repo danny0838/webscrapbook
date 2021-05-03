@@ -1705,7 +1705,7 @@
 <html data-scrapbook-type="file">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=${scrapbook.escapeHtml(url)}">
+<meta http-equiv="refresh" content="0; url=${scrapbook.escapeHtml(url)}">
 ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</head>
 <body>
 Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtml(filename, false)}</a>
@@ -2585,7 +2585,7 @@ ${scrapbook.escapeHtml(content)}
 <html data-scrapbook-type="note">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=index.md">
+<meta http-equiv="refresh" content="0; url=index.md">
 </head>
 <body>
 Redirecting to file <a href="index.md">index.md</a>

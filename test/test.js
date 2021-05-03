@@ -357,7 +357,7 @@ async function test_capture_xhtml() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc);
-  var metaRefreshElem = doc.querySelector('meta[http-equiv="refresh"][content="0;url=index.xhtml"]');
+  var metaRefreshElem = doc.querySelector('meta[http-equiv="refresh"][content="0; url=index.xhtml"]');
   assert(metaRefreshElem);
 
   var indexFile = zip.file('index.xhtml');
@@ -422,7 +422,7 @@ async function test_capture_xhtml() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc);
-  var metaRefreshElem = doc.querySelector('meta[http-equiv="refresh"][content="0;url=index.xhtml"]');
+  var metaRefreshElem = doc.querySelector('meta[http-equiv="refresh"][content="0; url=index.xhtml"]');
   assert(metaRefreshElem);
 
   var indexFile = zip.file(topdir + 'index.xhtml');
@@ -513,7 +513,7 @@ async function test_capture_file() {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc);
   assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'file');
-  assert(doc.querySelector('meta[http-equiv="refresh"][content="0;url=file.bmp"]'));
+  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=file.bmp"]'));
   assert(doc.querySelector('a[href="file.bmp"]'));
   assert(!doc.querySelector('img'));
 
@@ -551,7 +551,7 @@ async function test_capture_file() {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc);
   assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'file');
-  assert(doc.querySelector('meta[http-equiv="refresh"][content="0;url=file.bmp"]'));
+  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=file.bmp"]'));
   assert(doc.querySelector('a[href="file.bmp"]'));
   assert(!doc.querySelector('img'));
 
@@ -576,7 +576,7 @@ async function test_capture_file() {
   assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'file');
   var metaRefreshElem = doc.querySelector('meta[http-equiv="refresh"][content]');
   assert(metaRefreshElem);
-  assert(metaRefreshElem.getAttribute('content') === "0;url=" 
+  assert(metaRefreshElem.getAttribute('content') === "0; url=" 
       + "data:image/bmp;filename=file.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
   assert(!doc.querySelector('a[href="file.bmp"]')); // do NOT generate anchor to avoid long content
   assert(!doc.querySelector('img'));
@@ -615,7 +615,7 @@ async function test_capture_file_charset() {
   assert(doc.querySelector('meta[charset="UTF-8"]'));
   assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'file');
   assert(doc.documentElement.getAttribute('data-scrapbook-charset') === 'Big5');
-  assert(doc.querySelector('meta[http-equiv="refresh"][content="0;url=big5.py"]'));
+  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=big5.py"]'));
 
   var savedFile = zip.file(topdir + 'big5.py');
   var text = (await readFileAsText(await savedFile.async('blob'), "Big5")).trim();
@@ -644,7 +644,7 @@ async function test_capture_file_charset() {
   assert(doc.querySelector('meta[charset="UTF-8"]'));
   assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'file');
   assert(doc.documentElement.getAttribute('data-scrapbook-charset') === 'UTF-8');
-  assert(doc.querySelector('meta[http-equiv="refresh"][content="0;url=utf8.txt"]'));
+  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=utf8.txt"]'));
 
   var savedFile = zip.file(topdir + 'utf8.txt');
   var text = (await readFileAsText(await savedFile.async('blob'))).trim();
@@ -1775,7 +1775,7 @@ async function test_capture_bookmark() {
   assert(html.getAttribute('data-scrapbook-create').match(/^\d{17}$/));
   assert(html.getAttribute('data-scrapbook-type') === 'bookmark');
 
-  assert(doc.querySelector(`meta[http-equiv="refresh"][content="0;url=${localhost}/capture_bookmark/index.html"]`));
+  assert(doc.querySelector(`meta[http-equiv="refresh"][content="0; url=${localhost}/capture_bookmark/index.html"]`));
   assert(doc.querySelector(`a[href="${localhost}/capture_bookmark/index.html"]`));
   assert(doc.querySelector(`link[rel="shortcut icon"][href="data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"]`));
 }
@@ -8203,21 +8203,21 @@ async function test_capture_metaRefresh() {
 
   var mrs = doc.querySelectorAll('meta[http-equiv="refresh"]');
   assert(mrs[0].getAttribute('content') === `30`);
-  assert(mrs[1].getAttribute('content') === `30;url=#`);
-  assert(mrs[2].getAttribute('content') === `30;url=#123`);
-  assert(mrs[3].getAttribute('content') === `30;url=${localhost}/capture_metaRefresh/delayed.html?id=123`);
+  assert(mrs[1].getAttribute('content') === `30; url=#`);
+  assert(mrs[2].getAttribute('content') === `30; url=#123`);
+  assert(mrs[3].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh/delayed.html?id=123`);
   assert(mrs[4].getAttribute('content') === `30`);
-  assert(mrs[5].getAttribute('content') === `30;url=#`);
-  assert(mrs[6].getAttribute('content') === `30;url=#123`);
-  assert(mrs[7].getAttribute('content') === `30;url=${localhost}/capture_metaRefresh/delayed.html?id=123`);
-  assert(mrs[8].getAttribute('content') === `20;url=${localhost}/capture_metaRefresh/referred.html`);
-  assert(mrs[9].getAttribute('content') === `20;url=${localhost}/capture_metaRefresh/referred.html#`);
-  assert(mrs[10].getAttribute('content') === `20;url=${localhost}/capture_metaRefresh/referred.html#123`);
-  assert(mrs[11].getAttribute('content') === `20;url=${localhost}/capture_metaRefresh/referred.html?id=123`);
-  assert(mrs[12].getAttribute('content') === `15;url=http://example.com/`);
-  assert(mrs[13].getAttribute('content') === `15;url=http://example.com/#`);
-  assert(mrs[14].getAttribute('content') === `15;url=http://example.com/#123`);
-  assert(mrs[15].getAttribute('content') === `15;url=http://example.com/?id=123`);
+  assert(mrs[5].getAttribute('content') === `30; url=#`);
+  assert(mrs[6].getAttribute('content') === `30; url=#123`);
+  assert(mrs[7].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh/delayed.html?id=123`);
+  assert(mrs[8].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh/referred.html`);
+  assert(mrs[9].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh/referred.html#`);
+  assert(mrs[10].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh/referred.html#123`);
+  assert(mrs[11].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh/referred.html?id=123`);
+  assert(mrs[12].getAttribute('content') === `15; url=http://example.com/`);
+  assert(mrs[13].getAttribute('content') === `15; url=http://example.com/#`);
+  assert(mrs[14].getAttribute('content') === `15; url=http://example.com/#123`);
+  assert(mrs[15].getAttribute('content') === `15; url=http://example.com/?id=123`);
 }
 
 /**
@@ -8241,13 +8241,13 @@ async function test_capture_metaRefresh2() {
 
   var mrs = doc.querySelectorAll('meta[http-equiv="refresh"]');
   assert(mrs[0].getAttribute('content') === `30`);
-  assert(mrs[1].getAttribute('content') === `30;url=${localhost}/capture_metaRefresh2/delayed21.html#123`);
-  assert(mrs[2].getAttribute('content') === `30;url=${localhost}/capture_metaRefresh2/delayed21.html?id=123`);
+  assert(mrs[1].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed21.html#123`);
+  assert(mrs[2].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed21.html?id=123`);
   assert(mrs[3].getAttribute('content') === `30`);
-  assert(mrs[4].getAttribute('content') === `30;url=${localhost}/capture_metaRefresh2/delayed21.html#123`);
-  assert(mrs[5].getAttribute('content') === `30;url=${localhost}/capture_metaRefresh2/delayed21.html?id=123`);
-  assert(mrs[6].getAttribute('content') === `20;url=${localhost}/capture_metaRefresh2/referred.html`);
-  assert(mrs[7].getAttribute('content') === `15;url=http://example.com/`);
+  assert(mrs[4].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed21.html#123`);
+  assert(mrs[5].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed21.html?id=123`);
+  assert(mrs[6].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh2/referred.html`);
+  assert(mrs[7].getAttribute('content') === `15; url=http://example.com/`);
 
   /* refresh link target captured */
   var blob = await capture({
@@ -8263,13 +8263,13 @@ async function test_capture_metaRefresh2() {
 
   var mrs = doc.querySelectorAll('meta[http-equiv="refresh"]');
   assert(mrs[0].getAttribute('content') === `30`);
-  assert(mrs[1].getAttribute('content') === `30;url=#123`);
-  assert(mrs[2].getAttribute('content') === `30;url=${localhost}/capture_metaRefresh2/delayed22.html?id=123`);
+  assert(mrs[1].getAttribute('content') === `30; url=#123`);
+  assert(mrs[2].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed22.html?id=123`);
   assert(mrs[3].getAttribute('content') === `30`);
-  assert(mrs[4].getAttribute('content') === `30;url=#123`);
-  assert(mrs[5].getAttribute('content') === `30;url=${localhost}/capture_metaRefresh2/delayed22.html?id=123`);
-  assert(mrs[6].getAttribute('content') === `20;url=${localhost}/capture_metaRefresh2/referred.html`);
-  assert(mrs[7].getAttribute('content') === `15;url=http://example.com/`);
+  assert(mrs[4].getAttribute('content') === `30; url=#123`);
+  assert(mrs[5].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed22.html?id=123`);
+  assert(mrs[6].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh2/referred.html`);
+  assert(mrs[7].getAttribute('content') === `15; url=http://example.com/`);
 }
 
 /**
@@ -8291,16 +8291,16 @@ async function test_capture_metaRefresh3() {
 
   var mrs = doc.querySelectorAll('meta[http-equiv="refresh"]');
   assert(mrs[0].getAttribute('content') === `30`);
-  assert(mrs[1].getAttribute('content') === `30;url=#`);
-  assert(mrs[2].getAttribute('content') === `30;url=#123`);
-  assert(mrs[3].getAttribute('content') === `30;url=${localhost}/capture_metaRefresh3/delayed3.html?id=123`);
+  assert(mrs[1].getAttribute('content') === `30; url=#`);
+  assert(mrs[2].getAttribute('content') === `30; url=#123`);
+  assert(mrs[3].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh3/delayed3.html?id=123`);
   assert(mrs[4].getAttribute('content') === `30`);
-  assert(mrs[5].getAttribute('content') === `30;url=#`);
-  assert(mrs[6].getAttribute('content') === `30;url=#123`);
-  assert(mrs[7].getAttribute('content') === `30;url=${localhost}/capture_metaRefresh3/delayed3.html?id=123`);
-  assert(mrs[8].getAttribute('content') === `20;url=${localhost}/capture_metaRefresh3/referred.html`);
-  assert(mrs[9].getAttribute('content') === `20;url=${localhost}/capture_metaRefresh3/subdir/referred.html`);
-  assert(mrs[10].getAttribute('content') === `15;url=http://example.com/`);
+  assert(mrs[5].getAttribute('content') === `30; url=#`);
+  assert(mrs[6].getAttribute('content') === `30; url=#123`);
+  assert(mrs[7].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh3/delayed3.html?id=123`);
+  assert(mrs[8].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh3/referred.html`);
+  assert(mrs[9].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh3/subdir/referred.html`);
+  assert(mrs[10].getAttribute('content') === `15; url=http://example.com/`);
 }
 
 /**
