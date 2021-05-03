@@ -605,7 +605,7 @@
     "message": "啟用自動擷取:"
   },
   "OptionAutocaptureTooltip": {
-    "message": "自動擷取使用 JSON 定義，格式如下：\n\n  [\n   {\n    \"name\": \"Example#1\",\n    \"description\": \"Auto-capture example.com\",\n    \"pattern\": \"/^https?://example\\\\.com/i\",\n    \"delay\": 5000,\n    ...\n   },\n   ...\n  ]\n\n• name: 字串，標示此規則的名稱及用於除錯識別，可省略。\n• description: 字串，註記此規則的功能，可省略。\n• disabled: 屬真時將停用此規則，可省略。\n• tabId: 用於限定此規則作用的分頁 ID。省略此項則作用於任意分頁。\n• pattern: 字串，為正規表示式字串（「/表示式/標幟」），用於限定此規則作用的網址。省略此項則作用於任意網頁。\n• delay: 網頁載入完成至開始自動擷取前的延遲時間（毫秒）。省略或不大於 0 則無延遲。\n• repeat: 自動擷取開始後重複擷取的間隔時間（毫秒）。省略或不大於 0 則不重複擷取。\n• allowDuplicate: 屬真時將允許重複自動擷取相同網頁，可省略。\n• taskInfo: 覆寫擷取工作的 JSON 物件，格式同「擷取分頁為...」的主要 JSON 物件，可省略。\n• eachTaskInfo: 覆寫單一擷取工作的 JSON 物件，格式同「擷取分頁為...」tasks 陣列中的物件，可省略。"
+    "message": "自動擷取使用 JSON 定義，格式如下：\n\n  [\n   {\n    \"name\": \"Example#1\",\n    \"description\": \"Auto-capture example.com\",\n    \"pattern\": \"/^https?://example\\\\.com//i\",\n    \"delay\": 5000,\n    ...\n   },\n   ...\n  ]\n\n• name: 字串，標示此設定的名稱及用於除錯識別，可省略。\n• description: 字串，註記此設定的功能，可省略。\n• disabled: 屬真時將停用此設定，可省略。\n• tabId: 用於限定此設定作用的分頁 ID。省略此項則作用於任意分頁。\n• pattern: 字串，為正規表示式字串（「/表示式/標幟」），用於限定此設定作用的網址。省略此項則作用於任意網頁。\n• delay: 網頁載入完成至開始自動擷取前的延遲時間（毫秒）。省略或不大於 0 則無延遲。\n• repeat: 自動擷取開始後重複擷取的間隔時間（毫秒）。省略或不大於 0 則不重複擷取。\n• allowDuplicate: 屬真時將允許重複自動擷取相同網頁，可省略。\n• taskInfo: 覆寫擷取工作的 JSON 物件，格式同「擷取分頁為...」的主要 JSON 物件，可省略。\n• eachTaskInfo: 覆寫單一擷取工作的 JSON 物件，格式同「擷取分頁為...」tasks 陣列中的物件，可省略。"
   },
   "OptionCaptureAppletLabel": {
     "message": "APPLET 元素:"
