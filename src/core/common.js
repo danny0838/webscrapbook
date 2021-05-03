@@ -2325,13 +2325,18 @@ if (Node && !Node.prototype.getRootNode) {
   /**
    * Parse Content-Type string from the HTTP Header
    *
+   * ref: https://tools.ietf.org/html/rfc7231#section-3.1.1.1
+   *
    * @return {{type: string, parameters: {[charset: string]}}}
    */
   scrapbook.parseHeaderContentType = function (string) {
-    const regexFields = /^(.*?)(?=;|$)/i;
-    const regexDoubleQuotedField = /;((?:"(?:\\.|[^"])*(?:"|$)|[^"])*?)(?=;|$)/i;
-    const regexKeyValue = /\s*(.*?)\s*=\s*("(?:\\.|[^"])*"|[^"]*?)\s*$/i;
-    const regexDoubleQuotedValue = /^"(.*?)"$/;
+    const pOWS = "[\\t ]*";
+    const pToken = "[!#$%&'*+.0-9A-Z^_`a-z|~-]+";
+    const pQuotedString = '(?:"[^"]*(?:\\.[^"]*)*")';
+
+    const regexContentType = new RegExp(`^(${pToken}/${pToken})`);
+    const regexParameter = new RegExp(`^${pOWS};${pOWS}(${pToken})=([^\t ;"]*(?:${pQuotedString}[^\t ;"]*)*)`);
+
     const fn = scrapbook.parseHeaderContentType = function (string) {
       const result = {type: undefined, parameters: {}};
 
@@ -2339,23 +2344,21 @@ if (Node && !Node.prototype.getRootNode) {
         return result;
       }
 
-      if (regexFields.test(string)) {
+      if (regexContentType.test(string)) {
         string = RegExp.rightContext;
-        result.type = RegExp.$1.trim();
-        while (regexDoubleQuotedField.test(string)) {
+        result.type = RegExp.$1;
+
+        while (regexParameter.test(string)) {
           string = RegExp.rightContext;
-          let parameter = RegExp.$1;
-          if (regexKeyValue.test(parameter)) {
-            let field = RegExp.$1;
-            let value = RegExp.$2;
+          let field = RegExp.$1;
+          let value = RegExp.$2;
 
-            // manage double quoted value
-            if (regexDoubleQuotedValue.test(value)) {
-              value = scrapbook.unescapeQuotes(RegExp.$1);
-            }
-
-            result.parameters[field] = value;
+          if (value.startsWith('"')) {
+            // any valid value with leading '"' must be ".*"
+            value = value.slice(1, -1);
           }
+
+          result.parameters[field] = value;
         }
       }
 
