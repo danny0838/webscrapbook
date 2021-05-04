@@ -1654,9 +1654,11 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     // handle resources to internalize
     const resourceMap = new Map();
     if (internalize) {
+      const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
       for (const [fileUrl, data] of Object.entries(response)) {
         const fetchResource = async (url) => {
           const fullUrl = scrapbook.normalizeUrl(capturer.resolveRelativeUrl(url, fileUrl));
+          if (!scrapbook.isContentPage(fullUrl, allowFileAccess)) { return null; }
           if (fullUrl.startsWith(internalizePrefix)) { return null; }
 
           const file = resourceMap.get(fullUrl);
