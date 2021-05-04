@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.117.0] - 2021-05-05
+* Improved config checking of capture helpers and autocapture to prevent more possible bad input.
+* Fixed an issue that unfetchable resources are not skipped during internalization.
+* Fixed an error when internalizaing a single HTML item. Internalized resources are now saved as data URLs in such case.
+
 ## [0.116.0] - 2021-05-03
 * Capture the original page rather than the meta refreshed target page if the meta refresh time is non-zero.
 * Improved the tooltips about autosave.
