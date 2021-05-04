@@ -1627,13 +1627,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               internalizePrefix = base + m[0];
             }
           }
-          if (!internalizePrefix) {
-            // unable to determine which subdirectory to be prefix
-            internalize = false;
-          }
         }
-      } else {
-        internalize = false;
       }
     }
 
@@ -1676,9 +1670,15 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               responseType: 'blob',
             });
             const blob = xhr.response;
-            const sha = scrapbook.sha1(await scrapbook.readFileAsArrayBuffer(blob), 'ARRAYBUFFER');
-            const ext = Mime.extension(blob.type);
-            const file = new File([blob], sha + '.' + ext, {type: blob.type});
+
+            let file;
+            if (internalizePrefix) {
+              const sha = scrapbook.sha1(await scrapbook.readFileAsArrayBuffer(blob), 'ARRAYBUFFER');
+              const ext = Mime.extension(blob.type);
+              file = new File([blob], sha + '.' + ext, {type: blob.type});
+            } else {
+              file = await scrapbook.readFileAsDataURL(blob);
+            }
             resourceMap.set(fullUrl, file);
             return file;
           } catch (ex) {
@@ -1722,13 +1722,19 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               // replace resource URLs
               content = content.replace(/urn:scrapbook:url:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
                 if (data.resources[key]) {
-                  if (data.resources[key].file) {
-                    const resUrl = internalizePrefix + data.resources[key].file.name;
-                    const u = scrapbook.getRelativeUrl(resUrl, fileUrl);
-                    return scrapbook.escapeHtml(u);
-                  } else {
+                  const file = data.resources[key].file;
+
+                  if (!file) {
                     return scrapbook.escapeHtml(data.resources[key].url);
                   }
+
+                  if (typeof file === 'string') {
+                    return scrapbook.escapeHtml(file);
+                  }
+
+                  const resUrl = internalizePrefix + file.name;
+                  const u = scrapbook.getRelativeUrl(resUrl, fileUrl);
+                  return scrapbook.escapeHtml(u);
                 }
                 return match;
               });
@@ -1766,17 +1772,24 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         // resources
         for (const [url, file] of resourceMap.entries()) {
           if (!file) { continue; }
-          const target = internalizePrefix + file.name;
-          await server.request({
-            url: target + '?a=save',
-            method: "POST",
-            format: 'json',
-            csrfToken: true,
-            body: {
-              upload: file,
-            },
-          });
-          capturer.log(`Internalized resource ${target}`);
+
+          let target;
+          if (typeof file === 'string') {
+            target = file;
+          } else {
+            target = internalizePrefix + file.name;
+            await server.request({
+              url: target + '?a=save',
+              method: "POST",
+              format: 'json',
+              csrfToken: true,
+              body: {
+                upload: file,
+              },
+            });
+          }
+
+          capturer.log(`Internalized resource: ${scrapbook.crop(target, 256)}`);
         }
 
         // update item
