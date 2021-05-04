@@ -327,18 +327,27 @@
         }
 
         for (let i = 0, I = configs.length; i < I; i++) {
-          const config = configs[i];
-          if (typeof config !== 'object' || config === null || Array.isArray(config)) {
-            throw new Error(`Helper[${i}]: invalid object`);
-          }
-          if (config.pattern) {
-            if (/^\/(.*)\/([a-z]*)$/.test(config.pattern)) {
-              try {
-                new RegExp(RegExp.$1, RegExp.$2);
-              } catch (ex) {
-                throw new Error(`Helper[${i}]: invalid pattern: ${ex.message}`);
+          try {
+            const config = configs[i];
+            if (typeof config !== 'object' || config === null || Array.isArray(config)) {
+              throw new Error(`Invalid object`);
+            }
+            if (config.pattern) {
+              if (typeof config.pattern !== 'string') {
+                throw new Error(`Pattern must be a string`);
+              }
+              if (/^\/(.*)\/([a-z]*)$/.test(config.pattern)) {
+                try {
+                  new RegExp(RegExp.$1, RegExp.$2);
+                } catch (ex) {
+                  throw new Error(`Invalid pattern: ${ex.message}`);
+                }
+              } else {
+                throw new Error(`Invalid pattern: Unsupported format.`);
               }
             }
+          } catch (ex) {
+            throw new Error(`Helper[${i}]: ${ex.message}`);
           }
         }
       } catch (ex) {
@@ -365,18 +374,27 @@
         }
 
         for (let i = 0, I = configs.length; i < I; i++) {
-          const config = configs[i];
-          if (typeof config !== 'object' || config === null || Array.isArray(config)) {
-            throw new Error(`Config[${i}]: invalid object`);
-          }
-          if (config.pattern) {
-            if (/^\/(.*)\/([a-z]*)$/.test(config.pattern)) {
-              try {
-                new RegExp(RegExp.$1, RegExp.$2);
-              } catch (ex) {
-                throw new Error(`Config[${i}]: invalid pattern: ${ex.message}`);
+          try {
+            const config = configs[i];
+            if (typeof config !== 'object' || config === null || Array.isArray(config)) {
+              throw new Error(`Invalid object`);
+            }
+            if (config.pattern) {
+              if (typeof config.pattern !== 'string') {
+                throw new Error(`Pattern must be a string`);
+              }
+              if (/^\/(.*)\/([a-z]*)$/.test(config.pattern)) {
+                try {
+                  new RegExp(RegExp.$1, RegExp.$2);
+                } catch (ex) {
+                  throw new Error(`Invalid pattern: ${ex.message}`);
+                }
+              } else {
+                throw new Error(`Invalid pattern: Unsupported format.`);
               }
             }
+          } catch (ex) {
+            throw new Error(`Config[${i}]: ${ex.message}`);
           }
         }
       } catch (ex) {
