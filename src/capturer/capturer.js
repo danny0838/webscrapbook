@@ -2026,7 +2026,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                 const startCheck = text.slice(0, 3);
                 const endCheck = text.slice(-3);
 
-                scrapbook.unwrapElement(elem);
+                scrapbook.unwrapNode(elem);
 
                 Object.assign(annotation, {
                   startContainerPath: getXPath(startContainer, oldRootNode),
