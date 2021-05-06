@@ -1607,14 +1607,61 @@
               default:
                 if (elem.hasAttribute("data")) {
                   tasks.push(async () => {
-                    const response = await downloadFile({
-                      url: elem.getAttribute("data"),
-                      refUrl,
-                      settings,
-                      options,
+                    const sourceUrl = elem.getAttribute("data");
+
+                    // skip further processing and keep current src
+                    // (point to self, or not resolvable)
+                    if (!scrapbook.isUrlAbsolute(sourceUrl)) {
+                      return;
+                    }
+
+                    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+
+                    // headlessly capture
+                    const objectSettings = Object.assign({}, settings, {
+                      recurseChain: [...settings.recurseChain, refUrl],
+                      isMainFrame: false,
+                      fullPage: true,
+                      usedCssFontUrl: undefined,
+                      usedCssImageUrl: undefined,
+                      isHeadless: true,
                     });
-                    captureRewriteAttr(elem, "data", response.url);
-                    return response;
+
+                    let objectOptions = options;
+
+                    // special handling for data URL
+                    if (sourceUrl.startsWith("data:") &&
+                        !options["capture.saveDataUriAsFile"] &&
+                        options["capture.saveAs"] !== "singleHtml") {
+                      // Save object document and inner URLs as data URL since data URL
+                      // is null origin and no relative URL is allowed in it.
+                      objectOptions = Object.assign({}, options, {
+                        "capture.saveAs": "singleHtml",
+                      });
+                    }
+
+                    // check circular reference if saving as data URL
+                    if (objectOptions["capture.saveAs"] === "singleHtml") {
+                      if (objectSettings.recurseChain.includes(sourceUrlMain)) {
+                        console.warn(scrapbook.lang("WarnCaptureCircular", [refUrl, sourceUrlMain]));
+                        captureRewriteAttr(elem, "data", `urn:scrapbook:download:circular:url:${sourceUrl}`);
+                        return;
+                      }
+                    }
+
+                    return capturer.invoke("captureUrl", {
+                      url: sourceUrl,
+                      refUrl,
+                      settings: objectSettings,
+                      options: objectOptions,
+                    }).catch(async (ex) => {
+                      console.error(ex);
+                      warn(scrapbook.lang("ErrorFileDownloadError", [sourceUrl, ex.message]));
+                      return {url: capturer.getErrorUrl(sourceUrl, options), error: {message: ex.message}};
+                    }).then(async (response) => {
+                      captureRewriteAttr(elem, "data", response.url);
+                      return response;
+                    });
                   });
                 }
                 break;

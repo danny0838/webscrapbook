@@ -6041,10 +6041,12 @@ async function test_capture_embed() {
  * capture.object
  */
 async function test_capture_object() {
-  /* capture.object = save */
   var options = {
-    "capture.object": "save",
+    "capture.frameRename": false,
   };
+
+  /* capture.object = save */
+  options["capture.object"] = "save";
   var blob = await capture({
     url: `${localhost}/capture_object/object.html`,
     options: Object.assign({}, baseOptions, options),
@@ -6052,17 +6054,17 @@ async function test_capture_object() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['demo.svg']);
+  assert(zip.files['green.bmp']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var object = doc.querySelector('object');
-  assert(object.getAttribute('data') === `demo.svg`);
+  var objects = doc.querySelectorAll('object');
+  assert(objects[0].getAttribute('data') === `demo.svg`);
+  assert(objects[1].getAttribute('data') === `green.bmp`);
 
   /* capture.object = link */
-  var options = {
-    "capture.object": "link",
-  };
+  options["capture.object"] = "link";
   var blob = await capture({
     url: `${localhost}/capture_object/object.html`,
     options: Object.assign({}, baseOptions, options),
@@ -6074,13 +6076,12 @@ async function test_capture_object() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var object = doc.querySelector('object');
-  assert(object.getAttribute('data') === `${localhost}/capture_object/demo.svg`);
+  var objects = doc.querySelectorAll('object');
+  assert(objects[0].getAttribute('data') === `${localhost}/capture_object/demo.svg`);
+  assert(objects[1].getAttribute('data') === `${localhost}/capture_object/green.bmp`);
 
   /* capture.object = blank */
-  var options = {
-    "capture.object": "blank",
-  };
+  options["capture.object"] = "blank";
   var blob = await capture({
     url: `${localhost}/capture_object/object.html`,
     options: Object.assign({}, baseOptions, options),
@@ -6092,13 +6093,12 @@ async function test_capture_object() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var object = doc.querySelector('object');
-  assert(!object.hasAttribute('data'));
+  var objects = doc.querySelectorAll('object');
+  assert(!objects[0].hasAttribute('data'));
+  assert(!objects[1].hasAttribute('data'));
 
   /* capture.object = remove */
-  var options = {
-    "capture.object": "remove",
-  };
+  options["capture.object"] = "remove";
   var blob = await capture({
     url: `${localhost}/capture_object/object.html`,
     options: Object.assign({}, baseOptions, options),
@@ -6110,8 +6110,145 @@ async function test_capture_object() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var object = doc.querySelector('object');
-  assert(!object);
+  assert(!doc.querySelector('object'));
+}
+
+/**
+ * Headlessly capture object content like a frame.
+ *
+ * capture.object
+ */
+async function test_capture_object2() {
+  var options = {
+    "capture.saveResourcesSequentially": true,
+    "capture.object": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_object2/cross-origin.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var frames = doc.querySelectorAll('object');
+
+  // frame1.html
+  var frame = frames[0];
+  assert(frame.getAttribute('data') === `index_1.html`);
+  var frameFile = zip.file(frame.getAttribute('data'));
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content`);
+  assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
+
+  var imgFile = zip.file('red.bmp');
+  assert(imgFile);
+  var imgData = await imgFile.async('base64');
+  assert(imgData === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+
+  // frame2.xhtml
+  var frame = frames[1];
+  assert(frame.getAttribute('data') === `index_2.xhtml`);
+  var frameFile = zip.file(frame.getAttribute('data'));
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "application/xhtml+xml"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content`);
+  assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
+
+  // frame3.svg
+  var frame = frames[2];
+  assert(frame.getAttribute('data') === `index_3.svg`);
+  var frameFile = zip.file(frame.getAttribute('data'));
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_frame/same-origin.html`);
+
+  // text.txt
+  var frame = frames[3];
+  assert(frame.getAttribute('data') === 'text.txt');
+  var frameFile = zip.file(frame.getAttribute('data'));
+  var text = (await readFileAsText(await frameFile.async('blob'))).trim();
+  assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
+}
+
+/**
+ * Check if circular object referencing is handled correctly like a frame.
+ *
+ * capture.object
+ */
+async function test_capture_object_circular() {
+  /* capture.saveAs = zip */
+  // link to corresponding downloaded frame file
+  var options = {
+    "capture.object": "save",
+    "capture.saveAs": "zip",
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_object_circular/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  // frame1.html
+  var frame = doc.querySelector('object');
+  var frameSrc = frame.getAttribute('data');
+  assert(frameSrc === 'index_1.html');
+  var frameFile = zip.file(frameSrc);
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+
+  // frame2.html
+  var frame = frameDoc.querySelector('object');
+  var frameSrc = frame.getAttribute('data');
+  assert(frameSrc === 'index_2.html');
+  var frameFile = zip.file(frameSrc);
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+
+  // index.html
+  var frame = frameDoc.querySelector('object');
+  var frameSrc = frame.getAttribute('data');
+  assert(frameSrc === 'index.html');
+
+  /* capture.saveAs = singleHtml */
+  // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
+  var options = {
+    "capture.object": "save",
+    "capture.saveAs": "singleHtml",
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_object_circular/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  // frame1.html
+  var frame = doc.querySelector('object');
+  var frameSrc = frame.getAttribute('data');
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+
+  // frame2.html
+  var frame = frameDoc.querySelector('object');
+  var frameSrc = frame.getAttribute('data');
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+
+  // index.html
+  var frame = frameDoc.querySelector('object');
+  assert(frame.getAttribute('data') === `urn:scrapbook:download:circular:url:${localhost}/capture_object_circular/index.html`);
 }
 
 /**
