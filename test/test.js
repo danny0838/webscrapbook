@@ -2387,11 +2387,13 @@ async function test_capture_frame_singleHtml() {
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
 
-  var frameSrc = `data:application\/xhtml\+xml;charset=UTF-8,${encodeURIComponent(frames[1].getAttribute('srcdoc'))}`;
+  var frameSrc = frames[1].getAttribute('src');
+  assert(frameSrc.match(/^data:application\/xhtml\+xml;charset=UTF-8;filename=frame2\.xhtml,/));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
 
-  var frameSrc = `data:image\/svg\+xml;charset=UTF-8,${encodeURIComponent(frames[2].getAttribute('srcdoc'))}`;
+  var frameSrc = frames[2].getAttribute('src');
+  assert(frameSrc.match(/^data:image\/svg\+xml;charset=UTF-8;filename=frame3\.svg,/));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
 

@@ -1009,7 +1009,7 @@
                       options["capture.saveDataUriAsSrcdoc"]) {
                     const file = scrapbook.dataUriToFile(response.url);
                     const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(file.type);
-                    if (["text/html", "application/xhtml+xml", "image/svg+xml"].includes(mime)) {
+                    if (mime === "text/html") {
                       // assume the charset is UTF-8 if not defined
                       const content = await scrapbook.readFileAsText(file, charset || "UTF-8");
                       captureRewriteAttr(frame, "srcdoc", content);
