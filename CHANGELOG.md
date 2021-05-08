@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.118.0] - 2021-05-08
+* Added support of capturing source documents embedded via `<object>` tags.
+* No more save XHTML or SVG files as srcdoc when saving as single HTML.
+
 ## [0.117.0] - 2021-05-05
 * Improved config checking of capture helpers and autocapture to prevent more possible bad input.
 * Fixed an issue that unfetchable resources are not skipped during internalization.
