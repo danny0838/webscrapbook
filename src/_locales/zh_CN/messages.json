@@ -671,7 +671,7 @@
     "message": "包括以下网址:"
   },
   "OptionCaptureDownLinkDocUrlFilterTooltip": {
-    "message": "此过滤器根据网址筛选要获取的链接。\n\n• 以下每行为一个完整网址（“#”或空白以后的部分会自动去除）或一个正则表达式（如“/^http://example\\.com//”）。\n• 链接的完整网址（去除“#”以后的部分）匹配任何一行的规则即列入下载。例如链接“http://example.com/subpage#h2”匹配完整网址规则“http://example.com/subpage 子页面标题”或正则表达式规则“/^http://example\\.com/SubPage\\d*/i 子页面规则描述”。若每行皆无规则，则任何网址皆列入下载。\n• 以“#”开头的行皆视为注解，执行时会略过。"
+    "message": "此过滤器根据网址筛选要获取的链接。\n\n• 以下每行为一个完整网址（“#”以后的部分会自动去除）或一个正则表达式（如“/^http://example\\.com//”）。\n• 链接的完整网址（去除“#”以后的部分）匹配任何一行的规则即列入下载。例如链接“http://example.com/subpage#h2”匹配完整网址规则“http://example.com/subpage”或正则表达式规则“/^http://example\\.com/SubPage\\d*/i”。若每行皆无规则，则任何网址皆列入下载。\n• 以“#”开头的行皆视为注解，执行时会略过。\n• 每行空白字元以后的部分皆视为注解，执行时会自动忽略。例如“http://example.com/ 注解”视同“http://example.com/”；“/^https:/ 注解”视同“/^https:/”。"
   },
   "OptionCaptureDownLinkFileExtFilterLabel": {
     "message": "包括以下扩展名:"
@@ -698,7 +698,7 @@
     "message": "网址过滤器:"
   },
   "OptionCaptureDownLinkUrlFilterTooltip": {
-    "message": "此过滤器根据网址筛选禁止下载或获取的链接，优先于其他过滤器。\n\n• 以下每行为一个完整网址（“#”或空白以后的部分会自动去除）或一个正则表达式（如“/[/=]logout\\b/i”）。\n• 链接的完整网址（去除“#”以后的部分）匹配任何一行的规则即禁止下载。例如链接“http://example.com/logout”和“http://example.com/?a=LOGOUT”都匹配正则表达式规则“/[/=]logout\\b/i”。\n• 以“#”开头的行皆视为注解，执行时会略过。"
+    "message": "此过滤器根据网址筛选禁止下载或获取的链接，优先于其他过滤器。\n\n• 以下每行为一个完整网址（“#”以后的部分会自动去除）或一个正则表达式（如“/[/=]logout\\b/i”）。\n• 链接的完整网址（去除“#”以后的部分）匹配任何一行的规则即禁止下载。例如链接“http://example.com/logout”和“http://example.com/?a=LOGOUT”都匹配正则表达式规则“/[/=]logout\\b/i”。\n• 以“#”开头的行皆视为注解，执行时会略过。\n• 每行空白字元以后的部分皆视为注解，执行时会自动忽略。例如“http://example.com/ 注解”视同“http://example.com/”；“/^https:/ 注解”视同“/^https:/”。"
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
