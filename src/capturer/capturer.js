@@ -2725,6 +2725,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         line = line.trim();
         if (!line || line.startsWith("#")) { continue; }
 
+        line = line.split(REGEX_SPACES)[0];
         if (REGEX_PATTERN.test(line)) {
           try {
             ret.push(new RegExp(RegExp.$1, RegExp.$2));
@@ -2732,7 +2733,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             console.error(ex);
           }
         } else {
-          line = line.split(REGEX_SPACES)[0];
           line = scrapbook.splitUrlByAnchor(line)[0];
           ret.push(line);
         }
@@ -2779,6 +2779,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         line = line.trim();
         if (!line || line.startsWith("#")) { continue; }
 
+        line = line.split(REGEX_SPACES)[0];
         if (REGEX_PATTERN.test(line)) {
           try {
             ret.push(new RegExp(RegExp.$1, RegExp.$2));
@@ -2786,7 +2787,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             console.error(ex);
           }
         } else {
-          line = line.split(REGEX_SPACES)[0];
           line = scrapbook.splitUrlByAnchor(line)[0];
           ret.push(line);
         }

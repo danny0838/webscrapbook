@@ -252,49 +252,56 @@
   }
 
   function verifyDownLinkRules(srcText) {
-    const srcLines = srcText.split(/(?:\n|\r\n?)/);
-    for (let i = 0, I = srcLines.length; i < I; i++) {
-      const srcLine = srcLines[i];
-      let line = srcLine.trim();
-      if (!line || line.startsWith("#")) { continue; }
+    const REGEX_LINEFEEDS = /[\r\n]+/;
+    const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
+    const fn = verifyDownLinkRules = (source) => {
+      const lines = source.split(REGEX_LINEFEEDS);
+      for (let i = 0, I = lines.length; i < I; i++) {
+        let line = lines[i].trim();
+        if (!line || line.startsWith("#")) { continue; }
 
-      if (/^\/(.*)\/([a-z]*)$/.test(line)) {
-        try {
-          new RegExp(RegExp.$1, RegExp.$2);
-        } catch (ex) {
-          return `Line ${i + 1}: ${ex.message}`;
+        if (REGEX_PATTERN.test(line)) {
+          try {
+            new RegExp(RegExp.$1, RegExp.$2);
+          } catch (ex) {
+            return `Line ${i + 1}: ${ex.message}`;
+          }
         }
       }
-    }
-
-    return '';
+      return '';
+    };
+    return fn(srcText);
   }
 
   function verifyDownLinkUrlRules(srcText) {
-    const srcLines = srcText.split(/(?:\n|\r\n?)/);
-    for (let i = 0, I = srcLines.length; i < I; i++) {
-      const srcLine = srcLines[i];
-      let line = srcLine.trim();
-      if (!line || line.startsWith("#")) { continue; }
+    const REGEX_LINEFEEDS = /[\r\n]+/;
+    const REGEX_SPACES = /\s+/;
+    const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
+    const fn = verifyDownLinkUrlRules = (source) => {
+      const lines = source.split(REGEX_LINEFEEDS);
+      for (let i = 0, I = lines.length; i < I; i++) {
+        let line = lines[i].trim();
+        if (!line || line.startsWith("#")) { continue; }
 
-      if (/^\/(.*)\/([a-z]*)$/.test(line)) {
-        try {
-          new RegExp(RegExp.$1, RegExp.$2);
-        } catch (ex) {
-          return `Line ${i + 1}: ${ex.message}`;
-        }
-      } else {
-        try {
-          line = line.split(/\s+/)[0];
+        line = line.split(REGEX_SPACES)[0];
+        if (REGEX_PATTERN.test(line)) {
+          try {
+            new RegExp(RegExp.$1, RegExp.$2);
+          } catch (ex) {
+            return `Line ${i + 1}: ${ex.message}`;
+          }
+        } else {
           line = scrapbook.splitUrlByAnchor(line)[0];
-          new URL(line);
-        } catch (ex) {
-          return `Line ${i + 1}: Invalid URL: ${line}`;
+          try {
+            new URL(line);
+          } catch (ex) {
+            return `Line ${i + 1}: Invalid URL: ${line}`;
+          }
         }
       }
-    }
-
-    return '';
+      return '';
+    };
+    return fn(srcText);
   }
 
   function verifyDownLinkFileExtFilter() {
