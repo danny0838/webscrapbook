@@ -6365,6 +6365,10 @@ async function test_capture_preload() {
   assert(!preloads[4].hasAttribute('imagesrcset'));
   var preloads = doc.querySelectorAll('link[rel="modulepreload"]');
   assert(!preloads[0].hasAttribute('href'));
+  var preloads = doc.querySelectorAll('link[rel="dns-prefetch"]');
+  assert(!preloads[0].hasAttribute('href'));
+  var preloads = doc.querySelectorAll('link[rel="preconnect"]');
+  assert(!preloads[0].hasAttribute('href'));
 
   /* capture.preload = remove */
   var options = {
@@ -6381,6 +6385,8 @@ async function test_capture_preload() {
   var doc = await readFileAsDocument(indexBlob);
   assert(!doc.querySelector('link[rel="preload"]'));
   assert(!doc.querySelector('link[rel="modulepreload"]'));
+  assert(!doc.querySelector('link[rel="dns-prefetch"]'));
+  assert(!doc.querySelector('link[rel="preconnect"]'));
 }
 
 /**
