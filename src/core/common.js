@@ -96,6 +96,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.mergeCssResources": true,
     "capture.script": "remove", // "save", "link", "blank", "remove"
     "capture.noscript": "save", // "save", "blank", "remove"
+    "capture.contentSecurityPolicy": "remove", // "save", "remove"
     "capture.preload": "remove", // "blank", "remove"
     "capture.prefetch": "remove", // "blank", "remove"
     "capture.base": "blank", // "save", "blank", "remove"

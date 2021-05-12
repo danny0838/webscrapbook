@@ -599,8 +599,14 @@
                 }
               } else if (elem.getAttribute("http-equiv").toLowerCase() == "content-security-policy") {
                 // content security policy could make resources not loaded when viewed offline
-                if (options["capture.removeIntegrity"]) {
-                  captureRewriteAttr(elem, "http-equiv", null);
+                switch (options["capture.contentSecurityPolicy"]) {
+                  case "save":
+                    // do nothing
+                    break;
+                  case "remove":
+                  default:
+                    captureRemoveNode(elem);
+                    return;
                 }
               }
             } else if (elem.hasAttribute("charset")) {
@@ -2009,13 +2015,23 @@
           }
         }
 
+        // handle nonce
+        switch (options["capture.contentSecurityPolicy"]) {
+          case "save":
+            // do nothing
+            break;
+          case "remove":
+          default:
+            captureRewriteAttr(elem, "nonce", null); // this is meaningless as CSP is removed
+            break;
+        }
+
         // handle integrity and crossorigin
         // We have to remove integrity check because we could modify the content
         // and they might not work correctly in the offline environment.
         if (options["capture.removeIntegrity"]) {
           captureRewriteAttr(elem, "integrity", null);
           captureRewriteAttr(elem, "crossorigin", null);
-          captureRewriteAttr(elem, "nonce", null); // this is meaningless as CSP is removed
         }
       }
 

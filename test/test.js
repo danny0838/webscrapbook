@@ -31,6 +31,7 @@ const baseOptions = {
   "capture.mergeCssResources": false,
   "capture.script": "save",
   "capture.noscript": "save",
+  "capture.contentSecurityPolicy": "remove",
   "capture.preload": "remove",
   "capture.prefetch": "remove",
   "capture.base": "blank",
@@ -8590,6 +8591,51 @@ async function test_capture_metaRefresh6() {
 /**
  * Check if option works
  *
+ * capture.contentSecurityPolicy
+ */
+async function test_capture_contentSecurityPolicy() {
+  /* capture.contentSecurityPolicy = save */
+  var options = {
+    "capture.contentSecurityPolicy": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_contentSecurityPolicy/csp.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `default-src 'nonce-2726c7f26c';`);
+  assert(doc.querySelector('link').getAttribute('nonce') === `2726c7f26c`);
+  assert(doc.querySelector('style').getAttribute('nonce') === `2726c7f26c`);
+  assert(doc.querySelector('script[src]').getAttribute('nonce') === `2726c7f26c`);
+  assert(doc.querySelector('script:not([src])').getAttribute('nonce') === `2726c7f26c`);
+
+  /* capture.contentSecurityPolicy = remove */
+  var options = {
+    "capture.contentSecurityPolicy": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_contentSecurityPolicy/csp.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector('meta[http-equiv]'));
+  assert(!doc.querySelector('link').hasAttribute('nonce'));
+  assert(!doc.querySelector('style').hasAttribute('nonce'));
+  assert(!doc.querySelector('script[src]').hasAttribute('nonce'));
+  assert(!doc.querySelector('script:not([src])').hasAttribute('nonce'));
+}
+
+/**
+ * Check if option works
+ *
  * capture.removeIntegrity
  */
 async function test_capture_integrity() {
@@ -8613,22 +8659,6 @@ async function test_capture_integrity() {
   assert(!script.hasAttribute('integrity'));
   assert(!script.hasAttribute('crossorigin'));
 
-  var blob = await capture({
-    url: `${localhost}/capture_integrity/nonce.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-  var zip = await new JSZip().loadAsync(blob);
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  var meta = doc.querySelectorAll('meta')[1];
-  assert(!meta.hasAttribute('http-equiv'));
-  var link = doc.querySelector('link');
-  assert(!link.hasAttribute('nonce'));
-  var script = doc.querySelector('script');
-  assert(!script.hasAttribute('nonce'));
-
   /* -capture.removeIntegrity */
   var options = {
     "capture.removeIntegrity": false,
@@ -8648,22 +8678,6 @@ async function test_capture_integrity() {
   var script = doc.querySelector('script');
   assert(script.hasAttribute('integrity'));
   assert(script.hasAttribute('crossorigin'));
-
-  var blob = await capture({
-    url: `${localhost}/capture_integrity/nonce.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-  var zip = await new JSZip().loadAsync(blob);
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  var meta = doc.querySelectorAll('meta')[1];
-  assert(meta.hasAttribute('http-equiv'));
-  var link = doc.querySelector('link');
-  assert(link.hasAttribute('nonce'));
-  var script = doc.querySelector('script');
-  assert(script.hasAttribute('nonce'));
 }
 
 /**
@@ -9529,6 +9543,7 @@ async function test_capture_record_attrs2() {
     "capture.downLink.file.mode": "url",
     "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
+    "capture.contentSecurityPolicy": "remove",
   };
 
   /* +capture.recordRewrites */
@@ -9546,10 +9561,16 @@ async function test_capture_record_attrs2() {
 
   // attr
   assert(doc.querySelector('link[rel="preload"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.css`);
+  assert(doc.querySelector('link[rel="preload"]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
   assert(doc.querySelector('link[rel="prefetch"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null2.css`);
+  assert(doc.querySelector('link[rel="prefetch"]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
   assert(doc.querySelector('link[rel~="icon"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.bmp`);
+  assert(doc.querySelector('link[rel~="icon"]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
   assert(doc.querySelector('link[rel="stylesheet"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.css`);
-  assert(doc.querySelector('script').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.js`);
+  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
+  assert(doc.querySelector('script[src]').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.js`);
+  assert(doc.querySelector('script[src]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
+  assert(doc.querySelector('script:not([src])').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
   assert(doc.querySelector('img').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.bmp`);
   assert(doc.querySelector('img[srcset]').getAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`) === `./null.bmp 1x, ./null.bmp 2x`);
   assert(doc.querySelector('picture source').getAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`) === `./null.bmp`);
@@ -9597,10 +9618,16 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url("null.bmp"); }`);
 
   // attr
   assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
+  assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
   assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
+  assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
   assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
+  assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
   assert(!doc.querySelector('link[rel="stylesheet"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelector('script').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
+  assert(!doc.querySelector('link[rel="stylesheet"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
+  assert(!doc.querySelector('script[src]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
+  assert(!doc.querySelector('script[src]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
+  assert(!doc.querySelector('script:not([src])').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
   assert(!doc.querySelector('img').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
   assert(!doc.querySelector('img[srcset]').hasAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`));
   assert(!doc.querySelector('picture source').hasAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`));
@@ -9658,6 +9685,7 @@ async function test_capture_record_attrs3() {
     "capture.styleInline": "save",
     "capture.rewriteCss": "url",
     "capture.script": "blank",
+    "capture.contentSecurityPolicy": "remove",
   };
 
   /* +capture.recordRewrites */
@@ -9675,7 +9703,10 @@ async function test_capture_record_attrs3() {
 
   // attr
   assert(doc.querySelector('link[rel~="icon"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.bmp`);
-  assert(doc.querySelector('script').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.js`);
+  assert(doc.querySelectorAll('script')[0].getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.js`);
+  assert(doc.querySelectorAll('script')[0].getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
+  assert(doc.querySelectorAll('script')[1].getAttribute(`data-scrapbook-orig-textContent-${timeId}`).trim() === `console.log('script:not[src]');`);
+  assert(doc.querySelectorAll('script')[1].getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
   assert(doc.querySelector('img').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.bmp`);
   assert(doc.querySelectorAll('img')[1].getAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`) === `./null.bmp 1x, ./null.bmp 2x`);
   assert(doc.querySelector('picture source').getAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`) === `./null.bmp`);
@@ -9717,7 +9748,10 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url(""); }`);
 
   // attr
   assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
-  assert(!doc.querySelector('script').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
+  assert(!doc.querySelectorAll('script')[0].hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
+  assert(!doc.querySelectorAll('script')[0].hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
+  assert(!doc.querySelectorAll('script')[1].hasAttribute(`data-scrapbook-orig-textContent-${timeId}`));
+  assert(!doc.querySelectorAll('script')[1].hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
   assert(!doc.querySelector('img').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
   assert(!doc.querySelectorAll('img')[1].hasAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`));
   assert(!doc.querySelector('picture source').hasAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`));

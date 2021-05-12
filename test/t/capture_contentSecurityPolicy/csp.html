@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'nonce-2726c7f26c';">
+<link rel="stylesheet" href="csp.css" nonce="2726c7f26c">
+<style nonce="2726c7f26c">
+#css_internal { background-color: green; }
+</style>
+<script src="csp.js" nonce="2726c7f26c"></script>
+<script nonce="2726c7f26c">
+console.log('script:not([src])');
+</script>
+</head>
+<body>
+<blockquote id="css_external">link[rel="stylesheet"]</blockquote>
+<blockquote id="css_internal">style</blockquote>
+</body>
+</html>

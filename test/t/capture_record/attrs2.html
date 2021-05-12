@@ -7,11 +7,14 @@
 @font-face { font-family: myFont; src: url("./null.woff"); }
 p { background-image: url("./null.bmp"); }
 </style>
-<link rel="preload" href="./null.css" as="style">
-<link rel="prefetch" href="./null2.css" as="style">
-<link rel="shortcut icon" href="./null.bmp">
-<link rel="stylesheet" href="./null.css">
-<script src="./null.js"></script>
+<link rel="preload" href="./null.css" as="style" nonce="2726c7f26c">
+<link rel="prefetch" href="./null2.css" as="style" nonce="2726c7f26c">
+<link rel="shortcut icon" href="./null.bmp" nonce="2726c7f26c">
+<link rel="stylesheet" href="./null.css" nonce="2726c7f26c">
+<script src="./null.js" nonce="2726c7f26c"></script>
+<script nonce="2726c7f26c">
+console.log('script:not[src]');
+</script>
 </head>
 <body>
 <img src="./null.bmp">
