@@ -6407,6 +6407,8 @@ async function test_capture_prefetch() {
   assert(!prefetches[1].hasAttribute('href'));
   assert(!prefetches[2].hasAttribute('href'));
   assert(!prefetches[3].hasAttribute('href'));
+  var prefetches = doc.querySelectorAll('link[rel="prerender"]');
+  assert(!prefetches[0].hasAttribute('href'));
 
   /* capture.prefetch = remove */
   var options = {
@@ -6422,6 +6424,7 @@ async function test_capture_prefetch() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(!doc.querySelector('link[rel="prefetch"]'));
+  assert(!doc.querySelector('link[rel="prerender"]'));
 }
 
 /**

@@ -757,7 +757,7 @@
                   captureRemoveNode(elem);
                   return;
               }
-            } else if (elem.matches('[rel~="prefetch"]')) {
+            } else if (elem.matches('[rel~="prefetch"], [rel~="prerender"]')) {
               // @TODO: handle prefetches according to its "as" attribute
               switch (options["capture.prefetch"]) {
                 case "blank":
