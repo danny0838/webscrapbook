@@ -6362,6 +6362,7 @@ async function test_capture_preload() {
   assert(!preloads[1].hasAttribute('href'));
   assert(!preloads[2].hasAttribute('href'));
   assert(!preloads[3].hasAttribute('href'));
+  assert(!preloads[4].hasAttribute('imagesrcset'));
 
   /* capture.preload = remove */
   var options = {

@@ -614,9 +614,17 @@
           }
 
           case "link": {
-            if (!elem.hasAttribute("href")) { break; }
-            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), refUrl);
-            captureRewriteAttr(elem, "href", rewriteUrl);
+            if (elem.hasAttribute("href")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), refUrl);
+              captureRewriteAttr(elem, "href", rewriteUrl);
+            }
+
+            if (elem.hasAttribute("imagesrcset")) {
+              const rewriteSrcset = scrapbook.rewriteSrcset(elem.getAttribute("imagesrcset"), (url) => {
+                return capturer.resolveRelativeUrl(url, refUrl);
+              });
+              captureRewriteAttr(elem, "imagesrcset", rewriteSrcset);
+            }
 
             if (elem.matches('[rel~="stylesheet"]')) {
               // styles: link element
@@ -694,7 +702,7 @@
               switch (options["capture.favicon"]) {
                 case "link":
                   if (typeof favIconUrl === 'undefined') {
-                    favIconUrl = rewriteUrl;
+                    favIconUrl = elem.getAttribute("href");
                   }
                   break;
                 case "blank":
@@ -715,7 +723,7 @@
                 default:
                   let useFavIcon = false;
                   if (typeof favIconUrl === 'undefined') {
-                    favIconUrl = rewriteUrl;
+                    favIconUrl = elem.getAttribute("href");
                     useFavIcon = true;
                   }
                   tasks.push(async () => {
@@ -742,6 +750,7 @@
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // If the href attribute is absent, then the element does not define a link.
                   captureRewriteAttr(elem, "href", null);
+                  captureRewriteAttr(elem, "imagesrcset", null);
                   break;
                 case "remove":
                 default:
