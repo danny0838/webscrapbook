@@ -743,7 +743,7 @@
                   });
                   break;
               }
-            } else if (elem.matches('[rel~="preload"]')) {
+            } else if (elem.matches('[rel~="preload"], [rel~="modulepreload"]')) {
               // @TODO: handle preloads according to its "as" attribute
               switch (options["capture.preload"]) {
                 case "blank":
