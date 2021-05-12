@@ -32,6 +32,7 @@ const baseOptions = {
   "capture.script": "save",
   "capture.noscript": "save",
   "capture.preload": "remove",
+  "capture.prefetch": "remove",
   "capture.base": "blank",
   "capture.formStatus": "keep",
   "capture.shadowDom": "save",
@@ -6361,11 +6362,6 @@ async function test_capture_preload() {
   assert(!preloads[1].hasAttribute('href'));
   assert(!preloads[2].hasAttribute('href'));
   assert(!preloads[3].hasAttribute('href'));
-  var prefetchs = doc.querySelectorAll('link[rel="prefetch"]');
-  assert(!prefetchs[0].hasAttribute('href'));
-  assert(!prefetchs[1].hasAttribute('href'));
-  assert(!prefetchs[2].hasAttribute('href'));
-  assert(!prefetchs[3].hasAttribute('href'));
 
   /* capture.preload = remove */
   var options = {
@@ -6381,6 +6377,46 @@ async function test_capture_preload() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(!doc.querySelector('link[rel="preload"]'));
+}
+
+/**
+ * Check if option works
+ *
+ * capture.prefetch
+ */
+async function test_capture_prefetch() {
+  /* capture.prefetch = blank */
+  var options = {
+    "capture.prefetch": "blank",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_prefetch/prefetch.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var prefetches = doc.querySelectorAll('link[rel="prefetch"]');
+  assert(!prefetches[0].hasAttribute('href'));
+  assert(!prefetches[1].hasAttribute('href'));
+  assert(!prefetches[2].hasAttribute('href'));
+  assert(!prefetches[3].hasAttribute('href'));
+
+  /* capture.prefetch = remove */
+  var options = {
+    "capture.prefetch": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_prefetch/prefetch.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
   assert(!doc.querySelector('link[rel="prefetch"]'));
 }
 
@@ -9066,6 +9102,7 @@ async function test_capture_record_nodes1() {
     "capture.script": "remove",
     "capture.noscript": "remove",
     "capture.preload": "remove",
+    "capture.prefetch": "remove",
     "capture.base": "remove",
   };
 
@@ -9099,6 +9136,10 @@ async function test_capture_record_nodes1() {
 
   assert(new RegExp(
     `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="preload"[^>]*?>-->`
+  ).test(head.innerHTML));
+
+  assert(new RegExp(
+    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="prefetch"[^>]*?>-->`
   ).test(head.innerHTML));
 
   assert(new RegExp(
@@ -9471,6 +9512,7 @@ async function test_capture_record_attrs2() {
     "capture.rewriteCss": "url",
     "capture.script": "save",
     "capture.preload": "blank",
+    "capture.prefetch": "blank",
     "capture.downLink.file.mode": "url",
     "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
@@ -9491,6 +9533,7 @@ async function test_capture_record_attrs2() {
 
   // attr
   assert(doc.querySelector('link[rel="preload"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.css`);
+  assert(doc.querySelector('link[rel="prefetch"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null2.css`);
   assert(doc.querySelector('link[rel~="icon"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.bmp`);
   assert(doc.querySelector('link[rel="stylesheet"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.css`);
   assert(doc.querySelector('script').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.js`);
@@ -9541,6 +9584,7 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url("null.bmp"); }`);
 
   // attr
   assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
+  assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
   assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
   assert(!doc.querySelector('link[rel="stylesheet"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
   assert(!doc.querySelector('script').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));

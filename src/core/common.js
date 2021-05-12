@@ -97,6 +97,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.script": "remove", // "save", "link", "blank", "remove"
     "capture.noscript": "save", // "save", "blank", "remove"
     "capture.preload": "remove", // "blank", "remove"
+    "capture.prefetch": "remove", // "blank", "remove"
     "capture.base": "blank", // "save", "blank", "remove"
     "capture.formStatus": "keep", // "save-all", "save", "keep-all", "keep", "html-all", "html", "reset"
     "capture.shadowDom": "save", // "save", "remove"

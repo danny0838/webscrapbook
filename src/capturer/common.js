@@ -735,9 +735,22 @@
                   });
                   break;
               }
-            } else if (elem.matches('[rel~="preload"]') || elem.matches('[rel~="prefetch"]')) {
+            } else if (elem.matches('[rel~="preload"]')) {
               // @TODO: handle preloads according to its "as" attribute
               switch (options["capture.preload"]) {
+                case "blank":
+                  // HTML 5.1 2nd Edition / W3C Recommendation:
+                  // If the href attribute is absent, then the element does not define a link.
+                  captureRewriteAttr(elem, "href", null);
+                  break;
+                case "remove":
+                default:
+                  captureRemoveNode(elem);
+                  return;
+              }
+            } else if (elem.matches('[rel~="prefetch"]')) {
+              // @TODO: handle prefetches according to its "as" attribute
+              switch (options["capture.prefetch"]) {
                 case "blank":
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // If the href attribute is absent, then the element does not define a link.
