@@ -7,24 +7,24 @@
 @font-face { font-family: myFont; src: url("./null.woff"); }
 p { background-image: url("./null.bmp"); }
 </style>
-<link rel="preload" href="./null.css" as="style" nonce="2726c7f26c">
-<link rel="prefetch" href="./null2.css" as="style" nonce="2726c7f26c">
-<link rel="shortcut icon" href="./null.bmp" nonce="2726c7f26c">
-<link rel="stylesheet" href="./null.css" nonce="2726c7f26c">
-<script src="./null.js" nonce="2726c7f26c"></script>
+<link rel="preload" href="./null.css" as="style" nonce="2726c7f26c" crossorigin>
+<link rel="prefetch" href="./null2.css" as="style" nonce="2726c7f26c" crossorigin>
+<link rel="shortcut icon" href="./null.bmp" nonce="2726c7f26c" crossorigin="anonymous">
+<link rel="stylesheet" href="./null.css" nonce="2726c7f26c" crossorigin>
+<script src="./null.js" nonce="2726c7f26c" crossorigin="use-credentials"></script>
 <script nonce="2726c7f26c">
 console.log('script:not[src]');
 </script>
 </head>
 <body>
-<img src="./null.bmp">
+<img src="./null.bmp" crossorigin>
 
-<img srcset="./null.bmp 1x, ./null.bmp 2x">
+<img srcset="./null.bmp 1x, ./null.bmp 2x" crossorigin>
 
 <picture>
   <source media="(min-width: 650px)" srcset="./null.bmp">
   <source media="(min-width: 465px)" srcset="./null.bmp">
-  <img src="./null.bmp">
+  <img src="./null.bmp" crossorigin>
 </picture>
 
 <input type="image" src="./null.bmp">
@@ -39,16 +39,16 @@ console.log('script:not[src]');
   </tr>
 </table>
 
-<audio controls src="./null.mp3"></audio>
+<audio controls src="./null.mp3" crossorigin></audio>
 
-<audio controls>
+<audio controls crossorigin>
   <source src="./null.ogg" type="audio/ogg">
   <source src="./null.mp3" type="audio/mpeg">
 </audio>
 
-<video controls src="./null.mp4" poster="./null.bmp"></video>
+<video controls src="./null.mp4" poster="./null.bmp" crossorigin></video>
 
-<video controls>
+<video controls crossorigin>
   <source src="./null.webm" type="video/webm">
   <source src="./null.mp4" type="video/mp4">
 </video>

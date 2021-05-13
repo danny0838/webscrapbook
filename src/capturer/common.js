@@ -700,6 +700,9 @@
                       },
                     });
                   });
+
+                  // remove crossorigin as the origin has changed
+                  captureRewriteAttr(elem, "crossorigin", null);
                   break;
               }
               break;
@@ -747,6 +750,9 @@
                     }
                     return response;
                   });
+
+                  // remove crossorigin as the origin has changed
+                  captureRewriteAttr(elem, "crossorigin", null);
                   break;
               }
             } else if (elem.matches('[rel~="preload"], [rel~="modulepreload"], [rel~="dns-prefetch"], [rel~="preconnect"]')) {
@@ -868,6 +874,9 @@
                     return response;
                   });
                 }
+
+                // remove crossorigin as the origin has changed
+                captureRewriteAttr(elem, "crossorigin", null);
                 break;
             }
 
@@ -1268,6 +1277,9 @@
                     return response;
                   });
                 }
+
+                // remove crossorigin as the origin has changed
+                captureRewriteAttr(elem, "crossorigin", null);
                 break;
             }
             break;
@@ -1429,6 +1441,8 @@
                   });
                 }
 
+                // remove crossorigin as the origin has changed
+                captureRewriteAttr(elem, "crossorigin", null);
                 break;
             }
             break;
@@ -1565,6 +1579,8 @@
                   });
                 }
 
+                // remove crossorigin as the origin has changed
+                captureRewriteAttr(elem, "crossorigin", null);
                 break;
             }
             break;
@@ -2026,12 +2042,11 @@
             break;
         }
 
-        // handle integrity and crossorigin
+        // handle integrity
         // We have to remove integrity check because we could modify the content
         // and they might not work correctly in the offline environment.
         if (options["capture.removeIntegrity"]) {
           captureRewriteAttr(elem, "integrity", null);
-          captureRewriteAttr(elem, "crossorigin", null);
         }
       }
 

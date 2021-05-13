@@ -8634,6 +8634,90 @@ async function test_capture_contentSecurityPolicy() {
 }
 
 /**
+ * Check handling of crossorigin attribute
+ */
+async function test_capture_crossorigin() {
+  /* save */
+  var options = {
+    "capture.image": "save",
+    "capture.favicon": "save",
+    "capture.audio": "save",
+    "capture.video": "save",
+    "capture.style": "save",
+    "capture.rewriteCss": "url",
+    "capture.script": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_crossorigin/crossorigin.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(!doc.querySelector('link[rel~="stylesheet"]').hasAttribute('crossorigin'));
+  assert(!doc.querySelector('link[rel~="icon"]').hasAttribute('crossorigin'));
+  assert(!doc.querySelector('script').hasAttribute('crossorigin'));
+  assert(!doc.querySelector('img').hasAttribute('crossorigin'));
+  assert(!doc.querySelector('audio').hasAttribute('crossorigin'));
+  assert(!doc.querySelector('video').hasAttribute('crossorigin'));
+
+  /* link */
+  var options = {
+    "capture.image": "link",
+    "capture.favicon": "link",
+    "capture.audio": "link",
+    "capture.video": "link",
+    "capture.style": "link",
+    "capture.script": "link",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_crossorigin/crossorigin.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('link[rel~="stylesheet"]').getAttribute('crossorigin') === '');
+  assert(doc.querySelector('link[rel~="icon"]').getAttribute('crossorigin') === '');
+  assert(doc.querySelector('script').getAttribute('crossorigin') === '');
+  assert(doc.querySelector('img').getAttribute('crossorigin') === '');
+  assert(doc.querySelector('audio').getAttribute('crossorigin') === '');
+  assert(doc.querySelector('video').getAttribute('crossorigin') === '');
+
+  /* blank */
+  var options = {
+    "capture.image": "blank",
+    "capture.favicon": "blank",
+    "capture.audio": "blank",
+    "capture.video": "blank",
+    "capture.style": "blank",
+    "capture.script": "blank",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_crossorigin/crossorigin.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('link[rel~="stylesheet"]').getAttribute('crossorigin') === '');
+  assert(doc.querySelector('link[rel~="icon"]').getAttribute('crossorigin') === '');
+  assert(doc.querySelector('script').getAttribute('crossorigin') === '');
+  assert(doc.querySelector('img').getAttribute('crossorigin') === '');
+  assert(doc.querySelector('audio').getAttribute('crossorigin') === '');
+  assert(doc.querySelector('video').getAttribute('crossorigin') === '');
+}
+
+/**
  * Check if option works
  *
  * capture.removeIntegrity
@@ -8654,10 +8738,8 @@ async function test_capture_integrity() {
 
   var link = doc.querySelector('link');
   assert(!link.hasAttribute('integrity'));
-  assert(!link.hasAttribute('crossorigin'));
   var script = doc.querySelector('script');
   assert(!script.hasAttribute('integrity'));
-  assert(!script.hasAttribute('crossorigin'));
 
   /* -capture.removeIntegrity */
   var options = {
@@ -8674,10 +8756,8 @@ async function test_capture_integrity() {
 
   var link = doc.querySelector('link');
   assert(link.hasAttribute('integrity'));
-  assert(link.hasAttribute('crossorigin'));
   var script = doc.querySelector('script');
   assert(script.hasAttribute('integrity'));
-  assert(script.hasAttribute('crossorigin'));
 }
 
 /**
@@ -9478,7 +9558,6 @@ async function test_capture_record_attrs1() {
   assert(doc.querySelector('meta').getAttribute(`data-scrapbook-orig-attr-charset-${timeId}`) === `Big5`);
   assert(doc.querySelector('meta[content]').getAttribute(`data-scrapbook-orig-attr-content-${timeId}`) === `text/html; charset=Big5`);
   assert(doc.querySelector('script').getAttribute(`data-scrapbook-orig-attr-integrity-${timeId}`) === `sha256-FDJ1FZczv9rCdgEzfJCWGhlAqb9kOUFZoNu99URFDlg=`);
-  assert(doc.querySelector('script').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`) === `anonymous`);
   assert(doc.querySelector('body').getAttribute(`data-scrapbook-orig-attr-onload-${timeId}`) === `console.log('load');`);
   assert(doc.querySelector('div').getAttribute(`data-scrapbook-orig-attr-style-${timeId}`) === `background-color: green;`);
   assert(doc.querySelector('iframe').getAttribute(`data-scrapbook-orig-attr-srcdoc-${timeId}`) === `frame page content`);
@@ -9504,7 +9583,6 @@ async function test_capture_record_attrs1() {
   assert(!doc.querySelector('meta').hasAttribute(`data-scrapbook-orig-attr-charset-${timeId}`));
   assert(!doc.querySelector('meta[content]').hasAttribute(`data-scrapbook-orig-attr-content-${timeId}`));
   assert(!doc.querySelector('script').hasAttribute(`data-scrapbook-orig-attr-integrity-${timeId}`));
-  assert(!doc.querySelector('script').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(!doc.querySelector('body').hasAttribute(`data-scrapbook-orig-attr-onload-${timeId}`));
   assert(!doc.querySelector('div').hasAttribute(`data-scrapbook-orig-attr-style-${timeId}`));
   assert(!doc.querySelector('iframe').hasAttribute(`data-scrapbook-orig-attr-srcdoc-${timeId}`));
@@ -9562,28 +9640,40 @@ async function test_capture_record_attrs2() {
   // attr
   assert(doc.querySelector('link[rel="preload"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.css`);
   assert(doc.querySelector('link[rel="preload"]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
+  assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(doc.querySelector('link[rel="prefetch"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null2.css`);
   assert(doc.querySelector('link[rel="prefetch"]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
+  assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(doc.querySelector('link[rel~="icon"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.bmp`);
   assert(doc.querySelector('link[rel~="icon"]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
+  assert(doc.querySelector('link[rel~="icon"]').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`) === `anonymous`);
   assert(doc.querySelector('link[rel="stylesheet"]').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.css`);
   assert(doc.querySelector('link[rel="stylesheet"]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
+  assert(doc.querySelector('link[rel="stylesheet"]').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`) === ``);
   assert(doc.querySelector('script[src]').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.js`);
   assert(doc.querySelector('script[src]').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
+  assert(doc.querySelector('script[src]').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`) === `use-credentials`);
   assert(doc.querySelector('script:not([src])').getAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`) === `2726c7f26c`);
   assert(doc.querySelector('img').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.bmp`);
+  assert(doc.querySelector('img').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`) === ``);
   assert(doc.querySelector('img[srcset]').getAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`) === `./null.bmp 1x, ./null.bmp 2x`);
+  assert(doc.querySelector('img[srcset]').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`) === ``);
   assert(doc.querySelector('picture source').getAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`) === `./null.bmp`);
   assert(doc.querySelector('picture img').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.bmp`);
+  assert(doc.querySelector('picture img').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`) === ``);
   assert(doc.querySelector('input[type="image"]').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.bmp`);
   assert(doc.querySelector('table').getAttribute(`data-scrapbook-orig-attr-background-${timeId}`) === `./null.bmp`);
   assert(doc.querySelector('table tr').getAttribute(`data-scrapbook-orig-attr-background-${timeId}`) === `./null.bmp`);
   assert(doc.querySelector('table tr th').getAttribute(`data-scrapbook-orig-attr-background-${timeId}`) === `./null.bmp`);
   assert(doc.querySelector('table tr td').getAttribute(`data-scrapbook-orig-attr-background-${timeId}`) === `./null.bmp`);
   assert(doc.querySelector('audio[src]').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.mp3`);
+  assert(doc.querySelector('audio[src]').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`) === ``);
+  assert(doc.querySelector('audio:not([src])').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`) === ``);
   assert(doc.querySelector('audio source').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.ogg`);
   assert(doc.querySelector('video[src]').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.mp4`);
   assert(doc.querySelector('video[src]').getAttribute(`data-scrapbook-orig-attr-poster-${timeId}`) === `./null.bmp`);
+  assert(doc.querySelector('video[src]').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`) === ``);
+  assert(doc.querySelector('video:not([src])').getAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`) === ``);
   assert(doc.querySelector('video source').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.webm`);
   assert(doc.querySelector('iframe').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.html`);
   assert(doc.querySelector('embed').getAttribute(`data-scrapbook-orig-attr-src-${timeId}`) === `./null.swf`);
@@ -9619,28 +9709,40 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url("null.bmp"); }`);
   // attr
   assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
   assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
+  assert(!doc.querySelector('link[rel="preload"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
   assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
+  assert(!doc.querySelector('link[rel="prefetch"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
   assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
+  assert(!doc.querySelector('link[rel~="icon"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(!doc.querySelector('link[rel="stylesheet"]').hasAttribute(`data-scrapbook-orig-attr-href-${timeId}`));
   assert(!doc.querySelector('link[rel="stylesheet"]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
+  assert(!doc.querySelector('link[rel="stylesheet"]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(!doc.querySelector('script[src]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
   assert(!doc.querySelector('script[src]').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
+  assert(!doc.querySelector('script[src]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(!doc.querySelector('script:not([src])').hasAttribute(`data-scrapbook-orig-attr-nonce-${timeId}`));
   assert(!doc.querySelector('img').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
+  assert(!doc.querySelector('img').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(!doc.querySelector('img[srcset]').hasAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`));
+  assert(!doc.querySelector('img[srcset]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(!doc.querySelector('picture source').hasAttribute(`data-scrapbook-orig-attr-srcset-${timeId}`));
   assert(!doc.querySelector('picture img').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
+  assert(!doc.querySelector('picture img').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(!doc.querySelector('input[type="image"]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
   assert(!doc.querySelector('table').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
   assert(!doc.querySelector('table tr').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
   assert(!doc.querySelector('table tr th').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
   assert(!doc.querySelector('table tr td').hasAttribute(`data-scrapbook-orig-attr-background-${timeId}`));
   assert(!doc.querySelector('audio[src]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
+  assert(!doc.querySelector('audio[src]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
+  assert(!doc.querySelector('audio:not([src])').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(!doc.querySelector('audio source').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
   assert(!doc.querySelector('video[src]').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
   assert(!doc.querySelector('video[src]').hasAttribute(`data-scrapbook-orig-attr-poster-${timeId}`));
+  assert(!doc.querySelector('video[src]').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
+  assert(!doc.querySelector('video:not([src])').hasAttribute(`data-scrapbook-orig-attr-crossorigin-${timeId}`));
   assert(!doc.querySelector('video source').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
   assert(!doc.querySelector('iframe').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
   assert(!doc.querySelector('embed').hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
