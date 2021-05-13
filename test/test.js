@@ -9046,12 +9046,12 @@ async function test_capture_record_meta3() {
 }
 
 /**
- * Check if option works
+ * Check if removed nodes are recorded
  *
  * capture.recordRewrites
  * capturer.captureDocument
  */
-async function test_capture_record_nodes() {
+async function test_capture_record_nodes1() {
   var options = {
     "capture.image": "remove",
     "capture.favicon": "remove",
@@ -9073,7 +9073,7 @@ async function test_capture_record_nodes() {
   options["capture.recordRewrites"] = true;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_record/nodes.html`,
+    url: `${localhost}/capture_record/nodes1.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9161,7 +9161,7 @@ async function test_capture_record_nodes() {
   options["capture.recordRewrites"] = false;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_record/nodes.html`,
+    url: `${localhost}/capture_record/nodes1.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9247,7 +9247,7 @@ async function test_capture_record_nodes() {
 }
 
 /**
- * Check handling of removal of source nodes in picture, audio, and video
+ * Check for removed source nodes in picture, audio, and video
  *
  * capture.recordRewrites
  * capturer.captureDocument
@@ -9311,7 +9311,7 @@ async function test_capture_record_nodes2() {
 }
 
 /**
- * Check added nodes are recorded.
+ * Check if added nodes are recorded.
  *
  * capture.recordRewrites
  * capturer.captureDocument
@@ -9379,12 +9379,12 @@ async function test_capture_record_nodes3() {
 }
 
 /**
- * Check if option works
+ * Check if changed attributes are recorded
  *
  * capture.recordRewrites
  * capturer.captureDocument
  */
-async function test_capture_record_attrs() {
+async function test_capture_record_attrs1() {
   var options = {
     "capture.frame": "save",
     "capture.styleInline": "blank",
@@ -9398,7 +9398,7 @@ async function test_capture_record_attrs() {
   options["capture.recordRewrites"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_record/attrs.html`,
+    url: `${localhost}/capture_record/attrs1.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -9424,7 +9424,7 @@ async function test_capture_record_attrs() {
   options["capture.recordRewrites"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_record/attrs.html`,
+    url: `${localhost}/capture_record/attrs1.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -9448,13 +9448,13 @@ async function test_capture_record_attrs() {
 }
 
 /**
- * Check if option works: save cases
+ * Check for changed attributes: save case
  *
  * capture.recordRewrites
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_urls() {
+async function test_capture_record_attrs2() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -9480,7 +9480,7 @@ async function test_capture_record_urls() {
   options["capture.recordRewrites"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_record/urls.html`,
+    url: `${localhost}/capture_record/attrs2.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -9530,7 +9530,7 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url("null.bmp"); }`);
   options["capture.recordRewrites"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_record/urls.html`,
+    url: `${localhost}/capture_record/attrs2.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -9578,14 +9578,14 @@ p { background-image: url("null.bmp"); }`);
 }
 
 /**
- * Check if option works: blank cases
+ * Check for changed attributes: blank case
  * (save styles to save CSS and check image background and font)
  *
  * capture.recordRewrites
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_urls2() {
+async function test_capture_record_attrs3() {
   var options = {
     "capture.image": "blank",
     "capture.imageBackground": "blank",
@@ -9607,7 +9607,7 @@ async function test_capture_record_urls2() {
   options["capture.recordRewrites"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_record/urls.html`,
+    url: `${localhost}/capture_record/attrs2.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -9649,7 +9649,7 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url(""); }`);
   options["capture.recordRewrites"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_record/urls.html`,
+    url: `${localhost}/capture_record/attrs2.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -9689,14 +9689,14 @@ p { background-image: url(""); }`);
 }
 
 /**
- * Check if option works: save-current cases
+ * Check for changed attributes: save-current case
  * (and blank style)
  *
  * capture.recordRewrites
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_urls3() {
+async function test_capture_record_attrs4() {
   var options = {
     "capture.image": "save-current",
     "capture.audio": "save-current",
@@ -9708,7 +9708,7 @@ async function test_capture_record_urls3() {
   options["capture.recordRewrites"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_record/urls.html`,
+    url: `${localhost}/capture_record/attrs2.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -9731,11 +9731,11 @@ async function test_capture_record_urls3() {
   assert(doc.querySelectorAll('video')[1].getAttribute(`data-scrapbook-orig-null-attr-src-${timeId}`) === ``);
   assert(!doc.querySelectorAll('video')[1].getAttribute(`data-scrapbook-orig-attr-src-${timeId}`)); // double record bug
 
-  /* +capture.recordRewrites */
+  /* -capture.recordRewrites */
   options["capture.recordRewrites"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_record/urls.html`,
+    url: `${localhost}/capture_record/attrs2.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -9761,13 +9761,13 @@ async function test_capture_record_urls3() {
 }
 
 /**
- * Check if option works: for base
+ * Check for changed attributes: for base
  *
  * capture.recordRewrites
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_urls4() {
+async function test_capture_record_attrs5() {
   var options = {
     "capture.recordRewrites": true,
   };
@@ -9776,7 +9776,7 @@ async function test_capture_record_urls4() {
   options["capture.base"] = "save";
 
   var blob = await capture({
-    url: `${localhost}/capture_record/urls2.html`,
+    url: `${localhost}/capture_record/attrs3.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -9791,7 +9791,7 @@ async function test_capture_record_urls4() {
   options["capture.base"] = "blank";
 
   var blob = await capture({
-    url: `${localhost}/capture_record/urls2.html`,
+    url: `${localhost}/capture_record/attrs3.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
