@@ -3,6 +3,17 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.119.0] - 2021-05-14
+* Added and adjusted several default highlighter style options.
+* Adjusted default highlighter styles.
+* Added support of `imagesrcset` attribute for `<link>`s.
+* Added support of `rel` value `modulepreload`, `prerender`, `dns-prefetch`, or `preconnect` for `<link>` tags.
+* Added a new `capture.prefetch` option to tweak handling of prefetch-like `<link>` tags.
+* Added `capture.contentSecurityPolicy` option to tweak handling of `content-security-policy` meta tag and `nonce` attribute.
+* Removed `capture.removeIntegrity` option.
+* `crossorigin` attribute is now removed only when a resource is saved.
+* `integrity` attribute is now removed only for related tags.
+
 ## [0.118.0] - 2021-05-08
 * Added support of capturing source documents embedded via `<object>` tags.
 * No more save XHTML or SVG files as srcdoc when saving as single HTML.
