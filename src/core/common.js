@@ -110,7 +110,6 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.downLink.doc.delay": null,
     "capture.downLink.doc.urlFilter": "",
     "capture.downLink.urlFilter": "###skip common logout URL\n/[/=]logout\\b/i",
-    "capture.removeIntegrity": true,
     "capture.referrerPolicy": "strict-origin-when-cross-origin", // "no-referrer", "no-referrer-when-downgrade", "origin", "origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-url"
     "capture.referrerSpoofSource": false,
     "capture.recordDocumentMeta": true,

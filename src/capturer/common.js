@@ -632,6 +632,9 @@
               captureRewriteAttr(elem, "imagesrcset", rewriteSrcset);
             }
 
+            // integrity won't work due to rewriting or crossorigin issue
+            captureRewriteAttr(elem, "integrity", null);
+
             if (elem.matches('[rel~="stylesheet"]')) {
               // styles: link element
               let disableCss = false;
@@ -842,6 +845,9 @@
               const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("src"), refUrl);
               captureRewriteAttr(elem, "src", rewriteUrl);
             }
+
+            // integrity won't work due to rewriting or crossorigin issue
+            captureRewriteAttr(elem, "integrity", null);
 
             switch (options["capture.script"]) {
               case "link":
@@ -2040,13 +2046,6 @@
           default:
             captureRewriteAttr(elem, "nonce", null); // this is meaningless as CSP is removed
             break;
-        }
-
-        // handle integrity
-        // We have to remove integrity check because we could modify the content
-        // and they might not work correctly in the offline environment.
-        if (options["capture.removeIntegrity"]) {
-          captureRewriteAttr(elem, "integrity", null);
         }
       }
 
