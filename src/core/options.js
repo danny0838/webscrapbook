@@ -252,10 +252,10 @@
   }
 
   function verifyDownLinkRules(srcText) {
-    const REGEX_LINEFEEDS = /[\r\n]+/;
     const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
     const fn = verifyDownLinkRules = (source) => {
-      const lines = source.split(REGEX_LINEFEEDS);
+      // linefeeds are always '\n' for textarea value
+      const lines = source.split('\n');
       for (let i = 0, I = lines.length; i < I; i++) {
         let line = lines[i].trim();
         if (!line || line.startsWith("#")) { continue; }
@@ -274,11 +274,11 @@
   }
 
   function verifyDownLinkUrlRules(srcText) {
-    const REGEX_LINEFEEDS = /[\r\n]+/;
     const REGEX_SPACES = /\s+/;
     const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
     const fn = verifyDownLinkUrlRules = (source) => {
-      const lines = source.split(REGEX_LINEFEEDS);
+      // linefeeds are always '\n' for textarea value
+      const lines = source.split('\n');
       for (let i = 0, I = lines.length; i < I; i++) {
         let line = lines[i].trim();
         if (!line || line.startsWith("#")) { continue; }
