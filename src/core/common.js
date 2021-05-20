@@ -710,131 +710,93 @@ if (Node && !Node.prototype.getRootNode) {
         return p;
       },
 
-      async get(key) {
+      async _transaction(callback, mode, options) {
         const db = await this._connect();
-        const transaction = db.transaction("cache", "readonly");
+        const transaction = db.transaction("cache", mode, options);
         const objectStore = transaction.objectStore(["cache"]);
-
         return await new Promise((resolve, reject) => {
-          const request = objectStore.get(key);
-          request.onsuccess = function (event) {
-            const result = event.target.result;
+          // transaction is available from objectStore.transaction
+          const result = callback.call(this, objectStore);
+
+          transaction.oncomplete = (event) => {
             resolve(result);
           };
-          request.onerror = function (event) {
+
+          transaction.onerror = (event) => {
+            // unhandled error for IDBRequest will bubble up to transaction error
             reject(event.target.error);
           };
+
+          // abort the transaction if there's an unexpected error
+          result.catch((ex) => {
+            transaction.abort();
+            reject(ex);
+          });
         });
+      },
+
+      async get(key) {
+        return await this._transaction(async (objectStore) => {
+          return await new Promise((resolve, reject) => {
+            objectStore.get(key).onsuccess = (event) => {
+              resolve(event.target.result);
+            };
+          });
+        }, "readonly");
       },
 
       async getAll(filter) {
-        const db = await this._connect();
-        const transaction = db.transaction("cache", "readonly");
-        const objectStore = transaction.objectStore(["cache"]);
-
-        return await new Promise((resolve, reject) => {
-          const request = objectStore.openCursor();
+        return await this._transaction(async (objectStore) => {
           const result = {};
-          request.onsuccess = function (event) {
-            const cursor = event.target.result;
-
-            if (!cursor) {
-              resolve(result);
-              return;
-            }
-
-            try {
-              let obj = JSON.parse(cursor.key);
-              if (!filter(obj)) {
-                throw new Error("filter not matched");
+          return await new Promise((resolve, reject) => {
+            objectStore.openCursor().onsuccess = (event) => {
+              const cursor = event.target.result;
+              if (!cursor) {
+                resolve(result);
+                return;
               }
-              result[cursor.key] = cursor.value;
-            } catch (ex) {
-              // invalid JSON format => meaning not a cache
-              // or does not match the filter
-            }
-
-            cursor.continue();
-          };
-          request.onerror = function (event) {
-            reject(event.target.error);
-          };
-        });
+              try {
+                if (filter(JSON.parse(cursor.key))) {
+                  result[cursor.key] = cursor.value;
+                }
+              } catch (ex) {}
+              cursor.continue();
+            };
+          });
+        }, "readonly");
       },
 
       async set(key, value) {
-        const db = await this._connect();
-
-        return await new Promise((resolve, reject) => {
-          const transaction = db.transaction("cache", "readwrite");
-          const objectStore = transaction.objectStore(["cache"]);
-          const request = objectStore.put(value, key);
-          transaction.oncomplete = (event) => {
-            resolve();
-          };
-          transaction.onerror = (event) => {
-            reject(event.target.error);
-          };
-        });
+        return await this._transaction(async (objectStore) => {
+          objectStore.put(value, key);
+        }, "readwrite");
       },
 
       async remove(keys) {
-        const db = await this._connect();
-        const transaction = db.transaction("cache", "readwrite");
-        const objectStore = transaction.objectStore(["cache"]);
-
-        let tasks;
-        if (typeof keys === 'function') {
-          const filter = keys;
-          await new Promise((resolve, reject) => {
-            tasks = [];
-            const request = objectStore.openCursor();
-            request.onsuccess = function (event) {
-              const cursor = event.target.result;
-
-              if (!cursor) {
-                resolve();
-                return;
-              }
-
-              try {
-                if (filter(JSON.parse(cursor.key))) {
-                  tasks.push(new Promise((resolve, reject) => {
-                    const request = cursor.delete();
-                    request.onsuccess = function (event) {
-                      resolve();
-                    };
-                    request.onerror = function (event) {
-                      reject(event.target.error);
-                    };
-                  }));
+        return await this._transaction(async (objectStore) => {
+          if (typeof keys === 'function') {
+            const filter = keys;
+            return await new Promise((resolve, reject) => {
+              objectStore.openCursor().onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (!cursor) {
+                  resolve();
+                  return;
                 }
-              } catch (ex) {}
-
-              cursor.continue();
-            };
-            request.onerror = function (event) {
-              reject(event.target.error);
-            };
-          });
-        } else {
-          tasks = keys.map((key) => {
-            return new Promise((resolve, reject) => {
-              const request = objectStore.delete(key);
-              request.onsuccess = function (event) {
-                resolve();
-              };
-              request.onerror = function (event) {
-                reject(event.target.error);
+                try {
+                  if (filter(JSON.parse(cursor.key))) {
+                    cursor.delete();
+                  }
+                } catch (ex) {}
+                cursor.continue();
               };
             });
-          });
-        }
+          }
 
-        return await Promise.all(tasks).catch((ex) => {
-          transaction.abort();
-          throw ex;
-        });
+          for (const key of keys) {
+            objectStore.delete(key);
+          }
+        }, "readwrite");
       },
     },
 
