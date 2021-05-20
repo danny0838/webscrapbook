@@ -678,13 +678,15 @@ if (Node && !Node.prototype.getRootNode) {
     indexedDB: {
       async connect() {
         const p = new Promise((resolve, reject) => {
-          const request = indexedDB.open("scrapbook", 2);
+          const request = indexedDB.open("scrapbook", 3);
           request.onupgradeneeded = (event) => {
             let db = event.target.result;
             if (event.oldVersion === 1) {
               db.deleteObjectStore("archiveZipFiles");
+            } else if (event.oldVersion === 2) {
+              db.deleteObjectStore("cache");
             }
-            db.createObjectStore("cache", {keyPath: "key"});
+            db.createObjectStore("cache");
           };
           request.onblocked = (event) => {
             reject(new Error("Upgrade of the indexedDB is blocked by another connection."));
@@ -709,7 +711,7 @@ if (Node && !Node.prototype.getRootNode) {
           const request = objectStore.get(key);
           request.onsuccess = function (event) {
             const result = event.target.result;
-            resolve(result ? result.value : undefined);
+            resolve(result);
           };
           request.onerror = function (event) {
             reject(event.target.error);
@@ -723,23 +725,28 @@ if (Node && !Node.prototype.getRootNode) {
         const objectStore = transaction.objectStore(["cache"]);
 
         return await new Promise((resolve, reject) => {
-          const request = objectStore.getAll();
+          const request = objectStore.openCursor();
+          const result = {};
           request.onsuccess = function (event) {
-            const items = event.target.result;
-            const result = {};
-            for (let item of items) {
-              try {
-                let obj = JSON.parse(item.key);
-                if (!filter(obj)) {
-                  throw new Error("filter not matched");
-                }
-                result[item.key] = item.value;
-              } catch (ex) {
-                // invalid JSON format => meaning not a cache
-                // or does not match the filter
-              }
+            const cursor = event.target.result;
+
+            if (!cursor) {
+              resolve(result);
+              return;
             }
-            resolve(result);
+
+            try {
+              let obj = JSON.parse(cursor.key);
+              if (!filter(obj)) {
+                throw new Error("filter not matched");
+              }
+              result[cursor.key] = cursor.value;
+            } catch (ex) {
+              // invalid JSON format => meaning not a cache
+              // or does not match the filter
+            }
+
+            cursor.continue();
           };
           request.onerror = function (event) {
             reject(event.target.error);
@@ -753,7 +760,7 @@ if (Node && !Node.prototype.getRootNode) {
         return await new Promise((resolve, reject) => {
           const transaction = db.transaction("cache", "readwrite");
           const objectStore = transaction.objectStore(["cache"]);
-          const request = objectStore.put({key, value});
+          const request = objectStore.put(value, key);
           transaction.oncomplete = (event) => {
             resolve();
           };
