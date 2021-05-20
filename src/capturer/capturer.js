@@ -299,10 +299,9 @@
 
   capturer.clearFileCache = async function ({timeId}) {
     const tableSet = new Set(["pageCache", "fetchCache"]);
-    const items = await scrapbook.cache.getAll((obj) => {
+    await scrapbook.cache.remove((obj) => {
       return tableSet.has(obj.table) && obj.id === timeId;
     });
-    await scrapbook.cache.remove(Object.keys(items));
   };
 
   /**

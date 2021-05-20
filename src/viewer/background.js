@@ -152,14 +152,9 @@ a {
     }
 
     /* remove cache entry for all IDs that are not being viewed */
-    const items = await scrapbook.cache.getAll({table: "pageCache"});
-    for (const key in items) {
-      const keyData = JSON.parse(key);
-      if (usedIds.has(keyData.id)) {
-        delete(items[key]);
-      }
-    }
-    await scrapbook.cache.remove(Object.keys(items));
+    await scrapbook.cache.remove((obj) => {
+      return obj.table === 'pageCache' && !usedIds.has(obj.id);
+    });
   }
 
   async function init() {

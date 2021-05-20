@@ -584,7 +584,7 @@ if (Node && !Node.prototype.getRootNode) {
     },
 
     /**
-     * @param {Object|Function|string} filter
+     * @param {string|Object|Function} filter
      */
     async getAll(filter, cache = this.current) {
       if (typeof filter === 'function') {
@@ -609,13 +609,18 @@ if (Node && !Node.prototype.getRootNode) {
     },
 
     /**
-     * @param {string|Object|Array} keys - a key (string or Object) or an array of keys
+     * @param {string|Object|string[]|Object[]|Function} keys - a filter
+     *     function or a key (string or Object) or an array of keys
      */
     async remove(keys, cache = this.current) {
-      if (!Array.isArray(keys)) { keys = [keys]; }
-      keys = keys.map((key) => {
-        return (typeof key === "string") ? key : JSON.stringify(key);
-      });
+      if (typeof keys !== 'function') {
+        if (!Array.isArray(keys)) {
+          keys = [keys];
+        }
+        keys = keys.map((key) => {
+          return (typeof key === "string") ? key : JSON.stringify(key);
+        });
+      }
       return this[cache].remove(keys);
     },
 
@@ -671,6 +676,9 @@ if (Node && !Node.prototype.getRootNode) {
       },
 
       async remove(keys) {
+        if (typeof keys === 'function') {
+          keys = Object.keys(await this.getAll(keys));
+        }
         return await browser.storage.local.remove(keys);
       },
     },
@@ -772,20 +780,57 @@ if (Node && !Node.prototype.getRootNode) {
 
       async remove(keys) {
         const db = await this.connect();
-
         const transaction = db.transaction("cache", "readwrite");
         const objectStore = transaction.objectStore(["cache"]);
-        const tasks = keys.map((key) => {
-          return new Promise((resolve, reject) => {
-            const request = objectStore.delete(key);
+
+        let tasks;
+        if (typeof keys === 'function') {
+          const filter = keys;
+          await new Promise((resolve, reject) => {
+            tasks = [];
+            const request = objectStore.openCursor();
             request.onsuccess = function (event) {
-              resolve();
+              const cursor = event.target.result;
+
+              if (!cursor) {
+                resolve();
+                return;
+              }
+
+              try {
+                if (filter(JSON.parse(cursor.key))) {
+                  tasks.push(new Promise((resolve, reject) => {
+                    const request = cursor.delete();
+                    request.onsuccess = function (event) {
+                      resolve();
+                    };
+                    request.onerror = function (event) {
+                      reject(event.target.error);
+                    };
+                  }));
+                }
+              } catch (ex) {}
+
+              cursor.continue();
             };
             request.onerror = function (event) {
               reject(event.target.error);
             };
           });
-        });
+        } else {
+          tasks = keys.map((key) => {
+            return new Promise((resolve, reject) => {
+              const request = objectStore.delete(key);
+              request.onsuccess = function (event) {
+                resolve();
+              };
+              request.onerror = function (event) {
+                reject(event.target.error);
+              };
+            });
+          });
+        }
+
         return await Promise.all(tasks).catch((ex) => {
           transaction.abort();
           throw ex;
@@ -808,7 +853,7 @@ if (Node && !Node.prototype.getRootNode) {
 
       async getAll(filter) {
         const items = [];
-        for (var i = 0, I = sessionStorage.length; i < I; i++) {
+        for (let i = 0, I = sessionStorage.length; i < I; i++) {
           const key = sessionStorage.key(i);
           try {
             let obj = JSON.parse(key);
@@ -829,6 +874,19 @@ if (Node && !Node.prototype.getRootNode) {
       },
 
       async remove(keys) {
+        if (typeof keys === 'function') {
+          const filter = keys;
+          for (let i = 0, I = sessionStorage.length; i < I; i++) {
+            const key = sessionStorage.key(i);
+            try {
+              if (filter(JSON.parse(key))) {
+                sessionStorage.removeItem(key);
+              }
+            } catch (ex) {}
+          }
+          return;
+        }
+
         for (const key of keys) {
           sessionStorage.removeItem(key);
         }
