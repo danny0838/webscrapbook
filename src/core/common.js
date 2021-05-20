@@ -684,7 +684,7 @@ if (Node && !Node.prototype.getRootNode) {
     },
 
     indexedDB: {
-      async connect() {
+      async _connect() {
         const p = new Promise((resolve, reject) => {
           const request = indexedDB.open("scrapbook", 3);
           request.onupgradeneeded = (event) => {
@@ -706,12 +706,12 @@ if (Node && !Node.prototype.getRootNode) {
             reject(event.target.error);
           };
         });
-        this.connect = () => p;
+        this._connect = () => p;
         return p;
       },
 
       async get(key) {
-        const db = await this.connect();
+        const db = await this._connect();
         const transaction = db.transaction("cache", "readonly");
         const objectStore = transaction.objectStore(["cache"]);
 
@@ -728,7 +728,7 @@ if (Node && !Node.prototype.getRootNode) {
       },
 
       async getAll(filter) {
-        const db = await this.connect();
+        const db = await this._connect();
         const transaction = db.transaction("cache", "readonly");
         const objectStore = transaction.objectStore(["cache"]);
 
@@ -763,7 +763,7 @@ if (Node && !Node.prototype.getRootNode) {
       },
 
       async set(key, value) {
-        const db = await this.connect();
+        const db = await this._connect();
 
         return await new Promise((resolve, reject) => {
           const transaction = db.transaction("cache", "readwrite");
@@ -779,7 +779,7 @@ if (Node && !Node.prototype.getRootNode) {
       },
 
       async remove(keys) {
-        const db = await this.connect();
+        const db = await this._connect();
         const transaction = db.transaction("cache", "readwrite");
         const objectStore = transaction.objectStore(["cache"]);
 
