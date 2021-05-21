@@ -713,7 +713,7 @@ if (Node && !Node.prototype.getRootNode) {
       async _transaction(callback, mode, options) {
         const db = await this._connect();
         const transaction = db.transaction("cache", mode, options);
-        const objectStore = transaction.objectStore(["cache"]);
+        const objectStore = transaction.objectStore("cache");
         return await new Promise((resolve, reject) => {
           // transaction is available from objectStore.transaction
           const result = callback.call(this, objectStore);
