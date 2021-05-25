@@ -153,6 +153,12 @@
   "EditorButtonAnnotationLinkPrompt": {
     "message": "Input the URL to attach the link:"
   },
+  "EditorButtonAnnotationNext": {
+    "message": "Find next annotation"
+  },
+  "EditorButtonAnnotationPrev": {
+    "message": "Find previous annotation"
+  },
   "EditorButtonAnnotationSticky": {
     "message": "Create sticky note"
   },

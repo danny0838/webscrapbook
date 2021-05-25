@@ -408,6 +408,9 @@ ${sRoot}.toolbar .toolbar-close:hover {
   <div class="toolbar-annotation" title="${scrapbook.lang('EditorButtonAnnotation')}">
     <button></button>
     <ul hidden="" title="">
+      <li><button class="toolbar-annotation-prev">${scrapbook.lang('EditorButtonAnnotationPrev')}</button></li>
+      <li><button class="toolbar-annotation-next">${scrapbook.lang('EditorButtonAnnotationNext')}</button></li>
+      <hr/>
       <li><button class="toolbar-annotation-link">${scrapbook.lang('EditorButtonAnnotationLink')}</button></li>
       <li><button class="toolbar-annotation-sticky">${scrapbook.lang('EditorButtonAnnotationSticky')}</button></li>
       <li><button class="toolbar-annotation-sticky-richtext">${scrapbook.lang('EditorButtonAnnotationStickyRichText')}</button></li>
@@ -554,6 +557,16 @@ ${sRoot}.toolbar .toolbar-close:hover {
       event.preventDefault();
       editor.showContextMenu(event.currentTarget.nextElementSibling, event);
     });
+
+    var elem = wrapper.querySelector('.toolbar-annotation-prev');
+    elem.addEventListener("click", (event) => {
+      editor.locateAnnotation(-1);
+    }, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-annotation-next');
+    elem.addEventListener("click", (event) => {
+      editor.locateAnnotation(1);
+    }, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-annotation-link');
     elem.addEventListener("click", (event) => {
@@ -894,6 +907,114 @@ ${sRoot}.toolbar .toolbar-close:hover {
   /**
    * @kind invokable
    */
+  editor.locateAnnotationInternal = function (...args) {
+    const getAnnotationElems = () => {
+      const rv = [];
+      const checkedIds = new Set();
+      const nodeIterator = document.createNodeIterator(
+        document.documentElement,
+        NodeFilter.SHOW_ELEMENT,
+      );
+      let elem;
+      while (elem = nodeIterator.nextNode()) {
+        if (!(scrapbook.getScrapBookObjectRemoveType(elem) > 0)) {
+          continue;
+        }
+
+        // check the first element among those with the same ID
+        const id = elem.getAttribute('data-scrapbook-id');
+        if (id !== null) {
+          if (checkedIds.has(id)) {
+            continue;
+          }
+          checkedIds.add(id);
+          elem = document.querySelector(`[data-scrapbook-id="${CSS.escape(id)}"]`);
+        }
+
+        if (!elem.offsetParent) {
+          continue;
+        }
+
+        rv.push(elem);
+      }
+      return rv;
+    };
+
+    const getAnnotationRange = (elem) => {
+      const range = document.createRange();
+      range.selectNode(elem);
+
+      const id = elem.getAttribute('data-scrapbook-id');
+      if (id !== null) {
+        const otherRange = document.createRange();
+        for (const elem of document.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`)) {
+          if (!(scrapbook.getScrapBookObjectRemoveType(elem) > 0)) {
+            continue;
+          }
+
+          otherRange.selectNode(elem);
+          if (otherRange.compareBoundaryPoints(Range.END_TO_END, range) > 0) {
+            range.setEndAfter(elem);
+          }
+        }
+      }
+
+      return range;
+    };
+
+    const getCurrentAnnotationIndex = (annotationElems, refSelection = null) => {
+      if (!refSelection || !refSelection.rangeCount) {
+        return 0;
+      }
+
+      const currentRange = refSelection.getRangeAt(0);
+      const range = document.createRange();
+      for (let i = 0, I = annotationElems.length; i < I; i++) {
+        const elem = annotationElems[i];
+        range.selectNode(elem);
+
+        const delta = range.compareBoundaryPoints(Range.START_TO_START, currentRange);
+        if (delta === 0) {
+          return i;
+        }
+        if (delta > 0) {
+          return i - 0.5;
+        }
+      }
+
+      return annotationElems.length - 0.5;
+    };
+
+    const fn = editor.locateAnnotationInternal = ({offset = 0}) => {
+      // collect valid annotation elements
+      const annotationElems = getAnnotationElems();
+      if (!annotationElems.length) {
+        return;
+      }
+
+      // find current annotation index
+      const sel = document.getSelection();
+      let index = getCurrentAnnotationIndex(annotationElems, sel);
+      index = offset > 0 ? Math.floor(index) : Math.ceil(index);
+
+      // apply offset
+      index = (index + offset) % annotationElems.length;
+      if (index < 0) { index += annotationElems.length; }
+
+      // select found annotation
+      const elem = annotationElems[index];
+      const range = getAnnotationRange(elem);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      elem.scrollIntoView();
+    };
+
+    return fn(...args);
+  };
+
+  /**
+   * @kind invokable
+   */
   editor.eraseNodesInternal = function () {
     editor.addHistory();
 
@@ -1135,6 +1256,21 @@ scrapbook-toolbar, scrapbook-toolbar *,
       args: {
         frameId: await editor.getFocusedFrameId(),
         cmd: "editor.lineMarkerInternal",
+        args,
+      },
+    });
+  };
+
+  editor.locateAnnotation = async function (offset) {
+    const frameId = await editor.getFocusedFrameId();
+    const args = {
+      offset,
+    };
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        cmd: "editor.locateAnnotationInternal",
         args,
       },
     });

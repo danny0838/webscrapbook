@@ -153,6 +153,12 @@
   "EditorButtonAnnotationLinkPrompt": {
     "message": "请输入要附加的链接网址："
   },
+  "EditorButtonAnnotationNext": {
+    "message": "寻找下一个注记"
+  },
+  "EditorButtonAnnotationPrev": {
+    "message": "寻找上一个注记"
+  },
   "EditorButtonAnnotationSticky": {
     "message": "创建便利贴"
   },

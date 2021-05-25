@@ -153,6 +153,12 @@
   "EditorButtonAnnotationLinkPrompt": {
     "message": "請輸入要附加的超連結網址："
   },
+  "EditorButtonAnnotationNext": {
+    "message": "尋找下一個註記"
+  },
+  "EditorButtonAnnotationPrev": {
+    "message": "尋找上一個註記"
+  },
   "EditorButtonAnnotationSticky": {
     "message": "建立便利貼"
   },
