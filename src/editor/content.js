@@ -1746,13 +1746,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
     let type = scrapbook.getScrapBookObjectRemoveType(node);
     switch (type) {
       case 1: {
-        for (const part of scrapbook.getScrapBookObjectsById(node)) {
+        for (const part of scrapbook.getScrapBookObjectElems(node)) {
           part.remove();
         }
         break;
       }
       case 2: {
-        for (const part of scrapbook.getScrapBookObjectsById(node)) {
+        for (const part of scrapbook.getScrapBookObjectElems(node)) {
           scrapbook.unwrapNode(part);
         }
         break;
@@ -1800,7 +1800,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
           }
 
           const newElems = Array.prototype.map.call(
-            scrapbook.getScrapBookObjectsById(elem),
+            scrapbook.getScrapBookObjectElems(elem),
             (elem) => {
               const newElem = hElem.cloneNode(false);
               let node;
@@ -2201,7 +2201,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
             editor.addHistory();
           }
 
-          for (const part of scrapbook.getScrapBookObjectsById(elem)) {
+          for (const part of scrapbook.getScrapBookObjectElems(elem)) {
             if (annotation) {
               part.setAttribute('title', annotation);
             } else {
@@ -2333,7 +2333,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
         const annotation = popupElem.shadowRoot.querySelector('textarea').value;
         popupElem.remove();
-        for (const part of scrapbook.getScrapBookObjectsById(popupElem)) {
+        for (const part of scrapbook.getScrapBookObjectElems(popupElem)) {
           part.classList.remove('editing');
           if (!part.classList.length) { part.removeAttribute('class'); }
           if (annotation) {
@@ -2805,7 +2805,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         mutationHandler.addIgnoreStartPoint();
 
         // outline
-        for (const elem of scrapbook.getScrapBookObjectsById(lastTarget)) {
+        for (const elem of scrapbook.getScrapBookObjectElems(lastTarget)) {
           // elements like math doesn't implement the .style property and could throw an error
           if (elem.style) {
             mapMarkedNodes.set(elem, {

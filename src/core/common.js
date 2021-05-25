@@ -1451,7 +1451,7 @@ if (Node && !Node.prototype.getRootNode) {
    * @return {Element[]} Related elements having the shared ID; or the
    *     original element.
    */
-  scrapbook.getScrapBookObjectsById = function (node) {
+  scrapbook.getScrapBookObjectElems = function (node) {
     let id = node.getAttribute("data-scrapbook-id");
     if (id) {
       return node.ownerDocument.querySelectorAll(`[data-scrapbook-id="${CSS.escape(id)}"]`);
