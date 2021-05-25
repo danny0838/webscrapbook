@@ -964,7 +964,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
 
     const getCurrentAnnotationIndex = (annotationElems, refSelection = null) => {
       if (!refSelection || !refSelection.rangeCount) {
-        return 0;
+        return -0.5;
       }
 
       const currentRange = refSelection.getRangeAt(0);
