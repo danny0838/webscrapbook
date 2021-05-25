@@ -1140,7 +1140,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
     });
   };
 
-  editor.createLink = async function (style) {
+  editor.createLink = async function () {
     const frameId = await editor.getFocusedFrameId();
     const url = prompt(scrapbook.lang('EditorButtonAnnotationLinkPrompt'));
     if (!url) { return; }
