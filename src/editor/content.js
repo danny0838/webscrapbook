@@ -963,16 +963,19 @@ ${sRoot}.toolbar .toolbar-close:hover {
     };
 
     const getCurrentAnnotationIndex = (annotationElems, refSelection = null) => {
-      if (!refSelection || !refSelection.rangeCount) {
+      if (!refSelection) {
         return -0.5;
       }
 
-      const currentRange = refSelection.getRangeAt(0);
+      const currentRange = getValidRange(refSelection);
+      if (!currentRange) {
+        return -0.5;
+      }
+
       const range = document.createRange();
       for (let i = 0, I = annotationElems.length; i < I; i++) {
         const elem = annotationElems[i];
         range.selectNode(elem);
-
         const delta = range.compareBoundaryPoints(Range.START_TO_START, currentRange);
         if (delta === 0) {
           return i;
@@ -983,6 +986,19 @@ ${sRoot}.toolbar .toolbar-close:hover {
       }
 
       return annotationElems.length - 0.5;
+    };
+
+    const getValidRange = (sel) => {
+      for (let i = 0, I = sel.rangeCount; i < I; i++) {
+        const range = sel.getRangeAt(i);
+        // Firefox may include selection ranges for elements inside the toolbar.
+        // Exclude them to prevent an error.
+        if (editor.internalElement && editor.internalElement.contains(range.commonAncestorContainer)) {
+          continue;
+        }
+        return range;
+      }
+      return null;
     };
 
     const fn = editor.locateAnnotationInternal = ({offset = 0}) => {
