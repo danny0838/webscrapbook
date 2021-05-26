@@ -2304,6 +2304,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         }
 
         // enforce some capture options
+        let depth = options["capture.downLink.doc.depth"];
         Object.assign(options, {
           // capture to server
           "capture.saveTo": "server",
@@ -2313,8 +2314,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           // save to the same directory
           "capture.saveFilename": item.index.slice(0, -11),
           "capture.saveOverwrite": true,
-          // rebuild links and update index.json
-          "capture.downLink.doc.depth": 0,
+          // always rebuild links and update index.json
+          "capture.downLink.doc.depth": depth > 0 ? depth : 0,
         });
 
         // enforce disk cache
