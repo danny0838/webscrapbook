@@ -334,6 +334,9 @@
   "EditorButtonLocateViewDirectory": {
     "message": "检视页面所在目录"
   },
+  "EditorButtonLocateViewSource": {
+    "message": "检视原始页面"
+  },
   "EditorButtonMarker": {
     "message": "标示工具 - 点击以标示选取的文字。点击标示可创建或编辑批注。"
   },

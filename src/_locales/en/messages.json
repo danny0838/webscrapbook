@@ -334,6 +334,9 @@
   "EditorButtonLocateViewDirectory": {
     "message": "View page directory"
   },
+  "EditorButtonLocateViewSource": {
+    "message": "View source page"
+  },
   "EditorButtonMarker": {
     "message": "Marker - Click to mark the selected text. Click on a mark to create or edit annotation."
   },

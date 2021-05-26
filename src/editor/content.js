@@ -386,6 +386,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
     <button></button>
     <ul hidden="" title="">
       <li><button class="toolbar-locate-viewDirectory">${scrapbook.lang('EditorButtonLocateViewDirectory')}</button></li>
+      <li><button class="toolbar-locate-viewSource">${scrapbook.lang('EditorButtonLocateViewSource')}</button></li>
     </ul>
   </div>
   <div class="toolbar-marker" title="${scrapbook.lang('EditorButtonMarker')}">
@@ -520,6 +521,22 @@ ${sRoot}.toolbar .toolbar-close:hover {
     var elem = wrapper.querySelector('.toolbar-locate-viewDirectory');
     elem.addEventListener("click", (event) => {
       document.location.assign('.');
+    }, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-locate-viewSource');
+    elem.addEventListener("click", (event) => {
+      const url = document.documentElement.getAttribute('data-scrapbook-source');
+      try {
+        if (!url) {
+          throw new Error('Source URL record not found.');
+        }
+
+        // The browser may block this if url is file: protocol etc.
+        // However, some browsers (such as Chromium) do not throw an error.
+        document.location.assign(url);
+      } catch (ex) {
+        alert(ex.message);
+      }
     }, {passive: true});
 
     // marker
