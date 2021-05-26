@@ -2265,6 +2265,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                   token = capturer.getRegisterToken(url, role);
                 } catch (ex) {
                   // skip special or undefined URL
+                  continue;
                 }
 
                 info.urlToFilenameMap.set(token, {
@@ -2290,7 +2291,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                       blob,
                     });
                   } catch (ex) {
-                    // skip special or undefined URL
+                    // skip missing resource
+                    continue;
                   }
                 }
               }
