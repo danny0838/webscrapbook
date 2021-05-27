@@ -1116,9 +1116,10 @@
     // resolve meta refresh
     const metaRefreshChain = [];
     try {
+      let urlMain = sourceUrlMain;
       while (true) {
         fetchResponse = await capturer.fetch({
-          url: sourceUrlMain,
+          url: urlMain,
           refUrl,
           ignoreSizeLimit: settings.isMainPage && settings.isMainFrame,
           settings,
@@ -1147,8 +1148,9 @@
 
         metaRefreshChain.push(fetchResponse.url);
         refUrl = fetchResponse.url;
-        sourceUrl = metaRefreshTarget;
-        [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+
+        // meta refresh will replace the original hash
+        [urlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(metaRefreshTarget);
       }
     } catch (ex) {
       // URL not accessible
