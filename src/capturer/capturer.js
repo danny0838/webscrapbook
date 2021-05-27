@@ -1191,7 +1191,7 @@
         })
         .then(response => {
           return Object.assign({}, response, {
-            url: response.url + (response.url.startsWith('data:') ? '' : sourceUrlHash),
+            url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
           });
         });
       }
@@ -1199,9 +1199,8 @@
       if (downLinkInDepth && doc) {
         const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
         if (!linkedPages.has(sourceUrlMain)) {
-          const url = fetchResponse.url + (fetchResponse.url.startsWith('data:') ? '' : sourceUrlHash);
           linkedPages.set(sourceUrlMain, {
-            url,
+            url: capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash),
             refUrl,
             depth,
           });
@@ -1214,7 +1213,7 @@
     if (doc) {
       return await capturer.captureDocumentOrFile({
         doc,
-        docUrl: fetchResponse.url + (fetchResponse.url.startsWith('data:') ? '' : sourceUrlHash),
+        docUrl: capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash),
         refUrl,
         settings,
         options,
@@ -1222,7 +1221,7 @@
     }
 
     return await capturer.captureFile({
-      url: fetchResponse.url + (fetchResponse.url.startsWith('data:') ? '' : sourceUrlHash),
+      url: capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash),
       refUrl,
       charset: fetchResponse.headers.charset,
       settings,
@@ -1550,12 +1549,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         return Object.assign({}, response, {
           type: "file",
           charset: charset || undefined,
-          url: response.url + (response.url.startsWith('data:') ? '' : sourceUrlHash),
+          url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
         });
       }
     } else {
       return Object.assign({}, response, {
-        url: response.url + (response.url.startsWith('data:') ? '' : sourceUrlHash),
+        url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
       });
     }
   };

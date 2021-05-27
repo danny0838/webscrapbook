@@ -164,7 +164,7 @@
       return capturer.invoke("downloadFile", params)
         .then(response => {
           return Object.assign({}, response, {
-            url: response.url + (response.url.startsWith('data:') ? '' : scrapbook.splitUrlByAnchor(url)[1]),
+            url: capturer.getRedirectedUrl(response.url, scrapbook.splitUrlByAnchor(url)[1]),
           });
         })
         .catch((ex) => {
@@ -2190,7 +2190,7 @@
     // if a previous registry exists, return it
     if (registry.isDuplicate) {
       return Object.assign({}, registry, {
-        url: registry.url + (registry.url.startsWith('data:') ? '' : docUrlHash),
+        url: capturer.getRedirectedUrl(registry.url, docUrlHash),
       });
     }
 
@@ -2590,7 +2590,7 @@
     }
 
     const response = await capturer.invoke("saveDocument", {
-      sourceUrl: docUrl + (docUrl.startsWith('data:') ? '' : docUrlHash),
+      sourceUrl: capturer.getRedirectedUrl(docUrl, docUrlHash),
       documentFileName,
       settings,
       options,
@@ -2608,7 +2608,7 @@
     }
 
     return Object.assign({}, response, {
-      url: response.url + (response.url.startsWith('data:') ? '' : docUrlHash),
+      url: capturer.getRedirectedUrl(response.url, docUrlHash),
     });
   };
 
@@ -3166,6 +3166,26 @@
     filename = scrapbook.crop(filename, saveFilenameMaxLenUtf16, saveFilenameMaxLenUtf8, "");
 
     return filename;
+  };
+
+  capturer.getRedirectedUrl = function (redirectedUrl, sourceUrlHash) {
+    const [redirectedUrlMain, redirectedUrlHash] = scrapbook.splitUrlByAnchor(redirectedUrl);
+
+    // Some browsers may encounter an error for a data URL with hash.
+    if (redirectedUrl.startsWith('data:')) {
+      return redirectedUrlMain;
+    }
+
+    // @FIXME:
+    // Browsers usually take the redirected URL hash if it exists.
+    // Unfortunately, XMLHttpRequest and fetch does not keep response URL hash,
+    // and thus this may not actually happen.
+    if (redirectedUrlHash) {
+      return redirectedUrl;
+    }
+
+    // Browsers usually keep source URL hash if the redirected URL has no hash.
+    return redirectedUrlMain + sourceUrlHash;
   };
 
   capturer.resolveRelativeUrl = function (relativeUrl, baseUrl) {
