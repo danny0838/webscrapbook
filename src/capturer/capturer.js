@@ -1202,7 +1202,8 @@
         const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
         if (!linkedPages.has(sourceUrlMain)) {
           linkedPages.set(sourceUrlMain, {
-            url: capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash),
+            url: metaRefreshChain.length > 0 ? capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash) : fetchResponse.url,
+            hasMetaRefresh: metaRefreshChain.length > 0,
             refUrl,
             depth,
           });
@@ -3687,7 +3688,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {Object} params.options
    */
   capturer.rebuildLinks = async function (params) {
-    const rewriteHref = (elem, attr, urlToFilenameMap) => {
+    const rewriteHref = (elem, attr, urlToFilenameMap, linkedPages) => {
       let u;
       try {
         u = new URL(elem.getAttribute(attr));
@@ -3696,24 +3697,35 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         return;
       }
 
-      const hash = u.hash;
+      let urlHash = u.hash;
       u.hash = '';
+      let urlMain = u.href;
 
-      const token = capturer.getRegisterToken(u.href, 'document');
+      // handle possible redirect
+      const linkedPageItem = linkedPages.get(urlMain);
+      if (linkedPageItem) {
+        if (linkedPageItem.hasMetaRefresh) {
+          [urlMain, urlHash] = scrapbook.splitUrlByAnchor(linkedPageItem.url);
+        } else {
+          [urlMain, urlHash] = scrapbook.splitUrlByAnchor(capturer.getRedirectedUrl(linkedPageItem.url, urlHash));
+        }
+      }
+
+      const token = capturer.getRegisterToken(urlMain, 'document');
       const p = urlToFilenameMap.get(token);
       if (!p) { return; }
 
-      elem.setAttribute(attr, p.url + hash);
+      elem.setAttribute(attr, capturer.getRedirectedUrl(p.url, urlHash));
     };
 
-    const processRootNode = (rootNode, urlToFilenameMap) => {
+    const processRootNode = (rootNode, urlToFilenameMap, linkedPages) => {
       // rewrite links
       switch (rootNode.nodeName.toLowerCase()) {
         case 'svg': {
           for (const elem of rootNode.querySelectorAll('a[*|href]')) {
             for (const attr of REBUILD_LINK_SVG_HREF_ATTRS) {
               if (!elem.hasAttribute(attr)) { continue; }
-              rewriteHref(elem, attr, urlToFilenameMap);
+              rewriteHref(elem, attr, urlToFilenameMap, linkedPages);
             }
           }
           break;
@@ -3721,7 +3733,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         case 'html':
         case '#document-fragment': {
           for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
-            rewriteHref(elem, 'href', urlToFilenameMap);
+            rewriteHref(elem, 'href', urlToFilenameMap, linkedPages);
           }
           break;
         }
@@ -3732,7 +3744,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
           const shadowRoot = elem.attachShadow({mode: 'open'});
           shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
-          processRootNode(shadowRoot, urlToFilenameMap);
+          processRootNode(shadowRoot, urlToFilenameMap, linkedPages);
           elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
         }
       }
@@ -3742,6 +3754,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       const info = capturer.captureInfo.get(timeId);
       const files = info.files;
       const urlToFilenameMap = info.urlToFilenameMap;
+      const linkedPages = info.linkedPages;
 
       for (const [filename, item] of files.entries()) {
         const blob = item.blob;
@@ -3755,7 +3768,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         }
 
         const doc = await scrapbook.readFileAsDocument(blob);
-        processRootNode(doc.documentElement, urlToFilenameMap);
+        processRootNode(doc.documentElement, urlToFilenameMap, linkedPages);
 
         const content = scrapbook.documentToString(doc, options["capture.prettyPrint"]);
         await capturer.saveFileCache({

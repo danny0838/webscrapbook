@@ -8373,6 +8373,45 @@ async function test_capture_downLink11() {
 }
 
 /**
+ * Check links rewrite for meta refresh and redirect
+ *
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink12() {
+  var options = {
+    "capture.downLink.doc.depth": 1,
+  };
+
+  /* meta refresh */
+  var blob = await capture({
+    url: `${localhost}/capture_downLink7/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `refreshed.html#linked2-1`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink7/linked1-2.html#in-depth`);
+
+  /* redirect */
+  var blob = await capture({
+    url: `${localhost}/capture_downLink8/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `redirected.html#in-depth`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink8/linked1-2.pyr#in-depth`);
+}
+
+/**
  * Check if the URL in a meta refresh is rewritten correctly
  *
  * capturer.captureDocument
