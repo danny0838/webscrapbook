@@ -555,7 +555,7 @@
             response.error = `Resource size limit exceeded.`;
           }
 
-          if (!(xhr.status >= 200 && xhr.status < 300)) {
+          if (!(xhr.status >= 200 && xhr.status < 300 || xhr.status === 0)) {
             response.error = `${xhr.status} ${xhr.statusText}`;
           }
 
