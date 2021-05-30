@@ -2301,6 +2301,56 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             }
             break;
           }
+          case 2: {
+            for (let {path, url, role, token} of sitemap.files) {
+              info.files.set(path, {
+                url,
+                role,
+                token,
+              });
+
+              if (token) {
+                // use url and role if token not matched
+                // (possibly modified arbitrarily)
+                if (url && role) {
+                  const t = capturer.getRegisterToken(url, role);
+                  if (t !== token) {
+                    token = t;
+                    console.error(`Taking token from url and role for mismatching token: "${path}"`);
+                  }
+                }
+
+                info.urlToFilenameMap.set(token, {
+                  filename: path,
+                  url: scrapbook.escapeFilename(path),
+                });
+
+                // load previously captured pages to blob
+                if (REBUILD_LINK_SUPPORT_TYPES.has(Mime.lookup(path))) {
+                  const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
+                  try {
+                    const response = await server.request({
+                      url: fileUrl,
+                    });
+                    if (!response.ok) {
+                      throw new Error(`Bad status: ${response.status}`);
+                    }
+                    const blob = await response.blob();
+                    await capturer.saveFileCache({
+                      timeId,
+                      path,
+                      url,
+                      blob,
+                    });
+                  } catch (ex) {
+                    // skip missing resource
+                    continue;
+                  }
+                }
+              }
+            }
+            break;
+          }
           default: {
             throw new Error(`Sitemap version ${sitemap.version} not supported.`);
             break;
@@ -2485,9 +2535,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             newDocumentName = documentNameBase + "_" + (++count);
             newDocumentNameCI = newDocumentName.toLowerCase();
           }
-          files.set(newDocumentNameCI + ".html", {url: 'about:blank', role});
-          files.set(newDocumentNameCI + ".xhtml", {url: 'about:blank', role});
-          files.set(newDocumentNameCI + ".svg", {url: 'about:blank', role});
+          files.set(newDocumentNameCI + ".html", {role});
+          files.set(newDocumentNameCI + ".xhtml", {role});
+          files.set(newDocumentNameCI + ".svg", {role});
           documentFileName = newDocumentName + "." + getExtFromMime(mime);
         } else {
           documentFileName = getDocumentFileName({
@@ -3793,25 +3843,34 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const urlToFilenameMap = info.urlToFilenameMap;
 
     const sitemap = {
-      version: 1,
+      version: 2,
       files: [],
     };
 
-    for (const [path, {url, role}] of files.entries()) {
-      let primary;
-      try {
-        const token = capturer.getRegisterToken(url, role);
-        const p = urlToFilenameMap.get(token);
-        if (p) { primary = true; }
-      } catch (ex) {
-        // skip special or undefined URL
+    for (let [path, {url, role, token}] of files.entries()) {
+      if (!token) {
+        try {
+          const t = capturer.getRegisterToken(url, role);
+          if (urlToFilenameMap.has(t)) {
+            token = t;
+          }
+        } catch (ex) {
+          // skip special or undefined URL
+        }
+      }
+
+      // Don't record real URL for data:, blob:, etc.
+      if (url) {
+        if (!(url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:'))) {
+          url = undefined;
+        }
       }
 
       sitemap.files.push({
         path,
         url,
         role,
-        primary,
+        token,
       });
     }
 

@@ -7685,7 +7685,7 @@ async function test_capture_downLink04() {
   var sitemapFile = zip.file('index.json');
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
-    "version": 1,
+    "version": 2,
     "files": [
       {
         "path": "index.json"
@@ -7706,16 +7706,14 @@ async function test_capture_downLink04() {
         "path": "index.html",
         "url": `${localhost}/capture_downLink2/in-depth.html`,
         "role": "document",
-        "primary": true
+        "token": "43ed95c190934482c9d2e9c6c9843389aa5dd8a9"
       },
       {
         "path": "index.xhtml",
-        "url": "about:blank",
         "role": "document"
       },
       {
         "path": "index.svg",
-        "url": "about:blank",
         "role": "document"
       }
     ]
@@ -7780,7 +7778,7 @@ async function test_capture_downLink04() {
   var sitemapFile = zip.file('index.json');
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
-    "version": 1,
+    "version": 2,
     "files": [
       {
         "path": "index.json"
@@ -7801,47 +7799,45 @@ async function test_capture_downLink04() {
         "path": "index.html",
         "url": `${localhost}/capture_downLink2/in-depth.html`,
         "role": "document",
-        "primary": true
+        "token": "43ed95c190934482c9d2e9c6c9843389aa5dd8a9"
       },
       {
         "path": "index.xhtml",
-        "url": "about:blank",
         "role": "document"
       },
       {
         "path": "index.svg",
-        "url": "about:blank",
         "role": "document"
       },
       {
         "path": "linked1-1.html",
         "url": `${localhost}/capture_downLink2/linked1-1.html`,
         "role": "document",
-        "primary": true
+        "token": "f174e5b40ed6d6625cdc96cc4d303d90d2334f23"
       },
       {
         "path": "linked1-2.html",
         "url": `${localhost}/capture_downLink2/linked1-2.html`,
         "role": "document",
-        "primary": true
+        "token": "3e0df29c7ae372d83faf18d1d6eccaddb5a067b4"
       },
       {
         "path": "linked1-3.html",
         "url": `${localhost}/capture_downLink2/linked1-3.html`,
         "role": "document",
-        "primary": true
+        "token": "d1829b8fee028fc6c556d002f8292db5bab3fb3c"
       },
       {
         "path": "linked1-4.html",
         "url": `${localhost}/capture_downLink2/linked1-4.html`,
         "role": "document",
-        "primary": true
+        "token": "9b3e5bb43f8f839cd7014edc6820091decdc21ef"
       },
       {
         "path": "linked1-5.html",
         "url": `${localhost}/capture_downLink2/linked1-5.html`,
         "role": "document",
-        "primary": true
+        "token": "02279cec1f4a7bc19eafbeab953d782ab8848a8a"
       }
     ]
   };
@@ -7911,7 +7907,7 @@ async function test_capture_downLink04() {
   var sitemapFile = zip.file('index.json');
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
-    "version": 1,
+    "version": 2,
     "files": [
       {
         "path": "index.json"
@@ -7932,59 +7928,57 @@ async function test_capture_downLink04() {
         "path": "index.html",
         "url": `${localhost}/capture_downLink2/in-depth.html`,
         "role": "document",
-        "primary": true
+        "token": "43ed95c190934482c9d2e9c6c9843389aa5dd8a9"
       },
       {
         "path": "index.xhtml",
-        "url": "about:blank",
         "role": "document"
       },
       {
         "path": "index.svg",
-        "url": "about:blank",
         "role": "document"
       },
       {
         "path": "linked1-1.html",
         "url": `${localhost}/capture_downLink2/linked1-1.html`,
         "role": "document",
-        "primary": true
+        "token": "f174e5b40ed6d6625cdc96cc4d303d90d2334f23"
       },
       {
         "path": "linked1-2.html",
         "url": `${localhost}/capture_downLink2/linked1-2.html`,
         "role": "document",
-        "primary": true
+        "token": "3e0df29c7ae372d83faf18d1d6eccaddb5a067b4"
       },
       {
         "path": "linked1-3.html",
         "url": `${localhost}/capture_downLink2/linked1-3.html`,
         "role": "document",
-        "primary": true
+        "token": "d1829b8fee028fc6c556d002f8292db5bab3fb3c"
       },
       {
         "path": "linked1-4.html",
         "url": `${localhost}/capture_downLink2/linked1-4.html`,
         "role": "document",
-        "primary": true
+        "token": "9b3e5bb43f8f839cd7014edc6820091decdc21ef"
       },
       {
         "path": "linked1-5.html",
         "url": `${localhost}/capture_downLink2/linked1-5.html`,
         "role": "document",
-        "primary": true
+        "token": "02279cec1f4a7bc19eafbeab953d782ab8848a8a"
       },
       {
         "path": "linked2-1.html",
         "url": `${localhost}/capture_downLink2/linked2-1.html`,
         "role": "document",
-        "primary": true
+        "token": "ba8d72438189a5c55c2b9a65ca8fec4d3b352271"
       },
       {
         "path": "linked2-2.html",
         "url": `${localhost}/capture_downLink2/linked2-2.html`,
         "role": "document",
-        "primary": true
+        "token": "404c6de9eb35633a65170a9164e177be3d311901"
       }
     ]
   };
@@ -8409,6 +8403,79 @@ async function test_capture_downLink12() {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `redirected.html#in-depth`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink8/linked1-2.pyr#in-depth`);
+}
+
+/**
+ * Check URL for data: in index.json
+ *
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink13() {
+  var options = {
+    "capture.downLink.doc.depth": 1,
+    "capture.saveDataUriAsFile": true,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink9/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('img')[0].getAttribute('src') === `dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp`);
+  assert(doc.querySelectorAll('img')[1].getAttribute('src') === `test.bmp`);
+
+  var sitemapFile = zip.file('index.json');
+  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var expectedData = {
+    "version": 2,
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_downLink9/in-depth.html`,
+        "role": "document",
+        "token": "62d1916b2e5f61142c5bb1cf2d337f06c7159237"
+      },
+      {
+        "path": "index.xhtml",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "role": "document"
+      },
+      {
+       "path": "dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp",
+       "role": "resource",
+       "token": "53724543b9eec02e09e333bf253affae8bbf71d4"
+      },
+      {
+       "path": "test.bmp",
+       "role": "resource",
+       "token": "273f4b77f14df7c6f331c0cd1ee01746e41797e7"
+      }
+    ]
+  };
+  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
 }
 
 /**
