@@ -7686,6 +7686,9 @@ async function test_capture_downLink04() {
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
     "version": 2,
+    "indexPages": [
+      "index.html"
+    ],
     "files": [
       {
         "path": "index.json"
@@ -7779,6 +7782,9 @@ async function test_capture_downLink04() {
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
     "version": 2,
+    "indexPages": [
+      "index.html"
+    ],
     "files": [
       {
         "path": "index.json"
@@ -7908,6 +7914,9 @@ async function test_capture_downLink04() {
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
     "version": 2,
+    "indexPages": [
+      "index.html"
+    ],
     "files": [
       {
         "path": "index.json"
@@ -8433,6 +8442,9 @@ async function test_capture_downLink13() {
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
     "version": 2,
+    "indexPages": [
+      "index.html"
+    ],
     "files": [
       {
         "path": "index.json"

@@ -43,6 +43,7 @@
   /**
    * @typedef {Object} missionCaptureInfo
    * @property {boolean} useDiskCache
+   * @property {Set<string~filename>} indexPages
    * @property {Map<string~filename, Object>} files
    * @property {Map<string~token, Promise<fetchResult>>} fetchMap
    * @property {Map<string~token, Object>} urlToFilenameMap
@@ -54,6 +55,8 @@
    */
   capturer.captureInfo = new MapWithDefault(() => ({
     useDiskCache: false,
+
+    indexPages: new Set(),
 
     // index.json is for site map
     // index.dat is used in legacy ScrapBook
@@ -2302,6 +2305,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             break;
           }
           case 2: {
+            for (let indexPage of sitemap.indexPages) {
+              info.indexPages.add(indexPage);
+            }
             for (let {path, url, role, token} of sitemap.files) {
               info.files.set(path, {
                 url,
@@ -3172,6 +3178,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     let targetDir;
     let filename;
     let [, ext] = scrapbook.filenameParts(documentFileName);
+    capturer.captureInfo.get(timeId).indexPages.add(documentFileName);
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
         // singleHtml does not support deep capture
@@ -3844,6 +3851,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
     const sitemap = {
       version: 2,
+      indexPages: [...info.indexPages],
       files: [],
     };
 
