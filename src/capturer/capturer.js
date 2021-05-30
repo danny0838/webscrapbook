@@ -56,6 +56,7 @@
   capturer.captureInfo = new MapWithDefault(() => ({
     useDiskCache: false,
 
+    initialVersion: undefined,
     indexPages: new Set(),
 
     // index.json is for site map
@@ -2258,6 +2259,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
         switch (sitemap.version) {
           case 1: {
+            info.initialVersion = sitemap.version;
             for (const {path, url, role, primary} of sitemap.files) {
               info.files.set(path, {
                 url,
@@ -3851,6 +3853,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
     const sitemap = {
       version: 2,
+      initialVersion: info.initialVersion,
       indexPages: [...info.indexPages],
       files: [],
     };
