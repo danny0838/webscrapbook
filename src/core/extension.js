@@ -62,6 +62,23 @@
     return listener;
   };
 
+  /**
+   * Invoke an invokable command in the background script.
+   *
+   * @param {Object} params
+   * @param {string} params.cmd
+   * @param {Object} [params.args]
+   * @return {Promise<Object>}
+   */
+  scrapbook.invokeBackgroundScript = async function ({cmd, args}) {
+    // if this is the background page
+    if (window.background) {
+      return window.background[cmd](args);
+    }
+
+    return scrapbook.invokeExtensionScript({cmd: `background.${cmd}`, args});
+  };
+
 
   /****************************************************************************
    * ScrapBook utilities
@@ -163,8 +180,8 @@
       // Vivaldi creates the tab in the current window, overwriting the
       // current tab).
       if (inNormalWindow && browser.windows) {
-        const win = await scrapbook.invokeExtensionScript({
-          cmd: "background.getLastFocusedWindow",
+        const win = await scrapbook.invokeBackgroundScript({
+          cmd: "getLastFocusedWindow",
           args: {populate: true, windowTypes: ['normal']},
         });
 
@@ -182,8 +199,8 @@
 
     // If inNormalWindow, open in the active tab of the last focused window.
     if (inNormalWindow && browser.windows) {
-      const win = await scrapbook.invokeExtensionScript({
-        cmd: "background.getLastFocusedWindow",
+      const win = await scrapbook.invokeBackgroundScript({
+        cmd: "getLastFocusedWindow",
         args: {populate: true, windowTypes: ['normal']},
       });
 
