@@ -2049,14 +2049,10 @@ if (Node && !Node.prototype.getRootNode) {
   };
 
   scrapbook.quoteXPath = function (str) {
-    const reTail = /,""\)$/;
-    const fn = scrapbook.quoteXPath = (str) => {
-      const parts = str.split('"');
-      return parts.length > 1 ? 
-          ('concat("' + parts.join(`",'"',"`) + '")').replace(reTail, ")") : 
-          `"${str}"`;
-    };
-    return fn(str);
+    const parts = str.split('"');
+    return parts.length > 1 ? 
+        ('concat("' + parts.join(`",'"',"`) + '")') : 
+        `"${str}"`;
   };
 
   /**
