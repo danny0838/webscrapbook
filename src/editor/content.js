@@ -72,11 +72,7 @@ height: 100vh;`;
   /**
    * @kind invokable
    */
-  editor.init = async function ({willActive, force = false}) {
-    if (typeof willActive === "undefined") {
-      willActive = !editor.active;
-    }
-
+  editor.init = async function ({willActive = !editor.active, force = false} = {}) {
     if (!willActive) {
       return editor.close();
     }
@@ -859,7 +855,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
   /**
    * @kind invokable
    */
-  editor.lineMarkerInternal = function ({tagName = 'span', attrs = {}}) {
+  editor.lineMarkerInternal = function ({tagName = 'span', attrs = {}} = {}) {
     editor.addHistory();
 
     const hElem = document.createElement(tagName);
@@ -1018,7 +1014,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
       return null;
     };
 
-    const fn = editor.locateAnnotationInternal = ({offset = 0}) => {
+    const fn = editor.locateAnnotationInternal = ({offset = 0} = {}) => {
       // collect valid annotation elements
       const annotationElems = getAnnotationElems();
       if (!annotationElems.length) {
@@ -1063,7 +1059,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
   /**
    * @kind invokable
    */
-  editor.eraseSelectorInternal = function ({selector}) {
+  editor.eraseSelectorInternal = function (...args) {
     const FORBID_NODES = `\
 html, head, body,
 scrapbook-toolbar, scrapbook-toolbar *,
@@ -1088,13 +1084,13 @@ scrapbook-toolbar, scrapbook-toolbar *,
         editor.eraseNode(elem, timeId);
       }
     };
-    return fn({selector});
+    return fn(...args);
   };
 
   /**
    * @kind invokable
    */
-  editor.uneraseNodesInternal = function ({}) {
+  editor.uneraseNodesInternal = function () {
     editor.addHistory();
 
     // get selected element nodes with tweaks for boundary selection cases
@@ -1111,7 +1107,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   /**
    * @kind invokable
    */
-  editor.uneraseAllNodesInternal = function ({}) {
+  editor.uneraseAllNodesInternal = function () {
     editor.addHistory();
 
     const unerase = () => {
@@ -1142,7 +1138,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   /**
    * @kind invokable
    */
-  editor.removeEditsInternal = function ({}) {
+  editor.removeEditsInternal = function () {
     editor.addHistory();
 
     // get selected element nodes with tweaks for boundary selection cases
@@ -1160,7 +1156,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   /**
    * @kind invokable
    */
-  editor.removeAllEditsInternal = function ({}) {
+  editor.removeAllEditsInternal = function () {
     editor.addHistory();
 
     const selectedNodes = [];
@@ -1191,7 +1187,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   /**
    * @kind invokable
    */
-  editor.deleteErasedInternal = function ({}) {
+  editor.deleteErasedInternal = function () {
     editor.addHistory();
 
     const selectedNodes = [];
@@ -1214,7 +1210,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   /**
    * @kind invokable
    */
-  editor.editTitleInternal = function ({}) {
+  editor.editTitleInternal = function () {
     let title = prompt(scrapbook.lang('EditorButtonSaveEditTitlePrompt'), document.title);
     if (title === null) { return; }
     document.title = title;
@@ -1223,7 +1219,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
   /**
    * @kind invokable
    */
-  editor.setViewportInternal = function ({}) {
+  editor.setViewportInternal = function () {
     let viewportElem = document.querySelector('meta[name="viewport"i]');
     let viewportDeclaration = viewportElem ? viewportElem.getAttribute('content') : 'width=device-width, initial-scale=1.0';
     if (viewportElem) {
@@ -2296,11 +2292,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       /**
        * @kind invokable
        */
-      toggle({willActive}) {
-        if (typeof willActive === 'undefined') {
-          willActive = !this.active;
-        }
-
+      toggle({willActive = !this.active} = {}) {
         if (willActive) {
           if (!this.active) {
             this.active = true;
@@ -2523,7 +2515,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
        * @param {Node|false} [refNode] - The ref node to create a sticky note around.
        *     Auto-detected by selection when unspecified. False to not create a relative note.
        */
-      createSticky({richText, refNode}) {
+      createSticky({richText, refNode} = {}) {
         if (!SHADOW_DOM_SUPPORTED) { return; }
 
         editor.addHistory();
@@ -2894,11 +2886,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       /**
        * @kind invokable
        */
-      toggle({willActive}) {
-        if (typeof willActive === 'undefined') {
-          willActive = !this.active;
-        }
-
+      toggle({willActive = !this.active} = {}) {
         if (willActive) {
           if (!this.active) {
             this.active = true;
@@ -3121,11 +3109,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
     /**
      * @kind invokable
      */
-    async toggle({willActive}) {
-      if (typeof willActive === 'undefined') {
-        willActive = !this.active;
-      }
-
+    async toggle({willActive = !this.active} = {}) {
       if (willActive) {
         if (!this.active) {
           this.active = true;
@@ -3502,11 +3486,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       /**
        * @kind invokable
        */
-      toggle({willActive}) {
-        if (typeof willActive === 'undefined') {
-          willActive = !this.active;
-        }
-
+      toggle({willActive = !this.active} = {}) {
         if (willActive) {
           if (!this.active) {
             this.active = true;
