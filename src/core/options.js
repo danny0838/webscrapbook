@@ -128,10 +128,7 @@
     document.getElementById("import-input").value = null;
 
     try {
-      const data = JSON.parse(await scrapbook.readFileAsText(file));
-      const options = Object.assign(scrapbook.options, data);
-      scrapbook.options = options;
-      await scrapbook.saveOptions();
+      const options = JSON.parse(await scrapbook.readFileAsText(file));
       for (const key in options) {
         setOptionToDocument(key, options[key], true);
       }
