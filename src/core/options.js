@@ -22,15 +22,15 @@
 
   const defaultOptions = JSON.parse(JSON.stringify(scrapbook.options));
 
-  async function initDefaultOptions() {
+  async function initOptions() {
     const options = await scrapbook.loadOptions();
-    for (const id in options) {
-      setOptionToDocument(id, options[id]);
+    for (const key in options) {
+      setOptionToDocument(key, options[key]);
     }
   }
 
-  function getOptionFromDocument(id) {
-    const elem = document.getElementById(OPTION_PREFIX + id);
+  function getOptionFromDocument(key) {
+    const elem = document.getElementById(OPTION_PREFIX + key);
     if (!elem) { return; }
 
     if (elem.matches('input[type="checkbox"]')) {
@@ -42,8 +42,8 @@
     }
   }
 
-  function setOptionToDocument(id, value, includeHidden) {
-    let elem = document.getElementById(OPTION_PREFIX + id);
+  function setOptionToDocument(key, value, includeHidden) {
+    let elem = document.getElementById(OPTION_PREFIX + key);
 
     // If the given option is not in the form, create a hidden element to allow
     // reseting hidden values or do some hacking.
@@ -68,7 +68,7 @@
         elem = document.createElement('input');
         elem.type = 'number';
       }
-      elem.id = OPTION_PREFIX + id;
+      elem.id = OPTION_PREFIX + key;
       elem.hidden = true;
       wrapper.appendChild(elem);
     }
@@ -91,8 +91,8 @@
   }
 
   function resetOptions(file) {
-    for (const id in defaultOptions) {
-      setOptionToDocument(id, defaultOptions[id], true);
+    for (const key in defaultOptions) {
+      setOptionToDocument(key, defaultOptions[key], true);
     }
   }
 
@@ -132,8 +132,8 @@
       const options = Object.assign(scrapbook.options, data);
       scrapbook.options = options;
       await scrapbook.saveOptions();
-      for (const id in options) {
-        setOptionToDocument(id, options[id], true);
+      for (const key in options) {
+        setOptionToDocument(key, options[key], true);
       }
       alert(scrapbook.lang("OptionsImportSuccess"));
     } catch (ex) {
@@ -530,14 +530,14 @@
     refreshForm();
 
     // save options
-    for (const id in scrapbook.options) {
+    for (const key in scrapbook.options) {
       // Overwrite only keys with a defined value so that
       // keys not listed in the options page are not nullified.
       // In Chromium, storageArea.set({key: undefined}) does not store to key.
       // In Firefox, storageArea.set({key: undefined}) stores null to key.
-      const value = getOptionFromDocument(id);
+      const value = getOptionFromDocument(key);
       if (typeof value !== "undefined") {
-        scrapbook.options[id] = value;
+        scrapbook.options[key] = value;
       }
     }
     await scrapbook.saveOptions();
@@ -598,7 +598,7 @@
     }
 
     // load default options
-    await initDefaultOptions();
+    await initOptions();
 
     // load detail status
     await loadDetailStatus();
