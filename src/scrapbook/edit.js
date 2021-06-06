@@ -38,7 +38,7 @@
         let file = params.get('file');
         let checkRedirect = !file;
 
-        await scrapbook.loadOptions();
+        await scrapbook.loadOptionsAuto;
         await server.init();
 
         const book = server.books[bookId];

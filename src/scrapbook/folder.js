@@ -32,7 +32,7 @@
         const id = this.id = params.get('id') || 'root';
         const bookId = this.bookId = params.get('bookId') || '';
 
-        await scrapbook.loadOptions();
+        await scrapbook.loadOptionsAuto;
         await server.init();
 
         const book = server.books[bookId];

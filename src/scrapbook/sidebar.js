@@ -73,7 +73,7 @@
       window.addEventListener('customCommand', this.onCustomCommandRun);
 
       // load config
-      await scrapbook.loadOptions();
+      await scrapbook.loadOptionsAuto;
 
       if (!scrapbook.hasServer()) {
         this.error(scrapbook.lang('ScrapBookErrorServerNotConfigured'));
