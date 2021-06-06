@@ -320,6 +320,7 @@ if (Node && !Node.prototype.getRootNode) {
 
   const scrapbook = {
     BACKEND_MIN_VERSION,
+    DEFAULT_OPTIONS,
     ANNOTATION_CSS,
 
     /**
@@ -402,96 +403,86 @@ if (Node && !Node.prototype.getRootNode) {
    * Options
    ***************************************************************************/
 
-  scrapbook.options = DEFAULT_OPTIONS;
-  scrapbook.isOptionsSynced = false;
+  scrapbook.options = null;
 
   /**
-   * - Firefox < 52: browser.storage.sync === undefined
-   *
-   * - Firefox 52: webextensions.storage.sync.enabled is default to false,
-   *   and browser.storage.sync.*() gets an error.
-   *
-   * - Firefox >= 53: webextensions.storage.sync.enabled is default to true,
-   *   and browser.storage.sync.*() works.
-   *
-   * An error would occur if the user manually sets
-   * webextensions.storage.sync.enabled to false without restarting Firefox.
-   * We don't (and probably cannot) support such user operation since we
-   * cannot migrate configs from storage.sync to storage.local when it gets
-   * disabled, and we get an inconsistent status if we simply shift configs
-   * from storage.sync to storage.local.
-   */
-  scrapbook.getOptionStorage = async function () {
-    const storage = (async () => {
-      if (!browser.storage.sync) {
-        return browser.storage.local;
-      }
-      try {
-        await browser.storage.sync.get({});
-        return browser.storage.sync;
-      } catch (ex) {
-        return browser.storage.local;
-      }
-    })();
-    scrapbook.getOptionStorage = () => storage;
-    return storage;
-  };
-
-  /**
-   * run scrapbook.loadOptions before calling this
-   */
-  scrapbook.getOption = function (key, defaultValue) {
-    if (!scrapbook.isOptionsSynced) {
-      throw new Error('Options not synced yet.');
-    }
-
-    let result = scrapbook.options[key];
-    if (result === undefined) {
-      result = defaultValue;
-    }
-    return result;
-  };
-
-  /**
-   * run scrapbook.loadOptions before calling this
-   */
-  scrapbook.getOptions = function (keyPrefix) {
-    if (!scrapbook.isOptionsSynced) {
-      throw new Error('Options not synced yet.');
-    }
-
-    let result = {};
-    let regex = new RegExp("^" + scrapbook.escapeRegExp(keyPrefix) + "\\.");
-    for (let key in scrapbook.options) {
-      if (regex.test(key)) {
-        result[key] = scrapbook.getOption(key);
-      }
-    }
-    return result;
-  };
-
-  scrapbook.setOption = async function (key, value) {
-    scrapbook.options[key] = value;
-    const storage = await scrapbook.getOptionStorage();
-    return await storage.set({[key]: value});
-  };
-
-  /**
-   * load all options and store in scrapbook.options for later usage
+   * Load all options and store in scrapbook.options for sync retrieval.
    */
   scrapbook.loadOptions = async function () {
-    const storage = await scrapbook.getOptionStorage();
-    const items = await storage.get(scrapbook.options);
-    for (let i in items) {
-      scrapbook.options[i] = items[i];
-    }
-    scrapbook.isOptionsSynced = true;
-    return items;
+    scrapbook.options = await scrapbook.getOptions();
+    return scrapbook.options;
   };
 
-  scrapbook.saveOptions = async function () {
-    const storage = await scrapbook.getOptionStorage();
-    return await storage.set(scrapbook.options);
+  /**
+   * @param {string} key
+   * @param {Object} [options]
+   * @return {*|Promise<*>}
+   */
+  scrapbook.getOption = function (key, options = scrapbook.options) {
+    if (options) {
+      return options[key];
+    }
+    const args = {[key]: DEFAULT_OPTIONS[key]};
+    return browser.storage.sync.get(args).catch((ex) => {
+      return browser.storage.local.get(args);
+    }).then((response) => {
+      return response[key];
+    });
+  };
+
+  /**
+   * Use storage.sync if available. Fallback to storage.local and passed values.
+   *
+   * - Firefox < 52: browser.storage.sync === undefined
+   *
+   * - Firefox 52: browser.storage.sync.*() gets an error if
+   *     webextensions.storage.sync.enabled is false, which is default.
+   *
+   * - Firefox >= 53: webextensions.storage.sync.enabled is default to true
+   *
+   * @param {null|string|string[]|Object} [keys] - Fallback to DEFAULT_OPTIONS
+   *     when passing non-object.
+   * @param {Object} [options]
+   * @return {Object|Promise<Object>}
+   */
+  scrapbook.getOptions = function (keys = DEFAULT_OPTIONS, options = scrapbook.options) {
+    if (typeof keys === "string") {
+      const regex = new RegExp("^" + scrapbook.escapeRegExp(keys) + "(?:\\.|$)");
+      keys = {};
+      for (const key in DEFAULT_OPTIONS) {
+        if (regex.test(key)) {
+          keys[key] = DEFAULT_OPTIONS[key];
+        }
+      }
+    } else if (Array.isArray(keys)) {
+      keys = keys.reduce((rv, key) => {
+        rv[key] = DEFAULT_OPTIONS[key];
+        return rv;
+      }, {});
+    } else if (keys === null) {
+      keys = DEFAULT_OPTIONS;
+    }
+    if (options) {
+      const rv = {};
+      for (const key in keys) {
+        rv[key] = options[key];
+      }
+      return rv;
+    }
+    return browser.storage.sync.get(keys).catch((ex) => {
+      return browser.storage.local.get(keys);
+    });
+  };
+
+  /**
+   * Use storage.sync if available. Fallback to storage.local.
+   *
+   * @param {Object} keys
+   */
+  scrapbook.setOptions = async function (keys) {
+    return browser.storage.sync.set(keys).catch((ex) => {
+      return browser.storage.local.set(keys);
+    });
   };
 
 
@@ -3406,15 +3397,21 @@ if (Node && !Node.prototype.getRootNode) {
 
   /**
    * Check for whether a server backend is set
+   *
+   * @param {Object} [options]
+   * @return {boolean|Promise<boolean>}
    */
-  scrapbook.hasServer = function () {
-    const url = scrapbook.getOption("server.url");
-    try {
-      const urlObj = new URL(url);
-      return ['http:', 'https:'].includes(urlObj.protocol);
-    } catch (ex) {
-      return false;
-    }
+  scrapbook.hasServer = function (...args) {
+    const reHttp = /^https?:/;
+    const fn = scrapbook.hasServer = (options = scrapbook.options) => {
+      if (options) {
+        return reHttp.test(options["server.url"]);
+      }
+      return scrapbook.getOption("server.url").then((option) => {
+        return reHttp.test(option);
+      });
+    };
+    return fn(...args);
   };
 
 

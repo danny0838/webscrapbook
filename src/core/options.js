@@ -20,10 +20,8 @@
 
   const OPTION_PREFIX = "opt_";
 
-  const defaultOptions = JSON.parse(JSON.stringify(scrapbook.options));
-
   async function initOptions() {
-    const options = await scrapbook.loadOptions();
+    const options = await scrapbook.getOptions();
     for (const key in options) {
       setOptionToDocument(key, options[key]);
     }
@@ -91,8 +89,8 @@
   }
 
   function resetOptions(file) {
-    for (const key in defaultOptions) {
-      setOptionToDocument(key, defaultOptions[key], true);
+    for (const key in scrapbook.DEFAULT_OPTIONS) {
+      setOptionToDocument(key, scrapbook.DEFAULT_OPTIONS[key], true);
     }
   }
 
@@ -527,17 +525,18 @@
     refreshForm();
 
     // save options
-    for (const key in scrapbook.options) {
+    const keys = {};
+    for (const key in scrapbook.DEFAULT_OPTIONS) {
       // Overwrite only keys with a defined value so that
       // keys not listed in the options page are not nullified.
       // In Chromium, storageArea.set({key: undefined}) does not store to key.
       // In Firefox, storageArea.set({key: undefined}) stores null to key.
       const value = getOptionFromDocument(key);
       if (typeof value !== "undefined") {
-        scrapbook.options[key] = value;
+        keys[key] = value;
       }
     }
-    await scrapbook.saveOptions();
+    await scrapbook.setOptions(keys);
     return closeWindow();
   }
 
