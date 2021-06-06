@@ -318,7 +318,7 @@
       parentId = "root",
       index,
       delay = null,
-      options = scrapbook.getOptions("capture"),
+      options = await scrapbook.getOptions("capture", null),
     } = taskInfo || {};
     taskInfo = Object.assign({
       tasks,
