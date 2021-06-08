@@ -678,6 +678,9 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           // ignore non-left click
           if (e.button !== 0) { return; }
 
+          // ignore click with modifier
+          if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) { return; }
+
           // e.target won't work if clicking on a descendant node of an anchor
           const elem = e.target.closest('a[href], area[href]');
           if (!elem) { return; }
