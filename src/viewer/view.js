@@ -641,7 +641,33 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
     const urlHash = location.hash;
 
     const frameRegisterLinkLoader = function (frame) {
-      const frameOnLoad = function (frame) {
+      // a[target], area[target], or first base[target]
+      const getTarget = (elem) => {
+        let target = elem.target;
+        if (!target) {
+          const baseElem = elem.ownerDocument.querySelector('base[target]');
+          if (baseElem) {
+            target = baseElem.target;
+          }
+        }
+        if (!target || target === '_self') {
+          target = elem.ownerDocument.defaultView;
+        } else if (target === '_parent') {
+          target = elem.ownerDocument.defaultView.frames.parent;
+        } else if (target === '_top') {
+          target = elem.ownerDocument.defaultView.frames.top;
+        } else if (target === '_blank') {
+          target = '';
+        } else {
+          target = elem.ownerDocument.defaultView.frames[target] || target;
+        }
+        if (target === window) {
+          target = iframe.contentWindow;
+        }
+        return target;
+      };
+
+      const frameOnLoad = (frame) => {
         let frameDoc;
         try {
           frameDoc = frame.contentDocument;
@@ -685,8 +711,9 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           const elem = e.target.closest('a[href], area[href]');
           if (!elem) { return; }
 
+          const target = getTarget(elem);
           const url = elem.href;
-          if (frame === iframe) {
+          if (target === iframe.contentWindow) {
             if (url.startsWith("blob:")) {
               // in-zip file link
               const [main, search, hash] = scrapbook.splitUrl(url);
@@ -719,7 +746,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
               e.stopPropagation();
               document.location.assign('about:blank');
             }
-          } else {
+          } else if (typeof target !== 'string') {
             const [main, search, hash] = scrapbook.splitUrl(url);
             const inZipPath = viewer.blobUrlToInZipPath.get(main);
             if (!inZipPath) { return; }
@@ -738,7 +765,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
 
               const rewrittenUrl = fetchedUrl || "about:blank";
               elem.href = rewrittenUrl;
-              frameDoc.location = rewrittenUrl;
+              target.location = rewrittenUrl;
             }
           }
         }, false);

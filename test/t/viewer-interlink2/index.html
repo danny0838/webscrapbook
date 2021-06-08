@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="../../common.css">
+<script src="../../t.js"></script>
+</head>
+<body>
+<pre>
+1. Visit <a data-path="/viewer-interlink2/interlink2.py">interlink2.htz</a>.
+
+2. Click the link in the main window, and the iframe should be redirected to a new page. Click the back button afterwards.
+
+3. Click the "_self" link in the iframe, and the iframe should be redirected to a new page. Click the back button afterwards.
+
+4. Click the "_parent" link in the iframe, and the main window should be redirected to a new page. Click the back button afterwards.
+
+5. Click the "_parent" link in the iframe, and the main window should be redirected to a new page. Click the back button afterwards.
+
+6. Click the "_blank" link in the iframe, and a new window of blob: URL should be opened.
+
+7. Click the "_blank" link in the iframe again, and a new window of blob: URL should be opened.
+
+8. Click the "foo" link in the iframe, and a new window of blob: URL should be opened.
+
+9. Click the "foo" link in the iframe again, and the previous window should be redirected.
+
+10. Click the link in the second iframe, and the main window should be redirected.
+</pre>
+</body>
+</html>
