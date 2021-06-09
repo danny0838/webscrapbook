@@ -11446,6 +11446,17 @@ async function test_viewer_interlink2() {
   });
 }
 
+async function test_viewer_interlink3() {
+  return await openTestTab({
+    url: browser.runtime.getURL('t/viewer-interlink3/index.html'),
+    active: true,
+  }, (message, port, resolve) => {
+    if (message.cmd == 'result') {
+      resolve(message.args.value);
+    }
+  });
+}
+
 async function test_viewer_css_rules() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-css-rules/index.html'),
