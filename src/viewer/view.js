@@ -523,7 +523,9 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
         return elem;
       };
 
-      const refUrl = viewer.inZipPathToUrl(inZipPath);
+      const refUrl = doc.baseURI.startsWith('blob:' + browser.runtime.getURL('')) ?
+          viewer.inZipPathToUrl(inZipPath) :
+          doc.baseURI;
       const tasks = [];
 
       // rewrite URLs
