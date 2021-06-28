@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.125.0] - 2021-06-29
+* Added a new `viewer.viewAttachments` option to force opening attachments using the archive page viewer.
+
 ## [0.124.0] - 2021-06-09
 * Added hotkeys for batch capture page.
 * Fixed an issue that clicked links with specified target or base URL not working in the archive page viewer.
