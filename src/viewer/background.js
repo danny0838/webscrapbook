@@ -114,7 +114,7 @@ a {
           const contentDisposition = scrapbook.parseHeaderContentDisposition(header.value);
 
           // do not launch viewer if the file is marked to be downloaded
-          if (contentDisposition.type === 'attachment') {
+          if (contentDisposition.type === 'attachment' && !scrapbook.getOption("viewer.viewAttachments")) {
             return;
           }
 

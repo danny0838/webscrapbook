@@ -1185,6 +1185,12 @@
   "OptionUiToolbarButtonsLabel": {
     "message": "顯示工具列按鈕指令:"
   },
+  "OptionViewerViewAttachmentsLabel": {
+    "message": "強制檢視附件檔案"
+  },
+  "OptionViewerViewAttachmentsTooltip": {
+    "message": "附件檔案（含有 HTTP 標頭「Content-Disposition: attachment」的檔案）瀏覽器一般會直接下載而不嘗試開啟。如果想強制用封存頁面檢視器開啟附件檔案形式的封存頁面檔案，可勾選此選項。"
+  },
   "OptionViewerViewHtzLabel": {
     "message": "檢視 HTZ 檔案"
   },

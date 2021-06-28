@@ -1185,6 +1185,12 @@
   "OptionUiToolbarButtonsLabel": {
     "message": "显示工具列按钮命令:"
   },
+  "OptionViewerViewAttachmentsLabel": {
+    "message": "强制检视附加文件"
+  },
+  "OptionViewerViewAttachmentsTooltip": {
+    "message": "附加文件（含有 HTTP 标头“Content-Disposition: attachment”的文件）浏览器一般会直接下载而不尝试开启。如果想强制用封存页面检视器开启附加文件形式的封存页面文件，可勾选此选项。"
+  },
   "OptionViewerViewHtzLabel": {
     "message": "检视 HTZ 文件"
   },

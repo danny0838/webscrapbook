@@ -143,6 +143,7 @@ if (Node && !Node.prototype.getRootNode) {
     "editor.insertDateFormatIsUtc": false,
     "viewer.viewHtz": true,
     "viewer.viewMaff": true,
+    "viewer.viewAttachments": false,
     "indexer.createStaticSite": false,
     "indexer.createStaticIndex": false,
     "indexer.createRssFeed": false,

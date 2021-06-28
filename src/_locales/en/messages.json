@@ -1185,6 +1185,12 @@
   "OptionUiToolbarButtonsLabel": {
     "message": "Show toolbar button commands:"
   },
+  "OptionViewerViewAttachmentsLabel": {
+    "message": "Force open attachments"
+  },
+  "OptionViewerViewAttachmentsTooltip": {
+    "message": "Attachments (files with “Content-Disposition: attachment” HTTP header) are normally downloaded directly without an attempt to open by the browser. Check this option to force opening archive page files that are attachments using the archive page viewer."
+  },
   "OptionViewerViewHtzLabel": {
     "message": "View HTZ file"
   },
