@@ -94,8 +94,8 @@
     }
   }
 
-  function exportOptions() {
-    const blob = new Blob([JSON.stringify(scrapbook.options, null, 2)], {type: "application/json"});
+  async function exportOptions() {
+    const blob = new Blob([JSON.stringify(await scrapbook.getOptions(), null, 2)], {type: "application/json"});
     const filename = `webscrapbook.options.${scrapbook.dateToId().slice(0, 8)}.json`;
 
     if (scrapbook.userAgent.is('gecko')) {
