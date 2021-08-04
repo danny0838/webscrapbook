@@ -201,6 +201,13 @@
     if (elem.value === 'folder' && mode === 'file') {
       elem.querySelector(':enabled').selected = true;
     }
+    
+    if (mode === 'server') {
+      var url = document.getElementById("opt_server.url").value;
+      if (url === '') {
+        document.getElementById("opt_server.url").value = 'http://localhost:8080/';
+      }
+    }
   }
 
   function renewCaptureSaveAsDetails() {
