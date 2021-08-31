@@ -983,13 +983,14 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
      * @param {Object} params
      * @param {?Object} params.item - null to generate a default item. Overwrites existed id.
      * @param {?string} params.parentId - null to not add to any parent
-     * @param {?integer} params.index - null or Infinity to insert to last
+     * @param {?integer} params.index - 0 to insert at beginning,
+     *                                  null or Infinity to insert at end
      * @return {Object}
      */
     addItem({
       item,
       parentId = 'root',
-      index = Infinity,
+      index = scrapbook.getOption("capture.insertPosition")
     }) {
       if (index === null) {
         index = Infinity;

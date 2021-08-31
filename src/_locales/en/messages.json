@@ -873,6 +873,21 @@
   "OptionCaptureInsertInfoBarTooltip": {
     "message": "If checked, a script will be inserted in a captured or saved page to show an infobar at page top (requires JavaScript).\n\n• NOTE: Archive page viewer cannot show the infobar as it does not support JavaScript. Use a viewing technique that supports JavaScript to work with an archive page, such as opening the index page after unzipping."
   },
+  "OptionCaptureInsertPositionBottomLabel": {
+    "message": "bottom"
+  },
+  "OptionCaptureInsertPositionPostLabel": {
+    "message": "of the folder"
+  },
+  "OptionCaptureInsertPositionPreLabel": {
+    "message": "Put item at the"
+  },
+  "OptionCaptureInsertPositionTooltip": {
+    "message": "A captured web page item can be placed either at the top or the bottom of the Table of Contents folder in the WebScrapBook sidebar."
+  },
+  "OptionCaptureInsertPositionTopLabel": {
+    "message": "top"
+  },
   "OptionCaptureLinkUnsavedUriLabel": {
     "message": "Link uncaptured resource to source"
   },

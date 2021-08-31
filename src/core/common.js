@@ -126,6 +126,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.deleteErasedOnSave": false,
     "capture.backupForRecapture": true,
     "capture.zipCompressLevel": null,
+    "capture.insertPosition": "Infinity",
     "autocapture.enabled": false,
     "autocapture.rules": "",
     "editor.autoInit": true,
