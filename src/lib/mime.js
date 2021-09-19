@@ -50,6 +50,9 @@
     "application/a2l": {
       "source": "iana"
     },
+    "application/ace+cbor": {
+      "source": "iana"
+    },
     "application/activemessage": {
       "source": "iana"
     },
@@ -118,6 +121,9 @@
     "application/applixware": {
       "source": "apache",
       "extensions": ["aw"]
+    },
+    "application/at+jwt": {
+      "source": "iana"
     },
     "application/atf": {
       "source": "iana"
@@ -518,6 +524,10 @@
     "application/expect-ct-report+json": {
       "source": "iana",
       "compressible": true
+    },
+    "application/express": {
+      "source": "iana",
+      "extensions": ["exp"]
     },
     "application/fastinfoset": {
       "source": "iana"
@@ -1094,6 +1104,9 @@
       "source": "iana",
       "extensions": ["oxps"]
     },
+    "application/p21": {
+      "source": "iana"
+    },
     "application/p21+zip": {
       "source": "iana",
       "compressible": false
@@ -1666,6 +1679,9 @@
       "compressible": true
     },
     "application/tnauthlist": {
+      "source": "iana"
+    },
+    "application/token-introspection+jwt": {
       "source": "iana"
     },
     "application/toml": {
@@ -5823,6 +5839,15 @@
       "source": "apache",
       "extensions": ["iso"]
     },
+    "application/x-iwork-keynote-sffkey": {
+      "extensions": ["key"]
+    },
+    "application/x-iwork-numbers-sffnumbers": {
+      "extensions": ["numbers"]
+    },
+    "application/x-iwork-pages-sffpages": {
+      "extensions": ["pages"]
+    },
     "application/x-java-archive-diff": {
       "source": "nginx",
       "extensions": ["jardiff"]
@@ -7454,6 +7479,14 @@
       "source": "iana",
       "extensions": ["obj"]
     },
+    "model/step": {
+      "source": "iana"
+    },
+    "model/step+xml": {
+      "source": "iana",
+      "compressible": true,
+      "extensions": ["stpx"]
+    },
     "model/step+zip": {
       "source": "iana",
       "compressible": false,
@@ -8153,6 +8186,9 @@
     "video/jpm": {
       "source": "apache",
       "extensions": ["jpm","jpgm"]
+    },
+    "video/jxsv": {
+      "source": "iana"
     },
     "video/mj2": {
       "source": "iana",
