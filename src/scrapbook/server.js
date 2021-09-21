@@ -936,17 +936,23 @@
     }
 
     generateMetaFile(jsonData) {
+      // Escape U+2028 and U+2029 for embedded JSON data used as JavaScript
+      // code to prevent script breakage and potential security issue in old
+      // browsers not supporting ES2019, as they are not allowed in a string
+      // literal.
+      // https://stackoverflow.com/questions/16005091/node-js-javascript-stringify
       return `/**
  * Feel free to edit this file, but keep data code valid JSON format.
  */
-scrapbook.meta(${JSON.stringify(jsonData, null, 2)})`;
+scrapbook.meta(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')})`;
     }
 
     generateTocFile(jsonData) {
+      // see generateMetaFile for the replacing
       return `/**
  * Feel free to edit this file, but keep data code valid JSON format.
  */
-scrapbook.toc(${JSON.stringify(jsonData, null, 2)})`;
+scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')})`;
     }
 
     generateId() {
