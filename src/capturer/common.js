@@ -2646,6 +2646,21 @@
       };
 
       const processRootNode = (rootNode) => {
+        // fix noscript
+        // noscript cannot be nested
+        for (const elem of rootNode.querySelectorAll('noscript')) {
+          const elemOrig = origNodeMap.get(elem);
+          if (elemOrig.innerHTML === elemOrig.textContent) {
+            const tempElem = newDoc.createElement('scrapbook-noscript');
+            tempElem.innerHTML = elem.textContent;
+            let child;
+            elem.textContent = '';
+            while (child = tempElem.firstChild) {
+              elem.appendChild(child);
+            }
+          }
+        }
+
         // handle internalization
         if (internalize) {
           for (const elem of rootNode.querySelectorAll('img')) {
