@@ -31,13 +31,6 @@
 
   const capturer = {
     isContentScript: true,
-    get isNoscriptEscaped() {
-      // For some browsers (e.g. Firefox 73 and Chromium 79), <noscript> has
-      // only text content when JavaScript is enabled.
-      let elem = document.createElement("noscript"); elem.innerHTML = "<br>";
-      delete capturer.isNoscriptEscaped;
-      return capturer.isNoscriptEscaped = (elem.firstChild.nodeType !== 1);
-    }
   };
 
   /**
@@ -902,13 +895,19 @@
                 return;
               case "save":
               default:
-                if (capturer.isNoscriptEscaped) {
-                  const newElem = newDoc.createElement('scrapbook-noscript');
-                  escapedNoscriptList.push(newElem);
-                  newElem.innerHTML = elem.textContent;
-                  elem.replaceWith(newElem);
-                  rewriteRecursively(newElem, rootName, rewriteNode);
-                  return;
+                // In browsers conforming the spec, elem contains only text
+                // (innerHTML and textContent work like <style>)
+                // when JavaScript is enabled. Replace with normal HTML content.
+                // https://html.spec.whatwg.org/multipage/scripting.html#the-noscript-element
+                const elemOrig = origNodeMap.get(elem);
+                if (elemOrig.innerHTML === elemOrig.textContent) {
+                  const tempElem = newDoc.createElement('scrapbook-noscript');
+                  tempElem.innerHTML = elem.textContent;
+                  let child;
+                  elem.textContent = '';
+                  while (child = tempElem.firstChild) {
+                    elem.appendChild(child);
+                  }
                 }
                 break;
             }
@@ -2204,7 +2203,6 @@
     // construct the cloned node tree
     const origNodeMap = new WeakMap();
     const clonedNodeMap = new WeakMap();
-    const escapedNoscriptList = [];
     const shadowRootList = [];
 
     // create a new document to replicate nodes via import
@@ -2547,14 +2545,6 @@
     await downLinkTasks.reduce((prevTask, curTask) => {
       return prevTask.then(curTask);
     }, Promise.resolve());
-
-    // recover escaped noscripts
-    for (const node of escapedNoscriptList) {
-      if (!node.isConnected) { continue; }
-      const newElem = newDoc.createElement('noscript');
-      newElem.innerHTML = node.innerHTML;
-      node.replaceWith(newElem);
-    }
 
     // record after the content of all nested shadow roots have been processed
     for (const shadowRoot of shadowRootList) {
