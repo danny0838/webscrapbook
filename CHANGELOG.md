@@ -3,8 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.125.5] - 2021-09-22
+* Fixed capture error for a page with a link element without href attribute.
+
 ## [0.125.4] - 2021-09-21
-* Fixed an issue that noscript content is not correctly saved in Firefox.
+* Fixed an issue that noscript content is not correctly saved when captured using Firefox.
 * Fixed an issue that noscript content is not correctly saved when capturing source.
 * Fixed an issue that noscript content becomes escaped after saved by the editor.
 
