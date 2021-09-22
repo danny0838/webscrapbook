@@ -628,7 +628,7 @@
             // integrity won't work due to rewriting or crossorigin issue
             captureRewriteAttr(elem, "integrity", null);
 
-            if (elem.matches('[rel~="stylesheet"]')) {
+            if (elem.matches('[rel~="stylesheet"][href]')) {
               // styles: link element
               let disableCss = false;
               const css = cssHandler.getElemCss(elem);
@@ -702,7 +702,7 @@
                   break;
               }
               break;
-            } else if (elem.matches('[rel~="icon"]')) {
+            } else if (elem.matches('[rel~="icon"][href]')) {
               // favicon: the link element
               switch (options["capture.favicon"]) {
                 case "link":
@@ -751,7 +751,7 @@
                   captureRewriteAttr(elem, "crossorigin", null);
                   break;
               }
-            } else if (elem.matches('[rel~="preload"], [rel~="modulepreload"], [rel~="dns-prefetch"], [rel~="preconnect"]')) {
+            } else if (elem.matches('[rel~="preload"][href], [rel~="preload"][imagesrcset], [rel~="modulepreload"][href], [rel~="dns-prefetch"][href], [rel~="preconnect"][href]')) {
               // @TODO: handle preloads according to its "as" attribute
               switch (options["capture.preload"]) {
                 case "blank":
@@ -765,7 +765,7 @@
                   captureRemoveNode(elem);
                   return;
               }
-            } else if (elem.matches('[rel~="prefetch"], [rel~="prerender"]')) {
+            } else if (elem.matches('[rel~="prefetch"][href], [rel~="prerender"][href]')) {
               // @TODO: handle prefetches according to its "as" attribute
               switch (options["capture.prefetch"]) {
                 case "blank":
