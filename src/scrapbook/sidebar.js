@@ -1261,7 +1261,7 @@
         elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: null}));
       };
 
-      wrapper.innerHTML = '';
+      wrapper.textContent = '';
       wrapper.appendChild(elem);
       if (lockUi) {
         this.enableUi(false);

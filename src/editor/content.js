@@ -2947,16 +2947,25 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
         lastTarget = elem;
 
+        let outlineStyle;
+        let labelBody;
         if (scrapbook.getScrapBookObjectRemoveType(elem) <= 0) {
           const id = elem.id;
           const classText = Array.from(elem.classList.values()).map(x => '.' + x).join(''); // elements like svg doesn't support .className property
-          var outlineStyle = '2px solid red';
-          var labelHtml = `<b style="all: unset !important; font-weight: bold !important;">${scrapbook.escapeHtml(elem.tagName.toLowerCase(), false, false, true)}</b>` + 
-              (id ? "#" + scrapbook.escapeHtml(id, false, false, true) : "") + 
-              classText;
+          outlineStyle = '2px solid red';
+          labelBody = document.createDocumentFragment();
+          const b = labelBody.appendChild(document.createElement('b'));
+          b.style = 'all: unset !important; font-weight: bold !important;';
+          b.textContent = elem.tagName.toLowerCase();
+          if (id) {
+            labelBody.appendChild(document.createTextNode("#" + id));
+          }
+          if (classText) {
+            labelBody.appendChild(document.createTextNode(classText));
+          }
         } else {
-          var outlineStyle = '2px dashed blue';
-          var labelHtml = scrapbook.escapeHtml(scrapbook.lang("EditorButtonDOMEraserRemoveEdit"), false, false, true);
+          outlineStyle = '2px dashed blue';
+          labelBody = document.createTextNode(scrapbook.lang("EditorButtonDOMEraserRemoveEdit"));
         }
 
         mutationHandler.addIgnoreStartPoint();
@@ -2990,7 +2999,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
         labelElem.style.setProperty('background-color', '#fff0cc', 'important');
         labelElem.style.setProperty('font-size', '12px', 'important');
         labelElem.style.setProperty('font-family', 'sans-serif', 'important');
-        labelElem.innerHTML = labelHtml;
+        labelElem.appendChild(labelBody);
         document.body.appendChild(labelElem);
 
         const boundingRect = elem.getBoundingClientRect();
