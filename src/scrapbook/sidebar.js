@@ -864,7 +864,7 @@
           if (event.ctrlKey) {
             await scrapbook.invokeBatchCapture({
               taskInfo,
-              customTitle: true,
+              ignoreTitle: false,
               useJson: true,
             });
           } else {

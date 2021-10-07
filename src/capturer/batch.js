@@ -33,8 +33,8 @@
       return;
     }
 
-    if (typeof data.customTitle !== 'undefined') {
-      document.getElementById('opt-customTitle').checked = data.customTitle;
+    if (typeof data.ignoreTitle !== 'undefined') {
+      document.getElementById('opt-ignoreTitle').checked = data.ignoreTitle;
     }
     if (typeof data.useJson !== 'undefined') {
       document.getElementById('opt-useJson').checked = data.useJson;
@@ -47,7 +47,7 @@
     }
   }
 
-  async function capture({inputText, customTitle, useJson, uniquify}) {
+  async function capture({inputText, ignoreTitle, useJson, uniquify}) {
     const taskInfo = parseInputText(inputText, useJson);
 
     // remove duplicated URLs
@@ -69,10 +69,10 @@
       });
     }
 
-    // remove title if customTitle is not set
-    if (!customTitle) {
-      for (const i in taskInfo.tasks) {
-        delete(taskInfo.tasks[i].title);
+    // remove title if ignoreTitle is set
+    if (ignoreTitle) {
+      for (const task of taskInfo.tasks) {
+        delete(task.title);
       }
     }
 
@@ -221,12 +221,12 @@
   async function onCaptureClick(event) {
     const inputElem = document.getElementById('urls');
     const inputText = inputElem.value;
-    const customTitle = document.getElementById('opt-customTitle').checked;
+    const ignoreTitle = document.getElementById('opt-ignoreTitle').checked;
     const useJson = document.getElementById('opt-useJson').checked;
     const uniquify = document.getElementById('opt-uniquify').checked;
 
     try {
-      await capture({inputText, customTitle, useJson, uniquify});
+      await capture({inputText, ignoreTitle, useJson, uniquify});
       await exit();
     } catch (ex) {
       console.error(ex);

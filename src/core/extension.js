@@ -334,7 +334,7 @@
     }
     return await scrapbook.invokeBatchCapture({
       taskInfo,
-      customTitle: true,
+      ignoreTitle: false,
       useJson: true,
     });
   };
@@ -345,7 +345,7 @@
    * @param {Object} params
    * @param {Object} params.taskInfo
    * @param {boolean} [params.useJson]
-   * @param {boolean} [params.customTitle]
+   * @param {boolean} [params.ignoreTitle]
    * @param {boolean} [params.uniquify]
    * @return {Promise<Tab>}
    */
