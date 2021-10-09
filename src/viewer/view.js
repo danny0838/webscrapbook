@@ -774,12 +774,6 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           }
         }, false);
 
-        frame.contentWindow.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          console.error(`Form submission is forbidden for security reason.`);
-        }, false);
-
         for (const elem of frameDoc.querySelectorAll('frame, iframe')) {
           frameRegisterLinkLoader(elem);
         }
