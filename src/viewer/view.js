@@ -713,6 +713,8 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
           const elem = e.target.closest('a[href], area[href]');
           if (!elem) { return; }
 
+          if (elem.hasAttribute('download')) { return; }
+
           const target = getTarget(elem);
           const url = elem.href;
           if (target === iframe.contentWindow) {
