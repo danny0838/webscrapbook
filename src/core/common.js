@@ -81,6 +81,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.image": "save", // "save", "save-current", "link", "blank", "remove"
     "capture.imageBackground": "save-used", // "save", "save-used", "link", "blank"
     "capture.favicon": "save", // "save", "link", "blank", "remove"
+    "capture.faviconAttrs": "",
     "capture.canvas": "save", // "save", "blank", "remove"
     "capture.audio": "save", // "save", "save-current", "link", "blank", "remove"
     "capture.video": "save", // "save", "save-current", "link", "blank", "remove"

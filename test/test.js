@@ -16,6 +16,7 @@ const baseOptions = {
   "capture.image": "save",
   "capture.imageBackground": "save",
   "capture.favicon": "save",
+  "capture.faviconAttrs": "",
   "capture.canvas": "save",
   "capture.audio": "save",
   "capture.video": "save",
@@ -4997,6 +4998,85 @@ async function test_capture_image_favicon() {
 
   var iconElem = doc.querySelector('link[rel~="icon"]');
   assert(!iconElem);
+}
+
+/**
+ * Check if option works
+ *
+ * capture.faviconAttrs
+ */
+async function test_capture_image_favicon2() {
+  /* capture.faviconAttrs = "apple-touch-icon apple-touch-icon-precomposed" */
+  var options = {
+    "capture.favicon": "save",
+    "capture.faviconAttrs": "apple-touch-icon apple-touch-icon-precomposed",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_image_favicon2/favicon.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['red.bmp']);
+  assert(zip.files['yellow.bmp']);
+  assert(zip.files['green.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var iconElems = doc.querySelectorAll('link[rel]');
+  assert(iconElems[0].getAttribute('href') === `red.bmp`);
+  assert(iconElems[1].getAttribute('href') === `yellow.bmp`);
+  assert(iconElems[2].getAttribute('href') === `green.bmp`);
+
+  /* capture.faviconAttrs = "apple-touch-icon" */
+  var options = {
+    "capture.favicon": "save",
+    "capture.faviconAttrs": "apple-touch-icon",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_image_favicon2/favicon.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['red.bmp']);
+  assert(zip.files['yellow.bmp']);
+  assert(!zip.files['green.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var iconElems = doc.querySelectorAll('link[rel]');
+  assert(iconElems[0].getAttribute('href') === `red.bmp`);
+  assert(iconElems[1].getAttribute('href') === `yellow.bmp`);
+  assert(iconElems[2].getAttribute('href') === `${localhost}/capture_image_favicon2/green.bmp`);
+
+  /* capture.faviconAttrs = "" */
+  var options = {
+    "capture.favicon": "save",
+    "capture.faviconAttrs": "",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_image_favicon2/favicon.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['red.bmp']);
+  assert(!zip.files['yellow.bmp']);
+  assert(!zip.files['green.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var iconElems = doc.querySelectorAll('link[rel]');
+  assert(iconElems[0].getAttribute('href') === `red.bmp`);
+  assert(iconElems[1].getAttribute('href') === `${localhost}/capture_image_favicon2/yellow.bmp`);
+  assert(iconElems[2].getAttribute('href') === `${localhost}/capture_image_favicon2/green.bmp`);
 }
 
 /**

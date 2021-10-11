@@ -778,6 +778,36 @@
                   captureRemoveNode(elem);
                   return;
               }
+            } else if (favIconSelector && elem.matches(favIconSelector)) {
+              // favicon-like
+              switch (options["capture.favicon"]) {
+                case "link":
+                  break;
+                case "blank":
+                  // HTML 5.1 2nd Edition / W3C Recommendation:
+                  // If the href attribute is absent, then the element does not define a link.
+                  captureRewriteAttr(elem, "href", null);
+                  break;
+                case "remove":
+                  captureRemoveNode(elem);
+                  return;
+                case "save":
+                default:
+                  tasks.push(async () => {
+                    const response = await downloadFile({
+                      url: elem.getAttribute("href"),
+                      refUrl,
+                      settings,
+                      options,
+                    });
+                    captureRewriteAttr(elem, "href", response.url);
+                    return response;
+                  });
+
+                  // remove crossorigin as the origin has changed
+                  captureRewriteAttr(elem, "crossorigin", null);
+                  break;
+              }
             }
             break;
           }
@@ -2468,6 +2498,13 @@
     const cssHandler = new capturer.DocumentCssHandler({
       doc, rootNode, origNodeMap, clonedNodeMap, refUrl, settings, options,
     });
+
+    // prepare favicon selector
+    const favIconSelector = options["capture.faviconAttrs"]
+      .split(/[\t\n\f\r ]+/)
+      .filter(x => x)
+      .map(attr => `[rel~="${CSS.escape(attr)}"][href]`)
+      .join(', ');
 
     // inspect all nodes (and register async tasks) -->
     // some additional tasks that requires some data after nodes are inspected -->
