@@ -866,6 +866,17 @@
       }
     },
 
+    onServerTreeChange() {
+      if (!scrapbook.getOption("scrapbook.autoRebuildSidebars")) {
+        return;
+      }
+
+      // async
+      this.runTask(async () => {
+        await this.rebuild();
+      });
+    },
+
     /**
      * Locate item position in the sidebar.
      *

@@ -372,6 +372,32 @@
   background.onCaptureEnd = async function (params, sender) {
     background.setCapturedUrls(params, sender);
     await background.updateBadgeForAllTabs();
+
+    // nodify sidebars about server tree change
+    const sidebarUrls = [
+      browser.runtime.getURL("scrapbook/sidebar.html"),
+      browser.runtime.getURL("scrapbook/manage.html"),
+    ];
+
+    const tasks = [];
+    const cmd = 'sidebar.onServerTreeChange';
+    const args = {};
+    const errorHandler = (ex) => {
+      console.error(ex);
+    };
+
+    if (browser.sidebarAction) {
+      tasks.push(scrapbook.invokeExtensionScript({cmd, args}).catch(errorHandler));
+    }
+
+    const sidebarTabs = (await browser.tabs.query({}))
+        .filter(t => sidebarUrls.includes(scrapbook.splitUrl(t.url)[0]));
+
+    for (const tab of sidebarTabs) {
+      tasks.push(scrapbook.invokeContentScript({tabId: tab.id, frameId: 0, cmd, args}).catch(errorHandler));
+    }
+
+    return await Promise.all(tasks);
   };
 
   function initStorageChangeListener() {

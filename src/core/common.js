@@ -175,6 +175,7 @@ if (Node && !Node.prototype.getRootNode) {
     "scrapbook.copyItemInfoFormatPlain": "%id%",
     "scrapbook.copyItemInfoFormatHtml": "",
     "scrapbook.transactionAutoBackup": true,
+    "scrapbook.autoRebuildSidebars": true,
     "scrapbook.defaultSearch": "-type:folder -type:separator",
     "scrapbook.searchCommentLength": 100,
     "scrapbook.searchContextLength": 120,
