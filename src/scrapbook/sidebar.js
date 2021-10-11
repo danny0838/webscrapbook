@@ -33,6 +33,7 @@
     rootId: null,
     mode: 'normal',
     sidebarWindowId: null,
+    taskPromise: Promise.resolve(),
 
     async init() {
       // Init event handlers first so that the refresh button works if there's
@@ -122,167 +123,164 @@
       // save current active element
       const activeElement = document.activeElement;
 
-      this.enableUi(false);
-
-      // clear logs
-      if (!initial) {
-        document.getElementById('logger').textContent = '';
-      }
-
-      try {
-        // update bookId
-        if (typeof bookId === 'string' && bookId !== this.bookId) {
-          let requireUpdateBooks = true;
-
+      await this.runTask(async () => {
+        try {
+          // clear logs
           if (!initial) {
-            await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
-
-            await this.savePostit();
-            await this.uneditPostit();
-
-            // reload server config in case there has been a change
-            requireUpdateBooks = await server.init(true);
+            document.getElementById('logger').textContent = '';
           }
 
-          // update current book
-          this.bookId = bookId;
-          this.book = server.books[bookId];
+          // update bookId
+          if (typeof bookId === 'string' && bookId !== this.bookId) {
+            let requireUpdateBooks = true;
 
-          if (!this.book) {
-            this.warn(scrapbook.lang('ScrapBookErrorBookNotExist', [bookId]));
-            bookId = this.bookId = '';
-            this.book = server.books[bookId];
-            await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
-          }
+            if (!initial) {
+              await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
 
-          // update book selector
-          if (this.mode === 'normal' && requireUpdateBooks) {
-            const wrapper = document.getElementById('book');
-            wrapper.textContent = '';
-            for (const bookId of Object.keys(server.books).sort()) {
-              const book = server.books[bookId];
-              const opt = wrapper.appendChild(document.createElement('option'));
-              opt.value = book.id;
-              opt.textContent = book.name;
+              await this.savePostit();
+              await this.uneditPostit();
+
+              // reload server config in case there has been a change
+              requireUpdateBooks = await server.init(true);
             }
-            wrapper.value = bookId;
-            wrapper.hidden = false;
+
+            // update current book
+            this.bookId = bookId;
+            this.book = server.books[bookId];
+
+            if (!this.book) {
+              this.warn(scrapbook.lang('ScrapBookErrorBookNotExist', [bookId]));
+              bookId = this.bookId = '';
+              this.book = server.books[bookId];
+              await scrapbook.cache.set({table: "scrapbookServer", key: "currentScrapbook"}, bookId, 'storage');
+            }
+
+            // update book selector
+            if (this.mode === 'normal' && requireUpdateBooks) {
+              const wrapper = document.getElementById('book');
+              wrapper.textContent = '';
+              for (const bookId of Object.keys(server.books).sort()) {
+                const book = server.books[bookId];
+                const opt = wrapper.appendChild(document.createElement('option'));
+                opt.value = book.id;
+                opt.textContent = book.name;
+              }
+              wrapper.value = bookId;
+              wrapper.hidden = false;
+            }
+
+            document.getElementById('book').value = bookId;
           }
 
-          document.getElementById('book').value = bookId;
-        }
-
-        // update rootId
-        if (typeof rootId === 'string' && rootId !== this.rootId) {
-          this.rootId = rootId;
-        }
-
-        // refresh UI
-        if (this.rootId === 'root') {
-          document.title = scrapbook.lang('SidebarTitle', [server.config.app.name, this.book.name]);
-        } else {
-          document.title = scrapbook.lang('SidebarTitleWithRoot', [server.config.app.name, this.book.name, this.rootId])
-        }
-
-        const isLocal = server.config.app.is_local;
-        const isNoTree = !!this.book.config.no_tree;
-        const isRecycle = this.rootId === 'recycle';
-
-        document.getElementById('search').disabled = isNoTree;
-
-        {
-          const menuElem = document.getElementById('command-popup-book');
-          menuElem.querySelector('button[value="exec_book"]').disabled = !(isLocal);
-          menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
-          menuElem.querySelector('button[value="sort"]').disabled = isNoTree;
-
-          menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="mkpostit"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
-
-          menuElem.querySelector('button[value="view_recycle"]').disabled = isNoTree;
-
-          menuElem.querySelector('button[value="view_recycle"]').hidden = !(!isRecycle);
-        }
-
-        {
-          const menuElem = document.getElementById('command-popup');
-          menuElem.querySelector('button[value="opentab"]').disabled = isNoTree;
-          menuElem.querySelector('button[value="view_text"]').disabled = isNoTree;
-          menuElem.querySelector('button[value="exec"]').disabled = !(!isNoTree && isLocal);
-          menuElem.querySelector('button[value="browse"]').disabled = !(!isNoTree && isLocal);
-          menuElem.querySelector('button[value="source"]').disabled = isNoTree;
-          menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
-          menuElem.querySelector('button[value="search_in"]').disabled = isNoTree;
-          menuElem.querySelector('button[value="sort"]').disabled = isNoTree;
-
-          menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="mkpostit"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
-
-          menuElem.querySelector('button[value="edit"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="recover"]').disabled = !(!isNoTree && isRecycle);
-          menuElem.querySelector('button[value="move_up"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="move_down"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="move_into"]').disabled = isNoTree;
-          menuElem.querySelector('button[value="copy_into"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="drag"]').disabled = isNoTree;
-          menuElem.querySelector('button[value="recycle"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="delete"]').disabled = !(!isNoTree && isRecycle);
-
-          menuElem.querySelector('button[value="recapture"]').disabled = !(!isNoTree && !isRecycle);
-          menuElem.querySelector('button[value="copyinfo"]').disabled = isNoTree;
-          menuElem.querySelector('button[value="meta"]').disabled = isNoTree;
-        }
-
-        // refresh book tree
-        if (!isNoTree) {
-          await this.book.loadTreeFiles();
-          await this.book.loadToc();
-          await this.book.loadMeta();
-
-          const rootId = this.rootId;
-          if (!this.book.meta[rootId] && !this.book.isSpecialItem(rootId)) {
-            throw new Error(`specified root item "${rootId}" does not exist.`);
+          // update rootId
+          if (typeof rootId === 'string' && rootId !== this.rootId) {
+            this.rootId = rootId;
           }
-        } else {
-          this.log(scrapbook.lang('ScrapBookNoTree'));
+
+          // refresh UI
+          if (this.rootId === 'root') {
+            document.title = scrapbook.lang('SidebarTitle', [server.config.app.name, this.book.name]);
+          } else {
+            document.title = scrapbook.lang('SidebarTitleWithRoot', [server.config.app.name, this.book.name, this.rootId])
+          }
+
+          const isLocal = server.config.app.is_local;
+          const isNoTree = !!this.book.config.no_tree;
+          const isRecycle = this.rootId === 'recycle';
+
+          document.getElementById('search').disabled = isNoTree;
+
+          {
+            const menuElem = document.getElementById('command-popup-book');
+            menuElem.querySelector('button[value="exec_book"]').disabled = !(isLocal);
+            menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
+            menuElem.querySelector('button[value="sort"]').disabled = isNoTree;
+
+            menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="mkpostit"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
+
+            menuElem.querySelector('button[value="view_recycle"]').disabled = isNoTree;
+
+            menuElem.querySelector('button[value="view_recycle"]').hidden = !(!isRecycle);
+          }
+
+          {
+            const menuElem = document.getElementById('command-popup');
+            menuElem.querySelector('button[value="opentab"]').disabled = isNoTree;
+            menuElem.querySelector('button[value="view_text"]').disabled = isNoTree;
+            menuElem.querySelector('button[value="exec"]').disabled = !(!isNoTree && isLocal);
+            menuElem.querySelector('button[value="browse"]').disabled = !(!isNoTree && isLocal);
+            menuElem.querySelector('button[value="source"]').disabled = isNoTree;
+            menuElem.querySelector('button[value="manage"]').disabled = isNoTree;
+            menuElem.querySelector('button[value="search_in"]').disabled = isNoTree;
+            menuElem.querySelector('button[value="sort"]').disabled = isNoTree;
+
+            menuElem.querySelector('button[value="mkfolder"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="mksep"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="mkpostit"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
+
+            menuElem.querySelector('button[value="edit"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="recover"]').disabled = !(!isNoTree && isRecycle);
+            menuElem.querySelector('button[value="move_up"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="move_down"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="move_into"]').disabled = isNoTree;
+            menuElem.querySelector('button[value="copy_into"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="drag"]').disabled = isNoTree;
+            menuElem.querySelector('button[value="recycle"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="delete"]').disabled = !(!isNoTree && isRecycle);
+
+            menuElem.querySelector('button[value="recapture"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="copyinfo"]').disabled = isNoTree;
+            menuElem.querySelector('button[value="meta"]').disabled = isNoTree;
+          }
+
+          // refresh book tree
+          if (!isNoTree) {
+            await this.book.loadTreeFiles();
+            await this.book.loadToc();
+            await this.book.loadMeta();
+
+            const rootId = this.rootId;
+            if (!this.book.meta[rootId] && !this.book.isSpecialItem(rootId)) {
+              throw new Error(`specified root item "${rootId}" does not exist.`);
+            }
+          } else {
+            this.log(scrapbook.lang('ScrapBookNoTree'));
+          }
+
+          this.tree.init({
+            book: this.book,
+            rootId: this.rootId,
+            allowSelect: true,
+            allowMultiSelect: true,
+            allowMultiSelectOnClick: this.mode === 'manage',
+            allowAnchorClick: this.mode !== 'manage',
+            allowContextMenu: true,
+            allowKeyboardNavigation: true,
+            allowDrag: true,
+            allowDrop: true,
+            allowCopy: true,
+            allowPaste: true,
+            contextMenuCallback: this.onTreeContextMenu,
+            pasteCallback: this.onTreePaste,
+            itemAnchorClickCallback: this.onTreeItemAnchorClick,
+            itemDragOverCallback: this.onTreeItemDragOver,
+            itemDropCallback: this.onTreeItemDrop,
+          });
+          await this.tree.rebuild();
+        } catch (ex) {
+          console.error(ex);
+          throw new Error(scrapbook.lang('ScrapBookErrorInitTree', [ex.message]));
         }
-
-        this.tree.init({
-          book: this.book,
-          rootId: this.rootId,
-          allowSelect: true,
-          allowMultiSelect: true,
-          allowMultiSelectOnClick: this.mode === 'manage',
-          allowAnchorClick: this.mode !== 'manage',
-          allowContextMenu: true,
-          allowKeyboardNavigation: true,
-          allowDrag: true,
-          allowDrop: true,
-          allowCopy: true,
-          allowPaste: true,
-          contextMenuCallback: this.onTreeContextMenu,
-          pasteCallback: this.onTreePaste,
-          itemAnchorClickCallback: this.onTreeItemAnchorClick,
-          itemDragOverCallback: this.onTreeItemDragOver,
-          itemDropCallback: this.onTreeItemDrop,
-        });
-        await this.tree.rebuild();
-      } catch (ex) {
-        console.error(ex);
-        this.error(scrapbook.lang('ScrapBookErrorInitTree', [ex.message]));
-        return;
-      }
-
-      this.enableUi(true);
+      });
 
       // restore active element
-      if (activeElement) {
+      if (activeElement && activeElement.isConnected) {
         activeElement.focus();
       }
     },
@@ -521,23 +519,16 @@
      * @param {File[]} [event.detail.files] - files being uploaded
      */
     async onCustomCommandRun(event) {
-      const detail = event.detail;
-
-      this.enableUi(false);
-
-      try {
-        await this.commands[detail.command](detail);
-      } catch (ex) {
-        console.error(ex);
-        this.error(ex.message);
-        // when any error happens, the UI is possibility in an inconsistent status.
-        // lock the UI to avoid further manipulation and damage.
+      // skip if all commands are disabled
+      if (document.querySelector('#command:disabled')) {
         return;
       }
 
-      this.enableUi(true);
-
-      await this.tree.saveViewStatus();
+      const detail = event.detail;
+      await this.runTask(async () => {
+        await this.commands[detail.command](detail);
+        await this.tree.saveViewStatus();
+      });
     },
 
     onClickFileSelector(event) {
@@ -602,21 +593,12 @@
           return;
         }
 
-        this.enableUi(false);
-
-        try {
-          if (this.rootId !== 'recycle') {
+        if (this.rootId !== 'recycle') {
+          await this.runTask(async () => {
             await this.copyItems(data, targetId, targetIndex);
-          }
-        } catch (ex) {
-          console.error(ex);
-          this.error(ex.message);
-          // when any error happens, the UI is possibility in an inconsistent status.
-          // lock the UI to avoid further manipulation and damage.
-          return;
+          });
         }
 
-        this.enableUi(true);
         return;
       }
     },
@@ -726,6 +708,11 @@
       targetIndex,
       isOnItem = true,
     }) {
+      // disallow when commands disabled
+      if (document.querySelector('#command:disabled')) {
+        return;
+      }
+
       if (event.dataTransfer.types.includes('application/scrapbook.items+json')) {
         if (isOnItem || !lastDraggedElems) {
           const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.items+json'));
@@ -733,201 +720,148 @@
             return;
           }
 
-          this.enableUi(false);
-
-          try {
-            if (!lastDraggedElems) {
-              // drag from a different window
-              if (this.rootId !== 'recycle') {
+          if (!lastDraggedElems) {
+            // drag from a different window
+            if (this.rootId !== 'recycle') {
+              await this.runTask(async () => {
                 await this.copyItems(data, targetId, targetIndex);
-              }
-            } else if (event.altKey && this.rootId !== 'recycle') {
-              await this.linkItems(lastDraggedElems, targetId, targetIndex);
-            } else if (event.shiftKey && this.rootId !== 'recycle') {
-              await this.copyItems(data, targetId, targetIndex);
-            } else {
-              await this.moveItems(lastDraggedElems, targetId, targetIndex);
+              });
             }
-          } catch (ex) {
-            console.error(ex);
-            this.error(ex.message);
-            // when any error happens, the UI is possibility in an inconsistent status.
-            // lock the UI to avoid further manipulation and damage.
-            return;
+          } else if (event.altKey && this.rootId !== 'recycle') {
+            await this.runTask(async () => {
+              await this.linkItems(lastDraggedElems, targetId, targetIndex);
+            });
+          } else if (event.shiftKey && this.rootId !== 'recycle') {
+            await this.runTask(async () => {
+              await this.copyItems(data, targetId, targetIndex);
+            });
+          } else {
+            await this.runTask(async () => {
+              await this.moveItems(lastDraggedElems, targetId, targetIndex);
+            });
           }
-
-          this.enableUi(true);
         }
         return;
       }
 
       if (event.dataTransfer.types.includes('Files') && this.rootId !== 'recycle') {
-        this.enableUi(false);
+        const entries = Array.prototype.map.call(
+          event.dataTransfer.items,
+          x => x.webkitGetAsEntry && x.webkitGetAsEntry()
+        );
 
-        try {
-          const entries = Array.prototype.map.call(
-            event.dataTransfer.items,
-            x => x.webkitGetAsEntry && x.webkitGetAsEntry()
-          );
-
-          const files = [];
-          for (const entry of entries) {
-            if (!entry.isFile) { continue; }
-            try {
-              const file = await new Promise((resolve, reject) => {
-                entry.file(resolve, reject);
-              });
-              files.push(file);
-            } catch (ex) {}
+        const files = [];
+        for (const entry of entries) {
+          if (!entry.isFile) { continue; }
+          try {
+            const file = await new Promise((resolve, reject) => {
+              entry.file(resolve, reject);
+            });
+            files.push(file);
+          } catch (ex) {
+            console.error(`Unable to read file "${entry.name}"`);
           }
-
-          await this.uploadItems(files, targetId, targetIndex);
-        } catch (ex) {
-          console.error(ex);
-          this.error(ex.message);
-          // when any error happens, the UI is possibility in an inconsistent status.
-          // lock the UI to avoid further manipulation and damage.
-          return;
         }
 
-        this.enableUi(true);
+        await this.runTask(async () => {
+          await this.uploadItems(files, targetId, targetIndex);
+        });
         return;
       }
 
       if (event.dataTransfer.types.includes('application/scrapbook.capturetabs+json') && this.rootId !== 'recycle') {
-        this.enableUi(false);
-        try {
-          const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.capturetabs+json'));
-          const targetTab = await browser.tabs.get(data.tabId);
-          const tabs = await scrapbook.getHighlightedTabs({windowId: targetTab.windowId});
-          const mode = event.altKey ? 'bookmark' : event.shiftKey ? 'source' : data.mode;
-          const taskInfo = {
-            tasks: tabs.map(tab => ({
-              tabId: tab.id,
-              title: tab.title,
-            })),
-            bookId: this.bookId,
-            parentId: targetId,
-            index: targetIndex,
-            mode,
-            delay: null,
-            options: Object.assign(scrapbook.getOptions("capture"), {
-              "capture.saveTo": "server",
-            }),
-          };
-
-          if (event.ctrlKey || data.captureAs) {
-            await scrapbook.invokeCaptureAs(taskInfo);
-          } else {
+        const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.capturetabs+json'));
+        const targetTab = await browser.tabs.get(data.tabId);
+        const tabs = await scrapbook.getHighlightedTabs({windowId: targetTab.windowId});
+        const mode = event.altKey ? 'bookmark' : event.shiftKey ? 'source' : data.mode;
+        const taskInfo = {
+          tasks: tabs.map(tab => ({
+            tabId: tab.id,
+            title: tab.title,
+          })),
+          bookId: this.bookId,
+          parentId: targetId,
+          index: targetIndex,
+          mode,
+          delay: null,
+          options: Object.assign(scrapbook.getOptions("capture"), {
+            "capture.saveTo": "server",
+          }),
+        };
+        if (event.ctrlKey || data.captureAs) {
+          await scrapbook.invokeCaptureAs(taskInfo);
+        } else {
+          await this.runTask(async () => {
             await scrapbook.invokeCaptureEx({
               taskInfo,
               waitForResponse: true,
             });
-
             await this.rebuild();
-          }
-        } catch (ex) {
-          console.error(ex);
-          this.error(ex.message);
-          // when any error happens, the UI is possibility in an inconsistent status.
-          // lock the UI to avoid further manipulation and damage.
-          return;
+          });
         }
-
-        this.enableUi(true);
         return;
       }
 
       if (event.dataTransfer.types.includes('text/uri-list') && this.rootId !== 'recycle') {
-        this.enableUi(false);
-
         const mode = event.altKey ? 'bookmark' : event.shiftKey ? 'tab' : '';
-        try {
-          const tasks = event.dataTransfer.getData('text/uri-list')
-            .split('\r\n')
-            .filter(x => !x.startsWith('#') && x.trim())
-            .map(url => ({
-              url,
-            }));
-          const taskInfo = {
-            tasks,
-            bookId: this.bookId,
-            parentId: targetId,
-            index: targetIndex,
-            mode,
-            delay: null,
-            options: Object.assign(scrapbook.getOptions("capture"), {
-              "capture.saveTo": "server",
-            }),
-          };
-
-          if (event.ctrlKey) {
-            await scrapbook.invokeBatchCapture({
-              taskInfo,
-              ignoreTitle: false,
-              useJson: true,
-            });
-          } else {
+        const tasks = event.dataTransfer.getData('text/uri-list')
+          .split('\r\n')
+          .filter(x => !x.startsWith('#') && x.trim())
+          .map(url => ({
+            url,
+          }));
+        const taskInfo = {
+          tasks,
+          bookId: this.bookId,
+          parentId: targetId,
+          index: targetIndex,
+          mode,
+          delay: null,
+          options: Object.assign(scrapbook.getOptions("capture"), {
+            "capture.saveTo": "server",
+          }),
+        };
+        if (event.ctrlKey) {
+          await scrapbook.invokeBatchCapture({
+            taskInfo,
+            ignoreTitle: false,
+            useJson: true,
+          });
+        } else {
+          await this.runTask(async () => {
             await scrapbook.invokeCaptureEx({
               taskInfo,
               waitForResponse: true,
             });
-
             await this.rebuild();
-          }
-        } catch (ex) {
-          console.error(ex);
-          this.error(ex.message);
-          // when any error happens, the UI is possibility in an inconsistent status.
-          // lock the UI to avoid further manipulation and damage.
-          return;
+          });
         }
-
-        this.enableUi(true);
         return;
       }
 
       if (event.dataTransfer.types.includes('text/html') && this.rootId !== 'recycle') {
-        this.enableUi(false);
-
-        try {
+        const content = event.dataTransfer.getData('text/html');
+        await this.runTask(async () => {
           await this.captureNote({
             targetId,
             targetIndex,
             type: 'html',
-            content: event.dataTransfer.getData('text/html'),
+            content,
           });
-        } catch (ex) {
-          console.error(ex);
-          this.error(ex.message);
-          // when any error happens, the UI is possibility in an inconsistent status.
-          // lock the UI to avoid further manipulation and damage.
-          return;
-        }
-
-        this.enableUi(true);
+        });
         return;
       }
 
       if (event.dataTransfer.types.includes('text/plain') && this.rootId !== 'recycle') {
-        this.enableUi(false);
-
-        try {
+        const content = event.dataTransfer.getData('text/plain');
+        await this.runTask(async () => {
           await this.captureNote({
             targetId,
             targetIndex,
             type: 'text',
-            content: event.dataTransfer.getData('text/plain'),
+            content,
           });
-        } catch (ex) {
-          console.error(ex);
-          this.error(ex.message);
-          // when any error happens, the UI is possibility in an inconsistent status.
-          // lock the UI to avoid further manipulation and damage.
-          return;
-        }
-
-        this.enableUi(true);
+        });
         return;
       }
     },
@@ -1018,6 +952,29 @@
       document.getElementById('book').disabled = !willEnable;
       document.getElementById('command').disabled = !willEnable;
       document.getElementById('search').disabled = !(willEnable && !this.book.config.no_tree);
+    },
+
+    /**
+     * Add a task to queue and wait until it completes.
+     *
+     * - Automatically block UI during the task running.
+     * - If an error occurs, show the error message in the window, keep the UI
+     *   in blocked status, and fail the promise to prevent further run.
+     */
+    async runTask(callback) {
+      this.taskPromise = this.taskPromise.then(async () => {
+        this.enableUi(false);
+        try {
+          await callback();
+        } catch (ex) {
+          this.error(ex.message);
+          // when any error happens, the UI is possibility in an inconsistent status.
+          // keep the UI locked to avoid further manipulation and damage.
+          throw ex;
+        }
+        this.enableUi(true);
+      });
+      await this.taskPromise;
     },
 
     showBookCommands(willShow = document.getElementById('command-popup-book').hidden, pos = {}) {
@@ -1229,12 +1186,8 @@
      * @param {HTMLElement} elem - the element to be inserted to the dialog.
      *   - Dispatch 'dialogSubmit' event on elem to resolve the Promise with value.
      *   - Listen to 'dialogShow' event for elem to handle initialization.
-     * @param {Object} [options]
-     * @param {boolean} [options.lockUi] - whether to lock UI during dialog shown.
-     *   This is generally unneeded if there's already a wrapper context manager
-     *   that handles the UI locking.
      */
-    async showDialog(elem, {lockUi = false} = {}) {
+    async showDialog(elem) {
       const mask = document.getElementById('dialog-mask');
       const wrapper = document.getElementById('dialog-wrapper');
       const cancelElem = elem.querySelector('.cancel');
@@ -1263,9 +1216,6 @@
 
       wrapper.textContent = '';
       wrapper.appendChild(elem);
-      if (lockUi) {
-        this.enableUi(false);
-      }
       mask.hidden = false;
 
       if (!wrapper.hasAttribute('tabindex')) {
@@ -1289,9 +1239,6 @@
       cancelElem.removeEventListener('click', onCancel);
 
       mask.hidden = true;
-      if (lockUi) {
-        this.enableUi(true);
-      }
       this.treeElem.focus();
 
       return result;
