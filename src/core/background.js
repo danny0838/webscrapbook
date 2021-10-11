@@ -231,10 +231,11 @@
 
   /**
    * @kind invokable
-   * @param {string[]} urls
+   * @param {Object} [params]
+   * @param {string[]} [params.urls]
    * @return {Object<string~url, integer~count>}
    */
-  background.getCapturedUrls = function ({urls} = {}, sender) {
+  background.getCapturedUrls = function ({urls = []} = {}, sender) {
     const rv = {};
     for (const url of urls) {
       rv[url] = capturedUrls.get(url) || 0;
@@ -244,9 +245,10 @@
 
   /**
    * @kind invokable
-   * @param {string[]} urls
+   * @param {Object} [params]
+   * @param {string[]} [params.urls]
    */
-  background.setCapturedUrls = function ({urls} = {}, sender) {
+  background.setCapturedUrls = function ({urls = []} = {}, sender) {
     for (const url of urls) {
       capturedUrls.set(url, (capturedUrls.get(url) || 0) + 1);
     }
@@ -360,7 +362,16 @@
    * @kind invokable
    */
   background.updateBadgeForAllTabs = async function (params = {}, sender) {
-    return await capturer.updateBadgeForAllTabs();
+    await capturer.updateBadgeForAllTabs();
+  };
+
+  /**
+   * @kind invokable
+   * @param {Object} [params]
+   */
+  background.onCaptureEnd = async function (params, sender) {
+    background.setCapturedUrls(params, sender);
+    await background.updateBadgeForAllTabs();
   };
 
   function initStorageChangeListener() {
