@@ -45,6 +45,7 @@
     if (typeof data.taskInfo !== 'undefined') {
       document.getElementById('urls').value = stringifyTasks(data.taskInfo, document.getElementById('opt-useJson').checked);
     }
+    updateUi();
   }
 
   async function capture({inputText, ignoreTitle, useJson, uniquify}) {
@@ -153,6 +154,12 @@
     }
   }
 
+  function updateUi() {
+    const useJson = document.getElementById('opt-useJson').checked;
+    document.getElementById('desc').hidden = useJson;
+    document.getElementById('desc-json').hidden = !useJson;
+  }
+
   function toggleTooltip(elem) {
     if (!toggleTooltip.tooltipMap) {
       toggleTooltip.tooltipMap = new WeakMap();
@@ -216,6 +223,7 @@
     const newInputText = stringifyTasks(tasks, useJson);
     updateInputText(inputElem, newInputText);
     inputElem.setCustomValidity('');
+    updateUi();
   }
 
   async function onCaptureClick(event) {

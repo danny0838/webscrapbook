@@ -22,7 +22,7 @@ body {
   height: 100%;
 }
 
-#desc {
+#desc, #desc-json {
   margin-bottom: .5em;
 }
 
