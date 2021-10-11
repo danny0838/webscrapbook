@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.126.0] - 2021-10-11
+* Added a new `capture.faviconAttrs` option for saving favicon-like resources.
+* Adjusted UI for the `Capture as` dialog.
+* Added support of sidebar auto-rebuilding after a capture, with a new option `scrapbook.autoRebuildSidebars` to tweak the behavior..
+
 ## [0.125.7] - 2021-10-10
 * Fixed an issue that downloading links not working in the archive page viewer.
 
