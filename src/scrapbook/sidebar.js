@@ -791,13 +791,7 @@
         if (event.ctrlKey || data.captureAs) {
           await scrapbook.invokeCaptureAs(taskInfo);
         } else {
-          await this.runTask(async () => {
-            await scrapbook.invokeCaptureEx({
-              taskInfo,
-              waitForResponse: true,
-            });
-            await this.rebuild();
-          });
+          await scrapbook.invokeCaptureEx({taskInfo});
         }
         return;
       }
@@ -828,13 +822,7 @@
             useJson: true,
           });
         } else {
-          await this.runTask(async () => {
-            await scrapbook.invokeCaptureEx({
-              taskInfo,
-              waitForResponse: true,
-            });
-            await this.rebuild();
-          });
+          await scrapbook.invokeCaptureEx({taskInfo});
         }
         return;
       }
