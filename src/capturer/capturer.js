@@ -41,13 +41,35 @@
   capturer.missionId = scrapbook.getUuid();
 
   /**
+   * @typedef {Object} missionCaptureInfoFilesEntry
+   * @property {string} path
+   * @property {string} url
+   * @property {string} role
+   * @property {Blob} blob
+   */
+
+  /**
+   * @typedef {Object} missionCaptureInfoFilenameMapEntry
+   * @property {string} filename
+   * @property {string} url
+   */
+
+  /**
+   * @typedef {Object} missionCaptureInfoLinkedPagesEntry
+   * @property {string} url
+   * @property {boolean} hasMetaRefresh
+   * @property {string} [refUrl]
+   * @property {integer} depth
+   */
+
+  /**
    * @typedef {Object} missionCaptureInfo
    * @property {boolean} useDiskCache
    * @property {Set<string~filename>} indexPages
-   * @property {Map<string~filename, Object>} files
+   * @property {Map<string~filename, missionCaptureInfoFilesEntry>} files
    * @property {Map<string~token, Promise<fetchResult>>} fetchMap
-   * @property {Map<string~token, Object>} urlToFilenameMap
-   * @property {Map<string~url, Object>} linkedPages
+   * @property {Map<string~token, missionCaptureInfoFilenameMapEntry>} filenameMap
+   * @property {Map<string~url, missionCaptureInfoLinkedPagesEntry>} linkedPages
    */
 
   /**
@@ -72,7 +94,7 @@
     ]),
 
     fetchMap: new Map(),
-    urlToFilenameMap: new Map(),
+    filenameMap: new Map(),
 
     linkedPages: new Map(),
   }));
@@ -2279,7 +2301,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                   continue;
                 }
 
-                info.urlToFilenameMap.set(token, {
+                info.filenameMap.set(token, {
                   filename: path,
                   url: scrapbook.escapeFilename(path),
                 });
@@ -2332,7 +2354,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                   }
                 }
 
-                info.urlToFilenameMap.set(token, {
+                info.filenameMap.set(token, {
                   filename: path,
                   url: scrapbook.escapeFilename(path),
                 });
@@ -2513,7 +2535,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
       const {timeId, isMainPage, isMainFrame, documentName} = settings;
-      const urlToFilenameMap = capturer.captureInfo.get(timeId).urlToFilenameMap;
+      const filenameMap = capturer.captureInfo.get(timeId).filenameMap;
       const files = capturer.captureInfo.get(timeId).files;
 
       const fetchResponse = await capturer.fetch({
@@ -2528,7 +2550,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         const token = capturer.getRegisterToken(sourceUrlMain, role);
 
         // if a previous registry exists, return it
-        const previousRegistry = urlToFilenameMap.get(token);
+        const previousRegistry = filenameMap.get(token);
         if (previousRegistry) {
           return Object.assign({}, previousRegistry, {
             isDuplicate: true,
@@ -2570,7 +2592,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         response = {filename: documentFileName, url: scrapbook.escapeFilename(documentFileName)};
 
         // update registry
-        urlToFilenameMap.set(token, response);
+        filenameMap.set(token, response);
         Object.assign(files.get(documentFileName.toLowerCase()), {
           url: fetchResponse.url,
           role,
@@ -2686,7 +2708,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
       const {timeId} = settings;
-      const urlToFilenameMap = capturer.captureInfo.get(timeId).urlToFilenameMap;
+      const filenameMap = capturer.captureInfo.get(timeId).filenameMap;
       const files = capturer.captureInfo.get(timeId).files;
 
       const fetchResponse = await capturer.fetch({
@@ -2701,7 +2723,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         const token = capturer.getRegisterToken(fetchResponse.url, role);
 
         // if a previous registry exists, return it
-        const previousRegistry = urlToFilenameMap.get(token);
+        const previousRegistry = filenameMap.get(token);
         if (previousRegistry) {
           return Object.assign({}, previousRegistry, {
             isDuplicate: true,
@@ -2720,7 +2742,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         response = {filename, url: scrapbook.escapeFilename(filename)};
 
         // update registry
-        urlToFilenameMap.set(token, response);
+        filenameMap.set(token, response);
         Object.assign(files.get(filename.toLowerCase()), {
           url: fetchResponse.url,
           role,
@@ -3755,7 +3777,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {Object} params.options
    */
   capturer.rebuildLinks = async function (params) {
-    const rewriteHref = (elem, attr, urlToFilenameMap, linkedPages) => {
+    const rewriteHref = (elem, attr, filenameMap, linkedPages) => {
       let u;
       try {
         u = new URL(elem.getAttribute(attr));
@@ -3779,20 +3801,20 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
 
       const token = capturer.getRegisterToken(urlMain, 'document');
-      const p = urlToFilenameMap.get(token);
+      const p = filenameMap.get(token);
       if (!p) { return; }
 
       elem.setAttribute(attr, capturer.getRedirectedUrl(p.url, urlHash));
     };
 
-    const processRootNode = (rootNode, urlToFilenameMap, linkedPages) => {
+    const processRootNode = (rootNode, filenameMap, linkedPages) => {
       // rewrite links
       switch (rootNode.nodeName.toLowerCase()) {
         case 'svg': {
           for (const elem of rootNode.querySelectorAll('a[*|href]')) {
             for (const attr of REBUILD_LINK_SVG_HREF_ATTRS) {
               if (!elem.hasAttribute(attr)) { continue; }
-              rewriteHref(elem, attr, urlToFilenameMap, linkedPages);
+              rewriteHref(elem, attr, filenameMap, linkedPages);
             }
           }
           break;
@@ -3800,7 +3822,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         case 'html':
         case '#document-fragment': {
           for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
-            rewriteHref(elem, 'href', urlToFilenameMap, linkedPages);
+            rewriteHref(elem, 'href', filenameMap, linkedPages);
           }
           break;
         }
@@ -3811,7 +3833,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
           const shadowRoot = elem.attachShadow({mode: 'open'});
           shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
-          processRootNode(shadowRoot, urlToFilenameMap, linkedPages);
+          processRootNode(shadowRoot, filenameMap, linkedPages);
           elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
         }
       }
@@ -3820,7 +3842,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const rebuildLinks = capturer.rebuildLinks = async ({timeId, options}) => {
       const info = capturer.captureInfo.get(timeId);
       const files = info.files;
-      const urlToFilenameMap = info.urlToFilenameMap;
+      const filenameMap = info.filenameMap;
       const linkedPages = info.linkedPages;
 
       for (const [filename, item] of files.entries()) {
@@ -3835,7 +3857,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         }
 
         const doc = await scrapbook.readFileAsDocument(blob);
-        processRootNode(doc.documentElement, urlToFilenameMap, linkedPages);
+        processRootNode(doc.documentElement, filenameMap, linkedPages);
 
         const content = scrapbook.documentToString(doc, options["capture.prettyPrint"]);
         await capturer.saveFileCache({
@@ -3857,7 +3879,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   capturer.generateSiteMap = async function ({timeId, path}) {
     const info = capturer.captureInfo.get(timeId);
     const files = info.files;
-    const urlToFilenameMap = info.urlToFilenameMap;
+    const filenameMap = info.filenameMap;
 
     const sitemap = {
       version: 2,
@@ -3870,7 +3892,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       if (!token) {
         try {
           const t = capturer.getRegisterToken(url, role);
-          if (urlToFilenameMap.has(t)) {
+          if (filenameMap.has(t)) {
             token = t;
           }
         } catch (ex) {
