@@ -361,30 +361,23 @@
   /**
    * @kind invokable
    */
-  background.updateBadgeForAllTabs = async function (params = {}, sender) {
-    await capturer.updateBadgeForAllTabs();
-  };
+  background.onServerTreeChange = async function (params = {}, sender) {
+    const tasks = [];
 
-  /**
-   * @kind invokable
-   * @param {Object} [params]
-   */
-  background.onCaptureEnd = async function (params, sender) {
-    background.setCapturedUrls(params, sender);
-    await background.updateBadgeForAllTabs();
+    const errorHandler = (ex) => {
+      console.error(ex);
+    };
+
+    // update badge
+    tasks.push(capturer.updateBadgeForAllTabs().catch(errorHandler));
 
     // nodify sidebars about server tree change
     const sidebarUrls = [
       browser.runtime.getURL("scrapbook/sidebar.html"),
       browser.runtime.getURL("scrapbook/manage.html"),
     ];
-
-    const tasks = [];
     const cmd = 'sidebar.onServerTreeChange';
     const args = {};
-    const errorHandler = (ex) => {
-      console.error(ex);
-    };
 
     if (browser.sidebarAction) {
       tasks.push(scrapbook.invokeExtensionScript({cmd, args}).catch(errorHandler));
@@ -398,6 +391,15 @@
     }
 
     return await Promise.all(tasks);
+  };
+
+  /**
+   * @kind invokable
+   * @param {Object} [params]
+   */
+  background.onCaptureEnd = async function (params, sender) {
+    background.setCapturedUrls(params, sender);
+    await background.onServerTreeChange(params, sender);
   };
 
   function initStorageChangeListener() {

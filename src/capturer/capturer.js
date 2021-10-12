@@ -1830,6 +1830,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       },
     });
 
+    await scrapbook.invokeExtensionScript({
+      cmd: "background.onServerTreeChange",
+    });
+
     return {
       title,
       sourceUrl: url,
@@ -2185,6 +2189,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       },
     });
 
+    await scrapbook.invokeExtensionScript({
+      cmd: "background.onServerTreeChange",
+    });
+
     return result;
   };
 
@@ -2422,6 +2430,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
         await book.loadTreeFiles(true);  // update treeLastModified
       },
+    });
+
+    await scrapbook.invokeExtensionScript({
+      cmd: "background.onServerTreeChange",
     });
 
     return result;
