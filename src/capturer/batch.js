@@ -121,14 +121,14 @@
       return taskInfo.tasks
         .reduce((lines, task) => {
           let line;
-          if (task.url) {
-            line = task.url;
-          } else if (Number.isInteger(task.tabId)) {
+          if (Number.isInteger(task.tabId)) {
             if (Number.isInteger(task.frameId)) {
               line = `tab:${task.tabId}:${task.frameId}`;
             } else {
               line = `tab:${task.tabId}`;
             }
+          } else if (task.url) {
+            line = task.url;
           } else {
             return lines;
           }
