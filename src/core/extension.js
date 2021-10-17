@@ -320,7 +320,7 @@
       mode = "",
       bookId,
       parentId = "root",
-      index,
+      index = null,
       delay = null,
       options = await scrapbook.getOptions("capture", null),
     } = taskInfo || {};

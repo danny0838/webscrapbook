@@ -972,7 +972,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
      * @param {Object} params
      * @param {?Object} params.item - null to generate a default item. Overwrites existed id.
      * @param {?string} params.parentId - null to not add to any parent
-     * @param {integer} params.index - Infinity to insert to last
+     * @param {?integer} params.index - null or Infinity to insert to last
      * @return {Object}
      */
     addItem({
@@ -980,6 +980,10 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       parentId = 'root',
       index = Infinity,
     }) {
+      if (index === null) {
+        index = Infinity;
+      }
+
       // generate a cloned item, with keys sorted in a predefined order
       item = Object.assign(this.defaultMeta, item);
 
