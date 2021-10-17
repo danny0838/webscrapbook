@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.127.0] - 2021-10-17
+* Improved UI for the `Capture as` dialog.
+* Improved some option tooltips.
+
 ## [0.126.0] - 2021-10-11
 * Added a new `capture.faviconAttrs` option for saving favicon-like resources.
 * Adjusted UI for the `Capture as` dialog.
