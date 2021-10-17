@@ -39,6 +39,9 @@
     if (typeof data.useJson !== 'undefined') {
       document.getElementById('opt-useJson').checked = data.useJson;
     }
+    if (typeof data.lockJson !== 'undefined') {
+      document.getElementById('opt-useJson').disabled = data.lockJson;
+    }
     if (typeof data.uniquify !== 'undefined') {
       document.getElementById('opt-uniquify').checked = data.uniquify;
     }

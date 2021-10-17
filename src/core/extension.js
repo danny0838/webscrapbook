@@ -313,6 +313,7 @@
   scrapbook.invokeCaptureAs = async function (taskInfo, {
     ignoreTitle = false,
     useJson = true,
+    lockJson = true,
   } = {}) {
     const {
       tasks = [],
@@ -339,6 +340,7 @@
       taskInfo,
       ignoreTitle,
       useJson,
+      lockJson,
     });
   };
 
@@ -347,9 +349,10 @@
    *
    * @param {Object} params
    * @param {Object} params.taskInfo
-   * @param {boolean} [params.useJson]
    * @param {boolean} [params.ignoreTitle]
    * @param {boolean} [params.uniquify]
+   * @param {boolean} [params.useJson]
+   * @param {boolean} [params.lockJson]
    * @return {Promise<Tab>}
    */
   scrapbook.invokeBatchCapture = async function (params) {
