@@ -133,7 +133,7 @@
             return lines;
           }
           if (task.title) {
-            line += ' ' + task.title.replace(/[\r\n]+/g, ' ');
+            line += ' ' + task.title.replace(/[ \t\r\n\f]+/g, ' ').replace(/^ +/, '').replace(/ +$/, '');
           }
           lines.push(line);
           return lines;
