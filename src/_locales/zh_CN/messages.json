@@ -923,7 +923,7 @@
     "message": "后端服务器"
   },
   "OptionCaptureSaveToTooltip": {
-    "message": "指定管理保存数据的方式。\n\n• 后端服务器：将获取页面保存于后端服务器设置的剪贴簿数据目录。\n• 剪贴簿文件夹：将获取页面保存于 <默认下载文件夹> 下的剪贴簿文件夹。\n• 文件：将获取页面保存成文件。"
+    "message": "指定管理保存数据的方式。\n\n• 后端服务器：将获取页面保存于后端服务器设置的剪贴簿数据目录。注意：也需要设定后端服务器的网址、用户、密码，才能正常运作。\n• 剪贴簿文件夹：将获取页面保存于 <默认下载文件夹> 下的剪贴簿文件夹。\n• 文件：将获取页面保存成文件。"
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "剪贴簿文件夹:"
@@ -1145,7 +1145,7 @@
     "message": "网址:"
   },
   "OptionServerUrlTooltip": {
-    "message": "后端服务器程序的网址根目录（必须以“/”结尾），例如“http://localhost:8080/”或“https://example.com/wsb/”。\n\n• 后端服务器可用 PyWebScrapBook 套件（最低相容版本：$BACKEND_VERSION$）架设，安装细节参见 https://pypi.org/project/webscrapbook/。\n• 本地架设的 PyWebScrapBook 后端服务器默认网址为“http://localhost:8080/”。",
+    "message": "后端服务器程序的网址根目录（必须以“/”结尾），例如“http://localhost:8080/”或“https://example.com/wsb/”。\n\n• 后端服务器可用 PyWebScrapBook 套件（最低相容版本：$BACKEND_VERSION$）架设，安装细节参见 https://pypi.org/project/webscrapbook/。\n• 若未特别设定，本地架设的 PyWebScrapBook 后端服务器默认网址为“http://localhost:8080/”。",
     "placeholders": {
       "backend_version": {
         "content": "$1"
