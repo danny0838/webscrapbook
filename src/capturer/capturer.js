@@ -798,7 +798,7 @@
    * @param {string} [params.mode] - "tab", "source", "bookmark"
    * @param {Object} params.options
    * @param {string} [params.comment] - comment for the captured item
-   * @param {string} [params.bookId] - bookId ID for the captured items
+   * @param {?string} [params.bookId] - bookId ID for the captured items
    * @param {string} [params.parentId] - parent item ID for the captured items
    * @param {integer} [params.index] - position index for the captured items
    * @return {Promise<Object>}
@@ -810,11 +810,11 @@
     tabId, frameId, fullPage,
     url, refUrl, title, favIconUrl,
     mode, options, comment,
-    bookId, parentId, index,
+    bookId = null, parentId, index,
   }) {
     // determine bookId at the start of a capture
     if (options["capture.saveTo"] === 'server') {
-      if (typeof bookId === 'undefined') {
+      if (bookId === null) {
         bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
       }
       await server.init();
