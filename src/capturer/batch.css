@@ -33,6 +33,7 @@ body {
   min-height: 150px;
   overflow: auto;
   resize: none;
+  word-break: break-all;
 }
 
 #toolbar {

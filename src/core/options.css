@@ -38,6 +38,7 @@ details blockquote > textarea {
   box-sizing: border-box;
   width: 100%;
   min-height: 80px;
+  word-break: break-all;
 }
 
 a[data-tooltip] {
