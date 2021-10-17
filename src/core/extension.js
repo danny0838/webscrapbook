@@ -312,36 +312,26 @@
    */
   scrapbook.invokeCaptureAs = async function (taskInfo, {
     ignoreTitle = false,
-    useJson = true,
-    lockJson = true,
   } = {}) {
-    const {
-      tasks = [],
-      mode = "",
-      bookId,
-      parentId = "root",
-      index = null,
-      delay = null,
-      options = await scrapbook.getOptions("capture", null),
-    } = taskInfo || {};
     taskInfo = Object.assign({
-      tasks,
-      mode,
-      bookId,
-      parentId,
-      index,
-      delay,
-      options,
+      tasks: [],
+      mode: "",
+      bookId: null,
+      parentId: "root",
+      index: null,
+      delay: null,
+      options: null,
     }, taskInfo);
-    if (typeof taskInfo.bookId === 'undefined') {
+    if (taskInfo.bookId === null) {
       taskInfo.bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
+    }
+    if (taskInfo.options === null) {
+      taskInfo.options = await scrapbook.getOptions("capture", null);
     }
     return await scrapbook.invokeBatchCapture({
       taskInfo,
       ignoreTitle,
-      useJson,
-      lockJson,
-    });
+    }, 'advanced');
   };
 
   /**
@@ -351,15 +341,14 @@
    * @param {Object} params.taskInfo
    * @param {boolean} [params.ignoreTitle]
    * @param {boolean} [params.uniquify]
-   * @param {boolean} [params.useJson]
-   * @param {boolean} [params.lockJson]
+   * @param {string} [type]
    * @return {Promise<Tab>}
    */
-  scrapbook.invokeBatchCapture = async function (params) {
+  scrapbook.invokeBatchCapture = async function (params, type = 'batch') {
     const missionId = scrapbook.getUuid();
     const key = {table: "batchCaptureMissionCache", id: missionId};
     await scrapbook.cache.set(key, params);
-    const url = browser.runtime.getURL("capturer/batch.html") + `?mid=${missionId}`;
+    const url = browser.runtime.getURL(`capturer/${type}.html`) + `?mid=${missionId}`;
     return scrapbook.visitLink({url, newTab: true, inNormalWindow: true});
   };
 

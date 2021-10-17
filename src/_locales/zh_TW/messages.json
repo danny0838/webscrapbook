@@ -1,9 +1,21 @@
 {
+  "AdvancedCaptureTasksLabel": {
+    "message": "擷取工作:"
+  },
+  "AdvancedCaptureTasksTooltip": {
+    "message": "輸入擷取工作，格式為一個 JSON 物件，包括以下屬性：\n• bookId: 儲存至後端伺服器時，把擷取項目儲存至此 ID 的剪貼簿。省略時儲存至目前剪貼簿。\n• parentId: 儲存至後端伺服器時，把擷取項目插入此 ID 的項目下。省略時插入至根項目。\n• index: 儲存至後端伺服器時，擷取項目的插入位置（從 0 開始）。null 值或省略時插入至最後面。\n• delay: 執行下個擷取工作前的延遲時間（毫秒）。\n• autoClose: 擷取完成時自動關閉對話視窗的設定，覆寫預設選項。可用「none」、「nowarn」、「noerror」、「nofailure」、「always」等值。\n• mode: 擷取模式。「tab」為擷取分頁（擷取網址時自動開新分頁），「source」為擷取原貌，「bookmark」為擷取書籤。省略時指定 tabId 者預設為「tab」，指定 url 者預設為「source」。\n• options: 覆寫擷取選項的 JSON 物件，格式同匯出選項（限「capture.*」）。\n• tasks: 擷取工作列表，為 JSON 物件陣列，其中每個物件包括以下屬性：\n  • tabId: 待擷取的分頁 ID。省略時擷取 url。\n  • frameId: 待擷取分頁的框架頁 ID。省略時擷取主框架頁。\n  • fullPage: 屬真時擷取全頁，否則擷取選取範圍。\n  • url: 待擷取的網址。\n  • title: 自訂項目標題（勾選「忽略標題」時無效）。\n  • comment: 自訂項目評註。\n  • favIconUrl: 自訂項目圖示。\n  • mode: 此擷取工作的擷取模式。\n  • options: 此擷取工作的擷取選項。\n  • recaptureInfo: 重新擷取設定，為含有 bookId 及 itemId 屬性的 JSON 物件。\n  • mergeCaptureInfo: 合併擷取設定，為含有 bookId 及 itemId 屬性的 JSON 物件。"
+  },
+  "AdvancedCaptureTitle": {
+    "message": "進階擷取"
+  },
   "BatchCapture": {
     "message": "批次擷取所有分頁"
   },
   "BatchCaptureAbortLabel": {
     "message": "取消"
+  },
+  "BatchCaptureAdvancedLabel": {
+    "message": "進階設定"
   },
   "BatchCaptureCaptureLabel": {
     "message": "擷取"
@@ -17,20 +29,14 @@
   "BatchCaptureOptionUniquifyLabel": {
     "message": "略過重複網址"
   },
-  "BatchCaptureOptionUseJsonLabel": {
-    "message": "使用 JSON 格式"
-  },
   "BatchCaptureTitle": {
-    "message": "擷取網頁"
+    "message": "批次擷取網頁"
   },
   "BatchCaptureUrlsLabel": {
     "message": "網頁列表:"
   },
   "BatchCaptureUrlsTooltip": {
     "message": "輸入欲擷取的網頁列表。格式為每行一個網址，網址後可加上網頁標題，以空白字元分隔。"
-  },
-  "BatchCaptureUrlsTooltipJson": {
-    "message": "輸入欲擷取的網頁列表。格式為一個 JSON 物件，包括以下屬性：\n• bookId: 儲存至後端伺服器時，把擷取項目儲存至此 ID 的剪貼簿。省略時儲存至目前剪貼簿。\n• parentId: 儲存至後端伺服器時，把擷取項目插入此 ID 的項目下。省略時插入至根項目。\n• index: 儲存至後端伺服器時，擷取項目的插入位置（從 0 開始）。null 值或省略時插入至最後面。\n• delay: 執行下個擷取工作前的延遲時間（毫秒）。\n• autoClose: 擷取完成時自動關閉對話視窗的設定，覆寫預設選項。可用「none」、「nowarn」、「noerror」、「nofailure」、「always」等值。\n• mode: 擷取模式。「tab」為擷取分頁（擷取網址時自動開新分頁），「source」為擷取原貌，「bookmark」為擷取書籤。省略時指定 tabId 者預設為「tab」，指定 url 者預設為「source」。\n• options: 覆寫擷取選項的 JSON 物件，格式同匯出選項（限「capture.*」）。\n• tasks: 擷取工作列表，為 JSON 物件陣列，其中每個物件包括以下屬性：\n  • tabId: 待擷取的分頁 ID。省略時擷取 url。\n  • frameId: 待擷取分頁的框架頁 ID。省略時擷取主框架頁。\n  • fullPage: 屬真時擷取全頁，否則擷取選取範圍。\n  • url: 待擷取的網址。\n  • title: 自訂項目標題（勾選「忽略標題」時無效）。\n  • comment: 自訂項目評註。\n  • favIconUrl: 自訂項目圖示。\n  • mode: 此擷取工作的擷取模式。\n  • options: 此擷取工作的擷取選項。\n  • recaptureInfo: 重新擷取設定，為含有 bookId 及 itemId 屬性的 JSON 物件。\n  • mergeCaptureInfo: 合併擷取設定，為含有 bookId 及 itemId 屬性的 JSON 物件。"
   },
   "Cancel": {
     "message": "取消"

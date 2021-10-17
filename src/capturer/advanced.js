@@ -1,13 +1,13 @@
 /******************************************************************************
  *
- * Script for batch.html.
+ * Script for advanced.html.
  *
  * @require {Object} scrapbook
  *****************************************************************************/
 
 (function (root, factory) {
   // Browser globals
-  root.batch = factory(
+  root.advanced = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,
@@ -40,7 +40,7 @@
       document.getElementById('opt-uniquify').checked = data.uniquify;
     }
     if (typeof data.taskInfo !== 'undefined') {
-      document.getElementById('urls').value = stringifyTasks(data.taskInfo);
+      document.getElementById('tasks').value = stringifyTasks(data.taskInfo);
     }
   }
 
@@ -75,52 +75,37 @@
   }
 
   function parseInputText(inputText) {
-    const tasks = inputText
-      .split('\n')
-      .reduce((tasks, line) => {
-        let [_, url, title] = line.match(/^(\S*)(?:\s+(.*))?$/mu);
-        if (!url) { return tasks; }
-        if (!title) { title = undefined; }
-        if (url.startsWith('tab:')) {
-          let [_, tabId, frameId] = url.split(':');
-          tabId = parseInt(tabId, 10);
-          if (!Number.isInteger(tabId)) { return tasks; }
-          frameId = parseInt(frameId, 10);
-          if (!Number.isInteger(frameId)) { frameId = undefined; }
-          tasks.push({tabId, frameId, title});
-        } else {
-          tasks.push({url, title});
-        }
-        return tasks;
-      }, []);
-    return {tasks};
+    const taskInfo = JSON.parse(inputText);
+    if (typeof taskInfo !== 'object' || taskInfo === null || Array.isArray(taskInfo)) {
+      throw new Error('JSON data is not a valid object.');
+    } else if (!Array.isArray(taskInfo.tasks)) {
+      throw new Error('"tasks" property of JSON data is not an Array.');
+    }
+    return taskInfo;
+  }
+
+  function parseTasks(reportError = true) {
+    const inputElem = document.getElementById('tasks');
+    const inputText = inputElem.value;
+
+    let taskInfo;
+    try {
+      taskInfo = parseInputText(inputText);
+    } catch (ex) {
+      event.preventDefault();
+      inputElem.setCustomValidity(ex.message);
+      if (reportError) {
+        inputElem.reportValidity();
+      }
+      return null;
+    }
+
+    inputElem.setCustomValidity('');
+    return taskInfo;
   }
 
   function stringifyTasks(taskInfo) {
-    if (taskInfo) {
-      return taskInfo.tasks
-        .reduce((lines, task) => {
-          let line;
-          if (Number.isInteger(task.tabId)) {
-            if (Number.isInteger(task.frameId)) {
-              line = `tab:${task.tabId}:${task.frameId}`;
-            } else {
-              line = `tab:${task.tabId}`;
-            }
-          } else if (task.url) {
-            line = task.url;
-          } else {
-            return lines;
-          }
-          if (task.title) {
-            line += ' ' + task.title.replace(/[ \t\r\n\f]+/g, ' ').replace(/^ +/, '').replace(/ +$/, '');
-          }
-          lines.push(line);
-          return lines;
-        }, [])
-        .join('\n');
-    }
-    return '';
+    return JSON.stringify(taskInfo, null, 1);
   }
 
   function toggleTooltip(elem) {
@@ -146,38 +131,22 @@
     return await browser.tabs.remove(tab.id);
   };
 
+  function onTasksChange(event) {
+    parseTasks();
+  }
+
   async function onCaptureClick(event) {
-    const inputText = document.getElementById('urls').value;
+    const taskInfo = parseTasks();
+    if (!taskInfo) { return; }
+
     const ignoreTitle = document.getElementById('opt-ignoreTitle').checked;
     const uniquify = document.getElementById('opt-uniquify').checked;
 
-    const taskInfo = parseInputText(inputText);
     await capture({taskInfo, ignoreTitle, uniquify});
     await exit();
   }
 
   async function onAbortClick(event) {
-    await exit();
-  }
-
-  async function onAdvancedClick(event) {
-    const inputText = document.getElementById('urls').value;
-    const ignoreTitle = document.getElementById('opt-ignoreTitle').checked;
-    const uniquify = document.getElementById('opt-uniquify').checked;
-
-    const taskInfo = Object.assign({
-      tasks: [],
-      mode: "",
-      bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
-      parentId: "root",
-      index: null,
-      delay: null,
-    }, parseInputText(inputText));
-    await scrapbook.invokeBatchCapture({
-      taskInfo,
-      ignoreTitle,
-      uniquify,
-    }, 'advanced');
     await exit();
   }
 
@@ -190,9 +159,9 @@
   document.addEventListener('DOMContentLoaded', async () => {
     scrapbook.loadLanguages(document);
 
+    document.getElementById('tasks').addEventListener('change', onTasksChange);
     document.getElementById('btn-capture').addEventListener('click', onCaptureClick);
     document.getElementById('btn-abort').addEventListener('click', onAbortClick);
-    document.getElementById('btn-advanced').addEventListener('click', onAdvancedClick);
 
     for (const elem of document.querySelectorAll('a[data-tooltip]')) {
       elem.addEventListener("click", onTooltipClick);

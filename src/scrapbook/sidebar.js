@@ -820,8 +820,7 @@
           await scrapbook.invokeBatchCapture({
             taskInfo,
             ignoreTitle: false,
-            useJson: true,
-          });
+          }, 'advanced');
         } else {
           await scrapbook.invokeCaptureEx({taskInfo});
         }
@@ -2634,9 +2633,8 @@ Redirecting to file <a href="index.md">index.md</a>
           taskInfo: {
             tasks,
           },
-          useJson: true,
           uniquify: false,
-        });
+        }, 'advanced');
       },
 
       async move_up({itemElems: [itemElem]}) {
