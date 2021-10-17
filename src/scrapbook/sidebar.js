@@ -777,6 +777,7 @@
         const taskInfo = {
           tasks: tabs.map(tab => ({
             tabId: tab.id,
+            url: tab.url,
             title: tab.title,
           })),
           bookId: this.bookId,

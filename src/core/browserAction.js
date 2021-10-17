@@ -176,6 +176,7 @@
       return await scrapbook.invokeCaptureAs({
         tasks: tabs.map(tab => ({
           tabId: tab.id,
+          url: tab.url,
           title: tab.title,
         })),
       });

@@ -94,6 +94,7 @@
         return await scrapbook.invokeCaptureAs({
           tasks: tabs.map(tab => ({
             tabId: tab.id,
+            url: tab.url,
             title: tab.title,
           })),
         });
@@ -471,6 +472,7 @@
           return await scrapbook.invokeCaptureAs({
             tasks: tabs.map(tab => ({
               tabId: tab.id,
+              url: tab.url,
               title: tab.title,
             })),
           });
@@ -571,6 +573,7 @@
           return await scrapbook.invokeCaptureAs({
             tasks: [{
               tabId: tab.id,
+              url: tab.url,
               title: tab.title,
             }],
           });
@@ -635,6 +638,7 @@
           tasks: [{
             tabId: tab.id,
             fullPage: true,
+            url: tab.url,
             title: tab.title,
           }],
         });
@@ -700,6 +704,7 @@
             tabId: tab.id,
             frameId: info.frameId,
             fullPage: true,
+            url: info.frameUrl,
             title: tab.title,
           }],
         });
@@ -728,6 +733,7 @@
           tasks: [{
             tabId: tab.id,
             frameId: info.frameId,
+            url: info.frameUrl || tab.url,
             title: tab.title,
           }],
         });
