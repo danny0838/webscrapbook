@@ -803,8 +803,9 @@
         return await scrapbook.invokeCaptureAs({
           tasks: [{
             url: info.linkUrl,
+            title: info.linkText,
           }],
-        });
+        }, {ignoreTitle: true});
       },
     });
 

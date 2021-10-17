@@ -310,7 +310,10 @@
   /**
    * Shortcut for invoking a general "capture as".
    */
-  scrapbook.invokeCaptureAs = async function (taskInfo) {
+  scrapbook.invokeCaptureAs = async function (taskInfo, {
+    ignoreTitle = false,
+    useJson = true,
+  } = {}) {
     const {
       tasks = [],
       mode = "",
@@ -334,8 +337,8 @@
     }
     return await scrapbook.invokeBatchCapture({
       taskInfo,
-      ignoreTitle: false,
-      useJson: true,
+      ignoreTitle,
+      useJson,
     });
   };
 
