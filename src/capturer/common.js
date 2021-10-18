@@ -4726,6 +4726,49 @@
       return obj;
     }
 
+    resolveNodeData(obj, rootNode) {
+      let nodeData = this.resolve(obj, rootNode);
+      if (typeof nodeData === 'string') {
+        nodeData = {
+          name: "#text",
+          value: nodeData,
+        };
+      }
+
+      const {name, value = null, attrs, children} = nodeData;
+      const tag = this.resolve(name, rootNode) || "#text";
+      switch (tag) {
+        case "#text": {
+          return rootNode.ownerDocument.createTextNode(this.resolve(value, rootNode) || "");
+        }
+        case "#comment": {
+          return rootNode.ownerDocument.createComment(this.resolve(value, rootNode) || "");
+        }
+        default: {
+          const newElem = rootNode.ownerDocument.createElement(tag);
+          if (value !== null) {
+            newElem.textContent = this.resolve(value, rootNode);
+          } else {
+            if (Array.isArray(attrs)) {
+              for (const [key, value] of attrs) {
+                newElem.setAttribute(this.resolve(key, rootNode), this.resolve(value, rootNode));
+              }
+            } else if (attrs) {
+              for (const key in attrs) {
+                newElem.setAttribute(key, this.resolve(attrs[key], rootNode));
+              }
+            }
+            if (children) {
+              for (const childData of children) {
+                newElem.appendChild(this.resolveNodeData(childData, rootNode));
+              }
+            }
+          }
+          return newElem;
+        }
+      }
+    }
+
     cmd_if(rootNode, condition, thenValue, elseValue) {
       if (this.resolve(condition, rootNode)) {
         return this.resolve(thenValue, rootNode);
@@ -4948,35 +4991,26 @@
       }
     }
 
-    cmd_insert(rootNode, selector, name, attrs, text, mode, index) {
+    cmd_insert(rootNode, selector, nodeData, mode, index) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
-        const newElem = rootNode.ownerDocument.createElement(this.resolve(name, elem));
-
-        const attrs_ = this.resolve(attrs, elem);
-        for (const key in attrs_) {
-          const value = this.resolve(attrs_[key], elem);
-          newElem.setAttribute(key, value);
-        }
-
-        newElem.textContent = this.resolve(text, elem);
-
+        const newNode = this.resolveNodeData(nodeData, elem);
         switch (this.resolve(mode, elem)) {
           case 'before': {
-            elem.parentNode.insertBefore(newElem, elem);
+            elem.parentNode.insertBefore(newNode, elem);
             break;
           }
           case 'after': {
-            elem.parentNode.insertBefore(newElem, elem.nextSibling);
+            elem.parentNode.insertBefore(newNode, elem.nextSibling);
             break;
           }
           case 'insert': {
-            elem.insertBefore(newElem, elem.childNodes[this.resolve(index, elem)]);
+            elem.insertBefore(newNode, elem.childNodes[this.resolve(index, elem)]);
             break;
           }
           case 'append':
           default: {
-            elem.appendChild(newElem);
+            elem.appendChild(newNode);
             break;
           }
         }
