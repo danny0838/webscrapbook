@@ -4798,6 +4798,92 @@
       return value;
     }
 
+    cmd_concat(rootNode, baseArg, ...args) {
+      let rv = String(baseArg);
+      for (const arg of args) {
+        const value = this.resolve(arg, rootNode);
+        rv += String(value);
+      }
+      return rv;
+    }
+
+    cmd_slice(rootNode, text, beginIndex, endIndex) {
+      return String(text).slice(beginIndex, endIndex);
+    }
+
+    cmd_upper(rootNode, text) {
+      return String(text).toUpperCase();
+    }
+
+    cmd_lower(rootNode, text) {
+      return String(text).toLowerCase();
+    }
+
+    cmd_encode_uri(rootNode, text, safe) {
+      if (safe) {
+        return text.replace(new RegExp(`[^${scrapbook.escapeRegExp(String(safe))}]+`, 'ug'), x => encodeURIComponent(x));
+      }
+      return encodeURIComponent(text);
+    }
+
+    cmd_decode_uri(rootNode, text) {
+      return decodeURIComponent(text);
+    }
+
+    cmd_add(rootNode, baseArg, ...args) {
+      let rv = Number(baseArg);
+      for (const arg of args) {
+        const value = this.resolve(arg, rootNode);
+        rv += Number(value);
+      }
+      return rv;
+    }
+
+    cmd_subtract(rootNode, baseArg, ...args) {
+      let rv = Number(baseArg);
+      for (const arg of args) {
+        const value = this.resolve(arg, rootNode);
+        rv -= Number(value);
+      }
+      return rv;
+    }
+
+    cmd_multiply(rootNode, baseArg, ...args) {
+      let rv = Number(baseArg);
+      for (const arg of args) {
+        const value = this.resolve(arg, rootNode);
+        rv *= Number(value);
+      }
+      return rv;
+    }
+
+    cmd_divide(rootNode, baseArg, ...args) {
+      let rv = Number(baseArg);
+      for (const arg of args) {
+        const value = this.resolve(arg, rootNode);
+        rv /= Number(value);
+      }
+      return rv;
+    }
+
+    cmd_mod(rootNode, baseArg, ...args) {
+      let rv = Number(baseArg);
+      for (const arg of args) {
+        const value = this.resolve(arg, rootNode);
+        rv %= Number(value);
+      }
+      return rv;
+    }
+
+    cmd_power(rootNode, baseArg, ...args) {
+      let rv = Number(baseArg);
+      for (const arg of args) {
+        const value = this.resolve(arg, rootNode);
+        rv **= Number(value);
+      }
+      return rv;
+    }
+
     cmd_for(rootNode, selector, ...commands) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
