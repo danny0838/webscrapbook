@@ -4768,16 +4768,16 @@
       str = this.resolve(str, rootNode) || "";
       pattern = this.parseRegexStr(this.resolve(pattern, rootNode));
       index = this.resolve(index, rootNode);
-      if (typeof index !== 'number' && typeof index !== 'string') {
-        // boolean mode
-        if (!pattern) { return false; }
-        return pattern.test(str);
-      } else {
-        // substring mode
+      if (Number.isInteger(index)) {
+        // subgroup mode
         if (!pattern) { return null; }
         const m = str.match(pattern);
         if (!m) { return null; }
         return m[index];
+      } else {
+        // boolean mode
+        if (!pattern) { return false; }
+        return pattern.test(str);
       }
     }
 
