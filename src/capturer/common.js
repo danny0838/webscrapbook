@@ -4949,7 +4949,8 @@
             elem.insertBefore(newElem, elem.childNodes[this.resolve(index, elem)]);
             break;
           }
-          case 'append': {
+          case 'append':
+          default: {
             elem.appendChild(newElem);
             break;
           }
