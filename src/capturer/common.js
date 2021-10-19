@@ -4788,7 +4788,7 @@
       return pattern ? str.replace(pattern, replacement) : str;
     }
 
-    cmd_has_elem(rootNode, selector) {
+    cmd_has_node(rootNode, selector) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       return elems.length > 0;
     }
