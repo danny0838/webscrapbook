@@ -4765,7 +4765,7 @@
     }
 
     cmd_match(rootNode, str, pattern, index) {
-      str = this.resolve(str, rootNode) || "";
+      str = String(this.resolve(str, rootNode) || "");
       pattern = this.parseRegexStr(this.resolve(pattern, rootNode));
       index = this.resolve(index, rootNode);
       if (Number.isInteger(index)) {
@@ -4782,7 +4782,7 @@
     }
 
     cmd_replace(rootNode, str, pattern, replacement) {
-      str = this.resolve(str, rootNode) || "";
+      str = String(this.resolve(str, rootNode) || "");
       pattern = this.parseRegexStr(this.resolve(pattern, rootNode));
       replacement = this.resolve(replacement, rootNode) || "";
       return pattern ? str.replace(pattern, replacement) : str;
