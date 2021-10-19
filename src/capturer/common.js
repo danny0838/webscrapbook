@@ -4870,22 +4870,34 @@
       }
     }
 
-    cmd_attr(rootNode, selector, attrOrDict, valueOrNull) {
+    cmd_attr(rootNode, selector, attrs, attrValue) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
         if (!elem.setAttribute) { continue; }
-        const attrOrDict_ = this.resolve(attrOrDict, elem);
-        if (typeof attrOrDict_ === "string") {
-          const key = attrOrDict_;
-          const value = this.resolve(valueOrNull, elem);
+        if (typeof attrValue !== 'undefined') {
+          // key, value
+          const key = this.resolve(attrs, elem);
+          const value = this.resolve(attrValue, elem);
           if (value !== null) {
             elem.setAttribute(key, value);
           } else {
             elem.removeAttribute(key);
           }
+        } else if (Array.isArray(attrs)) {
+          // [[key1, value1], ...]
+          for (let [key, value] of attrs) {
+            key = this.resolve(key, elem);
+            value = this.resolve(value, elem);
+            if (value !== null) {
+              elem.setAttribute(key, value);
+            } else {
+              elem.removeAttribute(key);
+            }
+          }
         } else {
-          for (const key in attrOrDict_) {
-            const value = this.resolve(attrOrDict_[key], elem);
+          // {key1: value1, ...}
+          for (const key in attrs) {
+            const value = this.resolve(attrs[key], elem);
             if (value !== null) {
               elem.setAttribute(key, value);
             } else {
@@ -4896,23 +4908,36 @@
       }
     }
 
-    cmd_css(rootNode, selector, styleOrDict, valueOrNull, priorityOrNull) {
+    cmd_css(rootNode, selector, styles, styleValue, stylePriority) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
         if (!elem.style) { continue; }
-        const styleOrDict_ = this.resolve(styleOrDict, elem);
-        if (typeof styleOrDict_ === "string") {
-          const key = styleOrDict_;
-          const value = this.resolve(valueOrNull, elem);
-          const priority = this.resolve(priorityOrNull, elem);
+        if (typeof styleValue !== 'undefined' || typeof stylePriority !== 'undefined') {
+          // key, value, priority
+          const key = this.resolve(styles, elem);
+          const value = this.resolve(styleValue, elem);
+          const priority = this.resolve(stylePriority, elem);
           if (value !== null) {
             elem.style.setProperty(key, value, priority);
           } else {
             elem.style.removeProperty(key);
           }
+        } else if (Array.isArray(styles)) {
+          // [[key1, value1, priority1], ...]
+          for (let [key, value, priority] of styles) {
+            key = this.resolve(key, elem);
+            value = this.resolve(value, elem);
+            priority = this.resolve(priority, elem);
+            if (value !== null) {
+              elem.style.setProperty(key, value, priority);
+            } else {
+              elem.style.removeProperty(key);
+            }
+          }
         } else {
-          for (const key in styleOrDict_) {
-            const value = this.resolve(styleOrDict_[key], elem);
+          // {key1: value1, ...}
+          for (const key in styles) {
+            const value = this.resolve(styles[key], elem);
             if (value !== null) {
               elem.style.setProperty(key, value);
             } else {
@@ -4958,14 +4983,23 @@
       }
     }
 
-    cmd_options(rootNode, nameOrDict, valueOrNull) {
-      const nameOrDict_ = this.resolve(nameOrDict, rootNode);
-      if (typeof nameOrDict_ === "string") {
-        const value = this.resolve(valueOrNull, rootNode);
-        this.options[nameOrDict_] = value;
+    cmd_options(rootNode, options, optionValue) {
+      if (typeof optionValue !== 'undefined') {
+        // key, value
+        const key = this.resolve(options, rootNode);
+        const value = this.resolve(optionValue, rootNode);
+        this.options[key] = value;
+      } else if (Array.isArray(options)) {
+        // [[key1, value1], ...]
+        for (let [key, value] of options) {
+          key = this.resolve(key, rootNode);
+          value = this.resolve(value, rootNode);
+          this.options[key] = value;
+        }
       } else {
-        for (const key in nameOrDict_) {
-          const value = this.resolve(nameOrDict_[key], rootNode);
+        // {key1: value1, ...}
+        for (const key in options) {
+          const value = this.resolve(options[key], rootNode);
           this.options[key] = value;
         }
       }
