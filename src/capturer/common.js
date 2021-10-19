@@ -4644,7 +4644,7 @@
     parseRegexStr(str) {
       const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/i;
       const parseRegexStr = this.parseRegexStr = (str) => {
-        const m = str.match(REGEX_PATTERN);
+        const m = REGEX_PATTERN.exec(str);
         if (m) {
           return new RegExp(m[1], m[2]);
         }
