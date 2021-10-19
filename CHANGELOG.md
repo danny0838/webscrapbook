@@ -3,6 +3,16 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.128.0] - 2021-10-19
+* Added capture helper commands: `concat`, `slice`, `upper`, `lower`, `encode_uri`, `decode_uri`, `add`, `subtract`, `multiply`, `divide`, `mod`, and `power`.
+* Reworked capture helper commands `attr`, `css`, and `options` to support the parameter pattern `[[name1, value1], [name2, value2], ...]`.
+* Renamed capture helper commands `has_elem` to `has_node`.
+* Reworked capture helper command `insert` to take JSON node data.
+* Reworked capture helper commands `match` and `replace` to always return a string value.
+* Reworked UI for the `Capture as` dialog as `Batch capture` and `Advanced capture` dialogs.
+* Break words for option textareas.
+* Improved some option tooltips.
+
 ## [0.127.0] - 2021-10-17
 * Improved UI for the `Capture as` dialog.
 * Improved some option tooltips.
