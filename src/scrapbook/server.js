@@ -305,7 +305,7 @@
       }
 
       if (!scrapbook.hasServer()) {
-        throw new Error('Backend server not configured.');
+        throw new Error('Backend server address not configured.');
       }
 
       // record configs
