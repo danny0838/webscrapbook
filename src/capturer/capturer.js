@@ -1017,20 +1017,20 @@
         }
       }
 
-      const response = await capturer.captureTab({
-        timeId,
-        documentName,
-        tabId: tab.id,
-        fullPage: true,
-        title,
-        options,
-      });
-
       try {
-        await browser.tabs.remove(tab.id);
-      } catch (ex) {}
-
-      return response;
+        return await capturer.captureTab({
+          timeId,
+          documentName,
+          tabId: tab.id,
+          fullPage: true,
+          title,
+          options,
+        });
+      } finally {
+        try {
+          await browser.tabs.remove(tab.id);
+        } catch (ex) {}
+      }
     }
 
     const source = `${url}`;
