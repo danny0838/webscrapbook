@@ -3784,13 +3784,13 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {Object} params.options
    */
   capturer.rebuildLinks = async function (params) {
-    const rewriteHref = (elem, attr, filenameMap, linkedPages) => {
+    const rewriteUrl = (url, filenameMap, linkedPages) => {
       let u;
       try {
-        u = new URL(elem.getAttribute(attr));
+        u = new URL(url);
       } catch (ex) {
         // not absolute URL, probably already mapped
-        return;
+        return null;
       }
 
       let urlHash = u.hash;
@@ -3805,9 +3805,24 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       const token = capturer.getRegisterToken(urlMain, 'document');
       const p = filenameMap.get(token);
-      if (!p) { return; }
+      if (!p) { return null; }
 
-      elem.setAttribute(attr, capturer.getRedirectedUrl(p.url, urlHash));
+      return capturer.getRedirectedUrl(p.url, urlHash);
+    };
+
+    const rewriteHref = (elem, attr, filenameMap, linkedPages) => {
+      const url = elem.getAttribute(attr);
+      const newUrl = rewriteUrl(url, filenameMap, linkedPages);
+      if (!newUrl) { return; }
+      elem.setAttribute(attr, newUrl);
+    };
+
+    const rewriteMetaRefresh = (elem, filenameMap, linkedPages) => {
+      const {time, url} = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+      if (!url) { return; }
+      const newUrl = rewriteUrl(url, filenameMap, linkedPages);
+      if (!newUrl) { return; }
+      elem.setAttribute("content", `${time}; url=${newUrl}`);
     };
 
     const processRootNode = (rootNode, filenameMap, linkedPages) => {
@@ -3826,6 +3841,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         case '#document-fragment': {
           for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
             rewriteHref(elem, 'href', filenameMap, linkedPages);
+          }
+          for (const elem of rootNode.querySelectorAll('meta[http-equiv="refresh" i][content]')) {
+            rewriteMetaRefresh(elem, filenameMap, linkedPages);
           }
           break;
         }

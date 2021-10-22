@@ -589,6 +589,33 @@
                   // meta refresh is relative to document URL rather than base URL
                   const url = rewriteLocalLink(metaRefresh.url, docUrl);
                   captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
+
+                  // check downLink
+                  if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
+                    if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
+                        options["capture.downLink.doc.depth"] > 0) {
+                      downLinkTasks.push(async () => {
+                        const response = await capturer.invoke("captureUrl", {
+                          url,
+                          refUrl,
+                          downLink: true,
+                          settings,
+                          options,
+                        })
+                        .catch((ex) => {
+                          console.error(ex);
+                          warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
+                          return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
+                        });
+
+                        if (response) {
+                          const url = response.url;
+                          captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
+                        }
+                        return response;
+                      });
+                    }
+                  }
                 }
               } else if (elem.getAttribute("http-equiv").toLowerCase() == "content-security-policy") {
                 // content security policy could make resources not loaded when viewed offline

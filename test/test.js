@@ -8487,6 +8487,7 @@ async function test_capture_downLink11() {
  * capture.downLink.doc.depth
  */
 async function test_capture_downLink12() {
+  /* depth = 1 */
   var options = {
     "capture.downLink.doc.depth": 1,
   };
@@ -8503,6 +8504,62 @@ async function test_capture_downLink12() {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked1-1.html#in-depth`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-2.html#in-depth`);
+
+  var indexFile = zip.file('linked1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content') === `0; url=${localhost}/capture_downLink7/linked2-1.html#linked1-1`);
+
+  var indexFile = zip.file('linked1-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content') === `0; url=${localhost}/capture_downLink7/linked2-2.html`);
+
+  assert(!zip.file('linked2-1.html'));
+
+  assert(!zip.file('linked2-1.html'));
+
+  assert(!zip.file('refreshed.html'));
+
+  /* depth = 3 */
+  var options = {
+    "capture.downLink.doc.depth": 3,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink7/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked1-1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-2.html#in-depth`);
+
+  var indexFile = zip.file('linked1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content') === `0; url=linked2-1.html#linked1-1`);
+
+  var indexFile = zip.file('linked1-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content') === `0; url=linked2-2.html`);
+
+  var indexFile = zip.file('linked2-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content') === `0; url=refreshed.html#linked2-1`);
+
+  var indexFile = zip.file('linked2-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content') === `0; url=linked1-2.html`);
+
+  assert(zip.file('refreshed.html'));
 }
 
 /**
