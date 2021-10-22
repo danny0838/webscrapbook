@@ -8482,7 +8482,7 @@ async function test_capture_downLink11() {
 }
 
 /**
- * Check links rewrite for meta refresh and redirect
+ * Check links handling for meta refresh
  *
  * capture.downLink.doc.depth
  */
@@ -8491,7 +8491,6 @@ async function test_capture_downLink12() {
     "capture.downLink.doc.depth": 1,
   };
 
-  /* meta refresh */
   var blob = await capture({
     url: `${localhost}/capture_downLink7/in-depth.html`,
     options: Object.assign({}, baseOptions, options),
@@ -8502,10 +8501,20 @@ async function test_capture_downLink12() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `refreshed.html#linked2-1`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink7/linked1-2.html#in-depth`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked1-1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-2.html#in-depth`);
+}
 
-  /* redirect */
+/**
+ * Check links handling for redirect
+ *
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink13() {
+  var options = {
+    "capture.downLink.doc.depth": 1,
+  };
+
   var blob = await capture({
     url: `${localhost}/capture_downLink8/in-depth.html`,
     options: Object.assign({}, baseOptions, options),

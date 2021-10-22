@@ -1101,7 +1101,7 @@
     let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-    depth++;
+    if (downLink) { depth++; }
     let downLinkInDepth = downLink && depth <= options["capture.downLink.doc.depth"];
     let downLinkFile = downLink && ["header", "url"].includes(options["capture.downLink.file.mode"]);
 
@@ -1155,6 +1155,10 @@
         doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
 
         if (!doc) {
+          break;
+        }
+
+        if (depth > 0) {
           break;
         }
 
@@ -1224,8 +1228,7 @@
         const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
         if (!linkedPages.has(sourceUrlMain)) {
           linkedPages.set(sourceUrlMain, {
-            url: metaRefreshChain.length > 0 ? capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash) : fetchResponse.url,
-            hasMetaRefresh: metaRefreshChain.length > 0,
+            url: fetchResponse.url,
             refUrl,
             depth,
           });
@@ -3797,11 +3800,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       // handle possible redirect
       const linkedPageItem = linkedPages.get(urlMain);
       if (linkedPageItem) {
-        if (linkedPageItem.hasMetaRefresh) {
-          [urlMain, urlHash] = scrapbook.splitUrlByAnchor(linkedPageItem.url);
-        } else {
-          [urlMain, urlHash] = scrapbook.splitUrlByAnchor(capturer.getRedirectedUrl(linkedPageItem.url, urlHash));
-        }
+        [urlMain, urlHash] = scrapbook.splitUrlByAnchor(capturer.getRedirectedUrl(linkedPageItem.url, urlHash));
       }
 
       const token = capturer.getRegisterToken(urlMain, 'document');
