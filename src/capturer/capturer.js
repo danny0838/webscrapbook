@@ -3769,6 +3769,10 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         refUrl,
         settings: subSettings,
         options,
+      }).catch((ex) => {
+        console.error(ex);
+        capturer.error(`Subpage fatal error (${url}): ${ex.message}`);
+        return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
       });
 
       if (delay > 0) {
