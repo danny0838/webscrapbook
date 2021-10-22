@@ -180,7 +180,6 @@
     renewCaptureSaveAsDetails();
     verifySaveFolder();
     verifySaveFilename();
-    renewCaptureDownLinkDetails();
     verifyDownLinkFileExtFilter();
     verifyDownLinkDocUrlFilter();
     verifyDownLinkUrlFilter();
@@ -233,18 +232,6 @@
   function verifySaveFilename() {
     const elem = document.getElementById("opt_capture.saveFilename");
     verifySavePath(elem);
-  }
-
-  function renewCaptureDownLinkDetails() {
-    var input = document.getElementById("opt_capture.downLink.file.mode");
-    for (const elem of document.querySelectorAll('.captureDownLinkFileExtFilter')) {
-      elem.hidden = elem.disabled = input.value === 'none';
-    }
-
-    var input = document.getElementById("opt_capture.downLink.doc.depth");
-    for (const elem of document.querySelectorAll('.captureDownLinkDocUrlFilter')) {
-      elem.hidden = elem.disabled = !(input.valueAsNumber > 0);
-    }
   }
 
   function verifyDownLinkRules(srcText) {
@@ -612,8 +599,6 @@
     document.getElementById("opt_capture.saveFolder").addEventListener("change", verifySaveFolder);
     document.getElementById("opt_capture.saveFilename").addEventListener("change", verifySaveFilename);
 
-    document.getElementById("opt_capture.downLink.file.mode").addEventListener("change", renewCaptureDownLinkDetails);
-    document.getElementById("opt_capture.downLink.doc.depth").addEventListener("change", renewCaptureDownLinkDetails);
     document.getElementById("opt_capture.downLink.file.extFilter").addEventListener("change", verifyDownLinkFileExtFilter);
     document.getElementById("opt_capture.downLink.doc.urlFilter").addEventListener("change", verifyDownLinkDocUrlFilter);
     document.getElementById("opt_capture.downLink.urlFilter").addEventListener("change", verifyDownLinkUrlFilter);
