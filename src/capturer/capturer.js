@@ -3158,64 +3158,29 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
     };
 
-    const handleDeepCapture = async (path) => {
-      if (!(parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options["capture.saveAs"] !== "singleHtml")) {
-        return;
-      }
+    capturer.captureInfo.get(timeId).indexPages.add(documentFileName);
 
-      const delay = options["capture.downLink.doc.delay"];
-      const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
+    // handle in-depth capture
+    let itemType = '';
+    if (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options["capture.saveAs"] !== "singleHtml") {
+      itemType = 'site';
+      const sitemapPath = options["capture.saveAs"] === 'maff' ? `${timeId}/index.json` : 'index.json';
 
-      const subSettings = Object.assign({}, settings, {
-        isMainPage: false,
-        isMainFrame: true,
-        fullPage: true,
-        isHeadless: true,
-      });
-
-      for (const [sourceUrl, info] of linkedPages.entries()) {
-        const {url, refUrl, depth} = info;
-
-        capturer.log(`Capturing linked page (${depth}) ${sourceUrl} ...`);
-
-        Object.assign(subSettings, {
-          recurseChain: [],
-          depth,
-          documentName: undefined,
-          usedCssFontUrl: undefined,
-          usedCssImageUrl: undefined,
-        });
-
-        const response = await capturer.captureUrl({
-          url,
-          refUrl,
-          settings: subSettings,
-          options,
-        });
-
-        if (delay > 0) {
-          capturer.log(`Waiting for ${delay} ms...`);
-          await scrapbook.delay(delay);
-        }
-      }
+      await capturer.captureLinkedPages({settings, options});
 
       capturer.log('Rebuilding links...');
       await capturer.rebuildLinks({timeId, options});
-      await capturer.generateSiteMap({timeId, path});
-    };
+      await capturer.generateSiteMap({timeId, path: sitemapPath});
+    }
 
+    // save captured data to files
     capturer.log(`Saving data...`);
     const title = data.title || scrapbook.urlToFilename(sourceUrl);
-    let type = parseInt(options["capture.downLink.doc.depth"], 10) >= 0 ? "site" : "";
     let targetDir;
     let filename;
     let [, ext] = scrapbook.filenameParts(documentFileName);
-    capturer.captureInfo.get(timeId).indexPages.add(documentFileName);
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
-        // singleHtml does not support deep capture
-        type = "";
-
         let {content, mime, charset} = data;
         if (charset) {
           if (typeof content === 'string') {
@@ -3239,9 +3204,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
 
       case "zip": {
-        // handle deep capture
-        await handleDeepCapture(`index.json`);
-
         // create index.html that redirects to index.xhtml|.svg
         if (ext !== "html") {
           await addIndexHtml("index.html", `index.${ext}`, title);
@@ -3259,9 +3221,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
 
       case "maff": {
-        // handle deep capture
-        await handleDeepCapture(`${timeId}/index.json`);
-
         // create index.html that redirects to index.xhtml|.svg
         if (ext !== "html") {
           await addIndexHtml(`${timeId}/index.html`, `index.${ext}`, title);
@@ -3301,9 +3260,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
 
       case "folder":
       default: {
-        // handle deep capture
-        await handleDeepCapture(`index.json`);
-
         // create index.html that redirects to index.xhtml|.svg
         if (ext !== "html") {
           await addIndexHtml("index.html", `index.${ext}`, title);
@@ -3332,7 +3288,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     return {
       timeId,
       title,
-      type,
+      type: itemType,
       sourceUrl,
       targetDir,
       filename,
@@ -3769,6 +3725,54 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     }
 
     return newFilename;
+  };
+
+  /**
+   * @param {Object} params
+   * @param {string} params.settings
+   * @param {Object} params.options
+   * @return {Promise<string>} 
+   */
+  capturer.captureLinkedPages = async function (params) {
+    isDebug && console.debug("call: captureLinkedPages", params);
+
+    const {settings, options} = params;
+    const {timeId} = settings;
+
+    const delay = options["capture.downLink.doc.delay"];
+    const subSettings = Object.assign({}, settings, {
+      isMainPage: false,
+      isMainFrame: true,
+      fullPage: true,
+      isHeadless: true,
+    });
+
+    const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
+    for (const [sourceUrl, info] of linkedPages.entries()) {
+      const {url, refUrl, depth} = info;
+
+      capturer.log(`Capturing linked page (${depth}) ${sourceUrl} ...`);
+
+      Object.assign(subSettings, {
+        recurseChain: [],
+        depth,
+        documentName: undefined,
+        usedCssFontUrl: undefined,
+        usedCssImageUrl: undefined,
+      });
+
+      const response = await capturer.captureUrl({
+        url,
+        refUrl,
+        settings: subSettings,
+        options,
+      });
+
+      if (delay > 0) {
+        capturer.log(`Waiting for ${delay} ms...`);
+        await scrapbook.delay(delay);
+      }
+    }
   };
 
   /**
