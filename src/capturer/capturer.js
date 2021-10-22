@@ -982,57 +982,6 @@
     url, refUrl, title, favIconUrl,
     mode, options,
   }) {
-    // default mode => launch a tab to capture
-    if (mode === "tab") {
-      capturer.log(`Launching remote tab ...`);
-
-      const tab = await browser.tabs.create({
-        url,
-        active: false,
-      });
-
-      // wait until tab loading complete
-      await new Promise((resolve, reject) => {
-        const listener = (tabId, changeInfo, t) => {
-          if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-          browser.tabs.onUpdated.removeListener(listener);
-          browser.tabs.onRemoved.removeListener(listener2);
-          resolve(t);
-        };
-        const listener2 = (tabId, removeInfo) => {
-          if (!(tabId === tab.id)) { return; }
-          browser.tabs.onUpdated.removeListener(listener);
-          browser.tabs.onRemoved.removeListener(listener2);
-          reject({message: `Tab removed before loading complete.`});
-        };
-        browser.tabs.onUpdated.addListener(listener);
-        browser.tabs.onRemoved.addListener(listener2);
-      });
-
-      {
-        const delay = options["capture.remoteTabDelay"];
-        if (delay > 0) {
-          capturer.log(`Waiting for ${delay} ms...`);
-          await scrapbook.delay(delay);
-        }
-      }
-
-      try {
-        return await capturer.captureTab({
-          timeId,
-          documentName,
-          tabId: tab.id,
-          fullPage: true,
-          title,
-          options,
-        });
-      } finally {
-        try {
-          await browser.tabs.remove(tab.id);
-        } catch (ex) {}
-      }
-    }
-
     const source = `${url}`;
     const message = {
       url,
@@ -1061,14 +1010,15 @@
     let captureMode = mode;
     let captureFunc;
     switch (mode) {
+      case "tab": {
+        captureFunc = capturer.captureRemoteTab;
+        break;
+      }
       case "bookmark": {
         captureFunc = capturer.captureBookmark;
         break;
       }
-      case "source": {
-        captureFunc = capturer.captureUrl;
-        break;
-      }
+      case "source":
       default: {
         captureMode = "source";
         captureFunc = capturer.captureUrl;
@@ -1082,6 +1032,77 @@
     if (!response) { throw new Error(`Response not received.`); }
     if (response.error) { throw new Error(response.error.message); }
     return response;
+  };
+
+  /**
+   * @param {Object} params
+   * @param {string} params.url
+   * @param {string} [params.refUrl]
+   * @param {Object} params.settings
+   * @param {Object} params.options
+   * @return {Promise<Object>}
+   */
+  capturer.captureRemoteTab = async function ({
+    url, refUrl,
+    settings, options,
+  }) {
+    capturer.log(`Launching remote tab ...`);
+
+    const tab = await browser.tabs.create({
+      url,
+      active: false,
+    });
+
+    // wait until tab loading complete
+    await new Promise((resolve, reject) => {
+      const listener = (tabId, changeInfo, t) => {
+        if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
+        browser.tabs.onUpdated.removeListener(listener);
+        browser.tabs.onRemoved.removeListener(listener2);
+        resolve(t);
+      };
+      const listener2 = (tabId, removeInfo) => {
+        if (!(tabId === tab.id)) { return; }
+        browser.tabs.onUpdated.removeListener(listener);
+        browser.tabs.onRemoved.removeListener(listener2);
+        reject({message: `Tab removed before loading complete.`});
+      };
+      browser.tabs.onUpdated.addListener(listener);
+      browser.tabs.onRemoved.addListener(listener2);
+    });
+
+    const delay = options["capture.remoteTabDelay"];
+    if (delay > 0) {
+      capturer.log(`Waiting for ${delay} ms...`);
+      await scrapbook.delay(delay);
+    }
+
+    (await scrapbook.initContentScripts(tab.id)).forEach(({tabId, frameId, url, error, injected}) => {
+      if (error) {
+        const source = `[${tabId}:${frameId}] ${url}`;
+        capturer.error(scrapbook.lang("ErrorContentScriptExecute", [source, error]));
+      }
+    });
+
+    const subSettings = Object.assign({}, settings, {
+      fullPage: true,
+      isHeadless: false,
+    });
+
+    try {
+      return await capturer.invoke("captureDocumentOrFile", {
+        refUrl,
+        settings: subSettings,
+        options,
+      }, {
+        tabId: tab.id,
+        frameId: 0,
+      });
+    } finally {
+      try {
+        await browser.tabs.remove(tab.id);
+      } catch (ex) {}
+    }
   };
 
   /**
