@@ -30,7 +30,7 @@
   'use strict';
 
   const SHADOW_ROOT_SUPPORTED = !!document.documentElement.attachShadow;
-  const REBUILD_LINK_SUPPORT_TYPES = new Set(['text/html', 'application/xhtml+xml', 'image/svg+xml']);
+  const REBUILD_LINK_ROLE_PATTERN = /^document(?:-[a-f0-9-]+)?$/;
   const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
 
   // overwrite the value of common.js to define this is not a content script
@@ -2331,7 +2331,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                 });
 
                 // load previously captured pages to blob
-                if (REBUILD_LINK_SUPPORT_TYPES.has(Mime.lookup(path))) {
+                if (REBUILD_LINK_ROLE_PATTERN.test(role)) {
                   const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
                   try {
                     const response = await server.request({
@@ -2384,7 +2384,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                 });
 
                 // load previously captured pages to blob
-                if (REBUILD_LINK_SUPPORT_TYPES.has(Mime.lookup(path))) {
+                if (REBUILD_LINK_ROLE_PATTERN.test(role)) {
                   const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
                   try {
                     const response = await server.request({
@@ -3897,8 +3897,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           continue;
         }
 
-        const {type} = scrapbook.parseHeaderContentType(blob.type);
-        if (!REBUILD_LINK_SUPPORT_TYPES.has(type)) {
+        if (!REBUILD_LINK_ROLE_PATTERN.test(item.role)) {
           continue;
         }
 
