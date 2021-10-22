@@ -683,19 +683,19 @@
     "message": "擷取連結頁面深度:"
   },
   "OptionCaptureDownLinkDocDepthTooltip": {
-    "message": "擷取深度未超過此值的連結頁面，並建立交互連結及記錄資源列表。目前頁面為深度 0，深度 0 連結的頁面為深度 1，深度 1 連結的頁面為深度 2，……依此類推。\n\n• 深度設為 0 時仍會記錄資源列表。留空表示不擷取連結頁面也不記錄資源列表。\n• 注意：深層擷取可能會下載大量資料，宜設定儲存擷取資料為資料夾，以避免潛在的效能問題或錯誤。此功能不支援儲存為單一 HTML 檔案。"
+    "message": "擷取深度未超過此值的連結頁面，並建立交互連結及記錄資源列表。主頁面為深度 0，深度 0 連結的頁面為深度 1，深度 1 連結的頁面為深度 2，……依此類推。\n\n• 深度設為 0 時仍會記錄資源列表。留空表示不擷取連結頁面也不記錄資源列表。\n• 注意：深層擷取可能會下載大量資料，宜設定儲存擷取資料為資料夾，以避免潛在的效能問題或錯誤。此功能不支援儲存為單一 HTML 檔案。"
   },
   "OptionCaptureDownLinkDocUrlFilterLabel": {
-    "message": "包括以下網址:"
+    "message": "擷取連結頁面包含網址:"
   },
   "OptionCaptureDownLinkDocUrlFilterTooltip": {
-    "message": "此過濾器根據網址篩選要擷取的連結。\n\n• 以下每行為一個完整網址（「#」以後的部分會自動去除）或一個正規表示式（如「/^http://example\\.com//」）。\n• 連結的完整網址（去除「#」以後的部分）符合任何一行的規則即列入下載。例如連結「http://example.com/subpage#h2」符合完整網址規則「http://example.com/subpage」或正規表示式規則「/^http://example\\.com/SubPage\\d*/i」。若每行皆無規則，則任何網址皆列入下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。\n• 每行空白字元以後的部分皆視為註解，執行時會自動忽略。例如「http://example.com/ 註解」視同「http://example.com/」；「/^https:/ 註解」視同「/^https:/」。"
+    "message": "此過濾器根據網址篩選要擷取的連結頁面。\n\n• 以下每行為一個完整網址（「#」以後的部分會自動去除）或一個正規表示式（如「/^http://example\\.com//」）。\n• 連結的完整網址（去除「#」以後的部分）符合任何一行的規則即列入下載。例如連結「http://example.com/subpage#h2」符合完整網址規則「http://example.com/subpage」或正規表示式規則「/^http://example\\.com/SubPage\\d*/i」。若每行皆無規則，則任何網址皆列入下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。\n• 每行空白字元以後的部分皆視為註解，執行時會自動忽略。例如「http://example.com/ 註解」視同「http://example.com/」；「/^https:/ 註解」視同「/^https:/」。"
   },
   "OptionCaptureDownLinkFileExtFilterLabel": {
-    "message": "包括以下副檔名:"
+    "message": "下載連結檔案包含副檔名:"
   },
   "OptionCaptureDownLinkFileExtFilterTooltip": {
-    "message": "此過濾器根據副檔名篩選要下載的連結。\n\n• 以下每行為一個以「,」分隔的副檔名列表（不分大小寫，可含空白，如「jpg, jpeg」）或一個正規表示式（如「/jpe?g|gif|png/i」）。\n• 連結的全副檔名符合任何一行的規則即列入下載。例如連結「http://example.com/file.doc?token=foo」取「doc」比對，不符合副檔名列表規則「docx, do」。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
+    "message": "此過濾器根據副檔名篩選要下載的連結檔案。\n\n• 以下每行為一個以「,」分隔的副檔名列表（不分大小寫，可含空白，如「jpg, jpeg」）或一個正規表示式（如「/jpe?g|gif|png/i」）。\n• 連結的全副檔名符合任何一行的規則即列入下載。例如連結「http://example.com/file.doc?token=foo」取「doc」比對，不符合副檔名列表規則「docx, do」。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
   },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "比對 HTTP 標頭及網址副檔名"
@@ -707,13 +707,13 @@
     "message": "停用下載連結檔案"
   },
   "OptionCaptureDownLinkFileModeTooltip": {
-    "message": "此選項決定是否下載超連結（A 或 AREA 元素）指向的內容。\n\n• 停用下載連結檔案：不下載連結的檔案。\n• 比對網址副檔名：比對網址副檔名決定是否下載，效能較佳，但無法有效區分動態網頁的類型。例如副檔名為 .php 的網址可能輸出 html、doc、pdf 或其他格式，但此模式下都是取 php 做比對。\n• 比對 HTTP 標頭及網址副檔名：走訪每個連結取得 HTTP 標頭及實際輸出的副檔名，據此決定是否下載。注意：有些網站會把操作指令做成一般的超連結，導致走訪連結時誤觸指令（例如登出網站），此時可設定網址過濾器防止走訪。"
+    "message": "此選項決定是否下載超連結（A 或 AREA 元素）或 META 重導向指向的檔案。\n\n• 停用下載連結檔案：不下載連結的檔案。\n• 比對網址副檔名：比對網址副檔名決定是否下載，效能較佳，但無法有效區分動態網頁的類型。例如副檔名為 .php 的網址可能輸出 html、doc、pdf 或其他格式，但此模式下都是取 php 做比對。\n• 比對 HTTP 標頭及網址副檔名：走訪每個連結取得 HTTP 標頭及實際輸出的副檔名，據此決定是否下載。注意：有些網站會把操作指令做成一般的超連結，導致走訪連結時誤觸指令（例如登出網站），此時可設定網址過濾器防止走訪。"
   },
   "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "比對網址副檔名"
   },
   "OptionCaptureDownLinkUrlFilterLabel": {
-    "message": "網址過濾器:"
+    "message": "排除網址:"
   },
   "OptionCaptureDownLinkUrlFilterTooltip": {
     "message": "此過濾器根據網址篩選禁止下載或擷取的連結，優先於其他過濾器。\n\n• 以下每行為一個完整網址（「#」以後的部分會自動去除）或一個正規表示式（如「/[/=]logout\\b/i」）。\n• 連結的完整網址（去除「#」以後的部分）符合任何一行的規則即禁止下載。例如連結「http://example.com/logout」和「http://example.com/?a=LOGOUT」都符合正規表示式規則「/[/=]logout\\b/i」。\n• 以「#」開頭的行皆視為註解，執行時會略過。\n• 每行空白字元以後的部分皆視為註解，執行時會自動忽略。例如「http://example.com/ 註解」視同「http://example.com/」；「/^https:/ 註解」視同「/^https:/」。"

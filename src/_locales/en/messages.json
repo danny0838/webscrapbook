@@ -686,16 +686,16 @@
     "message": "Capture linked pages whose depth is not greater than the specified value, and build cross links and record used resources. The main page is depth 0, pages linked by a page with depth 0 is depth 1, pages linked by a page with depth 1 is depth 2, ... and so on.\n\n• Set depth to 0 to record used resources without capturing linked pages. Set depth to blank to not record used resources.\n• NOTE: A deep capture may download a lot of data. It's recommended to set “save captured data as” to “Folder” to prevent a potential performance issue or error. Saving as single HTML is not supported."
   },
   "OptionCaptureDownLinkDocUrlFilterLabel": {
-    "message": "Include these URLs:"
+    "message": "Included URLs for capturing linked pages:"
   },
   "OptionCaptureDownLinkDocUrlFilterTooltip": {
-    "message": "This determines what links are for capturing according to URL.\n\n• Each following line is a full URL (with chars following a “#” stripped) or a regular expression (e.g. “/^http://example\\.com//”). \n• A link whose full URL (with chars following a “#” stripped) matches a rule at any line is included for downloading. For example, the link “http://example.com/subpage#h2” matches the full URL rule “http://example.com/subpage” or the regular expression rule “/^http://example\\.com/SubPage\\d*/i”. Any URL is included if no rule exists in any line.\n• A line starting with “#” is regarded as a comment and will be ignored during execution.\n• Text following a space is regarded as a comment and will be ignored during execution. For example, “http://example.com/ comment” is treated as “http://example.com/”; “/^https:/ comment” is treated as“/^https:/”."
+    "message": "This determines what linked pages are for capturing according to URL.\n\n• Each following line is a full URL (with chars following a “#” stripped) or a regular expression (e.g. “/^http://example\\.com//”). \n• A link whose full URL (with chars following a “#” stripped) matches a rule at any line is included for downloading. For example, the link “http://example.com/subpage#h2” matches the full URL rule “http://example.com/subpage” or the regular expression rule “/^http://example\\.com/SubPage\\d*/i”. Any URL is included if no rule exists in any line.\n• A line starting with “#” is regarded as a comment and will be ignored during execution.\n• Text following a space is regarded as a comment and will be ignored during execution. For example, “http://example.com/ comment” is treated as “http://example.com/”; “/^https:/ comment” is treated as“/^https:/”."
   },
   "OptionCaptureDownLinkFileExtFilterLabel": {
-    "message": "Include these file extensions:"
+    "message": "Included file extensions for downloading linked files:"
   },
   "OptionCaptureDownLinkFileExtFilterTooltip": {
-    "message": "This determines what links are to be downloaded according to file extension.\n\n• Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. “jpg, jpeg”) or a regular expression (e.g. “/jpe?g|gif|png/i”).\n• A link whose full extension matches a rule at any line is included for download. For example, the link “http://example.com/file.doc?token=foo” is taken “doc” for matching and does not match the extensions rule “docx, do”.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
+    "message": "This determines what linked files are to be downloaded according to file extension.\n\n• Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. “jpg, jpeg”) or a regular expression (e.g. “/jpe?g|gif|png/i”).\n• A link whose full extension matches a rule at any line is included for download. For example, the link “http://example.com/file.doc?token=foo” is taken “doc” for matching and does not match the extensions rule “docx, do”.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "Match HTTP header and file extension"
@@ -707,16 +707,16 @@
     "message": "Disable download linked files"
   },
   "OptionCaptureDownLinkFileModeTooltip": {
-    "message": "This determines whether and how to download the targeted resource of a link (an A or AREA element).\n\n• Disable download linked files: Do not download the linked resource.\n• Match URL file extension: Match the file extension of the URL. This performs better but cannot differenciate dynamically generated resource. For example, a URL whose extension is .php can output a resource of html, doc, pdf, or other type, but the filter always gets “php” in this mode.\n• Match HTTP header and file extension: Traverse every link to get the HTTP header and the precise extension of the output resource for matching. NOTE: Certain sites make interactive commands as plain hyperlink, which could be unexpectedly triggered during traversal (such as logging out the site). The URL filter can be configured to avoid such trigering."
+    "message": "This determines whether and how to download the targeted resource of a link (an A or AREA element) or a meta refresh.\n\n• Disable download linked files: Do not download the linked resource.\n• Match URL file extension: Match the file extension of the URL. This performs better but cannot differenciate dynamically generated resource. For example, a URL whose extension is .php can output a resource of html, doc, pdf, or other type, but the filter always gets “php” in this mode.\n• Match HTTP header and file extension: Traverse every link to get the HTTP header and the precise extension of the output resource for matching. NOTE: Certain sites make interactive commands as plain hyperlink, which could be unexpectedly triggered during traversal (such as logging out the site). The URL filter can be configured to avoid such trigering."
   },
   "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "Match URL file extension"
   },
   "OptionCaptureDownLinkUrlFilterLabel": {
-    "message": "URL filter:"
+    "message": "Excluded URLs:"
   },
   "OptionCaptureDownLinkUrlFilterTooltip": {
-    "message": "This determines what are forbidden for downloading or capturing according to URL.\n\n• Each following line is a full URL (with chars following a “#” stripped) or a regular expression (e.g. “/[/=]logout\\b/i”). \n• A link whose full URL (with chars following a “#” stripped) matches a rule at any line is forbidden for downloading. For example, the links “http://example.com/logout” and “http://example.com/?a=LOGOUT” both match the regular expression rule “/[/=]logout\\b/i”.\n• A line starting with “#” is regarded as a comment and will be ignored during execution.\n• Text following a space is regarded as a comment and will be ignored during execution. For example, “http://example.com/ comment” is treated as “http://example.com/”; “/^https:/ comment” is treated as“/^https:/”."
+    "message": "This determines what links are forbidden for downloading or capturing according to URL.\n\n• Each following line is a full URL (with chars following a “#” stripped) or a regular expression (e.g. “/[/=]logout\\b/i”). \n• A link whose full URL (with chars following a “#” stripped) matches a rule at any line is forbidden for downloading. For example, the links “http://example.com/logout” and “http://example.com/?a=LOGOUT” both match the regular expression rule “/[/=]logout\\b/i”.\n• A line starting with “#” is regarded as a comment and will be ignored during execution.\n• Text following a space is regarded as a comment and will be ignored during execution. For example, “http://example.com/ comment” is treated as “http://example.com/”; “/^https:/ comment” is treated as“/^https:/”."
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBEDs:"
