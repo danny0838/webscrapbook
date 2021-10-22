@@ -186,6 +186,7 @@
     verifyDownLinkUrlFilter();
     verifyCaptureHelpers();
     verifyAutoCapture();
+    renewServerUrlRequirement();
     document.getElementById('options').reportValidity();
   }
 
@@ -408,6 +409,12 @@
     elem.setCustomValidity('');
   }
 
+  function renewServerUrlRequirement() {
+    const elem = document.getElementById("opt_server.url");
+    const required = document.getElementById("opt_capture.saveTo").value === 'server';
+    elem.required = required;
+  }
+
   async function openIndexer() {
     const u = new URL(browser.runtime.getURL("scrapbook/cache.html"));
     const params = u.searchParams;
@@ -615,6 +622,8 @@
     document.getElementById("opt_capture.helpers").addEventListener("change", verifyCaptureHelpers);
     document.getElementById("opt_autocapture.enabled").addEventListener("change", verifyAutoCapture);
     document.getElementById("opt_autocapture.rules").addEventListener("change", verifyAutoCapture);
+
+    document.getElementById("opt_capture.saveTo").addEventListener("change", renewServerUrlRequirement);
 
     document.getElementById("openIndexer").addEventListener("click", onOpenIndexerClick);
     document.getElementById("openChecker").addEventListener("click", onOpenCheckerClick);

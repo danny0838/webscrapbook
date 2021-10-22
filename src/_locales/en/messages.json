@@ -929,7 +929,7 @@
     "message": "Backend server"
   },
   "OptionCaptureSaveToTooltip": {
-    "message": "This determines how captured data files are managed.\n\n• Backend server: save the captured web page in the configured data directory of a book in the backend server. NOTE: Configure also the address, user, and password of the backend server to get it work.\n• Scrapbook folder: save the captured web page in the scrapbook folder under the <default download folder>.\n• File: save the captured web page as a file."
+    "message": "This determines how captured data files are managed.\n\n• Backend server: save the captured web page in the configured data directory of a book in the backend server.\n• Scrapbook folder: save the captured web page in the scrapbook folder under the <default download folder>.\n• File: save the captured web page as a file."
   },
   "OptionCaptureScrapbookFolderLabel": {
     "message": "Scrapbook folder:"
@@ -1151,7 +1151,7 @@
     "message": "Address:"
   },
   "OptionServerUrlTooltip": {
-    "message": "The root URL path (which must ends with “/”) of the backend server application, such as “http://localhost:8080/” or “https://example.com/wsb/”.\n\n• The backend server can be hosted using PyWebScrapBook (minimal compatible version: $BACKEND_VERSION$). See https://pypi.org/project/webscrapbook/ for further details.\n• The default address of a local PyWebScrapBook backend server is “http://localhost:8080/”, if not otherwise configured.",
+    "message": "The root URL path (which must ends with “/”) of the backend server application, such as “https://example.com/wsb/”.\n\n• The backend server can be hosted using PyWebScrapBook (minimal compatible version: $BACKEND_VERSION$). See https://pypi.org/project/webscrapbook/ for further details.\n• The default address of a local PyWebScrapBook backend server is “http://localhost:8080/”, if not otherwise configured.",
     "placeholders": {
       "backend_version": {
         "content": "$1"
