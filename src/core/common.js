@@ -58,7 +58,7 @@ if (Node && !Node.prototype.getRootNode) {
     "ui.toolbar.showOpenOptions": true,
     "ui.showContextMenu": true,
     "ui.autoCloseCaptureDialog": "none", // "none", "nowarn", "noerror", "nofailure", "always"
-    "ui.notifyPageCaptured": false,
+    "ui.notifyPageCaptured": true,
     "server.url": "",
     "server.user": "",
     "server.password": "",
