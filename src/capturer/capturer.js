@@ -3902,6 +3902,11 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         }
 
         const doc = await scrapbook.readFileAsDocument(blob);
+        if (!doc) {
+          capturer.warn(`Failed to rebuild links for file ${filename}: corrupted document.`);
+          continue;
+        }
+
         processRootNode(doc.documentElement, filenameMap, linkedPages);
 
         const content = scrapbook.documentToString(doc, options["capture.prettyPrint"]);
