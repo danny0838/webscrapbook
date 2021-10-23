@@ -3,6 +3,16 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.130.0] - 2021-10-23
+* Fixed an issue that some resource files such as SVG be incorrectly included for links rebuilding.
+* An error during links rebulding for a document no more terminates the capture task.
+* Fixed missing meta attributes for the index.html when capturing a XHTML or SVG file.
+* Pages other than index.html now records only source URL in meta attributes.
+* Header content type now takes higher priority than filename when checking links for downloading.
+* Added a new `capture.downLink.doc.mode` option for capturing linked pages using tab mode.
+* Added `View sitemap` editor tool.
+* Improved UI and tooltips for edit and postit dialog pages.
+
 ## [0.129.0] - 2021-10-22
 * Added support of saving meta refreshed pages for in-depth capture.
 * An automatically opened remote tab is now closed on error.
