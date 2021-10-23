@@ -3025,7 +3025,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     const addIndexHtml = async (path, target, title) => {
       const meta = options["capture.recordDocumentMeta"] ? 
           ' data-scrapbook-source="' + scrapbook.escapeHtml(scrapbook.normalizeUrl(sourceUrl)) + '"' + 
-          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' : 
+          ' data-scrapbook-create="' + scrapbook.escapeHtml(timeId) + '"' + 
+          (settings.title ? ' data-scrapbook-title="' + scrapbook.escapeHtml(settings.title) + '"' : "") + 
+          (settings.favIconUrl ? ' data-scrapbook-icon="' + scrapbook.escapeHtml(settings.favIconUrl) + '"' : "") + 
+          (itemType ? ' data-scrapbook-type="' + scrapbook.escapeHtml(itemType) + '"' : "") : 
           "";
 
       const html = `<!DOCTYPE html>
