@@ -44,6 +44,7 @@ const baseOptions = {
   "capture.downLink.file.extFilter": "",
   "capture.downLink.doc.depth": null,
   "capture.downLink.doc.delay": null,
+  "capture.downLink.doc.mode": "source",
   "capture.downLink.doc.urlFilter": "",
   "capture.downLink.urlFilter": "",
   "capture.referrerPolicy": "strict-origin-when-cross-origin",

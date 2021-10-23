@@ -1257,6 +1257,29 @@
     }
 
     if (doc) {
+      if (depth > 0 && options["capture.downLink.doc.mode"] === "tab") {
+        const response = await capturer.captureRemoteTab({
+          url: capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash),
+          refUrl,
+          settings,
+          options,
+        });
+
+        // update linkedPage data for a possible redirection
+        // (meta refresh or JavaScript re-location)
+        const redirectedUrlMain = response.sourceUrl;
+        if (redirectedUrlMain && redirectedUrlMain !== sourceUrlMain) {
+          const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
+          linkedPages.set(sourceUrlMain, {
+            url: redirectedUrlMain,
+            refUrl,
+            depth,
+          });
+        }
+
+        return response;
+      }
+
       return await capturer.captureDocumentOrFile({
         doc,
         docUrl: capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash),

@@ -109,6 +109,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.downLink.file.extFilter": "###image\n#bmp, gif, ico, jpg, jpeg, jpe, jp2, png, tif, tiff, svg\n###audio\n#aac, ape, flac, mid, midi, mp3, ogg, oga, ra, ram, rm, rmx, wav, wma\n###video\n#avc, avi, flv, mkv, mov, mpg, mpeg, mp4, wmv\n###archive\n#zip, rar, jar, bz2, gz, tar, rpm, 7z, 7zip, xz, jar, xpi, lzh, lha, lzma\n#/z[0-9]{2}|r[0-9]{2}/\n###document\n#pdf, doc, docx, xls, xlsx, ppt, pptx, odt, ods, odp, odg, odf, rtf, txt, csv\n###executable\n#exe, msi, dmg, bin, xpi, iso\n###any non-web-page\n#/(?!$|html?|xht(ml)?|php|py|pl|aspx?|cgi|jsp)(.*)/i",
     "capture.downLink.doc.depth": null,
     "capture.downLink.doc.delay": null,
+    "capture.downLink.doc.mode": "source",
     "capture.downLink.doc.urlFilter": "",
     "capture.downLink.urlFilter": "###skip common logout URL\n/[/=]logout\\b/i",
     "capture.referrerPolicy": "strict-origin-when-cross-origin", // "no-referrer", "no-referrer-when-downgrade", "origin", "origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-url"

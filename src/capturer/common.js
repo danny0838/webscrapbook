@@ -2261,6 +2261,7 @@
     if (registry.isDuplicate) {
       return Object.assign({}, registry, {
         url: capturer.getRedirectedUrl(registry.url, docUrlHash),
+        sourceUrl: docUrl,
       });
     }
 
@@ -2680,6 +2681,7 @@
 
     return Object.assign({}, response, {
       url: capturer.getRedirectedUrl(response.url, docUrlHash),
+      sourceUrl: docUrl,
     });
   };
 
