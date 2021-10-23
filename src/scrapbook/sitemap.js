@@ -71,30 +71,34 @@
         const indexUrl = await book.getItemIndexUrl(item, {checkMetaRefresh: false});
         const indexPages = new Set(['index.html']);
         if (item.type === 'site') {
-          let json;
           try {
-            const target = new URL('index.json', indexUrl).href;
-            json = await server.request({
-              url: target,
-              method: "GET",
-            }).then(r => r.json());
-          } catch (ex) {
-            console.error(ex);
-            throw new Error(`Unable to load index.json file: ${ex.message}`);
-          }
+            let json;
+            try {
+              const target = new URL('index.json', indexUrl).href;
+              json = await server.request({
+                url: target,
+                method: "GET",
+              }).then(r => r.json());
+            } catch (ex) {
+              console.error(ex);
+              throw new Error(`Unable to load index.json file: ${ex.message}`);
+            }
 
-          switch (json.version) {
-            case 2: {
-              if (json.indexPages) {
-                for (const indexPage of json.indexPages) {
-                  indexPages.add(indexPage);
+            switch (json.version) {
+              case 2: {
+                if (json.indexPages) {
+                  for (const indexPage of json.indexPages) {
+                    indexPages.add(indexPage);
+                  }
                 }
+                break;
               }
-              break;
+              default: {
+                throw new Error(`Sitemap version ${json.version} not supported.`);
+              }
             }
-            default: {
-              throw new Error(`Sitemap version ${json.version} not supported.`);
-            }
+          } catch (ex) {
+            console.error(`Failed to load sitemap: ${ex.message}\nHeuristically construct a sitemap from the index file instead...`);
           }
         }
 
