@@ -1214,13 +1214,10 @@
         // determine extension
         const headers = fetchResponse.headers;
         let ext;
-        if (headers.filename) {
-          [, ext] = scrapbook.filenameParts(headers.filename);
-          if (!ext && headers.contentType) {
-            ext = Mime.extension(headers.contentType);
-          }
-        } else if (headers.contentType) {
+        if (headers.contentType) {
           ext = Mime.extension(headers.contentType);
+        } else if (headers.filename) {
+          [, ext] = scrapbook.filenameParts(headers.filename);
         } else {
           const filename = scrapbook.urlToFilename(fetchResponse.url);
           [, ext] = scrapbook.filenameParts(filename);
