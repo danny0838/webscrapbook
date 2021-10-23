@@ -104,18 +104,28 @@
 
     // if not HTML|SVG document, capture as file
     if (!["text/html", "application/xhtml+xml", "image/svg+xml"].includes(doc.contentType)) {
-      // if it can be displayed as HTML, check saveFileAsHtml
-      if (!(doc.documentElement.nodeName.toLowerCase() === "html" && options["capture.saveFileAsHtml"])) {
-        return await capturer.invoke("captureFile", {
-          url: doc.URL,
-          refUrl,
-          charset: doc.characterSet,
-          settings: Object.assign({}, settings, {
-            title: settings.title || doc.title,
-          }),
+      // handle saveFileAsHtml
+      // if the document can be rendered as HTML, save as a normal HTML file
+      if (doc.documentElement.nodeName.toLowerCase() === "html" && options["capture.saveFileAsHtml"]) {
+        return await capturer.captureDocument({
+          doc,
+          docUrl,
+          baseUrl,
+          mime: "text/html",
+          settings,
           options,
         });
       }
+
+      return await capturer.invoke("captureFile", {
+        url: doc.URL,
+        refUrl,
+        charset: doc.characterSet,
+        settings: Object.assign({}, settings, {
+          title: settings.title || doc.title,
+        }),
+        options,
+      });
     }
 
     // otherwise, capture as document
@@ -134,6 +144,7 @@
    * @param {Document} params.doc
    * @param {string} [params.docUrl] - an overriding document URL
    * @param {string} [params.baseUrl] - an overriding document base URL
+   * @param {string} [params.mime] - an overriding document contentType
    * @param {Object} params.settings
    * @param {string} [params.settings.title] - item title
    * @param {string} [params.settings.favIconUrl] - item favicon
@@ -2190,7 +2201,7 @@
 
     const {doc = document, settings} = params;
     const {timeId, isHeadless, isMainPage, isMainFrame} = settings;
-    const {contentType: mime, documentElement: docElemNode} = doc;
+    const {documentElement: docElemNode} = doc;
 
     // allow overwriting by capture helpers
     let {options} = params;
@@ -2218,6 +2229,9 @@
     if (!docUrl) {
       [docUrl, docUrlHash] = scrapbook.splitUrlByAnchor(doc.URL);
     }
+
+    // determine mime
+    const mime = params.mime || doc.contentType;
 
     // alias of baseUrl for resolving links and resources
     const refUrl = baseUrl;
