@@ -129,17 +129,27 @@
         return true;
       };
 
-      const addPage = (page, type, parentElem) => {
-        const url = new URL(scrapbook.quote(page), indexUrl).href;
-        const urlci = url.toLowerCase();
-        if (pages.has(urlci)) { return; }
-        pages.add(urlci);
+      const addPage = (url, {
+        type = 'anchor',
+        label = null,
+        title = null,
+        parent = wrapper,
+      } = {}) => {
+        const [urlMain] = scrapbook.splitUrlByAnchor(url);
+        if (pages.has(urlMain)) { return; }
+        pages.add(urlMain);
 
-        const li = parentElem.appendChild(document.createElement('li'));
+        if (!label) {
+          label = scrapbook.urlToFilename(url);
+        }
+
+        const li = parent.appendChild(document.createElement('li'));
+        li.hidden = true;
         const anchor = li.appendChild(document.createElement('a'));
         anchor.href = url;
-        anchor.textContent = page;
         anchor.className = type;
+        anchor.textContent = label;
+        if (title) { anchor.title = title; }
         anchor.target = 'sitemapitem';
         return anchor;
       };
@@ -160,14 +170,19 @@
           elem.textContent = doc.title;
         }
 
+        elem.parentNode.hidden = false;
+
         const subqueue = [];
         const ul = elem.insertAdjacentElement('afterend', document.createElement('ul'));
 
         const items = loadLinks(doc, []);
-        for (const {url, type} of items) {
-          const [urlMain] = scrapbook.splitUrlByAnchor(url);
-          const page = decodeURIComponent(urlMain);
-          const anchor = addPage(page, type, ul);
+        for (const {url, type, label, title} of items) {
+          const anchor = addPage(url, {
+            type,
+            label,
+            title,
+            parent: ul,
+          });
           if (anchor) {
             subqueue.push(anchor);
           }
@@ -177,17 +192,20 @@
         }
       };
 
-      const loadLinks = (rootNode, items) => {
+      const loadLinks = (doc, items) => {
         // meta refresh doesn't work in a shadowroot
-        for (const elem of rootNode.querySelectorAll('meta[http-equiv="refresh" i][content]')) {
+        for (const elem of doc.querySelectorAll('meta[http-equiv="refresh" i][content]')) {
           const {time, url} = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
           if (!checkInterlinkingUrl(url)) { continue; }
-          items.push({url, type: 'refresh'});
+          items.push({
+            url: new URL(url, doc.URL).href,
+            type: 'refresh',
+          });
         }
 
         const frameItems = [];
         const anchorItems = [];
-        loadLinksRecursively(rootNode, frameItems, anchorItems);
+        loadLinksRecursively(doc, frameItems, anchorItems);
         for (const item of frameItems) {
           items.push(item);
         }
@@ -202,13 +220,20 @@
         for (const elem of rootNode.querySelectorAll('frame[src], iframe[src]')) {
           const url = elem.getAttribute('src');
           if (!checkInterlinkingUrl(url)) { continue; }
-          frameItems.push({url, type: 'frame'});
+          frameItems.push({
+            url: elem.src,
+            type: 'frame',
+          });
         }
 
         for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
           const url = elem.getAttribute('href');
           if (!checkInterlinkingUrl(url)) { continue; }
-          anchorItems.push({url, type: 'anchor'});
+          anchorItems.push({
+            url: elem.href,
+            type: 'anchor',
+            title: elem.textContent,
+          });
         }
 
         // recurse into shadow roots
@@ -222,7 +247,11 @@
       };
 
       for (const indexPage of indexPages) {
-        const anchor = addPage(indexPage, 'anchor', wrapper);
+        const url = new URL(scrapbook.quote(indexPage), indexUrl).href;
+        const anchor = addPage(url, {
+          label: indexPage,
+          parent: wrapper,
+        });
         if (anchor) {
           await loadPageMap(anchor);
         }
