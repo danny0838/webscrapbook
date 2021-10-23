@@ -34,23 +34,27 @@
       try {
         const params = new URL(document.URL).searchParams;
         const id = this.id = params.get('id');
-        const bookId = this.bookId = params.get('bookId');
+        let bookId = this.bookId = params.get('bookId');
         let file = params.get('file');
         let checkRedirect = !file;
 
         await scrapbook.loadOptionsAuto;
         await server.init();
 
+        if (typeof bookId !== 'string') {
+          bookId = server.bookId;
+        }
+
         const book = server.books[bookId];
         if (!book) {
-          throw new Error(`Specified book "${bookId}" does not exist.`);
+          throw new Error(`Book "${bookId}" does not exist.`);
         }
 
         const meta = await book.loadMeta();
 
         const item = meta[id];
         if (!item) {
-          throw new Error(`Specified item "${id}" does not exist.`);
+          throw new Error(`Item "${id}" does not exist.`);
         }
 
         file = file || item.index;
