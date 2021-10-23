@@ -2564,15 +2564,18 @@
     if (options["capture.recordDocumentMeta"]) {
       let url = docUrl.startsWith("data:") ? "data:" : docUrl;
 
-      // add hash only for the main document as subframes with different hash
+      // add hash only for index.html as subframes with different hash
       // must share the same file and record (e.g. foo.html and foo.html#bar)
-      if (isMainPage && isMainFrame) { url += docUrlHash; }
+      if (isMainPage && isMainFrame && mime === "text/html") {
+        url += docUrlHash;
+      }
 
       rootNode.setAttribute("data-scrapbook-source", url);
-      rootNode.setAttribute("data-scrapbook-create", timeId);
 
-      // record item metadata for the main document
-      if (isMainPage && isMainFrame) {
+      // record item metadata for index.html
+      if (isMainPage && isMainFrame && mime === "text/html") {
+        rootNode.setAttribute("data-scrapbook-create", timeId);
+
         if (settings.title) {
           rootNode.setAttribute("data-scrapbook-title", settings.title);
         }

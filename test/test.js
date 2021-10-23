@@ -9493,6 +9493,42 @@ async function test_capture_record_meta3() {
 }
 
 /**
+ * Record metadata in index.html rather than in *.xhtml
+ *
+ * capture.recordDocumentMeta
+ * capturer.captureDocument
+ */
+async function test_capture_record_meta4() {
+  /* html; +capture.recordDocumentMeta */
+  var options = {
+    "capture.recordDocumentMeta": true,
+    "capture.downLink.doc.depth": 0,
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_record/meta.xhtml#abc`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var html = doc.documentElement;
+  assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.xhtml#abc`);
+  assert(html.getAttribute('data-scrapbook-create').match(/^\d{17}$/));
+  assert(html.getAttribute('data-scrapbook-type') === `site`);
+
+  var indexFile = zip.file('index.xhtml');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "application/xhtml+xml"});
+  var doc = await readFileAsDocument(indexBlob);
+  var html = doc.documentElement;
+  assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.xhtml`);
+  assert(!html.hasAttribute('data-scrapbook-create'));
+  assert(!html.getAttribute('data-scrapbook-type'));
+}
+
+/**
  * Check if removed nodes are recorded
  *
  * capture.recordRewrites
