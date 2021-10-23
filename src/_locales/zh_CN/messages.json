@@ -343,6 +343,9 @@
   "EditorButtonLocateViewDirectory": {
     "message": "检视页面所在目录"
   },
+  "EditorButtonLocateViewSitemap": {
+    "message": "检视站台地图"
+  },
   "EditorButtonLocateViewSource": {
     "message": "检视原始页面"
   },
@@ -1572,6 +1575,14 @@
       },
       "root": {
         "content": "$3"
+      }
+    }
+  },
+  "SiteMapTitle": {
+    "message": "站台地图 $ID$",
+    "placeholders": {
+      "id": {
+        "content": "$1"
       }
     }
   },

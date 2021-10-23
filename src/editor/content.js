@@ -381,6 +381,7 @@ ${sRoot}.toolbar .toolbar-close:hover {
   <div class="toolbar-locate" title="${scrapbook.lang('EditorButtonLocate')}">
     <button></button>
     <ul hidden="" title="">
+      <li><button class="toolbar-locate-viewSitemap">${scrapbook.lang('EditorButtonLocateViewSitemap')}</button></li>
       <li><button class="toolbar-locate-viewDirectory">${scrapbook.lang('EditorButtonLocateViewDirectory')}</button></li>
       <li><button class="toolbar-locate-viewSource">${scrapbook.lang('EditorButtonLocateViewSource')}</button></li>
     </ul>
@@ -513,6 +514,13 @@ ${sRoot}.toolbar .toolbar-close:hover {
       editor.showContextMenu(elem.nextElementSibling, event);
     });
     elem.disabled = elem.hidden = !editor.inScrapBook;
+
+    var elem = wrapper.querySelector('.toolbar-locate-viewSitemap');
+    elem.addEventListener("click", (event) => {
+      const u = new URL(browser.runtime.getURL("scrapbook/sitemap.html"));
+      u.searchParams.append('url', document.location.href);
+      document.location.assign(u.href);
+    }, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-locate-viewDirectory');
     elem.addEventListener("click", (event) => {

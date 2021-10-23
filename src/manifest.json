@@ -48,6 +48,7 @@
 
   "web_accessible_resources": [
     "resources/*",
+    "scrapbook/sitemap.html",
     "viewer/load.html"
   ],
 

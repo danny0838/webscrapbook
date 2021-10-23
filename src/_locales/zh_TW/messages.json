@@ -343,6 +343,9 @@
   "EditorButtonLocateViewDirectory": {
     "message": "檢視頁面所在目錄"
   },
+  "EditorButtonLocateViewSitemap": {
+    "message": "檢視站台地圖"
+  },
   "EditorButtonLocateViewSource": {
     "message": "檢視原始頁面"
   },
@@ -1572,6 +1575,14 @@
       },
       "root": {
         "content": "$3"
+      }
+    }
+  },
+  "SiteMapTitle": {
+    "message": "站台地圖 $ID$",
+    "placeholders": {
+      "id": {
+        "content": "$1"
       }
     }
   },

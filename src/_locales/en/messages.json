@@ -343,6 +343,9 @@
   "EditorButtonLocateViewDirectory": {
     "message": "View page directory"
   },
+  "EditorButtonLocateViewSitemap": {
+    "message": "View sitemap"
+  },
   "EditorButtonLocateViewSource": {
     "message": "View source page"
   },
@@ -1572,6 +1575,14 @@
       },
       "root": {
         "content": "$3"
+      }
+    }
+  },
+  "SiteMapTitle": {
+    "message": "Sitemap $ID$",
+    "placeholders": {
+      "id": {
+        "content": "$1"
       }
     }
   },

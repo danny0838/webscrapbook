@@ -1,0 +1,15 @@
+body {
+  font-size: 16px;
+}
+
+ul {
+  padding-__MSG_@@bidi_start_edge__: 20px;
+}
+
+a.frame {
+  color: gray;
+}
+
+a.refresh {
+  color: darkred;
+}
