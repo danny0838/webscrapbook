@@ -4630,55 +4630,62 @@
       const {helpers, rootNode, docUrl} = this;
       const errors = [];
 
-      for (let i = 0, I = helpers.length; i < I; ++i) {
-        const helper = helpers[i];
+      try {
+        for (let i = 0, I = helpers.length; i < I; ++i) {
+          const helper = helpers[i];
 
-        if (helper.disabled) {
-          continue;
-        }
-
-        if (helper.debug) {
-          this.debugging = true;
-        }
-
-        if (typeof helper.pattern === 'string') {
-          const regex = this.parseRegexStr(helper.pattern);
-          if (regex) {
-            // regex pattern
-            if (!regex.test(docUrl)) {
-              continue;
-            }
-          } else {
-            // @TODO: support alternative filtering
+          if (helper.disabled) {
             continue;
           }
-        }
 
-        if (Array.isArray(helper.commands)) {
-          if (this.debugging) {
-            const nameStr = helper.name ? ` (${helper.name})` : '';
-            console.debug(`WebScrapBook: Running capture helper[${i}]${nameStr} for ${this.docUrl}`);
+          if (helper.debug) {
+            this.debugging = true;
           }
 
-          for (const command of helper.commands) {
-            if (!this.isCommand(command)) {
-              const msg = `Skipped running invalid capture helper command: ${JSON.stringify(command)}`;
-              console.error(`WebScrapBook: ${msg}`);
-              errors.push(msg);
+          if (typeof helper.pattern === 'string') {
+            const regex = this.parseRegexStr(helper.pattern);
+            if (regex) {
+              // regex pattern
+              if (!regex.test(docUrl)) {
+                continue;
+              }
+            } else {
+              // @TODO: support alternative filtering
               continue;
             }
-            try {
-              this.runCommand(command, rootNode);
-            } catch (ex) {
-              const msg = `Error running capture helper command: ${JSON.stringify(command)}`
-              console.error(`WebScrapBook: ${msg}`);
-              console.error(ex);
-              errors.push(`${msg}: ${ex.message}`);
+          }
+
+          if (Array.isArray(helper.commands)) {
+            if (this.debugging) {
+              const nameStr = helper.name ? ` (${helper.name})` : '';
+              console.debug(`WebScrapBook: Running capture helper[${i}]${nameStr} for ${this.docUrl}`);
+            }
+
+            for (const command of helper.commands) {
+              if (!this.isCommand(command)) {
+                const msg = `Skipped running invalid capture helper command: ${JSON.stringify(command)}`;
+                console.error(`WebScrapBook: ${msg}`);
+                errors.push(msg);
+                continue;
+              }
+              try {
+                this.runCommand(command, rootNode);
+              } catch (ex) {
+                const msg = `Error running capture helper command: ${JSON.stringify(command)}`;
+                console.error(`WebScrapBook: ${msg}`);
+                console.error(ex);
+                errors.push(`${msg}: ${ex.message}`);
+              }
             }
           }
         }
 
         this.debugging = false;
+      } catch (ex) {
+        const msg = `Error running capture helper`;
+        console.error(`WebScrapBook: ${msg}`);
+        console.error(ex);
+        errors.push(`${msg}: ${ex.message}`);
       }
 
       return {
