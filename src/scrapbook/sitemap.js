@@ -155,10 +155,14 @@
       };
 
       const loadPageMap = async (elem) => {
+        const url = elem.href;
         const doc = await scrapbook.xhr({
-          url: elem.href,
+          url,
           responseType: 'document',
-        }).then(xhr => xhr.response).catch(ex => null);
+        }).then(xhr => xhr.response).catch(ex => {
+          console.error(`Unable to load page ${url}`);
+          return null;
+        });
 
         // remove the element if not (X)HTML document
         if (!(doc && SITEMAP_DOCTYPE.has(doc.contentType))) {
