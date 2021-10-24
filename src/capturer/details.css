@@ -45,7 +45,7 @@
 #optionsWrapper textarea {
   box-sizing: border-box;
   width: 100%;
-  min-height: 80px;
+  min-height: 120px;
   resize: vertical;
   word-break: break-all;
 }
