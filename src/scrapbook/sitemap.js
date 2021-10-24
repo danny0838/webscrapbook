@@ -123,7 +123,12 @@
         if (scrapbook.isUrlAbsolute(url)) {
           return false;
         }
-        if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../') || url.startsWith('?') || url.startsWith('#')) {
+        if (url.startsWith('/')
+          || url.startsWith('./')
+          || url.startsWith('../')
+          || url.includes('?')
+          || url.startsWith('#')
+        ) {
           return false;
         }
         return true;
