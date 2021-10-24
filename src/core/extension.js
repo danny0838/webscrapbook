@@ -237,6 +237,7 @@
    * @param {Object} params
    * @param {Object} params.taskInfo
    * @param {Object} [params.windowCreateData]
+   * @param {Object} [params.tabCreateData]
    * @param {boolean} [params.waitForResponse]
    * @return {Promise<(Object|Window|Tab)>}
    */
