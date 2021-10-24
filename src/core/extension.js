@@ -258,19 +258,25 @@
       // make a deep clone
       taskInfo = JSON.parse(JSON.stringify(taskInfo));
 
-      // remove duplicated URLs
+      // remove duplicates
       if (uniquify) {
+        const tabs = new Set();
         const urls = new Set();
-        taskInfo.tasks = taskInfo.tasks.filter((task) => {
-          if (task.url) {
+        taskInfo.tasks = taskInfo.tasks.filter(({tabId, url}) => {
+          if (Number.isInteger(tabId)) {
+            if (tabs.has(tabId)) {
+              return false;
+            }
+            tabs.add(tabId);
+          } else if (url) {
             try {
-              const normalizedUrl = scrapbook.normalizeUrl(task.url);
+              const normalizedUrl = scrapbook.normalizeUrl(url);
               if (urls.has(normalizedUrl)) {
                 return false;
               }
               urls.add(normalizedUrl);
             } catch (ex) {
-              throw Error(`Failed to uniquify invalid URL: ${task.url}`);
+              throw Error(`Failed to uniquify invalid URL: ${url}`);
             }
           }
           return true;
