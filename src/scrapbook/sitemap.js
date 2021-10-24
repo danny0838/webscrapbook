@@ -98,7 +98,7 @@
               }
             }
           } catch (ex) {
-            console.error(`Failed to load sitemap: ${ex.message}\nHeuristically construct a sitemap from the index file instead...`);
+            console.error(`Failed to load indexes: ${ex.message}`);
           }
         }
 
