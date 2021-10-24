@@ -45,33 +45,7 @@
   }
 
   async function capture({taskInfo, ignoreTitle, uniquify}) {
-    // remove duplicated URLs
-    if (uniquify) {
-      const urls = new Set();
-      taskInfo.tasks = taskInfo.tasks.filter((task) => {
-        if (task.url) {
-          try {
-            const normalizedUrl = scrapbook.normalizeUrl(task.url);
-            if (urls.has(normalizedUrl)) {
-              return false;
-            }
-            urls.add(normalizedUrl);
-          } catch (ex) {
-            throw Error(`Failed to uniquify invalid URL: ${task.url}`);
-          }
-        }
-        return true;
-      });
-    }
-
-    // remove title if ignoreTitle is set
-    if (ignoreTitle) {
-      for (const task of taskInfo.tasks) {
-        delete(task.title);
-      }
-    }
-
-    await scrapbook.invokeCaptureEx({taskInfo, waitForResponse: false});
+    await scrapbook.invokeCaptureEx({taskInfo, ignoreTitle, uniquify, waitForResponse: false});
   }
 
   function parseInputText(inputText) {

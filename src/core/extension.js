@@ -239,6 +239,8 @@
    *
    * @param {Object} params
    * @param {Object} params.taskInfo
+   * @param {boolean} [params.uniquify]
+   * @param {boolean} [params.ignoreTitle]
    * @param {Object} [params.windowCreateData]
    * @param {Object} [params.tabCreateData]
    * @param {boolean} [params.waitForResponse]
@@ -246,10 +248,43 @@
    */
   scrapbook.invokeCaptureEx = async function ({
     taskInfo,
+    uniquify,
+    ignoreTitle,
     windowCreateData,
     tabCreateData,
     waitForResponse = true,
   }) {
+    if (uniquify || ignoreTitle) {
+      // make a deep clone
+      taskInfo = JSON.parse(JSON.stringify(taskInfo));
+
+      // remove duplicated URLs
+      if (uniquify) {
+        const urls = new Set();
+        taskInfo.tasks = taskInfo.tasks.filter((task) => {
+          if (task.url) {
+            try {
+              const normalizedUrl = scrapbook.normalizeUrl(task.url);
+              if (urls.has(normalizedUrl)) {
+                return false;
+              }
+              urls.add(normalizedUrl);
+            } catch (ex) {
+              throw Error(`Failed to uniquify invalid URL: ${task.url}`);
+            }
+          }
+          return true;
+        });
+      }
+
+      // remove title if ignoreTitle is set
+      if (ignoreTitle) {
+        for (const task of taskInfo.tasks) {
+          delete(task.title);
+        }
+      }
+    }
+
     const missionId = scrapbook.getUuid();
     const key = {table: "captureMissionCache", id: missionId};
     await scrapbook.cache.set(key, taskInfo);
