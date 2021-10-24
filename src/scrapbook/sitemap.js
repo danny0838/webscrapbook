@@ -69,7 +69,7 @@
         document.title = scrapbook.lang('SiteMapTitle', [item.id]);
 
         const indexUrl = await book.getItemIndexUrl(item, {checkMetaRefresh: false});
-        const indexPages = new Set(['index.html']);
+        const indexPages = new Set(['']);
         if (item.type === 'site') {
           try {
             let json;
