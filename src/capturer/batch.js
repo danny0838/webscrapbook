@@ -147,11 +147,12 @@
       index: null,
       delay: null,
     }, parseInputText(inputText));
-    await scrapbook.invokeBatchCapture({
+    await scrapbook.invokeCaptureEx({
+      dialog: 'advanced',
       taskInfo,
       ignoreTitle,
       uniquify,
-    }, 'advanced');
+    });
     await exit();
   }
 

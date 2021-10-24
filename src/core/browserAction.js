@@ -184,7 +184,8 @@
 
     document.getElementById("batchCapture").addEventListener('click', async (event) => {
       const tabs = await scrapbook.getContentTabs();
-      return await scrapbook.invokeBatchCapture({
+      return await scrapbook.invokeCaptureEx({
+        dialog: 'batch',
         taskInfo: {
           tasks: tabs.map(tab => ({
             tabId: tab.id,
@@ -205,7 +206,10 @@
           });
         })
         .then((tasks) => {
-          return scrapbook.invokeBatchCapture({taskInfo: {tasks}});
+          return scrapbook.invokeCaptureEx({
+            dialog: 'batch',
+            taskInfo: {tasks},
+          });
         });
     });
 

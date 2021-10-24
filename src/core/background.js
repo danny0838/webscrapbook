@@ -754,7 +754,10 @@
             });
           })
           .then((tasks) => {
-            return scrapbook.invokeBatchCapture({taskInfo: {tasks}});
+            return scrapbook.invokeCaptureEx({
+              dialog: 'batch',
+              taskInfo: {tasks},
+            });
           });
       },
     });

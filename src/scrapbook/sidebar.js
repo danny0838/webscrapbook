@@ -817,10 +817,11 @@
           }),
         };
         if (event.ctrlKey) {
-          await scrapbook.invokeBatchCapture({
+          await scrapbook.invokeCaptureEx({
+            dialog: 'advanced',
             taskInfo,
             ignoreTitle: false,
-          }, 'advanced');
+          });
         } else {
           await scrapbook.invokeCaptureEx({taskInfo});
         }
@@ -2629,12 +2630,13 @@ Redirecting to file <a href="index.md">index.md</a>
           });
         }
 
-        await scrapbook.invokeBatchCapture({
+        await scrapbook.invokeCaptureEx({
+          dialog: 'advanced',
           taskInfo: {
             tasks,
           },
           uniquify: false,
-        }, 'advanced');
+        });
       },
 
       async move_up({itemElems: [itemElem]}) {

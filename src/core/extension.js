@@ -238,6 +238,7 @@
    * Advanced API to invoke a capture.
    *
    * @param {Object} params
+   * @param {?string} [params.config]
    * @param {Object} params.taskInfo
    * @param {boolean} [params.uniquify]
    * @param {boolean} [params.ignoreTitle]
@@ -248,12 +249,25 @@
    */
   scrapbook.invokeCaptureEx = async function ({
     taskInfo,
+    dialog = null,
     uniquify,
     ignoreTitle,
     windowCreateData,
     tabCreateData,
     waitForResponse = true,
   }) {
+    if (dialog) {
+      const missionId = scrapbook.getUuid();
+      const key = {table: "batchCaptureMissionCache", id: missionId};
+      await scrapbook.cache.set(key, {
+        taskInfo,
+        uniquify,
+        ignoreTitle,
+      });
+      const url = browser.runtime.getURL(`capturer/${dialog}.html`) + `?mid=${missionId}`;
+      return scrapbook.visitLink({url, newTab: true, inNormalWindow: true});
+    }
+
     if (uniquify || ignoreTitle) {
       // make a deep clone
       taskInfo = JSON.parse(JSON.stringify(taskInfo));
@@ -373,28 +387,11 @@
     if (taskInfo.options === null) {
       taskInfo.options = await scrapbook.getOptions("capture", null);
     }
-    return await scrapbook.invokeBatchCapture({
+    return await scrapbook.invokeCaptureEx({
+      dialog: 'advanced',
       taskInfo,
       ignoreTitle,
-    }, 'advanced');
-  };
-
-  /**
-   * Invoke batch capture with preset params.
-   *
-   * @param {Object} params
-   * @param {Object} params.taskInfo
-   * @param {boolean} [params.ignoreTitle]
-   * @param {boolean} [params.uniquify]
-   * @param {string} [type]
-   * @return {Promise<Tab>}
-   */
-  scrapbook.invokeBatchCapture = async function (params, type = 'batch') {
-    const missionId = scrapbook.getUuid();
-    const key = {table: "batchCaptureMissionCache", id: missionId};
-    await scrapbook.cache.set(key, params);
-    const url = browser.runtime.getURL(`capturer/${type}.html`) + `?mid=${missionId}`;
-    return scrapbook.visitLink({url, newTab: true, inNormalWindow: true});
+    });
   };
 
   /**
