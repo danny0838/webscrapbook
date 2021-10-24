@@ -217,12 +217,14 @@
       };
 
       const loadLinksRecursively = (rootNode, frameItems, anchorItems) => {
-        for (const elem of rootNode.querySelectorAll('frame[src], iframe[src]')) {
-          const url = elem.getAttribute('src');
+        for (const elem of rootNode.querySelectorAll('frame[src], iframe[src], object[data]')) {
+          const type = elem.nodeName.toLowerCase() === 'object' ? 'object' : 'frame';
+          const urlProp = type === 'object' ? 'data' : 'src';
+          const url = elem.getAttribute(urlProp);
           if (!checkInterlinkingUrl(url)) { continue; }
           frameItems.push({
-            url: elem.src,
-            type: 'frame',
+            url: elem[urlProp],
+            type,
           });
         }
 
