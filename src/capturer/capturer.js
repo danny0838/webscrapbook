@@ -2809,39 +2809,18 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   };
 
   capturer.downLinkFileExtFilter = function (ext, options) {
-    const REGEX_LINEFEEDS = /[\r\n]+/;
-    const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
-    const REGEX_EXT_SEP = /[,;\s]+/;
-    const compileFilters = (source) => {
-      const ret = [];
-      for (let line of source.split(REGEX_LINEFEEDS)) {
-        line = line.trim();
-        if (!line || line.startsWith("#")) { continue; }
-
-        if (REGEX_PATTERN.test(line)) {
-          try {
-            ret.push(new RegExp(`^(?:${RegExp.$1})$`, RegExp.$2));
-          } catch (ex) {
-            console.error(ex);
-          }
-        } else {
-          const regex = line.split(REGEX_EXT_SEP)
-            .filter(x => !!x)
-            .map(x => scrapbook.escapeRegExp(x))
-            .join('|');
-          ret.push(new RegExp(`^(?:${regex})$`, 'i'));
-        }
-      }
-      return ret;
-    };
     let filterText;
     let filters;
-
     const fn = capturer.downLinkFileExtFilter = (ext, options) => {
       // use the cache if the filter is not changed
       if (filterText !== options["capture.downLink.file.extFilter"]) {
         filterText = options["capture.downLink.file.extFilter"];
-        filters = compileFilters(filterText);
+        try {
+          filters = scrapbook.parseOption("capture.downLink.file.extFilter", filterText);
+        } catch (ex) {
+          console.error(`Invalid capture.downLink.file.extFilter: ${ex.message}`);
+          filters = [];
+        }
       }
 
       return filters.some((filter) => {
@@ -2852,37 +2831,18 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   };
 
   capturer.downLinkDocUrlFilter = function (url, options) {
-    const REGEX_LINEFEEDS = /[\r\n]+/;
-    const REGEX_SPACES = /\s+/;
-    const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
-    const compileFilters = (source) => {
-      const ret = [];
-      for (let line of source.split(REGEX_LINEFEEDS)) {
-        line = line.trim();
-        if (!line || line.startsWith("#")) { continue; }
-
-        line = line.split(REGEX_SPACES)[0];
-        if (REGEX_PATTERN.test(line)) {
-          try {
-            ret.push(new RegExp(RegExp.$1, RegExp.$2));
-          } catch (ex) {
-            console.error(ex);
-          }
-        } else {
-          line = scrapbook.splitUrlByAnchor(line)[0];
-          ret.push(line);
-        }
-      }
-      return ret;
-    };
     let filterText;
     let filters;
-
     const fn = capturer.downLinkDocUrlFilter = (url, options) => {
       // use the cache if the filter is not changed
       if (filterText !== options["capture.downLink.doc.urlFilter"]) {
         filterText = options["capture.downLink.doc.urlFilter"];
-        filters = compileFilters(filterText);
+        try {
+          filters = scrapbook.parseOption("capture.downLink.doc.urlFilter", filterText);
+        } catch (ex) {
+          console.error(`Invalid capture.downLink.doc.urlFilter: ${ex.message}`);
+          filters = [];
+        }
       }
 
       // match the URL without hash
@@ -2906,37 +2866,18 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
   };
 
   capturer.downLinkUrlFilter = function (url, options) {
-    const REGEX_LINEFEEDS = /[\r\n]+/;
-    const REGEX_SPACES = /\s+/;
-    const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
-    const compileFilters = (source) => {
-      const ret = [];
-      for (let line of source.split(REGEX_LINEFEEDS)) {
-        line = line.trim();
-        if (!line || line.startsWith("#")) { continue; }
-
-        line = line.split(REGEX_SPACES)[0];
-        if (REGEX_PATTERN.test(line)) {
-          try {
-            ret.push(new RegExp(RegExp.$1, RegExp.$2));
-          } catch (ex) {
-            console.error(ex);
-          }
-        } else {
-          line = scrapbook.splitUrlByAnchor(line)[0];
-          ret.push(line);
-        }
-      }
-      return ret;
-    };
     let filterText;
     let filters;
-
     const fn = capturer.downLinkUrlFilter = (url, options) => {
       // use the cache if the filter is not changed
       if (filterText !== options["capture.downLink.urlFilter"]) {
         filterText = options["capture.downLink.urlFilter"];
-        filters = compileFilters(filterText);
+        try {
+          filters = scrapbook.parseOption("capture.downLink.urlFilter", filterText);
+        } catch (ex) {
+          console.error(`Invalid capture.downLink.urlFilter: ${ex.message}`);
+          filters = [];
+        }
       }
 
       // match the URL without hash

@@ -2505,7 +2505,7 @@
     if (options["capture.helpersEnabled"] && options["capture.helpers"]) {
       let helpers;
       try {
-        helpers = JSON.parse(options["capture.helpers"]);
+        helpers = scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
       } catch (ex) {
         // skip invalid helpers
         warn(`Skipped running capture handler due to invalid definition: ${ex.message}`);
@@ -4642,15 +4642,9 @@
             this.debugging = true;
           }
 
-          if (typeof helper.pattern === 'string') {
-            const regex = this.parseRegexStr(helper.pattern);
-            if (regex) {
-              // regex pattern
-              if (!regex.test(docUrl)) {
-                continue;
-              }
-            } else {
-              // @TODO: support alternative filtering
+          if (helper.pattern) {
+            helper.pattern.lastIndex = 0;
+            if (!helper.pattern.test(docUrl)) {
               continue;
             }
           }

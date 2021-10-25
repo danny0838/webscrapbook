@@ -213,92 +213,54 @@
     }
   }
 
-  function verifySavePath(elem) {
+  function verifySaveFolder() {
+    const elem = document.getElementById("opt_capture.saveFolder");
     if (elem.value) {
       // make sure it's a valid path for browser.downloads.download
-      elem.value = elem.value.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
+      elem.value = scrapbook.parseOption("capture.saveFolder", elem.value);
     } else {
-      // reset value to placeholder
       elem.value = elem.placeholder;
     }
   }
 
-  function verifySaveFolder() {
-    const elem = document.getElementById("opt_capture.saveFolder");
-    verifySavePath(elem);
-  }
-
   function verifySaveFilename() {
     const elem = document.getElementById("opt_capture.saveFilename");
-    verifySavePath(elem);
-  }
-
-  function verifyDownLinkRules(srcText) {
-    const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
-    const fn = verifyDownLinkRules = (source) => {
-      // linefeeds are always '\n' for textarea value
-      const lines = source.split('\n');
-      for (let i = 0, I = lines.length; i < I; i++) {
-        let line = lines[i].trim();
-        if (!line || line.startsWith("#")) { continue; }
-
-        if (REGEX_PATTERN.test(line)) {
-          try {
-            new RegExp(RegExp.$1, RegExp.$2);
-          } catch (ex) {
-            return `Line ${i + 1}: ${ex.message}`;
-          }
-        }
-      }
-      return '';
-    };
-    return fn(srcText);
-  }
-
-  function verifyDownLinkUrlRules(srcText) {
-    const REGEX_SPACES = /\s+/;
-    const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
-    const fn = verifyDownLinkUrlRules = (source) => {
-      // linefeeds are always '\n' for textarea value
-      const lines = source.split('\n');
-      for (let i = 0, I = lines.length; i < I; i++) {
-        let line = lines[i].trim();
-        if (!line || line.startsWith("#")) { continue; }
-
-        line = line.split(REGEX_SPACES)[0];
-        if (REGEX_PATTERN.test(line)) {
-          try {
-            new RegExp(RegExp.$1, RegExp.$2);
-          } catch (ex) {
-            return `Line ${i + 1}: ${ex.message}`;
-          }
-        } else {
-          line = scrapbook.splitUrlByAnchor(line)[0];
-          try {
-            new URL(line);
-          } catch (ex) {
-            return `Line ${i + 1}: Invalid URL: ${line}`;
-          }
-        }
-      }
-      return '';
-    };
-    return fn(srcText);
+    if (elem.value) {
+      // make sure it's a valid path for browser.downloads.download
+      elem.value = scrapbook.parseOption("capture.saveFilename", elem.value);
+    } else {
+      elem.value = elem.placeholder;
+    }
   }
 
   function verifyDownLinkFileExtFilter() {
     const elem = document.getElementById("opt_capture.downLink.file.extFilter");
-    elem.setCustomValidity(verifyDownLinkRules(elem.value));
+    try {
+      scrapbook.parseOption("capture.downLink.file.extFilter", elem.value);
+      elem.setCustomValidity('');
+    } catch (ex) {
+      elem.setCustomValidity(ex.message);
+    }
   }
 
   function verifyDownLinkDocUrlFilter() {
     const elem = document.getElementById("opt_capture.downLink.doc.urlFilter");
-    elem.setCustomValidity(verifyDownLinkUrlRules(elem.value));
+    try {
+      scrapbook.parseOption("capture.downLink.doc.urlFilter", elem.value);
+      elem.setCustomValidity('');
+    } catch (ex) {
+      elem.setCustomValidity(ex.message);
+    }
   }
 
   function verifyDownLinkUrlFilter() {
     const elem = document.getElementById("opt_capture.downLink.urlFilter");
-    elem.setCustomValidity(verifyDownLinkUrlRules(elem.value));
+    try {
+      scrapbook.parseOption("capture.downLink.urlFilter", elem.value);
+      elem.setCustomValidity('');
+    } catch (ex) {
+      elem.setCustomValidity(ex.message);
+    }
   }
 
   function verifyCaptureHelpers() {
@@ -307,45 +269,12 @@
     const elem = document.getElementById("opt_capture.helpers");
     elem.required = enabled;
 
-    const json = elem.value;
-    if (json) {
-      try {
-        const configs = JSON.parse(json);
-        if (!Array.isArray(configs)) {
-          throw new Error('Invalid array');
-        }
-
-        for (let i = 0, I = configs.length; i < I; i++) {
-          try {
-            const config = configs[i];
-            if (typeof config !== 'object' || config === null || Array.isArray(config)) {
-              throw new Error(`Invalid object`);
-            }
-            if (config.pattern) {
-              if (typeof config.pattern !== 'string') {
-                throw new Error(`Pattern must be a string`);
-              }
-              if (/^\/(.*)\/([a-z]*)$/.test(config.pattern)) {
-                try {
-                  new RegExp(RegExp.$1, RegExp.$2);
-                } catch (ex) {
-                  throw new Error(`Invalid pattern: ${ex.message}`);
-                }
-              } else {
-                throw new Error(`Invalid pattern: Unsupported format.`);
-              }
-            }
-          } catch (ex) {
-            throw new Error(`Helper[${i}]: ${ex.message}`);
-          }
-        }
-      } catch (ex) {
-        elem.setCustomValidity(ex.message);
-        return;
-      }
+    try {
+      scrapbook.parseOption("capture.helpers", elem.value);
+      elem.setCustomValidity('');
+    } catch (ex) {
+      elem.setCustomValidity(ex.message);
     }
-
-    elem.setCustomValidity('');
   }
 
   function verifyAutoCapture() {
@@ -354,45 +283,12 @@
     const elem = document.getElementById("opt_autocapture.rules");
     elem.required = enabled;
 
-    const json = elem.value;
-    if (json) {
-      try {
-        const configs = JSON.parse(json);
-        if (!Array.isArray(configs)) {
-          throw new Error('Invalid array');
-        }
-
-        for (let i = 0, I = configs.length; i < I; i++) {
-          try {
-            const config = configs[i];
-            if (typeof config !== 'object' || config === null || Array.isArray(config)) {
-              throw new Error(`Invalid object`);
-            }
-            if (config.pattern) {
-              if (typeof config.pattern !== 'string') {
-                throw new Error(`Pattern must be a string`);
-              }
-              if (/^\/(.*)\/([a-z]*)$/.test(config.pattern)) {
-                try {
-                  new RegExp(RegExp.$1, RegExp.$2);
-                } catch (ex) {
-                  throw new Error(`Invalid pattern: ${ex.message}`);
-                }
-              } else {
-                throw new Error(`Invalid pattern: Unsupported format.`);
-              }
-            }
-          } catch (ex) {
-            throw new Error(`Config[${i}]: ${ex.message}`);
-          }
-        }
-      } catch (ex) {
-        elem.setCustomValidity(ex.message);
-        return;
-      }
+    try {
+      scrapbook.parseOption("autocapture.rules", elem.value);
+      elem.setCustomValidity('');
+    } catch (ex) {
+      elem.setCustomValidity(ex.message);
     }
-
-    elem.setCustomValidity('');
   }
 
   function renewServerUrlRequirement() {

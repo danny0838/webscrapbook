@@ -579,39 +579,11 @@
   }
 
   function configAutoCapture() {
-    const rulesText = scrapbook.getOption("autocapture.rules");
-
-    if (!rulesText) {
-      autoCaptureConfigs = [];
-      return;
-    }
-
     try {
-      autoCaptureConfigs = JSON.parse(rulesText);
-      if (!Array.isArray(autoCaptureConfigs)) {
-        throw new Error(`Configs is not an array.`);
-      }
+      autoCaptureConfigs = scrapbook.parseOption("autocapture.rules", scrapbook.getOption("autocapture.rules"));
     } catch (ex) {
       console.error(`Skipped auto-capture config of due to invalid definition: ${ex.message}`);
       autoCaptureConfigs = [];
-      return;
-    }
-
-    for (let i = 0, I = autoCaptureConfigs.length; i < I; ++i) {
-      const config = autoCaptureConfigs[i];
-
-      try {
-        if (typeof config !== 'object') {
-          throw new Error('Invalid object')
-        }
-        if (config.pattern) {
-          config.pattern = parseRegexStr(config.pattern);
-        }
-      } catch (ex) {
-        const nameStr = (config && config.name) ? ` (${config.name})` : '';
-        console.error(`Disabled auto-capture config[${i}]${nameStr}: ${ex.message}`);
-        autoCaptureConfigs[i] = {disabled: true};
-      }
     }
   }
 
