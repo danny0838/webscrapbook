@@ -164,6 +164,9 @@
       const existedTab = (await browser.tabs.query({url: singleton}))[0];
 
       if (existedTab) {
+        if (browser.windows) {
+          await browser.windows.update(existedTab.windowId, {drawAttention: true});
+        }
         return await browser.tabs.update(existedTab.id, {active: true});
       }
     }
