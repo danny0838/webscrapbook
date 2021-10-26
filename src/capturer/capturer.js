@@ -2818,7 +2818,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         try {
           filters = scrapbook.parseOption("capture.downLink.file.extFilter", filterText);
         } catch (ex) {
-          console.error(`Invalid capture.downLink.file.extFilter: ${ex.message}`);
+          capturer.warn(`Ignored invalid capture.downLink.file.extFilter: ${ex.message}`);
           filters = [];
         }
       }
@@ -2840,7 +2840,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         try {
           filters = scrapbook.parseOption("capture.downLink.doc.urlFilter", filterText);
         } catch (ex) {
-          console.error(`Invalid capture.downLink.doc.urlFilter: ${ex.message}`);
+          capturer.warn(`Ignored invalid capture.downLink.doc.urlFilter: ${ex.message}`);
           filters = [];
         }
       }
@@ -2875,7 +2875,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         try {
           filters = scrapbook.parseOption("capture.downLink.urlFilter", filterText);
         } catch (ex) {
-          console.error(`Invalid capture.downLink.urlFilter: ${ex.message}`);
+          capturer.warn(`Ignored invalid capture.downLink.urlFilter: ${ex.message}`);
           filters = [];
         }
       }
