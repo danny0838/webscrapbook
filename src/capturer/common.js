@@ -2508,7 +2508,7 @@
         helpers = scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
       } catch (ex) {
         // skip invalid helpers
-        warn(`Skipped running capture handler due to invalid definition: ${ex.message}`);
+        warn(`Ignored invalid capture.helpers: ${ex.message}`);
       }
 
       if (helpers) {

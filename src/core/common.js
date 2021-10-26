@@ -286,7 +286,7 @@ if (Node && !Node.prototype.getRootNode) {
             }
           }
         } catch (ex) {
-          throw new Error(`Helper[${i}]: ${ex.message}`);
+          throw new Error(`Helpers[${i}]: ${ex.message}`);
         }
       }
 
