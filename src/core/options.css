@@ -1,44 +1,56 @@
-details {
+#optionsWrapper details {
   margin-bottom: .5em;
   border: 1px solid #EEE;
 }
 
-details > summary {
+#optionsWrapper details > summary {
   padding: .5em;
   background-color: #CCC;
 }
 
-details > div {
+#optionsWrapper details > div {
   margin: .5em;
 }
 
-details > div > fieldset {
+#optionsWrapper details > div > fieldset {
   margin: .75em 0;
   border: 0;
   padding: 0;
 }
 
-details > div > fieldset > blockquote {
+#optionsWrapper details > div > fieldset > blockquote {
   margin: .5em 0;
   margin-__MSG_@@bidi_start_edge__: 1.5em;
   border: 0;
   padding: 0;
 }
 
-details > div > fieldset > blockquote:first-child {
+#optionsWrapper details > div > fieldset > blockquote:first-child {
   margin-top: 0;
 }
 
-details > div > fieldset > blockquote:last-child {
+#optionsWrapper details > div > fieldset > blockquote:last-child {
   margin-bottom: 0;
 }
 
-details div > textarea,
-details blockquote > textarea {
+#optionsWrapper textarea {
   box-sizing: border-box;
   width: 100%;
   min-height: 80px;
   word-break: break-all;
+}
+
+#actionsWrapper {
+  margin-top: 0.75em;
+}
+
+#downloader {
+  /* display: none; causes child a.click() not work in Firefox */
+  visibility: hidden;
+  position: absolute;
+  border: none;
+  width: 0;
+  height: 0;
 }
 
 a[data-tooltip] {
@@ -58,17 +70,4 @@ div.tooltip {
   padding: 0.5em;
   background-color: #CCCCEE;
   white-space: pre-wrap;
-}
-
-#actionsWrapper {
-  margin-top: 0.75em;
-}
-
-#downloader {
-  /* display: none; causes child a.click() not work in Firefox */
-  visibility: hidden;
-  position: absolute;
-  border: none;
-  width: 0;
-  height: 0;
 }

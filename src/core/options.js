@@ -560,18 +560,18 @@
     saveDetailStatus();
   }
 
-  function onTooltipClick(event) {
-    event.preventDefault();
-    const elem = event.currentTarget;
-    toggleTooltip(elem);
-  }
-
   function onInvalid(event) {
     const elem = event.target;
     const closedParentDetails = elem.closest('details:not([open])');
     if (closedParentDetails) {
       closedParentDetails.setAttribute('open', '');
     }
+  }
+
+  function onTooltipClick(event) {
+    event.preventDefault();
+    const elem = event.currentTarget;
+    toggleTooltip(elem);
   }
 
   window.addEventListener("DOMContentLoaded", async (event) => {
@@ -618,16 +618,16 @@
     document.getElementById("import").addEventListener("click", onImportClick);
     document.getElementById("import-input").addEventListener("change", onImportInputChange);
 
-    for (const elem of document.querySelectorAll('details')) {
+    for (const elem of document.querySelectorAll('#optionsWrapper details')) {
       elem.addEventListener("toggle", onDetailsToggle);
+    }
+
+    for (const elem of document.querySelectorAll('#optionsWrapper :valid, #optionsWrapper :invalid')) {
+      elem.addEventListener("invalid", onInvalid);
     }
 
     for (const elem of document.querySelectorAll('a[data-tooltip]')) {
       elem.addEventListener("click", onTooltipClick);
-    }
-
-    for (const elem of document.querySelectorAll(':valid, :invalid')) {
-      elem.addEventListener("invalid", onInvalid);
     }
 
     // refresh form
