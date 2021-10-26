@@ -333,8 +333,11 @@
         }
 
         // check pattern
-        if (config.pattern && !config.pattern.test(tabInfo.url)) {
-          continue;
+        if (config.pattern) {
+          config.pattern.lastIndex = 0;
+          if (!config.pattern.test(tabInfo.url)) {
+            continue;
+          }
         }
 
         // skip if duplicated
