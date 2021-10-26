@@ -50,8 +50,7 @@
 
       const wrapper = document.getElementById('options');
       if (typeof value === 'string') {
-        elem = document.createElement('input');
-        elem.type = 'text';
+        elem = document.createElement('textarea');
         elem.value = value;
       } else if (typeof value === 'boolean') {
         elem = document.createElement('input');
