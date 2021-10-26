@@ -582,7 +582,7 @@
     try {
       autoCaptureConfigs = scrapbook.parseOption("autocapture.rules", scrapbook.getOption("autocapture.rules"));
     } catch (ex) {
-      console.error(`Skipped auto-capture config of due to invalid definition: ${ex.message}`);
+      console.error(`Ignored invalid auto-capture config: ${ex.message}`);
       autoCaptureConfigs = [];
     }
   }

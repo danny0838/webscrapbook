@@ -323,7 +323,7 @@ if (Node && !Node.prototype.getRootNode) {
             }
           }
         } catch (ex) {
-          throw new Error(`Config[${i}]: ${ex.message}`);
+          throw new Error(`Configs[${i}]: ${ex.message}`);
         }
       }
 
