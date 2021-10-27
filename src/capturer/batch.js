@@ -44,8 +44,8 @@
     }
   }
 
-  async function capture({taskInfo, ignoreTitle, uniquify}) {
-    await scrapbook.invokeCaptureEx({taskInfo, ignoreTitle, uniquify, waitForResponse: false});
+  async function capture({dialog = null, taskInfo, ignoreTitle, uniquify}) {
+    await scrapbook.invokeCaptureEx({dialog, taskInfo, ignoreTitle, uniquify, waitForResponse: false});
   }
 
   function parseInputText(inputText) {
@@ -147,12 +147,7 @@
       index: null,
       delay: null,
     }, parseInputText(inputText));
-    await scrapbook.invokeCaptureEx({
-      dialog: 'advanced',
-      taskInfo,
-      ignoreTitle,
-      uniquify,
-    });
+    await capture({dialog: 'advanced', taskInfo, ignoreTitle, uniquify});
     await exit();
   }
 
