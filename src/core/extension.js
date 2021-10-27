@@ -381,9 +381,6 @@
       delay: null,
       options: null,
     }, taskInfo);
-    if (taskInfo.bookId === null) {
-      taskInfo.bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
-    }
     if (taskInfo.options === null) {
       taskInfo.options = await scrapbook.getOptions("capture", null);
     }

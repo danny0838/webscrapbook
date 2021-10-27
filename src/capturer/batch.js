@@ -142,7 +142,7 @@
     const taskInfo = Object.assign({
       tasks: [],
       mode: "",
-      bookId: (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "",
+      bookId: null,
       parentId: "root",
       index: null,
       delay: null,
