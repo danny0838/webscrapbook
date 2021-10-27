@@ -41,6 +41,48 @@
   "Cancel": {
     "message": "取消"
   },
+  "CaptureDetailCaptureInfoTypeLabel": {
+    "message": "获取方式:"
+  },
+  "CaptureDetailCaptureInfoTypeMergeCaptureLabel": {
+    "message": "合并获取"
+  },
+  "CaptureDetailCaptureInfoTypeNormalLabel": {
+    "message": "一般获取"
+  },
+  "CaptureDetailCaptureInfoTypeRecaptureLabel": {
+    "message": "重新获取"
+  },
+  "CaptureDetailCaptureInfoTypeTooltip": {
+    "message": "设定如何处理获取的内容：\n• 一般获取: 获取为新项目并置于目标项目下。\n• 重新获取: 取代目标项目的内容，更新项目类型、索引档、修改时间、来源网址、最爱图示、标题、评注，并尝试复制原网页的注记。\n• 合并获取: 把获取的网页合并至目标项目，并重建交互链接。目标项目必须为 site 类型（获取链接页面深度为 0 以上）且保存为文件夹。"
+  },
+  "CaptureDetailFillParentId": {
+    "message": "选择"
+  },
+  "CaptureDetailOptionCommentLabel": {
+    "message": "评注:"
+  },
+  "CaptureDetailOptionCommentRecapturePlaceholder": {
+    "message": "留空以维持原值"
+  },
+  "CaptureDetailOptionIndexLabel": {
+    "message": "目标位置:"
+  },
+  "CaptureDetailOptionIndexTooltip": {
+    "message": "获取项目的插入位置（从 0 开始）。留空时插入至最后面。"
+  },
+  "CaptureDetailOptionTargetLabel": {
+    "message": "目标项目:"
+  },
+  "CaptureDetailOptionTitleLabel": {
+    "message": "标题:"
+  },
+  "CaptureDetailOptionTitleRecapturePlaceholder": {
+    "message": "留空以维持原值"
+  },
+  "CaptureDetailTitle": {
+    "message": "获取网页"
+  },
   "CaptureFrame": {
     "message": "获取框架"
   },
@@ -597,6 +639,9 @@
   },
   "IndexerTitle": {
     "message": "创建网站索引"
+  },
+  "ItemPickerTitle": {
+    "message": "选择项目"
   },
   "OK": {
     "message": "确定"

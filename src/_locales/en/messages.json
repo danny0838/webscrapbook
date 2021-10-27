@@ -3,7 +3,7 @@
     "message": "Capture tasks:"
   },
   "AdvancedCaptureTasksTooltip": {
-    "message": "Input capture tasks, which is a JSON object with following properties:\n• bookId: The scrapbook ID to save the captured item into, when saving to backend server. Save to the current scrapbook if omitted.\n• parentId: The parent item ID to insert the captured item into, when saving to backend server. Insert into root item if omitted.\n• index: The position to insert the captured item at (starting from 0), when saving to backend server. Append to last if null or omitted.\n• delay: Delay time before next capture task (ms).\n• autoClose: Overriding option for how to auto-close dialog on capture complete. Available values are: “none”, “nowarn”, “noerror”, “nofailure”, and “always”.\n• mode: The capture mode. “tab” to capture tab (auto-launch a new one for URL capture); “source” to capture source, and “bookmark” to capture as a bookmark. Defaults to “tab” if specified by tabId and to “source” if specified by url.\n• options: Overriding capture options, as a JSON object, with the same format as the exported options (limited to “capture.*”).\n• tasks: An array of capture tasks, with each element being a JSON object with following properties:\n  • tabId: The tab ID to capture. Take url if omitted.\n  • frameId: The frame ID of the tab to capture. Capture the main frame if omitted.\n  • fullPage: Capture whole page if truthy; otherwise capture the selected area.\n  • url: The URL to capture.\n  • mode: Overriding task-specific capture mode.\n  • options: Overriding task-specific capture options.\n  • title: Custom item title. (when saving to backend server) (ignored if “Ignore title” is checked)\n  • comment: Custom item comment. (when saving to backend server)\n  • favIconUrl: Custom item icon. (when saving to backend server)\n  • recaptureInfo: Config for recapture, as a JSON object with bookId and itemId attributes. (when saving to backend server)\n  • mergeCaptureInfo: Config for merge capture, as a JSON object with bookId and itemId attributes. (when saving to backend server)"
+    "message": "Input capture tasks, which is a JSON object with following properties:\n• bookId: The scrapbook ID to save the captured item into, when saving to backend server. Save to the current scrapbook if omitted.\n• parentId: The parent item ID to insert the captured item into, when saving to backend server. Insert into root item if omitted.\n• index: The position to insert the captured item at (starting from 0), when saving to backend server. Append to last if null or omitted.\n• delay: Delay time before next capture task (ms).\n• autoClose: Overriding option for how to auto-close dialog on capture complete. Available values are: “none”, “nowarn”, “noerror”, “nofailure”, and “always”.\n• mode: The capture mode. “tab” to capture tab (auto-launch a new one for URL capture); “source” to capture source, and “bookmark” to capture as a bookmark. Defaults to “tab” if specified by tabId and to “source” if specified by url.\n• options: Overriding capture options, as a JSON object, with the same format as the exported options (limited to “capture.*”).\n• tasks: An array of capture tasks, with each element being a JSON object with following properties:\n  • tabId: The tab ID to capture. Take url if omitted.\n  • frameId: The frame ID of the tab to capture. Capture the main frame if omitted.\n  • fullPage: Capture whole page if truthy; otherwise capture the selected area.\n  • url: The URL to capture.\n  • mode: Overriding task-specific capture mode.\n  • options: Overriding task-specific capture options.\n  • title: Custom item title. (when saving to the backend server) (ignored if “Ignore title” is checked)\n  • comment: Custom item comment. (when saving to the backend server)\n  • favIconUrl: Custom item icon. (when saving to the backend server)\n  • recaptureInfo: Config for a re-capture, as a JSON object with bookId and itemId properties. (when saving to the backend server)\n  • mergeCaptureInfo: Config for a merge-capture, as a JSON object with bookId and itemId properties. (when saving to the backend server)"
   },
   "AdvancedCaptureTitle": {
     "message": "Advanced capture"
@@ -40,6 +40,48 @@
   },
   "Cancel": {
     "message": "Cancel"
+  },
+  "CaptureDetailCaptureInfoTypeLabel": {
+    "message": "Capture type:"
+  },
+  "CaptureDetailCaptureInfoTypeMergeCaptureLabel": {
+    "message": "Merge-capture"
+  },
+  "CaptureDetailCaptureInfoTypeNormalLabel": {
+    "message": "Normal capture"
+  },
+  "CaptureDetailCaptureInfoTypeRecaptureLabel": {
+    "message": "Re-capture"
+  },
+  "CaptureDetailCaptureInfoTypeTooltip": {
+    "message": "This determines how to handle the captured content:\n• Normal capture: Capture as a new item and insert into the target item.\n• Re-capture: Replaces the content of the target item, update its item type, index, modified time, source URL, favicon, title, and comment, and attempt to copy annotations from the original page.\n• Merge-capture: Merge captured pages and resources to the target item, and rebuild the interlinks. The target item must be site type (“depth to capture linked pages” has been 0 or more) and has been saved as folder."
+  },
+  "CaptureDetailFillParentId": {
+    "message": "Select"
+  },
+  "CaptureDetailOptionCommentLabel": {
+    "message": "Comment:"
+  },
+  "CaptureDetailOptionCommentRecapturePlaceholder": {
+    "message": "Blank to keep original"
+  },
+  "CaptureDetailOptionIndexLabel": {
+    "message": "Target position:"
+  },
+  "CaptureDetailOptionIndexTooltip": {
+    "message": "The position to insert the captured item at (starting from 0). Blank to insert at last."
+  },
+  "CaptureDetailOptionTargetLabel": {
+    "message": "Target item:"
+  },
+  "CaptureDetailOptionTitleLabel": {
+    "message": "Title:"
+  },
+  "CaptureDetailOptionTitleRecapturePlaceholder": {
+    "message": "Blank to keep original"
+  },
+  "CaptureDetailTitle": {
+    "message": "Capture page"
   },
   "CaptureFrame": {
     "message": "Capture frame"
@@ -597,6 +639,9 @@
   },
   "IndexerTitle": {
     "message": "Generate site index"
+  },
+  "ItemPickerTitle": {
+    "message": "Select item"
   },
   "OK": {
     "message": "OK"

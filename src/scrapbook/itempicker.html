@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html dir="__MSG_@@bidi_dir__">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>__MSG_ItemPickerTitle__</title>
+<link rel="stylesheet" href="tree.css">
+<link rel="stylesheet" href="bookTree.css">
+<link rel="stylesheet" href="itempicker.css">
+<style id="item-filter"></style>
+<script src="../lib/browser-polyfill.js"></script>
+<script src="../core/common.js"></script>
+<script src="../core/optionsAuto.js"></script>
+<script src="../core/extension.js"></script>
+<script src="server.js"></script>
+<script src="tree.js"></script>
+<script src="bookTree.js"></script>
+<script src="itempicker.js"></script>
+</head>
+<body hidden>
+<fieldset id="wrapper" disabled>
+<div id="tree">
+  <div id="items"></div>
+</div>
+<div id="toolbar">
+  <div>
+    <input id="btn-save" type="button" value="__MSG_OK__" accesskey="S" autocomplete="off">
+    <input id="btn-exit" type="button" value="__MSG_Cancel__" accesskey="X" autocomplete="off">
+  </div>
+</div>
+</fieldset>
+</body>
+</html>

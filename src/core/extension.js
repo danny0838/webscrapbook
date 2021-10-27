@@ -385,10 +385,58 @@
       taskInfo.options = await scrapbook.getOptions("capture", null);
     }
     return await scrapbook.invokeCaptureEx({
-      dialog: 'advanced',
+      dialog: 'detail',
       taskInfo,
       ignoreTitle,
     });
+  };
+
+  /**
+   * @param {Object} params
+   * @param {integer} params.targetTabId
+   * @param {string} params.targetCallback
+   * @param {string} [params.bookId]
+   * @param {Object} [params.windowCreateData]
+   * @param {Object} [params.tabCreateData]
+   * @return {Promise<(Object|Window|Tab)>}
+   */
+  scrapbook.invokeItemPicker = async function ({
+    targetTabId,
+    targetCallback,
+    bookId,
+    windowCreateData,
+    tabCreateData,
+  }) {
+    const u = new URL(browser.runtime.getURL("scrapbook/itempicker.html"));
+    if (typeof targetTabId !== 'undefined') {
+      u.searchParams.set('tid', targetTabId);
+    }
+    if (typeof targetCallback !== 'undefined') {
+      u.searchParams.set('cb', targetCallback);
+    }
+    if (typeof bookId !== 'undefined') {
+      u.searchParams.set('bookId', bookId);
+    }
+    const url = u.href;
+
+    // launch 
+    let tab;
+    if (browser.windows) {
+      const win = await browser.windows.getCurrent();
+      ({tabs: [tab]} = await browser.windows.create(Object.assign({
+        url,
+        type: 'popup',
+        width: 400,
+        height: 400,
+        incognito: win.incognito,
+      }, windowCreateData)));
+      return tab;
+    } else {
+      tab = await browser.tabs.create(Object.assign({
+        url,
+      }, tabCreateData));
+      return tab;
+    }
   };
 
   /**

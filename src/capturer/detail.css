@@ -1,0 +1,70 @@
+#toolbar {
+  margin-top: .75em;
+}
+
+#toolbar div:last-of-type {
+  margin-top: 1em;
+  padding: .25em;
+}
+
+#optionsWrapper details {
+  margin-bottom: .5em;
+  border: 1px solid #EEE;
+}
+
+#optionsWrapper details > summary {
+  padding: .5em;
+  background-color: #CCC;
+}
+
+#optionsWrapper details > div {
+  margin: .5em;
+}
+
+#optionsWrapper details > div > fieldset {
+  margin: .75em 0;
+  border: 0;
+  padding: 0;
+}
+
+#optionsWrapper details > div > fieldset > blockquote {
+  margin: .5em 0;
+  margin-__MSG_@@bidi_start_edge__: 1.5em;
+  border: 0;
+  padding: 0;
+}
+
+#optionsWrapper details > div > fieldset > blockquote:first-child {
+  margin-top: 0;
+}
+
+#optionsWrapper details > div > fieldset > blockquote:last-child {
+  margin-bottom: 0;
+}
+
+#optionsWrapper textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  word-break: break-all;
+}
+
+a[data-tooltip] {
+  display: inline-block;
+  color: inherit;
+  text-decoration: inherit;
+  width: 1em;
+  height: 1em;
+  background: url("../resources/question.png") no-repeat;
+  background-size: contain;
+  cursor: help;
+}
+
+div.tooltip {
+  margin: 0.5em;
+  border-radius: 0.5em;
+  padding: 0.5em;
+  background-color: #CCCCEE;
+  white-space: pre-wrap;
+}

@@ -1,0 +1,23 @@
+#wrapper {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+#tree {
+  box-sizing: border-box;
+  border: 1px ridge gray;
+  padding: .25em;
+  font-size: 16px;
+}
+
+#toolbar {
+  margin-top: .75em;
+}
+
+#toolbar div:last-of-type {
+  margin-top: 1em;
+  padding: .25em;
+}
