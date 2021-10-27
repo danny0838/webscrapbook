@@ -2630,13 +2630,7 @@ Redirecting to file <a href="index.md">index.md</a>
           });
         }
 
-        await scrapbook.invokeCaptureEx({
-          dialog: 'advanced',
-          taskInfo: {
-            tasks,
-          },
-          uniquify: false,
-        });
+        await scrapbook.invokeCaptureAs({tasks});
       },
 
       async move_up({itemElems: [itemElem]}) {
