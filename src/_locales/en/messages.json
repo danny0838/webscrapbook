@@ -656,7 +656,7 @@
     "message": "Options"
   },
   "OpenScrapBook": {
-    "message": "Open ScrapBook"
+    "message": "Open scrapbook"
   },
   "OpenScrapBookTooltip": {
     "message": "Run a backend server and configure the options properly to get it work."
@@ -1070,7 +1070,7 @@
     "message": "Capture - content"
   },
   "OptionGroupChecker": {
-    "message": "Backend server - Checker"
+    "message": "Backend server - checker"
   },
   "OptionGroupDownLink": {
     "message": "Capture - capture links"
@@ -1079,16 +1079,16 @@
     "message": "Editor"
   },
   "OptionGroupHelpers": {
-    "message": "Capture - Capture Helpers"
+    "message": "Capture - capture helpers"
   },
   "OptionGroupIndexer": {
-    "message": "Backend server - Indexer"
+    "message": "Backend server - indexer"
   },
   "OptionGroupSave": {
     "message": "Capture - saving"
   },
   "OptionGroupScrapbook": {
-    "message": "Backend server - Scrapbook"
+    "message": "Backend server - scrapbook"
   },
   "OptionGroupServer": {
     "message": "Backend server"
