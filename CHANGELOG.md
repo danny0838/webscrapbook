@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.131.0] - 2021-10-28
+* Implemented new GUI for the `Capture as` dialog.
+* Various bug fixes and minor UI improvements.
+
 ## [0.130.0] - 2021-10-23
 * Fixed an issue that some resource files such as SVG be incorrectly included for links rebuilding.
 * An error during links rebulding for a document no more terminates the capture task.
