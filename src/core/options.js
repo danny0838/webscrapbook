@@ -191,7 +191,7 @@
   function renewCaptureSaveToDetails() {
     const mode = document.getElementById("opt_capture.saveTo").value;
 
-    for (const elem of document.querySelectorAll('.captureScrapbookFolder')) {
+    for (const elem of document.querySelectorAll('.ui-captureScrapbookFolder')) {
       elem.hidden = mode !== 'folder';
     }
 
@@ -205,10 +205,10 @@
   function renewCaptureSaveAsDetails() {
     const mode = document.getElementById("opt_capture.saveAs").value;
 
-    for (const elem of document.querySelectorAll('.captureMergeCssResources')) {
+    for (const elem of document.querySelectorAll('.ui-captureMergeCssResources')) {
       elem.hidden = mode !== 'singleHtml';
     }
-    for (const elem of document.querySelectorAll('.captureSaveDataUriAsFile')) {
+    for (const elem of document.querySelectorAll('.ui-captureSaveDataUriAsFile')) {
       elem.hidden = mode === 'singleHtml';
     }
   }
@@ -477,7 +477,7 @@
 
     // hide unsupported options
     if (!browser.browserAction || !browser.browserAction.setBadgeText) {
-      for (const elem of document.querySelectorAll('.uiNotifyPageCaptured')) {
+      for (const elem of document.querySelectorAll('.ui-uiNotifyPageCaptured')) {
         elem.hidden = true;
       }
     }
