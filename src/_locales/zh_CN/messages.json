@@ -41,46 +41,46 @@
   "Cancel": {
     "message": "取消"
   },
-  "CaptureDetailCaptureInfoTypeLabel": {
+  "CaptureDetailsCaptureInfoTypeLabel": {
     "message": "获取方式:"
   },
-  "CaptureDetailCaptureInfoTypeMergeCaptureLabel": {
+  "CaptureDetailsCaptureInfoTypeMergeCaptureLabel": {
     "message": "合并获取"
   },
-  "CaptureDetailCaptureInfoTypeNormalLabel": {
+  "CaptureDetailsCaptureInfoTypeNormalLabel": {
     "message": "一般获取"
   },
-  "CaptureDetailCaptureInfoTypeRecaptureLabel": {
+  "CaptureDetailsCaptureInfoTypeRecaptureLabel": {
     "message": "重新获取"
   },
-  "CaptureDetailCaptureInfoTypeTooltip": {
+  "CaptureDetailsCaptureInfoTypeTooltip": {
     "message": "设定如何处理获取的内容：\n• 一般获取: 获取为新项目并置于目标项目下。\n• 重新获取: 取代目标项目的内容，更新项目类型、索引档、修改时间、来源网址、最爱图示、标题、评注，并尝试复制原网页的注记。\n• 合并获取: 把获取的网页合并至目标项目，并重建交互链接。目标项目必须为 site 类型（获取链接页面深度为 0 以上）且保存为文件夹。"
   },
-  "CaptureDetailFillParentId": {
+  "CaptureDetailsFillParentId": {
     "message": "选择"
   },
-  "CaptureDetailOptionCommentLabel": {
+  "CaptureDetailsOptionCommentLabel": {
     "message": "评注:"
   },
-  "CaptureDetailOptionCommentRecapturePlaceholder": {
+  "CaptureDetailsOptionCommentRecapturePlaceholder": {
     "message": "留空以维持原值"
   },
-  "CaptureDetailOptionIndexLabel": {
+  "CaptureDetailsOptionIndexLabel": {
     "message": "目标位置:"
   },
-  "CaptureDetailOptionIndexTooltip": {
+  "CaptureDetailsOptionIndexTooltip": {
     "message": "获取项目的插入位置（从 0 开始）。留空时插入至最后面。"
   },
-  "CaptureDetailOptionTargetLabel": {
+  "CaptureDetailsOptionTargetLabel": {
     "message": "目标项目:"
   },
-  "CaptureDetailOptionTitleLabel": {
+  "CaptureDetailsOptionTitleLabel": {
     "message": "标题:"
   },
-  "CaptureDetailOptionTitleRecapturePlaceholder": {
+  "CaptureDetailsOptionTitleRecapturePlaceholder": {
     "message": "留空以维持原值"
   },
-  "CaptureDetailTitle": {
+  "CaptureDetailsTitle": {
     "message": "获取网页"
   },
   "CaptureFrame": {

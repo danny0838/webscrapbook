@@ -41,46 +41,46 @@
   "Cancel": {
     "message": "取消"
   },
-  "CaptureDetailCaptureInfoTypeLabel": {
+  "CaptureDetailsCaptureInfoTypeLabel": {
     "message": "擷取方式:"
   },
-  "CaptureDetailCaptureInfoTypeMergeCaptureLabel": {
+  "CaptureDetailsCaptureInfoTypeMergeCaptureLabel": {
     "message": "合併擷取"
   },
-  "CaptureDetailCaptureInfoTypeNormalLabel": {
+  "CaptureDetailsCaptureInfoTypeNormalLabel": {
     "message": "一般擷取"
   },
-  "CaptureDetailCaptureInfoTypeRecaptureLabel": {
+  "CaptureDetailsCaptureInfoTypeRecaptureLabel": {
     "message": "重新擷取"
   },
-  "CaptureDetailCaptureInfoTypeTooltip": {
+  "CaptureDetailsCaptureInfoTypeTooltip": {
     "message": "設定如何處理擷取的內容：\n• 一般擷取: 擷取為新項目並置於目標項目下。\n• 重新擷取: 取代目標項目的內容，更新項目類型、索引檔、修改時間、來源網址、最愛圖示、標題、評註，並嘗試複製原網頁的註記。\n• 合併擷取: 把擷取的網頁合併至目標項目，並重建交互連結。目標項目必須為 site 類型（擷取連結頁面深度為 0 以上）且儲存為資料夾。"
   },
-  "CaptureDetailFillParentId": {
+  "CaptureDetailsFillParentId": {
     "message": "選擇"
   },
-  "CaptureDetailOptionCommentLabel": {
+  "CaptureDetailsOptionCommentLabel": {
     "message": "評註:"
   },
-  "CaptureDetailOptionCommentRecapturePlaceholder": {
+  "CaptureDetailsOptionCommentRecapturePlaceholder": {
     "message": "留空以維持原值"
   },
-  "CaptureDetailOptionIndexLabel": {
+  "CaptureDetailsOptionIndexLabel": {
     "message": "目標位置:"
   },
-  "CaptureDetailOptionIndexTooltip": {
+  "CaptureDetailsOptionIndexTooltip": {
     "message": "擷取項目的插入位置（從 0 開始）。留空時插入至最後面。"
   },
-  "CaptureDetailOptionTargetLabel": {
+  "CaptureDetailsOptionTargetLabel": {
     "message": "目標項目:"
   },
-  "CaptureDetailOptionTitleLabel": {
+  "CaptureDetailsOptionTitleLabel": {
     "message": "標題:"
   },
-  "CaptureDetailOptionTitleRecapturePlaceholder": {
+  "CaptureDetailsOptionTitleRecapturePlaceholder": {
     "message": "留空以維持原值"
   },
-  "CaptureDetailTitle": {
+  "CaptureDetailsTitle": {
     "message": "擷取網頁"
   },
   "CaptureFrame": {

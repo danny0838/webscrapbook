@@ -41,46 +41,46 @@
   "Cancel": {
     "message": "Cancel"
   },
-  "CaptureDetailCaptureInfoTypeLabel": {
+  "CaptureDetailsCaptureInfoTypeLabel": {
     "message": "Capture type:"
   },
-  "CaptureDetailCaptureInfoTypeMergeCaptureLabel": {
+  "CaptureDetailsCaptureInfoTypeMergeCaptureLabel": {
     "message": "Merge-capture"
   },
-  "CaptureDetailCaptureInfoTypeNormalLabel": {
+  "CaptureDetailsCaptureInfoTypeNormalLabel": {
     "message": "Normal capture"
   },
-  "CaptureDetailCaptureInfoTypeRecaptureLabel": {
+  "CaptureDetailsCaptureInfoTypeRecaptureLabel": {
     "message": "Re-capture"
   },
-  "CaptureDetailCaptureInfoTypeTooltip": {
+  "CaptureDetailsCaptureInfoTypeTooltip": {
     "message": "This determines how to handle the captured content:\n• Normal capture: Capture as a new item and insert into the target item.\n• Re-capture: Replaces the content of the target item, update its item type, index, modified time, source URL, favicon, title, and comment, and attempt to copy annotations from the original page.\n• Merge-capture: Merge captured pages and resources to the target item, and rebuild the interlinks. The target item must be site type (“depth to capture linked pages” has been 0 or more) and has been saved as folder."
   },
-  "CaptureDetailFillParentId": {
+  "CaptureDetailsFillParentId": {
     "message": "Select"
   },
-  "CaptureDetailOptionCommentLabel": {
+  "CaptureDetailsOptionCommentLabel": {
     "message": "Comment:"
   },
-  "CaptureDetailOptionCommentRecapturePlaceholder": {
+  "CaptureDetailsOptionCommentRecapturePlaceholder": {
     "message": "Blank to keep original"
   },
-  "CaptureDetailOptionIndexLabel": {
+  "CaptureDetailsOptionIndexLabel": {
     "message": "Target position:"
   },
-  "CaptureDetailOptionIndexTooltip": {
+  "CaptureDetailsOptionIndexTooltip": {
     "message": "The position to insert the captured item at (starting from 0). Blank to insert at last."
   },
-  "CaptureDetailOptionTargetLabel": {
+  "CaptureDetailsOptionTargetLabel": {
     "message": "Target item:"
   },
-  "CaptureDetailOptionTitleLabel": {
+  "CaptureDetailsOptionTitleLabel": {
     "message": "Title:"
   },
-  "CaptureDetailOptionTitleRecapturePlaceholder": {
+  "CaptureDetailsOptionTitleRecapturePlaceholder": {
     "message": "Blank to keep original"
   },
-  "CaptureDetailTitle": {
+  "CaptureDetailsTitle": {
     "message": "Capture page"
   },
   "CaptureFrame": {

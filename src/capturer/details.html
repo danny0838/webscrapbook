@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>__MSG_CaptureDetailTitle__</title>
-<link rel="stylesheet" href="detail.css">
+<title>__MSG_CaptureDetailsTitle__</title>
+<link rel="stylesheet" href="details.css">
 <script src="../lib/browser-polyfill.js"></script>
 <script src="../core/common.js"></script>
 <script src="../core/optionsAuto.js"></script>
 <script src="../core/extension.js"></script>
 <script src="../scrapbook/server.js"></script>
-<script src="detail.js"></script>
+<script src="details.js"></script>
 </head>
 <body hidden>
 <form id="wrapper">
@@ -19,45 +19,45 @@
     <summary>__MSG_OptionGroupSave__</summary>
     <div>
       <fieldset>
-        <label for="captureInfoType">__MSG_CaptureDetailCaptureInfoTypeLabel__</label>
+        <label for="captureInfoType">__MSG_CaptureDetailsCaptureInfoTypeLabel__</label>
         <select id="captureInfoType">
-          <option value="normal">__MSG_CaptureDetailCaptureInfoTypeNormalLabel__</option>
-          <option value="recapture">__MSG_CaptureDetailCaptureInfoTypeRecaptureLabel__</option>
-          <option value="mergeCapture">__MSG_CaptureDetailCaptureInfoTypeMergeCaptureLabel__</option>
+          <option value="normal">__MSG_CaptureDetailsCaptureInfoTypeNormalLabel__</option>
+          <option value="recapture">__MSG_CaptureDetailsCaptureInfoTypeRecaptureLabel__</option>
+          <option value="mergeCapture">__MSG_CaptureDetailsCaptureInfoTypeMergeCaptureLabel__</option>
         </select>
-        <a href="javascript:" data-tooltip="__MSG_CaptureDetailCaptureInfoTypeTooltip__"></a>
+        <a href="javascript:" data-tooltip="__MSG_CaptureDetailsCaptureInfoTypeTooltip__"></a>
       </fieldset>
       <fieldset>
-        <label for="tasks_parentId">__MSG_CaptureDetailOptionTargetLabel__</label>
+        <label for="tasks_parentId">__MSG_CaptureDetailsOptionTargetLabel__</label>
         <select id="tasks_bookId"></select>
         <input type="text" id="tasks_parentId" placeholder="root">
-        <input id="fill-tasks_parentId" type="button" value="__MSG_CaptureDetailFillParentId__">
+        <input id="fill-tasks_parentId" type="button" value="__MSG_CaptureDetailsFillParentId__">
       </fieldset>
       <fieldset class="ui-captureInfoType-normal">
-        <label for="tasks_index">__MSG_CaptureDetailOptionIndexLabel__</label>
+        <label for="tasks_index">__MSG_CaptureDetailsOptionIndexLabel__</label>
         <input type="number" id="tasks_index" min="0" step="1" style="width: 3em;">
-        <a href="javascript:" data-tooltip="__MSG_CaptureDetailOptionIndexTooltip__"></a>
+        <a href="javascript:" data-tooltip="__MSG_CaptureDetailsOptionIndexTooltip__"></a>
       </fieldset>
       <fieldset class="ui-captureInfoType-normal">
-        <label for="task_title">__MSG_CaptureDetailOptionTitleLabel__</label>
+        <label for="task_title">__MSG_CaptureDetailsOptionTitleLabel__</label>
         <input type="text" id="task_title" list="task_title-preset">
         <datalist id="task_title-preset"></datalist>
       </fieldset>
       <fieldset class="ui-captureInfoType-normal">
-        <label for="task_comment">__MSG_CaptureDetailOptionCommentLabel__</label>
+        <label for="task_comment">__MSG_CaptureDetailsOptionCommentLabel__</label>
         <blockquote>
           <textarea id="task_comment"></textarea>
         </blockquote>
       </fieldset>
       <fieldset class="ui-captureInfoType-recapture">
-        <label for="captureInfoType-recapture-task_title">__MSG_CaptureDetailOptionTitleLabel__</label>
-        <input type="text" id="captureInfoType-recapture-task_title" placeholder="__MSG_CaptureDetailOptionTitleRecapturePlaceholder__" list="captureInfoType-recapture-task_title-preset">
+        <label for="captureInfoType-recapture-task_title">__MSG_CaptureDetailsOptionTitleLabel__</label>
+        <input type="text" id="captureInfoType-recapture-task_title" placeholder="__MSG_CaptureDetailsOptionTitleRecapturePlaceholder__" list="captureInfoType-recapture-task_title-preset">
         <datalist id="captureInfoType-recapture-task_title-preset"></datalist>
       </fieldset>
       <fieldset class="ui-captureInfoType-recapture">
-        <label for="captureInfoType-recapture-task_comment">__MSG_CaptureDetailOptionCommentLabel__</label>
+        <label for="captureInfoType-recapture-task_comment">__MSG_CaptureDetailsOptionCommentLabel__</label>
         <blockquote>
-          <textarea id="captureInfoType-recapture-task_comment" placeholder="__MSG_CaptureDetailOptionCommentRecapturePlaceholder__"></textarea>
+          <textarea id="captureInfoType-recapture-task_comment" placeholder="__MSG_CaptureDetailsOptionCommentRecapturePlaceholder__"></textarea>
         </blockquote>
       </fieldset>
     </div>

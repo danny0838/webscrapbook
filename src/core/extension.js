@@ -385,7 +385,7 @@
       taskInfo.options = await scrapbook.getOptions("capture", null);
     }
     return await scrapbook.invokeCaptureEx({
-      dialog: 'detail',
+      dialog: 'details',
       taskInfo,
       ignoreTitle,
     });

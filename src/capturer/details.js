@@ -1,14 +1,14 @@
 /******************************************************************************
  *
- * Script for detail.html.
+ * Script for details.html.
  *
  * @require {Object} scrapbook
- * @public {Object} detail
+ * @public {Object} details
  *****************************************************************************/
 
 (function (root, factory) {
   // Browser globals
-  root.detail = factory(
+  root.details = factory(
     root.isDebug,
     root.browser,
     root.scrapbook,
@@ -261,13 +261,13 @@
   }
 
   function onFormChange(event) {
-    detail.updateUi();
+    details.updateUi();
   }
 
   async function onFillParentIdClick(event) {
     await scrapbook.invokeItemPicker({
       targetTabId: (await browser.tabs.getCurrent()).id,
-      targetCallback: 'detail.pickItem',
+      targetCallback: 'details.pickItem',
       bookId: getOptionFromElement(document.getElementById('tasks_bookId')),
     });
   }
@@ -282,7 +282,7 @@
   }
 
   scrapbook.addMessageListener((message, sender) => {
-    if (!message.cmd.startsWith("detail.")) { return false; }
+    if (!message.cmd.startsWith("details.")) { return false; }
     return true;
   });
 
