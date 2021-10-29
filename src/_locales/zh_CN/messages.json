@@ -83,6 +83,14 @@
   "CaptureDetailsTitle": {
     "message": "获取网页"
   },
+  "CaptureDetailsTitleForSource": {
+    "message": "获取网页: $SOURCE$",
+    "placeholders": {
+      "source": {
+        "content": "$1"
+      }
+    }
+  },
   "CaptureFrame": {
     "message": "获取框架"
   },

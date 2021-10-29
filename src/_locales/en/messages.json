@@ -83,6 +83,14 @@
   "CaptureDetailsTitle": {
     "message": "Capture page"
   },
+  "CaptureDetailsTitleForSource": {
+    "message": "Capture page: $SOURCE$",
+    "placeholders": {
+      "source": {
+        "content": "$1"
+      }
+    }
+  },
   "CaptureFrame": {
     "message": "Capture frame"
   },

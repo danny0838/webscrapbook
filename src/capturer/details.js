@@ -34,6 +34,22 @@
         gTaskInfo.options = gTaskInfo.options || {};
       }
 
+      showSoureInTitle: {
+        let source;
+        if (Number.isInteger(gTaskInfo.tasks[0].tabId)) {
+          const tabId = gTaskInfo.tasks[0].tabId;
+          const frameId = Number.isInteger(gTaskInfo.tasks[0].frameId) ? ':' + gTaskInfo.tasks[0].frameId : '';
+          const title = gTaskInfo.tasks[0].title ? ' ' + gTaskInfo.tasks[0].title : 
+              gTaskInfo.tasks[0].url ? ' ' + gTaskInfo.tasks[0].url : '';
+          source = `[${tabId}${frameId}]${title}`;
+        } else if (gTaskInfo.tasks[0].url) {
+          source = gTaskInfo.tasks[0].url;
+        }
+        if (source) {
+          document.title = scrapbook.lang('CaptureDetailsTitleForSource', [source]);
+        }
+      }
+
       const toServer = gTaskInfo.options["capture.saveTo"] === "server"
         || gTaskInfo.tasks[0].recaptureInfo || gTaskInfo.tasks[0].mergeCaptureInfo;
       if (toServer) {

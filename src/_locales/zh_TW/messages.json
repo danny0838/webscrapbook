@@ -83,6 +83,14 @@
   "CaptureDetailsTitle": {
     "message": "擷取網頁"
   },
+  "CaptureDetailsTitleForSource": {
+    "message": "擷取網頁: $SOURCE$",
+    "placeholders": {
+      "source": {
+        "content": "$1"
+      }
+    }
+  },
   "CaptureFrame": {
     "message": "擷取框架頁"
   },
