@@ -5,6 +5,7 @@
  * @require {Object} scrapbook
  * @require {Object} server
  * @require {Class} CustomTree
+ * @public {Object} search
  *****************************************************************************/
 
 (function (root, factory) {

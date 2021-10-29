@@ -3,6 +3,7 @@
  * Script for advanced.html.
  *
  * @require {Object} scrapbook
+ * @public {Object} advanced
  *****************************************************************************/
 
 (function (root, factory) {

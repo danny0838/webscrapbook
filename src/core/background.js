@@ -2,6 +2,7 @@
  *
  * The background script for the main (auto-generated) background page.
  *
+ * @public {Object} background
  *****************************************************************************/
 
 (function (root, factory) {

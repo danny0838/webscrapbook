@@ -4,6 +4,7 @@
  *
  * @require {boolean} isDebug
  * @require {Object} scrapbook
+ * @public {Object} editor
  *****************************************************************************/
 
 (function (root, factory) {

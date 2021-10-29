@@ -4,6 +4,7 @@
  *
  * @require {Object} scrapbook
  * @require {Object} server
+ * @public {Object} controller
  *****************************************************************************/
 
 (function (root, factory) {

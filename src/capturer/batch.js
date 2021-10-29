@@ -3,6 +3,7 @@
  * Script for batch.html.
  *
  * @require {Object} scrapbook
+ * @public {Object} batch
  *****************************************************************************/
 
 (function (root, factory) {

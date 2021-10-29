@@ -3,6 +3,7 @@
  * Script for detail.html.
  *
  * @require {Object} scrapbook
+ * @public {Object} detail
  *****************************************************************************/
 
 (function (root, factory) {

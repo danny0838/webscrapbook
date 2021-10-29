@@ -4,6 +4,7 @@
  *
  * @require {Object} scrapbook
  * @require {Object} sidebar
+ * @override {string} sidebar.mode
  *****************************************************************************/
 
 (function (root, factory) {

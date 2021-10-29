@@ -6,6 +6,7 @@
  * @require {Object} server
  * @require {Class} CustomTree
  * @require {Class} MapWithDefault
+ * @public {Object} searchCaptures
  *****************************************************************************/
 
 (function (root, factory) {

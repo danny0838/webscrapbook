@@ -5,6 +5,7 @@
  * @require {Object} scrapbook
  * @require {Object} server
  * @require {Class} Tree
+ * @public {Object} sidebar
  *****************************************************************************/
 
 (function (root, factory) {
