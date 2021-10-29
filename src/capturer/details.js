@@ -60,6 +60,12 @@
         document.getElementById('group_save').hidden = true;
       }
 
+      if (gTaskInfo.options["capture.saveAs"] === "singleHtml") {
+        for (const elem of document.querySelectorAll(`.ui-captureDownLink-inDepth`)) {
+          elem.hidden = true;
+        }
+      }
+
       for (const elem of document.querySelectorAll('[id^="tasks_"]')) {
         const key = elem.id.slice(6);
         const value = gTaskInfo[key];
