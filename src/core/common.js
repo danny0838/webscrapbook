@@ -651,6 +651,16 @@ if (Node && !Node.prototype.getRootNode) {
     });
   };
 
+  /**
+   * Clear for storage.sync and storage.local.
+   *
+   * @param {string[]} keys
+   */
+  scrapbook.clearOptions = async function (keys) {
+    await browser.storage.sync.remove(keys).catch((ex) => {});
+    return await browser.storage.local.remove(keys);
+  };
+
 
   /****************************************************************************
    * Cache system

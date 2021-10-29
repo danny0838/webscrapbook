@@ -404,17 +404,32 @@
 
     // save options
     const keys = {};
+    const keysToRemove = [];
+
     for (const key in scrapbook.DEFAULT_OPTIONS) {
+      const value = getOptionFromDocument(key);
+
       // Overwrite only keys with a defined value so that
       // keys not listed in the options page are not nullified.
       // In Chromium, storageArea.set({key: undefined}) does not store to key.
       // In Firefox, storageArea.set({key: undefined}) stores null to key.
-      const value = getOptionFromDocument(key);
-      if (typeof value !== "undefined") {
-        keys[key] = value;
+      if (typeof value === "undefined") {
+        continue;
       }
+
+      // Remove the key if the value is identical to the default, so that the
+      // value will be updated if the default value changes in the future.
+      if (JSON.stringify(value) === JSON.stringify(scrapbook.DEFAULT_OPTIONS[key])) {
+        keysToRemove.push(key);
+        continue;
+      }
+
+      keys[key] = value;
     }
+
     await scrapbook.setOptions(keys);
+    await scrapbook.clearOptions(keysToRemove);
+
     return closeWindow();
   }
 
