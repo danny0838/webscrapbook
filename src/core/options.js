@@ -31,7 +31,9 @@
     const elem = document.getElementById(OPTION_PREFIX + key);
     if (!elem) { return; }
 
-    if (elem.matches('input[type="checkbox"]')) {
+    if (elem.matches('input[type="hidden"]')) {
+      return JSON.parse(elem.value);
+    } else if (elem.matches('input[type="checkbox"]')) {
       return elem.checked;
     } else if (elem.matches('input[type="number"]')) {
       return elem.validity.valid && elem.value !== "" ? elem.valueAsNumber : null;
@@ -49,28 +51,15 @@
       if (!includeHidden) { return; }
 
       const wrapper = document.getElementById('options');
-      if (typeof value === 'string') {
-        elem = document.createElement('textarea');
-        elem.value = value;
-      } else if (typeof value === 'boolean') {
-        elem = document.createElement('input');
-        elem.type = 'checkbox';
-        elem.checked = value;
-      } else if (typeof value === 'number') {
-        elem = document.createElement('input');
-        elem.type = 'number';
-        elem.value = value;
-      } else if (value === null) {
-        // null is only used for an unset number
-        elem = document.createElement('input');
-        elem.type = 'number';
-      }
+      elem = document.createElement('input');
+      elem.type = 'hidden';
       elem.id = OPTION_PREFIX + key;
-      elem.hidden = true;
       wrapper.appendChild(elem);
     }
 
-    if (elem.matches('input[type="checkbox"]')) {
+    if (elem.matches('input[type="hidden"]')) {
+      elem.value = JSON.stringify(value);
+    } else if (elem.matches('input[type="checkbox"]')) {
       elem.checked = !!value;
     } else {
       elem.value = value;
