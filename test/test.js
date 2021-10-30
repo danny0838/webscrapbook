@@ -1842,6 +1842,53 @@ async function test_capture_headless() {
 }
 
 /**
+ * Capture as file if header content-disposition is attachment.
+ *
+ * capturer.captureRemote
+ */
+async function test_capture_headless2() {
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless2/attachment.py`,
+    mode: "source",
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files["red.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  assert(indexFile);
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=attachment.html"]'));
+
+  var indexFile = zip.file('attachment.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="./red.bmp"]'));
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless2/refresh.html`,
+    mode: "source",
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files["red.bmp"]);
+
+  var indexFile = zip.file('index.html');
+  assert(indexFile);
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv="refresh"][content="0; url=attachment.html"]'));
+
+  var indexFile = zip.file('attachment.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="./red.bmp"]'));
+}
+
+/**
  * Check if captureBookmark works
  *
  * capturer.captureBookmark
@@ -8832,6 +8879,116 @@ async function test_capture_downLink14() {
     ]
   };
   assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+}
+
+/**
+ * An attachment page should be download as a file and not captured.
+ *
+ * capture.downLink.file.mode
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink15() {
+  /* downLink */
+  var options = {
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": "html",
+    "capture.downLink.doc.depth": 0,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink10/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.file('red.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink10/attachment1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `attachment1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `attachment2.html#in-depth`);
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('attachment1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="./red.bmp"]'));
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('attachment2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="./red.bmp"]'));
+
+  /* inDepth */
+  var options = {
+    "capture.downLink.file.mode": "none",
+    "capture.downLink.doc.depth": 1,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink10/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.file('attachment2.py'));
+  assert(zip.file('red.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `attachment1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink10/attachment1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink10/attachment2.py#in-depth`);
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('attachment1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="red.bmp"]'));
+
+  /* downLink & inDepth */
+  var options = {
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": "html",
+    "capture.downLink.doc.depth": 1,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink10/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('red.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `attachment1-1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `attachment1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `attachment2.html#in-depth`);
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('attachment1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="red.bmp"]'));
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('attachment1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="./red.bmp"]'));
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('attachment2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="./red.bmp"]'));
 }
 
 /**

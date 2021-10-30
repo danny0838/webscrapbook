@@ -1109,6 +1109,7 @@
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl]
+   * @param {boolean} [params.isAttachment] - the resource is known to be an attachment
    * @param {boolean} [params.downLink] - is downLink mode (check filter,
    *     and capture as file or register in linkedPages)
    * @param {boolean} [params.downLinkPage] - is a page previously registered in linkedPages
@@ -1121,7 +1122,7 @@
 
     const {downLink = false, downLinkPage = false, settings, options} = params;
     let {timeId, depth} = settings;
-    let {url: sourceUrl, refUrl} = params;
+    let {url: sourceUrl, refUrl, isAttachment} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     let downLinkDoc = downLink && parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options["capture.saveAs"] !== "singleHtml";
@@ -1180,6 +1181,16 @@
 
         if (fetchResponse.error) {
           throw new Error(fetchResponse.error);
+        }
+
+        if (!isAttachment && fetchResponse.headers.isAttachment) {
+          isAttachment = true;
+        }
+
+        // treat as non-document if it's an attachment
+        if (isAttachment) {
+          doc = null;
+          break;
         }
 
         doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
@@ -3839,6 +3850,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           for (const elem of rootNode.querySelectorAll('a[*|href]')) {
             for (const attr of REBUILD_LINK_SVG_HREF_ATTRS) {
               if (!elem.hasAttribute(attr)) { continue; }
+              if (elem.hasAttribute('download')) { continue; }
               rewriteHref(elem, attr, filenameMap, linkedPages);
             }
           }
@@ -3847,6 +3859,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         case 'html':
         case '#document-fragment': {
           for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
+            if (elem.hasAttribute('download')) { continue; }
             rewriteHref(elem, 'href', filenameMap, linkedPages);
           }
           for (const elem of rootNode.querySelectorAll('meta[http-equiv="refresh" i][content]')) {

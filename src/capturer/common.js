@@ -340,6 +340,7 @@
             const response = await capturer.invoke("captureUrl", {
               url,
               refUrl,
+              isAttachment: elem.hasAttribute('download'),
               downLink: true,
               settings: downLinkSettings,
               options,
