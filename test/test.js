@@ -8592,7 +8592,7 @@ async function test_capture_downLink13() {
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink13() {
+async function test_capture_downLink14() {
   var options = {
     "capture.downLink.doc.depth": 1,
     "capture.saveDataUriAsFile": true,
