@@ -1252,6 +1252,7 @@
                   // special handling for data URL
                   if (sourceUrl.startsWith("data:") &&
                       !options["capture.saveDataUriAsFile"] &&
+                      !(frame.nodeName.toLowerCase() === 'iframe' && options["capture.saveDataUriAsSrcdoc"]) &&
                       options["capture.saveAs"] !== "singleHtml") {
                     // Save frame document and inner URLs as data URL since data URL
                     // is null origin and no relative URL is allowed in it.
@@ -2265,7 +2266,7 @@
     const registry = await capturer.invoke("registerDocument", {
       docUrl,
       mime,
-      role: options["capture.saveAs"] === "singleHtml" ? undefined :
+      role: options["capture.saveAs"] === "singleHtml" || (docUrl.startsWith("data:") && !options["capture.saveDataUriAsFile"]) ? undefined :
           (isMainFrame || isHeadless) ? "document" : `document-${scrapbook.getUuid()}`,
       settings,
       options,

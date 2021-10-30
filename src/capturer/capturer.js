@@ -3540,77 +3540,93 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @return {Promise<downloadBlobResponse>}
    */
   capturer.downloadBlob = async function (params) {
-    isDebug && console.debug("call: downloadBlob", params);
+    const makeDataUri = async (blob, filename) => {
+      const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(blob.type);
 
-    const {filename, sourceUrl, settings, options} = params;
-    let {blob} = params;
-    const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-    const {timeId} = settings;
-
-    if (!(blob instanceof Blob)) {
-      const ab = scrapbook.byteStringToArrayBuffer(blob.data);
-      blob = new Blob([ab], {type: blob.type});
-    }
-
-    switch (options["capture.saveAs"]) {
-      case "singleHtml": {
-        const {type: mime, parameters: {charset}} = scrapbook.parseHeaderContentType(blob.type);
-
-        let dataUri;
-        if (charset || scrapbook.mimeIsText(mime)) {
-          if (charset && /utf-?8/i.test(charset)) {
-            const str = await scrapbook.readFileAsText(blob, "UTF-8");
-            dataUri = scrapbook.unicodeToDataUri(str, mime);
-          } else {
-            const str = await scrapbook.readFileAsText(blob, false);
-            dataUri = scrapbook.byteStringToDataUri(str, mime, charset);
-          }
+      let dataUri;
+      if (charset || scrapbook.mimeIsText(mime)) {
+        if (charset && /utf-?8/i.test(charset)) {
+          const str = await scrapbook.readFileAsText(blob, "UTF-8");
+          dataUri = scrapbook.unicodeToDataUri(str, mime);
         } else {
-          dataUri = await scrapbook.readFileAsDataURL(blob);
-          if (dataUri === "data:") {
-            // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
-            dataUri = `data:${mime};base64,`;
-          }
+          const str = await scrapbook.readFileAsText(blob, false);
+          dataUri = scrapbook.byteStringToDataUri(str, mime, charset);
+        }
+      } else {
+        dataUri = await scrapbook.readFileAsDataURL(blob);
+        if (dataUri === "data:") {
+          // Chromium returns "data:" if the blob is zero byte. Add the mimetype.
+          dataUri = `data:${mime};base64,`;
+        }
+      }
+
+      if (filename) {
+        dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(filename) + m);
+      }
+
+      return {filename, url: dataUri};
+    };
+
+    const downloadBlob = capturer.downloadBlob = async function (params) {
+      isDebug && console.debug("call: downloadBlob", params);
+
+      const {filename, sourceUrl, settings, options} = params;
+      let {blob} = params;
+      const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
+      const {timeId} = settings;
+
+      if (!(blob instanceof Blob)) {
+        const ab = scrapbook.byteStringToArrayBuffer(blob.data);
+        blob = new Blob([ab], {type: blob.type});
+      }
+
+      // special handling for data URI
+      // if not to save as file, convert the blob to a data URL
+      if (sourceUrlMain.startsWith("data:")) {
+        if (!(options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml")) {
+          return await makeDataUri(blob, filename);
+        }
+      }
+
+      switch (options["capture.saveAs"]) {
+        case "singleHtml": {
+          return await makeDataUri(blob, filename);
         }
 
-        if (filename) {
-          dataUri = dataUri.replace(/(;base64)?,/, m => ";filename=" + encodeURIComponent(filename) + m);
+        case "zip": {
+          await capturer.saveFileCache({
+            timeId,
+            path: filename,
+            url: sourceUrlMain,
+            blob,
+          });
+          return {filename, url: scrapbook.escapeFilename(filename)};
         }
 
-        return {filename, url: dataUri};
-      }
+        case "maff": {
+          await capturer.saveFileCache({
+            timeId,
+            path: timeId + "/" + filename,
+            url: sourceUrlMain,
+            blob,
+          });
+          return {filename, url: scrapbook.escapeFilename(filename)};
+        }
 
-      case "zip": {
-        await capturer.saveFileCache({
-          timeId,
-          path: filename,
-          url: sourceUrlMain,
-          blob,
-        });
-        return {filename, url: scrapbook.escapeFilename(filename)};
+        case "folder":
+        default: {
+          await capturer.saveFileCache({
+            timeId,
+            path: filename,
+            url: sourceUrlMain,
+            blob,
+          });
+          return {filename, url: scrapbook.escapeFilename(filename)};
+        }
       }
+    };
 
-      case "maff": {
-        await capturer.saveFileCache({
-          timeId,
-          path: timeId + "/" + filename,
-          url: sourceUrlMain,
-          blob,
-        });
-        return {filename, url: scrapbook.escapeFilename(filename)};
-      }
-
-      case "folder":
-      default: {
-        await capturer.saveFileCache({
-          timeId,
-          path: filename,
-          url: sourceUrlMain,
-          blob,
-        });
-        return {filename, url: scrapbook.escapeFilename(filename)};
-      }
-    }
+    return await downloadBlob(params);
   };
 
   /**
