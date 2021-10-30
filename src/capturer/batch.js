@@ -41,7 +41,7 @@
       document.getElementById('opt-uniquify').checked = data.uniquify;
     }
     if (typeof data.taskInfo !== 'undefined') {
-      document.getElementById('urls').value = stringifyTasks(data.taskInfo);
+      document.getElementById('tasks').value = stringifyTasks(data.taskInfo);
     }
   }
 
@@ -122,7 +122,7 @@
   };
 
   async function onCaptureClick(event) {
-    const inputText = document.getElementById('urls').value;
+    const inputText = document.getElementById('tasks').value;
     const ignoreTitle = document.getElementById('opt-ignoreTitle').checked;
     const uniquify = document.getElementById('opt-uniquify').checked;
 
@@ -136,7 +136,7 @@
   }
 
   async function onAdvancedClick(event) {
-    const inputText = document.getElementById('urls').value;
+    const inputText = document.getElementById('tasks').value;
     const ignoreTitle = document.getElementById('opt-ignoreTitle').checked;
     const uniquify = document.getElementById('opt-uniquify').checked;
 

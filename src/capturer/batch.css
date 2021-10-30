@@ -22,11 +22,11 @@ body {
   height: 100%;
 }
 
-#desc, #desc-json {
+#desc {
   margin-bottom: .5em;
 }
 
-#urls {
+#tasks {
   flex: 1;
   box-sizing: border-box;
   width: 100%;
