@@ -1124,7 +1124,7 @@
     let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-    let downLinkInDepth = downLink && depth <= options["capture.downLink.doc.depth"];
+    let downLinkInDepth = downLink && depth <= options["capture.downLink.doc.depth"] && options["capture.saveAs"] !== "singleHtml";
     let downLinkFile = downLink && ["header", "url"].includes(options["capture.downLink.file.mode"]);
 
     // check for downLink URL filter
