@@ -1109,7 +1109,9 @@
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl]
-   * @param {boolean} [params.downLink] - is downLink mode (check filter, download as file)
+   * @param {boolean} [params.downLink] - is downLink mode (check filter,
+   *     and capture as file or register in linkedPages)
+   * @param {boolean} [params.downLinkPage] - is a page previously registered in linkedPages
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object|null>} - The capture result, or null if not to be captured.
@@ -1117,7 +1119,7 @@
   capturer.captureUrl = async function (params) {
     isDebug && console.debug("call: captureUrl", params);
 
-    const {downLink = false, settings, options} = params;
+    const {downLink = false, downLinkPage = false, settings, options} = params;
     let {timeId, depth} = settings;
     let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
@@ -1179,7 +1181,8 @@
           break;
         }
 
-        if (depth > 0) {
+        // don't check meta refresh for downLink
+        if (downLink || downLinkPage) {
           break;
         }
 
@@ -1200,7 +1203,7 @@
         [urlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(metaRefreshTarget);
       }
     } catch (ex) {
-      // URL not accessible
+      // URL not accessible, or meta refresh not resolvable
       if (!downLink) {
         throw ex;
       }
@@ -1257,7 +1260,7 @@
     }
 
     if (doc) {
-      if (depth > 0 && options["capture.downLink.doc.mode"] === "tab") {
+      if (downLinkPage && options["capture.downLink.doc.mode"] === "tab") {
         const response = await capturer.captureRemoteTab({
           url: capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash),
           refUrl,
@@ -3752,6 +3755,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       const response = await capturer.captureUrl({
         url,
         refUrl,
+        downLinkPage: true,
         settings: subSettings,
         options,
       }).catch((ex) => {
