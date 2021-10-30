@@ -745,7 +745,7 @@
     "message": "获取链接页面包含网址:"
   },
   "OptionCaptureDownLinkDocUrlFilterTooltip": {
-    "message": "此过滤器根据网址筛选要获取的链接页面。\n\n• 以下每行为一个完整网址（“#”以后的部分会自动去除）或一个正则表达式（如“/^http://example\\.com//”）。\n• 链接的完整网址（去除“#”以后的部分）匹配任何一行的规则即列入下载。例如链接“http://example.com/subpage#h2”匹配完整网址规则“http://example.com/subpage”或正则表达式规则“/^http://example\\.com/SubPage\\d*/i”。若每行皆无规则，则任何网址皆列入下载。\n• 以“#”开头的行皆视为注解，执行时会略过。\n• 每行空白字元以后的部分皆视为注解，执行时会自动忽略。例如“http://example.com/ 注解”视同“http://example.com/”；“/^https:/ 注解”视同“/^https:/”。"
+    "message": "此过滤器根据网址筛选要获取的链接页面（A 或 AREA 元素或 META 重导向指向的目标）。\n\n• 以下每行为一个完整网址（“#”以后的部分会自动去除）或一个正则表达式（如“/^http://example\\.com//”）。\n• 链接的完整网址（去除“#”以后的部分）匹配任何一行的规则即列入下载。例如链接“http://example.com/subpage#h2”匹配完整网址规则“http://example.com/subpage”或正则表达式规则“/^http://example\\.com/SubPage\\d*/i”。若每行皆无规则，则任何网址皆列入下载。\n• 以“#”开头的行皆视为注解，执行时会略过。\n• 每行空白字元以后的部分皆视为注解，执行时会自动忽略。例如“http://example.com/ 注解”视同“http://example.com/”；“/^https:/ 注解”视同“/^https:/”。"
   },
   "OptionCaptureDownLinkFileExtFilterLabel": {
     "message": "下载链接文件包含扩展名:"
@@ -763,7 +763,7 @@
     "message": "停用下载链接文件"
   },
   "OptionCaptureDownLinkFileModeTooltip": {
-    "message": "此选项决定是否下载链接（A 或 AREA 元素）或 META 重导向指向的文件。\n\n• 停用下载链接文件：不下载链接的文件。\n• 匹配网址扩展名：匹配网址扩展名决定是否下载，效能较佳，但无法有效区分动态网页的类型。例如扩展名为 .php 的网址可能输出 html、doc、pdf 或其他格式，但此模式下都是取 php 做匹配。\n• 匹配 HTTP 标头及网址扩展名：走访每个链接取得 HTTP 标头及实际输出的扩展名，据此决定是否下载。注意：有些网站会把操作指令做成一般的链接，导致走访链接时误触指令（例如注销网站），此时可设置网址过滤器防止走访。"
+    "message": "此选项决定是否下载链接的文件（A 或 AREA 元素或 META 重导向指向的目标）。\n\n• 停用下载链接文件：不下载链接的文件。\n• 匹配网址扩展名：匹配网址扩展名决定是否下载，效能较佳，但无法有效区分动态网页的类型。例如扩展名为 .php 的网址可能输出 html、doc、pdf 或其他格式，但此模式下都是取 php 做匹配。\n• 匹配 HTTP 标头及网址扩展名：走访每个链接取得 HTTP 标头及实际输出的扩展名，据此决定是否下载。"
   },
   "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "匹配网址扩展名"
@@ -772,7 +772,7 @@
     "message": "排除网址:"
   },
   "OptionCaptureDownLinkUrlFilterTooltip": {
-    "message": "此过滤器根据网址筛选禁止下载或获取的链接，优先于其他过滤器。\n\n• 以下每行为一个完整网址（“#”以后的部分会自动去除）或一个正则表达式（如“/[/=]logout\\b/i”）。\n• 链接的完整网址（去除“#”以后的部分）匹配任何一行的规则即禁止下载。例如链接“http://example.com/logout”和“http://example.com/?a=LOGOUT”都匹配正则表达式规则“/[/=]logout\\b/i”。\n• 以“#”开头的行皆视为注解，执行时会略过。\n• 每行空白字元以后的部分皆视为注解，执行时会自动忽略。例如“http://example.com/ 注解”视同“http://example.com/”；“/^https:/ 注解”视同“/^https:/”。"
+    "message": "此过滤器根据网址筛选禁止下载或获取的链接，优先于其他过滤器。注意：有些网站会把操作指令做成一般的链接，导致走访链接时误触而导致注销网站等后果，此时可设置此过滤器防止走访。\n\n• 以下每行为一个完整网址（“#”以后的部分会自动去除）或一个正则表达式（如“/[/=]logout\\b/i”）。\n• 链接的完整网址（去除“#”以后的部分）匹配任何一行的规则即禁止下载。例如链接“http://example.com/logout”和“http://example.com/?a=LOGOUT”都匹配正则表达式规则“/[/=]logout\\b/i”。\n• 以“#”开头的行皆视为注解，执行时会略过。\n• 每行空白字元以后的部分皆视为注解，执行时会自动忽略。例如“http://example.com/ 注解”视同“http://example.com/”；“/^https:/ 注解”视同“/^https:/”。"
   },
   "OptionCaptureEmbedLabel": {
     "message": "EMBED 元素:"
