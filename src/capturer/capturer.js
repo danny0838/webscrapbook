@@ -1124,7 +1124,6 @@
     let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-    if (downLink) { depth++; }
     let downLinkInDepth = downLink && depth <= options["capture.downLink.doc.depth"];
     let downLinkFile = downLink && ["header", "url"].includes(options["capture.downLink.file.mode"]);
 

@@ -11179,6 +11179,10 @@ async function test_capture_sizeLimit() {
   var options = {
     "capture.style": "save",
     "capture.image": "save",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "txt",
+    "capture.downLink.doc.depth": 1,
+    "capture.downLink.urlFilter": "",
   };
 
   /* sizeLimit = null */
@@ -11194,6 +11198,10 @@ async function test_capture_sizeLimit() {
   assert(zip.files['link2.css']);
   assert(zip.files['img.bmp']);
   assert(zip.files['img2.bmp']);
+  assert(zip.files['linked.txt']);
+  assert(zip.files['linked2.txt']);
+  assert(zip.files['linked.html']);
+  assert(zip.files['linked2.html']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11203,6 +11211,10 @@ async function test_capture_sizeLimit() {
   assert(doc.querySelectorAll('link')[1].getAttribute('href') === `link2.css`);
   assert(doc.querySelectorAll('img')[0].getAttribute('src') === `img.bmp`);
   assert(doc.querySelectorAll('img')[1].getAttribute('src') === `img2.bmp`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked.txt`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked2.txt`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked.html`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `linked2.html`);
 
   /* sizeLimit = 1KB; linkUnsavedUri = false */
   options["capture.resourceSizeLimit"] = 1 / 1024;
@@ -11218,6 +11230,10 @@ async function test_capture_sizeLimit() {
   assert(!zip.files['link2.css']);
   assert(zip.files['img.bmp']);
   assert(!zip.files['img2.bmp']);
+  assert(zip.files['linked.txt']);
+  assert(!zip.files['linked2.txt']);
+  assert(zip.files['linked.html']);
+  assert(!zip.files['linked2.html']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11227,6 +11243,10 @@ async function test_capture_sizeLimit() {
   assert(doc.querySelectorAll('link')[1].getAttribute('href') === `urn:scrapbook:download:error:${localhost}/capture_sizeLimit/link2.css`);
   assert(doc.querySelectorAll('img')[0].getAttribute('src') === `img.bmp`);
   assert(doc.querySelectorAll('img')[1].getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_sizeLimit/img2.bmp`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked.txt`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `urn:scrapbook:download:error:${localhost}/capture_sizeLimit/linked2.txt`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked.html`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_sizeLimit/linked2.html`);
 
   /* sizeLimit = 1KB; linkUnsavedUri = true */
   options["capture.resourceSizeLimit"] = 1 / 1024;
@@ -11242,6 +11262,10 @@ async function test_capture_sizeLimit() {
   assert(!zip.files['link2.css']);
   assert(zip.files['img.bmp']);
   assert(!zip.files['img2.bmp']);
+  assert(zip.files['linked.txt']);
+  assert(!zip.files['linked2.txt']);
+  assert(zip.files['linked.html']);
+  assert(!zip.files['linked2.html']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11251,6 +11275,10 @@ async function test_capture_sizeLimit() {
   assert(doc.querySelectorAll('link')[1].getAttribute('href') === `${localhost}/capture_sizeLimit/link2.css`);
   assert(doc.querySelectorAll('img')[0].getAttribute('src') === `img.bmp`);
   assert(doc.querySelectorAll('img')[1].getAttribute('src') === `${localhost}/capture_sizeLimit/img2.bmp`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked.txt`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_sizeLimit/linked2.txt`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked.html`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_sizeLimit/linked2.html`);
 }
 
 /**

@@ -332,11 +332,16 @@
         if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
             options["capture.downLink.doc.depth"] > 0) {
           downLinkTasks.push(async () => {
+            const downLinkSettings = Object.assign({}, settings, {
+              depth: settings.depth + 1,
+              isMainPage: false,
+              isMainFrame: true,
+            });
             const response = await capturer.invoke("captureUrl", {
               url,
               refUrl,
               downLink: true,
-              settings,
+              settings: downLinkSettings,
               options,
             })
             .catch((ex) => {
@@ -606,11 +611,16 @@
                     if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
                         options["capture.downLink.doc.depth"] > 0) {
                       downLinkTasks.push(async () => {
+                        const downLinkSettings = Object.assign({}, settings, {
+                          depth: settings.depth + 1,
+                          isMainPage: false,
+                          isMainFrame: true,
+                        });
                         const response = await capturer.invoke("captureUrl", {
                           url,
                           refUrl,
                           downLink: true,
-                          settings,
+                          settings: downLinkSettings,
                           options,
                         })
                         .catch((ex) => {
