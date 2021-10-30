@@ -1114,6 +1114,7 @@ p { background-image: url("red.bmp"); }`);
  * Check URL resolution in a data URL frame
  *
  * capture.saveDataUriAsFile
+ * capture.saveDataUriAsSrcdoc
  * capturer.captureDocument
  */
 async function test_capture_dataUri3() {
@@ -1122,12 +1123,12 @@ async function test_capture_dataUri3() {
     "capture.downLink.file.mode": "url",
     "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
-    "capture.saveDataUriAsSrcdoc": false,
   };
 
-  /* -saveDataUriAsFile; relative link in data URL iframe */
+  /* -saveDataUriAsFile; -saveDataUriAsSrcdoc; relative link in data URL iframe */
   // relative link => can't resolve and error (output original URL)
   options["capture.saveDataUriAsFile"] = false;
+  options["capture.saveDataUriAsSrcdoc"] = false;
 
   var blob = await capture({
     url: `${localhost}/capture_dataUri3/resolve-frame-1.html`,
@@ -1167,12 +1168,13 @@ async function test_capture_dataUri3() {
   assert(frameDoc.querySelector('applet[code="null.class"][archive="null.jar"]'));
   assert(frameDoc.querySelector('a[href="null.txt"]'));
 
-  /* -saveDataUriAsFile; absolute link in data URL iframe */
-  // absolute link => force saved as a data URL (relative link won't work if saved as file)
+  /* -saveDataUriAsFile; +saveDataUriAsSrcdoc; relative link in data URL iframe */
+  // relative link => can't resolve and error (output original URL)
   options["capture.saveDataUriAsFile"] = false;
+  options["capture.saveDataUriAsSrcdoc"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri3/resolve-frame-2.html`,
+    url: `${localhost}/capture_dataUri3/resolve-frame-1.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1183,16 +1185,36 @@ async function test_capture_dataUri3() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  var frameSrc = doc.querySelector('iframe').getAttribute('src');
+  var frameSrc = `data:text/html;charset=UTF-8,${encodeURIComponent(doc.querySelector('iframe').getAttribute('srcdoc'))}`;
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
 
   assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
-  assert(frameDoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
-  assert(frameDoc.querySelector('a').getAttribute('href') === `data:text/plain;filename=null.txt,`);
+  assert(frameDoc.querySelector('meta[property="og:image"][content="null.bmp"]'));
+  assert(frameDoc.querySelector('link[rel~="icon"][href="null.bmp"]'));
+  assert(frameDoc.querySelector('link[rel="stylesheet"][href="null.css"]'));
+  assert(frameDoc.querySelector('script[src="null.js"]'));
+  assert(frameDoc.querySelector('img[src="null.bmp"]'));
+  assert(frameDoc.querySelector('img[srcset="null.bmp 1x, null.bmp 2x"]'));
+  assert(frameDoc.querySelector('picture source[srcset="null.bmp"]'));
+  assert(frameDoc.querySelector('input[type="image"][src="null.bmp"]'));
+  assert(frameDoc.querySelector('div').getAttribute('style') === `background: url("null.bmp");`);
+  assert(frameDoc.querySelector('table[background="null.bmp"]'));
+  assert(frameDoc.querySelector('tr[background="null.bmp"]'));
+  assert(frameDoc.querySelector('th[background="null.bmp"]'));
+  assert(frameDoc.querySelector('td[background="null.bmp"]'));
+  assert(frameDoc.querySelector('audio[src="null.mp3"]'));
+  assert(frameDoc.querySelector('audio source[src="null.ogg"]'));
+  assert(frameDoc.querySelector('video[src="null.mp4"][poster="null.bmp"]'));
+  assert(frameDoc.querySelector('video source[src="null.webm"]'));
+  assert(frameDoc.querySelector('embed[src="null.swf"]'));
+  assert(frameDoc.querySelector('object[data="null.swf"]'));
+  assert(frameDoc.querySelector('applet[code="null.class"][archive="null.jar"]'));
+  assert(frameDoc.querySelector('a[href="null.txt"]'));
 
   /* +saveDataUriAsFile; relative link in data URL iframe */
   // relative link => can't resolve and error (output original URL)
   options["capture.saveDataUriAsFile"] = true;
+  options["capture.saveDataUriAsSrcdoc"] = false;
 
   var blob = await capture({
     url: `${localhost}/capture_dataUri3/resolve-frame-1.html`,
@@ -1233,9 +1255,59 @@ async function test_capture_dataUri3() {
   assert(frameDoc.querySelector('applet[code="null.class"][archive="null.jar"]'));
   assert(frameDoc.querySelector('a[href="null.txt"]'));
 
+  /* -saveDataUriAsFile; -saveDataUriAsSrcdoc; absolute link in data URL iframe */
+  // absolute link => force saved as a data URL (relative link won't work if saved as file)
+  options["capture.saveDataUriAsFile"] = false;
+  options["capture.saveDataUriAsSrcdoc"] = false;
+
+  var blob = await capture({
+    url: `${localhost}/capture_dataUri3/resolve-frame-2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(Object.keys(zip.files).length === 1);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var frameSrc = doc.querySelector('iframe').getAttribute('src');
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+
+  assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
+  assert(frameDoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
+  assert(frameDoc.querySelector('a').getAttribute('href') === `data:text/plain;filename=null.txt,`);
+
+  /* -saveDataUriAsFile; +saveDataUriAsSrcdoc; absolute link in data URL iframe */
+  // absolute link => force saved as a data URL
+  // @TODO: save absolute link as file as relative links work in srcdoc
+  options["capture.saveDataUriAsFile"] = false;
+  options["capture.saveDataUriAsSrcdoc"] = true;
+
+  var blob = await capture({
+    url: `${localhost}/capture_dataUri3/resolve-frame-2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(Object.keys(zip.files).length === 1);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var frameSrc = `data:text/html;charset=UTF-8,${encodeURIComponent(doc.querySelector('iframe').getAttribute('srcdoc'))}`;
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+
+  assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
+  assert(frameDoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
+  assert(frameDoc.querySelector('a').getAttribute('href') === `data:text/plain;filename=null.txt,`);
+
   /* +saveDataUriAsFile; absolute link in data URL iframe */
   // absolute link => save as file
   options["capture.saveDataUriAsFile"] = true;
+  options["capture.saveDataUriAsSrcdoc"] = false;
 
   var blob = await capture({
     url: `${localhost}/capture_dataUri3/resolve-frame-2.html`,
