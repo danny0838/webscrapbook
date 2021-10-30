@@ -6,12 +6,12 @@
 <body>
 <!-- iframe, can resolve -->
 <script>
-var text = `\
+var html = `\
 <img src="${new URL("red.bmp", location.href)}">
-<a href="${new URL("null.txt", location.href)}"></a>`;
+<a href="${new URL("null.txt", location.href)}">null.txt</a>`;
 
 var elem = document.createElement("iframe");
-elem.src = `data:text/html,${encodeURIComponent(text)}`;
+elem.src = `data:text/html,${encodeURIComponent(html)}`;
 document.body.appendChild(elem);
 </script>
 </body>

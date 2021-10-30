@@ -5,6 +5,73 @@
 </head>
 <body>
 <!-- iframe, can't resolve -->
-<iframe src="data:text/html;charset=UTF-8,%3Chtml%3E%0A%3Chead%3E%0A%3Cmeta%20charset%3D%22UTF-8%22%3E%0A%3Cmeta%20property%3D%22og%3Aimage%22%20content%3D%22null.bmp%22%3E%0A%3Clink%20rel%3D%22shortcut%20icon%22%20href%3D%22null.bmp%22%3E%0A%3Clink%20rel%3D%22stylesheet%22%20href%3D%22null.css%22%3E%0A%3Cscript%20src%3D%22null.js%22%3E%3C%2Fscript%3E%0A%3C%2Fhead%3E%0A%3Cbody%3E%0A%3Cimg%20src%3D%22null.bmp%22%3E%0A%0A%3Cimg%20srcset%3D%22null.bmp%201x%2C%20null.bmp%202x%22%3E%0A%0A%3Cpicture%3E%0A%20%20%3Csource%20media%3D%22(min-width%3A%20650px)%22%20srcset%3D%22null.bmp%22%3E%0A%20%20%3Csource%20media%3D%22(min-width%3A%20465px)%22%20srcset%3D%22null.bmp%22%3E%0A%20%20%3Cimg%20src%3D%22null.bmp%22%3E%0A%3C%2Fpicture%3E%0A%0A%3Cinput%20type%3D%22image%22%20src%3D%22null.bmp%22%3E%0A%0A%3Cdiv%20style%3D'background%3A%20url(%22null.bmp%22)%3B'%3E%3C%2Fdiv%3E%0A%0A%3Ctable%20background%3D%22null.bmp%22%3E%0A%20%20%3Ctr%20background%3D%22null.bmp%22%3E%0A%20%20%20%20%3Cth%20background%3D%22null.bmp%22%3Eth%3C%2Fth%3E%0A%20%20%20%20%3Ctd%20background%3D%22null.bmp%22%3Etd%3C%2Ftd%3E%0A%20%20%20%20%3Ctd%3Etd%3C%2Ftd%3E%0A%20%20%3C%2Ftr%3E%0A%3C%2Ftable%3E%0A%0A%3Caudio%20controls%20src%3D%22null.mp3%22%3E%3C%2Faudio%3E%0A%0A%3Caudio%20controls%3E%0A%20%20%3Csource%20src%3D%22null.ogg%22%20type%3D%22audio%2Fogg%22%3E%0A%20%20%3Csource%20src%3D%22null.mp3%22%20type%3D%22audio%2Fmpeg%22%3E%0A%3C%2Faudio%3E%0A%0A%3Cvideo%20controls%20src%3D%22null.mp4%22%20poster%3D%22null.bmp%22%3E%3C%2Fvideo%3E%0A%0A%3Cvideo%20controls%3E%0A%20%20%3Csource%20src%3D%22null.webm%22%20type%3D%22video%2Fwebm%22%3E%0A%20%20%3Csource%20src%3D%22null.mp4%22%20type%3D%22video%2Fmp4%22%3E%0A%3C%2Fvideo%3E%0A%0A%3Cembed%20src%3D%22null.swf%22%3E%0A%0A%3Cobject%20data%3D%22null.swf%22%3E%3C%2Fobject%3E%0A%0A%3Capplet%0A%20%20code%3D%22null.class%22%0A%20%20archive%3D%22null.jar%22%0A%20%20width%3D%22300%22%0A%20%20height%3D%22300%22%3E%0A%20%20%3Cparam%20name%3D%22permissions%22%20value%3D%22sandbox%22%3E%0A%3C%2Fapplet%3E%0A%0A%3Ca%20href%3D%22null.txt%22%3E%3C%2Fa%3E%0A%3C%2Fbody%3E%0A%3C%2Fhtml%3E%0A"></iframe>
+<script>
+var html = `\
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta property="og:image" content="null.bmp">
+<link rel="shortcut icon" href="null.bmp">
+<link rel="stylesheet" href="null.css">
+<script src="null.js"><\/script>
+</head>
+<body>
+<img src="null.bmp">
+
+<img srcset="null.bmp 1x, null.bmp 2x">
+
+<picture>
+  <source media="(min-width: 650px)" srcset="null.bmp">
+  <source media="(min-width: 465px)" srcset="null.bmp">
+  <img src="null.bmp">
+</picture>
+
+<input type="image" src="null.bmp">
+
+<div style='background: url("null.bmp");'></div>
+
+<table background="null.bmp">
+  <tr background="null.bmp">
+    <th background="null.bmp">th</th>
+    <td background="null.bmp">td</td>
+    <td>td</td>
+  </tr>
+</table>
+
+<audio controls src="null.mp3"></audio>
+
+<audio controls>
+  <source src="null.ogg" type="audio/ogg">
+  <source src="null.mp3" type="audio/mpeg">
+</audio>
+
+<video controls src="null.mp4" poster="null.bmp"></video>
+
+<video controls>
+  <source src="null.webm" type="video/webm">
+  <source src="null.mp4" type="video/mp4">
+</video>
+
+<embed src="null.swf">
+
+<object data="null.swf"></object>
+
+<applet
+  code="null.class"
+  archive="null.jar"
+  width="300"
+  height="300">
+  <param name="permissions" value="sandbox">
+</applet>
+
+<a href="null.txt">null.txt</a>
+</body>
+</html>`;
+
+var elem = document.createElement("iframe");
+elem.src = `data:text/html,${encodeURIComponent(html)}`;
+document.body.appendChild(elem);
+</script>
 </body>
 </html>

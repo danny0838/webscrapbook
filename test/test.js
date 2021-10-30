@@ -1669,7 +1669,7 @@ async function test_capture_selection7() {
  * complete.
  *
  * capturer.captureTab
- * capturer.captureHeadless
+ * capturer.captureRemote
  */
 async function test_capture_headless() {
   /* from tab; source */
@@ -7159,7 +7159,7 @@ async function test_capture_redirect() {
  *
  * @TODO: Browser usually use the "Location" header hash if it exists and use
  * the source URL hash if not. As the response URL of XMLHttpRequest and
- * fetch API doesn't contain hash, we use the source URL hash any currently.
+ * fetch API doesn't contain hash, we use the source URL hash currently.
  */
 async function test_capture_redirect2() {
   var options = {
