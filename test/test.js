@@ -8232,7 +8232,7 @@ async function test_capture_downLink05() {
 }
 
 /**
- * Check downLink.file should overwrite downLink.doc
+ * Check downLink.file should be skipped for doc if downLink.doc.depth is set
  *
  * capture.downLink.file.mode
  * capture.downLink.file.extFilter
@@ -8242,8 +8242,10 @@ async function test_capture_downLink06() {
   var options = {
     "capture.downLink.file.mode": "url",
     "capture.downLink.file.extFilter": `bmp, html`,
-    "capture.downLink.doc.depth": 1,
   };
+
+  /* depth = null */
+  options["capture.downLink.doc.depth"] = null;
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink2/in-depth.html`,
@@ -8295,8 +8297,95 @@ async function test_capture_downLink06() {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc);
 
+  // not accessed
   assert(!zip.file('linked2-1.html'));
+  assert(!zip.file('linked2-2.html'));
 
+  /* depth = 0 */
+  options["capture.downLink.doc.depth"] = 0;
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink2/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink2/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink2/linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink2/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink2/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink2/linked1-5.html#555`);
+
+  // skip downLinkFile even if depth exceeds
+  assert(!zip.file('linked1-1.html'));
+  assert(!zip.file('linked1-2.html'));
+  assert(!zip.file('linked1-3.html'));
+  assert(!zip.file('linked1-4.html'));
+  assert(!zip.file('linked1-5.html'));
+  assert(!zip.file('linked2-1.html'));
+  assert(!zip.file('linked2-2.html'));
+
+  /* depth = 1 */
+  options["capture.downLink.doc.depth"] = 1;
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink2/in-depth.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `linked1-5.html#555`);
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('linked1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('linked1-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink2/linked2-1.html#1-2`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink2/linked2-2.html#1-2`);
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('linked1-3.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked1-1.html#1-3`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-5.html#1-3`);
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('linked1-4.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `index.html#1-4`);
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('linked1-5.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc);
+
+  // skip downLinkFile even if depth exceeds
+  assert(!zip.file('linked2-1.html'));
   assert(!zip.file('linked2-2.html'));
 }
 

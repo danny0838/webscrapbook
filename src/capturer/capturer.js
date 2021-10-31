@@ -1219,6 +1219,24 @@
     }
 
     if (downLink) {
+      if (downLinkDoc && doc) {
+        // for a document suitable for downLinkDoc, register in linkedPages and return null
+        if (downLinkDocValid) {
+          const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
+          if (!linkedPages.has(sourceUrlMain)) {
+            linkedPages.set(sourceUrlMain, {
+              url: fetchResponse.url,
+              refUrl,
+              depth,
+            });
+          }
+        }
+
+        // if downLinkDoc is set, ignore downLinkFile anyway
+        // (to prevent same document at deeper depth be downloaded again as file)
+        return null;
+      }
+
       // check for downLink header filter
       if (downLinkFileValid && options["capture.downLink.file.mode"] === "header") {
         // determine extension
@@ -1250,17 +1268,6 @@
             url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
           });
         });
-      }
-
-      if (downLinkDocValid && doc) {
-        const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
-        if (!linkedPages.has(sourceUrlMain)) {
-          linkedPages.set(sourceUrlMain, {
-            url: fetchResponse.url,
-            refUrl,
-            depth,
-          });
-        }
       }
 
       return null;
