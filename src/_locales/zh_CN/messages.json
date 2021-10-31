@@ -768,6 +768,12 @@
   "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "匹配网址扩展名"
   },
+  "OptionCaptureDownLinkUrlExtraLabel": {
+    "message": "额外网址:"
+  },
+  "OptionCaptureDownLinkUrlExtraTooltip": {
+    "message": "列出额外下载（“下载鏈接文件”必须非停用）或撷取（“撷取鏈接页面深度”必须为 0 以上）的网址，无视任何过滤器。\n\n• 以下每行为一个完整网址（“#”以后的部分会自动去除）。\n• 以“#”开头的行皆视为注解，执行时会略过。\n• 每行空白字元以后的部分皆视为注解，执行时会自动忽略。例如“http://example.com/ 注解”视同“http://example.com/”。"
+  },
   "OptionCaptureDownLinkUrlFilterLabel": {
     "message": "排除网址:"
   },

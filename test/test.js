@@ -47,6 +47,7 @@ const baseOptions = {
   "capture.downLink.doc.mode": "source",
   "capture.downLink.doc.urlFilter": "",
   "capture.downLink.urlFilter": "",
+  "capture.downLink.urlExtra": "",
   "capture.referrerPolicy": "strict-origin-when-cross-origin",
   "capture.referrerSpoofSource": false,
   "capture.recordDocumentMeta": true,
@@ -8989,6 +8990,240 @@ async function test_capture_downLink15() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('img[src="./red.bmp"]'));
+}
+
+/**
+ * Check option capture.downLink.urlExtra
+ *
+ * capture.downLink.urlExtra
+ * capture.downLink.file.mode
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink16() {
+  var options = {
+    "capture.downLink.file.extFilter": "jpg",
+    "capture.downLink.doc.urlFilter": "${localhost}/capture_downLink10/nonexist.html",
+    "capture.downLink.urlFilter": "//",
+    "capture.downLink.urlExtra": `\
+${localhost}/capture_downLink11/1-1.html
+${localhost}/capture_downLink11/1-2.py
+${localhost}/capture_downLink11/1-3.txt`,
+  };
+
+  /* -downLink -inDepth */
+  options["capture.downLink.file.mode"] = "none";
+  options["capture.downLink.doc.depth"] = null;
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink11/main.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('index.html'));
+  assert(!zip.file('index.json'));
+  assert(!zip.file('1-1.html'));
+  assert(!zip.file('1-1.bmp'));
+  assert(!zip.file('1-2.html'));
+  assert(!zip.file('1-2.bmp'));
+  assert(!zip.file('1-3.txt'));
+
+  /* +downLink -inDepth */
+  options["capture.downLink.file.mode"] = "url";
+  options["capture.downLink.doc.depth"] = null;
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink11/main.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('index.html'));
+  assert(!zip.file('index.json'));
+  assert(!zip.file('1-1.bmp'));
+  assert(!zip.file('1-2.bmp'));
+  assert(zip.file('1-3.txt'));
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="./1-1.bmp"]'));
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('1-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="./1-2.bmp"]'));
+
+  /* -downLink +inDepth */
+  options["capture.downLink.file.mode"] = "none";
+  options["capture.downLink.doc.depth"] = 0;
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink11/main.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('index.html'));
+  assert(zip.file('1-1.bmp'));
+  assert(!zip.file('1-2.html'));
+  assert(!zip.file('1-2.bmp'));
+  assert(!zip.file('1-3.txt'));
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="1-1.bmp"]'));
+
+  var sitemapFile = zip.file('index.json');
+  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var expectedData = {
+    "version": 2,
+    "indexPages": [
+      "index.html",
+      "1-1.html",
+    ],
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_downLink11/main.html`,
+        "role": "document",
+        "token": "a6b7e1e572e65b1f357666adcdc707d8e54baa66"
+      },
+      {
+        "path": "index.xhtml",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "role": "document"
+      },
+      {
+        "path": "1-1.html",
+        "url": `${localhost}/capture_downLink11/1-1.html`,
+        "role": "document",
+        "token": "459e96d47f1999fe840d87c5d5dca3547b1e0d75"
+      },
+      {
+        "path": "1-1.bmp",
+        "url": "http://localhost:8085/capture_downLink11/1-1.bmp",
+        "role": "resource",
+        "token": "0febeec85dadae327eee8a7bb1c0117f1f24bf93"
+      }
+    ]
+  };
+  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+
+  /* +downLink +inDepth */
+  options["capture.downLink.file.mode"] = "url";
+  options["capture.downLink.doc.depth"] = 0;
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink11/main.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('index.html'));
+  assert(zip.file('1-1.bmp'));
+  assert(!zip.file('1-2.bmp'));
+  assert(zip.file('1-3.txt'));
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('1-1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="1-1.bmp"]'));
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('1-2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="./1-2.bmp"]'));
+
+  var sitemapFile = zip.file('index.json');
+  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var expectedData = {
+    "version": 2,
+    "indexPages": [
+      "index.html",
+      "1-1.html",
+    ],
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_downLink11/main.html`,
+        "role": "document",
+        "token": "a6b7e1e572e65b1f357666adcdc707d8e54baa66"
+      },
+      {
+        "path": "index.xhtml",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "role": "document"
+      },
+      {
+        "path": "1-2.html",
+        "url": "http://localhost:8085/capture_downLink11/1-2.py",
+        "role": "resource",
+        "token": "18fbfc44a58e34e0d9eb4f25f8358e14adb88ac1"
+      },
+      {
+        "path": "1-3.txt",
+        "url": "http://localhost:8085/capture_downLink11/1-3.txt",
+        "role": "resource",
+        "token": "183ffee4befe1906d156246eb7f2c6464f0da085"
+      },
+      {
+        "path": "1-1.html",
+        "url": "http://localhost:8085/capture_downLink11/1-1.html",
+        "role": "document",
+        "token": "459e96d47f1999fe840d87c5d5dca3547b1e0d75"
+      },
+      {
+        "path": "1-1.bmp",
+        "url": "http://localhost:8085/capture_downLink11/1-1.bmp",
+        "role": "resource",
+        "token": "0febeec85dadae327eee8a7bb1c0117f1f24bf93"
+      }
+    ]
+  };
+  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
 }
 
 /**

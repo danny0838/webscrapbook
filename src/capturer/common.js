@@ -2566,6 +2566,37 @@
     const tasks = [];
     const downLinkTasks = [];
 
+    // add extra URLs with depth 0
+    if (settings.isMainPage && settings.isMainFrame) {
+      if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
+          (parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options['capture.saveAs'] !== 'singleHtml')) {
+        const downLinkSettings = Object.assign({}, settings, {
+          depth: 0,
+          isMainPage: false,
+          isMainFrame: true,
+        });
+        const urls = scrapbook.parseOption("capture.downLink.urlExtra", options["capture.downLink.urlExtra"]);
+        for (const url of urls) {
+          downLinkTasks.push(async () => {
+            const response = await capturer.invoke("captureUrl", {
+              url,
+              refUrl,
+              downLink: true,
+              downLinkExtra: true,
+              settings: downLinkSettings,
+              options,
+            })
+            .catch((ex) => {
+              console.error(ex);
+              warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
+              return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
+            });
+            return response;
+          });
+        }
+      }
+    }
+
     // inspect nodes
     let metaCharsetNode;
     let favIconUrl;

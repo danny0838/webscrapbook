@@ -1112,6 +1112,7 @@
    * @param {boolean} [params.isAttachment] - the resource is known to be an attachment
    * @param {boolean} [params.downLink] - is downLink mode (check filter,
    *     and capture as file or register in linkedPages)
+   * @param {boolean} [params.downLinkExtra] - is an extra downLink resource (don't check filter)
    * @param {boolean} [params.downLinkPage] - is a page previously registered in linkedPages
    * @param {Object} params.settings
    * @param {Object} params.options
@@ -1120,7 +1121,7 @@
   capturer.captureUrl = async function (params) {
     isDebug && console.debug("call: captureUrl", params);
 
-    const {downLink = false, downLinkPage = false, settings, options} = params;
+    const {downLink = false, downLinkExtra = false, downLinkPage = false, settings, options} = params;
     let {timeId, depth} = settings;
     let {url: sourceUrl, refUrl, isAttachment} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
@@ -1131,7 +1132,7 @@
     let downLinkFileValid = downLinkFile;
 
     // check for downLink URL filter
-    if (downLink) {
+    if (downLink && !downLinkExtra) {
       // early return if downLink condition not fulfilled
       // (e.g. depth exceeded for downLinkDoc and no downLinkFile)
       if (!downLinkDocValid && !downLinkFileValid) {
@@ -1232,7 +1233,7 @@
     if (downLink) {
       if (downLinkDoc && doc) {
         // for a document suitable for downLinkDoc, register in linkedPages and return null
-        if (downLinkDocValid) {
+        if (downLinkDocValid || downLinkExtra) {
           const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
           if (!linkedPages.has(sourceUrlMain)) {
             linkedPages.set(sourceUrlMain, {
@@ -1249,7 +1250,7 @@
       }
 
       // check for downLink header filter
-      if (downLinkFileValid && options["capture.downLink.file.mode"] === "header") {
+      if (!downLinkExtra && downLinkFileValid && options["capture.downLink.file.mode"] === "header") {
         // determine extension
         const headers = fetchResponse.headers;
         let ext;
@@ -1267,7 +1268,7 @@
         }
       }
 
-      if (downLinkFileValid) {
+      if (downLinkFileValid || (downLinkFile && downLinkExtra)) {
         return await capturer.downloadFile({
           url: fetchResponse.url,
           refUrl,
@@ -1279,6 +1280,10 @@
             url: capturer.getRedirectedUrl(response.url, sourceUrlHash),
           });
         });
+      }
+
+      if (downLinkExtra) {
+        capturer.warn(`Skipped invalid extra URL: "${sourceUrl}"`);
       }
 
       return null;
@@ -3788,6 +3793,11 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         capturer.error(`Subpage fatal error (${url}): ${ex.message}`);
         return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
       });
+
+      // add pages with depth 0 to indexPages
+      if (depth === 0) {
+        capturer.captureInfo.get(timeId).indexPages.add(response.filename);
+      }
 
       if (delay > 0) {
         capturer.log(`Waiting for ${delay} ms...`);

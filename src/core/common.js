@@ -112,6 +112,7 @@ if (Node && !Node.prototype.getRootNode) {
     "capture.downLink.doc.mode": "source",
     "capture.downLink.doc.urlFilter": "",
     "capture.downLink.urlFilter": "###skip common logout URL\n/[/=]logout\\b/i",
+    "capture.downLink.urlExtra": "",
     "capture.referrerPolicy": "strict-origin-when-cross-origin", // "no-referrer", "no-referrer-when-downgrade", "origin", "origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-url"
     "capture.referrerSpoofSource": false,
     "capture.recordDocumentMeta": true,
@@ -250,6 +251,24 @@ if (Node && !Node.prototype.getRootNode) {
             rule = scrapbook.splitUrlByAnchor(rule)[0];
             rv.push(rule);
           }
+        }
+        return rv;
+      };
+      return fn(...args);
+    },
+    "capture.downLink.urlExtra": (...args) => {
+      const REGEX_LINEFEED = /\n|\r\n?/;
+      const REGEX_SPACES = /\s+/;
+      const fn = OPTION_PARSERS["capture.downLink.urlExtra"] = (source) => {
+        const rv = [];
+        const lines = source.split(REGEX_LINEFEED);
+        for (let i = 0, I = lines.length; i < I; i++) {
+          const line = lines[i].trim();
+          if (!line || line.startsWith("#")) { continue; }
+
+          let rule = line.split(REGEX_SPACES)[0];
+          rule = scrapbook.splitUrlByAnchor(rule)[0];
+          rv.push(rule);
         }
         return rv;
       };
