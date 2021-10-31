@@ -1124,32 +1124,40 @@
     let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-    let downLinkInDepth = downLink && depth <= parseInt(options["capture.downLink.doc.depth"], 10) && options["capture.saveAs"] !== "singleHtml";
+    let downLinkDoc = downLink && parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options["capture.saveAs"] !== "singleHtml";
     let downLinkFile = downLink && ["header", "url"].includes(options["capture.downLink.file.mode"]);
+    let downLinkDocValid = downLinkDoc && depth <= parseInt(options["capture.downLink.doc.depth"], 10);
+    let downLinkFileValid = downLinkFile;
 
     // check for downLink URL filter
     if (downLink) {
+      // early return if downLink condition not fulfilled
+      // (e.g. depth exceeded for downLinkDoc and no downLinkFile)
+      if (!downLinkDocValid && !downLinkFileValid) {
+        return null;
+      }
+
       // exclude URLs mathing downLinkUrlFilter
       if (capturer.downLinkUrlFilter(sourceUrl, options)) {
         return null;
       }
 
       // apply extension filter when checking URL
-      if (downLinkFile && options["capture.downLink.file.mode"] === "url") {
+      if (downLinkFileValid && options["capture.downLink.file.mode"] === "url") {
         const filename = scrapbook.urlToFilename(sourceUrl);
         const [, ext] = scrapbook.filenameParts(filename);
         if (!capturer.downLinkFileExtFilter(ext, options)) {
-          downLinkFile = false;
+          downLinkFileValid = false;
         }
       }
 
       // apply in-depth URL filter
-      if (downLinkInDepth && !capturer.downLinkDocUrlFilter(sourceUrl, options)) {
-        downLinkInDepth = false;
+      if (downLinkDocValid && !capturer.downLinkDocUrlFilter(sourceUrl, options)) {
+        downLinkDocValid = false;
       }
 
       // return if downLink condition not fulfilled
-      if (!downLinkFile && !downLinkInDepth) {
+      if (!downLinkDocValid && !downLinkFileValid) {
         return null;
       }
     }
@@ -1212,7 +1220,7 @@
 
     if (downLink) {
       // check for downLink header filter
-      if (downLinkFile && options["capture.downLink.file.mode"] === "header") {
+      if (downLinkFileValid && options["capture.downLink.file.mode"] === "header") {
         // determine extension
         const headers = fetchResponse.headers;
         let ext;
@@ -1226,11 +1234,11 @@
         }
 
         if (!capturer.downLinkFileExtFilter(ext, options)) {
-          downLinkFile = false;
+          downLinkFileValid = false;
         }
       }
 
-      if (downLinkFile) {
+      if (downLinkFileValid) {
         return await capturer.downloadFile({
           url: fetchResponse.url,
           refUrl,
@@ -1244,7 +1252,7 @@
         });
       }
 
-      if (downLinkInDepth && doc) {
+      if (downLinkDocValid && doc) {
         const linkedPages = capturer.captureInfo.get(timeId).linkedPages;
         if (!linkedPages.has(sourceUrlMain)) {
           linkedPages.set(sourceUrlMain, {
