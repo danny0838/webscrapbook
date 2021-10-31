@@ -3,6 +3,14 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.133.0] - 2021-10-31
+* A linked web page is no more downloaded as a resource file if `depth to capture linked pages` is set.
+* A linked attachment web page is now correctly treated as a resource file.
+* Added `extra URLs` option for the capture dialog.
+* Fixed an issue that size limit does not work for a linked page with depth 1.
+* Fixed an issue of capturing unexpected linked pages in a frame whose source is data protocol.
+* Fixed an issue that a link in an extension tab cannot be opened in some browsers.
+
 ## [0.132.0] - 2021-10-29
 * Improved GUI for the `Capture as` dialog.
 * A configured option whose value is same as default now updates with the app.
