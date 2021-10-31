@@ -213,11 +213,12 @@
       }
 
       const targetTab = win.tabs.filter(x => x.active)[0];
+      let currentTab;
 
       // In some browser the last focused window may be the extension popup
       // window, causing targetTab=currentTab. Force creating a new tab to
       // prevent an error of updating the current tab.
-      if (!targetTab || targetTab.id === (await browser.tabs.getCurrent()).id) {
+      if (!targetTab || ((currentTab = await browser.tabs.getCurrent()) && targetTab.id === currentTab.id)) {
         return await browser.tabs.create({url, windowId: win.id});
       }
 
