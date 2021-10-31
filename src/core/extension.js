@@ -445,7 +445,7 @@
 
   /**
    * @param {boolean} [newTab] - Whether to open in a new tab.
-   * @return {undefined|Window|Tab}
+   * @return {undefined|Tab}
    */
   scrapbook.openScrapBook = async function ({newTab = true}) {
     const url = browser.runtime.getURL("scrapbook/sidebar.html");
@@ -454,28 +454,43 @@
       // This can only be called in a user action handler.
       // https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/User_actions
       return await browser.sidebarAction.open();
-    } else if (browser.windows) {
-      const currentWindow = await browser.windows.getCurrent({windowTypes: ['normal']});
+    }
 
-      let sideWindow = (await browser.windows.getAll({
-        windowTypes: ['popup'],
-        populate: true,
-      })).filter(w => w.tabs[0].url.startsWith(url))[0];
+    let sidebarTab = (await browser.tabs.query({}))
+        .filter(t => scrapbook.splitUrl(t.url)[0] === url)[0];
 
-      // calculate the desired position of the main and sidebar windows
+    openInSidebarWindow: {
+      // Firefox Android does not support windows
+      if (!browser.windows) {
+        break openInSidebarWindow;
+      }
+
+      let sidebarWindow;
+      if (sidebarTab) {
+        sidebarWindow = await browser.windows.get(sidebarTab.windowId);
+
+        // Treat as if browser.windows not supported if the sidebar is opened
+        // in a non-popup window.
+        if (sidebarWindow.type !== 'popup') {
+          break openInSidebarWindow;
+        }
+      }
+
+      // get the current window before further async tasks
+      // browser.windows.getCurrent throws if the current window doesn't exist
+      const currentWindow = await browser.windows.getCurrent({windowTypes: ['normal']}).catch(ex => null);
+
+      // calculate the desired position of the sidebar window
       const screenWidth = window.screen.availWidth;
       const screenHeight = window.screen.availHeight;
       const left = 0;
       const top = 0;
       const width = Math.max(Math.floor(screenWidth / 5 - 1), 200);
       const height = screenHeight - 1;
-      const mainLeft = Math.max(width + 1, currentWindow.left);
-      const mainTop = Math.max(0, currentWindow.top);
-      const mainWidth = Math.min(screenWidth - width - 1, currentWindow.width);
-      const mainHeight = Math.min(screenHeight - 1, currentWindow.height);
 
-      if (sideWindow) {
-        sideWindow = await browser.windows.update(sideWindow.id, {
+      // create or update the sidebar window
+      if (sidebarWindow) {
+        sidebarWindow = await browser.windows.update(sidebarWindow.id, {
           left,
           top,
           width,
@@ -483,7 +498,7 @@
           drawAttention: true,
         });
       } else {
-        sideWindow = await browser.windows.create({
+        sidebarWindow = await browser.windows.create({
           url,
           left,
           top,
@@ -491,30 +506,46 @@
           height,
           type: 'popup',
         });
+        sidebarTab = sidebarWindow.tabs[0];
 
         // Fix a bug for Firefox that positioning not work for windows.create
         // https://bugzilla.mozilla.org/show_bug.cgi?id=1271047
         // @FIXME: this occasionally doesn't work.
         if (scrapbook.userAgent.is('gecko')) {
-          await browser.windows.update(sideWindow.id, {
+          await browser.windows.update(sidebarWindow.id, {
             left,
             top,
           });
         }
       }
 
-      const axis = {state: 'normal'};
-      if (mainLeft !== currentWindow.left) { axis.left = mainLeft; }
-      if (mainTop !== currentWindow.top) { axis.top = mainTop; }
-      if (mainWidth !== currentWindow.width) { axis.width = mainWidth; }
-      if (mainHeight !== currentWindow.height) { axis.height = mainHeight; }
+      // update the current window if it exists
+      if (currentWindow) {
+        // calculate the desired position of the main window
+        const mainLeft = Math.max(width + 1, currentWindow.left);
+        const mainTop = Math.max(0, currentWindow.top);
+        const mainWidth = Math.min(screenWidth - width - 1, currentWindow.width);
+        const mainHeight = Math.min(screenHeight - 1, currentWindow.height);
 
-      await browser.windows.update(currentWindow.id, axis);
-      return sideWindow;
-    } else {
-      // Firefox Android does not support windows
-      return await scrapbook.visitLink({url, newTab});
+        const axis = {state: 'normal'};
+        if (mainLeft !== currentWindow.left) { axis.left = mainLeft; }
+        if (mainTop !== currentWindow.top) { axis.top = mainTop; }
+        if (mainWidth !== currentWindow.width) { axis.width = mainWidth; }
+        if (mainHeight !== currentWindow.height) { axis.height = mainHeight; }
+
+        await browser.windows.update(currentWindow.id, axis);
+      }
+
+      return sidebarTab;
     }
+
+    // update the sidebar tab if it exists
+    if (sidebarTab) {
+      await browser.tabs.update(sidebarTab.id, {active: true});
+      return sidebarTab;
+    }
+
+    return await scrapbook.visitLink({url, newTab});
   };
 
   scrapbook.editTab = async function ({tabId, frameId = 0, willActive, force}) {
