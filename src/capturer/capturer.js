@@ -939,7 +939,7 @@
     };
 
     // use disk cache for in-depth capture to prevent memory exhaustion
-    capturer.captureInfo.get(timeId).useDiskCache = options["capture.downLink.doc.depth"] > 0;
+    capturer.captureInfo.get(timeId).useDiskCache = parseInt(options["capture.downLink.doc.depth"], 10) > 0;
 
     capturer.log(`Capturing (document) ${source} ...`);
 
@@ -1003,7 +1003,7 @@
     };
 
     // use disk cache for in-depth capture to prevent memory exhaustion
-    capturer.captureInfo.get(timeId).useDiskCache = options["capture.downLink.doc.depth"] > 0;
+    capturer.captureInfo.get(timeId).useDiskCache = parseInt(options["capture.downLink.doc.depth"], 10) > 0;
 
     isDebug && console.debug("(main) capture", source, message);
 
@@ -1124,7 +1124,7 @@
     let {url: sourceUrl, refUrl} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
-    let downLinkInDepth = downLink && depth <= options["capture.downLink.doc.depth"] && options["capture.saveAs"] !== "singleHtml";
+    let downLinkInDepth = downLink && depth <= parseInt(options["capture.downLink.doc.depth"], 10) && options["capture.saveAs"] !== "singleHtml";
     let downLinkFile = downLink && ["header", "url"].includes(options["capture.downLink.file.mode"]);
 
     // check for downLink URL filter
@@ -2438,7 +2438,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         }
 
         // enforce some capture options
-        let depth = options["capture.downLink.doc.depth"];
+        let depth = parseInt(options["capture.downLink.doc.depth"], 10);
         Object.assign(options, {
           // capture to server
           "capture.saveTo": "server",

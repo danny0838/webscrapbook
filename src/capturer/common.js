@@ -330,7 +330,7 @@
       // check downLink
       if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
         if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
-            options["capture.downLink.doc.depth"] > 0) {
+            (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
           downLinkTasks.push(async () => {
             const downLinkSettings = Object.assign({}, settings, {
               depth: settings.depth + 1,
@@ -609,7 +609,7 @@
                   // check downLink
                   if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
                     if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
-                        options["capture.downLink.doc.depth"] > 0) {
+                        (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
                       downLinkTasks.push(async () => {
                         const downLinkSettings = Object.assign({}, settings, {
                           depth: settings.depth + 1,
