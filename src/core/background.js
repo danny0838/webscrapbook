@@ -185,42 +185,28 @@
 
       // pass windowId to restrict response to the current window sidebar
       return await scrapbook.invokeExtensionScript({id: (await browser.windows.getCurrent()).id, cmd, args});
-    } else if (browser.windows) {
-      const sidebarWindow = (await browser.windows.getAll({
-        windowTypes: ['popup'],
-        populate: true,
-      })).filter(w => scrapbook.splitUrl(w.tabs[0].url)[0] === sidebarUrl)[0];
-
-      if (!sidebarWindow) {
-        return false;
-      }
-
-      const tabId = sidebarWindow.tabs[0].id;
-      const result = await scrapbook.invokeContentScript({tabId, frameId: 0, cmd, args});
-
-      if (result) {
-        await browser.windows.update(sidebarWindow.id, {drawAttention: true});
-      }
-
-      return result;
-    } else {
-      // Firefox Android does not support windows
-      const sidebarTab = (await browser.tabs.query({}))
-          .filter(t => scrapbook.splitUrl(t.url)[0] === sidebarUrl)[0];
-
-      if (!sidebarTab) {
-        return false;
-      }
-
-      const tabId = sidebarTab.id;
-      const result = await scrapbook.invokeContentScript({tabId, frameId: 0, cmd, args});
-
-      if (result) {
-        await browser.tabs.update(tabId, {active: true});
-      }
-
-      return result;
     }
+
+    const sidebarTab = (await browser.tabs.query({}))
+        .filter(t => scrapbook.splitUrl(t.url)[0] === sidebarUrl)[0];
+
+    if (!sidebarTab) {
+      return false;
+    }
+
+    const tabId = sidebarTab.id;
+    const result = await scrapbook.invokeContentScript({tabId, frameId: 0, cmd, args});
+
+    if (result) {
+      // Firefox Android does not support windows
+      if (browser.windows && sidebarTab.windowId) {
+        await browser.windows.update(sidebarTab.windowId, {drawAttention: true});
+      }
+
+      await browser.tabs.update(tabId, {active: true});
+    }
+
+    return result;
   };
 
   /**
