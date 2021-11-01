@@ -2856,6 +2856,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         }
       }
 
+      if (typeof ext !== 'string') {
+        return false;
+      }
       return filters.some((filter) => {
         filter.lastIndex = 0;
         return filter.test(ext);
