@@ -7452,13 +7452,15 @@ async function test_capture_downLink01() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["file2.txt"]);
-  assert(zip.files["file3.txt"]);
-  assert(zip.files["file4.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
   assert(zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(zip.files["redirect.txt"]);
   assert(Object.keys(zip.files).length === 8);
 
   var indexFile = zip.file('index.html');
@@ -7466,13 +7468,15 @@ async function test_capture_downLink01() {
   var doc = await readFileAsDocument(indexBlob);
 
   var anchors = doc.querySelectorAll('a');
-  assert(anchors[0].getAttribute('href') === `file.txt`);
+  assert(anchors[0].getAttribute('href') === `file.bmp`);
   assert(anchors[1].getAttribute('href') === `file.css#123`);
-  assert(anchors[2].getAttribute('href') === `file.bmp`);
-  assert(anchors[3].getAttribute('href') === `page.html`);
+  assert(anchors[2].getAttribute('href') === `page.html`);
+  assert(anchors[3].getAttribute('href') === `file.txt`);
   assert(anchors[4].getAttribute('href') === `file2.txt`);
-  assert(anchors[5].getAttribute('href') === `file3.txt`);
-  assert(anchors[6].getAttribute('href') === `file4.txt`);
+  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink01/unknown.py`);
+  assert(anchors[6].getAttribute('href') === `file3.txt`);
+  assert(anchors[7].getAttribute('href') === `${localhost}/capture_downLink01/nofilename.py`);
+  assert(anchors[8].getAttribute('href') === `redirect.txt`);
 
   // page should be saved as file (not rewritten)
   var file = zip.file('page.html');
@@ -7502,13 +7506,15 @@ async function test_capture_downLink01() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["file4.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
   assert(zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["file4.txt"]);
   assert(Object.keys(zip.files).length === 5);
 
   var indexFile = zip.file('index.html');
@@ -7516,13 +7522,15 @@ async function test_capture_downLink01() {
   var doc = await readFileAsDocument(indexBlob);
 
   var anchors = doc.querySelectorAll('a');
-  assert(anchors[0].getAttribute('href') === `file.txt`);
+  assert(anchors[0].getAttribute('href') === `file.bmp`);
   assert(anchors[1].getAttribute('href') === `file.css#123`);
-  assert(anchors[2].getAttribute('href') === `file.bmp`);
-  assert(anchors[3].getAttribute('href') === `page.html`);
-  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink01/filename.py`);
-  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink01/mime.py`);
-  assert(anchors[6].getAttribute('href') === `${localhost}/capture_downLink01/redirect.pyr`);
+  assert(anchors[2].getAttribute('href') === `page.html`);
+  assert(anchors[3].getAttribute('href') === `file.txt`);
+  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink01/mime.py`);
+  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink01/unknown.py`);
+  assert(anchors[6].getAttribute('href') === `${localhost}/capture_downLink01/filename.py`);
+  assert(anchors[7].getAttribute('href') === `${localhost}/capture_downLink01/nofilename.py`);
+  assert(anchors[8].getAttribute('href') === `${localhost}/capture_downLink01/redirect.pyr`);
 
   // page should be saved as file (not rewritten)
   var file = zip.file('page.html');
@@ -7552,6 +7560,15 @@ async function test_capture_downLink01() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files["file.bmp"]);
+  assert(!zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(!zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["redirect.txt"]);
   assert(Object.keys(zip.files).length === 1);
 
   var indexFile = zip.file('index.html');
@@ -7559,13 +7576,15 @@ async function test_capture_downLink01() {
   var doc = await readFileAsDocument(indexBlob);
 
   var anchors = doc.querySelectorAll('a');
-  assert(anchors[0].getAttribute('href') === `${localhost}/capture_downLink01/file.txt`);
+  assert(anchors[0].getAttribute('href') === `${localhost}/capture_downLink01/file.bmp`);
   assert(anchors[1].getAttribute('href') === `${localhost}/capture_downLink01/file.css#123`);
-  assert(anchors[2].getAttribute('href') === `${localhost}/capture_downLink01/file.bmp`);
-  assert(anchors[3].getAttribute('href') === `${localhost}/capture_downLink01/page.html`);
-  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink01/filename.py`);
-  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink01/mime.py`);
-  assert(anchors[6].getAttribute('href') === `${localhost}/capture_downLink01/redirect.pyr`);
+  assert(anchors[2].getAttribute('href') === `${localhost}/capture_downLink01/page.html`);
+  assert(anchors[3].getAttribute('href') === `${localhost}/capture_downLink01/file.txt`);
+  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink01/mime.py`);
+  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink01/unknown.py`);
+  assert(anchors[6].getAttribute('href') === `${localhost}/capture_downLink01/filename.py`);
+  assert(anchors[7].getAttribute('href') === `${localhost}/capture_downLink01/nofilename.py`);
+  assert(anchors[8].getAttribute('href') === `${localhost}/capture_downLink01/redirect.pyr`);
 }
 
 /**
@@ -7588,12 +7607,16 @@ async function test_capture_downLink02() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["file2.txt"]);
-  assert(zip.files["file3.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
-  assert(Object.keys(zip.files).length === 6);
+  assert(!zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(zip.files["file2.txt"]);
+  assert(zip.files["unknown.bin"]);
+  assert(zip.files["file3.txt"]);
+  assert(zip.files["nofilename.py"]);
+  assert(!zip.files["file4.txt"]);
+  assert(Object.keys(zip.files).length === 8);
 
   // space separator
   var options = {
@@ -7608,9 +7631,15 @@ async function test_capture_downLink02() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["file4.txt"]);
   assert(Object.keys(zip.files).length === 4);
 
   // comma separator
@@ -7626,9 +7655,15 @@ async function test_capture_downLink02() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["file4.txt"]);
   assert(Object.keys(zip.files).length === 4);
 
   // semicolon separator
@@ -7644,9 +7679,15 @@ async function test_capture_downLink02() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["file4.txt"]);
   assert(Object.keys(zip.files).length === 4);
 
   // combined separator
@@ -7662,9 +7703,15 @@ async function test_capture_downLink02() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["file4.txt"]);
   assert(Object.keys(zip.files).length === 4);
 
   // match full extension
@@ -7680,6 +7727,15 @@ async function test_capture_downLink02() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files["file.bmp"]);
+  assert(!zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(!zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["redirect.txt"]);
   assert(Object.keys(zip.files).length === 1);
 
   // RegExp rule with flag
@@ -7695,9 +7751,15 @@ async function test_capture_downLink02() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["file4.txt"]);
   assert(Object.keys(zip.files).length === 4);
 
   // RegExp rule with no flag
@@ -7713,6 +7775,15 @@ async function test_capture_downLink02() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files["file.bmp"]);
+  assert(!zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(!zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["redirect.txt"]);
   assert(Object.keys(zip.files).length === 1);
 
   // RegExp rule
@@ -7728,10 +7799,15 @@ async function test_capture_downLink02() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
   assert(zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["file4.txt"]);
   assert(Object.keys(zip.files).length === 5);
 
   // match full extension
@@ -7747,6 +7823,39 @@ async function test_capture_downLink02() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files["file.bmp"]);
+  assert(!zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(!zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["redirect.txt"]);
+  assert(Object.keys(zip.files).length === 1);
+
+  // take URL filename if Content-Disposition without filename
+  var options = {
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `//`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink01/basic.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files["file.bmp"]);
+  assert(!zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(!zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["redirect.txt"]);
   assert(Object.keys(zip.files).length === 1);
 }
 
@@ -7781,8 +7890,15 @@ ${localhost}/capture_downLink01/redirect.pyr#bar`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files["file.bmp"]);
+  assert(!zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
   assert(zip.files["file.txt"]);
-  assert(zip.files["file2.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["redirect.txt"]);
   assert(Object.keys(zip.files).length === 3);
 
   // plain text rule must match full URL
@@ -7803,11 +7919,15 @@ ${localhost}/capture_downLink01/file.css`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["file.bmp"]);
+  assert(!zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
   assert(zip.files["file.txt"]);
   assert(zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
   assert(zip.files["file3.txt"]);
-  assert(zip.files["file4.txt"]);
-  assert(zip.files["file.bmp"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(zip.files["redirect.txt"]);
   assert(Object.keys(zip.files).length === 6);
 
   // chars after spaces should be stripped for a plain text rule
@@ -7828,11 +7948,15 @@ ${localhost}/capture_downLink01/file.css\tbar`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["file.bmp"]);
+  assert(!zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
   assert(zip.files["file.txt"]);
   assert(zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
   assert(zip.files["file3.txt"]);
-  assert(zip.files["file4.txt"]);
-  assert(zip.files["file.bmp"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(zip.files["redirect.txt"]);
   assert(Object.keys(zip.files).length === 6);
 
   // RegExp rule
@@ -7856,10 +7980,15 @@ ${localhost}/capture_downLink01/file.css\tbar`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["file4.txt"]);
   assert(zip.files["file.bmp"]);
   assert(zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(zip.files["redirect.txt"]);
   assert(Object.keys(zip.files).length === 5);
 }
 
