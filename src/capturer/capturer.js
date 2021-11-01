@@ -1976,13 +1976,15 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         const oldIndex = item.index;
 
         // enforce capture to server
-        options["capture.saveTo"] = "server";
+        const subOptions = Object.assign({}, options, {
+          "capture.saveTo": "server"
+        });
 
         result = await capturer.captureGeneral({
           timeId,
           tabId, frameId, fullPage,
           url: url || item.source, refUrl, title, favIconUrl,
-          mode, options,
+          mode, options: subOptions,
           bookId,
           captureOnly: true,
         });
@@ -2471,7 +2473,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
         // enforce some capture options
         let depth = parseInt(options["capture.downLink.doc.depth"], 10);
-        Object.assign(options, {
+        const subOptions = Object.assign({}, options, {
           // capture to server
           "capture.saveTo": "server",
           // only saving as folder can be effectively merged,
@@ -2493,7 +2495,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           timeId,
           tabId, frameId, fullPage,
           url, refUrl, title, favIconUrl,
-          mode, options,
+          mode, options: subOptions,
           bookId,
           documentName: null,
           captureOnly: true,
