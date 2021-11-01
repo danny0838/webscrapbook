@@ -742,16 +742,16 @@
     "message": "擷取深度未超過此值的連結頁面（A 或 AREA 元素或 META 重導向指向的目標），並建立交互連結及記錄資源列表。主頁面為深度 0，深度 0 連結的頁面為深度 1，深度 1 連結的頁面為深度 2，……依此類推。\n\n• 深度設為 0 時仍會記錄資源列表。留空表示不擷取連結頁面也不記錄資源列表。\n• 注意：深層擷取可能會下載大量資料，宜設定儲存擷取資料為資料夾，以避免潛在的效能問題或錯誤。此功能不支援儲存為單一 HTML 檔案。"
   },
   "OptionCaptureDownLinkDocUrlFilterLabel": {
-    "message": "擷取連結頁面包含網址:"
+    "message": "擷取連結頁面列入網址:"
   },
   "OptionCaptureDownLinkDocUrlFilterTooltip": {
     "message": "此過濾器根據網址篩選要擷取的連結頁面。\n\n• 以下每行為一個完整網址（「#」以後的部分會自動去除）或一個正規表示式（如「/^http://example\\.com//」）。\n• 連結的完整網址（去除「#」以後的部分）符合任何一行的規則即列入下載。例如連結「http://example.com/subpage#h2」符合完整網址規則「http://example.com/subpage」或正規表示式規則「/^http://example\\.com/SubPage\\d*/i」。若每行皆無規則，則任何網址皆列入下載。\n• 以「#」開頭的行皆視為註解，執行時會略過。\n• 每行空白字元以後的部分皆視為註解，執行時會自動忽略。例如「http://example.com/ 註解」視同「http://example.com/」；「/^https:/ 註解」視同「/^https:/」。"
   },
   "OptionCaptureDownLinkFileExtFilterLabel": {
-    "message": "下載連結檔案包含副檔名:"
+    "message": "下載連結檔案列入檔案類型:"
   },
   "OptionCaptureDownLinkFileExtFilterTooltip": {
-    "message": "此過濾器根據副檔名篩選要下載的連結檔案。\n\n• 以下每行為一個以「,」分隔的副檔名列表（不分大小寫，可含空白，如「jpg, jpeg」）或一個正規表示式（如「/jpe?g|gif|png/i」）。\n• 連結的全副檔名符合任何一行的規則即列入下載。例如連結「http://example.com/file.doc?token=foo」取「doc」比對，不符合副檔名列表規則「docx, do」。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
+    "message": "此過濾器根據副檔名或 MIME 類型篩選要下載的連結檔案。\n\n• 以下每行為一條規則，超連結的副檔名或 MIME 類型符合任何一條規則即列入下載。規則可為以下格式：\n  • 以「,」、「;」或空白分隔的副檔名列表，不分大小寫。如「jpg, jpeg; gif; png」會列入「jpg」、「jPEG」、「Gif」、或「PNG」，而不會列入「jp」或「jpgx」。\n  • 正規表示式字串，格式為「/表示式/標幟」。如「/jpe?g|gif|png/i」可列入與前項相同的副檔名。若要列入無副檔名的檔案，可用「//」。\n  • 以「mime:」開頭的字串，不分大小寫。如「mime:text/plain」會列入 MIME 類型為「text/plain」的檔案。\n  • 以「mime:」開頭的正規表示式。如「mime:/text/.*/i」會列入 MIME 類型為「text/plain」、「text/css」、「text/html」等檔案。\n• 以「#」開頭的行皆視為註解，執行時會略過。"
   },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
     "message": "比對 HTTP 標頭及網址副檔名"
@@ -763,7 +763,7 @@
     "message": "停用下載連結檔案"
   },
   "OptionCaptureDownLinkFileModeTooltip": {
-    "message": "此選項決定是否下載連結的檔案（A 或 AREA 元素或 META 重導向指向的目標）。\n\n• 停用下載連結檔案：不下載連結的檔案。\n• 比對網址副檔名：比對網址副檔名決定是否下載，效能較佳，但無法有效區分動態網頁的類型。例如副檔名為 .php 的網址可能輸出 html、doc、pdf 或其他格式，但此模式下都是取 php 做比對。\n• 比對 HTTP 標頭及網址副檔名：走訪每個連結取得 HTTP 標頭及實際輸出的副檔名，據此決定是否下載。"
+    "message": "此選項決定是否下載連結的檔案（A 或 AREA 元素或 META 重導向指向的目標）。\n\n• 停用下載連結檔案：不下載連結的檔案。\n• 比對網址副檔名：根據網址副檔名決定是否下載。效能較佳，但無法有效區分動態網頁的類型。例如網址「http://example.com/api.php?id=123#sec1」的副檔名為「php」，但實際輸出的檔案可能是 html、doc、pdf 或其他格式。\n• 比對 HTTP 標頭及網址副檔名：走訪每個連結，根據 HTTP 標頭指定的 MIME 類型與實際輸出副檔名和網址副檔名決定是否下載。\n  • 副檔名：如有 Content-Type 標頭，取其對應的副檔名，例如「application/javascript」取副檔名「js」。（若此標頭不對應任何副檔名，則不符合任何副檔名篩選規則。）其次如有 Content-Disposition 標頭且 filename 參數非空值，則取該參數值的副檔名，如「Content-Disposition: attachment; filename=\"fname.ext\"」取「ext」。否則取網址副檔名。\n  • MIME 類型：取 Content-Type 標頭的值（忽略參數部分），如「Content-Type: text/html; charset=utf-8」取「text/html」。（若無此標頭，則不符合任何 MIME 類型篩選規則。）"
   },
   "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "比對網址副檔名"

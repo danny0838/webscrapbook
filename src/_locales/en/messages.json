@@ -739,7 +739,7 @@
     "message": "Depth to capture linked pages:"
   },
   "OptionCaptureDownLinkDocDepthTooltip": {
-    "message": "Capture linked pages (targeted by an A or AREA element element or a meta refresh) whose depth is not greater than the specified value, and build cross links and record used resources. The main page is depth 0, pages linked by a page with depth 0 is depth 1, pages linked by a page with depth 1 is depth 2, ... and so on.\n\n• Set depth to 0 to record used resources without capturing linked pages. Set depth to blank to not record used resources.\n• NOTE: A deep capture may download a lot of data. It's recommended to set “save captured data as” to “Folder” to prevent a potential performance issue or error. Saving as single HTML is not supported."
+    "message": "Capture linked pages (targeted by an A or AREA element or a meta refresh) whose depth is not greater than the specified value, and build cross links and record used resources. The main page is depth 0, pages linked by a page with depth 0 is depth 1, pages linked by a page with depth 1 is depth 2, ... and so on.\n\n• Set depth to 0 to record used resources without capturing linked pages. Set depth to blank to not record used resources.\n• NOTE: A deep capture may download a lot of data. It's recommended to set “save captured data as” to “Folder” to prevent a potential performance issue or error. Saving as single HTML is not supported."
   },
   "OptionCaptureDownLinkDocUrlFilterLabel": {
     "message": "Included URLs for capturing linked pages:"
@@ -748,13 +748,13 @@
     "message": "This determines what linked pages are for capturing according to URL.\n\n• Each following line is a full URL (“#” and following chars will be auto-stripped) or a regular expression (e.g. “/^http://example\\.com//”). \n• A link whose full URL (with “#” and following chars stripped) matches a rule at any line is included for downloading. For example, the link “http://example.com/subpage#h2” matches the full URL rule “http://example.com/subpage” or the regular expression rule “/^http://example\\.com/SubPage\\d*/i”. Any URL is included if no rule exists in any line.\n• A line starting with “#” is regarded as a comment and will be ignored during execution.\n• Text following a space is regarded as a comment and will be ignored during execution. For example, “http://example.com/ comment” is treated as “http://example.com/”; “/^https:/ comment” is treated as“/^https:/”."
   },
   "OptionCaptureDownLinkFileExtFilterLabel": {
-    "message": "Included file extensions for downloading linked files:"
+    "message": "Included file types for downloading linked files:"
   },
   "OptionCaptureDownLinkFileExtFilterTooltip": {
-    "message": "This determines what linked files are to be downloaded according to file extension.\n\n• Each following line is a comma-separated list of extensions (case-insensitive and may include spaces, e.g. “jpg, jpeg”) or a regular expression (e.g. “/jpe?g|gif|png/i”).\n• A link whose full extension matches a rule at any line is included for download. For example, the link “http://example.com/file.doc?token=foo” is taken “doc” for matching and does not match the extensions rule “docx, do”.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
+    "message": "This determines what linked files are to be downloaded according to file extension.\n\n• Each following line is a rule, and a link whose full MIME type or file extension matches any rule is included for downloading. A rule can be:\n  • A list of extensions separated with “,”, “;”, or spaces, regardless of case. For example, “jpg, jpeg; gif; png” includes “jpg”, “jPEG”, “Gif”, or“PNG”, and not “jp” or “jpgx”.\n  • A regular expression string in the format “/expression/flags”. For example, “/jpe?g|gif|png/i” includes the same extensions as above. To include a file with no extension, use “//”.\n  • A “mime:”-starting string, regardless of case. For example, “mime:text/plain” includes files with MIME type “text/plain”.\n  • A “mime:”-starting regular expression string. For example, “mime:/text/.*/i” includes files with MIME type “text/plain”, “text/css”, “text/html”, etc.\n• A line starting with “#” is regarded as a comment and will be ignored during execution."
   },
   "OptionCaptureDownLinkFileModeHeaderLabel": {
-    "message": "Match HTTP header and file extension"
+    "message": "Match HTTP header and URL file extension"
   },
   "OptionCaptureDownLinkFileModeLabel": {
     "message": "Download linked files:"
@@ -763,7 +763,7 @@
     "message": "Disable download linked files"
   },
   "OptionCaptureDownLinkFileModeTooltip": {
-    "message": "This determines whether and how to download linked files (targeted by an A or AREA element element or a meta refresh).\n\n• Disable download linked files: Do not download the linked resource.\n• Match URL file extension: Match the file extension of the URL. This performs better but cannot differenciate dynamically generated resource. For example, a URL whose extension is .php can output a resource of html, doc, pdf, or other type, but the filter always gets “php” in this mode.\n• Match HTTP header and file extension: Traverse every link to get the HTTP header and the precise extension of the output resource for matching."
+    "message": "This determines whether and how to download linked files (targeted by an A or AREA element element or a meta refresh).\n\n• Disable download linked files: Do not download the linked resource.\n• Match URL file extension: Determine whether to download according to the file extension of the URL. This performs better but cannot differentiate dynamically generated resource. For example, the file extension for the URL “http://example.com/api.php?id=123#sec1” is “php”, while the actual output resource can be html, doc, pdf, or other format.\n• Match HTTP header and URL file extension: Traverse every link and determine whether to download according to its MIME type, extension of the output filename, and URL file extension.\n  • Extension: Take the file extension corresponding to the Content-Type header if specified. For example, “js” is taken for “application/javascript”. (Match no file extension filter rule if there is no corresponding file extension for the header.) Otherwise take the file extension from the filename parameter of the Content-Disposition header if it's non-blank. For example, “ext” is taken for “Content-Disposition: attachment; filename=\"fname.ext\"”. Otherwise take the URL file extension.\n  • MIME type: Take the value of the Content-Type header (ignoring parameters). For example, “text/html” is taken for “Content-Type: text/html; charset=utf-8”. (Match no MIME type filter rule if the header doesn't exist.)"
   },
   "OptionCaptureDownLinkFileModeUrlLabel": {
     "message": "Match URL file extension"
