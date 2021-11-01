@@ -198,19 +198,34 @@ if (Node && !Node.prototype.getRootNode) {
       return source.split(/[\\\/]/).map(x => scrapbook.validateFilename(x)).join('/');
     },
     "capture.downLink.file.extFilter": (...args) => {
+      const PREFIX_MIME = 'mime:';
       const REGEX_LINEFEED = /\n|\r\n?/;
       const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
       const REGEX_EXT_SEP = /[,;\s]+/;
       const fn = OPTION_PARSERS["capture.downLink.file.extFilter"] = (source) => {
-        const rv = [];
+        const rv = {ext: [], mime: []};
         const lines = source.split(REGEX_LINEFEED);
         for (let i = 0, I = lines.length; i < I; i++) {
-          const line = lines[i].trim();
+          let line = lines[i].trim();
           if (!line || line.startsWith("#")) { continue; }
+
+          if (line.startsWith(PREFIX_MIME)) {
+            line = line.slice(PREFIX_MIME.length);
+            if (REGEX_PATTERN.test(line)) {
+              try {
+                rv.mime.push(new RegExp(`^(?:${RegExp.$1})$`, RegExp.$2));
+              } catch (ex) {
+                throw new Error(`Line ${i + 1}: ${ex.message}`);
+              }
+            } else {
+              rv.mime.push(new RegExp(`^(?:${scrapbook.escapeRegExp(line)})$`, 'i'));
+            }
+            continue;
+          }
 
           if (REGEX_PATTERN.test(line)) {
             try {
-              rv.push(new RegExp(`^(?:${RegExp.$1})$`, RegExp.$2));
+              rv.ext.push(new RegExp(`^(?:${RegExp.$1})$`, RegExp.$2));
             } catch (ex) {
               throw new Error(`Line ${i + 1}: ${ex.message}`);
             }
@@ -219,7 +234,7 @@ if (Node && !Node.prototype.getRootNode) {
               .filter(x => !!x)
               .map(x => scrapbook.escapeRegExp(x))
               .join('|');
-            rv.push(new RegExp(`^(?:${regex})$`, 'i'));
+            rv.ext.push(new RegExp(`^(?:${regex})$`, 'i'));
           }
         }
         return rv;

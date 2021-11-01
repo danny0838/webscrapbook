@@ -7881,6 +7881,108 @@ async function test_capture_downLink02() {
   assert(!zip.files["nofilename.py"]);
   assert(!zip.files["redirect.txt"]);
   assert(Object.keys(zip.files).length === 1);
+
+  // mime: filter
+  var options = {
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `\
+mime:text/plain
+mime:image/bmp
+mime:application/wsb.unknown`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink01/basic.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["file.bmp"]);
+  assert(!zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(zip.files["file2.txt"]);
+  assert(zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(zip.files["redirect.txt"]);
+  assert(Object.keys(zip.files).length === 6);
+
+  // mime: filter with regex
+  var options = {
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `\
+mime:/text/.+/i`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink01/basic.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files["file.bmp"]);
+  assert(zip.files["file.css"]);
+  assert(zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(zip.files["redirect.txt"]);
+  assert(Object.keys(zip.files).length === 6);
+
+  // mime: filter should not hit if no Content-Type header
+  var options = {
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `\
+mime:/.*/i`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink01/basic.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["file.bmp"]);
+  assert(zip.files["file.css"]);
+  assert(zip.files["page.html"]);
+  assert(zip.files["file.txt"]);
+  assert(zip.files["file2.txt"]);
+  assert(zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(zip.files["redirect.txt"]);
+  assert(Object.keys(zip.files).length === 8);
+
+  // mime: filter should not hit for url mode
+  var options = {
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `\
+mime:/.*/i`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink01/basic.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files["file.bmp"]);
+  assert(!zip.files["file.css"]);
+  assert(!zip.files["page.html"]);
+  assert(!zip.files["file.txt"]);
+  assert(!zip.files["file2.txt"]);
+  assert(!zip.files["unknown.bin"]);
+  assert(!zip.files["file3.txt"]);
+  assert(!zip.files["nofilename.py"]);
+  assert(!zip.files["redirect.txt"]);
+  assert(Object.keys(zip.files).length === 1);
 }
 
 /**

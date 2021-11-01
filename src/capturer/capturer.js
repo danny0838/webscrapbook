@@ -1253,9 +1253,10 @@
       if (!downLinkExtra && downLinkFileValid && options["capture.downLink.file.mode"] === "header") {
         // determine extension
         const headers = fetchResponse.headers;
+        const mime = headers.contentType;
         let ext;
-        if (headers.contentType) {
-          ext = Mime.extension(headers.contentType);
+        if (mime) {
+          ext = Mime.extension(mime);
         } else if (headers.filename) {
           [, ext] = scrapbook.filenameParts(headers.filename);
         } else {
@@ -1263,7 +1264,7 @@
           [, ext] = scrapbook.filenameParts(filename);
         }
 
-        if (!capturer.downLinkFileExtFilter(ext, options)) {
+        if (!(capturer.downLinkFileMimeFilter(mime, options) || capturer.downLinkFileExtFilter(ext, options))) {
           downLinkFileValid = false;
         }
       }
@@ -2849,7 +2850,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       if (filterText !== options["capture.downLink.file.extFilter"]) {
         filterText = options["capture.downLink.file.extFilter"];
         try {
-          filters = scrapbook.parseOption("capture.downLink.file.extFilter", filterText);
+          filters = scrapbook.parseOption("capture.downLink.file.extFilter", filterText).ext;
         } catch (ex) {
           capturer.warn(`Ignored invalid capture.downLink.file.extFilter: ${ex.message}`);
           filters = [];
@@ -2865,6 +2866,32 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       });
     };
     return fn(ext, options);
+  };
+
+  capturer.downLinkFileMimeFilter = function (mime, options) {
+    let filterText;
+    let filters;
+    const fn = capturer.downLinkFileMimeFilter = (mime, options) => {
+      // use the cache if the filter is not changed
+      if (filterText !== options["capture.downLink.file.extFilter"]) {
+        filterText = options["capture.downLink.file.extFilter"];
+        try {
+          filters = scrapbook.parseOption("capture.downLink.file.extFilter", filterText).mime;
+        } catch (ex) {
+          capturer.warn(`Ignored invalid capture.downLink.file.extFilter: ${ex.message}`);
+          filters = [];
+        }
+      }
+
+      if (typeof mime !== 'string') {
+        return false;
+      }
+      return filters.some((filter) => {
+        filter.lastIndex = 0;
+        return filter.test(mime);
+      });
+    };
+    return fn(mime, options);
   };
 
   capturer.downLinkDocUrlFilter = function (url, options) {
