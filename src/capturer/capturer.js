@@ -2857,6 +2857,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       }
 
       return filters.some((filter) => {
+        filter.lastIndex = 0;
         return filter.test(ext);
       });
     };
@@ -2892,6 +2893,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           return filter === matchUrl;
         }
 
+        filter.lastIndex = 0;
         return filter.test(matchUrl);
       });
     };
@@ -2922,6 +2924,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           return filter === matchUrl;
         }
 
+        filter.lastIndex = 0;
         return filter.test(matchUrl);
       });
     };
