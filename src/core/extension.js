@@ -447,7 +447,7 @@
    * @param {boolean} [newTab] - Whether to open in a new tab.
    * @return {undefined|Tab}
    */
-  scrapbook.openScrapBook = async function ({newTab = true}) {
+  scrapbook.openScrapBook = async function ({newTab = true} = {}) {
     const url = browser.runtime.getURL("scrapbook/sidebar.html");
 
     if (browser.sidebarAction) {
