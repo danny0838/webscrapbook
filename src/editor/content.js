@@ -864,9 +864,35 @@ ${sRoot}.toolbar .toolbar-close:hover {
   /**
    * @kind invokable
    */
-  editor.initFrame = async function () {
-    document.documentElement.setAttribute('data-scrapbook-toolbar-active', '');
-    editor.annotator.toggle({willActive: true});
+  editor.initFrame = async function ({
+    active = true,
+    annotatorActive = true,
+    domEraserActive = false,
+    htmlEditorActive = false,
+    mutationHandlerActive = true,
+  }) {
+    if (active) {
+      document.documentElement.setAttribute('data-scrapbook-toolbar-active', '');
+    } else {
+      document.documentElement.removeAttribute('data-scrapbook-toolbar-active');
+    }
+    editor.annotator.toggle({willActive: annotatorActive});
+    editor.domEraser.toggle({willActive: domEraserActive});
+    editor.htmlEditor.toggle({willActive: htmlEditorActive});
+    editor.mutationHandler.toggle({willActive: mutationHandlerActive});
+  };
+
+  /**
+   * @kind invokable
+   */
+  editor.getStatus = function () {
+    return {
+      active: this.active,
+      annotatorActive: editor.annotator.active,
+      domEraserActive: editor.domEraser.active,
+      htmlEditorActive: editor.htmlEditor.active,
+      mutationHandlerActive: editor.mutationHandler.active,
+    };
   };
 
   /**

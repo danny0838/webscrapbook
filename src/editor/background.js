@@ -32,11 +32,19 @@
       }
 
       // a frame in an active editor is loaded, run init script for it
-      return scrapbook.initContentScripts(tabId, frameId).then(() => {
+      return Promise.all([
+        scrapbook.invokeContentScript({
+          tabId,
+          frameId: 0,
+          cmd: "editor.getStatus",
+        }),
+        scrapbook.initContentScripts(tabId, frameId),
+      ]).then(([status, initResults]) => {
         return scrapbook.invokeContentScript({
           tabId,
           frameId,
           cmd: "editor.initFrame",
+          args: status,
         });
       });
     }
