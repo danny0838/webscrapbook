@@ -1089,9 +1089,10 @@ if (Node && !Node.prototype.getRootNode) {
    * Init content scripts in the specified tab.
    *
    * @param {integer} tabId - The tab's ID to init content script.
+   * @param {integer} [frameId] - The frame ID to init content script.
    * @return {Promise<Object>}
    */
-  scrapbook.initContentScripts = async function (tabId) {
+  scrapbook.initContentScripts = async function (tabId, frameId) {
     // Simply run executeScript for allFrames by checking for nonexistence of
     // the content script in the main frame has a potential leak causing only
     // partial frames have the content script loaded. E.g. the user ran this
@@ -1099,8 +1100,11 @@ if (Node && !Node.prototype.getRootNode) {
     // existence of content script for every frame and inject on demand.
     const tasks = [];
     const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-    (await browser.webNavigation.getAllFrames({tabId})).forEach(({frameId, url}) => {
-      if (!scrapbook.isContentPage(url, allowFileAccess)) { return; }
+    const frameIds = Number.isInteger(frameId) ?
+        await browser.webNavigation.getFrame({tabId, frameId}).then(r => [Object.assign(r, {frameId})]) :
+        await browser.webNavigation.getAllFrames({tabId});
+    for (const {frameId, url} of frameIds) {
+      if (!scrapbook.isContentPage(url, allowFileAccess)) { continue; }
 
       // Send a test message to check whether content script is loaded.
       // If no content script, we get an error saying connection cannot be established.
@@ -1136,7 +1140,7 @@ if (Node && !Node.prototype.getRootNode) {
             return result;
           })
       );
-    });
+    }
     return await Promise.all(tasks);
   };
 

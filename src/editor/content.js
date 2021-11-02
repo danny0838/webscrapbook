@@ -864,6 +864,14 @@ ${sRoot}.toolbar .toolbar-close:hover {
   /**
    * @kind invokable
    */
+  editor.initFrame = async function () {
+    document.documentElement.setAttribute('data-scrapbook-toolbar-active', '');
+    editor.annotator.toggle({willActive: true});
+  };
+
+  /**
+   * @kind invokable
+   */
   editor.lineMarkerInternal = function ({tagName = 'span', attrs = {}} = {}) {
     editor.addHistory();
 
@@ -1669,6 +1677,12 @@ scrapbook-toolbar, scrapbook-toolbar *,
     document.documentElement.setAttribute('data-scrapbook-toolbar-active', '');
     document.documentElement.appendChild(editor.element);
     await scrapbook.invokeExtensionScript({
+      cmd: "background.registerActiveEditorTab",
+      args: {
+        willEnable: true,
+      },
+    });
+    await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
         code: `document.documentElement.setAttribute('data-scrapbook-toolbar-active', '')`,
@@ -1683,6 +1697,12 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
     document.documentElement.removeAttribute('data-scrapbook-toolbar-active');
     editor.element.remove();
+    await scrapbook.invokeExtensionScript({
+      cmd: "background.registerActiveEditorTab",
+      args: {
+        willEnable: false,
+      },
+    });
     await scrapbook.invokeExtensionScript({
       cmd: "background.invokeEditorCommand",
       args: {
@@ -3745,47 +3765,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
       editor.lastWindowBlurTime = Date.now();
     }
   }, {capture: true, passive: true});
-
-  {
-    const frameNodeSelector = 'frame, iframe';
-    const frameAddObserver = (elem) => {
-      elem.addEventListener("load", (event) => {
-        // console.warn('frame load', event);
-        // init content scripts for all descendant frames as we can hardly
-        // get this specific frame
-        return scrapbook.invokeExtensionScript({
-          cmd: "background.invokeEditorCommand",
-          args: {
-            frameIdExcept: 0,
-            code: `core.frameId;`,
-          },
-        });
-      });
-    }
-
-    const docObserver = new MutationObserver((mutations) => {
-      for (let mutation of mutations) {
-        // console.warn("DOM update", mutation);
-        for (let node of mutation.addedNodes) {
-          if (node.nodeType === 1) {
-            if (node.matches(frameNodeSelector)) {
-              frameAddObserver(node);
-            } else {
-              for (const elem of node.querySelectorAll(frameNodeSelector)) {
-                frameAddObserver(elem);
-              }
-            }
-          }
-        }
-      }
-    });
-    const docObserverConf = {childList: true, subtree: true};
-
-    docObserver.observe(document.documentElement, docObserverConf);
-    for (const elem of document.querySelectorAll(frameNodeSelector)) {
-      frameAddObserver(elem);
-    }
-  }
 
   return editor;
 

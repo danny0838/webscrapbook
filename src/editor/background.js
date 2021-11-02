@@ -21,10 +21,29 @@
 
   const AUTO_EDIT_FILTER = {url: [{schemes: ["http", "https"]}]};
 
-  function onDomContentLoaded(details) {
-    if (details.frameId !== 0) { return; }
+  const activeEditorTabIds = new Set();
 
-    const {url, tabId} = details;
+  function onDomContentLoaded(details) {
+    const {tabId, frameId, url} = details;
+
+    if (frameId !== 0) {
+      if (!activeEditorTabIds.has(tabId)) {
+        return;
+      }
+
+      // a frame in an active editor is loaded, run init script for it
+      return scrapbook.initContentScripts(tabId, frameId).then(() => {
+        return scrapbook.invokeContentScript({
+          tabId,
+          frameId,
+          cmd: "editor.initFrame",
+        });
+      });
+    }
+
+    // the main frame is reloaded, mark it as inactive
+    activeEditorTabIds.delete(tabId);
+
     const [urlMain, urlSearch, urlHash] = scrapbook.splitUrl(url);
 
     // skip URLs not in the backend server
@@ -55,6 +74,14 @@
     }
   }
 
+  function registerActiveEditorTab(tabId, willEnable = true) {
+    if (willEnable) {
+      activeEditorTabIds.add(tabId);
+    } else {
+      activeEditorTabIds.delete(tabId);
+    }
+  }
+
   async function init() {
     await scrapbook.loadOptionsAuto;
     toggleAutoEdit();
@@ -64,6 +91,7 @@
 
   return {
     toggleAutoEdit,
+    registerActiveEditorTab,
   };
 
 }));

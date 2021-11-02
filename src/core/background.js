@@ -292,6 +292,13 @@
   /**
    * @kind invokable
    */
+  background.registerActiveEditorTab = async function ({willEnable = true} = {}, sender) {
+    return editor.registerActiveEditorTab(sender.tab.id, willEnable);
+  };
+
+  /**
+   * @kind invokable
+   */
   background.invokeEditorCommand = async function ({code, cmd, args, frameId = -1, frameIdExcept = -1}, sender) {
     const tabId = sender.tab.id;
     if (frameId !== -1) {
