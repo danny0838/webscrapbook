@@ -21,7 +21,7 @@
 
   const AUTO_EDIT_FILTER = {url: [{schemes: ["http", "https"]}]};
 
-  function onNavigationComplete(details) {
+  function onDomContentLoaded(details) {
     if (details.frameId !== 0) { return; }
 
     const {url, tabId} = details;
@@ -49,9 +49,9 @@
   }
 
   function toggleAutoEdit() {
-    browser.webNavigation.onCompleted.removeListener(onNavigationComplete);
+    browser.webNavigation.onDOMContentLoaded.removeListener(onDomContentLoaded);
     if (scrapbook.getOption("editor.autoInit") && scrapbook.hasServer()) {
-      browser.webNavigation.onCompleted.addListener(onNavigationComplete, AUTO_EDIT_FILTER);
+      browser.webNavigation.onDOMContentLoaded.addListener(onDomContentLoaded, AUTO_EDIT_FILTER);
     }
   }
 
