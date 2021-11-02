@@ -772,7 +772,7 @@
     "message": "Extra URLs:"
   },
   "OptionCaptureDownLinkUrlExtraTooltip": {
-    "message": "A list of extra URLs to be downloaded (“download linked files” must non be disabled) or captured (“depth to capture linked pages” must be 0 or more), regardless of any filter.\n\n• Each following line is a full URL (“#” and following chars will be auto-stripped).\n• A line starting with “#” is regarded as a comment and will be ignored during execution.\n• Text following a space is regarded as a comment and will be ignored during execution. For example, “http://example.com/ comment” is treated as “http://example.com/”."
+    "message": "A list of extra URLs to be captured (“depth to capture linked pages” must be 0 or more) or downloaded (“download linked files” must non be disabled), regardless of interlinking and filters.\n\n• Each following line is a full URL (“#” and following chars will be auto-stripped).\n• A line starting with “#” is regarded as a comment and will be ignored during execution.\n• Text following a space is regarded as a comment and will be ignored during execution. For example, “http://example.com/ comment” is treated as “http://example.com/”."
   },
   "OptionCaptureDownLinkUrlFilterLabel": {
     "message": "Excluded URLs:"
