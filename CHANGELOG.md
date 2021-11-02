@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.134.0] - 2021-11-02
+* Added support of `mime:` prefix to filter linked files by MIME type.
+* Fixed an issue that a linked file with no Content-Type header is not correctly handled by the file type filter.
+* Fixed an issue that a reloaded iframe has inconsistent editor status with the main frame.
+
 ## [0.133.0] - 2021-10-31
 * A linked web page is no more downloaded as a resource file if `depth to capture linked pages` is set.
 * A linked attachment web page is now correctly treated as a resource file.
