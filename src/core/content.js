@@ -53,10 +53,10 @@
     isDebug && console.debug(cmd, "receive", args);
 
     const parts = cmd.split(".");
-    let subCmd = parts.pop();
+    const subCmd = parts.pop();
     let object = root;
-    while (parts.length) {
-      object = object[parts.shift()];
+    for (const part of parts) {
+      object = object[part];
     }
 
     // thrown Error don't show here but cause the sender to receive an error
