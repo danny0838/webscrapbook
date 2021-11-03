@@ -24,5 +24,4 @@ fn="$filename.xpi" &&
 rm -f "$dist/$fn" &&
 zip -r "$dist/$fn" * -x '.git*' &&
 zip -d "$dist/$fn" 'manifest.json' &&
-printf "@ manifest-firefox.json\n@=manifest.json\n" | zipnote -w "$dist/$fn" &&
-zip -d "$dist/$fn" '_locales/zh_TW/*' '_locales/zh_CN/*'
+printf "@ manifest-firefox.json\n@=manifest.json\n" | zipnote -w "$dist/$fn"
