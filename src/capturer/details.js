@@ -194,7 +194,7 @@
     // special handling
     taskInfo.parentId = taskInfo.parentId || "root";
 
-    if (taskInfo.options["capture.saveTo"] === "server") {
+    handleCaptureInfoType: {
       const captureInfoType = document.getElementById('captureInfoType').value;
       switch (captureInfoType) {
         case "recapture": {
