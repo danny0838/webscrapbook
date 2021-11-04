@@ -154,7 +154,7 @@
   capturer.captureDocument = async function (params) {
     isDebug && console.debug("call: captureDocument", params);
 
-    const warn = async (msg) => {
+    const warn = async (...msg) => {
       return capturer.invoke("remoteMsg", {
         msg,
         type: 'warn',

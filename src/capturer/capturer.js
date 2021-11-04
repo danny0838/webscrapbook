@@ -113,22 +113,31 @@
    */
   capturer.downloadHooks = new Map();
 
-  capturer.log = function (msg) {
-    capturer.logger.appendChild(document.createTextNode(msg + '\n'));
+  /**
+   * @param {...(string|Node)} msg
+   */
+  capturer.log = function (...msg) {
+    capturer.logger.append(...msg, '\n');
   };
 
-  capturer.warn = function (msg) {
+  /**
+   * @param {...(string|Node)} msg
+   */
+  capturer.warn = function (...msg) {
     const span = document.createElement('span');
     span.className = 'warn';
-    span.appendChild(document.createTextNode(msg + '\n'));
-    logger.appendChild(span);
+    span.append(...msg);
+    capturer.logger.append(span, '\n');
   };
 
-  capturer.error = function (msg) {
+  /**
+   * @param {...(string|Node)} msg
+   */
+  capturer.error = function (...msg) {
     const span = document.createElement('span');
     span.className = 'error';
-    span.appendChild(document.createTextNode(msg + '\n'));
-    logger.appendChild(span);
+    span.append(...msg);
+    capturer.logger.append(span, '\n');
   };
 
   /**
@@ -688,7 +697,7 @@
    */
   capturer.remoteMsg = async function ({msg, type}) {
     if (['log', 'warn', 'error'].includes(type)) {
-      capturer[type](msg);
+      capturer[type](...msg);
       return true;
     }
     return false;
@@ -3611,8 +3620,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         elem.target = 'download';
         elem.href = url2;
         elem.textContent = `If the download doesn't start, click me.`;
-        capturer.logger.appendChild(elem);
-        capturer.log('');
+        capturer.log(elem);
         return;
       }
 
@@ -3620,9 +3628,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       elem.download = filename;
       elem.href = url;
       elem.textContent = `If the download doesn't start, click me.`;
-      capturer.logger.appendChild(elem);
+      capturer.log(elem);
       elem.click();
-      capturer.log('');
     }).catch((ex) => {
       // probably USER_CANCELLED
       // treat as capture success and return the filename
