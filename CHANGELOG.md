@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.135.0] - 2021-11-04
+* Fixed an issue that `Capture again` does not work correctly if `Save captured data to` is not `Backend server`.
+* Added a link for the backuped page for re-capture if available. (Requires server >= 0.46)
+
 ## [0.134.0] - 2021-11-02
 * Added support of `mime:` prefix to filter linked files by MIME type.
 * Fixed an issue that a linked file with no Content-Type header is not correctly handled by the file type filter.
