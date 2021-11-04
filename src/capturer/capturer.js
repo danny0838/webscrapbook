@@ -2266,13 +2266,20 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           const target = book.dataUrl + scrapbook.escapeFilename(index);
 
           if (options["capture.backupForRecapture"]) {
-            capturer.log(`Moving old data files "${index}" to backup directory "${timeId}"...`);
-            await server.request({
+            const anchor = document.createElement('a');
+            anchor.target = '_blank';
+            anchor.textContent = timeId;
+            capturer.log(`Moving old data files "${index}" to backup directory "`, anchor, `"...`);
+            const response = await server.request({
               url: target + `?a=backup&ts=${timeId}&note=recapture&move=1`,
               method: "POST",
               format: 'json',
               csrfToken: true,
-            });
+            }).then(r => r.json());
+            if (book.backupUrl) {
+              anchor.href = book.backupUrl + response.data + '/' +
+                (book.dataUrl + scrapbook.quote(oldIndex)).slice(server.serverRoot.length);
+            }
           } else {
             capturer.log(`Deleting old data files "${index}"...`);
             try {
