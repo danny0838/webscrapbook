@@ -474,6 +474,13 @@
       this.treeUrl = this.topUrl +
           (this.config.tree_dir ? scrapbook.quote(this.config.tree_dir) + '/' : '');
 
+      {
+        const backupDir = server.config.app.backup_dir;
+        this.backupUrl = typeof backupDir === 'string' ?
+            server.serverRoot + (backupDir ? scrapbook.quote(backupDir) + '/' : '') :
+            null;
+      }
+
       this.indexUrl = this.topUrl + this.config.index;
 
       this.treeFiles = null;
