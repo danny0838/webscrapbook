@@ -926,23 +926,23 @@
       return true;
     },
 
-    log(msg, type = 'log') {
-      const div = document.createElement("div");
-      div.classList.add(type);
-      if (typeof msg === 'string') {
-        div.textContent = msg;
-      } else {
-        div.appendChild(msg);
-      }
-      document.getElementById("logger").appendChild(div);
+    _log(type = 'log', ...msg) {
+      const span = document.createElement("span");
+      span.classList.add(type);
+      span.append(...msg);
+      document.getElementById("logger").append(span, '\n');
     },
 
-    warn(msg) {
-      this.log(msg, 'warn');
+    log(...msg) {
+      this._log('log', ...msg);
     },
 
-    error(msg) {
-      this.log(msg, 'error');
+    warn(...msg) {
+      this._log('warn', ...msg);
+    },
+
+    error(...msg) {
+      this._log('error', ...msg);
     },
 
     enableUi(willEnable) {
