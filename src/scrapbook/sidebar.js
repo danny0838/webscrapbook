@@ -34,7 +34,7 @@
     rootId: null,
     mode: 'normal',
     sidebarWindowId: null,
-    taskPromise: Promise.resolve(),
+    taskPromise: null,
 
     async init() {
       // Init event handlers first so that the refresh button works if there's
@@ -113,6 +113,9 @@
         treeElem: this.treeElem,
         cacheType: this.mode === 'normal' ? 'storage' : 'sessionStorage',
       });
+
+      // enable runTask
+      this.taskPromise = Promise.resolve();
 
       await this.refresh(bookId, rootId, true);
     },
