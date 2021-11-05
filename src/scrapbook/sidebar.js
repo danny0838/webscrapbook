@@ -818,11 +818,7 @@
           }),
         };
         if (event.ctrlKey) {
-          await scrapbook.invokeCaptureEx({
-            dialog: 'advanced',
-            taskInfo,
-            ignoreTitle: false,
-          });
+          await scrapbook.invokeCaptureAs(taskInfo);
         } else {
           await scrapbook.invokeCaptureEx({taskInfo});
         }
