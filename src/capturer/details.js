@@ -169,7 +169,7 @@
     }
   }
 
-  async function capture({dialog = null, taskInfo, ignoreTitle = false, uniquify = true}) {
+  async function capture({dialog = null, taskInfo, ignoreTitle = false, uniquify = false}) {
     await scrapbook.invokeCaptureEx({dialog, taskInfo, ignoreTitle, uniquify, waitForResponse: false});
   }
 
