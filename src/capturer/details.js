@@ -84,6 +84,12 @@
         }
       } else {
         document.getElementById('group_save').hidden = true;
+
+        // replace #tasks_bookId to allow filling null value
+        const bookIdElem = document.createElement('input');
+        bookIdElem.id = 'tasks_bookId';
+        bookIdElem.type = 'hidden';
+        document.getElementById('tasks_bookId').replaceWith(bookIdElem);
       }
 
       if (gTaskInfo.options["capture.saveAs"] === "singleHtml") {
@@ -140,7 +146,9 @@
   }
 
   function getOptionFromElement(elem) {
-    if (elem.matches('input[type="checkbox"]')) {
+    if (elem.matches('input[type="hidden"]')) {
+      return JSON.parse(elem.value);
+    } else if (elem.matches('input[type="checkbox"]')) {
       return elem.checked;
     } else if (elem.matches('input[type="number"]')) {
       return elem.validity.valid && elem.value !== "" ? elem.valueAsNumber : null;
@@ -150,7 +158,9 @@
   }
 
   function setOptionToElement(elem, value) {
-    if (elem.matches('input[type="checkbox"]')) {
+    if (elem.matches('input[type="hidden"]')) {
+      elem.value = JSON.stringify(value);
+    } else if (elem.matches('input[type="checkbox"]')) {
       elem.checked = !!value;
     } else {
       elem.value = value;
