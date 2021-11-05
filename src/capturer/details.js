@@ -36,23 +36,26 @@
 
       showSoureInTitle: {
         let source;
-        if (Number.isInteger(gTaskInfo.tasks[0].tabId)) {
-          const tabId = gTaskInfo.tasks[0].tabId;
-          const frameId = Number.isInteger(gTaskInfo.tasks[0].frameId) ? ':' + gTaskInfo.tasks[0].frameId : '';
-          const title = gTaskInfo.tasks[0].title ? ' ' + gTaskInfo.tasks[0].title : 
-              gTaskInfo.tasks[0].url ? ' ' + gTaskInfo.tasks[0].url : '';
-          source = `[${tabId}${frameId}]${title}`;
-        } else if (gTaskInfo.tasks[0].url) {
-          source = gTaskInfo.tasks[0].url;
+        if (gTaskInfo.tasks.length === 1) {
+          if (Number.isInteger(gTaskInfo.tasks[0].tabId)) {
+            const tabId = gTaskInfo.tasks[0].tabId;
+            const frameId = Number.isInteger(gTaskInfo.tasks[0].frameId) ? ':' + gTaskInfo.tasks[0].frameId : '';
+            const title = gTaskInfo.tasks[0].title ? ' ' + gTaskInfo.tasks[0].title : 
+                gTaskInfo.tasks[0].url ? ' ' + gTaskInfo.tasks[0].url : '';
+            source = `[${tabId}${frameId}]${title}`;
+          } else if (gTaskInfo.tasks[0].url) {
+            source = gTaskInfo.tasks[0].url;
+          }
+        } else {
+          source = '*';
         }
         if (source) {
           document.title = scrapbook.lang('CaptureDetailsTitleForSource', [source]);
         }
       }
 
-      const toServer = gTaskInfo.options["capture.saveTo"] === "server"
-        || gTaskInfo.tasks[0].recaptureInfo || gTaskInfo.tasks[0].mergeCaptureInfo;
-      if (toServer) {
+      if (gTaskInfo.options["capture.saveTo"] === "server" ||
+          gTaskInfo.tasks.some(task => task.recaptureInfo || task.mergeCaptureInfo)) {
         await scrapbook.loadOptionsAuto;
         await server.init();
         if (gTaskInfo.bookId === null) {
@@ -65,12 +68,19 @@
           opt.value = book.id;
           opt.textContent = book.name;
         }
-        if (gTaskInfo.tasks[0].title) {
-          let opt;
-          opt = document.getElementById('task_title-preset').appendChild(document.createElement('option'));
-          opt.value = gTaskInfo.tasks[0].title;
-          opt = document.getElementById('captureInfoType-recapture-task_title-preset').appendChild(document.createElement('option'));
-          opt.value = gTaskInfo.tasks[0].title;
+
+        if (gTaskInfo.tasks.length === 1) {
+          if (gTaskInfo.tasks[0].title) {
+            let opt;
+            opt = document.getElementById('task_title-preset').appendChild(document.createElement('option'));
+            opt.value = gTaskInfo.tasks[0].title;
+            opt = document.getElementById('captureInfoType-recapture-task_title-preset').appendChild(document.createElement('option'));
+            opt.value = gTaskInfo.tasks[0].title;
+          }
+        } else {
+          for (const elem of document.querySelectorAll('.ui-single-item')) {
+            elem.hidden = true;
+          }
         }
       } else {
         document.getElementById('group_save').hidden = true;
@@ -89,13 +99,6 @@
           setOptionToElement(elem, value);
         }
       }
-      for (const elem of document.querySelectorAll('[id^="task_"]')) {
-        const key = elem.id.slice(5);
-        const value = gTaskInfo.tasks[0][key];
-        if (typeof value !== 'undefined') {
-          setOptionToElement(elem, value);
-        }
-      }
       for (const elem of document.querySelectorAll('[id^="opt_"]')) {
         const key = elem.id.slice(4);
         const value = gTaskInfo.options[key];
@@ -104,17 +107,27 @@
         }
       }
 
-      // overwrite tasks_bookId and tasks_parentId with recaptureInfo or mergeCaptureInfo
-      if (gTaskInfo.tasks[0].recaptureInfo) {
-        document.getElementById('captureInfoType').value = 'recapture';
-        document.getElementById('tasks_bookId').value = gTaskInfo.tasks[0].recaptureInfo.bookId;
-        document.getElementById('tasks_parentId').value = gTaskInfo.tasks[0].recaptureInfo.itemId;
-        delete gTaskInfo.tasks[0].recaptureInfo;
-      } else if (gTaskInfo.tasks[0].mergeCaptureInfo) {
-        document.getElementById('captureInfoType').value = 'mergeCapture';
-        document.getElementById('tasks_bookId').value = gTaskInfo.tasks[0].mergeCaptureInfo.bookId;
-        document.getElementById('tasks_parentId').value = gTaskInfo.tasks[0].mergeCaptureInfo.itemId;
-        delete gTaskInfo.tasks[0].mergeCaptureInfo;
+      if (gTaskInfo.tasks.length === 1) {
+        for (const elem of document.querySelectorAll('[id^="task_"]')) {
+          const key = elem.id.slice(5);
+          const value = gTaskInfo.tasks[0][key];
+          if (typeof value !== 'undefined') {
+            setOptionToElement(elem, value);
+          }
+        }
+
+        // overwrite tasks_bookId and tasks_parentId with recaptureInfo or mergeCaptureInfo
+        if (gTaskInfo.tasks[0].recaptureInfo) {
+          document.getElementById('captureInfoType').value = 'recapture';
+          document.getElementById('tasks_bookId').value = gTaskInfo.tasks[0].recaptureInfo.bookId;
+          document.getElementById('tasks_parentId').value = gTaskInfo.tasks[0].recaptureInfo.itemId;
+          delete gTaskInfo.tasks[0].recaptureInfo;
+        } else if (gTaskInfo.tasks[0].mergeCaptureInfo) {
+          document.getElementById('captureInfoType').value = 'mergeCapture';
+          document.getElementById('tasks_bookId').value = gTaskInfo.tasks[0].mergeCaptureInfo.bookId;
+          document.getElementById('tasks_parentId').value = gTaskInfo.tasks[0].mergeCaptureInfo.itemId;
+          delete gTaskInfo.tasks[0].mergeCaptureInfo;
+        }
       }
 
       updateUi();
@@ -154,9 +167,11 @@
   }
 
   function updateUi() {
-    const captureInfoType = document.getElementById('captureInfoType').value;
-    for (const elem of document.querySelectorAll(`.ui-captureInfoType-normal, .ui-captureInfoType-recapture, .ui-captureInfoType-mergeCapture`)) {
-      elem.hidden = !elem.matches(`.ui-captureInfoType-${captureInfoType}`);
+    if (gTaskInfo.tasks.length === 1) {
+      const captureInfoType = document.getElementById('captureInfoType').value;
+      for (const elem of document.querySelectorAll(`.ui-captureInfoType-normal, .ui-captureInfoType-recapture, .ui-captureInfoType-mergeCapture`)) {
+        elem.hidden = !elem.matches(`.ui-captureInfoType-${captureInfoType}`);
+      }
     }
 
     for (const elem of document.querySelectorAll('[id^="opt_"]')) {
@@ -180,11 +195,6 @@
       const value = getOptionFromElement(elem);
       taskInfo[key] = value;
     }
-    for (const elem of document.querySelectorAll('[id^="task_"]')) {
-      const key = elem.id.slice(5);
-      const value = getOptionFromElement(elem);
-      taskInfo.tasks[0][key] = value;
-    }
     for (const elem of document.querySelectorAll('[id^="opt_"]')) {
       const key = elem.id.slice(4);
       const value = getOptionFromElement(elem);
@@ -194,9 +204,14 @@
     // special handling
     taskInfo.parentId = taskInfo.parentId || "root";
 
-    handleCaptureInfoType: {
-      const captureInfoType = document.getElementById('captureInfoType').value;
-      switch (captureInfoType) {
+    if (taskInfo.tasks.length === 1) {
+      for (const elem of document.querySelectorAll('[id^="task_"]')) {
+        const key = elem.id.slice(5);
+        const value = getOptionFromElement(elem);
+        taskInfo.tasks[0][key] = value;
+      }
+
+      switch (document.getElementById('captureInfoType').value) {
         case "recapture": {
           Object.assign(taskInfo.tasks[0], {
             title: document.getElementById('captureInfoType-recapture-task_title').value,

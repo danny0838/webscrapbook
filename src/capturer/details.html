@@ -18,7 +18,7 @@
   <details id="group_save" open>
     <summary>__MSG_OptionGroupSave__</summary>
     <div>
-      <fieldset>
+      <fieldset class="ui-single-item">
         <label for="captureInfoType">__MSG_CaptureDetailsCaptureInfoTypeLabel__</label>
         <select id="captureInfoType">
           <option value="normal">__MSG_CaptureDetailsCaptureInfoTypeNormalLabel__</option>
@@ -38,23 +38,23 @@
         <input type="number" id="tasks_index" min="0" step="1" style="width: 3em;">
         <a href="javascript:" data-tooltip="__MSG_CaptureDetailsOptionIndexTooltip__"></a>
       </fieldset>
-      <fieldset class="ui-captureInfoType-normal">
+      <fieldset class="ui-single-item ui-captureInfoType-normal">
         <label for="task_title">__MSG_CaptureDetailsOptionTitleLabel__</label>
         <input type="text" id="task_title" list="task_title-preset">
         <datalist id="task_title-preset"></datalist>
       </fieldset>
-      <fieldset class="ui-captureInfoType-normal">
+      <fieldset class="ui-single-item ui-captureInfoType-normal">
         <label for="task_comment">__MSG_CaptureDetailsOptionCommentLabel__</label>
         <blockquote>
           <textarea id="task_comment"></textarea>
         </blockquote>
       </fieldset>
-      <fieldset class="ui-captureInfoType-recapture">
+      <fieldset class="ui-single-item ui-captureInfoType-recapture">
         <label for="captureInfoType-recapture-task_title">__MSG_CaptureDetailsOptionTitleLabel__</label>
         <input type="text" id="captureInfoType-recapture-task_title" placeholder="__MSG_CaptureDetailsOptionTitleRecapturePlaceholder__" list="captureInfoType-recapture-task_title-preset">
         <datalist id="captureInfoType-recapture-task_title-preset"></datalist>
       </fieldset>
-      <fieldset class="ui-captureInfoType-recapture">
+      <fieldset class="ui-single-item ui-captureInfoType-recapture">
         <label for="captureInfoType-recapture-task_comment">__MSG_CaptureDetailsOptionCommentLabel__</label>
         <blockquote>
           <textarea id="captureInfoType-recapture-task_comment" placeholder="__MSG_CaptureDetailsOptionCommentRecapturePlaceholder__"></textarea>
