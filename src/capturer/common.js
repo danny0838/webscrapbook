@@ -5100,6 +5100,40 @@
       }
     }
 
+    cmd_isolate(rootNode, selector) {
+      const doc = rootNode.ownerDocument;
+
+      // get a set of nodes to preserve
+      const toPreserve = new Set();
+      const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
+      for (const elem of elems) {
+        const xResult = doc.evaluate('ancestor-or-self::node() | descendant-or-self::node()', elem, null, XPathResult.ANY_TYPE);
+        let node;
+        while (node = xResult.iterateNext()) {
+          toPreserve.add(node);
+        }
+      }
+
+      // filter nodes to remove
+      // isolate nodes under body (preserve head) for HTML document
+      const root = doc.body || doc.documentElement;
+      const toRemove = [];
+      const walker = doc.createTreeWalker(root, NodeFilter.SHOW_ALL, {
+        acceptNode: (node) => {
+          return toPreserve.has(node) ? NodeFilter.FILTER_SKIP : NodeFilter.FILTER_ACCEPT;
+        },
+      });
+      let node;
+      while (node = walker.nextNode()) {
+        toRemove.push(node);
+      }
+
+      // remove the nodes
+      for (const node of toRemove.reverse()) {
+        node.parentNode.removeChild(node);
+      }
+    }
+
     cmd_html(rootNode, selector, value) {
       const elems = this.selectNodes(rootNode, this.resolve(selector, rootNode));
       for (const elem of elems) {
