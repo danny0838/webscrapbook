@@ -411,10 +411,8 @@
         }
 
         if (target) {
-          if (event.shiftKey && event.ctrlKey) {
-            this.highlightItem(target, true, {reselect: false, ranged: true});
-          } else if (event.shiftKey) {
-            this.highlightItem(target, true, {reselect: true, ranged: true});
+          if (this.allowMultiSelect && event.shiftKey) {
+            this.highlightItem(target, true, {reselect: !event.ctrlKey, ranged: true});
           } else if (event.ctrlKey) {
             this.anchorItem(target);
           } else {
@@ -445,10 +443,8 @@
         }
 
         if (target) {
-          if (event.shiftKey && event.ctrlKey) {
-            this.highlightItem(target, true, {reselect: false, ranged: true});
-          } else if (event.shiftKey) {
-            this.highlightItem(target, true, {reselect: true, ranged: true});
+          if (this.allowMultiSelect && event.shiftKey) {
+            this.highlightItem(target, true, {reselect: !event.ctrlKey, ranged: true});
           } else if (event.ctrlKey) {
             this.anchorItem(target);
           } else {
@@ -479,10 +475,8 @@
         }
 
         if (target) {
-          if (event.shiftKey && event.ctrlKey) {
-            this.highlightItem(target, true, {reselect: false, ranged: true});
-          } else if (event.shiftKey) {
-            this.highlightItem(target, true, {reselect: true, ranged: true});
+          if (this.allowMultiSelect && event.shiftKey) {
+            this.highlightItem(target, true, {reselect: !event.ctrlKey, ranged: true});
           } else if (event.ctrlKey) {
             this.anchorItem(target);
           } else {
@@ -513,10 +507,8 @@
         }
 
         if (target) {
-          if (event.shiftKey && event.ctrlKey) {
-            this.highlightItem(target, true, {reselect: false, ranged: true});
-          } else if (event.shiftKey) {
-            this.highlightItem(target, true, {reselect: true, ranged: true});
+          if (this.allowMultiSelect && event.shiftKey) {
+            this.highlightItem(target, true, {reselect: !event.ctrlKey, ranged: true});
           } else if (event.ctrlKey) {
             this.anchorItem(target);
           } else {

@@ -440,10 +440,8 @@
           parent = null;
         }
         if (parent) {
-          if (event.shiftKey && event.ctrlKey) {
-            this.highlightItem(parent, true, {reselect: false, ranged: true});
-          } else if (event.shiftKey) {
-            this.highlightItem(parent, true, {reselect: true, ranged: true});
+          if (this.allowMultiSelect && event.shiftKey) {
+            this.highlightItem(target, true, {reselect: !event.ctrlKey, ranged: true});
           } else if (event.ctrlKey) {
             this.anchorItem(parent);
           } else {
@@ -476,10 +474,8 @@
         // move to first child
         const child = anchorElem.querySelector('li[data-id]');
         if (child) {
-          if (event.shiftKey && event.ctrlKey) {
-            this.highlightItem(child, true, {reselect: false, ranged: true});
-          } else if (event.shiftKey) {
-            this.highlightItem(child, true, {reselect: true, ranged: true});
+          if (this.allowMultiSelect && event.shiftKey) {
+            this.highlightItem(target, true, {reselect: !event.ctrlKey, ranged: true});
           } else if (event.ctrlKey) {
             this.anchorItem(child);
           } else {
