@@ -430,8 +430,8 @@
       ({tabs: [tab]} = await browser.windows.create(Object.assign({
         url,
         type: 'popup',
-        width: 400,
-        height: 400,
+        width: 350,
+        height: 600,
         incognito: win.incognito,
       }, windowCreateData)));
       return tab;
