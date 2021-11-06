@@ -540,9 +540,10 @@
 
         if (target) {
           const willHighlight = (this.allowMultiSelect && event.shiftKey) ? true : undefined;
-          const reselect = event.ctrlKey ? !this.allowMultiSelect :
+          const reselect = !this.allowMultiSelect ? true :
+              event.ctrlKey ? false :
               event.shiftKey ? true :
-              !(this.allowMultiSelect && this.allowMultiSelectOnClick);
+              !this.allowMultiSelectOnClick;
           const ranged = this.allowMultiSelect && event.shiftKey;
           this.highlightItem(target, willHighlight, {reselect, ranged});
           target.scrollIntoView();
