@@ -539,7 +539,7 @@
         }
 
         if (target) {
-          const willHighlight = event.shiftKey ? true : undefined;
+          const willHighlight = (this.allowMultiSelect && event.shiftKey) ? true : undefined;
           const reselect = event.ctrlKey ? !this.allowMultiSelect :
               event.shiftKey ? true :
               !(this.allowMultiSelect && this.allowMultiSelectOnClick);
