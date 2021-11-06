@@ -1786,7 +1786,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             let file;
             if (internalizePrefix) {
               const sha = scrapbook.sha1(await scrapbook.readFileAsArrayBuffer(blob), 'ARRAYBUFFER');
-              const ext = Mime.extension(blob.type);
+              const ext = Mime.extension(blob.type) || 'bin';
               file = new File([blob], sha + '.' + ext, {type: blob.type});
             } else {
               file = await scrapbook.readFileAsDataURL(blob);
