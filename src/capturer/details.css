@@ -68,3 +68,15 @@ div.tooltip {
   background-color: #CCCCEE;
   white-space: pre-wrap;
 }
+
+#tasks_bookId {
+  min-width: 80px;
+  max-width: 20vw;
+  text-overflow: ellipsis;
+}
+
+#tasks_parentId {
+  min-width: 120px;
+  max-width: 50vw;
+  text-overflow: ellipsis;
+}
