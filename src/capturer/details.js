@@ -193,6 +193,22 @@
     }
   }
 
+  function insertInputText(elem, value) {
+    const sep = (elem.value && value) ? '\n' : '';
+    updateInputText(elem, elem.value + sep + value);
+  };
+
+  function updateInputText(elem, value) {
+    // Use execCommand rather than set value to allow undo in the textarea.
+    // Note that this removes the current selection.
+    // This may not work in Firefox < 89, and fallback to set value:
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1220696
+    elem.select();
+    if (!document.execCommand('insertText', false, value)) {
+      elem.value = value;
+    }
+  }
+
   async function capture({dialog = null, taskInfo, ignoreTitle = false, uniquify = false}) {
     await scrapbook.invokeCaptureEx({dialog, taskInfo, ignoreTitle, uniquify, waitForResponse: false});
   }
@@ -318,6 +334,63 @@
     });
   }
 
+  async function onFillDownLinkDocUrlFilterChange(event) {
+    const elem = event.target;
+    const inputElem = document.getElementById('opt_capture.downLink.doc.urlFilter');
+
+    const tabId = gTaskInfo.tasks[0].tabId;
+    const frameId = gTaskInfo.tasks[0].frameId || 0;
+    const url = gTaskInfo.tasks[0].url;
+
+    try {
+      switch (elem.value) {
+        case "origin": {
+          const sourceUrl = Number.isInteger(tabId) ? (await browser.webNavigation.getFrame({tabId, frameId})).url : url;
+          const u = new URL(sourceUrl);
+          u.pathname = u.search = u.hash = '';
+          const linksText = '/^' + scrapbook.escapeRegExp(u.href).replace(/\\\//g, '/') + '/';
+          insertInputText(inputElem, linksText);
+          break;
+        }
+        case "dir": {
+          const sourceUrl = Number.isInteger(tabId) ? (await browser.webNavigation.getFrame({tabId, frameId})).url : url;
+          const u = new URL(sourceUrl);
+          u.search = u.hash = '';
+          let base = u.href, pos;
+          if ((pos = base.lastIndexOf("/")) !== -1) { base = base.slice(0, pos + 1); }
+          const linksText = '/^' + scrapbook.escapeRegExp(base).replace(/\\\//g, '/') + '/';
+          insertInputText(inputElem, linksText);
+          break;
+        }
+        case "path": {
+          const sourceUrl = Number.isInteger(tabId) ? (await browser.webNavigation.getFrame({tabId, frameId})).url : url;
+          const u = new URL(sourceUrl);
+          u.search = u.hash = '';
+          const linksText = '/^' + scrapbook.escapeRegExp(u.href).replace(/\\\//g, '/') + '/';
+          insertInputText(inputElem, linksText);
+          break;
+        }
+        case "selectedLinks":
+        case "allLinks": {
+          await scrapbook.initContentScripts(tabId, frameId);
+          const links = await scrapbook.invokeContentScript({
+            tabId,
+            frameId,
+            cmd: "capturer.retrieveSelectedLinks",
+            args: {select: elem.value === 'selectedLinks' ? 'selected' : 'all'},
+          });
+          const linksText = links
+            .map(x => x.url + ' ' + x.title.replace(/[ \t\r\n\f]+/g, ' ').replace(/^ +/, '').replace(/ +$/, ''))
+            .join('\n');
+          insertInputText(inputElem, linksText);
+          break;
+        }
+      }
+    } finally {
+      elem.value = '';
+    }
+  }
+
   function pickItem({id, title, bookId}) {
     if (typeof bookId !== 'undefined') {
       setOptionToElement(document.getElementById('tasks_bookId'), bookId);
@@ -342,6 +415,7 @@
     document.getElementById('btn-abort').addEventListener('click', onAbortClick);
     document.getElementById('btn-advanced').addEventListener('click', onAdvancedClick);
     document.getElementById('fill-tasks_parentId').addEventListener('click', onFillParentIdClick);
+    document.getElementById('fill-opt_capture.downLink.doc.urlFilter').addEventListener('change', onFillDownLinkDocUrlFilterChange);
 
     document.getElementById('captureInfoType').addEventListener('change', onFormChange);
     for (const elem of document.querySelectorAll('[id^="opt_"]')) {

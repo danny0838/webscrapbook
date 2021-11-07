@@ -56,6 +56,24 @@
   "CaptureDetailsCaptureInfoTypeTooltip": {
     "message": "This determines how to handle the captured content:\n• Normal capture: Capture as a new item and insert into the target item.\n• Re-capture: Replaces the content of the target item, update its item type, index, modified time, source URL, favicon, title, and comment, and attempt to copy annotations from the original page.\n• Merge-capture: Merge captured pages and resources to the target item, and rebuild the interlinks. The target item must be site type (“depth to capture linked pages” has been 0 or more) and has been saved as folder."
   },
+  "CaptureDetailsFillDownLinkDocUrlFilter": {
+    "message": "Add rule"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterAllLinks": {
+    "message": "All links in the page"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterDir": {
+    "message": "Same directory"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterOrigin": {
+    "message": "Same site"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterPath": {
+    "message": "Same path"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterSelectedLinks": {
+    "message": "Selected links in the page"
+  },
   "CaptureDetailsFillParentId": {
     "message": "Select"
   },
