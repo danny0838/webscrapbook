@@ -3227,20 +3227,38 @@
    * @kind invokable
    * @param {Object} params
    * @param {Object} params.doc
+   * @param {string} [params.select]
    * @return {Promise<Array>}
    */
-  capturer.retrieveSelectedLinks = async function ({doc = document} = {}) {
+  capturer.retrieveSelectedLinks = async function ({
+    doc = document,
+    select = 'auto',
+  } = {}) {
+    switch (select) {
+      case 'selected':
+      case 'all':
+        break;
+      default:
+        select = document.getSelection().isCollapsed ? 'all' : 'selected';
+        break;
+    }
+
     let nodes;
-    if (!document.getSelection().isCollapsed) {
-      nodes = scrapbook.getSelectedNodes({
-        whatToShow: NodeFilter.SHOW_ELEMENT,
-        nodeFilter: (node) => {
-          return node.matches('a[href], area[href]');
-        },
-        fuzzy: true,
-      });
-    } else {
-      nodes = doc.querySelectorAll('a[href], area[href]');
+    switch (select) {
+      case 'selected': {
+        nodes = scrapbook.getSelectedNodes({
+          whatToShow: NodeFilter.SHOW_ELEMENT,
+          nodeFilter: (node) => {
+            return node.matches('a[href], area[href]');
+          },
+          fuzzy: true,
+        });
+        break;
+      }
+      case 'all': {
+        nodes = doc.querySelectorAll('a[href], area[href]');
+        break;
+      }
     }
 
     return Array.prototype.map.call(nodes, a => ({
