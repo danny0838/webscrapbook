@@ -1135,7 +1135,7 @@ if (Node && !Node.prototype.getRootNode) {
               result.injected = false;
             } else if (typeof response === "string") {
               result.injected = false;
-              result.error = response;
+              result.error = {message: response};
             }
             return result;
           })
