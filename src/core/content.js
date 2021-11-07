@@ -54,10 +54,9 @@
 
     const parts = cmd.split(".");
     const subCmd = parts.pop();
-    let object = root;
-    for (const part of parts) {
-      object = object[part];
-    }
+    const object = parts.reduce((object, part) => {
+      return object[part];
+    }, root);
 
     // thrown Error don't show here but cause the sender to receive an error
     if (!object || !subCmd || typeof object[subCmd] !== 'function') {

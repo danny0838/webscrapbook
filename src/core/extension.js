@@ -41,11 +41,10 @@
       isDebug && console.debug(cmd, "receive", `[${sender.tab ? sender.tab.id : -1}]`, args);
 
       const parts = cmd.split(".");
-      let subCmd = parts.pop();
-      let object = root;
-      while (parts.length) {
-        object = object[parts.shift()];
-      }
+      const subCmd = parts.pop();
+      const object = parts.reduce((object, part) => {
+        return object[part];
+      }, root);
 
       // thrown Error don't show here but cause the sender to receive an error
       if (!object || !subCmd || typeof object[subCmd] !== 'function') {
