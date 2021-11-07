@@ -699,7 +699,6 @@
             frameId: info.frameId,
             fullPage: true,
             url: info.frameUrl,
-            title: tab.title,
           }],
         });
       },
