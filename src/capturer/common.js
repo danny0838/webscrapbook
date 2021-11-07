@@ -3228,11 +3228,13 @@
    * @param {Object} params
    * @param {Object} params.doc
    * @param {string} [params.select]
+   * @param {string[]} [params.filter]
    * @return {Promise<Array>}
    */
   capturer.retrieveSelectedLinks = async function ({
     doc = document,
     select = 'auto',
+    filter = ['http:', 'https:'],
   } = {}) {
     switch (select) {
       case 'selected':
@@ -3261,10 +3263,16 @@
       }
     }
 
-    return Array.prototype.map.call(nodes, a => ({
+    let rv = Array.prototype.map.call(nodes, a => ({
      url: a.href,
      title: a.textContent,
     }));
+
+    if (filter) {
+      rv = rv.filter(x => filter.some(f => x.url.startsWith(f)))
+    }
+
+    return rv;
   };
 
   class ItemInfoFormatter extends scrapbook.ItemInfoFormatter {
