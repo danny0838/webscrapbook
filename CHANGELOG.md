@@ -3,6 +3,15 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.137.0] - 2021-11-07
+* Added a capture helper command: `isolate`.
+* Fixed incorrect title for `Capture frame as`.
+* Improved the GUI of the target item selector for `Capture as` dialog.
+* Added a rule filler for in-depth capture for `Capture as` dialog.
+* No more include URLs with non-http(s) protocol for batch capture.
+* Fixed an issue that the item picker for `Capture as` dialog incorrectly allows multi-selection through holding Shift.
+* Various minor bug fixes and UI improvements.
+
 ## [0.136.0] - 2021-11-05
 * Fixed several GUI issues for the `Capture as` dialog for a multi-item capture.
 
