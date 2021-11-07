@@ -113,11 +113,14 @@
         this.enableUi(false);
 
         const bookId = this.bookId;
+        const book = server.books[bookId];
         let id = 'root';
+        let title = id;
 
         const elems = this.tree.getSelectedItemElems();
         if (elems.length) {
           id = elems[0].getAttribute('data-id');
+          title = book.meta[id].title;
         }
 
         await scrapbook.invokeContentScript({
@@ -127,6 +130,7 @@
           args: {
             bookId,
             id,
+            title,
           },
         });
 
