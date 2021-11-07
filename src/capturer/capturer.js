@@ -424,61 +424,77 @@
       const deferred = new Deferred();
       const fetchCurrent = deferred.promise;
       (async () => {
-        let response;
         let headers = {};
-
-        // fail out if sourceUrl is empty.
-        if (!sourceUrlMain) {
-          throw new Error(`Source URL is empty.`);
-        }
-
-        // fail out if sourceUrl is relative,
-        // or it will be treated as relative to this extension page.
-        if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
-          throw new Error(`Requires an absolute URL.`);
-        }
-
-        const scheme = sourceUrlMain.match(REGEX_SCHEMES)[1];
-        if (!ALLOWED_SCHEMES.has(scheme)) {
-          throw new Error(`URI scheme not supported.`);
-        }
-
-        // special handling for data URI
-        if (scheme === "data") {
-          const file = scrapbook.dataUriToFile(sourceUrlMain);
-          if (!file) { throw new Error("Malformed data URL."); }
-
-          // simulate headers from data URI parameters
-          headers.filename = file.name;
-          headers.contentLength = file.size;
-          const contentType = scrapbook.parseHeaderContentType(file.type);
-          headers.contentType = contentType.type;
-          headers.charset = contentType.parameters.charset;
-
-          let blob = new Blob([file], {type: file.type});
-          if (capturer.captureInfo.get(timeId).useDiskCache) {
-            blob = await setCache(timeId, fetchToken, blob);
-          }
-
-          return {
-            url: sourceUrlMain,
-            status: 200,
-            headers,
-            blob,
-          };
-        }
-
-        // special handling for about:blank or about:srcdoc
-        if (scheme === "about") {
-          return {
-            url: sourceUrlMain,
-            status: 200,
-            headers,
-            blob: new Blob([], {type: 'text/html'}),
-          };
-        }
+        let response = {
+          url: sourceUrlMain,
+          status: 0,
+          headers,
+          blob: null,
+        };
 
         try {
+          // fail out if sourceUrl is empty.
+          if (!sourceUrlMain) {
+            return Object.assign(response, {
+              error: {
+                name: 'URIError',
+                message: 'Source URL is empty.',
+              },
+            });
+          }
+
+          // fail out if sourceUrl is relative,
+          // or it will be treated as relative to this extension page.
+          if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+            return Object.assign(response, {
+              error: {
+                name: 'URIError',
+                message: 'Requires an absolute URL.',
+              },
+            });
+          }
+
+          const scheme = sourceUrlMain.match(REGEX_SCHEMES)[1];
+          if (!ALLOWED_SCHEMES.has(scheme)) {
+            return Object.assign(response, {
+              error: {
+                name: 'URIError',
+                message: 'URI scheme not supported.',
+              },
+            });
+          }
+
+          // special handling for data URI
+          if (scheme === "data") {
+            const file = scrapbook.dataUriToFile(sourceUrlMain);
+            if (!file) { throw new Error("Malformed data URL."); }
+
+            // simulate headers from data URI parameters
+            headers.filename = file.name;
+            headers.contentLength = file.size;
+            const contentType = scrapbook.parseHeaderContentType(file.type);
+            headers.contentType = contentType.type;
+            headers.charset = contentType.parameters.charset;
+
+            let blob = new Blob([file], {type: file.type});
+            if (capturer.captureInfo.get(timeId).useDiskCache) {
+              blob = await setCache(timeId, fetchToken, blob);
+            }
+
+            return Object.assign(response, {
+              status: 200,
+              blob,
+            });
+          }
+
+          // special handling for about:blank or about:srcdoc
+          if (scheme === "about") {
+            return Object.assign(response, {
+              status: 200,
+              blob: new Blob([], {type: 'text/html'}),
+            });
+          }
+
           const xhr = await scrapbook.xhr({
             url: sourceUrlMain,
             responseType: 'blob',
@@ -533,41 +549,55 @@
                 }
               }
 
+              let earlyResponse;
               if (headerOnly) {
                 // skip loading body for a headerOnly fetch
-                response = {
+                earlyResponse = Object.assign(response, {
                   url: xhr.responseURL,
                   status: xhr.status,
-                  headers,
-                  blob: null,
-                };
+                });
               } else if (!ignoreSizeLimit &&
                   typeof options["capture.resourceSizeLimit"] === "number" &&
                   typeof headers.contentLength === "number" &&
                   headers.contentLength >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
                 // apply size limit if header contentLength is known
-                response = {
+                earlyResponse = Object.assign(response, {
                   url: xhr.responseURL,
                   status: xhr.status,
-                  headers,
-                  blob: null,
-                  error: `Resource size limit exceeded.`,
-                };
+                  error: {
+                    name: 'FilterSizeError',
+                    message: 'Resource size limit exceeded.',
+                  },
+                });
               }
 
-              if (response) {
+              if (earlyResponse) {
+                // handle HTTP error
                 if (!(xhr.status >= 200 && xhr.status < 300)) {
-                  response.error = `${xhr.status} ${xhr.statusText}`;
+                  Object.assign(earlyResponse, {
+                    error: {
+                      name: 'HttpError',
+                      message: `${xhr.status} ${xhr.statusText}`,
+                    },
+                  });
                 }
 
                 xhr.abort();
                 return;
               }
             },
+          }).catch((ex) => {
+            Object.assign(response, {
+              error: {
+                name: 'RequestError',
+                message: ex.message,
+              },
+            });
+            return;
           });
 
-          // xhr is resolved to undefined when aborted.
-          if (!xhr && response) {
+          // xhr is resolved to undefined when aborted or on error.
+          if (!xhr) {
             return response;
           }
 
@@ -576,34 +606,43 @@
             blob = await setCache(timeId, fetchToken, blob);
           }
 
-          response = {
+          Object.assign(response, {
             url: xhr.responseURL,
             status: xhr.status,
-            headers,
             blob,
-          };
+          });
 
           // apply size limit
           if (!ignoreSizeLimit &&
               typeof options["capture.resourceSizeLimit"] === "number" &&
               blob.size >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
-            response.blob = null;
-            response.error = `Resource size limit exceeded.`;
+            Object.assign(response, {
+              blob: null,
+              error: {
+                name: 'FilterSizeError',
+                message: 'Resource size limit exceeded.',
+              },
+            });
           }
 
+          // handle HTTP error
           if (!(xhr.status >= 200 && xhr.status < 300 || xhr.status === 0)) {
-            response.error = `${xhr.status} ${xhr.statusText}`;
+            Object.assign(response, {
+              error: {
+                name: 'HttpError',
+                message: `${xhr.status} ${xhr.statusText}`,
+              },
+            });
           }
 
           return response;
         } catch (ex) {
-          return {
-            url: sourceUrlMain,
-            status: 0,
-            headers,
-            blob: null,
-            error: ex.message,
-          };
+          return Object.assign(response, {
+            error: {
+              name: 'FetchError',
+              message: ex.message,
+            },
+          });
         }
       })().then(deferred.resolve, deferred.reject);
 
@@ -1191,7 +1230,7 @@
         });
 
         if (fetchResponse.error) {
-          throw new Error(fetchResponse.error);
+          throw new Error(fetchResponse.error.message);
         }
 
         if (!isAttachment && fetchResponse.headers.isAttachment) {
@@ -1373,7 +1412,7 @@
       });
 
       if (fetchResponse.error) {
-        throw new Error(fetchResponse.error);
+        throw new Error(fetchResponse.error.message);
       }
 
       doc = await scrapbook.readFileAsDocument(fetchResponse.blob);
@@ -1436,7 +1475,7 @@
         });
 
         if (fetchResponse.error) {
-          throw new Error(fetchResponse.error);
+          throw new Error(fetchResponse.error.message);
         }
 
         favIconUrl = await scrapbook.readFileAsDataURL(fetchResponse.blob);
@@ -3409,7 +3448,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     });
 
     if (fetchResponse.error) {
-      throw new Error(fetchResponse.error);
+      throw new Error(fetchResponse.error.message);
     }
 
     const registry = await capturer.registerFile({
@@ -3470,7 +3509,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     });
 
     if (fetchResponse.error) {
-      throw new Error(fetchResponse.error);
+      throw new Error(fetchResponse.error.message);
     }
 
     return await scrapbook.parseCssFile(fetchResponse.blob, fetchResponse.headers.charset);
