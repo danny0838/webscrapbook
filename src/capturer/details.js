@@ -166,10 +166,9 @@
       elem.value = value;
 
       // If the given value is not included in the options,
-      // generate a hidden option element for it.
+      // generate an option element for it.
       if (elem.matches('select') && elem.value != value) {
         const c = elem.appendChild(document.createElement('option'));
-        c.hidden = true;
         c.value = c.textContent = value;
         elem.value = value;
       }
