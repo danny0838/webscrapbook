@@ -197,7 +197,7 @@
 
     document.getElementById("batchCaptureLinks").addEventListener('click', async (event) => {
       const tab = targetTab || await selectTabFromDom(event.currentTarget);
-      return scrapbook.initContentScripts(tab.id)
+      return scrapbook.initContentScripts(tab.id, 0)
         .then(() => {
           return scrapbook.invokeContentScript({
             tabId: tab.id,

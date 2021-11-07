@@ -738,7 +738,7 @@
       contexts: ["selection"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.initContentScripts(tab.id)
+        return scrapbook.initContentScripts(tab.id, info.frameId)
           .then(() => {
             return scrapbook.invokeContentScript({
               tabId: tab.id,
