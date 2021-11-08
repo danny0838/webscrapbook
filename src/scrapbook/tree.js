@@ -311,6 +311,7 @@
           icon.src = ITEM_TYPE_ICON[meta.type] || ITEM_TYPE_ICON[''];
         }
         icon.alt = '';
+        icon.loading = 'lazy';
       } else {
         var line = div.appendChild(document.createElement('fieldset'));
         line.title = (meta.title || '') + (meta.source ? '\n' + meta.source : '') + (meta.comment ? '\n\n' + meta.comment : '');
