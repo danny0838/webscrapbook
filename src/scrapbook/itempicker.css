@@ -1,16 +1,33 @@
-#wrapper {
-  display: flex;
-  flex-direction: column;
+html,
+body {
   margin: 0;
   border: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#wrapper {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+  padding: 8px;
+  width: 100%;
+  height: 100%;
 }
 
 #tree {
+  flex: 1;
   box-sizing: border-box;
   border: 1px ridge gray;
   padding: .25em;
+  min-width: 100%;
+  width: 0;
+  min-height: 80px;
   font-size: 16px;
+  overflow: auto;
 }
 
 #toolbar {
