@@ -1283,8 +1283,8 @@ async function test_capture_dataUri3() {
 
   assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
   assert(frameDoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
-  assert(frameDoc.querySelectorAll('a')[0].getAttribute('href') === `data:text/plain;filename=null.txt,`);
-  assert(frameDoc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_dataUri3/null.html`);
+  assert(frameDoc.querySelectorAll('a')[0].getAttribute('href') === `data:text/plain;filename=file.txt,Linked%20file.`);
+  assert(frameDoc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_dataUri3/page.html`);
 
   /* -saveDataUriAsFile; +saveDataUriAsSrcdoc; absolute link in data URL iframe */
   // absolute link => force saved as a data URL
@@ -1310,8 +1310,8 @@ async function test_capture_dataUri3() {
 
   assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
   assert(frameDoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
-  assert(frameDoc.querySelectorAll('a')[0].getAttribute('href') === `data:text/plain;filename=null.txt,`);
-  assert(frameDoc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_dataUri3/null.html`);
+  assert(frameDoc.querySelectorAll('a')[0].getAttribute('href') === `data:text/plain;filename=file.txt,Linked%20file.`);
+  assert(frameDoc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_dataUri3/page.html`);
 
   /* +saveDataUriAsFile; absolute link in data URL iframe */
   // absolute link => save as file
@@ -1325,8 +1325,8 @@ async function test_capture_dataUri3() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files["red.bmp"]);
-  assert(zip.files["null.txt"]);
-  assert(zip.files["null.html"]);
+  assert(zip.files["file.txt"]);
+  assert(zip.files["page.html"]);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1339,8 +1339,8 @@ async function test_capture_dataUri3() {
 
   assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
   assert(frameDoc.querySelector('img[src="red.bmp"]'));
-  assert(frameDoc.querySelector('a[href="null.txt"]'));
-  assert(frameDoc.querySelector('a[href="null.html"]'));
+  assert(frameDoc.querySelector('a[href="file.txt"]'));
+  assert(frameDoc.querySelector('a[href="page.html"]'));
 }
 
 /**
