@@ -18,7 +18,8 @@
 .tree ul li {
   display: block;
   box-sizing: border-box;
-  padding: .25em;
+  padding-top: .25em;
+  padding-bottom: .25em;
   padding-__MSG_@@bidi_start_edge__: 1em;
 }
 
