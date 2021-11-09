@@ -1564,6 +1564,10 @@
       "compressible": true,
       "extensions": ["srx"]
     },
+    "application/spdx+json": {
+      "source": "iana",
+      "compressible": true
+    },
     "application/spirits-event+xml": {
       "source": "iana",
       "compressible": true
@@ -2044,6 +2048,10 @@
     },
     "application/vnd.afpc.modca-pagesegment": {
       "source": "iana"
+    },
+    "application/vnd.age": {
+      "source": "iana",
+      "extensions": ["age"]
     },
     "application/vnd.ah-barcode": {
       "source": "iana"
@@ -3885,6 +3893,10 @@
     "application/vnd.mynfc": {
       "source": "iana",
       "extensions": ["taglet"]
+    },
+    "application/vnd.nacamar.ybrid+json": {
+      "source": "iana",
+      "compressible": true
     },
     "application/vnd.ncd.control": {
       "source": "iana"
@@ -7220,6 +7232,7 @@
     },
     "image/vnd.microsoft.icon": {
       "source": "iana",
+      "compressible": true,
       "extensions": ["ico"]
     },
     "image/vnd.mix": {
@@ -7229,6 +7242,7 @@
       "source": "iana"
     },
     "image/vnd.ms-dds": {
+      "compressible": true,
       "extensions": ["dds"]
     },
     "image/vnd.ms-modi": {
@@ -7917,6 +7931,10 @@
     "text/vnd.esmertec.theme-descriptor": {
       "source": "iana",
       "charset": "UTF-8"
+    },
+    "text/vnd.familysearch.gedcom": {
+      "source": "iana",
+      "extensions": ["ged"]
     },
     "text/vnd.ficlab.flt": {
       "source": "iana"
