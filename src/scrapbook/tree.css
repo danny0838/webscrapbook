@@ -1,5 +1,7 @@
 .tree {
   position: relative;
+  width: fit-content;
+  min-width: 100%;
   line-height: 1;
 }
 
