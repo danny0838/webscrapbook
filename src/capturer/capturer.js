@@ -218,13 +218,8 @@
         const url = URL.createObjectURL(blob);
         const prefix = options["capture.saveFolder"] + "/" + (dir ? dir + '/' : '');
         isFilenameTaken = async (path) => {
-          const id = await browser.downloads.download({
-            url,
-            filename: prefix + path,
-            conflictAction: "uniquify",
-            saveAs: false,
-          });
-          const newFilename = await new Promise((resolve, reject) => {
+          const newFilename = await new Promise(async (resolve, reject) => {
+            let id = null;
             const onChanged = async (delta) => {
               if (delta.id !== id) { return; }
               if (delta.filename) {
@@ -248,6 +243,12 @@
               }
             };
             browser.downloads.onChanged.addListener(onChanged);
+            id = await browser.downloads.download({
+              url,
+              filename: prefix + path,
+              conflictAction: "uniquify",
+              saveAs: false,
+            });
           });
           return scrapbook.filepathParts(newFilename)[1] !== path;
         };
