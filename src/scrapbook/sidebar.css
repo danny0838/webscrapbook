@@ -235,13 +235,6 @@ body {
   flex: 1 1 auto;
   overflow: auto;
   font-size: 0.875em;
-  display: flex;
-  flex-flow: column;
-}
-
-#items {
-  flex: 1 1 auto;
-  overflow: auto;
 }
 
 #postit-resizer {
