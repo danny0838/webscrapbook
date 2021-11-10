@@ -19,6 +19,8 @@
 
   'use strict';
 
+  let gTaskInfo;
+
   async function init() {
     const missionId = new URL(document.URL).searchParams.get('mid');
     if (!missionId) { return; }
@@ -29,6 +31,7 @@
       data = await scrapbook.cache.get(key);
       await scrapbook.cache.remove(key);
       if (!data) { throw new Error(`Missing data for mission "${missionId}".`); }
+      gTaskInfo = data.taskInfo;
     } catch (ex) {
       console.error(ex);
       return;
@@ -50,6 +53,7 @@
   }
 
   function parseInputText(inputText) {
+    const taskInfo = JSON.parse(JSON.stringify(gTaskInfo)) || {};
     const tasks = inputText
       .split('\n')
       .reduce((tasks, line) => {
@@ -68,7 +72,7 @@
         }
         return tasks;
       }, []);
-    return {tasks};
+    return Object.assign(taskInfo, {tasks});
   }
 
   function stringifyTasks(taskInfo) {
