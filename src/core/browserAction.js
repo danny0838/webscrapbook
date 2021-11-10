@@ -82,7 +82,7 @@
       document.documentElement.classList.remove('dragged-within');
     };
 
-    const {isPrompt, activeTab, targetTab} = await (async () => {
+    const {isPrompt, targetTab} = await (async () => {
       const currentTab = await browser.tabs.getCurrent();
       // currentTab === undefined => browserAction.html is a prompt diaglog;
       // otherwise browserAction.html is opened in a tab (e.g. Firefox Android)
@@ -97,8 +97,10 @@
       // activeTab === currentTab if the user visits browserAction page by visiting URL.
       const targetTab = (isPrompt || activeTab && activeTab.id !== currentTab.id)  ? activeTab : undefined;
 
-      return {isPrompt, activeTab, targetTab};
+      return {isPrompt, targetTab};
     })();
+
+    const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
 
     // show commands as configured
     for (const [option, shown] of Object.entries(scrapbook.getOptions("ui.toolbar"))) {
@@ -113,9 +115,15 @@
       document.getElementById("openScrapBook").disabled = true;
     }
 
-    // disable tab-specific commands if active tab is not a valid content page
     if (targetTab) {
-      const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
+      // drag-and-drop works only when targetTab exists
+      document.getElementById("captureTab").draggable = true;
+      document.getElementById("captureTabSource").draggable = true;
+      document.getElementById("captureTabBookmark").draggable = true;
+      document.getElementById("captureTabAs").draggable = true;
+
+      // disable tab-specific commands if the active tab is not a valid content page
+      // (drag-and-drop will be ignored when the element is disabled)
       if (!scrapbook.isContentPage(targetTab.url, allowFileAccess)) {
         document.getElementById("captureTab").disabled = true;
         document.getElementById("captureTabSource").disabled = true;
@@ -125,32 +133,6 @@
         document.getElementById("editTab").disabled = true;
         document.getElementById("searchCaptures").disabled = true;
       }
-
-      document.getElementById("captureTab").addEventListener('dragstart', (event) => {
-        onCaptureCommandDragStart(event);
-      });
-      document.getElementById("captureTab").addEventListener('dragend', onCaptureCommandDragEnd);
-
-      document.getElementById("captureTabSource").addEventListener('dragstart', (event) => {
-        onCaptureCommandDragStart(event, {
-          mode: "source",
-        });
-      });
-      document.getElementById("captureTabSource").addEventListener('dragend', onCaptureCommandDragEnd);
-
-      document.getElementById("captureTabBookmark").addEventListener('dragstart', (event) => {
-        onCaptureCommandDragStart(event, {
-          mode: "bookmark",
-        });
-      });
-      document.getElementById("captureTabBookmark").addEventListener('dragend', onCaptureCommandDragEnd);
-
-      document.getElementById("captureTabAs").addEventListener('dragstart', (event) => {
-        onCaptureCommandDragStart(event, {
-          captureAs: true,
-        });
-      });
-      document.getElementById("captureTabAs").addEventListener('dragend', onCaptureCommandDragEnd);
     }
 
     document.getElementById("captureTab").addEventListener('click', async (event) => {
@@ -254,6 +236,33 @@
         singleton: true,
       });
     });
+
+    /* drag and drop */
+    document.getElementById("captureTab").addEventListener('dragstart', (event) => {
+      onCaptureCommandDragStart(event);
+    });
+    document.getElementById("captureTab").addEventListener('dragend', onCaptureCommandDragEnd);
+
+    document.getElementById("captureTabSource").addEventListener('dragstart', (event) => {
+      onCaptureCommandDragStart(event, {
+        mode: "source",
+      });
+    });
+    document.getElementById("captureTabSource").addEventListener('dragend', onCaptureCommandDragEnd);
+
+    document.getElementById("captureTabBookmark").addEventListener('dragstart', (event) => {
+      onCaptureCommandDragStart(event, {
+        mode: "bookmark",
+      });
+    });
+    document.getElementById("captureTabBookmark").addEventListener('dragend', onCaptureCommandDragEnd);
+
+    document.getElementById("captureTabAs").addEventListener('dragstart', (event) => {
+      onCaptureCommandDragStart(event, {
+        captureAs: true,
+      });
+    });
+    document.getElementById("captureTabAs").addEventListener('dragend', onCaptureCommandDragEnd);
   });
 
 }));
