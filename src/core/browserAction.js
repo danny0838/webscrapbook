@@ -22,7 +22,7 @@
     // load languages
     scrapbook.loadLanguages(document);
 
-    await scrapbook.loadOptions();
+    await scrapbook.loadOptionsAuto;
 
     const selectTabFromDom = async function (baseElem) {
       let selector = baseElem.nextSibling;
