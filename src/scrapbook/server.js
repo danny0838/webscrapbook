@@ -440,6 +440,10 @@
         .then(r => r.blob())
         .then(b => scrapbook.readFileAsDocument(b));
 
+      if (!doc) {
+        return;
+      }
+
       return scrapbook.getMetaRefreshTarget(doc, refUrl);
     }
 
