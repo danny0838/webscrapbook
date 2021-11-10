@@ -93,8 +93,9 @@
 
     const onCaptureCommandDragStart = function (event, params) {
       event.dataTransfer.setData(
-        'application/scrapbook.capturetabs+json',
+        'application/scrapbook.command+json',
         JSON.stringify(Object.assign({
+          cmd: 'capture',
           tabId: targetTab.id,
         }, params)),
       );
@@ -270,7 +271,7 @@
 
     document.getElementById("captureTabAs").addEventListener('dragstart', (event) => {
       onCaptureCommandDragStart(event, {
-        captureAs: true,
+        cmd: 'captureAs',
       });
     });
     document.getElementById("captureTabAs").addEventListener('dragend', onCaptureCommandDragEnd);

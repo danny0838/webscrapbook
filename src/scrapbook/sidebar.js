@@ -678,7 +678,7 @@
         return;
       }
 
-      if (event.dataTransfer.types.includes('application/scrapbook.capturetabs+json') && this.rootId !== 'recycle') {
+      if (event.dataTransfer.types.includes('application/scrapbook.command+json') && this.rootId !== 'recycle') {
         event.dataTransfer.dropEffect = 'copy';
         return;
       }
@@ -773,8 +773,8 @@
         return;
       }
 
-      if (event.dataTransfer.types.includes('application/scrapbook.capturetabs+json') && this.rootId !== 'recycle') {
-        const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.capturetabs+json'));
+      if (event.dataTransfer.types.includes('application/scrapbook.command+json') && this.rootId !== 'recycle') {
+        const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.command+json'));
         const targetTab = await browser.tabs.get(data.tabId);
         const tabs = await scrapbook.getHighlightedTabs({windowId: targetTab.windowId});
         const mode = event.altKey ? 'bookmark' : event.shiftKey ? 'source' : data.mode;
@@ -792,10 +792,15 @@
             "capture.saveTo": "server",
           },
         };
-        if (event.ctrlKey || data.captureAs) {
-          await scrapbook.invokeCaptureAs(taskInfo);
-        } else {
-          await scrapbook.invokeCaptureEx({taskInfo});
+        switch (data.cmd) {
+          case 'capture': {
+            event.ctrlKey ? await scrapbook.invokeCaptureAs(taskInfo) : await scrapbook.invokeCaptureEx({taskInfo});
+            break;
+          }
+          case 'captureAs': {
+            await scrapbook.invokeCaptureAs(taskInfo);
+            break;
+          }
         }
         return;
       }
