@@ -738,19 +738,12 @@
       contexts: ["selection"],
       documentUrlPatterns: urlMatch,
       onclick: (info, tab) => {
-        return scrapbook.initContentScripts(tab.id, info.frameId)
-          .then(() => {
-            return scrapbook.invokeContentScript({
-              tabId: tab.id,
-              frameId: info.frameId,
-              cmd: "capturer.retrieveSelectedLinks",
-            });
-          })
-          .then((tasks) => {
-            return scrapbook.invokeCaptureBatch({
-              tasks,
-            });
-          });
+        return scrapbook.invokeCaptureBatchLinks({
+          tasks: [{
+            tabId: tab.id,
+            frameId: info.frameId,
+          }],
+        });
       },
     });
 

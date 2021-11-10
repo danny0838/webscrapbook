@@ -176,19 +176,11 @@
 
     document.getElementById("batchCaptureLinks").addEventListener('click', async (event) => {
       const tab = targetTab || await selectTabFromDom(event.currentTarget);
-      return scrapbook.initContentScripts(tab.id, 0)
-        .then(() => {
-          return scrapbook.invokeContentScript({
-            tabId: tab.id,
-            frameId: 0,
-            cmd: "capturer.retrieveSelectedLinks",
-          });
-        })
-        .then((tasks) => {
-          return scrapbook.invokeCaptureBatch({
-            tasks,
-          });
-        });
+      return await scrapbook.invokeCaptureBatchLinks({
+        tasks: [{
+          tabId: tab.id,
+        }],
+      });
     });
 
     document.getElementById("editTab").addEventListener('click', async (event) => {

@@ -406,6 +406,34 @@
   };
 
   /**
+   * Shortcut for invoking a general "batch capture links as".
+   */
+  scrapbook.invokeCaptureBatchLinks = async function (taskInfo) {
+    const subTasks = taskInfo.tasks.map(({tabId, frameId = 0, fullPage}) => {
+      return scrapbook.initContentScripts(tabId, frameId)
+        .then(() => {
+          return scrapbook.invokeContentScript({
+            tabId,
+            frameId,
+            cmd: "capturer.retrieveSelectedLinks",
+            args: {
+              select: fullPage ? 'all' : undefined,
+            },
+          });
+        })
+        .catch((ex) => {
+          console.error(ex);
+          return [];
+        });
+    });
+    let tasks = [];
+    for (const subTaskList of await Promise.all(subTasks)) {
+      tasks = tasks.concat(subTaskList);
+    }
+    return await scrapbook.invokeCaptureBatch(Object.assign({}, taskInfo, {tasks}));
+  };
+
+  /**
    * @param {Object} params
    * @param {integer} params.targetTabId
    * @param {string} params.targetCallback
