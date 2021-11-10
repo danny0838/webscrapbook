@@ -776,8 +776,11 @@
       if (event.dataTransfer.types.includes('application/scrapbook.command+json') && this.rootId !== 'recycle') {
         const data = JSON.parse(event.dataTransfer.getData('application/scrapbook.command+json'));
         const targetTab = await browser.tabs.get(data.tabId);
-        const tabs = await scrapbook.getHighlightedTabs({windowId: targetTab.windowId});
-        const mode = event.altKey ? 'bookmark' : event.shiftKey ? 'source' : data.mode;
+        const windowId = targetTab.windowId;
+        const tabs = data.forAllTabs ? await scrapbook.getContentTabs({windowId}) : await scrapbook.getHighlightedTabs({windowId});
+        const mode = event.altKey ? 'bookmark' :
+            event.shiftKey ? (data.mode === 'source' ? 'tab' : 'source') :
+            data.mode;
         const taskInfo = {
           tasks: tabs.map(tab => ({
             tabId: tab.id,
@@ -799,6 +802,14 @@
           }
           case 'captureAs': {
             await scrapbook.invokeCaptureAs(taskInfo);
+            break;
+          }
+          case 'batchCapture': {
+            await scrapbook.invokeCaptureBatch(taskInfo);
+            break;
+          }
+          case 'batchCaptureLinks': {
+            await scrapbook.invokeCaptureBatchLinks(taskInfo);
             break;
           }
         }

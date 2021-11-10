@@ -153,6 +153,8 @@
       document.getElementById("captureTabSource").draggable = true;
       document.getElementById("captureTabBookmark").draggable = true;
       document.getElementById("captureTabAs").draggable = true;
+      document.getElementById("batchCapture").draggable = true;
+      document.getElementById("batchCaptureLinks").draggable = true;
 
       // disable tab-specific commands if the active tab is not a valid content page
       // (drag-and-drop will be ignored when the element is disabled)
@@ -275,6 +277,22 @@
       });
     });
     document.getElementById("captureTabAs").addEventListener('dragend', onCaptureCommandDragEnd);
+
+    document.getElementById("batchCapture").addEventListener('dragstart', (event) => {
+      onCaptureCommandDragStart(event, {
+        cmd: 'batchCapture',
+        forAllTabs: true,
+      });
+    });
+    document.getElementById("batchCapture").addEventListener('dragend', onCaptureCommandDragEnd);
+
+    document.getElementById("batchCaptureLinks").addEventListener('dragstart', (event) => {
+      onCaptureCommandDragStart(event, {
+        cmd: 'batchCaptureLinks',
+        mode: "source",
+      });
+    });
+    document.getElementById("batchCaptureLinks").addEventListener('dragend', onCaptureCommandDragEnd);
   });
 
 }));
