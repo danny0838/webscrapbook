@@ -788,10 +788,9 @@
           parentId: targetId,
           index: targetIndex,
           mode,
-          delay: null,
-          options: Object.assign(scrapbook.getOptions("capture"), {
+          options: {
             "capture.saveTo": "server",
-          }),
+          },
         };
         if (event.ctrlKey || data.captureAs) {
           await scrapbook.invokeCaptureAs(taskInfo);

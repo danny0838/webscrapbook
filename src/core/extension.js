@@ -384,13 +384,12 @@
       delay: null,
       options: null,
     }, taskInfo);
-    if (taskInfo.options === null) {
-      taskInfo.options = await scrapbook.getOptions("capture", null);
-    }
+    taskInfo.options = Object.assign(await scrapbook.getOptions("capture", null), taskInfo.options);
     return await scrapbook.invokeCaptureEx({
       dialog: 'details',
       taskInfo,
       ignoreTitle,
+      uniquify: false,
     });
   };
 
