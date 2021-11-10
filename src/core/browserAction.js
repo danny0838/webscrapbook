@@ -175,11 +175,13 @@
     });
 
     document.getElementById("batchCaptureLinks").addEventListener('click', async (event) => {
-      const tab = targetTab || await selectTabFromDom(event.currentTarget);
+      const tabs = targetTab ? 
+          await scrapbook.getHighlightedTabs() : 
+          [await selectTabFromDom(event.currentTarget)];
       return await scrapbook.invokeCaptureBatchLinks({
-        tasks: [{
+        tasks: tabs.map(tab => ({
           tabId: tab.id,
-        }],
+        })),
       });
     });
 
