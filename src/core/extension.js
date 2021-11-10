@@ -394,6 +394,18 @@
   };
 
   /**
+   * Shortcut for invoking a general "batch capture as".
+   */
+  scrapbook.invokeCaptureBatch = async function (taskInfo) {
+    return await scrapbook.invokeCaptureEx({
+      dialog: 'batch',
+      taskInfo,
+      ignoreTitle: true,
+      uniquify: true,
+    });
+  };
+
+  /**
    * @param {Object} params
    * @param {integer} params.targetTabId
    * @param {string} params.targetCallback

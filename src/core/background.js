@@ -747,9 +747,8 @@
             });
           })
           .then((tasks) => {
-            return scrapbook.invokeCaptureEx({
-              dialog: 'batch',
-              taskInfo: {tasks},
+            return scrapbook.invokeCaptureBatch({
+              tasks,
             });
           });
       },

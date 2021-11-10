@@ -166,14 +166,11 @@
 
     document.getElementById("batchCapture").addEventListener('click', async (event) => {
       const tabs = await scrapbook.getContentTabs();
-      return await scrapbook.invokeCaptureEx({
-        dialog: 'batch',
-        taskInfo: {
-          tasks: tabs.map(tab => ({
-            tabId: tab.id,
-            title: tab.title,
-          })),
-        },
+      return await scrapbook.invokeCaptureBatch({
+        tasks: tabs.map(tab => ({
+          tabId: tab.id,
+          title: tab.title,
+        })),
       });
     });
 
@@ -188,9 +185,8 @@
           });
         })
         .then((tasks) => {
-          return scrapbook.invokeCaptureEx({
-            dialog: 'batch',
-            taskInfo: {tasks},
+          return scrapbook.invokeCaptureBatch({
+            tasks,
           });
         });
     });
