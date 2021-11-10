@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.139.0] - 2021-11-10
+* Fixed an error of editing a created postit in Firefox.
+* Fixed several UI issues for the sidebar.
+* Adjusted scrollings for the item picker dialog.
+
 ## [0.138.0] - 2021-11-09
 * Fixed an issue that a capture may be interrupted occasionally when saved to folder as folder.
 * Minor UI improvements.
