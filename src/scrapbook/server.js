@@ -561,19 +561,19 @@
         }
       }
 
-      // @TODO: consider implementing a CRC-like checksum of all
-      // (file, timestamp) to catch more possible tree change
-      let regex = /^(?:meta|toc)\d*\.js$/i;
-      let treeLastModified = new Date(response.headers.get('Last-Modified')).valueOf() / 1000;
-      let treeFiles = data.reduce((data, item) => {
-        if (regex.test(item.name)) {
-          treeLastModified = Math.max(treeLastModified, item.last_modified);
+      // generate a checksum for change detection
+      const treeFiles = new Map();
+      const checksumFilterRegex = /^(?:meta|toc)\d*\.js$/i;
+      let checksum = [];
+      for (const file of data) {
+        treeFiles.set(file.name, file);
+        if (checksumFilterRegex.test(file.name) && file.type === 'file') {
+          checksum.push([file.name, file.last_modified, file.size].join('\t'));
         }
-        data.set(item.name, item);
-        return data;
-      }, new Map());
+      }
+      checksum = checksum.sort().join('\n');
 
-      this.treeLastModified = treeLastModified;
+      this.treeLastModified = checksum;
       return this.treeFiles = treeFiles;
     }
 
