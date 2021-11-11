@@ -709,7 +709,7 @@
     async onTreeItemDrop(event, {
       lastDraggedElems,
       targetId,
-      targetIndex,
+      targetIndex = null,
       isOnItem = true,
     }) {
       // disallow when commands disabled
