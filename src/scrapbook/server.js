@@ -561,11 +561,13 @@
         }
       }
 
+      // @TODO: consider implementing a CRC-like checksum of all
+      // (file, timestamp) to catch more possible tree change
       let regex = /^(?:meta|toc)\d*\.js$/i;
-      let treeLastModified = new Date(response.headers.get('Last-Modified')).valueOf();
+      let treeLastModified = new Date(response.headers.get('Last-Modified')).valueOf() / 1000;
       let treeFiles = data.reduce((data, item) => {
         if (regex.test(item.name)) {
-          treeLastModified = Math.max(treeLastModified, parseInt(item.last_modified) * 1000);
+          treeLastModified = Math.max(treeLastModified, item.last_modified);
         }
         data.set(item.name, item);
         return data;
