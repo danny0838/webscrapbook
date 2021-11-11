@@ -366,7 +366,7 @@
     // update badge
     tasks.push(capturer.updateBadgeForAllTabs().catch(errorHandler));
 
-    // nodify sidebars about server tree change
+    // notify sidebars about server tree change
     const sidebarUrls = [
       browser.runtime.getURL("scrapbook/sidebar.html"),
       browser.runtime.getURL("scrapbook/manage.html"),
