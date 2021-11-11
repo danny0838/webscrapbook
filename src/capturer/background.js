@@ -228,8 +228,7 @@
       return;
     }
 
-    // Chromium 89 may get an incomplete tab list if currentWindow = false
-    const tabs = await scrapbook.getContentTabs({currentWindow: undefined});
+    const tabs = await scrapbook.getContentTabs({});
     return await updateBadgeForTabs(tabs);
   }
 

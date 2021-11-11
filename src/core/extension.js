@@ -100,13 +100,12 @@
   /**
    * @return {Promise<Array>}
    */
-  scrapbook.getContentTabs = async function (filter) {
+  scrapbook.getContentTabs = async function (filter = {currentWindow: true}) {
     // scrapbook.getContentPagePattern() resolves to [] on Firefox Android 57
     // due to a bug of browser.tabs.query:
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1418737
     const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-    const queryObj = Object.assign({currentWindow: true, url: "<all_urls>"}, filter);
-    const tabs = await browser.tabs.query(queryObj);
+    const tabs = await browser.tabs.query(filter);
 
     // Note that tab.hidden is only supported in Firefox >= 61. For other
     // browsers it's undefined.
