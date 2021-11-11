@@ -115,13 +115,12 @@
   /**
    * Query for highlighted ("selected") tabs
    */
-  scrapbook.getHighlightedTabs = async function ({windowId} = {}) {
+  scrapbook.getHighlightedTabs = async function (filter = {currentWindow: true}) {
     const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-    const query = Number.isInteger(windowId) ? {windowId} : {currentWindow: true};
     // Querying for {highlighted:true} doesn't get highlighted tabs in some
     // Firefox version (e.g. 55), so we query for all tabs and filter them
     // afterwards.
-    const tabs = await browser.tabs.query(query);
+    const tabs = await browser.tabs.query(filter);
     return tabs.filter(t => (
       scrapbook.isContentPage(t.url, allowFileAccess) &&
       // Select active and highlighted tabs.
