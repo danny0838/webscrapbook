@@ -49,15 +49,46 @@
       });
     };
 
+    /**
+     * @param {MouseEvent} event
+     * @param {Object} params
+     * @param {string} cmd
+     * @param {string} [mode]
+     * @param {boolean} [forAllTabs]
+     */
     const onCaptureCommandClick = async (event, params) => {
-      const tabs = targetTab ? 
-          await scrapbook.getHighlightedTabs() : 
+      const tabs = params.forAllTabs ? await scrapbook.getContentTabs() :
+          targetTab ? await scrapbook.getHighlightedTabs() :
           [await selectTabFromDom(event.currentTarget)];
-      return await scrapbook.invokeCapture(
-        tabs.map(tab => (Object.assign({
+      const mode = event.altKey ? 'bookmark' :
+          event.shiftKey ? (params.mode === 'source' ? 'tab' : 'source') :
+          params.mode;
+      const taskInfo = {
+        tasks: tabs.map(tab => ({
           tabId: tab.id,
-        }, params)))
-      );
+          url: tab.url,
+          title: tab.title,
+        })),
+        mode,
+      };
+      switch (params.cmd) {
+        case 'capture': {
+          event.ctrlKey ? await scrapbook.invokeCaptureAs(taskInfo) : await scrapbook.invokeCaptureEx({taskInfo});
+          break;
+        }
+        case 'captureAs': {
+          await scrapbook.invokeCaptureAs(taskInfo);
+          break;
+        }
+        case 'batchCapture': {
+          await scrapbook.invokeCaptureBatch(taskInfo);
+          break;
+        }
+        case 'batchCaptureLinks': {
+          await scrapbook.invokeCaptureBatchLinks(taskInfo);
+          break;
+        }
+      }
     };
 
     const onCaptureCommandDragStart = function (event, params) {
@@ -136,52 +167,42 @@
     }
 
     document.getElementById("captureTab").addEventListener('click', async (event) => {
-      onCaptureCommandClick(event);
+      onCaptureCommandClick(event, {
+        cmd: 'capture',
+      });
     });
 
     document.getElementById("captureTabSource").addEventListener('click', async (event) => {
       onCaptureCommandClick(event, {
+        cmd: 'capture',
         mode: "source",
       });
     });
 
     document.getElementById("captureTabBookmark").addEventListener('click', async (event) => {
       onCaptureCommandClick(event, {
+        cmd: 'capture',
         mode: "bookmark",
       });
     });
 
     document.getElementById("captureTabAs").addEventListener('click', async (event) => {
-      const tabs = targetTab ? 
-          await scrapbook.getHighlightedTabs() : 
-          [await selectTabFromDom(event.currentTarget)];
-      return await scrapbook.invokeCaptureAs({
-        tasks: tabs.map(tab => ({
-          tabId: tab.id,
-          url: tab.url,
-          title: tab.title,
-        })),
+      onCaptureCommandClick(event, {
+        cmd: 'captureAs',
       });
     });
 
     document.getElementById("batchCapture").addEventListener('click', async (event) => {
-      const tabs = await scrapbook.getContentTabs();
-      return await scrapbook.invokeCaptureBatch({
-        tasks: tabs.map(tab => ({
-          tabId: tab.id,
-          title: tab.title,
-        })),
+      onCaptureCommandClick(event, {
+        cmd: 'batchCapture',
+        forAllTabs: true,
       });
     });
 
     document.getElementById("batchCaptureLinks").addEventListener('click', async (event) => {
-      const tabs = targetTab ? 
-          await scrapbook.getHighlightedTabs() : 
-          [await selectTabFromDom(event.currentTarget)];
-      return await scrapbook.invokeCaptureBatchLinks({
-        tasks: tabs.map(tab => ({
-          tabId: tab.id,
-        })),
+      onCaptureCommandClick(event, {
+        cmd: 'batchCaptureLinks',
+        mode: "source",
       });
     });
 
