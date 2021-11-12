@@ -3964,6 +3964,11 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           for (const elem of rootNode.querySelectorAll('meta[http-equiv="refresh" i][content]')) {
             rewriteMetaRefresh(elem, filenameMap, linkedPages);
           }
+          for (const elem of rootNode.querySelectorAll('iframe[srcdoc]')) {
+            const doc = (new DOMParser()).parseFromString(elem.srcdoc, 'text/html');
+            processRootNode(doc.documentElement, filenameMap, linkedPages);
+            elem.srcdoc = doc.documentElement.outerHTML;
+          }
           break;
         }
       }
