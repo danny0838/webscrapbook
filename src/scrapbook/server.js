@@ -26,7 +26,7 @@
   // this should correspond with the lock stale time in the backend server
   const LOCK_STALE_TIME = 60 * 1000;
 
-  const TRANSCATION_BACKUP_TREE_FILES_REGEX = /^(meta|toc)\d*\.js$/i;
+  const TRANSCATION_TREE_FILES_REGEX = /^(meta|toc)\d*\.js$/i;
 
   const TEMPLATE_DIR = '/templates/';
   const TEMPLATES = {
@@ -563,11 +563,10 @@
 
       // generate a checksum for change detection
       const treeFiles = new Map();
-      const checksumFilterRegex = /^(?:meta|toc)\d*\.js$/i;
       let checksum = [];
       for (const file of data) {
         treeFiles.set(file.name, file);
-        if (checksumFilterRegex.test(file.name) && file.type === 'file') {
+        if (TRANSCATION_TREE_FILES_REGEX.test(file.name) && file.type === 'file') {
           checksum.push([file.name, file.last_modified, file.size].join('\t'));
         }
       }
@@ -908,7 +907,7 @@
           }
 
           for (const [filename] of this.treeFiles) {
-            if (TRANSCATION_BACKUP_TREE_FILES_REGEX.test(filename)) {
+            if (TRANSCATION_TREE_FILES_REGEX.test(filename)) {
               await this.server.request({
                 url: this.treeUrl + filename + `?a=backup&ts=${backupTs}&note=${backupNote}`,
                 method: "POST",
