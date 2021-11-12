@@ -1093,8 +1093,7 @@
 
                     // frame document inaccessible (headless capture):
                     // contentType of srcdoc is always text/html
-                    const url = `data:text/html;charset=UTF-8,${encodeURIComponent(frame.getAttribute("srcdoc"))}`;
-                    const doc = await scrapbook.readFileAsDocument(scrapbook.dataUriToFile(url));
+                    const doc = (new DOMParser()).parseFromString(frame.getAttribute("srcdoc"), 'text/html');
                     const docUrl = 'about:srcdoc';
 
                     return capturer.captureDocument({
@@ -1212,8 +1211,7 @@
                       frame.hasAttribute("srcdoc")) {
                     // contentType of srcdoc is always text/html
                     const content = frame.getAttribute("srcdoc");
-                    const url = `data:text/html;charset=UTF-8,${encodeURIComponent(content)}`;
-                    const doc = await scrapbook.readFileAsDocument(scrapbook.dataUriToFile(url));
+                    const doc = (new DOMParser()).parseFromString(content, 'text/html');
 
                     // assign a unique checksum for deduplication
                     const docUrl = `about:srcdoc?sha1=${scrapbook.sha1(content, "TEXT")}`;
