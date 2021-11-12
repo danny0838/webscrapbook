@@ -26,7 +26,7 @@
   // this should correspond with the lock stale time in the backend server
   const LOCK_STALE_TIME = 60 * 1000;
 
-  const TRANSCATION_TREE_FILES_REGEX = /^(meta|toc)\d*\.js$/i;
+  const TRANSCATION_TREE_FILES_REGEX = /^(meta|toc)\d*\.js$/;
 
   const TEMPLATE_DIR = '/templates/';
   const TEMPLATES = {
