@@ -523,7 +523,9 @@
      * Load tree file list.
      *
      * - Also update this.treeLastModified.
+     * - Also update this.treeFiles.
      *
+     * @param {boolean} [refresh] - Load from the server even if this.treeFiles exists.
      * @return {Map}
      */
     async loadTreeFiles(refresh = false) {
@@ -577,10 +579,9 @@
     }
 
     /**
-     * Load files with specific tree file name.
+     * Load the tree files with the specific name.
      *
-     * e.g. meta.js, meta1.js, ...
-     *
+     * @param {string} name - e.g. "meta" for loading meta.js, meta1.js, ...
      * @return {Object}
      */
     async loadTreeFile(name) {
@@ -620,6 +621,10 @@
       return rv;
     }
 
+    /**
+     * @param {boolean} [refresh] - Load from the server even if this.meta exists.
+     * @return {Object}
+     */
     async loadMeta(refresh = false) {
       if (this.meta && !refresh) {
         return this.meta;
@@ -635,6 +640,10 @@
       return obj;
     }
 
+    /**
+     * @param {boolean} [refresh] - Load from the server even if this.toc exists.
+     * @return {Object}
+     */
     async loadToc(refresh = false) {
       if (this.toc && !refresh) {
         return this.toc;
@@ -643,6 +652,10 @@
       return this.toc = await this.loadTreeFile('toc');
     }
 
+    /**
+     * @param {boolean} [refresh] - Load from the server even if this.fulltext exists.
+     * @return {Object}
+     */
     async loadFulltext(refresh = false) {
       if (this.fulltext && !refresh) {
         return this.fulltext;

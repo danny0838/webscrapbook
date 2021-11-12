@@ -50,11 +50,15 @@
     };
 
     /**
+     * @typedef {Object} captureCommandParams
+     * @property {string} cmd
+     * @property {string} [mode]
+     * @property {boolean} [forAllTabs]
+     */
+
+    /**
      * @param {MouseEvent} event
-     * @param {Object} params
-     * @param {string} cmd
-     * @param {string} [mode]
-     * @param {boolean} [forAllTabs]
+     * @param {captureCommandParams} params
      */
     const onCaptureCommandClick = async (event, params) => {
       const tabs = params.forAllTabs ? await scrapbook.getContentTabs() :
@@ -91,11 +95,14 @@
       }
     };
 
+    /**
+     * @param {DragEvent} event
+     * @param {captureCommandParams} params
+     */
     const onCaptureCommandDragStart = function (event, params) {
       event.dataTransfer.setData(
         'application/scrapbook.command+json',
         JSON.stringify(Object.assign({
-          cmd: 'capture',
           tabId: targetTab.id,
         }, params)),
       );
@@ -253,12 +260,15 @@
 
     /* drag and drop */
     document.getElementById("captureTab").addEventListener('dragstart', (event) => {
-      onCaptureCommandDragStart(event);
+      onCaptureCommandDragStart(event, {
+        cmd: 'capture',
+      });
     });
     document.getElementById("captureTab").addEventListener('dragend', onCaptureCommandDragEnd);
 
     document.getElementById("captureTabSource").addEventListener('dragstart', (event) => {
       onCaptureCommandDragStart(event, {
+        cmd: 'capture',
         mode: "source",
       });
     });
@@ -266,6 +276,7 @@
 
     document.getElementById("captureTabBookmark").addEventListener('dragstart', (event) => {
       onCaptureCommandDragStart(event, {
+        cmd: 'capture',
         mode: "bookmark",
       });
     });

@@ -492,6 +492,10 @@
 
     const captureTab = await scrapbook.invokeCaptureEx(args);
     if (browser.windows) {
+      // In Chromium for Android (e.g. Kiwi Browser):
+      // - windowId of any tab is 1, which refers a non-existent window.
+      // - browser.windows.update() for a non-existent window does nothing
+      //   rather than throw.
       await browser.windows.update(captureTab.windowId, {
         focused: false,
         state: 'minimized',

@@ -162,6 +162,10 @@
 
       if (existedTab) {
         if (browser.windows) {
+          // In Chromium for Android (e.g. Kiwi Browser):
+          // - windowId of any tab is 1, which refers a non-existent window.
+          // - browser.windows.update() for a non-existent window does nothing
+          //   rather than throw.
           await browser.windows.update(existedTab.windowId, {drawAttention: true});
         }
         return await browser.tabs.update(existedTab.id, {active: true});
@@ -197,7 +201,11 @@
       return await browser.tabs.create({url});
     }
 
-    // If inNormalWindow, open in the active tab of the last focused window.
+    // If inNormalWindow, open in the active tab of the last focused window,
+    // but never the extension tab itself.
+    //
+    // In Chromium for Android (e.g. Kiwi Browser), browser.tabs.update({url})
+    // for the current tab throws an error.
     if (inNormalWindow && browser.windows) {
       const win = await scrapbook.invokeBackgroundScript({
         cmd: "getLastFocusedWindow",
@@ -209,13 +217,17 @@
         return tab;
       }
 
-      const targetTab = win.tabs.filter(x => x.active)[0];
-      let currentTab;
+      let targetTab = win.tabs.filter(x => x.active)[0];
 
-      // In some browser the last focused window may be the extension popup
-      // window, causing targetTab=currentTab. Force creating a new tab to
-      // prevent an error of updating the current tab.
-      if (!targetTab || ((currentTab = await browser.tabs.getCurrent()) && targetTab.id === currentTab.id)) {
+      // If targetTab is the current tab, treat as if no targetTab.
+      if (targetTab) {
+        const currentTab = await browser.tabs.getCurrent();
+        if (currentTab && targetTab.id === currentTab.id) {
+          targetTab = null;
+        }
+      }
+
+      if (!targetTab) {
         return await browser.tabs.create({url, windowId: win.id});
       }
 

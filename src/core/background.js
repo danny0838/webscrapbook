@@ -31,7 +31,7 @@
   const background = {
     commands: {
       async openScrapBook() {
-        return await scrapbook.openScrapBook({});
+        return await scrapbook.openScrapBook();
       },
 
       async openOptions() {
@@ -112,11 +112,11 @@
   };
 
   /**
-   * Get real last focused window.
+   * Get the real last focused window.
    *
-   * Native window.getLastFocusedWindow gets the last created window (the
-   * window "on top"), rather than the window the user last activates a tab
-   * within.
+   * Native browser.windows.getLastFocused() gets the last created window
+   * (the window "on top"), rather than the window the user last activates a
+   * tab within.
    *
    * @kind invokable
    * @param {Object} params
@@ -127,9 +127,9 @@
     populate = false,
     windowTypes = ['normal', 'popup'],
   } = {}) {
+    // Firefox < 58 does not support browser.windows.getAll({windowsTypes})),
+    // filter instead.
     const wins = (await browser.windows.getAll({populate}))
-      // Firefox does not support windowTypes for windows.getAll,
-      // so use filter instead.
       .filter(win => windowTypes.includes(win.type))
       .sort((a, b) => {
         const va = focusedWindows.get(a.id) || -Infinity;
@@ -198,8 +198,11 @@
     const result = await scrapbook.invokeContentScript({tabId, frameId: 0, cmd, args});
 
     if (result) {
-      // Firefox Android does not support windows
       if (browser.windows && sidebarTab.windowId) {
+        // In Chromium for Android (e.g. Kiwi Browser):
+        // - windowId of any tab is 1, which refers a non-existent window.
+        // - browser.windows.update() for a non-existent window does nothing
+        //   rather than throw.
         await browser.windows.update(sidebarTab.windowId, {drawAttention: true});
       }
 
@@ -504,7 +507,7 @@
         contexts: ["browser_action"],
         documentUrlPatterns: urlMatch,
         onclick: async (info, tab) => {
-          return await scrapbook.openScrapBook({});
+          return await scrapbook.openScrapBook();
         },
         enabled: hasServer,
       });

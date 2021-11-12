@@ -3432,7 +3432,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const {timeId} = settings;
 
     // special handling for data URI
-    // if not saved as file, save as-is regardless of its MIME type
+    // if not to save as file, save as-is regardless of its MIME type
     if (sourceUrlMain.startsWith("data:")) {
       if (!(options["capture.saveDataUriAsFile"] && options["capture.saveAs"] !== "singleHtml")) {
         return {url: sourceUrlMain};
