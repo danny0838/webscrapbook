@@ -33,7 +33,7 @@
       } catch(ex) {}
     }
     for (let key in changes) {
-      scrapbook.options[key] = changes[key].newValue;
+      scrapbook.options[key] = 'newValue' in changes[key] ? changes[key].newValue : scrapbook.DEFAULT_OPTIONS[key];
     }
   });
 
