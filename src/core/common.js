@@ -468,7 +468,7 @@ if (Node && !Node.prototype.getRootNode) {
 }
 [data-scrapbook-elem="sticky"].styled {
   position: absolute;
-  z-index: 500000;
+  z-index: 2147483647;
   opacity: .95;
   box-sizing: border-box;
   margin: 0;
@@ -494,7 +494,6 @@ if (Node && !Node.prototype.getRootNode) {
 }
 [data-scrapbook-elem="sticky"].dragging {
   opacity: .75;
-  z-index: 2147483641;
 }
 `;
 
