@@ -101,6 +101,17 @@
         });
       },
 
+      async batchCapture() {
+        const tabs = await scrapbook.getContentTabs();
+        return await scrapbook.invokeCaptureBatch({
+          tasks: tabs.map(tab => ({
+            tabId: tab.id,
+            url: tab.url,
+            title: tab.title,
+          })),
+        });
+      },
+
       async batchCaptureLinks() {
         const tabs = await scrapbook.getHighlightedTabs();
         return await scrapbook.invokeCaptureBatchLinks({
@@ -412,9 +423,14 @@
   };
 
   function initStorageChangeListener() {
+    const toolbarOptions = Object.keys(scrapbook.DEFAULT_OPTIONS).filter(x => x.startsWith('ui.toolbar.'));
+
     // Run this after optionsAuto to make sure that scrapbook.options is
     // up-to-date when the listener is called.
     browser.storage.onChanged.addListener((changes, areaName) => {
+      if (toolbarOptions.some(x => x in changes)) {
+        updateBrowserAction(); // async
+      }
       if (("ui.showContextMenu" in changes) || ("server.url" in changes)) {
         updateContextMenu(); // async
       }
@@ -436,26 +452,67 @@
     });
   }
 
-  function initBrowserAction() {
-    /* browser action button and fallback */
-    if (!browser.browserAction) {
-      // Firefox Android < 55: no browserAction
-      // Fallback to pageAction.
-      // Firefox Android ignores the tabId parameter and
-      // shows the pageAction for all tabs
-      browser.pageAction.show(0);
-      return;
-    }
+  function updateBrowserAction(...args) {
+    const actions = {
+      showCaptureTab: background.commands.captureTab,
+      showCaptureTabSource: background.commands.captureTabSource,
+      showCaptureTabBookmark: background.commands.captureTabBookmark,
+      showCaptureTabAs: background.commands.captureTabAs,
+      showBatchCapture: background.commands.batchCapture,
+      showBatchCaptureLinks: background.commands.batchCaptureLinks,
+      showEditTab: background.commands.editTab,
+      showSearchCaptures: background.commands.searchCaptures,
+      showOpenScrapBook: background.commands.openScrapBook,
+      showOpenViewer: background.commands.openViewer,
+      showOpenOptions: background.commands.openOptions,
+    };
+    let action;
 
-    if (!browser.browserAction.getPopup) {
-      // Firefox Android < 57: only browserAction onClick
-      // Fallback by opening browserAction page
-      browser.browserAction.onClicked.addListener((tab) => {
-        const url = browser.runtime.getURL("core/browserAction.html");
-        browser.tabs.create({url, active: true});
-      });
-      return;
-    }
+    const fn = updateBrowserAction = () => {
+      if (!browser.browserAction) {
+        // Firefox Android < 55: no browserAction
+        // Fallback to pageAction.
+        // Firefox Android ignores the tabId parameter and
+        // shows the pageAction for all tabs
+        browser.pageAction.show(0);
+        return;
+      }
+
+      if (!browser.browserAction.getPopup) {
+        // Firefox Android < 57: only browserAction onClick
+        // Fallback by opening browserAction page
+        browser.browserAction.onClicked.addListener((tab) => {
+          const url = browser.runtime.getURL("core/browserAction.html");
+          browser.tabs.create({url, active: true});
+        });
+        return;
+      }
+
+      // clear current listener and popup
+      browser.browserAction.setPopup({popup: ""});
+      if (action) {
+        browser.browserAction.onClicked.removeListener(action);
+      }
+
+      const buttons = scrapbook.getOptions("ui.toolbar");
+      const activeButtons = Object.entries(buttons).filter(x => x[1]);
+      if (activeButtons.length === 0) {
+        // if no button is activated, fallback to open option
+        action = actions.showOpenOptions;
+        browser.browserAction.onClicked.addListener(action);
+        return;
+      } else if (activeButtons.length === 1) {
+        // if a supported button is activated, make it the toolbar button click action
+        action = actions[activeButtons[0][0].slice(11)];
+        if (action) {
+          browser.browserAction.onClicked.addListener(action);
+          return;
+        }
+      }
+      browser.browserAction.setPopup({popup: "core/browserAction.html"});
+    };
+
+    return fn(...args);
   }
 
   async function updateContextMenu() {
@@ -934,7 +991,6 @@
 
   async function init() {
     initStorageChangeListener();
-    initBrowserAction();
     initCommands();
     initLastFocusedWindowListener();
     initBeforeSendHeadersListener();
@@ -942,6 +998,7 @@
     initExternalMessageListener();
 
     await scrapbook.loadOptionsAuto;
+    updateBrowserAction();
     updateContextMenu();
   }
 
