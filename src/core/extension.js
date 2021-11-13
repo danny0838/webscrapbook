@@ -384,6 +384,7 @@
    */
   scrapbook.invokeCaptureAs = async function (taskInfo, {
     ignoreTitle = false,
+    uniquify = false,
   } = {}) {
     taskInfo = Object.assign({
       tasks: [],
@@ -399,7 +400,7 @@
       dialog: 'details',
       taskInfo,
       ignoreTitle,
-      uniquify: false,
+      uniquify,
     });
   };
 

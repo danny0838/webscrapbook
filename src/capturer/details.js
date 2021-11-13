@@ -20,6 +20,8 @@
   'use strict';
 
   let gTaskInfo;
+  let gIgnoreTitle;
+  let gUniquify;
 
   async function init() {
     try {
@@ -32,6 +34,8 @@
         if (!data) { throw new Error(`Missing data for mission "${missionId}".`); }
         gTaskInfo = data.taskInfo;
         gTaskInfo.options = gTaskInfo.options || {};
+        gIgnoreTitle = data.ignoreTitle;
+        gUniquify = data.uniquify;
       }
 
       showSoureInTitle: {
@@ -120,6 +124,12 @@
           if (typeof value !== 'undefined') {
             setOptionToElement(elem, value);
           }
+        }
+
+        // blank the title field and set gIgnoreTitle=false for customization
+        if (gIgnoreTitle) {
+          setOptionToElement(document.getElementById('task_title'), '');
+          gIgnoreTitle = false;
         }
 
         // overwrite tasks_bookId and tasks_parentId with recaptureInfo or mergeCaptureInfo
@@ -291,7 +301,7 @@
   async function onSubmit(event) {
     event.preventDefault();
     const taskInfo = parseTasks();
-    await capture({taskInfo});
+    await capture({taskInfo, ignoreTitle: gIgnoreTitle, uniquify: gUniquify});
     await exit();
   }
 
@@ -312,7 +322,7 @@
       return;
     }
     const taskInfo = parseTasks();
-    await capture({dialog: 'advanced', taskInfo});
+    await capture({dialog: 'advanced', taskInfo, ignoreTitle: gIgnoreTitle, uniquify: gUniquify});
     await exit();
   }
 
