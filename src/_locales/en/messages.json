@@ -65,6 +65,9 @@
   "CaptureDetailsFillDownLinkDocUrlFilterDir": {
     "message": "Same directory"
   },
+  "CaptureDetailsFillDownLinkDocUrlFilterDomain": {
+    "message": "Same domain"
+  },
   "CaptureDetailsFillDownLinkDocUrlFilterOrigin": {
     "message": "Same site"
   },

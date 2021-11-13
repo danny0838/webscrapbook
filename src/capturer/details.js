@@ -351,6 +351,7 @@
 
     try {
       switch (command) {
+        case "domain":
         case "origin":
         case "dir":
         case "path": {
@@ -359,6 +360,11 @@
               const sourceUrl = Number.isInteger(tabId) ? (await browser.webNavigation.getFrame({tabId, frameId})).url : url;
               const u = new URL(sourceUrl);
               switch (command) {
+                case "domain": {
+                  return '/^https?://(?:[0-9A-Za-z-]+\\.)*?' +
+                    scrapbook.escapeRegExp(u.hostname.replace(/^www\./, '')) +
+                    '(?:\\d+)?/' + '/';
+                }
                 case "origin": {
                   u.pathname = u.search = u.hash = '';
                   return '/^' + scrapbook.escapeRegExp(u.href).replace(/\\\//g, '/') + '/';

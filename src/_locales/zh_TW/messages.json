@@ -65,6 +65,9 @@
   "CaptureDetailsFillDownLinkDocUrlFilterDir": {
     "message": "相同目錄"
   },
+  "CaptureDetailsFillDownLinkDocUrlFilterDomain": {
+    "message": "相同網域"
+  },
   "CaptureDetailsFillDownLinkDocUrlFilterOrigin": {
     "message": "相同網站"
   },
