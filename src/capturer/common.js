@@ -1072,6 +1072,8 @@
                     "capture.saveAs": "singleHtml",
                   });
 
+                  sourceUrl = 'about:srcdoc';
+
                   tasks.push(async () => {
                     let frameDoc;
                     try {
@@ -1174,7 +1176,7 @@
                   // frame document accessible:
                   // capture the content document directly
                   if (frameDoc) {
-                    sourceUrl = sourceUrl || frameDoc.URL;
+                    sourceUrl = frameDoc.URL;
                     return capturer.captureDocumentOrFile({
                       doc: frameDoc,
                       refUrl,
@@ -1193,7 +1195,6 @@
                   // frame window accessible:
                   // capture the content document through messaging if viable
                   if (frameWindow) {
-                    sourceUrl = frame.src;
                     const response = await capturer.invoke("captureDocumentOrFile", {
                       refUrl,
                       settings: frameSettings,
@@ -1211,6 +1212,7 @@
                   // if the frame has srcdoc, use it
                   if (frame.nodeName.toLowerCase() === 'iframe' &&
                       frame.hasAttribute("srcdoc")) {
+                    sourceUrl = 'about:srcdoc';
                     // contentType of srcdoc is always text/html
                     const content = frame.getAttribute("srcdoc");
                     const doc = (new DOMParser()).parseFromString(content, 'text/html');
