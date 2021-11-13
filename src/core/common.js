@@ -3369,7 +3369,7 @@ if (Node && !Node.prototype.getRootNode) {
    */
   scrapbook.getSelectedNodes = function ({win = window, range, whatToShow = -1, nodeFilter, fuzzy = false}) {
     const doc = win.document;
-    const result = [];
+    const result = new Set();
     const ranges = range ? [range] : scrapbook.getSelectionRanges(win);
     for (let range of ranges) {
       if (range.collapsed) {
@@ -3409,10 +3409,10 @@ if (Node && !Node.prototype.getRootNode) {
       );
       let node;
       while (node = walker.nextNode()) {
-        result.push(node);
+        result.add(node);
       }
     }
-    return result;
+    return Array.from(result);
   };
 
   scrapbook.getSelectionRanges = function (win = window) {
