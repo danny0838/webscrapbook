@@ -414,6 +414,78 @@
           insertInputText(inputElem, rulesText);
           break;
         }
+        case "include":
+        case "exclude": {
+          const REGEX_PATTERN = /^\/(.*)\/([a-z]*)$/;
+          const REGEX_SPACES = /\s+/;
+          const INCLUSIVE = command === 'include';
+          const PROMPT_MSG = INCLUSIVE ?
+              scrapbook.lang('CaptureDetailsFillDownLinkDocUrlFilterIncludeTooltip') :
+              scrapbook.lang('CaptureDetailsFillDownLinkDocUrlFilterExcludeTooltip');
+
+          // prepare filter
+          let filter;
+          let input;
+          let isRegex;
+          while (true) {
+            input = prompt(PROMPT_MSG, input);
+            if (input === null) {
+              break;
+            }
+            try {
+              if (REGEX_PATTERN.test(input)) {
+                filter = new RegExp(RegExp.$1, RegExp.$2);
+                isRegex = true;
+              } else {
+                filter = new RegExp(scrapbook.escapeRegExp(input));
+                isRegex = false;
+              }
+              break;
+            } catch (ex) {
+              alert(`Error: ${ex.message}`);
+            }
+          }
+          if (!filter) {
+            break;
+          }
+
+          // apply filter
+          const rv = [];
+          for (const line of inputElem.value.split('\n')) {
+            try {
+              if (!line) {
+                throw new Error('empty line');
+              }
+              if (line.startsWith('#')) {
+                throw new Error('commented');
+              }
+              const rule = line.split(REGEX_SPACES)[0];
+              if (!rule) {
+                throw new Error('empty rule');
+              }
+              if (REGEX_PATTERN.test(rule)) {
+                throw new Error('regex rule');
+              }
+              filter.lastIndex = 0;
+              if (filter.test(rule)) {
+                if (INCLUSIVE) {
+                  throw new Error('filter matched');
+                }
+              } else {
+                if (!INCLUSIVE) {
+                  throw new Error('filter unmatched');
+                }
+              }
+              rv.push('# ' + line);
+            } catch (ex) {
+              rv.push(line);
+            }
+          }
+          rv.push(`# -- ${INCLUSIVE ? 'included' : 'excluded'} by ${isRegex ? 'regex' : 'string'}: ${input}`);
+
+          updateInputText(inputElem, rv.join('\n'));
+          break;
+        }
       }
     } finally {
       elem.value = '';

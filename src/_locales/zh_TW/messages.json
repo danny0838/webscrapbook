@@ -68,6 +68,18 @@
   "CaptureDetailsFillDownLinkDocUrlFilterDomain": {
     "message": "相同網域"
   },
+  "CaptureDetailsFillDownLinkDocUrlFilterExclude": {
+    "message": "以排除條件過濾"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterExcludeTooltip": {
+    "message": "輸入字串或正規表示式字串（/表示式/標幟）作為過濾現有網址規則的排除條件，符合條件的會轉換為註解。"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterInclude": {
+    "message": "以列入條件過濾"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterIncludeTooltip": {
+    "message": "輸入字串或正規表示式字串（/表示式/標幟）作為過濾現有網址規則的列入條件，不符合條件的會轉換為註解。"
+  },
   "CaptureDetailsFillDownLinkDocUrlFilterOrigin": {
     "message": "相同網站"
   },

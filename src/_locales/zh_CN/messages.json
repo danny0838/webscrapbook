@@ -68,6 +68,18 @@
   "CaptureDetailsFillDownLinkDocUrlFilterDomain": {
     "message": "相同网域"
   },
+  "CaptureDetailsFillDownLinkDocUrlFilterExclude": {
+    "message": "以排除条件过滤"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterExcludeTooltip": {
+    "message": "输入字串或正则表达式字串（/表达式/标帜）作为过滤现有网址规则的排除条件，匹配条件的会转换为注解。"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterInclude": {
+    "message": "以列入条件过滤"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterIncludeTooltip": {
+    "message": "输入字串或正则表达式字串（/表达式/标帜）作为过滤现有网址规则的列入条件，不匹配条件的会转换为注解。"
+  },
   "CaptureDetailsFillDownLinkDocUrlFilterOrigin": {
     "message": "相同网站"
   },

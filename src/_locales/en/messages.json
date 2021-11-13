@@ -68,6 +68,18 @@
   "CaptureDetailsFillDownLinkDocUrlFilterDomain": {
     "message": "Same domain"
   },
+  "CaptureDetailsFillDownLinkDocUrlFilterExclude": {
+    "message": "Exclude with filter"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterExcludeTooltip": {
+    "message": "Input a string or a regular expression string (/regex/flags) as the exclusion criteria to filter the current URL rules. Matched ones will be commented out."
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterInclude": {
+    "message": "Include with filter"
+  },
+  "CaptureDetailsFillDownLinkDocUrlFilterIncludeTooltip": {
+    "message": "Input a string or a regular expression string (/regex/flags) as the inclusion criteria to filter the current URL rules. Unmatched ones will be commented out."
+  },
   "CaptureDetailsFillDownLinkDocUrlFilterOrigin": {
     "message": "Same site"
   },
