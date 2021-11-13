@@ -3,6 +3,18 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.141.0] - 2021-11-13
+* Fixed an issue that an incorret option value is sometimes get when the options change.
+* Added `delay for capturing linked pages` option for the `capture as` dialog.
+* Added support of single click invocation of the toolbar button when only one command is shown.
+* No more force all resources be data URL when an iframe with a data URL source is saved as srcdoc.
+* Fixed an issue that the srcdoc attribute of a frame element is removed whan `capture.frame` is `blank`.
+* Fixed an issue that the URL of a meta refresh is not correctly resolved when the page has a base element.
+* Fixed incorrect source URL in the log message when there's an error during capturing a frame.
+* The editor toolbar now appears at the top.
+* Sticky notes now appear at the top, except for being under the editor toolbar.
+* Implemented a more accurate server tree change detection algorithm to cover more possible cases.
+
 ## [0.140.0] - 2021-11-11
 * Added modifiers support for toolbar commands.
 * Added multi-tab support for `batch capture selected links` toolbar command.
