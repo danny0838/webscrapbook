@@ -154,7 +154,7 @@ ${sHost} {
   bottom: 0px !important;
   width: 100% !important;
   height: 40px !important;
-  z-index: 2147483645 !important;
+  z-index: 2147483647 !important;
 }
 
 ${sHost} style {
