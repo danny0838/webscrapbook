@@ -605,8 +605,14 @@
                 // rewrite meta refresh
                 const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
                 if (metaRefresh.url) {
-                  // meta refresh is relative to initial base URL
-                  const url = rewriteLocalLink(metaRefresh.url, baseUrlInitial);
+                  // Meta refresh should be resolved using base URL according
+                  // to spec. Note that browsers may not follow the spec:
+                  // - In Chromium 95, a meta refresh element with time = 0
+                  //   before the first <base> element is resolved using the
+                  //   initial base URL.
+                  // - In Firefox, a meta refresh is resolved using the
+                  //   initial base URL.
+                  const url = rewriteLocalLink(metaRefresh.url, baseUrl);
                   captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
 
                   // check downLink

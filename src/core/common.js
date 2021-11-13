@@ -3342,6 +3342,13 @@ if (Node && !Node.prototype.getRootNode) {
       }
     }
     if (typeof lastMetaRefreshUrl !== 'undefined') {
+      for (const baseElem of doc.querySelectorAll('base[href]')) {
+        if (!baseElem.closest('svg, math')) {
+          refUrl = new URL(baseElem.getAttribute('href'), refUrl).href;
+          break;
+        }
+      }
+
       return new URL(lastMetaRefreshUrl, refUrl).href;
     }
   };

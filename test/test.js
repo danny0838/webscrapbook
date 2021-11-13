@@ -9668,29 +9668,30 @@ async function test_capture_metaRefresh2() {
  * capturer.captureDocument
  */
 async function test_capture_metaRefresh3() {
-  var blob = await capture({
-    url: `${localhost}/capture_metaRefresh3/delayed3.html`,
+  // time = 0 (capture the redirected page)
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_metaRefresh3/refresh0.html`,
     options: baseOptions,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector(`html[data-scrapbook-source="${localhost}/capture_metaRefresh3/subdir/target.html?id=123#456"]`));
 
+  // time = 1 (capture the meta refresh page)
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_metaRefresh3/refresh1.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
   var mrs = doc.querySelectorAll('meta[http-equiv="refresh"]');
-  assert(mrs[0].getAttribute('content') === `30`);
-  assert(mrs[1].getAttribute('content') === `30; url=#`);
-  assert(mrs[2].getAttribute('content') === `30; url=#123`);
-  assert(mrs[3].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh3/delayed3.html?id=123`);
-  assert(mrs[4].getAttribute('content') === `30`);
-  assert(mrs[5].getAttribute('content') === `30; url=#`);
-  assert(mrs[6].getAttribute('content') === `30; url=#123`);
-  assert(mrs[7].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh3/delayed3.html?id=123`);
-  assert(mrs[8].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh3/referred.html`);
-  assert(mrs[9].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh3/subdir/referred.html`);
-  assert(mrs[10].getAttribute('content') === `15; url=http://example.com/`);
+  assert(mrs[0].getAttribute('content') === `1; url=${localhost}/capture_metaRefresh3/subdir/target.html?id=123#456`);
 }
 
 /**
