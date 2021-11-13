@@ -2111,7 +2111,7 @@ async function test_capture_frame2() {
 }
 
 /**
- * Check frame capture if srcdoc
+ * Check frame capture for srcdoc
  *
  * capture.frame
  */
@@ -2151,6 +2151,33 @@ async function test_capture_frame3() {
   var imgData = await imgFile.async('base64');
   assert(imgData === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
+  // frame[srcdoc] should be ignored (left unchanged) and its src should be used
+  //
+  // In some browsers (e.g. Chromium 95), the frame loads an empty document when
+  // "srcdoc" attribute exists. We skipped checking the captured document in
+  // detail to prevent inconsistent results.
+  var blob = await capture({
+    url: `${localhost}/capture_frame/srcdoc2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var frame = doc.querySelector('frame');
+  assert(frame.getAttribute('srcdoc').trim() === `\
+<p>srcdoc content</p>
+<img src="frames/red.bmp">
+
+<style>img { width: 60px; }</style>
+<script>
+document.querySelector('p').textContent = 'srcdoc content modified';
+</script>`);
+  assert(frame.getAttribute('src') === `index_1.html`);
+
   /* capture.frame = link */
   // record resolved src and save rewritten srcdoc
   // resources in srcdoc should be saved as data URL
@@ -2178,6 +2205,29 @@ async function test_capture_frame3() {
   assert(srcdoc.querySelector('img').getAttribute('src') === 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
   assert(!zip.file('red.bmp'));
 
+  // frame[srcdoc] should be ignored (left unchanged) and its src should be used
+  var blob = await capture({
+    url: `${localhost}/capture_frame/srcdoc2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var frame = doc.querySelector('frame');
+  assert(frame.getAttribute('srcdoc').trim() === `\
+<p>srcdoc content</p>
+<img src="frames/red.bmp">
+
+<style>img { width: 60px; }</style>
+<script>
+document.querySelector('p').textContent = 'srcdoc content modified';
+</script>`);
+  assert(frame.getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html`);
+
   /* capture.frame = blank */
   // srcdoc should be removed
   options["capture.frame"]  = "blank";
@@ -2197,6 +2247,29 @@ async function test_capture_frame3() {
   var frame = doc.querySelector('iframe');
   assert(!frame.hasAttribute('src'));
   assert(!frame.hasAttribute('srcdoc'));
+
+  // frame[srcdoc] should be ignored (left unchanged)
+  var blob = await capture({
+    url: `${localhost}/capture_frame/srcdoc2.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var frame = doc.querySelector('frame');
+  assert(frame.getAttribute('srcdoc').trim() === `\
+<p>srcdoc content</p>
+<img src="frames/red.bmp">
+
+<style>img { width: 60px; }</style>
+<script>
+document.querySelector('p').textContent = 'srcdoc content modified';
+</script>`);
+  assert(!frame.hasAttribute('src'));
 
   /* capture.frame = remove */
   // same as same origin
@@ -2315,7 +2388,7 @@ async function test_capture_frame_headless() {
 }
 
 /**
- * Check headless frame save if srcdoc
+ * Check headless frame save for srcdoc
  *
  * capture.frame
  */

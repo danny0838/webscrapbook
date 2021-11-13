@@ -1111,7 +1111,9 @@
                 // HTML 5.1 2nd Edition / W3C Recommendation:
                 // The src attribute, if present, must be a valid non-empty URL.
                 captureRewriteAttr(frame, "src", null);
-                captureRewriteAttr(frame, "srcdoc", null);
+                if (frame.nodeName.toLowerCase() === 'iframe') {
+                  captureRewriteAttr(frame, "srcdoc", null);
+                }
                 break;
               }
               case "remove": {
