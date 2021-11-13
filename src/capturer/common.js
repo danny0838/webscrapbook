@@ -142,8 +142,10 @@
    * @kind invokable
    * @param {Object} params
    * @param {Document} params.doc
-   * @param {string} [params.docUrl] - an overriding document URL
-   * @param {string} [params.baseUrl] - an overriding document base URL
+   * @param {string} [params.docUrl] - an overriding document URL (for handling
+   *     document metadata)
+   * @param {string} [params.baseUrl] - an overriding document base URL (for
+   *     resolving resources)
    * @param {string} [params.mime] - an overriding document contentType
    * @param {Object} params.settings
    * @param {string} [params.settings.title] - item title
@@ -573,8 +575,8 @@
           case "base": {
             if (!elem.hasAttribute("href")) { break; }
 
-            // resolve base URL using document URL rather than base URL
-            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), docUrl);
+            // resolve base URL using initial base URL
+            const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), baseUrlInitial);
             captureRewriteAttr(elem, "href", rewriteUrl);
 
             switch (options["capture.base"]) {
@@ -603,8 +605,8 @@
                 // rewrite meta refresh
                 const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
                 if (metaRefresh.url) {
-                  // meta refresh is relative to document URL rather than base URL
-                  const url = rewriteLocalLink(metaRefresh.url, docUrl);
+                  // meta refresh is relative to initial base URL
+                  const url = rewriteLocalLink(metaRefresh.url, baseUrlInitial);
                   captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
 
                   // check downLink
@@ -1087,6 +1089,7 @@
                     if (frameDoc) {
                       return capturer.captureDocumentOrFile({
                         doc: frameDoc,
+                        baseUrl,
                         refUrl,
                         settings: frameSettings,
                         options: frameOptions,
@@ -1179,6 +1182,7 @@
                     sourceUrl = frameDoc.URL;
                     return capturer.captureDocumentOrFile({
                       doc: frameDoc,
+                      baseUrl: sourceUrl.startsWith('about:') ? baseUrl : sourceUrl,
                       refUrl,
                       settings: frameSettings,
                       options,
@@ -2219,28 +2223,19 @@
     // allow overwriting by capture helpers
     let {options} = params;
 
-    // determine docUrl and baseUrl
+    // determine docUrl, baseUrlInitial, and baseUrl
     let {docUrl, baseUrl} = params;
+    docUrl = docUrl || doc.URL;
     let docUrlHash;
-    if (docUrl) {
-      [docUrl, docUrlHash] = scrapbook.splitUrlByAnchor(docUrl);
-    }
-    if (!baseUrl) {
-      if (docUrl) {
-        baseUrl = docUrl;
-        for (const baseElem of doc.querySelectorAll('base[href]')) {
-          if (!baseElem.closest('svg, math')) {
-            baseUrl = new URL(baseElem.getAttribute('href'), docUrl).href;
-            break;
-          }
-        }
-      } else {
-        baseUrl = doc.baseURI;
+    [docUrl, docUrlHash] = scrapbook.splitUrlByAnchor(docUrl);
+
+    const baseUrlInitial = baseUrl = scrapbook.splitUrlByAnchor(baseUrl || docUrl)[0];
+    for (const baseElem of doc.querySelectorAll('base[href]')) {
+      if (!baseElem.closest('svg, math')) {
+        baseUrl = new URL(baseElem.getAttribute('href'), baseUrl).href;
+        baseUrl = scrapbook.splitUrlByAnchor(baseUrl)[0];
+        break;
       }
-      baseUrl = scrapbook.splitUrlByAnchor(baseUrl)[0];
-    }
-    if (!docUrl) {
-      [docUrl, docUrlHash] = scrapbook.splitUrlByAnchor(doc.URL);
     }
 
     // determine mime

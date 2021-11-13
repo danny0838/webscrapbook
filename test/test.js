@@ -2428,6 +2428,17 @@ async function test_capture_frame_headless2() {
   var imgData = await imgFile.async('base64');
   assert(imgData === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
 
+  // meta refresh in the srcdoc should be resolved according to the base URL of the main document
+  var frame = doc.querySelectorAll('iframe')[1];
+  assert(!frame.hasAttribute('srcdoc'));
+  assert(frame.getAttribute('src') === `index_2.html`);
+  var frameFile = zip.file(frame.getAttribute('src'));
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc?sha1=d8574d12e72fddd0ab8d749f1b68c9621cb47ba7"]'));
+  var mrs = frameDoc.querySelectorAll('meta[http-equiv="refresh"]');
+  assert(mrs[0].getAttribute('content') === `0; url=${localhost}/capture_frame/frames/frame1.html`);
+
   // frame[srcdoc] should be ignored (left unchanged) and its src should be used
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/srcdoc2.html`,
@@ -2478,6 +2489,15 @@ document.querySelector('p').textContent = 'srcdoc content modified';
   assert(srcdoc.querySelector('p').textContent.trim() === `srcdoc content`);
   assert(srcdoc.querySelector('img').getAttribute('src') === 'data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
   assert(!zip.file('red.bmp'));
+
+  // meta refresh in the srcdoc should be resolved according to the base URL of the main document
+  var frame = doc.querySelectorAll('iframe')[1];
+  var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
+  var srcdoc = await readFileAsDocument(srcdocBlob);
+
+  assert(srcdoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
+  var mrs = frameDoc.querySelectorAll('meta[http-equiv="refresh"]');
+  assert(mrs[0].getAttribute('content') === `0; url=${localhost}/capture_frame/frames/frame1.html`);
 
   // frame[srcdoc] should be ignored (left unchanged) and its src should be used
   var blob = await captureHeadless({
