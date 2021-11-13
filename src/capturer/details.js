@@ -346,53 +346,66 @@
 
   async function onFillDownLinkDocUrlFilterChange(event) {
     const elem = event.target;
+    const command = elem.value;
     const inputElem = document.getElementById('opt_capture.downLink.doc.urlFilter');
 
-    const tabId = gTaskInfo.tasks[0].tabId;
-    const frameId = gTaskInfo.tasks[0].frameId || 0;
-    const url = gTaskInfo.tasks[0].url;
-
     try {
-      switch (elem.value) {
-        case "origin": {
-          const sourceUrl = Number.isInteger(tabId) ? (await browser.webNavigation.getFrame({tabId, frameId})).url : url;
-          const u = new URL(sourceUrl);
-          u.pathname = u.search = u.hash = '';
-          const linksText = '/^' + scrapbook.escapeRegExp(u.href).replace(/\\\//g, '/') + '/';
-          insertInputText(inputElem, linksText);
-          break;
-        }
-        case "dir": {
-          const sourceUrl = Number.isInteger(tabId) ? (await browser.webNavigation.getFrame({tabId, frameId})).url : url;
-          const u = new URL(sourceUrl);
-          u.search = u.hash = '';
-          let base = u.href, pos;
-          if ((pos = base.lastIndexOf("/")) !== -1) { base = base.slice(0, pos + 1); }
-          const linksText = '/^' + scrapbook.escapeRegExp(base).replace(/\\\//g, '/') + '/';
-          insertInputText(inputElem, linksText);
-          break;
-        }
+      switch (command) {
+        case "origin":
+        case "dir":
         case "path": {
-          const sourceUrl = Number.isInteger(tabId) ? (await browser.webNavigation.getFrame({tabId, frameId})).url : url;
-          const u = new URL(sourceUrl);
-          u.search = u.hash = '';
-          const linksText = '/^' + scrapbook.escapeRegExp(u.href).replace(/\\\//g, '/') + '/';
-          insertInputText(inputElem, linksText);
+          const tasks = gTaskInfo.tasks.map(({tabId, frameId = 0, url}) => (async () => {
+            try {
+              const sourceUrl = Number.isInteger(tabId) ? (await browser.webNavigation.getFrame({tabId, frameId})).url : url;
+              const u = new URL(sourceUrl);
+              switch (command) {
+                case "origin": {
+                  u.pathname = u.search = u.hash = '';
+                  return '/^' + scrapbook.escapeRegExp(u.href).replace(/\\\//g, '/') + '/';
+                }
+                case "dir": {
+                  u.search = u.hash = '';
+                  let base = u.href, pos;
+                  if ((pos = base.lastIndexOf("/")) !== -1) { base = base.slice(0, pos + 1); }
+                  return '/^' + scrapbook.escapeRegExp(base).replace(/\\\//g, '/') + '/';
+                }
+                case "path": {
+                  u.search = u.hash = '';
+                  return '/^' + scrapbook.escapeRegExp(u.href).replace(/\\\//g, '/') + '/';
+                }
+              }
+            } catch (ex) {
+              console.error(ex);
+              return null;
+            }
+          })());
+          const rulesText = (await Promise.all(tasks))
+            .filter(x => x)
+            .join('\n');
+          insertInputText(inputElem, rulesText);
           break;
         }
         case "selectedLinks":
         case "allLinks": {
-          await scrapbook.initContentScripts(tabId, frameId);
-          const links = await scrapbook.invokeContentScript({
-            tabId,
-            frameId,
-            cmd: "capturer.retrieveSelectedLinks",
-            args: {select: elem.value === 'selectedLinks' ? 'selected' : 'all'},
-          });
-          const linksText = links
+          const cmd = "capturer.retrieveSelectedLinks";
+          const args = {select: command === 'selectedLinks' ? 'selected' : 'all'};
+          const tasks = gTaskInfo.tasks.map(({tabId, frameId = 0}) => (async () => {
+            try {
+              if (!Number.isInteger(tabId)) {
+                throw new Error('Missing tabId');
+              }
+              await scrapbook.initContentScripts(tabId, frameId);
+              return await scrapbook.invokeContentScript({tabId, frameId, cmd, args});
+            } catch (ex) {
+              console.error(ex);
+              return [];
+            }
+          })());
+          const rulesText = (await Promise.all(tasks))
+            .reduce((mergedLinks, links) => mergedLinks.concat(links), [])
             .map(x => x.url + ' ' + x.title.replace(/[ \t\r\n\f]+/g, ' ').replace(/^ +/, '').replace(/ +$/, ''))
             .join('\n');
-          insertInputText(inputElem, linksText);
+          insertInputText(inputElem, rulesText);
           break;
         }
       }
