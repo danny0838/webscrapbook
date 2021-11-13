@@ -114,6 +114,9 @@
     "captureTabAs": {
       "description": "__MSG_CaptureTabAs__..."
     },
+    "batchCaptureLinks": {
+      "description": "__MSG_BatchCaptureLinks__..."
+    },
     "editTab": {
       "description": "__MSG_EditTab__"
     }

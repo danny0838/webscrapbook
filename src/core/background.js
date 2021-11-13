@@ -101,6 +101,17 @@
         });
       },
 
+      async batchCaptureLinks() {
+        const tabs = await scrapbook.getHighlightedTabs();
+        return await scrapbook.invokeCaptureBatchLinks({
+          tasks: tabs.map(tab => ({
+            tabId: tab.id,
+            url: tab.url,
+            title: tab.title,
+          })),
+        });
+      },
+
       async editTab() {
         const tab = (await browser.tabs.query({active: true, currentWindow: true}))[0];
         return await scrapbook.editTab({

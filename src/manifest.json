@@ -104,6 +104,9 @@
     "captureTabAs": {
       "description": "__MSG_CaptureTabAs__..."
     },
+    "batchCaptureLinks": {
+      "description": "__MSG_BatchCaptureLinks__..."
+    },
     "editTab": {
       "suggested_key": {
         "default": "Ctrl+Shift+E"
