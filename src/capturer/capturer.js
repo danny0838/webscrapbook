@@ -1551,13 +1551,8 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
           filename,
           sourceUrl,
         });
-        if (typeof downloadItem === 'object') {
-          capturer.log(`Saved to "${downloadItem.filename}"`);
-          filename = scrapbook.filepathParts(downloadItem.filename)[1];
-        } else {
-          // save failed (possibly user cancel)
-          filename = downloadItem;
-        }
+        capturer.log(`Saved to "${downloadItem.filename}"`);
+        filename = scrapbook.filepathParts(downloadItem.filename)[1];
         break;
       }
       case 'server': {
@@ -3150,13 +3145,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             filename,
             sourceUrl,
           });
-          if (typeof downloadItem === 'object') {
-            capturer.log(`Saved to "${downloadItem.filename}"`);
-            filename = scrapbook.filepathParts(downloadItem.filename)[1];
-          } else {
-            // save failed (possibly user cancel)
-            filename = downloadItem;
-          }
+          capturer.log(`Saved to "${downloadItem.filename}"`);
+          filename = scrapbook.filepathParts(downloadItem.filename)[1];
           break;
         }
         case 'server': {
@@ -3640,8 +3630,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {Blob} params.blob
    * @param {string} params.filename
    * @param {string} params.sourceUrl
-   * @return {Promise<DownloadItem|string>} DownloadItem for the saved blob,
-   *     or filename if error.
+   * @return {Promise<DownloadItem>} DownloadItem for the saved blob.
    */
   capturer.saveBlobNaturally = async function (params) {
     const {timeId, blob, filename, sourceUrl} = params;
@@ -3696,10 +3685,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       elem.textContent = `If the download doesn't start, click me.`;
       capturer.log(elem);
       elem.click();
-    }).catch((ex) => {
-      // probably USER_CANCELLED
-      // treat as capture success and return the filename
-      return filename;
     });
   };
 
