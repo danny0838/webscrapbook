@@ -1918,13 +1918,14 @@ ${scrapbook.escapeHtml(content)}
       },
 
       async source({itemElems, modifiers}) {
-        const newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarSourceInNewTab");
+        let newTab = modifiers.shiftKey || modifiers.ctrlKey || scrapbook.getOption("scrapbook.sidebarSourceInNewTab");
         for (const elem of itemElems) {
           const id = elem.getAttribute('data-id');
           const item = this.book.meta[id];
           if (item.source) {
             const target = item.source;
             await this.openLink(target, newTab);
+            if (!newTab) { newTab = true; }
           }
         }
       },
