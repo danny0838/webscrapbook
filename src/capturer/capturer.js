@@ -3646,12 +3646,12 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         onError: reject,
       });
 
-      if (scrapbook.userAgent.is('gecko')) {
-        // Firefox has a bug that the screen turns unresponsive
-        // when an addon page is redirected to a blob URL.
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
-        //
-        // Workaround by creating the anchor in an iframe.
+      // Firefox < 59 has a bug that the window may turn unresponsive when an
+      // addon page is redirected to a blob URL.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
+      //
+      // Workaround by clicking an anchor in a hidden iframe.
+      if (scrapbook.userAgent.is('gecko') && scrapbook.userAgent.major < 59) {
         const iDoc = this.downloader.contentDocument;
         const a = iDoc.createElement('a');
         a.download = filename;
@@ -3661,7 +3661,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         a.remove();
 
         // In case the download still fails.
-        const file = new File([blob], filename, {type: "application/octet-stream"});
+        const file = new File([blob], filename, {type: blob.type});
         const url2 = URL.createObjectURL(file);
 
         capturer.downloadHooks.set(url2, {
@@ -3672,7 +3672,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         });
 
         const elem = document.createElement('a');
-        elem.target = 'download';
+        elem.target = 'download'; // open a new tab to workaround the bug
         elem.href = url2;
         elem.textContent = `If the download doesn't start, click me.`;
         capturer.log(elem);
