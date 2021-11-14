@@ -3259,10 +3259,13 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               // show message for individual saving error
               console.error(ex);
               capturer.error(scrapbook.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
-              return {filename: targetDir + "/" + path};
+              return {filename: targetDir + "/" + path, error: {message: ex.message}};
             });
           }));
           const downloadItem = downloadItems.pop();
+          if (downloadItem.error) {
+            throw new Error(`Unable to save index.html`);
+          }
           capturer.log(`Saved to "${downloadItem.filename}"`);
           filename = scrapbook.filepathParts(downloadItem.filename)[1];
           break;
