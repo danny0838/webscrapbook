@@ -206,7 +206,7 @@ if (Node && !Node.prototype.getRootNode) {
         const rv = {ext: [], mime: []};
         const lines = source.split(REGEX_LINEFEED);
         for (let i = 0, I = lines.length; i < I; i++) {
-          let line = lines[i].trim();
+          let line = lines[i];
           if (!line || line.startsWith("#")) { continue; }
 
           if (line.startsWith(PREFIX_MIME)) {
@@ -252,10 +252,12 @@ if (Node && !Node.prototype.getRootNode) {
         const rv = [];
         const lines = source.split(REGEX_LINEFEED);
         for (let i = 0, I = lines.length; i < I; i++) {
-          const line = lines[i].trim();
+          const line = lines[i];
           if (!line || line.startsWith("#")) { continue; }
 
           let rule = line.split(REGEX_SPACES)[0];
+          if (!rule) { continue; }
+
           if (REGEX_PATTERN.test(rule)) {
             try {
               rv.push(new RegExp(RegExp.$1, RegExp.$2));
@@ -278,10 +280,12 @@ if (Node && !Node.prototype.getRootNode) {
         const rv = [];
         const lines = source.split(REGEX_LINEFEED);
         for (let i = 0, I = lines.length; i < I; i++) {
-          const line = lines[i].trim();
+          const line = lines[i];
           if (!line || line.startsWith("#")) { continue; }
 
           let rule = line.split(REGEX_SPACES)[0];
+          if (!rule) { continue; }
+
           rule = scrapbook.splitUrlByAnchor(rule)[0];
           rv.push(rule);
         }
