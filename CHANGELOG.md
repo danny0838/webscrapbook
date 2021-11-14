@@ -3,12 +3,21 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.142.0] - 2021-11-14
+* Fixed an issue that a line of a rule for downloading links that is prefixed with spaces is not treated as a comment.
+* No more take the link text as title (but available in the dropdown) when capturing a link for `Capture as` dialog.
+* Allow the rule filler for in-depth capture be used for a capture with multiple tasks.
+* Added `Same domain`, `Include with filter`, and `Exclude with filter` rule helpers for `Capture as` dialog.
+* Fixed an issue that links covered by multiple selection ranges are duplicately included in a batch capture dialog.
+* Fixed an issue that a failure to save the index file when saving as folder is not treated as a capture failure.
+* Fixed an issue that a failure to save the file when saving as file is not treated as a capture failure.
+
 ## [0.141.0] - 2021-11-13
 * Fixed an issue that an incorret option value is sometimes get when the options change.
-* Added `delay for capturing linked pages` option for the `capture as` dialog.
+* Added `Delay for capturing linked pages` option for the `Capture as` dialog.
 * Added support of single click invocation of the toolbar button when only one command is shown.
 * No more force all resources be data URL when an iframe with a data URL source is saved as srcdoc.
-* Fixed an issue that the srcdoc attribute of a frame element is removed whan `capture.frame` is `blank`.
+* Fixed an issue that the srcdoc attribute of a frame element is removed whan `Frames` option is `Blank`.
 * Fixed an issue that the URL of a meta refresh is not correctly resolved when the page has a base element.
 * Fixed incorrect source URL in the log message when there's an error during capturing a frame.
 * The editor toolbar now appears at the top.
@@ -17,8 +26,8 @@
 
 ## [0.140.0] - 2021-11-11
 * Added modifiers support for toolbar commands.
-* Added multi-tab support for `batch capture selected links` toolbar command.
-* Added drag-and-drop support for `batch capture all tabs` and `batch capture selected links` toolbar commands.
+* Added multi-tab support for `Batch capture selected links` toolbar command.
+* Added drag-and-drop support for `Batch capture all tabs` and `Batch capture selected links` toolbar commands.
 * Fixed an issue that sidebar fails to reload when data changes rapidly within a second.
 * Fixed a siderbar styling issue for older Firefox.
 
@@ -53,9 +62,9 @@
 * Fixed an issue that a reloaded iframe has inconsistent editor status with the main frame.
 
 ## [0.133.0] - 2021-10-31
-* A linked web page is no more downloaded as a resource file if `depth to capture linked pages` is set.
+* A linked web page is no more downloaded as a resource file if `Depth to capture linked pages` is set.
 * A linked attachment web page is now correctly treated as a resource file.
-* Added `extra URLs` option for the capture dialog.
+* Added `Extra URLs` option for the capture dialog.
 * Fixed an issue that size limit does not work for a linked page with depth 1.
 * Fixed an issue of capturing unexpected linked pages in a frame whose source is data protocol.
 * Fixed an issue that a link in an extension tab cannot be opened in some browsers.
@@ -290,7 +299,7 @@
 * Changed internal identifier for some capture links (download linked files) related options.
 
 ## [0.89.0] - 2020-10-31
-* Added `copy` command to sidebar.
+* Added `Copy` command to sidebar.
 * Added support for cross-scrapbook drag-and-drop.
 * The descendant items are now automatically deselected when an item is toggled collapsed.
 * Fixed an issue that the sidebar is unlocked when a dialog is dismissed, even though the command is still running.
@@ -301,17 +310,17 @@
 
 ## [0.87.0] - 2020-10-27
 * Bumped server requirement to >= 0.29.
-* Added `sort` command to sidebar.
-* Added `capture again` command to sidebar.
+* Added `Sort` command to sidebar.
+* Added `Capture again` command to sidebar.
 
 ## [0.86.0] - 2020-10-26
 * Fixed styling error for `site` and `combine` types.
 
 ## [0.85.0] - 2020-10-25
-* Added options `notify captured pages` and `view captured pages`.
+* Added an option `Show hint when browsing a page having been captured` and a toolbar command `View captured pages`.
 
 ## [0.84.0] - 2020-10-22
-* Reworked `batch capture` as `batch capture all tabs`, and remove `capture all tabs`.
+* Reworked `Batch capture` as `Batch capture all tabs`, and remove `Capture all tabs`.
 * Fixed an issue that backup files are generated for auto fulltext cache.
 
 ## [0.83.0] - 2020-10-19
@@ -328,8 +337,8 @@
   * Improved error reporting.
 * Improved sidebar and manage dialog:
   * Adjusted command button to show scrapbook-related commands rather than echo the context menu.
-  * Added `search within` command.
-  * Added `recover` command for recycling bin.
+  * Added `Search within` command to sidebar.
+  * Added `Recover` command for a recycle bin to sidebar.
 
 ## [0.81.0] - 2020-10-14
 * Reworked editor toolbar:
@@ -389,7 +398,7 @@
 * Added a capture option to limit resource size to download.
 
 ## [0.52.0] - 2019-09-15
-* Dropped support of `scripted single html` format for a page capture.
+* Dropped support of `Scripted single HTML` format for a page capture.
 
 ## [0.51.0] - 2019-09-13
 * Added support to capture shadowRoot content.

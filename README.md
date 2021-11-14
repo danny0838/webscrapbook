@@ -2,6 +2,10 @@
 
 ![Screenshot](doc/screenshots/main-001.png)
 
-For further information and frequently asked questions, visit the [documentation wiki](https://github.com/danny0838/webscrapbook/wiki/Intro).
+This extension is available for Chromium-based browsers and Firefox-based browsers, and can be installed from the corresponding web store:
 
-This extension is available for Chromium-based browsers ([Google Chrome](https://chrome.google.com/webstore/detail/web-scrapbook/oegnpmiddfljlloiklpkeelagaeejfai), [Edge](https://microsoftedge.microsoft.com/addons/detail/lodlipoddpmffbngkadebncbbidnambc), Opera, Vivaldi, etc.), and [Firefox for Desktop and Android](https://addons.mozilla.org/firefox/addon/webscrapbook).
+* Known supported Chromium-based browsers: [Google Chrome](https://chrome.google.com/webstore/detail/web-scrapbook/oegnpmiddfljlloiklpkeelagaeejfai), [Microsoft Edge](https://microsoftedge.microsoft.com/addons/detail/lodlipoddpmffbngkadebncbbidnambc), Chromium, Opera, Vivaldi, Brave. Mobile: Kiwi.
+
+* Known supported Firefox-based browsers: [Firefox](https://addons.mozilla.org/firefox/addon/webscrapbook), Waterfox, Tor Browser. Mobile: Firefox for Android.
+
+For installation and usage guide, frequently asked questions, and further details, visit the [documentation wiki](https://github.com/danny0838/webscrapbook/wiki/Intro).
