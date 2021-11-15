@@ -1690,6 +1690,11 @@
               captureRewriteAttr(elem, "src", rewriteUrl);
             }
 
+            if (elem.hasAttribute("pluginspage")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("pluginspage"), refUrl);
+              captureRewriteAttr(elem, "pluginspage", rewriteUrl);
+            }
+
             switch (options["capture.embed"]) {
               case "link":
                 // do nothing
@@ -1772,8 +1777,25 @@
 
           // media: object
           case "object": {
+            let objectBaseUrl = refUrl;
+
+            // Some browsers ignore the codebase attribute (e.g. Chromium).
+            // We follow it anyway.
+            if (elem.hasAttribute("codebase")) {
+              objectBaseUrl = capturer.resolveRelativeUrl(elem.getAttribute("codebase"), objectBaseUrl);
+              captureRewriteAttr(elem, "codebase", null);
+            }
+
+            // According to doc, classid is resolved using codebase, although
+            // it's usually an absolute non-http URI.
+            // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/object
+            if (elem.hasAttribute("classid")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("classid"), objectBaseUrl);
+              captureRewriteAttr(elem, "classid", rewriteUrl);
+            }
+
             if (elem.hasAttribute("data")) {
-              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("data"), refUrl);
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("data"), objectBaseUrl);
               captureRewriteAttr(elem, "data", rewriteUrl);
             }
 
@@ -1859,13 +1881,27 @@
 
           // media: applet
           case "applet": {
+            let appletBaseUrl = refUrl;
+
+            if (elem.hasAttribute("codebase")) {
+              appletBaseUrl = capturer.resolveRelativeUrl(elem.getAttribute("codebase"), appletBaseUrl);
+              captureRewriteAttr(elem, "codebase", null);
+            }
+
+            // According to doc, classid is used by applet.
+            // http://help.dottoro.com/lhbvlpge.php
+            if (elem.hasAttribute("classid")) {
+              const rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("classid"), appletBaseUrl);
+              captureRewriteAttr(elem, "classid", rewriteUrl);
+            }
+
             if (elem.hasAttribute("code")) {
-              let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("code"), refUrl);
+              let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("code"), appletBaseUrl);
               captureRewriteAttr(elem, "code", rewriteUrl);
             }
 
             if (elem.hasAttribute("archive")) {
-              let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("archive"), refUrl);
+              let rewriteUrl = capturer.resolveRelativeUrl(elem.getAttribute("archive"), appletBaseUrl);
               captureRewriteAttr(elem, "archive", rewriteUrl);
             }
 

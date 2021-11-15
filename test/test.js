@@ -6529,6 +6529,8 @@ async function test_capture_object() {
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['demo.svg']);
   assert(zip.files['green.bmp']);
+  assert(zip.files['demo2.svg']);
+  assert(zip.files['green2.bmp']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6536,6 +6538,10 @@ async function test_capture_object() {
   var objects = doc.querySelectorAll('object');
   assert(objects[0].getAttribute('data') === `demo.svg`);
   assert(objects[1].getAttribute('data') === `green.bmp`);
+  assert(objects[2].getAttribute('data') === `demo2.svg`);
+  assert(!objects[2].hasAttribute('codebase'));
+  assert(objects[3].getAttribute('data') === `green2.bmp`);
+  assert(!objects[3].hasAttribute('codebase'));
 
   /* capture.object = link */
   options["capture.object"] = "link";
@@ -6553,6 +6559,10 @@ async function test_capture_object() {
   var objects = doc.querySelectorAll('object');
   assert(objects[0].getAttribute('data') === `${localhost}/capture_object/demo.svg`);
   assert(objects[1].getAttribute('data') === `${localhost}/capture_object/green.bmp`);
+  assert(objects[2].getAttribute('data') === `${localhost}/capture_object/resources/demo2.svg`);
+  assert(!objects[2].hasAttribute('codebase'));
+  assert(objects[3].getAttribute('data') === `${localhost}/capture_object/resources/green2.bmp`);
+  assert(!objects[3].hasAttribute('codebase'));
 
   /* capture.object = blank */
   options["capture.object"] = "blank";
@@ -6570,6 +6580,10 @@ async function test_capture_object() {
   var objects = doc.querySelectorAll('object');
   assert(!objects[0].hasAttribute('data'));
   assert(!objects[1].hasAttribute('data'));
+  assert(!objects[2].hasAttribute('data'));
+  assert(!objects[2].hasAttribute('codebase'));
+  assert(!objects[3].hasAttribute('data'));
+  assert(!objects[3].hasAttribute('codebase'));
 
   /* capture.object = remove */
   options["capture.object"] = "remove";
@@ -6746,13 +6760,18 @@ async function test_capture_applet() {
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['applet.class']);
   assert(zip.files['applet.jar']);
+  assert(zip.files['applet2.class']);
+  assert(zip.files['applet2.jar']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var applet = doc.querySelector('applet');
-  assert(applet.getAttribute('code') === `applet.class`);
-  assert(applet.getAttribute('archive') === `applet.jar`);
+  var applets = doc.querySelectorAll('applet');
+  assert(applets[0].getAttribute('code') === `applet.class`);
+  assert(applets[0].getAttribute('archive') === `applet.jar`);
+  assert(applets[1].getAttribute('code') === `applet2.class`);
+  assert(applets[1].getAttribute('archive') === `applet2.jar`);
+  assert(!applets[1].hasAttribute('codebase'));
 
   /* capture.applet = link */
   var options = {
@@ -6769,9 +6788,12 @@ async function test_capture_applet() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var applet = doc.querySelector('applet');
-  assert(applet.getAttribute('code') === `${localhost}/capture_applet/applet.class`);
-  assert(applet.getAttribute('archive') === `${localhost}/capture_applet/applet.jar`);
+  var applets = doc.querySelectorAll('applet');
+  assert(applets[0].getAttribute('code') === `${localhost}/capture_applet/applet.class`);
+  assert(applets[0].getAttribute('archive') === `${localhost}/capture_applet/applet.jar`);
+  assert(applets[1].getAttribute('code') === `${localhost}/capture_applet/resources/applet2.class`);
+  assert(applets[1].getAttribute('archive') === `${localhost}/capture_applet/resources/applet2.jar`);
+  assert(!applets[1].hasAttribute('codebase'));
 
   /* capture.applet = blank */
   var options = {
@@ -6788,9 +6810,12 @@ async function test_capture_applet() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var applet = doc.querySelector('applet');
-  assert(!applet.hasAttribute('code'));
-  assert(!applet.hasAttribute('archive'));
+  var applets = doc.querySelectorAll('applet');
+  assert(!applets[0].hasAttribute('code'));
+  assert(!applets[0].hasAttribute('archive'));
+  assert(!applets[1].hasAttribute('code'));
+  assert(!applets[1].hasAttribute('archive'));
+  assert(!applets[1].hasAttribute('codebase'));
 
   /* capture.applet = remove */
   var options = {
@@ -6807,9 +6832,7 @@ async function test_capture_applet() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  var applet = doc.querySelector('applet');
-  assert(!applet);
-  assert(!applet);
+  assert(!doc.querySelector('applet'));
 }
 
 /**
