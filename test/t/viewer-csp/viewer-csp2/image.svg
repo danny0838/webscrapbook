@@ -2,12 +2,9 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
     "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 467 462">
-  <!-- This is the red square: -->
-  <rect x="80" y="60" width="250" height="250" rx="20" fill="red"
+  <!-- rounded red square -->
+  <rect x="60" y="60" width="250" height="250" rx="20" fill="red"
          stroke="black" stroke-width="2px" />
-  <!-- This is the blue square: -->
-  <rect x="140" y="120" width="250" height="250" rx="40" fill="blue"
-         stroke="black" stroke-width="2px" fill-opacity="0.7" />
-  <rect x="180" y="160" width="250" height="250" rx="40" fill="blue"
-         stroke="green" stroke-width="2px" fill-opacity="0.7" />
+  <!-- green square -->
+  <image id="img1" href="green.bmp" x="100" y="100" width="250" height="250"/>
 </svg>

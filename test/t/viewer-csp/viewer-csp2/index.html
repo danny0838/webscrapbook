@@ -4,12 +4,35 @@
 <meta charset="UTF-8">
 </head>
 <body style="background: #aaa;">
+<h3>frame.html</h3>
 <p>
 <iframe src="frame.html" width="300" height="300"></iframe>
+<embed src="frame.html" width="300" height="300"></embed>
+<object data="frame.html" width="300" height="300"></object>
+</p>
+
+<h3>frame.html (external)</h3>
+<p>
+<iframe src="http://localhost{port}/viewer-csp/viewer-csp2/frame.html" width="300" height="300"></iframe>
+<embed src="http://localhost{port}/viewer-csp/viewer-csp2/frame.html" width="300" height="300"></embed>
+<object data="http://localhost{port}/viewer-csp/viewer-csp2/frame.html" width="300" height="300"></object>
+</p>
+
+<h3>image.svg</h3>
+<p>
+<iframe src="image.svg" width="300" height="300"></iframe>
 <embed src="image.svg" width="300" height="300"></embed>
 <object data="image.svg" width="300" height="300"></object>
 </p>
 
+<h3>image.svg (external)</h3>
+<p>
+<iframe src="http://localhost{port}/viewer-csp/viewer-csp2/image.svg" width="300" height="300"></iframe>
+<embed src="http://localhost{port}/viewer-csp/viewer-csp2/image.svg" width="300" height="300"></embed>
+<object data="http://localhost{port}/viewer-csp/viewer-csp2/image.svg" width="300" height="300"></object>
+</p>
+
+<h3>helloworld.swf | DynamicTreeDemo.jar</h3>
 <p>
 <embed src="helloworld.swf" width="300" height="300"></embed>
 <object data="helloworld.swf" width="300" height="300"></object>
@@ -18,12 +41,7 @@
 </applet>
 </p>
 
-<p>
-<iframe src="http://localhost{port}/viewer-csp/viewer-csp2/frame.html" width="300" height="300"></iframe>
-<embed src="http://localhost{port}/viewer-csp/viewer-csp2/image.svg" width="300" height="300"></embed>
-<object data="http://localhost{port}/viewer-csp/viewer-csp2/image.svg" width="300" height="300"></object>
-</p>
-
+<h3>helloworld.swf | DynamicTreeDemo.jar (external)</h3>
 <p>
 <embed src="http://localhost{port}/viewer-csp/viewer-csp2/helloworld.swf" width="300" height="300"></embed>
 <object data="http://localhost{port}/viewer-csp/viewer-csp2/helloworld.swf" width="300" height="300"></object>
