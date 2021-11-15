@@ -19,10 +19,10 @@
     outline: dotted 1px blue;
   }
   </style>
-  <a href="../same-origin.html">
+  <a href="../cross-origin.py">
     <circle cx="50" cy="40" r="35"></circle>
   </a>
-  <a xlink:href="../same-origin.html">
+  <a xlink:href="../cross-origin.py">
     <text x="50" y="90" text-anchor="middle">
       &lt;circle&gt;
     </text>

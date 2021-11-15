@@ -6498,7 +6498,7 @@ async function test_capture_object2() {
   var frameFile = zip.file(frame.getAttribute('data'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_frame/same-origin.html`);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_object2/cross-origin.py`);
 
   // text.txt
   var frame = frames[3];
