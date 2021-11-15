@@ -6300,7 +6300,7 @@ async function test_capture_embed() {
     "capture.embed": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_object/embed.html`,
+    url: `${localhost}/capture_embed/embed.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6318,7 +6318,7 @@ async function test_capture_embed() {
     "capture.embed": "link",
   };
   var blob = await capture({
-    url: `${localhost}/capture_object/embed.html`,
+    url: `${localhost}/capture_embed/embed.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6329,14 +6329,14 @@ async function test_capture_embed() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var embed = doc.querySelector('embed');
-  assert(embed.getAttribute('src') === `${localhost}/capture_object/helloworld.swf`);
+  assert(embed.getAttribute('src') === `${localhost}/capture_embed/helloworld.swf`);
 
   /* capture.embed = blank */
   var options = {
     "capture.embed": "blank",
   };
   var blob = await capture({
-    url: `${localhost}/capture_object/embed.html`,
+    url: `${localhost}/capture_embed/embed.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6354,7 +6354,7 @@ async function test_capture_embed() {
     "capture.embed": "remove",
   };
   var blob = await capture({
-    url: `${localhost}/capture_object/embed.html`,
+    url: `${localhost}/capture_embed/embed.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6598,7 +6598,7 @@ async function test_capture_applet() {
     "capture.applet": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_object/applet.html`,
+    url: `${localhost}/capture_applet/applet.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6618,7 +6618,7 @@ async function test_capture_applet() {
     "capture.applet": "link",
   };
   var blob = await capture({
-    url: `${localhost}/capture_object/applet.html`,
+    url: `${localhost}/capture_applet/applet.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6629,15 +6629,15 @@ async function test_capture_applet() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var applet = doc.querySelector('applet');
-  assert(applet.getAttribute('code') === `${localhost}/capture_object/applet.class`);
-  assert(applet.getAttribute('archive') === `${localhost}/capture_object/applet.jar`);
+  assert(applet.getAttribute('code') === `${localhost}/capture_applet/applet.class`);
+  assert(applet.getAttribute('archive') === `${localhost}/capture_applet/applet.jar`);
 
   /* capture.applet = blank */
   var options = {
     "capture.applet": "blank",
   };
   var blob = await capture({
-    url: `${localhost}/capture_object/applet.html`,
+    url: `${localhost}/capture_applet/applet.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6656,7 +6656,7 @@ async function test_capture_applet() {
     "capture.applet": "remove",
   };
   var blob = await capture({
-    url: `${localhost}/capture_object/applet.html`,
+    url: `${localhost}/capture_applet/applet.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
