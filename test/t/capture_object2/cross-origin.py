@@ -14,9 +14,9 @@ sys.stdout.buffer.write("""Content-Type: text/html
 <title>Test Capture Frame</title>
 </head>
 <body>
-<object data="//localhost{port}/capture_object2/frames/frame1.html"></object>
-<object data="//localhost{port}/capture_object2/frames/frame2.xhtml"></object>
-<object data="//localhost{port}/capture_object2/frames/frame3.svg"></object>
-<object data="//localhost{port}/capture_object2/frames/frame4.txt"></object>
+<object data="//localhost{port}/capture_object2/frames/frame1.html" width="200" height="200">frame1.html</object>
+<object data="//localhost{port}/capture_object2/frames/frame2.xhtml" width="200" height="200">frame2.xhtml</object>
+<object data="//localhost{port}/capture_object2/frames/frame3.svg" width="200" height="200">frame3.svg</object>
+<object data="//localhost{port}/capture_object2/frames/frame4.txt" width="200" height="200">frame4.txt</object>
 </body>
 </html>""".format(port=port).encode("UTF-8"))
