@@ -228,8 +228,8 @@
       };
 
       const loadLinksRecursively = (rootNode, frameItems, anchorItems) => {
-        for (const elem of rootNode.querySelectorAll('frame[src], iframe[src], object[data]')) {
-          const type = elem.nodeName.toLowerCase() === 'object' ? 'object' : 'frame';
+        for (const elem of rootNode.querySelectorAll('frame[src], iframe[src], embed[src], object[data]')) {
+          const type = elem.nodeName.toLowerCase();
           const urlProp = type === 'object' ? 'data' : 'src';
           const url = elem.getAttribute(urlProp);
           if (!checkInterlinkingUrl(url)) { continue; }

@@ -6,11 +6,11 @@ ul {
   padding-__MSG_@@bidi_start_edge__: 20px;
 }
 
-a.frame {
+a.frame, a.iframe {
   color: gray;
 }
 
-a.object {
+a.embed, a.object {
   color: darkgray;
 }
 
