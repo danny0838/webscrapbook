@@ -124,11 +124,12 @@
         if (scrapbook.isUrlAbsolute(url)) {
           return false;
         }
-        if (url.startsWith('/')
-          || url.startsWith('./')
-          || url.startsWith('../')
-          || url.includes('?')
-          || url.startsWith('#')
+        const [urlMain, urlHash] = scrapbook.splitUrlByAnchor(url);
+        if (urlMain.startsWith('/')
+          || urlMain.startsWith('./')
+          || urlMain.startsWith('../')
+          || urlMain.includes('?')
+          || !urlMain
         ) {
           return false;
         }
