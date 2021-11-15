@@ -6517,6 +6517,7 @@ async function test_capture_embed_circular() {
 async function test_capture_object() {
   var options = {
     "capture.frameRename": false,
+    "capture.saveResourcesSequentially": true,
   };
 
   /* capture.object = save */
@@ -6531,6 +6532,7 @@ async function test_capture_object() {
   assert(zip.files['green.bmp']);
   assert(zip.files['demo2.svg']);
   assert(zip.files['green2.bmp']);
+  assert(zip.files['demo-1.svg']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6542,6 +6544,7 @@ async function test_capture_object() {
   assert(!objects[2].hasAttribute('codebase'));
   assert(objects[3].getAttribute('data') === `green2.bmp`);
   assert(!objects[3].hasAttribute('codebase'));
+  assert(objects[4].getAttribute('archive') === `demo-1.svg green.bmp`);
 
   /* capture.object = link */
   options["capture.object"] = "link";
@@ -6563,6 +6566,7 @@ async function test_capture_object() {
   assert(!objects[2].hasAttribute('codebase'));
   assert(objects[3].getAttribute('data') === `${localhost}/capture_object/resources/green2.bmp`);
   assert(!objects[3].hasAttribute('codebase'));
+  assert(objects[4].getAttribute('archive') === `${localhost}/capture_object/demo.svg ${localhost}/capture_object/green.bmp`);
 
   /* capture.object = blank */
   options["capture.object"] = "blank";
@@ -6584,6 +6588,7 @@ async function test_capture_object() {
   assert(!objects[2].hasAttribute('codebase'));
   assert(!objects[3].hasAttribute('data'));
   assert(!objects[3].hasAttribute('codebase'));
+  assert(!objects[4].hasAttribute('archive'));
 
   /* capture.object = remove */
   options["capture.object"] = "remove";
