@@ -6500,12 +6500,15 @@ async function test_capture_object2() {
   var frameDoc = await readFileAsDocument(frameBlob);
   assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_object2/cross-origin.py`);
 
-  // text.txt
+  // frame4.txt
   var frame = frames[3];
-  assert(frame.getAttribute('data') === 'text.txt');
+  assert(frame.getAttribute('data') === 'frame4.txt');
   var frameFile = zip.file(frame.getAttribute('data'));
   var text = (await readFileAsText(await frameFile.async('blob'))).trim();
-  assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
+  assert(text === `<!DOCTYPE>
+<style>img { width: 60px; }</style>
+<p>Frame page content.</p>
+<img src="./red.bmp">`);
 }
 
 /**

@@ -17,6 +17,6 @@ sys.stdout.buffer.write("""Content-Type: text/html
 <object data="//localhost{port}/capture_object2/frames/frame1.html"></object>
 <object data="//localhost{port}/capture_object2/frames/frame2.xhtml"></object>
 <object data="//localhost{port}/capture_object2/frames/frame3.svg"></object>
-<object data="//localhost{port}/capture_object2/frames/text.txt"></object>
+<object data="//localhost{port}/capture_object2/frames/frame4.txt"></object>
 </body>
 </html>""".format(port=port).encode("UTF-8"))
