@@ -6369,6 +6369,147 @@ async function test_capture_embed() {
 }
 
 /**
+ * Headlessly capture embed content like a frame.
+ *
+ * capture.embed
+ */
+async function test_capture_embed2() {
+  var options = {
+    "capture.saveResourcesSequentially": true,
+    "capture.embed": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_embed2/cross-origin.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var frames = doc.querySelectorAll('embed');
+
+  // frame1.html
+  var frame = frames[0];
+  assert(frame.getAttribute('src') === `index_1.html`);
+  var frameFile = zip.file(frame.getAttribute('src'));
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content`);
+  assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
+
+  var imgFile = zip.file('red.bmp');
+  assert(imgFile);
+  var imgData = await imgFile.async('base64');
+  assert(imgData === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA');
+
+  // frame2.xhtml
+  var frame = frames[1];
+  assert(frame.getAttribute('src') === `index_2.xhtml`);
+  var frameFile = zip.file(frame.getAttribute('src'));
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "application/xhtml+xml"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content`);
+  assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
+
+  // frame3.svg
+  var frame = frames[2];
+  assert(frame.getAttribute('src') === `index_3.svg`);
+  var frameFile = zip.file(frame.getAttribute('src'));
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_embed2/cross-origin.py`);
+
+  // frame4.txt
+  var frame = frames[3];
+  assert(frame.getAttribute('src') === 'frame4.txt');
+  var frameFile = zip.file(frame.getAttribute('src'));
+  var text = (await readFileAsText(await frameFile.async('blob'))).trim();
+  assert(text === `<!DOCTYPE>
+<style>img { width: 60px; }</style>
+<p>Frame page content.</p>
+<img src="./red.bmp">`);
+}
+
+/**
+ * Check if circular embed referencing is handled correctly like a frame.
+ *
+ * capture.embed
+ */
+async function test_capture_embed_circular() {
+  /* capture.saveAs = zip */
+  // link to corresponding downloaded frame file
+  var options = {
+    "capture.embed": "save",
+    "capture.saveAs": "zip",
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_embed_circular/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  // frame1.html
+  var frame = doc.querySelector('embed');
+  var frameSrc = frame.getAttribute('src');
+  assert(frameSrc === 'index_1.html');
+  var frameFile = zip.file(frameSrc);
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+
+  // frame2.html
+  var frame = frameDoc.querySelector('embed');
+  var frameSrc = frame.getAttribute('src');
+  assert(frameSrc === 'index_2.html');
+  var frameFile = zip.file(frameSrc);
+  var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
+  var frameDoc = await readFileAsDocument(frameBlob);
+
+  // index.html
+  var frame = frameDoc.querySelector('embed');
+  var frameSrc = frame.getAttribute('src');
+  assert(frameSrc === 'index.html');
+
+  /* capture.saveAs = singleHtml */
+  // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
+  var options = {
+    "capture.embed": "save",
+    "capture.saveAs": "singleHtml",
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_embed_circular/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var doc = await readFileAsDocument(blob);
+
+  // frame1.html
+  var frame = doc.querySelector('embed');
+  var frameSrc = frame.getAttribute('src');
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+
+  // frame2.html
+  var frame = frameDoc.querySelector('embed');
+  var frameSrc = frame.getAttribute('src');
+  var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
+
+  // index.html
+  var frame = frameDoc.querySelector('embed');
+  assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_embed_circular/index.html`);
+}
+
+/**
  * Check if option works
  *
  * capture.object
