@@ -1097,28 +1097,32 @@
   }) {
     capturer.log(`Launching remote tab ...`);
 
-    const tab = await browser.tabs.create({
-      url,
-      active: false,
-    });
+    const tab = await browser.tabs.create({url, active: false});
 
     // wait until tab loading complete
-    await new Promise((resolve, reject) => {
+    {
       const listener = (tabId, changeInfo, t) => {
         if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-        browser.tabs.onUpdated.removeListener(listener);
-        browser.tabs.onRemoved.removeListener(listener2);
-        resolve(t);
+        resolver(t);
       };
       const listener2 = (tabId, removeInfo) => {
         if (!(tabId === tab.id)) { return; }
+        rejecter(new Error('Tab removed before loading complete.'));
+      };
+      let resolver, rejecter;
+      const promise = new Promise((resolve, reject) => {
+        resolver = resolve;
+        rejecter = reject;
+      });
+      try {
+        browser.tabs.onUpdated.addListener(listener);
+        browser.tabs.onRemoved.addListener(listener2);
+        await promise;
+      } finally {
         browser.tabs.onUpdated.removeListener(listener);
         browser.tabs.onRemoved.removeListener(listener2);
-        reject({message: `Tab removed before loading complete.`});
-      };
-      browser.tabs.onUpdated.addListener(listener);
-      browser.tabs.onRemoved.addListener(listener2);
-    });
+      }
+    }
 
     const delay = options["capture.remoteTabDelay"];
     if (delay > 0) {
