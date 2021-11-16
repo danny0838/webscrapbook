@@ -18,14 +18,13 @@
     root.server,
     root.capturer,
     root.JSZip,
-    root.Deferred,
     root.MapWithDefault,
     root,
     window,
     document,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, server, capturer, JSZip, Deferred, MapWithDefault, root, window, document, console) {
+}(this, function (isDebug, browser, scrapbook, server, capturer, JSZip, MapWithDefault, root, window, document, console) {
 
   'use strict';
 
@@ -463,9 +462,7 @@
         }
       }
 
-      const deferred = new Deferred();
-      const fetchCurrent = deferred.promise;
-      (async () => {
+      const fetchCurrent = (async () => {
         try {
           // special handling for data URI
           if (scheme === "data") {
@@ -647,7 +644,7 @@
             },
           });
         }
-      })().then(deferred.resolve, deferred.reject);
+      })();
 
       fetchMap.set(fetchToken, fetchCurrent);
       if (!headerOnly) {

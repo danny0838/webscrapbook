@@ -374,7 +374,6 @@ if (Node && !Node.prototype.getRootNode) {
     "/lib/browser-polyfill.js",
     "/lib/mime.js",
     "/lib/sha_dev.js",
-    "/lib/deferred.js",
     "/lib/map-with-default.js",
     "/lib/strftime.js",
     "/core/common.js",
