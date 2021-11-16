@@ -94,22 +94,27 @@ async function delay(ms) {
 }
 
 async function waitTabLoading(tab) {
-  return await new Promise((resolve, reject) => {
-    const listener = (tabId, changeInfo, t) => {
-      if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
-      browser.tabs.onUpdated.removeListener(listener);
-      browser.tabs.onRemoved.removeListener(listener2);
-      resolve(t);
-    };
-    const listener2 = (tabId, removeInfo) => {
-      if (!(tabId === tab.id)) { return; }
-      browser.tabs.onUpdated.removeListener(listener);
-      browser.tabs.onRemoved.removeListener(listener2);
-      reject(new Error(`Tab removed before loading complete.`));
-    };
+  const listener = (tabId, changeInfo, t) => {
+    if (!(tabId === tab.id && changeInfo.status === 'complete')) { return; }
+    resolver(t);
+  };
+  const listener2 = (tabId, removeInfo) => {
+    if (!(tabId === tab.id)) { return; }
+    rejecter(new Error('Tab removed before loading complete.'));
+  };
+  let resolver, rejecter;
+  const promise = new Promise((resolve, reject) => {
+    resolver = resolve;
+    rejecter = reject;
+  });
+  try {
     browser.tabs.onUpdated.addListener(listener);
     browser.tabs.onRemoved.addListener(listener2);
-  });
+    return await promise;
+  } finally {
+    browser.tabs.onUpdated.removeListener(listener);
+    browser.tabs.onRemoved.removeListener(listener2);
+  }
 };
 
 async function openTab(createProperties) {
