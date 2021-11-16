@@ -33,12 +33,13 @@ if (Node && !Node.prototype.getRootNode) {
     root.jsSHA,
     root.Mime,
     root.Strftime,
+    root, // root and window are different in Firefox
     window,
     console,
     crypto,
     navigator,
   );
-}(this, function (isDebug, browser, JSZip, jsSHA, Mime, Strftime, window, console, crypto, navigator) {
+}(this, function (isDebug, browser, JSZip, jsSHA, Mime, Strftime, global, window, console, crypto, navigator) {
 
   'use strict';
 
@@ -1087,6 +1088,49 @@ if (Node && !Node.prototype.getRootNode) {
   /****************************************************************************
    * ScrapBook messaging
    ***************************************************************************/
+
+  /**
+   * Add a message listener, with optional filter and errorHandler.
+   *
+   * @param {Function} [filter]
+   * @param {Function} [errorHandler]
+   * @return {Function}
+   */
+  scrapbook.addMessageListener = function (filter, errorHandler = ex => {
+    console.error(ex);
+    throw ex;
+  }) {
+    const listener = (message, sender) => {
+      if (filter && !filter(message, sender)) { return; }
+
+      const {cmd, args} = message;
+      const senderInfo = '[' +
+        (sender.tab ? sender.tab.id : -1) + 
+        (typeof sender.frameId !== 'undefined' ? ':' + sender.frameId : '') +
+        ']';
+
+      isDebug && console.debug(cmd, "receive", senderInfo, args);
+
+      const parts = cmd.split('.');
+      const subCmd = parts.pop();
+      const object = parts.reduce((object, part) => {
+        return object[part];
+      }, global);
+
+      // thrown Error don't show here but cause the sender to receive an error
+      if (!object || !subCmd || typeof object[subCmd] !== 'function') {
+        throw new Error(`Unable to invoke unknown command '${cmd}'.`);
+      }
+
+      return Promise.resolve()
+        .then(() => {
+          return object[subCmd](args, sender);
+        })
+        .catch(errorHandler);
+    };
+    browser.runtime.onMessage.addListener(listener);
+    return listener;
+  };
 
   /**
    * Init content scripts in the specified tab.

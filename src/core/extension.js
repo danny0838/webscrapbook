@@ -24,44 +24,6 @@
    ***************************************************************************/
 
   /**
-   * Add a message listener, with optional filter and errorHandler.
-   *
-   * @param {Function} [filter]
-   * @param {Function} [errorHandler]
-   * @return {Function}
-   */
-  scrapbook.addMessageListener = function (filter, errorHandler = ex => {
-    console.error(ex);
-    throw ex;
-  }) {
-    const listener = (message, sender) => {
-      if (filter && !filter(message, sender)) { return; }
-
-      const {cmd, args} = message;
-      isDebug && console.debug(cmd, "receive", `[${sender.tab ? sender.tab.id : -1}]`, args);
-
-      const parts = cmd.split(".");
-      const subCmd = parts.pop();
-      const object = parts.reduce((object, part) => {
-        return object[part];
-      }, root);
-
-      // thrown Error don't show here but cause the sender to receive an error
-      if (!object || !subCmd || typeof object[subCmd] !== 'function') {
-        throw new Error(`Unable to invoke unknown command '${cmd}'.`);
-      }
-
-      return Promise.resolve()
-        .then(() => {
-          return object[subCmd](args, sender);
-        })
-        .catch(errorHandler);
-    };
-    browser.runtime.onMessage.addListener(listener);
-    return listener;
-  };
-
-  /**
    * Invoke an invokable command in the background script.
    *
    * @param {Object} params

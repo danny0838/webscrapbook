@@ -4086,9 +4086,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     if (!message.cmd.startsWith("capturer.")) { return false; }
     if (message.id !== capturer.missionId) { return false; }
     return true;
-  }, (ex) => {
-    console.error(ex);
-    throw ex;
   });
 
   browser.downloads.onCreated.addListener((downloadItem) => {

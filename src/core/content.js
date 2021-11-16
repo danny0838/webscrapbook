@@ -13,11 +13,11 @@
     root.isDebug,
     root.browser,
     root.scrapbook,
-    root,
+    root, // root and window are different in Firefox
     window,
     console,
   );
-}(this, function (isDebug, browser, scrapbook, root, window, console) {
+}(this, function (isDebug, browser, scrapbook, global, window, console) {
 
   'use strict';
 
@@ -48,30 +48,7 @@
     event.ports[0].postMessage({frameId: core.frameId});
   }, false);
 
-  browser.runtime.onMessage.addListener((message, sender) => {
-    const {cmd, args} = message;
-    isDebug && console.debug(cmd, "receive", args);
-
-    const parts = cmd.split(".");
-    const subCmd = parts.pop();
-    const object = parts.reduce((object, part) => {
-      return object[part];
-    }, root);
-
-    // thrown Error don't show here but cause the sender to receive an error
-    if (!object || !subCmd || typeof object[subCmd] !== 'function') {
-      throw new Error(`Unable to invoke unknown command '${cmd}'.`);
-    }
-
-    return Promise.resolve()
-      .then(() => {
-        return object[subCmd](args, sender);
-      })
-      .catch((ex) => {
-        console.error(ex);
-        throw ex;
-      });
-  });
+  scrapbook.addMessageListener();
 
   return core;
 
