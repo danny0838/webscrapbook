@@ -425,7 +425,7 @@
         return Object.assign(response, {
           error: {
             name: 'URIError',
-            message: 'Source URL is empty.',
+            message: 'URL is empty.',
           },
         });
       }
@@ -436,7 +436,7 @@
         return Object.assign(response, {
           error: {
             name: 'URIError',
-            message: 'Requires an absolute URL.',
+            message: 'URL is not absolute.',
           },
         });
       }
@@ -446,7 +446,7 @@
         return Object.assign(response, {
           error: {
             name: 'URIError',
-            message: 'URI scheme not supported.',
+            message: 'URL scheme not supported.',
           },
         });
       }
