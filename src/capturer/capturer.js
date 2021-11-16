@@ -409,6 +409,48 @@
       const {url: sourceUrl, refUrl, headerOnly = false, ignoreSizeLimit = false, settings: {timeId}, options} = params;
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
+      let headers = {};
+      let response = {
+        url: sourceUrlMain,
+        status: 0,
+        headers,
+        blob: null,
+      };
+
+      // Throw an error for a bad URL before generating fetchToken, which
+      // requires URL normalization and cannot work for a bad URL.
+
+      // fail out if sourceUrl is empty.
+      if (!sourceUrlMain) {
+        return Object.assign(response, {
+          error: {
+            name: 'URIError',
+            message: 'Source URL is empty.',
+          },
+        });
+      }
+
+      // fail out if sourceUrl is relative,
+      // or it will be treated as relative to this extension page.
+      if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
+        return Object.assign(response, {
+          error: {
+            name: 'URIError',
+            message: 'Requires an absolute URL.',
+          },
+        });
+      }
+
+      const scheme = sourceUrlMain.match(REGEX_SCHEMES)[1];
+      if (!ALLOWED_SCHEMES.has(scheme)) {
+        return Object.assign(response, {
+          error: {
+            name: 'URIError',
+            message: 'URI scheme not supported.',
+          },
+        });
+      }
+
       const fetchMap = capturer.captureInfo.get(timeId).fetchMap;
       const fetchRole = headerOnly ? 'head' : 'blob';
       const fetchToken = getFetchToken(sourceUrlMain, fetchRole);
@@ -424,46 +466,7 @@
       const deferred = new Deferred();
       const fetchCurrent = deferred.promise;
       (async () => {
-        let headers = {};
-        let response = {
-          url: sourceUrlMain,
-          status: 0,
-          headers,
-          blob: null,
-        };
-
         try {
-          // fail out if sourceUrl is empty.
-          if (!sourceUrlMain) {
-            return Object.assign(response, {
-              error: {
-                name: 'URIError',
-                message: 'Source URL is empty.',
-              },
-            });
-          }
-
-          // fail out if sourceUrl is relative,
-          // or it will be treated as relative to this extension page.
-          if (!scrapbook.isUrlAbsolute(sourceUrlMain)) {
-            return Object.assign(response, {
-              error: {
-                name: 'URIError',
-                message: 'Requires an absolute URL.',
-              },
-            });
-          }
-
-          const scheme = sourceUrlMain.match(REGEX_SCHEMES)[1];
-          if (!ALLOWED_SCHEMES.has(scheme)) {
-            return Object.assign(response, {
-              error: {
-                name: 'URIError',
-                message: 'URI scheme not supported.',
-              },
-            });
-          }
-
           // special handling for data URI
           if (scheme === "data") {
             const file = scrapbook.dataUriToFile(sourceUrlMain);
