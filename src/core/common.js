@@ -712,6 +712,83 @@ if (Node && !Node.prototype.getRootNode) {
    *   to above reasons.
    ***************************************************************************/
 
+  /**
+   * @typedef {Object} serializedObject
+   * @property {string} __type__
+   */
+
+  /**
+   * Serialize an object to be transmittable through messaging.
+   *
+   * If the serialization cannot be done synchronously, a Promise is returned.
+   *
+   * @param {*} obj
+   * @return {*|serializedObject|Promise<serializedObject>}
+   */
+  scrapbook.serializeObject = function (...args) {
+    // Max JavaScript string is 256MiB UTF-16 chars in an older Browser.
+    const BYTE_STRING_MAX = 32 * 1024 * 1024;
+
+    const readBlobAsByteStrings = async (blob) => {
+      const rv = [];
+      const u8ar = new Uint8Array(await scrapbook.readFileAsArrayBuffer(blob));
+      for (let i = 0, I = u8ar.length; i < I; i += BYTE_STRING_MAX) {
+        rv.push(scrapbook.arrayBufferToByteString(u8ar.subarray(i, i + BYTE_STRING_MAX)));
+      }
+      return rv;
+    };
+
+    const fn = scrapbook.serializeObject = (obj) => {
+      if (obj instanceof File) {
+        return (async () => ({
+          __type__: 'File',
+          name: obj.name,
+          type: obj.type,
+          lastModified: obj.lastModified,
+          data: await readBlobAsByteStrings(obj),
+        }))();
+      } else if (obj instanceof Blob) {
+        return (async () => ({
+          __type__: 'Blob',
+          type: obj.type,
+          data: await readBlobAsByteStrings(obj),
+        }))();
+      }
+      return obj;
+    };
+
+    return fn(...args);
+  };
+
+  /**
+   * Deerialize a serializedObject.
+   *
+   * If the deserialization cannot be done synchronously, a Promise is returned.
+   *
+   * @param {serializedObject|*} obj
+   * @return {*|Promise<*>}
+   */
+  scrapbook.deserializeObject = function (obj) {
+    switch (obj && obj.__type__) {
+      case "File": {
+        const {data, name, type, lastModified} = obj;
+        return new File(
+          data.map(x => scrapbook.byteStringToArrayBuffer(x)),
+          name,
+          {type, lastModified}
+        );
+      }
+      case "Blob": {
+        const {data, type} = obj;
+        return new Blob(
+          data.map(x => scrapbook.byteStringToArrayBuffer(x)),
+          {type}
+        );
+      }
+    }
+    return obj;
+  };
+
   scrapbook.cache = {
     _current: 'auto',
 
@@ -731,43 +808,55 @@ if (Node && !Node.prototype.getRootNode) {
     },
 
     async _serializeObject(obj) {
-      if (obj instanceof File) {
-        return {
-          __type__: 'File',
-          name: obj.name,
-          type: obj.type,
-          lastModified: obj.lastModified,
-          data: await scrapbook.readFileAsText(obj, false),
-        };
-      } else if (obj instanceof Blob) {
-        return {
-          __type__: 'Blob',
-          type: obj.type,
-          data: await scrapbook.readFileAsText(obj, false),
-        };
+      const map = {};
+      const objStr = JSON.stringify(obj, (key, value) => {
+        const valueNew = scrapbook.serializeObject(value);
+        if (valueNew !== value) {
+          const id = scrapbook.getUuid();
+          map[id] = valueNew;
+          return id;
+        }
+        return value;
+      });
+      if (!objStr) {
+        // obj not JSON stringifiable, probably undefined
+        return obj;
       }
-      return obj;
+      for (const key in map) {
+        map[key] = await map[key];
+      }
+      return JSON.parse(objStr, (key, value) => {
+        if (value in map) {
+          return map[value];
+        }
+        return value;
+      });
     },
 
-    _deserializeObject(obj) {
-      try {
-        switch (obj.__type__) {
-          case "File": {
-            return new File(
-              [scrapbook.byteStringToArrayBuffer(obj.data)],
-              obj.name,
-              {type: obj.type, lastModified: obj.lastModified}
-            );
-          }
-          case "Blob": {
-            return new Blob(
-              [scrapbook.byteStringToArrayBuffer(obj.data)],
-              {type: obj.type}
-            );
-          }
+    async _deserializeObject(obj) {
+      const map = {};
+      const objStr = JSON.stringify(obj, (key, value) => {
+        const valueNew = scrapbook.deserializeObject(value);
+        if (valueNew !== value) {
+          const id = scrapbook.getUuid();
+          map[id] = valueNew;
+          return id;
         }
-      } catch (ex) {}
-      return obj;
+        return value;
+      });
+      if (!objStr) {
+        // obj not JSON stringifiable, probably undefined
+        return obj;
+      }
+      for (const key in map) {
+        map[key] = await map[key];
+      }
+      return JSON.parse(objStr, (key, value) => {
+        if (value in map) {
+          return map[value];
+        }
+        return value;
+      });
     },
 
     _filterByObject(filter, obj) {
@@ -846,16 +935,16 @@ if (Node && !Node.prototype.getRootNode) {
         return obj;
       },
 
-      _deserializeObject(obj) {
+      async _deserializeObject(obj) {
         if (this._serializeObjectNeeded) {
-          return scrapbook.cache._deserializeObject(obj);
+          return await scrapbook.cache._deserializeObject(obj);
         }
         return obj;
       },
 
       async get(key) {
         const items = await browser.storage.local.get(key);
-        return this._deserializeObject(items[key]);
+        return await this._deserializeObject(items[key]);
       },
 
       async getAll(filter) {
@@ -866,7 +955,7 @@ if (Node && !Node.prototype.getRootNode) {
             if (!filter(obj)) {
               throw new Error("filter not matched");
             }
-            items[key] = this._deserializeObject(items[key]);
+            items[key] = await this._deserializeObject(items[key]);
           } catch (ex) {
             // invalid JSON format => meaning not a cache
             // or does not match the filter
@@ -1010,11 +1099,12 @@ if (Node && !Node.prototype.getRootNode) {
         return await scrapbook.cache._serializeObject(obj);
       },
 
-      _deserializeObject(obj) {
-        return scrapbook.cache._deserializeObject(obj);
+      async _deserializeObject(obj) {
+        return await scrapbook.cache._deserializeObject(obj);
       },
 
       async get(key) {
+        // @TODO: direct string to object deserialization?
         return this._deserializeObject(JSON.parse(sessionStorage.getItem(key)));
       },
 
@@ -1037,6 +1127,7 @@ if (Node && !Node.prototype.getRootNode) {
       },
 
       async set(key, value) {
+        // @TODO: direct object to string serialization?
         return sessionStorage.setItem(key, JSON.stringify(await this._serializeObject(value)));
       },
 
