@@ -144,10 +144,14 @@ a {
     /* build a set with the ids that are still being viewed */
     const usedIds = new Set();
     for (const tab of tabs) {
-      const u = new URL(tab.url);
-      if (u.href.startsWith(browser.runtime.getURL("viewer/view.html") + '?')) {
-        const id = u.searchParams.get('id');
-        if (id) { usedIds.add(id); }
+      try {
+        const u = new URL(tab.url);
+        if (u.href.startsWith(browser.runtime.getURL("viewer/view.html") + '?')) {
+          const id = u.searchParams.get('id');
+          if (id) { usedIds.add(id); }
+        }
+      } catch (ex) {
+        console.error(ex);
       }
     }
 
