@@ -830,6 +830,9 @@ if (Node && !Node.prototype.getRootNode) {
 
     storage: {
       get _serializeObjectNeeded() {
+        // In Firefox < 56 and Chromium,
+        // Blob cannot be stored in browser.storage,
+        // fallback to an object containing byte string data.
         delete this._serializeObjectNeeded;
         return this._serializeObjectNeeded = 
             (scrapbook.userAgent.major < 56 && scrapbook.userAgent.is('gecko')) || 
@@ -837,19 +840,17 @@ if (Node && !Node.prototype.getRootNode) {
       },
 
       async _serializeObject(obj) {
-        // In Firefox < 56 and Chromium,
-        // Blob cannot be stored in browser.storage,
-        // fallback to an object containing byte string data.
         if (this._serializeObjectNeeded) {
           return await scrapbook.cache._serializeObject(obj);
         }
-
-        // otherwise return the original object
         return obj;
       },
 
       _deserializeObject(obj) {
-        return scrapbook.cache._deserializeObject(obj);
+        if (this._serializeObjectNeeded) {
+          return scrapbook.cache._deserializeObject(obj);
+        }
+        return obj;
       },
 
       async get(key) {
