@@ -2810,12 +2810,8 @@
 
     // save document
     let content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
-
-    // pass content as Blob to prevent size limitation of a message
-    // (for a supported browser)
-    if (scrapbook.userAgent.is('gecko')) {
-      content = new Blob([content], {type: 'text/plain'});
-    }
+    content = new Blob([content]);
+    content = await capturer.saveBlobCache(content);
 
     const response = await capturer.invoke("saveDocument", {
       sourceUrl: capturer.getRedirectedUrl(docUrl, docUrlHash),
@@ -3100,12 +3096,8 @@
       });
 
       let content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
-
-      // pass content as Blob to prevent size limitation of a message
-      // (for a supported browser)
-      if (scrapbook.userAgent.is('gecko')) {
-        content = new Blob([content], {type: 'text/plain'});
-      }
+      content = new Blob([content]);
+      content = await capturer.saveBlobCache(content);
 
       data[docUrl] = {
         content,
@@ -3482,6 +3474,54 @@
       }
     }
     return sourceUrl;
+  };
+
+  /**
+   * @typedef {Object} blobCacheObject
+   * @property {string} [__key__]
+   * @property {string} [__type__]
+   */
+
+  /**
+   * Save a Blob in the cache and return a blobCacheObject that can be
+   * transmitted through messaging.
+   *
+   * @param {Blob} blob
+   * @return {Promise<blobCacheObject>}
+   */
+  capturer.saveBlobCache = async function (blob) {
+    // Return the original Blob if the browser supports tramsmitting Blob
+    // through message natively.
+    if (scrapbook.userAgent.is('gecko')) {
+      return blob;
+    }
+
+    // for a small Blob, simply serialize to an object
+    if (blob.size < 32 * 1024 * 1024) {
+      return await scrapbook.serializeObject(blob);
+    }
+
+    const uuid = scrapbook.getUuid();
+    const key = {table: "blobCache", key: uuid};
+    await scrapbook.cache.set(key, blob, 'storage');
+    return {__key__: uuid};
+  };
+
+  /**
+   * Load a Blob from a blobCacheObject.
+   *
+   * @param {blobCacheObject} blob
+   * @return {Promise<Blob>}
+   */
+  capturer.loadBlobCache = async function (blob) {
+    if (blob.__type__) {
+      return await scrapbook.deserializeObject(blob);
+    }
+
+    const key = {table: "blobCache", key: blob.__key__};
+    const rv = await scrapbook.cache.get(key, 'storage');
+    await scrapbook.cache.remove(key, 'storage');
+    return rv;
   };
 
 
@@ -4770,15 +4810,17 @@
           return;
         }
 
-        // imported or external CSS
         // Save as byte string when charset is unknown so that the user can
         // convert the saved CSS file if the assumed charset is incorrect.
+        let blob = new Blob(
+          [charset ? cssText : scrapbook.byteStringToArrayBuffer(cssText)],
+          {type: charset ? "text/css;charset=UTF-8" : "text/css"}
+          );
+        blob = await capturer.saveBlobCache(blob);
+
+        // imported or external CSS
         const response = await capturer.invoke("downloadBlob", {
-          blob: {
-            __type__: "Blob",
-            type: charset ? "text/css;charset=UTF-8" : "text/css",
-            data: charset ? scrapbook.unicodeToUtf8(cssText) : cssText,
-          },
+          blob,
           filename: newFilename,
           sourceUrl,
           settings,

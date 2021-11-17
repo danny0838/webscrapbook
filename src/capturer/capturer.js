@@ -1661,12 +1661,8 @@ ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</h
 Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>
 </body>
 </html>`;
-
-      // pass content as Blob to prevent size limitation of a message
-      // (for a supported browser)
-      if (scrapbook.userAgent.is('gecko')) {
-        content = new Blob([content], {type: 'text/plain'});
-      }
+      content = new Blob([content], {type: "text/html"});
+      content = await capturer.saveBlobCache(content);
 
       const mime = "text/html";
       const documentFileName = documentName + ".html";
@@ -1866,9 +1862,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             // save document
             try {
               let content = data.content;
-              if (typeof content !== 'string') {
-                content = await scrapbook.readFileAsText(content);
+              if (!(content instanceof Blob)) {
+                content = await capturer.loadBlobCache(content);
               }
+              content = await scrapbook.readFileAsText(content);
 
               // replace resource URLs
               content = content.replace(/urn:scrapbook:url:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
@@ -3029,7 +3026,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {Object} params
    * @param {Object} params.data
    * @param {string} params.data.mime
-   * @param {string|Blob} params.data.content - USVString or byte string
+   * @param {string|Blob|blobCacheObject} params.data.content - USVString or byte string
    * @param {string} [params.data.charset] - save USVString as UTF-8 if omitted
    * @param {string} [params.data.title]
    * @param {string} [params.data.favIconUrl]
@@ -3058,6 +3055,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       }
     } else {
       charset = 'UTF-8';
+    }
+    if (typeof content !== 'string' && !(content instanceof Blob)) {
+      content = await capturer.loadBlobCache(content);
     }
     const blob = new Blob([content], {type: `${mime};charset=${charset}`});
     const response = await capturer.downloadBlob({
@@ -3092,7 +3092,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @param {Object} params
    * @param {Object} params.data
    * @param {string} [params.data.mime]
-   * @param {string|Blob} [params.data.content] - USVString or byte string
+   * @param {string|Blob|blobCacheObject} [params.data.content] - USVString or byte string
    * @param {string} [params.data.charset] - save USVString as UTF-8 if omitted
    * @param {string} [params.data.title]
    * @param {string} [params.data.favIconUrl]
@@ -3297,6 +3297,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           }
         } else {
           charset = 'UTF-8';
+        }
+        if (typeof content !== 'string' && !(content instanceof Blob)) {
+          content = await capturer.loadBlobCache(content);
         }
         const blob = new Blob([content], {type: `${mime};charset=${charset}`});
         filename = settings.indexFilename + "." + ext;
@@ -3513,13 +3516,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   };
 
   /**
-   * @typedef {Object} blobObject
-   * @property {string} __type__ - "Blob", "File"
-   * @property {string} type
-   * @property {string} data - byte string
-   */
-
-  /**
    * @typedef {Object} downloadBlobResponse
    * @property {string} filename - The downloaded filename.
    * @property {string} url - URL of the downloaded filename (without hash).
@@ -3528,7 +3524,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   /**
    * @kind invokable
    * @param {Object} params
-   * @param {Blob|blobObject} params.blob - may include charset
+   * @param {Blob|blobCacheObject} params.blob - may include charset
    * @param {string} [params.filename] - validated and unique;
    *     may be absent when saveAs = singleHtml
    * @param {string} params.sourceUrl
@@ -3573,8 +3569,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       const {timeId} = settings;
 
       if (!(blob instanceof Blob)) {
-        const ab = scrapbook.byteStringToArrayBuffer(blob.data);
-        blob = new Blob([ab], {type: blob.type});
+        blob = await capturer.loadBlobCache(blob);
       }
 
       // special handling for data URI

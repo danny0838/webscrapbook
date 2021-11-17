@@ -24,6 +24,9 @@
     await scrapbook.cache.remove((obj) => {
       return tableSet.has(obj.table);
     });
+    await scrapbook.cache.remove((obj) => {
+      return obj.table === "blobCache";
+    }, 'storage');
   }
 
 
