@@ -730,7 +730,7 @@ if (Node && !Node.prototype.getRootNode) {
       this._current = value;
     },
 
-    async _escapeObject(obj) {
+    async _serializeObject(obj) {
       if (obj instanceof File) {
         return {
           __type__: 'File',
@@ -749,7 +749,7 @@ if (Node && !Node.prototype.getRootNode) {
       return obj;
     },
 
-    _unescapeObject(obj) {
+    _deserializeObject(obj) {
       try {
         switch (obj.__type__) {
           case "File": {
@@ -829,32 +829,32 @@ if (Node && !Node.prototype.getRootNode) {
     },
 
     storage: {
-      get _escapeObjectNeeded() {
-        delete this._escapeObjectNeeded;
-        return this._escapeObjectNeeded = 
+      get _serializeObjectNeeded() {
+        delete this._serializeObjectNeeded;
+        return this._serializeObjectNeeded = 
             (scrapbook.userAgent.major < 56 && scrapbook.userAgent.is('gecko')) || 
             scrapbook.userAgent.is('chromium');
       },
 
-      async _escapeObject(obj) {
+      async _serializeObject(obj) {
         // In Firefox < 56 and Chromium,
         // Blob cannot be stored in browser.storage,
         // fallback to an object containing byte string data.
-        if (this._escapeObjectNeeded) {
-          return await scrapbook.cache._escapeObject(obj);
+        if (this._serializeObjectNeeded) {
+          return await scrapbook.cache._serializeObject(obj);
         }
 
         // otherwise return the original object
         return obj;
       },
 
-      _unescapeObject(obj) {
-        return scrapbook.cache._unescapeObject(obj);
+      _deserializeObject(obj) {
+        return scrapbook.cache._deserializeObject(obj);
       },
 
       async get(key) {
         const items = await browser.storage.local.get(key);
-        return this._unescapeObject(items[key]);
+        return this._deserializeObject(items[key]);
       },
 
       async getAll(filter) {
@@ -865,7 +865,7 @@ if (Node && !Node.prototype.getRootNode) {
             if (!filter(obj)) {
               throw new Error("filter not matched");
             }
-            items[key] = this._unescapeObject(items[key]);
+            items[key] = this._deserializeObject(items[key]);
           } catch (ex) {
             // invalid JSON format => meaning not a cache
             // or does not match the filter
@@ -876,7 +876,7 @@ if (Node && !Node.prototype.getRootNode) {
       },
 
       async set(key, value) {
-        return await browser.storage.local.set({[key]: await this._escapeObject(value)});
+        return await browser.storage.local.set({[key]: await this._serializeObject(value)});
       },
 
       async remove(keys) {
@@ -1005,16 +1005,16 @@ if (Node && !Node.prototype.getRootNode) {
     },
 
     sessionStorage: {
-      async _escapeObject(obj) {
-        return await scrapbook.cache._escapeObject(obj);
+      async _serializeObject(obj) {
+        return await scrapbook.cache._serializeObject(obj);
       },
 
-      _unescapeObject(obj) {
-        return scrapbook.cache._unescapeObject(obj);
+      _deserializeObject(obj) {
+        return scrapbook.cache._deserializeObject(obj);
       },
 
       async get(key) {
-        return this._unescapeObject(JSON.parse(sessionStorage.getItem(key)));
+        return this._deserializeObject(JSON.parse(sessionStorage.getItem(key)));
       },
 
       async getAll(filter) {
@@ -1026,7 +1026,7 @@ if (Node && !Node.prototype.getRootNode) {
             if (!filter(obj)) {
               throw new Error("filter not matched");
             }
-            items[key] = this._unescapeObject(JSON.parse(sessionStorage.getItem(key)));
+            items[key] = this._deserializeObject(JSON.parse(sessionStorage.getItem(key)));
           } catch (ex) {
             // invalid JSON format => meaning not a cache
             // or does not match the filter
@@ -1036,7 +1036,7 @@ if (Node && !Node.prototype.getRootNode) {
       },
 
       async set(key, value) {
-        return sessionStorage.setItem(key, JSON.stringify(await this._escapeObject(value)));
+        return sessionStorage.setItem(key, JSON.stringify(await this._serializeObject(value)));
       },
 
       async remove(keys) {
