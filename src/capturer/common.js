@@ -1800,10 +1800,10 @@
             }
 
             if (elem.hasAttribute("archive")) {
-              const rewrittenArchive = scrapbook.rewriteArchive(elem.getAttribute("archive"), (url) => {
+              const newUrls = scrapbook.rewriteUrls(elem.getAttribute("archive"), (url) => {
                 return capturer.resolveRelativeUrl(url, objectBaseUrl);
               });
-              captureRewriteAttr(elem, "archive", rewrittenArchive);
+              captureRewriteAttr(elem, "archive", newUrls);
             }
 
             switch (options["capture.object"]) {
@@ -1889,7 +1889,7 @@
                 // plugins referenced by legacy archive are static and do not require rewriting
                 if (elem.hasAttribute("archive")) {
                   tasks.push(async () => {
-                    const response = await scrapbook.rewriteArchive(elem.getAttribute("archive"), async (url) => {
+                    const response = await scrapbook.rewriteUrls(elem.getAttribute("archive"), async (url) => {
                       return (await downloadFile({
                         url,
                         refUrl,

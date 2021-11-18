@@ -3350,24 +3350,26 @@ if (Node && !Node.prototype.getRootNode) {
   /**
    * The function that rewrites each URL into a new URL.
    *
-   * @callback rewriteArchiveRewriter
+   * @callback rewriteUrlsRewriter
    * @param {string} url
    * @return {string|Promise<string>} The rewritten URL.
    */
 
   /**
-   * @param {string} archive
-   * @param {rewriteArchiveRewriter} rewriter
+   * Rewrite a space separated URLs.
+   *
+   * @param {string} urls
+   * @param {rewriteUrlsRewriter} rewriter
    * @return {string|Promise<string>} The rewritten URL.
    */
-  scrapbook.rewriteArchive = function (archive, rewriter) {
+  scrapbook.rewriteUrls = function (...args) {
     const KEY_PREFIX = "urn:scrapbook:str:";
     const REGEX_SPACES = /[\t\n\f\r ]+/;
     const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
 
-    const fn = scrapbook.rewriteArchive = function (archive, rewriter) {
+    const fn = scrapbook.rewriteUrls = function (urls, rewriter) {
       let mapUrlPromise;
-      const response = archive.split(REGEX_SPACES).map(url => {
+      const response = urls.split(REGEX_SPACES).map(url => {
         let replacement = rewriter(url);
         if (scrapbook.isPromise(replacement)) {
           if (!mapUrlPromise) { mapUrlPromise = new Map(); }
@@ -3393,7 +3395,7 @@ if (Node && !Node.prototype.getRootNode) {
         });
       });
     };
-    return fn(archive, rewriter);
+    return fn(...args);
   };
 
   /**
