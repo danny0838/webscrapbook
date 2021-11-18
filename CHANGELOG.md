@@ -3,6 +3,15 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.143.0] - 2021-11-18
+* Added support of capturing the source document embedded through an `<embed>` tag.
+* Added support of handling legacy HTML attributes for a capture: embed[pluginspage], object[codebase], object[archive], object[classid], applet[codebase], applet[classid].
+* Fixed an issue of message length error for Chromium if a page to be captured or saved exceeds around 50MB.
+* Fixed an issue that `View source` in the current tab doesn't create new tabs when multiple items are selected.
+* Fixed an issue that a link like "foo.html#?bar" is not shown in the sitemap.
+* Fixed an issue that a frame page embedded through `<embed>` is not shown in the sitemap.
+* Fixed an issue that a resource embedded through `<embed>`, `<object>`, or `<applet>` may not be blocked correctly in the viewer for Chromium.
+
 ## [0.142.0] - 2021-11-14
 * Fixed an issue that a line of a rule for downloading links that is prefixed with spaces is not treated as a comment.
 * No more take the link text as title (but available in the dropdown) when capturing a link for `Capture as` dialog.
@@ -171,7 +180,7 @@
 * `integrity` attribute is now removed only for related tags.
 
 ## [0.118.0] - 2021-05-08
-* Added support of capturing source documents embedded via `<object>` tags.
+* Added support of capturing the source document embedded through an `<object>` tag.
 * No more save XHTML or SVG files as srcdoc when saving as single HTML.
 
 ## [0.117.0] - 2021-05-05
