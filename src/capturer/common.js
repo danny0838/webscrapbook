@@ -1289,6 +1289,23 @@
 
           case "a":
           case "area": {
+            if (elem.hasAttribute("ping")) {
+              switch (options["capture.ping"]) {
+                case "link": {
+                  const newUrls = scrapbook.rewriteUrls(elem.getAttribute("ping"), (url) => {
+                    return capturer.resolveRelativeUrl(url, refUrl);
+                  });
+                  captureRewriteAttr(elem, "ping", newUrls);
+                  break;
+                }
+                case "blank":
+                default: {
+                  captureRewriteAttr(elem, "ping", null);
+                  break;
+                }
+              }
+            }
+
             rewriteAnchor(elem, "href");
             break;
           }

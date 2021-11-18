@@ -6843,6 +6843,45 @@ async function test_capture_applet() {
 /**
  * Check if option works
  *
+ * capture.ping
+ */
+async function test_capture_ping() {
+  /* capture.ping = link */
+  var options = {
+    "capture.ping": "link",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_ping/ping.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var a = doc.querySelector('a');
+  assert(a.getAttribute('ping') === `${localhost}/capture_ping/ping.py ${localhost}/capture_ping/ping2.py`);
+
+  /* capture.ping = blank */
+  var options = {
+    "capture.ping": "blank",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_ping/ping.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var a = doc.querySelector('a');
+  assert(!a.hasAttribute('ping'));
+}
+
+/**
+ * Check if option works
+ *
  * capture.preload
  */
 async function test_capture_preload() {
@@ -11038,6 +11077,7 @@ async function test_capture_record_attrs2() {
     "capture.styleInline": "save",
     "capture.rewriteCss": "url",
     "capture.script": "save",
+    "capture.ping": "blank",
     "capture.preload": "blank",
     "capture.prefetch": "blank",
     "capture.downLink.file.mode": "url",
