@@ -1651,7 +1651,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
           (charset ? ' data-scrapbook-charset="' + charset + '"' : "") : 
           "";
 
-      let content =`<!DOCTYPE html>
+      const content =`<!DOCTYPE html>
 <html${meta}>
 <head>
 <meta charset="UTF-8">
@@ -1661,15 +1661,14 @@ ${title ? '<title>' + scrapbook.escapeHtml(title, false) + '</title>\n' : ''}</h
 Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.escapeHtml(response.filename, false)}</a>
 </body>
 </html>`;
-      content = new Blob([content], {type: "text/html"});
-      content = await capturer.saveBlobCache(content);
+      let blob = new Blob([content], {type: "text/html;charset=UTF-8"});
+      blob = await capturer.saveBlobCache(blob);
 
-      const mime = "text/html";
       const documentFileName = documentName + ".html";
 
       const registry = await capturer.invoke("registerDocument", {
         docUrl: 'about:blank',
-        mime,
+        mime: "text/html",
         role: `document-${scrapbook.getUuid()}`,
         settings,
         options,
@@ -1683,8 +1682,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           options,
           data: {
             title,
-            mime,
-            content,
+            blob,
           },
         });
 
@@ -1854,18 +1852,20 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               throw new Error(scrapbook.lang("ErrorSaveNotUnderDataDir", [target]));
             }
 
+            let {blob} = data;
+            if (!(blob instanceof Blob)) {
+              blob = await capturer.loadBlobCache(blob);
+            }
+            const {parameters: {charset}} = scrapbook.parseHeaderContentType(blob.type);
+
             // forbid non-UTF-8 for data safety
-            if (data.charset !== "UTF-8") {
+            if (!['UTF-8', 'UTF8'].includes(charset.toUpperCase())) {
               throw new Error(scrapbook.lang("ErrorSaveNonUTF8", [target]));
             }
 
             // save document
             try {
-              let content = data.content;
-              if (!(content instanceof Blob)) {
-                content = await capturer.loadBlobCache(content);
-              }
-              content = await scrapbook.readFileAsText(content);
+              let content = await scrapbook.readFileAsText(blob);
 
               // replace resource URLs
               content = content.replace(/urn:scrapbook:url:([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})/g, (match, key) => {
@@ -1887,14 +1887,13 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                 return match;
               });
 
-              const blob = new Blob([content], {type: "text/html"});
               await server.request({
                 url: target + '?a=save',
                 method: "POST",
                 format: 'json',
                 csrfToken: true,
                 body: {
-                  upload: blob,
+                  upload: new Blob([content], {type: blob.type}),
                 },
               });
               capturer.log(`Updated ${target}`);
@@ -3025,9 +3024,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @kind invokable
    * @param {Object} params
    * @param {Object} params.data
-   * @param {string} params.data.mime
-   * @param {string|Blob|blobCacheObject} params.data.content - USVString or byte string
-   * @param {string} [params.data.charset] - save USVString as UTF-8 if omitted
+   * @param {Blob|blobCacheObject} params.data.blob
    * @param {string} [params.data.title]
    * @param {string} [params.data.favIconUrl]
    * @param {string} params.documentFileName
@@ -3048,18 +3045,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       }
     }
 
-    let {content, mime, charset} = data;
-    if (charset) {
-      if (typeof content === 'string') {
-        content = scrapbook.byteStringToArrayBuffer(content);
-      }
-    } else {
-      charset = 'UTF-8';
+    let {blob} = data;
+    if (!(blob instanceof Blob)) {
+      blob = await capturer.loadBlobCache(blob);
     }
-    if (typeof content !== 'string' && !(content instanceof Blob)) {
-      content = await capturer.loadBlobCache(content);
-    }
-    const blob = new Blob([content], {type: `${mime};charset=${charset}`});
     const response = await capturer.downloadBlob({
       blob,
       filename: documentFileName,
@@ -3091,9 +3080,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
    * @kind invokable
    * @param {Object} params
    * @param {Object} params.data
-   * @param {string} [params.data.mime]
-   * @param {string|Blob|blobCacheObject} [params.data.content] - USVString or byte string
-   * @param {string} [params.data.charset] - save USVString as UTF-8 if omitted
+   * @param {Blob|blobCacheObject} [params.data.blob]
    * @param {string} [params.data.title]
    * @param {string} [params.data.favIconUrl]
    * @param {string} params.sourceUrl - may include hash
@@ -3290,18 +3277,10 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     let [, ext] = scrapbook.filenameParts(documentFileName);
     switch (options["capture.saveAs"]) {
       case "singleHtml": {
-        let {content, mime, charset} = data;
-        if (charset) {
-          if (typeof content === 'string') {
-            content = scrapbook.byteStringToArrayBuffer(content);
-          }
-        } else {
-          charset = 'UTF-8';
+        let {blob} = data;
+        if (!(blob instanceof Blob)) {
+          blob = await capturer.loadBlobCache(blob);
         }
-        if (typeof content !== 'string' && !(content instanceof Blob)) {
-          content = await capturer.loadBlobCache(content);
-        }
-        const blob = new Blob([content], {type: `${mime};charset=${charset}`});
         filename = settings.indexFilename + "." + ext;
 
         // special handling: single HTML cannot use "index.html"

@@ -2809,9 +2809,9 @@
     });
 
     // save document
-    let content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
-    content = new Blob([content]);
-    content = await capturer.saveBlobCache(content);
+    const content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
+    let blob = new Blob([content], {type: `${mime};charset=UTF-8`});
+    blob = await capturer.saveBlobCache(blob);
 
     const response = await capturer.invoke("saveDocument", {
       sourceUrl: capturer.getRedirectedUrl(docUrl, docUrlHash),
@@ -2819,8 +2819,7 @@
       settings,
       options,
       data: {
-        mime,
-        content,
+        blob,
         title: settings.title || doc.title,
         favIconUrl: settings.favIconUrl || favIconUrl,
       },
@@ -3095,14 +3094,12 @@
         insertInfoBar: options["capture.insertInfoBar"],
       });
 
-      let content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
-      content = new Blob([content]);
-      content = await capturer.saveBlobCache(content);
+      const content = scrapbook.documentToString(newDoc, options["capture.prettyPrint"]);
+      let blob = new Blob([content], {type: `${mime};charset=${charset}`});
+      blob = await capturer.saveBlobCache(blob);
 
       data[docUrl] = {
-        content,
-        charset,
-        mime,
+        blob,
         info,
         resources,
       };
