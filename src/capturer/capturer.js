@@ -3669,19 +3669,14 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   /**
    * @param {Object} params
    * @param {Blob} params.blob
-   * @return {Promise<blobObject>}
+   * @return {Promise<serializedObject>}
    */
   capturer.saveBlobInMemory = async function (params) {
     isDebug && console.debug("call: saveBlobInMemory", params);
 
     const {blob} = params;
 
-    // convert BLOB data to byte string so that it can be sent via messaging
-    return {
-      __type__: 'Blob',
-      type: blob.type,
-      data: await scrapbook.readFileAsText(blob, false),
-    };
+    return await scrapbook.serializeObject(blob);
   };
 
   /**

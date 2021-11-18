@@ -225,7 +225,7 @@ async function capture(params, options = {}) {
   !result.error && await browser.tabs.remove(response.tab.id);
   !headless && await browser.tabs.remove(pageTab.id);
 
-  const blob = new Blob([byteStringToArrayBuffer(result.data)], {type: result.type});
+  const blob = new Blob(result.data.map(x => byteStringToArrayBuffer(x)), {type: result.type});
   return blob;
 }
 
