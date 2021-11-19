@@ -4322,10 +4322,13 @@
      * @param {Object} [settings]
      * @param {Object} [options]
      */
-    async rewriteCssText({cssText, refUrl, refCss = null, rootNode, isInline = false, settings = this.settings, options = this.options}) {
-      settings = Object.assign({}, settings, {
+    async rewriteCssText({cssText, refUrl, refCss = null, rootNode, isInline = false, settings, options}) {
+      settings = Object.assign({}, this.settings, settings);
+      settings = Object.assign(settings, {
         recurseChain: [...settings.recurseChain, scrapbook.splitUrlByAnchor(refUrl)[0]],
       });
+      options = options ? Object.assign({}, this.options, options) : this.options;
+
       const {usedCssFontUrl, usedCssImageUrl} = settings;
 
       const resolveCssUrl = (sourceUrl, refUrl) => {
@@ -4608,7 +4611,10 @@
      * @param {Object} [settings]
      * @param {Object} [options]
      */
-    async rewriteCss({elem, url, refCss, refUrl, rootNode, callback, settings = this.settings, options = this.options}) {
+    async rewriteCss({elem, url, refCss, refUrl, rootNode, callback, settings, options}) {
+      settings = settings ? Object.assign({}, this.settings, settings) : this.settings;
+      options = options ? Object.assign({}, this.options, options) : this.options;
+
       let sourceUrl;
       let cssType = !elem ? 'imported' : elem.nodeName.toLowerCase() === 'link' ? 'external' : 'internal';
       let cssText = "";
