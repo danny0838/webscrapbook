@@ -3214,7 +3214,11 @@ async function test_capture_css_styleInline() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('blockquote').getAttribute('style') === `background: yellow;`);
+  var elems = doc.querySelectorAll('blockquote');
+  assert(elems[0].getAttribute('style') === `background: yellow;`);
+  assert(elems[1].getAttribute('style') === `background: url("green.bmp");`);
+  assert(elems[2].getAttribute('style') === `@font-face { font-family: myFont; src: url("./font.woff"); }`);
+  assert(elems[3].getAttribute('style') === `@import "./import.css";`);
 
   /* capture.styleInline = blank */
   options["capture.styleInline"] = "blank";
@@ -3230,7 +3234,11 @@ async function test_capture_css_styleInline() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('blockquote').getAttribute('style') === ``);
+  var elems = doc.querySelectorAll('blockquote');
+  assert(elems[0].getAttribute('style') === ``);
+  assert(elems[1].getAttribute('style') === ``);
+  assert(elems[2].getAttribute('style') === ``);
+  assert(elems[3].getAttribute('style') === ``);
 
   /* capture.styleInline = remove */
   options["capture.styleInline"] = "remove";
@@ -3246,7 +3254,11 @@ async function test_capture_css_styleInline() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(!doc.querySelector('blockquote').getAttribute('style'));
+  var elems = doc.querySelectorAll('blockquote');
+  assert(!elems[0].hasAttribute('style'));
+  assert(!elems[1].hasAttribute('style'));
+  assert(!elems[2].hasAttribute('style'));
+  assert(!elems[3].hasAttribute('style'));
 }
 
 /**
