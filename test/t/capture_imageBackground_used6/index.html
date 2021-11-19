@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test neverused background images that are used in inline style</title>
+
+<!-- neverused -->
+<style>
+#neverused { background-image: url(./green.bmp); }
+</style>
+<style>
+@keyframes neverused {
+  from { background-image: url(./green.bmp); }
+  to { transform: translateX(40px); }
+}
+</style>
+</head>
+<body>
+<blockquote style="background-image: url(./green.bmp);">inline</blockquote>
+</body>
+</html>

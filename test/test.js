@@ -5154,6 +5154,39 @@ async function test_capture_imageBackground_used5() {
 }
 
 /**
+ * Do not count background images referenced only by inline styles.
+ *
+ * capture.imageBackground
+ */
+async function test_capture_imageBackground_used6() {
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+    "capture.styleInline": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used6/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['green.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[0].textContent.trim() === `#neverused { background-image: url(""); }`);
+  assert(styleElems[1].textContent.trim() === `\
+@keyframes neverused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}`);
+
+  assert(doc.querySelector('blockquote').getAttribute('style').trim() === `background-image: url("green.bmp");`);
+}
+
+/**
  * Check if option works
  *
  * capture.favicon

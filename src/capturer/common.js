@@ -2297,6 +2297,10 @@
                     cssText: elem.getAttribute("style"),
                     refUrl,
                     isInline: true,
+                    settings: {
+                      usedCssFontUrl: undefined,
+                      usedCssImageUrl: undefined,
+                    },
                   });
                   captureRewriteAttr(elem, "style", response);
                   return response;
@@ -2310,6 +2314,10 @@
                     cssText: elem.style.cssText,
                     refUrl,
                     isInline: true,
+                    settings: {
+                      usedCssFontUrl: undefined,
+                      usedCssImageUrl: undefined,
+                    },
                   });
                   captureRewriteAttr(elem, "style", response);
                   return response;
@@ -4098,13 +4106,13 @@
           }
         },
 
-        inspectStyle(style, refUrl) {
+        inspectStyle(style, refUrl, isInline = false) {
           for (let prop of style) {
             if (prop === 'font-family') {
               this.useFont(style.getPropertyValue('font-family'));
             } else if (prop === 'animation-name') {
               this.useKeyFrame(style.getPropertyValue('animation-name'));
-            } else {
+            } else if (!isInline) {
               forEachUrl(style.getPropertyValue(prop), refUrl, (url) => {
                 this.useImage(url);
               });
@@ -4290,7 +4298,7 @@
       const inspectElement = async (elem) => {
         const {style} = elem;
         if (style) {
-          collector.inspectStyle(style, refUrl);
+          collector.inspectStyle(style, refUrl, true);
         }
 
         const shadowRoot = elem.shadowRoot;
