@@ -3509,38 +3509,41 @@ if (Node && !Node.prototype.getRootNode) {
    * the last one of those with least refresh time.
    *
    * @param {Document} doc
-   * @param {string} [refUrl] - An arbitarary reference URL. Use document.URL if not set.
+   * @param {string} [baseUrl] - An arbitarary reference URL. Use document.URL if not set.
    * @param {boolean} [includeDelayedRefresh] - Also consider meta refresh with non-0 refresh time.
    * @param {boolean} [includeNoscript] - Also consider meta refresh in <noscript>.
    * @return {string|undefined} Absolute URL of the meta refresh target.
    */
-  scrapbook.getMetaRefreshTarget = function (doc, refUrl = doc.URL,
+  scrapbook.getMetaRefreshTarget = function (doc, baseUrl = doc.URL,
       includeDelayedRefresh = false, includeNoscript = false) {
     let lastMetaRefreshTime = Infinity;
     let lastMetaRefreshUrl;
-    for (const elem of doc.querySelectorAll('meta[http-equiv="refresh"][content]')) {
-      const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
-      if (typeof metaRefresh.time !== 'undefined') {
-        if (includeDelayedRefresh || metaRefresh.time === 0) {
-          if (includeNoscript || !elem.closest('noscript')) {
-            if (metaRefresh.time <= lastMetaRefreshTime) {
-              lastMetaRefreshTime = metaRefresh.time;
-              lastMetaRefreshUrl = metaRefresh.url;
-            }
-          }
-        }
-      }
-    }
-    if (typeof lastMetaRefreshUrl !== 'undefined') {
-      for (const baseElem of doc.querySelectorAll('base[href]')) {
-        if (!baseElem.closest('svg, math')) {
-          refUrl = new URL(baseElem.getAttribute('href'), refUrl).href;
-          break;
-        }
+    let seenBaseElem = false;
+    for (const elem of doc.querySelectorAll('base[href], meta[http-equiv="refresh"][content]')) {
+      // update baseUrl when seeing the first base[href]
+      if (elem.matches('base') && !elem.closest('svg, math') && !seenBaseElem) {
+        baseUrl = new URL(elem.getAttribute('href'), baseUrl).href;
+        seenBaseElem = true;
+        continue;
       }
 
-      return new URL(lastMetaRefreshUrl, refUrl).href;
+      const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+      if (typeof metaRefresh.time === 'undefined') {
+        continue;
+      }
+      if (!(includeDelayedRefresh || metaRefresh.time === 0)) {
+        continue;
+      }
+      if (!(includeNoscript || !elem.closest('noscript'))) {
+        continue;
+      }
+      if (metaRefresh.time > lastMetaRefreshTime) {
+        continue;
+      }
+      lastMetaRefreshTime = metaRefresh.time;
+      lastMetaRefreshUrl = new URL(metaRefresh.url, baseUrl).href;
     }
+    return lastMetaRefreshUrl;
   };
 
   /**
