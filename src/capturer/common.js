@@ -3476,17 +3476,17 @@
     return redirectedUrlMain + sourceUrlHash;
   };
 
-  capturer.resolveRelativeUrl = function (relativeUrl, baseUrl) {
-    let url = relativeUrl;
-
-    // do not resolve empty or pure hash URL
-    if (url && !url.startsWith("#")) {
-      try {
-        url = new URL(relativeUrl, baseUrl).href;
-      } catch (ex) {}
+  capturer.resolveRelativeUrl = function (url, baseUrl) {
+    // do not resolve an empty or pure hash URL
+    if (!url || url.startsWith("#")) {
+      return url;
     }
 
-    return url;
+    try {
+      return new URL(url, baseUrl).href;
+    } catch (ex) {
+      return url;
+    }
   };
 
   capturer.getErrorUrl = function (sourceUrl, options) {
