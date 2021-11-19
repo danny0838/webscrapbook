@@ -2235,6 +2235,18 @@
             break;
           }
 
+          // cite
+          case "q":
+          case "blockquote":
+          case "ins":
+          case "del": {
+            if (elem.hasAttribute("cite")) {
+              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("cite"), refUrl);
+              captureRewriteAttr(elem, "cite", newUrl);
+            }
+            break;
+          }
+
           // xmp
           case "xmp": {
             // escape </xmp> as textContent can contain HTML

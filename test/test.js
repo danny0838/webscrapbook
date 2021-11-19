@@ -6841,6 +6841,27 @@ async function test_capture_applet() {
 }
 
 /**
+ * Check if "cite" attribute is correctly rewritten
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_cite() {
+  var blob = await capture({
+    url: `${localhost}/capture_cite/cite.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_cite/test.html`);
+  assert(doc.querySelector('blockquote').getAttribute('cite') === `${localhost}/capture_cite/test.html`);
+  assert(doc.querySelector('ins').getAttribute('cite') === `${localhost}/capture_cite/test.html`);
+  assert(doc.querySelector('del').getAttribute('cite') === `${localhost}/capture_cite/test.html`);
+}
+
+/**
  * Check if option works
  *
  * capture.ping
