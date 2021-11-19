@@ -2071,33 +2071,28 @@ ${scrapbook.escapeHtml(content)}
         const copyinfo = async ({itemElems, modifiers}) => {
           if (!itemElems.length) { return; }
 
-          const items = [];
-          {
-            if (modifiers.shiftKey || modifiers.ctrlKey) {
-              const elems = new Set();
-              for (const itemElem of itemElems) {
-                elems.add(itemElem);
-                this.tree.loadDescendants(itemElem);
-                for (const elem of itemElem.querySelectorAll('li[data-id]')) {
-                  elems.add(elem);
-                }
-              }
-              itemElems = elems;
-            }
+          if (modifiers.shiftKey || modifiers.ctrlKey) {
+            const elems = new Set();
             for (const itemElem of itemElems) {
-              const id = itemElem.getAttribute('data-id');
-              items.push(this.book.meta[id]);
+              elems.add(itemElem);
+              this.tree.loadDescendants(itemElem);
+              for (const elem of itemElem.querySelectorAll('li[data-id]')) {
+                elems.add(elem);
+              }
             }
+            itemElems = Array.from(elems);
           }
 
           const plainFormat = scrapbook.getOption("scrapbook.copyItemInfoFormatPlain");
-          const plainText = items.map((item) => {
-            return scrapbook.ItemInfoFormatter.format(item, plainFormat, {book: this.book});
+          const plainText = itemElems.map((itemElem) => {
+            const item = this.book.meta[itemElem.getAttribute('data-id')];
+            return ItemInfoFormatter.format(item, plainFormat, {book: this.book, tree: this.tree, itemElem});
           }).join('\r\n');
 
           const htmlFormat = scrapbook.getOption("scrapbook.copyItemInfoFormatHtml");
-          const htmlText = htmlFormat ? items.map((item) => {
-            return scrapbook.ItemInfoFormatter.format(item, htmlFormat, {book: this.book});
+          const htmlText = htmlFormat ? itemElems.map((itemElem) => {
+            const item = this.book.meta[itemElem.getAttribute('data-id')];
+            return ItemInfoFormatter.format(item, htmlFormat, {book: this.book, tree: this.tree, itemElem});
           }).join('<br>') : "";
 
           copyToClipboard(plainText, htmlText);
@@ -3001,6 +2996,46 @@ Redirecting to file <a href="index.md">index.md</a>
       },
     },
   };
+
+  class ItemInfoFormatter extends scrapbook.ItemInfoFormatter {
+    constructor(item, {book, tree, itemElem} = {}) {
+      super(item, {book});
+      this.tree = tree;
+      this.itemElem = itemElem;
+    }
+
+    format_folder() {
+      const {item, book, tree, itemElem} = this;
+      const rv = [];
+      let elem = itemElem;
+      while (true) {
+        const {parentItemElem, parentItemId, index} = tree.getParentAndIndex(elem);
+        if (!parentItemId || book.isSpecialItem(parentItemId)) {
+          break;
+        }
+        const meta = book.meta[parentItemId];
+        rv.unshift(meta.title);
+        elem = parentItemElem;
+      }
+      return rv.join('/');
+    }
+
+    format_path() {
+      const {item, book, tree, itemElem} = this;
+      const rv = [item.title];
+      let elem = itemElem;
+      while (true) {
+        const {parentItemElem, parentItemId, index} = tree.getParentAndIndex(elem);
+        if (!parentItemId || book.isSpecialItem(parentItemId)) {
+          break;
+        }
+        const meta = book.meta[parentItemId];
+        rv.unshift(meta.title);
+        elem = parentItemElem;
+      }
+      return rv.join('/');
+    }
+  }
 
   scrapbook.addMessageListener((message, sender) => {
     if (!message.cmd.startsWith("sidebar.")) { return false; }
