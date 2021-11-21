@@ -3,9 +3,15 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [0.144.0] - 2021-11-21
+* Added support of rewriting the `cite` attribute for several elements.
+* Added support of handling the `ping` attribute for anchor elements, with a new option `capture.ping` to tweak the behavior.
+* Resources used only by inline styles are no more counted as used when `Style images` is `Save used`.
+* Added support of `%folder%` and `%path%` formatters for `Copy info` command of the sidebar.
+
 ## [0.143.0] - 2021-11-18
 * Added support of capturing the source document embedded through an `<embed>` tag.
-* Added support of handling legacy HTML attributes for a capture: embed[pluginspage], object[codebase], object[archive], object[classid], applet[codebase], applet[classid].
+* Added support of handling legacy HTML attributes for a capture: `embed[pluginspage]`, `object[codebase]`, `object[archive]`, `object[classid]`, `applet[codebase]`, `applet[classid]`.
 * Fixed an issue of message length error for Chromium if a page to be captured or saved exceeds around 50MB.
 * Fixed an issue that `View source` in the current tab doesn't create new tabs when multiple items are selected.
 * Fixed an issue that a link like "foo.html#?bar" is not shown in the sitemap.
