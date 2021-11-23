@@ -199,16 +199,22 @@
     itemReduceContainer(elem) {
       if (elem === this.rootElem) { return; }
       if (!elem.container) { return; }
-      if (elem.container.hasAttribute('data-loaded') && !elem.container.hasChildNodes()) {
-        // remove toggler
-        if (this.treeElem.contains(elem.toggler)) {
-          elem.toggler.remove();
-        }
+      if (elem.container.hasChildNodes()) { return; }
 
-        // remove container
-        elem.container.remove();
-        delete elem.container;
+      if (!elem.container.hasAttribute('data-loaded')) {
+        const toc = this.book.toc[elem.getAttribute('data-id')];
+        if (toc && toc.length) {
+          return;
+        }
       }
+
+      // remove toggler
+      elem.toggler.remove();
+      delete elem.toggler;
+
+      // remove container
+      elem.container.remove();
+      delete elem.container;
     }
 
     /**
@@ -340,7 +346,15 @@
       Array.prototype.filter.call(
         this.treeElem.querySelectorAll(`[data-id="${CSS.escape(parentId)}"]`),
         (parentElem) => {
-          if (!(this.treeElem.contains(parentElem) && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
+          if (!(this.treeElem.contains(parentElem) && parentElem.container)) {
+            return;
+          }
+
+          if (!parentElem.container.hasAttribute('data-loaded')) {
+            this.itemReduceContainer(parentElem);
+            return;
+          }
+
           const itemElem = parentElem.container.children[index];
 
           // prepare for updating anchor elem if needed
