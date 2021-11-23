@@ -326,7 +326,7 @@
     insertItem(id, parentId, index) {
       for (const parentElem of this.treeElem.querySelectorAll(`[data-id="${CSS.escape(parentId)}"]`)) {
         this.itemMakeContainer(parentElem);
-        if (!parentElem.container.hasAttribute('data-loaded')) { return; }
+        if (!parentElem.container.hasAttribute('data-loaded')) { continue; }
         this.addItem(id, parentElem, index);
       }
     }
