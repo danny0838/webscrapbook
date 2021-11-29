@@ -97,7 +97,7 @@
       }
 
       if (gTaskInfo.options["capture.saveAs"] === "singleHtml") {
-        for (const elem of document.querySelectorAll(`.ui-captureDownLink-inDepth`)) {
+        for (const elem of document.querySelectorAll(`.ui-downLink-inDepth`)) {
           elem.hidden = true;
         }
       }
