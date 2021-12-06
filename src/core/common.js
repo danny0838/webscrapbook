@@ -2160,8 +2160,8 @@ if (Node && !Node.prototype.getRootNode) {
    * @return {integer} 1: a > b; 0: a = b; -1: a < b
    */
   scrapbook.versionCompare = function (a, b) {
-    //treat non-numerical characters as lower version
-    //replacing them with a negative number based on charcode of each character
+    // treat non-numerical characters as lower version
+    // replacing them with a negative number based on charcode of each character
     function fix(s) {
       return "." + (s.toLowerCase().charCodeAt(0) - 2147483647) + ".";
     }
@@ -2170,7 +2170,7 @@ if (Node && !Node.prototype.getRootNode) {
     b = ("" + b).replace(/[^0-9\.]/g, fix).split('.');
     const c = Math.max(a.length, b.length);
     for (let i = 0; i < c; i++) {
-      //convert to integer the most efficient way
+      // convert to integer with the most efficient way
       a[i] = ~~a[i];
       b[i] = ~~b[i];
 
