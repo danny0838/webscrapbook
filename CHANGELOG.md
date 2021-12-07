@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.0.0] - 2021-12-07
+* Dropped support of legacy ScrapBook objects. (Use `wsb convert sb2wsb` and `wsb convert migrate` command of PyWebScrapBook to convert pages captured using legacy ScrapBook to WebScrapBook format.)
+
 ## [0.144.0] - 2021-11-21
 * Added support of rewriting the `cite` attribute for several elements.
 * Added support of handling the `ping` attribute for anchor elements, with a new option `capture.ping` to tweak the behavior.
