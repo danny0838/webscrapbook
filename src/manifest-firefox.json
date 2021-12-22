@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "__MSG_ExtensionName__",
   "description": "__MSG_ExtensionDescription__",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Danny Lin",
   "default_locale": "en",
 
