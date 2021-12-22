@@ -60,8 +60,10 @@
     }
 
     async rebuild() {
+      const wrapper = this.treeElem.parentNode;
+
       // save scrolling
-      const {scrollLeft, scrollTop} = this.treeElem;
+      const {scrollLeft, scrollTop} = wrapper;
 
       // save current highlights
       let anchorElem = this.anchorElem;
@@ -127,8 +129,8 @@
       }
 
       // restore scrolling
-      this.treeElem.scrollLeft = scrollLeft;
-      this.treeElem.scrollTop = scrollTop;
+      wrapper.scrollLeft = scrollLeft;
+      wrapper.scrollTop = scrollTop;
     }
 
     getViewStatusKey() {
