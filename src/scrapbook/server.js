@@ -201,7 +201,7 @@
           cache,
         });
       } catch (ex) {
-        throw new RequestError('Unable to connect to backend server.');
+        throw new RequestError('Unable to connect to backend server.', {url});
       }
 
       if (!response.ok) {
