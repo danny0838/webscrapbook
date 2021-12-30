@@ -75,8 +75,6 @@
     constructor () {
       this._config = null;
       this._serverRoot = null;
-      this._user = null;
-      this._password = null;
       this._bookId = null;
       this._books = null;
     }
@@ -311,15 +309,6 @@
       // record configs
       this._bookId = (await scrapbook.cache.get({table: "scrapbookServer", key: "currentScrapbook"}, 'storage')) || "";
 
-      // Take user and password only when both are non-empty;
-      // otherwise omit both fields for the browser to try cached
-      // auth credentials.
-      this._user = scrapbook.getOption("server.user");
-      this._password = scrapbook.getOption("server.password");
-      if (!(this._user && this._password)) {
-        this._user = this._password = null;
-      }
-
       // load config from server
       {
         let rootUrlObj;
@@ -331,15 +320,25 @@
           throw new Error('Malformed server address.');
         }
 
-        // Use xhr for the first time for authentication as fetch API doesn't
+        const url = rootUrlObj.href + '?a=config&f=json&ts=' + Date.now(); // ignore cache
+
+        // Take user and password only when both are non-empty;
+        // otherwise omit both fields for the browser to try the cached
+        // auth credentials.
+        let user = await scrapbook.getOption("server.user");
+        let password = await scrapbook.getOption("server.password");
+        if (!(user && password)) {
+          user = password = null;
+        }
+
+        // Use XHR for the first time for authentication as fetch API doesn't
         // support a URL with user/password.
         let xhr;
-        const url = rootUrlObj.href + '?a=config&f=json&ts=' + Date.now(); // ignore cache
         try {
           xhr = await scrapbook.xhr({
-            url, // ignore cache
-            user: this._user,
-            password: this._password,
+            url,
+            user,
+            password,
             responseType: 'json',
             requestHeaders: {
               Accept: 'application/json, */*;q=0.1',
