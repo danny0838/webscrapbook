@@ -108,6 +108,14 @@
       this.itemDragOverCallback = itemDragOverCallback;
       this.itemDropCallback = itemDropCallback;
 
+      // In Chromium mobile (e.g. Kiwi browser 98), there is missing
+      // event.dataTransfer causing DnD not functioning well.
+      // Disallow DnD to prevent a confusion.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=1266859
+      if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.is('mobile')) {
+        this.allowDrag = false;
+      }
+
       if (this.allowSelect) {
         this.treeElem.classList.add(TREE_CLASS_SELECTABLE);
       } else {
