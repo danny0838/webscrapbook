@@ -123,17 +123,19 @@
 
     const {isPrompt, targetTab} = await (async () => {
       const currentTab = await browser.tabs.getCurrent();
+
       // currentTab === undefined => browserAction.html is a prompt diaglog;
-      // otherwise browserAction.html is opened in a tab (e.g. Firefox Android)
+      // otherwise browserAction.html is opened in a tab (e.g. Firefox or
+      // Chromium based mobile browser, or by visiting URL)
       const isPrompt = !currentTab;
 
-      const tabs = await browser.tabs.query({active: true, currentWindow: true});
-
-      const activeTab = tabs[0];
+      const activeTab = (await browser.tabs.query({active: true, currentWindow: true}))[0];
 
       // Get a target tab whenever determinable.
-      // activeTab is the page where user clicks browserAction on Firefox for Android.
-      // activeTab === currentTab if the user visits browserAction page by visiting URL.
+      // activeTab is the page where user clicks browserAction in Firefox or
+      // Chromium based mobile browser.
+      // activeTab === currentTab if the browserAction page is opened through
+      // pageAction (Firefox for Android < 55) or by visiting URL.
       const targetTab = (isPrompt || activeTab && activeTab.id !== currentTab.id)  ? activeTab : undefined;
 
       return {isPrompt, targetTab};
