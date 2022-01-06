@@ -85,15 +85,11 @@
     const tabs = await browser.tabs.query(filter);
     return tabs.filter(t => (
       scrapbook.isContentPage(t.url, allowFileAccess) &&
-      // Select active and highlighted tabs.
-      //
-      // Normally active tabs are always highlighted, but in some browsers
-      // (e.g. Opera 58) Tab.highlighted = false, so check for active tabs
-      // explictly as a fallback.
-      //
-      // Firefox for Android < 54 does not support Tab.highlighted. Treat
-      // undefined as true.
-      (t.active || t.highlighted !== false)
+
+      // Normally active tabs are always highlighted. Also check for .active as
+      // .highlighted doesn't work in some browsers.
+      // - In Opera 58, .highlighted = false for all tabs.
+      (t.active || t.highlighted)
     ));
   };
 
