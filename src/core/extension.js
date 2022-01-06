@@ -78,6 +78,14 @@
    * Query for highlighted ("selected") tabs
    */
   scrapbook.getHighlightedTabs = async function (filter = {currentWindow: true}) {
+    // In Chromium mobile (e.g. Kiwi browser 98), all tabs.Tab have
+    // .highlighted = true and sometimes all tabs.Tab have .active = false
+    // (e.g. when at browser action page).
+    // Query with {active: true} to get the real active tabs instead.
+    if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.is('mobile')) {
+      return await browser.tabs.query(Object.assign({}, filter, {active: true}));
+    }
+
     const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
     // Querying for {highlighted:true} doesn't get highlighted tabs in some
     // Firefox version (e.g. 55), so we query for all tabs and filter them
