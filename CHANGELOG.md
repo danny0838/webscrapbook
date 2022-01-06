@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.1.0] - 2022-01-06
+* Fixed an issue that all tabs are treated as selected when performing a capture or so in a Chromium-based mobile browser.
+* Disable drag-and-drop in a Chromium-based mobile browser to prevent an unfixed bug.
+* Internal code optimization.
+
 ## [1.0.1] - 2021-12-22
 * Fixed an issue that the sidebar scrolling point is reset when the tree refreshes.
 
