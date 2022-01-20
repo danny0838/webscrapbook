@@ -1386,7 +1386,7 @@ if (Node && !Node.prototype.getRootNode) {
   scrapbook.validateFilename = function (filename, forceAscii) {
     let fn = filename
         // control chars are bad for filename
-        .replace(/[\x00-\x1F\x7F]+/g, "")
+        .replace(/[\x00-\x1F\x7F\x80-\x9F]+/g, "")
         // leading/trailing spaces and dots are not allowed on Windows
         .replace(/^\./, "_.").replace(/^ +/, "").replace(/[. ]+$/, "")
         // bad chars on most OS
