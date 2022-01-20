@@ -452,7 +452,19 @@
 
       const fetchMap = capturer.captureInfo.get(timeId).fetchMap;
       const fetchRole = headerOnly ? 'head' : 'blob';
-      const fetchToken = getFetchToken(sourceUrlMain, fetchRole);
+
+      // fail out if sourceUrl is invalid
+      let fetchToken;
+      try {
+        fetchToken = getFetchToken(sourceUrlMain, fetchRole);
+      } catch (ex) {
+        return Object.assign(response, {
+          error: {
+            name: 'URIError',
+            message: ex.message,
+          },
+        });
+      }
 
       // check for previous fetch
       {
@@ -509,6 +521,7 @@
               if (xhr.readyState !== 2) { return; }
 
               // check for previous fetch if redirected
+              // xhr.responseURL must be valid; otherwise the onerror event of the XHR will be triggered
               const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
               if (responseUrlMain !== sourceUrlMain) {
                 const responseFetchToken = getFetchToken(responseUrlMain, fetchRole);
