@@ -377,7 +377,7 @@
                 }
                 case "path": {
                   u.search = u.hash = '';
-                  return '/^' + scrapbook.escapeRegExp(u.href).replace(/\\\//g, '/') + '/';
+                  return '/^' + scrapbook.escapeRegExp(u.href).replace(/\\\//g, '/') + '(?=[?#]|$)/';
                 }
               }
             } catch (ex) {
