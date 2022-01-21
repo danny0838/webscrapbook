@@ -703,14 +703,14 @@ if (Node && !Node.prototype.getRootNode) {
   /****************************************************************************
    * Cache system
    *
-   * - IndexedDb is powerful but more restricted (not available for a content
-   *   script and a Firefox private window, and not shared with an incognito
-   *   window in Chromium). Arbitrarily use storage if needed.
-   * - Storage API does not support storing a Blob or File in Firefox < 56 and
-   *   Chromium. A shim with byte-string based object is implemented, but it's
-   *   not performant and should thus be avoided whenever possible.
-   * - By default, use indexedDB for Chromium and storage API for Firefox, due
-   *   to above reasons.
+   * - IndexedDB is powerful and performant but not available for content
+   *   scripts. Data in normal windows and incognito windows aren't shared with
+   *   each other (due to the split mode in Chromium; IndexedDB is not
+   *   available for Firefox private windows and will be automatically shifted
+   *   to storage).
+   * - Storage API does not support storing Blob, File, etc., in Firefox < 56
+   *   and Chromium. A shim with byte-string based object is implemented, but
+   *   it's not performant and should thus be avoided whenever possible.
    ***************************************************************************/
 
   /**
@@ -795,11 +795,7 @@ if (Node && !Node.prototype.getRootNode) {
 
     get current() {
       if (this._current === 'auto') {
-        if (scrapbook.userAgent.is('gecko')) {
-          this._current = 'storage';
-        } else {
-          this._current = 'indexedDB';
-        }
+        this._current = 'indexedDB';
       }
       return this._current;
     },
@@ -1037,7 +1033,12 @@ if (Node && !Node.prototype.getRootNode) {
               resolve(event.target.result);
             };
           });
-        }, "readonly");
+        }, "readonly").catch(ex => {
+          if (ex.name === 'InvalidStateError') {
+            return scrapbook.cache.storage.get(key);
+          }
+          throw ex;
+        });
       },
 
       async getAll(filter) {
@@ -1058,13 +1059,23 @@ if (Node && !Node.prototype.getRootNode) {
               cursor.continue();
             };
           });
-        }, "readonly");
+        }, "readonly").catch(ex => {
+          if (ex.name === 'InvalidStateError') {
+            return scrapbook.cache.storage.getAll(filter);
+          }
+          throw ex;
+        });
       },
 
       async set(key, value) {
         return await this._transaction(async (objectStore) => {
           objectStore.put(value, key);
-        }, "readwrite");
+        }, "readwrite").catch(ex => {
+          if (ex.name === 'InvalidStateError') {
+            return scrapbook.cache.storage.set(key, value);
+          }
+          throw ex;
+        });
       },
 
       async remove(keys) {
@@ -1091,7 +1102,12 @@ if (Node && !Node.prototype.getRootNode) {
           for (const key of keys) {
             objectStore.delete(key);
           }
-        }, "readwrite");
+        }, "readwrite").catch(ex => {
+          if (ex.name === 'InvalidStateError') {
+            return scrapbook.cache.storage.remove(keys);
+          }
+          throw ex;
+        });
       },
     },
 
