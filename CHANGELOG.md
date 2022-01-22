@@ -7,7 +7,7 @@
 * Fixed an issue that some control chars in a filename causes a downloading error.
 * Fixed the bad path rule filler for in-depth capture.
 * Fixed an inaccurate error log message for a link with an invalid URL.
-* Intemediate data is now cached using indexedDB when available in Firefox.
+* Intermediate data is now cached using indexedDB when available in Firefox.
 
 ## [1.1.0] - 2022-01-06
 * Fixed an issue that all tabs are treated as selected when performing a capture or so in a Chromium-based mobile browser.
