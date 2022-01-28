@@ -3834,6 +3834,64 @@ if (Node && !Node.prototype.getRootNode) {
    ***************************************************************************/
 
   /**
+   * Wrapped browser.windows.create() with automatic compatibility handling.
+   */
+  scrapbook.createWindow = async function (createData) {
+    createData = Object.assign({}, createData);
+    const updateDatas = [];
+
+    if (scrapbook.userAgent.is('gecko')) {
+      let updateData = {};
+
+      // Firefox does not support createData with focused.
+      // Such call never returns.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1213484
+      if (typeof createData.focused !== 'undefined') {
+        updateData.focused = createData.focused;
+        delete createData.focused;
+      }
+
+      // Firefox does not support createData with left or top.
+      // Such properties are ignored.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1271047
+      if (typeof createData.left !== 'undefined') {
+        updateData.left = createData.left;
+        delete createData.left;
+      }
+      if (typeof createData.top !== 'undefined') {
+        updateData.top = createData.top;
+        delete createData.top;
+      }
+
+      if (Object.keys(updateData).length) {
+        updateDatas.push(updateData);
+      }
+    }
+
+    if (['minimized', 'maximized', 'fullscreen'].includes(createData.state)) {
+      // focused doesn't work on a window with any of the states.
+      // Other properties cannot be used with any of the states.
+      // Change state after creation instead.
+      if (typeof createData.focused !== 'undefined'
+          || typeof createData.top !== 'undefined'
+          || typeof createData.left !== 'undefined'
+          || typeof createData.width !== 'undefined'
+          || typeof createData.height !== 'undefined'
+          ) {
+        updateDatas.push({state: createData.state});
+        delete createData.state;
+      }
+    }
+
+    const winNew = await browser.windows.create(createData);
+    for (const updateData of updateDatas) {
+      await browser.windows.update(winNew.id, updateData);
+    }
+
+    return winNew;
+  };
+
+  /**
    * A polled prompt for a multi-line input.
    */
   scrapbook.prompt = function (message, prefill = '', linebreak = '  ') {

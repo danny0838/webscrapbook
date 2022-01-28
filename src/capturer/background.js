@@ -479,6 +479,7 @@
       taskInfo,
       windowCreateData: {
         focused: false,
+        state: 'minimized',
       },
       tabCreateData: {
         active: false,
@@ -486,24 +487,7 @@
       waitForResponse: false,
     };
 
-    // Firefox does not support browser.windows.create({focused}),
-    // such call never returns.
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=1213484
-    if (scrapbook.userAgent.is('gecko')) {
-      delete args.windowCreateData;
-    }
-
-    const captureTab = await scrapbook.invokeCaptureEx(args);
-    if (browser.windows) {
-      // In Chromium for Android (e.g. Kiwi Browser):
-      // - windowId of any tab is 1, which refers a non-existent window.
-      // - browser.windows.update() for a non-existent window does nothing
-      //   rather than throw.
-      await browser.windows.update(captureTab.windowId, {
-        focused: false,
-        state: 'minimized',
-      });
-    }
+    await scrapbook.invokeCaptureEx(args);
 
     if (isRepeat) {
       return;

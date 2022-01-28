@@ -293,7 +293,7 @@
     let tab;
     if (browser.windows) {
       const win = await browser.windows.getCurrent();
-      ({tabs: [tab]} = await browser.windows.create(Object.assign({
+      ({tabs: [tab]} = await scrapbook.createWindow(Object.assign({
         url,
         type: 'popup',
         width: 400,
@@ -442,7 +442,7 @@
     let tab;
     if (browser.windows) {
       const win = await browser.windows.getCurrent();
-      ({tabs: [tab]} = await browser.windows.create(Object.assign({
+      ({tabs: [tab]} = await scrapbook.createWindow(Object.assign({
         url,
         type: 'popup',
         width: 350,
@@ -513,7 +513,7 @@
           drawAttention: true,
         });
       } else {
-        sidebarWindow = await browser.windows.create({
+        sidebarWindow = await scrapbook.createWindow({
           url,
           left,
           top,
@@ -522,16 +522,6 @@
           type: 'popup',
         });
         sidebarTab = sidebarWindow.tabs[0];
-
-        // Fix a bug for Firefox that positioning not work for windows.create
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=1271047
-        // @FIXME: this occasionally doesn't work.
-        if (scrapbook.userAgent.is('gecko')) {
-          await browser.windows.update(sidebarWindow.id, {
-            left,
-            top,
-          });
-        }
       }
 
       // update the current window if it exists
