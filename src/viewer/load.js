@@ -135,21 +135,19 @@
     async openUrl(url, inNewTab = false) {
       if (inNewTab) {
         // In Firefox, a window.open popup is blocked by default, and the
-        // user has to manually add an exception to the popup blocker.
-        // Morever, a bug causes the notification not shown for the
-        // blocked popup.
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=1396745
+        // dialog isn't shown as the main tab is immediately redirected. As a
+        // result, the user has to tweak the popup blocker setting in prior to
+        // see the popup. Use browser.tabs.create to workaround the issue.
         //
-        // browser.tabs.create fails silently in Firefox private window.
-        //
-        // browser.tabs is undefined in a Firefox addon page in a frame.
+        // @FIXME:
+        // In Firefox < 74, browser.tabs is undefined when the page is
+        // redirected from a browser.webRequest event handler (either through a
+        // blocking redirect or browser.tabs.update).
         if (scrapbook.userAgent.is('gecko')) {
           try {
-            const tab = await browser.tabs.getCurrent();
-            if (tab.incognito) { throw new Error('private window'); }
             return await browser.tabs.create({url, active: false});
           } catch (ex) {
-            // pass
+            console.error(ex);
           }
         }
 
