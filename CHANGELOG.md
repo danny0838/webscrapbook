@@ -3,6 +3,12 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.3.0] - 2022-02-16
+* Fixed an error when a capture is invoked from the context menu of a Firefox private window.
+* Fixed an error when a capture is invoked from a private tab in Firefox for Android.
+* Fixed an issue that the archive viewer doesn't open additional tabs for a MAFF with multiple web pages in a Firefox private window.
+* Adjusted sidebar updating mechanism as a tentative fix for an issue that items get disappeared or misplaced after several move/link/copy operations.
+
 ## [1.2.0] - 2022-01-21
 * Fixed an issue that some control chars in a filename causes a downloading error.
 * Fixed the bad path rule filler for in-depth capture.
