@@ -821,7 +821,7 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
       const indexFile = viewerData.indexFile || "index.html";
 
       /* load zip content from previous cache */
-      const entries = Object.entries(await scrapbook.cache.getAll(key));
+      const entries = Object.entries(await scrapbook.cache.getAll(key, 'indexedDB'));
 
       if (!entries.length) {
         throw new Error(`Archive '${id}' does not exist or has been cleared.`);

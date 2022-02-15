@@ -268,8 +268,8 @@
   capturer.saveFileCache = async function ({timeId, path, blob}) {
     if (capturer.captureInfo.get(timeId).useDiskCache) {
       const key = {table: "pageCache", id: timeId, path};
-      await scrapbook.cache.set(key, blob);
-      blob = await scrapbook.cache.get(key);
+      await scrapbook.cache.set(key, blob, 'indexedDB');
+      blob = await scrapbook.cache.get(key, 'indexedDB');
     }
 
     const files = capturer.captureInfo.get(timeId).files;
@@ -336,7 +336,7 @@
     const tableSet = new Set(["pageCache", "fetchCache"]);
     await scrapbook.cache.remove((obj) => {
       return tableSet.has(obj.table) && obj.id === timeId;
-    });
+    }, 'indexedDB');
   };
 
   /**
@@ -398,8 +398,8 @@
 
     const setCache = async (id, token, data) => {
       const key = {table: "fetchCache", id, token};
-      await scrapbook.cache.set(key, data);
-      return await scrapbook.cache.get(key);
+      await scrapbook.cache.set(key, data, 'indexedDB');
+      return await scrapbook.cache.get(key, 'indexedDB');
     };
 
     const fetch = capturer.fetch = async function (params) {

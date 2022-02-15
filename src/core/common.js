@@ -704,13 +704,13 @@ if (Node && !Node.prototype.getRootNode) {
    * Cache system
    *
    * - IndexedDB is powerful and performant but not available for content
-   *   scripts. Data in normal windows and incognito windows aren't shared with
-   *   each other (due to the split mode in Chromium; IndexedDB is not
-   *   available for Firefox private windows and will be automatically shifted
-   *   to storage).
+   *   scripts, and stored data in normal and incognito windows aren't shared
+   *   with each other. IndexedDB is not available in Firefox private windows
+   *   and will automatically fallback to storage.
    * - Storage API does not support storing Blob, File, etc., in Firefox < 56
    *   and Chromium. A shim with byte-string based object is implemented, but
    *   it's not performant and should thus be avoided whenever possible.
+   * - Use storage by default and use indexedDB when appropriate.
    ***************************************************************************/
 
   /**
@@ -795,7 +795,7 @@ if (Node && !Node.prototype.getRootNode) {
 
     get current() {
       if (this._current === 'auto') {
-        this._current = 'indexedDB';
+        this._current = 'storage';
       }
       return this._current;
     },

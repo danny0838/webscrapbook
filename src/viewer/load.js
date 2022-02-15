@@ -276,7 +276,7 @@
           });
 
           const key = {table: "pageCache", id: uuid, path: inZipPath};
-          await scrapbook.cache.set(key, data);
+          await scrapbook.cache.set(key, data, 'indexedDB');
         }
 
         /* Retrieve indexFiles */
