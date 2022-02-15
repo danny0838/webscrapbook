@@ -345,60 +345,58 @@
      * @param {HTMLElement[]} [itemElems] - Cached item elements in the tree for faster access.
      */
     removeItem(parentId, index, itemElems) {
-      Array.prototype.filter.call(
-        this.treeElem.querySelectorAll(`[data-id="${CSS.escape(parentId)}"]`),
-        (parentElem) => {
-          if (!(this.treeElem.contains(parentElem) && parentElem.container)) {
-            return;
-          }
+      for (const parentElem of this.treeElem.querySelectorAll(`[data-id="${CSS.escape(parentId)}"]`)) {
+        if (!(this.treeElem.contains(parentElem) && parentElem.container)) {
+          continue;
+        }
 
-          if (!parentElem.container.hasAttribute('data-loaded')) {
-            this.itemReduceContainer(parentElem);
-            return;
-          }
-
-          const itemElem = parentElem.container.children[index];
-
-          // prepare for updating anchor elem if needed
-          const updateAnchor = itemElem === this.anchorElem;
-          let anchorIndex;
-          if (updateAnchor) {
-            if (!itemElems) {
-              itemElems = this.treeElem.querySelectorAll('li[data-id]');
-            }
-            anchorIndex = Array.prototype.indexOf.call(itemElems, itemElem);
-          }
-
-          itemElem.remove();
+        if (!parentElem.container.hasAttribute('data-loaded')) {
           this.itemReduceContainer(parentElem);
+          continue;
+        }
 
-          // update anchorElem
-          if (updateAnchor && anchorIndex >= 0) {
-            let anchorElem;
+        const itemElem = parentElem.container.children[index];
 
-            // look forward for a suitable element
-            for (let i = anchorIndex, I = itemElems.length; i < I; i++) {
+        // prepare for updating anchor elem if needed
+        const updateAnchor = itemElem === this.anchorElem;
+        let anchorIndex;
+        if (updateAnchor) {
+          if (!itemElems) {
+            itemElems = this.treeElem.querySelectorAll('li[data-id]');
+          }
+          anchorIndex = Array.prototype.indexOf.call(itemElems, itemElem);
+        }
+
+        itemElem.remove();
+        this.itemReduceContainer(parentElem);
+
+        // update anchorElem
+        if (updateAnchor && anchorIndex >= 0) {
+          let anchorElem;
+
+          // look forward for a suitable element
+          for (let i = anchorIndex, I = itemElems.length; i < I; i++) {
+            if (this.treeElem.contains(itemElems[i]) && !itemElems[i].closest('[hidden]')) {
+              anchorElem = itemElems[i];
+              break;
+            }
+          }
+
+          if (!anchorElem) {
+            // look backward for a suitable element if not found
+            for (let i = anchorIndex - 1; i >= 0; i--) {
               if (this.treeElem.contains(itemElems[i]) && !itemElems[i].closest('[hidden]')) {
                 anchorElem = itemElems[i];
                 break;
               }
             }
-
-            if (!anchorElem) {
-              // look backward for a suitable element if not found
-              for (let i = anchorIndex - 1; i >= 0; i--) {
-                if (this.treeElem.contains(itemElems[i]) && !itemElems[i].closest('[hidden]')) {
-                  anchorElem = itemElems[i];
-                  break;
-                }
-              }
-            }
-
-            if (anchorElem) {
-              this.anchorItem(anchorElem);
-            }
           }
-        });
+
+          if (anchorElem) {
+            this.anchorItem(anchorElem);
+          }
+        }
+      }
     }
 
     moveItem(id, currentParentId, currentIndex, targetParentId, targetIndex) {
@@ -408,15 +406,13 @@
         // When moving inside the same parent, we can simply re-insert each
         // item element to the new position since the number of parent elements
         // must match.
-        Array.prototype.filter.call(
-          this.treeElem.querySelectorAll(`[data-id="${CSS.escape(currentParentId)}"]`),
-          (parentElem) => {
-            if (!(this.treeElem.contains(parentElem) && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { return; }
-            const container = parentElem.container;
-            const itemElem = container.children[currentIndex];
-            itemElem.remove();  // remove itemElem to get container.children recalculated
-            container.insertBefore(itemElem, container.children[targetIndex]);
-          });
+        for (const parentElem of this.treeElem.querySelectorAll(`[data-id="${CSS.escape(currentParentId)}"]`)) {
+          if (!(this.treeElem.contains(parentElem) && parentElem.container && parentElem.container.hasAttribute('data-loaded'))) { continue; }
+          const container = parentElem.container;
+          const itemElem = container.children[currentIndex];
+          itemElem.remove();  // remove itemElem to get container.children recalculated
+          container.insertBefore(itemElem, container.children[targetIndex]);
+        }
       } else {
         // We can't simply insert elements to target parent since the number
         // of elements for currentParentId and targetParentId may not match.
