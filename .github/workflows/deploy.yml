@@ -1,0 +1,17 @@
+name: "deploy"
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run build process
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/build/pack.sh"
+          "${GITHUB_WORKSPACE}/build/pack.sh"
+      - name: Browser Plugin Publish
+        uses: plasmo-corp/bpp@v0.0.0
+        with:
+          keys: ${{ secrets.SUBMIT_KEYS }}
