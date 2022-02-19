@@ -996,15 +996,15 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
      * @param {Object} params
      * @param {?Object} params.item - null to generate a default item. Overwrites existed id.
      * @param {?string} params.parentId - null to not add to any parent
-     * @param {?integer} params.index - null or Infinity to insert to last
+     * @param {?integer} [params.index] - non-integer to insert to last
      * @return {Object}
      */
     addItem({
       item,
       parentId = 'root',
-      index = Infinity,
+      index,
     }) {
-      if (index === null) {
+      if (!Number.isInteger(index)) {
         index = Infinity;
       }
 
@@ -1099,11 +1099,11 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
      *
      * @param {Object} params
      * @param {string} params.id
-     * @param {?string} params.currentParentId - null to not removed from certain parent
-     *         (useful for checking stale items)
+     * @param {?string} [params.currentParentId] - falsy to not remove from any parent
+     *     (useful for checking a stale item)
      * @param {integer} params.currentIndex
      * @param {string} [params.targetParentId] - ID of the recycle bin item
-     * @param {integer} [params.targetIndex] - Infinity to insert to last
+     * @param {?integer} [params.targetIndex] - non-integer to insert to last
      * @return {integer} the real insertion index
      */
     recycleItemTree({
@@ -1111,8 +1111,12 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       currentParentId,
       currentIndex,
       targetParentId = 'recycle',
-      targetIndex = Infinity,
+      targetIndex,
     }) {
+      if (!Number.isInteger(targetIndex)) {
+        targetIndex = Infinity;
+      }
+
       // remove from parent TOC
       if (currentParentId && this.toc[currentParentId]) {
         this.toc[currentParentId].splice(currentIndex, 1);
@@ -1134,16 +1138,12 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
         }
         this.toc[targetParentId].splice(targetIndex, 0, id);
 
-        if (!isFinite(targetIndex)) {
-          targetIndex = this.toc[targetParentId].length - 1;
-        }
-
         // record recycled time and original parent ID and in meta
         this.meta[id].parent = currentParentId;
         this.meta[id].recycled = scrapbook.dateToId();
       }
 
-      return targetIndex;
+      return isFinite(targetIndex) ? targetIndex : this.toc[targetParentId].length - 1;
     }
 
     /**
@@ -1151,10 +1151,11 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
      *
      * @param {Object} params
      * @param {string} params.id
-     * @param {?string} params.currentParentId - null if none
+     * @param {?string} [params.currentParentId] - falsy to not remove from any parent
+     *     (useful for generating a link item)
      * @param {integer} params.currentIndex
      * @param {integer} params.targetParentId
-     * @param {integer} [params.targetIndex] - Infinity to insert to last
+     * @param {?integer} [params.targetIndex] - non-integer to insert to last
      * @return {integer} the real insertion index
      */
     moveItem({
@@ -1162,8 +1163,12 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       currentParentId,
       currentIndex,
       targetParentId,
-      targetIndex = Infinity,
+      targetIndex,
     }) {
+      if (!Number.isInteger(targetIndex)) {
+        targetIndex = Infinity;
+      }
+
       // fix when moving within the same parent
       // -1 as the current item will be removed from the original position
       if (currentParentId === targetParentId && targetIndex > currentIndex) {
@@ -1184,10 +1189,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       }
       this.toc[targetParentId].splice(targetIndex, 0, id);
 
-      if (!isFinite(targetIndex)) {
-        targetIndex = this.toc[targetParentId].length - 1;
-      }
-      return targetIndex;
+      return isFinite(targetIndex) ? targetIndex : this.toc[targetParentId].length - 1;
     }
 
     /**

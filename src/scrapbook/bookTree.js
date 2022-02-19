@@ -222,7 +222,7 @@
     /**
      * Add an item which is already in the scrapbook to the tree DOM
      */
-    addItem(id, parent, index = Infinity) {
+    addItem(id, parent, index) {
       const meta = this.book.meta[id];
       if (!meta) {
         return null;

@@ -217,8 +217,18 @@
 
     /**
      * Add an item to DOM
+     *
+     * @param {Object} params
+     * @param {Object} params.item - item to add
+     * @param {HTMLElement} params.parent - parent to insert the item
+     * @param {?integer} [params.index] - non-integer to insert to last
+     * @return {HTMLLIElement}
      */
-    addItem(item, parent = this.rootElem.container, index = Infinity) {
+    addItem(item, parent = this.rootElem.container, index) {
+      if (!Number.isInteger(index)) {
+        index = Infinity;
+      }
+
       // create element
       const elem = document.createElement('li');
       const div = elem.controller = elem.appendChild(document.createElement('div'));
