@@ -1318,6 +1318,9 @@
           targetIndex,
         });
 
+        // update DOM
+        this.tree.moveItem(itemId, parentItemId, index, targetId, newIndex);
+
         targetIndex = newIndex;
       }
 
@@ -1329,8 +1332,6 @@
           await book.loadTreeFiles(true);  // update treeLastModified
         },
       });
-
-      await this.rebuild();
     },
 
     async linkItems(sourceItemElems, targetId, targetIndex) {
@@ -1350,6 +1351,9 @@
           targetIndex,
         });
 
+        // update DOM
+        this.tree.insertItem(itemId, targetId, newIndex);
+
         targetIndex = newIndex + 1;
       }
 
@@ -1361,8 +1365,6 @@
           await book.loadTreeFiles(true);  // update treeLastModified
         },
       });
-
-      await this.rebuild();
     },
 
     async copyItems({src, bookId: sourceBookId, treeLastModified, items: sourceItems},
@@ -1508,6 +1510,11 @@
             targetIndex,
           });
 
+          // update DOM
+          if (targetBook === this.book) {
+            this.tree.insertItem(itemId, targetParentId, targetIndex);
+          }
+
           return newIndex;
         };
 
@@ -1590,8 +1597,6 @@
         }
 
         await book.loadTreeFiles(true);  // update treeLastModified
-
-        await this.rebuild();
       };
 
       await sourceBook.transaction({
