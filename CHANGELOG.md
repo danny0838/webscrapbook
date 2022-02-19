@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.3.1] - 2022-02-19
+* Fixed an issue that an item moved into another item through drag-and-drop is placed at top rather than the bottem.
+
 ## [1.3.0] - 2022-02-16
 * Fixed an error when a capture is invoked from the context menu of a Firefox private window.
 * Fixed an error when a capture is invoked from a private tab in Firefox for Android.
