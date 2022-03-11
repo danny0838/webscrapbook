@@ -1000,13 +1000,13 @@
     "message": "Max length for filename to save (UTF-16 bytes):"
   },
   "OptionCaptureSaveFilenameMaxLenUtf16Tooltip": {
-    "message": "Truncate a filename whose length exceeds this defined bytes in UTF-16 encoding. \n\n• Windows usually uses UTF-16 for filename encoding and has a restriction of max file path length of 255 bytes."
+    "message": "Truncate a filename whose length exceeds the specified bytes in UTF-16 encoding. \n\n• Windows usually uses UTF-16 for filename encoding and has a restriction of max filename length of 255 bytes and max file path length of 260 bytes."
   },
   "OptionCaptureSaveFilenameMaxLenUtf8Label": {
     "message": "Max length for filename to save (UTF-8 bytes):"
   },
   "OptionCaptureSaveFilenameMaxLenUtf8Tooltip": {
-    "message": "Truncate a filename whose length exceeds this defined bytes in UTF-16 encoding. \n\n• Linux usually uses UTF-8 for filename encoding and has a restriction of max filename length of 255 bytes and max file path length of 4096 bytes."
+    "message": "Truncate a filename whose length exceeds the specified bytes in UTF-8 encoding. \n\n• Linux usually uses UTF-8 for filename encoding and has a restriction of max filename length of 255 bytes and max file path length of 4096 bytes."
   },
   "OptionCaptureSaveFilenameTooltip": {
     "message": "This determines the filename (excluding the extension) when saving a capture. A slash “/” can be used to specify a subfolder, e.g. “%create-Y%/%create-m%/%title%”.\n\nFollowing “%<param>%” template syntaxes are available:\n• %% - a literal “%”.\n• %id% - the unique identifier of the capture, e.g. “20190301124533216”.\n• %id-legacy% - the unique identifier using legacy ScrapBook format, e.g. “20190301204533”.\n• %uuid% - generates a random UUID, e.g. “941e4674-d6c7-4709-9703-a1b4359286c6”.\n• %title% - page title, or the last URL segment.\n• %source% - URL of the source.\n• %source-host% - domain name of the source, e.g. “example.com”.\n• %source-file% - filename of the source, usually the last URL segment.\n• %source-page% - page name of the source, usually the last URL segment with extension removed.\n• %create% - create time.\n\nThe <param> of %create% can be suffixed with “-<time_format>” to specify a time format (using POSIX strftime format), and the <time_format> can be suffixed with “-utc” to use UTC time. For example, “%create-F-utc%” outputs something like “2020-04-01”.\n\nBelow is a list of some frequently used POSIX strftime formats:\n• Y: year with 4 digits\n• y: year with 2 digits\n• m: month with 2 digits (01 to 12)\n• d: date of month with 2 digits (01 to 31)\n• H: hours with 2 digits (00 to 23)\n• M: minutes with 2 digits (00 to 59)\n• S: seconds with 2 digits (00 to 59)\n• F: date (YYYY-MM-DD)\n• T: time (HH:MM:SS)"
