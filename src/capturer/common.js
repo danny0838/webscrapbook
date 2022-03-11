@@ -2300,7 +2300,7 @@
             break;
           case "remove":
             captureRewriteAttr(elem, "style", null);
-            return;
+            break;
           case "save":
           default:
             switch (options["capture.rewriteCss"]) {
