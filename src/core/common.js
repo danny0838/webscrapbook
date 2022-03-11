@@ -2209,14 +2209,18 @@ if (Node && !Node.prototype.getRootNode) {
   scrapbook.crop = function (str, charLimit, byteLimit, ellipsis = '...') {
     if (charLimit) {
       if (str.length > charLimit) {
-        str = str.substring(0, charLimit - ellipsis.length);
-        const lastCharCode = str.charCodeAt(str.length - 1);
+        let cutPos = charLimit - ellipsis.length;
 
-        // prevent cutting a surrogate pair
-        if (0xD800 < lastCharCode && lastCharCode < 0xDBFF) {
-          str = str.slice(0, -1);
+        // prevent cutting between a valid surrogate pair
+        {
+          const high = str.charCodeAt(cutPos - 1);
+          const low = str.charCodeAt(cutPos);
+          if (0xD800 <= high && high <= 0xDBFF && 0xDC00 <= low && low <= 0xDFFF) {
+            cutPos -= 1;
+          }
         }
 
+        str = str.substring(0, cutPos);
         str += ellipsis;
       }
     }
