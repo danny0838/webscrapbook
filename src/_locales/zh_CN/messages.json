@@ -900,6 +900,12 @@
   "OptionCaptureMergeCssResourcesTooltip": {
     "message": "以变量替换样式表重复引用的媒体资源，可显著缩小容量。此功能只能支援较新的浏览器，例如 Chromium ≥ 49、Firefox ≥ 31、Edge ≥ 15、Safari > 9.1、Opera ≥ 36，不支援的浏览器将无法呈现相关资源。"
   },
+  "OptionCaptureNoscriptLabel": {
+    "message": "NOSCRIPT 元素:"
+  },
+  "OptionCaptureNoscriptTooltip": {
+    "message": "此选项决定 NOSCRIPT 元素的处理方式。NOSCRIPT 元素会在浏览器不支援或停用脚本时显示，通常用于提示浏览器不支援脚本，或重导向至不使用脚本的页面。不获取脚本时可考虑移除这些内容。\n\n• 保存：保留 NOSCRIPT 元素内容。\n• 清空：将 NOSCRIPT 元素清空。\n• 移除：将 NOSCRIPT 元素移除。"
+  },
   "OptionCaptureObjectLabel": {
     "message": "OBJECT 元素:"
   },

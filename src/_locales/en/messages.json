@@ -900,6 +900,12 @@
   "OptionCaptureMergeCssResourcesTooltip": {
     "message": "Replace duplicated CSS media with variables. This can significantly reduce file size, but is only supported by modern browsers, such as Chromium ≥ 49, Firefox ≥ 31, Edge ≥ 15, Safari > 9.1, and Opera ≥ 36; other browsers won't be able to show related media."
   },
+  "OptionCaptureNoscriptLabel": {
+    "message": "NOSCRIPTs:"
+  },
+  "OptionCaptureNoscriptTooltip": {
+    "message": "This determines how NOSCRIPT elements are handled. A NOSCRIPT element is shown when the browser does not or has disabled scripts, and typically shows a warning that the browser does not support scripts, or redirects to another page without script requirement. Consider remove such contents when scripts are not captured.\n\n• Save: Keep NOSCRIPT elements.\n• Blank: Blank NOSCRIPT elements.\n• Remove: Remove NOSCRIPT elements."
+  },
   "OptionCaptureObjectLabel": {
     "message": "OBJECTs:"
   },
