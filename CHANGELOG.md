@@ -3,6 +3,15 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.4.0] - 2022-03-12
+* Added GUI for `NOSCRIPTs` capture option.
+* Minor option groups in the options page are now collapsed by default.
+* Fixed an issue that `on*` attributes are not correctly handled if `capture.styleInline` is `remove`.
+* Fixed an issue that a unicode surrogate pair is not correctly handled during text cropping in certain cases.
+* Fixed tooltips about filename length restriction.
+* Fixed some issues of test code.
+* Upgraded 3rd party libraries.
+
 ## [1.3.1] - 2022-02-19
 * Fixed an issue that an item moved into another item through drag-and-drop is placed at top rather than the bottem.
 
