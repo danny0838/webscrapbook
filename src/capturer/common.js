@@ -2372,16 +2372,14 @@
     };
 
     const addAdoptedStyleSheets = (docOrShadowRoot, root) => {
-      if (docOrShadowRoot.adoptedStyleSheets) {
-        for (const refCss of docOrShadowRoot.adoptedStyleSheets) {
-          const css = root.appendChild(newDoc.createElement("style"));
-          captureRecordAddedNode(css);
-          css.textContent = Array.prototype.map.call(
-            refCss.cssRules,
-            cssRule => cssRule.cssText,
-          ).join("\n");
-          css.setAttribute("data-scrapbook-elem", "adoptedStyleSheet");
-        }
+      for (const refCss of capturer.getAdoptedStyleSheets(docOrShadowRoot)) {
+        const css = root.appendChild(newDoc.createElement("style"));
+        captureRecordAddedNode(css);
+        css.textContent = Array.prototype.map.call(
+          refCss.cssRules,
+          cssRule => cssRule.cssText,
+        ).join("\n");
+        css.setAttribute("data-scrapbook-elem", "adoptedStyleSheet");
       }
     };
 
@@ -3528,6 +3526,17 @@
     return sourceUrl;
   };
 
+  capturer.getAdoptedStyleSheets = function (docOrShadowRoot) {
+    try {
+      return docOrShadowRoot.adoptedStyleSheets;
+    } catch (ex) {
+      // docOrShadowRoot.adoptedStyleSheets of a content script is restricted
+      // in some Firefox versions.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1767819
+    }
+    return [];
+  };
+
   /**
    * @typedef {Object} blobCacheObject
    * @property {string} [__key__]
@@ -4298,12 +4307,10 @@
           }
         }
 
-        if (doc.adoptedStyleSheets) {
-          for (const css of doc.adoptedStyleSheets) {
-            const rules = await this.getRulesFromCss({css, refUrl});
-            for (const rule of rules) {
-              await parseCssRule(rule, css.href || refUrl, root);
-            }
+        for (const css of capturer.getAdoptedStyleSheets(doc)) {
+          const rules = await this.getRulesFromCss({css, refUrl});
+          for (const rule of rules) {
+            await parseCssRule(rule, css.href || refUrl, root);
           }
         }
 
