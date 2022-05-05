@@ -2372,7 +2372,7 @@
     };
 
     const addAdoptedStyleSheets = (docOrShadowRoot, root) => {
-      for (const refCss of capturer.getAdoptedStyleSheets(docOrShadowRoot)) {
+      for (const refCss of capturer.getAdoptedStyleSheets(docOrShadowRoot) || []) {
         const css = root.appendChild(newDoc.createElement("style"));
         captureRecordAddedNode(css);
         css.textContent = Array.prototype.map.call(
@@ -3534,7 +3534,6 @@
       // in some Firefox versions.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1767819
     }
-    return [];
   };
 
   /**
@@ -4307,7 +4306,7 @@
           }
         }
 
-        for (const css of capturer.getAdoptedStyleSheets(doc)) {
+        for (const css of capturer.getAdoptedStyleSheets(doc) || []) {
           const rules = await this.getRulesFromCss({css, refUrl});
           for (const rule of rules) {
             await parseCssRule(rule, css.href || refUrl, root);
