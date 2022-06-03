@@ -3,6 +3,15 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.4.3] - 2022-06-03
+* Fixed an error of iterating document.adoptedStyleSheets during a capture for Firefox since 101.0b8.
+
+## [1.4.2] - 2022-05-05
+* Fixed an error of undefined document.adoptedStyleSheets during a capture for Firefox < 101.
+
+## [1.4.1] - 2022-05-05
+* Fixed an error of accessing document.adoptedStyleSheets during a capture for Firefox 101.
+
 ## [1.4.0] - 2022-03-12
 * Added GUI for `NOSCRIPTs` capture option.
 * Minor option groups in the options page are now collapsed by default.
