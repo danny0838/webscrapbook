@@ -2372,7 +2372,7 @@
     };
 
     const addAdoptedStyleSheets = (docOrShadowRoot, root) => {
-      for (const refCss of capturer.getAdoptedStyleSheets(docOrShadowRoot) || []) {
+      for (const refCss of capturer.getAdoptedStyleSheets(docOrShadowRoot)) {
         const css = root.appendChild(newDoc.createElement("style"));
         captureRecordAddedNode(css);
         css.textContent = Array.prototype.map.call(
@@ -3526,13 +3526,20 @@
     return sourceUrl;
   };
 
-  capturer.getAdoptedStyleSheets = function (docOrShadowRoot) {
+  capturer.getAdoptedStyleSheets = function* (docOrShadowRoot) {
     try {
-      return docOrShadowRoot.adoptedStyleSheets;
+      yield* docOrShadowRoot.adoptedStyleSheets;
     } catch (ex) {
+      // docOrShadowRoot.adoptedStyleSheets is undefined for Firefox < 101.
+      //
       // docOrShadowRoot.adoptedStyleSheets of a content script is restricted
-      // in some Firefox versions.
+      // for 101 <= Firefox < 101.0b8.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1767819
+      //
+      // docOrShadowRoot.adoptedStyleSheets of a content script
+      // has all properties unreadable since Firefox 101.0b8.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1770592
+      return;
     }
   };
 
@@ -4306,7 +4313,7 @@
           }
         }
 
-        for (const css of capturer.getAdoptedStyleSheets(doc) || []) {
+        for (const css of capturer.getAdoptedStyleSheets(doc)) {
           const rules = await this.getRulesFromCss({css, refUrl});
           for (const rule of rules) {
             await parseCssRule(rule, css.href || refUrl, root);
