@@ -129,8 +129,8 @@ async function openCapturerTab(url) {
     type: "popup",
     width: 50,
     height: 50,
-    top: window.screen.availHeight,
-    left: window.screen.availWidth,
+    top: window.screen.availHeight - 50,
+    left: window.screen.availWidth - 50,
   };
 
   // Firefox does not support focused in windows.create().
@@ -198,8 +198,8 @@ async function capture(params, options = {}) {
     type: "popup",
     width: 50,
     height: 50,
-    top: window.screen.availHeight,
-    left: window.screen.availWidth,
+    top: window.screen.availHeight - 50,
+    left: window.screen.availWidth - 50,
   };
 
   // Firefox does not support focused in windows.create().
