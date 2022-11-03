@@ -1515,11 +1515,11 @@ if (Node && !Node.prototype.getRootNode) {
     }
 
     formatKey(key) {
-      const [keyMain, keySub, keySub2] = key.split('-');
+      const [keyMain, ...keySubs] = key.split('-');
       const fn = this[`format_${keyMain.toLowerCase()}`];
       if (typeof fn === 'function') {
         try {
-          return fn.call(this, keySub, keySub2) || '';
+          return fn.apply(this, keySubs) || '';
         } catch (ex) {
           console.error(`Failed to format "${key}": ${ex.message}`, this.item);
         }
@@ -1639,8 +1639,8 @@ if (Node && !Node.prototype.getRootNode) {
       return this.item.title;
     }
 
-    format_source(keySub) {
-      switch (keySub) {
+    format_source(key) {
+      switch (key) {
         case "host": {
           const u = new URL(this.item.source);
           return u.host;
@@ -1662,16 +1662,16 @@ if (Node && !Node.prototype.getRootNode) {
       return this.getItemUrl();
     }
 
-    format_create(keySub, keySub2) {
-      return this.formatDate(this.item.create, keySub, keySub2);
+    format_create(key, mode) {
+      return this.formatDate(this.item.create, key, mode);
     }
 
-    format_modify(keySub, keySub2) {
-      return this.formatDate(this.item.modify, keySub, keySub2);
+    format_modify(key, mode) {
+      return this.formatDate(this.item.modify, key, mode);
     }
 
-    format_recycled(keySub, keySub2) {
-      return this.formatDate(this.item.recycled, keySub, keySub2);
+    format_recycled(key, mode) {
+      return this.formatDate(this.item.recycled, key, mode);
     }
   }
 
