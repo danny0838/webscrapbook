@@ -1639,11 +1639,38 @@ if (Node && !Node.prototype.getRootNode) {
       return this.item.title;
     }
 
-    format_source(key) {
+    format_source(key, searchKey) {
       switch (key) {
+        case "protocol": {
+          const u = new URL(this.item.source);
+          return u.protocol.slice(0, -1);
+        }
         case "host": {
           const u = new URL(this.item.source);
           return u.host;
+        }
+        case "hostname": {
+          const u = new URL(this.item.source);
+          return u.hostname;
+        }
+        case "port": {
+          const u = new URL(this.item.source);
+          return u.port;
+        }
+        case "pathname": {
+          const u = new URL(this.item.source);
+          return u.pathname.slice(1);
+        }
+        case "search": {
+          const u = new URL(this.item.source);
+          if (typeof searchKey !== 'undefined') {
+            return u.searchParams.get(searchKey);
+          }
+          return u.search.slice(1);
+        }
+        case "hash": {
+          const u = new URL(this.item.source);
+          return u.hash.slice(1);
         }
         case "file": {
           return scrapbook.urlToFilename(this.item.source);
