@@ -5088,22 +5088,20 @@
         }
         default: {
           const newElem = rootNode.ownerDocument.createElement(tag);
+          if (Array.isArray(attrs)) {
+            for (const [key, value] of attrs) {
+              newElem.setAttribute(this.resolve(key, rootNode), this.resolve(value, rootNode));
+            }
+          } else if (attrs) {
+            for (const key in attrs) {
+              newElem.setAttribute(key, this.resolve(attrs[key], rootNode));
+            }
+          }
           if (value !== null) {
             newElem.textContent = this.resolve(value, rootNode);
-          } else {
-            if (Array.isArray(attrs)) {
-              for (const [key, value] of attrs) {
-                newElem.setAttribute(this.resolve(key, rootNode), this.resolve(value, rootNode));
-              }
-            } else if (attrs) {
-              for (const key in attrs) {
-                newElem.setAttribute(key, this.resolve(attrs[key], rootNode));
-              }
-            }
-            if (children) {
-              for (const childData of children) {
-                newElem.appendChild(this.resolveNodeData(childData, rootNode));
-              }
+          } else if (children) {
+            for (const childData of children) {
+              newElem.appendChild(this.resolveNodeData(childData, rootNode));
             }
           }
           return newElem;
