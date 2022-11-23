@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.5.1] - 2022-11-23
+* Fixed an issue that the "attrs" property is ignored when the "value" property is set for the "insert" command of a capture helper.
+
 ## [1.5.0] - 2022-11-03
 * Added support of more URL placeholders for `capture.saveFilename` option.
 * Improved some tooltips.
