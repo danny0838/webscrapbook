@@ -3477,6 +3477,12 @@
     // see capturer.getUniqueFilename for limitation details
     filename = scrapbook.crop(filename, saveFilenameMaxLenUtf16, saveFilenameMaxLenUtf8, "");
 
+    // in case the cropped filename has invalid ending chars
+    filename = filename
+      .split('/')
+      .map(x => scrapbook.validateFilename(x))
+      .join('/');
+
     return filename;
   };
 
