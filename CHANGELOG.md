@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.5.2] - 2022-12-12
+* Fixed an error when the downloaded folder name happens to contain bad ending chars after cropping.
+* Fixed infinite loop when the downloaded folder cannot be generated.
+* Fixed missing error message when an error occurs during folder name determination.
+
 ## [1.5.1] - 2022-11-23
 * Fixed an issue that the "attrs" property is ignored when the "value" property is set for the "insert" command of a capture helper.
 
