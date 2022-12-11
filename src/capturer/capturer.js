@@ -229,8 +229,7 @@
                 resolve(filename);
               } else if (delta.state && delta.state.current === "complete") {
                 browser.downloads.onChanged.removeListener(onChanged);
-                const items = await browser.downloads.search({id});
-                const item = items[0];
+                const [item] = await browser.downloads.search({id});
                 const filename = item.filename;
                 if (item.exists) { await browser.downloads.removeFile(id); }
                 await browser.downloads.erase({id});
