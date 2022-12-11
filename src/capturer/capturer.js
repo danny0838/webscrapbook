@@ -217,7 +217,8 @@
         const url = URL.createObjectURL(blob);
         const prefix = options["capture.saveFolder"] + "/" + (dir ? dir + '/' : '');
         isFilenameTaken = async (path) => {
-          const newFilename = await new Promise(async (resolve, reject) => {
+          const filename = prefix + path;
+          const newFilename = await new Promise((resolve, reject) => {
             let id = null;
             const onChanged = async (delta) => {
               if (delta.id !== id) { return; }
@@ -241,11 +242,15 @@
               }
             };
             browser.downloads.onChanged.addListener(onChanged);
-            id = await browser.downloads.download({
+            browser.downloads.download({
               url,
-              filename: prefix + path,
+              filename,
               conflictAction: "uniquify",
               saveAs: false,
+            }).then(downloadId => {
+              id = downloadId;
+            }).catch(ex => {
+              reject(new Error(`Failed to download "${filename}": ${ex.message}`));
             });
           });
           return scrapbook.filepathParts(newFilename)[1] !== path;
