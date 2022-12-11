@@ -253,7 +253,24 @@
               reject(new Error(`Failed to download "${filename}": ${ex.message}`));
             });
           });
-          return scrapbook.filepathParts(newFilename)[1] !== path;
+
+          const [, newBasename] = scrapbook.filepathParts(newFilename);
+          if (newBasename === path) {
+            return false;
+          }
+
+          // This may happen when:
+          // 1. The downloaded filename is cropped due to length restriction.
+          //    e.g. xxxxxxxxxx => xxxxxx (1)
+          //    e.g. xxxxxxx(1) => xxxxxx (1)
+          // 2. The browser API cannot return the correct downloaded path
+          //    (e.g. on Kiwi Browser), in which case the test will never pass.
+          // Fail early for either case.
+          if (!newBasename.startsWith(basename)) {
+            throw new Error(`Failed to download "${filename}": Unable to generate folder.`);
+          }
+
+          return true;
         };
         break;
       }
