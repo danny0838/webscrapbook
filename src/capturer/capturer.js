@@ -222,23 +222,28 @@
             let id = null;
             const onChanged = async (delta) => {
               if (delta.id !== id) { return; }
-              if (delta.filename) {
-                // Chromium: an event with filename change is triggered before download
-                const filename = delta.filename.current;
-                browser.downloads.onChanged.removeListener(onChanged);
-                await browser.downloads.erase({id});
-                resolve(filename);
-              } else if (delta.state && delta.state.current === "complete") {
-                browser.downloads.onChanged.removeListener(onChanged);
-                const [item] = await browser.downloads.search({id});
-                const filename = item.filename;
-                if (item.exists) { await browser.downloads.removeFile(id); }
-                await browser.downloads.erase({id});
-                resolve(filename);
-              } else if (delta.error) {
-                browser.downloads.onChanged.removeListener(onChanged);
-                await browser.downloads.erase({id});
-                reject(new Error(`Download interruped: ${delta.error.current}.`));
+              try {
+                if (delta.filename) {
+                  // Chromium: an event with filename change is triggered before download
+                  const filename = delta.filename.current;
+                  browser.downloads.onChanged.removeListener(onChanged);
+                  await browser.downloads.erase({id});
+                  resolve(filename);
+                } else if (delta.state && delta.state.current === "complete") {
+                  browser.downloads.onChanged.removeListener(onChanged);
+                  const [item] = await browser.downloads.search({id});
+                  const filename = item.filename;
+                  if (item.exists) { await browser.downloads.removeFile(id); }
+                  await browser.downloads.erase({id});
+                  resolve(filename);
+                } else if (delta.error) {
+                  browser.downloads.onChanged.removeListener(onChanged);
+                  await browser.downloads.erase({id});
+                  reject(new Error(`Download interruped: ${delta.error.current}.`));
+                }
+              } catch (ex) {
+                // reject for an unexpected error
+                reject(new Error(`Failed to download "${filename}": ${ex.message}`));
               }
             };
             browser.downloads.onChanged.addListener(onChanged);
