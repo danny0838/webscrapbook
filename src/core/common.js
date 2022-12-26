@@ -1175,7 +1175,12 @@ if (Node && !Node.prototype.getRootNode) {
    ***************************************************************************/
 
   scrapbook.lang = function (key, args) {
-    return browser.i18n.getMessage(key, args) || "__MSG_" + key + "__";
+    const msg = browser.i18n.getMessage(key, args);
+    if (msg) {
+      // recursively replace __MSG_key__
+      return msg.replace(/__MSG_(.*?)__/, (m, k) => scrapbook.lang(k));
+    }
+    return "__MSG_" + key + "__";
   };
 
   scrapbook.loadLanguages = function (rootNode) {
