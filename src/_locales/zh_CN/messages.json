@@ -182,16 +182,19 @@
     "message": "获取分页 (书签)"
   },
   "CaptureTabBookmarkTooltip": {
-    "message": "将㧥择的分页获取为书签网页或剪贴簿项目。"
+    "message": "将㧥择的分页获取为书签网页或剪贴簿项目。\n\n__MSG_CaptureTabDnDTooltip__"
+  },
+  "CaptureTabDnDTooltip": {
+    "message": "提示：拖放此项目至剪贴簿以获取至特定位置。按住 Shift 以获取原貌。按住 Alt 以获取为书签。按住 Ctrl 以设定获取细节。"
   },
   "CaptureTabSource": {
     "message": "获取分页 (原貌)"
   },
   "CaptureTabSourceTooltip": {
-    "message": "获取㧥择的分页的原始状态（未经过脚本处理）。"
+    "message": "获取㧥择的分页的原始状态（未经过脚本处理）。\n\n__MSG_CaptureTabDnDTooltip__"
   },
   "CaptureTabTooltip": {
-    "message": "获取㧥择的分页的当前状态。若分页中有选择内容则只获取选择范围。"
+    "message": "获取㧥择的分页的当前状态。若分页中有选择内容则只获取选择范围。\n\n__MSG_CaptureTabDnDTooltip__"
   },
   "CapturerTitle": {
     "message": "获取页面"

@@ -182,16 +182,19 @@
     "message": "Capture tabs (bookmark)"
   },
   "CaptureTabBookmarkTooltip": {
-    "message": "Capture each selected tab as a bookmark page or scrapbook item."
+    "message": "Capture each selected tab as a bookmark page or scrapbook item.\n\n__MSG_CaptureTabDnDTooltip__"
+  },
+  "CaptureTabDnDTooltip": {
+    "message": "Tip: Drag this to the scrapbook to capture to a specific position. Hold Shift to capture source. Hold Alt to capture as bookmark. Hold Ctrl to capture with detail options."
   },
   "CaptureTabSource": {
     "message": "Capture tabs (source)"
   },
   "CaptureTabSourceTooltip": {
-    "message": "Capture the original content of each selected tab (before processed by the scripts)."
+    "message": "Capture the original content of each selected tab (before processed by the scripts).\n\n__MSG_CaptureTabDnDTooltip__"
   },
   "CaptureTabTooltip": {
-    "message": "Capture the current status of each selected tab. Only the selected range(s) is captured if there's a selection in the tab."
+    "message": "Capture the current status of each selected tab. Only the selected range(s) is captured if there's a selection in the tab.\n\n__MSG_CaptureTabDnDTooltip__"
   },
   "CapturerTitle": {
     "message": "Capture page"

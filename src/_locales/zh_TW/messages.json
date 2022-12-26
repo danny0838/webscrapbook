@@ -182,16 +182,19 @@
     "message": "擷取分頁 (書籤)"
   },
   "CaptureTabBookmarkTooltip": {
-    "message": "將選取的分頁擷取為書籤網頁或剪貼簿項目。"
+    "message": "將選取的分頁擷取為書籤網頁或剪貼簿項目。\n\n__MSG_CaptureTabDnDTooltip__"
+  },
+  "CaptureTabDnDTooltip": {
+    "message": "提示：拖放此項目至剪貼簿以擷取至特定位置。按住 Shift 以擷取原貌。按住 Alt 以擷取為書籤。按住 Ctrl 以設定擷取細節。"
   },
   "CaptureTabSource": {
     "message": "擷取分頁 (原貌)"
   },
   "CaptureTabSourceTooltip": {
-    "message": "擷取選取的分頁的原始狀態（未經過腳本處理）。"
+    "message": "擷取選取的分頁的原始狀態（未經過腳本處理）。\n\n__MSG_CaptureTabDnDTooltip__"
   },
   "CaptureTabTooltip": {
-    "message": "擷取選取的分頁的目前狀態。若分頁中有選取內容則只擷取選取範圍。"
+    "message": "擷取選取的分頁的目前狀態。若分頁中有選取內容則只擷取選取範圍。\n\n__MSG_CaptureTabDnDTooltip__"
   },
   "CapturerTitle": {
     "message": "擷取頁面"
