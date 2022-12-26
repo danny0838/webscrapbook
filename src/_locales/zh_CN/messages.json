@@ -134,7 +134,7 @@
     "message": "获取框架 (书签)"
   },
   "CaptureFrameSource": {
-    "message": "获取框架 (原样)"
+    "message": "获取框架 (原貌)"
   },
   "CaptureLink": {
     "message": "获取链接页面 (新分页)"
@@ -146,7 +146,7 @@
     "message": "获取链接页面 (书签)"
   },
   "CaptureLinkSource": {
-    "message": "获取链接页面 (原样)"
+    "message": "获取链接页面 (原貌)"
   },
   "CaptureMedia": {
     "message": "获取多媒体"
@@ -164,7 +164,7 @@
     "message": "获取页面 (书签)"
   },
   "CapturePageSource": {
-    "message": "获取页面 (原样)"
+    "message": "获取页面 (原貌)"
   },
   "CaptureSelection": {
     "message": "获取选择范围"
@@ -185,7 +185,7 @@
     "message": "将㧥择的分页获取为书签网页或剪贴簿项目。"
   },
   "CaptureTabSource": {
-    "message": "获取分页 (原样)"
+    "message": "获取分页 (原貌)"
   },
   "CaptureTabSourceTooltip": {
     "message": "获取㧥择的分页的原始状态（未经过脚本处理）。"
