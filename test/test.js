@@ -740,34 +740,36 @@ async function test_capture_header_mime() {
  * scrapbook.escapeFilename
  */
 async function test_capture_filename() {
+  const EXPECTED_FILENAMES = [
+    "_",
+    "abc",
+    "_.bin",
+    "abcd",
+    "abcde.bin",
+    "abcdef",
+    "123ABCabc中文 !#$%&'()+,-;=@[]^_`{}-",
+    "中文 !_#$%&'()_+,-__;(=)_@[_]^_`{_}-",
+  ];
+
   var blob = await capture({
     url: `${localhost}/capture_filename/index.html`,
     options: baseOptions,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["_"]);
-  assert(zip.files["abc"]);
-  assert(zip.files["_.bin"]);
-  assert(zip.files["abcd"]);
-  assert(zip.files["abcde.bin"]);
-  assert(zip.files["abcdef"]);
-  assert(zip.files["123ABCabc中文 !#$%&'()+,-;=@[]^_`{}-"]);
-  assert(zip.files["中文 !_#$%&'()_+,-__;(=)_@[_]^_`{_}-"]);
+  for (const fn of EXPECTED_FILENAMES) {
+    assert(zip.files[fn]);
+  }
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
   var imgs = doc.querySelectorAll('img');
-  assert(imgs[0].getAttribute('src') === "_");
-  assert(imgs[1].getAttribute('src') === "abc");
-  assert(imgs[2].getAttribute('src') === "_.bin");
-  assert(imgs[3].getAttribute('src') === "abcd");
-  assert(imgs[4].getAttribute('src') === "abcde.bin");
-  assert(imgs[5].getAttribute('src') === "abcdef");
-  assert(imgs[6].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}-");
-  assert(imgs[7].getAttribute('src') === "中文%20!_%23$%25&'()_+,-__;(=)_@[_]^_`{_}-");
+  EXPECTED_FILENAMES.forEach((fn, i) => {
+    fn = fn.replace(/[ %#]+/g, m => encodeURIComponent(m));
+    assert(imgs[i].getAttribute('src') === fn);
+  });
 }
 
 /**
