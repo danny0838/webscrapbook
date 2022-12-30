@@ -4,13 +4,37 @@
 <meta charset="UTF-8">
 </head>
 <body>
-<img src="data:application/octet-stream;filename=%00%01%09%0A%0D%1F%7F%C2%80%C2%9F,">
-<img src="data:application/octet-stream;filename=abc,">
-<img src="data:application/octet-stream;filename=.bin,">
-<img src="data:application/octet-stream;filename=abcd.,">
-<img src="data:application/octet-stream;filename=%20abcde.bin,">
-<img src="data:application/octet-stream;filename=abcdef%20,">
-<img src="123ABCabc%E4%B8%AD%E6%96%87%20!%23%24%25%26'()%2B%2C-%3B%3D%40%5B%5D%5E_%60%7B%7D~">
-<img src="data:application/octet-stream;filename=%E4%B8%AD%E6%96%87%00%01%02%03%04%05%06%07%08%09%0A%0B%0C%0D%0E%0F%10%11%12%13%14%15%16%17%18%19%1A%1B%1C%1D%1E%1F%7F%20!%22%23%24%25%26'()*%2B%2C-%2F%3A%3B%3C%3D%3E%3F%40%5B%5C%5D%5E_%60%7B%7C%7D~,">
+<!-- Common -->
+<img src="data:application/octet-stream;filename=file01,">
+<img src="data:application/octet-stream;filename=file02%0D%0A%09%0Cfile02,">
+<img src="data:application/octet-stream;filename=%00%01%02%03%04%05%06%07%08%0B%0E%0F%10%11%12%13%14%15%16%17%18%19%1A%1B%1C%1D%1E%1F%7F%C2%80%C2%9F,">
+<img src="data:application/octet-stream;filename=%E4%B8%AD%E6%96%87%20%21%22%23%24%25%26%27%28%29%2A%2B%2C%2D%2F%3A%3B%3C%3D%3E%3F%40%5B%5C%5D%5E%5F%60%7B%7C%7D,">
+<img src="123ABCabc%E4%B8%AD%E6%96%87%20!%23%24%25%26'()%2B%2C-%3B%3D%40%5B%5D%5E_%60%7B%7D">
+
+<!-- Browsers -->
+<img src="data:application/octet-stream;filename=~file03,">
+<img src="data:application/octet-stream;filename=file04%C2%A0%C2%A0%C2%A0file04,">
+<img src="data:application/octet-stream;filename=file05~%C2%A0%C2%AD%E2%80%80%E2%80%81%E2%80%82%E2%80%83%E2%80%84%E2%80%85%E2%80%86%E2%80%87%E2%80%88%E2%80%89%E2%80%8A%E2%80%8B%E2%80%8C%E2%80%8D%E2%80%8E%E2%80%8F%E2%80%AA%E2%80%AB%E2%80%AC%E2%80%AD%E2%80%AE%E2%80%AF%E2%81%9F%E2%81%A0%E2%81%A1%E2%81%A2%E2%81%A3%E2%81%A4%E2%81%A5%E2%81%A6%E2%81%A7%E2%81%A8%E2%81%A9%E2%81%AA%E2%81%AB%E2%81%AC%E2%81%AD%E2%81%AE%E2%81%AFfile05,">
+<img src="data:application/octet-stream;filename=file06%EF%BB%BF%EF%BF%B9%EF%BF%BA%EF%BF%BB%EF%BF%BE%EF%BF%BF%F4%8F%BF%BFfile06,">
+
+<!-- Windows -->
+<img src="data:application/octet-stream;filename=%20%20file07,">
+<img src="data:application/octet-stream;filename=file08%20%20,">
+<img src="data:application/octet-stream;filename=file09..,">
+<img src="data:application/octet-stream;filename=file10..%20%20,">
+<img src="data:application/octet-stream;filename=.bin01,">
+<img src="data:application/octet-stream;filename=%20%20..bin02,">
+<img src="data:application/octet-stream;filename=con,">
+<img src="data:application/octet-stream;filename=prn,">
+<img src="data:application/octet-stream;filename=aux,">
+<img src="data:application/octet-stream;filename=nul,">
+<img src="data:application/octet-stream;filename=com0,">
+<img src="data:application/octet-stream;filename=lpt0,">
+<img src="data:application/octet-stream;filename=con.txt,">
+<img src="data:application/octet-stream;filename=prn.txt,">
+<img src="data:application/octet-stream;filename=aux.txt,">
+<img src="data:application/octet-stream;filename=nul.txt,">
+<img src="data:application/octet-stream;filename=com0.txt,">
+<img src="data:application/octet-stream;filename=lpt0.txt,">
 </body>
 </html>

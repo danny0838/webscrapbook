@@ -318,17 +318,17 @@ async function test_capture_rename2() {
   assert(Object.keys(zip.files).length === 3);
   assert(zip.files["index.html"]);
   assert(zip.files["abc.bmp"]);
-  assert(zip.files["123ABCabc中文 !#$%&'()+,-;=@[]^_`{}-.bmp"]);
+  assert(zip.files["123ABCabc中文 !#$%&'()+,-;=@[]^_`{}_.bmp"]);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var imgs = doc.querySelectorAll('img');
-  assert(imgs[0].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}-.bmp");
-  assert(imgs[1].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}-.bmp");
-  assert(imgs[2].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}-.bmp");
-  assert(imgs[3].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}-.bmp");
-  assert(imgs[4].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}-.bmp");
+  assert(imgs[0].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}_.bmp");
+  assert(imgs[1].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}_.bmp");
+  assert(imgs[2].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}_.bmp");
+  assert(imgs[3].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}_.bmp");
+  assert(imgs[4].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}_.bmp");
   assert(imgs[5].getAttribute('src') === "abc.bmp#abc%E4%B8%AD%E6%96%87%");
   assert(imgs[6].getAttribute('src') === "abc.bmp#ab%63%e4%b8%ad%e6%96%87%25");
 }
@@ -741,14 +741,35 @@ async function test_capture_header_mime() {
  */
 async function test_capture_filename() {
   const EXPECTED_FILENAMES = [
+    "file01",
+    "file02 file02",
     "_",
-    "abc",
-    "_.bin",
-    "abcd",
-    "abcde.bin",
-    "abcdef",
-    "123ABCabc中文 !#$%&'()+,-;=@[]^_`{}-",
-    "中文 !_#$%&'()_+,-__;(=)_@[_]^_`{_}-",
+    "中文 !_#$%&'()_+,-__;_=__@[_]^_`{_}",
+    "123ABCabc中文 !#$%&'()+,-;=@[]^_`{}",
+
+    "_file03",
+    "file04___file04",
+    "file05_______________file05",
+    "file06file06",
+
+    "file07",
+    "file08",
+    "file09",
+    "file10",
+    "_.bin01",
+    "_..bin02",
+    "con_",
+    "prn_",
+    "aux_",
+    "nul_",
+    "com0_",
+    "lpt0_",
+    "con_.txt",
+    "prn_.txt",
+    "aux_.txt",
+    "nul_.txt",
+    "com0_.txt",
+    "lpt0_.txt",
   ];
 
   var blob = await capture({
@@ -822,6 +843,7 @@ async function test_capture_saveAsciiFilename() {
   assert(zip.files['123ABCabc_中文_𠀀-2.bmp']);
   assert(zip.files['123ABCabc_中文_𠀀.css']);
   assert(zip.files['123ABCabc_中文_𠀀.woff']);
+  assert(zip.files['123%.dat']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -831,8 +853,9 @@ async function test_capture_saveAsciiFilename() {
   assert(doc.querySelector('style').textContent.trim() === `@import url("123ABCabc_中文_𠀀.css");
 @font-face { font-family: myFont; src: url("123ABCabc_中文_𠀀.woff"); }
 p { background-image: url("123ABCabc_中文_𠀀.bmp"); }`);
-  assert(doc.querySelector('img').getAttribute('src') === "123ABCabc_中文_𠀀.bmp");
-  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === "123ABCabc_中文_𠀀.bmp 1x, 123ABCabc_中文_𠀀-2.bmp 2x");
+  assert(doc.querySelectorAll('img')[0].getAttribute('src') === "123ABCabc_中文_𠀀.bmp");
+  assert(doc.querySelectorAll('img')[1].getAttribute('srcset') === "123ABCabc_中文_𠀀.bmp 1x, 123ABCabc_中文_𠀀-2.bmp 2x");
+  assert(doc.querySelectorAll('img')[2].getAttribute('src') === "123%25.dat");
 
   /* +saveAsciiFilename */
   var options = {
@@ -848,6 +871,7 @@ p { background-image: url("123ABCabc_中文_𠀀.bmp"); }`);
   assert(zip.files['123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80-2.bmp']);
   assert(zip.files['123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.css']);
   assert(zip.files['123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.woff']);
+  assert(zip.files['123%.dat']);
 
   // URLs in the page need to be encoded to represent a percent char,
   // and thus the output looks like %25xx%25xx...
@@ -859,8 +883,9 @@ p { background-image: url("123ABCabc_中文_𠀀.bmp"); }`);
   assert(doc.querySelector('style').textContent.trim() === `@import url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580.css");
 @font-face { font-family: myFont; src: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580.woff"); }
 p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580.bmp"); }`);
-  assert(doc.querySelector('img').getAttribute('src') === "123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580.bmp");
-  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === "123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580.bmp 1x, 123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580-2.bmp 2x");
+  assert(doc.querySelectorAll('img')[0].getAttribute('src') === "123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580.bmp");
+  assert(doc.querySelectorAll('img')[1].getAttribute('srcset') === "123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580.bmp 1x, 123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580-2.bmp 2x");
+  assert(doc.querySelectorAll('img')[2].getAttribute('src') === "123%25.dat");
 }
 
 /**

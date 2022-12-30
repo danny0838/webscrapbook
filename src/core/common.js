@@ -1406,16 +1406,23 @@ if (Node && !Node.prototype.getRootNode) {
    */
   scrapbook.validateFilename = function (filename, forceAscii) {
     let fn = filename
-        // control chars are bad for filename
+        // common restrictions
+        // - collapse document spaces
+        .replace(/[\t\n\f\r]+/g, " ")
+        // - control chars are bad for filename
         .replace(/[\x00-\x1F\x7F\x80-\x9F]+/g, "")
-        // leading/trailing spaces and dots are not allowed on Windows
-        .replace(/^\./, "_.").replace(/^ +/, "").replace(/[. ]+$/, "")
-        // bad chars on most OS
-        .replace(/[:"?*\\/|]/g, "_")
-        // bad chars on Windows, replace with adequate direction
-        .replace(/[<]/g, "(").replace(/[>]/g, ")")
-        // "~" is not allowed by browser.downloads
-        .replace(/[~]/g, "-");
+        // - bad chars on most OS
+        .replace(/[:"?*\\/|<>]/g, "_")
+        // downloads API restrictions
+        .replace(/[\xAD\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF\uFFF9-\uFFFB\uFFFE\uFFFF\u{10FFFF}]+/gu, "")
+        // "~": not allowed in Chromium
+        // [\xA0\u2000-\u200A\u202F\u205F]: spaces, not allowed in Firefox
+        .replace(/[~\xA0\u2000-\u200A\u202F\u205F]/g, "_")
+        // Windows restrictions
+        // - leading/trailing spaces and dots
+        .replace(/^ +/, "").replace(/[. ]+$/, "").replace(/^\./, "_.")
+        // - reserved filenames
+        .replace(/^(CON|PRN|AUX|NUL|COM\d|LPT\d)((?:\..+)?)$/i, "$1_$2");
     if (forceAscii) {
       fn = fn.replace(/[^\x00-\x7F]+/g, m => encodeURIComponent(m));
     }
