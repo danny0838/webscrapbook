@@ -12852,6 +12852,17 @@ async function test_viewer_validate() {
   });
 }
 
+async function test_viewer_encoding() {
+  return await openTestTab({
+    url: browser.runtime.getURL('t/viewer-encoding/index.html'),
+    active: true,
+  }, (message, port, resolve) => {
+    if (message.cmd == 'result') {
+      resolve(message.args.value);
+    }
+  });
+}
+
 async function test_viewer_attachment() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-attachment/index.html'),

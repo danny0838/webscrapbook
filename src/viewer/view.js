@@ -559,12 +559,18 @@ Redirecting to: <a href="${scrapbook.escapeHtml(info.url)}">${scrapbook.escapeHt
       rewriteRecursively(root, root.nodeName.toLowerCase(), rewriteNode);
 
       if (["text/html", "application/xhtml+xml"].includes(doc.contentType)) {
+        const head = doc.querySelector("head");
+
         // Reset CSS for Chromium
         const elem = doc.createElement("link");
         elem.rel = "stylesheet";
         elem.href = browser.runtime.getURL("core/reset.css");
-        const head = doc.querySelector("head");
         head.insertBefore(elem, head.firstChild);
+
+        // Force UTF-8
+        const metaElem = doc.createElement("meta");
+        metaElem.setAttribute("charset", "UTF-8");
+        head.insertBefore(metaElem, head.firstChild);
       }
 
       await Promise.all(tasks);
