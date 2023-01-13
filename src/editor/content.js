@@ -132,15 +132,12 @@ height: 100vh;`;
 
     // Attach a shadowRoot if supported; otherwise fallback with an ID selector.
     let sHost;
-    let sRoot;
     if (wrapper.attachShadow) {
       editor.internalElement = wrapper = wrapper.attachShadow({mode: 'open'});
       sHost = `:host`;
-      sRoot = '';
     } else {
       editor.internalElement = wrapper;
       sHost = `#${uid}`;
-      sRoot = `#${uid} `;
     }
 
     // this needs to be XHTML compatible
@@ -161,7 +158,7 @@ ${sHost} style {
   display: none !important;
 }
 
-${sRoot}*:not(scrapbook-toolbar-samp) {
+${sHost} *:not(scrapbook-toolbar-samp) {
   visibility: unset !important;
   opacity: unset !important;
   position: unset !important;
@@ -188,11 +185,11 @@ ${sRoot}*:not(scrapbook-toolbar-samp) {
   vertical-align: unset !important;
 }
 
-${sRoot}scrapbook-toolbar-samp {
+${sHost} scrapbook-toolbar-samp {
   all: unset;
 }
 
-${sRoot}.toolbar {
+${sHost} .toolbar {
   display: block !important;
   position: relative !important;
   box-sizing: border-box !important;
@@ -205,15 +202,15 @@ ${sRoot}.toolbar {
   white-space: nowrap !important;
 }
 
-${sRoot}.toolbar > div {
+${sHost} .toolbar > div {
   display: inline-block !important;
 }
 
-${sRoot}.toolbar > div[hidden] {
+${sHost} .toolbar > div[hidden] {
   display: none !important;
 }
 
-${sRoot}.toolbar > div > button {
+${sHost} .toolbar > div > button {
   display: inline-block !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -225,66 +222,66 @@ ${sRoot}.toolbar > div > button {
   background-repeat: no-repeat !important;
 }
 
-${sRoot}.toolbar > div > button:enabled {
+${sHost} .toolbar > div > button:enabled {
   cursor: pointer !important;
 }
 
-${sRoot}.toolbar > div > button:enabled:hover,
-${sRoot}.toolbar > div > button:enabled:focus {
+${sHost} .toolbar > div > button:enabled:hover,
+${sHost} .toolbar > div > button:enabled:focus {
   border-color: #CCC !important;
   background-color: #FFF !important;
 }
 
-${sRoot}.toolbar > div > button:enabled:active {
+${sHost} .toolbar > div > button:enabled:active {
   border-style: inset !important;
 }
 
-${sRoot}.toolbar > div > button:disabled {
+${sHost} .toolbar > div > button:disabled {
   filter: grayscale(100%) !important;
   opacity: 0.3 !important;
 }
 
-${sRoot}.toolbar > div > button[checked] {
+${sHost} .toolbar > div > button[checked] {
   box-shadow: 0px 0px 10px 0px #909090 inset !important;
 }
 
-${sRoot}.toolbar > div > button[hidden] {
+${sHost} .toolbar > div > button[hidden] {
   display: none !important;
 }
 
-${sRoot}.toolbar .toolbar-locate > button:first-of-type {
+${sHost} .toolbar .toolbar-locate > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-locate.svg")}") !important;
 }
 
-${sRoot}.toolbar .toolbar-marker > button:first-of-type {
+${sHost} .toolbar .toolbar-marker > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-marker.png")}") !important;
 }
 
-${sRoot}.toolbar .toolbar-annotation > button:first-of-type {
+${sHost} .toolbar .toolbar-annotation > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-annotation.png")}") !important;
 }
 
-${sRoot}.toolbar .toolbar-eraser > button:first-of-type {
+${sHost} .toolbar .toolbar-eraser > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-eraser.png")}") !important;
 }
 
-${sRoot}.toolbar .toolbar-domEraser > button:first-of-type {
+${sHost} .toolbar .toolbar-domEraser > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-dom-eraser.png")}") !important;
 }
 
-${sRoot}.toolbar .toolbar-htmlEditor > button:first-of-type {
+${sHost} .toolbar .toolbar-htmlEditor > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-html.png")}") !important;
 }
 
-${sRoot}.toolbar .toolbar-undo > button:first-of-type {
+${sHost} .toolbar .toolbar-undo > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-undo.png")}") !important;
 }
 
-${sRoot}.toolbar .toolbar-save > button:first-of-type {
+${sHost} .toolbar .toolbar-save > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-save.png")}") !important;
 }
 
-${sRoot}.toolbar > div > ul {
+${sHost} .toolbar > div > ul {
   display: block !important;
   position: absolute !important;
   overflow: auto !important;
@@ -300,15 +297,15 @@ ${sRoot}.toolbar > div > ul {
   max-height: calc(100vh - 40px - ${editor.scrollbar.vWidth}px - 2px) !important;
 }
 
-${sRoot}.toolbar > div > ul[hidden] {
+${sHost} .toolbar > div > ul[hidden] {
   display: none !important;
 }
 
-${sRoot}.toolbar > div > ul > li {
+${sHost} .toolbar > div > ul > li {
   display: block !important;
 }
 
-${sRoot}.toolbar > div > ul > li > button {
+${sHost} .toolbar > div > ul > li > button {
   display: block !important;
   padding: 4px 8px !important;
   width: 100% !important;
@@ -316,35 +313,35 @@ ${sRoot}.toolbar > div > ul > li > button {
   color: #333 !important;
 }
 
-${sRoot}.toolbar > div > ul > li > button:enabled:focus {
+${sHost} .toolbar > div > ul > li > button:enabled:focus {
   outline: 1px solid rgba(125, 162, 206, 0.8) !important;
   background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.8)) !important;
 }
 
-${sRoot}.toolbar > div > ul > li > button:enabled:hover {
+${sHost} .toolbar > div > ul > li > button:enabled:hover {
   background-color: rgba(202, 202, 202, 0.8) !important;
 }
 
-${sRoot}.toolbar > div > ul > li > button:enabled:active {
+${sHost} .toolbar > div > ul > li > button:enabled:active {
   background-image: radial-gradient(rgba(0, 0, 0, 0.9), rgba(64, 64, 64, 0.9)) !important;
   color: #FFFFFF !important;
 }
 
-${sRoot}.toolbar > div > ul > li > button:disabled {
+${sHost} .toolbar > div > ul > li > button:disabled {
   filter: grayscale(100%) !important;
   opacity: 0.3 !important;
 }
 
-${sRoot}.toolbar > div > ul > li > button[checked] {
+${sHost} .toolbar > div > ul > li > button[checked] {
   box-shadow: 0px 0px 10px 0px #909090 inset !important;
 }
 
-${sRoot}.toolbar > div > ul > hr {
+${sHost} .toolbar > div > ul > hr {
   display: block !important;
   border: 1px inset #EEE !important;
 }
 
-${sRoot}.toolbar .toolbar-close {
+${sHost} .toolbar .toolbar-close {
   display: block !important;
   position: absolute !important;
   top: 0 !important;
@@ -355,8 +352,8 @@ ${sRoot}.toolbar .toolbar-close {
   opacity: 0.3 !important;
 }
 
-${sRoot}.toolbar .toolbar-close::before,
-${sRoot}.toolbar .toolbar-close::after {
+${sHost} .toolbar .toolbar-close::before,
+${sHost} .toolbar .toolbar-close::after {
   content: "" !important;
   position: absolute !important;
   height: 4px !important;
@@ -366,15 +363,15 @@ ${sRoot}.toolbar .toolbar-close::after {
   background: #000 !important;
 }
 
-${sRoot}.toolbar .toolbar-close::before {
+${sHost} .toolbar .toolbar-close::before {
   transform: rotate(45deg) !important;
 }
 
-${sRoot}.toolbar .toolbar-close::after {
+${sHost} .toolbar .toolbar-close::after {
   transform: rotate(-45deg) !important;
 }
 
-${sRoot}.toolbar .toolbar-close:hover {
+${sHost} .toolbar .toolbar-close:hover {
   opacity: 1 !important;
 }
 </style>
