@@ -473,6 +473,9 @@
   "EditorButtonSaveInternalize": {
     "message": "Internalize external resources"
   },
+  "EditorButtonSavePinTop": {
+    "message": "Pin toolbar to the top"
+  },
   "EditorButtonSaveSetViewport": {
     "message": "Edit page viewport"
   },

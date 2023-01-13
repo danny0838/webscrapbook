@@ -132,12 +132,15 @@ height: 100vh;`;
 
     // Attach a shadowRoot if supported; otherwise fallback with an ID selector.
     let sHost;
+    let sHostTop;
     if (wrapper.attachShadow) {
       editor.internalElement = wrapper = wrapper.attachShadow({mode: 'open'});
       sHost = `:host`;
+      sHostTop = `:host(.top)`;
     } else {
       editor.internalElement = wrapper;
       sHost = `#${uid}`;
+      sHostTop = `#${uid}.top`;
     }
 
     // this needs to be XHTML compatible
@@ -152,6 +155,11 @@ ${sHost} {
   width: 100% !important;
   height: 40px !important;
   z-index: 2147483647 !important;
+}
+
+${sHostTop} {
+  top: 0px !important;
+  bottom: auto !important;
 }
 
 ${sHost} style {
@@ -295,6 +303,11 @@ ${sHost} .toolbar > div > ul {
   padding: 1px !important;
   background: white !important;
   max-height: calc(100vh - 40px - ${editor.scrollbar.vWidth}px - 2px) !important;
+}
+
+${sHostTop} .toolbar > div > ul {
+  top: 40px !important;
+  bottom: auto !important;
 }
 
 ${sHost} .toolbar > div > ul[hidden] {
@@ -495,6 +508,8 @@ ${sHost} .toolbar .toolbar-close:hover {
       <hr/>
       <li><button class="toolbar-save-editTitle">${scrapbook.lang('EditorButtonSaveEditTitle')}...</button></li>
       <li><button class="toolbar-save-setViewport">${scrapbook.lang('EditorButtonSaveSetViewport')}...</button></li>
+      <hr/>
+      <li><button class="toolbar-save-pinTop">${scrapbook.lang('EditorButtonSavePinTop')}</button></li>
     </ul>
   </div>
   <a class="toolbar-close" href="javascript:" title="${scrapbook.lang('EditorButtonClose')}"></a>
@@ -846,6 +861,11 @@ ${sHost} .toolbar .toolbar-close:hover {
     var elem = wrapper.querySelector('.toolbar-save-setViewport');
     elem.addEventListener("click", (event) => {
       editor.setViewport();
+    }, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-save-pinTop');
+    elem.addEventListener("click", (event) => {
+      editor.pinTop();
     }, {passive: true});
 
     // close
@@ -1692,6 +1712,30 @@ scrapbook-toolbar, scrapbook-toolbar *,
         args: {},
       },
     });
+  };
+
+  editor.pinTop = async function (willActive) {
+    const editElem = editor.internalElement.querySelector('.toolbar-save-pinTop');
+
+    if (typeof willActive === "undefined") {
+      willActive = !editElem.hasAttribute("checked");
+    }
+
+    if (willActive) {
+      if (editElem.hasAttribute("checked")) {
+        // already active or is doing async activating
+        return;
+      }
+      editElem.setAttribute("checked", "");
+      editor.element.classList.add('top');
+    } else {
+      if (!editElem.hasAttribute("checked")) {
+        // already inactive or is doing async deactivating
+        return;
+      }
+      editElem.removeAttribute("checked");
+      editor.element.classList.remove('top');
+    }
   };
 
   editor.open = async function () {

@@ -473,6 +473,9 @@
   "EditorButtonSaveInternalize": {
     "message": "保存内嵌的外部资源"
   },
+  "EditorButtonSavePinTop": {
+    "message": "工具栏置顶"
+  },
   "EditorButtonSaveSetViewport": {
     "message": "修改页面视图"
   },

@@ -473,6 +473,9 @@
   "EditorButtonSaveInternalize": {
     "message": "儲存內嵌的外部資源"
   },
+  "EditorButtonSavePinTop": {
+    "message": "工具欄置頂"
+  },
   "EditorButtonSaveSetViewport": {
     "message": "修改頁面視圖"
   },
@@ -1012,7 +1015,7 @@
     "message": "截短 UTF-8 編碼下位元組長度超過此值的檔名。\n\n• Linux 系統一般使用 UTF-8 編碼，檔名長度限制為 255 位元組，檔案路徑全長限制為 4096 位元組。"
   },
   "OptionCaptureSaveFilenameTooltip": {
-    "message": "指定擷取資料的儲存檔名（不含副檔名）。可用斜線「/」指定子資料夾，例如「%create-Y%/%create-m%/%title%」。\n\n可用以下「%<參數>%」模版語法帶入資訊：\n• %% - 帶入「%」符號。\n• %id% - 擷取資料的唯一識別碼，如「20190301124533216」。\n• %id-legacy% - 舊版 ScrapBook 格式的識別碼，如「20190301204533」。\n• %uuid% - 產生一個亂數 UUID，如「941e4674-d6c7-4709-9703-a1b4359286c6」。\n• %title% - 頁面標題，若無頁面標題，則取網址最後一節作為標題。\n• %source% - 資料來源網址。\n• %create% - 建立時間。\n\n%source% 的 <參數> 可在尾端加上「-<子參數>」帶入網址局部資訊。以「https://example.com:8000/app/search.html?q=foo&page=1#results」為例：\n• file: 檔名，一般取網址最後一節，如「search.html」。\n• page: 頁面，一般取網址最後一節，並去除副檔名，如「search」。\n• protocol: 協定，如「https」。\n• host: 主機，含主機名稱與通訊埠，如「example.com:8000」。\n• hostname: 主機名稱，如「example.com」。\n• port: 通訊埠，如「8000」。\n• pathname: 路徑，如「app/search.html」。\n• search: 搜尋值，如「q=foo&page=1」。\n• search-<鍵名>: 搜尋值中 <鍵名> 對應的鍵值，如「search-page」可得到「1」。\n• hash: 雜湊值，如「results」。\n\n%create% 的 <參數> 可在尾端加上「-<時間格式>」指定時間格式（使用 POSIX strftime 格式），<時間格式> 可在尾端加上「-utc」使用世界協調時間。例如「%create-F-utc%」輸出如「2020-04-01」。以下列出一些較常用的 POSIX strftime 格式：\n• Y: 四位數年份\n• y: 二位數年份\n• m: 二位數月份（01 至 12）\n• d: 二位數月中日期（01 至 31）\n• H: 二位數小時數（00 至 23）\n• M: 二位數分鐘數（00 至 59）\n• S: 二位數秒數（00 至 59）\n• F: 日期（YYYY-MM-DD）\n• T: 時間（HH:MM:SS）"
+    "message": "指定擷取資料的儲存檔名（不含副檔名）。可用斜線「/」指定子資料夾，例如「%create-Y%/%create-m%/%title%」。\n\n可用以下「%<參數>%」模版語法帶入資訊：\n• % - 帶入「%」符號。\n• %id% - 擷取資料的唯一識別碼，如「20190301124533216」。\n• %id-legacy% - 舊版 ScrapBook 格式的識別碼，如「20190301204533」。\n• %uuid% - 產生一個亂數 UUID，如「941e4674-d6c7-4709-9703-a1b4359286c6」。\n• %title% - 頁面標題，若無頁面標題，則取網址最後一節作為標題。\n• %source% - 資料來源網址。\n• %create% - 建立時間。\n\n%source% 的 <參數> 可在尾端加上「-<子參數>」帶入網址局部資訊。以「https://example.com:8000/app/search.html?q=foo&page=1#results」為例：\n• file: 檔名，一般取網址最後一節，如「search.html」。\n• page: 頁面，一般取網址最後一節，並去除副檔名，如「search」。\n• protocol: 協定，如「https」。\n• host: 主機，含主機名稱與通訊埠，如「example.com:8000」。\n• hostname: 主機名稱，如「example.com」。\n• port: 通訊埠，如「8000」。\n• pathname: 路徑，如「app/search.html」。\n• search: 搜尋值，如「q=foo&page=1」。\n• search-<鍵名>: 搜尋值中 <鍵名> 對應的鍵值，如「search-page」可得到「1」。\n• hash: 雜湊值，如「results」。\n\n%create% 的 <參數> 可在尾端加上「-<時間格式>」指定時間格式（使用 POSIX strftime 格式），<時間格式> 可在尾端加上「-utc」使用世界協調時間。例如「%create-F-utc%」輸出如「2020-04-01」。以下列出一些較常用的 POSIX strftime 格式：\n• Y: 四位數年份\n• y: 二位數年份\n• m: 二位數月份（01 至 12）\n• d: 二位數月中日期（01 至 31）\n• H: 二位數小時數（00 至 23）\n• M: 二位數分鐘數（00 至 59）\n• S: 二位數秒數（00 至 59）\n• F: 日期（YYYY-MM-DD）\n• T: 時間（HH:MM:SS）"
   },
   "OptionCaptureSaveResourcesSequentiallyLabel": {
     "message": "循序儲存資源檔案"
@@ -1108,7 +1111,7 @@
     "message": "插入日期格式:"
   },
   "OptionEditorInsertDateFormatTooltip": {
-    "message": "插入本地的目前時間，使用 POSIX strftime 格式。\n\n以下列出一小部分較常用的格式：\n• %c: 本地日期時間\n• %x: 本地年月日\n• %Y: 四位數年份\n• %y: 二位數年份\n• %m: 二位數月份（01 至 12）\n• %B: 本地月份長名\n• %b: 本地月份短名\n• %d: 二位數月中日期（01 至 31）\n• %A: 本地星期幾長名\n• %a: 本地星期幾短名\n• %X: 本地時分秒\n• %H: 二位數小時數，24 時制（00 至 23）\n• %I: 二位數小時數，12 時制（00 至 12）\n• %p: AM 或 PM\n• %M: 二位數分鐘數（00 至 59）\n• %S: 二位數秒數（00 至 59）\n• %z: 本地時區偏移值\n• %Z: 本地時區名稱\n• %%: % 符號"
+    "message": "插入本地的目前時間，使用 POSIX strftime 格式。\n\n以下列出一小部分較常用的格式：\n• %c: 本地日期時間\n• %x: 本地年月日\n• %Y: 四位數年份\n• %y: 二位數年份\n• %m: 二位數月份（01 至 12）\n• %B: 本地月份長名\n• %b: 本地月份短名\n• %d: 二位數月中日期（01 至 31）\n• %A: 本地星期幾長名\n• %a: 本地星期幾短名\n• %X: 本地時分秒\n• %H: 二位數小時數，24 時制（00 至 23）\n• %I: 二位數小時數，12 時制（00 至 12）\n• %p: AM 或 PM\n• %M: 二位數分鐘數（00 至 59）\n• %S: 二位數秒數（00 至 59）\n• %z: 本地時區偏移值\n• %Z: 本地時區名稱\n• %: % 符號"
   },
   "OptionEditorLineMarkerStyleLabel": {
     "message": "標示樣式"
@@ -1204,7 +1207,7 @@
     "message": "複製資訊格式:"
   },
   "OptionScrapbookCopyItemInfoFormatPlainTooltip": {
-    "message": "設定複製資訊的格式。\n\n可用以下「%<參數>%」模版語法帶入資訊：\n• %% - 帶入「%」符號。\n• %id% - 項目 ID。\n• %title% - 項目標題。\n• %comment% - 項目評註。\n• %source% - 項目來源網址。\n• %url% - 項目網址。\n• %create% - 項目建立時間。\n• %modify% - 項目修改時間。\n• %folder% - 資料夾。\n• %path% - 資料夾及標題。\n\n%create% 和 %modify% 的 <參數> 可在尾端加上「-<時間格式>」指定時間格式（使用 POSIX strftime 格式），<時間格式> 可在尾端加上「-utc」使用世界協調時間。例如「%create-F-utc%」可輸出如「2020-04-01」格式的時間。以下列出一些較常用的 POSIX strftime 格式：\n• Y: 四位數年份\n• y: 二位數年份\n• m: 二位數月份（01 至 12）\n• d: 二位數月中日期（01 至 31）\n• H: 二位數小時數（00 至 23）\n• M: 二位數分鐘數（00 至 59）\n• S: 二位數秒數（00 至 59）\n• F: 日期（YYYY-MM-DD）\n• T: 時間（HH:MM:SS）\n\n<參數> 可在尾端加上一或多次「:<格式>」轉換輸出格式，例如「%title:oneline:escape_html%」。<格式> 可用的值如下：\n• oneline: 截去換行字元及之後的內容。\n• collapse: 壓縮 ASCII 空白字元。\n• url: 脫義處理 URL 特殊字元。\n• escape_html: 脫義處理 HTML 特殊字元，包括「<」、「&」、「>」、「\"」。\n• escape_html_space: 脫義處理 HTML 特殊字元並將連續的半形空白轉為「&nbsp;」。\n• escape_css: 脫義處理 CSS 特殊字元。\n• json: 轉為 JSON 字串。"
+    "message": "設定複製資訊的格式。\n\n可用以下「%<參數>%」模版語法帶入資訊：\n• % - 帶入「%」符號。\n• %id% - 項目 ID。\n• %title% - 項目標題。\n• %comment% - 項目評註。\n• %source% - 項目來源網址。\n• %url% - 項目網址。\n• %create% - 項目建立時間。\n• %modify% - 項目修改時間。\n• %folder% - 資料夾。\n• %path% - 資料夾及標題。\n\n%create% 和 %modify% 的 <參數> 可在尾端加上「-<時間格式>」指定時間格式（使用 POSIX strftime 格式），<時間格式> 可在尾端加上「-utc」使用世界協調時間。例如「%create-F-utc%」可輸出如「2020-04-01」格式的時間。以下列出一些較常用的 POSIX strftime 格式：\n• Y: 四位數年份\n• y: 二位數年份\n• m: 二位數月份（01 至 12）\n• d: 二位數月中日期（01 至 31）\n• H: 二位數小時數（00 至 23）\n• M: 二位數分鐘數（00 至 59）\n• S: 二位數秒數（00 至 59）\n• F: 日期（YYYY-MM-DD）\n• T: 時間（HH:MM:SS）\n\n<參數> 可在尾端加上一或多次「:<格式>」轉換輸出格式，例如「%title:oneline:escape_html%」。<格式> 可用的值如下：\n• oneline: 截去換行字元及之後的內容。\n• collapse: 壓縮 ASCII 空白字元。\n• url: 脫義處理 URL 特殊字元。\n• escape_html: 脫義處理 HTML 特殊字元，包括「<」、「&」、「>」、「\"」。\n• escape_html_space: 脫義處理 HTML 特殊字元並將連續的半形空白轉為「&nbsp;」。\n• escape_css: 脫義處理 CSS 特殊字元。\n• json: 轉為 JSON 字串。"
   },
   "OptionScrapbookDefaultSearchLabel": {
     "message": "預設搜尋條件:"
