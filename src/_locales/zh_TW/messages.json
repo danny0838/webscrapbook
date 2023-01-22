@@ -104,6 +104,18 @@
   "CaptureDetailsOptionIndexTooltip": {
     "message": "擷取項目的插入位置（從 0 開始）。留空時插入至最後面。"
   },
+  "CaptureDetailsOptionModeBookmarkLabel": {
+    "message": "書籤"
+  },
+  "CaptureDetailsOptionModeLabel": {
+    "message": "擷取模式:"
+  },
+  "CaptureDetailsOptionModeNormalLabel": {
+    "message": "一般"
+  },
+  "CaptureDetailsOptionModeSourceLabel": {
+    "message": "原貌"
+  },
   "CaptureDetailsOptionTargetLabel": {
     "message": "目標項目:"
   },

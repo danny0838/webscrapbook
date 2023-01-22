@@ -104,6 +104,18 @@
   "CaptureDetailsOptionIndexTooltip": {
     "message": "获取项目的插入位置（从 0 开始）。留空时插入至最后面。"
   },
+  "CaptureDetailsOptionModeBookmarkLabel": {
+    "message": "书签"
+  },
+  "CaptureDetailsOptionModeLabel": {
+    "message": "获取模式:"
+  },
+  "CaptureDetailsOptionModeNormalLabel": {
+    "message": "一般"
+  },
+  "CaptureDetailsOptionModeSourceLabel": {
+    "message": "原貌"
+  },
   "CaptureDetailsOptionTargetLabel": {
     "message": "目标项目:"
   },

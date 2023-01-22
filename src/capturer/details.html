@@ -30,10 +30,18 @@
 <body hidden>
 <form id="wrapper">
 <div id="optionsWrapper">
-  <details id="group_save" open class="ui-saveTo-server">
+  <details id="group_save" open>
     <summary>__MSG_OptionGroupSave__</summary>
     <div>
-      <fieldset class="ui-single-item">
+      <fieldset>
+        <label for="tasks_mode">__MSG_CaptureDetailsOptionModeLabel__</label>
+        <select id="tasks_mode">
+          <option value="">__MSG_CaptureDetailsOptionModeNormalLabel__</option>
+          <option value="source">__MSG_CaptureDetailsOptionModeSourceLabel__</option>
+          <option value="bookmark">__MSG_CaptureDetailsOptionModeBookmarkLabel__</option>
+        </select>
+      </fieldset>
+      <fieldset class="ui-saveTo-server ui-single-item">
         <label for="captureInfoType">__MSG_CaptureDetailsCaptureInfoTypeLabel__</label>
         <select id="captureInfoType">
           <option value="normal">__MSG_CaptureDetailsCaptureInfoTypeNormalLabel__</option>
@@ -42,34 +50,34 @@
         </select>
         <a href="javascript:" data-tooltip="__MSG_CaptureDetailsCaptureInfoTypeTooltip__"></a>
       </fieldset>
-      <fieldset>
+      <fieldset class="ui-saveTo-server">
         <label for="fill-tasks_parentId">__MSG_CaptureDetailsOptionTargetLabel__</label>
         <select id="tasks_bookId"></select>
         <select id="tasks_parentId"></select>
         <input id="fill-tasks_parentId" type="button" value="__MSG_CaptureDetailsFillParentId__...">
       </fieldset>
-      <fieldset class="ui-captureInfoType-normal">
+      <fieldset class="ui-saveTo-server ui-captureInfoType-normal">
         <label for="tasks_index">__MSG_CaptureDetailsOptionIndexLabel__</label>
         <input type="number" id="tasks_index" min="0" step="1" style="width: 3em;">
         <a href="javascript:" data-tooltip="__MSG_CaptureDetailsOptionIndexTooltip__"></a>
       </fieldset>
-      <fieldset class="ui-single-item ui-captureInfoType-normal">
+      <fieldset class="ui-saveTo-server ui-single-item ui-captureInfoType-normal">
         <label for="task_title">__MSG_CaptureDetailsOptionTitleLabel__</label>
         <input type="text" id="task_title" list="task_title-preset">
         <datalist id="task_title-preset"></datalist>
       </fieldset>
-      <fieldset class="ui-single-item ui-captureInfoType-normal">
+      <fieldset class="ui-saveTo-server ui-single-item ui-captureInfoType-normal">
         <label for="task_comment">__MSG_CaptureDetailsOptionCommentLabel__</label>
         <blockquote>
           <textarea id="task_comment"></textarea>
         </blockquote>
       </fieldset>
-      <fieldset class="ui-single-item ui-captureInfoType-recapture">
+      <fieldset class="ui-saveTo-server ui-single-item ui-captureInfoType-recapture">
         <label for="captureInfoType-recapture-task_title">__MSG_CaptureDetailsOptionTitleLabel__</label>
         <input type="text" id="captureInfoType-recapture-task_title" placeholder="__MSG_CaptureDetailsOptionTitleRecapturePlaceholder__" list="captureInfoType-recapture-task_title-preset">
         <datalist id="captureInfoType-recapture-task_title-preset"></datalist>
       </fieldset>
-      <fieldset class="ui-single-item ui-captureInfoType-recapture">
+      <fieldset class="ui-saveTo-server ui-single-item ui-captureInfoType-recapture">
         <label for="captureInfoType-recapture-task_comment">__MSG_CaptureDetailsOptionCommentLabel__</label>
         <blockquote>
           <textarea id="captureInfoType-recapture-task_comment" placeholder="__MSG_CaptureDetailsOptionCommentRecapturePlaceholder__"></textarea>

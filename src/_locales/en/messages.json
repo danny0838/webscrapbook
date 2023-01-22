@@ -104,6 +104,18 @@
   "CaptureDetailsOptionIndexTooltip": {
     "message": "The position to insert the captured item at (starting from 0). Blank to insert at last."
   },
+  "CaptureDetailsOptionModeBookmarkLabel": {
+    "message": "Bookmark"
+  },
+  "CaptureDetailsOptionModeLabel": {
+    "message": "Capture mode:"
+  },
+  "CaptureDetailsOptionModeNormalLabel": {
+    "message": "Normal"
+  },
+  "CaptureDetailsOptionModeSourceLabel": {
+    "message": "Source"
+  },
   "CaptureDetailsOptionTargetLabel": {
     "message": "Target item:"
   },
