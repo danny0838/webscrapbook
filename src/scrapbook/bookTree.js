@@ -446,7 +446,7 @@
         if (anchorElem.container && !anchorElem.container.hidden) {
           this.toggleItem(anchorElem, false);
           this.saveViewStatus();
-          anchorElem.scrollIntoView();
+          this.scrollIntoView(anchorElem);
           return;
         }
 
@@ -463,7 +463,7 @@
           } else {
             this.highlightItem(parent, true);
           }
-          parent.scrollIntoView();
+          this.scrollIntoView(parent);
           return;
         }
 
@@ -483,7 +483,7 @@
         if (anchorElem.container && anchorElem.container.hidden) {
           this.toggleItem(anchorElem, true);
           this.saveViewStatus();
-          anchorElem.scrollIntoView();
+          this.scrollIntoView(anchorElem);
           return;
         }
 
@@ -497,7 +497,7 @@
           } else {
             this.highlightItem(child, true);
           }
-          child.scrollIntoView();
+          this.scrollIntoView(child);
         }
 
         return;
@@ -526,7 +526,7 @@
       }
 
       // locate the item element
-      curElem.scrollIntoView();
+      this.scrollIntoView(curElem);
       this.highlightItem(curElem, true, {reselect: true});
       this.saveViewStatus();
     }

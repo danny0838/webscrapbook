@@ -414,6 +414,10 @@
       this.anchorItem(itemElem);
     }
 
+    scrollIntoView(itemElem) {
+      itemElem.scrollIntoView();
+    }
+
     keyboardNavigation(event) {
       if (event.code === "ArrowUp") {
         event.preventDefault();
@@ -441,7 +445,7 @@
           } else {
             this.highlightItem(target, true);
           }
-          target.scrollIntoView();
+          this.scrollIntoView(target);
         }
 
         return;
@@ -473,7 +477,7 @@
           } else {
             this.highlightItem(target, true);
           }
-          target.scrollIntoView();
+          this.scrollIntoView(target);
         }
 
         return;
@@ -505,7 +509,7 @@
           } else {
             this.highlightItem(target, true);
           }
-          target.scrollIntoView();
+          this.scrollIntoView(target);
         }
 
         return;
@@ -537,7 +541,7 @@
           } else {
             this.highlightItem(target, true);
           }
-          target.scrollIntoView();
+          this.scrollIntoView(target);
         }
 
         return;
@@ -569,7 +573,7 @@
               !this.allowMultiSelectOnClick;
           const ranged = this.allowMultiSelect && event.shiftKey;
           this.highlightItem(target, willHighlight, {reselect, ranged});
-          target.scrollIntoView();
+          this.scrollIntoView(target);
         }
 
         return;
