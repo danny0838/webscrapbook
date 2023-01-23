@@ -21,12 +21,12 @@
   box-sizing: border-box;
   padding-top: .25em;
   padding-bottom: .25em;
-  padding-__MSG_@@bidi_start_edge__: 1em;
 }
 
 .tree ul li ul {
   margin-top: .25em;
   margin-bottom: -.25em;
+  padding-__MSG_@@bidi_start_edge__: 1em;
 }
 
 .tree li > div {
@@ -34,6 +34,7 @@
   margin: -2px 0;
   border: solid transparent;
   border-width: 2px 0;
+  padding-__MSG_@@bidi_start_edge__: 1em;
   white-space: nowrap;
 }
 

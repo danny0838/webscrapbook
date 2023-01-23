@@ -415,7 +415,7 @@
     }
 
     scrollIntoView(itemElem) {
-      itemElem.scrollIntoView();
+      itemElem.controller.scrollIntoView({block: "nearest", inline: "start"});
     }
 
     keyboardNavigation(event) {
