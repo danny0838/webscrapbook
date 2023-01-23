@@ -69,7 +69,7 @@
       }
 
       var a = div.appendChild(document.createElement('a'));
-      a.href = "#";
+      a.href = "javascript:void(0)";
       a.addEventListener('click', search.onClickLocate);
       var img = a.appendChild(document.createElement('img'));
       img.src = browser.runtime.getURL("resources/edit-locate.svg");

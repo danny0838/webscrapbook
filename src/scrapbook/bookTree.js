@@ -182,7 +182,7 @@
       if (this.allowKeyboardNavigation) {
         toggler.setAttribute('tabindex', -1);
       }
-      toggler.href = '#';
+      toggler.href = 'javascript:void(0)';
       toggler.className = 'toggle';
       toggler.addEventListener('click', this.onItemTogglerClick);
       div.insertBefore(toggler, div.firstChild);
