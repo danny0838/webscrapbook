@@ -72,6 +72,7 @@
       a.href = "javascript:void(0)";
       a.addEventListener('click', search.onClickLocate);
       var img = a.appendChild(document.createElement('img'));
+      img.draggable = false;
       img.src = browser.runtime.getURL("resources/edit-locate.svg");
       img.title = scrapbook.lang('SearchLocateTitle');
       img.alt = "";

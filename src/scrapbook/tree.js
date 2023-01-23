@@ -278,6 +278,9 @@
 
       if (meta.type !== 'separator') {
         var a = elem.anchor = div.appendChild(document.createElement('a'));
+        if (this.allowDrag) {
+          a.draggable = false;
+        }
         if (this.allowKeyboardNavigation) {
           a.setAttribute('tabindex', -1);
         }
@@ -321,6 +324,7 @@
         }
 
         var icon = a.insertBefore(document.createElement('img'), a.firstChild);
+        icon.draggable = false;
         if (meta.icon) {
           icon.src = /^(?:[a-z][a-z0-9+.-]*:|[/])/i.test(meta.icon || '') ? 
               meta.icon : 

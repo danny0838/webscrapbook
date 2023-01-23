@@ -179,6 +179,9 @@
       const div = elem.controller;
 
       const toggler = elem.toggler = document.createElement('a');
+      if (this.allowDrag) {
+        toggler.draggable = false;
+      }
       if (this.allowKeyboardNavigation) {
         toggler.setAttribute('tabindex', -1);
       }
@@ -188,6 +191,7 @@
       div.insertBefore(toggler, div.firstChild);
 
       const togglerImg = document.createElement('img');
+      togglerImg.draggable = false;
       togglerImg.src = TOGGLER_ICON.collapsed;
       togglerImg.alt = '';
       toggler.appendChild(togglerImg);
