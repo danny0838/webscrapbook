@@ -2244,7 +2244,7 @@ ${scrapbook.escapeHtml(content)}
           dialog.querySelector('[name="charset"]').parentNode.parentNode.hidden = ['folder', 'separator', 'bookmark', 'postit'].includes(item.type);
 
           dialog.addEventListener('dialogShow', (event) => {
-            dialog.querySelector('[name="title"]').focus();
+            dialog.querySelector('[name="title"]').select();
           });
 
           if (!await this.showDialog(dialog)) {
