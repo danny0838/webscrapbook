@@ -2471,28 +2471,34 @@ ${scrapbook.escapeHtml(content)}
 
         const newTab = modifiers.shiftKey || modifiers.ctrlKey;
 
+        let title;
         let type;
         {
           const frag = document.importNode(document.getElementById('tpl-mknote').content, true);
           const dialog = frag.children[0];
           scrapbook.loadLanguages(dialog);
+          dialog['title'].value = scrapbook.lang('ScrapBookNewNoteName');
 
           dialog.addEventListener('dialogShow', (event) => {
-            dialog.querySelector('[name="format"]').focus();
+            dialog.querySelector('[name="title"]').select();
           });
 
           if (!await this.showDialog(dialog)) {
             return;
           }
 
+          title = dialog['title'].value;
           type = dialog['format'].value;
+        }
+        if (!title) {
+          return;
         }
 
         // create new item
         const newItem = this.book.addItem({
           item: {
-            "title": scrapbook.lang('ScrapBookNewNoteName'),
-            "type": "note",
+            title,
+            type: "note",
           },
           parentId: parentItemId,
           index,

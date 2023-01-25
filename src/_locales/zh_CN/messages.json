@@ -1377,7 +1377,10 @@
     "message": "添加笔记"
   },
   "ScrapBookCommandCreateNoteDialogTitle": {
-    "message": "新笔记的格式:"
+    "message": "笔记标题:"
+  },
+  "ScrapBookCommandCreateNoteDialogType": {
+    "message": "笔记格式:"
   },
   "ScrapBookCommandCreatePostit": {
     "message": "添加便签"
