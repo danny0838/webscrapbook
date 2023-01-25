@@ -3,6 +3,15 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.7.0] - 2023-01-25
+* Added `Capture mode` option for `Capture as` dialog.
+* Improved UI for the sidebar:
+  * Whole title is now selected when entering the `Properties` dialog.
+  * Added support of renaming during folder or note creation.
+  * Improved automatic scrolling for keyboard navigation and item locating.
+  * Improved displaying effect when dragging an internal link or image of an item.
+  * Prevent some link-like elements from being opened unexpectedly.
+
 ## [1.6.0] - 2023-01-14
 * Adjusted filename tidying strategy:
   * Spaces, tabs, and linefeeds are now collapsed into a space.
