@@ -1373,6 +1373,9 @@
   "ScrapBookCommandCreateFolder": {
     "message": "添加文件夹"
   },
+  "ScrapBookCommandCreateFolderDialogTitle": {
+    "message": "文件夹标题:"
+  },
   "ScrapBookCommandCreateNote": {
     "message": "添加笔记"
   },

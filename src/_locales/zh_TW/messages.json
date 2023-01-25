@@ -1373,6 +1373,9 @@
   "ScrapBookCommandCreateFolder": {
     "message": "新增資料夾"
   },
+  "ScrapBookCommandCreateFolderDialogTitle": {
+    "message": "資料夾標題:"
+  },
   "ScrapBookCommandCreateNote": {
     "message": "新增筆記"
   },

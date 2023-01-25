@@ -1373,6 +1373,9 @@
   "ScrapBookCommandCreateFolder": {
     "message": "New folder"
   },
+  "ScrapBookCommandCreateFolderDialogTitle": {
+    "message": "Folder title:"
+  },
   "ScrapBookCommandCreateNote": {
     "message": "New Note"
   },

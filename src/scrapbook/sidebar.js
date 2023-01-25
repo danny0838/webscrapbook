@@ -2322,11 +2322,32 @@ ${scrapbook.escapeHtml(content)}
           }
         }
 
+        let title;
+        {
+          const frag = document.importNode(document.getElementById('tpl-mkfolder').content, true);
+          const dialog = frag.children[0];
+          scrapbook.loadLanguages(dialog);
+          dialog['title'].value = scrapbook.lang('ScrapBookNewFolderName');
+
+          dialog.addEventListener('dialogShow', (event) => {
+            dialog.querySelector('[name="title"]').select();
+          });
+
+          if (!await this.showDialog(dialog)) {
+            return;
+          }
+
+          title = dialog['title'].value;
+        }
+        if (!title) {
+          return;
+        }
+
         // create new item
         const newItem = this.book.addItem({
           item: {
-            "title": scrapbook.lang('ScrapBookNewFolderName'),
-            "type": "folder",
+            title,
+            type: "folder",
           },
           parentId: parentItemId,
           index,
