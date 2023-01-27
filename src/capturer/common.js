@@ -1000,7 +1000,9 @@
                 // when JavaScript is enabled. Replace with normal HTML content.
                 // https://html.spec.whatwg.org/multipage/scripting.html#the-noscript-element
                 const elemOrig = origNodeMap.get(elem);
-                if (elemOrig.innerHTML === elemOrig.textContent) {
+                if (elemOrig && elemOrig.innerHTML === elemOrig.textContent) {
+                  // elemOrig may not exist for nested <noscript> when handling the inner level,
+                  // skip as the replacement should have been done in the outer level
                   const tempElem = newDoc.createElement('scrapbook-noscript');
                   tempElem.innerHTML = elem.textContent;
                   let child;
