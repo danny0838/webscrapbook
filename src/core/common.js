@@ -64,7 +64,7 @@ if (Node && !Node.prototype.getRootNode) {
     "server.user": "",
     "server.password": "",
     "capture.serverUploadWorkers": 4,
-    "capture.serverUploadRetryCount": 2,
+    "capture.serverUploadRetryCount": 3,
     "capture.serverUploadRetryDelay": 2000,
     "capture.saveTo": "folder", // "server", "folder", "file", "memory"
     "capture.saveFolder": "WebScrapBook/data",
