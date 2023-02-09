@@ -217,65 +217,94 @@
         const url = URL.createObjectURL(blob);
         const prefix = options["capture.saveFolder"] + "/" + (dir ? dir + '/' : '');
         isFilenameTaken = async (path) => {
-          const filename = prefix + path;
-          const newFilename = await new Promise((resolve, reject) => {
-            let id = null;
-            const onChanged = async (delta) => {
-              if (delta.id !== id) { return; }
-              try {
-                if (delta.filename) {
-                  // Chromium: an event with filename change is triggered before download
-                  const filename = delta.filename.current;
-                  browser.downloads.onChanged.removeListener(onChanged);
-                  await browser.downloads.erase({id});
-                  resolve(filename);
-                } else if (delta.state && delta.state.current === "complete") {
-                  browser.downloads.onChanged.removeListener(onChanged);
-                  const [item] = await browser.downloads.search({id});
-                  const filename = item.filename;
-                  if (item.exists) { await browser.downloads.removeFile(id); }
-                  await browser.downloads.erase({id});
-                  resolve(filename);
-                } else if (delta.error) {
-                  browser.downloads.onChanged.removeListener(onChanged);
-                  await browser.downloads.erase({id});
-                  reject(new Error(`Download interruped: ${delta.error.current}.`));
+          const filename = isFile ? prefix + path : prefix + path + '/' + 'index.html';
+
+          try {
+            const item = await new Promise((resolve, reject) => {
+              let id = null;
+              const onChanged = async (delta) => {
+                if (delta.id !== id) { return; }
+                try {
+                  if (delta.error) {
+                    browser.downloads.onChanged.removeListener(onChanged);
+                    await browser.downloads.erase({id});
+
+                    // Treat download failure as filename being taken.
+                    // If ancestor folder path is a file:
+                    // - Chromium will prompt the user to select another path.
+                    // - Firefox will fail to start downloading.
+                    resolve(null);
+                  } else if (delta.state && delta.state.current === "complete") {
+                    browser.downloads.onChanged.removeListener(onChanged);
+                    const [item] = await browser.downloads.search({id});
+                    resolve(item);
+                  }
+                } catch (ex) {
+                  // reject for an unexpected error
+                  reject(new Error(`Unexpected error: ${ex.message}`));
                 }
-              } catch (ex) {
+              };
+              browser.downloads.onChanged.addListener(onChanged);
+              browser.downloads.download({
+                url,
+                filename,
+                conflictAction: "uniquify",
+                saveAs: false,
+              }).catch(ex => {
                 // reject for an unexpected error
-                reject(new Error(`Failed to download "${filename}": ${ex.message}`));
-              }
-            };
-            browser.downloads.onChanged.addListener(onChanged);
-            browser.downloads.download({
-              url,
-              filename,
-              conflictAction: "uniquify",
-              saveAs: false,
-            }).then(downloadId => {
-              id = downloadId;
-            }).catch(ex => {
-              reject(new Error(`Failed to download "${filename}": ${ex.message}`));
+                reject(new Error(`Unable to start downloading: ${ex.message}`));
+              }).then(downloadId => {
+                id = downloadId;
+              });
             });
-          });
 
-          const [, newBasename] = scrapbook.filepathParts(newFilename);
-          if (newBasename === path) {
-            return false;
+            if (item === null) {
+              return true;
+            }
+
+            const [, newBasename] = scrapbook.filepathParts(item.filename);
+            const [, oldBasename] = scrapbook.filepathParts(filename);
+            if (newBasename === oldBasename) {
+              await browser.downloads.erase({id: item.id});
+              return false;
+            }
+
+            removeDummyFile: {
+              // A random temporarily OS or API issue may cause the file
+              // removal to fail. Retry a few times to alleviate that.
+              const retryCount = options["capture.downloadRetryCount"];
+              const retryDelay = options["capture.downloadRetryDelay"];
+              let tried = 0;
+              while (true) {
+                try {
+                  await browser.downloads.removeFile(item.id);
+                  break;
+                } catch (ex) {
+                  if (tried++ >= retryCount) {
+                    throw ex;
+                  }
+                  console.error(`Failed to remove downloaded file "${filename}" (tried ${tried}): ${ex.message}`);
+                  await scrapbook.delay(retryDelay);
+                }
+              }
+            }
+            await browser.downloads.erase({id: item.id});
+
+            // This may happen when:
+            // 1. The downloaded filename is cropped due to length restriction.
+            //    e.g. xxxxxxxxxx => xxxxxx (1)
+            //    e.g. xxxxxxx(1) => xxxxxx (1)
+            // 2. The browser API cannot return the correct downloaded path
+            //    (e.g. on Kiwi Browser), in which case the test will never pass.
+            // Fail early for either case.
+            if (!newBasename.startsWith(scrapbook.filenameParts(oldBasename)[0])) {
+              throw new Error(`Unable to download to the folder.`);
+            }
+
+            return true;
+          } catch (ex) {
+            throw new Error(`Failed to download "${filename}": ${ex.message}`);
           }
-
-          // This may happen when:
-          // 1. The downloaded filename is cropped due to length restriction.
-          //    e.g. xxxxxxxxxx => xxxxxx (1)
-          //    e.g. xxxxxxx(1) => xxxxxx (1)
-          // 2. The browser API cannot return the correct downloaded path
-          //    (e.g. on Kiwi Browser), in which case the test will never pass.
-          // Fail early for either case.
-          if (!newBasename.startsWith(basename)) {
-            throw new Error(`Failed to download "${filename}": Unable to generate folder.`);
-          }
-
-          return true;
         };
         break;
       }
@@ -3264,7 +3293,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               sourceUrl,
               autoErase: path !== "index.html",
               savePrompt: false,
-              conflictAction: options["capture.saveOverwrite"] ? "overwrite" : "uniquify",
+              conflictAction: "overwrite",
               settings,
               options,
             }).catch((ex) => {
