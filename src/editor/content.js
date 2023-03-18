@@ -2058,7 +2058,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       switch (objectType) {
         case 'sticky': {
           if (target.shadowRoot) {
-            const innerTarget = getEventInnerTarget(event);
+            const innerTarget = event.composedPath()[0];
             if (innerTarget.matches('header')) {
               if (target.classList.contains('relative')) {
                 break;
@@ -2218,13 +2218,6 @@ scrapbook-toolbar, scrapbook-toolbar *,
 
     const getEventPositionObject = (event) => {
       return event.changedTouches ? event.changedTouches[0] : event;
-    };
-
-    const getEventInnerTarget = (event) => {
-      // Get the targeted element in the shadow root.
-      // In Firefox event.explicitOriginalTarget is the target in shadowRoot.
-      // In Chromium event.path bubbles from the target in shadowRoot upwards.
-      return event.path ? event.path[0] : event.explicitOriginalTarget;
     };
 
     const annotator = {
