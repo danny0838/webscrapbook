@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.8.1] - 2023-03-18
+* Fixed an issue that a sticky note cannot be dragged in Chromium >= 109.
+
 ## [1.8.0] - 2023-02-10
 * Fixed several possible errors for concurrent captures that saves as a folder to the default download directory.
 * Adjusted the default retry times for saving a file to the backend server.
