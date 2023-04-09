@@ -739,13 +739,13 @@
     },
 
     async search(query, {resultHandler}) {
-      const books = new Set(search.books);
+      let books = new Set(search.books);
       if (query.books.include.length) {
-        for (const book of books) {
-          if (!query.books.include.includes(book.id)) {
-            books.delete(book);
-          }
-        }
+        books = new Set(
+          query.books.include
+            .map(id => server.books[id])
+            .filter(book => books.has(book))
+        );
       }
       for (const book of books) {
         if (query.books.exclude.includes(book.id)) {
