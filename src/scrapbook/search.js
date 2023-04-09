@@ -881,11 +881,11 @@
     },
 
     _match_create(rule, item) {
-      return this.matchDate(rule, item.meta.create);
+      return this.matchDateOr(rule, item.meta.create);
     },
 
     _match_modify(rule, item) {
-      return this.matchDate(rule, item.meta.modify);
+      return this.matchDateOr(rule, item.meta.modify);
     },
 
     _match_marked(rule, item) {
@@ -952,7 +952,7 @@
       return false;
     },
 
-    matchDate(rule, date) {
+    matchDateOr(rule, date) {
       if (!date) { return false; }
 
       for (const key of rule.exclude) {
@@ -961,13 +961,14 @@
         }
       }
 
+      if (!rule.include.length) { return true; }
       for (const key of rule.include) {
-        if (!(key[0] <= date && date <= key[1])) {
-          return false;
+        if (key[0] <= date && date <= key[1]) {
+          return true;
         }
       }
 
-      return true;
+      return false;
     },
 
     idLocalToUtc(id) {
