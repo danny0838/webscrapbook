@@ -269,7 +269,8 @@
           if (!searchWithRootIds || usedBookIds.has(key)) {
             this.books.push(book);
             const opt = document.createElement('option');
-            opt.value = opt.textContent = book.name;
+            opt.textContent = book.name;
+            opt.value = book.id;
             if (usedBookIds.has(key)) { opt.selected = true; }
             booksSelectElem.appendChild(opt);
           }
@@ -312,7 +313,7 @@
 
         // set queryStrFromFrom
         let queryStrFromFrom = "";
-        queryStrFromFrom +=  Array.from(document.getElementById("books").selectedOptions).map(x => `book:"${x.value}"`).join(' ');
+        queryStrFromFrom += Array.from(document.getElementById("books").selectedOptions).map(x => `book:"${x.value}"`).join(' ');
 
         // set query string
         let queryStr = document.getElementById("keyword").value;
@@ -741,13 +742,13 @@
       const books = new Set(search.books);
       if (query.books.include.length) {
         for (const book of books) {
-          if (!query.books.include.includes(book.name)) {
+          if (!query.books.include.includes(book.id)) {
             books.delete(book);
           }
         }
       }
       for (const book of books) {
-        if (query.books.exclude.includes(book.name)) {
+        if (query.books.exclude.includes(book.id)) {
           books.delete(book);
         }
       }
