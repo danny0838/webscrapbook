@@ -303,7 +303,7 @@
         document.getElementById('keyword').focus();
       } catch (ex) {
         console.error(ex);
-        this.addMsg(`Error: ${ex.message}`, 'error');
+        this.addMsg(`Error: ${ex.message}`, {type: 'error'});
       }
     },
 
@@ -328,7 +328,7 @@
         const query = searchEngine.parseQuery(queryStr);
         if (query.error.length) {
           for (const err of query.error) {
-            this.addMsg(scrapbook.lang('ErrorSearch', [err]), 'error');
+            this.addMsg(scrapbook.lang('ErrorSearch', [err]), {type: 'error'});
           }
           return;
         }
@@ -340,7 +340,7 @@
         });
       } catch(ex) {
         console.error(ex);
-        this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), 'error');
+        this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), {type: 'error'});
       };
     },
 
@@ -434,7 +434,7 @@
               a.textContent = cacheOutdatedMessage;
               a.href = u.href;
               a.target = '_blank';
-              this.addMsg(a, 'warn', document.getElementById('messages'));
+              this.addMsg(a, {type: 'warn', wrapper: document.getElementById('messages')});
             }
           }
 
@@ -451,7 +451,7 @@
                 size * 1024 > 0.1 ? (size * 1024).toFixed(1) + ' KiB' :
                 fulltextSize + ' B';
             const msg = scrapbook.lang('WarnSearchCacheBlocked', [book.name, size]);
-            this.addMsg(msg, 'warn', document.getElementById('messages'));
+            this.addMsg(msg, {type: 'warn', wrapper: document.getElementById('messages')});
             book.fulltext = {};
           } else {
             tasks.push(book.loadFulltext());
@@ -466,7 +466,7 @@
       return await loadBook(book);
     },
 
-    addMsg(msg, className, wrapper = document.getElementById("result")) {
+    addMsg(msg, {type, wrapper = document.getElementById("result")} = {}) {
       const div = document.createElement("div");
       if (typeof msg === 'string') {
         div.textContent = msg;
@@ -474,7 +474,7 @@
         div.appendChild(msg);
       }
       div.classList.add('msg');
-      if (className) { div.classList.add(className); }
+      if (type) { div.classList.add(type); }
       wrapper.appendChild(div);
     },
 
