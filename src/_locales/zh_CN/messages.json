@@ -662,10 +662,26 @@
       }
     }
   },
+  "ErrorSearchInvalidLimit": {
+    "message": "笔数限制格式错误: $LIMIT$",
+    "placeholders": {
+      "limit": {
+        "content": "$1"
+      }
+    }
+  },
   "ErrorSearchInvalidRegExp": {
     "message": "正则表达式格式错误: $REGEX$",
     "placeholders": {
       "regex": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSearchInvalidSort": {
+    "message": "排序格式错误: $SORT$",
+    "placeholders": {
+      "sort": {
         "content": "$1"
       }
     }

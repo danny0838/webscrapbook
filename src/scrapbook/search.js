@@ -501,7 +501,7 @@
         error: [],
         rules: {},
         sorts: [],
-        limit: null,
+        limit: 0,
         books: {
           include: [],
           exclude: [],
@@ -530,21 +530,27 @@
           case "content":
             query.sorts.push({key: "fulltext", subkey: key, order});
             break;
-          default:
+          case "title": case "comment": case "file": case "source":
+          case "type": case "create": case "modify":
             query.sorts.push({key: "meta", subkey: key, order});
+            break;
+          default:
+            addError(scrapbook.lang('ErrorSearchInvalidSort', [key]));
             break;
         }
       };
 
       const setLimit = (value, positive) => {
         if (!positive) {
-          query.limit = null;
+          query.limit = 0;
           return; 
         }
 
-        const newValue = parseInt(value);
-        if (!Number.isNaN(newValue)) {
+        const newValue = parseInt(value, 10);
+        if (Number.isInteger(newValue)) {
           query.limit = newValue;
+        } else {
+          addError(scrapbook.lang('ErrorSearchInvalidLimit', [value]));
         }
       };
 

@@ -662,10 +662,26 @@
       }
     }
   },
+  "ErrorSearchInvalidLimit": {
+    "message": "Invalid limit: $LIMIT$",
+    "placeholders": {
+      "limit": {
+        "content": "$1"
+      }
+    }
+  },
   "ErrorSearchInvalidRegExp": {
     "message": "Invalid RegExp synatx: $REGEX$",
     "placeholders": {
       "regex": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorSearchInvalidSort": {
+    "message": "Invalid sort: $SORT$",
+    "placeholders": {
+      "sort": {
         "content": "$1"
       }
     }
