@@ -3,6 +3,14 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.9.0] - 2023-04-10
+* Improved the search page:
+  * `create:` and `modify:` conditions are now "or"-connected.
+  * `book:` conditions are now matched by book ID.
+  * Search results are now shown in the order of provided `book:` conditions.
+  * A bad input for `sort:` and `limit:` is now forbidden.
+  * Fixed an issue that the results of an interrupted search interminges into the current search.
+
 ## [1.8.1] - 2023-03-18
 * Fixed an issue that a sticky note cannot be dragged in Chromium >= 109.
 
