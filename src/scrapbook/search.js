@@ -308,9 +308,13 @@
     },
 
     async search() {
-      try {
-        this.clearResult();
+      // Set up a clean new wrapper to place further async results.
+      // The wrapper will be removed from DOM if the search is interrupted.
+      const wrapper = document.createElement('div');
+      wrapper.id = "result";
+      document.getElementById("result").replaceWith(wrapper);
 
+      try {
         // set queryStrFromFrom
         let queryStrFromFrom = "";
         queryStrFromFrom += Array.from(document.getElementById("books").selectedOptions).map(x => `book:"${x.value}"`).join(' ');
@@ -328,7 +332,7 @@
         const query = searchEngine.parseQuery(queryStr);
         if (query.error.length) {
           for (const err of query.error) {
-            this.addMsg(scrapbook.lang('ErrorSearch', [err]), {type: 'error'});
+            this.addMsg(scrapbook.lang('ErrorSearch', [err]), {type: 'error', wrapper});
           }
           return;
         }
@@ -336,21 +340,23 @@
 
         // search and get result
         return await searchEngine.search(query, {
-          resultHandler: this.showResults.bind(this),
+          resultHandler: (results, {book, markers}) => {
+            this.showResults(results, {book, markers, wrapper});
+          },
         });
       } catch(ex) {
         console.error(ex);
-        this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), {type: 'error'});
+        this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), {type: 'error', wrapper});
       };
     },
 
-    showResults(results, {book, markers}) {
-      this.addMsg(scrapbook.lang('SearchFound', [book.name, results.length]));
+    showResults(results, {book, markers, wrapper}) {
+      this.addMsg(scrapbook.lang('SearchFound', [book.name, results.length]), {wrapper});
 
-      const wrapper = document.createElement("div");
+      const treeElem = document.createElement("div");
 
       const tree = new SearchTree({
-        treeElem: wrapper,
+        treeElem,
         bookId: book.id,
         markers,
         commentLength: scrapbook.getOption("scrapbook.searchCommentLength"),
@@ -375,13 +381,9 @@
 
       // Add a <br> for spacing between books, and adds a spacing when the user
       // selects and the search results and copy and paste as plain text.
-      wrapper.appendChild(document.createElement('br'));
+      treeElem.appendChild(document.createElement('br'));
 
-      document.getElementById("result").appendChild(wrapper);
-    },
-
-    clearResult() {
-      document.getElementById("result").textContent = "";
+      wrapper.appendChild(treeElem);
     },
 
     async loadBook(book) {
