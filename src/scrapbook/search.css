@@ -61,12 +61,20 @@ a:focus {
   color: red;
 }
 
+.tree-search {
+  width: unset;
+}
+
+.tree-search li > div {
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
 .tree-search li > div.details {
   margin-top: .25em;
   margin-bottom: .25em;
   border: 0;
   font-size: .85em;
-  white-space: normal;
 }
 
 .tree-search li > div.details::before {
