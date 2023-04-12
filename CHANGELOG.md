@@ -3,6 +3,12 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.10.0] - 2023-04-12
+* Improved UI for search results.
+  * Long lines are now wrapped.
+  * Adjusted indentation of results.
+  * Adjusted mouse hover effects.
+
 ## [1.9.0] - 2023-04-10
 * Improved the search page:
   * `create:` and `modify:` conditions are now "or"-connected.
