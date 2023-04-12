@@ -44,6 +44,10 @@ a {
   color: inherit;
 }
 
+a:hover {
+  background-color: rgba(196, 221, 252, .5);
+}
+
 a:focus {
   outline-style: auto;
   background-color: rgba(196, 221, 252, 1);
