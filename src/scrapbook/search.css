@@ -70,10 +70,16 @@ a:focus {
   overflow-wrap: break-word;
 }
 
+.tree-search li > div:first-child {
+  padding-left: 1.36em;
+  text-indent: -1.36em;
+}
+
 .tree-search li > div.details {
   margin-top: .25em;
   margin-bottom: .25em;
   border: 0;
+  padding-left: 1.6em;
   font-size: .85em;
 }
 
