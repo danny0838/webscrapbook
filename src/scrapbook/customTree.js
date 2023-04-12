@@ -24,15 +24,12 @@
 
   'use strict';
 
-  const TREE_CLASS = 'tree-custom';
-
   class CustomTree extends Tree {
     constructor({
       treeElem,
       bookId,
     }) {
       super({treeElem});
-      treeElem.classList.add(TREE_CLASS);
 
       if (typeof bookId === 'string') {
         treeElem.setAttribute('data-bookId', bookId);
