@@ -42,7 +42,7 @@
   cursor: cell;
 }
 
-.tree li > div::before {
+.tree.selectable li > div::before {
   position: absolute;
   box-sizing: border-box;
   left: 0;
@@ -54,7 +54,7 @@
   content: "";
 }
 
-.tree li > div:hover::before {
+.tree.selectable li > div:hover::before {
   border-color: rgba(125, 162, 206, 0.3);
   background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.3));
 }
@@ -115,17 +115,17 @@
   font-weight: bold;
 }
 
-.tree li > div.highlight::before {
+.tree.selectable li > div.highlight::before {
   border: 1px solid rgba(125, 162, 206, .7);
   background: linear-gradient(rgba(235, 244, 253, .7), rgba(196, 221, 252, .7));
 }
 
-.tree li > div.anchor::before {
+.tree.selectable li > div.anchor::before {
   border: 1px solid rgba(125, 162, 206, .7);
 }
 
-.tree li > div.highlight:hover::before,
-.tree li > div.highlight.anchor::before {
+.tree.selectable li > div.highlight:hover::before,
+.tree.selectable li > div.highlight.anchor::before {
   border: 1px solid rgba(125, 162, 206, .9);
   background: linear-gradient(rgba(235, 244, 253, .9), rgba(196, 221, 252, .9));
 }
