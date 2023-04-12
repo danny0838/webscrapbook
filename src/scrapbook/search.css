@@ -57,7 +57,7 @@ a:focus {
   color: red;
 }
 
-.tree .details {
+.tree-search li > div.details {
   margin-top: .25em;
   margin-bottom: .25em;
   border: 0;
@@ -65,22 +65,22 @@ a:focus {
   white-space: normal;
 }
 
-.tree .details::before {
+.tree-search li > div.details::before {
   display: none;
 }
 
-.tree .details .comment {
+.tree-search li > div.details .comment {
   margin: .4em 0 .2em;
   border: 1px solid gray;
   border-radius: 3px;
   padding: .2em;
 }
 
-.tree .details .context {
+.tree-search li > div.details .context {
   margin: .5em 0;
 }
 
-.tree .details .source {
+.tree-search li > div.details .source {
   margin: .4em 0;
   color: green;
   word-break: break-all;

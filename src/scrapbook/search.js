@@ -24,6 +24,8 @@
 
   'use strict';
 
+  const TREE_CLASS = 'tree-search';
+
   class SearchTree extends CustomTree {
     constructor(params) {
       super(params);
@@ -31,6 +33,26 @@
       this.commentLength = params.commentLength;
       this.contextLength = params.contextLength;
       this.sourceLength = params.sourceLength;
+      this.treeElem.classList.add(TREE_CLASS);
+    }
+
+    init(params) {
+      super.init(Object.assign({
+        allowSelect: false,
+        allowMultiSelect: false,
+        allowMultiSelectOnClick: false,
+        allowAnchorClick: true,
+        allowDrag: false,
+        allowDrop: false,
+      }, params));
+    }
+
+    rebuild() {
+      super.rebuild();
+
+      // Add a <br> for spacing between books, and adds a spacing when the user
+      // selects and the search results and copy and paste as plain text.
+      this.treeElem.appendChild(document.createElement('br'));
     }
 
     addItem(item, file, fulltext) {
@@ -363,25 +385,13 @@
         contextLength: scrapbook.getOption("scrapbook.searchContextLength"),
         sourceLength: scrapbook.getOption("scrapbook.searchSourceLength"),
       });
-      tree.init({
-        book,
-        allowSelect: false,
-        allowMultiSelect: false,
-        allowMultiSelectOnClick: false,
-        allowAnchorClick: true,
-        allowDrag: false,
-        allowDrop: false,
-      });
+      tree.init({book});
       tree.rebuild();
 
       for (const result of results) {
         const {id, file, meta, fulltext} = result;
         tree.addItem(meta, file, fulltext.content);
       }
-
-      // Add a <br> for spacing between books, and adds a spacing when the user
-      // selects and the search results and copy and paste as plain text.
-      treeElem.appendChild(document.createElement('br'));
 
       wrapper.appendChild(treeElem);
     },
