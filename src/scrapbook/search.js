@@ -36,15 +36,17 @@
       this.treeElem.classList.add(TREE_CLASS);
     }
 
-    init(params) {
-      super.init(Object.assign({
+    init({book}) {
+      super.init({
+        book,
         allowSelect: false,
         allowMultiSelect: false,
         allowMultiSelectOnClick: false,
         allowAnchorClick: true,
         allowDrag: false,
         allowDrop: false,
-      }, params));
+      });
+      this.treeElem.setAttribute('data-book-id', book.id);
     }
 
     rebuild() {
@@ -379,7 +381,6 @@
 
       const tree = new SearchTree({
         treeElem,
-        bookId: book.id,
         markers,
         commentLength: scrapbook.getOption("scrapbook.searchCommentLength"),
         contextLength: scrapbook.getOption("scrapbook.searchContextLength"),
@@ -493,7 +494,7 @@
     async onClickLocate(event) {
       event.preventDefault();
       const elem = event.currentTarget;
-      const bookId = elem.closest('[data-bookId]').getAttribute('data-bookId');
+      const bookId = elem.closest('[data-book-id]').getAttribute('data-book-id');
       const id = elem.closest('[data-id]').getAttribute('data-id');
       const response = await scrapbook.invokeExtensionScript({
         cmd: "background.locateItem",

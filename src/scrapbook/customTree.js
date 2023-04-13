@@ -25,17 +25,6 @@
   'use strict';
 
   class CustomTree extends Tree {
-    constructor({
-      treeElem,
-      bookId,
-    }) {
-      super({treeElem});
-
-      if (typeof bookId === 'string') {
-        treeElem.setAttribute('data-bookId', bookId);
-      }
-    }
-
     rebuild() {
       super.rebuild();
 
