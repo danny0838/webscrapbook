@@ -28,7 +28,25 @@
 
   const REGEX_IPv4 = /^(?:\d{1,3}\.){3}\d{1,3}$/;
 
+  const TREE_CLASS = 'tree-search-captures';
+
   class SearchTree extends CustomTree {
+    constructor(params) {
+      super(params);
+      this.treeElem.classList.add(TREE_CLASS);
+    }
+
+    init(params) {
+      super.init(Object.assign({
+        allowSelect: false,
+        allowMultiSelect: false,
+        allowMultiSelectOnClick: false,
+        allowAnchorClick: true,
+        allowDrag: false,
+        allowDrop: false,
+      }, params));
+    }
+
     addItem(item) {
       const elem = super.addItem(item);
       const div = elem.controller;
@@ -200,15 +218,7 @@
           treeElem: wrapper,
           bookId,
         });
-        tree.init({
-          book,
-          allowSelect: false,
-          allowMultiSelect: false,
-          allowMultiSelectOnClick: false,
-          allowAnchorClick: true,
-          allowDrag: false,
-          allowDrop: false,
-        });
+        tree.init({book});
         tree.rebuild();
 
         return tree;
