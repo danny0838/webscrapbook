@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.10.1] - 2023-04-13
+* Improved UI for `View captured pages` page.
+
 ## [1.10.0] - 2023-04-12
 * Improved UI for search results.
   * Long lines are now wrapped.
