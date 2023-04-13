@@ -1243,9 +1243,6 @@
   "OptionScrapbookDefaultSearchTooltip": {
     "message": "The prefilled search condition. For example, setting this to “-type:separator” makes “keyword” in the search field mean searching “-type:separator keyword”.\n\n• Besides general search commands, “default:” can be used to set the default command. For example, setting this to “default:title” makes “keyword” in the search field mean searching “title:keyword”. (defaults to default:tcc)"
   },
-  "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
-    "message": "Size limit for remote fulltext cache (MiB):"
-  },
   "OptionScrapbookScrapbookSearchCommentLengthLabel": {
     "message": "Comment length shown in search results:"
   },
@@ -1660,6 +1657,9 @@
   "SearchLocateTitle": {
     "message": "Locate this item in scrapbook"
   },
+  "SearchNotFound": {
+    "message": "No match found"
+  },
   "SearchSortId": {
     "message": "Sort by ID"
   },
@@ -1740,17 +1740,6 @@
         "content": "$1"
       },
       "target": {
-        "content": "$2"
-      }
-    }
-  },
-  "WarnSearchCacheBlocked": {
-    "message": "Skipped loading remote fulltext cache for book “$BOOK$” due to exceeding size limit (totally $SIZE$).",
-    "placeholders": {
-      "book": {
-        "content": "$1"
-      },
-      "size": {
         "content": "$2"
       }
     }

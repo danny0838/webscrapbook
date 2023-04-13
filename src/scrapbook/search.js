@@ -29,10 +29,6 @@
   class SearchTree extends CustomTree {
     constructor(params) {
       super(params);
-      this.markers = params.markers;
-      this.commentLength = params.commentLength;
-      this.contextLength = params.contextLength;
-      this.sourceLength = params.sourceLength;
       this.treeElem.classList.add(TREE_CLASS);
     }
 
@@ -57,10 +53,19 @@
       this.treeElem.appendChild(document.createElement('br'));
     }
 
-    addItem(item, file, fulltext) {
+    addItem(item, file, context) {
       const elem = super.addItem(item);
 
       const div = elem.controller;
+
+      // replace label with marked context title if item has title
+      // (or use the original value such as item ID without marking)
+      if (item.title) {
+        const labelElem = document.createElement('span');
+        labelElem.innerHTML = context.title;
+        elem.label.replaceWith(labelElem);
+        elem.label = labelElem;
+      }
 
       handleSubFile: {
         if (!file || file === '.') {
@@ -86,9 +91,8 @@
 
         const span = document.createElement('span');
         span.appendChild(document.createTextNode(' ('));
-        const fileNode = span.appendChild(document.createTextNode(file));
+        span.insertAdjacentHTML('beforeend', context.file);
         span.appendChild(document.createTextNode(')'));
-        nodeMarker.markTextNode(fileNode, this.markers.file);
         a.parentNode.insertBefore(span, a.nextSibling);
       }
 
@@ -101,42 +105,30 @@
       img.title = scrapbook.lang('SearchLocateTitle');
       img.alt = "";
 
-      // mark title if item has title
-      // (or use the original value such as item ID without marking)
-      if (item.title) {
-        nodeMarker.markTextNode(elem.label, this.markers.title);
-      }
-
-      // add details if set
-      if (this.commentLength || this.contextLength || this.sourceLength) {
+      // add context to details if exists
+      if (context.comment || context.fulltext || context.source) {
         const divDetails = document.createElement('div');
         divDetails.classList.add('details');
 
         // comment
-        if (this.commentLength && item.comment) {
-          const text = nodeMarker.cropSnippets(item.comment, this.markers.comment, this.commentLength);
+        if (context.comment) {
           const div = divDetails.appendChild(document.createElement('div'));
           div.classList.add('comment');
-          const commentNode = div.appendChild(document.createTextNode(text));
-          nodeMarker.markTextNode(commentNode, this.markers.comment);
+          div.innerHTML = context.comment;
         }
 
-        // context (fulltext)
-        if (this.contextLength && fulltext) {
-          const text = nodeMarker.cropSnippets(fulltext, this.markers.content, this.contextLength);
+        // fulltext
+        if (context.fulltext) {
           const div = divDetails.appendChild(document.createElement('div'));
           div.classList.add('context');
-          const contextNode = div.appendChild(document.createTextNode(text));
-          nodeMarker.markTextNode(contextNode, this.markers.content);
+          div.innerHTML = context.fulltext;
         }
 
         // source
-        if (this.sourceLength && item.source) {
-          const text = nodeMarker.cropSnippets(item.source, this.markers.source, this.sourceLength);
+        if (context.source) {
           const div = divDetails.appendChild(document.createElement('div'));
           div.classList.add('source');
-          const sourceNode = div.appendChild(document.createTextNode(text));
-          nodeMarker.markTextNode(sourceNode, this.markers.source);
+          div.innerHTML = context.source;
         }
 
         div.parentNode.appendChild(divDetails);
@@ -144,112 +136,9 @@
     }
   }
 
-  const nodeMarker = {
-    get template() {
-      const value = document.createElement('mark');
-      Object.defineProperty(nodeMarker, 'template', {
-        value,
-        configurable: true,
-      });
-      return value;
-    },
-
-    markTextNode(node, regexes) {
-      regexes = new Set(regexes);
-
-      let curNode = node;
-      let nextNode;
-      let s = curNode.nodeValue;
-      let nextIndex = 0;
-      for (const regex of regexes) {
-        regex.lastIndex = 0;
-      }
-
-      while (true) {
-        let hits = [];
-        for (const regex of regexes) {
-          const m = regex.exec(s);
-          if (!m) {
-            regexes.delete(regex);
-            continue;
-          }
-          const len = m[0].length;
-          const end = regex.lastIndex;
-          const start = regex.lastIndex - len;
-          hits.push({regex, start, len, end});
-        }
-
-        if (!hits.length) { break; }
-
-        const hit = hits.reduce(this.markTextNodeReducer);
-        if (hit.len === 0) {
-          // lastIndex of /(?:)/u decreases from 1 to 0 after exec on '\uD800\uDC00'
-          // also save to nextIndex to ensure increasing for every loop.
-          nextIndex = Math.max(hit.regex.lastIndex, nextIndex) + 1;
-          for (const regex of regexes) {
-            regex.lastIndex = nextIndex;
-          }
-          continue;
-        }
-
-        const newNode = this.template.cloneNode(false);
-        if (curNode.nodeValue.length > hit.end) {
-          nextNode = curNode.splitText(hit.end);
-        }
-        const wordNode = curNode.splitText(hit.start);
-        curNode.parentNode.replaceChild(newNode, wordNode);
-        newNode.appendChild(wordNode);
-
-        if (!nextNode) { break; }
-
-        curNode = nextNode;
-        s = curNode.nodeValue;
-        nextIndex = 0;
-        for (const regex of regexes) {
-          regex.lastIndex = 0;
-        }
-      }
-    },
-
-    markTextNodeReducer(a, b) {
-      if (a.start < b.start) { return a; }
-      if (a.start > b.start) { return b; }
-      if (a.len > b.len) { return a; }
-      if (a.len < b.len) { return b; }
-      return a;
-    },
-
-    cropSnippets(text, regexes, maxLen) {
-      cropAtHit: {
-        const hits = [];
-        for (const regex of regexes) {
-          regex.lastIndex = 0;
-          const m = regex.exec(text);
-          if (!m) { continue; }
-          const len = m[0].length;
-          const end = regex.lastIndex;
-          const start = regex.lastIndex - len;
-          hits.push({regex, start, len, end});
-        }
-        if (!hits.length) { break cropAtHit; }
-        const hit = hits.reduce(this.cropTextReducer);
-        const cropStart = Math.max(hit.start - maxLen / 4, 0);
-        text = text.slice(cropStart);
-      }
-      return scrapbook.crop(text, maxLen);
-    },
-
-    cropTextReducer(a, b) {
-      if (a.start < b.start) { return a; }
-      if (a.start > b.start) { return b; }
-      return a;
-    },
-  };
-
   const search = {
     defaultSearch: "",
     fulltextCacheUpdateThreshold: null,
-    fulltextCacheRemoteSizeLimit: null,
     books: [],
 
     enableUi(willEnable) {
@@ -263,8 +152,8 @@
         // load conf from options
         this.defaultSearch = scrapbook.getOption("scrapbook.defaultSearch");
         this.fulltextCacheUpdateThreshold = scrapbook.getOption('scrapbook.fulltextCacheUpdateThreshold');
-        this.fulltextCacheRemoteSizeLimit = scrapbook.getOption('scrapbook.fulltextCacheRemoteSizeLimit');
         this.inclusiveFrames = scrapbook.getOption('indexer.fulltextCacheFrameAsPageContent');
+        this.searchSse = scrapbook.getOption("scrapbook.searchSse");
 
         await server.init();
 
@@ -355,46 +244,100 @@
           queryStr = queryStrFromFrom + " " + queryStr;
         }
 
-        // parse query
-        const query = searchEngine.parseQuery(queryStr);
-        if (query.error.length) {
-          for (const err of query.error) {
-            this.addMsg(scrapbook.lang('ErrorSearch', [err]), {type: 'error', wrapper});
-          }
-          return;
-        }
-        console.log("Search:", query);
+        // prepare query to server
+        let url;
+        {
+          const u = new URL(server.serverRoot);
+          u.searchParams.set('a', 'search');
+          u.searchParams.set('q', queryStr);
 
-        // search and get result
-        return await searchEngine.search(query, {
-          resultHandler: (results, {book, markers}) => {
-            this.showResults(results, {book, markers, wrapper});
-          },
-        });
+          const commentLength = scrapbook.getOption("scrapbook.searchCommentLength");
+          if (Number.isInteger(commentLength)) {
+            u.searchParams.set('comment', commentLength);
+          }
+
+          const sourceLength = scrapbook.getOption("scrapbook.searchSourceLength");
+          if (Number.isInteger(sourceLength)) {
+            u.searchParams.set('source', sourceLength);
+          }
+
+          const contextLength = scrapbook.getOption("scrapbook.searchContextLength");
+          if (Number.isInteger(contextLength)) {
+            u.searchParams.set('fulltext', contextLength);
+          }
+
+          url = u.href;
+        }
+
+        // handle response
+        if (this.searchSse) {
+          const rv = new Map();
+          let error = false;
+          await server.requestSse({
+            url,
+            onMessage: (info) => {
+              if (['error', 'critical'].includes(info.type)) {
+                this.addMsg(scrapbook.lang('ErrorSearch', [info.msg]), {type: 'error', wrapper});
+                error = true;
+                return;
+              }
+              const {book_id, id, file, context} = info.data;
+              let list = rv.get(book_id);
+              if (!list) {
+                list = []
+                rv.set(book_id, list);
+              }
+              list.push({id, file, context});
+            },
+          });
+          if (error) { return; }
+          if (rv.size) {
+            for (const [bookId, results] of rv) {
+              const book = server.books[bookId];
+              await this.loadBook(book);
+              await this.showResults(results, {book, wrapper});
+            }
+          } else {
+            this.addMsg(scrapbook.lang('SearchNotFound'), {wrapper});
+          }
+        } else {
+          const response = await server.request({
+            url,
+            method: 'POST',
+            format: 'json',
+            csrfToken: true,
+          }).then(r => r.json());
+          let found = false;
+          for (const bookId in response.data) {
+            found = true;
+            const results = response.data[bookId];
+            const book = server.books[bookId];
+            await this.loadBook(book);
+            await this.showResults(results, {book, wrapper});
+          }
+          if (!found) {
+            this.addMsg(scrapbook.lang('SearchNotFound'), {wrapper});
+          }
+        }
       } catch(ex) {
         console.error(ex);
         this.addMsg(scrapbook.lang('ErrorSearch', [ex.message]), {type: 'error', wrapper});
       };
     },
 
-    showResults(results, {book, markers, wrapper}) {
+    showResults(results, {book, wrapper}) {
       this.addMsg(scrapbook.lang('SearchFound', [book.name, results.length]), {wrapper});
 
       const treeElem = document.createElement("div");
-
-      const tree = new SearchTree({
-        treeElem,
-        markers,
-        commentLength: scrapbook.getOption("scrapbook.searchCommentLength"),
-        contextLength: scrapbook.getOption("scrapbook.searchContextLength"),
-        sourceLength: scrapbook.getOption("scrapbook.searchSourceLength"),
-      });
+      const tree = new SearchTree({treeElem});
       tree.init({book});
       tree.rebuild();
 
       for (const result of results) {
-        const {id, file, meta, fulltext} = result;
-        tree.addItem(meta, file, fulltext.content);
+        const {id, file, context} = result;
+        const meta = book.meta[id];
+        if (!meta) { continue; }
+        tree.addItem(meta, file, context);
       }
 
       wrapper.appendChild(treeElem);
@@ -412,16 +355,12 @@
           let regexFulltext = /^fulltext\d*\.js$/;
           let regexMeta = /^(?:meta|toc)\d*\.js$/;
           let fulltextMtime = -Infinity;
-          let fulltextSize = 0;
           let metaMtime = -Infinity;
-          let metaSize = 0;
           for (const file of book.treeFiles.values()) {
             if (regexFulltext.test(file.name)) {
               fulltextMtime = Math.max(fulltextMtime, file.last_modified);
-              if (file.size !== null) { fulltextSize += file.size; }
             } else if (regexMeta.test(file.name)) {
               metaMtime = Math.max(metaMtime, file.last_modified);
-              if (file.size !== null) { metaSize += file.size; }
             }
           }
           fulltextMtime = Math.floor(fulltextMtime) * 1000;
@@ -454,27 +393,7 @@
             }
           }
 
-          // check size
-          const tasks = [
-            book.loadMeta(),
-            book.loadToc(),
-          ];
-          if (!server.config.app.is_local
-              && typeof this.fulltextCacheRemoteSizeLimit === 'number'
-              && fulltextSize > this.fulltextCacheRemoteSizeLimit * 1024 * 1024) {
-            let size = fulltextSize / (1024 * 1024);
-            size = size > 0.1 ? size.toFixed(1) + ' MiB' :
-                size * 1024 > 0.1 ? (size * 1024).toFixed(1) + ' KiB' :
-                fulltextSize + ' B';
-            const msg = scrapbook.lang('WarnSearchCacheBlocked', [book.name, size]);
-            this.addMsg(msg, {type: 'warn', wrapper: document.getElementById('messages')});
-            book.fulltext = {};
-          } else {
-            tasks.push(book.loadFulltext());
-          }
-
-          // load index
-          await Promise.all(tasks);
+          await book.loadMeta();
         })();
         tasks.set(book.id, task);
         return task;
@@ -508,512 +427,6 @@
       } else if (response === null) {
         alert(scrapbook.lang("ErrorLocateNotFound"));
       }
-    },
-  };
-
-  const searchEngine = {
-    parseQuery(queryStr) {
-      const query = {
-        error: [],
-        rules: {},
-        sorts: [],
-        limit: 0,
-        books: {
-          include: [],
-          exclude: [],
-        },
-        roots: {
-          include: [],
-          exclude: [],
-        },
-        mc: false,
-        re: false,
-        default: "tcc",
-      };
-
-      const addRule = (name, type, value) => {
-        if (typeof query.rules[name] === "undefined") {
-          query.rules[name] = {"include": [], "exclude": []};
-        }
-        query.rules[name][type].push(value);
-      };
-
-      const addSort = (key, order) => {
-        switch (key) {
-          case "id": case "file":
-            query.sorts.push({key, order});
-            break;
-          case "content":
-            query.sorts.push({key: "fulltext", subkey: key, order});
-            break;
-          case "title": case "comment": case "source":
-          case "type": case "create": case "modify":
-            query.sorts.push({key: "meta", subkey: key, order});
-            break;
-          default:
-            addError(scrapbook.lang('ErrorSearchInvalidSort', [key]));
-            break;
-        }
-      };
-
-      const setLimit = (value, positive) => {
-        if (!positive) {
-          query.limit = 0;
-          return; 
-        }
-
-        const newValue = parseInt(value, 10);
-        if (Number.isInteger(newValue)) {
-          query.limit = newValue;
-        } else {
-          addError(scrapbook.lang('ErrorSearchInvalidLimit', [value]));
-        }
-      };
-
-      const addError = (msg) => {
-        query.error.push(msg);
-      };
-
-      const parseStr = (term, exactMatch = false) => {
-        let flags = query.mc ? "mu" : "imu";
-        let regex = "";
-        if (query.re) {
-          try {
-            regex = new RegExp(term, flags);
-          } catch(ex) {
-            addError(scrapbook.lang('ErrorSearchInvalidRegExp', [term]));
-            return null;
-          }
-        } else {
-          let key = scrapbook.escapeRegExp(term);
-          if (exactMatch) { key = "^" + key + "$"; }
-          regex = new RegExp(key, flags);
-        }
-        return regex;
-      };
-
-      const parseDate = (term) => {
-        const match = term.match(/^(\d{0,17})(?:-(\d{0,17}))?$/);
-        if (!match) {
-          addError(scrapbook.lang('ErrorSearchInvalidDate', [term]));
-          return null;
-        }
-        const since = match[1] ? this.idLocalToUtc(pad(match[1], 17)) : pad("", 17);
-        const until = match[2] ? this.idLocalToUtc(pad(match[2], 17)) : pad("", 17, "9");
-        return [since, until];
-      };
-
-      const pad = (n, width, z) => {
-        z = z || "0";
-        n = n + "";
-        return n.length >= width ? n : n + new Array(width - n.length + 1).join(z);
-      };
-
-      queryStr.replace(/(-*[A-Za-z]+:|-+)(?:"([^"]*(?:""[^"]*)*)"|([^"\s]*))|(?:"([^"]*(?:""[^"]*)*)"|([^"\s]+))/g, (match, cmd, qterm, term, qterm2, term2) => {
-        let pos = true;
-        if (cmd) {
-          term = (qterm !== undefined) ? qterm.replace(/""/g, '"') : term;
-          let m = /^(-*)(.*)$/.exec(cmd);
-          if (m[1].length % 2 === 1) { pos = false; }
-          cmd = m[2];
-        } else {
-          term = (qterm2 !== undefined) ? qterm2.replace(/""/g, '"') : term2;
-        }
-
-        if (cmd) {
-          cmd = cmd.slice(0, -1);
-        } else {
-          cmd = query.default;
-        }
-
-        switch (cmd) {
-          case "default":
-            query.default = String(term);
-            break;
-          case "mc":
-            query.mc = pos;
-            break;
-          case "re":
-            query.re = pos;
-            break;
-          case "book":
-            query.books[pos ? 'include' : 'exclude'].push(term);
-            break;
-          case "root":
-            query.roots[pos ? 'include' : 'exclude'].push(term);
-            break;
-          case "sort":
-            addSort(term, pos ? 1 : -1);
-            break;
-          case "limit":
-            setLimit(term, pos);
-            break;
-          case "type":
-            addRule("type", pos ? "include" : "exclude", parseStr(term, true));
-            break;
-          case "id":
-            addRule("id", pos ? "include" : "exclude", parseStr(term, true));
-            break;
-          case "file":
-            addRule("file", pos ? "include" : "exclude", parseStr(term));
-            break;
-          case "source":
-            addRule("source", pos ? "include" : "exclude", parseStr(term));
-            break;
-          case "icon":
-            addRule("icon", pos ? "include" : "exclude", parseStr(term));
-            break;
-          case "tc":
-            addRule("tc", pos ? "include" : "exclude", parseStr(term));
-            break;
-          case "tcc":
-            addRule("tcc", pos ? "include" : "exclude", parseStr(term));
-            break;
-          case "title":
-            addRule("title", pos ? "include" : "exclude", parseStr(term));
-            break;
-          case "comment":
-            addRule("comment", pos ? "include" : "exclude", parseStr(term));
-            break;
-          case "content":
-            addRule("content", pos ? "include" : "exclude", parseStr(term));
-            break;
-          case "index":
-            addRule("index", pos ? "include" : "exclude", parseStr(term));
-            break;
-          case "charset":
-            addRule("charset", pos ? "include" : "exclude", parseStr(term));
-            break;
-          case "create":
-            addRule("create", pos ? "include" : "exclude", parseDate(term));
-            break;
-          case "modify":
-            addRule("modify", pos ? "include" : "exclude", parseDate(term));
-            break;
-          case "marked":
-            addRule("marked", pos ? "include" : "exclude", true);
-            break;
-          case "locked":
-            addRule("locked", pos ? "include" : "exclude", true);
-            break;
-          case "location":
-            addRule("location", pos ? "include" : "exclude", true);
-            break;
-        }
-
-        return "";
-      });
-      return query;
-    },
-
-    parseMarkers(query) {
-      const markers = {
-        title: [],
-        comment: [],
-        content: [],
-        source: [],
-        file: [],
-      };
-      if (query.rules.tcc) {
-        for (const regex of query.rules.tcc.include) {
-          markers.title.push(regex);
-          markers.comment.push(regex);
-          markers.content.push(regex);
-        }
-      }
-      if (query.rules.tc) {
-        for (const regex of query.rules.tc.include) {
-          markers.title.push(regex);
-          markers.comment.push(regex);
-        }
-      }
-      if (query.rules.title) {
-        for (const regex of query.rules.title.include) {
-          markers.title.push(regex);
-        }
-      }
-      if (query.rules.comment) {
-        for (const regex of query.rules.comment.include) {
-          markers.comment.push(regex);
-        }
-      }
-      if (query.rules.content) {
-        for (const regex of query.rules.content.include) {
-          markers.content.push(regex);
-        }
-      }
-      if (query.rules.source) {
-        for (const regex of query.rules.source.include) {
-          markers.source.push(regex);
-        }
-      }
-      if (query.rules.file) {
-        for (const regex of query.rules.file.include) {
-          markers.file.push(regex);
-        }
-      }
-
-      for (const k in markers) {
-        markers[k] = markers[k].map(r => new RegExp(r.source, `${r.ignoreCase ? 'i': ''}mug`));
-      }
-
-      return markers;
-    },
-
-    async search(query, {resultHandler}) {
-      let books = new Set(search.books);
-      if (query.books.include.length) {
-        books = new Set(
-          query.books.include
-            .map(id => server.books[id])
-            .filter(book => books.has(book))
-        );
-      }
-      for (const book of books) {
-        if (query.books.exclude.includes(book.id)) {
-          books.delete(book);
-        }
-      }
-
-      const markers = this.parseMarkers(query);
-
-      for (const book of books) {
-        await search.loadBook(book);
-        const results = this.searchBook(query, book);
-        resultHandler(results, {book, markers});
-      }
-    },
-
-    searchBook(query, book) {
-      const results = [];
-
-      const idPool = new Set();
-      {
-        if (!query.roots.include.length) {
-          query.roots.include.push('root');
-        }
-
-        for (const root of query.roots.include) {
-          for (const id of book.getReachableItems(root)) {
-            idPool.add(id);
-          }
-        }
-
-        for (const root of query.roots.exclude) {
-          for (const id of book.getReachableItems(root)) {
-            idPool.delete(id);
-          }
-        }
-      }
-
-      for (const id of idPool) {
-        let subfiles = book.fulltext[id] || {};
-        if (!Object.keys(subfiles).length) { subfiles[""] = {}; }
-
-        for (const file in subfiles) {
-          const item = {
-            id,
-            file,
-            meta: book.meta[id],
-            fulltext: subfiles[file],
-          };
-          if (this.matchItem(item, query)) {
-            results.push(item);
-          }
-        }
-      }
-
-      // sort results
-      for (const {key, subkey, order} of query.sorts) {
-        results.sort((a, b) => {
-          a = a[key]; if (subkey) { a = a[subkey]; } a = a || "";
-          b = b[key]; if (subkey) { b = b[subkey]; } b = b || "";
-          if (a > b) { return order; }
-          if (a < b) { return -order; }
-          return 0;
-        });
-      }
-
-      // limit results
-      if (query.limit) {
-        results.splice(query.limit);
-      }
-
-      return results;
-    },
-
-    matchItem(item, query) {
-      if (!item.meta) {
-        return false;
-      }
-
-      for (const i in query.rules) {
-        if (!this["_match_" + i](query.rules[i], item)) { return false; }
-      }
-
-      return true;
-    },
-
-    _match_tc(rule, item) {
-      return this.matchText(rule, [item.meta.title, item.meta.comment].join("\n"));
-    },
-
-    _match_tcc(rule, item) {
-      return this.matchText(rule, [item.meta.title, item.meta.comment, item.fulltext.content].join("\n"));
-    },
-
-    _match_content(rule, item) {
-      return this.matchText(rule, item.fulltext.content);
-    },
-
-    _match_id(rule, item) {
-      return this.matchTextOr(rule, item.id);
-    },
-
-    _match_file(rule, item) {
-      return this.matchText(rule, item.file);
-    },
-
-    _match_title(rule, item) {
-      return this.matchText(rule, item.meta.title);
-    },
-
-    _match_comment(rule, item) {
-      return this.matchText(rule, item.meta.comment);
-    },
-
-    _match_index(rule, item) {
-      return this.matchText(rule, item.meta.index);
-    },
-
-    _match_charset(rule, item) {
-      return this.matchText(rule, item.meta.charset);
-    },
-
-    _match_source(rule, item) {
-      return this.matchText(rule, item.meta.source);
-    },
-
-    _match_icon(rule, item) {
-      return this.matchText(rule, item.meta.icon);
-    },
-
-    _match_type(rule, item) {
-      return this.matchTextOr(rule, item.meta.type);
-    },
-
-    _match_create(rule, item) {
-      return this.matchDateOr(rule, item.meta.create);
-    },
-
-    _match_modify(rule, item) {
-      return this.matchDateOr(rule, item.meta.modify);
-    },
-
-    _match_marked(rule, item) {
-      return this.matchBool(rule, item.meta.marked);
-    },
-
-    _match_locked(rule, item) {
-      return this.matchBool(rule, item.meta.locked);
-    },
-
-    _match_location(rule, item) {
-      return this.matchBool(rule, item.meta.location);
-    },
-
-    matchBool(rule, bool) {
-      if (rule.exclude.length) {
-        if (bool) {
-          return false;
-        }
-      }
-
-      if (rule.include.length) {
-        if (!bool) {
-          return false;
-        }
-      }
-
-      return true;
-    },
-
-    matchText(rule, text) {
-      text = text || "";
-
-      for (const key of rule.exclude) {
-        if (key.test(text)) {
-          return false;
-        }
-      }
-
-      for (const key of rule.include) {
-        if (!key.test(text)) {
-          return false;
-        }
-      }
-
-      return true;
-    },
-
-    matchTextOr(rule, text) {
-      text = text || "";
-
-      for (const key of rule.exclude) {
-        if (key.test(text)) {
-          return false;
-        }
-      }
-
-      if (!rule.include.length) { return true; }
-      for (const key of rule.include) {
-        if (key.test(text)) {
-          return true;
-        }
-      }
-      return false;
-    },
-
-    matchDateOr(rule, date) {
-      if (!date) { return false; }
-
-      for (const key of rule.exclude) {
-        if (key[0] <= date && date <= key[1]) {
-          return false;
-        }
-      }
-
-      if (!rule.include.length) { return true; }
-      for (const key of rule.include) {
-        if (key[0] <= date && date <= key[1]) {
-          return true;
-        }
-      }
-
-      return false;
-    },
-
-    idLocalToUtc(id) {
-      if (/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})$/.test(id)) {
-        const dd = new Date(
-            parseInt(RegExp.$1, 10), Math.max(parseInt(RegExp.$2, 10), 1) - 1, Math.max(parseInt(RegExp.$3, 10), 1),
-            parseInt(RegExp.$4, 10), parseInt(RegExp.$5, 10), parseInt(RegExp.$6, 10), parseInt(RegExp.$7, 10)
-            );
-        return dd.getUTCFullYear() +
-            this.intToFixedStr(dd.getUTCMonth() + 1, 2) +
-            this.intToFixedStr(dd.getUTCDate(), 2) +
-            this.intToFixedStr(dd.getUTCHours(), 2) +
-            this.intToFixedStr(dd.getUTCMinutes(), 2) +
-            this.intToFixedStr(dd.getUTCSeconds(), 2) +
-            this.intToFixedStr(dd.getUTCMilliseconds(), 3);
-      }
-      return null;
-    },
-
-    intToFixedStr(number, width, padder) {
-      padder = padder || "0";
-      number = number.toString(10);
-      return number.length >= width ? number : new Array(width - number.length + 1).join(padder) + number;
     },
   };
 

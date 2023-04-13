@@ -1243,9 +1243,6 @@
   "OptionScrapbookDefaultSearchTooltip": {
     "message": "設定搜尋欄位預先填入的搜尋條件，例如設定為「-type:separator」，則在搜尋欄位填入「keyword」相當於搜尋「-type:separator keyword」。\n\n• 除一般搜尋指令以外，還可用「default:」指令設定預設指令，例如設定為「default:title」，則在搜尋欄位填入「keyword」相當於搜尋「title:keyword」。（預設為 default:tcc）"
   },
-  "OptionScrapbookFulltextCacheRemoteSizeLimitLabel": {
-    "message": "遠端全文搜尋快取大小限制 (MiB):"
-  },
   "OptionScrapbookScrapbookSearchCommentLengthLabel": {
     "message": "搜尋結果顯示評註長度:"
   },
@@ -1635,7 +1632,7 @@
     "message": "相同網域："
   },
   "SearchCapturesNotFound": {
-    "message": "找不到相關頁面"
+    "message": "找不到相符的頁面"
   },
   "SearchCapturesTitle": {
     "message": "尋找已擷取的頁面"
@@ -1659,6 +1656,9 @@
   },
   "SearchLocateTitle": {
     "message": "在剪貼簿顯示此項目的位置"
+  },
+  "SearchNotFound": {
+    "message": "找不到相符的結果"
   },
   "SearchSortId": {
     "message": "ID 排序"
@@ -1740,17 +1740,6 @@
         "content": "$1"
       },
       "target": {
-        "content": "$2"
-      }
-    }
-  },
-  "WarnSearchCacheBlocked": {
-    "message": "已停止載入遠端剪貼簿「$BOOK$」的全文搜尋快取，因超出大小限制（共 $SIZE$）。",
-    "placeholders": {
-      "book": {
-        "content": "$1"
-      },
-      "size": {
         "content": "$2"
       }
     }

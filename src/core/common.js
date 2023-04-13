@@ -213,7 +213,7 @@ if (new URLSearchParams({}).toString() !== '') {
     "scrapbook.searchCommentLength": 100,
     "scrapbook.searchContextLength": 120,
     "scrapbook.searchSourceLength": null,
-    "scrapbook.fulltextCacheRemoteSizeLimit": null,
+    "scrapbook.searchSse": false,
     "scrapbook.fulltextCacheUpdateThreshold": 5 * 24 * 60 * 60 * 1000,
     "geolocation.enableHighAccuracy": true,
     "geolocation.timeout": 3000,
