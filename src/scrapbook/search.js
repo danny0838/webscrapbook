@@ -543,7 +543,7 @@
           case "content":
             query.sorts.push({key: "fulltext", subkey: key, order});
             break;
-          case "title": case "comment": case "file": case "source":
+          case "title": case "comment": case "source":
           case "type": case "create": case "modify":
             query.sorts.push({key: "meta", subkey: key, order});
             break;
