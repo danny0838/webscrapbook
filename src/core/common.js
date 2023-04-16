@@ -344,6 +344,7 @@ if (Node && !Node.prototype.getRootNode) {
         throw new Error('Invalid array');
       }
 
+      const patternParseRegex = /^\/(.*)\/([a-z]*)$/;
       for (let i = 0, I = configs.length; i < I; i++) {
         try {
           const config = configs[i];
@@ -351,17 +352,59 @@ if (Node && !Node.prototype.getRootNode) {
             throw new Error(`Invalid object`);
           }
           if (config.pattern) {
-            if (typeof config.pattern !== 'string') {
-              throw new Error(`Pattern must be a string`);
-            }
-            if (/^\/(.*)\/([a-z]*)$/.test(config.pattern)) {
-              try {
-                config.pattern = new RegExp(RegExp.$1, RegExp.$2);
-              } catch (ex) {
-                throw new Error(`Invalid pattern: ${ex.message}`);
+            if (typeof config.pattern === 'string') {
+              if (patternParseRegex.test(config.pattern)) {
+                try {
+                  config.pattern = [new RegExp(RegExp.$1, RegExp.$2)];
+                } catch (ex) {
+                  throw new Error(`Invalid pattern: ${ex.message}`);
+                }
+              } else {
+                throw new Error(`Invalid pattern: Unsupported format.`);
+              }
+            } else if (Array.isArray(config.pattern)) {
+              for (let j = 0, J = config.pattern.length; j < J; j++) {
+                const subpattern = config.pattern[j];
+                if (patternParseRegex.test(subpattern)) {
+                  try {
+                    config.pattern[j] = new RegExp(RegExp.$1, RegExp.$2);
+                  } catch (ex) {
+                    throw new Error(`Invalid pattern[${j}]: ${ex.message}`);
+                  }
+                } else {
+                  throw new Error(`Invalid pattern[${j}]: Unsupported format.`);
+                }
               }
             } else {
-              throw new Error(`Invalid pattern: Unsupported format.`);
+              throw new Error(`Pattern must be a string or an array of strings.`);
+            }
+          }
+          if (config.exclude) {
+            if (typeof config.exclude === 'string') {
+              if (patternParseRegex.test(config.exclude)) {
+                try {
+                  config.exclude = [new RegExp(RegExp.$1, RegExp.$2)];
+                } catch (ex) {
+                  throw new Error(`Invalid exclude: ${ex.message}`);
+                }
+              } else {
+                throw new Error(`Invalid exclude: Unsupported format.`);
+              }
+            } else if (Array.isArray(config.exclude)) {
+              for (let j = 0, J = config.exclude.length; j < J; j++) {
+                const subexclude = config.exclude[j];
+                if (patternParseRegex.test(subexclude)) {
+                  try {
+                    config.exclude[j] = new RegExp(RegExp.$1, RegExp.$2);
+                  } catch (ex) {
+                    throw new Error(`Invalid exclude[${j}]: ${ex.message}`);
+                  }
+                } else {
+                  throw new Error(`Invalid exclude[${j}]: Unsupported format.`);
+                }
+              }
+            } else {
+              throw new Error(`Exclude must be a string or an array of strings.`);
             }
           }
         } catch (ex) {

@@ -332,12 +332,28 @@
           continue;
         }
 
-        // check pattern
+        // check pattern and exclude
         if (config.pattern) {
-          config.pattern.lastIndex = 0;
-          if (!config.pattern.test(tabInfo.url)) {
-            continue;
+          let match = false;
+          for (const pattern of config.pattern) {
+            pattern.lastIndex = 0;
+            if (pattern.test(tabInfo.url)) {
+              match = true;
+              break;
+            }
           }
+          if (!match) { continue; }
+        }
+        if (config.exclude) {
+          let match = false;
+          for (const exclude of config.exclude) {
+            exclude.lastIndex = 0;
+            if (exclude.test(tabInfo.url)) {
+              match = true;
+              break;
+            }
+          }
+          if (match) { continue; }
         }
 
         // skip if duplicated
