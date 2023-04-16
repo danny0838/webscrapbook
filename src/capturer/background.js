@@ -317,8 +317,6 @@
     // update book caches from backend
     const bookIds = await updateAutoCaptureBookCaches();
 
-    const isDuplicate = checkDuplicate(tabInfo.url, bookIds);
-
     // check config
     for (let i = 0, I = autoCaptureConfigs.length; i < I; ++i) {
       const config = autoCaptureConfigs[i];
@@ -343,6 +341,7 @@
         }
 
         // skip if duplicated
+        const isDuplicate = checkDuplicate(tabInfo.url, bookIds);
         if (!config.allowDuplicate && isDuplicate) {
           continue;
         }
