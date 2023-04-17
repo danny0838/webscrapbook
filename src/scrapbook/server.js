@@ -1114,7 +1114,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       targetIndex,
     }) {
       if (!Number.isInteger(targetIndex)) {
-        targetIndex = Infinity;
+        targetIndex = (this.toc[targetParentId] || []).length;
       }
 
       // remove from parent TOC
@@ -1143,7 +1143,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
         this.meta[id].recycled = scrapbook.dateToId();
       }
 
-      return isFinite(targetIndex) ? targetIndex : this.toc[targetParentId].length - 1;
+      return targetIndex;
     }
 
     /**
