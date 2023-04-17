@@ -59,7 +59,7 @@
       super.init(params);
     }
 
-    async rebuild() {
+    async rebuild({keepHighlights = true} = {}) {
       const wrapper = this.treeElem.parentNode;
 
       // save scrolling
@@ -68,7 +68,7 @@
       // save current highlights
       let anchorElem = this.anchorElem;
       if (anchorElem) {
-        if (this.treeElem.contains(anchorElem)) {
+        if (this.treeElem.contains(anchorElem) && keepHighlights) {
           const map = new Map();
           this.getXpaths(anchorElem, map, {includeParents: false});
           for (const xpath of map.keys()) {
@@ -81,7 +81,7 @@
 
       let lastHighlightElem = this.lastHighlightElem;
       if (lastHighlightElem) {
-        if (this.treeElem.contains(lastHighlightElem)) {
+        if (this.treeElem.contains(lastHighlightElem) && keepHighlights) {
           const map = new Map();
           this.getXpaths(lastHighlightElem, map, {includeParents: false});
           for (const xpath of map.keys()) {
@@ -93,8 +93,10 @@
       }
 
       const highlights = new Map();
-      for (const elem of this.treeElem.querySelectorAll('.highlight')) {
-        this.getXpaths(elem.parentElement, highlights, {includeParents: false})
+      if (keepHighlights) {
+        for (const elem of this.treeElem.querySelectorAll('.highlight')) {
+          this.getXpaths(elem.parentElement, highlights, {includeParents: false})
+        }
       }
 
       // rebuild

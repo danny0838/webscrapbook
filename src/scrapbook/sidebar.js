@@ -315,10 +315,10 @@
     /**
      * Reload tree data and rebuild the item tree.
      */
-    async rebuild() {
+    async rebuild({keepHighlights} = {}) {
       const refresh = await this.book.refreshTreeFiles();
       if (refresh) {
-        await this.tree.rebuild();
+        await this.tree.rebuild({keepHighlights});
       }
     },
 
@@ -1318,44 +1318,42 @@
         return;
       }
 
-      // Reverse the order to always move an item before its parent so that
-      // its parent is in the DOM and gets children updated correctly.
-      const itemElems = [...sourceItemElems].reverse();
-
-      for (const itemElem of itemElems) {
-        if (!this.treeElem.contains(itemElem)) { continue; }
-
-        const itemId = itemElem.getAttribute('data-id');
-
+      const items = sourceItemElems.map((itemElem) => {
         const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+        return [parentItemId, index];
+      });
 
-        // Forbid moving self to a descendant as it will become non-reachagble
-        // (unless move within the same parent).
-        if (this.book.getReachableItems(itemId).has(targetId) && targetId !== parentItemId) {
-          continue;
-        }
+      await this._moveItemsInternal(items, targetId, targetIndex);
+    },
 
-        // update TOC
-        const newIndex = this.book.moveItem({
-          id: itemId,
-          currentParentId: parentItemId,
-          currentIndex: index,
-          targetParentId: targetId,
-          targetIndex,
-        });
-
-        // update DOM
-        this.tree.moveItem(itemId, parentItemId, index, targetId, newIndex);
-
-        targetIndex = newIndex;
-      }
-
-      // upload changes to server
+    async _moveItemsInternal(items, targetId, targetIndex) {
       await this.book.transaction({
         mode: 'validate',
         callback: async (book) => {
-          await book.saveToc();
-          await book.loadTreeFiles(true);  // update treeLastModified
+          await server.request({
+            query: {
+              a: 'query',
+              no_lock: 1,
+            },
+            body: {
+              q: JSON.stringify({
+                book: book.id,
+                cmd: 'move_items',
+                kwargs: {
+                  items,
+                  target_parent_id: targetId,
+                  target_index: targetIndex,
+                },
+              }),
+            },
+            method: 'POST',
+            format: 'json',
+            csrfToken: true,
+          });
+
+          // discard highlights as current items will be moved from the current
+          // position
+          await this.rebuild({keepHighlights: false});
         },
       });
     },
@@ -1366,29 +1364,39 @@
         return;
       }
 
-      for (const itemElem of sourceItemElems) {
-        const itemId = itemElem.getAttribute('data-id');
+      const items = sourceItemElems.map((itemElem) => {
+        const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+        return [parentItemId, index];
+      });
 
-        // update TOC
-        const newIndex = this.book.moveItem({
-          id: itemId,
-          currentParentId: null,
-          targetParentId: targetId,
-          targetIndex,
-        });
-
-        // update DOM
-        this.tree.insertItem(itemId, targetId, newIndex);
-
-        targetIndex = newIndex + 1;
-      }
-
-      // upload changes to server
+      // update book
       await this.book.transaction({
         mode: 'validate',
         callback: async (book) => {
-          await book.saveToc();
-          await book.loadTreeFiles(true);  // update treeLastModified
+          await server.request({
+            query: {
+              a: 'query',
+              no_lock: 1,
+            },
+            body: {
+              q: JSON.stringify({
+                book: book.id,
+                cmd: 'link_items',
+                kwargs: {
+                  items,
+                  target_parent_id: targetId,
+                  target_index: targetIndex,
+                },
+              }),
+            },
+            method: 'POST',
+            format: 'json',
+            csrfToken: true,
+          });
+
+          // discard highlights as new items with same ID may be inserted the
+          // relative position may change
+          await this.rebuild({keepHighlights: false});
         },
       });
     },
@@ -1403,230 +1411,12 @@
       const targetBook = server.books[targetBookId];
       if (!targetBook || targetBook.config.no_tree) { return; }
 
-      const _copyItems = async (book) => {
-        await book.loadMeta();
-        await book.loadToc();
+      const items = sourceItems.map((sourceItem) => {
+        const {id, parentId, index} = sourceItem;
+        return [parentId, index];
+      });
 
-        if (!targetParentId || !(!!book.meta[targetParentId] || book.isSpecialItem(targetParentId))) {
-          this.warn(`Unable to copy: target ID "${targetParentId}" is invalid.`);
-          return;
-        }
-
-        const sourceBookFaviconPrefix = scrapbook.normalizeUrl(sourceBook.treeUrl + 'favicon/');
-        const targetBookFaviconPrefix = scrapbook.normalizeUrl(targetBook.treeUrl + 'favicon/');
-
-        const itemsToCache = [];
-
-        // a mapping for item descendants be attached to the newly created parent
-        const idMapping = new Map();
-
-        const _tidyFilename = (name) => {
-          name = scrapbook.validateFilename(name);
-          name = scrapbook.crop(name, scrapbook.getOption("capture.saveFilenameMaxLenUtf16"), scrapbook.getOption("capture.saveFilenameMaxLenUtf8"), "");
-          return name;
-        };
-
-        const _uniquifyFilename = async (name) => {
-          const isFilenameTaken = async (path) => {
-            const target = targetBook.dataUrl + scrapbook.escapeFilename(path);
-            const info = await server.request({
-              url: target + '?a=info',
-              format: 'json',
-              method: "GET",
-            }).then(r => r.json()).then(r => r.data);
-            return info.type !== null;
-          };
-
-          let [base, ext] = scrapbook.filenameParts(name);
-          let index = 0;
-          while (await isFilenameTaken(name)) {
-            name = base + '(' + (++index) + ')' + (ext ? '.' + ext : '');
-          }
-
-          return name;
-        };
-
-        const _copyItem = async (itemId, targetParentId, targetIndex) => {
-          const item = sourceBook.meta[itemId];
-          if (!item) { return; }
-
-          const targetId = targetBook.meta[itemId] ? targetBook.generateId() : itemId;
-          const targetFilename = _tidyFilename(targetId);
-          const newItem = Object.assign({}, item, {id: targetId});
-          idMapping.set(itemId, targetId);
-
-          // copy data files
-          let oldIndexFile;
-          let newIndexFile;
-          if (item.index) {
-            if (item.index.endsWith('/index.html')) {
-              oldIndexFile = item.index.replace(/[/][^/]*$/, '');
-              newIndexFile = await _uniquifyFilename(`${targetFilename}`);
-              newItem.index = `${newIndexFile}/index.html`;
-            } else {
-              let [, ext] = scrapbook.filenameParts(item.index);
-              ext = ext ? '.' + ext : '';
-              oldIndexFile = item.index;
-              newIndexFile = await _uniquifyFilename(`${targetFilename}${ext}`);
-              newItem.index = `${newIndexFile}`;
-            }
-
-            const source = sourceBook.dataUrl + scrapbook.escapeFilename(oldIndexFile);
-            const target = '/' + (targetBook.dataUrl + scrapbook.escapeFilename(newIndexFile)).slice(server.serverRoot.length);
-            await server.request({
-              url: source,
-              query: {
-                'a': 'copy',
-                'target': decodeURIComponent(target),
-              },
-              method: "POST",
-              format: 'json',
-              csrfToken: true,
-            });
-
-            itemsToCache.push(newItem.id);
-          }
-
-          // copy cached favicon
-          if (sourceBook !== targetBook && item.icon) {
-            let oldIcon = new URL(item.icon, sourceBook.dataUrl + scrapbook.escapeFilename(item.index || ''));
-            oldIcon = scrapbook.normalizeUrl(oldIcon.href);
-            if (oldIcon.startsWith(sourceBookFaviconPrefix)) {
-              const [oldIconMain, oldIconSearch, oldIconHash] = scrapbook.splitUrl(oldIcon);
-              const newIcon = targetBookFaviconPrefix + oldIconMain.replace(/^.*[/]/, '');
-              newItem.icon = scrapbook.getRelativeUrl(newIcon, targetBook.dataUrl + scrapbook.escapeFilename(newItem.index || ''));
-
-              try {
-                await server.request({
-                  url: oldIconMain,
-                  query: {
-                    'a': 'copy',
-                    'target': decodeURIComponent(newIcon.slice(server.serverRoot.length)),
-                  },
-                  method: "POST",
-                  format: 'json',
-                  csrfToken: true,
-                });
-              } catch (ex) {
-                console.error(ex);
-              }
-            }
-          }
-
-          // update TOC
-          targetBook.addItem({
-            item: newItem,
-            parentId: targetParentId,
-            index: targetIndex,
-          });
-          const newIndex = Number.isInteger(targetIndex) ? targetIndex : targetBook.toc[targetParentId].length - 1;
-
-          // update DOM
-          if (targetBook === this.book) {
-            this.tree.insertItem(targetId, targetParentId, newIndex);
-          }
-
-          return newIndex;
-        };
-
-        const _linkItem = (itemId, targetParentId, targetIndex) => {
-          // update TOC
-          const newIndex = targetBook.moveItem({
-            id: itemId,
-            currentParentId: null,
-            targetParentId,
-            targetIndex,
-          });
-
-          // update DOM
-          if (targetBook === this.book) {
-            this.tree.insertItem(itemId, targetParentId, targetIndex);
-          }
-
-          return newIndex;
-        };
-
-        const _addDecendingItems = async (id, parentId, index, idChain) => {
-          // this id is already copied, link to it and do not add descendants
-          if (idMapping.has(id)) {
-            return _linkItem(idMapping.get(id), parentId, index);
-          }
-
-          const newIndex = await _copyItem(id, parentId, index);
-
-          // failed to add id
-          if (!Number.isInteger(newIndex)) { return newIndex; }
-
-          // this is a recursive node, do not add descendants
-          if (idChain.has(id)) { return newIndex; }
-
-          // recursively add descendants to the generated item copy
-          if (recursively) {
-            const toc = sourceBook.toc[id];
-            if (toc) {
-              idChain.add(id);
-              for (let i = 0, I = toc.length; i < I; ++i) {
-                await _addDecendingItems(toc[i], idMapping.get(id), i, idChain);
-              }
-              idChain.delete(id);
-            }
-          }
-
-          return newIndex;
-        };
-
-        for (const {id, parentId, index} of sourceItems) {
-          // Forbid copying self to a descendant recursively
-          if (recursively && book.getReachableItems(id).has(targetParentId)) {
-            continue;
-          }
-
-          // copy item and descendants
-          const idChain = new Set();
-
-          // validate that id matches the provided parentId and index
-          const toc = sourceBook.toc[parentId];
-          if (!toc || toc[index] !== id) {
-            return;
-          }
-
-          const newIndex = await _addDecendingItems(id, targetParentId, targetIndex, idChain);
-
-          if (Number.isInteger(newIndex)) {
-            targetIndex = newIndex + 1;
-          }
-        }
-
-        // upload changes to server
-        await book.saveMeta();
-        await book.saveToc();
-
-        if (itemsToCache.length > 0) {
-          // Due to a concern of URL length and performance, skip cache
-          // update if too many items are affected.
-          if (scrapbook.getOption("indexer.fulltextCache")) {
-            await server.requestSse({
-              query: {
-                "a": "cache",
-                "book": book.id,
-                "item": itemsToCache.slice(0, 10),
-                "fulltext": 1,
-                "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-                "no_lock": 1,
-                "no_backup": 1,
-              },
-              onMessage(info) {
-                if (['error', 'critical'].includes(info.type)) {
-                  this.error(`Error when updating fulltext cache: ${info.msg}`);
-                }
-              },
-            });
-          }
-        }
-
-        await book.loadTreeFiles(true);  // update treeLastModified
-      };
-
+      // update book
       await sourceBook.transaction({
         mode: 'validate',
         callback: async (sourceBook, _, backupTs) => {
@@ -1636,20 +1426,56 @@
             return;
           }
 
-          if (sourceBook !== targetBook) {
-            await sourceBook.loadMeta();
-            await sourceBook.loadToc();
-
+          // lock targetBook for cross-book copy
+          if (sourceBook === targetBook) {
+            await this._copyItemsInternal(items, sourceBookId, targetParentId, targetIndex, targetBookId, recursively);
+            await this.rebuild();
+          } else {
             await targetBook.transaction({
               mode: 'validate',
-              callback: _copyItems,
               autoBackupTs: backupTs,
+              callback: async (targetBook) => {
+                await this._copyItemsInternal(items, sourceBookId, targetParentId, targetIndex, targetBookId, recursively);
+                if (targetBook === this.book) {
+                  await this.rebuild();
+                } else {
+                  await targetBook.refreshTreeFiles();
+                }
+              },
             });
-            return;
           }
-
-          await _copyItems(sourceBook);
         },
+      });
+    },
+
+    async _copyItemsInternal(items, sourceBookId, targetParentId, targetIndex, targetBookId, recursively) {
+      await server.request({
+        query: {
+          a: 'query',
+          no_lock: 1,
+        },
+        body: {
+          q: JSON.stringify({
+            book: sourceBookId,
+            cmd: 'copy_items',
+            kwargs: {
+              items,
+              target_parent_id: targetParentId,
+              target_index: targetIndex,
+              target_book_id: targetBookId,
+              recursively,
+            },
+          }),
+          auto_cache: JSON.stringify(
+            scrapbook.getOption("indexer.fulltextCache") ? {
+              fulltext: 1,
+              inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+            } : null
+          ),
+        },
+        method: 'POST',
+        format: 'json',
+        csrfToken: true,
       });
     },
 
@@ -1657,16 +1483,13 @@
       await this.book.transaction({
         mode: 'validate',
         callback: async (book) => {
+          const items = [];
           for (const file of files) {
             try {
               // create new item
-              const newItem = this.book.addItem({
-                item: {
-                  "title": file.name,
-                  "type": "file",
-                },
-                parentId: targetId,
-                index: targetIndex,
+              const newItem = book.addItem({
+                title: file.name,
+                type: "file",
               });
               newItem.index = newItem.id + '/index.html';
 
@@ -1676,7 +1499,7 @@
 
               // upload file
               {
-                const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/' + filename);
+                const target = book.dataUrl + scrapbook.escapeFilename(newItem.id + '/' + filename);
                 await server.request({
                   url: target + '?a=save',
                   method: "POST",
@@ -1704,7 +1527,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
 </html>
 `;
                 const file = new File([html], 'index.html', {type: 'text/html'});
-                const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
+                const target = book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
                 await server.request({
                   url: target + '?a=save',
                   method: "POST",
@@ -1716,20 +1539,36 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
                 });
               }
 
-              // update DOM
-              this.tree.insertItem(newItem.id, targetId, targetIndex);
-
-              targetIndex++;
+              items.push(newItem);
             } catch (ex) {
               console.error(ex);
               this.warn(`Unable to upload '${file.name}': ${ex.message}`);
             }
           }
 
-          // save meta and TOC
-          await book.saveMeta();
-          await book.saveToc();
-          await book.loadTreeFiles(true);  // update treeLastModified
+          // update book
+          await server.request({
+            query: {
+              a: 'query',
+              no_lock: 1,
+            },
+            body: {
+              q: JSON.stringify({
+                book: book.id,
+                cmd: 'add_items',
+                kwargs: {
+                  items,
+                  target_parent_id: targetId,
+                  target_index: targetIndex,
+                },
+              }),
+            },
+            method: 'POST',
+            format: 'json',
+            csrfToken: true,
+          });
+
+          await this.rebuild();
         },
       });
     },
@@ -1740,9 +1579,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       type,
       content,
     }) {
-      let parentItemId = targetId;
-      let index = targetIndex;
-
       // prepare html content and title
       let title = '';
       switch (type) {
@@ -1799,12 +1635,8 @@ ${scrapbook.escapeHtml(content)}
 
       // create new item
       const newItem = this.book.addItem({
-        item: {
-          title,
-          type: "note",
-        },
-        parentId: parentItemId,
-        index,
+        title,
+        type: "note",
       });
       newItem.index = newItem.id + '/index.html';
 
@@ -1827,15 +1659,31 @@ ${scrapbook.escapeHtml(content)}
             },
           });
 
-          // save meta and TOC
-          await book.saveMeta();
-          await book.saveToc();
-          await book.loadTreeFiles(true);  // update treeLastModified
+          // update book
+          await server.request({
+            query: {
+              a: 'query',
+              no_lock: 1,
+            },
+            body: {
+              q: JSON.stringify({
+                book: book.id,
+                cmd: 'add_item',
+                kwargs: {
+                  item: newItem,
+                  target_parent_id: targetId,
+                  target_index: targetIndex,
+                },
+              }),
+            },
+            method: 'POST',
+            format: 'json',
+            csrfToken: true,
+          });
+
+          await this.rebuild();
         },
       });
-
-      // update DOM
-      this.tree.insertItem(newItem.id, parentItemId, index);
     },
 
     async editPostit(id) {
@@ -2000,82 +1848,43 @@ ${scrapbook.escapeHtml(content)}
 
         const key = dialog.key.value;
         const direction = dialog.direction.value;
+        const reverse = direction === 'desc';
         const recursive = dialog.recursive.checked;
 
         if (!(itemElems && itemElems.length)) {
           itemElems = [this.tree.rootElem];
         }
-        const itemIds = itemElems.reduce((set, itemElem) => {
-          const id = itemElem.getAttribute('data-id');
-          if (recursive) {
-            this.book.getReachableItems(id, set);
-          } else {
-            set.add(id);
-          }
-          return set;
-        }, new Set());
+        const itemIds = itemElems.map(itemElem => itemElem.getAttribute('data-id'));
 
-        const meta = this.book.meta;
-        const toc = this.book.toc;
-        const order = (direction === 'desc') ? -1 : 1;
-
-        let compareFunc;
-        if (key === 'reverse') {
-          for (const itemId of itemIds) {
-            const subToc = toc[itemId];
-            if (!(subToc && subToc.length)) { continue; }
-            subToc.reverse();
-          }
-        } else {
-          if (key === 'type') {
-            const mapTypeValue = {
-              folder: -1,
-              bookmark: 1,
-              postit: 2,
-              note: 3,
-            };
-            compareFunc = (a, b) => {
-              const va = mapTypeValue[meta[a].type] || 0;
-              const vb = mapTypeValue[meta[b].type] || 0;
-              if (va > vb) { return order; }
-              if (va < vb) { return -order; }
-              return 0;
-            };
-          } else if (key === 'marked') {
-            compareFunc = (a, b) => {
-              const va = meta[a].marked ? 0 : 1;
-              const vb = meta[b].marked ? 0 : 1;
-              if (va > vb) { return order; }
-              if (va < vb) { return -order; }
-              return 0;
-            };
-          } else {
-            compareFunc = (a, b) => {
-              const va = meta[a][key] || '';
-              const vb = meta[b][key] || '';
-              if (va > vb) { return order; }
-              if (va < vb) { return -order; }
-              return 0;
-            };
-          }
-
-          for (const itemId of itemIds) {
-            const subToc = toc[itemId];
-            if (!(subToc && subToc.length)) { continue; }
-            subToc.sort(compareFunc);
-          }
-        }
-
-        // upload changes to server
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
-            await book.saveToc();
-            await book.loadTreeFiles(true);  // update treeLastModified
+            await server.request({
+              query: {
+                a: 'query',
+                no_lock: 1,
+              },
+              body: {
+                'q': JSON.stringify({
+                  book: book.id,
+                  cmd: 'sort_items',
+                  kwargs: {
+                    items: itemIds,
+                    key,
+                    reverse,
+                    recursively: recursive,
+                  },
+                }),
+              },
+              method: 'POST',
+              format: 'json',
+              csrfToken: true,
+            });
+
+            // discard highlights items with same ID may be reordered
+            await this.rebuild({keepHighlights: false});
           },
         });
-
-        await this.tree.rebuild();
       },
 
       async copyinfo(...args) {
@@ -2318,28 +2127,40 @@ ${scrapbook.escapeHtml(content)}
           location,
           comment: dialog.querySelector('[name="comment"]').value,
         };
-        const newItem = this.book.addItem({
-          item,
-          parentId: null,
-        });
+        const newItem = this.book.addItem(item);
         for (const [key, value] of Object.entries(dialogData)) {
           if (value || typeof item[key] !== 'undefined') {
             newItem[key] = value;
           }
         }
 
-        // save meta
+        // update book
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
-            await book.saveMeta();
-            await book.saveToc();
-            await book.loadTreeFiles(true);
+            await server.request({
+              query: {
+                a: 'query',
+                no_lock: 1,
+              },
+              body: {
+                q: JSON.stringify({
+                  book: book.id,
+                  cmd: 'update_item',
+                  kwargs: {
+                    item: newItem,
+                    auto_modify: false,
+                  },
+                }),
+              },
+              method: 'POST',
+              format: 'json',
+              csrfToken: true,
+            });
+
+            await this.rebuild();
           },
         });
-
-        // update DOM
-        this.tree.refreshItem(id);
       },
 
       async mkfolder({itemElems: [itemElem], modifiers}) {
@@ -2380,26 +2201,38 @@ ${scrapbook.escapeHtml(content)}
 
         // create new item
         const newItem = this.book.addItem({
-          item: {
-            title,
-            type: "folder",
-          },
-          parentId: parentItemId,
-          index,
+          title,
+          type: "folder",
         });
 
-        // save meta and TOC
+        // update book
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
-            await book.saveMeta();
-            await book.saveToc();
-            await book.loadTreeFiles(true);  // update treeLastModified
+            await server.request({
+              query: {
+                a: 'query',
+                no_lock: 1,
+              },
+              body: {
+                q: JSON.stringify({
+                  book: book.id,
+                  cmd: 'add_item',
+                  kwargs: {
+                    item: newItem,
+                    target_parent_id: parentItemId,
+                    target_index: index,
+                  },
+                }),
+              },
+              method: 'POST',
+              format: 'json',
+              csrfToken: true,
+            });
+
+            await this.rebuild();
           },
         });
-
-        // update DOM
-        this.tree.insertItem(newItem.id, parentItemId, index);
       },
 
       async mksep({itemElems: [itemElem], modifiers}) {
@@ -2419,26 +2252,38 @@ ${scrapbook.escapeHtml(content)}
 
         // create new item
         const newItem = this.book.addItem({
-          item: {
-            "title": "",
-            "type": "separator",
-          },
-          parentId: parentItemId,
-          index,
+          title: "",
+          type: "separator",
         });
 
-        // save meta and TOC
+        // update book
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
-            await book.saveMeta();
-            await book.saveToc();
-            await book.loadTreeFiles(true);  // update treeLastModified
+            await server.request({
+              query: {
+                a: 'query',
+                no_lock: 1,
+              },
+              body: {
+                q: JSON.stringify({
+                  book: book.id,
+                  cmd: 'add_item',
+                  kwargs: {
+                    item: newItem,
+                    target_parent_id: parentItemId,
+                    target_index: index,
+                  },
+                }),
+              },
+              method: 'POST',
+              format: 'json',
+              csrfToken: true,
+            });
+
+            await this.rebuild();
           },
         });
-
-        // update DOM
-        this.tree.insertItem(newItem.id, parentItemId, index);
       },
 
       async mkpostit({itemElems: [itemElem], modifiers}) {
@@ -2460,40 +2305,52 @@ ${scrapbook.escapeHtml(content)}
 
         // create new item
         const newItem = this.book.addItem({
-          item: {
-            "type": "postit",
-          },
-          parentId: parentItemId,
-          index,
+          type: "postit",
         });
         newItem.index = newItem.id + '/index.html';
 
         // create file
         const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
 
-        // save meta and TOC
+        // update book
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
-            await book.saveMeta();
-            await book.saveToc();
-            await book.loadTreeFiles(true);  // update treeLastModified
+            await server.request({
+              query: {
+                a: 'query',
+                no_lock: 1,
+              },
+              body: {
+                q: JSON.stringify({
+                  book: book.id,
+                  cmd: 'add_item',
+                  kwargs: {
+                    item: newItem,
+                    target_parent_id: parentItemId,
+                    target_index: index,
+                  },
+                }),
+              },
+              method: 'POST',
+              format: 'json',
+              csrfToken: true,
+            });
+
+            // save data files
+            await server.request({
+              url: target + '?a=save',
+              method: "POST",
+              format: 'json',
+              csrfToken: true,
+              body: {
+                upload: new Blob([''], {type: 'text/plain'}),
+              },
+            });
+
+            await this.rebuild();
           },
         });
-
-        // save data files
-        await server.request({
-          url: target + '?a=save',
-          method: "POST",
-          format: 'json',
-          csrfToken: true,
-          body: {
-            upload: new Blob([''], {type: 'text/plain'}),
-          },
-        });
-
-        // update DOM
-        this.tree.insertItem(newItem.id, parentItemId, index);
 
         // edit the postit
         if (this.mode !== 'normal') {
@@ -2552,12 +2409,8 @@ ${scrapbook.escapeHtml(content)}
 
         // create new item
         const newItem = this.book.addItem({
-          item: {
-            title,
-            type: "note",
-          },
-          parentId: parentItemId,
-          index,
+          title,
+          type: "note",
         });
         newItem.index = newItem.id + '/index.html';
 
@@ -2578,30 +2431,45 @@ ${scrapbook.escapeHtml(content)}
         const content = await this.book.renderTemplate(target, newItem, type);
         const blob = new Blob([content], {type: 'text/plain'});
 
-        // save meta and TOC
+        // update book
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
-            await book.saveMeta();
-            await book.saveToc();
-            await book.loadTreeFiles(true);  // update treeLastModified
-          },
-        });
+            await server.request({
+              query: {
+                a: 'query',
+                no_lock: 1,
+              },
+              body: {
+                q: JSON.stringify({
+                  book: book.id,
+                  cmd: 'add_item',
+                  kwargs: {
+                    item: newItem,
+                    target_parent_id: parentItemId,
+                    target_index: index,
+                  },
+                }),
+              },
+              method: 'POST',
+              format: 'json',
+              csrfToken: true,
+            });
 
-        // save data files
-        await server.request({
-          url: target + '?a=save',
-          method: "POST",
-          format: 'json',
-          csrfToken: true,
-          body: {
-            upload: blob,
-          },
-        });
+            // save data files
+            await server.request({
+              url: target + '?a=save',
+              method: "POST",
+              format: 'json',
+              csrfToken: true,
+              body: {
+                upload: blob,
+              },
+            });
 
-        if (type === 'markdown') {
-          const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
-          const content = `<!DOCTYPE html>
+            if (type === 'markdown') {
+              const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
+              const content = `<!DOCTYPE html>
 <html data-scrapbook-type="note">
 <head>
 <meta charset="UTF-8">
@@ -2611,20 +2479,21 @@ ${scrapbook.escapeHtml(content)}
 Redirecting to file <a href="index.md">index.md</a>
 </body>
 </html>`;
-          const blob = new Blob([content], {type: 'text/plain'});
-          await server.request({
-            url: target + '?a=save',
-            method: "POST",
-            format: 'json',
-            csrfToken: true,
-            body: {
-              upload: blob,
-            },
-          });
-        }
+              const blob = new Blob([content], {type: 'text/plain'});
+              await server.request({
+                url: target + '?a=save',
+                method: "POST",
+                format: 'json',
+                csrfToken: true,
+                body: {
+                  upload: blob,
+                },
+              });
+            }
 
-        // update DOM
-        this.tree.insertItem(newItem.id, parentItemId, index);
+            await this.rebuild();
+          },
+        });
 
         // open link
         if (this.mode !== 'normal') {
@@ -2709,59 +2578,19 @@ Redirecting to file <a href="index.md">index.md</a>
       async move_up({itemElems: [itemElem]}) {
         if (!this.treeElem.contains(itemElem)) { return; }
 
-        const itemId = itemElem.getAttribute('data-id');
         const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
         if (!(index > 0)) { return; }
 
-        // update TOC
-        const newIndex = this.book.moveItem({
-          id: itemId,
-          currentParentId: parentItemId,
-          currentIndex: index,
-          targetParentId: parentItemId,
-          targetIndex: index - 1,
-        });
-
-        // update DOM
-        this.tree.moveItem(itemId, parentItemId, index, parentItemId, newIndex);
-
-        // upload changes to server
-        await this.book.transaction({
-          mode: 'validate',
-          callback: async (book) => {
-            await book.saveToc();
-            await book.loadTreeFiles(true);  // update treeLastModified
-          },
-        });
+        await this._moveItemsInternal([[parentItemId, index]], parentItemId, index - 1);
       },
 
       async move_down({itemElems: [itemElem]}) {
         if (!this.treeElem.contains(itemElem)) { return; }
 
-        const itemId = itemElem.getAttribute('data-id');
         const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
         if (!itemElem.nextElementSibling) { return; }
 
-        // update TOC
-        const newIndex = this.book.moveItem({
-          id: itemId,
-          currentParentId: parentItemId,
-          currentIndex: index,
-          targetParentId: parentItemId,
-          targetIndex: index + 2,
-        });
-
-        // update DOM
-        this.tree.moveItem(itemId, parentItemId, index, parentItemId, newIndex);
-
-        // upload changes to server
-        await this.book.transaction({
-          mode: 'validate',
-          callback: async (book) => {
-            await book.saveToc();
-            await book.loadTreeFiles(true);  // update treeLastModified
-          },
-        });
+        await this._moveItemsInternal([[parentItemId, index]], parentItemId, index + 2);
       },
 
       async move_into({itemElems}) {
@@ -2863,39 +2692,35 @@ Redirecting to file <a href="index.md">index.md</a>
       async recycle({itemElems}) {
         if (!itemElems.length) { return; }
 
-        // Reverse the order to always move an item before its parent so that
-        // its parent is in the DOM and gets children updated correctly.
-        itemElems = [...itemElems].reverse();
-
-        const cachedItemElems = this.tree.treeElem.querySelectorAll('li[data-id]');
-        let targetIndex = Infinity;
-        for (const itemElem of itemElems) {
-          if (!this.treeElem.contains(itemElem)) { continue; }
-
-          const itemId = itemElem.getAttribute('data-id');
+        const items = itemElems.map((itemElem) => {
           const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+          return [parentItemId, index];
+        });
 
-          // remove this and descendant items from Book
-          const newIndex = this.book.recycleItemTree({
-            id: itemId,
-            currentParentId: parentItemId,
-            currentIndex: index,
-            targetIndex,
-          });
-
-          // update DOM
-          this.tree.removeItem(parentItemId, index, cachedItemElems);
-
-          targetIndex = newIndex;
-        }
-
-        // upload changes to server
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
-            await book.saveMeta();
-            await book.saveToc();
-            await book.loadTreeFiles(true);  // update treeLastModified
+            await server.request({
+              query: {
+                a: 'query',
+                no_lock: 1,
+              },
+              body: {
+                q: JSON.stringify({
+                  book: book.id,
+                  cmd: 'recycle_items',
+                  kwargs: {
+                    items,
+                  },
+                }),
+              },
+              method: 'POST',
+              format: 'json',
+              csrfToken: true,
+            });
+
+            // discard highlights items will be removed
+            await this.rebuild({keepHighlights: false});
           },
         });
       },
@@ -2903,92 +2728,41 @@ Redirecting to file <a href="index.md">index.md</a>
       async delete({itemElems}) {
         if (!itemElems.length) { return; }
 
-        const removeDataFiles = async (itemIndexFile) => {
-          if (!itemIndexFile) { return; }
-          const index = itemIndexFile.replace(/\/index.[^.]+$/, '');
-          const target = this.book.dataUrl + scrapbook.escapeFilename(index);
-          await server.request({
-            url: target + '?a=delete',
-            method: "POST",
-            format: 'json',
-            csrfToken: true,
-          });
-        };
-
-        // Reverse the order to always move an item before its parent so that
-        // its parent is in the DOM and gets children updated correctly.
-        itemElems = [...itemElems].reverse();
+        const items = itemElems.map((itemElem) => {
+          const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+          return [parentItemId, index];
+        });
 
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
-            const cachedItemElems = this.tree.treeElem.querySelectorAll('li[data-id]');
-            let allRemovedItems = [];
-            for (const itemElem of itemElems) {
-              if (!this.treeElem.contains(itemElem)) { continue; }
+            await server.request({
+              query: {
+                a: 'query',
+                no_lock: 1,
+              },
+              body: {
+                q: JSON.stringify({
+                  book: book.id,
+                  cmd: 'delete_items',
+                  kwargs: {
+                    items,
+                  },
+                }),
+                auto_cache: JSON.stringify(
+                  scrapbook.getOption("indexer.fulltextCache") ? {
+                    fulltext: 1,
+                    inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+                  } : null
+                ),
+              },
+              method: 'POST',
+              format: 'json',
+              csrfToken: true,
+            });
 
-              const itemId = itemElem.getAttribute('data-id');
-              const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
-
-              // remove this and descendant items from Book
-              const removedItems = this.book.removeItemTree({
-                id: itemId,
-                parentId: parentItemId,
-                index,
-              });
-              for (const i of removedItems) {
-                allRemovedItems.push(i.id);
-              }
-
-              // update DOM
-              this.tree.removeItem(parentItemId, index, cachedItemElems);
-
-              // remove data files
-              for (const removedItem of removedItems) {
-                if (!removedItem.index) { continue; }
-                try {
-                  await removeDataFiles(removedItem.index);
-                } catch (ex) {
-                  console.error(ex);
-                  this.warn(`Unable to delete '${removedItem.index}': ${ex.message}`);
-                }
-              }
-            }
-
-            // upload changes to server
-            if (allRemovedItems.length > 0) {
-              await book.saveMeta();
-            }
-            await book.saveToc();
-
-            if (allRemovedItems.length > 0) {
-              // Due to a concern of URL length and performance, skip cache
-              // update if too many items are affected. Cache update for
-              // deleted items can be safely deferred as deleted items aren't
-              // shown in the search result anyway.
-              if (allRemovedItems.length <= 20) {
-                if (scrapbook.getOption("indexer.fulltextCache")) {
-                  await server.requestSse({
-                    query: {
-                      "a": "cache",
-                      "book": book.id,
-                      "item": allRemovedItems,
-                      "fulltext": 1,
-                      "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-                      "no_lock": 1,
-                      "no_backup": 1,
-                    },
-                    onMessage(info) {
-                      if (['error', 'critical'].includes(info.type)) {
-                        this.error(`Error when updating fulltext cache: ${info.msg}`);
-                      }
-                    },
-                  });
-                }
-              }
-            }
-
-            await book.loadTreeFiles(true);  // update treeLastModified
+            // discard highlights items will be removed
+            await this.rebuild({keepHighlights: false});
           },
         });
       },
@@ -2996,51 +2770,35 @@ Redirecting to file <a href="index.md">index.md</a>
       async recover({itemElems}) {
         if (!itemElems.length) { return; }
 
-        // Handle items in order so that the order of recovered items is
-        // preserved if they have same parent.
-        // If a recycled item A has a child B, B will be removed from the DOM
-        // when A is removed, and its moving will be skipped.
-        const cachedItemElems = this.tree.treeElem.querySelectorAll('li[data-id]');
-        for (const itemElem of itemElems) {
-          if (!this.treeElem.contains(itemElem)) { continue; }
-
-          const itemId = itemElem.getAttribute('data-id');
+        const items = itemElems.map((itemElem) => {
           const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+          return [parentItemId, index];
+        });
 
-          let targetId = this.book.meta[itemId].parent || 'root';
-
-          // move to root instead if the original parent no more exists
-          if (!(this.book.meta[targetId] || this.book.isSpecialItem(targetId))) {
-            targetId = 'root';
-          }
-
-          if (targetId !== parentItemId) {
-            // update TOC
-            const newIndex = this.book.moveItem({
-              id: itemId,
-              currentParentId: parentItemId,
-              currentIndex: index,
-              targetParentId: targetId,
-              targetIndex: Infinity,
-            });
-
-            // remove parent and recycled time record
-            delete this.book.meta[itemId].parent;
-            delete this.book.meta[itemId].recycled;
-
-            // update DOM
-            this.tree.removeItem(parentItemId, index, cachedItemElems);
-            this.tree.insertItem(itemId, targetId, newIndex);
-          }
-        }
-
-        // upload changes to server
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
-            await book.saveMeta();
-            await book.saveToc();
-            await book.loadTreeFiles(true);  // update treeLastModified
+            await server.request({
+              query: {
+                a: 'query',
+                no_lock: 1,
+              },
+              body: {
+                q: JSON.stringify({
+                  book: book.id,
+                  cmd: 'unrecycle_items',
+                  kwargs: {
+                    items,
+                  },
+                }),
+              },
+              method: 'POST',
+              format: 'json',
+              csrfToken: true,
+            });
+
+            // discard highlights items will be removed
+            await this.rebuild({keepHighlights: false});
           },
         });
       },

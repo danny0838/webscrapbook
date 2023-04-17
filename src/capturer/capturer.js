@@ -760,34 +760,38 @@
           parentId = 'root';
         }
 
-        await book.addItem({
-          item: Object.assign({}, item, {icon}),
-          parentId,
-          index,
+        // update book
+        const newItem = book.addItem(
+          Object.assign({}, item, {icon})
+        );
+
+        await server.request({
+          url: book.topUrl,
+          query: {
+            a: 'query',
+            no_lock: 1,
+          },
+          method: 'POST',
+          format: 'json',
+          csrfToken: true,
+          body: {
+            q: JSON.stringify({
+              book: book.id,
+              cmd: 'add_item',
+              kwargs: {
+                item: newItem,
+                target_parent_id: parentId,
+                target_index: index,
+              },
+            }),
+            auto_cache: JSON.stringify(
+              scrapbook.getOption("indexer.fulltextCache") ? {
+                fulltext: 1,
+                inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+              } : null
+            ),
+          },
         });
-        await book.saveMeta();
-        await book.saveToc();
-
-        if (scrapbook.getOption("indexer.fulltextCache")) {
-          await server.requestSse({
-            query: {
-              "a": "cache",
-              "book": book.id,
-              "item": item.id,
-              "fulltext": 1,
-              "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-              "no_lock": 1,
-              "no_backup": 1,
-            },
-            onMessage(info) {
-              if (['error', 'critical'].includes(info.type)) {
-                capturer.error(`Error when generating fulltext cache: ${info.msg}`);
-              }
-            },
-          });
-        }
-
-        await book.loadTreeFiles(true);  // update treeLastModified
       },
     });
   };
@@ -1801,7 +1805,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       throw new Error(scrapbook.lang("ErrorSaveNonHtml", [url]));
     }
 
-    // Load server config and verify whether we can actually save the page.
     await server.init();
     const bookId = await server.findBookIdFromUrl(url);
     const book = server.books[bookId];
@@ -1810,106 +1813,104 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
       throw new Error(scrapbook.lang("ErrorSaveNotUnderDataDir", [url]));
     }
 
-    const item = await book.findItemFromUrl(url);
+    await book.transaction({
+      mode: 'update',
+      callback: async (book, updated) => {
+        await book.loadMeta(updated);
+        const item = await book.findItemFromUrl(url);
+        if (item && item.locked) {
+          throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
+        }
 
-    if (item && item.locked) {
-      throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
-    }
+        const isMainDocument = book.isItemIndexUrl(item, url);
 
-    const isMainDocument = book.isItemIndexUrl(item, url);
-
-    let internalizePrefix;
-    if (internalize) {
-      if (item && item.index) {
-        const index = item.index;
-        const indexCI = index.toLowerCase();
-        if (index.endsWith('/index.html')) {
-          internalizePrefix = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(index.slice(0, -10)));
-        } else if (indexCI.endsWith('.htz')) {
-          internalizePrefix = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(item.index + '!/'));
-        } else if (indexCI.endsWith('.maff')) {
-          // Trust only the subdirectory in the current URL, as it is
-          // possible that */index.html be redirected to another page.
-          const base = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(item.index + '!/'));
-          const urlN = scrapbook.normalizeUrl(url);
-          if (urlN.startsWith(base)) {
-            const m = urlN.slice(base.length).match(/^[^/]+\//);
-            if (m) {
-              internalizePrefix = base + m[0];
+        let internalizePrefix;
+        if (internalize) {
+          if (item && item.index) {
+            const index = item.index;
+            const indexCI = index.toLowerCase();
+            if (index.endsWith('/index.html')) {
+              internalizePrefix = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(index.slice(0, -10)));
+            } else if (indexCI.endsWith('.htz')) {
+              internalizePrefix = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(item.index + '!/'));
+            } else if (indexCI.endsWith('.maff')) {
+              // Trust only the subdirectory in the current URL, as it is
+              // possible that */index.html be redirected to another page.
+              const base = scrapbook.normalizeUrl(book.dataUrl + scrapbook.escapeFilename(item.index + '!/'));
+              const urlN = scrapbook.normalizeUrl(url);
+              if (urlN.startsWith(base)) {
+                const m = urlN.slice(base.length).match(/^[^/]+\//);
+                if (m) {
+                  internalizePrefix = base + m[0];
+                }
+              }
             }
           }
         }
-      }
-    }
 
-    (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
-      if (error) {
-        const source = `[${tabId}:${frameId}] ${url}`;
-        capturer.error(scrapbook.lang("ErrorContentScriptExecute", [source, error.message]));
-      }
-    });
-
-    const message = {
-      internalize,
-      isMainPage: isMainDocument,
-      item,
-      options: Object.assign(scrapbook.getOptions("capture"), options),
-    };
-
-    isDebug && console.debug("(main) send", source, message);
-    const response = await capturer.invoke("retrieveDocumentContent", message, {tabId, frameId});
-    isDebug && console.debug("(main) response", source, response);
-
-    const modify = scrapbook.dateToId();
-
-    // handle resources to internalize
-    const resourceMap = new Map();
-    if (internalize) {
-      const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
-      for (const [fileUrl, data] of Object.entries(response)) {
-        const fetchResource = async (url) => {
-          const fullUrl = scrapbook.normalizeUrl(capturer.resolveRelativeUrl(url, fileUrl));
-          if (!scrapbook.isContentPage(fullUrl, allowFileAccess)) { return null; }
-          if (fullUrl.startsWith(internalizePrefix)) { return null; }
-
-          const file = resourceMap.get(fullUrl);
-          if (typeof file !== 'undefined') { return file; }
-
-          resourceMap.set(fullUrl, null);
-
-          try {
-            const xhr = await scrapbook.xhr({
-              url: fullUrl,
-              responseType: 'blob',
-            });
-            const blob = xhr.response;
-
-            let file;
-            if (internalizePrefix) {
-              const sha = scrapbook.sha1(await scrapbook.readFileAsArrayBuffer(blob), 'ARRAYBUFFER');
-              const ext = Mime.extension(blob.type) || 'bin';
-              file = new File([blob], sha + '.' + ext, {type: blob.type});
-            } else {
-              file = await scrapbook.readFileAsDataURL(blob);
-            }
-            resourceMap.set(fullUrl, file);
-            return file;
-          } catch (ex) {
-            console.error(ex);
-            capturer.warn(`Unable to internalize resource "${scrapbook.crop(url, 256)}": ${ex.message}`);
+        (await scrapbook.initContentScripts(tabId)).forEach(({tabId, frameId, url, error, injected}) => {
+          if (error) {
+            const source = `[${tabId}:${frameId}] ${url}`;
+            capturer.error(scrapbook.lang("ErrorContentScriptExecute", [source, error.message]));
           }
+        });
+
+        const message = {
+          internalize,
+          isMainPage: isMainDocument,
+          item,
+          options: Object.assign(scrapbook.getOptions("capture"), options),
         };
 
-        for (const [uuid, url] of Object.entries(data.resources)) {
-          const file = await fetchResource(url);
-          data.resources[uuid] = {url, file};
-        }
-      }
-    }
+        isDebug && console.debug("(main) send", source, message);
+        const response = await capturer.invoke("retrieveDocumentContent", message, {tabId, frameId});
+        isDebug && console.debug("(main) response", source, response);
 
-    await book.transaction({
-      mode: 'validate',
-      callback: async (book) => {
+        // handle resources to internalize
+        const resourceMap = new Map();
+        if (internalize) {
+          const allowFileAccess = await browser.extension.isAllowedFileSchemeAccess();
+          for (const [fileUrl, data] of Object.entries(response)) {
+            const fetchResource = async (url) => {
+              const fullUrl = scrapbook.normalizeUrl(capturer.resolveRelativeUrl(url, fileUrl));
+              if (!scrapbook.isContentPage(fullUrl, allowFileAccess)) { return null; }
+              if (fullUrl.startsWith(internalizePrefix)) { return null; }
+
+              const file = resourceMap.get(fullUrl);
+              if (typeof file !== 'undefined') { return file; }
+
+              resourceMap.set(fullUrl, null);
+
+              try {
+                const xhr = await scrapbook.xhr({
+                  url: fullUrl,
+                  responseType: 'blob',
+                });
+                const blob = xhr.response;
+
+                let file;
+                if (internalizePrefix) {
+                  const sha = scrapbook.sha1(await scrapbook.readFileAsArrayBuffer(blob), 'ARRAYBUFFER');
+                  const ext = Mime.extension(blob.type) || 'bin';
+                  file = new File([blob], sha + '.' + ext, {type: blob.type});
+                } else {
+                  file = await scrapbook.readFileAsDataURL(blob);
+                }
+                resourceMap.set(fullUrl, file);
+                return file;
+              } catch (ex) {
+                console.error(ex);
+                capturer.warn(`Unable to internalize resource "${scrapbook.crop(url, 256)}": ${ex.message}`);
+              }
+            };
+
+            for (const [uuid, url] of Object.entries(data.resources)) {
+              const file = await fetchResource(url);
+              data.resources[uuid] = {url, file};
+            }
+          }
+        }
+
         // documents
         for (const [fileUrl, data] of Object.entries(response)) {
           try {
@@ -2010,30 +2011,30 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         // update item
         if (item) {
           capturer.log(`Updating server index for item "${item.id}"...`);
-          item.modify = modify;
-          book.meta[item.id] = item;
-          await book.saveMeta();
-
-          if (scrapbook.getOption("indexer.fulltextCache")) {
-            await server.requestSse({
-              query: {
-                "a": "cache",
-                "book": book.id,
-                "item": item.id,
-                "fulltext": 1,
-                "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-                "no_lock": 1,
-                "no_backup": 1,
-              },
-              onMessage(info) {
-                if (['error', 'critical'].includes(info.type)) {
-                  capturer.error(`Error when updating fulltext cache: ${info.msg}`);
-                }
-              },
-            });
-          }
-
-          await book.loadTreeFiles(true);  // update treeLastModified
+          await server.request({
+            query: {
+              a: 'query',
+              no_lock: 1,
+            },
+            body: {
+              q: JSON.stringify({
+                book: book.id,
+                cmd: 'update_item',
+                kwargs: {
+                  item: {id: item.id},
+                },
+              }),
+              auto_cache: JSON.stringify(
+                scrapbook.getOption("indexer.fulltextCache") ? {
+                  fulltext: 1,
+                  inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+                } : null
+              ),
+            },
+            method: 'POST',
+            format: 'json',
+            csrfToken: true,
+          });
         } else {
           if (!book.config.no_tree) {
             capturer.warn(scrapbook.lang("ErrorSaveUnknownItem"));
@@ -2342,26 +2343,30 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
         // update item meta
         capturer.log(`Updating server index for item "${itemId}"...`);
-        await book.saveMeta();
-
-        if (scrapbook.getOption("indexer.fulltextCache")) {
-          await server.requestSse({
-            query: {
-              "a": "cache",
-              "book": bookId,
-              "item": itemId,
-              "fulltext": 1,
-              "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-              "no_lock": 1,
-              "no_backup": 1,
-            },
-            onMessage(info) {
-              if (['error', 'critical'].includes(info.type)) {
-                capturer.error(`Error when generating fulltext cache: ${info.msg}`);
-              }
-            },
-          });
-        }
+        await server.request({
+          query: {
+            a: 'query',
+            no_lock: 1,
+          },
+          body: {
+            q: JSON.stringify({
+              book: book.id,
+              cmd: 'update_item',
+              kwargs: {
+                item,
+              },
+            }),
+            auto_cache: JSON.stringify(
+              scrapbook.getOption("indexer.fulltextCache") ? {
+                fulltext: 1,
+                inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+              } : null
+            ),
+          },
+          method: 'POST',
+          format: 'json',
+          csrfToken: true,
+        });
 
         // move current data files to backup
         if (oldIndex) {
@@ -2408,8 +2413,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         // preserve info if error out
         capturer.captureInfo.delete(timeId);
         await capturer.clearFileCache({timeId});
-
-        await book.loadTreeFiles(true);  // update treeLastModified
       },
     });
 
@@ -2614,8 +2617,6 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         // enforce disk cache
         info.useDiskCache = true;
 
-        const modified = scrapbook.dateToId();
-
         result = await capturer.captureGeneral({
           timeId,
           tabId, frameId, fullPage,
@@ -2626,36 +2627,36 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           captureOnly: true,
         });
 
-        item.modify = modified;
-
         // update item meta
         capturer.log(`Updating server index for item "${itemId}"...`);
-        await book.saveMeta();
-
-        if (scrapbook.getOption("indexer.fulltextCache")) {
-          await server.requestSse({
-            query: {
-              "a": "cache",
-              "book": bookId,
-              "item": itemId,
-              "fulltext": 1,
-              "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-              "no_lock": 1,
-              "no_backup": 1,
-            },
-            onMessage(info) {
-              if (['error', 'critical'].includes(info.type)) {
-                capturer.error(`Error when generating fulltext cache: ${info.msg}`);
-              }
-            },
-          });
-        }
+        await server.request({
+          query: {
+            a: 'query',
+            no_lock: 1,
+          },
+          body: {
+            q: JSON.stringify({
+              book: book.id,
+              cmd: 'update_item',
+              kwargs: {
+                item: {id: item.id},
+              },
+            }),
+            auto_cache: JSON.stringify(
+              scrapbook.getOption("indexer.fulltextCache") ? {
+                fulltext: 1,
+                inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+              } : null
+            ),
+          },
+          method: 'POST',
+          format: 'json',
+          csrfToken: true,
+        });
 
         // preserve info if error out
         capturer.captureInfo.delete(timeId);
         await capturer.clearFileCache({timeId});
-
-        await book.loadTreeFiles(true);  // update treeLastModified
       },
     });
 

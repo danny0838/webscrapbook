@@ -100,9 +100,7 @@
           mode: 'refresh',
           callback: async (book, updated) => {
             const meta = await book.loadMeta(updated);
-
-            const item = meta[id];
-            if (!item) {
+            if (!meta[id]) {
               throw new Error(`Specified item "${id}" does not exist.`);
             }
 
@@ -118,30 +116,31 @@
               },
             });
 
-            // update item
-            item.modify = scrapbook.dateToId();
-            await book.saveMeta();
-
-            if (scrapbook.getOption("indexer.fulltextCache")) {
-              await server.requestSse({
-                query: {
-                  "a": "cache",
-                  "book": book.id,
-                  "item": item.id,
-                  "fulltext": 1,
-                  "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-                  "no_lock": 1,
-                  "no_backup": 1,
-                },
-                onMessage(info) {
-                  if (['error', 'critical'].includes(info.type)) {
-                    alert(`Error when updating fulltext cache: ${info.msg}`);
-                  }
-                },
-              });
-            }
-
-            await book.loadTreeFiles(true);  // update treeLastModified
+            // update book
+            await server.request({
+              query: {
+                a: 'query',
+                no_lock: 1,
+              },
+              body: {
+                q: JSON.stringify({
+                  book: book.id,
+                  cmd: 'update_item',
+                  kwargs: {
+                    item: {id},
+                  },
+                }),
+                auto_cache: JSON.stringify(
+                  scrapbook.getOption("indexer.fulltextCache") ? {
+                    fulltext: 1,
+                    inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+                  } : null
+                ),
+              },
+              method: 'POST',
+              format: 'json',
+              csrfToken: true,
+            });
           },
         });
       } catch (ex) {

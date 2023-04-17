@@ -1008,21 +1008,15 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
     /**
      * Add (or replace) an item to the Book.
      *
-     * @param {Object} params
-     * @param {?Object} params.item - null to generate a default item. Overwrites existed id.
-     * @param {?string} params.parentId - null to not add to any parent
-     * @param {?integer} [params.index] - non-integer to insert to last
-     * @return {Object}
+     * The purpose of this method is to emulate adding a series of items to
+     * prevent generating duplicated item IDs.  This does not do all required
+     * steps to add an item, and a true item adding should then be issued to
+     * the server, and meta and toc of this Book should then be refreshed.
+     *
+     * @param {?Object} item - null to generate a default item. Overwrites existed id.
+     * @return {Object} The newly added item object.
      */
-    addItem({
-      item,
-      parentId = 'root',
-      index,
-    }) {
-      if (!Number.isInteger(index)) {
-        index = Infinity;
-      }
-
+    addItem(item) {
       // generate a cloned item, with keys sorted in a predefined order
       item = Object.assign(this.defaultMeta, item);
 
@@ -1044,167 +1038,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       // add to meta (overwrite if item.id exists)
       this.meta[item.id] = item;
 
-      // add to TOC if parentId is not null
-      if (parentId) {
-        if (!this.toc[parentId]) {
-          this.toc[parentId] = [];
-        }
-        this.toc[parentId].splice(index, 0, item.id);
-      }
-
       return item;
-    }
-
-    /**
-     * Remove an item and descneding items from the Book.
-     *
-     * @param {Object} params
-     * @param {string} params.id
-     * @param {?string} params.parentId - null to not removed from certain parent
-     *         (useful for checking stale items)
-     * @param {integer} params.index
-     * @return {Set} a set of removed items
-     */
-    removeItemTree({
-      id,
-      parentId,
-      index,
-    }) {
-      // reachable items
-      const allItems = new Set();
-      this.getReachableItems('root', allItems);
-      this.getReachableItems('hidden', allItems);
-      this.getReachableItems('recycle', allItems);
-
-      // remove from parent TOC
-      if (parentId && this.toc[parentId]) {
-        this.toc[parentId].splice(index, 1);
-        if (!this.toc[parentId].length) {
-          delete this.toc[parentId];
-        }
-      }
-
-      // reachable items after removal
-      const curItems = new Set();
-      this.getReachableItems('root', curItems);
-      this.getReachableItems('hidden', curItems);
-      this.getReachableItems('recycle', curItems);
-
-      // clear stale data for items no longer reachable
-      const removedItems = new Set();
-      for (const id of allItems) {
-        if (curItems.has(id)) {
-          // still reachable
-          continue;
-        }
-        if (!this.meta[id]) {
-          // already deleted, but repeatedly called due to some reason
-          continue;
-        }
-        removedItems.add(this.meta[id]);
-        delete this.meta[id];
-        delete this.toc[id];
-      }
-
-      return removedItems;
-    }
-
-    /**
-     * Remove an item from Book tree and put it to recycle bin if not referenced.
-     *
-     * @param {Object} params
-     * @param {string} params.id
-     * @param {?string} [params.currentParentId] - falsy to not remove from any parent
-     *     (useful for checking a stale item)
-     * @param {integer} params.currentIndex
-     * @param {string} [params.targetParentId] - ID of the recycle bin item
-     * @param {?integer} [params.targetIndex] - non-integer to insert to last
-     * @return {integer} the real insertion index
-     */
-    recycleItemTree({
-      id,
-      currentParentId,
-      currentIndex,
-      targetParentId = 'recycle',
-      targetIndex,
-    }) {
-      if (!Number.isInteger(targetIndex)) {
-        targetIndex = (this.toc[targetParentId] || []).length;
-      }
-
-      // remove from parent TOC
-      if (currentParentId && this.toc[currentParentId]) {
-        this.toc[currentParentId].splice(currentIndex, 1);
-        if (!this.toc[currentParentId].length) {
-          delete this.toc[currentParentId];
-        }
-      }
-
-      // reachable items after removal
-      const curItems = new Set();
-      this.getReachableItems('root', curItems);
-      this.getReachableItems('hidden', curItems);
-      this.getReachableItems(targetParentId, curItems);
-
-      // add item to targetParentId if no longer referenced
-      if (!curItems.has(id)) {
-        if (!this.toc[targetParentId]) {
-          this.toc[targetParentId] = [];
-        }
-        this.toc[targetParentId].splice(targetIndex, 0, id);
-
-        // record recycled time and original parent ID and in meta
-        this.meta[id].parent = currentParentId;
-        this.meta[id].recycled = scrapbook.dateToId();
-      }
-
-      return targetIndex;
-    }
-
-    /**
-     * Move an item in the Book.
-     *
-     * @param {Object} params
-     * @param {string} params.id
-     * @param {?string} [params.currentParentId] - falsy to not remove from any parent
-     *     (useful for generating a link item)
-     * @param {integer} params.currentIndex
-     * @param {integer} params.targetParentId
-     * @param {?integer} [params.targetIndex] - non-integer to insert to last
-     * @return {integer} the real insertion index
-     */
-    moveItem({
-      id,
-      currentParentId,
-      currentIndex,
-      targetParentId,
-      targetIndex,
-    }) {
-      if (!Number.isInteger(targetIndex)) {
-        targetIndex = Infinity;
-      }
-
-      // fix when moving within the same parent
-      // -1 as the current item will be removed from the original position
-      if (currentParentId === targetParentId && targetIndex > currentIndex) {
-        targetIndex--;
-      }
-
-      // remove from parent TOC
-      if (currentParentId && this.toc[currentParentId]) {
-        this.toc[currentParentId].splice(currentIndex, 1);
-        if (!this.toc[currentParentId].length) {
-          delete this.toc[currentParentId];
-        }
-      }
-
-      // add to target TOC
-      if (!this.toc[targetParentId]) {
-        this.toc[targetParentId] = [];
-      }
-      this.toc[targetParentId].splice(targetIndex, 0, id);
-
-      return isFinite(targetIndex) ? targetIndex : this.toc[targetParentId].length - 1;
     }
 
     /**
@@ -1453,30 +1287,35 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
           });
 
           // update item
-          item.title = title;
-          item.modify = scrapbook.dateToId();
-          await book.saveMeta();
+          await server.request({
+            query: {
+              a: 'query',
+              no_lock: 1,
+            },
+            body: {
+              q: JSON.stringify({
+                book: book.id,
+                cmd: 'update_item',
+                kwargs: {
+                  item: {
+                    id: item.id,
+                    title,
+                  },
+                },
+              }),
+              auto_cache: JSON.stringify(
+                scrapbook.getOption("indexer.fulltextCache") ? {
+                  fulltext: 1,
+                  inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
+                } : null
+              ),
+            },
+            method: 'POST',
+            format: 'json',
+            csrfToken: true,
+          });
 
-          if (scrapbook.getOption("indexer.fulltextCache")) {
-            await this.server.requestSse({
-              query: {
-                "a": "cache",
-                "book": book.id,
-                "item": item.id,
-                "fulltext": 1,
-                "inclusive_frames": scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-                "no_lock": 1,
-                "no_backup": 1,
-              },
-              onMessage(info) {
-                if (['error', 'critical'].includes(info.type)) {
-                  errors.push(`Error when updating fulltext cache: ${info.msg}`);
-                }
-              },
-            });
-          }
-
-          await book.loadTreeFiles(true);  // update treeLastModified
+          await book.refreshTreeFiles();
         },
       });
       return {
