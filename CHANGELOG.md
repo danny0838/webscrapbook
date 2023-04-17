@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.10.2] - 2023-04-18
+* Fixed an issue that removing an item may get an error when the recycle bin is empty.
+
 ## [1.10.1] - 2023-04-13
 * Improved UI for `View captured pages` page.
 
@@ -298,13 +301,13 @@
 * No more save XHTML or SVG files as srcdoc when saving as single HTML.
 
 ## [0.117.0] - 2021-05-05
-* Improved config checking of capture helpers and autocapture to prevent more possible bad input.
+* Improved config checking of capture helpers and auto-capture to prevent more possible bad input.
 * Fixed an issue that unfetchable resources are not skipped during internalization.
 * Fixed an error when internalizaing a single HTML item. Internalized resources are now saved as data URLs in such case.
 
 ## [0.116.0] - 2021-05-03
 * Capture the original page rather than the meta refreshed target page if the meta refresh time is non-zero.
-* Improved the tooltips about autosave.
+* Improved the tooltips about auto-capture.
 * Adjusted handling of some HTTP headers and HTML attributes to conform with the spec better.
 * Fixed some potential errors for ASCII whitespace handling.
 * Fixed a potential error handling for nested svg and math elements.
@@ -348,7 +351,7 @@
 * Added support of captured pages notification for captures during the same browser session.
 * Moved option `scrapbook.notifyPageCaptured` to `ui.notifyPageCaptured`.
 * Notification of captured pages now updates when a capture succeeds.
-* Reworked duplicates detection for autocapture to check for captures during the same browser session and items in the backend server.
+* Reworked duplicates detection for auto-capture to check for captures during the same browser session and items in the backend server.
 * Fixed an issue of script error for Firefox for Android < 55.
 
 ## [0.110.0] - 2021-04-14
