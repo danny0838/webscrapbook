@@ -222,7 +222,7 @@
      *
      * @param {Object} params
      * @param {string|URL} [params.url]
-     * @param {Object} [params.query]
+     * @param {string|Object|Array|URLSearchParams} [params.query]
      * @param {string} [params.credentials]
      * @param {string} [params.cache]
      * @param {boolean} [params.csrfToken]
@@ -243,16 +243,11 @@
       url.searchParams.set('f', 'sse');
 
       if (query) {
-        for (const [key, value] of Object.entries(query)) {
-          if (typeof value !== "undefined") {
-            if (Array.isArray(value)) {
-              for (const v of value) {
-                url.searchParams.append(key, v);
-              }
-            } else {
-              url.searchParams.append(key, value);
-            }
-          }
+        if (!(query instanceof URLSearchParams)) {
+          query = new URLSearchParams(query);
+        }
+        for (const [key, value] of query) {
+          url.searchParams.append(key, value);
         }
       }
 

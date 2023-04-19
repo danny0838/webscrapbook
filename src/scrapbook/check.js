@@ -38,17 +38,11 @@
       await server.init();
 
       // handle URL actions
-      const params = new URL(document.URL).searchParams;
-      const u = new URL(server.serverRoot);
-      for (const [k, v] of params.entries()) {
-        u.searchParams.append(k, v);
-      }
-      u.searchParams.set('a', 'check');
-      u.searchParams.set('f', 'sse');
-      u.searchParams.set('token', await server.acquireToken());
+      const query = new URLSearchParams(new URL(document.URL).search);
+      query.set('a', 'check');
 
       return await server.requestSse({
-        url: u.href,
+        query,
         onMessage(info) {
           log(info);
         },
