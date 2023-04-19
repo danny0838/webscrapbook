@@ -106,17 +106,19 @@
      * Wrapped API for a general request to backend server
      *
      * @param {Object} params
-     * @param {string|URL} params.url
+     * @param {string|URL} [params.url]
+     * @param {string|Object|Array|URLSearchParams} [params.query]
      * @param {string} [params.method]
-     * @param {Object|Headers} [params.headers]
-     * @param {Object|FormData} [params.body]
+     * @param {Object|Array|Headers} [params.headers]
+     * @param {Object|Array|FormData} [params.body]
      * @param {string} [params.credentials]
      * @param {string} [params.cache]
      * @param {boolean} [params.csrfToken]
      * @param {string} [params.format]
      */
     async request({
-      url,
+      url = this.serverRoot,
+      query,
       method,
       headers,
       body,
@@ -133,20 +135,17 @@
         url = new URL(url);
       }
 
-      if (headers && !(headers instanceof Headers)) {
-        const h = new Headers();
-        for (const [key, value] of Object.entries(headers)) {
-          if (typeof value !== "undefined") {
-            if (Array.isArray(value)) {
-              for (const v of value) {
-                h.append(key, v);
-              }
-            } else {
-              h.append(key, value);
-            }
-          }
+      if (query) {
+        if (!(query instanceof URLSearchParams)) {
+          query = new URLSearchParams(query);
         }
-        headers = h;
+        for (const [key, value] of query) {
+          url.searchParams.append(key, value);
+        }
+      }
+
+      if (headers && !(headers instanceof Headers)) {
+        headers = new Headers(headers);
       }
 
       if (format) {
@@ -168,13 +167,17 @@
 
       if (body && !(body instanceof FormData)) {
         const b = new FormData();
-        for (const [key, value] of Object.entries(body)) {
-          if (typeof value !== "undefined") {
-            if (Array.isArray(value)) {
-              for (const v of value) {
-                b.append(key, v);
-              }
-            } else {
+        try {
+          // Array or iterable
+          for (const [key, value] of body) {
+            if (typeof value !== 'undefined') {
+              b.append(key, value);
+            }
+          }
+        } catch (ex) {
+          // object
+          for (const [key, value] of Object.entries(body)) {
+            if (typeof value !== 'undefined') {
               b.append(key, value);
             }
           }

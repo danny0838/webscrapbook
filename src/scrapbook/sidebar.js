@@ -1447,11 +1447,12 @@
 
             const source = sourceBook.dataUrl + scrapbook.escapeFilename(oldIndexFile);
             const target = '/' + (targetBook.dataUrl + scrapbook.escapeFilename(newIndexFile)).slice(server.serverRoot.length);
-            const u = new URL(source);
-            u.searchParams.append('a', 'copy');
-            u.searchParams.append('target', decodeURIComponent(target));
             await server.request({
-              url: u,
+              url: source,
+              query: {
+                'a': 'copy',
+                'target': decodeURIComponent(target),
+              },
               method: "POST",
               format: 'json',
               csrfToken: true,
@@ -1469,12 +1470,13 @@
               const newIcon = targetBookFaviconPrefix + oldIconMain.replace(/^.*[/]/, '');
               newItem.icon = scrapbook.getRelativeUrl(newIcon, targetBook.dataUrl + scrapbook.escapeFilename(newItem.index || ''));
 
-              const u = new URL(oldIconMain);
-              u.searchParams.append('a', 'copy');
-              u.searchParams.append('target', decodeURIComponent(newIcon.slice(server.serverRoot.length)));
               try {
                 await server.request({
-                  url: u,
+                  url: oldIconMain,
+                  query: {
+                    'a': 'copy',
+                    'target': decodeURIComponent(newIcon.slice(server.serverRoot.length)),
+                  },
                   method: "POST",
                   format: 'json',
                   csrfToken: true,
