@@ -853,7 +853,6 @@
      * @param {Object} params
      * @param {transactionCallback} params.callback - the callback function to
      *     peform the tasks.
-     * @param {integer} [params.timeout] - timeout for lock.
      * @param {string} [params.mode] - mode for the transaction:
      *     - "validate": validate the tree before the request and fail out if
      *       the remote tree has been updated.
@@ -861,11 +860,14 @@
      *        param about whether the remote tree has been updated.
      * @param {boolean} [params.autoBackup] - whether to automatically create a
      *     temporary tree backup before a transaction and remove after success.
+     * @param {string} [params.autoBackupTs] - timestamp for the auto backup.
+     * @param {integer} [params.timeout] - timeout for lock.
      */
     async transaction({
       callback,
       mode,
       autoBackup = scrapbook.getOption("scrapbook.transactionAutoBackup"),
+      autoBackupTs,
       timeout = 5,
     }) {
       let lockId;
@@ -909,7 +911,7 @@
 
         // auto backup
         if (autoBackup) {
-          backupTs = scrapbook.dateToId();
+          backupTs = autoBackupTs || scrapbook.dateToId();
 
           // Load tree files if not done yet.
           if (!this.treeFiles) {
@@ -929,7 +931,7 @@
         }
 
         // run the callback
-        await callback.call(this, this, updated);
+        await callback.call(this, this, updated, backupTs);
 
         // clear auto backup if transaction successful
         if (backupTs) {
