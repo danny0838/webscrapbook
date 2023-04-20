@@ -2083,6 +2083,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         if (!item) {
           throw new Error(`Recapture reference item invalid: "${itemId}".`);
         }
+        if (item.locked) {
+          throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
+        }
 
         // record original index
         const oldIndex = item.index;
@@ -2452,6 +2455,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         }
         if (item.type !== 'site') {
           throw new Error(`Merge capture supports only site items.`);
+        }
+        if (item.locked) {
+          throw new Error(scrapbook.lang("ErrorSaveLockedItem"));
         }
 
         const timeId = item.id;
