@@ -337,6 +337,10 @@
     details.updateUi();
   }
 
+  function onBookIdChange(event) {
+    refreshParentIdOptions();
+  }
+
   async function onFillParentIdClick(event) {
     await scrapbook.invokeItemPicker({
       targetTabId: (await browser.tabs.getCurrent()).id,
@@ -500,8 +504,31 @@
     const idElem = document.getElementById('tasks_parentId');
     setOptionToElement(idElem, id);
 
-    // reset the label of the option to match title
-    idElem.querySelector(`option[value="${CSS.escape(id)}"]`).textContent = title || id;
+    if (id !== 'root') {
+      const elem = idElem.selectedOptions[0];
+
+      // bind book ID
+      if (!elem.bookIds) {
+        elem.bookIds = new Set();
+      }
+      elem.bookIds.add(bookId);
+
+      // reset label to match title
+      elem.textContent = title || id;
+    }
+
+    refreshParentIdOptions();
+  }
+
+  function refreshParentIdOptions() {
+    const bookId = document.getElementById('tasks_bookId').value;
+    const idElem = document.getElementById('tasks_parentId');
+    for (const elem of idElem.querySelectorAll(`option`)) {
+      elem.disabled = elem.hidden = elem.bookIds && !elem.bookIds.has(bookId);
+    }
+    if (idElem.selectedOptions[0].disabled) {
+      idElem.value = 'root';
+    }
   }
 
   scrapbook.addMessageListener((message, sender) => {
@@ -515,6 +542,7 @@
     document.getElementById('wrapper').addEventListener('submit', onSubmit);
     document.getElementById('btn-abort').addEventListener('click', onAbortClick);
     document.getElementById('btn-advanced').addEventListener('click', onAdvancedClick);
+    document.getElementById('tasks_bookId').addEventListener('change', onBookIdChange);
     document.getElementById('fill-tasks_parentId').addEventListener('click', onFillParentIdClick);
     document.getElementById('fill-opt_capture.downLink.doc.urlFilter').addEventListener('change', onFillDownLinkDocUrlFilterChange);
 
