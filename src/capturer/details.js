@@ -72,6 +72,7 @@
         const wrapper = document.getElementById('tasks_bookId');
         for (const bookId of Object.keys(server.books).sort()) {
           const book = server.books[bookId];
+          if (book.config.no_tree) { continue; }
           const opt = wrapper.appendChild(document.createElement('option'));
           opt.value = book.id;
           opt.textContent = book.name;
