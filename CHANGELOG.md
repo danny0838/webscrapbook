@@ -3,6 +3,14 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.11.0] - 2023-04-25
+* Added support of multiple include and exclude patterns for auto-capture.
+* Fixed an issue that no-tree books are shown in `Capture as` dialog.
+* Fixed an issue of showing items unrelated with the current selected parent book in `Capture as` dialog.
+* Fixed an issue that item locking does not prevent a recapture or merge-capture.
+* Fixed an issue that copying an item across scrapbooks can generate two transaction backups.
+* Miscellaneous code optimization and refactoring.
+
 ## [1.10.2] - 2023-04-18
 * Fixed an issue that removing an item may get an error when the recycle bin is empty.
 
