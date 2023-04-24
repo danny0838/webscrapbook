@@ -493,16 +493,15 @@
     }
   }
 
-  function pickItem({id, title, bookId}) {
-    if (typeof bookId !== 'undefined') {
-      setOptionToElement(document.getElementById('tasks_bookId'), bookId);
-    }
-    if (typeof id !== 'undefined') {
-      setOptionToElement(document.getElementById('tasks_parentId'), id);
+  function pickItem({bookId, id, title}) {
+    const bookIdElem = document.getElementById('tasks_bookId');
+    setOptionToElement(bookIdElem, bookId);
 
-      // reset the label of the option to match title
-      document.getElementById('tasks_parentId').querySelector(`option[value="${CSS.escape(id)}"]`).textContent = title || id;
-    }
+    const idElem = document.getElementById('tasks_parentId');
+    setOptionToElement(idElem, id);
+
+    // reset the label of the option to match title
+    idElem.querySelector(`option[value="${CSS.escape(id)}"]`).textContent = title || id;
   }
 
   scrapbook.addMessageListener((message, sender) => {
