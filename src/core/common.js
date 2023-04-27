@@ -502,6 +502,24 @@ if (Node && !Node.prototype.getRootNode) {
     511: "Network Authentication Required",
   };
 
+  const COMPRESSIBLE_TYPES = new Set([
+    'application/xml',
+
+    // historical non-text/* javascript types
+    // ref: https://mimesniff.spec.whatwg.org/
+    'application/javascript',
+    'application/ecmascript',
+    'application/x-ecmascript',
+    'application/x-javascript',
+
+    'application/json',
+  ]);
+
+  const COMPRESSIBLE_SUFFIXES = new Set([
+      '+xml',
+      '+json',
+  ]);
+
   const DOMPARSER_SUPPORT_TYPES = new Set(['text/html', 'application/xhtml+xml', 'text/xml', 'application/xml', 'image/svg+xml']);
 
   const SCRAPBOOK_OBJECT_REMOVE_TYPE_REMOVE = new Set(["annotation", "freenote", "sticky", "block-comment", "custom"]);
@@ -4047,15 +4065,34 @@ if (Node && !Node.prototype.getRootNode) {
    * @require JSZip
    ***************************************************************************/
 
+  scrapbook.isCompressible = function (mimetype) {
+    if (!mimetype) {
+      return false;
+    }
+
+    if (mimetype.startsWith('text/')) {
+      return true;
+    }
+
+    if (COMPRESSIBLE_TYPES.has(mimetype)) {
+      return true;
+    }
+
+    for (const suffix of COMPRESSIBLE_SUFFIXES) {
+      if (mimetype.endsWith(suffix)) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   scrapbook.zipAddFile = function (zipObj, filename, blob, options) {
     const zipOptions = Object.assign({}, options);
 
     // auto-determine compression method if not defined
     if (typeof zipOptions.compression === 'undefined') {
-      const isText = /^text\/|\b(?:xml|json|javascript)\b/.test(blob.type);
-
-      // Binary and small text data usually have poor compression rate.
-      if (isText && blob.size >= 128) {
+      if (scrapbook.isCompressible(blob.type)) {
         zipOptions.compression = "DEFLATE";
         if (!zipOptions.compressionOptions) {
           zipOptions.compressionOptions = {level: 9};
