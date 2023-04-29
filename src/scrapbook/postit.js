@@ -95,12 +95,7 @@
         const {id, bookId} = this;
         const book = server.books[bookId];
 
-        const {title, errors} = await book.savePostit(id, content);
-
-        // alert errors
-        for (const error of errors) {
-          alert(error);
-        }
+        const {title} = await book.savePostit(id, content);
 
         // update document title
         document.title = title || '';

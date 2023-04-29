@@ -49,16 +49,6 @@
     },
   };
 
-  const REGEX_ITEM_POSTIT = new RegExp('^[\\S\\s]*?<pre>\\n?([^<]*(?:<(?!/pre>)[^<]*)*)\\n</pre>[\\S\\s]*$');
-  const ITEM_POSTIT_FORMATTER = `\
-<!DOCTYPE html><html><head>\
-<meta charset="UTF-8">\
-<meta name="viewport" content="width=device-width">\
-<style>pre { white-space: pre-wrap; overflow-wrap: break-word; }</style>\
-</head><body><pre>
-%POSTIT_CONTENT%
-</pre></body></html>`;
-
   class RequestError extends Error {
     constructor(message, response) {
       super(message);
@@ -1237,19 +1227,28 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
     }
 
     async loadPostit(item) {
-      const target = await this.getItemIndexUrl(item);
-      let text = await server.request({
-        url: target + '?a=source',
-        method: "GET",
-      }).then(r => r.text());
-      text = text.replace(/\r\n?/g, '\n');
-      text = text.replace(REGEX_ITEM_POSTIT, '$1');
-      return scrapbook.unescapeHtml(text);
+      const json = await server.request({
+        query: {
+          a: 'query',
+          no_lock: 1,
+        },
+        body: {
+          q: JSON.stringify({
+            book: this.id,
+            cmd: 'load_item_postit',
+            args: [item.id],
+          }),
+          details: 1,
+        },
+        method: 'POST',
+        format: 'json',
+        csrfToken: true,
+      }).then(r => r.json());
+      return json.data[0];
     }
 
     async savePostit(id, text) {
       let item;
-      let errors = [];
       await this.transaction({
         mode: 'refresh',
         callback: async (book, updated) => {
@@ -1260,48 +1259,16 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
             throw new Error(`Specified item "${id}" does not exist.`);
           }
 
-          // upload text content
-          const title = text.replace(/\n[\s\S]*$/, '');
-          const content = ITEM_POSTIT_FORMATTER.replace(/%(\w*)%/gu, (_, key) => {
-            let value;
-            switch (key) {
-              case '':
-                value = '%';
-                break;
-              case 'POSTIT_CONTENT':
-                value = text;
-                break;
-            }
-            return value ? scrapbook.escapeHtml(value) : '';
-          });
-
-          const target = await this.getItemIndexUrl(item);
-          await this.server.request({
-            url: target + '?a=save',
-            method: "POST",
-            format: 'json',
-            csrfToken: true,
-            body: {
-              text: scrapbook.unicodeToUtf8(content),
-            },
-          });
-
-          // update item
-          await server.request({
+          const json = await server.request({
             query: {
               a: 'query',
               no_lock: 1,
             },
             body: {
               q: JSON.stringify({
-                book: book.id,
-                cmd: 'update_item',
-                kwargs: {
-                  item: {
-                    id: item.id,
-                    title,
-                  },
-                },
+                book: this.id,
+                cmd: 'save_item_postit',
+                args: [id, text],
               }),
               auto_cache: JSON.stringify(
                 scrapbook.getOption("indexer.fulltextCache") ? {
@@ -1309,19 +1276,16 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
                   inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
                 } : null
               ),
+              details: 1,
             },
             method: 'POST',
             format: 'json',
             csrfToken: true,
-          });
-
-          await book.refreshTreeFiles();
+          }).then(r => r.json());
+          item = json.data[0][id];
         },
       });
-      return {
-        title: item.title,
-        errors,
-      };
+      return item;
     }
 
     /**

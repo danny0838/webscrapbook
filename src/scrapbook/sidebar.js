@@ -2309,9 +2309,6 @@ ${scrapbook.escapeHtml(content)}
         });
         newItem.index = newItem.id + '/index.html';
 
-        // create file
-        const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
-
         // update book
         await this.book.transaction({
           mode: 'validate',
@@ -2337,7 +2334,8 @@ ${scrapbook.escapeHtml(content)}
               csrfToken: true,
             });
 
-            // save data files
+            // create index file
+            const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
             await server.request({
               url: target + '?a=save',
               method: "POST",
