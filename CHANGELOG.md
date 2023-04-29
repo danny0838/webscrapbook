@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.12.0] - 2023-04-29
+* Small text files are now compressed when added to an archive.
+
 ## [1.11.0] - 2023-04-25
 * Added support of multiple include and exclude patterns for auto-capture.
 * Fixed an issue that no-tree books are shown in `Capture as` dialog.
