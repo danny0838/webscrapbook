@@ -273,16 +273,6 @@
   background.createSubPage = async function ({url, title}, sender) {
     await server.init(true);
 
-    // reject if file exists
-    const fileInfo = await server.request({
-      url: url + '?a=info',
-      method: "GET",
-      format: 'json',
-    }).then(r => r.json());
-    if (fileInfo.data.type !== null) {
-      throw new Error(`File already exists at "${url}".`);
-    }
-
     // search for bookId and item
     // reject if not found
     const bookId = await server.findBookIdFromUrl(url);
@@ -300,17 +290,27 @@
       throw new Error(`Index page is not "*/index.html".`);
     }
 
-    // generate content and upload
-    const content = await book.renderTemplate(url, item, 'html', title);
-    const file = new File([content], scrapbook.urlToFilename(url), {type: 'text/html'});
+    // generate subpage
+    const base = scrapbook.getRelativeUrl(url, book.dataUrl);
     await server.request({
-      url: url + '?a=save',
-      method: "POST",
+      query: {
+        a: 'query',
+        no_lock: 1,
+      },
+      body: {
+        q: JSON.stringify({
+          book: book.id,
+          cmd: 'add_item_subpage',
+          kwargs: {
+            item_id: item.id,
+            title,
+            base,
+          },
+        }),
+      },
+      method: 'POST',
       format: 'json',
       csrfToken: true,
-      body: {
-        upload: file,
-      },
     });
   };
 

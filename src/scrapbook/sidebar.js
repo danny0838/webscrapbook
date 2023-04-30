@@ -2412,23 +2412,6 @@ ${scrapbook.escapeHtml(content)}
         });
         newItem.index = newItem.id + '/index.html';
 
-        // create file
-        let target;
-        switch (type) {
-          case 'html': {
-            target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
-            break;
-          }
-          case 'markdown': {
-            target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.md');
-            break;
-          }
-        }
-
-        // generate content
-        const content = await this.book.renderTemplate(target, newItem, type);
-        const blob = new Blob([content], {type: 'text/plain'});
-
         // update book
         await this.book.transaction({
           mode: 'validate',
@@ -2454,17 +2437,28 @@ ${scrapbook.escapeHtml(content)}
               csrfToken: true,
             });
 
-            // save data files
+            // generate index page
             await server.request({
-              url: target + '?a=save',
-              method: "POST",
+              query: {
+                a: 'query',
+                no_lock: 1,
+              },
+              body: {
+                q: JSON.stringify({
+                  book: book.id,
+                  cmd: 'add_item_subpage',
+                  kwargs: {
+                    item_id: newItem.id,
+                    ext: type === 'markdown' ? '.md' : '.html',
+                  },
+                }),
+              },
+              method: 'POST',
               format: 'json',
               csrfToken: true,
-              body: {
-                upload: blob,
-              },
             });
 
+            // create index redirect for markdown
             if (type === 'markdown') {
               const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.id + '/index.html');
               const content = `<!DOCTYPE html>
@@ -2500,6 +2494,7 @@ Redirecting to file <a href="index.md">index.md</a>
 
         switch (type) {
           case 'html': {
+            const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
             await this.openLink(target, newTab || scrapbook.getOption("scrapbook.sidebarEditNoteInNewTab"));
             break;
           }

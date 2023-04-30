@@ -28,27 +28,6 @@
 
   const TRANSCATION_TREE_FILES_REGEX = /^(meta|toc)\d*\.js$/;
 
-  const TEMPLATE_DIR = '/templates/';
-  const TEMPLATES = {
-    'html': {
-      filename: 'note_template.html',
-      content: `<!DOCTYPE html>
-<html data-scrapbook-type="note">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title data-scrapbook-elem="title">%NOTE_TITLE%</title>
-</head>
-<body>%NOTE_TITLE%</body>
-</html>
-`,
-    },
-    'markdown': {
-      filename: 'note_template.md',
-      content: `%NOTE_TITLE%`,
-    },
-  };
-
   class RequestError extends Error {
     constructor(message, response) {
       super(message);
@@ -1168,62 +1147,6 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       const path = [{id: rootId}];
       const ids = new Set(rootId);
       yield* tracePath();
-    }
-
-    async getTemplate(type = 'html') {
-      const url = this.treeUrl + encodeURI(TEMPLATE_DIR + TEMPLATES[type].filename);
-
-      let templateText;
-      try {
-        // attempt to load template
-        templateText = await this.server.request({
-          url: url + '?a=source',
-          method: "GET",
-        }).then(r => r.text());
-      } catch (ex) {
-        // template file not exist, generate default one
-        templateText = TEMPLATES[type].content;
-        const blob = new Blob([templateText], {type: "text/plain"});
-        await this.server.request({
-          url: url + '?a=save',
-          method: "POST",
-          format: 'json',
-          csrfToken: true,
-          body: {
-            upload: blob,
-          },
-        });
-      }
-
-      return templateText;
-    }
-
-    async renderTemplate(target, item, type = 'html', subPageTitle) {
-      const templateText = await this.getTemplate(type);
-      return templateText.replace(/%(\w*)%/gu, (_, key) => {
-        let value;
-        switch (key) {
-          case '':
-            value = '%';
-            break;
-          case 'NOTE_TITLE':
-            value = (typeof subPageTitle === 'string') ? subPageTitle : item.title;
-            break;
-          case 'SCRAPBOOK_DIR':
-            value = scrapbook.getRelativeUrl(this.topUrl, target);
-            break;
-          case 'TREE_DIR':
-            value = scrapbook.getRelativeUrl(this.treeUrl, target);
-            break;
-          case 'DATA_DIR':
-            value = scrapbook.getRelativeUrl(this.dataUrl, target);
-            break;
-          case 'ITEM_DIR':
-            value = scrapbook.getRelativeUrl(this.dataUrl + item.index.replace(/[^\/]*$/, ''), target) || './';
-            break;
-        }
-        return value ? scrapbook.escapeHtml(value) : '';
-      });
     }
 
     async loadPostit(item) {

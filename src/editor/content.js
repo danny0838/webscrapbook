@@ -1704,13 +1704,13 @@ ${sHost} .toolbar .toolbar-close:hover {
     const title = prompt(scrapbook.lang('EditorButtonSaveCreateSubPagePrompt'));
     if (!title) { return; }
 
-    const filename = scrapbook.validateFilename(title + '.html');
-    const url = new URL(scrapbook.escapeFilename(filename), location.href).href;
-
     try {
       await scrapbook.invokeExtensionScript({
         cmd: "background.createSubPage",
-        args: {url, title},
+        args: {
+          url: location.href,
+          title,
+        },
       });
     } catch (ex) {
       console.error(ex);
