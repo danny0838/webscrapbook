@@ -1186,32 +1186,8 @@
   "OptionGroupViewer": {
     "message": "Viewer"
   },
-  "OptionIndexerCreateRssFeedBaseLabel": {
-    "message": "Root URL of RSS feed:"
-  },
-  "OptionIndexerCreateRssFeedBaseTooltip": {
-    "message": "The address of an RSS feed must be an absolute URL. Generally this field can be left blank, and the URL of the backend server will be automatically used. If the static site is to be distributed on another server, the root URL path of the scrapbook (which looks like “https://example.com/wsb/”) must be provided explicitly here."
-  },
-  "OptionIndexerCreateRssFeedCountLabel": {
-    "message": "RSS item number:"
-  },
-  "OptionIndexerCreateRssFeedLabel": {
-    "message": "Generate RSS feed (feed.atom)"
-  },
-  "OptionIndexerCreateRssFeedTooltip": {
-    "message": "The RSS feed lists recently modified data items, to inform the subscribers about recent updates."
-  },
-  "OptionIndexerCreateStaticIndexLabel": {
-    "message": "Generate static index page (index.html)"
-  },
-  "OptionIndexerCreateStaticIndexTooltip": {
-    "message": "The static index page provides a static list of data items, for the search engine to index and for a client not supporting JavaScript to browse. This page is loads slower than map.html, though."
-  },
   "OptionIndexerCreateStaticSiteLabel": {
     "message": "Generate static site pages"
-  },
-  "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
-    "message": "Cache frame content as main document content"
   },
   "OptionIndexerFulltextCacheLabel": {
     "message": "Generate fulltext cache"

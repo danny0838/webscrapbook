@@ -292,23 +292,11 @@
     if (getOptionFromDocument('indexer.fulltextCache')) {
       params.append('fulltext', 1);
     }
-    if (getOptionFromDocument('indexer.fulltextCacheFrameAsPageContent')) {
-      params.append('inclusive_frames', 1);
-    }
     if (getOptionFromDocument('indexer.fulltextCacheRecreate')) {
       params.append('recreate', 1);
     }
     if (getOptionFromDocument('indexer.createStaticSite')) {
       params.append('static_site', 1);
-    }
-    if (getOptionFromDocument('indexer.createStaticIndex')) {
-      params.append('static_index', 1);
-    }
-    if (getOptionFromDocument('indexer.createRssFeed')) {
-      const rssRoot = getOptionFromDocument('indexer.createRssFeedBase') ||
-          getOptionFromDocument('server.url');
-      params.append('rss_root', rssRoot);
-      params.append('rss_item_count', getOptionFromDocument('indexer.createRssFeedCount'));
     }
     if (!getOptionFromDocument('indexer.makeBackup')) {
       params.append('no_backup', 1);

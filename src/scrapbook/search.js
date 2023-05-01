@@ -152,7 +152,6 @@
         // load conf from options
         this.defaultSearch = scrapbook.getOption("scrapbook.defaultSearch");
         this.fulltextCacheUpdateThreshold = scrapbook.getOption('scrapbook.fulltextCacheUpdateThreshold');
-        this.inclusiveFrames = scrapbook.getOption('indexer.fulltextCacheFrameAsPageContent');
         this.searchSse = scrapbook.getOption("scrapbook.searchSse");
 
         await server.init();
@@ -381,9 +380,6 @@
               const u = new URL(browser.runtime.getURL('scrapbook/cache.html'));
               u.searchParams.append('book', book.id);
               u.searchParams.append('fulltext', 1);
-              if (this.inclusiveFrames) {
-                u.searchParams.append('inclusive_frames', 1);
-              }
 
               const a = document.createElement('a');
               a.textContent = cacheOutdatedMessage;

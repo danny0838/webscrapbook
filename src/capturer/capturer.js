@@ -785,10 +785,7 @@
               },
             }),
             auto_cache: JSON.stringify(
-              scrapbook.getOption("indexer.fulltextCache") ? {
-                fulltext: 1,
-                inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-              } : null
+              scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
             ),
           },
         });
@@ -2025,10 +2022,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                 },
               }),
               auto_cache: JSON.stringify(
-                scrapbook.getOption("indexer.fulltextCache") ? {
-                  fulltext: 1,
-                  inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-                } : null
+                scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
               ),
             },
             method: 'POST',
@@ -2357,10 +2351,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               },
             }),
             auto_cache: JSON.stringify(
-              scrapbook.getOption("indexer.fulltextCache") ? {
-                fulltext: 1,
-                inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-              } : null
+              scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
             ),
           },
           method: 'POST',
@@ -2643,10 +2634,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
               },
             }),
             auto_cache: JSON.stringify(
-              scrapbook.getOption("indexer.fulltextCache") ? {
-                fulltext: 1,
-                inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-              } : null
+              scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
             ),
           },
           method: 'POST',

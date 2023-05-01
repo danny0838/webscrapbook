@@ -131,10 +131,7 @@
                   },
                 }),
                 auto_cache: JSON.stringify(
-                  scrapbook.getOption("indexer.fulltextCache") ? {
-                    fulltext: 1,
-                    inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-                  } : null
+                  scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
                 ),
               },
               method: 'POST',

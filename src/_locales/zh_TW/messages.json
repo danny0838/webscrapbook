@@ -1186,32 +1186,8 @@
   "OptionGroupViewer": {
     "message": "檢視器"
   },
-  "OptionIndexerCreateRssFeedBaseLabel": {
-    "message": "RSS 摘要根網址:"
-  },
-  "OptionIndexerCreateRssFeedBaseTooltip": {
-    "message": "RSS 摘要的網址須為絕對路徑，一般空白即可，系統會自動使用後端伺服器的網址。若要轉發布至其他網址，則須在此提供發布剪貼簿的網址根目錄，例如「https://example.com/wsb/」。"
-  },
-  "OptionIndexerCreateRssFeedCountLabel": {
-    "message": "RSS 項目數量:"
-  },
-  "OptionIndexerCreateRssFeedLabel": {
-    "message": "生成 RSS 摘要 (feed.atom)"
-  },
-  "OptionIndexerCreateRssFeedTooltip": {
-    "message": "RSS 摘要會列出最近更動的資料項目，以告知訂閱者近期更新情形。"
-  },
-  "OptionIndexerCreateStaticIndexLabel": {
-    "message": "生成靜態索引頁 (index.html)"
-  },
-  "OptionIndexerCreateStaticIndexTooltip": {
-    "message": "靜態索引頁提供靜態的資料項目列表，供搜尋引擎檢索及不支援 JavaScript 的客戶端瀏覽，但此頁面載入較 map.html 慢。"
-  },
   "OptionIndexerCreateStaticSiteLabel": {
     "message": "生成靜態站台頁面"
-  },
-  "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
-    "message": "將框架頁內容快取為主頁內容"
   },
   "OptionIndexerFulltextCacheLabel": {
     "message": "生成全文搜尋快取"

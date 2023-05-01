@@ -1186,32 +1186,8 @@
   "OptionGroupViewer": {
     "message": "检视器"
   },
-  "OptionIndexerCreateRssFeedBaseLabel": {
-    "message": "RSS 摘要根网址:"
-  },
-  "OptionIndexerCreateRssFeedBaseTooltip": {
-    "message": "RSS 摘要的网址须为绝对路径，一般空白即可，系统会自动使用后端服务器的网址。若要转发布至其他网址，则须在此提供发布剪贴簿的网址根目录，例如“https://example.com/wsb/”。"
-  },
-  "OptionIndexerCreateRssFeedCountLabel": {
-    "message": "RSS 项目数量:"
-  },
-  "OptionIndexerCreateRssFeedLabel": {
-    "message": "产生 RSS 摘要 (feed.atom)"
-  },
-  "OptionIndexerCreateRssFeedTooltip": {
-    "message": "RSS 摘要会列出最近更动的资料项目，以告知订阅者近期更新情形。"
-  },
-  "OptionIndexerCreateStaticIndexLabel": {
-    "message": "产生静态索引页 (index.html)"
-  },
-  "OptionIndexerCreateStaticIndexTooltip": {
-    "message": "静态索引页提供静态的资料项目列表，供搜寻引擎检索及不支援 JavaScript 的客户端浏览，但此页面载入较 map.html 慢。"
-  },
   "OptionIndexerCreateStaticSiteLabel": {
     "message": "产生静态站台页面"
-  },
-  "OptionIndexerFulltextCacheFrameAsPageContentLabel": {
-    "message": "将框架页内容缓存为主页内容"
   },
   "OptionIndexerFulltextCacheLabel": {
     "message": "产生全文搜索缓存"

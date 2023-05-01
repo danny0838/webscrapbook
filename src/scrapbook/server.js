@@ -1194,10 +1194,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
                 args: [id, text],
               }),
               auto_cache: JSON.stringify(
-                scrapbook.getOption("indexer.fulltextCache") ? {
-                  fulltext: 1,
-                  inclusive_frames: scrapbook.getOption("indexer.fulltextCacheFrameAsPageContent"),
-                } : null
+                scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
               ),
               details: 1,
             },
