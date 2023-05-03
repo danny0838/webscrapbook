@@ -661,6 +661,22 @@
       return this.fulltext = await this.loadTreeFile('fulltext');
     }
 
+    /**
+     * Refresh loaded tree files if changed on the server.
+     *
+     * @return {boolean} Whether the tree is changed.
+     */
+    async refreshTreeFiles() {
+      const refresh = !await this.validateTree();
+      if (this.meta) {
+        await this.loadMeta(refresh);
+      }
+      if (this.toc) {
+        await this.loadToc(refresh);
+      }
+      return refresh;
+    }
+
     async lockTree({
       id,
       timeout = 5,

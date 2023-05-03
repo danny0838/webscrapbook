@@ -293,10 +293,10 @@
      * Reload tree data and rebuild the item tree.
      */
     async rebuild() {
-      const refresh = !await this.book.validateTree();
-      await this.book.loadMeta(refresh);
-      await this.book.loadToc(refresh);
-      await this.tree.rebuild();
+      const refresh = await this.book.refreshTreeFiles();
+      if (refresh) {
+        await this.tree.rebuild();
+      }
     },
 
     onKeyDown(event) {
