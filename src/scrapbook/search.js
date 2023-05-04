@@ -101,8 +101,11 @@
       img.title = scrapbook.lang('SearchLocateTitle');
       img.alt = "";
 
-      // mark title
-      nodeMarker.markTextNode(elem.label, this.markers.title);
+      // mark title if item has title
+      // (or use the original value such as item ID without marking)
+      if (item.title) {
+        nodeMarker.markTextNode(elem.label, this.markers.title);
+      }
 
       // add details if set
       if (this.commentLength || this.contextLength || this.sourceLength) {
