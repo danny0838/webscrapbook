@@ -25,6 +25,7 @@
   const editor = {
     id: null,
     bookId: null,
+    lastContent: null,
 
     enableUi(willEnable) {
       document.getElementById('wrapper').disabled = !willEnable;
@@ -67,7 +68,7 @@
 
         try {
           const content = await book.loadPostit(item);
-          document.getElementById('editor').value = content;
+          this.lastContent = document.getElementById('editor').value = content;
         } catch (ex) {
           console.error(ex);
           throw new Error(`Unable to load postit: ${ex.message}`);
@@ -86,10 +87,15 @@
       try {
         this.enableUi(false);
 
+        const content = document.getElementById("editor").value;
+        if (content === this.lastContent) {
+          return;
+        }
+
         const {id, bookId} = this;
         const book = server.books[bookId];
 
-        const {title, errors} = await book.savePostit(id, document.getElementById("editor").value);
+        const {title, errors} = await book.savePostit(id, content);
 
         // alert errors
         for (const error of errors) {
@@ -98,6 +104,8 @@
 
         // update document title
         document.title = title || '';
+
+        this.lastContent = content;
       } catch (ex) {
         console.error(ex);
         alert(`Unable to save postit: ${ex.message}`);
