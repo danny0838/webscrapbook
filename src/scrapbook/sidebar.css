@@ -238,10 +238,12 @@ body {
 }
 
 #postit-resizer {
-  flex: 0 1 auto;
+  flex: 0 0 40%;
   display: flex;
   resize: vertical;
   overflow: hidden;
+  min-height: 40px;
+  max-height: 80%;
 }
 
 #postit-resizer[hidden] {

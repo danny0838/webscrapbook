@@ -74,6 +74,29 @@
 
       window.addEventListener('customCommand', this.onCustomCommandRun);
 
+      // init postit resizer
+      initPostitResizer: {
+        // CSS3 resizer changes the height style when the user performs a
+        // resize. Populate it to flex-basis.
+        // @TODO: ResizeObserver may be better but not supported by all target
+        // browsers currently.
+        const resizer = document.getElementById('postit-resizer');
+        if (!resizer) { break initPostitResizer; }
+        const options = {
+          attributes: true,
+          attributeFilter: ['style'],
+        };
+        const handler = (mutationList) => {
+          resizer.style.flexBasis = resizer.style.height;
+        };
+        const mutationObserver = new MutationObserver((mutationList, observer) => {
+          mutationObserver.disconnect();
+          handler(mutationList);
+          mutationObserver.observe(resizer, options);
+        });
+        mutationObserver.observe(resizer, options);
+      }
+
       // load config
       await scrapbook.loadOptionsAuto;
 
