@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.13.0] - 2023-05-04
+* No more save a postit automatically if its content is not changed.
+* Fixed an issue that the postit is poorly sized and can hardly be resized when the sidebar tree is large.
+* Fixed an issue that an item without title shows marked alternative title in the search result.
+
 ## [1.12.0] - 2023-04-29
 * Small text files are now compressed when added to an archive.
 
