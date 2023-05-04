@@ -63,7 +63,7 @@
           throw new Error(`Index of item "${id}" does not exist.`);
         }
 
-        document.title = item.title || ' ';
+        document.title = item.title || '';
 
         try {
           const content = await book.loadPostit(item);
@@ -97,10 +97,10 @@
         }
 
         // update document title
-        document.title = title;
+        document.title = title || '';
       } catch (ex) {
         console.error(ex);
-        alert(`Unable to save document: ${ex.message}`);
+        alert(`Unable to save postit: ${ex.message}`);
       } finally {
         this.enableUi(true);
       }

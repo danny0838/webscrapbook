@@ -55,7 +55,7 @@
           throw new Error(`Index of the specified item "${id}" does not exist.`);
         }
 
-        document.title = item.title || ' ';
+        document.title = item.title || '';
         document.getElementById('header').textContent = item.title || '';
 
         try {
@@ -77,7 +77,8 @@
     async save() {
       const {id, bookId} = this;
       const book = server.books[bookId];
-      return await book.savePostit(id, document.getElementById("editor").value);
+      const {title} = await book.savePostit(id, document.getElementById("editor").value);
+      document.title = title || '';
     },
 
     async expand() {
