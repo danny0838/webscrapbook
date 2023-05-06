@@ -1740,20 +1740,8 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       let parentItemId = targetId;
       let index = targetIndex;
 
-      // create new item
-      const newItem = this.book.addItem({
-        item: {
-          "type": "note",
-        },
-        parentId: parentItemId,
-        index,
-      });
-      newItem.index = newItem.id + '/index.html';
-
-      // create file
-      let target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
-
-      // prepare html content
+      // prepare html content and title
+      let title = '';
       switch (type) {
         case 'html': {
           const doc = (new DOMParser()).parseFromString('<!DOCTYPE html>' + content, 'text/html');
@@ -1783,10 +1771,12 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
             metaViewportNode.setAttribute('name', 'viewport');
             metaViewportNode.setAttribute('content', 'width=device-width');
           }
+          title = doc.body.textContent.replace(/\s+/g, ' ');
           content = scrapbook.documentToString(doc);
           break;
         }
         default: {
+          title = content.replace(/\s+/g, ' ');
           content = `<!DOCTYPE html>
 <html>
 <head>
@@ -1802,6 +1792,21 @@ ${scrapbook.escapeHtml(content)}
           break;
         }
       }
+      title = scrapbook.crop(title, 150, 180);
+
+      // create new item
+      const newItem = this.book.addItem({
+        item: {
+          title,
+          type: "note",
+        },
+        parentId: parentItemId,
+        index,
+      });
+      newItem.index = newItem.id + '/index.html';
+
+      // create file
+      let target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
 
       // upload data
       await this.book.transaction({
