@@ -80,7 +80,19 @@
   }
 
   function stringifyTasks(taskInfo) {
-    return JSON.stringify(taskInfo, null, 1);
+    // pre-defined order of keys for better userbility
+    const info = {
+      tasks: undefined,
+      bookId: undefined,
+      parentId: undefined,
+      index: undefined,
+      mode: undefined,
+      delay: undefined,
+      autoClose: undefined,
+      options: undefined,
+    };
+    Object.assign(info, taskInfo);
+    return JSON.stringify(info, null, 1);
   }
 
   function toggleTooltip(elem) {
