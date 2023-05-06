@@ -230,8 +230,10 @@
             menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
 
             menuElem.querySelector('button[value="view_recycle"]').disabled = isNoTree;
+            menuElem.querySelector('button[value="clean"]').disabled = !(!isNoTree && isRecycle);
 
             menuElem.querySelector('button[value="view_recycle"]').hidden = !(!isRecycle);
+            menuElem.querySelector('button[value="clean"]').hidden = !(isRecycle);
           }
 
           {
@@ -1573,6 +1575,46 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
       });
     },
 
+    async deleteItems(itemElems) {
+      if (!itemElems.length) { return; }
+
+      const items = itemElems.map((itemElem) => {
+        const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+        return [parentItemId, index];
+      });
+
+      await this.book.transaction({
+        mode: 'validate',
+        callback: async (book) => {
+          await server.request({
+            query: {
+              a: 'query',
+              no_lock: 1,
+            },
+            body: {
+              q: JSON.stringify({
+                book: book.id,
+                cmd: 'delete_items',
+                kwargs: {
+                  items,
+                },
+              }),
+              auto_cache: JSON.stringify(
+                scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
+              ),
+            },
+            method: 'POST',
+            format: 'json',
+            csrfToken: true,
+          });
+
+
+          // discard highlights items will be removed
+          await this.rebuild({keepHighlights: false});
+        },
+      });
+    },
+
     async captureNote({
       targetId,
       targetIndex,
@@ -2708,42 +2750,7 @@ Redirecting to file <a href="index.md">index.md</a>
       },
 
       async delete({itemElems}) {
-        if (!itemElems.length) { return; }
-
-        const items = itemElems.map((itemElem) => {
-          const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
-          return [parentItemId, index];
-        });
-
-        await this.book.transaction({
-          mode: 'validate',
-          callback: async (book) => {
-            await server.request({
-              query: {
-                a: 'query',
-                no_lock: 1,
-              },
-              body: {
-                q: JSON.stringify({
-                  book: book.id,
-                  cmd: 'delete_items',
-                  kwargs: {
-                    items,
-                  },
-                }),
-                auto_cache: JSON.stringify(
-                  scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
-                ),
-              },
-              method: 'POST',
-              format: 'json',
-              csrfToken: true,
-            });
-
-            // discard highlights items will be removed
-            await this.rebuild({keepHighlights: false});
-          },
-        });
+        await this.deleteItems(itemElems);
       },
 
       async recover({itemElems}) {
@@ -2792,6 +2799,11 @@ Redirecting to file <a href="index.md">index.md</a>
         } else {
           await this.openModalWindow(target);
         }
+      },
+
+      async clean() {
+        const itemElems = Array.from(this.tree.rootElem.querySelectorAll('[data-id]'));
+        await this.deleteItems(itemElems);
       },
     },
   };

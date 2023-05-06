@@ -1338,6 +1338,9 @@
   "ScrapBookCommandBrowse": {
     "message": "在檔案管理員檢視"
   },
+  "ScrapBookCommandClean": {
+    "message": "清空回收筒"
+  },
   "ScrapBookCommandCopyDialogAdvanced": {
     "message": "進階:"
   },

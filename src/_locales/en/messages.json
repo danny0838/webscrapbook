@@ -1338,6 +1338,9 @@
   "ScrapBookCommandBrowse": {
     "message": "Browse locally"
   },
+  "ScrapBookCommandClean": {
+    "message": "Empty recycle bin"
+  },
   "ScrapBookCommandCopyDialogAdvanced": {
     "message": "Advanced:"
   },
