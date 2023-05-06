@@ -57,7 +57,10 @@
         }
 
         document.title = item.title || '';
-        document.getElementById('header').textContent = item.title || '';
+        if (item.title) {
+          const headerElem = document.getElementById('header');
+          headerElem.textContent = headerElem.title = item.title;
+        }
 
         try {
           const content = await book.loadPostit(item);
