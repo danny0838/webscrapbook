@@ -638,6 +638,10 @@
         }
 
         if (this.rootId !== 'recycle') {
+          if (!this.book.config.new_at_top) {
+            // insert after the selected one
+            targetIndex += 1;
+          }
           await this.runTask(async () => {
             await this.copyItems(data, targetId, targetIndex);
           });
@@ -2231,8 +2235,10 @@ ${scrapbook.escapeHtml(content)}
           } else {
             ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
-            // insert after the selected one
-            index += 1;
+            if (!this.book.config.new_at_top) {
+              // insert after the selected one
+              index += 1;
+            }
           }
         }
 
@@ -2303,8 +2309,10 @@ ${scrapbook.escapeHtml(content)}
           } else {
             ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
-            // insert after the selected one
-            index += 1;
+            if (!this.book.config.new_at_top) {
+              // insert after the selected one
+              index += 1;
+            }
           }
         }
 
@@ -2354,8 +2362,10 @@ ${scrapbook.escapeHtml(content)}
           } else {
             ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
-            // insert after the selected one
-            index += 1;
+            if (!this.book.config.new_at_top) {
+              // insert after the selected one
+              index += 1;
+            }
           }
         }
 
@@ -2431,8 +2441,10 @@ ${scrapbook.escapeHtml(content)}
           } else {
             ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
-            // insert after the selected one
-            index += 1;
+            if (!this.book.config.new_at_top) {
+              // insert after the selected one
+              index += 1;
+            }
           }
         }
 
@@ -2566,8 +2578,10 @@ Redirecting to file <a href="index.md">index.md</a>
           } else {
             ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
 
-            // insert after the selected one
-            index += 1;
+            if (!this.book.config.new_at_top) {
+              // insert after the selected one
+              index += 1;
+            }
           }
         }
 

@@ -791,6 +791,8 @@
         });
       },
     });
+
+    capturer.addItemToServer.added = true;
   };
 
   /**
@@ -846,6 +848,8 @@
 
       let result;
       try {
+        capturer.addItemToServer.added = false;
+
         if (["resave", "internalize"].includes(mode)) {
           result = await capturer.resaveTab({
             tabId, frameId,
@@ -877,8 +881,15 @@
             bookId, parentId, index,
           });
 
+          // increament the index if an item is added
           if (Number.isInteger(index)) {
-            index++;
+            if (capturer.addItemToServer.added) {
+              try {
+                if (!server.books[bookId].config.new_at_top) {
+                  index++;
+                }
+              } catch (ex) {}
+            }
           }
         }
 

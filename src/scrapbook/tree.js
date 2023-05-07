@@ -744,7 +744,7 @@
       if (this.treeElem.contains(this.anchorElem) && !this.anchorElem.closest('[hidden]')) {
         const {parentItemId, index} = this.getParentAndIndex(this.anchorElem);
         targetId = parentItemId;
-        targetIndex = index + 1;
+        targetIndex = index;
       } else {
         targetId = this.rootId;
         targetIndex = Infinity;
