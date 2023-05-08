@@ -1386,6 +1386,14 @@
   "ScrapBookCommandDelete": {
     "message": "刪除"
   },
+  "ScrapBookCommandDeleteConfirm": {
+    "message": "確定要永久刪除這 $NUM$ 個項目嗎？",
+    "placeholders": {
+      "num": {
+        "content": "$1"
+      }
+    }
+  },
   "ScrapBookCommandEdit": {
     "message": "編輯"
   },

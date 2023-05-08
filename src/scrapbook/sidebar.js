@@ -386,11 +386,6 @@
       }
 
       {
-        // skip if a modifier is pressed
-        if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
-          return;
-        }
-
         // skip if command is diabled
         if (document.querySelector('#command:disabled')) {
           return;
@@ -411,12 +406,32 @@
           return;
         }
 
+        // check modifiers
+        const {ctrlKey, shiftKey, altKey, metaKey} = event;
+        const modifiers = {ctrlKey, shiftKey, altKey, metaKey};
+        switch (command) {
+          case 'recycle':
+            if (Object.entries(modifiers).some(([key, value]) => {
+              return key !== 'shiftKey' && value;
+            })) {
+              return;
+            }
+            break;
+          default:
+            // skip if any modifier is pressed
+            if (Object.values(modifiers).includes(true)) {
+              return;
+            }
+            break;
+        }
+
         // execute command
         event.preventDefault();
         const evt = new CustomEvent("customCommand", {
           detail: {
             command,
             itemElems: this.tree.getSelectedItemElems(),
+            modifiers,
           },
         });
         window.dispatchEvent(evt);
@@ -2713,8 +2728,17 @@ Redirecting to file <a href="index.md">index.md</a>
           targetId, targetIndex, targetBookId, recursively);
       },
 
-      async recycle({itemElems}) {
+      async recycle({itemElems, modifiers}) {
         if (!itemElems.length) { return; }
+
+        // delete instead if Shift is hold
+        if (modifiers.shiftKey) {
+          if (!confirm(scrapbook.lang('ScrapBookCommandDeleteConfirm', [itemElems.length]))) {
+            return;
+          }
+          await this.deleteItems(itemElems);
+          return;
+        }
 
         const items = itemElems.map((itemElem) => {
           const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);

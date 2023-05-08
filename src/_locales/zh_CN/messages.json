@@ -1386,6 +1386,14 @@
   "ScrapBookCommandDelete": {
     "message": "删除"
   },
+  "ScrapBookCommandDeleteConfirm": {
+    "message": "确定要永久删除这 $NUM$ 个项目吗？",
+    "placeholders": {
+      "num": {
+        "content": "$1"
+      }
+    }
+  },
   "ScrapBookCommandEdit": {
     "message": "编辑"
   },

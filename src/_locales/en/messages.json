@@ -1386,6 +1386,14 @@
   "ScrapBookCommandDelete": {
     "message": "Delete"
   },
+  "ScrapBookCommandDeleteConfirm": {
+    "message": "Are you sure to permanently delete the $NUM$ item(s)?",
+    "placeholders": {
+      "num": {
+        "content": "$1"
+      }
+    }
+  },
   "ScrapBookCommandEdit": {
     "message": "Edit"
   },
