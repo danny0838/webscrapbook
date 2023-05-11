@@ -504,7 +504,7 @@
       }
     }
 
-    async locate(id, paths) {
+    async locate(id, path) {
       // Attempt to find a match from currently visible items; othwise lookup in
       // the whole tree.
       let curElem;
@@ -516,7 +516,6 @@
       }
 
       if (!curElem) {
-        const path = paths[0];
         curElem = this.treeElem.querySelector(`[data-id="${scrapbook.escapeQuotes(path[0].id)}"]`);
         for (let i = 1, I = path.length; i < I; ++i) {
           const {pos} = path[i];

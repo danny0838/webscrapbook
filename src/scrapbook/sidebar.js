@@ -946,14 +946,17 @@
         }).call(this) :
         book.specialItems;
       let rootId;
-      let paths;
+      let path;
       for (rootId of rootIds) {
-        paths = book.findItemPaths(item.id, rootId);
-        if (paths.length) { break; }
+        const p = book.findItemPaths(item.id, rootId).next().value;
+        if (p) {
+          path = p;
+          break;
+        }
       }
 
       // return if not found
-      if (!paths.length) {
+      if (!path) {
         return null;
       }
 
@@ -962,7 +965,7 @@
         await this.refresh(bookId, rootId);
       }
 
-      this.tree.locate(item.id, paths);
+      this.tree.locate(item.id, path);
 
       return true;
     },

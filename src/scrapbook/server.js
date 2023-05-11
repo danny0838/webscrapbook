@@ -1320,28 +1320,30 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       return matchedItem;
     }
 
-    findItemPaths(id, rootId) {
-      const tracePath = (path) => {
-        const parent = this.toc[path[path.length - 1].id];
-        if (!parent) { return; }
+    *findItemPaths(id, rootId) {
+      const tracePath = (function* () {
+        const toc = this.toc[path[path.length - 1].id];
+        if (!toc) { return; }
 
-        for (let i = 0, I = parent.length; i < I; ++i) {
-          const child = parent[i];
-          if (path.some(x => x.id === child)) { continue; }
+        for (let i = 0, I = toc.length; i < I; ++i) {
+          const child = toc[i];
+          if (ids.has(child)) { continue; }
 
           path.push({id: child, pos: i});
+          ids.add(child);
           if (child === id) {
-            result.push([...path]);
+            yield [...path];
           } else {
-            tracePath(path);
+            yield* tracePath();
           }
           path.pop();
+          ids.delete(child);
         }
-      };
+      }).bind(this);
 
-      const result = [];
-      tracePath([{id: rootId, pos: 1}]);
-      return result;
+      const path = [{id: rootId}];
+      const ids = new Set(rootId);
+      yield* tracePath();
     }
 
     async getTemplate(type = 'html') {
