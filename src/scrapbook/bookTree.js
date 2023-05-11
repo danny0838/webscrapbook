@@ -133,6 +133,51 @@
       wrapper.scrollTop = scrollTop;
     }
 
+    /**
+     * @return {Object[]} item info from top to elem parent
+     */
+    getParents(itemElem, {includeIndex = false, cacheMap} = {}) {
+      let parents = [];
+      let specialRoot = false;
+      let elem = itemElem;
+      while (true) {
+        const parentItemElem = this.getParent(elem);
+        if (!parentItemElem) {
+          break;
+        }
+        const parentItemId = this.getItemId(parentItemElem);
+        const parent = {elem: parentItemElem, id: parentItemId};
+        if (includeIndex) {
+          parent.index = this.getIndex(elem, cacheMap);
+        }
+        parents.push(parent);
+        if (this.book.isSpecialItem(parentItemId)) {
+          specialRoot = true;
+          break;
+        }
+        elem = parentItemElem;
+      }
+      parents.reverse();
+      if (!specialRoot) {
+        // find and fill items from root to tree root
+        for (const root of this.book.specialItems) {
+          const path = this.book.findItemPaths(this.rootId, root).next().value;
+          if (path) {
+            path.pop();
+            parents = path.map(({id, pos}) => {
+              const parent = {elem: null, id};
+              if (includeIndex) {
+                parent.index = pos;
+              }
+              return parent;
+            }).concat(parents);
+            break;
+          }
+        }
+      }
+      return parents;
+    }
+
     getViewStatusKey() {
       return {table: 'scrapbookTreeView', serverRoot: server.serverRoot, bookId: this.book.id, rootId: this.rootId};
     }

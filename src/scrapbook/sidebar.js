@@ -3065,36 +3065,30 @@ Redirecting to file <a href="index.md">index.md</a>
       this.itemElem = itemElem;
     }
 
-    format_folder() {
-      const {item, book, tree, itemElem} = this;
-      const rv = [];
-      let elem = itemElem;
-      while (true) {
-        const {parentItemElem, parentItemId, index} = tree.getParentAndIndex(elem);
-        if (!parentItemId || book.isSpecialItem(parentItemId)) {
-          break;
-        }
-        const meta = book.meta[parentItemId];
-        rv.unshift(meta.title);
-        elem = parentItemElem;
+    formatFolders(includeSelf = false, prop = 'title', sep = '/') {
+      const {book, tree, itemElem, item} = this;
+      let parents = tree.getParents(itemElem);
+
+      // In most case parents should be ['root', ...],
+      // and possibly ['recycle', ...], and ['hidden', ...].
+      // Remove the top special item as it doesn't have real properties.
+      if (this.book.isSpecialItem(parents[0].id)) {
+        parents.shift();
       }
-      return rv.join('/');
+
+      const items = parents.map(({id}) => book.meta[id]);
+      if (includeSelf) {
+        items.push(item);
+      }
+      return items.map(item => item[prop]).join(sep);
     }
 
-    format_path() {
-      const {item, book, tree, itemElem} = this;
-      const rv = [item.title];
-      let elem = itemElem;
-      while (true) {
-        const {parentItemElem, parentItemId, index} = tree.getParentAndIndex(elem);
-        if (!parentItemId || book.isSpecialItem(parentItemId)) {
-          break;
-        }
-        const meta = book.meta[parentItemId];
-        rv.unshift(meta.title);
-        elem = parentItemElem;
-      }
-      return rv.join('/');
+    format_folder(prop) {
+      return this.formatFolders(false, prop);
+    }
+
+    format_path(prop) {
+      return this.formatFolders(true, prop);
     }
   }
 
