@@ -171,11 +171,23 @@
     }
 
     getParent(itemElem) {
-      return itemElem.parentNode.parentNode;
+      const parentItemElem = itemElem.parentNode.parentNode;
+      if (!this.rootElem.contains(parentItemElem)) {
+        return null;
+      }
+      return parentItemElem;
     }
 
     getParentAndIndex(itemElem) {
       const parentItemElem = itemElem.parentNode.parentNode;
+      if (!this.rootElem.contains(parentItemElem)) {
+        return {
+          parentItemElem: null,
+          parentItemId: null,
+          siblingItems: [],
+          index: null,
+        };
+      }
       const parentItemId = parentItemElem.getAttribute('data-id');
       const siblingItems = parentItemElem.container.children;
       const index = Array.prototype.indexOf.call(siblingItems, itemElem);
