@@ -503,8 +503,7 @@
         charset: undefined,
         marked: undefined,
         locked: undefined,
-        folder: undefined,
-        exported: undefined,
+        location: undefined,
       };
     }
 
