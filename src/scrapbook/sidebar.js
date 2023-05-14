@@ -773,7 +773,7 @@
             }
           } else if (event.altKey && this.rootId !== 'recycle') {
             await this.runTask(async () => {
-              await this.linkItems(lastDraggedElems, targetId, targetIndex);
+              await this.linkItems(data, targetId, targetIndex);
             });
           } else if (event.shiftKey && this.rootId !== 'recycle') {
             await this.runTask(async () => {
@@ -781,7 +781,7 @@
             });
           } else {
             await this.runTask(async () => {
-              await this.moveItems(lastDraggedElems, targetId, targetIndex);
+              await this.moveItems(data, targetId, targetIndex);
             });
           }
         }
@@ -1329,15 +1329,15 @@
       });
     },
 
-    async moveItems(sourceItemElems, targetId, targetIndex) {
+    async moveItems({items: sourceItems}, targetId, targetIndex) {
       if (!targetId || !(!!this.book.meta[targetId] || this.book.isSpecialItem(targetId))) {
         this.warn(`Unable to move: target ID "${targetId}" is invalid.`);
         return;
       }
 
-      const items = sourceItemElems.map((itemElem) => {
-        const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
-        return [parentItemId, index];
+      const items = sourceItems.map((sourceItem) => {
+        const {id, parentId, index} = sourceItem;
+        return [parentId, index];
       });
 
       await this._moveItemsInternal(items, targetId, targetIndex);
@@ -1375,15 +1375,15 @@
       });
     },
 
-    async linkItems(sourceItemElems, targetId, targetIndex) {
+    async linkItems({items: sourceItems}, targetId, targetIndex) {
       if (!targetId || !(!!this.book.meta[targetId] || this.book.isSpecialItem(targetId))) {
         this.warn(`Unable to create link: target ID "${targetId}" is invalid.`);
         return;
       }
 
-      const items = sourceItemElems.map((itemElem) => {
-        const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
-        return [parentItemId, index];
+      const items = sourceItems.map((sourceItem) => {
+        const {id, parentId, index} = sourceItem;
+        return [parentId, index];
       });
 
       // update book
@@ -1593,8 +1593,9 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
     async deleteItems(itemElems) {
       if (!itemElems.length) { return; }
 
+      const cacheMap = new Map();
       const items = itemElems.map((itemElem) => {
-        const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+        const {parentItemId, index} = this.tree.getParentAndIndex(itemElem, cacheMap);
         return [parentItemId, index];
       });
 
@@ -2662,14 +2663,22 @@ Redirecting to file <a href="index.md">index.md</a>
           mode = dialog['mode'].value;
         }
 
+        const cacheMap = new Map();
+        const items = itemElems.reduce((list, itemElem) => {
+          const id = this.tree.getItemId(itemElem);
+          const {parentItemId: parentId, index} = this.tree.getParentAndIndex(itemElem, cacheMap);
+          list.push({id, parentId, index});
+          return list;
+        }, []);
+        const data = {bookId: this.bookId, treeLastModified: this.book.treeLastModified, items};
         switch (mode) {
           case "link": {
-            await this.linkItems(itemElems, targetId, targetIndex);
+            await this.linkItems(data, targetId, targetIndex);
             break;
           }
           case "move":
           default: {
-            await this.moveItems(itemElems, targetId, targetIndex);
+            await this.moveItems(data, targetId, targetIndex);
             break;
           }
         }
@@ -2713,19 +2722,15 @@ Redirecting to file <a href="index.md">index.md</a>
           recursively = dialog.querySelector('[name="recursive"]').checked;
         }
 
+        const cacheMap = new Map();
         const items = itemElems.reduce((list, itemElem) => {
-          const id = itemElem.getAttribute('data-id');
-          const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
-          list.push({
-            id,
-            parentId: parentItemId,
-            index,
-          });
-
+          const id = this.tree.getItemId(itemElem);
+          const {parentItemId: parentId, index} = this.tree.getParentAndIndex(itemElem, cacheMap);
+          list.push({id, parentId, index});
           return list;
         }, []);
-        await this.copyItems({bookId: this.bookId, treeLastModified: this.book.treeLastModified, items},
-          targetId, targetIndex, targetBookId, recursively);
+        const data = {bookId: this.bookId, treeLastModified: this.book.treeLastModified, items};
+        await this.copyItems(data, targetId, targetIndex, targetBookId, recursively);
       },
 
       async recycle({itemElems, modifiers}) {
@@ -2740,8 +2745,9 @@ Redirecting to file <a href="index.md">index.md</a>
           return;
         }
 
+        const cacheMap = new Map();
         const items = itemElems.map((itemElem) => {
-          const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+          const {parentItemId, index} = this.tree.getParentAndIndex(itemElem, cacheMap);
           return [parentItemId, index];
         });
 
@@ -2780,8 +2786,9 @@ Redirecting to file <a href="index.md">index.md</a>
       async recover({itemElems}) {
         if (!itemElems.length) { return; }
 
+        const cacheMap = new Map();
         const items = itemElems.map((itemElem) => {
-          const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+          const {parentItemId, index} = this.tree.getParentAndIndex(itemElem, cacheMap);
           return [parentItemId, index];
         });
 

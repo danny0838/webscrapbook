@@ -707,6 +707,7 @@
 
       const selectedItemElems = this.getSelectedItemElems();
 
+      const cacheMap = new Map();
       event.clipboardData.setData(
         'application/scrapbook.items+json',
         JSON.stringify({
@@ -718,12 +719,8 @@
           treeLastModified: this.book.treeLastModified,
 
           items: selectedItemElems.map(elem => {
-            const {parentItemId, index} = this.getParentAndIndex(elem);
-            return {
-              id: this.getItemId(elem),
-              parentId: parentItemId,
-              index,
-            };
+            const {parentItemId: parentId, index} = this.getParentAndIndex(elem, cacheMap);
+            return {id: this.getItemId(elem), parentId, index};
           }),
         })
       );
@@ -776,6 +773,7 @@
       }
 
       // Firefox requires at least one data to get dragging work
+      const cacheMap = new Map();
       event.dataTransfer.setData(
         'application/scrapbook.items+json',
         JSON.stringify({
@@ -787,12 +785,8 @@
           treeLastModified: this.book.treeLastModified,
 
           items: selectedItemElems.map(elem => {
-            const {parentItemId, index} = this.getParentAndIndex(elem);
-            return {
-              id: this.getItemId(elem),
-              parentId: parentItemId,
-              index,
-            };
+            const {parentItemId: parentId, index} = this.getParentAndIndex(elem, cacheMap);
+            return {id: this.getItemId(elem), parentId, index};
           }),
         })
       );
