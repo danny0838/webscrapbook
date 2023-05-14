@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.14.1] - 2023-05-14
+* Fixed script error when copying info from a non-root scrapbook tree with folder-related formatters.
+
 ## [1.14.0] - 2023-05-07
 * Adjusted key order for the initlal JSON data of the advanced capture dialog.
 * A title is now auto-generated when capturing a note through dragging a piece of rich text content.
