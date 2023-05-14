@@ -178,24 +178,72 @@
       return parentItemElem;
     }
 
-    getParentAndIndex(itemElem) {
-      const parentItemElem = itemElem.parentNode.parentNode;
-      if (!this.rootElem.contains(parentItemElem)) {
+    /**
+     * Get position index of an item element.
+     *
+     * According to a benchmark, counting previous elements (getIndex1) is
+     * faster than calling Array.indexOf on siblings for both Firefox (v114)
+     * and Google Chrome (v113).
+     *
+     *   function getIndex1(elem) {
+     *     let i = 0, e = elem;
+     *     while (e = e.previousElementSibling) { i++; }
+     *     return i;
+     *   }
+     *
+     *   function getIndex2(elem) {
+     *     const parent = elem.parentNode;
+     *     const siblings = parent.children;
+     *     return Array.prototype.indexOf.call(siblings, elem);
+     *   }
+     *
+     * @param {HTMLElement} itemElem
+     * @param {Map<HTMLElement~itemElem, integer~index>} [cacheMap] -
+     *     A cache Map for better performance when accessed many times at once.
+     * @return {integer}
+     */
+    getIndex(itemElem, cacheMap) {
+      let index = 0, elem = itemElem;
+      while (elem = elem.previousElementSibling) {
+        if (cacheMap) {
+          const prevIndex = cacheMap.get(elem);
+          if (typeof prevIndex !== 'undefined') {
+            index += prevIndex + 1;
+            break;
+          }
+        }
+        index++;
+      }
+      if (cacheMap) {
+        cacheMap.set(itemElem, index);
+      }
+      return index;
+    }
+
+    /**
+     * @param {HTMLElement} itemElem
+     * @param {Map<HTMLElement~itemElem, integer~index>} [cacheMap]
+     */
+    getParentAndIndex(itemElem, cacheMap) {
+      const parentItemElem = this.getParent(itemElem);
+      if (!parentItemElem) {
         return {
           parentItemElem: null,
           parentItemId: null,
-          siblingItems: [],
           index: null,
         };
       }
-      const parentItemId = parentItemElem.getAttribute('data-id');
-      const siblingItems = parentItemElem.container.children;
-      const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-      return {parentItemElem, parentItemId, siblingItems, index};
+      const parentItemId = this.getItemId(parentItemElem);
+      const index = this.getIndex(itemElem, cacheMap);
+      return {parentItemElem, parentItemId, index};
     }
 
-    getItemUrl(elem) {
-      const anchor = elem.anchor;
+    getItemId(itemElem) {
+      return itemElem.getAttribute('data-id');
+    }
+
+    getItemUrl(itemElem) {
+      const anchor = itemElem.anchor;
       if (!anchor) { return ''; }
       return anchor.href;
     }
@@ -672,7 +720,7 @@
           items: selectedItemElems.map(elem => {
             const {parentItemId, index} = this.getParentAndIndex(elem);
             return {
-              id: elem.getAttribute('data-id'),
+              id: this.getItemId(elem),
               parentId: parentItemId,
               index,
             };
@@ -681,7 +729,7 @@
       );
       event.clipboardData.setData(
         'text/plain',
-        selectedItemElems.map(x => x.getAttribute('data-id')).join('\r\n')
+        selectedItemElems.map(x => this.getItemId(x)).join('\r\n')
       );
     }
 
@@ -741,7 +789,7 @@
           items: selectedItemElems.map(elem => {
             const {parentItemId, index} = this.getParentAndIndex(elem);
             return {
-              id: elem.getAttribute('data-id'),
+              id: this.getItemId(elem),
               parentId: parentItemId,
               index,
             };
@@ -750,7 +798,7 @@
       );
       event.dataTransfer.setData(
         'text/plain',
-        selectedItemElems.map(x => x.getAttribute('data-id')).join('\r\n')
+        selectedItemElems.map(x => this.getItemId(x)).join('\r\n')
       );
 
       // prevent mis-intereprated as a regular link
@@ -861,21 +909,15 @@
       let targetIndex;
       if (pos < 1/3) {
         // above
-        const parentItemElem = itemElem.parentNode.parentNode;
-        const siblingItems = parentItemElem.container.children;
-        const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-        targetId = parentItemElem.getAttribute('data-id');
-        targetIndex = index;
+        targetId = this.getItemId(this.getParent(itemElem));
+        targetIndex = this.getIndex(itemElem);
       } else if (pos > 2/3) {
         // below
-        const parentItemElem = itemElem.parentNode.parentNode;
-        const siblingItems = parentItemElem.container.children;
-        const index = Array.prototype.indexOf.call(siblingItems, itemElem);
-        targetId = parentItemElem.getAttribute('data-id');
-        targetIndex = index + 1;
+        targetId = this.getItemId(this.getParent(itemElem));
+        targetIndex = this.getIndex(itemElem) + 1;
       } else {
         // within
-        targetId = itemElem.getAttribute('data-id');
+        targetId = this.getItemId(itemElem);
       }
 
       // invoke callback

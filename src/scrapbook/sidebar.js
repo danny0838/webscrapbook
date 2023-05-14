@@ -2738,8 +2738,8 @@ Redirecting to file <a href="index.md">index.md</a>
         if (!this.treeElem.contains(itemElem)) { return; }
 
         const itemId = itemElem.getAttribute('data-id');
-        const {parentItemId, index, siblingItems} = this.tree.getParentAndIndex(itemElem);
-        if (!(index < siblingItems.length - 1)) { return; }
+        const {parentItemId, index} = this.tree.getParentAndIndex(itemElem);
+        if (!itemElem.nextElementSibling) { return; }
 
         // update TOC
         const newIndex = this.book.moveItem({
