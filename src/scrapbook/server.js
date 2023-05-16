@@ -1193,9 +1193,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
                 cmd: 'save_item_postit',
                 args: [id, text],
               }),
-              auto_cache: JSON.stringify(
-                scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
-              ),
+              auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
               details: 1,
             },
             method: 'POST',

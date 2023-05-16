@@ -130,9 +130,7 @@
                     item: {id},
                   },
                 }),
-                auto_cache: JSON.stringify(
-                  scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
-                ),
+                auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
               },
               method: 'POST',
               format: 'json',

@@ -210,6 +210,8 @@ if (new URLSearchParams({}).toString() !== '') {
     "scrapbook.searchSourceLength": null,
     "scrapbook.searchSse": false,
     "scrapbook.fulltextCacheUpdateThreshold": 5 * 24 * 60 * 60 * 1000,
+    "scrapbook.autoCache.fulltextCache": true,
+    "scrapbook.autoCache.createStaticSite": false,
     "geolocation.enableHighAccuracy": true,
     "geolocation.timeout": 3000,
     "geolocation.maximumAge": 0,
@@ -784,6 +786,17 @@ if (new URLSearchParams({}).toString() !== '') {
     return await browser.storage.local.remove(keys);
   };
 
+  scrapbook.autoCacheOptions = function () {
+    const fulltextCache = scrapbook.getOption("scrapbook.autoCache.fulltextCache");
+    const createStaticSite = scrapbook.getOption("scrapbook.autoCache.createStaticSite");
+    if (!(fulltextCache || createStaticSite)) {
+      return null;
+    }
+    const rv = {};
+    if (fulltextCache) { rv.fulltext = 1; }
+    if (createStaticSite) { rv.static_site = 1; }
+    return rv;
+  };
 
   /****************************************************************************
    * Cache system

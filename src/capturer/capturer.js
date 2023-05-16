@@ -784,9 +784,7 @@
                 target_index: index,
               },
             }),
-            auto_cache: JSON.stringify(
-              scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
-            ),
+            auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
           },
         });
       },
@@ -2032,9 +2030,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                   item: {id: item.id},
                 },
               }),
-              auto_cache: JSON.stringify(
-                scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
-              ),
+              auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
             },
             method: 'POST',
             format: 'json',
@@ -2361,9 +2357,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                 item,
               },
             }),
-            auto_cache: JSON.stringify(
-              scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
-            ),
+            auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
           },
           method: 'POST',
           format: 'json',
@@ -2644,9 +2638,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
                 item: {id: item.id},
               },
             }),
-            auto_cache: JSON.stringify(
-              scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
-            ),
+            auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
           },
           method: 'POST',
           format: 'json',

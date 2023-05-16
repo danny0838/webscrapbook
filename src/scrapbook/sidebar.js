@@ -1487,9 +1487,7 @@
               recursively,
             },
           }),
-          auto_cache: JSON.stringify(
-            scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
-          ),
+          auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
         },
         method: 'POST',
         format: 'json',
@@ -1580,9 +1578,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
                   target_index: targetIndex,
                 },
               }),
-              auto_cache: JSON.stringify(
-                scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
-              ),
+              auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
             },
             method: 'POST',
             format: 'json',
@@ -1619,9 +1615,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
                   items,
                 },
               }),
-              auto_cache: JSON.stringify(
-                scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
-              ),
+              auto_cache: JSON.stringify(scrapbook.autoCacheOptions()),
             },
             method: 'POST',
             format: 'json',
@@ -2508,9 +2502,7 @@ ${scrapbook.escapeHtml(content)}
                     ext: type === 'markdown' ? '.md' : '.html',
                   },
                 })],
-                ['auto_cache', JSON.stringify(
-                  scrapbook.getOption("indexer.fulltextCache") ? {fulltext: 1} : null
-                )],
+                ['auto_cache', JSON.stringify(scrapbook.autoCacheOptions())],
               ],
               method: 'POST',
               format: 'json',
