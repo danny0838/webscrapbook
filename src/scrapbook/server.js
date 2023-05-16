@@ -822,6 +822,11 @@
      * @callback transactionCallback
      * @param {Book} book - the Book the transaction is performed on.
      * @param {Object} params
+     * @param {string} params.lockId - ID of the lock.
+     * @param {Function} params.discardLock - a controller that discards the
+     *     lock (no longer keep and release it) when called. This should
+     *     normally be called after requested another action that keeps the
+     *     lock (by passing lockId).
      * @param {string} [params.backupTs] - the timestamp for the automatic
      *     backup ("validate" mode).
      * @param {boolean} [params.updated] - whether the server tree has been
@@ -881,6 +886,10 @@
         const refreshInterval = LOCK_STALE_TIME * 0.2;
         const refreshAcquireTimeout = 1;
         keeper = setInterval(async () => {
+          if (!lockId) {
+            clearInterval(keeper);
+            return;
+          }
           await this.lockTree({id: lockId, timeout: refreshAcquireTimeout});
         }, refreshInterval);
 
@@ -925,7 +934,8 @@
         }
 
         // run the callback
-        await callback.call(this, this, {backupTs, updated});
+        const discardLock = () => { lockId = null; };
+        await callback.call(this, this, {lockId, discardLock, backupTs, updated});
 
         // clear auto backup if transaction successful
         if (backupTs) {
@@ -950,10 +960,12 @@
         clearInterval(keeper);
 
         // unlock the tree
-        try {
-          await this.unlockTree({id: lockId});
-        } catch (ex) {
-          throw new Error(`Failed to unlock tree for remote book "${this.id}".`);
+        if (lockId) {
+          try {
+            await this.unlockTree({id: lockId});
+          } catch (ex) {
+            throw new Error(`Failed to unlock tree for remote book "${this.id}".`);
+          }
         }
       }
     }
