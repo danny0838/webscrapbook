@@ -769,7 +769,7 @@
           url: book.topUrl,
           query: {
             a: 'query',
-            no_lock: 1,
+            lock: '',
           },
           method: 'POST',
           format: 'json',
@@ -2020,7 +2020,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           await server.request({
             query: {
               a: 'query',
-              no_lock: 1,
+              lock: '',
             },
             body: {
               q: JSON.stringify({
@@ -2347,7 +2347,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         await server.request({
           query: {
             a: 'query',
-            no_lock: 1,
+            lock: '',
           },
           body: {
             q: JSON.stringify({
@@ -2628,7 +2628,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
         await server.request({
           query: {
             a: 'query',
-            no_lock: 1,
+            lock: '',
           },
           body: {
             q: JSON.stringify({

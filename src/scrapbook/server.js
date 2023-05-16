@@ -1153,7 +1153,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       const json = await server.request({
         query: {
           a: 'query',
-          no_lock: 1,
+          lock: '',
         },
         body: {
           q: JSON.stringify({
@@ -1185,7 +1185,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
           const json = await server.request({
             query: {
               a: 'query',
-              no_lock: 1,
+              lock: '',
             },
             body: {
               q: JSON.stringify({

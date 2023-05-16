@@ -120,7 +120,7 @@
             await server.request({
               query: {
                 a: 'query',
-                no_lock: 1,
+                lock: '',
               },
               body: {
                 q: JSON.stringify({

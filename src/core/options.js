@@ -298,9 +298,7 @@
     if (getOptionFromDocument('indexer.createStaticSite')) {
       params.append('static_site', 1);
     }
-    if (!getOptionFromDocument('indexer.makeBackup')) {
-      params.append('no_backup', 1);
-    }
+    params.append('backup', getOptionFromDocument('indexer.makeBackup') ? 1 : '');
 
     return await scrapbook.visitLink({
       url: u.href,
@@ -345,9 +343,7 @@
     if (getOptionFromDocument('checker.resolveUnusedIcon')) {
       params.append('resolve_unused_icon', 1);
     }
-    if (!getOptionFromDocument('checker.makeBackup')) {
-      params.append('no_backup', 1);
-    }
+    params.append('backup', getOptionFromDocument('checker.makeBackup') ? 1 : '');
 
     return await scrapbook.visitLink({
       url: u.href,

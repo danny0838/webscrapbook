@@ -1354,7 +1354,7 @@
           await server.request({
             query: {
               a: 'query',
-              no_lock: 1,
+              lock: '',
             },
             body: {
               q: JSON.stringify({
@@ -1397,7 +1397,7 @@
           await server.request({
             query: {
               a: 'query',
-              no_lock: 1,
+              lock: '',
             },
             body: {
               q: JSON.stringify({
@@ -1473,7 +1473,7 @@
       await server.request({
         query: {
           a: 'query',
-          no_lock: 1,
+          lock: '',
         },
         body: {
           q: JSON.stringify({
@@ -1566,7 +1566,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
           await server.request({
             query: {
               a: 'query',
-              no_lock: 1,
+              lock: '',
             },
             body: {
               q: JSON.stringify({
@@ -1605,7 +1605,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
           await server.request({
             query: {
               a: 'query',
-              no_lock: 1,
+              lock: '',
             },
             body: {
               q: JSON.stringify({
@@ -1719,7 +1719,7 @@ ${scrapbook.escapeHtml(content)}
           await server.request({
             query: {
               a: 'query',
-              no_lock: 1,
+              lock: '',
             },
             body: {
               q: JSON.stringify({
@@ -1918,7 +1918,7 @@ ${scrapbook.escapeHtml(content)}
             await server.request({
               query: {
                 a: 'query',
-                no_lock: 1,
+                lock: '',
               },
               body: {
                 'q': JSON.stringify({
@@ -2197,7 +2197,7 @@ ${scrapbook.escapeHtml(content)}
             await server.request({
               query: {
                 a: 'query',
-                no_lock: 1,
+                lock: '',
               },
               body: {
                 q: JSON.stringify({
@@ -2270,7 +2270,7 @@ ${scrapbook.escapeHtml(content)}
             await server.request({
               query: {
                 a: 'query',
-                no_lock: 1,
+                lock: '',
               },
               body: {
                 q: JSON.stringify({
@@ -2323,7 +2323,7 @@ ${scrapbook.escapeHtml(content)}
             await server.request({
               query: {
                 a: 'query',
-                no_lock: 1,
+                lock: '',
               },
               body: {
                 q: JSON.stringify({
@@ -2379,7 +2379,7 @@ ${scrapbook.escapeHtml(content)}
             await server.request({
               query: {
                 a: 'query',
-                no_lock: 1,
+                lock: '',
               },
               body: [
                 ['q', JSON.stringify({
@@ -2482,7 +2482,7 @@ ${scrapbook.escapeHtml(content)}
             await server.request({
               query: {
                 a: 'query',
-                no_lock: 1,
+                lock: '',
               },
               body: [
                 ['q', JSON.stringify({
@@ -2763,7 +2763,7 @@ Redirecting to file <a href="index.md">index.md</a>
             await server.request({
               query: {
                 a: 'query',
-                no_lock: 1,
+                lock: '',
               },
               body: {
                 q: JSON.stringify({
@@ -2804,7 +2804,7 @@ Redirecting to file <a href="index.md">index.md</a>
             await server.request({
               query: {
                 a: 'query',
-                no_lock: 1,
+                lock: '',
               },
               body: {
                 q: JSON.stringify({
