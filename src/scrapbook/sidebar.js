@@ -1440,7 +1440,7 @@
       // update book
       await sourceBook.transaction({
         mode: 'validate',
-        callback: async (sourceBook, _, backupTs) => {
+        callback: async (sourceBook, {backupTs}) => {
           // validate if the dragging source is up to date
           if (treeLastModified !== sourceBook.treeLastModified) {
             this.warn(scrapbook.lang('ScrapBookErrorSourceTreeOutdated'));

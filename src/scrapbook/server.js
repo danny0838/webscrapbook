@@ -821,7 +821,11 @@
     /**
      * @callback transactionCallback
      * @param {Book} book - the Book the transaction is performed on.
-     * @param {boolean} [updated] - whether the server tree has been updated.
+     * @param {Object} params
+     * @param {string} [params.backupTs] - the timestamp for the automatic
+     *     backup ("validate" mode).
+     * @param {boolean} [params.updated] - whether the server tree has been
+     *     updated ("refresh" mode).
      */
 
     /**
@@ -845,6 +849,7 @@
      * @param {boolean} [params.autoBackup] - whether to automatically create a
      *     temporary tree backup before a transaction and remove after success.
      * @param {string} [params.autoBackupTs] - timestamp for the auto backup.
+     * @param {string} [params.autoBackupNote] - note for the auto backup.
      * @param {integer} [params.timeout] - timeout for lock.
      */
     async transaction({
@@ -852,13 +857,13 @@
       mode,
       autoBackup = scrapbook.getOption("scrapbook.transactionAutoBackup"),
       autoBackupTs,
+      autoBackupNote = 'transaction',
       timeout = 5,
     }) {
       let lockId;
       let keeper;
-      let updated;
       let backupTs;
-      let backupNote = 'transaction';
+      let updated;
 
       // lock the tree
       try {
@@ -905,7 +910,12 @@
           for (const [filename] of this.treeFiles) {
             if (TRANSCATION_TREE_FILES_REGEX.test(filename)) {
               await this.server.request({
-                url: this.treeUrl + filename + `?a=backup&ts=${backupTs}&note=${backupNote}`,
+                url: this.treeUrl + filename,
+                query: {
+                  a: 'backup',
+                  ts: backupTs,
+                  note: autoBackupNote,
+                },
                 method: "POST",
                 format: 'json',
                 csrfToken: true,
@@ -915,13 +925,18 @@
         }
 
         // run the callback
-        await callback.call(this, this, updated, backupTs);
+        await callback.call(this, this, {backupTs, updated});
 
         // clear auto backup if transaction successful
         if (backupTs) {
           try {
             await this.server.request({
-              url: this.treeUrl + `?a=unbackup&ts=${backupTs}&note=${backupNote}`,
+              url: this.treeUrl,
+              query: {
+                a: 'unbackup',
+                ts: backupTs,
+                note: autoBackupNote,
+              },
               method: "POST",
               format: 'json',
               csrfToken: true,
@@ -1174,7 +1189,7 @@ scrapbook.toc(${JSON.stringify(jsonData, null, 2).replace(/\u2028/g, '\\u2028').
       let item;
       await this.transaction({
         mode: 'refresh',
-        callback: async (book, updated) => {
+        callback: async (book, {updated}) => {
           const meta = await book.loadMeta(updated);
 
           item = meta[id];

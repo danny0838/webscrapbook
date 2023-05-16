@@ -750,7 +750,7 @@
     await book.transaction({
       mode: 'refresh',
       timeout: 60,
-      callback: async (book, updated) => {
+      callback: async (book, {updated}) => {
         await book.loadMeta(updated);
         await book.loadToc(updated);
 
@@ -1821,7 +1821,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
 
     await book.transaction({
       mode: 'update',
-      callback: async (book, updated) => {
+      callback: async (book, {updated}) => {
         await book.loadMeta(updated);
         const item = await book.findItemFromUrl(url);
         if (item && item.locked) {
@@ -2079,7 +2079,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     let result;
     await book.transaction({
       mode: 'refresh',
-      callback: async (book, updated) => {
+      callback: async (book, {updated}) => {
         await book.loadMeta(updated);
         const item = book.meta[itemId];
         if (!item) {
@@ -2446,7 +2446,7 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
     let result;
     await book.transaction({
       mode: 'refresh',
-      callback: async (book, updated) => {
+      callback: async (book, {updated}) => {
         await book.loadMeta(updated);
         const item = book.meta[itemId];
         if (!item) {

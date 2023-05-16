@@ -98,7 +98,7 @@
 
         await book.transaction({
           mode: 'refresh',
-          callback: async (book, updated) => {
+          callback: async (book, {updated}) => {
             const meta = await book.loadMeta(updated);
             if (!meta[id]) {
               throw new Error(`Specified item "${id}" does not exist.`);
