@@ -61,5 +61,6 @@ div.tooltip {
   border-radius: 0.5em;
   padding: 0.5em;
   background-color: #CCCCEE;
+  overflow-wrap: break-word;
   white-space: pre-wrap;
 }

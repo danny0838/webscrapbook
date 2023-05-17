@@ -114,6 +114,7 @@ body {
   flex: 0 1 auto;
   max-height: 200px;
   overflow: auto;
+  overflow-wrap: break-word;
   white-space: pre-wrap;
   margin: 0;
   padding: 3px;
