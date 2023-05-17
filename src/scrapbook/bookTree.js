@@ -163,14 +163,17 @@
         for (const root of this.book.specialItems) {
           const path = this.book.findItemPaths(this.rootId, root).next().value;
           if (path) {
-            path.pop();
-            parents = path.map(({id, pos}) => {
-              const parent = {elem: null, id};
-              if (includeIndex) {
-                parent.index = pos;
+            parents = path.reduce((parents, {id, pos}, index, path) => {
+              // skip last
+              if (path[index +1]) {
+                const parent = {elem: null, id};
+                if (includeIndex) {
+                  parent.index = path[index + 1].pos;
+                }
+                parents.push(parent);
               }
-              return parent;
-            }).concat(parents);
+              return parents;
+            }, []).concat(parents);
             break;
           }
         }
