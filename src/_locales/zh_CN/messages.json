@@ -1219,6 +1219,18 @@
   "OptionScrapbookDefaultSearchTooltip": {
     "message": "设置搜索栏位默认填入的搜索条件，例如设置为“-type:separator”，则在搜索栏位填入“keyword”相当于搜索“-type:separator keyword”。\n\n• 除一般搜索指令以外，还可用“default:”指令设置默认指令，例如设置为“default:title”，则在搜索栏位填入“keyword”相当于搜索“title:keyword”。（默认为 default:tcc）"
   },
+  "OptionScrapbookExportNonSingletonLabel": {
+    "message": "导出: 允许重复导出不同位置的同一项目"
+  },
+  "OptionScrapbookExportRecursiveLabel": {
+    "message": "导出: 一并导出下层项目"
+  },
+  "OptionScrapbookImportRebuildFoldersLabel": {
+    "message": "导入: 重建文件夹结构"
+  },
+  "OptionScrapbookImportResolveItemUsedNewLabel": {
+    "message": "导入: 为重复项目产生新项目"
+  },
   "OptionScrapbookScrapbookSearchCommentLengthLabel": {
     "message": "搜索结果显示评注长度:"
   },
@@ -1402,6 +1414,12 @@
   },
   "ScrapBookCommandExecBook": {
     "message": "在文件管理员检视主目录"
+  },
+  "ScrapBookCommandExport": {
+    "message": "导出"
+  },
+  "ScrapBookCommandImport": {
+    "message": "导入"
   },
   "ScrapBookCommandIndex": {
     "message": "检视主页"

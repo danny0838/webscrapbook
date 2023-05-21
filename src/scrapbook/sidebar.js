@@ -70,7 +70,8 @@
       document.getElementById("command-popup").addEventListener('click', this.onCommandClick);
       document.getElementById("command-popup").addEventListener('focusout', this.onCommandFocusOut);
 
-      document.getElementById('upload-file-selector').addEventListener('change', this.onClickFileSelector);
+      document.getElementById('upload-file-selector').addEventListener('change', this.onClickUploadFileSelector);
+      document.getElementById('import-file-selector').addEventListener('change', this.onClickImportFileSelector);
 
       window.addEventListener('customCommand', this.onCustomCommandRun);
 
@@ -228,6 +229,7 @@
             menuElem.querySelector('button[value="mkpostit"]').disabled = !(!isNoTree && !isRecycle);
             menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
             menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="import"]').disabled = !(!isNoTree && !isRecycle);
 
             menuElem.querySelector('button[value="view_recycle"]').disabled = isNoTree;
             menuElem.querySelector('button[value="clean"]').disabled = !(!isNoTree && isRecycle);
@@ -252,6 +254,7 @@
             menuElem.querySelector('button[value="mkpostit"]').disabled = !(!isNoTree && !isRecycle);
             menuElem.querySelector('button[value="mknote"]').disabled = !(!isNoTree && !isRecycle);
             menuElem.querySelector('button[value="upload"]').disabled = !(!isNoTree && !isRecycle);
+            menuElem.querySelector('button[value="import"]').disabled = !(!isNoTree && !isRecycle);
 
             menuElem.querySelector('button[value="edit"]').disabled = !(!isNoTree && !isRecycle);
             menuElem.querySelector('button[value="recover"]').disabled = !(!isNoTree && isRecycle);
@@ -491,6 +494,17 @@
           break;
         }
 
+        case 'import': {
+          const elem = document.getElementById('import-file-selector');
+          customDataMap.set(elem, {
+            items: false,
+            modifiers,
+          });
+          elem.value = '';
+          elem.click();
+          break;
+        }
+
         default: {
           const evt = new CustomEvent("customCommand", {
             detail: {
@@ -525,6 +539,17 @@
       switch (command) {
         case 'upload': {
           const elem = document.getElementById('upload-file-selector');
+          customDataMap.set(elem, {
+            items: true,
+            modifiers,
+          });
+          elem.value = '';
+          elem.click();
+          break;
+        }
+
+        case 'import': {
+          const elem = document.getElementById('import-file-selector');
           customDataMap.set(elem, {
             items: true,
             modifiers,
@@ -575,12 +600,26 @@
       });
     },
 
-    onClickFileSelector(event) {
+    onClickUploadFileSelector(event) {
       event.preventDefault();
       const detail = customDataMap.get(document.getElementById('upload-file-selector'));
       const evt = new CustomEvent("customCommand", {
         detail: {
           command: 'upload',
+          itemElems: detail.items ? this.tree.getSelectedItemElems() : [],
+          files: event.target.files,
+          modifiers: detail.modifiers,
+        },
+      });
+      window.dispatchEvent(evt);
+    },
+
+    onClickImportFileSelector(event) {
+      event.preventDefault();
+      const detail = customDataMap.get(document.getElementById('import-file-selector'));
+      const evt = new CustomEvent("customCommand", {
+        detail: {
+          command: 'import',
           itemElems: detail.items ? this.tree.getSelectedItemElems() : [],
           files: event.target.files,
           modifiers: detail.modifiers,
@@ -812,7 +851,11 @@
         }
 
         await this.runTask(async () => {
-          await this.uploadItems(files, targetId, targetIndex);
+          if (files.every(f => f.name.toLowerCase().endsWith('.wsba'))) {
+            await this.importItems(files, targetId, targetIndex);
+          } else {
+            await this.uploadItems(files, targetId, targetIndex);
+          }
         });
         return;
       }
@@ -1059,6 +1102,7 @@
       menuElem.querySelector('button[value="mkpostit"]').hidden = !(!isRecycle);
       menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
       menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
+      menuElem.querySelector('button[value="import"]').hidden = !(!isRecycle);
 
       menuElem.querySelector('button[value="view_recycle"]').hidden = !(!isRecycle);
 
@@ -1127,6 +1171,7 @@
           menuElem.querySelector('button[value="mkpostit"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="import"]').hidden = !(!isRecycle);
 
           menuElem.querySelector('button[value="edit"]').hidden = true;
           menuElem.querySelector('button[value="recover"]').hidden = true;
@@ -1134,6 +1179,7 @@
           menuElem.querySelector('button[value="move_down"]').hidden = true;
           menuElem.querySelector('button[value="move_into"]').hidden = true;
           menuElem.querySelector('button[value="copy_into"]').hidden = true;
+          menuElem.querySelector('button[value="export"]').hidden = true;
           menuElem.querySelector('button[value="recycle"]').hidden = true;
           menuElem.querySelector('button[value="delete"]').hidden = true;
 
@@ -1160,6 +1206,7 @@
           menuElem.querySelector('button[value="mkpostit"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="mknote"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="upload"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="import"]').hidden = !(!isRecycle);
 
           menuElem.querySelector('button[value="edit"]').hidden = !(!isRecycle && ['note'].includes(item.type) && item.index);
           menuElem.querySelector('button[value="recover"]').hidden = !(isRecycle);
@@ -1167,6 +1214,7 @@
           menuElem.querySelector('button[value="move_down"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="move_into"]').hidden = false;
           menuElem.querySelector('button[value="copy_into"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="export"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="recycle"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
 
@@ -1191,6 +1239,7 @@
           menuElem.querySelector('button[value="mkpostit"]').hidden = true;
           menuElem.querySelector('button[value="mknote"]').hidden = true;
           menuElem.querySelector('button[value="upload"]').hidden = true;
+          menuElem.querySelector('button[value="import"]').hidden = true;
 
           menuElem.querySelector('button[value="edit"]').hidden = true;
           menuElem.querySelector('button[value="recover"]').hidden = !(isRecycle);
@@ -1198,6 +1247,7 @@
           menuElem.querySelector('button[value="move_down"]').hidden = true;
           menuElem.querySelector('button[value="move_into"]').hidden = false;
           menuElem.querySelector('button[value="copy_into"]').hidden = !(!isRecycle);
+          menuElem.querySelector('button[value="export"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="recycle"]').hidden = !(!isRecycle);
           menuElem.querySelector('button[value="delete"]').hidden = !(isRecycle);
 
@@ -1583,6 +1633,90 @@ Redirecting to file <a href="${scrapbook.escapeHtml(url)}">${scrapbook.escapeHtm
             method: 'POST',
             format: 'json',
             csrfToken: true,
+          });
+
+          await this.rebuild();
+        },
+      });
+    },
+
+    async importItems(files, targetId, targetIndex) {
+      await this.book.transaction({
+        mode: 'validate',
+        callback: async (book) => {
+          // clear dir if exists
+          {
+            const target = book.treeUrl + scrapbook.escapeFilename('exports');
+            const json = await server.request({
+              url: target,
+              query: {
+                a: 'info',
+              },
+              method: "POST",
+              format: 'json',
+              csrfToken: true,
+            }).then(r => r.json());
+            if (json.data.type !== null) {
+              await server.request({
+                url: target,
+                query: {
+                  a: 'delete',
+                },
+                method: "POST",
+                format: 'json',
+                csrfToken: true,
+              });
+            }
+          }
+
+          // upload files
+          for (const file of files) {
+            try {
+              const filename = scrapbook.validateFilename(file.name);
+              const target = book.treeUrl + scrapbook.escapeFilename('exports/' + filename);
+              await server.request({
+                url: target,
+                query: {
+                  a: 'save',
+                },
+                method: "POST",
+                format: 'json',
+                csrfToken: true,
+                body: {
+                  upload: file,
+                },
+              });
+            } catch (ex) {
+              console.error(ex);
+              this.warn(`Unable to upload '${file.name}': ${ex.message}`);
+            }
+          }
+
+          // import
+          await server.requestSse({
+            query: {
+              a: 'import',
+              book: book.id,
+              target: targetId,
+              index: targetIndex,
+              rebuild: scrapbook.getOption("scrapbook.import.rebuildFolders") ? 1 : '',
+              resolve: scrapbook.getOption("scrapbook.import.resolveItemUsedNew") ? 'new' : 'skip',
+              lock: '',
+            },
+            onMessage: (info) => {
+              switch (info.type) {
+                case 'info':
+                  this.log(info.msg);
+                  break;
+                case 'warn':
+                  this.warn(info.msg);
+                  break;
+                case 'error':
+                case 'critical':
+                  this.error(info.msg);
+                  break;
+              }
+            },
           });
 
           await this.rebuild();
@@ -2580,6 +2714,26 @@ Redirecting to file <a href="index.md">index.md</a>
         await this.uploadItems(files, parentItemId, index);
       },
 
+      async import({itemElems: [itemElem], files, modifiers}) {
+        let parentItemId = this.rootId;
+        let index = Infinity;
+
+        if (itemElem) {
+          if (modifiers.altKey) {
+            parentItemId = itemElem.getAttribute('data-id');
+          } else {
+            ({parentItemId, index} = this.tree.getParentAndIndex(itemElem));
+
+            if (!this.book.config.new_at_top) {
+              // insert after the selected one
+              index += 1;
+            }
+          }
+        }
+
+        await this.importItems(files, parentItemId, index);
+      },
+
       async edit({itemElems: [itemElem], modifiers}) {
         if (!itemElem) { return; }
 
@@ -2737,6 +2891,51 @@ Redirecting to file <a href="index.md">index.md</a>
         }, []);
         const data = {bookId: this.bookId, treeLastModified: this.book.treeLastModified, items};
         await this.copyItems(data, targetId, targetIndex, targetBookId, recursively);
+      },
+
+      async export({itemElems, modifiers}) {
+        if (!itemElems.length) { return; }
+
+        const cacheMap = new Map();
+        const items = itemElems.map((itemElem) => {
+          const parents = this.tree.getParents(itemElem, {includeIndex: true, cacheMap});
+          if (parents.length) {
+            const id = parents[0].id;
+            const indexes = parents.map(p => p.index);
+            return [id, ...indexes];
+          }
+          return null;
+        });
+
+        await this.book.transaction({
+          mode: 'validate',
+          callback: async (book, {lockId, discardLock}) => {
+            const u = new URL(server.serverRoot);
+            u.search = new URLSearchParams({
+              a: 'export',
+              book: book.id,
+              recursive: scrapbook.getOption("scrapbook.export.recursive") ? 1 : '',
+              singleton: !scrapbook.getOption("scrapbook.export.nonSingleton") ? 1 : '',
+            });
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = u.href;
+            let elem;
+            elem = form.appendChild(document.createElement('input'));
+            elem.name = 'items';
+            elem.value = JSON.stringify(items);
+            elem = form.appendChild(document.createElement('input'));
+            elem.name = 'token';
+            elem.value = await server.acquireToken();
+            elem = form.appendChild(document.createElement('input'));
+            elem.name = 'lock';
+            elem.value = lockId;
+            document.getElementById('downloader').contentDocument.body.appendChild(form);
+            form.submit();
+            form.remove();
+            discardLock();
+          },
+        });
       },
 
       async recycle({itemElems, modifiers}) {

@@ -23,6 +23,7 @@
 <div id="dialog-mask" hidden>
   <div id="dialog-wrapper"></div>
 </div>
+<iframe id="downloader"></iframe>
 <div id="wrapper">
   <form id="toolbar">
     <select id="book" autocomplete="off" hidden></select>
@@ -32,6 +33,7 @@
       <button id="command" type="button" disabled>☰</button>
     </div>
     <input type="file" id="upload-file-selector" multiple hidden>
+    <input type="file" id="import-file-selector" multiple hidden accept=".wsba">
   </form>
   <pre id="logger"></pre>
   <div id="tree">
@@ -50,6 +52,7 @@
   <button value="mkpostit" hidden>__MSG_ScrapBookCommandCreatePostit__</button>
   <button value="mknote" hidden>__MSG_ScrapBookCommandCreateNote__...</button>
   <button value="upload" hidden>__MSG_ScrapBookCommandUpload__...</button>
+  <button value="import" hidden>__MSG_ScrapBookCommandImport__...</button>
   <hr>
   <button value="view_recycle" hidden>__MSG_ScrapBookCommandViewRecycle__</button>
   <button value="clean" hidden>__MSG_ScrapBookCommandClean__</button>
@@ -70,6 +73,7 @@
   <button value="mkpostit" hidden>__MSG_ScrapBookCommandCreatePostit__</button>
   <button value="mknote" hidden>__MSG_ScrapBookCommandCreateNote__...</button>
   <button value="upload" hidden>__MSG_ScrapBookCommandUpload__...</button>
+  <button value="import" hidden>__MSG_ScrapBookCommandImport__...</button>
   <hr>
   <button value="edit" hidden>__MSG_ScrapBookCommandEdit__</button>
   <button value="recover" hidden>__MSG_ScrapBookCommandRecover__</button>
@@ -78,6 +82,7 @@
   <button value="move_into" hidden>__MSG_ScrapBookCommandMoveTo__...</button>
   <button value="copy_into" hidden>__MSG_ScrapBookCommandCopyTo__...</button>
   <button value="drag" hidden></button>
+  <button value="export" hidden>__MSG_ScrapBookCommandExport__</button>
   <button value="recycle" hidden>__MSG_ScrapBookCommandRecycle__</button>
   <button value="delete" hidden>__MSG_ScrapBookCommandDelete__</button>
   <hr>

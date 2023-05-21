@@ -1219,6 +1219,18 @@
   "OptionScrapbookDefaultSearchTooltip": {
     "message": "設定搜尋欄位預先填入的搜尋條件，例如設定為「-type:separator」，則在搜尋欄位填入「keyword」相當於搜尋「-type:separator keyword」。\n\n• 除一般搜尋指令以外，還可用「default:」指令設定預設指令，例如設定為「default:title」，則在搜尋欄位填入「keyword」相當於搜尋「title:keyword」。（預設為 default:tcc）"
   },
+  "OptionScrapbookExportNonSingletonLabel": {
+    "message": "匯出: 允許重複匯出不同位置的同一項目"
+  },
+  "OptionScrapbookExportRecursiveLabel": {
+    "message": "匯出: 一併匯出下層項目"
+  },
+  "OptionScrapbookImportRebuildFoldersLabel": {
+    "message": "匯入: 重建資料夾結構"
+  },
+  "OptionScrapbookImportResolveItemUsedNewLabel": {
+    "message": "匯入: 為重複項目產生新項目"
+  },
   "OptionScrapbookScrapbookSearchCommentLengthLabel": {
     "message": "搜尋結果顯示評註長度:"
   },
@@ -1402,6 +1414,12 @@
   },
   "ScrapBookCommandExecBook": {
     "message": "在檔案管理員檢視主目錄"
+  },
+  "ScrapBookCommandExport": {
+    "message": "匯出"
+  },
+  "ScrapBookCommandImport": {
+    "message": "匯入"
   },
   "ScrapBookCommandIndex": {
     "message": "檢視主頁"

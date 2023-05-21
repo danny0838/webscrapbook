@@ -6,6 +6,15 @@ body {
   font-size: 16px;
 }
 
+#downloader {
+  /* display: none; causes child a.click() not work in Firefox */
+  visibility: hidden;
+  position: absolute;
+  border: none;
+  width: 0;
+  height: 0;
+}
+
 #wrapper {
   display: flex;
   flex-flow: column;

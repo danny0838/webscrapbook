@@ -1219,6 +1219,18 @@
   "OptionScrapbookDefaultSearchTooltip": {
     "message": "The prefilled search condition. For example, setting this to “-type:separator” makes “keyword” in the search field mean searching “-type:separator keyword”.\n\n• Besides general search commands, “default:” can be used to set the default command. For example, setting this to “default:title” makes “keyword” in the search field mean searching “title:keyword”. (defaults to default:tcc)"
   },
+  "OptionScrapbookExportNonSingletonLabel": {
+    "message": "Export: include duplicated items at another position"
+  },
+  "OptionScrapbookExportRecursiveLabel": {
+    "message": "Export: also export descendant items"
+  },
+  "OptionScrapbookImportRebuildFoldersLabel": {
+    "message": "Import: rebuild folder structure"
+  },
+  "OptionScrapbookImportResolveItemUsedNewLabel": {
+    "message": "Import: generate a new item for an existing one"
+  },
   "OptionScrapbookScrapbookSearchCommentLengthLabel": {
     "message": "Comment length shown in search results:"
   },
@@ -1402,6 +1414,12 @@
   },
   "ScrapBookCommandExecBook": {
     "message": "View root directory locally"
+  },
+  "ScrapBookCommandExport": {
+    "message": "Export"
+  },
+  "ScrapBookCommandImport": {
+    "message": "Import"
   },
   "ScrapBookCommandIndex": {
     "message": "View index page"
