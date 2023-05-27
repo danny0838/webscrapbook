@@ -2810,7 +2810,7 @@ Redirecting to file <a href="index.md">index.md</a>
           }
 
           dialog.addEventListener('dialogShow', (event) => {
-            dialog.querySelector('[name="id"]').focus();
+            dialog.querySelector('[name="id"]').select();
           });
 
           if (!await this.showDialog(dialog)) {
@@ -2868,7 +2868,7 @@ Redirecting to file <a href="index.md">index.md</a>
           bookSelector.value = this.bookId;
 
           dialog.addEventListener('dialogShow', (event) => {
-            dialog.querySelector('[name="id"]').focus();
+            dialog.querySelector('[name="id"]').select();
           });
 
           if (!await this.showDialog(dialog)) {
