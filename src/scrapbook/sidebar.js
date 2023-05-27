@@ -1296,12 +1296,20 @@
 
     /**
      * @param {HTMLElement} elem - the element to be inserted to the dialog.
-     *   - Dispatch 'dialogSubmit' event on elem to resolve the Promise with value.
      *   - Listen to 'dialogShow' event for elem to handle initialization.
      */
     async showDialog(elem) {
-      const mask = document.getElementById('dialog-mask');
-      const wrapper = document.getElementById('dialog-wrapper');
+      const mask = document.createElement('div');
+      mask.id = 'dialog-mask';
+
+      const dialog = mask.appendChild(document.createElement('div'));
+      dialog.id = 'dialog-wrapper';
+      dialog.setAttribute('role', 'dialog');
+      dialog.setAttribute('aria-modal', 'true');
+      dialog.setAttribute('tabindex', -1);
+      dialog.appendChild(elem);
+
+      const submitElem = elem.querySelector('input[type="submit"]');
       const cancelElem = elem.querySelector('.cancel');
 
       const onKeyDown = (event) => {
@@ -1310,47 +1318,34 @@
           return;
         }
 
-        if (event.code === "Escape" || event.code === "F10") {
+        if (event.code === "Escape") {
           event.preventDefault();
-          elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: null}));
+          dialog.dispatchEvent(new CustomEvent('close', {detail: ''}));
         }
       };
 
-      const onSubmit = (event) => {
-        event.preventDefault();
-        elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: true}));
-      };
-
-      const onCancel = (event) => {
-        event.preventDefault();
-        elem.dispatchEvent(new CustomEvent('dialogSubmit', {detail: null}));
-      };
-
-      wrapper.textContent = '';
-      wrapper.appendChild(elem);
-      mask.hidden = false;
-
-      if (!wrapper.hasAttribute('tabindex')) {
-        wrapper.setAttribute('tabindex', -1);
-      }
-      wrapper.focus();
+      document.body.appendChild(mask);
+      dialog.focus();
 
       window.addEventListener('keydown', onKeyDown, true);
-      elem.addEventListener('submit', onSubmit);
-      cancelElem.addEventListener('click', onCancel);
+      elem.addEventListener('submit', (event) => {
+        event.preventDefault();
+        dialog.dispatchEvent(new CustomEvent('close', {detail: submitElem.value}));
+      });
+      cancelElem.addEventListener('click', (event) => {
+        event.preventDefault();
+        dialog.dispatchEvent(new CustomEvent('close', {detail: ''}));
+      });
 
       const result = await new Promise((resolve, reject) => {
-        elem.addEventListener('dialogSubmit', (event) => {
+        dialog.addEventListener('close', (event) => {
          resolve(event.detail);
         });
-        elem.dispatchEvent(new CustomEvent('dialogShow', {detail: null}));
+        elem.dispatchEvent(new CustomEvent('dialogShow'));
       });
 
       window.removeEventListener('keydown', onKeyDown, true);
-      elem.removeEventListener('submit', onSubmit);
-      cancelElem.removeEventListener('click', onCancel);
-
-      mask.hidden = true;
+      mask.remove();
       this.treeElem.focus();
 
       return result;

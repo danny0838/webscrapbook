@@ -144,19 +144,26 @@ body {
 /* dialog*/
 #dialog-mask {
   position: fixed;
+  top: 0;
+  left: 0;
   z-index: 10000;
   width: 100%;
   height: 100%;
-  background-color: rgba(32, 32, 32, 0.6);
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 #dialog-wrapper {
-  position: relative;
+  position: fixed;
   top: 5%;
+  bottom: unset;
+  left: 0;
+  right: 0;
   margin: auto;
-  width: 80%;
-  max-height: 85%;
+  border: solid;
+  width: 90%;
+  max-height: 90%;
   padding: 12px;
+  box-sizing: border-box;
   background-color: #fcfcfc;
   overflow: auto;
   font-size: 0.75em;
