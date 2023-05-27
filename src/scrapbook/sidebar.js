@@ -1299,6 +1299,35 @@
      *   - Listen to 'dialogShow' event for elem to handle initialization.
      */
     async showDialog(elem) {
+      // polyfill for Firefox < 98
+      if (typeof HTMLDialogElement !== 'function') {
+        return await this.showDialogPolyfill(elem);
+      }
+
+      elem.method = 'dialog';
+
+      const dialog = document.createElement('dialog');
+      dialog.id = 'dialog-wrapper';
+      dialog.appendChild(elem);
+
+      const cancelElem = elem.querySelector('.cancel');
+      cancelElem.addEventListener('click', (event) => {
+        event.preventDefault();
+        dialog.close();
+      });
+
+      return await new Promise((resolve, reject) => {
+        dialog.addEventListener('close', (event) => {
+          dialog.remove();
+          resolve(dialog.returnValue);
+        });
+        document.body.appendChild(dialog);
+        dialog.showModal();
+        elem.dispatchEvent(new CustomEvent('dialogShow'));
+      });
+    },
+
+    async showDialogPolyfill(elem) {
       const mask = document.createElement('div');
       mask.id = 'dialog-mask';
 
