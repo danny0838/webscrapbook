@@ -2239,27 +2239,28 @@ ${scrapbook.escapeHtml(content)}
           dialog.querySelector('[name="charset"]').value = item.charset || "";
           dialog.querySelector('[name="comment"]').value = item.comment || "";
 
-          var elem = dialog.querySelector('[name="create"]');
+          let elem;
+          elem = dialog.querySelector('[name="create"]');
           elem.value = item.create ? scrapbook.idToDate(item.create).toLocaleString() : "";
           elem.setAttribute('data-id', item.create || "");
           elem.addEventListener('focus', onDateFocus);
           elem.addEventListener('blur', onDateBlur);
 
-          var elem = dialog.querySelector('[name="modify"]');
+          elem = dialog.querySelector('[name="modify"]');
           elem.value = item.modify ? scrapbook.idToDate(item.modify).toLocaleString() : "";
           elem.setAttribute('data-id', item.modify || "");
           elem.addEventListener('focus', onDateFocus);
           elem.addEventListener('blur', onDateBlur);
 
-          var elem = dialog.querySelector('[name="location"]');
+          elem = dialog.querySelector('[name="location"]');
           elem.value = item.location ? JSON.stringify(item.location) : "";
           validateLocation(elem);
           elem.addEventListener('change', onLocationChange);
 
-          var elem = dialog.querySelector('[name="location-view"]');
+          elem = dialog.querySelector('[name="location-view"]');
           elem.addEventListener('click', onLocationShow);
 
-          var elem = dialog.querySelector('[name="location-reset"]');
+          elem = dialog.querySelector('[name="location-reset"]');
           elem.addEventListener('click', onLocationReset);
 
           if (['postit'].includes(item.type)) {
