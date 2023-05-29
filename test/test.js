@@ -3326,6 +3326,7 @@ async function test_capture_css_disabled() {
   var blob = await capture({
     url: `${localhost}/capture_css_disabled/index2.html`,
     options: Object.assign({}, baseOptions, options),
+    delay: 100,
   });
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
@@ -3370,6 +3371,7 @@ async function test_capture_css_disabled() {
   var blob = await capture({
     url: `${localhost}/capture_css_disabled/index3.html`,
     options: Object.assign({}, baseOptions, options),
+    delay: 100,
   });
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
@@ -3414,6 +3416,7 @@ async function test_capture_css_disabled() {
   var blob = await capture({
     url: `${localhost}/capture_css_disabled/index4.html`,
     options: Object.assign({}, baseOptions, options),
+    delay: 100,
   });
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');

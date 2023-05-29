@@ -22,7 +22,9 @@
 <blockquote id="internal">internal</blockquote>
 </body>
 <script>
-document.styleSheets[2].disabled = true;
-document.styleSheets[3].disabled = false;
+setTimeout(() => {
+  document.styleSheets[2].disabled = true;
+  document.styleSheets[3].disabled = false;
+}, 0);
 </script>
 </html>
