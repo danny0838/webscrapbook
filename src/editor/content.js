@@ -1897,6 +1897,7 @@ scrapbook-toolbar, scrapbook-toolbar *,
       "shadowroot-loader", // WebScrapBook < 0.69
       "canvas-loader", // WebScrapBook < 0.69
       "infobar-loader",
+      "custom-elements-loader",
       "custom-script-safe",
     ]);
 

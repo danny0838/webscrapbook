@@ -2396,6 +2396,14 @@
           break;
       }
 
+      // record custom elements
+      {
+        const nodeName = elem.nodeName.toLowerCase();
+        if (nodeName.includes('-')) {
+          customElementNames.add(nodeName);
+        }
+      }
+
       return elem;
     };
 
@@ -2490,6 +2498,7 @@
     const origNodeMap = new WeakMap();
     const clonedNodeMap = new WeakMap();
     const shadowRootList = [];
+    const customElementNames = new Set();
 
     // create a new document to replicate nodes via import
     const newDoc = scrapbook.cloneDocument(doc, {origNodeMap, clonedNodeMap});
@@ -2897,6 +2906,20 @@
       elem.textContent = ':root {'
           + Object.entries(cssHandler.resourceMap).map(([k, v]) => `${v}:url("${k}");`).join('')
           + '}';
+      headNode.appendChild(elem);
+    }
+
+    // add a dummy custom element registration to prevent breaking :defined css rule
+    // if scripts are not captured
+    if (customElementNames.size > 0 && !['save', 'link'].includes(options["capture.script"])) {
+      const elem = newDoc.createElement('script');
+      elem.setAttribute("data-scrapbook-elem", "custom-elements-loader");
+      elem.textContent = "(" + scrapbook.compressJsFunc(function (names) {
+        if (!customElements) { return; }
+        for (const name of names) {
+          customElements.define(name, class CustomElement extends HTMLElement {});
+        }
+      }) + ")(" + JSON.stringify([...customElementNames]) + ")";
       headNode.appendChild(elem);
     }
 

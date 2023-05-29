@@ -12897,6 +12897,75 @@ async function test_capture_namespace() {
   assert(scriptElems[3].innerHTML.trim() === `console.log("svg &gt; html script")`);
 }
 
+/**
+ * Handle custom elements registry.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_custom_elements() {
+	/* capture.script = save */
+  var options = {
+    "capture.script": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_custom_elements/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`));
+
+	/* capture.script = link */
+  var options = {
+    "capture.script": "link",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_custom_elements/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(!doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`));
+
+	/* capture.script = blank */
+  var options = {
+    "capture.script": "blank",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_custom_elements/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var value = doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`).textContent.trim();
+  assert(value.match(/^\(function \(names\) \{.+\}\)\(\["custom-subelem","custom-elem"\]\)$/));
+
+	/* capture.script = remove */
+  var options = {
+    "capture.script": "remove",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_custom_elements/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var value = doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`).textContent.trim();
+  assert(value.match(/^\(function \(names\) \{.+\}\)\(\["custom-subelem","custom-elem"\]\)$/));
+}
+
 async function test_viewer_validate() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-validate/index.html'),

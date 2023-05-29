@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test shadowRoot</title>
+<style>:not(:defined) { visibility: hidden; }</style>
+</head>
+<body>
+<custom-elem><strong>This</strong> is very good.</custom-elem>
+</body>
+<script>
+customElements.define(
+  'custom-elem',
+  class CustomElem extends HTMLElement {
+    constructor() {
+      super();
+      var shadow = this.attachShadow({mode: 'open'});
+      var style = shadow.appendChild(document.createElement('style'));
+      style.textContent = `div { background-color: red; }`;
+      var div = shadow.appendChild(document.createElement('div'));
+      div.textContent = 'This is custom-elem';
+      var subElem = shadow.appendChild(document.createElement('custom-subelem'));
+    }
+  },
+);
+
+customElements.define(
+  'custom-subelem',
+  class CustomSubElem extends HTMLElement {
+    constructor() {
+      super();
+      var shadow = this.attachShadow({mode: 'open'});
+      var style = shadow.appendChild(document.createElement('style'));
+      style.textContent = `div { background-color: yellow; }`;
+      var div = shadow.appendChild(document.createElement('div'));
+      div.textContent = 'This is custom-subelem';
+    }
+  },
+);
+</script>
+</html>
