@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>body > #html { background: green; }</style>
+<script>console.log("head > html script")</script>
+</head>
+<body>
+<blockquote id="html">html</blockquote>
+<blockquote id="non-html">non-html</blockquote>
+<blockquote>
+<svg width="100" height="100"
+     viewBox="0 0 200 200"
+     xmlns="http://www.w3.org/2000/svg">
+  <style>#svg > circle { fill: green; }</style>
+  <script>console.log("svg > svg script")</script>
+  <a id="svg" href="#"><circle cx="50" cy="50" r="35"></circle></a>
+  <a id="non-svg" href="#"><circle cx="150" cy="50" r="35"></circle></a>
+</svg>
+</blockquote>
+<script>
+var elem = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+elem.textContent = 'body > #non-html { background: green; }';
+document.head.appendChild(elem);
+
+var elem = document.createElementNS('http://www.w3.org/2000/svg', 'script');
+elem.textContent = 'console.log("head > non-html script")';
+document.head.appendChild(elem);
+
+var elem = document.createElement('style');
+elem.textContent = '#non-svg > circle { fill: green; }';
+document.querySelector('svg').appendChild(elem);
+
+var elem = document.createElement('script');
+elem.textContent = 'console.log("svg > html script")';
+document.querySelector('svg').appendChild(elem);
+
+document.currentScript.remove();
+</script>
+</body>
+</html>

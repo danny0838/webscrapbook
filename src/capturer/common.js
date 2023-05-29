@@ -923,6 +923,19 @@
                     callback: (elem, response) => {
                       // escape </style> as textContent can contain HTML
                       captureRewriteTextContent(elem, response.cssText.replace(/<\/(style>)/gi, "<\\/$1"));
+
+                      // For an HTML document the CSS content must not be HTML-escaped.
+                      // However the innerHTML/outerHTML property of the <style> element
+                      // is escaped if the element is in another namespace. Replace it
+                      // with the default namespace to fix it.
+                      if (elem.namespaceURI !== 'http://www.w3.org/1999/xhtml') {
+                        const newElem = newDoc.createElement('style');
+                        for (const attr of elem.attributes) {
+                          newElem.setAttribute(attr.name, attr.value);
+                        }
+                        newElem.textContent = elem.textContent;
+                        elem.replaceWith(newElem);
+                      }
                     },
                   });
                 });
@@ -981,6 +994,19 @@
 
             // escape </script> as textContent can contain HTML
             elem.textContent = elem.textContent.replace(/<\/(script>)/gi, "<\\/$1");
+
+            // For an HTML document the script content must not be HTML-escaped.
+            // However the innerHTML/outerHTML property of the <script> element
+            // is escaped if the element is in another namespace. Replace it
+            // with the default namespace to fix it.
+            if (elem.namespaceURI !== 'http://www.w3.org/1999/xhtml') {
+              const newElem = newDoc.createElement('script');
+              for (const attr of elem.attributes) {
+                newElem.setAttribute(attr.name, attr.value);
+              }
+              newElem.textContent = elem.textContent;
+              elem.replaceWith(newElem);
+            }
             break;
           }
 

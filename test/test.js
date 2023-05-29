@@ -12868,6 +12868,35 @@ async function test_capture_helpers2() {
   assert(doc.querySelector('img[src="green.bmp"]'));
 }
 
+/**
+ * Check if <style> or <script> is in another namespace.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_namespace() {
+  var blob = await capture({
+    url: `${localhost}/capture_namespace/namespace.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[0].innerHTML.trim() === `body > #html { background: green; }`);
+  assert(styleElems[1].innerHTML.trim() === `body > #non-html { background: green; }`);
+  assert(styleElems[2].innerHTML.trim() === `#svg &gt; circle { fill: green; }`);
+  assert(styleElems[3].innerHTML.trim() === `#non-svg &gt; circle { fill: green; }`);
+
+  var scriptElems = doc.querySelectorAll('script');
+  assert(scriptElems[0].innerHTML.trim() === `console.log("head > html script")`);
+  assert(scriptElems[1].innerHTML.trim() === `console.log("head > non-html script")`);
+  assert(scriptElems[2].innerHTML.trim() === `console.log("svg &gt; svg script")`);
+  assert(scriptElems[3].innerHTML.trim() === `console.log("svg &gt; html script")`);
+}
+
 async function test_viewer_validate() {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer-validate/index.html'),
