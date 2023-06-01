@@ -2,7 +2,7 @@
 
 * `browser-polyfill.js`: built from [webextension-polyfill](https://github.com/mozilla/webextension-polyfill/tree/0.8.0)
 
-* `jszip.js`: from [jszip](https://github.com/Stuk/jszip/blob/v3.5.0/dist/jszip.js)
+* `jszip.js`: from [jszip](https://github.com/Stuk/jszip/blob/v3.10.1/dist/jszip.js)
 
 * `sha_dev.js`: from [jsSHA](https://github.com/Caligatio/jsSHA/blob/v2.3.1/src/sha_dev.js)
 
