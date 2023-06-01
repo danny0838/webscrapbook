@@ -446,7 +446,7 @@ if (new URLSearchParams({}).toString() !== '') {
   const CONTENT_SCRIPT_FILES = [
     "/lib/browser-polyfill.js",
     "/lib/mime.js",
-    "/lib/sha_dev.js",
+    "/lib/sha.js",
     "/lib/map-with-default.js",
     "/lib/strftime.js",
     "/core/common.js",
