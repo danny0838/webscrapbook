@@ -40,18 +40,27 @@
 
       showSoureInTitle: {
         let source;
-        if (gTaskInfo.tasks.length === 1) {
-          if (Number.isInteger(gTaskInfo.tasks[0].tabId)) {
-            const tabId = gTaskInfo.tasks[0].tabId;
-            const frameId = Number.isInteger(gTaskInfo.tasks[0].frameId) ? ':' + gTaskInfo.tasks[0].frameId : '';
-            const title = gTaskInfo.tasks[0].title ? ' ' + gTaskInfo.tasks[0].title : 
-                gTaskInfo.tasks[0].url ? ' ' + gTaskInfo.tasks[0].url : '';
-            source = `[${tabId}${frameId}]${title}`;
-          } else if (gTaskInfo.tasks[0].url) {
-            source = gTaskInfo.tasks[0].url;
+        switch (gTaskInfo.tasks.length) {
+          case 1: {
+            if (Number.isInteger(gTaskInfo.tasks[0].tabId)) {
+              const tabId = gTaskInfo.tasks[0].tabId;
+              const frameId = Number.isInteger(gTaskInfo.tasks[0].frameId) ? ':' + gTaskInfo.tasks[0].frameId : '';
+              const title = gTaskInfo.tasks[0].title ? ' ' + gTaskInfo.tasks[0].title : 
+                  gTaskInfo.tasks[0].url ? ' ' + gTaskInfo.tasks[0].url : '';
+              source = `[${tabId}${frameId}]${title}`;
+            } else if (gTaskInfo.tasks[0].url) {
+              source = gTaskInfo.tasks[0].url;
+            }
+            break;
           }
-        } else {
-          source = '*';
+          case 0: {
+            source = '-';
+            break;
+          }
+          default: {
+            source = '*';
+            break;
+          }
         }
         if (source) {
           document.title = scrapbook.lang('CaptureDetailsTitleForSource', [source]);
