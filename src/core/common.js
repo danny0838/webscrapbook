@@ -194,6 +194,7 @@ if (new URLSearchParams({}).toString() !== '') {
     "checker.resolveAbsoluteIcon": true,
     "checker.resolveUnusedIcon": true,
     "checker.makeBackup": true,
+    "scrapbook.itemPicker.recentItemsMax": 10,
     "scrapbook.sidebarOpenInNewTab": false,
     "scrapbook.sidebarSourceInNewTab": false,
     "scrapbook.sidebarViewTextInNewTab": false,

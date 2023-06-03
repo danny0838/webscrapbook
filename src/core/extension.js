@@ -415,6 +415,7 @@
    * @param {integer} params.targetTabId
    * @param {string} params.targetCallback
    * @param {string} [params.bookId]
+   * @param {string} [params.recentItemsKey]
    * @param {Object} [params.windowCreateData]
    * @param {Object} [params.tabCreateData]
    * @return {Promise<(Object|Window|Tab)>}
@@ -423,6 +424,7 @@
     targetTabId,
     targetCallback,
     bookId,
+    recentItemsKey,
     windowCreateData,
     tabCreateData,
   }) {
@@ -435,6 +437,9 @@
     }
     if (typeof bookId !== 'undefined') {
       u.searchParams.set('bookId', bookId);
+    }
+    if (typeof recentItemsKey !== 'undefined') {
+      u.searchParams.set('rkey', recentItemsKey);
     }
     const url = u.href;
 

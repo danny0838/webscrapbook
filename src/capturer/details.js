@@ -367,6 +367,7 @@
       targetTabId: (await browser.tabs.getCurrent()).id,
       targetCallback: 'details.pickItem',
       bookId: getOptionFromElement(document.getElementById('tasks_bookId')),
+      recentItemsKey: 'scrapbookLastPickedItems',
     });
   }
 

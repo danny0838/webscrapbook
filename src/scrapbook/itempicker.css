@@ -24,6 +24,10 @@ body {
   min-width: unset;
 }
 
+#recent {
+  margin-bottom: .5em;
+}
+
 #tree {
   flex: 1;
   box-sizing: border-box;
