@@ -110,6 +110,18 @@
           setOptionToElement(elem, value);
         }
       }
+
+      // bind book ID for parentId options
+      {
+        const bookId = gTaskInfo['bookId'];
+        for (const elem of document.getElementById('tasks_parentId').querySelectorAll('#tasks_parentId option:not([value="root"])')) {
+          if (!elem.bookIds) {
+            elem.bookIds = new Set();
+          }
+          elem.bookIds.add(bookId);
+        }
+      }
+
       for (const elem of document.querySelectorAll('[id^="opt_"]')) {
         const key = elem.id.slice(4);
         const value = gTaskInfo.options[key];
