@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.14.5] - 2023-06-03
+* Fixed some GUI issues of the target item selector for `Capture as` dialog when loaded with a non-root value.
+* Improved the title for `Capture as` dialog when no task is loaded.
+* Improved the GUI for the sidebar tree to make the dropping demarcation more clear.
+
 ## [1.14.4] - 2023-05-29
 * Fixed incorrectly escaped style/script contents in the captured page in some rare cases.
 * Fixed broken `:defined` CSS rules in the captured page when scripts are not saved.
