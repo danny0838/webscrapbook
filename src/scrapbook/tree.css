@@ -135,14 +135,14 @@
 }
 
 .tree li > div.dragover.above {
-  border-top-color: #3399FF;
+  border-top-color: #FF3333;
 }
 
 .tree li > div.dragover.below {
-  border-bottom-color: #3399FF;
+  border-bottom-color: #FF3333;
 }
 
 .tree li > div.dragover.within {
   border-style: dashed;
-  border-color: #3399FF;
+  border-color: #FF3333;
 }
