@@ -33,7 +33,7 @@
   box-sizing: border-box;
   margin: -2px 0;
   border: solid transparent;
-  border-width: 2px 0;
+  border-width: 2px;
   padding-__MSG_@@bidi_start_edge__: 1em;
   white-space: nowrap;
 }
@@ -55,8 +55,8 @@
 }
 
 .tree.selectable li > div:hover::before {
-  border-color: rgba(125, 162, 206, 0.3);
-  background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.3));
+  border-color: rgba(125, 162, 206, .3);
+  background: linear-gradient(rgba(235, 244, 253, .2), rgba(196, 221, 252, .2));
 }
 
 .tree a {
@@ -117,7 +117,7 @@
 
 .tree.selectable li > div.highlight::before {
   border: 1px solid rgba(125, 162, 206, .7);
-  background: linear-gradient(rgba(235, 244, 253, .7), rgba(196, 221, 252, .7));
+  background: linear-gradient(rgba(235, 244, 253, .3), rgba(196, 221, 252, .3));
 }
 
 .tree.selectable li > div.anchor::before {
@@ -126,8 +126,8 @@
 
 .tree.selectable li > div.highlight:hover::before,
 .tree.selectable li > div.highlight.anchor::before {
-  border: 1px solid rgba(125, 162, 206, .9);
-  background: linear-gradient(rgba(235, 244, 253, .9), rgba(196, 221, 252, .9));
+  border: 1px solid rgba(125, 162, 206, .7);
+  background: linear-gradient(rgba(235, 244, 253, .5), rgba(196, 221, 252, .5));
 }
 
 .tree.moving li.dragged {
@@ -143,5 +143,6 @@
 }
 
 .tree li > div.dragover.within {
-  outline: 2px dashed #3399FF;
+  border-style: dashed;
+  border-color: #3399FF;
 }
