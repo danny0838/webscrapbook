@@ -123,7 +123,7 @@
       // bind book ID for parentId options
       {
         const bookId = gTaskInfo['bookId'];
-        for (const elem of document.getElementById('tasks_parentId').querySelectorAll('#tasks_parentId option:not([value="root"])')) {
+        for (const elem of document.getElementById('tasks_parentId').querySelectorAll('option:not([value="root"])')) {
           if (!elem.bookIds) {
             elem.bookIds = new Set();
           }
