@@ -2313,13 +2313,14 @@ ${scrapbook.escapeHtml(content)}
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
+            // add item and generate index page
             await server.request({
               query: {
                 a: 'query',
                 no_lock: 1,
               },
-              body: {
-                q: JSON.stringify({
+              body: [
+                ['q', JSON.stringify({
                   book: book.id,
                   cmd: 'add_item',
                   kwargs: {
@@ -2327,23 +2328,20 @@ ${scrapbook.escapeHtml(content)}
                     target_parent_id: parentItemId,
                     target_index: index,
                   },
-                }),
-              },
+                })],
+                ['q', JSON.stringify({
+                  book: book.id,
+                  cmd: 'save_item_postit',
+                  kwargs: {
+                    item_id: newItem.id,
+                    content: '',
+                    auto_modify: false,
+                  },
+                })],
+              ],
               method: 'POST',
               format: 'json',
               csrfToken: true,
-            });
-
-            // create index file
-            const target = this.book.dataUrl + scrapbook.escapeFilename(newItem.index);
-            await server.request({
-              url: target + '?a=save',
-              method: "POST",
-              format: 'json',
-              csrfToken: true,
-              body: {
-                upload: new Blob([''], {type: 'text/plain'}),
-              },
             });
 
             await this.rebuild();
@@ -2416,13 +2414,14 @@ ${scrapbook.escapeHtml(content)}
         await this.book.transaction({
           mode: 'validate',
           callback: async (book) => {
+            // add item and generate index page
             await server.request({
               query: {
                 a: 'query',
                 no_lock: 1,
               },
-              body: {
-                q: JSON.stringify({
+              body: [
+                ['q', JSON.stringify({
                   book: book.id,
                   cmd: 'add_item',
                   kwargs: {
@@ -2430,29 +2429,16 @@ ${scrapbook.escapeHtml(content)}
                     target_parent_id: parentItemId,
                     target_index: index,
                   },
-                }),
-              },
-              method: 'POST',
-              format: 'json',
-              csrfToken: true,
-            });
-
-            // generate index page
-            await server.request({
-              query: {
-                a: 'query',
-                no_lock: 1,
-              },
-              body: {
-                q: JSON.stringify({
+                })],
+                ['q', JSON.stringify({
                   book: book.id,
                   cmd: 'add_item_subpage',
                   kwargs: {
                     item_id: newItem.id,
                     ext: type === 'markdown' ? '.md' : '.html',
                   },
-                }),
-              },
+                })],
+              ],
               method: 'POST',
               format: 'json',
               csrfToken: true,
