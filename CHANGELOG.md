@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [1.14.7] - 2023-06-11
+* Fixed an issue that erasing by selector may remove the custom elements loader.
+
 ## [1.14.6] - 2023-06-04
 * Fixed misbehaving tree scrollbar for the item picker dialog.
 
