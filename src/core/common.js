@@ -1865,6 +1865,7 @@ if (new URLSearchParams({}).toString() !== '') {
    *   basic-loader (since 0.69.0 <= WSB)
    *   annotation-css (since 0.70.0 <= WSB)
    *   annotation-loader (since 0.70.0 <= WSB)
+   *   custom-elements-loader (since 1.14.4 <= WSB)
    *   infobar-loader (since 0.82.0 <= WSB)
    *   canvas-loader (for 0.51 <= WSB < 0.69)
    *   shadowroot-loader (for 0.51 <= WSB < 0.69)

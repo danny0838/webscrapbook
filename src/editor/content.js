@@ -58,17 +58,14 @@
 
   const LINEMARKABLE_ELEMENTS = `img, picture, canvas, input[type="image"]`;
 
-  const NON_ERASABLE_ELEMENTS = `\
-html, head, body,
-scrapbook-toolbar, scrapbook-toolbar *,
-[data-scrapbook-elem="annotation-css"],
-[data-scrapbook-elem="basic-loader"],
-[data-scrapbook-elem="annotation-loader"],
-[data-scrapbook-elem="shadowroot-loader"],
-[data-scrapbook-elem="canvas-loader"],
-[data-scrapbook-elem="custom-css"],
-[data-scrapbook-elem="custom-script"],
-[data-scrapbook-elem="custom-script-safe"]`;
+  const NON_ERASABLE_ELEMENTS = [
+    'html', 'head', 'body',
+    'scrapbook-toolbar', 'scrapbook-toolbar *',
+    '[data-scrapbook-elem="annotation-css"]',
+    '[data-scrapbook-elem="custom-css"]',
+    '[data-scrapbook-elem="custom-script"]',
+    ...[...ALLOWED_SCRAPBOOK_SCRIPTS].map(x => `[data-scrapbook-elem="${x}"]`),
+  ].join(',');
 
   const editor = {
     element: null,
