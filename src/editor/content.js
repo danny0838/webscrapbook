@@ -25,7 +25,50 @@
 
   const SHADOW_DOM_SUPPORTED = !!document.documentElement.attachShadow;
 
+  // https://mimesniff.spec.whatwg.org/
+  const SCRIPT_TYPES = new Set([
+    "",
+    "application/ecmascript",
+    "application/javascript",
+    "application/x-ecmascript",
+    "application/x-javascript",
+    "text/ecmascript",
+    "text/javascript",
+    "text/javascript1.0",
+    "text/javascript1.1",
+    "text/javascript1.2",
+    "text/javascript1.3",
+    "text/javascript1.4",
+    "text/javascript1.5",
+    "text/jscript",
+    "text/livescript",
+    "text/x-ecmascript",
+    "text/x-javascript",
+  ]);
+
+  const ALLOWED_SCRAPBOOK_SCRIPTS = new Set([
+    "basic-loader",
+    "annotation-loader",
+    "shadowroot-loader", // WebScrapBook < 0.69
+    "canvas-loader", // WebScrapBook < 0.69
+    "infobar-loader",
+    "custom-elements-loader",
+    "custom-script-safe",
+  ]);
+
   const LINEMARKABLE_ELEMENTS = `img, picture, canvas, input[type="image"]`;
+
+  const NON_ERASABLE_ELEMENTS = `\
+html, head, body,
+scrapbook-toolbar, scrapbook-toolbar *,
+[data-scrapbook-elem="annotation-css"],
+[data-scrapbook-elem="basic-loader"],
+[data-scrapbook-elem="annotation-loader"],
+[data-scrapbook-elem="shadowroot-loader"],
+[data-scrapbook-elem="canvas-loader"],
+[data-scrapbook-elem="custom-css"],
+[data-scrapbook-elem="custom-script"],
+[data-scrapbook-elem="custom-script-safe"]`;
 
   const editor = {
     element: null,
@@ -1119,32 +1162,18 @@ ${sHost} .toolbar .toolbar-close:hover {
   /**
    * @kind invokable
    */
-  editor.eraseSelectorInternal = function (...args) {
-    const FORBID_NODES = `\
-html, head, body,
-scrapbook-toolbar, scrapbook-toolbar *,
-[data-scrapbook-elem="annotation-css"],
-[data-scrapbook-elem="basic-loader"],
-[data-scrapbook-elem="annotation-loader"],
-[data-scrapbook-elem="shadowroot-loader"],
-[data-scrapbook-elem="canvas-loader"],
-[data-scrapbook-elem="custom-css"],
-[data-scrapbook-elem="custom-script"],
-[data-scrapbook-elem="custom-script-safe"]`;
-    const fn = editor.eraseSelectorInternal = ({selector}) => {
-      editor.addHistory();
+  editor.eraseSelectorInternal = function ({selector}) {
+    editor.addHistory();
 
-      const timeId = scrapbook.dateToId();
-      const elems = document.querySelectorAll(selector);
+    const timeId = scrapbook.dateToId();
+    const elems = document.querySelectorAll(selector);
 
-      // handle descendant node first as it may be altered when handling ancestor
-      for (const elem of Array.from(elems).reverse()) {
-        if (elem.matches(FORBID_NODES)) { continue; }
+    // handle descendant node first as it may be altered when handling ancestor
+    for (const elem of Array.from(elems).reverse()) {
+      if (elem.matches(NON_ERASABLE_ELEMENTS)) { continue; }
 
-        editor.eraseNode(elem, timeId);
-      }
-    };
-    return fn(...args);
+      editor.eraseNode(elem, timeId);
+    }
   };
 
   /**
@@ -1871,42 +1900,12 @@ scrapbook-toolbar, scrapbook-toolbar *,
    * @return {boolean} Whether the document has a working script.
    */
   editor.isDocumentScripted = function (doc) {
-    // https://mimesniff.spec.whatwg.org/
-    const SCRIPT_TYPES = new Set([
-      "",
-      "application/ecmascript",
-      "application/javascript",
-      "application/x-ecmascript",
-      "application/x-javascript",
-      "text/ecmascript",
-      "text/javascript",
-      "text/javascript1.0",
-      "text/javascript1.1",
-      "text/javascript1.2",
-      "text/javascript1.3",
-      "text/javascript1.4",
-      "text/javascript1.5",
-      "text/jscript",
-      "text/livescript",
-      "text/x-ecmascript",
-      "text/x-javascript",
-    ]);
-    const LOADER_TYPES = new Set([
-      "basic-loader",
-      "annotation-loader",
-      "shadowroot-loader", // WebScrapBook < 0.69
-      "canvas-loader", // WebScrapBook < 0.69
-      "infobar-loader",
-      "custom-elements-loader",
-      "custom-script-safe",
-    ]);
-
     for (const fdoc of scrapbook.flattenFrames(doc)) {
       for (const elem of fdoc.querySelectorAll("*")) {
         // check <script> elements
         if (elem.nodeName.toLowerCase() === 'script') {
           if (SCRIPT_TYPES.has(elem.type.toLowerCase()) &&
-              !LOADER_TYPES.has(scrapbook.getScrapbookObjectType(elem))) {
+              !ALLOWED_SCRAPBOOK_SCRIPTS.has(scrapbook.getScrapbookObjectType(elem))) {
             if (elem.src) {
               return true;
             } else if (!/^\s*(?:(?:\/\*[^*]*(?:\*(?!\/)[^*]*)*\*\/|\/\/.*)\s*)*$/.test(elem.textContent)) {
