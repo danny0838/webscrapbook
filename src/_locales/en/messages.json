@@ -323,7 +323,7 @@
     "message": "Revert erases in selection"
   },
   "EditorButtonEraserSelection": {
-    "message": "Revert all erases"
+    "message": "Erase selected content"
   },
   "EditorButtonEraserSelector": {
     "message": "Erase via CSS selector"
