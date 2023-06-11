@@ -334,6 +334,15 @@
   "EditorButtonEraserSelectorPrompt": {
     "message": "请输入用于擦除内容的 CSS 选择器："
   },
+  "EditorButtonEraserXpath": {
+    "message": "透过 XPath 擦除内容"
+  },
+  "EditorButtonEraserXpathAll": {
+    "message": "透过 XPath 擦除内容（所有框架页）"
+  },
+  "EditorButtonEraserXpathPrompt": {
+    "message": "请输入用于擦除内容的 XPath："
+  },
   "EditorButtonHtmlEditor": {
     "message": "HTML 编辑工具 - 点击开启或关闭。开启后可自由编辑页面内容。（保存后无法复原）"
   },
@@ -557,6 +566,14 @@
   },
   "ErrorEditorButtonEraserSelectorInvalid": {
     "message": "'$SELECTOR$' 不是有效的 CSS 选择器。",
+    "placeholders": {
+      "selector": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorEditorButtonEraserXpathInvalid": {
+    "message": "'$SELECTOR$' 不是有效的 XPath。",
     "placeholders": {
       "selector": {
         "content": "$1"

@@ -334,6 +334,15 @@
   "EditorButtonEraserSelectorPrompt": {
     "message": "Specify the CSS selector to erase elements:"
   },
+  "EditorButtonEraserXpath": {
+    "message": "Erase via XPath"
+  },
+  "EditorButtonEraserXpathAll": {
+    "message": "Erase via XPath (all frames)"
+  },
+  "EditorButtonEraserXpathPrompt": {
+    "message": "Specify the XPath to erase elements:"
+  },
   "EditorButtonHtmlEditor": {
     "message": "HTML editor - Click to toggle page content editing. (Edits cannot be undone after save.)"
   },
@@ -557,6 +566,14 @@
   },
   "ErrorEditorButtonEraserSelectorInvalid": {
     "message": "'$selector$' is not a valid selector.",
+    "placeholders": {
+      "selector": {
+        "content": "$1"
+      }
+    }
+  },
+  "ErrorEditorButtonEraserXpathInvalid": {
+    "message": "'$SELECTOR$' is not a valid XPath。",
     "placeholders": {
       "selector": {
         "content": "$1"

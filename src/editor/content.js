@@ -471,6 +471,8 @@ ${sHost} .toolbar .toolbar-close:hover {
       <li><button class="toolbar-eraser-eraseSelection">${scrapbook.lang('EditorButtonEraserSelection')}</button></li>
       <li><button class="toolbar-eraser-eraseSelector">${scrapbook.lang('EditorButtonEraserSelector')}...</button></li>
       <li><button class="toolbar-eraser-eraseSelectorAll">${scrapbook.lang('EditorButtonEraserSelectorAll')}...</button></li>
+      <li><button class="toolbar-eraser-eraseXpath">${scrapbook.lang('EditorButtonEraserXpath')}...</button></li>
+      <li><button class="toolbar-eraser-eraseXpathAll">${scrapbook.lang('EditorButtonEraserXpathAll')}...</button></li>
       <hr/>
       <li><button class="toolbar-eraser-uneraseSelection">${scrapbook.lang('EditorButtonEraserRevertSelection')}</button></li>
       <li><button class="toolbar-eraser-uneraseAll">${scrapbook.lang('EditorButtonEraserRevertAll')}</button></li>
@@ -690,6 +692,16 @@ ${sHost} .toolbar .toolbar-close:hover {
     var elem = wrapper.querySelector('.toolbar-eraser-eraseSelectorAll');
     elem.addEventListener("click", (event) => {
       editor.eraseSelector(true);
+    }, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-eraser-eraseXpath');
+    elem.addEventListener("click", (event) => {
+      editor.eraseXpath();
+    }, {passive: true});
+
+    var elem = wrapper.querySelector('.toolbar-eraser-eraseXpathAll');
+    elem.addEventListener("click", (event) => {
+      editor.eraseXpath(true);
     }, {passive: true});
 
     var elem = wrapper.querySelector('.toolbar-eraser-uneraseSelection');
@@ -1176,6 +1188,28 @@ ${sHost} .toolbar .toolbar-close:hover {
   /**
    * @kind invokable
    */
+  editor.eraseXpathInternal = function ({selector}) {
+    editor.addHistory();
+
+    const timeId = scrapbook.dateToId();
+    const evaluator = document.evaluate(selector, document, null);
+    const elems = [];
+    let nextElem;
+    while (nextElem = evaluator.iterateNext()) {
+      elems.push(nextElem);
+    }
+
+    // handle descendant node first as it may be altered when handling ancestor
+    for (const elem of elems.reverse()) {
+      if (elem.matches(NON_ERASABLE_ELEMENTS)) { continue; }
+
+      editor.eraseNode(elem, timeId);
+    }
+  };
+
+  /**
+   * @kind invokable
+   */
   editor.uneraseNodesInternal = function () {
     editor.addHistory();
 
@@ -1458,6 +1492,32 @@ ${sHost} .toolbar .toolbar-close:hover {
       args: {
         frameId,
         cmd: "editor.eraseSelectorInternal",
+        args: {selector},
+      },
+    });
+  };
+
+  editor.eraseXpath = async function (allFrames = false) {
+    const frameId = allFrames ? undefined : await editor.getFocusedFrameId();
+    const selector = prompt(scrapbook.lang('EditorButtonEraserXpathPrompt'));
+
+    if (!selector) {
+      return;
+    }
+
+    let evaluator;
+    try {
+      document.evaluate(selector, document, null);
+    } catch (ex) {
+      alert(scrapbook.lang('ErrorEditorButtonEraserXpathInvalid', [selector]));
+      return;
+    }
+
+    return await scrapbook.invokeExtensionScript({
+      cmd: "background.invokeEditorCommand",
+      args: {
+        frameId,
+        cmd: "editor.eraseXpathInternal",
         args: {selector},
       },
     });
