@@ -1,6 +1,6 @@
 ## Dependencies
 
-* `browser-polyfill.js`: from [webextension-polyfill](https://unpkg.com/browse/webextension-polyfill@0.10.0/dist/)
+* `browser-polyfill.js`: from [webextension-polyfill](https://unpkg.com/browse/webextension-polyfill@0.8.0/dist/)
 
 * `jszip.js`: from [jszip](https://github.com/Stuk/jszip/blob/v3.10.1/dist/jszip.js)
 

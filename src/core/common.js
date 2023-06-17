@@ -1377,6 +1377,7 @@ if (new URLSearchParams({}).toString() !== '') {
             isDebug && console.debug("inject content scripts", tabId, frameId, url);
             try {
               for (const file of CONTENT_SCRIPT_FILES) {
+console.warn(file)
                 await browser.tabs.executeScript(tabId, {frameId, file, runAt: "document_start"});
               }
               await browser.tabs.executeScript(tabId, {frameId, code: `core.frameId = ${frameId};`, runAt: "document_start"});
