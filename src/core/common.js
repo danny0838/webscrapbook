@@ -70,7 +70,7 @@ if (new URLSearchParams({}).toString() !== '') {
 
   'use strict';
 
-  const BACKEND_MIN_VERSION = '0.36.0';
+  const BACKEND_MIN_VERSION = '2.0.1';
 
   const DEFAULT_OPTIONS = {
     "ui.toolbar.showCaptureTab": true,

@@ -3,6 +3,20 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.0.1] - 2023-06-17
+* Bumped server requirement to >= 2.0.1.
+* Reworked scrapbook search as server sided.
+* Optimized several scrapbook operations using new server-sided API.
+* Added support of recent picked items for the item picker of the details dialog.
+* Added support of erasing elements with XPath.
+* Added support of permanently deleting item(s) by holding shift when performing a `Remove`.
+* Added `Empty recycle bin` command.
+* Added support of item exporting/importing.
+* Added new options `scrapbook.autoCache.fulltextCache` and `scrapbook.autoCache.createStaticSite` for automatic cache update.
+* Fulltext cache is now updated automatically when creating a new note or uploading files.
+* Adjusted DnD effect for the sidebar tree.
+* Improved UI for modal dialogs.
+
 ## [1.14.7] - 2023-06-11
 * Fixed an issue that erasing by selector may remove the custom elements loader.
 
