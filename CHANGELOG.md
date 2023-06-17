@@ -3,6 +3,9 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.0.3] - 2023-06-18
+* Remove obsolete debug code.
+
 ## [2.0.2] - 2023-06-18
 * Fixed script error in Chromium < 80 and Firefox < 74.
 
