@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.0.4] - 2023-06-21
+* Fixed an issue that `Capture tabs` like actions in the context menu of a tab does not apply to all selected tabs.
+* Fixed an issue that item locating does not work in Firefox < 59.
+
 ## [2.0.3] - 2023-06-18
 * Remove obsolete debug code.
 
