@@ -475,7 +475,12 @@
     }
 
     scrollIntoView(itemElem) {
-      itemElem.controller.scrollIntoView({block: "nearest", inline: "start"});
+      try {
+        itemElem.controller.scrollIntoView({block: "nearest", inline: "start"});
+      } catch (ex) {
+        // Firfox < 58: block: "nearest" is not supported
+        itemElem.controller.scrollIntoView({block: "start", inline: "start"});
+      }
     }
 
     keyboardNavigation(event) {
