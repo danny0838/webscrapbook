@@ -595,14 +595,25 @@
 
     // Available only in Firefox >= 53.
     if (browser.contextMenus.ContextType.TAB) {
+      const captureTabs = async ({mode, details = false} = {}) => {
+        const tabs = await scrapbook.getHighlightedTabs();
+        const taskInfo = {
+          tasks: tabs.map(tab => ({
+            tabId: tab.id,
+            url: tab.url,
+            title: tab.title,
+          })),
+          mode,
+        };
+        return details ? await scrapbook.invokeCaptureAs(taskInfo) : await scrapbook.invokeCaptureEx({taskInfo});
+      };
+
       browser.contextMenus.create({
         title: scrapbook.lang("CaptureTab"),
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
         onclick: (info, tab) => {
-          return scrapbook.invokeCapture([{
-            tabId: tab.id,
-          }]);
+          return captureTabs();
         },
       });
 
@@ -611,10 +622,9 @@
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
         onclick: (info, tab) => {
-          return scrapbook.invokeCapture([{
-            tabId: tab.id,
+          return captureTabs({
             mode: "source",
-          }]);
+          });
         },
       });
 
@@ -623,10 +633,9 @@
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
         onclick: (info, tab) => {
-          return scrapbook.invokeCapture([{
-            tabId: tab.id,
+          return captureTabs({
             mode: "bookmark",
-          }]);
+          });
         },
       });
 
@@ -635,12 +644,8 @@
         contexts: ["tab"],
         documentUrlPatterns: urlMatch,
         onclick: async (info, tab) => {
-          return await scrapbook.invokeCaptureAs({
-            tasks: [{
-              tabId: tab.id,
-              url: tab.url,
-              title: tab.title,
-            }],
+          return captureTabs({
+            details: true,
           });
         },
       });
