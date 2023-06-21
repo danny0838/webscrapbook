@@ -201,7 +201,10 @@
     if (browser.sidebarAction) {
       // Unfortunately we cannot force open the sidebar from a user gesture
       // in a content page if it's closed.
-      if (!await browser.sidebarAction.isOpen({})) {
+      // Firefox < 59: browser.sidebarAction.isOpen is not supported. Run
+      // invokeExtensionScript anyway, and gets an error if the sidebar is not
+      // opened.
+      if (browser.sidebarAction.isOpen && !await browser.sidebarAction.isOpen({})) {
         return false;
       }
 
