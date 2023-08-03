@@ -670,6 +670,11 @@
         return;
       }
 
+      // insert after the selected one
+      if (!this.book.config.new_at_top) {
+        targetIndex += 1;
+      }
+
       if (event.clipboardData.types.includes('application/scrapbook.items+json')) {
         const data = JSON.parse(event.clipboardData.getData('application/scrapbook.items+json'));
         if (!data.items) {
@@ -677,15 +682,44 @@
         }
 
         if (this.rootId !== 'recycle') {
-          if (!this.book.config.new_at_top) {
-            // insert after the selected one
-            targetIndex += 1;
-          }
           await this.runTask(async () => {
             await this.copyItems(data, targetId, targetIndex);
           });
         }
 
+        return;
+      }
+
+      if (event.clipboardData.types.includes('Files') && this.rootId !== 'recycle') {
+        const entries = Array.prototype.map.call(
+          event.clipboardData.items,
+          x => x.webkitGetAsEntry && x.webkitGetAsEntry()
+        ).sort((a, b) => {
+          if (a.name > b.name) { return 1; }
+          if (a.name < b.name) { return -1; }
+          return 0;
+        });
+
+        const files = [];
+        for (const entry of entries) {
+          if (!entry.isFile) { continue; }
+          try {
+            const file = await new Promise((resolve, reject) => {
+              entry.file(resolve, reject);
+            });
+            files.push(file);
+          } catch (ex) {
+            console.error(`Unable to read file "${entry.name}"`);
+          }
+        }
+
+        await this.runTask(async () => {
+          if (files.every(f => f.name.toLowerCase().endsWith('.wsba'))) {
+            await this.importItems(files, targetId, targetIndex);
+          } else {
+            await this.uploadItems(files, targetId, targetIndex);
+          }
+        });
         return;
       }
     },
