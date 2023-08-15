@@ -1611,7 +1611,7 @@
     }
   },
   "ScrapBookErrorServerInit": {
-    "message": "Backend initilization error: $REASON$",
+    "message": "Backend initialization error: $REASON$",
     "placeholders": {
       "reason": {
         "content": "$1"
