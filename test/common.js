@@ -362,6 +362,18 @@ function assert(condition, message) {
   }
 }
 
+function sha1(data, type) {
+  let shaObj = new jsSHA("SHA-1", type);
+  shaObj.update(data);
+  return shaObj.getHash("HEX");
+}
+
+function getToken(url, role) {
+  let token = `${url}\t${role}`;
+  token = sha1(token, "TEXT");
+  return token;
+}
+
 function getUuid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     let r = Math.random()*16|0, v = (c == 'x') ? r : (r&0x3|0x8);

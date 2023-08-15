@@ -8601,7 +8601,7 @@ async function test_capture_downLink04() {
         "path": "index.html",
         "url": `${localhost}/capture_downLink02/in-depth.html`,
         "role": "document",
-        "token": "4d1c1ec03d903c3784223ca53a70f1c2e6d0f9a2"
+        "token": getToken(`${localhost}/capture_downLink02/in-depth.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -8697,7 +8697,7 @@ async function test_capture_downLink04() {
         "path": "index.html",
         "url": `${localhost}/capture_downLink02/in-depth.html`,
         "role": "document",
-        "token": "4d1c1ec03d903c3784223ca53a70f1c2e6d0f9a2"
+        "token": getToken(`${localhost}/capture_downLink02/in-depth.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -8711,31 +8711,31 @@ async function test_capture_downLink04() {
         "path": "linked1-1.html",
         "url": `${localhost}/capture_downLink02/linked1-1.html`,
         "role": "document",
-        "token": "b121b87e0bf03bd60a90e111aaecf4f8a677ee5b"
+        "token": getToken(`${localhost}/capture_downLink02/linked1-1.html`, "document")
       },
       {
         "path": "linked1-2.html",
         "url": `${localhost}/capture_downLink02/linked1-2.html`,
         "role": "document",
-        "token": "a8aa97a92cb43b5f7660faee8f137fdab8ca31b9"
+        "token": getToken(`${localhost}/capture_downLink02/linked1-2.html`, "document")
       },
       {
         "path": "linked1-3.html",
         "url": `${localhost}/capture_downLink02/linked1-3.html`,
         "role": "document",
-        "token": "58b56ed1c67b711350cd7a9287c389da0735ad94"
+        "token": getToken(`${localhost}/capture_downLink02/linked1-3.html`, "document")
       },
       {
         "path": "linked1-4.html",
         "url": `${localhost}/capture_downLink02/linked1-4.html`,
         "role": "document",
-        "token": "22eab9cdd5f27dcfdad49e3403cacedef8120ed1"
+        "token": getToken(`${localhost}/capture_downLink02/linked1-4.html`, "document")
       },
       {
         "path": "linked1-5.html",
         "url": `${localhost}/capture_downLink02/linked1-5.html`,
         "role": "document",
-        "token": "5b126f38787046a90d5587d28ee2db7620b9c889"
+        "token": getToken(`${localhost}/capture_downLink02/linked1-5.html`, "document")
       }
     ]
   };
@@ -8829,7 +8829,7 @@ async function test_capture_downLink04() {
         "path": "index.html",
         "url": `${localhost}/capture_downLink02/in-depth.html`,
         "role": "document",
-        "token": "4d1c1ec03d903c3784223ca53a70f1c2e6d0f9a2"
+        "token": getToken(`${localhost}/capture_downLink02/in-depth.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -8843,43 +8843,43 @@ async function test_capture_downLink04() {
         "path": "linked1-1.html",
         "url": `${localhost}/capture_downLink02/linked1-1.html`,
         "role": "document",
-        "token": "b121b87e0bf03bd60a90e111aaecf4f8a677ee5b"
+        "token": getToken(`${localhost}/capture_downLink02/linked1-1.html`, "document")
       },
       {
         "path": "linked1-2.html",
         "url": `${localhost}/capture_downLink02/linked1-2.html`,
         "role": "document",
-        "token": "a8aa97a92cb43b5f7660faee8f137fdab8ca31b9"
+        "token": getToken(`${localhost}/capture_downLink02/linked1-2.html`, "document")
       },
       {
         "path": "linked1-3.html",
         "url": `${localhost}/capture_downLink02/linked1-3.html`,
         "role": "document",
-        "token": "58b56ed1c67b711350cd7a9287c389da0735ad94"
+        "token": getToken(`${localhost}/capture_downLink02/linked1-3.html`, "document")
       },
       {
         "path": "linked1-4.html",
         "url": `${localhost}/capture_downLink02/linked1-4.html`,
         "role": "document",
-        "token": "22eab9cdd5f27dcfdad49e3403cacedef8120ed1"
+        "token": getToken(`${localhost}/capture_downLink02/linked1-4.html`, "document")
       },
       {
         "path": "linked1-5.html",
         "url": `${localhost}/capture_downLink02/linked1-5.html`,
         "role": "document",
-        "token": "5b126f38787046a90d5587d28ee2db7620b9c889"
+        "token": getToken(`${localhost}/capture_downLink02/linked1-5.html`, "document")
       },
       {
         "path": "linked2-1.html",
         "url": `${localhost}/capture_downLink02/linked2-1.html`,
         "role": "document",
-        "token": "e26b23caa1aacba9fed043f8454de6fe3f7ffb29"
+        "token": getToken(`${localhost}/capture_downLink02/linked2-1.html`, "document")
       },
       {
         "path": "linked2-2.html",
         "url": `${localhost}/capture_downLink02/linked2-2.html`,
         "role": "document",
-        "token": "cf14ae6586cb649d918cdb92bed8cbca7cdd06e2"
+        "token": getToken(`${localhost}/capture_downLink02/linked2-2.html`, "document")
       }
     ]
   };
@@ -9513,7 +9513,7 @@ async function test_capture_downLink14() {
         "path": "index.html",
         "url": `${localhost}/capture_downLink09/in-depth.html`,
         "role": "document",
-        "token": "a1bfd6c1a9a79bbbc6a3c28b0d6cc4ba39469702"
+        "token": getToken(`${localhost}/capture_downLink09/in-depth.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -9762,7 +9762,7 @@ ${localhost}/capture_downLink11/1-3.txt`,
         "path": "index.html",
         "url": `${localhost}/capture_downLink11/main.html`,
         "role": "document",
-        "token": "a6b7e1e572e65b1f357666adcdc707d8e54baa66"
+        "token": getToken(`${localhost}/capture_downLink11/main.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -9776,13 +9776,13 @@ ${localhost}/capture_downLink11/1-3.txt`,
         "path": "1-1.html",
         "url": `${localhost}/capture_downLink11/1-1.html`,
         "role": "document",
-        "token": "459e96d47f1999fe840d87c5d5dca3547b1e0d75"
+        "token": getToken(`${localhost}/capture_downLink11/1-1.html`, "document")
       },
       {
         "path": "1-1.bmp",
-        "url": "http://localhost:8085/capture_downLink11/1-1.bmp",
+        "url": `${localhost}/capture_downLink11/1-1.bmp`,
         "role": "resource",
-        "token": "0febeec85dadae327eee8a7bb1c0117f1f24bf93"
+        "token": getToken(`${localhost}/capture_downLink11/1-1.bmp`, "resource")
       }
     ]
   };
@@ -9843,7 +9843,7 @@ ${localhost}/capture_downLink11/1-3.txt`,
         "path": "index.html",
         "url": `${localhost}/capture_downLink11/main.html`,
         "role": "document",
-        "token": "a6b7e1e572e65b1f357666adcdc707d8e54baa66"
+        "token": getToken(`${localhost}/capture_downLink11/main.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -9855,27 +9855,27 @@ ${localhost}/capture_downLink11/1-3.txt`,
       },
       {
         "path": "1-2.html",
-        "url": "http://localhost:8085/capture_downLink11/1-2.py",
+        "url": `${localhost}/capture_downLink11/1-2.py`,
         "role": "resource",
-        "token": "18fbfc44a58e34e0d9eb4f25f8358e14adb88ac1"
+        "token": getToken(`${localhost}/capture_downLink11/1-2.py`, "resource")
       },
       {
         "path": "1-3.txt",
-        "url": "http://localhost:8085/capture_downLink11/1-3.txt",
+        "url": `${localhost}/capture_downLink11/1-3.txt`,
         "role": "resource",
-        "token": "183ffee4befe1906d156246eb7f2c6464f0da085"
+        "token": getToken(`${localhost}/capture_downLink11/1-3.txt`, "resource")
       },
       {
         "path": "1-1.html",
-        "url": "http://localhost:8085/capture_downLink11/1-1.html",
+        "url": `${localhost}/capture_downLink11/1-1.html`,
         "role": "document",
-        "token": "459e96d47f1999fe840d87c5d5dca3547b1e0d75"
+        "token": getToken(`${localhost}/capture_downLink11/1-1.html`, "document")
       },
       {
         "path": "1-1.bmp",
-        "url": "http://localhost:8085/capture_downLink11/1-1.bmp",
+        "url": `${localhost}/capture_downLink11/1-1.bmp`,
         "role": "resource",
-        "token": "0febeec85dadae327eee8a7bb1c0117f1f24bf93"
+        "token": getToken(`${localhost}/capture_downLink11/1-1.bmp`, "resource")
       }
     ]
   };
