@@ -2487,9 +2487,10 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
           throw new Error(`Unable to access "index.json" for item "${itemId}".`);
         }
 
+        info.initialVersion = sitemap.initialVersion || sitemap.version;
+
         switch (sitemap.version) {
           case 1: {
-            info.initialVersion = sitemap.version;
             for (const {path, url, role, primary} of sitemap.files) {
               info.files.set(path, {
                 url,
@@ -4079,6 +4080,10 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       indexPages: [...info.indexPages],
       files: [],
     };
+
+    if (sitemap.initialVersion === sitemap.version) {
+      delete sitemap.initialVersion;
+    }
 
     for (let [path, {url, role, token}] of files.entries()) {
       if (!token) {
