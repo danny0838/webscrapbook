@@ -9232,7 +9232,7 @@ async function test_capture_downLink08() {
 }
 
 /**
- * A pages linked from a frame should have same depth as from the main page.
+ * A page linked from a frame should have same depth as from the main page.
  *
  * capture.downLink.doc.depth
  */
@@ -9469,7 +9469,7 @@ async function test_capture_downLink13() {
 async function test_capture_downLink14() {
   var options = {
     "capture.saveResourcesSequentially": true,
-    "capture.downLink.doc.depth": 1,
+    "capture.downLink.doc.depth": 0,
     "capture.saveDataUriAsFile": true,
   };
 
