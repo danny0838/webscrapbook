@@ -8577,7 +8577,7 @@ async function test_capture_downLink04() {
   var sitemapFile = zip.file('index.json');
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
-    "version": 2,
+    "version": 3,
     "indexPages": [
       "index.html"
     ],
@@ -8673,7 +8673,7 @@ async function test_capture_downLink04() {
   var sitemapFile = zip.file('index.json');
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
-    "version": 2,
+    "version": 3,
     "indexPages": [
       "index.html"
     ],
@@ -8805,7 +8805,7 @@ async function test_capture_downLink04() {
   var sitemapFile = zip.file('index.json');
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
-    "version": 2,
+    "version": 3,
     "indexPages": [
       "index.html"
     ],
@@ -9489,7 +9489,7 @@ async function test_capture_downLink14() {
   var sitemapFile = zip.file('index.json');
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
-    "version": 2,
+    "version": 3,
     "indexPages": [
       "index.html"
     ],
@@ -9737,7 +9737,7 @@ ${localhost}/capture_downLink11/1-3.txt`,
   var sitemapFile = zip.file('index.json');
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
-    "version": 2,
+    "version": 3,
     "indexPages": [
       "index.html",
       "1-1.html",
@@ -9818,7 +9818,7 @@ ${localhost}/capture_downLink11/1-3.txt`,
   var sitemapFile = zip.file('index.json');
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
   var expectedData = {
-    "version": 2,
+    "version": 3,
     "indexPages": [
       "index.html",
       "1-1.html",
@@ -9876,6 +9876,92 @@ ${localhost}/capture_downLink11/1-3.txt`,
         "url": `${localhost}/capture_downLink11/1-1.bmp`,
         "role": "resource",
         "token": getToken(`${localhost}/capture_downLink11/1-1.bmp`, "resource")
+      }
+    ]
+  };
+  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+}
+
+/**
+ * Check if case is preserved for the paths in index.json
+ *
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink17() {
+  var options = {
+    "capture.downLink.doc.depth": 1,
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": `bmp`,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_downLink12/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(Object.keys(zip.files).length === 5);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img').getAttribute('src') === `Green.bmp`);
+
+  var sitemapFile = zip.file('index.json');
+  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var expectedData = {
+    "version": 3,
+    "indexPages": [
+      "index.html"
+    ],
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_downLink12/index.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_downLink12/index.html`, "document")
+      },
+      {
+        "path": "index.xhtml",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "role": "document"
+      },
+      {
+        "path": "Green.bmp",
+        "url": `${localhost}/capture_downLink12/Green.bmp`,
+        "role": "resource",
+        "token": getToken(`${localhost}/capture_downLink12/Green.bmp`, "resource")
+      },
+      {
+       "path": "Yellow.bmp",
+       "url": `${localhost}/capture_downLink12/Yellow.bmp`,
+       "role": "resource",
+       "token": getToken(`${localhost}/capture_downLink12/Yellow.bmp`, "resource")
+      },
+      {
+       "path": "Linked.html",
+       "url": `${localhost}/capture_downLink12/Linked.html`,
+       "role": "document",
+       "token": getToken(`${localhost}/capture_downLink12/Linked.html`, "document")
       }
     ]
   };

@@ -41,10 +41,10 @@
 
   /**
    * @typedef {Object} missionCaptureInfoFilesEntry
-   * @property {string} path
-   * @property {string} url
-   * @property {string} role
-   * @property {Blob} blob
+   * @property {string} [path]
+   * @property {string} [url]
+   * @property {string} [role]
+   * @property {Blob} [blob]
    */
 
   /**
@@ -2590,6 +2590,60 @@ Redirecting to file <a href="${scrapbook.escapeHtml(response.url)}">${scrapbook.
             }
             break;
           }
+          case 3: {
+            for (let indexPage of sitemap.indexPages) {
+              info.indexPages.add(indexPage);
+            }
+            for (let {path, url, role, token} of sitemap.files) {
+              info.files.set(path.toLowerCase(), {
+                path,
+                url,
+                role,
+                token,
+              });
+
+              if (token) {
+                // use url and role if token not matched
+                // (possibly modified arbitrarily)
+                if (url && role) {
+                  const t = capturer.getRegisterToken(url, role);
+                  if (t !== token) {
+                    token = t;
+                    console.error(`Taking token from url and role for mismatching token: "${path}"`);
+                  }
+                }
+
+                info.filenameMap.set(token, {
+                  filename: path,
+                  url: scrapbook.escapeFilename(path),
+                });
+
+                // load previously captured pages to blob
+                if (REBUILD_LINK_ROLE_PATTERN.test(role)) {
+                  const fileUrl = new URL(scrapbook.escapeFilename(path), indexUrl).href;
+                  try {
+                    const response = await server.request({
+                      url: fileUrl,
+                    });
+                    if (!response.ok) {
+                      throw new Error(`Bad status: ${response.status}`);
+                    }
+                    const blob = await response.blob();
+                    await capturer.saveFileCache({
+                      timeId,
+                      path,
+                      url,
+                      blob,
+                    });
+                  } catch (ex) {
+                    // skip missing resource
+                    continue;
+                  }
+                }
+              }
+            }
+            break;
+          }
           default: {
             throw new Error(`Sitemap version ${sitemap.version} not supported.`);
             break;
@@ -4075,7 +4129,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const filenameMap = info.filenameMap;
 
     const sitemap = {
-      version: 2,
+      version: 3,
       initialVersion: info.initialVersion,
       indexPages: [...info.indexPages],
       files: [],
@@ -4085,7 +4139,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       delete sitemap.initialVersion;
     }
 
-    for (let [path, {url, role, token}] of files.entries()) {
+    for (let [filename, {path, url, role, token}] of files.entries()) {
       if (!token) {
         try {
           const t = capturer.getRegisterToken(url, role);
@@ -4105,7 +4159,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
 
       sitemap.files.push({
-        path,
+        path: path ? path.replace(/^.*\//, '') : filename,
         url,
         role,
         token,
