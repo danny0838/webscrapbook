@@ -3355,7 +3355,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               // value is not acturally used)
               // see browser.downloads.onChanged handler
               if (blob.size === 0 && ex.message === "Cannot find downloaded item.") {
-                return path;
+                return {filename: targetDir + "/" + path};
               }
 
               // show message for individual saving error
