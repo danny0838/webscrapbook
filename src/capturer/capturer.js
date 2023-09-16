@@ -3306,27 +3306,27 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           workers = Math.min(workers, entries.length);
 
           let taskIdx = 0;
-          const runNextTask = async () => {
-            if (taskIdx >= entries.length) { return; }
-            const [path, sourceUrl, blob] = entries[taskIdx++];
-            try {
-              await capturer.saveBlobToServer({
-                timeId,
-                blob,
-                directory: targetDir,
-                filename: path,
-                settings,
-                options,
-              });
-            } catch (ex) {
-              // show message for individual saving error
-              console.error(ex);
-              capturer.error(scrapbook.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
+          const runTask = async () => {
+            while (taskIdx < entries.length) {
+              const [path, sourceUrl, blob] = entries[taskIdx++];
+              try {
+                await capturer.saveBlobToServer({
+                  timeId,
+                  blob,
+                  directory: targetDir,
+                  filename: path,
+                  settings,
+                  options,
+                });
+              } catch (ex) {
+                // show message for individual saving error
+                console.error(ex);
+                capturer.error(scrapbook.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
+              }
             }
-            return runNextTask();
           };
 
-          await Promise.all(Array.from({length: workers}, _ => runNextTask()));
+          await Promise.all(Array.from({length: workers}, () => runTask()));
 
           capturer.log(`Saved to "${targetDir}"`);
 
