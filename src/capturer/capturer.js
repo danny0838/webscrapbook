@@ -3337,19 +3337,28 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         case 'memory': // not supported, fallback to folder
         default: {
           targetDir = options["capture.saveFolder"] + "/" + settings.indexFilename;
-          const downloadItems = await Promise.all(entries.map(([path, sourceUrl, blob]) => {
-            return capturer.saveBlob({
-              timeId,
-              blob,
-              directory: targetDir,
-              filename: path,
-              sourceUrl,
-              autoErase: path !== "index.html",
-              savePrompt: false,
-              conflictAction: "overwrite",
-              settings,
-              options,
-            }).catch((ex) => {
+
+          let workers = options["capture.downloadWorkers"];
+          if (!(workers >= 1)) { workers = Infinity; }
+          workers = Math.min(workers, entries.length);
+
+          let downloadItems = [];
+          let taskIdx = 0;
+          const saveEntry = async ([path, sourceUrl, blob]) => {
+            try {
+              return await capturer.saveBlob({
+                timeId,
+                blob,
+                directory: targetDir,
+                filename: path,
+                sourceUrl,
+                autoErase: path !== "index.html",
+                savePrompt: false,
+                conflictAction: "overwrite",
+                settings,
+                options,
+              });
+            } catch (ex) {
               // handle bug for zero-sized in Firefox < 65
               // path should be same as the download filename (though the
               // value is not acturally used)
@@ -3362,8 +3371,16 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
               console.error(ex);
               capturer.error(scrapbook.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
               return {filename: targetDir + "/" + path, error: {message: ex.message}};
-            });
-          }));
+            }
+          };
+          const runTask = async () => {
+            while (taskIdx < entries.length) {
+              const idx = taskIdx++;
+              downloadItems[idx] = await saveEntry(entries[idx]);
+            }
+          };
+          await Promise.all(Array.from({length: workers}, () => runTask()));
+
           const downloadItem = downloadItems.pop();
           if (downloadItem.error) {
             throw new Error(`Unable to save index.html`);

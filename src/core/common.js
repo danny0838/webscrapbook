@@ -93,6 +93,7 @@ if (new URLSearchParams({}).toString() !== '') {
     "capture.serverUploadWorkers": 4,
     "capture.serverUploadRetryCount": 3,
     "capture.serverUploadRetryDelay": 2000,
+    "capture.downloadWorkers": 4,
     "capture.downloadRetryCount": 3,
     "capture.downloadRetryDelay": 1000,
     "capture.saveTo": "folder", // "server", "folder", "file", "memory"
