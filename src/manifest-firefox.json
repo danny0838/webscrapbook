@@ -2,14 +2,14 @@
   "manifest_version": 2,
   "name": "__MSG_ExtensionName__",
   "description": "__MSG_ExtensionDescription__",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "author": "Danny Lin",
   "default_locale": "en",
 
   "browser_specific_settings": {
     "gecko": {
       "id": "webscrapbook@danny0838.addons.mozilla.org",
-      "strict_min_version": "69.0"
+      "strict_min_version": "68.0"
     },
     "gecko_android": {
       "strict_min_version": "113.0"
