@@ -11,19 +11,7 @@
  * Polyfills
  */
 
-// Polyfill for Firefox < 53
-// As shadowRoot is not supported, we can simply skip implementing options.
-if (Node && !Node.prototype.getRootNode) {
-  Node.prototype.getRootNode = function getRootNode(options) {
-    var current = this, parent;
-    while (parent = current.parentNode) {
-      current = parent;
-    }
-    return current;
-  };
-}
-
-// Polyfill for Firefox < 53 / Chromium < 58
+// Polyfill for Chromium < 58
 if (new URLSearchParams({}).toString() !== '') {
   const _URLSearchParams = URLSearchParams;
   this.URLSearchParams = class URLSearchParams extends _URLSearchParams {
@@ -730,12 +718,8 @@ if (new URLSearchParams({}).toString() !== '') {
   /**
    * Use storage.sync if available. Fallback to storage.local and passed values.
    *
-   * - Firefox < 52: browser.storage.sync === undefined
-   *
-   * - Firefox 52: browser.storage.sync.*() gets an error if
-   *     webextensions.storage.sync.enabled is false, which is default.
-   *
-   * - Firefox >= 53: webextensions.storage.sync.enabled is default to true
+   * - Firefox: browser.storage.sync.*() gets an error if
+   *     webextensions.storage.sync.enabled is false.
    *
    * @param {null|string|string[]|Object} [keys] - Fallback to DEFAULT_OPTIONS
    *     when passing non-object.
@@ -811,9 +795,9 @@ if (new URLSearchParams({}).toString() !== '') {
    *   scripts, and stored data in normal and incognito windows aren't shared
    *   with each other. IndexedDB is not available in Firefox private windows
    *   and will automatically fallback to storage.
-   * - Storage API does not support storing Blob, File, etc., in Firefox < 56
-   *   and Chromium. A shim with byte-string based object is implemented, but
-   *   it's not performant and should thus be avoided whenever possible.
+   * - Storage API does not support storing Blob, File, etc., in Chromium. A
+   *   shim with byte-string based object is implemented, but it's not
+   *   performant and should thus be avoided whenever possible.
    * - Use storage by default and use indexedDB when appropriate.
    ***************************************************************************/
 
@@ -1020,8 +1004,7 @@ if (new URLSearchParams({}).toString() !== '') {
 
     storage: {
       get _serializeObjectNeeded() {
-        // In Firefox < 56 and Chromium,
-        // Blob cannot be stored in browser.storage,
+        // In Chromium, a Blob cannot be stored in browser.storage,
         // fallback to an object containing byte string data.
         delete this._serializeObjectNeeded;
         return this._serializeObjectNeeded = 

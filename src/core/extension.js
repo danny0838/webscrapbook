@@ -141,9 +141,6 @@
     if (newTab) {
       // If inNormalWindow, create a tab in the last focused window.
       //
-      // Firefox < 60 (?) allows multiple tabs in a popup window, but the
-      // user cannot switch between them.
-      //
       // Chromium allows only one tab in a popup window. Although
       // tabs.create without windowId creates a new tab in the last focused
       // window, some Chromium forks has an inconsistent behavior (e.g.

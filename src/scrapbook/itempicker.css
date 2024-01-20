@@ -16,11 +16,6 @@ body {
   padding: 8px;
   width: 100%;
   height: 100%;
-
-  /**
-   * This doesn't work in Firefox < 53 due to a bug:
-   * https://bugzilla.mozilla.org/show_bug.cgi?id=504622
-   */
   min-width: unset;
 }
 

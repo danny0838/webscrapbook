@@ -149,10 +149,7 @@
     populate = false,
     windowTypes = ['normal', 'popup'],
   } = {}) {
-    // Firefox < 58 does not support browser.windows.getAll({windowsTypes})),
-    // filter instead.
-    const wins = (await browser.windows.getAll({populate}))
-      .filter(win => windowTypes.includes(win.type))
+    const wins = (await browser.windows.getAll({windowTypes, populate}))
       .sort((a, b) => {
         const va = focusedWindows.get(a.id) || -Infinity;
         const vb = focusedWindows.get(b.id) || -Infinity;
@@ -201,10 +198,7 @@
     if (browser.sidebarAction) {
       // Unfortunately we cannot force open the sidebar from a user gesture
       // in a content page if it's closed.
-      // Firefox < 59: browser.sidebarAction.isOpen is not supported. Run
-      // invokeExtensionScript anyway, and gets an error if the sidebar is not
-      // opened.
-      if (browser.sidebarAction.isOpen && !await browser.sidebarAction.isOpen({})) {
+      if (!await browser.sidebarAction.isOpen({})) {
         return false;
       }
 
@@ -472,25 +466,6 @@
     let action;
 
     const fn = updateBrowserAction = () => {
-      if (!browser.browserAction) {
-        // Firefox Android < 55: no browserAction
-        // Fallback to pageAction.
-        // Firefox Android ignores the tabId parameter and
-        // shows the pageAction for all tabs
-        browser.pageAction.show(0);
-        return;
-      }
-
-      if (!browser.browserAction.getPopup) {
-        // Firefox Android < 57: only browserAction onClick
-        // Fallback by opening browserAction page
-        browser.browserAction.onClicked.addListener((tab) => {
-          const url = browser.runtime.getURL("core/browserAction.html");
-          browser.tabs.create({url, active: true});
-        });
-        return;
-      }
-
       // clear current listener and popup
       browser.browserAction.setPopup({popup: ""});
       if (action) {
@@ -969,7 +944,6 @@
   function initExternalMessageListener() {
     if (!browser.runtime.onMessageExternal) { return; }
 
-    // Available for Firefox >= 54.
     browser.runtime.onMessageExternal.addListener((message, sender) => {
       const {cmd, args} = message;
 

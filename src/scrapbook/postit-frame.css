@@ -22,14 +22,6 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
-
-  /**
-   * This doesn't work in Firefox < 53 due to a bug:
-   * https://bugzilla.mozilla.org/show_bug.cgi?id=504622
-   *
-   * As a workaround, let it overflow and show a scroll at <html> when the
-   * title is too long.
-   */
   min-width: unset;
 }
 

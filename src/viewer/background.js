@@ -50,26 +50,11 @@
     newUrl.search = "?src=" + encodeURIComponent(url.href);
     newUrl = newUrl.href;
 
-    if (type === "main_frame") {
-      // Firefox < 56 does not allow redirecting a page to an extension page,
-      // even if whom is listed in web_accessible_resources.  The redirect
-      // fails silently without throwing.
-      //
-      // Using data URI with meta or javascript refresh works but generates
-      // an extra history entry.
-      if (scrapbook.userAgent.major < 56) {
-        browser.tabs.update(tabId, {url: newUrl});
-        return {cancel: true};
-      }
-    } else { // sub_frame
+    if (type === "sub_frame") {
       // Chromium < 77: an extension page cannot be loaded in a frame and
       // becomes empty silently if the top frame page is not an extension page.
       // Chromium < 119: an extension page in a frame cannot access IndexedDB.
-      //
-      // Firefox < 56 does not allow redirecting a page to an extension page,
-      // even if whom is listed in web_accessible_resources.  The redirect
-      // fails silently without throwing.
-      if ((scrapbook.userAgent.is('chromium') && scrapbook.userAgent.major < 119) || scrapbook.userAgent.major < 56) {
+      if (scrapbook.userAgent.is('chromium') && scrapbook.userAgent.major < 119) {
         const html = `<!DOCTYPE html>
 <html dir="${scrapbook.lang('@@bidi_dir')}">
 <head>

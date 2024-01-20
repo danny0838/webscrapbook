@@ -134,8 +134,7 @@
       // Get a target tab whenever determinable.
       // activeTab is the page where user clicks browserAction in Firefox or
       // Chromium based mobile browser.
-      // activeTab === currentTab if the browserAction page is opened through
-      // pageAction (Firefox for Android < 55) or by visiting URL.
+      // activeTab === currentTab if the browserAction page is opened by visiting URL.
       const targetTab = (isPrompt || activeTab && activeTab.id !== currentTab.id)  ? activeTab : undefined;
 
       return {isPrompt, targetTab};

@@ -209,11 +209,7 @@
         break;
       }
       case "folder": {
-        // Firefox < 65 has a bug that a zero-sized file is never found by
-        // browser.downloads.search. Fill the probe file with a null byte to work
-        // around.
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=1503760
-        const blob = new Blob(['\x00'], {type: "application/octet-stream"});
+        const blob = new Blob([], {type: "application/octet-stream"});
         const url = URL.createObjectURL(blob);
         const prefix = options["capture.saveFolder"] + "/" + (dir ? dir + '/' : '');
         isFilenameTaken = async (path) => {
@@ -3359,14 +3355,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
                 options,
               });
             } catch (ex) {
-              // handle bug for zero-sized in Firefox < 65
-              // path should be same as the download filename (though the
-              // value is not acturally used)
-              // see browser.downloads.onChanged handler
-              if (blob.size === 0 && ex.message === "Cannot find downloaded item.") {
-                return {filename: targetDir + "/" + path};
-              }
-
               // show message for individual saving error
               console.error(ex);
               capturer.error(scrapbook.lang("ErrorFileSaveError", [sourceUrl, path, ex.message]));
@@ -3762,39 +3750,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         onError: reject,
       });
 
-      // Firefox < 59 has a bug that the window may turn unresponsive when an
-      // addon page is redirected to a blob URL.
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
-      //
-      // Workaround by clicking an anchor in a hidden iframe.
-      if (scrapbook.userAgent.is('gecko') && scrapbook.userAgent.major < 59) {
-        const iDoc = this.downloader.contentDocument;
-        const a = iDoc.createElement('a');
-        a.download = filename;
-        a.href = url;
-        iDoc.body.appendChild(a);
-        a.click();
-        a.remove();
-
-        // In case the download still fails.
-        const file = new File([blob], filename, {type: blob.type});
-        const url2 = URL.createObjectURL(file);
-
-        capturer.downloadHooks.set(url2, {
-          timeId,
-          src: sourceUrl,
-          onComplete: resolve,
-          onError: reject,
-        });
-
-        const elem = document.createElement('a');
-        elem.target = 'download'; // open a new tab to workaround the bug
-        elem.href = url2;
-        elem.textContent = `If the download doesn't start, click me.`;
-        capturer.log(elem);
-        return;
-      }
-
       const elem = document.createElement('a');
       elem.download = filename;
       elem.href = url;
@@ -3876,10 +3831,8 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       saveAs: savePrompt,
     };
 
-    // Firefox < 52 gets an error if saveAs is defined
     // Firefox Android gets an error if saveAs = true
-    if (scrapbook.userAgent.is('gecko') &&
-        (scrapbook.userAgent.major < 52 || scrapbook.userAgent.is('mobile'))) {
+    if (scrapbook.userAgent.is('gecko') && scrapbook.userAgent.is('mobile')) {
       delete downloadParams.saveAs;
     }
 
@@ -4239,9 +4192,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
         if (downloadItem) {
           downloadHooks.get(downloadId).onComplete(downloadItem);
         } else {
-          // Firefox < 65 has a bug that a zero-sized file is never found by
-          // browser.downloads.search.
-          // https://bugzilla.mozilla.org/show_bug.cgi?id=1503760
+          // This should not happen.
           downloadHooks.get(downloadId).onError(new Error("Cannot find downloaded item."));
         }
       } else if (downloadDelta.error) {
@@ -4284,7 +4235,6 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       scrapbook.loadLanguages(document);
 
       capturer.logger = document.getElementById('logger');
-      capturer.downloader = document.getElementById('downloader');
 
       await scrapbook.loadOptions();
 

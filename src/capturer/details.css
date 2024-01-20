@@ -25,11 +25,6 @@
   margin: .75em 0;
   border: 0;
   padding: 0;
-
-  /**
-   * This doesn't work in Firefox < 53 due to a bug:
-   * https://bugzilla.mozilla.org/show_bug.cgi?id=504622
-   */
   min-width: unset;
 }
 
