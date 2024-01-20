@@ -1886,8 +1886,8 @@ if (new URLSearchParams({}).toString() !== '') {
    *   stylesheet (link, style) (for SB, SBX)
    *   stylesheet-temp (link, style) (for SBX)
    *
-   *   custom-css (should not be altered by the capturer or editor) (since 0.70 <= WSB)
-   *   custom-script (should not be altered by the capturer or editor) (since 0.70 <= WSB)
+   *   custom-css (should not be altered by the editor) (since 0.70 <= WSB)
+   *   custom-script (should not be altered by the editor) (since 0.70 <= WSB)
    *   custom-script-safe (known safe for page resaving) (since 0.70 <= WSB)
    *
    * @return {false|string} Scrapbook object type of the element; or false.

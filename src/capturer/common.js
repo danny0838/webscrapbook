@@ -4032,7 +4032,7 @@
      *     cross-orign CSS.
      * @param {boolean} [params.crossOrigin] - Whether to retrieve CSS via web
      *     request if it's cross origin.
-     * @param {boolean} [params.errorWithNull] - Whether to throw an error if
+     * @param {boolean} [params.errorWithNull] - Whether to return null if CSS
      *     not retrievable.
      * @return {?CSSStyleRule[]}
      */
@@ -4040,13 +4040,14 @@
       let rules = null;
       try {
         // Firefox may get this for a stylesheet with relative URL imported from
-        // a stylesheet with null href (mostly created via
-        // document.implementation.createHTMLDocument). In such case css.cssRules
-        // is an empty CSSRuleList.
+        // a stylesheet with null href (mostly when the owner document is created
+        // using document.implementation.createHTMLDocument). In such case
+        // css.cssRules is an empty CSSRuleList.
         if (css.href === 'about:invalid') {
           throw new Error('cssRules not accessible.');
         }
 
+        // If cross-origin, css.cssRules may return null or throw an error.
         rules = css.cssRules;
 
         if (!rules) {
@@ -4409,14 +4410,16 @@
     /**
      * Rewrite a given CSS Text.
      *
-     * @param {string} cssText - the CSS text to rewrite.
-     * @param {string} refUrl - the reference URL for URL resolving.
-     * @param {CSSStyleSheet} [refCss] - the reference CSS (which holds the
-     *     @import rule(s), for imported CSS).
-     * @param {Node} [rootNode] - the reference root node for an imported CSS
-     * @param {boolean} [isInline] - whether cssText is inline.
-     * @param {Object} [settings]
-     * @param {Object} [options]
+     * @param {Object} params
+     * @param {string} params.cssText - the CSS text to rewrite.
+     * @param {string} params.refUrl - the reference URL for URL resolving.
+     * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which
+     *     holds the @import rule(s), for an imported CSS).
+     * @param {Node} [params.rootNode] - the reference root node for an
+     *     imported CSS.
+     * @param {boolean} [params.isInline] - whether cssText is inline.
+     * @param {Object} [params.settings]
+     * @param {Object} [params.options]
      */
     async rewriteCssText({cssText, refUrl, refCss = null, rootNode, isInline = false, settings, options}) {
       settings = Object.assign({}, this.settings, settings);
@@ -4697,15 +4700,17 @@
      * - Pass {elem, callback} for internal or external CSS.
      * - Pass {url, refCss, callback} for imported CSS.
      *
-     * @param {HTMLElement} [elem] - the elem to have CSS rewritten.
-     * @param {string} [url] - the source URL of the imported CSS.
-     * @param {string} [refCss] - the reference CSS (the imported styleSheet
-     *     object) of the imported CSS.
-     * @param {string} [refUrl] - the reference URL for URL resolving.
-     * @param {Node} [rootNode] - the reference root node for an imported CSS
-     * @param {Function} callback
-     * @param {Object} [settings]
-     * @param {Object} [options]
+     * @param {Object} params
+     * @param {HTMLElement} [params.elem] - the elem to have CSS rewritten.
+     * @param {string} [params.url] - the source URL of the imported CSS.
+     * @param {CSSStyleSheet} [params.refCss] - the reference CSS of the
+     *     imported CSS (CSSImportRule.styleSheet).
+     * @param {string} [params.refUrl] - the reference URL for URL resolving.
+     * @param {Node} [params.rootNode] - the reference root node for an
+     *     imported CSS.
+     * @param {Function} params.callback
+     * @param {Object} [params.settings]
+     * @param {Object} [params.options]
      */
     async rewriteCss({elem, url, refCss, refUrl, rootNode, callback, settings, options}) {
       settings = settings ? Object.assign({}, this.settings, settings) : this.settings;

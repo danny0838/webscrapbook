@@ -87,7 +87,7 @@
     const filename = `webscrapbook.options.${scrapbook.dateToId().slice(0, 8)}.json`;
 
     if (scrapbook.userAgent.is('gecko')) {
-      // Firefox has a bug that the screen turns unresponsive
+      // Firefox < 59 has a bug that the screen turns unresponsive
       // when an addon page is redirected to a blob URL.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1420419
       //
