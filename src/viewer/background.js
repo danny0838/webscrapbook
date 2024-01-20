@@ -62,15 +62,14 @@
         return {cancel: true};
       }
     } else { // sub_frame
-      // In Chromium, an extension frame page whose top frame page is not an
-      // extension page cannot load a blob page in an iframe, which becomes
-      // empty silently.
-      // https://bugs.chromium.org/p/chromium/issues/detail?id=761341
+      // Chromium < 77: an extension page cannot be loaded in a frame and
+      // becomes empty silently if the top frame page is not an extension page.
+      // Chromium < 119: an extension page in a frame cannot access IndexedDB.
       //
       // Firefox < 56 does not allow redirecting a page to an extension page,
       // even if whom is listed in web_accessible_resources.  The redirect
       // fails silently without throwing.
-      if (scrapbook.userAgent.is('chromium') || scrapbook.userAgent.major < 56) {
+      if ((scrapbook.userAgent.is('chromium') && scrapbook.userAgent.major < 119) || scrapbook.userAgent.major < 56) {
         const html = `<!DOCTYPE html>
 <html dir="${scrapbook.lang('@@bidi_dir')}">
 <head>
