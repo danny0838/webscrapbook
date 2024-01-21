@@ -4025,7 +4025,7 @@
 
     /**
      * @param {Object} params
-     * @param {CSSStyleSheet} params.css - The CSS to get rules from.
+     * @param {?CSSStyleSheet} params.css - The CSS to get rules from.
      * @param {string} params.url - The overriding source URL for retrieving a
      *     cross-orign CSS.
      * @param {string} [params.refUrl] - The referrer URL for retrieving a
@@ -4048,6 +4048,8 @@
         }
 
         // If cross-origin, css.cssRules may return null or throw an error.
+        // In Chromium >= 120, css (CSSImportRule.styleSheet) is null for an
+        // imported CSS.
         rules = css.cssRules;
 
         if (!rules) {
@@ -4056,7 +4058,7 @@
       } catch (ex) {
         // cssRules not accessible, probably a cross-domain CSS.
         if (crossOrigin) {
-          if (css.ownerNode && css.ownerNode.nodeName.toLowerCase() === 'style') {
+          if (css && css.ownerNode && css.ownerNode.nodeName.toLowerCase() === 'style') {
             rules = await this.getRulesFromCssText(css.ownerNode.textContent);
           } else {
             const {settings, options} = this;
@@ -4703,7 +4705,7 @@
      * @param {Object} params
      * @param {HTMLElement} [params.elem] - the elem to have CSS rewritten.
      * @param {string} [params.url] - the source URL of the imported CSS.
-     * @param {CSSStyleSheet} [params.refCss] - the reference CSS of the
+     * @param {?CSSStyleSheet} [params.refCss] - the reference CSS of the
      *     imported CSS (CSSImportRule.styleSheet).
      * @param {string} [params.refUrl] - the reference URL for URL resolving.
      * @param {Node} [params.rootNode] - the reference root node for an
@@ -4881,7 +4883,7 @@
         case "tidy": {
           if (!isDynamic) {
             charset = "UTF-8";
-            if (refCss && !isCircular) {
+            if (!isCircular) {
               const cssRulesCssom = await this.getRulesFromCss({
                 css: refCss,
                 url: sourceUrl,
@@ -4907,7 +4909,7 @@
         case "match": {
           if (!cssRules) {
             charset = "UTF-8";
-            if (refCss && !isCircular) {
+            if (!isCircular) {
               cssRules = await this.getRulesFromCss({
                 css: refCss,
                 url: sourceUrl,
