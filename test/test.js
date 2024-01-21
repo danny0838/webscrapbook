@@ -13165,18 +13165,19 @@ async function test_viewer_csp() {
   });
 }
 
-async function runTests(prefix = 'test_') {
-  for (const t of Object.keys(window).filter(x => x.startsWith(prefix))) {
+async function runTests(prefixes = ['test_']) {
+  const tests = Object.keys(window).filter(x => prefixes.some(p => x.startsWith(p)));
+  for (const t of tests) {
     await test(window[t]);
   }
 }
 
 async function runAutomatedTests() {
-  await runTests('test_capture_');
+  await runTests(config["automated_tests"]);
 }
 
 async function runManualTests() {
-  await runTests('test_viewer_');
+  await runTests(config["manual_tests"]);
 }
 
 /**

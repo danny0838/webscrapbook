@@ -1,6 +1,7 @@
 {
   "wsb_extension_id": "oegnpmiddfljlloiklpkeelagaeejfai",
-  "wsb_message_port_name": "WebScrapBook Test Suite",
   "server_port": 8080,
-  "server_port2": 8081
+  "server_port2": 8081,
+  "automated_tests": ["test_capture_"],
+  "manual_tests": ["test_viewer_"]
 }
