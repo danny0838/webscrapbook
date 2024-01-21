@@ -7,37 +7,6 @@
  * @public {Object} scrapbook
  *****************************************************************************/
 
-/**
- * Polyfills
- */
-
-// Polyfill for Chromium < 58
-if (new URLSearchParams({}).toString() !== '') {
-  const _URLSearchParams = URLSearchParams;
-  this.URLSearchParams = class URLSearchParams extends _URLSearchParams {
-    constructor(query) {
-      if (typeof query === 'string') {
-        super(query);
-        return;
-      }
-      super();
-      if (Array.isArray(query)) {
-        for (const [key, value] of query) {
-          this.append(key, value);
-        }
-      } else if (query.forEach) {
-        query.forEach((value, key) => {
-          this.append(key, value);
-        });
-      } else {
-        for (const key in query) {
-          this.append(key, query[key]);
-        }
-      }
-    }
-  };
-}
-
 (function (root, factory) {
   // Browser globals
   if (root.hasOwnProperty('scrapbook')) { return; }
