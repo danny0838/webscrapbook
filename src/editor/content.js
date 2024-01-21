@@ -23,8 +23,6 @@
 
   'use strict';
 
-  const SHADOW_DOM_SUPPORTED = !!document.documentElement.attachShadow;
-
   // https://mimesniff.spec.whatwg.org/
   const SCRIPT_TYPES = new Set([
     "",
@@ -164,29 +162,17 @@ height: 100vh;`;
     }
 
     // generate toolbar content
-    const uid = 'scrapbook-' + scrapbook.getUuid();
     let wrapper = editor.element = document.documentElement.appendChild(document.createElement("scrapbook-toolbar"));
-    wrapper.id = uid;
     wrapper.setAttribute('data-scrapbook-elem', 'toolbar');
     wrapper.setAttribute('dir', scrapbook.lang('@@bidi_dir'));
 
-    // Attach a shadowRoot if supported; otherwise fallback with an ID selector.
-    let sHost;
-    let sHostTop;
-    if (wrapper.attachShadow) {
-      editor.internalElement = wrapper = wrapper.attachShadow({mode: 'open'});
-      sHost = `:host`;
-      sHostTop = `:host(.top)`;
-    } else {
-      editor.internalElement = wrapper;
-      sHost = `#${uid}`;
-      sHostTop = `#${uid}.top`;
-    }
+    // Attach a shadowRoot.
+    editor.internalElement = wrapper = wrapper.attachShadow({mode: 'open'});
 
     // this needs to be XHTML compatible
     wrapper.innerHTML = `\
 <style>
-${sHost} {
+:host {
   all: initial !important;
   position: fixed !important;
   display: block !important;
@@ -197,16 +183,16 @@ ${sHost} {
   z-index: 2147483647 !important;
 }
 
-${sHostTop} {
+:host(.top) {
   top: 0px !important;
   bottom: auto !important;
 }
 
-${sHost} style {
+:host style {
   display: none !important;
 }
 
-${sHost} *:not(scrapbook-toolbar-samp) {
+:host *:not(scrapbook-toolbar-samp) {
   visibility: unset !important;
   opacity: unset !important;
   position: unset !important;
@@ -233,11 +219,11 @@ ${sHost} *:not(scrapbook-toolbar-samp) {
   vertical-align: unset !important;
 }
 
-${sHost} scrapbook-toolbar-samp {
+:host scrapbook-toolbar-samp {
   all: unset;
 }
 
-${sHost} .toolbar {
+:host .toolbar {
   display: block !important;
   position: relative !important;
   box-sizing: border-box !important;
@@ -250,15 +236,15 @@ ${sHost} .toolbar {
   white-space: nowrap !important;
 }
 
-${sHost} .toolbar > div {
+:host .toolbar > div {
   display: inline-block !important;
 }
 
-${sHost} .toolbar > div[hidden] {
+:host .toolbar > div[hidden] {
   display: none !important;
 }
 
-${sHost} .toolbar > div > button {
+:host .toolbar > div > button {
   display: inline-block !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -270,66 +256,66 @@ ${sHost} .toolbar > div > button {
   background-repeat: no-repeat !important;
 }
 
-${sHost} .toolbar > div > button:enabled {
+:host .toolbar > div > button:enabled {
   cursor: pointer !important;
 }
 
-${sHost} .toolbar > div > button:enabled:hover,
-${sHost} .toolbar > div > button:enabled:focus {
+:host .toolbar > div > button:enabled:hover,
+:host .toolbar > div > button:enabled:focus {
   border-color: #CCC !important;
   background-color: #FFF !important;
 }
 
-${sHost} .toolbar > div > button:enabled:active {
+:host .toolbar > div > button:enabled:active {
   border-style: inset !important;
 }
 
-${sHost} .toolbar > div > button:disabled {
+:host .toolbar > div > button:disabled {
   filter: grayscale(100%) !important;
   opacity: 0.3 !important;
 }
 
-${sHost} .toolbar > div > button[checked] {
+:host .toolbar > div > button[checked] {
   box-shadow: 0px 0px 10px 0px #909090 inset !important;
 }
 
-${sHost} .toolbar > div > button[hidden] {
+:host .toolbar > div > button[hidden] {
   display: none !important;
 }
 
-${sHost} .toolbar .toolbar-locate > button:first-of-type {
+:host .toolbar .toolbar-locate > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-locate.svg")}") !important;
 }
 
-${sHost} .toolbar .toolbar-marker > button:first-of-type {
+:host .toolbar .toolbar-marker > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-marker.png")}") !important;
 }
 
-${sHost} .toolbar .toolbar-annotation > button:first-of-type {
+:host .toolbar .toolbar-annotation > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-annotation.png")}") !important;
 }
 
-${sHost} .toolbar .toolbar-eraser > button:first-of-type {
+:host .toolbar .toolbar-eraser > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-eraser.png")}") !important;
 }
 
-${sHost} .toolbar .toolbar-domEraser > button:first-of-type {
+:host .toolbar .toolbar-domEraser > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-dom-eraser.png")}") !important;
 }
 
-${sHost} .toolbar .toolbar-htmlEditor > button:first-of-type {
+:host .toolbar .toolbar-htmlEditor > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-html.png")}") !important;
 }
 
-${sHost} .toolbar .toolbar-undo > button:first-of-type {
+:host .toolbar .toolbar-undo > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-undo.png")}") !important;
 }
 
-${sHost} .toolbar .toolbar-save > button:first-of-type {
+:host .toolbar .toolbar-save > button:first-of-type {
   background-image: url("${browser.runtime.getURL("resources/edit-save.png")}") !important;
 }
 
-${sHost} .toolbar > div > ul {
+:host .toolbar > div > ul {
   display: block !important;
   position: absolute !important;
   overflow: auto !important;
@@ -345,20 +331,20 @@ ${sHost} .toolbar > div > ul {
   max-height: calc(100vh - 40px - ${editor.scrollbar.vWidth}px - 2px) !important;
 }
 
-${sHostTop} .toolbar > div > ul {
+:host(.top) .toolbar > div > ul {
   top: 40px !important;
   bottom: auto !important;
 }
 
-${sHost} .toolbar > div > ul[hidden] {
+:host .toolbar > div > ul[hidden] {
   display: none !important;
 }
 
-${sHost} .toolbar > div > ul > li {
+:host .toolbar > div > ul > li {
   display: block !important;
 }
 
-${sHost} .toolbar > div > ul > li > button {
+:host .toolbar > div > ul > li > button {
   display: block !important;
   padding: 4px 8px !important;
   width: 100% !important;
@@ -366,35 +352,35 @@ ${sHost} .toolbar > div > ul > li > button {
   color: #333 !important;
 }
 
-${sHost} .toolbar > div > ul > li > button:enabled:focus {
+:host .toolbar > div > ul > li > button:enabled:focus {
   outline: 1px solid rgba(125, 162, 206, 0.8) !important;
   background: linear-gradient(rgba(235, 244, 253, 0.3), rgba(196, 221, 252, 0.8)) !important;
 }
 
-${sHost} .toolbar > div > ul > li > button:enabled:hover {
+:host .toolbar > div > ul > li > button:enabled:hover {
   background-color: rgba(202, 202, 202, 0.8) !important;
 }
 
-${sHost} .toolbar > div > ul > li > button:enabled:active {
+:host .toolbar > div > ul > li > button:enabled:active {
   background-image: radial-gradient(rgba(0, 0, 0, 0.9), rgba(64, 64, 64, 0.9)) !important;
   color: #FFFFFF !important;
 }
 
-${sHost} .toolbar > div > ul > li > button:disabled {
+:host .toolbar > div > ul > li > button:disabled {
   filter: grayscale(100%) !important;
   opacity: 0.3 !important;
 }
 
-${sHost} .toolbar > div > ul > li > button[checked] {
+:host .toolbar > div > ul > li > button[checked] {
   box-shadow: 0px 0px 10px 0px #909090 inset !important;
 }
 
-${sHost} .toolbar > div > ul > hr {
+:host .toolbar > div > ul > hr {
   display: block !important;
   border: 1px inset #EEE !important;
 }
 
-${sHost} .toolbar .toolbar-close {
+:host .toolbar .toolbar-close {
   display: block !important;
   position: absolute !important;
   top: 0 !important;
@@ -405,8 +391,8 @@ ${sHost} .toolbar .toolbar-close {
   opacity: 0.3 !important;
 }
 
-${sHost} .toolbar .toolbar-close::before,
-${sHost} .toolbar .toolbar-close::after {
+:host .toolbar .toolbar-close::before,
+:host .toolbar .toolbar-close::after {
   content: "" !important;
   position: absolute !important;
   height: 4px !important;
@@ -416,15 +402,15 @@ ${sHost} .toolbar .toolbar-close::after {
   background: #000 !important;
 }
 
-${sHost} .toolbar .toolbar-close::before {
+:host .toolbar .toolbar-close::before {
   transform: rotate(45deg) !important;
 }
 
-${sHost} .toolbar .toolbar-close::after {
+:host .toolbar .toolbar-close::after {
   transform: rotate(-45deg) !important;
 }
 
-${sHost} .toolbar .toolbar-close:hover {
+:host .toolbar .toolbar-close:hover {
   opacity: 1 !important;
 }
 </style>
@@ -622,9 +608,6 @@ ${sHost} .toolbar .toolbar-close:hover {
     }
 
     // annotation
-    var elem = wrapper.querySelector('.toolbar-annotation');
-    elem.hidden = !SHADOW_DOM_SUPPORTED;
-
     var elem = wrapper.querySelector('.toolbar-annotation > button:first-of-type');
     elem.addEventListener("click", (event) => {
       editor.createSticky();
@@ -2341,28 +2324,6 @@ ${sHost} .toolbar .toolbar-close:hover {
           elem.setAttribute('data-scrapbook-id', id);
         }
 
-        // fallback to popup if shadow DOM is not supported
-        if (!SHADOW_DOM_SUPPORTED) {
-          const annotation0 = elem.title;
-          const annotation = scrapbook.prompt(scrapbook.lang('EditorEditAnnotationPrompt', [annotation0]), annotation0);
-          if (annotation === null || annotation === annotation0) {
-            return;
-          }
-
-          if (!skipHistory) {
-            editor.addHistory();
-          }
-
-          for (const part of scrapbook.getScrapBookObjectElems(elem)) {
-            if (annotation) {
-              part.setAttribute('title', annotation);
-            } else {
-              part.removeAttribute('title');
-            }
-          }
-          return;
-        }
-
         if (!skipHistory) {
           editor.addHistory();
         }
@@ -2507,8 +2468,6 @@ ${sHost} .toolbar .toolbar-close:hover {
        *     Auto-detected by selection when unspecified. False to not create a relative note.
        */
       createSticky({richText, refNode} = {}) {
-        if (!SHADOW_DOM_SUPPORTED) { return; }
-
         editor.addHistory();
 
         const useNativeTags = scrapbook.getOption("editor.useNativeTags");
@@ -2574,7 +2533,7 @@ ${sHost} .toolbar .toolbar-close:hover {
 
         this.saveAll();
 
-        if (!SHADOW_DOM_SUPPORTED || !mainElem.classList.contains('styled')) {
+        if (!mainElem.classList.contains('styled')) {
           const attr = mainElem.classList.contains('plaintext') ? 'textContent' : 'innerHTML';
           let content = mainElem[attr];
           content = scrapbook.prompt(scrapbook.lang('EditorEditAnnotationPrompt', [content]), content);

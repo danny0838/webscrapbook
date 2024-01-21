@@ -28,7 +28,6 @@
 
   'use strict';
 
-  const SHADOW_ROOT_SUPPORTED = !!document.documentElement.attachShadow;
   const REBUILD_LINK_ROLE_PATTERN = /^document(?:-[a-f0-9-]+)?$/;
   const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
 
@@ -4042,13 +4041,11 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       }
 
       // recurse into shadow roots
-      if (SHADOW_ROOT_SUPPORTED) {
-        for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
-          const shadowRoot = elem.attachShadow({mode: 'open'});
-          shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
-          processRootNode(shadowRoot, filenameMap, linkedPages);
-          elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
-        }
+      for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
+        const shadowRoot = elem.attachShadow({mode: 'open'});
+        shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
+        processRootNode(shadowRoot, filenameMap, linkedPages);
+        elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
       }
     };
 

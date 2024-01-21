@@ -3141,21 +3141,13 @@
         }
 
         // update shadow root data
-        if (shadowRootSupported) {
-          for (const elem of rootNode.querySelectorAll("*")) {
-            elem.removeAttribute("data-scrapbook-shadowdom");
-            const shadowRoot = elem.shadowRoot;
-            if (!shadowRoot) { continue; }
-            processRootNode(shadowRoot);
-            elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
-            requireBasicLoader = true;
-          }
-        } else {
-          // shadowRoot not supported by the browser.
-          // Just record whether there's a recorded shadow root.
-          if (rootNode.querySelector('[data-scrapbook-shadowdom]')) {
-            requireBasicLoader = true;
-          }
+        for (const elem of rootNode.querySelectorAll("*")) {
+          elem.removeAttribute("data-scrapbook-shadowdom");
+          const shadowRoot = elem.shadowRoot;
+          if (!shadowRoot) { continue; }
+          processRootNode(shadowRoot);
+          elem.setAttribute("data-scrapbook-shadowdom", shadowRoot.innerHTML);
+          requireBasicLoader = true;
         }
       };
 
@@ -3178,7 +3170,6 @@
         title: (isMainPage && isMainFrame ? item && item.title : doc.title) || "",
       };
       const resources = {};
-      const shadowRootSupported = !!rootNode.attachShadow;
       let requireBasicLoader = false;
 
       // remove webscrapbook toolbar related

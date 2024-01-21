@@ -22,7 +22,6 @@
 
   'use strict';
 
-  const SHADOW_ROOT_SUPPORTED = !!document.documentElement.attachShadow;
   const SITEMAP_DOCTYPE = new Set(["text/html", "application/xhtml+xml"]);
 
   const sitemap = {
@@ -250,12 +249,10 @@
         }
 
         // recurse into shadow roots
-        if (SHADOW_ROOT_SUPPORTED) {
-          for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
-            const shadowRoot = elem.attachShadow({mode: 'open'});
-            shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
-            loadLinksRecursively(shadowRoot, frameItems, anchorItems);
-          }
+        for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
+          const shadowRoot = elem.attachShadow({mode: 'open'});
+          shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
+          loadLinksRecursively(shadowRoot, frameItems, anchorItems);
         }
       };
 

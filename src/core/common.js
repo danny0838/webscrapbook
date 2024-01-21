@@ -2155,7 +2155,7 @@
     if (shadowDom) {
       const shadowRootJson = elem.getAttribute('data-scrapbook-shadowroot');
       if (shadowRootJson !== null) {
-        if (apply && elem.attachShadow && !elem.shadowRoot) {
+        if (apply && !elem.shadowRoot) {
           try {
             const {data, mode} = JSON.parse(shadowRootJson);
             const shadowRoot = elem.attachShadow({mode});
