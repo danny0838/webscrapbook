@@ -1490,64 +1490,101 @@
    * Returns the ScrapBook ID from a given Date object
    *
    * @param  {Date} [date] - Given day, or now if not provided.
-   * @return {string} the ScrapBook ID
+   * @return {?string} the ScrapBook ID
    */
   scrapbook.dateToId = function (date) {
-    let dd = date || new Date();
-    return dd.getUTCFullYear() +
-        this.intToFixedStr(dd.getUTCMonth() + 1, 2) +
-        this.intToFixedStr(dd.getUTCDate(), 2) +
-        this.intToFixedStr(dd.getUTCHours(), 2) +
-        this.intToFixedStr(dd.getUTCMinutes(), 2) +
-        this.intToFixedStr(dd.getUTCSeconds(), 2) +
-        this.intToFixedStr(dd.getUTCMilliseconds(), 3);
+    const dt = date || new Date();
+    if (Number.isNaN(dt.valueOf())) { return null; }
+    const year = dt.getUTCFullYear();
+    if (year > 9999) { return '99991231235959999'; }
+    if (year < 0) { return '00000101000000000'; }
+    return year.toString().padStart(4, '0') +
+        (dt.getUTCMonth() + 1).toString().padStart(2, '0') +
+        dt.getUTCDate().toString().padStart(2, '0') +
+        dt.getUTCHours().toString().padStart(2, '0') +
+        dt.getUTCMinutes().toString().padStart(2, '0') +
+        dt.getUTCSeconds().toString().padStart(2, '0') +
+        dt.getUTCMilliseconds().toString().padStart(3, '0');
   };
 
   /**
    * @param {Date} id - Given ScrapBook ID
+   * @return {?Date}
    */
-  scrapbook.idToDate = function (id) {
-    let dd;
-    if (/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})$/.test(id)) {
-      dd = new Date(
-          parseInt(RegExp.$1, 10), parseInt(RegExp.$2, 10) - 1, parseInt(RegExp.$3, 10),
-          parseInt(RegExp.$4, 10), parseInt(RegExp.$5, 10), parseInt(RegExp.$6, 10), parseInt(RegExp.$7, 10)
-          );
-      dd.setTime(dd.valueOf() - dd.getTimezoneOffset() * 60 * 1000);
-    }
-    return dd;
+  scrapbook.idToDate = function (...args) {
+    const DT_MAX = new Date('9999-12-31T23:59:59.999Z').valueOf();
+    const DT_MIN = new Date('0000-01-01T00:00:00.000Z').valueOf();
+    const fn = scrapbook.idToDate = (id) => {
+      const m = id.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})$/);
+      if (!m) { return null; }
+      const dt = new Date();
+      dt.setUTCFullYear(Math.max(parseInt(m[1], 10), 0));
+      dt.setUTCMonth(Math.max(parseInt(m[2], 10) - 1, 0));
+      dt.setUTCDate(Math.max(parseInt(m[3], 10), 1));
+      dt.setUTCHours(parseInt(m[4], 10));
+      dt.setUTCMinutes(parseInt(m[5], 10));
+      dt.setUTCSeconds(parseInt(m[6], 10));
+      dt.setUTCMilliseconds(parseInt(m[7], 10));
+      if (dt.valueOf() > DT_MAX) { dt.setTime(DT_MAX); }
+      else if (dt.valueOf() < DT_MIN) { dt.setTime(DT_MIN); }
+      return dt;
+    };
+    return fn(...args);
   };
 
   /**
    * Returns the legacy ScrapBook ID from a given Date object
    *
-   * @deprecated Used by legacy ScrapBook. Inaccurate when used across timezone. Same seconds issue.
+   * @deprecated Used by legacy ScrapBook, with several issues:
+   *     - inaccurate when used across timezones
+   *     - items with same seconds issue
    * @param {Date} [date] - Given day, or now if not provided.
-   * @return {string} the ScrapBook ID
+   * @return {?string} the ScrapBook ID
    */
   scrapbook.dateToIdOld = function (date) {
-    let dd = date || new Date();
-    return dd.getFullYear() +
-        this.intToFixedStr(dd.getMonth() + 1, 2) +
-        this.intToFixedStr(dd.getDate(), 2) +
-        this.intToFixedStr(dd.getHours(), 2) +
-        this.intToFixedStr(dd.getMinutes(), 2) +
-        this.intToFixedStr(dd.getSeconds(), 2);
+    const dt = date || new Date();
+    if (Number.isNaN(dt.valueOf())) { return null; }
+    const year = dt.getFullYear();
+    if (year > 9999) { return '99991231235959'; }
+    if (year < 0) { return '00000101000000'; }
+    return year.toString().padStart(4, '0') +
+        (dt.getMonth() + 1).toString().padStart(2, '0') +
+        dt.getDate().toString().padStart(2, '0') +
+        dt.getHours().toString().padStart(2, '0') +
+        dt.getMinutes().toString().padStart(2, '0') +
+        dt.getSeconds().toString().padStart(2, '0');
   };
 
   /**
    * @deprecated See scrapbook.dateToIdOld for details.
    * @param {Date} id - Given ScrapBook ID
+   * @return {?Date}
    */
-  scrapbook.idToDateOld = function (id) {
-    let dd;
-    if (/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/.test(id)) {
-      dd = new Date(
-          parseInt(RegExp.$1, 10), parseInt(RegExp.$2, 10) - 1, parseInt(RegExp.$3, 10),
-          parseInt(RegExp.$4, 10), parseInt(RegExp.$5, 10), parseInt(RegExp.$6, 10)
-          );
-    }
-    return dd;
+  scrapbook.idToDateOld = function (...args) {
+    const DT_MAX = (() => {
+      const dt = new Date('9999-12-31T23:59:59.999Z');
+      return dt.valueOf() + dt.getTimezoneOffset() * 60 * 1000;
+    })();
+    const DT_MIN = (() => {
+      const dt = new Date('0000-01-01T00:00:00.000Z');
+      return dt.valueOf() + dt.getTimezoneOffset() * 60 * 1000;
+    })();
+    const fn = scrapbook.idToDateOld = (id) => {
+      const m = id.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
+      if (!m) { return null; }
+      const dt = new Date();
+      dt.setFullYear(Math.max(parseInt(m[1], 10), 0));
+      dt.setMonth(Math.max(parseInt(m[2], 10) - 1, 0));
+      dt.setDate(Math.max(parseInt(m[3], 10), 1));
+      dt.setHours(parseInt(m[4], 10));
+      dt.setMinutes(parseInt(m[5], 10));
+      dt.setSeconds(parseInt(m[6], 10));
+      dt.setMilliseconds(0);
+      if (dt.valueOf() > DT_MAX) { dt.setTime(DT_MAX); }
+      else if (dt.valueOf() < DT_MIN) { dt.setTime(DT_MIN); }
+      return dt;
+    };
+    return fn(...args);
   };
 
   scrapbook.ItemInfoFormatter = class ItemInfoFormatter {
@@ -2541,12 +2578,6 @@
     let shaObj = new jsSHA("SHA-1", type);
     shaObj.update(data);
     return shaObj.getHash("HEX");
-  };
-
-  scrapbook.intToFixedStr = function (number, width, padder) {
-    padder = padder || "0";
-    number = number.toString(10);
-    return number.length >= width ? number : new Array(width - number.length + 1).join(padder) + number;
   };
 
   /**
