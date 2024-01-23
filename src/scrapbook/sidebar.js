@@ -2219,17 +2219,23 @@ ${scrapbook.escapeHtml(content)}
           const uneditDate = (elem) => {
             if (!elem.hasAttribute('data-editing')) { return; }
 
-            const date = scrapbook.idToDate(elem.value);
+            if (elem.value) {
+              const date = scrapbook.idToDate(elem.value.substring(0, 17).padEnd(17, '0'));
 
-            // if new date is valid, re-convert to id;
-            // otherwise revert to previous value
-            if (date) {
-              date.setTime(date.valueOf() + date.getTimezoneOffset() * 60 * 1000);
+              // if new date is valid, re-convert to ID;
+              // otherwise revert to previous value
+              if (date) {
+                date.setTime(date.valueOf() + date.getTimezoneOffset() * 60 * 1000);
+                elem.setAttribute('data-id', scrapbook.dateToId(date));
+                elem.value = date.toLocaleString();
+              } else {
+                const id = elem.getAttribute('data-id');
+                elem.value = id ? scrapbook.idToDate(id).toLocaleString() : '';
+              }
+            } else {
+              const date = new Date();
               elem.setAttribute('data-id', scrapbook.dateToId(date));
               elem.value = date.toLocaleString();
-            } else {
-              const id = elem.getAttribute('data-id');
-              elem.value = id ? scrapbook.idToDate(id).toLocaleString() : '';
             }
 
             elem.removeAttribute('data-editing');
