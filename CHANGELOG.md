@@ -3,6 +3,10 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.5.0] - 2024-01-24
+* Added auto-fixing of item create/modify time when the input value is too short or too long, and auto-fill current time if empty.
+* Fixed bad handling of ID-Date conversion for some rare cases.
+
 ## [2.4.0] - 2024-01-21
 * Fixed an issue that a cross-origin imported CSS is captured empty in Chromium >= 120.
 * Added support of viewing HTZ/MAFF in a frame directly for Chromium >= 119.
