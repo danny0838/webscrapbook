@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test referrer policy</title>
+<style>img { width: 60px; }</style>
+<link rel="shortcut icon" href="favicon.py" referrerpolicy="origin">
+<link rel="shortcut icon noreferrer" href="favicon_rel.py">
+<link rel="stylesheet" href="stylesheet.py" referrerpolicy="origin">
+<link rel="stylesheet noreferrer" href="stylesheet_rel.py">
+<script src="script.py" referrerpolicy="origin"></script>
+</head>
+<body>
+<blockquote><img src="imgsrc.py" referrerpolicy="origin"></blockquote>
+<blockquote><img srcset="imgsrcset.py 2x" referrerpolicy="origin"></blockquote>
+<blockquote><iframe src="iframe.py" referrerpolicy="origin"></iframe></blockquote>
+<blockquote><a href="a.py" referrerpolicy="origin">anchor</a></blockquote>
+<blockquote><a href="a_rel.py" rel="noreferrer">anchor (rel)</a></blockquote>
+<blockquote>
+  <img src="green.bmp" usemap="#area-map">
+  <map name="area-map">
+    <area shape="rect" coords="0,0,60,30" href="area.py" referrerpolicy="origin"></area>
+    <area shape="rect" coords="0,30,60,60" href="area_rel.py" rel="noreferrer"></area>
+  </map>
+</blockquote>
+</body>
+</html>

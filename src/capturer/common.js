@@ -23,6 +23,26 @@
 
   'use strict';
 
+  // ref: https://html.spec.whatwg.org/#meta-referrer
+  const META_REFERRER_POLICY = new Set([
+    "",
+    "no-referrer",
+    "no-referrer-when-downgrade",
+    "same-origin",
+    "origin",
+    "strict-origin",
+    "origin-when-cross-origin",
+    "strict-origin-when-cross-origin",
+    "unsafe-url",
+  ]);
+
+  const META_REFERRER_POLICY_LEGACY = new Map([
+    ['never', 'no-referrer'],
+    ['default', ''],
+    ['always', 'unsafe-url'],
+    ['origin-when-crossorigin', 'origin-when-cross-origin'],
+  ]);
+
   const REWRITABLE_SPECIAL_OBJECTS = new Set([false, 'adoptedStyleSheet']);
 
   const REMOVE_HIDDEN_EXCLUDE_HTML = new Set(["html", "head", "title", "meta", "link", "style", "script", "body", "noscript", "template", "source", "track"]);
@@ -92,6 +112,7 @@
    * @param {string} [params.docUrl] - an overriding document URL
    * @param {string} [params.baseUrl] - an overriding document base URL
    * @param {string} [params.refUrl] - the referrer URL
+   * @param {string} [params.refPolicy] - the referrer policy
    * @param {Object} params.settings
    * @param {string} [params.settings.title] - item title
    * @param {Object} params.options
@@ -100,7 +121,7 @@
   capturer.captureDocumentOrFile = async function (params) {
     isDebug && console.debug("call: captureDocumentOrFile", params);
 
-    const {doc = document, docUrl, baseUrl, refUrl, settings, options} = params;
+    const {doc = document, docUrl, baseUrl, refUrl, refPolicy, settings, options} = params;
 
     // if not HTML|SVG document, capture as file
     if (!["text/html", "application/xhtml+xml", "image/svg+xml"].includes(doc.contentType)) {
@@ -120,6 +141,7 @@
       return await capturer.invoke("captureFile", {
         url: doc.URL,
         refUrl,
+        refPolicy,
         charset: doc.characterSet,
         settings: Object.assign({}, settings, {
           title: settings.title || doc.title,
@@ -334,6 +356,11 @@
         if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
             (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
           downLinkTasks.push(async () => {
+            let refPolicy = docRefPolicy;
+            if (isHtml) {
+              refPolicy = (elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy) || refPolicy;
+            }
+
             const isAttachment = isHtml ? elem.hasAttribute('download') : false;
             const downLinkSettings = Object.assign({}, settings, {
               depth: settings.depth + 1,
@@ -343,6 +370,7 @@
             const response = await capturer.invoke("captureUrl", {
               url,
               refUrl,
+              refPolicy,
               isAttachment,
               downLink: true,
               settings: downLinkSettings,
@@ -396,6 +424,7 @@
             const response = await downloadFile({
               url,
               refUrl,
+              refPolicy: docRefPolicy,
               settings,
               options,
             });
@@ -505,6 +534,7 @@
                     const response = await downloadFile({
                       url: elem.getAttribute(attr),
                       refUrl,
+                      refPolicy: docRefPolicy,
                       settings,
                       options,
                     });
@@ -537,6 +567,7 @@
                   await cssHandler.rewriteCss({
                     elem,
                     refUrl,
+                    refPolicy: docRefPolicy,
                     settings,
                     callback: (elem, response) => {
                       // escape </style> as textContent can contain HTML
@@ -742,6 +773,7 @@
                     await cssHandler.rewriteCss({
                       elem,
                       refUrl,
+                      refPolicy: elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy,
                       settings,
                       callback: (elem, response) => {
                         captureRewriteAttr(elem, "href", response.url);
@@ -788,6 +820,7 @@
                     const response = await downloadFile({
                       url: elem.getAttribute("href"),
                       refUrl,
+                      refPolicy: elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy,
                       settings,
                       options,
                     });
@@ -850,6 +883,7 @@
                     const response = await downloadFile({
                       url: elem.getAttribute("href"),
                       refUrl,
+                      refPolicy: elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy,
                       settings,
                       options,
                     });
@@ -906,6 +940,7 @@
                   await cssHandler.rewriteCss({
                     elem,
                     refUrl,
+                    refPolicy: docRefPolicy,
                     settings,
                     callback: (elem, response) => {
                       // escape </style> as textContent can contain HTML
@@ -966,6 +1001,7 @@
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
+                      refPolicy: elem.referrerPolicy || docRefPolicy,
                       settings,
                       options,
                     });
@@ -1125,6 +1161,7 @@
                         doc: frameDoc,
                         baseUrl,
                         refUrl,
+                        refPolicy: frame.referrerPolicy || docRefPolicy,
                         settings: frameSettings,
                         options: frameOptions,
                       }).then(captureFrameCallback).catch(captureFrameErrorHandler);
@@ -1235,6 +1272,7 @@
                   if (frameWindow) {
                     const response = await capturer.invoke("captureDocumentOrFile", {
                       refUrl,
+                      refPolicy: frame.referrerPolicy || docRefPolicy,
                       settings: frameSettings,
                       options,
                     }, {frameWindow}).catch(captureFrameErrorHandler);
@@ -1305,6 +1343,7 @@
                   return capturer.invoke("captureUrl", {
                     url: sourceUrl,
                     refUrl,
+                    refPolicy: frame.referrerPolicy || docRefPolicy,
                     settings: frameSettings,
                     options: frameOptions,
                   }).catch(captureFrameErrorHandler).then(captureFrameCallback);
@@ -1380,6 +1419,7 @@
                       const response = await downloadFile({
                         url,
                         refUrl,
+                        refPolicy: elem.referrerPolicy || docRefPolicy,
                         settings,
                         options,
                       });
@@ -1397,6 +1437,7 @@
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
+                      refPolicy: elem.referrerPolicy || docRefPolicy,
                       settings,
                       options,
                     });
@@ -1411,6 +1452,7 @@
                       return (await downloadFile({
                         url,
                         refUrl,
+                        refPolicy: elem.referrerPolicy || docRefPolicy,
                         settings,
                         options,
                       })).url;
@@ -2325,6 +2367,7 @@
                   const response = await cssHandler.rewriteCssText({
                     cssText: elem.getAttribute("style"),
                     refUrl,
+                    refPolicy: docRefPolicy,
                     isInline: true,
                     settings: {
                       usedCssFontUrl: undefined,
@@ -2343,6 +2386,7 @@
                   const response = await cssHandler.rewriteCssText({
                     cssText: elem.style.cssText,
                     refUrl,
+                    refPolicy: docRefPolicy,
                     isInline: true,
                     settings: {
                       usedCssFontUrl: undefined,
@@ -2444,6 +2488,8 @@
 
     // determine mime
     const mime = params.mime || doc.contentType;
+
+    let docRefPolicy = null;
 
     if (isMainPage && isMainFrame) {
       settings.indexFilename = await capturer.formatIndexFilename({
@@ -2755,12 +2801,31 @@
       }
     }
 
+    // determine document referrer policy
+    // meta[name=" referrer "] or meta[content=" origin "] doesn't take effect
+    // ref: https://html.spec.whatwg.org/multipage/semantics.html#meta-referrer
+    for (const metaElem of doc.querySelectorAll('meta[name="referrer" i]')) {
+      const policy = metaElem.getAttribute('content').toLowerCase();
+      if (META_REFERRER_POLICY.has(policy)) {
+        docRefPolicy = policy;
+      } else {
+        const policyLegacy = META_REFERRER_POLICY_LEGACY.get(policy);
+        if (policyLegacy !== undefined) {
+          docRefPolicy = policy;
+        }
+      }
+    }
+
     // init cssHandler
     // @FIXME: resolve each URL using dynamic baseUrl
     // (Not so mandatory as this only have a problem when there's a URL
     // before the first base[href], which violates the spec.)
     const cssHandler = new capturer.DocumentCssHandler({
-      doc, rootNode, origNodeMap, clonedNodeMap, refUrl: baseUrlFinal, settings, options,
+      doc, rootNode,
+      origNodeMap, clonedNodeMap,
+      refUrl: baseUrlFinal,
+      refPolicy: docRefPolicy,
+      settings, options,
     });
 
     // prepare favicon selector
@@ -3647,12 +3712,13 @@
    ***************************************************************************/
 
   capturer.DocumentCssHandler = class DocumentCssHandler {
-    constructor({doc, rootNode, origNodeMap, clonedNodeMap, refUrl, settings, options}) {
+    constructor({doc, rootNode, origNodeMap, clonedNodeMap, refUrl, refPolicy, settings, options}) {
       this.doc = doc;
       this.rootNode = rootNode || doc.documentElement;
       this.origNodeMap = origNodeMap;
       this.clonedNodeMap = clonedNodeMap;
       this.refUrl = refUrl;
+      this.refPolicy = refPolicy;
       this.settings = settings;
       this.options = options;
       this.resourceMap = ((options['capture.saveAs'] === 'singleHtml') && options['capture.mergeCssResources']) ? {} : null;
@@ -4023,13 +4089,15 @@
      *     cross-orign CSS.
      * @param {string} [params.refUrl] - The referrer URL for retrieving a
      *     cross-orign CSS.
+     * @param {string} [params.refPolicy] - the referrer policy for retrieving
+     *     a cross-orign CSS.
      * @param {boolean} [params.crossOrigin] - Whether to retrieve CSS via web
      *     request if it's cross origin.
      * @param {boolean} [params.errorWithNull] - Whether to return null if CSS
      *     not retrievable.
      * @return {?CSSStyleRule[]}
      */
-    async getRulesFromCss({css, url, refUrl, crossOrigin = true, errorWithNull = false}) {
+    async getRulesFromCss({css, url, refUrl, refPolicy, crossOrigin = true, errorWithNull = false}) {
       let rules = null;
       try {
         // Firefox may get this for a stylesheet with relative URL imported from
@@ -4060,6 +4128,7 @@
               const response = await capturer.invoke("fetchCss", {
                 url: url || css.href,
                 refUrl,
+                refPolicy,
                 settings,
                 options,
               });
@@ -4094,7 +4163,7 @@
      * @return {{usedCssFontUrl: Object, usedCssImageUrl: Object}}
      */
     async getCssResources() {
-      const {doc, rootNode, refUrl, settings, options} = this;
+      const {doc, rootNode, refUrl, refPolicy, settings, options} = this;
 
       const collector = {
         scopes: [],
@@ -4259,7 +4328,7 @@
 
             const css = cssRule.styleSheet;
             const url = new URL(cssRule.href, refUrl).href;
-            const rules = await this.getRulesFromCss({css, url, refUrl});
+            const rules = await this.getRulesFromCss({css, url, refUrl, refPolicy});
             for (const rule of rules) {
               await parseCssRule(rule, url);
             }
@@ -4360,14 +4429,14 @@
 
       const inspectDocOrShadowRoot = async (doc, root) => {
         for (const css of doc.styleSheets) {
-          const rules = await this.getRulesFromCss({css, refUrl});
+          const rules = await this.getRulesFromCss({css, refUrl, refPolicy});
           for (const rule of rules) {
             await parseCssRule(rule, css.href || refUrl, root);
           }
         }
 
         for (const css of capturer.getAdoptedStyleSheets(doc)) {
-          const rules = await this.getRulesFromCss({css, refUrl});
+          const rules = await this.getRulesFromCss({css, refUrl, refPolicy});
           for (const rule of rules) {
             await parseCssRule(rule, css.href || refUrl, root);
           }
@@ -4408,6 +4477,8 @@
      * @param {Object} params
      * @param {string} params.cssText - the CSS text to rewrite.
      * @param {string} params.refUrl - the reference URL for URL resolving.
+     * @param {string} [params.refPolicy] - the referrer policy for fetching
+     *     resources.
      * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which
      *     holds the @import rule(s), for an imported CSS).
      * @param {Node} [params.rootNode] - the reference root node for an
@@ -4416,7 +4487,7 @@
      * @param {Object} [params.settings]
      * @param {Object} [params.options]
      */
-    async rewriteCssText({cssText, refUrl, refCss = null, rootNode, isInline = false, settings, options}) {
+    async rewriteCssText({cssText, refUrl, refPolicy, refCss = null, rootNode, isInline = false, settings, options}) {
       settings = Object.assign({}, this.settings, settings);
       settings = Object.assign(settings, {
         recurseChain: [...settings.recurseChain, scrapbook.splitUrlByAnchor(refUrl)[0]],
@@ -4445,6 +4516,7 @@
         const response = await capturer.invoke("downloadFile", {
           url,
           refUrl,
+          refPolicy,
           settings,
           options,
         }).catch((ex) => {
@@ -4458,7 +4530,7 @@
       const importRules = [];
       let importRuleIdx = 0;
       if (refCss) {
-        const rules = await this.getRulesFromCss({css: refCss, url: refUrl, refUrl});
+        const rules = await this.getRulesFromCss({css: refCss, url: refUrl, refUrl, refPolicy});
         for (const rule of rules) {
           if (rule.type === 3) {
             importRules.push(rule);
@@ -4484,6 +4556,7 @@
                 url,
                 refCss: rule && rule.styleSheet,
                 refUrl,
+                refPolicy,
                 rootNode,
                 settings,
                 options,
@@ -4562,7 +4635,7 @@
     /**
      * Rewrite given cssRules to cssText.
      */
-    async rewriteCssRules({cssRules, refUrl, refCss, rootNode, indent = '', settings, options}) {
+    async rewriteCssRules({cssRules, refUrl, refPolicy, refCss, rootNode, indent = '', settings, options}) {
       const rules = [];
       for (const cssRule of cssRules) {
         switch (cssRule.type) {
@@ -4573,6 +4646,7 @@
             const cssText = await this.rewriteCssText({
               cssText: cssRule.cssText,
               refUrl,
+              refPolicy,
               refCss,
               settings,
               options,
@@ -4586,6 +4660,7 @@
             const cssText = await this.rewriteCssText({
               cssText: cssRule.cssText,
               refUrl,
+              refPolicy,
               refCss,
               rootNode,
               settings,
@@ -4600,6 +4675,7 @@
             const cssText = (await this.rewriteCssRules({
               cssRules: cssRule.cssRules,
               refUrl,
+              refPolicy,
               refCss,
               rootNode,
               indent: indent + '  ',
@@ -4617,6 +4693,7 @@
             const cssText = (await this.rewriteCssRules({
               cssRules: cssRule.cssRules,
               refUrl,
+              refPolicy,
               refCss,
               rootNode,
               indent: indent + '  ',
@@ -4634,6 +4711,7 @@
             const cssText = (await this.rewriteCssRules({
               cssRules: cssRule.cssRules,
               refUrl,
+              refPolicy,
               refCss,
               rootNode,
               indent: indent + '  ',
@@ -4656,6 +4734,7 @@
             const cssText = await this.rewriteCssText({
               cssText: cssRule.cssText,
               refUrl,
+              refPolicy,
               refCss,
               settings,
               options,
@@ -4689,13 +4768,14 @@
      * @param {?CSSStyleSheet} [params.refCss] - the reference CSS of the
      *     imported CSS (CSSImportRule.styleSheet).
      * @param {string} [params.refUrl] - the reference URL for URL resolving.
+     * @param {string} [params.refPolicy] - the referrer policy
      * @param {Node} [params.rootNode] - the reference root node for an
      *     imported CSS.
      * @param {Function} params.callback
      * @param {Object} [params.settings]
      * @param {Object} [params.options]
      */
-    async rewriteCss({elem, url, refCss, refUrl, rootNode, callback, settings, options}) {
+    async rewriteCss({elem, url, refCss, refUrl, refPolicy, rootNode, callback, settings, options}) {
       settings = settings ? Object.assign({}, this.settings, settings) : this.settings;
       options = options ? Object.assign({}, this.options, options) : this.options;
 
@@ -4736,6 +4816,7 @@
           response = await capturer.invoke("fetchCss", {
             url: sourceUrl,
             refUrl,
+            refPolicy,
             settings,
             options,
           });
@@ -4862,6 +4943,7 @@
           cssText = await this.rewriteCssText({
             cssText,
             refUrl: sourceUrl || refUrl,
+            refPolicy,
             refCss,
             settings,
             options,
@@ -4884,6 +4966,7 @@
           cssText = await this.rewriteCssText({
             cssText,
             refUrl: sourceUrl || refUrl,
+            refPolicy,
             refCss,
             settings,
             options,
@@ -4901,6 +4984,7 @@
             cssText = await this.rewriteCssRules({
               cssRules,
               refUrl: sourceUrl || refUrl,
+              refPolicy,
               refCss,
               rootNode,
               settings,

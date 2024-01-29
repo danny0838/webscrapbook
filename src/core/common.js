@@ -102,7 +102,7 @@
     "capture.downLink.doc.urlFilter": "",
     "capture.downLink.urlFilter": "###skip common logout URL\n/[/=]logout\\b/i",
     "capture.downLink.urlExtra": "",
-    "capture.referrerPolicy": "strict-origin-when-cross-origin", // "no-referrer", "no-referrer-when-downgrade", "origin", "origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-url"
+    "capture.referrerPolicy": "", // "", "no-referrer", "no-referrer-when-downgrade", "origin", "origin-when-cross-origin", "same-origin", "strict-origin", "strict-origin-when-cross-origin", "unsafe-url"; prepend "+" to force
     "capture.referrerSpoofSource": false,
     "capture.recordDocumentMeta": true,
     "capture.recordRewrites": false,

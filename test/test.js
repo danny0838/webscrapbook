@@ -48,7 +48,7 @@ const baseOptions = {
   "capture.downLink.doc.urlFilter": "",
   "capture.downLink.urlFilter": "",
   "capture.downLink.urlExtra": "",
-  "capture.referrerPolicy": "strict-origin-when-cross-origin",
+  "capture.referrerPolicy": "",
   "capture.referrerSpoofSource": false,
   "capture.recordDocumentMeta": true,
   "capture.recordRewrites": false,
@@ -10991,6 +10991,445 @@ async function test_capture_referrer2() {
   var file = zip.file('referrer2.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost2}/`);
+}
+
+/**
+ * Check if referrerpolicy attribute and rel=noreferrer are honored.
+ * Check if capture.referrerPolicy takes lower priority.
+ *
+ * capture.referrerPolicy
+ */
+async function test_capture_referrer3() {
+  /* capture.referrerPolicy = "unsafe-url" */
+  var options = {
+    "capture.referrerPolicy": "unsafe-url",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "py",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_referrer2/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var file = zip.file('favicon.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('favicon_rel.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === ``);
+
+  var file = zip.file('stylesheet.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('stylesheet_rel.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === ``);
+
+  var file = zip.file('script.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('imgsrc.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('imgsrcset.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('iframe.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('a.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('a_rel.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === ``);
+
+  var file = zip.file('area.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('area_rel.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === ``);
+}
+
+/**
+ * Check if capture.referrerPolicy with "+"-prefix takes higher priority
+ * than referrerpolicy attribute and rel=noreferrer.
+ *
+ * capture.referrerPolicy
+ */
+async function test_capture_referrer4() {
+  /* capture.referrerPolicy = "+unsafe-url" */
+  var options = {
+    "capture.referrerPolicy": "+unsafe-url",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "py",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_referrer2/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var file = zip.file('favicon.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+
+  var file = zip.file('favicon_rel.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+
+  var file = zip.file('stylesheet.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+
+  var file = zip.file('stylesheet_rel.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+
+  var file = zip.file('script.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+
+  var file = zip.file('imgsrc.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+
+  var file = zip.file('imgsrcset.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+
+  var file = zip.file('iframe.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+
+  var file = zip.file('a.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+
+  var file = zip.file('a_rel.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+
+  var file = zip.file('area.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+
+  var file = zip.file('area_rel.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer2/index.html`);
+}
+
+/**
+ * Check if meta[name="referrer"] is honored.
+ * Check if capture.referrerPolicy takes lower priority.
+ *
+ * capture.referrerPolicy
+ */
+async function test_capture_referrer5() {
+  /* capture.referrerPolicy = "unsafe-url" */
+  var options = {
+    "capture.referrerPolicy": "unsafe-url",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "py",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_referrer3/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var file = zip.file('favicon.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('stylesheet.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('script.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('imgsrc.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('imgsrcset.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('iframe.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('a.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('area.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('svg_image.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('svg_imagex.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('svg_script.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('svg_scriptx.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('svg_a.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('svg_ax.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('math_msup.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+}
+
+/**
+ * Check if capture.referrerPolicy with "+"-prefix takes higher priority
+ * than meta[name="referrer"].
+ *
+ * capture.referrerPolicy
+ */
+async function test_capture_referrer6() {
+  /* capture.referrerPolicy = "+unsafe-url" */
+  var options = {
+    "capture.referrerPolicy": "+unsafe-url",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "py",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_referrer3/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var file = zip.file('favicon.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('stylesheet.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('script.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('imgsrc.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('imgsrcset.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('iframe.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('a.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('area.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('svg_image.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('svg_imagex.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('svg_script.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('svg_scriptx.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('svg_a.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('svg_ax.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+
+  var file = zip.file('math_msup.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer3/index.html`);
+}
+
+/**
+ * Check referrer policy for cross-origin external and imported CSS.
+ *
+ * capture.referrerPolicy
+ */
+async function test_capture_referrer7() {
+  /* capture.rewriteCss = "url" */
+  var options = {
+    "capture.rewriteCss": "url",
+    "capture.referrerPolicy": "",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_referrer4/index.py`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var file = zip.file('css_bg.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer4/index.py`);
+
+  var file = zip.file('css_style_bg.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer4/index.py`);
+
+  var file = zip.file('css_style_font.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer4/index.py`);
+
+  var file = zip.file('css_style_import.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+
+  var file = zip.file('css_link.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+
+  var file = zip.file('css_link_bg.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+
+  var file = zip.file('css_link_font.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+
+  var file = zip.file('css_link_import.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `:root { --referrer: ${localhost2}/capture_referrer4/css_link.py; }`);
+
+  /* capture.rewriteCss = "tidy" */
+  var options = {
+    "capture.rewriteCss": "tidy",
+    "capture.referrerPolicy": "",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_referrer4/index.py`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var file = zip.file('css_bg.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer4/index.py`);
+
+  var file = zip.file('css_style_bg.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer4/index.py`);
+
+  var file = zip.file('css_style_font.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer4/index.py`);
+
+  var file = zip.file('css_style_import.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+
+  var file = zip.file('css_link.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+
+  var file = zip.file('css_link_bg.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+
+  var file = zip.file('css_link_font.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+
+  var file = zip.file('css_link_import.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `:root { --referrer: ${localhost2}/capture_referrer4/css_link.py; }`);
+
+  /* capture.rewriteCss = "match" */
+  var options = {
+    "capture.rewriteCss": "match",
+    "capture.referrerPolicy": "",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_referrer4/index.py`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var file = zip.file('css_bg.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer4/index.py`);
+
+  var file = zip.file('css_style_bg.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer4/index.py`);
+
+  var file = zip.file('css_style_font.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer4/index.py`);
+
+  var file = zip.file('css_style_import.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+
+  var file = zip.file('css_link.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+
+  var file = zip.file('css_link_bg.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+
+  var file = zip.file('css_link_font.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+
+  var file = zip.file('css_link_import.py.css');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `:root { --referrer: ${localhost2}/capture_referrer4/css_link.py; }`);
 }
 
 /**

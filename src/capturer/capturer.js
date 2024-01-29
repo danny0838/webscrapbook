@@ -404,6 +404,7 @@
    * @param {Object} params
    * @param {string} params.url
    * @param {string} [params.refUrl] - the referrer URL
+   * @param {string} [params.refPolicy] - the referrer policy
    * @param {boolean} [params.headerOnly] - fetch HTTP header only
    * @param {boolean} [params.ignoreSizeLimit]
    * @param {Objet} params.settings
@@ -430,11 +431,15 @@
      * @param {Object} params.headers
      * @param {string} params.targetUrl
      * @param {string} [params.refUrl]
+     * @param {string} [params.refPolicy] - the referrer policy
      * @param {Object} [params.options]
      * @return {Object} The modified headers object.
      */
-    const setReferrer = function ({headers, targetUrl, refUrl, options = {}}) {
-      const policy = options["capture.referrerPolicy"];
+    const setReferrer = function ({headers, targetUrl, refUrl, refPolicy, options = {}}) {
+      const defaultPolicy = options["capture.referrerPolicy"];
+      const policy = defaultPolicy.startsWith('+') ?
+          (defaultPolicy.substring(1) || refPolicy) :
+          (refPolicy || defaultPolicy);
       const spoof = options["capture.referrerSpoofSource"];
       const referrer = new Referrer(refUrl, targetUrl, policy, spoof).toString();
 
@@ -457,7 +462,7 @@
     const fetch = capturer.fetch = async function (params) {
       isDebug && console.debug("call: fetch", params);
 
-      const {url: sourceUrl, refUrl, headerOnly = false, ignoreSizeLimit = false, settings: {timeId}, options} = params;
+      const {url: sourceUrl, refUrl, refPolicy, headerOnly = false, ignoreSizeLimit = false, settings: {timeId}, options} = params;
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
       let headers = {};
@@ -567,6 +572,7 @@
               headers: {},
               refUrl,
               targetUrl: sourceUrlMain,
+              refPolicy,
               options,
             }),
             onreadystatechange(xhr) {
@@ -1094,6 +1100,7 @@
    * @param {?string} [params.documentName]
    * @param {string} params.url
    * @param {string} [params.refUrl]
+   * @param {string} [params.refPolicy] - the referrer policy
    * @param {string} [params.title] - item title
    * @param {string} [params.favIconUrl] - item favicon
    * @param {string} [params.mode] - "tab", "source", "bookmark"
@@ -1103,13 +1110,14 @@
   capturer.captureRemote = async function ({
     timeId,
     documentName,
-    url, refUrl, title, favIconUrl,
+    url, refUrl, refPolicy, title, favIconUrl,
     mode, options,
   }) {
     const source = `${url}`;
     const message = {
       url,
       refUrl,
+      refPolicy,
       settings: {
         missionId: capturer.missionId,
         timeId,
@@ -1162,12 +1170,13 @@
    * @param {Object} params
    * @param {string} params.url
    * @param {string} [params.refUrl]
+   * @param {string} [params.refPolicy] - the referrer policy
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<Object>}
    */
   capturer.captureRemoteTab = async function ({
-    url, refUrl,
+    url, refUrl, refPolicy,
     settings, options,
   }) {
     capturer.log(`Launching remote tab ...`);
@@ -1220,6 +1229,7 @@
     try {
       return await capturer.invoke("captureDocumentOrFile", {
         refUrl,
+        refPolicy,
         settings: subSettings,
         options,
       }, {
@@ -1237,6 +1247,7 @@
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl]
+   * @param {string} [params.refPolicy] - the referrer policy
    * @param {boolean} [params.isAttachment] - the resource is known to be an attachment
    * @param {boolean} [params.downLink] - is downLink mode (check filter,
    *     and capture as file or register in linkedPages)
@@ -1251,7 +1262,7 @@
 
     const {downLink = false, downLinkExtra = false, downLinkPage = false, settings, options} = params;
     let {timeId, depth} = settings;
-    let {url: sourceUrl, refUrl, isAttachment} = params;
+    let {url: sourceUrl, refUrl, refPolicy, isAttachment} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     let downLinkDoc = downLink && parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options["capture.saveAs"] !== "singleHtml";
@@ -1303,6 +1314,7 @@
         fetchResponse = await capturer.fetch({
           url: urlMain,
           refUrl,
+          refPolicy,
           ignoreSizeLimit: settings.isMainPage && settings.isMainFrame,
           settings,
           options,
@@ -1401,6 +1413,7 @@
         return await capturer.downloadFile({
           url: fetchResponse.url,
           refUrl,
+          refPolicy,
           settings,
           options,
         })
@@ -1464,6 +1477,7 @@
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl]
+   * @param {string} [params.refPolicy] - the referrer policy
    * @param {Object} params.settings
    * @param {string} params.settings.timeId
    * @param {string} [params.settings.title] - item title (also used as index page title)
@@ -1475,7 +1489,7 @@
     isDebug && console.debug("call: captureBookmark", params);
 
     const {settings, options} = params;
-    let {url: sourceUrl, refUrl} = params;
+    let {url: sourceUrl, refUrl, refPolicy} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     let fetchResponse;
     let doc;
@@ -1486,6 +1500,7 @@
       fetchResponse = await capturer.fetch({
         url: sourceUrlMain,
         refUrl,
+        refPolicy,
         settings,
         options,
       });
@@ -1549,6 +1564,7 @@
         const fetchResponse = await capturer.fetch({
           url: favIconUrlMain,
           refUrl: sourceUrl,
+          refPolicy,
           settings,
           options,
         });
@@ -1686,6 +1702,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl] - the referrer URL
+   * @param {string} [params.refPolicy] - the referrer policy
    * @param {string} [params.charset] - charset for the text file
    * @param {Object} params.settings
    * @param {string} [params.settings.title] - item title (also used as index page title)
@@ -1695,7 +1712,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
   capturer.captureFile = async function (params) {
     isDebug && console.debug("call: captureFile", params);
 
-    const {url: sourceUrl, refUrl, charset, settings, options} = params;
+    const {url: sourceUrl, refUrl, refPolicy, charset, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId, isMainPage, isMainFrame, documentName, title} = settings;
 
@@ -1712,6 +1729,7 @@ Bookmark for <a href="${scrapbook.escapeHtml(sourceUrl)}">${scrapbook.escapeHtml
     const response = await capturer.downloadFile({
       url: sourceUrl,
       refUrl,
+      refPolicy,
       settings,
       options,
     });
@@ -3526,6 +3544,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl] - the referrer URL
+   * @param {string} [params.refPolicy] - the referrer policy
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<downloadFileResponse>}
@@ -3533,7 +3552,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   capturer.downloadFile = async function (params) {
     isDebug && console.debug("call: downloadFile", params);
 
-    const {url: sourceUrl, refUrl, settings, options} = params;
+    const {url: sourceUrl, refUrl, refPolicy, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
@@ -3549,6 +3568,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
     const fetchResponse = await capturer.fetch({
       url: sourceUrlMain,
       refUrl,
+      refPolicy,
       settings,
       options,
     });
@@ -3596,6 +3616,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {Object} params
    * @param {string} params.url
    * @param {string} [params.refUrl]
+   * @param {string} [params.refPolicy] - the referrer policy
    * @param {string} params.settings
    * @param {Object} params.options
    * @return {Promise<fetchCssResponse>}
@@ -3603,13 +3624,14 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   capturer.fetchCss = async function (params) {
     isDebug && console.debug("call: fetchCss", params);
 
-    const {url: sourceUrl, refUrl, settings, options} = params;
+    const {url: sourceUrl, refUrl, refPolicy, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
     const fetchResponse = await capturer.fetch({
       url: sourceUrlMain,
       refUrl,
+      refPolicy,
       settings,
       options,
     });

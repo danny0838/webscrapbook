@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="origin">
+<title>Test document referrer policy</title>
+<style>img { width: 60px; }</style>
+<link rel="shortcut icon" href="favicon.py">
+<link rel="stylesheet" href="stylesheet.py">
+<script src="script.py"></script>
+</head>
+<body>
+<blockquote><img src="imgsrc.py"></blockquote>
+<blockquote><img srcset="imgsrcset.py 2x"></blockquote>
+<blockquote><iframe src="iframe.py"></iframe></blockquote>
+<blockquote><a href="a.py">anchor</a></blockquote>
+<blockquote>
+  <img src="green.bmp" usemap="#area-map">
+  <map name="area-map">
+    <area shape="rect" coords="0,0,60,60" href="area.py"></area>
+  </map>
+</blockquote>
+<blockquote>
+<svg width="100" height="100" viewBox="0 0 100 100"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+  <script href="svg_script.py"></script>
+  <script xlink:href="svg_scriptx.py"></script>
+  <a href="svg_a.py">
+    <circle cx="50" cy="40" r="35"></circle>
+  </a>
+  <a xlink:href="svg_ax.py">
+    <text x="50" y="90" text-anchor="middle">
+      &lt;circle&gt;
+    </text>
+  </a>
+  <image href="svg_image.py" x="15" y="5" width="10" height="10" />
+  <image xlink:href="svg_imagex.py" x="75" y="5" width="10" height="10"/>
+</svg>
+</blockquote>
+<blockquote>
+<math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mi>a</mi>
+    <mo>&InvisibleTimes;</mo>
+    <msup href="math_msup.py">
+      <mi>x</mi>
+      <mn>2</mn>
+    </msup>
+    <mo>+</mo>
+    <mi>b</mi>
+    <mo>&InvisibleTimes;</mo>
+    <mi>x</mi>
+    <mo>+</mo>
+    <mi>c</mi>
+  </mrow>
+</math>
+</blockquote>
+</body>
+</html>
