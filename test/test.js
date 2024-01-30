@@ -545,7 +545,7 @@ async function test_capture_file() {
   var doc = await readFileAsDocument(rdfBlob);
   assert(doc);
   var elem = doc.getElementsByTagNameNS(MAF, "indexfilename")[0];
-  assert(elem.getAttributeNS(RDF, "resource") === 'index.html');  
+  assert(elem.getAttributeNS(RDF, "resource") === 'index.html');
   var elem = doc.getElementsByTagNameNS(MAF, "charset")[0];
   assert(elem.getAttributeNS(RDF, "resource") === 'UTF-8'); // for index.html
 
@@ -580,8 +580,8 @@ async function test_capture_file() {
   assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'file');
   var metaRefreshElem = doc.querySelector('meta[http-equiv="refresh"][content]');
   assert(metaRefreshElem);
-  assert(metaRefreshElem.getAttribute('content') === "0; url=" 
-      + "data:image/bmp;filename=file.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+  assert(metaRefreshElem.getAttribute('content') ===
+    "0; url=data:image/bmp;filename=file.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
   assert(!doc.querySelector('a[href="file.bmp"]')); // do NOT generate anchor to avoid long content
   assert(!doc.querySelector('img'));
 }
@@ -5420,7 +5420,7 @@ async function test_capture_canvas() {
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
   assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
-  
+
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
@@ -10952,7 +10952,7 @@ async function test_capture_record_nodes1() {
     `<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\\s\\S]*?</noscript>-->`
   ).test(body.innerHTML));
 
-  /* -capture.recordRewrites */  
+  /* -capture.recordRewrites */
   options["capture.recordRewrites"] = false;
 
   var blob = await captureHeadless({

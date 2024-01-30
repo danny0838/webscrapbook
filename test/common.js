@@ -115,7 +115,7 @@ async function waitTabLoading(tab) {
     browser.tabs.onUpdated.removeListener(listener);
     browser.tabs.onRemoved.removeListener(listener2);
   }
-};
+}
 
 async function openTab(createProperties) {
   const tab = await browser.tabs.create(createProperties);

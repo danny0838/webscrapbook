@@ -18,4 +18,4 @@ Link: <header/header.css>; rel=stylesheet
 <blockquote id="link">link</blockquote>
 <blockquote id="import">import</blockquote>
 </body>
-</html>""".encode("UTF-8"))
+</html>""".encode('UTF-8'))

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-import sys
 import os
+import sys
 from urllib.parse import parse_qs
 
 q = parse_qs(os.environ['QUERY_STRING'])
@@ -12,4 +12,4 @@ sys.stdout.buffer.write(f"""Content-Type: image/svg+xml
 <rect width="100%" height="100%" fill="red" />
 <!-- {res_id} -->
 </svg>
-""".encode("ASCII"))
+""".encode('ASCII'))

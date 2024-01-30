@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+
 sys.stdout.buffer.write("""Content-Type: text/html;charset=Big5
 
 <!DOCTYPE html>
@@ -13,4 +14,4 @@ sys.stdout.buffer.write("""Content-Type: text/html;charset=Big5
 <img src="圖片.bmp">
 <img src="%E5%9C%96%E7%89%87.bmp">
 </body>
-</html>""".encode("Big5"))
+</html>""".encode('Big5'))

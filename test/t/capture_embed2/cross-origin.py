@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-import sys
-import os
 import json
+import os
+import sys
 
 port = json.loads(os.environ['wsb.config'])['server_port2']
-port = '' if port == 80 else ':' + str(port)
-sys.stdout.buffer.write("""Content-Type: text/html
+port = '' if port == 80 else f':{port}'
+sys.stdout.buffer.write(f"""Content-Type: text/html
 
 <!DOCTYPE html>
 <html>
@@ -19,4 +19,4 @@ sys.stdout.buffer.write("""Content-Type: text/html
 <embed src="//localhost{port}/capture_embed2/frames/frame3.svg" width="200" height="200">
 <embed src="//localhost{port}/capture_embed2/frames/frame4.txt" width="200" height="200">
 </body>
-</html>""".format(port=port).encode("UTF-8"))
+</html>""".encode('UTF-8'))

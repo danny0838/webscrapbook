@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-import sys
-import os
 import mimetypes
+import os
+import sys
 from urllib.parse import parse_qs
 from urllib.request import url2pathname
 
@@ -15,7 +15,7 @@ mime = mime or 'application/octet-stream'
 sys.stdout.buffer.write(f"""Content-Type: {mime}
 Access-Control-Allow-Origin: *
 
-""".encode("ASCII"))
+""".encode('ASCII'))
 
 with open(file, 'rb') as fh:
     sys.stdout.buffer.write(fh.read())

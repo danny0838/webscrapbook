@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import sys
-import os
 import time
 
 sys.stdout.buffer.write("""Content-Type: text/html
@@ -13,7 +12,7 @@ sys.stdout.buffer.write("""Content-Type: text/html
 img { width: 60px; }
 </style>
 </head>
-""".encode("UTF-8"))
+""".encode('UTF-8'))
 sys.stdout.flush()
 
 time.sleep(10)
@@ -23,4 +22,4 @@ sys.stdout.buffer.write("""<body>
 <img src="red.py">
 </body>
 </html>
-""".encode("UTF-8"))
+""".encode('UTF-8'))

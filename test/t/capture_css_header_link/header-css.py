@@ -5,6 +5,7 @@
 - Not supported by Chromium (80.*).
 """
 import sys
+
 sys.stdout.buffer.write("""Content-Type: text/html
 Link: <header.css>; rel="stylesheet"
 
@@ -17,4 +18,4 @@ Link: <header.css>; rel="stylesheet"
 <blockquote id="header">header background: yellow;</blockquote>
 </body>
 </html>
-""".encode("UTF-8"))
+""".encode('UTF-8'))

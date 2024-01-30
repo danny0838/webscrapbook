@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-import sys
-import os
 import json
+import os
+import sys
 
 port = json.loads(os.environ['wsb.config'])['server_port2']
-port = '' if port == 80 else ':' + str(port)
-sys.stdout.buffer.write("""Content-Type: text/html
+port = '' if port == 80 else f':{port}'
+sys.stdout.buffer.write(f"""Content-Type: text/html
 
 <!DOCTYPE html>
 <html>
@@ -17,4 +17,4 @@ sys.stdout.buffer.write("""Content-Type: text/html
 <img src="referrer.py">
 <img src="//localhost{port}/capture_referrer/referrer2.py">
 </body>
-</html>""".format(port=port).encode("UTF-8"))
+</html>""".encode('UTF-8'))

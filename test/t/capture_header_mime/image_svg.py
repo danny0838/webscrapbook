@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import os
-import sys
 import shutil
+import sys
 
 os.chdir(os.path.dirname(sys.argv[0]))
-with open("image.svg", "rb") as fh:
+with open('image.svg', 'rb') as fh:
     sys.stdout.buffer.write(b"""Content-Type: image/svg+xml
 
 """)
