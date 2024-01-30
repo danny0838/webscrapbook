@@ -13057,7 +13057,7 @@ async function test_capture_custom_elements() {
 
 async function test_viewer_validate() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer-validate/index.html'),
+    url: browser.runtime.getURL('t/viewer_validate/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -13068,7 +13068,7 @@ async function test_viewer_validate() {
 
 async function test_viewer_encoding() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer-encoding/index.html'),
+    url: browser.runtime.getURL('t/viewer_encoding/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -13079,7 +13079,7 @@ async function test_viewer_encoding() {
 
 async function test_viewer_attachment() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer-attachment/index.html'),
+    url: browser.runtime.getURL('t/viewer_attachment/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -13090,7 +13090,7 @@ async function test_viewer_attachment() {
 
 async function test_viewer_interlink() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer-interlink/index.html'),
+    url: browser.runtime.getURL('t/viewer_interlink/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -13101,7 +13101,7 @@ async function test_viewer_interlink() {
 
 async function test_viewer_interlink2() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer-interlink2/index.html'),
+    url: browser.runtime.getURL('t/viewer_interlink2/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -13112,7 +13112,7 @@ async function test_viewer_interlink2() {
 
 async function test_viewer_interlink3() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer-interlink3/index.html'),
+    url: browser.runtime.getURL('t/viewer_interlink3/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -13123,7 +13123,7 @@ async function test_viewer_interlink3() {
 
 async function test_viewer_css_rules() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer-css-rules/index.html'),
+    url: browser.runtime.getURL('t/viewer_css_rules/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -13134,7 +13134,7 @@ async function test_viewer_css_rules() {
 
 async function test_viewer_metaRefresh() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer-metaRefresh/index.html'),
+    url: browser.runtime.getURL('t/viewer_metaRefresh/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -13145,7 +13145,7 @@ async function test_viewer_metaRefresh() {
 
 async function test_viewer_archive_in_frame() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer-archive-in-frame/index.html'),
+    url: browser.runtime.getURL('t/viewer_archive_in_frame/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -13156,7 +13156,7 @@ async function test_viewer_archive_in_frame() {
 
 async function test_viewer_csp() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer-csp/index.html'),
+    url: browser.runtime.getURL('t/viewer_csp/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
