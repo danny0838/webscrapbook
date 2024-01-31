@@ -3578,16 +3578,29 @@
     try {
       yield* docOrShadowRoot.adoptedStyleSheets;
     } catch (ex) {
-      // docOrShadowRoot.adoptedStyleSheets is undefined for Firefox < 101.
+      // Firefox < 101.0b1: docOrShadowRoot.adoptedStyleSheets is undefined
       //
-      // docOrShadowRoot.adoptedStyleSheets of a content script is restricted
-      // for 101 <= Firefox < 101.0b8.
+      // Firefox < 101.0b8: docOrShadowRoot.adoptedStyleSheets of a content
+      // script throws an error when accessed.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1767819
       //
-      // docOrShadowRoot.adoptedStyleSheets of a content script
-      // has all properties unreadable since Firefox 101.0b8.
+      // Firefox >= 101.0b8: docOrShadowRoot.adoptedStyleSheets of a content
+      // script has all properties unreadable.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=1770592
-      return;
+      //
+      // Workaround with document.wrappedJSObject:
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1817675
+      if (!('adoptedStyleSheets' in docOrShadowRoot)) {
+        return;
+      }
+
+      try {
+        yield* docOrShadowRoot.wrappedJSObject.adoptedStyleSheets;
+      } catch (ex) {
+        // This shouldn't happen.
+        // Catch the error in case of an unexpected implementation change.
+        console.error(ex);
+      }
     }
   };
 
