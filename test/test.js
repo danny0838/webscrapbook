@@ -1645,10 +1645,9 @@ async function test_capture_selection6() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  // Some browsers support multiple selection (e.g. Firefox), while some don't
-  // Skip test if not support.
+  // Multiple selection is only supported by some browsers (e.g. Firefox)
   if (!doc.querySelector('#selection2')) {
-    return;
+    throw new TestSkipError(`multiple selection not supported`);
   }
 
   // selected elements and resources
@@ -1691,10 +1690,9 @@ async function test_capture_selection7() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "application/xhtml+xml"});
   var doc = await readFileAsDocument(indexBlob);
 
-  // Some browsers support multiple selection (e.g. Firefox), while some don't
-  // Skip test if not support.
+  // Multiple selection is only supported by some browsers (e.g. Firefox)
   if (!doc.querySelector('#selection2')) {
-    return;
+    throw new TestSkipError(`multiple selection not supported`);
   }
 
   // selected elements and resources
@@ -3698,7 +3696,7 @@ svg|a text, text svg|a {
  *
  * capture.rewriteCss
  */
-async function test_capture_css_rewriteCss2() {
+async function test_capture_css_rewriteCss2_1() {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
@@ -3749,30 +3747,77 @@ async function test_capture_css_rewriteCss2() {
   assert(styleElems[4].textContent.trim().match(regex));
 
   assert(styleElems[5].textContent.trim() === ``);
+}
 
-  assert(styleElems[6].textContent.trim() === `:hover { }`);
+async function test_capture_css_rewriteCss2_2() {
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
 
-  assert(styleElems[7].textContent.trim() === `#pseudo1::before { }`);
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss2/rewrite_pseudo.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
 
-  assert(styleElems[8].textContent.trim() === `#pseudo2:not([hidden]) { }`);
+  var zip = await new JSZip().loadAsync(blob);
 
-  assert(styleElems[9].textContent.trim() === `#pseudo3:not(blockquote) { }`);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
 
-  assert(styleElems[10].textContent.trim() === `#pseudo4:is(blockquote) { }`);
+  var styleElems = doc.querySelectorAll('style');
 
-  assert(styleElems[11].textContent.trim() === ``);
+  assert(styleElems[0].textContent.trim() === `:hover { }`);
 
-  assert(styleElems[12].textContent.trim() === `:is(#pseudo6):not([hidden]) { }`);
+  assert(styleElems[1].textContent.trim() === `#pseudo1::before { }`);
 
-  assert(styleElems[13].textContent.trim() === `:is(#pseudo7):not(blockquote) { }`);
+  assert(styleElems[2].textContent.trim() === `#pseudo2:not([hidden]) { }`);
 
-  assert(styleElems[14].textContent.trim() === `[id="pseudo8"]:not([hidden]) { }`);
+  assert(styleElems[3].textContent.trim() === `#pseudo3:not(blockquote) { }`);
 
-  assert(styleElems[15].textContent.trim() === `[id="pseudo9"]:not(blockquote) { }`);
+  assert(styleElems[4].textContent.trim() === `[id="pseudo4"]:not([hidden]) { }`);
 
-  assert(styleElems[16].textContent.trim() === `#pseudo10 :nth-of-type(1) { }`);
+  assert(styleElems[5].textContent.trim() === `[id="pseudo5"]:not(blockquote) { }`);
 
-  assert(styleElems[17].textContent.trim() === ``);
+  assert(styleElems[6].textContent.trim() === `#pseudo6 :nth-of-type(1) { }`);
+
+  assert(styleElems[7].textContent.trim() === ``);
+}
+
+async function test_capture_css_rewriteCss2_3() {
+  // :is() CSS pseudo-class is supported in Firefox >= 78 and Chromium >= 88.
+  try {
+    document.querySelector(':is()');
+  } catch (ex) {
+    throw new TestSkipError(`:is() CSS pseudo-class not supported`);
+  }
+
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss2/rewrite_pseudo_is.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+
+  assert(styleElems[1].textContent.trim() === `#pseudo1:is(blockquote) { }`);
+
+  assert(styleElems[2].textContent.trim() === ``);
+
+  assert(styleElems[3].textContent.trim() === `:is(#pseudo3):not([hidden]) { }`);
+
+  assert(styleElems[4].textContent.trim() === `:is(#pseudo4):not(blockquote) { }`);
 }
 
 /**
@@ -4402,9 +4447,10 @@ async function test_capture_css_dynamic2() {
  * capturer.DocumentCssHandler
  */
 async function test_capture_css_adoptedStyleSheets() {
-  // Document.adoptedStyleSheets is supported by Chromium only.
-  // Skip for a browser that does not support it.
-  if (!document.adoptedStyleSheets) { return; }
+  // Document.adoptedStyleSheets is not supported by Firefox < 101.
+  if (!document.adoptedStyleSheets) {
+    throw new TestSkipError(`Document.adoptedStyleSheets not supported`);
+  }
 
   var blob = await capture({
     url: `${localhost}/capture_css_adoptedStyleSheets/index.html`,
@@ -5151,9 +5197,10 @@ async function test_capture_imageBackground_used4() {
  * capture.imageBackground
  */
 async function test_capture_imageBackground_used5() {
-  // Document.adoptedStyleSheets is supported by Chromium only.
-  // Skip for a browser that does not support it.
-  if (!document.adoptedStyleSheets) { return; }
+  // Document.adoptedStyleSheets is not supported by Firefox < 101.
+  if (!document.adoptedStyleSheets) {
+    throw new TestSkipError(`Document.adoptedStyleSheets not supported`);
+  }
 
   /* capture.imageBackground = save-used */
   var options = {

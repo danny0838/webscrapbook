@@ -5,6 +5,14 @@ var localhost;
 var localhost2;
 var testTotal = 0;
 var testPass = 0;
+var testSkipped = 0;
+
+class TestSkipError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'TestSkipError';
+  }
+}
 
 var userAgent = (() => {
     const ua = navigator.userAgent;
@@ -327,11 +335,23 @@ async function test(fn) {
   testTotal += 1;
   log(`Testing: ${fn.name}... `);
   try {
+    // pass
     await fn();
     testPass += 1;
     log(`pass`);
     log(`\n`);
   } catch(ex) {
+    if (ex.name === 'TestSkipError') {
+      // skipped
+      testSkipped += 1;
+      testTotal -= 1;
+      const msg = ex.message ? ` (${ex.message})` : '';
+      log(`skipped${msg}`);
+      log(`\n`);
+      return;
+    }
+
+    // fail
     console.error(ex);
     error(`fail`);
     log(`\n`);
@@ -340,7 +360,8 @@ async function test(fn) {
 
 async function showTestResult() {
   const reportMethod = (testPass === testTotal) ? log : error;
-  reportMethod(`Tests pass/total: ${testPass}/${testTotal}`);
+  const skippedMsg = testSkipped ? ` (skipped=${testSkipped})` : '';
+  reportMethod(`Tests pass/total: ${testPass}/${testTotal}${skippedMsg}`);
   log(`\n`);
 }
 

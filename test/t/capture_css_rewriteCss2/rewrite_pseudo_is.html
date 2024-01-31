@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>/* dummy placeholder */</style>
+<style>
+#pseudo1:is(blockquote) {}
+</style>
+<style>
+#pseudo2:is(div) {}
+</style>
+<style>
+:is(#pseudo3):not([hidden]) {}
+</style>
+<style>
+:is(#pseudo4):not(blockquote) {}
+</style>
+</head>
+<body>
+<blockquote id="pseudo1"></blockquote>
+<blockquote id="pseudo2"></blockquote>
+<blockquote id="pseudo3"></blockquote>
+<blockquote id="pseudo4"></blockquote>
+</body>
+</html>

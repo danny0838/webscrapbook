@@ -42,59 +42,5 @@ svg|nonexist text { fill: blue; }
   unknown: url(ref/unsupported-4.bmp); /* unknown */
 }
 </style>
-<!-- further selector syntax tests -->
-<style>
-:hover {}
-</style>
-<style>
-#pseudo1::before {}
-</style>
-<style>
-#pseudo2:not([hidden]) {}
-</style>
-<style>
-#pseudo3:not(blockquote) {}
-</style>
-<style>
-#pseudo4:is(blockquote) {}
-</style>
-<style>
-#pseudo5:is(div) {}
-</style>
-<style>
-:is(#pseudo6):not([hidden]) {}
-</style>
-<style>
-:is(#pseudo7):not(blockquote) {}
-</style>
-<style>
-[id="pseudo8"]:not([hidden]) {}
-</style>
-<style>
-[id="pseudo9"]:not(blockquote) {}
-</style>
-<style>
-#pseudo10 :nth-of-type(1) {}
-</style>
-<style>
-#pseudo11 :nth-of-type(2) {}
-</style>
-</head>
-<body>
-<blockquote id="pseudo1"></blockquote>
-<blockquote id="pseudo2"></blockquote>
-<blockquote id="pseudo3"></blockquote>
-<blockquote id="pseudo4"></blockquote>
-<blockquote id="pseudo5"></blockquote>
-<blockquote id="pseudo6"></blockquote>
-<blockquote id="pseudo7"></blockquote>
-<blockquote id="pseudo8"></blockquote>
-<blockquote id="pseudo9"></blockquote>
-<div id="pseudo10">
-  <blockquote></blockquote>
-</div>
-<div id="pseudo11">
-  <blockquote></blockquote>
-</div>
 </body>
 </html>

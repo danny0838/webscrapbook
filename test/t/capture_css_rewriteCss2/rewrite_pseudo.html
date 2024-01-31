@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+:hover {}
+</style>
+<style>
+#pseudo1::before {}
+</style>
+<style>
+#pseudo2:not([hidden]) {}
+</style>
+<style>
+#pseudo3:not(blockquote) {}
+</style>
+<style>
+[id="pseudo4"]:not([hidden]) {}
+</style>
+<style>
+[id="pseudo5"]:not(blockquote) {}
+</style>
+<style>
+#pseudo6 :nth-of-type(1) {}
+</style>
+<style>
+#pseudo7 :nth-of-type(2) {}
+</style>
+</head>
+<body>
+<blockquote id="pseudo1"></blockquote>
+<blockquote id="pseudo2"></blockquote>
+<blockquote id="pseudo3"></blockquote>
+<blockquote id="pseudo4"></blockquote>
+<blockquote id="pseudo5"></blockquote>
+<div id="pseudo6">
+  <blockquote></blockquote>
+</div>
+<div id="pseudo7">
+  <blockquote></blockquote>
+</div>
+</body>
+</html>
