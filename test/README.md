@@ -3,8 +3,8 @@ Unit tests
 
 ### System requirements
 
-* Firefox ≥ 63, Chromium ≥ 57
-* Python 3.* (≥ 3.6 is better)
+* Firefox ≥ 68, Chromium ≥ 73
+* Python ≥ 3.7
 
 ### Usage
 
