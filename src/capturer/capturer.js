@@ -434,7 +434,9 @@
      * @return {Object} The modified headers object.
      */
     const setReferrer = function ({headers, targetUrl, refUrl, options = {}}) {
-      const referrer = new Referrer(refUrl, targetUrl, options["capture.referrerPolicy"], options["capture.referrerSpoofSource"]).getReferrer();
+      const policy = options["capture.referrerPolicy"];
+      const spoof = options["capture.referrerSpoofSource"];
+      const referrer = new Referrer(refUrl, targetUrl, policy, spoof).toString();
 
       if (referrer) {
         // Browser does not allow assigning "Referer" header directly.

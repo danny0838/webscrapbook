@@ -3,7 +3,7 @@
  *
  * ref: https://www.w3.org/TR/referrer-policy/#referrer-policies
  *
- * Copyright Danny Lin 2021
+ * Copyright Danny Lin 2021-2024
  * Distributed under the MIT License
  * https://opensource.org/licenses/MIT
  */
@@ -32,55 +32,71 @@
     constructor(refUrl, targetUrl, policy, spoof = false) {
       this.refUrl = refUrl;
       this.targetUrl = targetUrl;
-      this.policy = policy;
+      this.policy = (policy || '').toLowerCase();
       this.spoof = spoof;
     }
 
     get source() {
       if (this.spoof) {
-        Object.defineProperty(this, 'source', {value: this.target});
-        return this.source;
+        const value = this.target;
+        Object.defineProperty(this, 'source', {value});
+        return value;
       }
 
+      let value = null;
       try {
-        Object.defineProperty(this, 'source', {value: new URL(this.refUrl)});
+        value = new URL(this.refUrl);
       } catch (ex) {
-        Object.defineProperty(this, 'source', {value: null});
+        // pass
       }
-      return this.source;
+      Object.defineProperty(this, 'source', {value});
+      return value;
     }
 
     get target() {
+      let value = null;
       try {
-        Object.defineProperty(this, 'target', {value: new URL(this.targetUrl)});
+        value = new URL(this.targetUrl);
       } catch (ex) {
-        Object.defineProperty(this, 'target', {value: null});
+        // pass
       }
-      return this.target;
-    }
-
-    get isValidSource() {
-      Object.defineProperty(this, 'isValidSource', {value: this.source && ['https:', 'http:'].includes(this.source.protocol)});
-      return this.isValidSource;
-    }
-
-    get isValidTarget() {
-      Object.defineProperty(this, 'isValidTarget', {value: this.target && ['https:', 'http:'].includes(this.target.protocol)});
-      return this.isValidTarget;
+      Object.defineProperty(this, 'target', {value});
+      return value;
     }
 
     get isSameOrigin() {
-      Object.defineProperty(this, 'isSameOrigin', {value: this.source && this.target && this.source.origin === this.target.origin && this.source.origin !== 'null' && this.target.origin !== 'null'});
-      return this.isSameOrigin;
+      const value = this.source.origin === this.target.origin
+        && this.source.origin !== 'null' && this.target.origin !== 'null'
+        && this.source.protocol !== 'file:' && this.target.protocol !== 'file:';
+      Object.defineProperty(this, 'isSameOrigin', {value});
+      return value;
     }
 
     get isDownGrade() {
-      Object.defineProperty(this, 'isDownGrade', {value: !this.source || !this.target || this.source.protocol === 'https:' && this.target.protocol !== 'https:'});
-      return this.isDownGrade;
+      // ref: https://www.w3.org/TR/secure-contexts/#is-url-trustworthy
+      const sourceIsTls = ['https:', 'wss:'].includes(this.source.protocol);
+      const targetIsPotentiallyTrustworthy = ['about:blank', 'about:srcdoc'].includes(this.target.protocol + this.target.pathname)
+        || ['data:', 'https:', 'wss:', 'file:', ...this.appProtocols].includes(this.target.protocol)
+        || this.target.hostname.match(/^127(?:\.\d{0,3}){3}$/)
+        || ['[::1]', 'localhost', 'localhost.'].includes(this.target.hostname)
+        || this.target.hostname.endsWith('.localhost') || this.target.hostname.endsWith('.localhost.');
+
+      const value = sourceIsTls && !targetIsPotentiallyTrustworthy;
+      Object.defineProperty(this, 'isDownGrade', {value});
+      return value;
     }
 
-    getReferrer() {
-      if (!this.isValidSource || !this.isValidTarget) { return null; }
+    get appProtocols() {
+      const value = [];
+      try {
+        value.push(new URL(browser.runtime.getURL('')).protocol);
+      } catch (ex) {}
+      Object.defineProperty(this, 'appProtocols', {value});
+      return value;
+    }
+
+    toString() {
+      if (!this.source || !this.target) { return ''; }
 
       let mode;
       switch (this.policy) {
@@ -114,7 +130,7 @@
         }
         case 'strict-origin-when-cross-origin':
         default: {
-          mode = !this.isDownGrade ? (this.isSameOrigin ? 'all' : 'origin') : 'none';
+          mode = this.isSameOrigin ? 'all' : (!this.isDownGrade ? 'origin' : 'none');
           break;
         }
       }
@@ -133,7 +149,7 @@
         }
         case 'none':
         default: {
-          return null;
+          return '';
         }
       }
     }
