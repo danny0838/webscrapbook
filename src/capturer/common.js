@@ -4886,11 +4886,13 @@
           if (!isDynamic) {
             charset = "UTF-8";
             if (!isCircular) {
-              const cssRulesCssom = await this.getRulesFromCss({
-                css: refCss,
-                url: sourceUrl,
-                refUrl,
-              });
+              const cssRulesCssom = refCss ?
+                await this.getRulesFromCss({
+                  css: refCss,
+                  url: sourceUrl,
+                  refUrl,
+                }) :
+                await this.getRulesFromCssText(cssText);
               cssText = Array.prototype.map.call(
                 cssRulesCssom,
                 cssRule => cssRule.cssText,
@@ -4912,11 +4914,13 @@
           if (!cssRules) {
             charset = "UTF-8";
             if (!isCircular) {
-              cssRules = await this.getRulesFromCss({
-                css: refCss,
-                url: sourceUrl,
-                refUrl,
-              });
+              cssRules = refCss ?
+                await this.getRulesFromCss({
+                  css: refCss,
+                  url: sourceUrl,
+                  refUrl,
+                }) :
+                await this.getRulesFromCssText(cssText);
             }
           }
           if (cssRules) {
