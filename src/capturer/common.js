@@ -4004,6 +4004,8 @@
     getElemCss(elem) {
       const {origNodeMap} = this;
       const origElem = origNodeMap.get(elem);
+
+      // origElem.sheet may be null for a headless document in some browsers
       return origElem && origElem.sheet;
     }
 
@@ -4574,18 +4576,6 @@
      * Rewrite given cssRules to cssText.
      */
     async rewriteCssRules({cssRules, refUrl, refCss, rootNode, indent = '', settings, options}) {
-      // get rootNode, the cloned <html> or documentElement (shadowRoot)
-      if (!rootNode) {
-        rootNode = this.clonedNodeMap.get(refCss.ownerNode).getRootNode();
-
-        // if it's <html>, wrap it with a documentFragment, so that CSS selector "html" can match
-        if (rootNode.nodeType === 1) {
-          const frag = rootNode.ownerDocument.createDocumentFragment();
-          frag.appendChild(rootNode);
-          rootNode = frag;
-        }
-      }
-
       const rules = [];
       for (const cssRule of cssRules) {
         switch (cssRule.type) {
@@ -4733,6 +4723,9 @@
 
       init: {
         if (cssType === 'internal') {
+          //prevent missing rootNode
+          rootNode = rootNode || elem.getRootNode();
+
           refCss = this.getElemCss(elem);
           cssText = elem.textContent;
           charset = "UTF-8";
@@ -4740,9 +4733,14 @@
         }
 
         if (cssType === 'external') {
+          //prevent missing rootNode
+          rootNode = rootNode || elem.getRootNode();
+
           refCss = this.getElemCss(elem);
           sourceUrl = elem.getAttribute("href");
         } else if (cssType === 'imported') {
+          //rootNode should exist (passed by the importer CSS)
+
           sourceUrl = url;
         }
 
