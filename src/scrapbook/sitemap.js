@@ -258,7 +258,7 @@
           }
           case 'html':
           default: {
-            for (const elem of rootNode.querySelectorAll('frame[src], iframe[src], embed[src], object[data]')) {
+            for (const elem of rootNode.querySelectorAll('frame[src], iframe[src]:not([srcdoc]), embed[src], object[data]')) {
               if (elem.closest('svg, math')) { continue; }
               const type = elem.nodeName.toLowerCase();
               const urlProp = type === 'object' ? 'data' : 'src';
@@ -270,14 +270,14 @@
               });
             }
 
-            for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
+            for (const elem of rootNode.querySelectorAll('a[href]:not([download]), area[href]:not([download])')) {
               if (elem.closest('svg, math')) { continue; }
               const url = elem.getAttribute('href');
               if (!checkInterlinkingUrl(url)) { continue; }
               anchorItems.push({
                 url: elem.href,
                 type: 'anchor',
-                title: elem.textContent,
+                title: elem.matches('a') && elem.textContent,
               });
             }
 
