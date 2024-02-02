@@ -9639,6 +9639,7 @@ async function test_capture_downLink14() {
 
 /**
  * An attachment page should be download as a file and not captured.
+ * Also check that links in an embedded SVG or MathML are handled correctly.
  *
  * capture.downLink.file.mode
  * capture.downLink.doc.depth
@@ -9665,6 +9666,9 @@ async function test_capture_downLink15() {
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink10/attachment1.html#in-depth`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `attachment1.html#in-depth`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `attachment2.html#in-depth`);
+  assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `${localhost}/capture_downLink10/attachment3.html#in-depth`);
+  assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `${localhost}/capture_downLink10/attachment4.html#in-depth`);
+  assert(doc.querySelectorAll('math [href]')[0].getAttribute('href') === `${localhost}/capture_downLink10/attachment5.html#in-depth`);
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('attachment1.html');
@@ -9699,9 +9703,30 @@ async function test_capture_downLink15() {
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `attachment1.html#in-depth`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink10/attachment1.html#in-depth`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink10/attachment2.py#in-depth`);
+  assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `attachment3.html#in-depth`);
+  assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `attachment4.html#in-depth`);
+  assert(doc.querySelectorAll('math [href]')[0].getAttribute('href') === `attachment5.html#in-depth`);
 
   // captured as page (rewritten)
   var indexFile = zip.file('attachment1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="red.bmp"]'));
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('attachment3.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="red.bmp"]'));
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('attachment4.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="red.bmp"]'));
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('attachment5.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('img[src="red.bmp"]'));
@@ -9727,6 +9752,9 @@ async function test_capture_downLink15() {
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `attachment1-1.html#in-depth`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `attachment1.html#in-depth`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `attachment2.html#in-depth`);
+  assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `attachment3.html#in-depth`);
+  assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `attachment4.html#in-depth`);
+  assert(doc.querySelectorAll('math [href]')[0].getAttribute('href') === `attachment5.html#in-depth`);
 
   // captured as page (rewritten)
   var indexFile = zip.file('attachment1-1.html');
@@ -9745,6 +9773,24 @@ async function test_capture_downLink15() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('img[src="./red.bmp"]'));
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('attachment3.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="red.bmp"]'));
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('attachment4.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="red.bmp"]'));
+
+  // captured as page (rewritten)
+  var indexFile = zip.file('attachment5.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="red.bmp"]'));
 }
 
 /**

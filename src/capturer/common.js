@@ -299,7 +299,7 @@
       return url;
     };
 
-    const rewriteAnchor = (elem, attr) => {
+    const rewriteAnchor = (elem, attr, {isHtml = true} = {}) => {
       if (!elem.hasAttribute(attr)) { return; }
 
       let url = elem.getAttribute(attr);
@@ -334,6 +334,7 @@
         if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
             (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
           downLinkTasks.push(async () => {
+            const isAttachment = isHtml ? elem.hasAttribute('download') : false;
             const downLinkSettings = Object.assign({}, settings, {
               depth: settings.depth + 1,
               isMainPage: false,
@@ -342,7 +343,7 @@
             const response = await capturer.invoke("captureUrl", {
               url,
               refUrl,
-              isAttachment: elem.hasAttribute('download'),
+              isAttachment,
               downLink: true,
               settings: downLinkSettings,
               options,
@@ -470,7 +471,7 @@
         switch (elem.nodeName.toLowerCase()) {
           case "a": {
             for (const attr of ["href", "xlink:href"]) {
-              rewriteAnchor(elem, attr);
+              rewriteAnchor(elem, attr, {isHtml: false});
             }
             break;
           }
@@ -559,7 +560,7 @@
           }
         }
       } else if (rootName === "math") {
-        rewriteAnchor(elem, "href");
+        rewriteAnchor(elem, "href", {isHtml: false});
       } else {
         switch (elem.nodeName.toLowerCase()) {
           case "base": {

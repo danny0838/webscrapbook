@@ -4016,15 +4016,21 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           for (const elem of rootNode.querySelectorAll('a[*|href]')) {
             for (const attr of REBUILD_LINK_SVG_HREF_ATTRS) {
               if (!elem.hasAttribute(attr)) { continue; }
-              if (elem.hasAttribute('download')) { continue; }
               rewriteHref(elem, attr, filenameMap, linkedPages);
             }
+          }
+          break;
+        }
+        case 'math': {
+          for (const elem of rootNode.querySelectorAll('[href]')) {
+            rewriteHref(elem, 'href', filenameMap, linkedPages);
           }
           break;
         }
         case 'html':
         case '#document-fragment': {
           for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
+            if (elem.closest('svg, math')) { continue; }
             if (elem.hasAttribute('download')) { continue; }
             rewriteHref(elem, 'href', filenameMap, linkedPages);
           }
@@ -4035,6 +4041,9 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
             const doc = (new DOMParser()).parseFromString(elem.srcdoc, 'text/html');
             processRootNode(doc.documentElement, filenameMap, linkedPages);
             elem.srcdoc = doc.documentElement.outerHTML;
+          }
+          for (const elem of rootNode.querySelectorAll('svg, math')) {
+            processRootNode(elem, filenameMap, linkedPages);
           }
           break;
         }
