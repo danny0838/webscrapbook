@@ -4786,7 +4786,6 @@
         // real rules from CSSOM
         cssRules = await this.getRulesFromCss({
           css: refCss,
-          refUrl,
           crossOrigin: false,
           errorWithNull: true,
         });
@@ -4886,15 +4885,9 @@
           if (!isDynamic) {
             charset = "UTF-8";
             if (!isCircular) {
-              const cssRulesCssom = refCss ?
-                await this.getRulesFromCss({
-                  css: refCss,
-                  url: sourceUrl,
-                  refUrl,
-                }) :
-                await this.getRulesFromCssText(cssText);
+              cssRules = cssRules || await this.getRulesFromCssText(cssText);
               cssText = Array.prototype.map.call(
-                cssRulesCssom,
+                cssRules,
                 cssRule => cssRule.cssText,
               ).join("\n");
             } else {
@@ -4914,13 +4907,7 @@
           if (!cssRules) {
             charset = "UTF-8";
             if (!isCircular) {
-              cssRules = refCss ?
-                await this.getRulesFromCss({
-                  css: refCss,
-                  url: sourceUrl,
-                  refUrl,
-                }) :
-                await this.getRulesFromCssText(cssText);
+              cssRules = await this.getRulesFromCssText(cssText);
             }
           }
           if (cssRules) {
