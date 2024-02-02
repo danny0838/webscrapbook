@@ -469,19 +469,17 @@
       if (rootName === "svg") {
         switch (elem.nodeName.toLowerCase()) {
           case "a": {
-            rewriteAnchor(elem, "href");
-            rewriteAnchor(elem, "xlink:href");
+            for (const attr of ["href", "xlink:href"]) {
+              rewriteAnchor(elem, attr);
+            }
             break;
           }
 
           case "script": {
-            if (elem.hasAttribute("href")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), baseUrl);
-              captureRewriteAttr(elem, "href", newUrl);
-            }
-            if (elem.hasAttribute("xlink:href")) {
-              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("xlink:href"), baseUrl);
-              captureRewriteAttr(elem, "xlink:href", newUrl);
+            for (const attr of ["href", "xlink:href"]) {
+              if (!elem.hasAttribute(attr)) { continue; }
+              const newUrl = capturer.resolveRelativeUrl(elem.getAttribute(attr), baseUrl);
+              captureRewriteAttr(elem, attr, newUrl);
             }
 
             switch (options["capture.script"]) {
@@ -489,11 +487,9 @@
                 // do nothing
                 break;
               case "blank":
-                if (elem.hasAttribute("href")) {
-                  captureRewriteAttr(elem, "href", null);
-                }
-                if (elem.hasAttribute("xlink:href")) {
-                  captureRewriteAttr(elem, "xlink:href", null);
+                for (const attr of ["href", "xlink:href"]) {
+                  if (!elem.hasAttribute(attr)) { continue; }
+                  captureRewriteAttr(elem, attr, null);
                 }
                 captureRewriteTextContent(elem, "");
                 break;
@@ -502,27 +498,16 @@
                 return;
               case "save":
               default:
-                if (elem.hasAttribute("href")) {
+                for (const attr of ["href", "xlink:href"]) {
+                  if (!elem.hasAttribute(attr)) { continue; }
                   tasks.push(async () => {
                     const response = await downloadFile({
-                      url: elem.getAttribute("href"),
+                      url: elem.getAttribute(attr),
                       refUrl,
                       settings,
                       options,
                     });
-                    captureRewriteAttr(elem, "href", response.url);
-                    return response;
-                  });
-                }
-                if (elem.hasAttribute("xlink:href")) {
-                  tasks.push(async () => {
-                    const response = await downloadFile({
-                      url: elem.getAttribute("xlink:href"),
-                      refUrl,
-                      settings,
-                      options,
-                    });
-                    captureRewriteAttr(elem, "xlink:href", response.url);
+                    captureRewriteAttr(elem, attr, response.url);
                     return response;
                   });
                 }
@@ -567,8 +552,9 @@
           default: {
             // SVG spec is quite complicated, but generally we can treat every
             // href and xlink:href as an image link, except for "a" and "script"
-            rewriteSvgHref(elem, "href");
-            rewriteSvgHref(elem, "xlink:href");
+            for (const attr of ["href", "xlink:href"]) {
+              rewriteSvgHref(elem, attr);
+            }
             break;
           }
         }
