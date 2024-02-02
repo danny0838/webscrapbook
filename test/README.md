@@ -8,13 +8,13 @@ Unit tests
 
 ### Usage
 
-1. Install WebScrapBook extension (standard install or as a temporary extension).
-
-2. Copy `config.json` to `config.local.json` and edit it:
+1. Copy `config.json` to `config.local.json` and edit it:
    * Make sure "wsb_extension_id" matches the extension ID of WebScrapBook.
    * Make sure "server_port" and "server_port2" are available (not used by other applications).
 
-3. Run `server.py` to start the local hosting server.
+2. Run `server.py` to start the local hosting server and do some initialization.
+
+3. Install WebScrapBook extension (standard install or as a temporary extension).
 
 4. Install `WebScrapBook Test Suite` extension in this directory (as a temporary extension).
 

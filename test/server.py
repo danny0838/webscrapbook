@@ -2,6 +2,7 @@
 import http.server
 import json
 import os
+import shutil
 import time
 from threading import Thread
 
@@ -76,6 +77,15 @@ def main():
     else:
         with fh as fh:
             config.update(json.load(fh))
+
+    # build hardlinks for shared libraries
+    fsrc = os.path.join(os.path.dirname(root), 'src', 'lib')
+    fdst = os.path.join(root, 'lib')
+    try:
+        shutil.rmtree(fdst)
+    except FileNotFoundError:
+        pass
+    shutil.copytree(fsrc, fdst, copy_function=os.link)
 
     # start server
     os.chdir(os.path.join(root, 't'))
