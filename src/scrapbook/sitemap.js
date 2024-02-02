@@ -216,7 +216,7 @@
 
         const frameItems = [];
         const anchorItems = [];
-        loadLinksRecursively(doc, frameItems, anchorItems);
+        loadLinksRecursively(doc.documentElement, frameItems, anchorItems);
         for (const item of frameItems) {
           items.push(item);
         }
@@ -228,32 +228,72 @@
       };
 
       const loadLinksRecursively = (rootNode, frameItems, anchorItems) => {
-        for (const elem of rootNode.querySelectorAll('frame[src], iframe[src], embed[src], object[data]')) {
-          const type = elem.nodeName.toLowerCase();
-          const urlProp = type === 'object' ? 'data' : 'src';
-          const url = elem.getAttribute(urlProp);
-          if (!checkInterlinkingUrl(url)) { continue; }
-          frameItems.push({
-            url: elem[urlProp],
-            type,
-          });
-        }
+        switch (rootNode.nodeName.toLowerCase()) {
+          case 'svg': {
+            for (const elem of rootNode.querySelectorAll('a[*|href]')) {
+              // take href if both attributes exist
+              for (const attr of ['href', 'xlink:href']) {
+                if (!elem.hasAttribute(attr)) { continue; }
+                const url = elem.getAttribute(attr);
+                if (!checkInterlinkingUrl(url)) { break; }
+                anchorItems.push({
+                  url: this.resolveRelativeUrl(url, elem.ownerDocument.documentURI),
+                  type: 'anchor',
+                });
+                break;
+              }
+            }
+            break;
+          }
+          case 'math': {
+            for (const elem of rootNode.querySelectorAll('[href]')) {
+              const url = elem.getAttribute('href');
+              if (!checkInterlinkingUrl(url)) { continue; }
+              anchorItems.push({
+                url: this.resolveRelativeUrl(url, elem.ownerDocument.documentURI),
+                type: 'anchor',
+              });
+            }
+            break;
+          }
+          case 'html':
+          default: {
+            for (const elem of rootNode.querySelectorAll('frame[src], iframe[src], embed[src], object[data]')) {
+              if (elem.closest('svg, math')) { continue; }
+              const type = elem.nodeName.toLowerCase();
+              const urlProp = type === 'object' ? 'data' : 'src';
+              const url = elem.getAttribute(urlProp);
+              if (!checkInterlinkingUrl(url)) { continue; }
+              frameItems.push({
+                url: elem[urlProp],
+                type,
+              });
+            }
 
-        for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
-          const url = elem.getAttribute('href');
-          if (!checkInterlinkingUrl(url)) { continue; }
-          anchorItems.push({
-            url: elem.href,
-            type: 'anchor',
-            title: elem.textContent,
-          });
-        }
+            for (const elem of rootNode.querySelectorAll('a[href], area[href]')) {
+              if (elem.closest('svg, math')) { continue; }
+              const url = elem.getAttribute('href');
+              if (!checkInterlinkingUrl(url)) { continue; }
+              anchorItems.push({
+                url: elem.href,
+                type: 'anchor',
+                title: elem.textContent,
+              });
+            }
 
-        // recurse into shadow roots
-        for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
-          const shadowRoot = elem.attachShadow({mode: 'open'});
-          shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
-          loadLinksRecursively(shadowRoot, frameItems, anchorItems);
+            // handle embedded SVG or MathML
+            for (const elem of rootNode.querySelectorAll('svg, math')) {
+              loadLinksRecursively(elem, frameItems, anchorItems);
+            }
+
+            // recurse into shadow roots
+            for (const elem of rootNode.querySelectorAll('[data-scrapbook-shadowdom]')) {
+              const shadowRoot = elem.attachShadow({mode: 'open'});
+              shadowRoot.innerHTML = elem.getAttribute('data-scrapbook-shadowdom');
+              loadLinksRecursively(shadowRoot, frameItems, anchorItems);
+            }
+            break;
+          }
         }
       };
 
@@ -277,6 +317,14 @@
         if (!elem.firstChild) {
           elem.remove();
         }
+      }
+    },
+
+    resolveRelativeUrl(url, baseUrl) {
+      try {
+        return new URL(url, baseUrl).href;
+      } catch (ex) {
+        return url;
       }
     },
   };
