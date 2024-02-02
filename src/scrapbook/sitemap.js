@@ -85,7 +85,8 @@
             }
 
             switch (json.version) {
-              case 2: {
+              case 2:
+              case 3: {
                 if (json.indexPages) {
                   for (const indexPage of json.indexPages) {
                     indexPages.add(indexPage);
