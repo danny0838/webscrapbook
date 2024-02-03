@@ -5067,22 +5067,19 @@ async function test_capture_imageBackground_used2() {
   var doc = await readFileAsDocument(indexBlob);
 
   var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[1].textContent.trim() === `\
-@keyframes keyframes1 {
+  assert(styleElems[1].textContent.trim() === String.raw`@keyframes keyframes1 {
   from { background-image: url("keyframes-1.bmp"); }
   to { transform: translateX(40px); }
 }`);
-  assert(styleElems[2].textContent.trim() === `\
-@keyframes keyframes\\Awith\\ complex\\\\syntax {
+  assert(styleElems[2].textContent.trim() === String.raw`@keyframes keyframes\Awith\ complex\\syntax {
   from { background-image: url("keyframes-complex-1.bmp"); }
   to { transform: translateX(40px); }
 }`);
-  assert(styleElems[3].textContent.trim() === `\
-@keyframes multi\\ 1 {
+  assert(styleElems[3].textContent.trim() === String.raw`@keyframes multi\ 1 {
   from { background-image: url("keyframes-multi-1.bmp"); }
   to { transform: translateX(40px); }
 }
-@keyframes multi\\"2\\" {
+@keyframes multi\"2\" {
   33% { background-image: url("keyframes-multi-2.bmp"); }
   66% { background-image: url("keyframes-multi-3.bmp"); }
 }`);
