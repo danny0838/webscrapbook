@@ -3464,16 +3464,19 @@ async function test_capture_css_rewriteCss1() {
 @import "imported.css";
 @font-face { font-family: fontface; src: url("sansation_light.woff"); }
 #background { background: url("green.bmp"); }`);
+
   assert(styleElems[1].textContent.trim() === `\
 @media print {
   #media { color: green; }
 }`);
+
   assert(styleElems[2].textContent.trim() === `\
 @keyframes demo {
   from { transform: translateX(-5px); }
   to { transform: translateX(40px); }
 }
 #keyframes { animation: demo 3s linear infinite; }`);
+
   assert(styleElems[3].textContent.trim() === `\
 @supports (--myvar: green) {
   :root {
@@ -3483,12 +3486,14 @@ async function test_capture_css_rewriteCss1() {
     color: var(--myvar);
   }
 }`);
+
   assert(styleElems[4].textContent.trim() === `\
 @namespace svg url(http://www.w3.org/2000/svg);
 svg|a text, text svg|a {
   fill: blue;
   text-decoration: underline;
 }`);
+
   assert(styleElems[5].textContent.trim() === `\
 /* unsupported rules */
 #unsupported {
@@ -3498,7 +3503,8 @@ svg|a text, text svg|a {
   unknown: url("unsupported-4.bmp"); /* unknown */
 }`);
 
-  assert(doc.querySelector('blockquote').getAttribute('style') === `background: blue; background: url("green.bmp");`);
+  assert(doc.querySelector('blockquote').getAttribute('style') === `\
+background: blue; background: url("green.bmp");`);
 
   /* capture.rewriteCss = tidy */
   var options = {
@@ -3524,46 +3530,37 @@ svg|a text, text svg|a {
   var doc = await readFileAsDocument(indexBlob);
 
   var styleElems = doc.querySelectorAll('style');
-  var regex = new RegExp(
-    `@import url\\("imported.css"\\);\\s*` +
-    `@font-face\\s*{\\s*font-family:\\s*fontface;\\s*src:\\s*url\\("sansation_light.woff"\\);\\s*}\\s*` +
-    `#background\\s*{\\s*background:\\s*(?=.*url\\("green.bmp"\\)).*;\\s*}\\s*`
-  );
+  var regex = cssRegex`@import url("imported.css");
+@font-face { font-family: fontface; src: url("sansation_light.woff"); }
+#background { background: ${'(?=.*?'}url("green.bmp")${').*?'}; }`;
   assert(styleElems[0].textContent.trim().match(regex));
-  var regex = new RegExp(
-    `@media\\s*print\\s*{\\s*` +
-    `#media\\s*{\\s*color:\\s*green;\\s*}\\s*` +
-    `}\\s*`
-  );
+
+  var regex = cssRegex`@media print {
+  #media { color: green; }
+}`;
   assert(styleElems[1].textContent.trim().match(regex));
-  var regex = new RegExp(
-    `@keyframes\\s*demo\\s*{\\s*` +
-    `0%\\s*{\\s*transform:\\s*translateX\\(-5px\\);\\s*}\\s*` +
-    `100%\\s*{\\s*transform:\\s*translateX\\(40px\\);\\s*}\\s*` +
-    `}\\s*` +
-    `#keyframes\\s*{\\s*animation:\\s*(?=.*\\b3s\\b)(?=.*\\bdemo\\b)(?=.*\\blinear\\b)(?=.*\\binfinite\\b).*;\\s*}\\s*`
-  );
+
+  var regex = cssRegex`@keyframes demo {
+  0% { transform: translateX(-5px); }
+  100% { transform: translateX(40px); }
+}
+#keyframes { animation: ${/(?=.*?\b3s\b)(?=.*?\bdemo\b)(?=.*?\blinear\b)(?=.*?\binfinite\b).*?/}; }`;
   assert(styleElems[2].textContent.trim().match(regex));
-  var regex = new RegExp(
-    `@supports\\s*\\(--myvar:\\s*green\\s*\\)\\s*{\\s*` +
-    `:root\\s*{\\s*--myvar:\\s*green;\\s*}\\s*` +
-    `#supports\\s*{\\s*color:\\s*var\\(--myvar\\);\\s*}\\s*` +
-    `}\\s*`
-  );
+
+  var regex = cssRegex`@supports (--myvar: green) {
+  :root { --myvar: green; }
+  #supports { color: var(--myvar); }
+}`;
   assert(styleElems[3].textContent.trim().match(regex));
-  var regex = new RegExp(
-    `@namespace\\s*svg\\s*url\\("http://www.w3.org/2000/svg"\\);\\s*` +
-    `svg\\|a\\s*text,\\s*text\\s*svg\\|a\\s*{\\s*fill:\\s*blue;\\s*text-decoration:\\s*underline;\\s*}\\s*`
-  );
+
+  var regex = cssRegex`@namespace svg url("http://www.w3.org/2000/svg");
+svg|a text, text svg|a { fill: blue; text-decoration: underline; }`;
   assert(styleElems[4].textContent.trim().match(regex));
-  var regex = new RegExp(
-    `#unsupported\\s*{\\s*}\\s*`
-  );
+
+  var regex = cssRegex`#unsupported { }`;
   assert(styleElems[5].textContent.trim().match(regex));
 
-  var regex = new RegExp(
-    `background:\\s*(?=.*\\burl\\("green.bmp"\\)).*;\\s*`
-  );
+  var regex = cssRegex`background: ${'(?=.*?'}url("green.bmp")${').*?'};`;
   assert(doc.querySelector('blockquote').getAttribute('style').match(regex));
 
   /* capture.rewriteCss = match */
@@ -3590,46 +3587,37 @@ svg|a text, text svg|a {
   var doc = await readFileAsDocument(indexBlob);
 
   var styleElems = doc.querySelectorAll('style');
-  var regex = new RegExp(
-    `@import url\\("imported.css"\\);\\s*` +
-    `@font-face\\s*{\\s*font-family:\\s*fontface;\\s*src:\\s*url\\("sansation_light.woff"\\);\\s*}\\s*` +
-    `#background\\s*{\\s*background:\\s*(?=.*url\\("green.bmp"\\)).*;\\s*}\\s*`
-  );
+  var regex = cssRegex`@import url("imported.css");
+@font-face { font-family: fontface; src: url("sansation_light.woff"); }
+#background { background: ${'(?=.*?'}url("green.bmp")${').*?'}; } `;
   assert(styleElems[0].textContent.trim().match(regex));
-  var regex = new RegExp(
-    `@media\\s*print\\s*{\\s*` +
-    `#media\\s*{\\s*color:\\s*green;\\s*}\\s*` +
-    `}\\s*`
-  );
+
+  var regex = cssRegex`@media print {
+  #media { color: green; }
+}`;
   assert(styleElems[1].textContent.trim().match(regex));
-  var regex = new RegExp(
-    `@keyframes\\s*demo\\s*{\\s*` +
-    `0%\\s*{\\s*transform:\\s*translateX\\(-5px\\);\\s*}\\s*` +
-    `100%\\s*{\\s*transform:\\s*translateX\\(40px\\);\\s*}\\s*` +
-    `}\\s*` +
-    `#keyframes\\s*{\\s*animation:\\s*(?=.*\\b3s\\b)(?=.*\\bdemo\\b)(?=.*\\blinear\\b)(?=.*\\binfinite\\b).*;\\s*}\\s*`
-  );
+
+  var regex = cssRegex`@keyframes demo {
+  0% { transform: translateX(-5px); }
+  100% { transform: translateX(40px); }
+}
+#keyframes { animation: ${/(?=.*?\b3s\b)(?=.*?\bdemo\b)(?=.*?\blinear\b)(?=.*?\binfinite\b).*/}; }`;
   assert(styleElems[2].textContent.trim().match(regex));
-  var regex = new RegExp(
-    `@supports\\s*\\(--myvar:\\s*green\\s*\\)\\s*{\\s*` +
-    `:root\\s*{\\s*--myvar:\\s*green;\\s*}\\s*` +
-    `#supports\\s*{\\s*color:\\s*var\\(--myvar\\);\\s*}\\s*` +
-    `}\\s*`
-  );
+
+  var regex = cssRegex`@supports (--myvar: green ) {
+  :root { --myvar: green; }
+  #supports { color: var(--myvar); }
+}`;
   assert(styleElems[3].textContent.trim().match(regex));
-  var regex = new RegExp(
-    `@namespace\\s*svg\\s*url\\("http://www.w3.org/2000/svg"\\);\\s*` +
-    `svg\\|a\\s*text,\\s*text\\s*svg\\|a\\s*{\\s*fill:\\s*blue;\\s*text-decoration:\\s*underline;\\s*}\\s*`
-  );
+
+  var regex = cssRegex`@namespace svg url("http://www.w3.org/2000/svg");
+svg|a text, text svg|a { fill: blue; text-decoration: underline; }`;
   assert(styleElems[4].textContent.trim().match(regex));
-  var regex = new RegExp(
-    `#unsupported\\s*{\\s*}\\s*`
-  );
+
+  var regex = cssRegex`#unsupported { }`;
   assert(styleElems[5].textContent.trim().match(regex));
 
-  var regex = new RegExp(
-    `background:\\s*(?=.*\\burl\\("green.bmp"\\)).*;\\s*`
-  );
+  var regex = cssRegex`background: ${'(?=.*?'}url("green.bmp")${').*?'};`;
   assert(doc.querySelector('blockquote').getAttribute('style').match(regex));
 
   /* capture.rewriteCss = none */
@@ -3654,16 +3642,19 @@ svg|a text, text svg|a {
 @import "rewrite/imported.css";
 @font-face { font-family: fontface; src: url(rewrite/sansation_light.woff); }
 #background { background: url(rewrite/green.bmp); }`);
+
   assert(styleElems[1].textContent.trim() === `\
 @media print {
   #media { color: green; }
 }`);
+
   assert(styleElems[2].textContent.trim() === `\
 @keyframes demo {
   from { transform: translateX(-5px); }
   to { transform: translateX(40px); }
 }
 #keyframes { animation: demo 3s linear infinite; }`);
+
   assert(styleElems[3].textContent.trim() === `\
 @supports (--myvar: green) {
   :root {
@@ -3673,12 +3664,14 @@ svg|a text, text svg|a {
     color: var(--myvar);
   }
 }`);
+
   assert(styleElems[4].textContent.trim() === `\
 @namespace svg url(http://www.w3.org/2000/svg);
 svg|a text, text svg|a {
   fill: blue;
   text-decoration: underline;
 }`);
+
   assert(styleElems[5].textContent.trim() === `\
 /* unsupported rules */
 #unsupported {
@@ -3688,7 +3681,8 @@ svg|a text, text svg|a {
   unknown: url(rewrite/unsupported-4.bmp); /* unknown */
 }`);
 
-  assert(doc.querySelector('blockquote').getAttribute('style') === `background: blue; background: url(rewrite/green.bmp);`);
+  assert(doc.querySelector('blockquote').getAttribute('style') === `\
+background: blue; background: url(rewrite/green.bmp);`);
 }
 
 /**
@@ -3724,24 +3718,18 @@ async function test_capture_css_rewriteCss2_1() {
 
   assert(styleElems[1].textContent.trim() === '');
 
-  var regex = new RegExp(
-    `@keyframes\\s*demo\\s*{\\s*` +
-    `0%\\s*{\\s*transform:\\s*translateX\\(-5px\\);\\s*}\\s*` +
-    `100%\\s*{\\s*transform:\\s*translateX\\(40px\\);\\s*}\\s*` +
-    `}\\s*`
-  );
+  var regex = cssRegex`@keyframes demo {
+  0% { transform: translateX(-5px); }
+  100% { transform: translateX(40px); }
+}`;
   assert(styleElems[2].textContent.trim().match(regex));
 
-  var regex = new RegExp(
-    `@supports\\s*\\(--myvar:\\s*green\\s*\\)\\s*{\\s*` +
-    `:root\\s*{\\s*--myvar:\\s*green;\\s*}\\s*` +
-    `}\\s*`
-  );
+  var regex = cssRegex`@supports (--myvar: green ) {
+  :root { --myvar: green; }
+}`;
   assert(styleElems[3].textContent.trim().match(regex));
 
-  var regex = new RegExp(
-    `^@namespace\\s*svg\\s*url\\("http://www.w3.org/2000/svg"\\);\\s*$`
-  );
+  var regex = cssRegex`${'^'}@namespace svg url("http://www.w3.org/2000/svg");${'$'}`;
   assert(styleElems[4].textContent.trim().match(regex));
 
   assert(styleElems[5].textContent.trim() === ``);

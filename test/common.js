@@ -465,3 +465,24 @@ function rawRegex(strings, ...args) {
   });
   return new RegExp(results.join(''));
 }
+
+/**
+ * A RegExp with raw CSS string with permissive spacing and optional
+ * interpolated RegExp source fragments.
+ *
+ * Usage:
+ *     cssRegex`body { background: ${/\w+/} }` === /body\s*\{\s*background:\s*\w+\s*\}/
+ */
+function cssRegex(strings, ...args) {
+  const permissiveSpacing = (s) => s.split(/\s+/).map(s => escapeRegExp(s)).join('\\s*');
+  const results = [permissiveSpacing(strings.raw[0])];
+  args.forEach((arg, i) => {
+    if (arg instanceof RegExp) {
+      results.push(arg.source);
+    } else {
+      results.push(String(arg));
+    }
+    results.push(permissiveSpacing(strings.raw[i + 1]));
+  });
+  return new RegExp(results.join(''));
+}
