@@ -3707,7 +3707,7 @@ async function test_capture_css_disabled() {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss1() {
+async function test_capture_css_rewriteCss1_1() {
   /* capture.rewriteCss = url */
   var options = {
     "capture.rewriteCss": "url",
@@ -3955,6 +3955,228 @@ svg|a text, text svg|a {
 
   assert(doc.querySelector('blockquote').getAttribute('style') === `\
 background: blue; background: url(rewrite/green.bmp);`);
+}
+
+/**
+ * Check if option works for nesting CSS.
+ *
+ * capture.rewriteCss
+ * capturer.DocumentCssHandler
+ */
+async function test_capture_css_rewriteCss1_2() {
+  // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
+  try {
+    // Chrome 109/110 gets null for the querySelector
+    if (!document.querySelector('&')) {
+      throw new Error('bad support');
+    }
+  } catch (ex) {
+    throw new TestSkipError(`CSS nesting not supported`);
+  }
+
+  /* capture.rewriteCss = url */
+  var options = {
+    "capture.rewriteCss": "url",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_nested.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['case1.bmp']);
+  assert(zip.files['case1-1.bmp']);
+  assert(zip.files['case1-1-1.bmp']);
+  assert(zip.files['case1-1-2.bmp']);
+  assert(zip.files['case1-2.bmp']);
+  assert(zip.files['case1-2-1.bmp']);
+  assert(zip.files['case1-2-2.bmp']);
+  assert(zip.files['case2-1.bmp']);
+  assert(zip.files['dummy.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+.case1, #nonexist {
+  background: url("case1.bmp");
+  padding: 0;
+  .case1-1 {
+    .case1-1-1 {
+      background: url("case1-1-1.bmp");
+    }
+    &.case1-1-2 {
+      background: url("case1-1-2.bmp");
+    }
+    background: url("case1-1.bmp");
+  }
+  &.case1-2 {
+    .case1-2-1 {
+      background: url("case1-2-1.bmp");
+    }
+    background: url("case1-2.bmp");
+    &.case1-2-2 {
+      background: url("case1-2-2.bmp");
+    }
+  }
+  .dummy { background: url("dummy.bmp"); }
+  &.dummy { background: url("dummy.bmp"); }
+}
+& .case2 {
+  .case2-1 & {
+    background: url("case2-1.bmp");
+  }
+}`);
+
+  /* capture.rewriteCss = tidy */
+  var options = {
+    "capture.rewriteCss": "tidy",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_nested.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['case1.bmp']);
+  assert(zip.files['case1-1.bmp']);
+  assert(zip.files['case1-1-1.bmp']);
+  assert(zip.files['case1-1-2.bmp']);
+  assert(zip.files['case1-2.bmp']);
+  assert(zip.files['case1-2-1.bmp']);
+  assert(zip.files['case1-2-2.bmp']);
+  assert(zip.files['case2-1.bmp']);
+  assert(zip.files['dummy.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim().match(
+    cssRegex`.case1, #nonexist {
+  background: url("case1.bmp");
+  padding: 0px;
+  .case1-1 {
+    background: url("case1-1.bmp");
+    .case1-1-1 { background: url("case1-1-1.bmp"); }
+    &.case1-1-2 { background: url("case1-1-2.bmp"); }
+  }
+  &.case1-2 {
+    background: url("case1-2.bmp");
+    .case1-2-1 { background: url("case1-2-1.bmp"); }
+    &.case1-2-2 { background: url("case1-2-2.bmp"); }
+  }
+  .dummy { background: url("dummy.bmp"); }
+  &.dummy { background: url("dummy.bmp"); }
+}
+& .case2 {
+  .case2-1 & {
+    background: url("case2-1.bmp");
+  }
+}`
+  ));
+
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_nested.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['case1.bmp']);
+  assert(zip.files['case1-1.bmp']);
+  assert(zip.files['case1-1-1.bmp']);
+  assert(zip.files['case1-1-2.bmp']);
+  assert(zip.files['case1-2.bmp']);
+  assert(zip.files['case1-2-1.bmp']);
+  assert(zip.files['case1-2-2.bmp']);
+  assert(zip.files['case2-1.bmp']);
+  assert(!zip.files['dummy.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim().match(
+    cssRegex`.case1, #nonexist {
+  background: url("case1.bmp");
+  padding: 0px;
+  .case1-1 {
+    background: url("case1-1.bmp");
+    .case1-1-1 { background: url("case1-1-1.bmp"); }
+    &.case1-1-2 { background: url("case1-1-2.bmp"); }
+  }
+  &.case1-2 {
+    background: url("case1-2.bmp");
+    .case1-2-1 { background: url("case1-2-1.bmp"); }
+    &.case1-2-2 { background: url("case1-2-2.bmp"); }
+  }
+}
+& .case2 {
+  .case2-1 & {
+    background: url("case2-1.bmp");
+  }
+}`
+  ));
+
+  /* capture.rewriteCss = none */
+  var options = {
+    "capture.rewriteCss": "none",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_nested.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(!zip.files['case1.bmp']);
+  assert(!zip.files['case1-1.bmp']);
+  assert(!zip.files['case1-1-1.bmp']);
+  assert(!zip.files['case1-1-2.bmp']);
+  assert(!zip.files['case1-2.bmp']);
+  assert(!zip.files['case1-2-1.bmp']);
+  assert(!zip.files['case1-2-2.bmp']);
+  assert(!zip.files['case2-1.bmp']);
+  assert(!zip.files['dummy.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+.case1, #nonexist {
+  background: url(./rewrite_nested/case1.bmp);
+  padding: 0;
+  .case1-1 {
+    .case1-1-1 {
+      background: url(./rewrite_nested/case1-1-1.bmp);
+    }
+    &.case1-1-2 {
+      background: url(./rewrite_nested/case1-1-2.bmp);
+    }
+    background: url(./rewrite_nested/case1-1.bmp);
+  }
+  &.case1-2 {
+    .case1-2-1 {
+      background: url(./rewrite_nested/case1-2-1.bmp);
+    }
+    background: url(./rewrite_nested/case1-2.bmp);
+    &.case1-2-2 {
+      background: url(./rewrite_nested/case1-2-2.bmp);
+    }
+  }
+  .dummy { background: url(./rewrite_nested/dummy.bmp); }
+  &.dummy { background: url(./rewrite_nested/dummy.bmp); }
+}
+& .case2 {
+  .case2-1 & {
+    background: url(./rewrite_nested/case2-1.bmp);
+  }
+}`);
 }
 
 /**
@@ -5671,6 +5893,68 @@ async function test_capture_imageBackground_used7() {
 }
 
 /**
+ * Check if used background images are checked correctly for nesting CSS.
+ *
+ * capture.imageBackground
+ */
+async function test_capture_imageBackground_used8() {
+  // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
+  try {
+    // Chrome 109/110 gets null for the querySelector
+    if (!document.querySelector('&')) {
+      throw new Error('bad support');
+    }
+  } catch (ex) {
+    throw new TestSkipError(`CSS nesting not supported`);
+  }
+
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used8/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['case1.bmp']);
+  assert(zip.files['case1-1.bmp']);
+  assert(zip.files['case1-1-1.bmp']);
+  assert(zip.files['case1-1-2.bmp']);
+  assert(!zip.files['case1-2.bmp']);
+  assert(!zip.files['case1-2-1.bmp']);
+  assert(!zip.files['case1-2-2.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+.case1 {
+  background: url("case1.bmp");
+  .case1-1 {
+    background: url("case1-1.bmp");
+    .case1-1-1 {
+      background: url("case1-1-1.bmp");
+    }
+    &.case1-1-2 {
+      background: url("case1-1-2.bmp");
+    }
+  }
+  .case1-2 {
+    background: url("");
+    .case1-2-1 {
+      background: url("");
+    }
+    &.case1-2-2 {
+      background: url("");
+    }
+  }
+}`);
+}
+
+/**
  * Check if option works
  *
  * capture.favicon
@@ -6672,6 +6956,75 @@ async function test_capture_font_used4() {
   to { transform: translateX(40px); }
 }
 #var5 { animation: anime5 3s linear infinite; font-family: var(--var-5); font-size: 1.1em; }`);
+}
+
+/**
+ * Check if used fonts are checked correctly for nesting CSS.
+ *
+ * capture.font = "save-used"
+ */
+async function test_capture_font_used5() {
+  // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
+  try {
+    // Chrome 109/110 gets null for the querySelector
+    if (!document.querySelector('&')) {
+      throw new Error('bad support');
+    }
+  } catch (ex) {
+    throw new TestSkipError(`CSS nesting not supported`);
+  }
+
+  /* capture.font = save-used */
+  var options = {
+    "capture.font": "save-used",
+    "capture.rewriteCss": "url",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_font_used5/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['file1.woff']);
+  assert(zip.files['file1-1.woff']);
+  assert(zip.files['file1-1-1.woff']);
+  assert(zip.files['file1-1-2.woff']);
+  assert(!zip.files['file1-2.woff']);
+  assert(!zip.files['file1-2-1.woff']);
+  assert(!zip.files['file1-2-2.woff']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+@font-face { font-family: font1; src: url("file1.woff"); }
+@font-face { font-family: font1-1; src: url("file1-1.woff"); }
+@font-face { font-family: font1-1-1; src: url("file1-1-1.woff"); }
+@font-face { font-family: font1-1-2; src: url("file1-1-2.woff"); }
+@font-face { font-family: font1-2; src: url(""); }
+@font-face { font-family: font1-2-1; src: url(""); }
+@font-face { font-family: font1-2-2; src: url(""); }
+.case1 {
+  font-family: font1;
+  .case1-1 {
+    font-family: font1-1;
+    .case1-1-1 {
+      font-family: font1-1-1;
+    }
+    &.case1-1-2 {
+      font-family: font1-1-2;
+    }
+  }
+  .case1-2 {
+    font-family: font1-2;
+    .case1-2-1 {
+      font-family: font1-2-1;
+    }
+    &.case1-2-2 {
+      font-family: font1-2-2;
+    }
+  }
+}`);
 }
 
 /**

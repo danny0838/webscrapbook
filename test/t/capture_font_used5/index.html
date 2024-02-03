@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used fonts for nesting CSS</title>
+<style>
+@font-face { font-family: font1; src: url("file1.woff"); }
+@font-face { font-family: font1-1; src: url("file1-1.woff"); }
+@font-face { font-family: font1-1-1; src: url("file1-1-1.woff"); }
+@font-face { font-family: font1-1-2; src: url("file1-1-2.woff"); }
+@font-face { font-family: font1-2; src: url("file1-2.woff"); }
+@font-face { font-family: font1-2-1; src: url("file1-2-1.woff"); }
+@font-face { font-family: font1-2-2; src: url("file1-2-2.woff"); }
+.case1 {
+  font-family: font1;
+  .case1-1 {
+    font-family: font1-1;
+    .case1-1-1 {
+      font-family: font1-1-1;
+    }
+    &.case1-1-2 {
+      font-family: font1-1-2;
+    }
+  }
+  .case1-2 {
+    font-family: font1-2;
+    .case1-2-1 {
+      font-family: font1-2-1;
+    }
+    &.case1-2-2 {
+      font-family: font1-2-2;
+    }
+  }
+}
+</style>
+</head>
+<body>
+<blockquote class="case1">
+  .case1
+  <blockquote class="case1-1">
+    .case1 .case1-1
+    <blockquote class="case1-1-1">
+      .case1 .case1-1 .case1-1-1
+    </blockquote>
+  </blockquote>
+  <blockquote class="case1-1 case1-1-2">
+    .case1 .case1-1.case1-1-2
+  </blockquote>
+</blockquote>
+</body>
+</html>

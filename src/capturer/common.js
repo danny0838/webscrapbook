@@ -3800,6 +3800,50 @@
     }
 
     /**
+     * Return the equivalent selector text for a possibly nested CSSStyleRule.
+     *
+     * @param {CSSStyleRule} rule
+     * @return {string} The equivalent selector text.
+     */
+    getSelectorText(...args) {
+      const regex = /(?:\\.|"[^\\"]*(?:\\.[^\\"]*)*")+|(&)|./gu;
+      const getParentStyleRule = (rule) => {
+        let ruleCurrent = rule;
+        while (ruleCurrent = ruleCurrent.parentRule) {
+          if (ruleCurrent.type === 1) {
+            return ruleCurrent;
+          }
+        }
+        return null;
+      };
+      const rewriteRule = (rule, wrap = false) => {
+        let selectorText = rule.selectorText;
+        const parent = getParentStyleRule(rule);
+        if (parent) {
+          const parentSelectorText = rewriteRule(parent, true);
+          let hasAmp = false;
+          selectorText = selectorText.replace(regex, (m, amp) => {
+            if (!amp) { return m; }
+            hasAmp = true;
+            return parentSelectorText;
+          });
+          if (!hasAmp) {
+            selectorText = parentSelectorText + ' ' + selectorText;
+          }
+        }
+        if (wrap) {
+          selectorText = `:is(${selectorText})`;
+        }
+        return selectorText;
+      };
+      const fn = (rule) => {
+        return rewriteRule(rule);
+      };
+      Object.defineProperty(this, 'getSelectorText', {value: fn});
+      return fn(...args);
+    }
+
+    /**
      * Verify whether rule matches something in root.
      *
      * @param {Element|DocumentFragment} root
@@ -4015,7 +4059,7 @@
       }
 
       const verifySelector = (root, rule) => {
-        const selectorText = rule.selectorText;
+        const selectorText = this.getSelectorText(rule);
 
         let selectorTextInvalid = false;
         try {
@@ -4323,6 +4367,14 @@
             if (!this.verifySelector(root, cssRule)) { break; }
 
             collector.inspectStyle(cssRule.style, refUrl);
+
+            // recurse into sub-rules for nesting CSS
+            if (cssRule.cssRules && cssRule.cssRules.length) {
+              for (const rule of cssRule.cssRules) {
+                await parseCssRule(rule, refUrl);
+              }
+            }
+
             break;
           }
           case CSSRule.IMPORT_RULE: {
@@ -4645,16 +4697,49 @@
             // this CSS rule applies to no node in the captured area
             if (rootNode && !this.verifySelector(rootNode, cssRule)) { break; }
 
-            const cssText = await this.rewriteCssText({
-              cssText: cssRule.cssText,
-              refUrl,
-              refPolicy,
-              refCss,
-              settings,
-              options,
-            });
-            if (cssText) {
-              rules[rules.length] = indent + cssText;
+            if (cssRule.cssRules && cssRule.cssRules.length) {
+              // nesting CSS
+
+              // style declarations of this rule
+              const cssText1 = await this.rewriteCssText({
+                cssText: cssRule.style.cssText,
+                refUrl,
+                refPolicy,
+                refCss,
+                settings,
+                options,
+              });
+
+              // recurse into sub-rules
+              const cssText2 = (await this.rewriteCssRules({
+                cssRules: cssRule.cssRules,
+                refUrl,
+                refPolicy,
+                refCss,
+                rootNode,
+                indent: indent + '  ',
+                settings,
+                options,
+              }));
+
+              const cssText = (cssText1 ? indent + '  ' + cssText1 + '\n' : '') + cssText2;
+              if (cssText) {
+                rules[rules.length] = indent + cssRule.selectorText + ' {\n'
+                  + cssText + '\n'
+                  + indent + '}';
+              }
+            } else {
+              const cssText = await this.rewriteCssText({
+                cssText: cssRule.cssText,
+                refUrl,
+                refPolicy,
+                refCss,
+                settings,
+                options,
+              });
+              if (cssText) {
+                rules[rules.length] = indent + cssText;
+              }
             }
             break;
           }
