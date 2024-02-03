@@ -3800,12 +3800,12 @@
     }
 
     /**
-     * Verify whether selectorText matches something in root.
+     * Verify whether rule matches something in root.
      *
      * @param {Element|DocumentFragment} root
-     * @param {string} selectorText - selectorText of a CSSStyleRule
+     * @param {CSSStyleRule} rule
      */
-    verifySelector(root, selectorText) {
+    verifySelector(...args) {
       // Do not include :not as the semantic is reversed and the rule could be
       // narrower after rewriting (e.g. :not(:hover) => :not(*)).
       const ALLOWED_PSEUDO = new Set([
@@ -3821,7 +3821,7 @@
        *
        * 1. Remove namespace in selector (e.g. svg|a => a).
        * 2. Recursively remove pseudoes (including pseudo-classes(:*) and
-       *    pseudo-elements(::*))) unless it's listed in ALLOWED_PSEUDO. (e.g.
+       *    pseudo-elements(::*)) unless it's listed in ALLOWED_PSEUDO. (e.g.
        *    div:hover => div).
        * 3. Add * in place if it will be empty after removal (e.g. :hover => *).
        */
@@ -4014,7 +4014,9 @@
         }
       }
 
-      const verifySelector = (root, selectorText) => {
+      const verifySelector = (root, rule) => {
+        const selectorText = rule.selectorText;
+
         let selectorTextInvalid = false;
         try {
           // querySelector of a pseudo selector like a:hover always return null
@@ -4051,7 +4053,7 @@
         writable: false,
         configurable: true,
       });
-      return verifySelector(root, selectorText);
+      return verifySelector(...args);
     }
 
     getElemCss(elem) {
@@ -4318,7 +4320,7 @@
         switch (cssRule.type) {
           case CSSRule.STYLE_RULE: {
             // this CSS rule applies to no node in the captured area
-            if (!this.verifySelector(root, cssRule.selectorText)) { break; }
+            if (!this.verifySelector(root, cssRule)) { break; }
 
             collector.inspectStyle(cssRule.style, refUrl);
             break;
@@ -4641,7 +4643,7 @@
         switch (cssRule.type) {
           case CSSRule.STYLE_RULE: {
             // this CSS rule applies to no node in the captured area
-            if (rootNode && !this.verifySelector(rootNode, cssRule.selectorText)) { break; }
+            if (rootNode && !this.verifySelector(rootNode, cssRule)) { break; }
 
             const cssText = await this.rewriteCssText({
               cssText: cssRule.cssText,
