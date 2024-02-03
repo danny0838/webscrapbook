@@ -136,7 +136,7 @@ async function test_capture_html() {
   assert(zip);
   var topdir = Object.keys(zip.files)[0];
   assert(zip.files[topdir].dir);
-  assert(topdir.match(/^\d{17}\/$/));
+  assert(topdir.match(regex`^\d{17}/$`));
 
   var rdfFile = zip.file(topdir + 'index.rdf');
   assert(rdfFile);
@@ -190,7 +190,7 @@ async function test_capture_html() {
     url: `${localhost}/capture_html/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
-  assert(blob.type.match(/^text\/html(?:;|$)/));
+  assert(blob.type.match(rawRegex`${'^'}text/html${'(?:;|$)'}`));
 
   var doc = await readFileAsDocument(blob);
   assert(doc);
@@ -468,7 +468,7 @@ async function test_capture_xhtml() {
     url: `${localhost}/capture_xhtml/index.xhtml`,
     options: Object.assign({}, baseOptions, options),
   });
-  assert(blob.type.match(/^application\/xhtml\+xml(?:;|$)/));
+  assert(blob.type.match(rawRegex`${'^'}application/xhtml+xml${'(?:;|$)'}`));
 
   var doc = await readFileAsDocument(blob);
   assert(doc);
@@ -1930,7 +1930,7 @@ async function test_capture_bookmark() {
 
   var html = doc.documentElement;
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_bookmark/index.html`);
-  assert(html.getAttribute('data-scrapbook-create').match(/^\d{17}$/));
+  assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
   assert(html.getAttribute('data-scrapbook-type') === 'bookmark');
 
   assert(doc.querySelector(`meta[http-equiv="refresh"][content="0; url=${localhost}/capture_bookmark/index.html"]`));
@@ -2639,17 +2639,17 @@ async function test_capture_frame_singleHtml() {
   assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
 
   var frameSrc = frames[1].getAttribute('src');
-  assert(frameSrc.match(/^data:application\/xhtml\+xml;charset=UTF-8;filename=frame2\.xhtml,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:application/xhtml+xml;charset=UTF-8;filename=frame2.xhtml,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
 
   var frameSrc = frames[2].getAttribute('src');
-  assert(frameSrc.match(/^data:image\/svg\+xml;charset=UTF-8;filename=frame3\.svg,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:image/svg+xml;charset=UTF-8;filename=frame3.svg,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
 
   var frameSrc = frames[3].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/plain;filename=text\.txt,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/plain;filename=text.txt,`));
   var text = (await xhr({url: frameSrc, responseType: "text"})).response;
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
 
@@ -2663,12 +2663,12 @@ async function test_capture_frame_singleHtml() {
   var frames = doc.querySelectorAll('frame');
 
   var frameSrc = frames[0].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=frame1.html,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
 
   var frameSrc = frames[1].getAttribute('src');
-  assert(frameSrc.match(/^data:application\/xhtml\+xml;charset=UTF-8;filename=frame2\.xhtml,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:application/xhtml+xml;charset=UTF-8;filename=frame2.xhtml,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
 
@@ -2689,22 +2689,22 @@ async function test_capture_frame_singleHtml() {
   var frames = doc.querySelectorAll('iframe');
 
   var frameSrc = frames[0].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=frame1.html,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
 
   var frameSrc = frames[1].getAttribute('src');
-  assert(frameSrc.match(/^data:application\/xhtml\+xml;charset=UTF-8;filename=frame2\.xhtml,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:application/xhtml+xml;charset=UTF-8;filename=frame2.xhtml,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
 
   var frameSrc = frames[2].getAttribute('src');
-  assert(frameSrc.match(/^data:image\/svg\+xml;charset=UTF-8;filename=frame3\.svg,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:image/svg+xml;charset=UTF-8;filename=frame3.svg,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
 
   var frameSrc = frames[3].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/plain;filename=text\.txt,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/plain;filename=text.txt,`));
   var text = (await xhr({url: frameSrc, responseType: "text"})).response;
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
 
@@ -2718,12 +2718,12 @@ async function test_capture_frame_singleHtml() {
   var frames = doc.querySelectorAll('frame');
 
   var frameSrc = frames[0].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=frame1.html,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame1 content modified`);
 
   var frameSrc = frames[1].getAttribute('src');
-  assert(frameSrc.match(/^data:application\/xhtml\+xml;charset=UTF-8;filename=frame2\.xhtml,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:application/xhtml+xml;charset=UTF-8;filename=frame2.xhtml,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
 }
@@ -3085,16 +3085,16 @@ async function test_capture_frameRename2() {
   var doc = await readFileAsDocument(blob);
 
   var frameSrc = doc.querySelectorAll('iframe')[0].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=frame1.html,`));
 
   var frameSrc = doc.querySelectorAll('iframe')[1].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame2\.html,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=frame2.html,`));
 
   var frameSrc = doc.querySelectorAll('iframe')[2].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame3\.py\.html,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=frame3.py.html,`));
 
   var frameSrc = doc.querySelectorAll('iframe')[3].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=a%E4%B8%ADb%23c\.php\.html,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=a%E4%B8%ADb%23c.php.html,`));
 
   /* capture.saveAs = singleHtml; srcdoc = false; headless */
   var options = {
@@ -3112,16 +3112,16 @@ async function test_capture_frameRename2() {
   var doc = await readFileAsDocument(blob);
 
   var frameSrc = doc.querySelectorAll('iframe')[0].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame1\.html,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=frame1.html,`));
 
   var frameSrc = doc.querySelectorAll('iframe')[1].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame2\.html,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=frame2.html,`));
 
   var frameSrc = doc.querySelectorAll('iframe')[2].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=frame3\.py\.html,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=frame3.py.html,`));
 
   var frameSrc = doc.querySelectorAll('iframe')[3].getAttribute('src');
-  assert(frameSrc.match(/^data:text\/html;charset=UTF-8;filename=a%E4%B8%ADb%23c\.php\.html,/));
+  assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=a%E4%B8%ADb%23c.php.html,`));
 }
 
 /**
@@ -3720,11 +3720,9 @@ async function test_capture_css_rewriteCss2_1() {
 
   var styleElems = doc.querySelectorAll('style');
 
-  var regex = new RegExp(`^$`);
-  assert(styleElems[0].textContent.trim().match(regex));
+  assert(styleElems[0].textContent.trim() === '');
 
-  var regex = new RegExp(`^$`);
-  assert(styleElems[1].textContent.trim().match(regex));
+  assert(styleElems[1].textContent.trim() === '');
 
   var regex = new RegExp(
     `@keyframes\\s*demo\\s*{\\s*` +
@@ -4228,15 +4226,17 @@ async function test_capture_css_circular() {
   // style1.css
   var url = doc.querySelector('link').getAttribute('href');
   var text = (await xhr({url, responseType: "text"})).response;
-  assert(text.match(/^@import "(data:text\/css;filename=style2.css,[^"#]*)(?:#[^"]*)?";/));
+  var match = text.match(rawRegex`${'^'}@import "${'('}data:text/css;filename=style2.css,${'[^"#]*)(?:#[^"]*)?'}";`);
+  assert(match);
 
   // style2.css
-  var url = RegExp.$1;
+  var url = match[1];
   var text = (await xhr({url, responseType: "text"})).response;
-  assert(text.match(/^@import "(data:text\/css;filename=style3.css,[^"#]*)(?:#[^"]*)?";/));
+  var match = text.match(rawRegex`${'^'}@import "${'('}data:text/css;filename=style3.css,${'[^"#]*)(?:#[^"]*)?'}";`);
+  assert(match);
 
   // style3.css
-  var url = RegExp.$1;
+  var url = match[1];
   var text = (await xhr({url, responseType: "text"})).response;
   assert(text.trim() === `@import "urn:scrapbook:download:circular:url:${localhost}/capture_css_circular/style1.css";
 body { color: blue; }`);
@@ -4427,7 +4427,7 @@ async function test_capture_css_dynamic2() {
   assert(linkNames[3][1] === 'def');
 
   var importNames = doc.querySelectorAll('style')[1].textContent.trim().split('\n').map((url) => {
-    return url.match(/@import "([^"]*)"/)[1].split('#');
+    return url.match(rawRegex`@import "${'([^"]*)'}"`)[1].split('#');
   });
 
   assert(importNames[0][0] === importNames[1][0]);
@@ -5445,10 +5445,10 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
 
   assert(!doc.querySelector('#c1').hasAttribute("data-scrapbook-canvas"));
-  assert(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas").match(/^data:image\/png;base64,/));
+  assert(doc.querySelector('#c2').getAttribute("data-scrapbook-canvas").match(rawRegex`${'^'}data:image/png;base64,`));
 
   // canvas in the shadow DOM
   var blob = await capture({
@@ -5463,13 +5463,13 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
 
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
-  assert(shadow.querySelector('canvas').getAttribute('data-scrapbook-canvas').match(/^data:image\/png;base64,/));
+  assert(shadow.querySelector('canvas').getAttribute('data-scrapbook-canvas').match(rawRegex`${'^'}data:image/png;base64,`));
 
   /* capture.canvas = blank */
   var options = {
@@ -5504,7 +5504,7 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
 
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
@@ -5545,7 +5545,7 @@ async function test_capture_canvas() {
   var doc = await readFileAsDocument(indexBlob);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
 
   var host = doc.querySelector('span');
   var frag = doc.createElement("template");
@@ -7487,7 +7487,7 @@ async function test_capture_shadowRoot() {
   assert(shadow2.querySelector('img').getAttribute('src') === `blue.bmp`);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
 
   /* capture.shadowDom = remove */
   var options = {
@@ -7546,7 +7546,7 @@ async function test_capture_shadowRoot2() {
   assert(shadow1.querySelector('img').getAttribute('src') === `green.bmp`);
 
   var loader = doc.querySelector('script[data-scrapbook-elem="basic-loader"]');
-  assert(loader.textContent.trim().match(/^\(function \(\) \{.+\}\)\(\)$/));
+  assert(loader.textContent.trim().match(rawRegex`${'^'}(function () {${'.+'}})()${'$'}`));
 
   /* mode: closed */
   var blob = await capture({
@@ -10636,7 +10636,7 @@ async function test_capture_record_meta() {
   var html = doc.documentElement;
 
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html`);
-  assert(html.getAttribute('data-scrapbook-create').match(/^\d{17}$/));
+  assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
 
   /* html; -capture.recordDocumentMeta */
   var options = {
@@ -10670,7 +10670,7 @@ async function test_capture_record_meta() {
   var html = doc.documentElement;
 
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/text.py`);
-  assert(html.getAttribute('data-scrapbook-create').match(/^\d{17}$/));
+  assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
   assert(html.getAttribute('data-scrapbook-type') === 'file');
   assert(html.getAttribute('data-scrapbook-charset') === 'Big5');
 
@@ -10706,7 +10706,7 @@ async function test_capture_record_meta() {
   var html = doc.documentElement;
 
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html`);
-  assert(html.getAttribute('data-scrapbook-create').match(/^\d{17}$/));
+  assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
   assert(html.getAttribute('data-scrapbook-type') === 'bookmark');
 
   /* bookmark; -capture.recordDocumentMeta */
@@ -10867,7 +10867,7 @@ async function test_capture_record_meta4() {
   var doc = await readFileAsDocument(indexBlob);
   var html = doc.documentElement;
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.xhtml#abc`);
-  assert(html.getAttribute('data-scrapbook-create').match(/^\d{17}$/));
+  assert(html.getAttribute('data-scrapbook-create').match(regex`^\d{17}$`));
   assert(html.getAttribute('data-scrapbook-type') === `site`);
 
   var indexFile = zip.file('index.xhtml');
@@ -10920,81 +10920,81 @@ async function test_capture_record_nodes1() {
   var body = doc.body;
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<base[^>]*?>-->`
-  ).test(head.innerHTML));
+  assert(head.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<base[^>]*?>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="shortcut icon"[^>]*?>-->`
-  ).test(head.innerHTML));
+  assert(head.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="shortcut icon"[^>]*?>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="stylesheet"[^>]*?>-->`
-  ).test(head.innerHTML));
+  assert(head.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="stylesheet"[^>]*?>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="preload"[^>]*?>-->`
-  ).test(head.innerHTML));
+  assert(head.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="preload"[^>]*?>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="prefetch"[^>]*?>-->`
-  ).test(head.innerHTML));
+  assert(head.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="prefetch"[^>]*?>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<script[^>]*?>[\\s\\S]*?</script>-->`
-  ).test(head.innerHTML));
+  assert(head.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<script[^>]*?>[\s\S]*?</script>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<img[^>]*? src=[^>]*?>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<img[^>]*? src=[^>]*?>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<img[^>]*? srcset=[^>]*?>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<img[^>]*? srcset=[^>]*?>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<picture>[\\s\\S]*?</picture>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<picture>[\s\S]*?</picture>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<input[^>]*? type="image"[^>]*?>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<input[^>]*? type="image"[^>]*?>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<canvas[^>]*?>[\\s\\S]*?</canvas>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<canvas[^>]*?>[\s\S]*?</canvas>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<audio[^>]*?>[\\s\\S]*?</audio>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<audio[^>]*?>[\s\S]*?</audio>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\\s\\S]*?</video>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\s\S]*?</video>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\\s\\S]*?</video>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\s\S]*?</video>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<embed[^>]*?>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<embed[^>]*?>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<object[^>]*?>[\\s\\S]*?</object>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<object[^>]*?>[\s\S]*?</object>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<applet[^>]*?>[\\s\\S]*?</applet>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<applet[^>]*?>[\s\S]*?</applet>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<iframe[^>]*?>[\\s\\S]*?</iframe>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<iframe[^>]*?>[\s\S]*?</iframe>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\\s\\S]*?</noscript>-->`
-  ).test(body.innerHTML));
+  assert(body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\s\S]*?</noscript>-->`
+  ));
 
   /* -capture.recordRewrites */
   options["capture.recordRewrites"] = false;
@@ -11012,77 +11012,77 @@ async function test_capture_record_nodes1() {
   var body = doc.body;
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<base[^>]*?>-->`
-  ).test(head.innerHTML));
+  assert(!head.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<base[^>]*?>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="shortcut icon"[^>]*?>-->`
-  ).test(head.innerHTML));
+  assert(!head.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="shortcut icon"[^>]*?>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="stylesheet"[^>]*?>-->`
-  ).test(head.innerHTML));
+  assert(!head.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="stylesheet"[^>]*?>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="preload"[^>]*?>-->`
-  ).test(head.innerHTML));
+  assert(!head.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<link[^>]*? rel="preload"[^>]*?>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<script[^>]*?>[\\s\\S]*?</script>-->`
-  ).test(head.innerHTML));
+  assert(!head.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<script[^>]*?>[\s\S]*?</script>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<img[^>]*? src=[^>]*?>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<img[^>]*? src=[^>]*?>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<img[^>]*? srcset=[^>]*?>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<img[^>]*? srcset=[^>]*?>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<picture>[\\s\\S]*?</picture>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<picture>[\s\S]*?</picture>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<input[^>]*? type="image"[^>]*?>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<input[^>]*? type="image"[^>]*?>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<canvas[^>]*?>[\\s\\S]*?</canvas>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<canvas[^>]*?>[\s\S]*?</canvas>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<audio[^>]*?>[\\s\\S]*?</audio>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<audio[^>]*?>[\s\S]*?</audio>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\\s\\S]*?</video>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\s\S]*?</video>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\\s\\S]*?</video>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<video[^>]*?>[\s\S]*?</video>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<embed[^>]*?>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<embed[^>]*?>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<object[^>]*?>[\\s\\S]*?</object>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<object[^>]*?>[\s\S]*?</object>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<applet[^>]*?>[\\s\\S]*?</applet>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<applet[^>]*?>[\s\S]*?</applet>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<iframe[^>]*?>[\\s\\S]*?</iframe>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<iframe[^>]*?>[\s\S]*?</iframe>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\\s\\S]*?</noscript>-->`
-  ).test(body.innerHTML));
+  assert(!body.innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\s\S]*?</noscript>-->`
+  ));
 }
 
 /**
@@ -11111,17 +11111,17 @@ async function test_capture_record_nodes2() {
   var doc = await readFileAsDocument(indexBlob);
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ).test(doc.querySelector('picture').innerHTML));
+  assert(doc.querySelector('picture').innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ).test(doc.querySelector('audio').innerHTML));
+  assert(doc.querySelector('audio').innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
+  ));
 
-  assert(new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ).test(doc.querySelector('video').innerHTML));
+  assert(doc.querySelector('video').innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
+  ));
 
   /* -capture.recordRewrites */
   options["capture.recordRewrites"] = false;
@@ -11136,17 +11136,17 @@ async function test_capture_record_nodes2() {
   var doc = await readFileAsDocument(indexBlob);
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ).test(doc.querySelector('picture').innerHTML));
+  assert(!doc.querySelector('picture').innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ).test(doc.querySelector('audio').innerHTML));
+  assert(!doc.querySelector('audio').innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
+  ));
 
-  assert(!new RegExp(
-    `<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
-  ).test(doc.querySelector('video').innerHTML));
+  assert(!doc.querySelector('video').innerHTML.match(
+    regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
+  ));
 }
 
 /**
@@ -12324,11 +12324,11 @@ async function test_capture_singleHtml_mergeCss() {
 
   // @import cannot use CSS variable
   var cssText = styles[0].textContent.trim();
-  assert(cssText.match(/^@import "data:[^"]+";$/));
+  assert(cssText.match(rawRegex`${'^'}@import "data:${'[^"]+'}";${'$'}`));
 
   // @font-face src cannot use CSS variable
   var cssText = styles[1].textContent.trim();
-  assert(cssText.match(/src: url\("data:[^")]+"\);/));
+  assert(cssText.match(rawRegex`src: url("data:${'[^")]+'}");`));
 
   // link
   var cssText = (await xhr({
@@ -12375,11 +12375,11 @@ async function test_capture_singleHtml_mergeCss() {
 
   // @import cannot use CSS variable
   var cssText = styles[0].textContent.trim();
-  assert(cssText.match(/^@import "data:[^"]+";$/));
+  assert(cssText.match(rawRegex`${'^'}@import "data:${'[^"]+'}";${'$'}`));
 
   // @font-face src cannot use CSS variable
   var cssText = styles[1].textContent.trim();
-  assert(cssText.match(/src: url\("data:[^")]+"\);/));
+  assert(cssText.match(rawRegex`src: url("data:${'[^")]+'}");`));
 
   // link
   var cssText = (await xhr({
@@ -13080,7 +13080,7 @@ async function test_capture_custom_elements() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var value = doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`).textContent.trim();
-  assert(value.match(/^\(function \(names\) \{.+\}\)\(\["custom-subelem","custom-elem"\]\)$/));
+  assert(value.match(rawRegex`${'^'}(function (names) {${'.+'}})(["custom-subelem","custom-elem"])${'$'}`));
 
 	/* capture.script = remove */
   var options = {
@@ -13096,7 +13096,7 @@ async function test_capture_custom_elements() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var value = doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`).textContent.trim();
-  assert(value.match(/^\(function \(names\) \{.+\}\)\(\["custom-subelem","custom-elem"\]\)$/));
+  assert(value.match(rawRegex`${'^'}(function (names) {${'.+'}})(["custom-subelem","custom-elem"])${'$'}`));
 }
 
 async function test_viewer_validate() {
