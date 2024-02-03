@@ -3437,14 +3437,14 @@ async function test_capture_css_disabled() {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss() {
+async function test_capture_css_rewriteCss1() {
   /* capture.rewriteCss = url */
   var options = {
     "capture.rewriteCss": "url",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
+    url: `${localhost}/capture_css_rewriteCss1/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3508,7 +3508,7 @@ svg|a text, text svg|a {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
+    url: `${localhost}/capture_css_rewriteCss1/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3574,7 +3574,7 @@ svg|a text, text svg|a {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
+    url: `${localhost}/capture_css_rewriteCss1/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3640,7 +3640,7 @@ svg|a text, text svg|a {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
+    url: `${localhost}/capture_css_rewriteCss1/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3653,9 +3653,9 @@ svg|a text, text svg|a {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `\
-@import "ref/imported.css";
-@font-face { font-family: fontface; src: url(ref/sansation_light.woff); }
-#background { background: url(ref/green.bmp); }`);
+@import "rewrite/imported.css";
+@font-face { font-family: fontface; src: url(rewrite/sansation_light.woff); }
+#background { background: url(rewrite/green.bmp); }`);
   assert(styleElems[1].textContent.trim() === `\
 @media print {
   #media { color: green; }
@@ -3684,13 +3684,13 @@ svg|a text, text svg|a {
   assert(styleElems[5].textContent.trim() === `\
 /* unsupported rules */
 #unsupported {
-  *background: url(ref/unsupported-1.bmp); /* IE7 */
-  _background: url(ref/unsupported-2.bmp); /* IE6 */
-  -o-background: url(ref/unsupported-3.bmp); /* vandor prefix */
-  unknown: url(ref/unsupported-4.bmp); /* unknown */
+  *background: url(rewrite/unsupported-1.bmp); /* IE7 */
+  _background: url(rewrite/unsupported-2.bmp); /* IE6 */
+  -o-background: url(rewrite/unsupported-3.bmp); /* vandor prefix */
+  unknown: url(rewrite/unsupported-4.bmp); /* unknown */
 }`);
 
-  assert(doc.querySelector('blockquote').getAttribute('style') === `background: blue; background: url(ref/green.bmp);`);
+  assert(doc.querySelector('blockquote').getAttribute('style') === `background: blue; background: url(rewrite/green.bmp);`);
 }
 
 /**
@@ -4030,7 +4030,7 @@ async function test_capture_css_charset() {
  * Check whether linked and imported CSS are all rewritten
  * based to the CSS file (rather than the web page)
  *
- * inline and internal CSS are checked in test_capture_css_rewriteCss
+ * inline and internal CSS are checked in test_capture_css_rewriteCss1
  */
 async function test_capture_css_rewrite() {
   var options = {

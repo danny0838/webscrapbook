@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <style>
-@import "ref/imported.css";
-@font-face { font-family: fontface; src: url(ref/sansation_light.woff); }
-#background { background: url(ref/green.bmp); }
+@import "rewrite/imported.css";
+@font-face { font-family: fontface; src: url(rewrite/sansation_light.woff); }
+#background { background: url(rewrite/green.bmp); }
 </style>
 <style>
 @media print {
@@ -39,16 +39,16 @@ svg|a text, text svg|a {
 <style>
 /* unsupported rules */
 #unsupported {
-  *background: url(ref/unsupported-1.bmp); /* IE7 */
-  _background: url(ref/unsupported-2.bmp); /* IE6 */
-  -o-background: url(ref/unsupported-3.bmp); /* vandor prefix */
-  unknown: url(ref/unsupported-4.bmp); /* unknown */
+  *background: url(rewrite/unsupported-1.bmp); /* IE7 */
+  _background: url(rewrite/unsupported-2.bmp); /* IE6 */
+  -o-background: url(rewrite/unsupported-3.bmp); /* vandor prefix */
+  unknown: url(rewrite/unsupported-4.bmp); /* unknown */
 }
 </style>
 </head>
 <body>
 <h2>Basic rewrite</h2>
-<blockquote style="background: blue; background: url(ref/green.bmp);">inline background</blockquote>
+<blockquote style="background: blue; background: url(rewrite/green.bmp);">inline background</blockquote>
 <blockquote id="background">background</blockquote>
 <blockquote style="font-family: fontface;">@font-face</blockquote>
 <blockquote id="imported">@import</blockquote>
@@ -57,7 +57,7 @@ svg|a text, text svg|a {
 <blockquote id="supports">@supports</blockquote>
 <blockquote id="namespace">@namespace
 <svg width="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <a href="ref/green.bmp">
+  <a href="rewrite/green.bmp">
     <text x="50" y="90" text-anchor="middle">
       &lt;circle&gt;
     </text>
