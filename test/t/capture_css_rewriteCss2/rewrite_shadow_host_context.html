@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+div::before { content: attr(id); }
+</style>
+</head>
+<body>
+<div id="host1">
+<template>
+<style>
+:host-context(body) { background-color: lime; }
+</style>
+</template>
+</div>
+<div id="host2">
+<template>
+<style>
+:host-context(#nonexist) { background-color: lime; }
+</style>
+</template>
+</div>
+<script>
+/* load template content as shadowRoot */
+for (const t of document.querySelectorAll('template')) {
+  const elem = t.parentNode;
+  const shadow = elem.attachShadow({mode: 'open'});
+  shadow.innerHTML = t.innerHTML;
+  t.remove();
+}
+</script>
+</body>
+</html>

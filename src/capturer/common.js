@@ -3853,6 +3853,7 @@
       // Do not include :not as the semantic is reversed and the rule could be
       // narrower after rewriting (e.g. :not(:hover) => :not(*)).
       const ALLOWED_PSEUDO = new Set([
+        'root', 'scope',
         'is', 'matches', 'any', 'where', 'has',
         'first-child', 'first-of-type', 'last-child', 'last-of-type',
         'nth-child', 'nth-of-type', 'nth-last-child', 'nth-last-of-type',
