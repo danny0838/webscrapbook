@@ -5588,6 +5588,89 @@ async function test_capture_imageBackground_used6() {
 }
 
 /**
+ * Check background images referenced by CSS variable.
+ *
+ * capture.imageBackground
+ */
+async function test_capture_imageBackground_used7() {
+  throw new TestSkipError(`currently broken`);
+
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used7/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['var1.bmp']);
+  assert(zip.files['var2.bmp']);  // @FIXME
+  assert(zip.files['var3.bmp']);  // @FIXME
+  assert(zip.files['var4.bmp']);  // @FIXME
+  assert(zip.files['var5.bmp']);
+  assert(zip.files['var6.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+
+  assert(styleElems[0].textContent.trim() === `\
+:root { --var-1: url("var1.bmp"); }
+#var1 { background: var(--var-1); }`);
+
+  // @FIXME: image URL emptied
+  assert(styleElems[1].textContent.trim() === `\
+@keyframes var2 {
+  from { background-image: url("var2.bmp"); }
+  to { transform: translateX(40px); }
+}
+:root { --var-2: var2 3s linear infinite; }
+#var2 { animation: var(--var-2); }`);
+
+  // @FIXME: image URL emptied
+  assert(styleElems[2].textContent.trim() === `\
+@keyframes var3 {
+  from { background-image: url("var3.bmp"); }
+  to { transform: translateX(40px); }
+}
+:root { --var-3: var3; }
+#var3 { animation: var(--var-3) 3s linear infinite; }`);
+
+  // @FIXME: image URL emptied
+  assert(styleElems[3].textContent.trim() === `\
+@keyframes var4 {
+  from { background-image: url("var4.bmp"); }
+  to { transform: translateX(40px); }
+}
+:root { --var-4: var4; }
+#var4 {
+  animation-name: var(--var-4);
+  animation-duration: 3s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}`);
+
+  assert(styleElems[4].textContent.trim() === `\
+@keyframes var5 {
+  from { background-image: var(--var-5); }
+  to { transform: translateX(40px); }
+}
+:root { --var-5: url("var5.bmp"); }
+#var5 { animation: var5 3s linear infinite; }`);
+
+  assert(styleElems[5].textContent.trim() === `\
+@keyframes var6 {
+  from { --var-6: url("var6.bmp"); }
+  to { transform: translateX(40px); }
+}
+#var6 { animation: var6 3s linear infinite; }`);
+}
+
+/**
  * Check if option works
  *
  * capture.favicon
@@ -6520,6 +6603,75 @@ async function test_capture_font_used3() {
 
 #shadow3 { font-family: internal2; }
 @font-face { font-family: internal2; src: url("shadow3.woff"); }`);
+}
+
+/**
+ * Check if used fonts in the CSS are mapped correctly
+ *
+ * capture.font = "save-used"
+ */
+async function test_capture_font_used4() {
+  throw new TestSkipError(`currently broken`);
+
+  /* capture.font = save-used */
+  var options = {
+    "capture.rewriteCss": "url",
+    "capture.video": "remove",
+    "capture.font": "save-used",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_font_used4/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['var1.woff']);  // @FIXME
+  assert(zip.files['var2.woff']);  // @FIXME
+  assert(zip.files['var3.woff']);  // @FIXME
+  assert(zip.files['var4.woff']);  // @FIXME
+  assert(zip.files['var5.woff']);  // @FIXME
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+
+  // @FIXME: font-face src emptied
+  assert(styleElems[0].textContent.trim() === `\
+@font-face { font-family: var1; src: url("var1.woff"); }
+:root { --var-1: 1.1em var1; }
+#var1 { font: var(--var-1); }`);
+
+  // @FIXME: font-face src emptied
+  assert(styleElems[1].textContent.trim() === `\
+@font-face { font-family: var2; src: url("var2.woff"); }
+:root { --var-2: var2; }
+#var2 { font: 1.1em var(--var-2); }`);
+
+  // @FIXME: font-face src emptied
+  assert(styleElems[2].textContent.trim() === `\
+@font-face { font-family: var3; src: url("var3.woff"); }
+:root { --var-3: var3; }
+#var3 { font-family: var(--var-3); font-size: 1.1em; }`);
+
+  // @FIXME: font-face src emptied
+  assert(styleElems[3].textContent.trim() === `\
+@font-face { font-family: var4; src: url("var4.woff"); }
+@keyframes anime4 {
+  from { font-family: var(--var-4); font-size: 1.1em; }
+  to { transform: translateX(40px); }
+}
+:root { --var-4: var4; }
+#var4 { animation: anime4 3s linear infinite; }`);
+
+  // @FIXME: font-face src emptied
+  assert(styleElems[4].textContent.trim() === `\
+@font-face { font-family: var5; src: url("var5.woff"); }
+@keyframes anime5 {
+  from { --var-5: var5; }
+  to { transform: translateX(40px); }
+}
+#var5 { animation: anime5 3s linear infinite; font-family: var(--var-5); font-size: 1.1em; }`);
 }
 
 /**

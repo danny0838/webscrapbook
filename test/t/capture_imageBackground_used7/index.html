@@ -49,15 +49,15 @@
   from { --var-6: url("var6.bmp"); }
   to { transform: translateX(40px); }
 }
-#var6 { animation: var6 3s linear infinite; }
+#var6 { animation: var6 3s linear infinite; background-image: var(--var-6); }
 </style>
 </head>
 <body>
-<blockquote id="var1">var for background</blockquote>
-<blockquote id="var2">var for @keyframes (complete)</blockquote>
-<blockquote id="var3">var for @keyframes (partial)</blockquote>
-<blockquote id="var4">var for @keyframes (local)</blockquote>
-<blockquote id="var5">var in @keyframes</blockquote>
-<blockquote id="var6" style="background-image: var(--var-6);">var by @keyframes</blockquote>
+<blockquote id="var1">var as background</blockquote>
+<blockquote id="var2">var as animation (complete)</blockquote>
+<blockquote id="var3">var as animation (partial)</blockquote>
+<blockquote id="var4">var as animation-name</blockquote>
+<blockquote id="var5">var as background-image (referenced in @keyframes)</blockquote>
+<blockquote id="var6">var as background-image (defined in @keyframes)</blockquote>
 </body>
 </html>
