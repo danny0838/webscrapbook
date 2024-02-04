@@ -4430,8 +4430,7 @@
             });
             break;
           }
-          // @TODO: COUNTER_STYLE_RULE is only supported by Firefox
-          // and the API is unstable. Check if counter-style is really used
+          // Chromium < 91: COUNTER_STYLE_RULE not supported
           case 11/* CSSRule.COUNTER_STYLE_RULE */: {
             if (!cssRule.symbols) { break; }
 
@@ -4440,18 +4439,7 @@
             });
             break;
           }
-          // @TODO: check SUPPORTS_RULE is supported or not
-          case CSSRule.SUPPORTS_RULE: {
-            if (!cssRule.cssRules) { break; }
-
-            for (const rule of cssRule.cssRules) {
-              await parseCssRule(rule, refUrl);
-            }
-            break;
-          }
-          // @TODO: DOCUMENT_RULE is only supported by Firefox
-          // (with -moz-) and the API is unstable.
-          case 13/* CSSRule.DOCUMENT_RULE */: {
+          default: {
             if (!cssRule.cssRules) { break; }
 
             for (const rule of cssRule.cssRules) {
@@ -4807,11 +4795,17 @@
             }
             break;
           }
+          case CSSRule.NAMESPACE_RULE: {
+            const cssText = cssRule.cssText;
+            if (cssText) {
+              rules[rules.length] = indent + cssText;
+            }
+            break;
+          }
           case CSSRule.FONT_FACE_RULE:
           case CSSRule.PAGE_RULE:
           case CSSRule.KEYFRAME_RULE:
           case 11/* CSSRule.COUNTER_STYLE_RULE */:
-          case 13/* CSSRule.DOCUMENT_RULE */:
           default: {
             const cssText = await this.rewriteCssText({
               cssText: cssRule.cssText,
@@ -4821,13 +4815,6 @@
               settings,
               options,
             });
-            if (cssText) {
-              rules[rules.length] = indent + cssText;
-            }
-            break;
-          }
-          case CSSRule.NAMESPACE_RULE: {
-            const cssText = cssRule.cssText;
             if (cssText) {
               rules[rules.length] = indent + cssText;
             }

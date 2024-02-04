@@ -4180,6 +4180,306 @@ async function test_capture_css_rewriteCss1_2() {
 }
 
 /**
+ * Check if option works for @supports.
+ *
+ * capture.rewriteCss
+ * capturer.DocumentCssHandler
+ */
+async function test_capture_css_rewriteCss1_3() {
+  /* capture.rewriteCss = url */
+  var options = {
+    "capture.rewriteCss": "url",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_supports.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+
+  assert(styleElems[1].textContent.trim() === `\
+@supports (display: block) {
+  #case1 {
+    background-image: url("case1.bmp");
+  }
+}`
+  );
+
+  assert(styleElems[2].textContent.trim() === `\
+@supports (display: nonexist) {
+  #case2 {
+    background-image: url("case2.bmp");
+  }
+}`
+  );
+
+  /* capture.rewriteCss = tidy */
+  var options = {
+    "capture.rewriteCss": "tidy",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_supports.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+
+  assert(styleElems[1].textContent.trim().match(
+    cssRegex`@supports (display: block) {
+  #case1 { background-image: url("case1.bmp"); }
+}`
+  ));
+
+  assert(styleElems[2].textContent.trim().match(
+    cssRegex`@supports (display: nonexist) {
+  #case2 { background-image: url("case2.bmp"); }
+}`
+  ));
+
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_supports.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+
+  assert(styleElems[1].textContent.trim().match(
+    cssRegex`@supports (display: block) {
+  #case1 { background-image: url("case1.bmp"); }
+}`
+  ));
+
+  assert(styleElems[2].textContent.trim().match(
+    cssRegex`@supports (display: nonexist) {
+  #case2 { background-image: url("case2.bmp"); }
+}`
+  ));
+
+  /* capture.rewriteCss = none */
+  var options = {
+    "capture.rewriteCss": "none",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_supports.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+
+  assert(styleElems[1].textContent.trim() === `\
+@supports (display: block) {
+  #case1 {
+    background-image: url(rewrite_at_supports/case1.bmp);
+  }
+}`
+  );
+
+  assert(styleElems[2].textContent.trim() === `\
+@supports (display: nonexist) {
+  #case2 {
+    background-image: url(rewrite_at_supports/case2.bmp);
+  }
+}`
+  );
+}
+
+/**
+ * Check if option works for @counter-style.
+ *
+ * capture.rewriteCss
+ * capturer.DocumentCssHandler
+ */
+async function test_capture_css_rewriteCss1_4() {
+  try {
+    const d = document.implementation.createHTMLDocument();
+    const style = d.head.appendChild(d.createElement('style'));
+    style.textContent = '@counter-style my { symbols: "1"; }';
+    if (!style.sheet.cssRules.length) {
+      throw new Error('not supported');
+    }
+  } catch (ex) {
+    throw new TestSkipError('@counter-style CSS rule not supported');
+  }
+
+  /* capture.rewriteCss = url */
+  var options = {
+    "capture.rewriteCss": "url",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_counter_style.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+@counter-style mycounter {
+  system: cyclic;
+  suffix: " ";
+  symbols: url("1.bmp") url("2.bmp") url("3.bmp");
+  symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ;
+}`
+  );
+
+  /* capture.rewriteCss = tidy */
+  var options = {
+    "capture.rewriteCss": "tidy",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_counter_style.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim().match(
+    cssRegex`@counter-style mycounter {${
+      '(?=[\\s\\S]*?'}system: cyclic;${')'}${
+      '(?=[\\s\\S]*?'}suffix: "${' '}";${')'}${
+      '(?=[\\s\\S]*?'}symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ;${')'}${
+      '[\\s\\S]*?'}}`
+  ));
+
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_counter_style.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim().match(
+    cssRegex`@counter-style mycounter {${
+      '(?=[\\s\\S]*?'}system: cyclic;${')'}${
+      '(?=[\\s\\S]*?'}suffix: "${' '}";${')'}${
+      '(?=[\\s\\S]*?'}symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ;${')'}${
+      '[\\s\\S]*?'}}`
+  ));
+
+  /* capture.rewriteCss = none */
+  var options = {
+    "capture.rewriteCss": "none",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_counter_style.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+@counter-style mycounter {
+  system: cyclic;
+  suffix: " ";
+  symbols: url(./rewrite_at_counter_style/1.bmp) url(./rewrite_at_counter_style/2.bmp) url(./rewrite_at_counter_style/3.bmp);
+  symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ;
+}`
+  );
+}
+
+/**
+ * Check if option works for @layer.
+ *
+ * capture.rewriteCss
+ * capturer.DocumentCssHandler
+ */
+async function test_capture_css_rewriteCss1_5() {
+  try {
+    const d = document.implementation.createHTMLDocument();
+    const style = d.head.appendChild(d.createElement('style'));
+    style.textContent = '@layer mylayer;';
+    if (!style.sheet.cssRules.length) {
+      throw new Error('not supported');
+    }
+  } catch (ex) {
+    throw new TestSkipError('@layer CSS rule not supported');
+  }
+
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_layer.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+
+  assert(styleElems[1].textContent.trim().match(
+    cssRegex`@layer base, special;
+@layer special {
+  #case1 { background-image: url("case1s.bmp"); }
+}
+@layer base {
+  #case1 { background-image: url("case1b.bmp"); }
+}`
+  ));
+
+  assert(styleElems[2].textContent.trim().match(
+    cssRegex`@layer special2 {
+  #case2 { background-image: url("case2s.bmp"); }
+}
+@layer base2 {
+  #case2 { background-image: url("case2b.bmp"); }
+}`
+  ));
+}
+
+/**
  * Check DOM matching for capture.rewriteCss = "match"
  *
  * capture.rewriteCss
@@ -6046,6 +6346,51 @@ async function test_capture_imageBackground_used8() {
       background: url("");
     }
   }
+}`);
+}
+
+/**
+ * Check if used background images are checked correctly for advanced at-rules
+ * such as @layer.
+ *
+ * capture.imageBackground
+ */
+async function test_capture_imageBackground_used9() {
+  try {
+    const d = document.implementation.createHTMLDocument();
+    const style = d.head.appendChild(d.createElement('style'));
+    style.textContent = '@layer mylayer;';
+    if (!style.sheet.cssRules.length) {
+      throw new Error('not supported');
+    }
+  } catch (ex) {
+    throw new TestSkipError('@layer CSS rule not supported');
+  }
+
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used9/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['base.bmp']);
+  assert(zip.files['special.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+@layer base, special;
+@layer special {
+  #case1 { background-image: url("special.bmp"); }
+}
+@layer base {
+  #case1 { background-image: url("base.bmp"); }
 }`);
 }
 
