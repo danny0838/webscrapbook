@@ -3,6 +3,21 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.6.0] - 2024-02-04
+* Added support of nesting CSS for a capture.
+* Added support of referrer policy related attributes when performing a capture.
+* Reworked `capture.referrerPolicy` to provide default referrer policy, or provide dominant referrer policy by prepending "+".
+* Fixed some bad referrer handling cases for downgrading requests for a capture.
+* Fixed script error when `rewrite styles` is `(advanced) tidy` for an external or imported CSS for a headless capture.
+* Fixed missing resources inside an at-rule like `@layer` when `Style images` is `Save used` for a capture.
+* Fixed `:root` and `:scope` CSS rules not correctly handled when `Rewrite styles` is `Tidy` for a capture.
+* Fixed an issue that constructed stylesheets are not captured in Firefox.
+* Fixed downloading linked files and in-depth capture of hyperlink elements in an SVG or MathML for a capture.
+* Fixed broken version 3 sitemap.
+* Fixed missing links in an embedded SVG or MathML for sitemap.
+* Fixed misleading links of `a[download], area[download], iframe[srcdoc]` elements for sitemap.
+* Miscellaneous optimization of the internal code and unit test suite.
+
 ## [2.5.0] - 2024-01-24
 * Added auto-fixing of item create/modify time when the input value is too short or too long, and auto-fill current time if empty.
 * Fixed bad handling of ID-Date conversion for some rare cases.
