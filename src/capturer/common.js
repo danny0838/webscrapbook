@@ -4120,12 +4120,6 @@
       const styleElem = d.createElement('style');
       styleElem.textContent = cssText;
       d.head.appendChild(styleElem);
-
-      // In Firefox, an error is thrown when accessing cssRules right after
-      // insertion of a stylesheet containing an @import rule. A delay is
-      // required to prevent the error.
-      await scrapbook.delay(0);
-
       return styleElem.sheet.cssRules;
     }
 
