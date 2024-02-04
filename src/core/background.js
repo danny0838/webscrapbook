@@ -949,6 +949,10 @@
 
       let result;
       switch (cmd) {
+        case "ping": {
+          result = true;
+          break;
+        }
         case "invokeCapture": {
           result = scrapbook.invokeCapture(args);
           break;

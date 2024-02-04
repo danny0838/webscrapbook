@@ -95,6 +95,15 @@ async function init() {
     error(`Unable to connect to local server "${localhost2}". Make sure the server has been started and the port is not occupied by another application.`);
     throw ex;
   }
+
+  try {
+    if (!await browser.runtime.sendMessage(config["wsb_extension_id"], {cmd: "ping"})) {
+      throw new Error('ping failure');
+    }
+  } catch (ex) {
+    error(`Unable to connect to the WebScrapBook extension with ID "${config["wsb_extension_id"]}". Make sure the extension is installed and its ID is correctly configured.`);
+    throw ex;
+  }
 }
 
 async function delay(ms) {
