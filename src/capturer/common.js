@@ -355,11 +355,11 @@
       if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
         if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
             (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
+          let refPolicy = docRefPolicy;
+          if (isHtml) {
+            refPolicy = (elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy) || refPolicy;
+          }
           downLinkTasks.push(async () => {
-            let refPolicy = docRefPolicy;
-            if (isHtml) {
-              refPolicy = (elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy) || refPolicy;
-            }
 
             const isAttachment = isHtml ? elem.hasAttribute('download') : false;
             const downLinkSettings = Object.assign({}, settings, {
@@ -420,11 +420,12 @@
             break;
           }
 
+          const refPolicy = docRefPolicy;
           tasks.push(async () => {
             const response = await downloadFile({
               url,
               refUrl,
-              refPolicy: docRefPolicy,
+              refPolicy,
               settings,
               options,
             });
@@ -528,13 +529,14 @@
                 return;
               case "save":
               default:
+                const refPolicy = docRefPolicy;
                 for (const attr of ["href", "xlink:href"]) {
                   if (!elem.hasAttribute(attr)) { continue; }
                   tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute(attr),
                       refUrl,
-                      refPolicy: docRefPolicy,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -561,11 +563,12 @@
               case "link":
               default: {
                 const refUrl = baseUrl;
+                const refPolicy = docRefPolicy;
                 tasks.push(async () => {
                   await cssHandler.rewriteCss({
                     elem,
                     refUrl,
-                    refPolicy: docRefPolicy,
+                    refPolicy,
                     settings,
                     callback: (elem, response) => {
                       // escape </style> as textContent can contain HTML
@@ -699,6 +702,21 @@
               }
             }
 
+            // dynamically update document referrer policy
+            // spaced value e.g. name=" referrer " or content=" origin " doesn't take effect
+            // ref: https://html.spec.whatwg.org/multipage/semantics.html#meta-referrer
+            if (elem.matches('[name="referrer" i]')) {
+              const policy = elem.getAttribute('content').toLowerCase();
+              if (META_REFERRER_POLICY.has(policy)) {
+                docRefPolicy = cssHandler.docRefPolicy = policy;
+              } else {
+                const policyLegacy = META_REFERRER_POLICY_LEGACY.get(policy);
+                if (policyLegacy !== undefined) {
+                  docRefPolicy = cssHandler.docRefPolicy = policy;
+                }
+              }
+            }
+
             // An open graph URL does not acknowledge <base> and should always use an absolute URL,
             // and thus we simply skip meta[property="og:*"].
             break;
@@ -782,11 +800,12 @@
                   }
 
                   const refUrl = baseUrl;
+                  const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy;
                   tasks.push(async () => {
                     await cssHandler.rewriteCss({
                       elem,
                       refUrl,
-                      refPolicy: elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy,
+                      refPolicy,
                       settings,
                       callback: (elem, response) => {
                         captureRewriteAttr(elem, "href", response.url);
@@ -829,11 +848,12 @@
                     favIconUrl = elem.getAttribute("href");
                     useFavIcon = true;
                   }
+                  const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy;
                   tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("href"),
                       refUrl,
-                      refPolicy: elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -892,11 +912,12 @@
                   return;
                 case "save":
                 default:
+                  const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy;
                   tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("href"),
                       refUrl,
-                      refPolicy: elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -949,11 +970,12 @@
                   break;
                 }
                 const refUrl = baseUrl;
+                const refPolicy = docRefPolicy;
                 tasks.push(async () => {
                   await cssHandler.rewriteCss({
                     elem,
                     refUrl,
-                    refPolicy: docRefPolicy,
+                    refPolicy,
                     settings,
                     callback: (elem, response) => {
                       // escape </style> as textContent can contain HTML
@@ -1010,11 +1032,12 @@
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
+                  const refPolicy = elem.referrerPolicy || docRefPolicy;
                   tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
-                      refPolicy: elem.referrerPolicy || docRefPolicy,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -1125,6 +1148,7 @@
               captureRewriteAttr(frame, "src", sourceUrl);
             }
 
+            const refPolicy = frame.referrerPolicy || docRefPolicy;
             switch (options["capture.frame"]) {
               case "link": {
                 // if the frame has srcdoc, use it
@@ -1174,7 +1198,7 @@
                         doc: frameDoc,
                         baseUrl,
                         refUrl,
-                        refPolicy: frame.referrerPolicy || docRefPolicy,
+                        refPolicy,
                         settings: frameSettings,
                         options: frameOptions,
                       }).then(captureFrameCallback).catch(captureFrameErrorHandler);
@@ -1285,7 +1309,7 @@
                   if (frameWindow) {
                     const response = await capturer.invoke("captureDocumentOrFile", {
                       refUrl,
-                      refPolicy: frame.referrerPolicy || docRefPolicy,
+                      refPolicy,
                       settings: frameSettings,
                       options,
                     }, {frameWindow}).catch(captureFrameErrorHandler);
@@ -1356,7 +1380,7 @@
                   return capturer.invoke("captureUrl", {
                     url: sourceUrl,
                     refUrl,
-                    refPolicy: frame.referrerPolicy || docRefPolicy,
+                    refPolicy,
                     settings: frameSettings,
                     options: frameOptions,
                   }).catch(captureFrameErrorHandler).then(captureFrameCallback);
@@ -1404,6 +1428,7 @@
               captureRewriteAttr(elem, "srcset", rewriteSrcset);
             }
 
+            const refPolicy = elem.referrerPolicy || docRefPolicy;
             switch (options["capture.image"]) {
               case "link":
                 // do nothing
@@ -1432,7 +1457,7 @@
                       const response = await downloadFile({
                         url,
                         refUrl,
-                        refPolicy: elem.referrerPolicy || docRefPolicy,
+                        refPolicy,
                         settings,
                         options,
                       });
@@ -1450,7 +1475,7 @@
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
-                      refPolicy: elem.referrerPolicy || docRefPolicy,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -1465,7 +1490,7 @@
                       return (await downloadFile({
                         url,
                         refUrl,
-                        refPolicy: elem.referrerPolicy || docRefPolicy,
+                        refPolicy,
                         settings,
                         options,
                       })).url;
@@ -2373,14 +2398,15 @@
             break;
           case "save":
           default:
+            const refUrl = baseUrl;
+            const refPolicy = docRefPolicy;
             switch (options["capture.rewriteCss"]) {
               case "url": {
-                const refUrl = baseUrl;
                 tasks.push(async () => {
                   const response = await cssHandler.rewriteCssText({
                     cssText: elem.getAttribute("style"),
                     refUrl,
-                    refPolicy: docRefPolicy,
+                    refPolicy,
                     isInline: true,
                     settings: {
                       usedCssFontUrl: undefined,
@@ -2394,12 +2420,11 @@
               }
               case "tidy":
               case "match": {
-                const refUrl = baseUrl;
                 tasks.push(async () => {
                   const response = await cssHandler.rewriteCssText({
                     cssText: elem.style.cssText,
                     refUrl,
-                    refPolicy: docRefPolicy,
+                    refPolicy,
                     isInline: true,
                     settings: {
                       usedCssFontUrl: undefined,
@@ -2811,21 +2836,6 @@
         baseUrlFinal = new URL(baseElem.getAttribute('href'), baseUrlFallback).href;
         baseUrlFinal = scrapbook.splitUrlByAnchor(baseUrlFinal)[0];
         break;
-      }
-    }
-
-    // determine document referrer policy
-    // meta[name=" referrer "] or meta[content=" origin "] doesn't take effect
-    // ref: https://html.spec.whatwg.org/multipage/semantics.html#meta-referrer
-    for (const metaElem of doc.querySelectorAll('meta[name="referrer" i]')) {
-      const policy = metaElem.getAttribute('content').toLowerCase();
-      if (META_REFERRER_POLICY.has(policy)) {
-        docRefPolicy = policy;
-      } else {
-        const policyLegacy = META_REFERRER_POLICY_LEGACY.get(policy);
-        if (policyLegacy !== undefined) {
-          docRefPolicy = policy;
-        }
       }
     }
 

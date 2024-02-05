@@ -12378,6 +12378,38 @@ async function test_capture_referrer7() {
 }
 
 /**
+ * Check if dynamic meta[name="referrer"] is honored.
+ *
+ * capture.referrerPolicy
+ */
+async function test_capture_referrer8() {
+  /* capture.referrerPolicy = "unsafe-url" */
+  var options = {
+    "capture.referrerPolicy": "unsafe-url",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "py",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_referrer5/index.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var file = zip.file('css1.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer5/index.html`);
+
+  var file = zip.file('css2.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('css3.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === ``);
+}
+
+/**
  * Check if option works
  *
  * capture.recordDocumentMeta
