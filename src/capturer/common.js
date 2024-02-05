@@ -622,68 +622,83 @@
           }
 
           case "meta": {
-            // spaced attribute e.g. http-equiv=" refresh " doesn't take effect
-            if (elem.hasAttribute("http-equiv") && elem.hasAttribute("content")) {
-              if (elem.getAttribute("http-equiv").toLowerCase() == "content-type") {
-                // force UTF-8
-                metaCharsetNode = elem;
-                captureRewriteAttr(elem, "content", "text/html; charset=UTF-8");
-              } else if (elem.getAttribute("http-equiv").toLowerCase() == "refresh") {
-                // rewrite meta refresh
-                const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
-                if (metaRefresh.url) {
-                  const url = rewriteLocalLink(metaRefresh.url, baseUrl);
-                  captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
+            // Exactly one of the name, http-equiv, charset, and itemprop
+            // attributes must be specified, according to the spec. Though we
+            // check and rewrite all of them in case of a bad element
+            // containing multiple attributes.
 
-                  // check downLink
-                  if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
-                    if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
-                        (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
-                      downLinkTasks.push(async () => {
-                        const downLinkSettings = Object.assign({}, settings, {
-                          depth: settings.depth + 1,
-                          isMainPage: false,
-                          isMainFrame: true,
-                        });
-                        const response = await capturer.invoke("captureUrl", {
-                          url,
-                          refUrl,
-                          downLink: true,
-                          settings: downLinkSettings,
-                          options,
-                        })
-                        .catch((ex) => {
-                          console.error(ex);
-                          warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
-                          return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
-                        });
-
-                        if (response) {
-                          const url = response.url;
-                          captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
-                        }
-                        return response;
-                      });
-                    }
-                  }
-                }
-              } else if (elem.getAttribute("http-equiv").toLowerCase() == "content-security-policy") {
-                // content security policy could make resources not loaded when viewed offline
-                switch (options["capture.contentSecurityPolicy"]) {
-                  case "save":
-                    // do nothing
-                    break;
-                  case "remove":
-                  default:
-                    captureRemoveNode(elem);
-                    return;
-                }
-              }
-            } else if (elem.hasAttribute("charset")) {
+            if (elem.matches('[charset]')) {
               // force UTF-8
               metaCharsetNode = elem;
               captureRewriteAttr(elem, "charset", "UTF-8");
             }
+
+            // spaced value e.g. http-equiv=" refresh " doesn't take effect
+            if (elem.matches('[http-equiv][content]')) {
+              switch (elem.getAttribute("http-equiv").toLowerCase()) {
+                case "content-type": {
+                  // force UTF-8
+                  metaCharsetNode = elem;
+                  captureRewriteAttr(elem, "content", "text/html; charset=UTF-8");
+                  break;
+                }
+                case "refresh": {
+                  // rewrite meta refresh
+                  const metaRefresh = scrapbook.parseHeaderRefresh(elem.getAttribute("content"));
+                  if (metaRefresh.url) {
+                    const url = rewriteLocalLink(metaRefresh.url, baseUrl);
+                    captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
+
+                    // check downLink
+                    if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
+                      if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
+                          (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
+                        downLinkTasks.push(async () => {
+                          const downLinkSettings = Object.assign({}, settings, {
+                            depth: settings.depth + 1,
+                            isMainPage: false,
+                            isMainFrame: true,
+                          });
+                          const response = await capturer.invoke("captureUrl", {
+                            url,
+                            refUrl,
+                            downLink: true,
+                            settings: downLinkSettings,
+                            options,
+                          })
+                          .catch((ex) => {
+                            console.error(ex);
+                            warn(scrapbook.lang("ErrorFileDownloadError", [url, ex.message]));
+                            return {url: capturer.getErrorUrl(url, options), error: {message: ex.message}};
+                          });
+
+                          if (response) {
+                            const url = response.url;
+                            captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
+                          }
+                          return response;
+                        });
+                      }
+                    }
+                  }
+                  break;
+                }
+                case "content-security-policy": {
+                  // content security policy could make resources not loaded when viewed offline
+                  switch (options["capture.contentSecurityPolicy"]) {
+                    case "save":
+                      // do nothing
+                      break;
+                    case "remove":
+                    default:
+                      captureRemoveNode(elem);
+                      return;
+                  }
+                  break;
+                }
+              }
+            }
+
             // An open graph URL does not acknowledge <base> and should always use an absolute URL,
             // and thus we simply skip meta[property="og:*"].
             break;
