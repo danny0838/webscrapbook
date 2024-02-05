@@ -1122,10 +1122,12 @@
                 case "save-used":
                 case "save":
                 default:
+                  const refPolicy = docRefPolicy;
                   tasks.push(async () => {
                     const response = await downloadFile({
                       url: newUrl,
                       refUrl,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -1292,6 +1294,7 @@
                       doc: frameDoc,
                       baseUrl: sourceUrl.startsWith('about:') ? baseUrl : sourceUrl,
                       refUrl,
+                      refPolicy,
                       settings: frameSettings,
                       options,
                     }).catch(captureFrameErrorHandler).then(captureFrameCallback);
@@ -1549,6 +1552,7 @@
                 // Headless capture doesn't support currentSrc, fallback to "save".
               case "save":
               default:
+                const refPolicy = docRefPolicy;
                 for (const subElem of elem.querySelectorAll('source[srcset]')) {
                   tasks.push(async () => {
                     const response = await scrapbook.rewriteSrcset(subElem.getAttribute("srcset"), async (url) => {
@@ -1556,6 +1560,7 @@
                       return (await downloadFile({
                         url: newUrl,
                         refUrl,
+                        refPolicy,
                         settings,
                         options,
                       })).url;
@@ -1581,6 +1586,7 @@
               captureRewriteAttr(subElem, "src", newUrl);
             }
 
+            const refPolicy = docRefPolicy;
             switch (options["capture.audio"]) {
               case "link":
                 // do nothing
@@ -1611,6 +1617,7 @@
                       const response = await downloadFile({
                         url,
                         refUrl,
+                        refPolicy,
                         settings,
                         options,
                       });
@@ -1624,6 +1631,7 @@
                       const response = await downloadFile({
                         url: subElem.getAttribute("src"),
                         refUrl,
+                        refPolicy,
                         settings,
                         options,
                       });
@@ -1642,6 +1650,7 @@
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -1655,6 +1664,7 @@
                     const response = await downloadFile({
                       url: subElem.getAttribute("src"),
                       refUrl,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -1687,6 +1697,7 @@
               captureRewriteAttr(subElem, "src", newUrl);
             }
 
+            const refPolicy = docRefPolicy;
             switch (options["capture.video"]) {
               case "link":
                 // do nothing
@@ -1719,6 +1730,7 @@
                       const response = await downloadFile({
                         url: elem.getAttribute("poster"),
                         refUrl,
+                        refPolicy,
                         settings,
                         options,
                       });
@@ -1736,6 +1748,7 @@
                       const response = await downloadFile({
                         url,
                         refUrl,
+                        refPolicy,
                         settings,
                         options,
                       })
@@ -1749,6 +1762,7 @@
                       const response = await downloadFile({
                         url: subElem.getAttribute("src"),
                         refUrl,
+                        refPolicy,
                         settings,
                         options,
                       });
@@ -1767,6 +1781,7 @@
                     const response = await downloadFile({
                       url: elem.getAttribute("poster"),
                       refUrl,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -1780,6 +1795,7 @@
                     const response = await downloadFile({
                       url: elem.getAttribute("src"),
                       refUrl,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -1793,6 +1809,7 @@
                     const response = await downloadFile({
                       url: subElem.getAttribute("src"),
                       refUrl,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -1837,6 +1854,7 @@
               case "save":
               default:
                 if (elem.hasAttribute("src")) {
+                  const refPolicy = docRefPolicy;
                   tasks.push(async () => {
                     const sourceUrl = elem.getAttribute("src");
 
@@ -1883,6 +1901,7 @@
                     return capturer.invoke("captureUrl", {
                       url: sourceUrl,
                       refUrl,
+                      refPolicy,
                       settings: embedSettings,
                       options: embedOptions,
                     }).catch((ex) => {
@@ -1951,6 +1970,7 @@
                 return;
               case "save":
               default:
+                const refPolicy = docRefPolicy;
                 if (elem.hasAttribute("data")) {
                   tasks.push(async () => {
                     const sourceUrl = elem.getAttribute("data");
@@ -1998,6 +2018,7 @@
                     return capturer.invoke("captureUrl", {
                       url: sourceUrl,
                       refUrl,
+                      refPolicy,
                       settings: objectSettings,
                       options: objectOptions,
                     }).catch(async (ex) => {
@@ -2018,6 +2039,7 @@
                       return (await downloadFile({
                         url,
                         refUrl,
+                        refPolicy,
                         settings,
                         options,
                       })).url;
@@ -2075,11 +2097,13 @@
                 return;
               case "save":
               default:
+                const refPolicy = docRefPolicy;
                 if (elem.hasAttribute("code")) {
                   tasks.push(async () => {
                     const response = await downloadFile({
                       url: elem.getAttribute("code"),
                       refUrl,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -2093,6 +2117,7 @@
                     const response = await downloadFile({
                       url: elem.getAttribute("archive"),
                       refUrl,
+                      refPolicy,
                       settings,
                       options,
                     });
@@ -2166,10 +2191,12 @@
                     // srcset and currentSrc are not supported, do the same as save
                   case "save":
                   default:
+                    const refPolicy = docRefPolicy;
                     tasks.push(async () => {
                       const response = await downloadFile({
                         url: elem.getAttribute("src"),
                         refUrl,
+                        refPolicy,
                         settings,
                         options,
                       });

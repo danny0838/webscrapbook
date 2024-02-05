@@ -12128,6 +12128,80 @@ async function test_capture_referrer5() {
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost}/`);
 
+  // other
+  var file = zip.file('table.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('tr.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('th.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('td.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('input.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('picture_source.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('audio.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('audio_source.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('audio_track.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('video.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('video_poster.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('video_source.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('video_track.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('embed.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('object.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('object_archive.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('applet.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('applet_archive.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  // svg
   var file = zip.file('svg_image.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost}/`);
@@ -12152,6 +12226,7 @@ async function test_capture_referrer5() {
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost}/`);
 
+  // math
   var file = zip.file('math_msup.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost}/`);
