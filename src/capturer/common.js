@@ -548,8 +548,6 @@
           }
 
           case "style": {
-            const css = cssHandler.getElemCss(elem);
-
             switch (options["capture.style"]) {
               case "blank": {
                 captureRewriteTextContent(elem, "");
@@ -597,7 +595,7 @@
           case "base": {
             if (!elem.hasAttribute("href")) { break; }
 
-            // resolv using baseUrlFallback
+            // resolve using baseUrlFallback
             const newUrl = capturer.resolveRelativeUrl(elem.getAttribute("href"), baseUrlFallback);
             captureRewriteAttr(elem, "href", newUrl);
 

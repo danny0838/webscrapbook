@@ -2,7 +2,8 @@
  *
  * Shared utilities for extension scripts.
  *
- * @public {Object} scrapbook
+ * @require {Object} scrapbook
+ * @extends scrapbook
  *****************************************************************************/
 
 (function (root, factory) {

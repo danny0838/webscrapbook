@@ -6,6 +6,7 @@
  * @require {Object} scrapbook
  * @require {Object} server
  * @require {Object} capturer
+ * @extends capturer
  * @override {boolean} capturer.isContentScript
  *****************************************************************************/
 
