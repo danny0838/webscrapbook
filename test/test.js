@@ -8449,6 +8449,243 @@ async function test_capture_base() {
 }
 
 /**
+ * Check if URLs are parsed correctly when base changes.
+ *
+ * capture.base
+ */
+async function test_capture_base2() {
+  /* capture.base = save */
+  var options = {
+    "capture.base": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_base2/base.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
+  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp 2x`);
+  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
+  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
+  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp") repeat;`);
+  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp"); }`);
+
+  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+
+  assert(doc.querySelector('base').getAttribute('href') === `${localhost}/capture_base2/resources/`);
+
+  assert(doc.querySelectorAll('img[src]')[1].getAttribute('src') === `green.bmp`);
+  assert(doc.querySelectorAll('img[srcset]')[1].getAttribute('srcset') === `green.bmp 2x`);
+  assert(doc.querySelectorAll('input[type="image"]')[1].getAttribute('src') === `green.bmp`);
+  assert(doc.querySelectorAll('table')[1].getAttribute('background') === `green.bmp`);
+  assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background: url("green.bmp") repeat;`);
+  assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("green.bmp"); }`);
+
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+
+  /* capture.base = blank */
+  var options = {
+    "capture.base": "blank",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_base2/base.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
+  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp 2x`);
+  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
+  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
+  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp") repeat;`);
+  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp"); }`);
+
+  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+
+  assert(!doc.querySelector('base').hasAttribute('href'));
+
+  assert(doc.querySelectorAll('img[src]')[1].getAttribute('src') === `green.bmp`);
+  assert(doc.querySelectorAll('img[srcset]')[1].getAttribute('srcset') === `green.bmp 2x`);
+  assert(doc.querySelectorAll('input[type="image"]')[1].getAttribute('src') === `green.bmp`);
+  assert(doc.querySelectorAll('table')[1].getAttribute('background') === `green.bmp`);
+  assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background: url("green.bmp") repeat;`);
+  assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("green.bmp"); }`);
+
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+
+  /* capture.base = remove */
+  var options = {
+    "capture.base": "remove",
+    "capture.frame": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_base2/base.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
+  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp 2x`);
+  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
+  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
+  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp") repeat;`);
+  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp"); }`);
+
+  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+
+  assert(!doc.querySelector('base'));
+
+  assert(doc.querySelectorAll('img[src]')[1].getAttribute('src') === `green.bmp`);
+  assert(doc.querySelectorAll('img[srcset]')[1].getAttribute('srcset') === `green.bmp 2x`);
+  assert(doc.querySelectorAll('input[type="image"]')[1].getAttribute('src') === `green.bmp`);
+  assert(doc.querySelectorAll('table')[1].getAttribute('background') === `green.bmp`);
+  assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background: url("green.bmp") repeat;`);
+  assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("green.bmp"); }`);
+
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+  
+
+  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
+  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp") repeat;`);
+  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp"); }`);
+  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+}
+
+/**
+ * Check if URLs are parsed correctly when base changes for iframes.
+ *
+ * capture.base
+ * capture.frame
+ * mode: tab/source
+ */
+async function test_capture_base3() {
+  /* capture.frame = save */
+  var options = {
+    "capture.base": "blank",
+    "capture.frame": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_base3/base.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index_1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img').getAttribute('src') === `green.bmp`);
+
+  var indexFile = zip.file('index_2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base3/resources/resources/green.bmp`);
+
+  /* capture.frame = save (headless) */
+  var options = {
+    "capture.base": "blank",
+    "capture.frame": "save",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_base3/base.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files["index_1.html"]);
+  assert(!zip.files["index_2.html"]);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  // both iframe[srcdoc] are identical and saves as the same file
+  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_1.html`);
+
+  var indexFile = zip.file('index_1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img').getAttribute('src') === `green.bmp`);
+
+  /* capture.frame = link */
+  var options = {
+    "capture.base": "blank",
+    "capture.frame": "link",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_base3/base.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var frames = doc.querySelectorAll('iframe');
+
+  var srcdocBlob = new Blob([frames[0].getAttribute('srcdoc')], {type: "text/html"});
+  var srcdoc = await readFileAsDocument(srcdocBlob);
+  assert(srcdoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+
+  var srcdocBlob = new Blob([frames[1].getAttribute('srcdoc')], {type: "text/html"});
+  var srcdoc = await readFileAsDocument(srcdocBlob);
+  assert(srcdoc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base3/resources/resources/green.bmp`);
+
+  /* capture.frame = link (headless) */
+  var options = {
+    "capture.base": "blank",
+    "capture.frame": "link",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_base3/base.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var frames = doc.querySelectorAll('iframe');
+
+  var srcdocBlob = new Blob([frames[0].getAttribute('srcdoc')], {type: "text/html"});
+  var srcdoc = await readFileAsDocument(srcdocBlob);
+  assert(srcdoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+
+  var srcdocBlob = new Blob([frames[1].getAttribute('srcdoc')], {type: "text/html"});
+  var srcdoc = await readFileAsDocument(srcdocBlob);
+  assert(srcdoc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base3/resources/resources/green.bmp`);
+}
+
+
+/**
  * Check if option works
  *
  * capture.formStatus

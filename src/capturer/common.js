@@ -1150,6 +1150,7 @@
               captureRewriteAttr(frame, "src", sourceUrl);
             }
 
+            const baseUrlCurrent = baseUrl;
             const refPolicy = frame.referrerPolicy || docRefPolicy;
             switch (options["capture.frame"]) {
               case "link": {
@@ -1198,7 +1199,7 @@
                     if (frameDoc) {
                       return capturer.captureDocumentOrFile({
                         doc: frameDoc,
-                        baseUrl,
+                        baseUrl: baseUrlCurrent,
                         refUrl,
                         refPolicy,
                         settings: frameSettings,
@@ -1214,7 +1215,7 @@
                     return capturer.captureDocument({
                       doc,
                       docUrl,
-                      baseUrl,
+                      baseUrl: baseUrlCurrent,
                       settings: frameSettings,
                       options: frameOptions,
                     }).then(captureFrameCallback).catch(captureFrameErrorHandler);
@@ -1292,7 +1293,7 @@
                     sourceUrl = frameDoc.URL;
                     return capturer.captureDocumentOrFile({
                       doc: frameDoc,
-                      baseUrl: sourceUrl.startsWith('about:') ? baseUrl : sourceUrl,
+                      baseUrl: sourceUrl.startsWith('about:') ? baseUrlCurrent : sourceUrl,
                       refUrl,
                       refPolicy,
                       settings: frameSettings,
@@ -1339,7 +1340,7 @@
                     return capturer.captureDocument({
                       doc,
                       docUrl,
-                      baseUrl,
+                      baseUrl: baseUrlCurrent,
                       settings: frameSettings,
                       options,
                     }).catch(captureFrameErrorHandler).then(captureFrameCallback);
@@ -2539,7 +2540,8 @@
     // or when it's "href" attribute changes.
     //
     // Nevertheless, links and citations should be updated when the baseUrl
-    // changes, such as a[href], a[ping], q[cite].
+    // changes, such as a[href], a[ping], q[cite]. As a result, they should
+    // be resolved using baseUrlFinal.
     //
     // Normally baseUrl should be equivalent to baseUrlFinal as base[href]
     // should appear at first according to spec. Though we still implement

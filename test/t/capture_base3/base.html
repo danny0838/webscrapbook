@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test bad document (URLs before base[href]) for iframes</title>
+<style>img { width: 60px; }</style>
+</head>
+<body>
+<blockquote><iframe srcdoc="<style>img { width: 60px; }</style><img src=&quot;./resources/green.bmp&quot;>"></iframe></blockquote>
+
+<!-- URLs before the first base[href] should not exist according to the spec -->
+<base href="resources/">
+
+<blockquote><iframe srcdoc="<style>img { width: 60px; }</style><img src=&quot;./resources/green.bmp&quot;>"></iframe></blockquote>
+</body>
+</html>

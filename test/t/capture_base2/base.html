@@ -5,17 +5,31 @@
 <title>Test bad document (URLs before base[href])</title>
 <style>img { width: 60px; }</style>
 </head>
-<body style="background: url(./green.bmp) repeat;">
-<div><a href="./test.html">test</a></div>
-<div><q cite="./test.html">quote</q></div>
-<div><img src="./green.bmp"></div>
-<div><span style="background: url(./green.bmp) repeat;">css</span></div>
-<style>#id1 { background: url(./green.bmp); }</style>
+<body>
+
+<blockquote><picture><source media="(min-width: 300px)" srcset="./green.bmp"><img src="./green.bmp"></picture></blockquote>
+<blockquote><img srcset="./green.bmp 2x"></blockquote>
+<blockquote><input type="image" src="./green.bmp"></blockquote>
+<blockquote><table background="./green.bmp"></table></blockquote>
+<blockquote><span style="background: url(./green.bmp) repeat;">style inline</span></blockquote>
+
+<blockquote id="style1"><style>#style1 { background: url(./green.bmp); }</style>style internal</blockquote>
+
+<blockquote><a href="./test.html">anchor</a></blockquote>
+<blockquote><q cite="./test.html">quote</q></blockquote>
+
+<!-- URLs before the first base[href] should not exist according to the spec -->
 <base href="resources/">
-<div><a href="./test.html">test</a></div>
-<div><q cite="./test.html">quote</q></div>
-<div><img src="./green.bmp"></div>
-<div><span style="background: url(./green.bmp) repeat;">css</span></div>
-<style>#id2 { background: url(./green.bmp); }</style>
+
+<blockquote><picture><source media="(min-width: 300px)" srcset="./green.bmp"><img src="./green.bmp"></picture></blockquote>
+<blockquote><img srcset="./green.bmp 2x"></blockquote>
+<blockquote><input type="image" src="green.bmp"></blockquote>
+<blockquote><table background="green.bmp"></table></blockquote>
+<blockquote><span style="background: url(./green.bmp) repeat;">style inline</span></blockquote>
+<blockquote id="style2"><style>#style2 { background: url(./green.bmp); }</style>style internal</blockquote>
+
+<blockquote><a href="./test.html">anchor</a></blockquote>
+<blockquote><q cite="./test.html">quote</q></blockquote>
+
 </body>
 </html>
