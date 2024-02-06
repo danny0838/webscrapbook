@@ -3,6 +3,14 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.6.1] - 2024-02-06
+* Fixed CSS images for the root element be emptied when `Style images` is `Save used`.
+* Fixed referrer policy related attributes for some elements.
+* Fixed referrer policy handling for a document with multiple document referrer policy definition for a capture.
+* Fixed base URL resolution for some spec-violating cases for a capture.
+* Fixed meta element handling for some spec-violating cases for a capture.
+* Miscellaneous optimization of the internal code and unit test suite.
+
 ## [2.6.0] - 2024-02-04
 * Added support of nesting CSS for a capture.
 * Added support of referrer policy related attributes when performing a capture.
