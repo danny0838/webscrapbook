@@ -2873,7 +2873,7 @@
     // (Not so mandatory as this only have a problem when there's a URL
     // before the first base[href], which violates the spec.)
     const cssHandler = new capturer.DocumentCssHandler({
-      doc, rootNode,
+      doc, rootNode: newDoc,
       origNodeMap, clonedNodeMap,
       refUrl: baseUrlFinal,
       refPolicy: docRefPolicy,

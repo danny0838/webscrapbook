@@ -6395,6 +6395,33 @@ async function test_capture_imageBackground_used9() {
 }
 
 /**
+ * Check if used background images are checked correctly for a selector for
+ * the root element.
+ *
+ * capture.imageBackground
+ */
+async function test_capture_imageBackground_used10() {
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used10/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.files['green.bmp']);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('style').textContent.trim() === `html { background-image: url("green.bmp"); }`);
+}
+
+/**
  * Check if option works
  *
  * capture.favicon
