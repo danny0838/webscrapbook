@@ -831,7 +831,7 @@ async function test_capture_rename() {
 /**
  * Check URL normalization.
  *
- * capturer.access
+ * capturer.fetch
  */
 async function test_capture_rename_normalize() {
   var blob = await capture({
@@ -2020,7 +2020,7 @@ async function test_capture_selection_comment() {
 }
 
 /**
- * Test selecting CDATA node
+ * Test selecting CDATA node (for XHTML)
  *
  * capturer.captureDocument
  */
@@ -2372,6 +2372,7 @@ async function test_capture_bookmark() {
 /**
  * Check meta charset is correctly rewritten
  *
+ * capturer.captureDocument
  * capturer.saveDocument
  */
 async function test_capture_meta_charset() {
@@ -2446,25 +2447,22 @@ async function test_capture_meta_charset() {
  */
 async function test_capture_meta_refresh() {
   var blob = await capture({
-    url: `${localhost}/capture_meta_refresh/delayed.html`,
+    url: `${localhost}/capture_meta_refresh/basic.html`,
     options: baseOptions,
   });
-
   var zip = await new JSZip().loadAsync(blob);
-
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-
   var mrs = doc.querySelectorAll('meta[http-equiv="refresh"]');
   assert(mrs[0].getAttribute('content') === `30`);
   assert(mrs[1].getAttribute('content') === `30; url=#`);
   assert(mrs[2].getAttribute('content') === `30; url=#123`);
-  assert(mrs[3].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh/delayed.html?id=123`);
+  assert(mrs[3].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh/basic.html?id=123`);
   assert(mrs[4].getAttribute('content') === `30`);
   assert(mrs[5].getAttribute('content') === `30; url=#`);
   assert(mrs[6].getAttribute('content') === `30; url=#123`);
-  assert(mrs[7].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh/delayed.html?id=123`);
+  assert(mrs[7].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh/basic.html?id=123`);
   assert(mrs[8].getAttribute('content') === `20; url=${localhost}/capture_meta_refresh/referred.html`);
   assert(mrs[9].getAttribute('content') === `20; url=${localhost}/capture_meta_refresh/referred.html#`);
   assert(mrs[10].getAttribute('content') === `20; url=${localhost}/capture_meta_refresh/referred.html#123`);
@@ -9597,7 +9595,7 @@ async function test_capture_svg() {
 }
 
 /**
- * Check if MathMl can be captured correctly.
+ * Check if MathML can be captured correctly.
  *
  * capturer.captureDocument
  */
@@ -9673,9 +9671,9 @@ async function test_capture_invalid_tags() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('xmp').textContent.trim() === `Explode <\\/xmp> with a bomb!<script>alert("bomb");</script>`);
-  assert(doc.querySelector('style').textContent.trim() === `/*Explode <\\/style> with a bomb!<script>alert("bomb");</script>*/`);
-  assert(doc.querySelector('script').textContent.trim() === `/*Explode <\\/script> with a bomb!<script>alert("bomb");<\\/script>*/`);
+  assert(doc.querySelector('xmp').textContent.trim() === String.raw`Explode <\/xmp> with a bomb!<script>alert("bomb");</script>`);
+  assert(doc.querySelector('style').textContent.trim() === String.raw`/*Explode <\/style> with a bomb!<script>alert("bomb");</script>*/`);
+  assert(doc.querySelector('script').textContent.trim() === String.raw`/*Explode <\/script> with a bomb!<script>alert("bomb");<\/script>*/`);
 }
 
 /**
@@ -10249,7 +10247,6 @@ async function test_capture_referrer_spoof() {
  * capture.referrerPolicy
  */
 async function test_capture_referrer_attr() {
-  /* capture.referrerPolicy = "unsafe-url" */
   var options = {
     "capture.referrerPolicy": "unsafe-url",
     "capture.downLink.file.mode": "url",
@@ -10318,7 +10315,6 @@ async function test_capture_referrer_attr() {
  * capture.referrerPolicy
  */
 async function test_capture_referrer_attr_force() {
-  /* capture.referrerPolicy = "+unsafe-url" */
   var options = {
     "capture.referrerPolicy": "+unsafe-url",
     "capture.downLink.file.mode": "url",
@@ -10387,7 +10383,6 @@ async function test_capture_referrer_attr_force() {
  * capture.referrerPolicy
  */
 async function test_capture_referrer_doc() {
-  /* capture.referrerPolicy = "unsafe-url" */
   var options = {
     "capture.referrerPolicy": "unsafe-url",
     "capture.downLink.file.mode": "url",
@@ -10543,7 +10538,6 @@ async function test_capture_referrer_doc() {
  * capture.referrerPolicy
  */
 async function test_capture_referrer_doc_force() {
-  /* capture.referrerPolicy = "+unsafe-url" */
   var options = {
     "capture.referrerPolicy": "+unsafe-url",
     "capture.downLink.file.mode": "url",
@@ -10762,7 +10756,6 @@ async function test_capture_referrer_cross_origin() {
  * capture.referrerPolicy
  */
 async function test_capture_referrer_dynamic() {
-  /* capture.referrerPolicy = "unsafe-url" */
   var options = {
     "capture.referrerPolicy": "unsafe-url",
     "capture.downLink.file.mode": "url",
