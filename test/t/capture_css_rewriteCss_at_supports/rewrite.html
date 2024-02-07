@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+blockquote::before { content: attr(id); }
+</style>
+<style>
+@supports (display: block) {
+  #case1 {
+    background-image: url(resources/case1.bmp);
+  }
+}
+</style>
+<style>
+@supports (display: nonexist) {
+  #case2 {
+    background-image: url(resources/case2.bmp);
+  }
+}
+</style>
+</head>
+<body>
+<blockquote id="case1"></blockquote>
+<blockquote id="case2"></blockquote>
+</body>
+</html>

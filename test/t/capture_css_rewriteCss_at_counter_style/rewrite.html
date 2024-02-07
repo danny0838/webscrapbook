@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@counter-style mycounter {
+  system: cyclic;
+  suffix: " ";
+  symbols: url(./resources/1.bmp) url(./resources/2.bmp) url(./resources/3.bmp);
+  symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ;
+}
+</style>
+<style>
+ol {
+  list-style: mycounter;
+}
+</style>
+</head>
+<body>
+<ol>
+  <li>item1
+  <li>item2
+  <li>item3
+  <li>item4
+  <li>item5
+  <li>item6
+  <li>item7
+  <li>item8
+  <li>item9
+  <li>item10
+</ol>
+</body>
+</html>

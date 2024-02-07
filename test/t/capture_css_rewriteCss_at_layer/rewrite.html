@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+blockquote::before { content: attr(id); }
+</style>
+<style>
+@layer base, special;
+
+@layer special {
+  #case1 {
+    background-image: url(./resources/case1s.bmp);
+  }
+}
+
+@layer base {
+  #case1 {
+    background-image: url(./resources/case1b.bmp);
+  }
+}
+</style>
+<style>
+@layer special2 {
+  #case2 {
+    background-image: url(./resources/case2s.bmp);
+  }
+}
+
+@layer base2 {
+  #case2 {
+    background-image: url(./resources/case2b.bmp);
+  }
+}
+</style>
+</head>
+<body>
+<blockquote id="case1"></blockquote>
+<blockquote id="case2"></blockquote>
+</body>
+</html>

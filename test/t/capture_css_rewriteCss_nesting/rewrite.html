@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+.case1, #nonexist {
+  background: url(./resources/case1.bmp);
+  padding: 0;
+  .case1-1 {
+    .case1-1-1 {
+      background: url(./resources/case1-1-1.bmp);
+    }
+    &.case1-1-2 {
+      background: url(./resources/case1-1-2.bmp);
+    }
+    background: url(./resources/case1-1.bmp);
+  }
+  &.case1-2 {
+    .case1-2-1 {
+      background: url(./resources/case1-2-1.bmp);
+    }
+    background: url(./resources/case1-2.bmp);
+    &.case1-2-2 {
+      background: url(./resources/case1-2-2.bmp);
+    }
+  }
+  .dummy { background: url(./resources/dummy.bmp); }
+  &.dummy { background: url(./resources/dummy.bmp); }
+}
+& .case2 {
+  .case2-1 & {
+    background: url(./resources/case2-1.bmp);
+  }
+}
+</style>
+</head>
+<body>
+<blockquote class="dummy"></blockquote>
+<blockquote class="case1">
+  .case1
+  <blockquote class="case1-1">
+    .case1 .case1-1
+    <blockquote class="case1-1-1">
+      .case1 .case1-1 .case1-1-1
+    </blockquote>
+  </blockquote>
+  <blockquote class="case1-1 case1-1-2">
+    .case1 .case1-1.case1-1-2
+  </blockquote>
+</blockquote>
+<blockquote class="case1 case1-2">
+  .case1.case1-2
+  <blockquote class="case1-2-1">
+    .case1.case1-2 .case1-2-1
+  </blockquote>
+</blockquote>
+<blockquote class="case1 case1-2 case1-2-2">
+  .case1.case1-2.case1-2-2
+</blockquote>
+<blockquote class="case2-1">
+  case2-1
+  <blockquote class="case2">
+    .case2-1 .case2
+  </blockquote>
+</blockquote>
+</body>
+</html>

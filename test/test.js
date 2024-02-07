@@ -490,10 +490,10 @@ async function test_capture_html() {
  *
  * capturer.saveDocument
  */
-async function test_capture_metaCharset() {
+async function test_capture_meta_charset() {
   /* meta new */
   var blob = await capture({
-    url: `${localhost}/capture_metaCharset/big5.html`,
+    url: `${localhost}/capture_meta_charset/big5.html`,
     options: baseOptions,
   });
 
@@ -514,7 +514,7 @@ async function test_capture_metaCharset() {
 
   /* meta old */
   var blob = await capture({
-    url: `${localhost}/capture_metaCharset/big5-old.html`,
+    url: `${localhost}/capture_meta_charset/big5-old.html`,
     options: baseOptions,
   });
 
@@ -535,7 +535,7 @@ async function test_capture_metaCharset() {
 
   /* no meta charset; HTTP header Big5 */
   var blob = await capture({
-    url: `${localhost}/capture_metaCharset/big5-header.py`,
+    url: `${localhost}/capture_meta_charset/big5-header.py`,
     options: baseOptions,
   });
 
@@ -580,9 +580,9 @@ async function test_capture_rename() {
  *
  * capturer.access
  */
-async function test_capture_rename2() {
+async function test_capture_rename_normalize() {
   var blob = await capture({
-    url: `${localhost}/capture_rename2/index.html`,
+    url: `${localhost}/capture_rename_normalize/index.html`,
     options: baseOptions,
   });
 
@@ -1071,9 +1071,9 @@ async function test_capture_filename() {
  * capturer.getUniqueFilename
  * capturer.captureInfo.*.files
  */
-async function test_capture_filename2() {
+async function test_capture_filename_forbidden() {
   var blob = await capture({
-    url: `${localhost}/capture_filename2/index.html`,
+    url: `${localhost}/capture_filename_forbidden/index.html`,
     options: baseOptions,
   });
 
@@ -1306,7 +1306,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
  * capturer.downloadFile
  * capturer.DocumentCssHandler
  */
-async function test_capture_dataUri2() {
+async function test_capture_dataUri_css() {
   var options = {
     "capture.style": "save",
     "capture.font": "save",
@@ -1318,7 +1318,7 @@ async function test_capture_dataUri2() {
   options["capture.saveDataUriAsFile"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri2/resolve-css-1.html`,
+    url: `${localhost}/capture_dataUri_css/resolve_css_1.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1341,7 +1341,7 @@ async function test_capture_dataUri2() {
   options["capture.saveDataUriAsFile"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri2/resolve-css-2.html`,
+    url: `${localhost}/capture_dataUri_css/resolve_css_2.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1364,7 +1364,7 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
   options["capture.saveDataUriAsFile"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri2/resolve-css-1.html`,
+    url: `${localhost}/capture_dataUri_css/resolve_css_1.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1388,7 +1388,7 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
   options["capture.saveDataUriAsFile"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri2/resolve-css-2.html`,
+    url: `${localhost}/capture_dataUri_css/resolve_css_2.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1417,7 +1417,7 @@ p { background-image: url("red.bmp"); }`);
  * capture.saveDataUriAsSrcdoc
  * capturer.captureDocument
  */
-async function test_capture_dataUri3() {
+async function test_capture_dataUri_frame() {
   var options = {
     "capture.frame": "save",
     "capture.downLink.file.mode": "url",
@@ -1432,7 +1432,7 @@ async function test_capture_dataUri3() {
   options["capture.saveDataUriAsSrcdoc"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri3/resolve-frame-1.html`,
+    url: `${localhost}/capture_dataUri_frame/resolve_frame_1.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1476,7 +1476,7 @@ async function test_capture_dataUri3() {
   options["capture.saveDataUriAsSrcdoc"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri3/resolve-frame-1.html`,
+    url: `${localhost}/capture_dataUri_frame/resolve_frame_1.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1520,7 +1520,7 @@ async function test_capture_dataUri3() {
   options["capture.saveDataUriAsSrcdoc"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri3/resolve-frame-1.html`,
+    url: `${localhost}/capture_dataUri_frame/resolve_frame_1.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1566,7 +1566,7 @@ async function test_capture_dataUri3() {
   options["capture.saveDataUriAsSrcdoc"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri3/resolve-frame-2.html`,
+    url: `${localhost}/capture_dataUri_frame/resolve_frame_2.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1583,7 +1583,7 @@ async function test_capture_dataUri3() {
   assert(frameDoc.querySelector('html[data-scrapbook-source="data:"]'));
   assert(frameDoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
   assert(frameDoc.querySelectorAll('a')[0].getAttribute('href') === `data:text/plain;filename=file.txt,Linked%20file.`);
-  assert(frameDoc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_dataUri3/page.html`);
+  assert(frameDoc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_dataUri_frame/page.html`);
 
   /* -saveDataUriAsFile; +saveDataUriAsSrcdoc; absolute link in data URL iframe */
   // absolute link => save as file
@@ -1591,7 +1591,7 @@ async function test_capture_dataUri3() {
   options["capture.saveDataUriAsSrcdoc"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri3/resolve-frame-2.html`,
+    url: `${localhost}/capture_dataUri_frame/resolve_frame_2.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1618,7 +1618,7 @@ async function test_capture_dataUri3() {
   options["capture.saveDataUriAsSrcdoc"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_dataUri3/resolve-frame-2.html`,
+    url: `${localhost}/capture_dataUri_frame/resolve_frame_2.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1647,9 +1647,9 @@ async function test_capture_dataUri3() {
  *
  * capture.saveDataUriAsFile
  */
-async function test_capture_dataUri4() {
+async function test_capture_dataUri_params() {
   var blob = await capture({
-    url: `${localhost}/capture_dataUri4/index.html`,
+    url: `${localhost}/capture_dataUri_params/index.html`,
     options: baseOptions,
   });
 
@@ -1710,7 +1710,7 @@ async function test_capture_dataUri4() {
  */
 async function test_capture_selection() {
   var blob = await capture({
-    url: `${localhost}/capture_selection/index.html`,
+    url: `${localhost}/capture_selection/selection.html`,
     options: baseOptions,
   });
 
@@ -1743,13 +1743,13 @@ async function test_capture_selection() {
 }
 
 /**
- * Test selecting single node
+ * Test selecting single element
  *
  * capturer.captureDocument
  */
-async function test_capture_selection2() {
+async function test_capture_selection_element() {
   var blob = await capture({
-    url: `${localhost}/capture_selection/index2.html`,
+    url: `${localhost}/capture_selection/selection_element.html`,
     options: baseOptions,
   });
 
@@ -1786,9 +1786,9 @@ async function test_capture_selection2() {
  *
  * capturer.captureDocument
  */
-async function test_capture_selection3() {
+async function test_capture_selection_text() {
   var blob = await capture({
-    url: `${localhost}/capture_selection/index3.html`,
+    url: `${localhost}/capture_selection/selection_text.html`,
     options: baseOptions,
   });
 
@@ -1825,9 +1825,9 @@ async function test_capture_selection3() {
  *
  * capturer.captureDocument
  */
-async function test_capture_selection4() {
+async function test_capture_selection_comment() {
   var blob = await capture({
-    url: `${localhost}/capture_selection/index4.html`,
+    url: `${localhost}/capture_selection/selection_comment.html`,
     options: baseOptions,
   });
 
@@ -1865,9 +1865,9 @@ async function test_capture_selection4() {
  *
  * capturer.captureDocument
  */
-async function test_capture_selection5() {
+async function test_capture_selection_cdata() {
   var blob = await capture({
-    url: `${localhost}/capture_selection/index5.xhtml`,
+    url: `${localhost}/capture_selection/selection_cdata.xhtml`,
     options: baseOptions,
   });
 
@@ -1905,9 +1905,9 @@ async function test_capture_selection5() {
  *
  * capturer.captureDocument
  */
-async function test_capture_selection6() {
+async function test_capture_selection_multiple() {
   var blob = await capture({
-    url: `${localhost}/capture_selection/index6.html`,
+    url: `${localhost}/capture_selection/selection_multiple.html`,
     options: baseOptions,
   });
 
@@ -1950,9 +1950,9 @@ async function test_capture_selection6() {
  *
  * capturer.captureDocument
  */
-async function test_capture_selection7() {
+async function test_capture_selection_multiple_text() {
   var blob = await capture({
-    url: `${localhost}/capture_selection/index7.xhtml`,
+    url: `${localhost}/capture_selection/selection_multiple_text.xhtml`,
     options: baseOptions,
   });
 
@@ -2144,9 +2144,9 @@ async function test_capture_headless() {
  *
  * capturer.captureRemote
  */
-async function test_capture_headless2() {
+async function test_capture_headless_attachment() {
   var blob = await captureHeadless({
-    url: `${localhost}/capture_headless2/attachment.py`,
+    url: `${localhost}/capture_headless_attachment/attachment.py`,
     mode: "source",
     options: baseOptions,
   });
@@ -2166,7 +2166,7 @@ async function test_capture_headless2() {
   assert(doc.querySelector('img[src="./red.bmp"]'));
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_headless2/refresh.html`,
+    url: `${localhost}/capture_headless_attachment/refresh.html`,
     mode: "source",
     options: baseOptions,
   });
@@ -2224,7 +2224,7 @@ async function test_capture_frame() {
   options["capture.frame"]  = "save";
 
   var blob = await capture({
-    url: `${localhost}/capture_frame/same-origin.html`,
+    url: `${localhost}/capture_frame/same_origin.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -2264,7 +2264,7 @@ async function test_capture_frame() {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same_origin.html`);
 
   // text.txt
   var frame = frames[3];
@@ -2277,7 +2277,7 @@ async function test_capture_frame() {
   options["capture.frame"]  = "link";
 
   var blob = await capture({
-    url: `${localhost}/capture_frame/same-origin.html`,
+    url: `${localhost}/capture_frame/same_origin.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -2298,7 +2298,7 @@ async function test_capture_frame() {
   options["capture.frame"]  = "blank";
 
   var blob = await capture({
-    url: `${localhost}/capture_frame/same-origin.html`,
+    url: `${localhost}/capture_frame/same_origin.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -2319,7 +2319,7 @@ async function test_capture_frame() {
   options["capture.frame"]  = "remove";
 
   var blob = await capture({
-    url: `${localhost}/capture_frame/same-origin.html`,
+    url: `${localhost}/capture_frame/same_origin.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -2337,7 +2337,7 @@ async function test_capture_frame() {
  *
  * capture.frame
  */
-async function test_capture_frame2() {
+async function test_capture_frame_cross_origin() {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -2348,7 +2348,7 @@ async function test_capture_frame2() {
   options["capture.frame"]  = "save";
 
   var blob = await capture({
-    url: `${localhost}/capture_frame/cross-origin.py`,
+    url: `${localhost}/capture_frame/cross_origin.py`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -2388,7 +2388,7 @@ async function test_capture_frame2() {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_frame/same-origin.html`);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_frame/same_origin.html`);
 
   // text.txt
   var frame = frames[3];
@@ -2412,7 +2412,7 @@ async function test_capture_frame2() {
  *
  * capture.frame
  */
-async function test_capture_frame3() {
+async function test_capture_frame_srcdoc() {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -2577,7 +2577,7 @@ document.querySelector('p').textContent = 'srcdoc content modified';
  *
  * capture.frame
  */
-async function test_capture_frame4() {
+async function test_capture_frame_duplicate() {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -2638,7 +2638,7 @@ async function test_capture_frame_headless() {
   options["capture.frame"]  = "save";
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_frame/same-origin.html`,
+    url: `${localhost}/capture_frame/same_origin.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -2675,7 +2675,7 @@ async function test_capture_frame_headless() {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same_origin.html`);
 
   var frame = frames[3];
   assert(frame.getAttribute('src') === 'text.txt');
@@ -2689,7 +2689,7 @@ async function test_capture_frame_headless() {
  *
  * capture.frame
  */
-async function test_capture_frame_headless2() {
+async function test_capture_frame_headless_srcdoc() {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -2826,7 +2826,7 @@ document.querySelector('p').textContent = 'srcdoc content modified';
  *
  * capture.frame
  */
-async function test_capture_frame_headless3() {
+async function test_capture_frame_headless_self() {
   /* capture.frame = save */
   var options = {
     "capture.frame": "save",
@@ -2856,7 +2856,7 @@ async function test_capture_frame_headless3() {
  *
  * capture.frame
  */
-async function test_capture_frame_headless4() {
+async function test_capture_frame_headless_duplicate() {
   /* capture.frame = save */
   var options = {
     "capture.frame": "save",
@@ -2899,7 +2899,7 @@ async function test_capture_frame_singleHtml() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_frame/same-origin.html`,
+    url: `${localhost}/capture_frame/same_origin.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -2918,7 +2918,7 @@ async function test_capture_frame_singleHtml() {
   var frameSrc = frames[2].getAttribute('src');
   assert(frameSrc.match(rawRegex`${'^'}data:image/svg+xml;charset=UTF-8;filename=frame3.svg,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
-  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same_origin.html`);
 
   var frameSrc = frames[3].getAttribute('src');
   assert(frameSrc.match(rawRegex`${'^'}data:text/plain;filename=text.txt,`));
@@ -2953,7 +2953,7 @@ async function test_capture_frame_singleHtml() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_frame/same-origin.html`,
+    url: `${localhost}/capture_frame/same_origin.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -2973,7 +2973,7 @@ async function test_capture_frame_singleHtml() {
   var frameSrc = frames[2].getAttribute('src');
   assert(frameSrc.match(rawRegex`${'^'}data:image/svg+xml;charset=UTF-8;filename=frame3.svg,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
-  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same-origin.html`);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost}/capture_frame/same_origin.html`);
 
   var frameSrc = frames[3].getAttribute('src');
   assert(frameSrc.match(rawRegex`${'^'}data:text/plain;filename=text.txt,`));
@@ -3008,7 +3008,7 @@ async function test_capture_frame_singleHtml() {
  *
  * capture.frame
  */
-async function test_capture_frame_singleHtml2() {
+async function test_capture_frame_singleHtml_duplicate() {
   /* capture.saveDataUriAsSrcdoc = true */
   var options = {
     "capture.saveAs": "singleHtml",
@@ -3164,7 +3164,7 @@ async function test_capture_frame_circular() {
  *
  * capture.frame
  */
-async function test_capture_frame_circular2() {
+async function test_capture_frame_circular_self() {
   /* capture.frame = save */
   // link to corresponding downloaded frame file
   var options = {
@@ -3172,7 +3172,7 @@ async function test_capture_frame_circular2() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_frame_circular2/index.html`,
+    url: `${localhost}/capture_frame_circular_self/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -3196,7 +3196,7 @@ async function test_capture_frame_circular2() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_frame_circular2/index.html`,
+    url: `${localhost}/capture_frame_circular_self/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -3204,7 +3204,7 @@ async function test_capture_frame_circular2() {
   var doc = await readFileAsDocument(blob);
 
   var frame = doc.querySelector('iframe');
-  assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular2/index.html`);
+  assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular_self/index.html`);
   assert(!frame.hasAttribute('srcdoc'));
 
   /* capture.saveAs = singleHtml; srcdoc = false */
@@ -3216,7 +3216,7 @@ async function test_capture_frame_circular2() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_frame_circular2/index.html`,
+    url: `${localhost}/capture_frame_circular_self/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -3224,7 +3224,7 @@ async function test_capture_frame_circular2() {
   var doc = await readFileAsDocument(blob);
 
   var frame = doc.querySelector('iframe');
-  assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular2/index.html`);
+  assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular_self/index.html`);
   assert(!frame.hasAttribute('srcdoc'));
 }
 
@@ -3288,7 +3288,7 @@ async function test_capture_frameRename() {
  *
  * capture.frameRename
  */
-async function test_capture_frameRename2() {
+async function test_capture_frameRename_header() {
   /* capture.frameRename = false */
   var options = {
     "capture.frame": "save",
@@ -3296,7 +3296,7 @@ async function test_capture_frameRename2() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_frameRename2/index.html`,
+    url: `${localhost}/capture_frameRename_header/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3322,7 +3322,7 @@ async function test_capture_frameRename2() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_frameRename2/index.html`,
+    url: `${localhost}/capture_frameRename_header/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -3350,7 +3350,7 @@ async function test_capture_frameRename2() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_frameRename2/index.html`,
+    url: `${localhost}/capture_frameRename_header/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3376,7 +3376,7 @@ async function test_capture_frameRename2() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_frameRename2/index.html`,
+    url: `${localhost}/capture_frameRename_header/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -3707,14 +3707,14 @@ async function test_capture_css_disabled() {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss1_1() {
+async function test_capture_css_rewriteCss() {
   /* capture.rewriteCss = url */
   var options = {
     "capture.rewriteCss": "url",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite.html`,
+    url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3784,7 +3784,7 @@ background: blue; background: url("green.bmp");`);
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite.html`,
+    url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3841,7 +3841,7 @@ svg|a text, text svg|a { fill: blue; text-decoration: underline; }`;
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite.html`,
+    url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3898,7 +3898,7 @@ svg|a text, text svg|a { fill: blue; text-decoration: underline; }`;
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite.html`,
+    url: `${localhost}/capture_css_rewriteCss/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3963,7 +3963,7 @@ background: blue; background: url(rewrite/green.bmp);`);
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss1_2() {
+async function test_capture_css_rewriteCss_nesting() {
   // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
   try {
     // Chrome 109/110 gets null for the querySelector
@@ -3980,7 +3980,7 @@ async function test_capture_css_rewriteCss1_2() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_nested.html`,
+    url: `${localhost}/capture_css_rewriteCss_nesting/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4035,7 +4035,7 @@ async function test_capture_css_rewriteCss1_2() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_nested.html`,
+    url: `${localhost}/capture_css_rewriteCss_nesting/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4083,7 +4083,7 @@ async function test_capture_css_rewriteCss1_2() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_nested.html`,
+    url: `${localhost}/capture_css_rewriteCss_nesting/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4129,7 +4129,7 @@ async function test_capture_css_rewriteCss1_2() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_nested.html`,
+    url: `${localhost}/capture_css_rewriteCss_nesting/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4149,32 +4149,32 @@ async function test_capture_css_rewriteCss1_2() {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('style').textContent.trim() === `\
 .case1, #nonexist {
-  background: url(./rewrite_nested/case1.bmp);
+  background: url(./resources/case1.bmp);
   padding: 0;
   .case1-1 {
     .case1-1-1 {
-      background: url(./rewrite_nested/case1-1-1.bmp);
+      background: url(./resources/case1-1-1.bmp);
     }
     &.case1-1-2 {
-      background: url(./rewrite_nested/case1-1-2.bmp);
+      background: url(./resources/case1-1-2.bmp);
     }
-    background: url(./rewrite_nested/case1-1.bmp);
+    background: url(./resources/case1-1.bmp);
   }
   &.case1-2 {
     .case1-2-1 {
-      background: url(./rewrite_nested/case1-2-1.bmp);
+      background: url(./resources/case1-2-1.bmp);
     }
-    background: url(./rewrite_nested/case1-2.bmp);
+    background: url(./resources/case1-2.bmp);
     &.case1-2-2 {
-      background: url(./rewrite_nested/case1-2-2.bmp);
+      background: url(./resources/case1-2-2.bmp);
     }
   }
-  .dummy { background: url(./rewrite_nested/dummy.bmp); }
-  &.dummy { background: url(./rewrite_nested/dummy.bmp); }
+  .dummy { background: url(./resources/dummy.bmp); }
+  &.dummy { background: url(./resources/dummy.bmp); }
 }
 & .case2 {
   .case2-1 & {
-    background: url(./rewrite_nested/case2-1.bmp);
+    background: url(./resources/case2-1.bmp);
   }
 }`);
 }
@@ -4185,14 +4185,14 @@ async function test_capture_css_rewriteCss1_2() {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss1_3() {
+async function test_capture_css_rewriteCss_at_supports() {
   /* capture.rewriteCss = url */
   var options = {
     "capture.rewriteCss": "url",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_supports.html`,
+    url: `${localhost}/capture_css_rewriteCss_at_supports/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4225,7 +4225,7 @@ async function test_capture_css_rewriteCss1_3() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_supports.html`,
+    url: `${localhost}/capture_css_rewriteCss_at_supports/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4254,7 +4254,7 @@ async function test_capture_css_rewriteCss1_3() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_supports.html`,
+    url: `${localhost}/capture_css_rewriteCss_at_supports/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4283,7 +4283,7 @@ async function test_capture_css_rewriteCss1_3() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_supports.html`,
+    url: `${localhost}/capture_css_rewriteCss_at_supports/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4297,7 +4297,7 @@ async function test_capture_css_rewriteCss1_3() {
   assert(styleElems[1].textContent.trim() === `\
 @supports (display: block) {
   #case1 {
-    background-image: url(rewrite_at_supports/case1.bmp);
+    background-image: url(resources/case1.bmp);
   }
 }`
   );
@@ -4305,7 +4305,7 @@ async function test_capture_css_rewriteCss1_3() {
   assert(styleElems[2].textContent.trim() === `\
 @supports (display: nonexist) {
   #case2 {
-    background-image: url(rewrite_at_supports/case2.bmp);
+    background-image: url(resources/case2.bmp);
   }
 }`
   );
@@ -4317,7 +4317,7 @@ async function test_capture_css_rewriteCss1_3() {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss1_4() {
+async function test_capture_css_rewriteCss_at_counter_style() {
   try {
     const d = document.implementation.createHTMLDocument();
     const style = d.head.appendChild(d.createElement('style'));
@@ -4335,7 +4335,7 @@ async function test_capture_css_rewriteCss1_4() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_counter_style.html`,
+    url: `${localhost}/capture_css_rewriteCss_at_counter_style/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4359,7 +4359,7 @@ async function test_capture_css_rewriteCss1_4() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_counter_style.html`,
+    url: `${localhost}/capture_css_rewriteCss_at_counter_style/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4382,7 +4382,7 @@ async function test_capture_css_rewriteCss1_4() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_counter_style.html`,
+    url: `${localhost}/capture_css_rewriteCss_at_counter_style/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4405,7 +4405,7 @@ async function test_capture_css_rewriteCss1_4() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_counter_style.html`,
+    url: `${localhost}/capture_css_rewriteCss_at_counter_style/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4418,7 +4418,7 @@ async function test_capture_css_rewriteCss1_4() {
 @counter-style mycounter {
   system: cyclic;
   suffix: " ";
-  symbols: url(./rewrite_at_counter_style/1.bmp) url(./rewrite_at_counter_style/2.bmp) url(./rewrite_at_counter_style/3.bmp);
+  symbols: url(./resources/1.bmp) url(./resources/2.bmp) url(./resources/3.bmp);
   symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ;
 }`
   );
@@ -4430,7 +4430,7 @@ async function test_capture_css_rewriteCss1_4() {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss1_5() {
+async function test_capture_css_rewriteCss_at_layer() {
   try {
     const d = document.implementation.createHTMLDocument();
     const style = d.head.appendChild(d.createElement('style'));
@@ -4448,7 +4448,7 @@ async function test_capture_css_rewriteCss1_5() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss1/rewrite_at_layer.html`,
+    url: `${localhost}/capture_css_rewriteCss_at_layer/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4484,14 +4484,14 @@ async function test_capture_css_rewriteCss1_5() {
  *
  * capture.rewriteCss
  */
-async function test_capture_css_rewriteCss2_1() {
+async function test_capture_css_rewriteCss_match() {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss2/rewrite.html`,
+    url: `${localhost}/capture_css_rewriteCss_match/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4529,14 +4529,14 @@ async function test_capture_css_rewriteCss2_1() {
   assert(styleElems[5].textContent.trim() === ``);
 }
 
-async function test_capture_css_rewriteCss2_2() {
+async function test_capture_css_rewriteCss_match_pseudo() {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss2/rewrite_pseudo.html`,
+    url: `${localhost}/capture_css_rewriteCss_match_pseudo/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4573,7 +4573,7 @@ async function test_capture_css_rewriteCss2_2() {
   assert(styleElems[11].textContent.trim() === ``);
 }
 
-async function test_capture_css_rewriteCss2_3() {
+async function test_capture_css_rewriteCss_match_pseudo_is() {
   // :is() CSS pseudo-class is supported in Firefox >= 78 and Chromium >= 88.
   try {
     document.querySelector(':is()');
@@ -4587,7 +4587,7 @@ async function test_capture_css_rewriteCss2_3() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss2/rewrite_pseudo_is.html`,
+    url: `${localhost}/capture_css_rewriteCss_match_pseudo/rewrite_is.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4608,14 +4608,14 @@ async function test_capture_css_rewriteCss2_3() {
   assert(styleElems[4].textContent.trim() === `:is(#pseudo4):not(blockquote) { }`);
 }
 
-async function test_capture_css_rewriteCss2_4() {
+async function test_capture_css_rewriteCss_match_shadow() {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss2/rewrite_shadow.html`,
+    url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4657,7 +4657,7 @@ async function test_capture_css_rewriteCss2_4() {
   assert(shadow.querySelector('style').textContent.trim() === `:host(#nonexist) { background-color: lime; }`);
 }
 
-async function test_capture_css_rewriteCss2_5() {
+async function test_capture_css_rewriteCss_match_shadow_host_context() {
   try {
     document.querySelector(':host-context(*)');
   } catch (ex) {
@@ -4671,7 +4671,7 @@ async function test_capture_css_rewriteCss2_5() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss2/rewrite_shadow_host_context.html`,
+    url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_host_context.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4700,14 +4700,14 @@ async function test_capture_css_rewriteCss2_5() {
  *
  * capture.rewriteCss
  */
-async function test_capture_css_rewriteCss3() {
+async function test_capture_css_rewriteCss_cross_origin() {
   /* capture.rewriteCss = tidy */
   var options = {
     "capture.rewriteCss": "tidy",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss3/rewrite.py`,
+    url: `${localhost}/capture_css_rewriteCss_cross_origin/rewrite.py`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4731,48 +4731,13 @@ async function test_capture_css_rewriteCss3() {
 #imported { background-color: green; }
 #unused { background-color: red; }`);
 
-  /* capture.rewriteCss = match */
-  var options = {
-    "capture.rewriteCss": "match",
-  };
-
-  var blob = await capture({
-    url: `${localhost}/capture_css_rewriteCss3/rewrite.py`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  var cssFile = zip.file('linked.css');
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var cssText = (await readFileAsText(cssBlob)).trim();
-  assert(cssText === `\
-@import url("imported.css");
-#linked { background-color: green; }`);
-
-  var cssFile = zip.file('imported.css');
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var cssText = (await readFileAsText(cssBlob)).trim();
-  assert(cssText === `\
-#imported { background-color: green; }`);
-}
-
-/**
- * Check cross-origin CSS for "tidy" and "match" (headless)
- *
- * capture.rewriteCss
- */
-async function test_capture_css_rewriteCss4() {
-  /* capture.rewriteCss = tidy */
+  /* capture.rewriteCss = tidy (headless) */
   var options = {
     "capture.rewriteCss": "tidy",
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_css_rewriteCss3/rewrite.py`,
+    url: `${localhost}/capture_css_rewriteCss_cross_origin/rewrite.py`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -4802,8 +4767,36 @@ async function test_capture_css_rewriteCss4() {
     "capture.rewriteCss": "match",
   };
 
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss_cross_origin/rewrite.py`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var cssFile = zip.file('linked.css');
+  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
+  var cssText = (await readFileAsText(cssBlob)).trim();
+  assert(cssText === `\
+@import url("imported.css");
+#linked { background-color: green; }`);
+
+  var cssFile = zip.file('imported.css');
+  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
+  var cssText = (await readFileAsText(cssBlob)).trim();
+  assert(cssText === `\
+#imported { background-color: green; }`);
+
+  /* capture.rewriteCss = match (headless) */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
   var blob = await captureHeadless({
-    url: `${localhost}/capture_css_rewriteCss3/rewrite.py`,
+    url: `${localhost}/capture_css_rewriteCss_cross_origin/rewrite.py`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -5017,7 +5010,7 @@ async function test_capture_css_charset() {
  * Check whether linked and imported CSS are all rewritten
  * based to the CSS file (rather than the web page)
  *
- * inline and internal CSS are checked in test_capture_css_rewriteCss1
+ * inline and internal CSS are checked in test_capture_css_rewriteCss
  */
 async function test_capture_css_rewrite() {
   var options = {
@@ -5052,13 +5045,13 @@ async function test_capture_css_rewrite() {
 /**
  * Check if URL is resolved correctly when base is set to another directory
  */
-async function test_capture_css_rewrite2() {
+async function test_capture_css_rewrite_base() {
   var options = {
     "capture.imageBackground": "link",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_rewrite2/index.html`,
+    url: `${localhost}/capture_css_rewrite_base/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -5067,21 +5060,21 @@ async function test_capture_css_rewrite2() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('style').textContent.trim() === `#internal { background: url("${localhost}/capture_css_rewrite2/base/green.bmp"); }`);
+  assert(doc.querySelector('style').textContent.trim() === `#internal { background: url("${localhost}/capture_css_rewrite_base/base/green.bmp"); }`);
 
   var file = zip.file('style.css');
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
-  assert(text === `#link { background: url("${localhost}/capture_css_rewrite2/link/yellow.bmp"); }`);
+  assert(text === `#link { background: url("${localhost}/capture_css_rewrite_base/link/yellow.bmp"); }`);
 }
 
 /**
  * Check for "" and hash URL
  * They should be ignored and no file is retrieved
  */
-async function test_capture_css_rewrite3() {
+async function test_capture_css_rewrite_empty() {
   var blob = await capture({
-    url: `${localhost}/capture_css_rewrite3/index.html`,
+    url: `${localhost}/capture_css_rewrite_empty/index.html`,
     options: baseOptions,
   });
 
@@ -5101,9 +5094,9 @@ async function test_capture_css_rewrite3() {
  * Check for a URL pointing to main page (a bad case)
  * It will be regarded as a CSS file: be fetched, parsed, and saved.
  */
-async function test_capture_css_rewrite4() {
+async function test_capture_css_rewrite_bad() {
   var blob = await capture({
-    url: `${localhost}/capture_css_rewrite4/index.html`,
+    url: `${localhost}/capture_css_rewrite_bad/index.html`,
     options: baseOptions,
   });
 
@@ -5189,7 +5182,7 @@ body { color: blue; }`);
 /**
  * Check if self-pointing circular CSS referencing is handled correctly
  */
-async function test_capture_css_circular2() {
+async function test_capture_css_circular_self() {
   /* singleHtml */
   // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
   var options = {
@@ -5198,7 +5191,7 @@ async function test_capture_css_circular2() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_css_circular2/index.html`,
+    url: `${localhost}/capture_css_circular_self/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -5207,7 +5200,7 @@ async function test_capture_css_circular2() {
   // style1.css
   var url = doc.querySelector('link').getAttribute('href');
   var text = (await xhr({url, responseType: "text"})).response;
-  assert(text.trim() === `@import "urn:scrapbook:download:circular:url:${localhost}/capture_css_circular2/style1.css";
+  assert(text.trim() === `@import "urn:scrapbook:download:circular:url:${localhost}/capture_css_circular_self/style1.css";
 body { color: red; }`);
 }
 
@@ -5330,13 +5323,13 @@ async function test_capture_css_dynamic() {
  *
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_dynamic2() {
+async function test_capture_css_dynamic_rename() {
   var options = {
     "capture.imageBackground": "save",
     "capture.font": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_css_dynamic2/dynamic2.html`,
+    url: `${localhost}/capture_css_dynamic_rename/dynamic.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -5390,14 +5383,14 @@ async function test_capture_css_dynamic2() {
  *
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_adoptedStyleSheets() {
+async function test_capture_css_adopted() {
   // Document.adoptedStyleSheets is not supported by Firefox < 101.
   if (!document.adoptedStyleSheets) {
     throw new TestSkipError(`Document.adoptedStyleSheets not supported`);
   }
 
   var blob = await capture({
-    url: `${localhost}/capture_css_adoptedStyleSheets/index.html`,
+    url: `${localhost}/capture_css_adopted/index.html`,
     options: baseOptions,
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -5988,14 +5981,14 @@ async function test_capture_imageBackground_used() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used2() {
+async function test_capture_imageBackground_used_syntax() {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used2/index.html`,
+    url: `${localhost}/capture_imageBackground_used_syntax/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6034,7 +6027,7 @@ async function test_capture_imageBackground_used2() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used3() {
+async function test_capture_imageBackground_used_shadow() {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6042,7 +6035,7 @@ async function test_capture_imageBackground_used3() {
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used3/index.html`,
+    url: `${localhost}/capture_imageBackground_used_shadow/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6068,7 +6061,7 @@ async function test_capture_imageBackground_used3() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used4() {
+async function test_capture_imageBackground_used_scope() {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6076,7 +6069,7 @@ async function test_capture_imageBackground_used4() {
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used4/index.html`,
+    url: `${localhost}/capture_imageBackground_used_scope/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6137,7 +6130,7 @@ async function test_capture_imageBackground_used4() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used5() {
+async function test_capture_imageBackground_used_adopted() {
   // Document.adoptedStyleSheets is not supported by Firefox < 101.
   if (!document.adoptedStyleSheets) {
     throw new TestSkipError(`Document.adoptedStyleSheets not supported`);
@@ -6150,7 +6143,7 @@ async function test_capture_imageBackground_used5() {
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used5/index.html`,
+    url: `${localhost}/capture_imageBackground_used_adopted/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6176,14 +6169,14 @@ async function test_capture_imageBackground_used5() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used6() {
+async function test_capture_imageBackground_used_inline() {
   var options = {
     "capture.imageBackground": "save-used",
     "capture.rewriteCss": "url",
     "capture.styleInline": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used6/index.html`,
+    url: `${localhost}/capture_imageBackground_used_inline/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6209,7 +6202,7 @@ async function test_capture_imageBackground_used6() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used7() {
+async function test_capture_imageBackground_used_var() {
   throw new TestSkipError(`currently broken`);
 
   /* capture.imageBackground = save-used */
@@ -6218,7 +6211,7 @@ async function test_capture_imageBackground_used7() {
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used7/index.html`,
+    url: `${localhost}/capture_imageBackground_used_var/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6292,7 +6285,7 @@ async function test_capture_imageBackground_used7() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used8() {
+async function test_capture_imageBackground_used_nesting() {
   // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
   try {
     // Chrome 109/110 gets null for the querySelector
@@ -6309,7 +6302,7 @@ async function test_capture_imageBackground_used8() {
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used8/index.html`,
+    url: `${localhost}/capture_imageBackground_used_nesting/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6355,7 +6348,7 @@ async function test_capture_imageBackground_used8() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used9() {
+async function test_capture_imageBackground_used_syntax_at() {
   try {
     const d = document.implementation.createHTMLDocument();
     const style = d.head.appendChild(d.createElement('style'));
@@ -6373,7 +6366,7 @@ async function test_capture_imageBackground_used9() {
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used9/index.html`,
+    url: `${localhost}/capture_imageBackground_used_syntax_at/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6400,14 +6393,14 @@ async function test_capture_imageBackground_used9() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used10() {
+async function test_capture_imageBackground_used_root() {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used10/index.html`,
+    url: `${localhost}/capture_imageBackground_used_root/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6426,13 +6419,13 @@ async function test_capture_imageBackground_used10() {
  *
  * capture.favicon
  */
-async function test_capture_image_favicon() {
+async function test_capture_favicon() {
   /* capture.favicon = save */
   var options = {
     "capture.favicon": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image_favicon/favicon.html`,
+    url: `${localhost}/capture_favicon/favicon.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6451,7 +6444,7 @@ async function test_capture_image_favicon() {
     "capture.favicon": "link",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image_favicon/favicon.html`,
+    url: `${localhost}/capture_favicon/favicon.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6463,14 +6456,14 @@ async function test_capture_image_favicon() {
   var doc = await readFileAsDocument(indexBlob);
 
   var iconElem = doc.querySelector('link[rel~="icon"]');
-  assert(iconElem.getAttribute('href') === `${localhost}/capture_image_favicon/red.bmp`);
+  assert(iconElem.getAttribute('href') === `${localhost}/capture_favicon/red.bmp`);
 
   /* capture.favicon = blank */
   var options = {
     "capture.favicon": "blank",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image_favicon/favicon.html`,
+    url: `${localhost}/capture_favicon/favicon.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6489,7 +6482,7 @@ async function test_capture_image_favicon() {
     "capture.favicon": "remove",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image_favicon/favicon.html`,
+    url: `${localhost}/capture_favicon/favicon.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6509,14 +6502,14 @@ async function test_capture_image_favicon() {
  *
  * capture.faviconAttrs
  */
-async function test_capture_image_favicon2() {
+async function test_capture_faviconAttrs() {
   /* capture.faviconAttrs = "apple-touch-icon apple-touch-icon-precomposed" */
   var options = {
     "capture.favicon": "save",
     "capture.faviconAttrs": "apple-touch-icon apple-touch-icon-precomposed",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image_favicon2/favicon.html`,
+    url: `${localhost}/capture_faviconAttrs/favicon.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6540,7 +6533,7 @@ async function test_capture_image_favicon2() {
     "capture.faviconAttrs": "apple-touch-icon",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image_favicon2/favicon.html`,
+    url: `${localhost}/capture_faviconAttrs/favicon.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6556,7 +6549,7 @@ async function test_capture_image_favicon2() {
   var iconElems = doc.querySelectorAll('link[rel]');
   assert(iconElems[0].getAttribute('href') === `red.bmp`);
   assert(iconElems[1].getAttribute('href') === `yellow.bmp`);
-  assert(iconElems[2].getAttribute('href') === `${localhost}/capture_image_favicon2/green.bmp`);
+  assert(iconElems[2].getAttribute('href') === `${localhost}/capture_faviconAttrs/green.bmp`);
 
   /* capture.faviconAttrs = "" */
   var options = {
@@ -6564,7 +6557,7 @@ async function test_capture_image_favicon2() {
     "capture.faviconAttrs": "",
   };
   var blob = await capture({
-    url: `${localhost}/capture_image_favicon2/favicon.html`,
+    url: `${localhost}/capture_faviconAttrs/favicon.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6579,8 +6572,8 @@ async function test_capture_image_favicon2() {
 
   var iconElems = doc.querySelectorAll('link[rel]');
   assert(iconElems[0].getAttribute('href') === `red.bmp`);
-  assert(iconElems[1].getAttribute('href') === `${localhost}/capture_image_favicon2/yellow.bmp`);
-  assert(iconElems[2].getAttribute('href') === `${localhost}/capture_image_favicon2/green.bmp`);
+  assert(iconElems[1].getAttribute('href') === `${localhost}/capture_faviconAttrs/yellow.bmp`);
+  assert(iconElems[2].getAttribute('href') === `${localhost}/capture_faviconAttrs/green.bmp`);
 }
 
 /**
@@ -7257,14 +7250,14 @@ async function test_capture_font_used() {
  *
  * capture.font = "save-used"
  */
-async function test_capture_font_used2() {
+async function test_capture_font_used_syntax() {
   /* capture.font = save-used */
   var options = {
     "capture.rewriteCss": "url",
     "capture.font": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used2/index.html`,
+    url: `${localhost}/capture_font_used_syntax/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7315,14 +7308,14 @@ async function test_capture_font_used2() {
  *
  * capture.font
  */
-async function test_capture_font_used3() {
+async function test_capture_font_used_scope() {
   /* capture.font = save-used */
   var options = {
     "capture.rewriteCss": "url",
     "capture.font": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used3/index.html`,
+    url: `${localhost}/capture_font_used_scope/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7357,11 +7350,11 @@ async function test_capture_font_used3() {
 }
 
 /**
- * Check if used fonts in the CSS are mapped correctly
+ * Check used fonts referenced by CSS variable.
  *
  * capture.font = "save-used"
  */
-async function test_capture_font_used4() {
+async function test_capture_font_used_var() {
   throw new TestSkipError(`currently broken`);
 
   /* capture.font = save-used */
@@ -7371,7 +7364,7 @@ async function test_capture_font_used4() {
     "capture.font": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used4/index.html`,
+    url: `${localhost}/capture_font_used_var/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7430,7 +7423,7 @@ async function test_capture_font_used4() {
  *
  * capture.font = "save-used"
  */
-async function test_capture_font_used5() {
+async function test_capture_font_used_nesting() {
   // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
   try {
     // Chrome 109/110 gets null for the querySelector
@@ -7447,7 +7440,7 @@ async function test_capture_font_used5() {
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used5/index.html`,
+    url: `${localhost}/capture_font_used_nesting/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7686,7 +7679,7 @@ async function test_capture_noscript() {
  *
  * capture.noscript
  */
-async function test_capture_noscript2() {
+async function test_capture_noscript_headless() {
   var options = {
     "capture.noscript": "save",
   };
@@ -7791,14 +7784,14 @@ async function test_capture_embed() {
  *
  * capture.embed
  */
-async function test_capture_embed2() {
+async function test_capture_embed_cross_origin() {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.embed": "save",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_embed2/cross-origin.py`,
+    url: `${localhost}/capture_embed_cross_origin/cross_origin.py`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7838,7 +7831,7 @@ async function test_capture_embed2() {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_embed2/cross-origin.py`);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_embed_cross_origin/cross_origin.py`);
 
   // frame4.txt
   var frame = frames[3];
@@ -8029,14 +8022,14 @@ async function test_capture_object() {
  *
  * capture.object
  */
-async function test_capture_object2() {
+async function test_capture_object_frame() {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.object": "save",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_object2/cross-origin.py`,
+    url: `${localhost}/capture_object_frame/cross_origin.py`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8076,7 +8069,7 @@ async function test_capture_object2() {
   var frameFile = zip.file(frame.getAttribute('data'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_object2/cross-origin.py`);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_object_frame/cross_origin.py`);
 
   // frame4.txt
   var frame = frames[3];
@@ -8284,13 +8277,13 @@ async function test_capture_cite() {
  *
  * capture.ping
  */
-async function test_capture_ping() {
+async function test_capture_anchor_ping() {
   /* capture.ping = link */
   var options = {
     "capture.ping": "link",
   };
   var blob = await capture({
-    url: `${localhost}/capture_ping/ping.html`,
+    url: `${localhost}/capture_anchor_ping/ping.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8299,14 +8292,14 @@ async function test_capture_ping() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var a = doc.querySelector('a');
-  assert(a.getAttribute('ping') === `${localhost}/capture_ping/ping.py ${localhost}/capture_ping/ping2.py`);
+  assert(a.getAttribute('ping') === `${localhost}/capture_anchor_ping/ping.py ${localhost}/capture_anchor_ping/ping2.py`);
 
   /* capture.ping = blank */
   var options = {
     "capture.ping": "blank",
   };
   var blob = await capture({
-    url: `${localhost}/capture_ping/ping.html`,
+    url: `${localhost}/capture_anchor_ping/ping.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8480,13 +8473,13 @@ async function test_capture_base() {
  *
  * capture.base
  */
-async function test_capture_base2() {
+async function test_capture_base_dynamic() {
   /* capture.base = save */
   var options = {
     "capture.base": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_base2/base.html`,
+    url: `${localhost}/capture_base_dynamic/base.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8496,17 +8489,17 @@ async function test_capture_base2() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
-  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp 2x`);
-  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
-  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
-  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp") repeat;`);
-  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp"); }`);
+  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp 2x`);
+  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp") repeat;`);
+  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp"); }`);
 
-  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
-  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
+  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
 
-  assert(doc.querySelector('base').getAttribute('href') === `${localhost}/capture_base2/resources/`);
+  assert(doc.querySelector('base').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/`);
 
   assert(doc.querySelectorAll('img[src]')[1].getAttribute('src') === `green.bmp`);
   assert(doc.querySelectorAll('img[srcset]')[1].getAttribute('srcset') === `green.bmp 2x`);
@@ -8515,15 +8508,15 @@ async function test_capture_base2() {
   assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background: url("green.bmp") repeat;`);
   assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("green.bmp"); }`);
 
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
-  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
+  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
 
   /* capture.base = blank */
   var options = {
     "capture.base": "blank",
   };
   var blob = await capture({
-    url: `${localhost}/capture_base2/base.html`,
+    url: `${localhost}/capture_base_dynamic/base.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8533,15 +8526,15 @@ async function test_capture_base2() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
-  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp 2x`);
-  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
-  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
-  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp") repeat;`);
-  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp"); }`);
+  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp 2x`);
+  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp") repeat;`);
+  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp"); }`);
 
-  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
-  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
+  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
 
   assert(!doc.querySelector('base').hasAttribute('href'));
 
@@ -8552,8 +8545,8 @@ async function test_capture_base2() {
   assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background: url("green.bmp") repeat;`);
   assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("green.bmp"); }`);
 
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
-  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
+  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
 
   /* capture.base = remove */
   var options = {
@@ -8561,7 +8554,7 @@ async function test_capture_base2() {
     "capture.frame": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_base2/base.html`,
+    url: `${localhost}/capture_base_dynamic/base.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8571,15 +8564,15 @@ async function test_capture_base2() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
-  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp 2x`);
-  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
-  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
-  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp") repeat;`);
-  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp"); }`);
+  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp 2x`);
+  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp") repeat;`);
+  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp"); }`);
 
-  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
-  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
+  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
 
   assert(!doc.querySelector('base'));
 
@@ -8590,15 +8583,15 @@ async function test_capture_base2() {
   assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background: url("green.bmp") repeat;`);
   assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("green.bmp"); }`);
 
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
-  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
+  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
   
 
-  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp`);
-  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp") repeat;`);
-  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base2/green.bmp"); }`);
-  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base2/resources/test.html`);
-  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base2/resources/test.html`);
+  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp") repeat;`);
+  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp"); }`);
+  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
+  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
 }
 
 /**
@@ -8608,14 +8601,14 @@ async function test_capture_base2() {
  * capture.frame
  * mode: tab/source
  */
-async function test_capture_base3() {
+async function test_capture_base_dynamic_iframe() {
   /* capture.frame = save */
   var options = {
     "capture.base": "blank",
     "capture.frame": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_base3/base.html`,
+    url: `${localhost}/capture_base_dynamic_iframe/base.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8629,7 +8622,7 @@ async function test_capture_base3() {
   var indexFile = zip.file('index_2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base3/resources/resources/green.bmp`);
+  assert(doc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic_iframe/resources/resources/green.bmp`);
 
   /* capture.frame = save (headless) */
   var options = {
@@ -8637,7 +8630,7 @@ async function test_capture_base3() {
     "capture.frame": "save",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_base3/base.html`,
+    url: `${localhost}/capture_base_dynamic_iframe/base.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -8665,7 +8658,7 @@ async function test_capture_base3() {
     "capture.frame": "link",
   };
   var blob = await capture({
-    url: `${localhost}/capture_base3/base.html`,
+    url: `${localhost}/capture_base_dynamic_iframe/base.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8682,7 +8675,7 @@ async function test_capture_base3() {
 
   var srcdocBlob = new Blob([frames[1].getAttribute('srcdoc')], {type: "text/html"});
   var srcdoc = await readFileAsDocument(srcdocBlob);
-  assert(srcdoc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base3/resources/resources/green.bmp`);
+  assert(srcdoc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic_iframe/resources/resources/green.bmp`);
 
   /* capture.frame = link (headless) */
   var options = {
@@ -8690,7 +8683,7 @@ async function test_capture_base3() {
     "capture.frame": "link",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_base3/base.html`,
+    url: `${localhost}/capture_base_dynamic_iframe/base.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -8708,7 +8701,7 @@ async function test_capture_base3() {
 
   var srcdocBlob = new Blob([frames[1].getAttribute('srcdoc')], {type: "text/html"});
   var srcdoc = await readFileAsDocument(srcdocBlob);
-  assert(srcdoc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base3/resources/resources/green.bmp`);
+  assert(srcdoc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic_iframe/resources/resources/green.bmp`);
 }
 
 
@@ -9054,7 +9047,7 @@ async function test_capture_shadowRoot() {
  *
  * capturer.captureDocument
  */
-async function test_capture_shadowRoot2() {
+async function test_capture_shadowRoot_custom() {
   var options = {
     "capture.shadowDom": "save",
     "capture.image": "save",
@@ -9063,7 +9056,7 @@ async function test_capture_shadowRoot2() {
 
   /* mode: open */
   var blob = await capture({
-    url: `${localhost}/capture_shadowRoot2/index.html`,
+    url: `${localhost}/capture_shadowRoot_custom/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9086,7 +9079,7 @@ async function test_capture_shadowRoot2() {
 
   /* mode: closed */
   var blob = await capture({
-    url: `${localhost}/capture_shadowRoot2/index2.html`,
+    url: `${localhost}/capture_shadowRoot_custom/index2.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9184,9 +9177,9 @@ async function test_capture_removeHidden() {
  * capturer.resolveRelativeUrl
  * capturer.captureDocument
  */
-async function test_capture_rewrite() {
+async function test_capture_base_rewrite() {
   var blob = await capture({
-    url: `${localhost}/capture_rewrite/index.html`,
+    url: `${localhost}/capture_base_rewrite/index.html`,
     options: baseOptions,
   });
 
@@ -9209,13 +9202,13 @@ async function test_capture_rewrite() {
  * capturer.resolveRelativeUrl
  * capturer.captureDocument
  */
-async function test_capture_rewrite2() {
+async function test_capture_base_rewrite_special() {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_rewrite2/index.html`,
+    url: `${localhost}/capture_base_rewrite_special/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9271,13 +9264,13 @@ async function test_capture_redirect() {
  * the source URL hash if not. As the response URL of XMLHttpRequest and
  * fetch API doesn't contain hash, we use the source URL hash currently.
  */
-async function test_capture_redirect2() {
+async function test_capture_redirect_hash() {
   var options = {
     "capture.frameRename": false,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_redirect2/index.html`,
+    url: `${localhost}/capture_redirect_hash/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9338,7 +9331,7 @@ async function test_capture_anchor() {
  *
  * capturer.captureDocument
  */
-async function test_capture_anchor2() {
+async function test_capture_anchor_self() {
   /* hash link target not captured */
   var blob = await capture({
     url: `${localhost}/capture_anchor/index21.html`,
@@ -9389,7 +9382,7 @@ async function test_capture_anchor2() {
  *
  * capturer.captureDocument
  */
-async function test_capture_anchor3() {
+async function test_capture_anchor_base() {
   var blob = await capture({
     url: `${localhost}/capture_anchor/index3.html`,
     options: baseOptions,
@@ -9419,7 +9412,7 @@ async function test_capture_anchor3() {
  * capture.downLink.file.mode
  * capture.downLink.file.extFilter
  */
-async function test_capture_downLink01() {
+async function test_capture_downLink_file() {
   /* header */
   var options = {
     "capture.downLink.file.mode": "header",
@@ -9427,7 +9420,7 @@ async function test_capture_downLink01() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9453,9 +9446,9 @@ async function test_capture_downLink01() {
   assert(anchors[2].getAttribute('href') === `page.html`);
   assert(anchors[3].getAttribute('href') === `file.txt`);
   assert(anchors[4].getAttribute('href') === `file2.txt`);
-  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink01/unknown.py`);
+  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink_file/unknown.py`);
   assert(anchors[6].getAttribute('href') === `file3.txt`);
-  assert(anchors[7].getAttribute('href') === `${localhost}/capture_downLink01/nofilename.py`);
+  assert(anchors[7].getAttribute('href') === `${localhost}/capture_downLink_file/nofilename.py`);
   assert(anchors[8].getAttribute('href') === `redirect.txt`);
 
   // page should be saved as file (not rewritten)
@@ -9481,7 +9474,7 @@ async function test_capture_downLink01() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9506,11 +9499,11 @@ async function test_capture_downLink01() {
   assert(anchors[1].getAttribute('href') === `file.css#123`);
   assert(anchors[2].getAttribute('href') === `page.html`);
   assert(anchors[3].getAttribute('href') === `file.txt`);
-  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink01/mime.py`);
-  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink01/unknown.py`);
-  assert(anchors[6].getAttribute('href') === `${localhost}/capture_downLink01/filename.py`);
-  assert(anchors[7].getAttribute('href') === `${localhost}/capture_downLink01/nofilename.py`);
-  assert(anchors[8].getAttribute('href') === `${localhost}/capture_downLink01/redirect.pyr`);
+  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink_file/mime.py`);
+  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink_file/unknown.py`);
+  assert(anchors[6].getAttribute('href') === `${localhost}/capture_downLink_file/filename.py`);
+  assert(anchors[7].getAttribute('href') === `${localhost}/capture_downLink_file/nofilename.py`);
+  assert(anchors[8].getAttribute('href') === `${localhost}/capture_downLink_file/redirect.pyr`);
 
   // page should be saved as file (not rewritten)
   var file = zip.file('page.html');
@@ -9535,7 +9528,7 @@ async function test_capture_downLink01() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9556,15 +9549,15 @@ async function test_capture_downLink01() {
   var doc = await readFileAsDocument(indexBlob);
 
   var anchors = doc.querySelectorAll('a');
-  assert(anchors[0].getAttribute('href') === `${localhost}/capture_downLink01/file.bmp`);
-  assert(anchors[1].getAttribute('href') === `${localhost}/capture_downLink01/file.css#123`);
-  assert(anchors[2].getAttribute('href') === `${localhost}/capture_downLink01/page.html`);
-  assert(anchors[3].getAttribute('href') === `${localhost}/capture_downLink01/file.txt`);
-  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink01/mime.py`);
-  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink01/unknown.py`);
-  assert(anchors[6].getAttribute('href') === `${localhost}/capture_downLink01/filename.py`);
-  assert(anchors[7].getAttribute('href') === `${localhost}/capture_downLink01/nofilename.py`);
-  assert(anchors[8].getAttribute('href') === `${localhost}/capture_downLink01/redirect.pyr`);
+  assert(anchors[0].getAttribute('href') === `${localhost}/capture_downLink_file/file.bmp`);
+  assert(anchors[1].getAttribute('href') === `${localhost}/capture_downLink_file/file.css#123`);
+  assert(anchors[2].getAttribute('href') === `${localhost}/capture_downLink_file/page.html`);
+  assert(anchors[3].getAttribute('href') === `${localhost}/capture_downLink_file/file.txt`);
+  assert(anchors[4].getAttribute('href') === `${localhost}/capture_downLink_file/mime.py`);
+  assert(anchors[5].getAttribute('href') === `${localhost}/capture_downLink_file/unknown.py`);
+  assert(anchors[6].getAttribute('href') === `${localhost}/capture_downLink_file/filename.py`);
+  assert(anchors[7].getAttribute('href') === `${localhost}/capture_downLink_file/nofilename.py`);
+  assert(anchors[8].getAttribute('href') === `${localhost}/capture_downLink_file/redirect.pyr`);
 }
 
 /**
@@ -9572,7 +9565,7 @@ async function test_capture_downLink01() {
  *
  * capture.downLink.file.extFilter
  */
-async function test_capture_downLink02() {
+async function test_capture_downLink_file_extFilter() {
   // a rule each line
   // match URL (*.py) but download using resolved filename using header (*.txt)
   var options = {
@@ -9581,7 +9574,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9605,7 +9598,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9629,7 +9622,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9653,7 +9646,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9677,7 +9670,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9701,7 +9694,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9725,7 +9718,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9749,7 +9742,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9773,7 +9766,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9797,7 +9790,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9821,7 +9814,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9845,7 +9838,7 @@ async function test_capture_downLink02() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9872,7 +9865,7 @@ mime:application/wsb.unknown`,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9897,7 +9890,7 @@ mime:/text/.+/i`,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9922,7 +9915,7 @@ mime:/.*/i`,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9947,7 +9940,7 @@ mime:/.*/i`,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -9970,7 +9963,7 @@ mime:/.*/i`,
  *
  * capture.downLink.urlFilter
  */
-async function test_capture_downLink03() {
+async function test_capture_downLink_file_urlFilter() {
   // a rule each line
   // plain text rule
   // match original URL
@@ -9983,14 +9976,14 @@ async function test_capture_downLink03() {
     // 3. should match (hash in rule is stripped)
     // 4. should match (match source URL rather then redirected URL)
     "capture.downLink.urlFilter": `\
-${localhost}/capture_downLink01/file.bmp
-${localhost}/capture_downLink01/file.css#whatever
-${localhost}/capture_downLink01/mime.py#foo
-${localhost}/capture_downLink01/redirect.pyr#bar`,
+${localhost}/capture_downLink_file/file.bmp
+${localhost}/capture_downLink_file/file.css#whatever
+${localhost}/capture_downLink_file/mime.py#foo
+${localhost}/capture_downLink_file/redirect.pyr#bar`,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10014,12 +10007,12 @@ ${localhost}/capture_downLink01/redirect.pyr#bar`,
     // 1. should not match
     // 2. should match (hash in URL is stripped)
     "capture.downLink.urlFilter": `\
-capture_downLink01/mime.py
-${localhost}/capture_downLink01/file.css`,
+capture_downLink_file/mime.py
+${localhost}/capture_downLink_file/file.css`,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10043,12 +10036,12 @@ ${localhost}/capture_downLink01/file.css`,
     // 1. should not match
     // 2. should match (hash in URL is stripped)
     "capture.downLink.urlFilter": `\
-capture_downLink01/mime.py  foo
-${localhost}/capture_downLink01/file.css\tbar`,
+capture_downLink_file/mime.py  foo
+${localhost}/capture_downLink_file/file.css\tbar`,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10080,7 +10073,7 @@ ${localhost}/capture_downLink01/file.css\tbar`,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink01/basic.html`,
+    url: `${localhost}/capture_downLink_file/basic.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10103,14 +10096,14 @@ ${localhost}/capture_downLink01/file.css\tbar`,
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink04() {
+async function test_capture_downLink_indepth() {
   /* depth = null */
   var options = {
     "capture.downLink.doc.depth": null,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink02/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10122,11 +10115,11 @@ async function test_capture_downLink04() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(!doc.documentElement.hasAttribute('data-scrapbook-type'));
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/file.bmp`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink02/linked1-1.html#111`);
-  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink02/linked1-2.html#222`);
-  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink02/linked1-3.html#333`);
-  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink02/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
 
   assert(!zip.file('index.json'));
 
@@ -10136,7 +10129,7 @@ async function test_capture_downLink04() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink02/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10148,11 +10141,11 @@ async function test_capture_downLink04() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'site');
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/file.bmp`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink02/linked1-1.html#111`);
-  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink02/linked1-2.html#222`);
-  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink02/linked1-3.html#333`);
-  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink02/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
 
   var sitemapFile = zip.file('index.json');
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
@@ -10179,9 +10172,9 @@ async function test_capture_downLink04() {
       },
       {
         "path": "index.html",
-        "url": `${localhost}/capture_downLink02/in-depth.html`,
+        "url": `${localhost}/capture_downLink_indepth/in-depth.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/in-depth.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -10201,7 +10194,7 @@ async function test_capture_downLink04() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink02/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10212,7 +10205,7 @@ async function test_capture_downLink04() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'site');
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/file.bmp`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/file.bmp`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-1.html#111`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `linked1-3.html#333`);
@@ -10227,8 +10220,8 @@ async function test_capture_downLink04() {
   var indexFile = zip.file('linked1-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/linked2-1.html#1-2`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink02/linked2-2.html#1-2`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked2-1.html#1-2`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked2-2.html#1-2`);
 
   var indexFile = zip.file('linked1-3.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10275,9 +10268,9 @@ async function test_capture_downLink04() {
       },
       {
         "path": "index.html",
-        "url": `${localhost}/capture_downLink02/in-depth.html`,
+        "url": `${localhost}/capture_downLink_indepth/in-depth.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/in-depth.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -10289,33 +10282,33 @@ async function test_capture_downLink04() {
       },
       {
         "path": "linked1-1.html",
-        "url": `${localhost}/capture_downLink02/linked1-1.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked1-1.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked1-1.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-1.html`, "document")
       },
       {
         "path": "linked1-2.html",
-        "url": `${localhost}/capture_downLink02/linked1-2.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked1-2.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked1-2.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-2.html`, "document")
       },
       {
         "path": "linked1-3.html",
-        "url": `${localhost}/capture_downLink02/linked1-3.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked1-3.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked1-3.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-3.html`, "document")
       },
       {
         "path": "linked1-4.html",
-        "url": `${localhost}/capture_downLink02/linked1-4.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked1-4.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked1-4.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-4.html`, "document")
       },
       {
         "path": "linked1-5.html",
-        "url": `${localhost}/capture_downLink02/linked1-5.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked1-5.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked1-5.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-5.html`, "document")
       }
     ]
   };
@@ -10327,7 +10320,7 @@ async function test_capture_downLink04() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink02/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10338,7 +10331,7 @@ async function test_capture_downLink04() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.documentElement.getAttribute('data-scrapbook-type') === 'site');
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/file.bmp`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/file.bmp`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-1.html#111`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `linked1-3.html#333`);
@@ -10380,7 +10373,7 @@ async function test_capture_downLink04() {
   var indexFile = zip.file('linked2-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/linked3-1.html#2-2`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked3-1.html#2-2`);
 
   var sitemapFile = zip.file('index.json');
   var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
@@ -10407,9 +10400,9 @@ async function test_capture_downLink04() {
       },
       {
         "path": "index.html",
-        "url": `${localhost}/capture_downLink02/in-depth.html`,
+        "url": `${localhost}/capture_downLink_indepth/in-depth.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/in-depth.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/in-depth.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -10421,45 +10414,45 @@ async function test_capture_downLink04() {
       },
       {
         "path": "linked1-1.html",
-        "url": `${localhost}/capture_downLink02/linked1-1.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked1-1.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked1-1.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-1.html`, "document")
       },
       {
         "path": "linked1-2.html",
-        "url": `${localhost}/capture_downLink02/linked1-2.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked1-2.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked1-2.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-2.html`, "document")
       },
       {
         "path": "linked1-3.html",
-        "url": `${localhost}/capture_downLink02/linked1-3.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked1-3.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked1-3.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-3.html`, "document")
       },
       {
         "path": "linked1-4.html",
-        "url": `${localhost}/capture_downLink02/linked1-4.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked1-4.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked1-4.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-4.html`, "document")
       },
       {
         "path": "linked1-5.html",
-        "url": `${localhost}/capture_downLink02/linked1-5.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked1-5.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked1-5.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked1-5.html`, "document")
       },
       {
         "path": "linked2-1.html",
-        "url": `${localhost}/capture_downLink02/linked2-1.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked2-1.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked2-1.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked2-1.html`, "document")
       },
       {
         "path": "linked2-2.html",
-        "url": `${localhost}/capture_downLink02/linked2-2.html`,
+        "url": `${localhost}/capture_downLink_indepth/linked2-2.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink02/linked2-2.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth/linked2-2.html`, "document")
       }
     ]
   };
@@ -10472,7 +10465,7 @@ async function test_capture_downLink04() {
  * capture.downLink.doc.depth
  * capture.saveAs
  */
-async function test_capture_downLink05() {
+async function test_capture_downLink_indepth_singleHtml() {
   /* depth = 0 */
   var options = {
     "capture.downLink.doc.depth": 0,
@@ -10480,18 +10473,18 @@ async function test_capture_downLink05() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink02/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
   var doc = await readFileAsDocument(blob);
   assert(!doc.documentElement.hasAttribute('data-scrapbook-type'));
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/file.bmp`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink02/linked1-1.html#111`);
-  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink02/linked1-2.html#222`);
-  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink02/linked1-3.html#333`);
-  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink02/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
 
   /* depth = 1 */
   var options = {
@@ -10500,18 +10493,18 @@ async function test_capture_downLink05() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink02/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
   var doc = await readFileAsDocument(blob);
   assert(!doc.documentElement.hasAttribute('data-scrapbook-type'));
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/file.bmp`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink02/linked1-1.html#111`);
-  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink02/linked1-2.html#222`);
-  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink02/linked1-3.html#333`);
-  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink02/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
 }
 
 /**
@@ -10521,7 +10514,7 @@ async function test_capture_downLink05() {
  * capture.downLink.file.extFilter
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink06() {
+async function test_capture_downLink_indepth_skip_file() {
   var options = {
     "capture.downLink.file.mode": "url",
     "capture.downLink.file.extFilter": `bmp, html`,
@@ -10531,7 +10524,7 @@ async function test_capture_downLink06() {
   options["capture.downLink.doc.depth"] = null;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink02/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10588,7 +10581,7 @@ async function test_capture_downLink06() {
   options["capture.downLink.doc.depth"] = 0;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink02/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10599,11 +10592,11 @@ async function test_capture_downLink06() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `file.bmp`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink02/linked1-1.html#111`);
-  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink02/linked1-2.html#222`);
-  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink02/linked1-3.html#333`);
-  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink02/linked1-4.html#444`);
-  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink02/linked1-5.html#555`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-2.html#222`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-5.html#555`);
 
   // skip downLinkFile even if depth exceeds
   assert(!zip.file('linked1-1.html'));
@@ -10618,7 +10611,7 @@ async function test_capture_downLink06() {
   options["capture.downLink.doc.depth"] = 1;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink02/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10645,8 +10638,8 @@ async function test_capture_downLink06() {
   var indexFile = zip.file('linked1-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/linked2-1.html#1-2`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink02/linked2-2.html#1-2`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked2-1.html#1-2`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked2-2.html#1-2`);
 
   // captured as page (rewritten)
   var indexFile = zip.file('linked1-3.html');
@@ -10678,17 +10671,17 @@ async function test_capture_downLink06() {
  * capture.downLink.doc.depth
  * capture.downLink.doc.urlFilter
  */
-async function test_capture_downLink07() {
+async function test_capture_downLink_indepth_urlFilter() {
   /* plain URLs */
   var options = {
     "capture.downLink.doc.depth": 2,
     "capture.downLink.doc.urlFilter": `\
-${localhost}/capture_downLink02/linked1-2.html
-${localhost}/capture_downLink02/linked2-1.html`,
+${localhost}/capture_downLink_indepth/linked1-2.html
+${localhost}/capture_downLink_indepth/linked2-1.html`,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink02/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10698,12 +10691,12 @@ ${localhost}/capture_downLink02/linked2-1.html`,
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/file.bmp`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink02/linked1-1.html#111`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/file.bmp`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-1.html#111`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
-  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink02/linked1-3.html#333`);
-  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink02/linked1-4.html#444`);
-  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink02/linked1-5.html#555`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-5.html#555`);
 
   assert(!zip.file('linked1-1.html'));
 
@@ -10711,7 +10704,7 @@ ${localhost}/capture_downLink02/linked2-1.html`,
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked2-1.html#1-2`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink02/linked2-2.html#1-2`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked2-2.html#1-2`);
 
   assert(!zip.file('linked1-3.html'));
 
@@ -10733,7 +10726,7 @@ ${localhost}/capture_downLink02/linked2-1.html`,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink02/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10743,12 +10736,12 @@ ${localhost}/capture_downLink02/linked2-1.html`,
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/file.bmp`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/file.bmp`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `linked1-1.html#111`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked1-2.html#222`);
-  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink02/linked1-3.html#333`);
-  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink02/linked1-4.html#444`);
-  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink02/linked1-5.html#555`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
+  assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
+  assert(doc.querySelectorAll('a')[5].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-5.html#555`);
 
   var indexFile = zip.file('linked1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10758,8 +10751,8 @@ ${localhost}/capture_downLink02/linked2-1.html`,
   var indexFile = zip.file('linked1-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink02/linked2-1.html#1-2`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink02/linked2-2.html#1-2`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked2-1.html#1-2`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked2-2.html#1-2`);
 
   assert(!zip.file('linked1-3.html'));
 
@@ -10773,17 +10766,17 @@ ${localhost}/capture_downLink02/linked2-1.html`,
 }
 
 /**
- * Check link rebuild for XHTML and SVG
+ * Check link rebuild for non-HTML pages (XHTML and SVG)
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink08() {
+async function test_capture_downLink_indepth_nonHtml() {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink03/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_nonHtml/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10816,13 +10809,13 @@ async function test_capture_downLink08() {
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink09() {
+async function test_capture_downLink_indepth_frame() {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink04/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_frame/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10851,7 +10844,7 @@ async function test_capture_downLink09() {
  * capture.downLink.doc.depth
  * capture.frameRename
  */
-async function test_capture_downLink10() {
+async function test_capture_downLink_indepth_renaming() {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.downLink.doc.depth": 1,
@@ -10861,7 +10854,7 @@ async function test_capture_downLink10() {
   options["capture.frameRename"] = true;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink05/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_renaming/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10883,7 +10876,7 @@ async function test_capture_downLink10() {
   options["capture.frameRename"] = false;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink05/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_renaming/in-depth.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -10907,13 +10900,13 @@ async function test_capture_downLink10() {
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink11() {
+async function test_capture_downLink_indepth_shadow() {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink06/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_shadow/in-depth.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -10941,14 +10934,14 @@ async function test_capture_downLink11() {
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink12() {
+async function test_capture_downLink_indepth_metaRefresh() {
   /* depth = 1 */
   var options = {
     "capture.downLink.doc.depth": 1,
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink07/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_metaRefresh/in-depth.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -10963,12 +10956,12 @@ async function test_capture_downLink12() {
   var indexFile = zip.file('linked1-1.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content') === `0; url=${localhost}/capture_downLink07/linked2-1.html#linked1-1`);
+  assert(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content') === `0; url=${localhost}/capture_downLink_indepth_metaRefresh/linked2-1.html#linked1-1`);
 
   var indexFile = zip.file('linked1-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content') === `0; url=${localhost}/capture_downLink07/linked2-2.html`);
+  assert(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content') === `0; url=${localhost}/capture_downLink_indepth_metaRefresh/linked2-2.html`);
 
   assert(!zip.file('linked2-1.html'));
 
@@ -10982,7 +10975,7 @@ async function test_capture_downLink12() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink07/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_metaRefresh/in-depth.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11022,13 +11015,13 @@ async function test_capture_downLink12() {
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink13() {
+async function test_capture_downLink_indepth_redirect() {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink08/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_redirect/in-depth.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11038,15 +11031,15 @@ async function test_capture_downLink13() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `redirected.html#in-depth`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink08/linked1-2.pyr#in-depth`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth_redirect/linked1-2.pyr#in-depth`);
 }
 
 /**
- * Check URL for data: in index.json
+ * Check URL should be removed for data: in index.json
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink14() {
+async function test_capture_downLink_indepth_datauri() {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.downLink.doc.depth": 0,
@@ -11054,7 +11047,7 @@ async function test_capture_downLink14() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink09/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_datauri/in-depth.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11091,9 +11084,9 @@ async function test_capture_downLink14() {
       },
       {
         "path": "index.html",
-        "url": `${localhost}/capture_downLink09/in-depth.html`,
+        "url": `${localhost}/capture_downLink_indepth_datauri/in-depth.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink09/in-depth.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth_datauri/in-depth.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -11125,7 +11118,7 @@ async function test_capture_downLink14() {
  * capture.downLink.file.mode
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink15() {
+async function test_capture_downLink_indepth_attachment() {
   /* downLink */
   var options = {
     "capture.downLink.file.mode": "header",
@@ -11134,7 +11127,7 @@ async function test_capture_downLink15() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink10/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_attachment/in-depth.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11144,12 +11137,12 @@ async function test_capture_downLink15() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink10/attachment1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment1.html#in-depth`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `attachment1.html#in-depth`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `attachment2.html#in-depth`);
-  assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `${localhost}/capture_downLink10/attachment3.html#in-depth`);
-  assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `${localhost}/capture_downLink10/attachment4.html#in-depth`);
-  assert(doc.querySelectorAll('math [href]')[0].getAttribute('href') === `${localhost}/capture_downLink10/attachment5.html#in-depth`);
+  assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment3.html#in-depth`);
+  assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `${localhost}/capture_downLink_indepth_attachment/attachment4.html#in-depth`);
+  assert(doc.querySelectorAll('math [href]')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment5.html#in-depth`);
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('attachment1.html');
@@ -11170,7 +11163,7 @@ async function test_capture_downLink15() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink10/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_attachment/in-depth.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11182,8 +11175,8 @@ async function test_capture_downLink15() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `attachment1.html#in-depth`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink10/attachment1.html#in-depth`);
-  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink10/attachment2.py#in-depth`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment2.py#in-depth`);
   assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `attachment3.html#in-depth`);
   assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `attachment4.html#in-depth`);
   assert(doc.querySelectorAll('math [href]')[0].getAttribute('href') === `attachment5.html#in-depth`);
@@ -11220,7 +11213,7 @@ async function test_capture_downLink15() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink10/in-depth.html`,
+    url: `${localhost}/capture_downLink_indepth_attachment/in-depth.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11281,15 +11274,15 @@ async function test_capture_downLink15() {
  * capture.downLink.file.mode
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink16() {
+async function test_capture_downLink_indepth_urlExtra() {
   var options = {
     "capture.downLink.file.extFilter": "jpg",
-    "capture.downLink.doc.urlFilter": "${localhost}/capture_downLink10/nonexist.html",
+    "capture.downLink.doc.urlFilter": "/(?!)/",
     "capture.downLink.urlFilter": "//",
     "capture.downLink.urlExtra": `\
-${localhost}/capture_downLink11/1-1.html
-${localhost}/capture_downLink11/1-2.py
-${localhost}/capture_downLink11/1-3.txt`,
+${localhost}/capture_downLink_indepth_urlExtra/1-1.html
+${localhost}/capture_downLink_indepth_urlExtra/1-2.py
+${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
   };
 
   /* -downLink -inDepth */
@@ -11297,7 +11290,7 @@ ${localhost}/capture_downLink11/1-3.txt`,
   options["capture.downLink.doc.depth"] = null;
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink11/main.html`,
+    url: `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11315,7 +11308,7 @@ ${localhost}/capture_downLink11/1-3.txt`,
   options["capture.downLink.doc.depth"] = null;
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink11/main.html`,
+    url: `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11343,7 +11336,7 @@ ${localhost}/capture_downLink11/1-3.txt`,
   options["capture.downLink.doc.depth"] = 0;
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink11/main.html`,
+    url: `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11386,9 +11379,9 @@ ${localhost}/capture_downLink11/1-3.txt`,
       },
       {
         "path": "index.html",
-        "url": `${localhost}/capture_downLink11/main.html`,
+        "url": `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink11/main.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/main.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -11400,15 +11393,15 @@ ${localhost}/capture_downLink11/1-3.txt`,
       },
       {
         "path": "1-1.html",
-        "url": `${localhost}/capture_downLink11/1-1.html`,
+        "url": `${localhost}/capture_downLink_indepth_urlExtra/1-1.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink11/1-1.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.html`, "document")
       },
       {
         "path": "1-1.bmp",
-        "url": `${localhost}/capture_downLink11/1-1.bmp`,
+        "url": `${localhost}/capture_downLink_indepth_urlExtra/1-1.bmp`,
         "role": "resource",
-        "token": getToken(`${localhost}/capture_downLink11/1-1.bmp`, "resource")
+        "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.bmp`, "resource")
       }
     ]
   };
@@ -11419,7 +11412,7 @@ ${localhost}/capture_downLink11/1-3.txt`,
   options["capture.downLink.doc.depth"] = 0;
 
   var blob = await capture({
-    url: `${localhost}/capture_downLink11/main.html`,
+    url: `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11467,9 +11460,9 @@ ${localhost}/capture_downLink11/1-3.txt`,
       },
       {
         "path": "index.html",
-        "url": `${localhost}/capture_downLink11/main.html`,
+        "url": `${localhost}/capture_downLink_indepth_urlExtra/main.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink11/main.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/main.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -11481,27 +11474,27 @@ ${localhost}/capture_downLink11/1-3.txt`,
       },
       {
         "path": "1-2.html",
-        "url": `${localhost}/capture_downLink11/1-2.py`,
+        "url": `${localhost}/capture_downLink_indepth_urlExtra/1-2.py`,
         "role": "resource",
-        "token": getToken(`${localhost}/capture_downLink11/1-2.py`, "resource")
+        "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-2.py`, "resource")
       },
       {
         "path": "1-3.txt",
-        "url": `${localhost}/capture_downLink11/1-3.txt`,
+        "url": `${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
         "role": "resource",
-        "token": getToken(`${localhost}/capture_downLink11/1-3.txt`, "resource")
+        "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`, "resource")
       },
       {
         "path": "1-1.html",
-        "url": `${localhost}/capture_downLink11/1-1.html`,
+        "url": `${localhost}/capture_downLink_indepth_urlExtra/1-1.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink11/1-1.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.html`, "document")
       },
       {
         "path": "1-1.bmp",
-        "url": `${localhost}/capture_downLink11/1-1.bmp`,
+        "url": `${localhost}/capture_downLink_indepth_urlExtra/1-1.bmp`,
         "role": "resource",
-        "token": getToken(`${localhost}/capture_downLink11/1-1.bmp`, "resource")
+        "token": getToken(`${localhost}/capture_downLink_indepth_urlExtra/1-1.bmp`, "resource")
       }
     ]
   };
@@ -11513,7 +11506,7 @@ ${localhost}/capture_downLink11/1-3.txt`,
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink17() {
+async function test_capture_downLink_indepth_case() {
   var options = {
     "capture.downLink.doc.depth": 1,
     "capture.downLink.file.mode": "url",
@@ -11521,7 +11514,7 @@ async function test_capture_downLink17() {
   };
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_downLink12/index.html`,
+    url: `${localhost}/capture_downLink_indepth_case/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -11559,9 +11552,9 @@ async function test_capture_downLink17() {
       },
       {
         "path": "index.html",
-        "url": `${localhost}/capture_downLink12/index.html`,
+        "url": `${localhost}/capture_downLink_indepth_case/index.html`,
         "role": "document",
-        "token": getToken(`${localhost}/capture_downLink12/index.html`, "document")
+        "token": getToken(`${localhost}/capture_downLink_indepth_case/index.html`, "document")
       },
       {
         "path": "index.xhtml",
@@ -11573,21 +11566,21 @@ async function test_capture_downLink17() {
       },
       {
         "path": "Green.bmp",
-        "url": `${localhost}/capture_downLink12/Green.bmp`,
+        "url": `${localhost}/capture_downLink_indepth_case/Green.bmp`,
         "role": "resource",
-        "token": getToken(`${localhost}/capture_downLink12/Green.bmp`, "resource")
+        "token": getToken(`${localhost}/capture_downLink_indepth_case/Green.bmp`, "resource")
       },
       {
        "path": "Yellow.bmp",
-       "url": `${localhost}/capture_downLink12/Yellow.bmp`,
+       "url": `${localhost}/capture_downLink_indepth_case/Yellow.bmp`,
        "role": "resource",
-       "token": getToken(`${localhost}/capture_downLink12/Yellow.bmp`, "resource")
+       "token": getToken(`${localhost}/capture_downLink_indepth_case/Yellow.bmp`, "resource")
       },
       {
        "path": "Linked.html",
-       "url": `${localhost}/capture_downLink12/Linked.html`,
+       "url": `${localhost}/capture_downLink_indepth_case/Linked.html`,
        "role": "document",
-       "token": getToken(`${localhost}/capture_downLink12/Linked.html`, "document")
+       "token": getToken(`${localhost}/capture_downLink_indepth_case/Linked.html`, "document")
       }
     ]
   };
@@ -11599,9 +11592,9 @@ async function test_capture_downLink17() {
  *
  * capturer.captureDocument
  */
-async function test_capture_metaRefresh() {
+async function test_capture_meta_refresh() {
   var blob = await capture({
-    url: `${localhost}/capture_metaRefresh/delayed.html`,
+    url: `${localhost}/capture_meta_refresh/delayed.html`,
     options: baseOptions,
   });
 
@@ -11615,15 +11608,15 @@ async function test_capture_metaRefresh() {
   assert(mrs[0].getAttribute('content') === `30`);
   assert(mrs[1].getAttribute('content') === `30; url=#`);
   assert(mrs[2].getAttribute('content') === `30; url=#123`);
-  assert(mrs[3].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh/delayed.html?id=123`);
+  assert(mrs[3].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh/delayed.html?id=123`);
   assert(mrs[4].getAttribute('content') === `30`);
   assert(mrs[5].getAttribute('content') === `30; url=#`);
   assert(mrs[6].getAttribute('content') === `30; url=#123`);
-  assert(mrs[7].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh/delayed.html?id=123`);
-  assert(mrs[8].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh/referred.html`);
-  assert(mrs[9].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh/referred.html#`);
-  assert(mrs[10].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh/referred.html#123`);
-  assert(mrs[11].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh/referred.html?id=123`);
+  assert(mrs[7].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh/delayed.html?id=123`);
+  assert(mrs[8].getAttribute('content') === `20; url=${localhost}/capture_meta_refresh/referred.html`);
+  assert(mrs[9].getAttribute('content') === `20; url=${localhost}/capture_meta_refresh/referred.html#`);
+  assert(mrs[10].getAttribute('content') === `20; url=${localhost}/capture_meta_refresh/referred.html#123`);
+  assert(mrs[11].getAttribute('content') === `20; url=${localhost}/capture_meta_refresh/referred.html?id=123`);
   assert(mrs[12].getAttribute('content') === `15; url=http://example.com/`);
   assert(mrs[13].getAttribute('content') === `15; url=http://example.com/#`);
   assert(mrs[14].getAttribute('content') === `15; url=http://example.com/#123`);
@@ -11636,10 +11629,10 @@ async function test_capture_metaRefresh() {
  *
  * capturer.captureDocument
  */
-async function test_capture_metaRefresh2() {
+async function test_capture_meta_refresh_selection() {
   /* refresh link target not captured */
   var blob = await capture({
-    url: `${localhost}/capture_metaRefresh2/delayed21.html`,
+    url: `${localhost}/capture_meta_refresh_selection/delayed21.html`,
     options: baseOptions,
   });
 
@@ -11651,17 +11644,17 @@ async function test_capture_metaRefresh2() {
 
   var mrs = doc.querySelectorAll('meta[http-equiv="refresh"]');
   assert(mrs[0].getAttribute('content') === `30`);
-  assert(mrs[1].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed21.html#123`);
-  assert(mrs[2].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed21.html?id=123`);
+  assert(mrs[1].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh_selection/delayed21.html#123`);
+  assert(mrs[2].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh_selection/delayed21.html?id=123`);
   assert(mrs[3].getAttribute('content') === `30`);
-  assert(mrs[4].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed21.html#123`);
-  assert(mrs[5].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed21.html?id=123`);
-  assert(mrs[6].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh2/referred.html`);
+  assert(mrs[4].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh_selection/delayed21.html#123`);
+  assert(mrs[5].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh_selection/delayed21.html?id=123`);
+  assert(mrs[6].getAttribute('content') === `20; url=${localhost}/capture_meta_refresh_selection/referred.html`);
   assert(mrs[7].getAttribute('content') === `15; url=http://example.com/`);
 
   /* refresh link target captured */
   var blob = await capture({
-    url: `${localhost}/capture_metaRefresh2/delayed22.html`,
+    url: `${localhost}/capture_meta_refresh_selection/delayed22.html`,
     options: baseOptions,
   });
 
@@ -11674,11 +11667,11 @@ async function test_capture_metaRefresh2() {
   var mrs = doc.querySelectorAll('meta[http-equiv="refresh"]');
   assert(mrs[0].getAttribute('content') === `30`);
   assert(mrs[1].getAttribute('content') === `30; url=#123`);
-  assert(mrs[2].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed22.html?id=123`);
+  assert(mrs[2].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh_selection/delayed22.html?id=123`);
   assert(mrs[3].getAttribute('content') === `30`);
   assert(mrs[4].getAttribute('content') === `30; url=#123`);
-  assert(mrs[5].getAttribute('content') === `30; url=${localhost}/capture_metaRefresh2/delayed22.html?id=123`);
-  assert(mrs[6].getAttribute('content') === `20; url=${localhost}/capture_metaRefresh2/referred.html`);
+  assert(mrs[5].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh_selection/delayed22.html?id=123`);
+  assert(mrs[6].getAttribute('content') === `20; url=${localhost}/capture_meta_refresh_selection/referred.html`);
   assert(mrs[7].getAttribute('content') === `15; url=http://example.com/`);
 }
 
@@ -11687,10 +11680,10 @@ async function test_capture_metaRefresh2() {
  *
  * capturer.captureDocument
  */
-async function test_capture_metaRefresh3() {
+async function test_capture_meta_refresh_base() {
   // time = 0 (capture the redirected page)
   var blob = await captureHeadless({
-    url: `${localhost}/capture_metaRefresh3/refresh0.html`,
+    url: `${localhost}/capture_meta_refresh_base/refresh0.html`,
     options: baseOptions,
   });
 
@@ -11698,11 +11691,11 @@ async function test_capture_metaRefresh3() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector(`html[data-scrapbook-source="${localhost}/capture_metaRefresh3/subdir/target.html?id=123#456"]`));
+  assert(doc.querySelector(`html[data-scrapbook-source="${localhost}/capture_meta_refresh_base/subdir/target.html?id=123#456"]`));
 
   // time = 1 (capture the meta refresh page)
   var blob = await captureHeadless({
-    url: `${localhost}/capture_metaRefresh3/refresh1.html`,
+    url: `${localhost}/capture_meta_refresh_base/refresh1.html`,
     options: baseOptions,
   });
 
@@ -11711,7 +11704,7 @@ async function test_capture_metaRefresh3() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   var mrs = doc.querySelectorAll('meta[http-equiv="refresh"]');
-  assert(mrs[0].getAttribute('content') === `1; url=${localhost}/capture_metaRefresh3/subdir/target.html?id=123#456`);
+  assert(mrs[0].getAttribute('content') === `1; url=${localhost}/capture_meta_refresh_base/subdir/target.html?id=123#456`);
 }
 
 /**
@@ -11719,10 +11712,10 @@ async function test_capture_metaRefresh3() {
  *
  * capturer.captureDocument
  */
-async function test_capture_metaRefresh4() {
+async function test_capture_meta_refresh_mode() {
   /* source */
   var blob = await captureHeadless({
-    url: `${localhost}/capture_metaRefresh4/refresh.html`,
+    url: `${localhost}/capture_meta_refresh_mode/refresh.html`,
     mode: 'source',
     options: baseOptions,
   });
@@ -11732,18 +11725,18 @@ async function test_capture_metaRefresh4() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh4/target.html#abc`);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_meta_refresh_mode/target.html#abc`);
 
   /* bookmark */
   var blob = await captureHeadless({
-    url: `${localhost}/capture_metaRefresh4/refresh.html`,
+    url: `${localhost}/capture_meta_refresh_mode/refresh.html`,
     mode: 'bookmark',
     options: baseOptions,
   });
 
   var doc = await readFileAsDocument(blob);
 
-  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh4/target.html#abc`);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_meta_refresh_mode/target.html#abc`);
 }
 
 /**
@@ -11751,10 +11744,10 @@ async function test_capture_metaRefresh4() {
  *
  * capturer.captureDocument
  */
-async function test_capture_metaRefresh5() {
+async function test_capture_meta_refresh_mode_file() {
   /* source */
   var blob = await captureHeadless({
-    url: `${localhost}/capture_metaRefresh5/refresh.html`,
+    url: `${localhost}/capture_meta_refresh_mode_file/refresh.html`,
     mode: 'source',
     options: baseOptions,
   });
@@ -11764,18 +11757,18 @@ async function test_capture_metaRefresh5() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh5/target.txt#abc`);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_meta_refresh_mode_file/target.txt#abc`);
 
   /* bookmark */
   var blob = await captureHeadless({
-    url: `${localhost}/capture_metaRefresh5/refresh.html`,
+    url: `${localhost}/capture_meta_refresh_mode_file/refresh.html`,
     mode: 'bookmark',
     options: baseOptions,
   });
 
   var doc = await readFileAsDocument(blob);
 
-  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh5/target.txt#abc`);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_meta_refresh_mode_file/target.txt#abc`);
 }
 
 /**
@@ -11783,10 +11776,10 @@ async function test_capture_metaRefresh5() {
  *
  * capturer.captureDocument
  */
-async function test_capture_metaRefresh6() {
+async function test_capture_meta_refresh_noscript() {
   /* source */
   var blob = await captureHeadless({
-    url: `${localhost}/capture_metaRefresh6/refresh.html`,
+    url: `${localhost}/capture_meta_refresh_noscript/refresh.html`,
     mode: 'source',
     options: baseOptions,
   });
@@ -11796,18 +11789,18 @@ async function test_capture_metaRefresh6() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh6/refresh.html`);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_meta_refresh_noscript/refresh.html`);
 
   /* bookmark */
   var blob = await captureHeadless({
-    url: `${localhost}/capture_metaRefresh6/refresh.html`,
+    url: `${localhost}/capture_meta_refresh_noscript/refresh.html`,
     mode: 'bookmark',
     options: baseOptions,
   });
 
   var doc = await readFileAsDocument(blob);
 
-  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_metaRefresh6/refresh.html`);
+  assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_meta_refresh_noscript/refresh.html`);
 }
 
 /**
@@ -11815,13 +11808,13 @@ async function test_capture_metaRefresh6() {
  *
  * capture.contentSecurityPolicy
  */
-async function test_capture_contentSecurityPolicy() {
+async function test_capture_meta_csp() {
   /* capture.contentSecurityPolicy = save */
   var options = {
     "capture.contentSecurityPolicy": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_contentSecurityPolicy/csp.html`,
+    url: `${localhost}/capture_meta_csp/csp.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -11840,7 +11833,7 @@ async function test_capture_contentSecurityPolicy() {
     "capture.contentSecurityPolicy": "remove",
   };
   var blob = await capture({
-    url: `${localhost}/capture_contentSecurityPolicy/csp.html`,
+    url: `${localhost}/capture_meta_csp/csp.html`,
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -12146,7 +12139,7 @@ async function test_capture_referrer() {
  * capture.referrerSpoofSource
  * capture.referrerPolicy
  */
-async function test_capture_referrer2() {
+async function test_capture_referrer_spoof() {
   /* capture.referrerSpoofSource = false */
   var options = {
     "capture.referrerPolicy": "unsafe-url",
@@ -12208,7 +12201,7 @@ async function test_capture_referrer2() {
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer3() {
+async function test_capture_referrer_attr() {
   /* capture.referrerPolicy = "unsafe-url" */
   var options = {
     "capture.referrerPolicy": "unsafe-url",
@@ -12216,7 +12209,7 @@ async function test_capture_referrer3() {
     "capture.downLink.file.extFilter": "py",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_referrer2/index.html`,
+    url: `${localhost}/capture_referrer_attr/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -12277,7 +12270,7 @@ async function test_capture_referrer3() {
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer4() {
+async function test_capture_referrer_attr_force() {
   /* capture.referrerPolicy = "+unsafe-url" */
   var options = {
     "capture.referrerPolicy": "+unsafe-url",
@@ -12285,7 +12278,7 @@ async function test_capture_referrer4() {
     "capture.downLink.file.extFilter": "py",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_referrer2/index.html`,
+    url: `${localhost}/capture_referrer_attr/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -12293,51 +12286,51 @@ async function test_capture_referrer4() {
 
   var file = zip.file('favicon.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 
   var file = zip.file('favicon_rel.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 
   var file = zip.file('stylesheet.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 
   var file = zip.file('stylesheet_rel.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 
   var file = zip.file('script.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 
   var file = zip.file('imgsrc.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 
   var file = zip.file('imgsrcset.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 
   var file = zip.file('iframe.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 
   var file = zip.file('a.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 
   var file = zip.file('a_rel.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 
   var file = zip.file('area.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 
   var file = zip.file('area_rel.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer2/index.html`);
+  assert(text === `${localhost}/capture_referrer_attr/index.html`);
 }
 
 /**
@@ -12346,7 +12339,7 @@ async function test_capture_referrer4() {
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer5() {
+async function test_capture_referrer_doc() {
   /* capture.referrerPolicy = "unsafe-url" */
   var options = {
     "capture.referrerPolicy": "unsafe-url",
@@ -12354,7 +12347,7 @@ async function test_capture_referrer5() {
     "capture.downLink.file.extFilter": "py",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_referrer3/index.html`,
+    url: `${localhost}/capture_referrer_doc/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -12502,7 +12495,7 @@ async function test_capture_referrer5() {
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer6() {
+async function test_capture_referrer_doc_force() {
   /* capture.referrerPolicy = "+unsafe-url" */
   var options = {
     "capture.referrerPolicy": "+unsafe-url",
@@ -12510,7 +12503,7 @@ async function test_capture_referrer6() {
     "capture.downLink.file.extFilter": "py",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_referrer3/index.html`,
+    url: `${localhost}/capture_referrer_doc/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -12518,63 +12511,63 @@ async function test_capture_referrer6() {
 
   var file = zip.file('favicon.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('stylesheet.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('script.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('imgsrc.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('imgsrcset.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('iframe.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('a.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('area.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('svg_image.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('svg_imagex.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('svg_script.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('svg_scriptx.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('svg_a.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('svg_ax.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('math_msup.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer3/index.html`);
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 }
 
 /**
@@ -12582,14 +12575,14 @@ async function test_capture_referrer6() {
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer7() {
+async function test_capture_referrer_cross_origin() {
   /* capture.rewriteCss = "url" */
   var options = {
     "capture.rewriteCss": "url",
     "capture.referrerPolicy": "",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_referrer4/index.py`,
+    url: `${localhost}/capture_referrer_cross_origin/index.py`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -12597,35 +12590,35 @@ async function test_capture_referrer7() {
 
   var file = zip.file('css_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer4/index.py`);
+  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
   var file = zip.file('css_style_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer4/index.py`);
+  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
   var file = zip.file('css_style_font.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer4/index.py`);
+  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
   var file = zip.file('css_style_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+  assert(text === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
 
   var file = zip.file('css_link.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
 
   var file = zip.file('css_link_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
 
   var file = zip.file('css_link_font.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
 
   var file = zip.file('css_link_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost2}/capture_referrer4/css_link.py; }`);
+  assert(text === `:root { --referrer: ${localhost2}/capture_referrer_cross_origin/css_link.py; }`);
 
   /* capture.rewriteCss = "tidy" */
   var options = {
@@ -12633,7 +12626,7 @@ async function test_capture_referrer7() {
     "capture.referrerPolicy": "",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_referrer4/index.py`,
+    url: `${localhost}/capture_referrer_cross_origin/index.py`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -12641,35 +12634,35 @@ async function test_capture_referrer7() {
 
   var file = zip.file('css_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer4/index.py`);
+  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
   var file = zip.file('css_style_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer4/index.py`);
+  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
   var file = zip.file('css_style_font.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer4/index.py`);
+  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
   var file = zip.file('css_style_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+  assert(text === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
 
   var file = zip.file('css_link.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
 
   var file = zip.file('css_link_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
 
   var file = zip.file('css_link_font.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
 
   var file = zip.file('css_link_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost2}/capture_referrer4/css_link.py; }`);
+  assert(text === `:root { --referrer: ${localhost2}/capture_referrer_cross_origin/css_link.py; }`);
 
   /* capture.rewriteCss = "match" */
   var options = {
@@ -12677,7 +12670,7 @@ async function test_capture_referrer7() {
     "capture.referrerPolicy": "",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_referrer4/index.py`,
+    url: `${localhost}/capture_referrer_cross_origin/index.py`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -12685,35 +12678,35 @@ async function test_capture_referrer7() {
 
   var file = zip.file('css_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer4/index.py`);
+  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
   var file = zip.file('css_style_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer4/index.py`);
+  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
   var file = zip.file('css_style_font.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer4/index.py`);
+  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
   var file = zip.file('css_style_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+  assert(text === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
 
   var file = zip.file('css_link.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer4/index.py; }`);
+  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
 
   var file = zip.file('css_link_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
 
   var file = zip.file('css_link_font.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer4/css_link.py`);
+  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
 
   var file = zip.file('css_link_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost2}/capture_referrer4/css_link.py; }`);
+  assert(text === `:root { --referrer: ${localhost2}/capture_referrer_cross_origin/css_link.py; }`);
 }
 
 /**
@@ -12721,7 +12714,7 @@ async function test_capture_referrer7() {
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer8() {
+async function test_capture_referrer_dynamic() {
   /* capture.referrerPolicy = "unsafe-url" */
   var options = {
     "capture.referrerPolicy": "unsafe-url",
@@ -12729,7 +12722,7 @@ async function test_capture_referrer8() {
     "capture.downLink.file.extFilter": "py",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_referrer5/index.html`,
+    url: `${localhost}/capture_referrer_dynamic/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -12737,7 +12730,7 @@ async function test_capture_referrer8() {
 
   var file = zip.file('css1.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer5/index.html`);
+  assert(text === `${localhost}/capture_referrer_dynamic/index.html`);
 
   var file = zip.file('css2.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -12870,7 +12863,7 @@ async function test_capture_record_meta() {
  * capturer.captureFile
  * capturer.captureBookmark
  */
-async function test_capture_record_meta2() {
+async function test_capture_record_meta_hash() {
   /* html */
   var options = {
     "capture.recordDocumentMeta": true,
@@ -12960,7 +12953,7 @@ async function test_capture_record_meta2() {
  * capturer.captureFile
  * capturer.captureBookmark
  */
-async function test_capture_record_meta3() {
+async function test_capture_record_meta_redirect() {
   /* html; +capture.recordDocumentMeta */
   var options = {
     "capture.recordDocumentMeta": true,
@@ -12985,7 +12978,7 @@ async function test_capture_record_meta3() {
  * capture.recordDocumentMeta
  * capturer.captureDocument
  */
-async function test_capture_record_meta4() {
+async function test_capture_record_meta_xhtml() {
   /* html; +capture.recordDocumentMeta */
   var options = {
     "capture.recordDocumentMeta": true,
@@ -13021,7 +13014,7 @@ async function test_capture_record_meta4() {
  * capture.recordRewrites
  * capturer.captureDocument
  */
-async function test_capture_record_nodes1() {
+async function test_capture_record_nodes_removed() {
   var options = {
     "capture.image": "remove",
     "capture.favicon": "remove",
@@ -13227,7 +13220,7 @@ async function test_capture_record_nodes1() {
  * capture.recordRewrites
  * capturer.captureDocument
  */
-async function test_capture_record_nodes2() {
+async function test_capture_record_nodes_removed_source() {
   var options = {
     "capture.image": "save-current",
     "capture.audio": "save-current",
@@ -13291,7 +13284,7 @@ async function test_capture_record_nodes2() {
  * capture.recordRewrites
  * capturer.captureDocument
  */
-async function test_capture_record_nodes3() {
+async function test_capture_record_nodes_added() {
   var options = {
     "capture.image": "save-current",
     "capture.audio": "save-current",
@@ -13359,7 +13352,7 @@ async function test_capture_record_nodes3() {
  * capture.recordRewrites
  * capturer.captureDocument
  */
-async function test_capture_record_attrs1() {
+async function test_capture_record_attrs() {
   var options = {
     "capture.frame": "save",
     "capture.styleInline": "blank",
@@ -13424,7 +13417,7 @@ async function test_capture_record_attrs1() {
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_attrs2() {
+async function test_capture_record_attrs_save() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -13606,7 +13599,7 @@ p { background-image: url("null.bmp"); }`);
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_attrs3() {
+async function test_capture_record_attrs_blank() {
   var options = {
     "capture.image": "blank",
     "capture.imageBackground": "blank",
@@ -13724,7 +13717,7 @@ p { background-image: url(""); }`);
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_attrs4() {
+async function test_capture_record_attrs_save_current() {
   var options = {
     "capture.image": "save-current",
     "capture.audio": "save-current",
@@ -13795,7 +13788,7 @@ async function test_capture_record_attrs4() {
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_attrs5() {
+async function test_capture_record_attrs_base() {
   var options = {
     "capture.recordRewrites": true,
   };
@@ -13840,7 +13833,7 @@ async function test_capture_record_attrs5() {
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri1() {
+async function test_capture_linkUnsavedUri() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -13910,7 +13903,7 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
  * capture.linkUnsavedUri
  * capture.downLink.file.mode
  */
-async function test_capture_linkUnsavedUri2() {
+async function test_capture_linkUnsavedUri_downLink() {
   var options = {
     "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
@@ -13987,7 +13980,7 @@ async function test_capture_linkUnsavedUri2() {
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri3() {
+async function test_capture_linkUnsavedUri_empty() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -14038,7 +14031,7 @@ p { background-image: url(""); }`);
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri4() {
+async function test_capture_linkUnsavedUri_hash() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -14089,7 +14082,7 @@ p { background-image: url("#123"); }`);
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri5() {
+async function test_capture_linkUnsavedUri_nonResolvable() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -14145,7 +14138,7 @@ p { background-image: url("nonexist.bmp"); }`);
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri6() {
+async function test_capture_linkUnsavedUri_protocol() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -14197,7 +14190,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri7() {
+async function test_capture_linkUnsavedUri_blob() {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -14702,7 +14695,7 @@ async function test_capture_sizeLimit() {
  * capturer.captureDocument
  * capturer.linkUnsavedUri
  */
-async function test_capture_sizeLimit2() {
+async function test_capture_sizeLimit_frame() {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.frame": "save",
@@ -14712,7 +14705,7 @@ async function test_capture_sizeLimit2() {
   options["capture.resourceSizeLimit"] = null;
 
   var blob = await capture({
-    url: `${localhost}/capture_sizeLimit2/index.html`,
+    url: `${localhost}/capture_sizeLimit_frame/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -14732,7 +14725,7 @@ async function test_capture_sizeLimit2() {
   options["capture.linkUnsavedUri"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_sizeLimit2/index.html`,
+    url: `${localhost}/capture_sizeLimit_frame/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -14752,7 +14745,7 @@ async function test_capture_sizeLimit2() {
   options["capture.linkUnsavedUri"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_sizeLimit2/index.html`,
+    url: `${localhost}/capture_sizeLimit_frame/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -14771,7 +14764,7 @@ async function test_capture_sizeLimit2() {
   options["capture.resourceSizeLimit"] = null;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_sizeLimit2/index.html`,
+    url: `${localhost}/capture_sizeLimit_frame/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -14792,7 +14785,7 @@ async function test_capture_sizeLimit2() {
   options["capture.linkUnsavedUri"] = false;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_sizeLimit2/index.html`,
+    url: `${localhost}/capture_sizeLimit_frame/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -14806,14 +14799,14 @@ async function test_capture_sizeLimit2() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_sizeLimit2/iframe2.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_sizeLimit_frame/iframe2.html`);
 
   /* sizeLimit = 1KB; linkUnsavedUri = true; headless */
   options["capture.resourceSizeLimit"] = 1 / 1024;
   options["capture.linkUnsavedUri"] = true;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_sizeLimit2/index.html`,
+    url: `${localhost}/capture_sizeLimit_frame/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -14827,7 +14820,7 @@ async function test_capture_sizeLimit2() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `${localhost}/capture_sizeLimit2/iframe2.html`);
+  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `${localhost}/capture_sizeLimit_frame/iframe2.html`);
 }
 
 /**
@@ -14836,7 +14829,7 @@ async function test_capture_sizeLimit2() {
  * capturer.captureDocument
  * capturer.linkUnsavedUri
  */
-async function test_capture_sizeLimit3() {
+async function test_capture_sizeLimit_datauri() {
   var options = {
     "capture.style": "save",
     "capture.image": "save",
@@ -14848,7 +14841,7 @@ async function test_capture_sizeLimit3() {
   options["capture.saveDataUriAsFile"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_sizeLimit3/index.html`,
+    url: `${localhost}/capture_sizeLimit_datauri/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -14868,7 +14861,7 @@ async function test_capture_sizeLimit3() {
   options["capture.saveDataUriAsFile"] = true;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_sizeLimit3/index.html`,
+    url: `${localhost}/capture_sizeLimit_datauri/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -14890,7 +14883,7 @@ async function test_capture_sizeLimit3() {
  * capturer.captureDocument
  * capturer.linkUnsavedUri
  */
-async function test_capture_sizeLimit4() {
+async function test_capture_sizeLimit_frame_datauri() {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.frame": "save",
@@ -14902,7 +14895,7 @@ async function test_capture_sizeLimit4() {
   options["capture.saveDataUriAsFile"] = true;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_sizeLimit4/index.html`,
+    url: `${localhost}/capture_sizeLimit_frame_datauri/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -14921,7 +14914,7 @@ async function test_capture_sizeLimit4() {
   options["capture.saveDataUriAsFile"] = true;
 
   var blob = await capture({
-    url: `${localhost}/capture_sizeLimit4/index.html`,
+    url: `${localhost}/capture_sizeLimit_frame_datauri/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -14941,7 +14934,7 @@ async function test_capture_sizeLimit4() {
  * capturer.captureDocument
  * capturer.linkUnsavedUri
  */
-async function test_capture_sizeLimit5() {
+async function test_capture_sizeLimit_frame_srcdoc() {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.frame": "save",
@@ -14952,7 +14945,7 @@ async function test_capture_sizeLimit5() {
   options["capture.linkUnsavedUri"] = false;
 
   var blob = await capture({
-    url: `${localhost}/capture_sizeLimit5/index.html`,
+    url: `${localhost}/capture_sizeLimit_frame_srcdoc/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -14969,7 +14962,7 @@ async function test_capture_sizeLimit5() {
   options["capture.linkUnsavedUri"] = false;
 
   var blob = await captureHeadless({
-    url: `${localhost}/capture_sizeLimit5/index.html`,
+    url: `${localhost}/capture_sizeLimit_frame_srcdoc/index.html`,
     mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
@@ -15107,7 +15100,7 @@ async function test_capture_helpers() {
  * capturer.helpersEnabled
  * capture.helpers
  */
-async function test_capture_helpers2() {
+async function test_capture_helpers_nesting() {
   var options = {
     "capture.helpersEnabled": true,
     "capture.helpers": `\
@@ -15121,7 +15114,7 @@ async function test_capture_helpers2() {
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_helpers2/index.html`,
+    url: `${localhost}/capture_helpers_nesting/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -15279,9 +15272,9 @@ async function test_viewer_interlink() {
   });
 }
 
-async function test_viewer_interlink2() {
+async function test_viewer_interlink_frame() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer_interlink2/index.html'),
+    url: browser.runtime.getURL('t/viewer_interlink_frame/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
@@ -15290,9 +15283,9 @@ async function test_viewer_interlink2() {
   });
 }
 
-async function test_viewer_interlink3() {
+async function test_viewer_interlink_frame_form() {
   return await openTestTab({
-    url: browser.runtime.getURL('t/viewer_interlink3/index.html'),
+    url: browser.runtime.getURL('t/viewer_interlink_frame_form/index.html'),
     active: true,
   }, (message, port, resolve) => {
     if (message.cmd == 'result') {
