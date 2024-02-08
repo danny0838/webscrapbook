@@ -1040,7 +1040,6 @@ async function test_capture_redirect() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_redirect/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -1068,7 +1067,6 @@ async function test_capture_redirect_hash() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_redirect_hash/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -2272,7 +2270,6 @@ async function test_capture_headless() {
   /* from URL; source */
   var blob = await captureHeadless({
     url: `${localhost}/capture_headless/tab-info.html`,
-    mode: "source",
     options: baseOptions,
   });
 
@@ -2306,7 +2303,6 @@ async function test_capture_headless() {
 async function test_capture_headless_attachment() {
   var blob = await captureHeadless({
     url: `${localhost}/capture_headless_attachment/attachment.py`,
-    mode: "source",
     options: baseOptions,
   });
 
@@ -2326,7 +2322,6 @@ async function test_capture_headless_attachment() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_headless_attachment/refresh.html`,
-    mode: "source",
     options: baseOptions,
   });
 
@@ -2983,7 +2978,6 @@ async function test_capture_base_dynamic_iframe() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_base_dynamic_iframe/base.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -3036,7 +3030,6 @@ async function test_capture_base_dynamic_iframe() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_base_dynamic_iframe/base.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4338,7 +4331,6 @@ async function test_capture_css_rewriteCss_cross_origin() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_css_rewriteCss_cross_origin/rewrite.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -4397,7 +4389,6 @@ async function test_capture_css_rewriteCss_cross_origin() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_css_rewriteCss_cross_origin/rewrite.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -5524,7 +5515,6 @@ async function test_capture_imageBackground_used() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_imageBackground_used/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6185,7 +6175,6 @@ async function test_capture_font_used() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_font_used/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6667,7 +6656,6 @@ async function test_capture_noscript_headless() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_script/noscript.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7111,7 +7099,6 @@ async function test_capture_frame_headless() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/same_origin.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7172,7 +7159,6 @@ async function test_capture_frame_headless_srcdoc() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/srcdoc.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7211,7 +7197,6 @@ async function test_capture_frame_headless_srcdoc() {
   // frame[srcdoc] should be ignored (left unchanged) and its src should be used
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/srcdoc2.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7239,7 +7224,6 @@ document.querySelector('p').textContent = 'srcdoc content modified';
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/srcdoc.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7271,7 +7255,6 @@ document.querySelector('p').textContent = 'srcdoc content modified';
   // frame[srcdoc] should be ignored (left unchanged) and its src should be used
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/srcdoc2.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7306,7 +7289,6 @@ async function test_capture_frame_headless_self() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/self.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7336,7 +7318,6 @@ async function test_capture_frame_headless_duplicate() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/duplicate.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7490,7 +7471,6 @@ async function test_capture_frame_singleHtml_duplicate() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/duplicate.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7510,7 +7490,6 @@ async function test_capture_frame_singleHtml_duplicate() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame/duplicate.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7537,7 +7516,6 @@ async function test_capture_frame_circular() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame_circular/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7578,7 +7556,6 @@ async function test_capture_frame_circular() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame_circular/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7609,7 +7586,6 @@ async function test_capture_frame_circular() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame_circular/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7645,7 +7621,6 @@ async function test_capture_frame_circular_self() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame_circular_self/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7669,7 +7644,6 @@ async function test_capture_frame_circular_self() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame_circular_self/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7689,7 +7663,6 @@ async function test_capture_frame_circular_self() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frame_circular_self/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7795,7 +7768,6 @@ async function test_capture_frameRename_header() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frameRename_header/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7849,7 +7821,6 @@ async function test_capture_frameRename_header() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_frameRename_header/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8114,7 +8085,6 @@ async function test_capture_image() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_image/image.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8239,7 +8209,6 @@ async function test_capture_audio() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_audio/audio.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8297,7 +8266,6 @@ async function test_capture_audio() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_audio/audio.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8326,7 +8294,6 @@ async function test_capture_audio() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_audio/audio.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8352,7 +8319,6 @@ async function test_capture_audio() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_audio/audio.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8378,7 +8344,6 @@ async function test_capture_audio() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_audio/audio.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8411,7 +8376,6 @@ async function test_capture_video() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_video/video.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8471,7 +8435,6 @@ async function test_capture_video() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_video/video.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8501,7 +8464,6 @@ async function test_capture_video() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_video/video.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8528,7 +8490,6 @@ async function test_capture_video() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_video/video.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8555,7 +8516,6 @@ async function test_capture_video() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_video/video.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8865,7 +8825,6 @@ async function test_capture_embed_circular() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_embed_circular/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -8905,7 +8864,6 @@ async function test_capture_embed_circular() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_embed_circular/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9103,7 +9061,6 @@ async function test_capture_object_circular() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_object_circular/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9143,7 +9100,6 @@ async function test_capture_object_circular() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_object_circular/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -10047,7 +10003,6 @@ async function test_capture_referrer() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10064,7 +10019,6 @@ async function test_capture_referrer() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10081,7 +10035,6 @@ async function test_capture_referrer() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10098,7 +10051,6 @@ async function test_capture_referrer() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10115,7 +10067,6 @@ async function test_capture_referrer() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10132,7 +10083,6 @@ async function test_capture_referrer() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10149,7 +10099,6 @@ async function test_capture_referrer() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10166,7 +10115,6 @@ async function test_capture_referrer() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10192,7 +10140,6 @@ async function test_capture_referrer_spoof() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10210,7 +10157,6 @@ async function test_capture_referrer_spoof() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10228,7 +10174,6 @@ async function test_capture_referrer_spoof() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10254,7 +10199,6 @@ async function test_capture_referrer_attr() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer_attr/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10322,7 +10266,6 @@ async function test_capture_referrer_attr_force() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer_attr/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10390,7 +10333,6 @@ async function test_capture_referrer_doc() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer_doc/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10545,7 +10487,6 @@ async function test_capture_referrer_doc_force() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer_doc/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10624,7 +10565,6 @@ async function test_capture_referrer_cross_origin() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer_cross_origin/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10668,7 +10608,6 @@ async function test_capture_referrer_cross_origin() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer_cross_origin/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10712,7 +10651,6 @@ async function test_capture_referrer_cross_origin() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer_cross_origin/index.py`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -10763,7 +10701,6 @@ async function test_capture_referrer_dynamic() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_referrer_dynamic/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -11137,7 +11074,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11161,7 +11097,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11185,7 +11120,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11209,7 +11143,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11233,7 +11166,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11257,7 +11189,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11281,7 +11212,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11305,7 +11235,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11329,7 +11258,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11353,7 +11281,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11377,7 +11304,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11401,7 +11327,6 @@ async function test_capture_downLink_file_extFilter() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11428,7 +11353,6 @@ mime:application/wsb.unknown`,
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11453,7 +11377,6 @@ mime:/text/.+/i`,
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11478,7 +11401,6 @@ mime:/.*/i`,
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11503,7 +11425,6 @@ mime:/.*/i`,
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11546,7 +11467,6 @@ ${localhost}/capture_downLink_file/redirect.pyr#bar`,
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11575,7 +11495,6 @@ ${localhost}/capture_downLink_file/file.css`,
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11604,7 +11523,6 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11636,7 +11554,6 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_file/basic.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11666,7 +11583,6 @@ async function test_capture_downLink_indepth() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11692,7 +11608,6 @@ async function test_capture_downLink_indepth() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11757,7 +11672,6 @@ async function test_capture_downLink_indepth() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11883,7 +11797,6 @@ async function test_capture_downLink_indepth() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -12036,7 +11949,6 @@ async function test_capture_downLink_indepth_singleHtml() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -12056,7 +11968,6 @@ async function test_capture_downLink_indepth_singleHtml() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -12087,7 +11998,6 @@ async function test_capture_downLink_indepth_skip_file() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -12144,7 +12054,6 @@ async function test_capture_downLink_indepth_skip_file() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -12174,7 +12083,6 @@ async function test_capture_downLink_indepth_skip_file() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -12244,7 +12152,6 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -12289,7 +12196,6 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -12339,7 +12245,6 @@ async function test_capture_downLink_indepth_nonHtml() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth_nonHtml/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -12378,7 +12283,6 @@ async function test_capture_downLink_indepth_frame() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth_frame/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -12417,7 +12321,6 @@ async function test_capture_downLink_indepth_renaming() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth_renaming/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -12439,7 +12342,6 @@ async function test_capture_downLink_indepth_renaming() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth_renaming/in-depth.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -13077,7 +12979,6 @@ async function test_capture_downLink_indepth_case() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_downLink_indepth_case/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -13297,7 +13198,6 @@ async function test_capture_record_meta_hash() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_record/frame.html#abc`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -13331,7 +13231,6 @@ async function test_capture_record_meta_hash() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_record/text.py#abc`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -13368,7 +13267,6 @@ async function test_capture_record_meta_redirect() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_record/meta.pyr#abc`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -13394,7 +13292,6 @@ async function test_capture_record_meta_xhtml() {
   };
   var blob = await captureHeadless({
     url: `${localhost}/capture_record/meta.xhtml#abc`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -13446,7 +13343,6 @@ async function test_capture_record_nodes_removed() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_record/nodes1.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -13538,7 +13434,6 @@ async function test_capture_record_nodes_removed() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_record/nodes1.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -14261,7 +14156,6 @@ async function test_capture_linkUnsavedUri() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_linkUnsavedUri/error1.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -14285,7 +14179,6 @@ p { background-image: url("urn:scrapbook:download:error:${localhost}/capture_lin
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_linkUnsavedUri/error1.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -14323,7 +14216,6 @@ async function test_capture_linkUnsavedUri_downLink() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_linkUnsavedUri/error2.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -14344,7 +14236,6 @@ async function test_capture_linkUnsavedUri_downLink() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_linkUnsavedUri/error2.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -14365,7 +14256,6 @@ async function test_capture_linkUnsavedUri_downLink() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_linkUnsavedUri/error2.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -14408,7 +14298,6 @@ async function test_capture_linkUnsavedUri_empty() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_linkUnsavedUri/error3.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -14459,7 +14348,6 @@ async function test_capture_linkUnsavedUri_hash() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_linkUnsavedUri/error4.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -14510,7 +14398,6 @@ async function test_capture_linkUnsavedUri_nonResolvable() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_linkUnsavedUri/error5.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -14566,7 +14453,6 @@ async function test_capture_linkUnsavedUri_protocol() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_linkUnsavedUri/error6.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
@@ -14855,7 +14741,6 @@ async function test_capture_sizeLimit_frame() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_sizeLimit_frame/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -14876,7 +14761,6 @@ async function test_capture_sizeLimit_frame() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_sizeLimit_frame/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -14897,7 +14781,6 @@ async function test_capture_sizeLimit_frame() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_sizeLimit_frame/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -14952,7 +14835,6 @@ async function test_capture_sizeLimit_datauri() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_sizeLimit_datauri/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -14986,7 +14868,6 @@ async function test_capture_sizeLimit_frame_datauri() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_sizeLimit_frame_datauri/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -15005,7 +14886,6 @@ async function test_capture_sizeLimit_frame_datauri() {
 
   var blob = await capture({
     url: `${localhost}/capture_sizeLimit_frame_datauri/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -15053,7 +14933,6 @@ async function test_capture_sizeLimit_frame_srcdoc() {
 
   var blob = await captureHeadless({
     url: `${localhost}/capture_sizeLimit_frame_srcdoc/index.html`,
-    mode: "source",
     options: Object.assign({}, baseOptions, options),
   });
 

@@ -247,10 +247,13 @@ async function capture(params, options = {}) {
 }
 
 /**
- * Shortcut for capture(params, {headless: true})
+ * Shortcut for a general headless capture.
  */
-async function captureHeadless(params) {
-  return await capture(params, {headless: true});
+async function captureHeadless(params, options = {}) {
+  return await capture(
+    Object.assign({mode: "source"}, params),
+    Object.assign(options, {headless: true}),
+  );
 }
 
 function readFileAsArrayBuffer(blob) {
