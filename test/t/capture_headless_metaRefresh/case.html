@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<meta http-equiv="refresh" content=""><!-- invalid -->
+<meta http-equiv="refresh" content=" "><!-- invalid -->
+<meta http-equiv="refresh" content=" ;"><!-- invalid -->
+<meta http-equiv="refresh" content=" ,"><!-- invalid -->
+<meta http-equiv="refresh" content="referred.html"><!-- invalid -->
+<meta http-equiv="refresh" content="url=referred.html"><!-- invalid -->
+<meta http-equiv="refresh" content=";url=referred.html"><!-- invalid -->
+
+<meta http-equiv="refresh" content="9">
+<meta http-equiv="refresh" content="0">
+<meta http-equiv="refresh" content="-1"><!-- invalid -->
+<meta http-equiv="refresh" content="+1"><!-- invalid -->
+<meta http-equiv="refresh" content=".123.456">
+<meta http-equiv="refresh" content=".123.456.">
+
+<meta http-equiv="refresh" content="9 ">
+<meta http-equiv="refresh" content="9;">
+<meta http-equiv="refresh" content="9,">
+<meta http-equiv="refresh" content="9 ; ">
+<meta http-equiv="refresh" content="9 , ">
+
+<meta http-equiv="refresh" content="1 referred.html">
+<meta http-equiv="refresh" content="1;referred.html">
+<meta http-equiv="refresh" content="1,referred.html">
+<meta http-equiv="refresh" content="1 ; referred.html">
+<meta http-equiv="refresh" content="1 , referred.html">
+
+<meta http-equiv="refresh" content="1 u=referred.html"><!-- url="u=referred.html" -->
+<meta http-equiv="refresh" content="1 u = referred.html"><!-- url="u = referred.html" -->
+<meta http-equiv="refresh" content="1 url referred.html"><!-- url="url referred.html" -->
+
+<meta http-equiv="refresh" content="1 url=referred.html">
+<meta http-equiv="refresh" content="1;url=referred.html">
+<meta http-equiv="refresh" content="1,url=referred.html">
+<meta http-equiv="refresh" content="1 ; url = referred.html">
+<meta http-equiv="refresh" content="1 , url = referred.html">
+
+<meta http-equiv="refresh" content='1 "referred.html"'>
+<meta http-equiv="refresh" content="1 'referred.html'">
+<meta http-equiv="refresh" content='1 "referred.html"'>
+<meta http-equiv="refresh" content='1 "referred.html 123'><!-- url="referred.html 123" -->
+<meta http-equiv="refresh" content='1 "referred.html&apos;123'><!-- url="referred.html'123" -->
+<meta http-equiv="refresh" content='1 "referred.html"123'>
+<meta http-equiv="refresh" content="1 'referred.html&quot;123'"><!-- url='referred.html"123' -->
+<meta http-equiv="refresh" content="1 'referred.html'123">
+
+<meta http-equiv="refresh" content='1 url="referred.html"'>
+<meta http-equiv="refresh" content="1 url='referred.html'">
+<meta http-equiv="refresh" content='1 url="referred.html '><!-- url="referred.html " -->
+<meta http-equiv="refresh" content='1 url="referred.html&apos;123'><!-- url="referred.html'123" -->
+<meta http-equiv="refresh" content='1 url="referred.html"123'>
+<meta http-equiv="refresh" content="1 url='referred.html&quot;123'"><!-- url='referred.html"123' -->
+<meta http-equiv="refresh" content="1 url='referred.html'123">

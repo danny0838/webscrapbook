@@ -2965,19 +2965,16 @@
    */
   scrapbook.parseHeaderRefresh = function (string) {
     const regex = new RegExp([
-    '^',
-    '[\\t\\n\\f\\r ]*',
-    '(\\d+)',
-    '(?:\\.[\\d.]*)?',
-    '(?:',
-        '(?=[\\t\\n\\f\\r ;,])',
-        '[\\t\\n\\f\\r ]*',
-        '[;,]?',
-        '[\\t\\n\\f\\r ]*',
-        '(?:url[\\t\\n\\f\\r ]*=[\\t\\n\\f\\r ]*)?',
-        '(.*)',
-    ')?',
-    '$',
+      '^',
+      String.raw`[${ASCII_WHITESPACE}]*`,
+      String.raw`(\d+|(?=\.))`,  // capture 1
+      String.raw`[\d.]*`,
+      '(?:',
+        String.raw`(?=[${ASCII_WHITESPACE};,])`,
+        String.raw`[${ASCII_WHITESPACE}]*[;,]?[${ASCII_WHITESPACE}]*`,
+        String.raw`(?:url[${ASCII_WHITESPACE}]*=[${ASCII_WHITESPACE}]*)?`,
+        String.raw`(?:"([^"]*)(?="|$)|'([^']*)(?='|$)|(.*)$)`,  // capture 2, 3, 4
+      ')?',
     ].join(''), 'i');
     const fn = scrapbook.parseHeaderRefresh = function (string) {
       const result = {time: undefined, url: undefined};
@@ -2988,21 +2985,8 @@
 
       const m = string.match(regex);
       if (m) {
-        result.time = parseInt(m[1]);
-
-        let url = m[2];
-        if (url) {
-          for (const quote of ['"', "'"]) {
-            if (url.startsWith(quote)) {
-              const pos = url.indexOf(quote, 1);
-              url = url.slice(1, pos !== -1 ? pos : undefined);
-              break;
-            }
-          }
-          result.url = scrapbook.trim(url);
-        } else {
-          result.url = '';
-        }
+        result.time = parseInt(m[1] || 0, 10);
+        result.url = scrapbook.trim(m[2] || m[3] || m[4] || "");
       }
 
       return result;

@@ -2359,6 +2359,235 @@ async function test_capture_headless_attachment() {
 }
 
 /**
+ * Check headless captures redirected by a zero-time meta refresh.
+ *
+ * - Also check meta refresh syntax handling.
+ *   - valid, time = 0: capture the refreshed page.
+ *   - valid, time > 0: rewrite element, capture the original page.
+ *   - invalid: don't rewrite element, capture the original page.
+ *
+ * capturer.captureUrl
+ * scrapbook.parseHeaderRefresh
+ */
+async function test_capture_headless_metaRefresh() {
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case1.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === "");
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case2.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === " ");
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case3.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === " ;");
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case5.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === "referred.html");
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case8.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === "9");
+
+  var result = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case9.html`,
+    options: baseOptions,
+  });
+  assert(result.error);
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case10.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === "-1 referred.html");
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case11.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === "+1 referred.html");
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case12.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.body.innerHTML === "refresh target page");
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case13.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.body.innerHTML === "refresh target page");
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case14.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.body.innerHTML === "refresh target page");
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case19.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === "1:referred.html");
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case24.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/u=referred.html`);
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case26.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/url%20referred.html`);
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case40.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/referred.html`);
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case41.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/referred.html`);
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case42.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/referred.html`);
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case43.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/referred.html`);
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case44.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/referred.html'123`);
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case45.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/referred.html`);
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case46.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/referred.html%22123`);
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_headless_metaRefresh/case47.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/referred.html`);
+}
+
+/**
  * Check if captureBookmark works
  *
  * capturer.captureBookmark
