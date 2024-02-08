@@ -92,7 +92,7 @@
             return lines;
           }
           if (task.title) {
-            line += ' ' + task.title.replace(/[ \t\r\n\f]+/g, ' ').replace(/^ +/, '').replace(/ +$/, '');
+            line += ' ' + scrapbook.split(task.title).join(' ');
           }
           lines.push(line);
           return lines;

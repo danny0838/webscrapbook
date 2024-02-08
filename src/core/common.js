@@ -552,6 +552,8 @@
 }
 `;
 
+  const ASCII_WHITESPACE = String.raw`\t\n\f\r `;
+
   const scrapbook = {
     BACKEND_MIN_VERSION,
     DEFAULT_OPTIONS,
@@ -1642,7 +1644,7 @@
           return text.replace(/[\r\n][\S\s]+$/, '');
         }
         case "collapse": {
-          return scrapbook.trim(text).replace(/[\t\n\f\r ]+/g, ' ');
+          return scrapbook.split(text).join(' ');
         }
         case "url": {
           return encodeURIComponent(text);
@@ -2632,12 +2634,27 @@
    * Usually used for HTML parsing.
    */
   scrapbook.trim = function (str) {
-    const regexLeading = /^[\t\n\f\r ]+/;
-    const regexTrailing = /[\t\n\f\r ]+$/;
+    const regexLeading = new RegExp(`^[${ASCII_WHITESPACE}]+`);
+    const regexTrailing = new RegExp(`[${ASCII_WHITESPACE}]+$`);
     const trim = scrapbook.trim = (str) => {
-      return str.replace(regexLeading, '').replace(regexTrailing, '');
+      return (str || '').replace(regexLeading, '').replace(regexTrailing, '');
     };
     return trim(str);
+  };
+
+  /**
+   * Split by ASCII whitespaces and discard empty components.
+   *
+   * Usually used for HTML parsing.
+   */
+  scrapbook.split = function (str) {
+    const regex = new RegExp(`[${ASCII_WHITESPACE}]+`);
+    const filter = x => !!x;
+    const split = scrapbook.split = (str) => {
+      const parts = (str || '').split(regex);
+      return (str || '').split(regex).filter(filter);
+    };
+    return split(str);
   };
 
   /**
@@ -3495,12 +3512,11 @@
    */
   scrapbook.rewriteUrls = function (...args) {
     const KEY_PREFIX = "urn:scrapbook:str:";
-    const REGEX_SPACES = /[\t\n\f\r ]+/;
     const REGEX_UUID = new RegExp(KEY_PREFIX + "([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})", 'g');
 
     const fn = scrapbook.rewriteUrls = function (urls, rewriter) {
       let mapUrlPromise;
-      const response = urls.split(REGEX_SPACES).map(url => {
+      const response = scrapbook.split(urls).map(url => {
         let replacement = rewriter(url);
         if (scrapbook.isPromise(replacement)) {
           if (!mapUrlPromise) { mapUrlPromise = new Map(); }

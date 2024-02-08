@@ -436,7 +436,7 @@
           })());
           const rulesText = (await Promise.all(tasks))
             .reduce((mergedLinks, links) => mergedLinks.concat(links), [])
-            .map(x => x.url + ' ' + x.title.replace(/[ \t\r\n\f]+/g, ' ').replace(/^ +/, '').replace(/ +$/, ''))
+            .map(x => x.url + ' ' + scrapbook.split(x.title).join(' '))
             .join('\n');
           insertInputText(inputElem, rulesText);
           break;

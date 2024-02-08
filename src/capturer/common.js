@@ -2897,9 +2897,7 @@
     });
 
     // prepare favicon selector
-    const favIconSelector = options["capture.faviconAttrs"]
-      .split(/[\t\n\f\r ]+/)
-      .filter(x => x)
+    const favIconSelector = scrapbook.split(options["capture.faviconAttrs"])
       .map(attr => `[rel~="${CSS.escape(attr)}"][href]`)
       .join(', ');
 
