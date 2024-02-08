@@ -878,7 +878,25 @@ async function test_capture_header() {
   var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
   assert(b64 === "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
 
-  // filename*=UTF-8''...
+  // FILENAME
+  var savedFile = zip.file('file2.bmp');
+  assert(savedFile);
+  var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
+  assert(b64 === "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+
+  // filename = "..."
+  var savedFile = zip.file('file _X_.bmp');
+  assert(savedFile);
+  var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
+  assert(b64 === "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+
+  // filename=...; filename*=iso-8859-1'en'...
+  var savedFile = zip.file('£ rates.bmp');
+  assert(savedFile);
+  var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
+  assert(b64 === "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
+
+  // filename*=UTF-8''...; filename=...
   var savedFile = zip.file('中文𠀀.bmp');
   assert(savedFile);
   var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
@@ -12661,9 +12679,10 @@ async function test_capture_downLink_indepth_attachment() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment1.py#in-depth`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `attachment1.html#in-depth`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `attachment2.html#in-depth`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `attachment2-2.html#in-depth`);
   assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment3.html#in-depth`);
   assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `${localhost}/capture_downLink_indepth_attachment/attachment4.html#in-depth`);
   assert(doc.querySelectorAll('math [href]')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment5.html#in-depth`);
@@ -12676,6 +12695,12 @@ async function test_capture_downLink_indepth_attachment() {
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('attachment2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="./red.bmp"]'));
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('attachment2-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('img[src="./red.bmp"]'));
@@ -12693,14 +12718,16 @@ async function test_capture_downLink_indepth_attachment() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(!zip.file('attachment2.py'));
+  assert(!zip.file('attachment2-2.py'));
   assert(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `attachment1.html#in-depth`);
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment1.html#in-depth`);
+  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment1.py#in-depth`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment2.py#in-depth`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth_attachment/attachment2-2.py#in-depth`);
   assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `attachment3.html#in-depth`);
   assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `attachment4.html#in-depth`);
   assert(doc.querySelectorAll('math [href]')[0].getAttribute('href') === `attachment5.html#in-depth`);
@@ -12750,6 +12777,7 @@ async function test_capture_downLink_indepth_attachment() {
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `attachment1-1.html#in-depth`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `attachment1.html#in-depth`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `attachment2.html#in-depth`);
+  assert(doc.querySelectorAll('a')[3].getAttribute('href') === `attachment2-2.html#in-depth`);
   assert(doc.querySelectorAll('svg a')[0].getAttribute('href') === `attachment3.html#in-depth`);
   assert(doc.querySelectorAll('svg a')[1].getAttribute('xlink:href') === `attachment4.html#in-depth`);
   assert(doc.querySelectorAll('math [href]')[0].getAttribute('href') === `attachment5.html#in-depth`);
@@ -12768,6 +12796,12 @@ async function test_capture_downLink_indepth_attachment() {
 
   // downloaded as file (not rewritten)
   var indexFile = zip.file('attachment2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img[src="./red.bmp"]'));
+
+  // downloaded as file (not rewritten)
+  var indexFile = zip.file('attachment2-2.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('img[src="./red.bmp"]'));

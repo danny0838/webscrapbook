@@ -2870,27 +2870,33 @@
     const regexExtValue = /^([^']*)'([^']*)'([^']*)$/;
 
     const fn = scrapbook.parseHeaderContentDisposition = function (string) {
-      const result = {type: undefined, parameters: {}};
+      const result = {type: "inline", parameters: {}};
 
       if (typeof string !== 'string') {
         return result;
       }
 
-      if (regexContentDisposition.test(string)) {
-        string = RegExp.rightContext;
-        result.type = RegExp.$1;
+      let match;
+      if (match = regexContentDisposition.exec(string)) {
+        string = string.slice(match.index + match[0].length);
+        result.type = match[1].toLowerCase();
 
-        while (regexDispExtParam.test(string)) {
-          string = RegExp.rightContext;
-          let field = RegExp.$1;
-          let value = RegExp.$2;
+        while (match = regexDispExtParam.exec(string)) {
+          string = string.slice(match.index + match[0].length);
+          let field = match[1];
+          let value = match[2];
+
+          // RFC 6266 does not mention that parameters other than "filename"
+          // and "filename*" should be matched case-insensitively.
+          if (/^filename$/i.test(field)) {
+            field = field.toLowerCase();
+          }
 
           try {
             if (field.endsWith('*')) {
               // ext-value
-              field = field.slice(0, -1);
-              if (regexExtValue.test(value)) {
-                let charset = RegExp.$1, lang = RegExp.$2, valueEncoded = RegExp.$3;
+              if (match = regexExtValue.exec(value)) {
+                let charset = match[1], lang = match[2], valueEncoded = match[3];
                 switch (charset.toLowerCase()) {
                   case 'iso-8859-1':
                     value = unescape(valueEncoded);
@@ -2899,16 +2905,16 @@
                     value = decodeURIComponent(valueEncoded);
                     break;
                   default:
-                    console.error(`Unsupported charset in the extended field of header content-disposition: {charset}`);
+                    throw new Error(`Ignored unsupported charset for content-disposition: ${field}=${value}`);
                     break;
                 }
               } else {
-                throw new Error(`Bad ext-value`);
+                throw new Error(`Ignored malformed value for content-disposition: ${field}=${value}`);
               }
             } else {
               if (value.startsWith('"')) {
                 // any valid value with leading '"' must be ".*"
-                value = value.slice(1, -1);
+                value = scrapbook.unescapeQuotes(value.slice(1, -1));
               }
             }
 
@@ -2918,6 +2924,13 @@
             console.error(ex);
           }
         }
+      }
+
+      // overwrite field with field*
+      for (const field in result.parameters) {
+        if (!field.endsWith('*')) { continue; }
+        result.parameters[field.slice(0, -1)] = result.parameters[field];
+        delete result.parameters[field];
       }
 
       return result;

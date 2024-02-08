@@ -612,7 +612,7 @@
                 const headerContentDisposition = xhr.getResponseHeader("Content-Disposition");
                 if (headerContentDisposition) {
                   const contentDisposition = scrapbook.parseHeaderContentDisposition(headerContentDisposition);
-                  headers.isAttachment = (contentDisposition.type === "attachment");
+                  headers.isAttachment = (contentDisposition.type !== "inline");
                   headers.filename = contentDisposition.parameters.filename;
                 }
                 const headerContentLength = xhr.getResponseHeader("Content-Length");
