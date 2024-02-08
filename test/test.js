@@ -2694,6 +2694,33 @@ async function test_capture_meta_csp() {
 }
 
 /**
+ * Check meta in a shadowRoot is ignored.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_meta_shadow() {
+  var blob = await capture({
+    url: `${localhost}/capture_meta_shadow/meta.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  // a default meta[charset] should be generated
+  assert(doc.querySelector('meta[charset="UTF-8"]:not([http-equiv]):not([content])'));
+
+  var host = doc.querySelector('[data-scrapbook-shadowdom]');
+  assert(host.getAttribute("data-scrapbook-shadowdom").trim() === `\
+<meta charset="Big5">
+<meta http-equiv="content-type" content="text/html; charset=Big5">
+<meta http-equiv="Content-Security-Policy" content="default-src 'nonce-2726c7f26c';">
+<meta http-equiv="refresh" content="0; url=nonexist.html">`);
+}
+
+/**
  * Check if option works
  *
  * capture.base
@@ -10716,6 +10743,39 @@ async function test_capture_referrer_dynamic() {
   var file = zip.file('css3.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === ``);
+}
+
+/**
+ * meta[name="referrer"] in a shadowRoot should be ignored.
+ *
+ * capture.referrerPolicy
+ */
+async function test_capture_referrer_dynamic_shadow() {
+  var options = {
+    "capture.referrerPolicy": "unsafe-url",
+    "capture.downLink.file.mode": "url",
+    "capture.downLink.file.extFilter": "py",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_referrer_dynamic_shadow/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var file = zip.file('css1.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer_dynamic_shadow/index.html`);
+
+  var file = zip.file('css2.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer_dynamic_shadow/index.html`);
+
+  var file = zip.file('css3.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer_dynamic_shadow/index.html`);
 }
 
 /**

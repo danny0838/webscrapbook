@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<div></div>
+<script>
+var d = document.querySelector('div');
+var s = d.attachShadow({mode: 'open'});
+s.innerHTML = `
+<meta charset="Big5">
+<meta http-equiv="content-type" content="text/html; charset=Big5">
+<meta http-equiv="Content-Security-Policy" content="default-src 'nonce-2726c7f26c';">
+<meta http-equiv="refresh" content="0; url=nonexist.html">
+`;
+</script>

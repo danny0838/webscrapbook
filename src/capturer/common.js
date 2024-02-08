@@ -625,6 +625,10 @@
           }
 
           case "meta": {
+            // <meta> elements in a shadowRoot never works. Don't process or
+            // rewrite them.
+            if (elem.getRootNode().nodeType === 11) { break; }
+
             // Exactly one of the name, http-equiv, charset, and itemprop
             // attributes must be specified, according to the spec. Though we
             // check and rewrite all of them in case of a bad element
