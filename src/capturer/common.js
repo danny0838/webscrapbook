@@ -823,7 +823,7 @@
               // favicon: the link element
               switch (options["capture.favicon"]) {
                 case "link":
-                  if (typeof favIconUrl === 'undefined') {
+                  if (typeof favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
                     favIconUrl = elem.getAttribute("href");
                   }
                   break;
@@ -831,20 +831,20 @@
                   // HTML 5.1 2nd Edition / W3C Recommendation:
                   // If the href attribute is absent, then the element does not define a link.
                   captureRewriteAttr(elem, "href", null);
-                  if (typeof favIconUrl === 'undefined') {
+                  if (typeof favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
                     favIconUrl = "";
                   }
                   break;
                 case "remove":
                   captureRemoveNode(elem);
-                  if (typeof favIconUrl === 'undefined') {
+                  if (typeof favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
                     favIconUrl = "";
                   }
                   return;
                 case "save":
                 default:
                   let useFavIcon = false;
-                  if (typeof favIconUrl === 'undefined') {
+                  if (typeof favIconUrl === 'undefined' && elem.getRootNode().nodeType !== 11) {
                     favIconUrl = elem.getAttribute("href");
                     useFavIcon = true;
                   }
