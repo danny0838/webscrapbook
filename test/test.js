@@ -2402,7 +2402,10 @@ async function test_capture_meta_charset() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.title === 'ABC 中文');
-  assert(doc.querySelector('meta[charset="UTF-8"]'));
+
+  var metaElems = doc.querySelectorAll('meta');
+  assert(metaElems[0].getAttribute('charset') === `UTF-8`);
+  assert(metaElems[1].getAttribute('charset') === `GBK`);
 
   var imgElem = doc.querySelectorAll('img')[0];
   assert(imgElem.getAttribute('src') === `圖片.bmp`);
@@ -2423,13 +2426,35 @@ async function test_capture_meta_charset() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.title === 'ABC 中文');
-  assert(doc.querySelector('meta[content="text/html; charset=UTF-8"]'));
+
+  var metaElems = doc.querySelectorAll('meta');
+  assert(metaElems[0].getAttribute('content') === `text/html; charset=UTF-8`);
+  assert(metaElems[1].getAttribute('content') === `text/html; charset=GBK`);
 
   var imgElem = doc.querySelectorAll('img')[0];
   assert(imgElem.getAttribute('src') === `圖片.bmp`);
 
   var imgElem = doc.querySelectorAll('img')[1];
   assert(imgElem.getAttribute('src') === `圖片.bmp`);
+
+  /* meta old (complicated syntax) */
+  var blob = await capture({
+    url: `${localhost}/capture_meta_charset/big5-old2.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.title === 'ABC 中文');
+
+  var metaElems = doc.querySelectorAll('meta');
+  assert(metaElems[0].getAttribute('content') === String.raw`text/javascript; KEY=VALUE`);
+  assert(metaElems[1].getAttribute('content') === String.raw`text/plain; charset=UTF-8; data=bar456; data2="中文\"789\""`);
+  assert(metaElems[2].getAttribute('content') === String.raw`text/css; CHARSET="GBK"; data=中文123`);
 
   /* no meta charset; HTTP header Big5 */
   var blob = await capture({
@@ -13772,7 +13797,6 @@ async function test_capture_record_attrs() {
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
   assert(doc.querySelector('meta').getAttribute(`data-scrapbook-orig-attr-charset-${timeId}`) === `Big5`);
-  assert(doc.querySelector('meta[content]').getAttribute(`data-scrapbook-orig-attr-content-${timeId}`) === `text/html; charset=Big5`);
   assert(doc.querySelector('body').getAttribute(`data-scrapbook-orig-attr-onload-${timeId}`) === `console.log('load');`);
   assert(doc.querySelector('div').getAttribute(`data-scrapbook-orig-attr-style-${timeId}`) === `background-color: green;`);
   assert(doc.querySelector('iframe').getAttribute(`data-scrapbook-orig-attr-srcdoc-${timeId}`) === `frame page content`);
@@ -13796,7 +13820,6 @@ async function test_capture_record_attrs() {
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
   assert(!doc.querySelector('meta').hasAttribute(`data-scrapbook-orig-attr-charset-${timeId}`));
-  assert(!doc.querySelector('meta[content]').hasAttribute(`data-scrapbook-orig-attr-content-${timeId}`));
   assert(!doc.querySelector('body').hasAttribute(`data-scrapbook-orig-attr-onload-${timeId}`));
   assert(!doc.querySelector('div').hasAttribute(`data-scrapbook-orig-attr-style-${timeId}`));
   assert(!doc.querySelector('iframe').hasAttribute(`data-scrapbook-orig-attr-srcdoc-${timeId}`));

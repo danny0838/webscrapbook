@@ -2822,24 +2822,25 @@
     const regexParameter = new RegExp(`^${pOWS};${pOWS}(${pToken})=([^\t ;"]*(?:${pQuotedString}[^\t ;"]*)*)`);
 
     const fn = scrapbook.parseHeaderContentType = function (string) {
-      const result = {type: undefined, parameters: {}};
+      const result = {type: "", parameters: {}};
 
       if (typeof string !== 'string') {
         return result;
       }
 
-      if (regexContentType.test(string)) {
-        string = RegExp.rightContext;
-        result.type = RegExp.$1;
+      let match;
+      if (match = regexContentType.exec(string)) {
+        string = string.slice(match.index + match[0].length);
+        result.type = match[1].toLowerCase();
 
-        while (regexParameter.test(string)) {
-          string = RegExp.rightContext;
-          let field = RegExp.$1;
-          let value = RegExp.$2;
+        while (match = regexParameter.exec(string)) {
+          string = string.slice(match.index + match[0].length);
+          let field = match[1].toLowerCase();
+          let value = match[2];
 
           if (value.startsWith('"')) {
             // any valid value with leading '"' must be ".*"
-            value = value.slice(1, -1);
+            value = scrapbook.unescapeQuotes(value.slice(1, -1));
           }
 
           result.parameters[field] = value;

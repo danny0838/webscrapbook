@@ -631,10 +631,12 @@
 
             // Exactly one of the name, http-equiv, charset, and itemprop
             // attributes must be specified, according to the spec. Though we
-            // check and rewrite all of them in case of a bad element
-            // containing multiple attributes.
+            // check all of them in case that a bad element contains multiple
+            // attributes. It's tested that Firefox and Chromium will take the
+            // charset of meta[charset] or meta[http-equiv=content-type][content]
+            // even if another http-equiv or name also exists.
 
-            if (elem.matches('[charset]')) {
+            if (elem.matches('[charset]') && !metaCharsetNode) {
               // force UTF-8
               metaCharsetNode = elem;
               captureRewriteAttr(elem, "charset", "UTF-8");
@@ -644,9 +646,19 @@
             if (elem.matches('[http-equiv][content]')) {
               switch (elem.getAttribute("http-equiv").toLowerCase()) {
                 case "content-type": {
-                  // force UTF-8
-                  metaCharsetNode = elem;
-                  captureRewriteAttr(elem, "content", "text/html; charset=UTF-8");
+                  const contentType = scrapbook.parseHeaderContentType(elem.getAttribute("content"));
+                  if (contentType.parameters.charset && !metaCharsetNode) {
+                    // force UTF-8
+                    metaCharsetNode = elem;
+                    const regexToken = /^[!#$%&'*+.0-9A-Z^_`a-z|~-]+$/;
+                    let value = contentType.type;
+                    for (const field in contentType.parameters) {
+                      let v = contentType.parameters[field];
+                      if (field === 'charset') { v = 'UTF-8'; }
+                      value += '; ' + field + '=' + (regexToken.test(v) ? v : '"' + scrapbook.escapeQuotes(v) + '"');
+                    }
+                    captureRewriteAttr(elem, "content", value);
+                  }
                   break;
                 }
                 case "refresh": {
