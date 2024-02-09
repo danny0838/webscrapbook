@@ -9513,6 +9513,47 @@ async function test_capture_applet() {
 }
 
 /**
+ * Check if template content is captured.
+ *
+ * - Getting/setting template.innerHTML/outerHTML is redirected to handle
+ *   template.content, which is a hidden DocumentFragment.
+ * - Getting/setting template.textContent or template.appendChild handles
+ *   its childNodes. By default a templates is styled display: none, but can
+ *   be changed by CSS.
+ *
+ * capturer.captureDocument
+ */
+async function test_capture_template() {
+  /* tab */
+  var blob = await capture({
+    url: `${localhost}/capture_template/template.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('template').innerHTML.trim() === `\
+<img src="./nonexist.bmp">
+<a href="./nonexist.html">anchor</a>`);
+
+  /* headless */
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_template/template.html`,
+    options: baseOptions,
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('template').innerHTML.trim() === `\
+<img src="./nonexist.bmp">
+<a href="./nonexist.html">anchor</a>`);
+}
+
+/**
  * Check if option works
  *
  * capture.formStatus
