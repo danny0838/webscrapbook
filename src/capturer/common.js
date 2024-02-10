@@ -724,11 +724,11 @@
             if (elem.matches('[name="referrer" i]')) {
               const policy = elem.getAttribute('content').toLowerCase();
               if (META_REFERRER_POLICY.has(policy)) {
-                docRefPolicy = cssHandler.docRefPolicy = policy;
+                docRefPolicy = policy;
               } else {
                 const policyLegacy = META_REFERRER_POLICY_LEGACY.get(policy);
                 if (policyLegacy !== undefined) {
-                  docRefPolicy = cssHandler.docRefPolicy = policy;
+                  docRefPolicy = policy;
                 }
               }
             }
@@ -2885,14 +2885,9 @@
     }
 
     // init cssHandler
-    // @FIXME: resolve each URL using dynamic baseUrl
-    // (Not so mandatory as this only have a problem when there's a URL
-    // before the first base[href], which violates the spec.)
     const cssHandler = new capturer.DocumentCssHandler({
       doc, rootNode: newDoc,
       origNodeMap, clonedNodeMap,
-      refUrl: baseUrlFinal,
-      refPolicy: docRefPolicy,
       settings, options,
     });
 
@@ -2987,7 +2982,14 @@
 
     // map used background images and fonts
     if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
-      const {usedCssFontUrl, usedCssImageUrl} = await cssHandler.getCssResources();
+      // @FIXME: resolve each URL using dynamic baseUrl (Not so mandatory as
+      //         this only have a problem when there's a URL before the first
+      //         base[href], which violates the spec.)
+      // @FIXME: resolve each URL using dynamic docRefPolicy
+      const {usedCssFontUrl, usedCssImageUrl} = await cssHandler.getCssResources({
+        refUrl: baseUrlFinal,
+        refPolicy: docRefPolicy,
+      });
 
       // expose filter to settings
       if (options["capture.imageBackground"] === "save-used") {
@@ -3778,13 +3780,11 @@
    ***************************************************************************/
 
   capturer.DocumentCssHandler = class DocumentCssHandler {
-    constructor({doc, rootNode, origNodeMap, clonedNodeMap, refUrl, refPolicy, settings, options}) {
+    constructor({doc, rootNode, origNodeMap, clonedNodeMap, settings, options}) {
       this.doc = doc;
-      this.rootNode = rootNode || doc.documentElement;
+      this.rootNode = rootNode;
       this.origNodeMap = origNodeMap;
       this.clonedNodeMap = clonedNodeMap;
-      this.refUrl = refUrl;
-      this.refPolicy = refPolicy;
       this.settings = settings;
       this.options = options;
       this.resourceMap = ((options['capture.saveAs'] === 'singleHtml') && options['capture.mergeCssResources']) ? {} : null;
@@ -4269,8 +4269,8 @@
      *
      * @return {{usedCssFontUrl: Object, usedCssImageUrl: Object}}
      */
-    async getCssResources() {
-      const {doc, rootNode, refUrl, refPolicy, settings, options} = this;
+    async getCssResources({refUrl, refPolicy}) {
+      const {doc, rootNode, settings, options} = this;
 
       const collector = {
         scopes: [],
