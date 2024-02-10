@@ -628,7 +628,7 @@
               }
 
               // get headers
-              if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:")) {
+              if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("blob:")) {
                 const headerContentType = xhr.getResponseHeader("Content-Type");
                 if (headerContentType) {
                   const contentType = scrapbook.parseHeaderContentType(headerContentType);
