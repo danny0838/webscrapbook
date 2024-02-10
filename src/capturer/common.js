@@ -1203,12 +1203,13 @@
                   sourceUrl = 'about:srcdoc';
 
                   tasks.push(async () => {
-                    let frameDoc;
-                    try {
-                      frameDoc = frameSrc.contentDocument;
-                    } catch (ex) {
-                      // console.debug(ex);
-                    }
+                    const frameDoc = (() => {
+                      try {
+                        return frameSrc.contentDocument;
+                      } catch (ex) {
+                        // console.debug(ex);
+                      }
+                    })();
 
                     // frame document accessible:
                     // capture the content document directly
@@ -1296,12 +1297,13 @@
                 sourceUrl = frame.getAttribute("src");
 
                 tasks.push(async () => {
-                  let frameDoc;
-                  try {
-                    frameDoc = frameSrc.contentDocument;
-                  } catch (ex) {
-                    // console.debug(ex);
-                  }
+                  const frameDoc = (() => {
+                    try {
+                      return frameSrc.contentDocument;
+                    } catch (ex) {
+                      // console.debug(ex);
+                    }
+                  })();
 
                   // frame document accessible:
                   // capture the content document directly
@@ -1317,12 +1319,13 @@
                     }).catch(captureFrameErrorHandler).then(captureFrameCallback);
                   }
 
-                  let frameWindow;
-                  try {
-                    frameWindow = frameSrc.contentWindow;
-                  } catch (ex) {
-                    // console.debug(ex);
-                  }
+                  const frameWindow = (() => {
+                    try {
+                      return frameSrc.contentWindow;
+                    } catch (ex) {
+                      // console.debug(ex);
+                    }
+                  })();
 
                   // frame window accessible:
                   // capture the content document through messaging if viable
@@ -2532,18 +2535,12 @@
       }
     };
 
-    const {doc = document, settings} = params;
+    const {doc = document, settings, options} = params;
     const {timeId, isHeadless, isMainPage, isMainFrame} = settings;
     const {documentElement: docElemNode} = doc;
 
-    // allow overwriting by capture helpers
-    let {options} = params;
-
-    // determine docUrl and baseUrl etc.
-    let {docUrl, baseUrl} = params;
-    docUrl = docUrl || doc.URL;
-    let docUrlHash;
-    [docUrl, docUrlHash] = scrapbook.splitUrlByAnchor(docUrl);
+    // determine docUrl, baseUrl, etc.
+    const [docUrl, docUrlHash] = scrapbook.splitUrlByAnchor(params.docUrl || doc.URL);
 
     // baseUrl: updates dynamically when the first base[href] is parsed.
     // baseUrlFallback: the initial baseUrl, used for resolving base elements.
@@ -2564,8 +2561,18 @@
     // dynamic baseUrl for a bad document with an URL before base[href].
     //
     // ref: https://html.spec.whatwg.org/#dynamic-changes-to-base-urls
-    const baseUrlFallback = baseUrl = scrapbook.splitUrlByAnchor(baseUrl || docUrl)[0];
-    let baseUrlFinal = baseUrl;
+    const baseUrlFallback = scrapbook.splitUrlByAnchor(params.baseUrl || docUrl)[0];
+    let baseUrl = baseUrlFallback;
+    const baseUrlFinal = (() => {
+      let base = baseUrlFallback;
+      for (const elem of doc.querySelectorAll('base[href]')) {
+        if (elem.closest('svg, math')) { continue; }
+        base = new URL(elem.getAttribute('href'), baseUrlFallback).href;
+        base = scrapbook.splitUrlByAnchor(base)[0];
+        break;
+      }
+      return base;
+    })();
     const refUrl = baseUrlFallback;
     let seenBaseElem = false;
 
@@ -2842,13 +2849,14 @@
 
     // preprocess with helpers
     if (options["capture.helpersEnabled"] && options["capture.helpers"]) {
-      let helpers;
-      try {
-        helpers = scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
-      } catch (ex) {
-        // skip invalid helpers
-        warn(`Ignored invalid capture.helpers: ${ex.message}`);
-      }
+      const helpers = (() => {
+        try {
+          return scrapbook.parseOption("capture.helpers", options["capture.helpers"]);
+        } catch (ex) {
+          // skip invalid helpers
+          warn(`Ignored invalid capture.helpers: ${ex.message}`);
+        }
+      })();
 
       if (helpers) {
         const parser = new capturer.CaptureHelperHandler({
@@ -2860,10 +2868,11 @@
         });
         const result = parser.run();
 
-        // replace options with merged ones
-        if (Object.keys(result.options).length) {
-          options = Object.assign({}, options, result.options);
-        }
+        // overwrite options
+        // @TODO: rewriting some options doesn't work or results in a
+        //        conflicting status as they are already processed before this
+        //        point.
+        Object.assign(options, result.options);
 
         if (result.errors.length) {
           (async () => {
@@ -2872,15 +2881,6 @@
             }
           })();
         }
-      }
-    }
-
-    // set baseUrlFinal according to the modified DOM
-    for (const baseElem of doc.querySelectorAll('base[href]')) {
-      if (!baseElem.closest('svg, math')) {
-        baseUrlFinal = new URL(baseElem.getAttribute('href'), baseUrlFallback).href;
-        baseUrlFinal = scrapbook.splitUrlByAnchor(baseUrlFinal)[0];
-        break;
       }
     }
 

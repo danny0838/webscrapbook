@@ -3358,7 +3358,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
           if (!(workers >= 1)) { workers = Infinity; }
           workers = Math.min(workers, entries.length);
 
-          let downloadItems = [];
+          const downloadItems = [];
           let taskIdx = 0;
           const saveEntry = async ([path, sourceUrl, blob]) => {
             try {
