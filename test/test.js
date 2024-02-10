@@ -6787,13 +6787,19 @@ async function test_capture_script() {
   assert(scripts[3].textContent.trim() === `console.log('body');`);
   assert(scripts[4].textContent.trim() === `console.log('post-body');`);
   assert(scripts[5].textContent.trim() === `console.log('post-html');`);
-  var a = doc.querySelector('a');
-  assert(a.getAttribute('href').trim() === `javascript:console.log('a');`);
-  var body = doc.body;
-  assert(body.getAttribute('onload').trim() === `console.log('load');`);
-  assert(body.getAttribute('oncontextmenu').trim() === `return false;`);
-  var div = doc.querySelector('div');
-  assert(div.getAttribute('onclick').trim() === `console.log('click');`);
+  var elem = doc.querySelector('a');
+  assert(elem.getAttribute('href').trim() === `javascript:console.log('a');`);
+  var elem = doc.body;
+  assert(elem.getAttribute('onload').trim() === `console.log('load');`);
+  assert(elem.getAttribute('oncontextmenu').trim() === `return false;`);
+  var elem = doc.querySelector('div');
+  assert(elem.getAttribute('onclick').trim() === `console.log('click');`);
+  var elem = doc.querySelector('svg circle');
+  assert(elem.getAttribute('onclick').trim() === `console.log('click');`);
+  var elem = doc.querySelector('svg text');
+  assert(elem.getAttribute('onclick').trim() === `console.log('click');`);
+  var elem = doc.querySelector('math mrow');
+  assert(elem.getAttribute('onclick').trim() === `console.log('click');`);
 
   /* capture.script = link */
   var options = {
@@ -6818,13 +6824,19 @@ async function test_capture_script() {
   assert(scripts[3].textContent.trim() === `console.log('body');`);
   assert(scripts[4].textContent.trim() === `console.log('post-body');`);
   assert(scripts[5].textContent.trim() === `console.log('post-html');`);
-  var a = doc.querySelector('a');
-  assert(a.getAttribute('href').trim() === `javascript:console.log('a');`);
-  var body = doc.body;
-  assert(body.getAttribute('onload').trim() === `console.log('load');`);
-  assert(body.getAttribute('oncontextmenu').trim() === `return false;`);
-  var div = doc.querySelector('div');
-  assert(div.getAttribute('onclick').trim() === `console.log('click');`);
+  var elem = doc.querySelector('a');
+  assert(elem.getAttribute('href').trim() === `javascript:console.log('a');`);
+  var elem = doc.body;
+  assert(elem.getAttribute('onload').trim() === `console.log('load');`);
+  assert(elem.getAttribute('oncontextmenu').trim() === `return false;`);
+  var elem = doc.querySelector('div');
+  assert(elem.getAttribute('onclick').trim() === `console.log('click');`);
+  var elem = doc.querySelector('svg circle');
+  assert(elem.getAttribute('onclick').trim() === `console.log('click');`);
+  var elem = doc.querySelector('svg text');
+  assert(elem.getAttribute('onclick').trim() === `console.log('click');`);
+  var elem = doc.querySelector('math mrow');
+  assert(elem.getAttribute('onclick').trim() === `console.log('click');`);
 
   /* capture.script = blank */
   var options = {
@@ -6849,13 +6861,19 @@ async function test_capture_script() {
   assert(scripts[3].textContent.trim() === ``);
   assert(scripts[4].textContent.trim() === ``);
   assert(scripts[5].textContent.trim() === ``);
-  var a = doc.querySelector('a');
-  assert(a.getAttribute('href').trim() === `javascript:`);
-  var body = doc.body;
-  assert(!body.hasAttribute('onload'));
-  assert(!body.hasAttribute('oncontextmenu'));
-  var div = doc.querySelector('div');
-  assert(!div.hasAttribute('onclick'));
+  var elem = doc.querySelector('a');
+  assert(elem.getAttribute('href').trim() === `javascript:`);
+  var elem = doc.body;
+  assert(!elem.hasAttribute('onload'));
+  assert(!elem.hasAttribute('oncontextmenu'));
+  var elem = doc.querySelector('div');
+  assert(!elem.hasAttribute('onclick'));
+  var elem = doc.querySelector('svg circle');
+  assert(!elem.hasAttribute('onclick'));
+  var elem = doc.querySelector('svg text');
+  assert(!elem.hasAttribute('onclick'));
+  var elem = doc.querySelector('math mrow');
+  assert(!elem.hasAttribute('onclick'));
 
   /* capture.script = remove */
   var options = {
@@ -6874,13 +6892,19 @@ async function test_capture_script() {
   var doc = await readFileAsDocument(indexBlob);
   var scripts = doc.querySelectorAll('script');
   assert(scripts.length === 0);
-  var a = doc.querySelector('a');
-  assert(a.getAttribute('href').trim() === `javascript:`);
-  var body = doc.body;
-  assert(!body.hasAttribute('onload'));
-  assert(!body.hasAttribute('oncontextmenu'));
-  var div = doc.querySelector('div');
-  assert(!div.hasAttribute('onclick'));
+  var elem = doc.querySelector('a');
+  assert(elem.getAttribute('href').trim() === `javascript:`);
+  var elem = doc.body;
+  assert(!elem.hasAttribute('onload'));
+  assert(!elem.hasAttribute('oncontextmenu'));
+  var elem = doc.querySelector('div');
+  assert(!elem.hasAttribute('onclick'));
+  var elem = doc.querySelector('svg circle');
+  assert(!elem.hasAttribute('onclick'));
+  var elem = doc.querySelector('svg text');
+  assert(!elem.hasAttribute('onclick'));
+  var elem = doc.querySelector('math mrow');
+  assert(!elem.hasAttribute('onclick'));
 }
 
 /**

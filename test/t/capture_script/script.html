@@ -16,6 +16,26 @@ console.log('body');
 </script>
 <a href="javascript:console.log('a');">javascript</a>
 <div onclick="console.log('click');">onclick</div>
+<svg witdh="50" height="50" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="40" r="35" onclick="console.log('click');"></circle>
+  <text x="50" y="90" text-anchor="middle" onclick="console.log('click');">&lt;circle&gt;</text>
+</svg>
+<math xmlns="http://www.w3.org/1998/Math/MathML" href="resources/green.bmp">
+  <mrow onclick="console.log('click');">
+    <mi>a</mi>
+    <mo>&InvisibleTimes;</mo>
+    <msup>
+      <mi>x</mi>
+      <mn>2</mn>
+    </msup>
+    <mo>+</mo>
+    <mi>b</mi>
+    <mo>&InvisibleTimes; </mo>
+    <mi>x</mi>
+    <mo>+</mo>
+    <mi>c</mi>
+  </mrow>
+</math>
 </body>
 <script>
 console.log('post-body');
