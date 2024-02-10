@@ -3567,6 +3567,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    */
 
   /**
+   * @override
    * @kind invokable
    * @param {Object} params
    * @param {string} params.url - may include hash
@@ -3639,6 +3640,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   /**
    * Fetch a remote CSS and resolve its charset and text.
    *
+   * @override
    * @kind invokable
    * @param {Object} params
    * @param {string} params.url

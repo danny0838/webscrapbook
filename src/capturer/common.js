@@ -89,6 +89,28 @@
   /**
    * @kind invokable
    * @param {Object} params
+   * @return {Promise<downloadFileResponse>}
+   */
+  capturer.downloadFile = async function (params) {
+    isDebug && console.debug("call: downloadFile", params);
+
+    return await capturer.invoke("downloadFile", params);
+  };
+
+  /**
+   * @kind invokable
+   * @param {Object} params
+   * @return {Promise<fetchCssResponse>}
+   */
+  capturer.fetchCss = async function (params) {
+    isDebug && console.debug("call: fetchCss", params);
+
+    return await capturer.invoke("fetchCss", params);
+  };
+
+  /**
+   * @kind invokable
+   * @param {Object} params
    * @param {Document} params.doc
    * @param {string} [params.docUrl] - an overriding document URL
    * @param {string} [params.baseUrl] - an overriding document base URL
@@ -170,7 +192,7 @@
     // add hash and error handling
     const downloadFile = async (params) => {
       const {url, options} = params;
-      return capturer.invoke("downloadFile", params)
+      return capturer.downloadFile(params)
         .then(response => {
           return Object.assign({}, response, {
             url: capturer.getRedirectedUrl(response.url, scrapbook.splitUrlByAnchor(url)[1]),
@@ -4213,7 +4235,7 @@
             const {settings, options} = this;
 
             try {
-              const response = await capturer.invoke("fetchCss", {
+              const response = await capturer.fetchCss({
                 url: url || css.href,
                 refUrl,
                 refPolicy,
@@ -4597,7 +4619,7 @@
       };
 
       const downloadFileInCss = async (url) => {
-        const response = await capturer.invoke("downloadFile", {
+        const response = await capturer.downloadFile({
           url,
           refUrl,
           refPolicy,
@@ -4929,7 +4951,7 @@
 
         let response;
         try {
-          response = await capturer.invoke("fetchCss", {
+          response = await capturer.fetchCss({
             url: sourceUrl,
             refUrl,
             refPolicy,
