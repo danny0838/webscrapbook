@@ -3349,6 +3349,59 @@ async function test_capture_base_dynamic_iframe() {
 }
 
 /**
+ * Handle base[href] change after resources have been loaded.
+ *
+ * - Seems impossible to get the real source URL of the resources before src
+ *   etc. has beeen changed.
+ *
+ * capture.base
+ */
+async function test_capture_base_dynamic_scripted() {
+  throw new TestSkipError('currently broken');
+
+  var options = {
+    "capture.base": "blank",
+  };
+
+  /* capture (source) */
+  var blob = await capture({
+    url: `${localhost}/capture_base_dynamic_scripted/base.html`,
+    mode: "source",
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var imgFile = zip.file('img.bmp');
+  assert(imgFile);
+  var imgData = await imgFile.async('base64');
+  assert(imgData === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');  // green
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img').getAttribute('src') === "img.bmp");
+
+  /* capture (tab) */
+  var blob = await capture({
+    url: `${localhost}/capture_base_dynamic_scripted/base.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var imgFile = zip.file('img.bmp');
+  assert(imgFile);
+  var imgData = await imgFile.async('base64');
+  assert(imgData === 'Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA');  // green
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('img').getAttribute('src') === "img.bmp");
+}
+
+/**
  * Check if option works
  *
  * capture.favicon

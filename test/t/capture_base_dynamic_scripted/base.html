@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<base href="resources/">
+<title>Test base[href] change after resources loaded</title>
+<style>img { width: 60px; }</style>
+</head>
+<body>
+<blockquote><img src="./img.bmp"></blockquote>
+</body>
+<script>
+document.querySelector('base').href = 'resources2/';
+</script>
+</html>
