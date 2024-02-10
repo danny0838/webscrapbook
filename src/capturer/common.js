@@ -49,59 +49,40 @@
   const REMOVE_HIDDEN_EXCLUDE_SVG = new Set(["svg"]);
   const REMOVE_HIDDEN_EXCLUDE_MATH = new Set(["math"]);
 
-  const capturer = {
-    isContentScript: true,
-  };
+  const capturer = {};
 
   /**
    * Invoke an invokable capturer method from another script.
    *
-   * - To invoke a background script method from the background script, provide
-   *   nothing.
-   * - To invoke a background script method from a content script, provide
-   *   details.missionId or args.settings.missionId.
-   * - To invoke a content script method from the background script, provide
-   *   details.tabId and optionally details.frameId.
-   * - To invoke a content script method in a frame from a content script,
-   *   provide details.frameWindow.
+   * - To invoke a background script, provide details.missionId or
+   *   args.settings.missionId.
+   * - To invoke a content script method in a frame, provide
+   *   details.frameWindow.
    *
    * @param {string} method - The capturer method to invoke.
-   * @param {string} args - The arguments to pass to the capturer method.
-   * @param {string} [details] - Data to determine invocation behavior.
-   * @param {string} [details.tabId]
-   * @param {string} [details.frameId]
+   * @param {Object} [args] - The arguments to pass to the capturer method.
+   * @param {Object} [details] - Data to determine invocation behavior.
    * @param {Window} [details.frameWindow]
+   * @param {string} [details.missionId]
    * @return {Promise<Object>}
    */
   capturer.invoke = async function (method, args, details = {}) {
-    const {tabId, frameId = 0, frameWindow, missionId} = details;
-    if (Number.isInteger(tabId)) {
-      // to content script (or content script call self)
-      if (!capturer.isContentScript) {
-        const cmd = "capturer." + method;
-        return await scrapbook.invokeContentScript({tabId, frameId, cmd, args});
-      } else {
-        return await capturer[method](args);
-      }
-    } else if (frameWindow) {
+    const {frameWindow, missionId} = details;
+    if (frameWindow) {
       // to frame
       const cmd = "capturer." + method;
       return await scrapbook.invokeFrameScript({frameWindow, cmd, args});
     } else {
-      // to capturer.html page (or capturer.html call self)
-      if (capturer.isContentScript) {
-        let id;
-        try {
-          id = details.missionId || args.settings.missionId;
-          if (!id) { throw new Error(`unknown missionId`); }
-        } catch (ex) {
-          throw new Error(`missionId is required to invoke from a content script.`);
-        }
-        const cmd = "capturer." + method;
-        return await scrapbook.invokeExtensionScript({id, cmd, args});
-      } else {
-        return await capturer[method](args);
+      // to capturer.html page
+      let id;
+      try {
+        id = missionId || args.settings.missionId;
+        if (!id) { throw new Error(`unknown missionId`); }
+      } catch (ex) {
+        throw new Error(`missionId is required to invoke from a content script.`);
       }
+      const cmd = "capturer." + method;
+      return await scrapbook.invokeExtensionScript({id, cmd, args});
     }
   };
 

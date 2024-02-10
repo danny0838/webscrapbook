@@ -7,7 +7,7 @@
  * @require {Object} server
  * @require {Object} capturer
  * @extends capturer
- * @override {boolean} capturer.isContentScript
+ * @override {Function} capturer.invoke
  *****************************************************************************/
 
 (function (root, factory) {
@@ -31,9 +31,6 @@
 
   const REBUILD_LINK_ROLE_PATTERN = /^document(?:-[a-f0-9-]+)?$/;
   const REBUILD_LINK_SVG_HREF_ATTRS = ['href', 'xlink:href'];
-
-  // overwrite the value of common.js to define this is not a content script
-  capturer.isContentScript = false;
 
   // missionId is fixed to this page, to identify the capture mission
   // generate a unique one, if not otherwise set
@@ -137,6 +134,35 @@
     span.className = 'error';
     span.append(...msg);
     capturer.logger.append(span, '\n');
+  };
+
+  /**
+   * Invoke an invokable capturer method from another script.
+   *
+   * This overrides the same method in common.js, and should take compatible
+   * parameters.
+   *
+   * - To invoke a background script method, provide nothing.
+   * - To invoke a content script method, provide details.tabId and
+   *   optionally details.frameId.
+   *
+   * @override
+   * @param {string} method - The capturer method to invoke.
+   * @param {Object} [args] - The arguments to pass to the capturer method.
+   * @param {Object} [details] - Data to determine invocation behavior.
+   * @param {string} [details.tabId]
+   * @param {string} [details.frameId]
+   * @return {Promise<Object>}
+   */
+  capturer.invoke = async function (method, args, details = {}) {
+    const {tabId, frameId = 0} = details;
+    if (Number.isInteger(tabId)) {
+      const cmd = "capturer." + method;
+      return await scrapbook.invokeContentScript({tabId, frameId, cmd, args});
+    } else {
+      // capturer.html call self
+      return await capturer[method](args);
+    }
   };
 
   /**
