@@ -15370,7 +15370,8 @@ async function test_capture_helpers() {
 [
   {
     "commands": [
-      ["remove", "#exclude, .exclude, img"]
+      ["remove", "#exclude, .exclude, img"],
+      ["options", {"capture.style": "remove"}]
     ]
   }
 ]`,
@@ -15390,18 +15391,20 @@ async function test_capture_helpers() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
+  assert(!doc.querySelector('style'));
   assert(!doc.querySelector('#exclude'));
   assert(!doc.querySelector('.exclude'));
   assert(!doc.querySelector('img'));
 
-  /* capture.helpers disabled */
+  /* capture.helpers set and not enabled */
   var options = {
     "capture.helpersEnabled": false,
     "capture.helpers": `\
 [
   {
     "commands": [
-      ["remove", "#exclude, .exclude, img"]
+      ["remove", "#exclude, .exclude, img"],
+      ["options", {"capture.style": "remove"}]
     ]
   }
 ]`,
@@ -15421,13 +15424,14 @@ async function test_capture_helpers() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
+  assert(doc.querySelector('style'));
   assert(doc.querySelector('#exclude'));
   assert(doc.querySelector('.exclude'));
   assert(doc.querySelector('img'));
 
   /* capture.helpers invalid (regard as not set) */
   var options = {
-    "capture.helpersEnabled": false,
+    "capture.helpersEnabled": true,
     "capture.helpers": `[bad syntax]`,
   };
 
@@ -15445,13 +15449,14 @@ async function test_capture_helpers() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
+  assert(doc.querySelector('style'));
   assert(doc.querySelector('#exclude'));
   assert(doc.querySelector('.exclude'));
   assert(doc.querySelector('img'));
 
   /* capture.helpers not set */
   var options = {
-    "capture.helpersEnabled": false,
+    "capture.helpersEnabled": true,
     "capture.helpers": "",
   };
 
@@ -15469,6 +15474,7 @@ async function test_capture_helpers() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
+  assert(doc.querySelector('style'));
   assert(doc.querySelector('#exclude'));
   assert(doc.querySelector('.exclude'));
   assert(doc.querySelector('img'));
