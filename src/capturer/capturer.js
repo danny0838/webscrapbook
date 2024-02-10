@@ -432,6 +432,7 @@
    * @param {string} params.url
    * @param {string} [params.refUrl] - the referrer URL
    * @param {string} [params.refPolicy] - the referrer policy
+   * @param {Blob} [params.overrideBlob]
    * @param {boolean} [params.headerOnly] - fetch HTTP header only
    * @param {boolean} [params.ignoreSizeLimit]
    * @param {Objet} params.settings
@@ -489,7 +490,7 @@
     const fetch = capturer.fetch = async function (params) {
       isDebug && console.debug("call: fetch", params);
 
-      const {url: sourceUrl, refUrl, refPolicy, headerOnly = false, ignoreSizeLimit = false, settings: {timeId}, options} = params;
+      const {url: sourceUrl, refUrl, refPolicy, overrideBlob, headerOnly = false, ignoreSizeLimit = false, settings: {timeId}, options} = params;
       const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
       let headers = {};
@@ -559,6 +560,8 @@
       }
 
       const fetchCurrent = (async () => {
+        let overrideUrl;
+
         try {
           // special handling for data URI
           if (scheme === "data") {
@@ -591,14 +594,19 @@
             });
           }
 
+          // special handling of overrideBlob
+          if (overrideBlob) {
+            overrideUrl = URL.createObjectURL(overrideBlob);
+          }
+
           const xhr = await scrapbook.xhr({
-            url: sourceUrlMain,
+            url: overrideUrl || sourceUrlMain,
             responseType: 'blob',
             allowAnyStatus: true,
             requestHeaders: setReferrer({
               headers: {},
               refUrl,
-              targetUrl: sourceUrlMain,
+              targetUrl: overrideUrl || sourceUrlMain,
               refPolicy,
               options,
             }),
@@ -606,24 +614,27 @@
               if (xhr.readyState !== 2) { return; }
 
               // check for previous fetch if redirected
-              // xhr.responseURL must be valid; otherwise the onerror event of the XHR will be triggered
-              const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
-              if (responseUrlMain !== sourceUrlMain) {
-                const responseFetchToken = getFetchToken(responseUrlMain, fetchRole);
-                const responseFetchPrevious = fetchMap.get(responseFetchToken);
+              // treat as if no redirect when overrideUrl is used
+              if (!overrideUrl) {
+                // xhr.responseURL must be valid; otherwise the onerror event of the XHR will be triggered
+                const [responseUrlMain, responseUrlHash] = scrapbook.splitUrlByAnchor(xhr.responseURL);
+                if (responseUrlMain !== sourceUrlMain) {
+                  const responseFetchToken = getFetchToken(responseUrlMain, fetchRole);
+                  const responseFetchPrevious = fetchMap.get(responseFetchToken);
 
-                // a fetch to the redirected URL exists, abort the request and return it
-                if (responseFetchPrevious) {
-                  response = responseFetchPrevious;
-                  xhr.abort();
-                  return;
-                }
+                  // a fetch to the redirected URL exists, abort the request and return it
+                  if (responseFetchPrevious) {
+                    response = responseFetchPrevious;
+                    xhr.abort();
+                    return;
+                  }
 
-                // otherwise, map the redirected URL to the same fetch promise
-                fetchMap.set(responseFetchToken, fetchCurrent);
-                if (!headerOnly) {
-                  const responseFetchToken = getFetchToken(responseUrlMain, 'head');
+                  // otherwise, map the redirected URL to the same fetch promise
                   fetchMap.set(responseFetchToken, fetchCurrent);
+                  if (!headerOnly) {
+                    const responseFetchToken = getFetchToken(responseUrlMain, 'head');
+                    fetchMap.set(responseFetchToken, fetchCurrent);
+                  }
                 }
               }
 
@@ -651,7 +662,7 @@
               if (headerOnly) {
                 // skip loading body for a headerOnly fetch
                 earlyResponse = Object.assign(response, {
-                  url: xhr.responseURL,
+                  url: overrideUrl ? sourceUrlMain : xhr.responseURL,
                   status: xhr.status,
                 });
               } else if (!ignoreSizeLimit &&
@@ -660,7 +671,7 @@
                   headers.contentLength >= options["capture.resourceSizeLimit"] * 1024 * 1024) {
                 // apply size limit if header contentLength is known
                 earlyResponse = Object.assign(response, {
-                  url: xhr.responseURL,
+                  url: overrideUrl ? sourceUrlMain : xhr.responseURL,
                   status: xhr.status,
                   error: {
                     name: 'FilterSizeError',
@@ -705,7 +716,7 @@
           }
 
           Object.assign(response, {
-            url: xhr.responseURL,
+            url: overrideUrl ? sourceUrlMain : xhr.responseURL,
             status: xhr.status,
             blob,
           });
@@ -741,6 +752,10 @@
               message: ex.message,
             },
           });
+        } finally {
+          if (overrideUrl) {
+            URL.revokeObjectURL(overrideUrl);
+          }
         }
       })();
 
@@ -3573,6 +3588,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl] - the referrer URL
    * @param {string} [params.refPolicy] - the referrer policy
+   * @param {Blob} [params.overrideBlob]
    * @param {Object} params.settings
    * @param {Object} params.options
    * @return {Promise<downloadFileResponse>}
@@ -3580,7 +3596,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   capturer.downloadFile = async function (params) {
     isDebug && console.debug("call: downloadFile", params);
 
-    const {url: sourceUrl, refUrl, refPolicy, settings, options} = params;
+    const {url: sourceUrl, refUrl, refPolicy, overrideBlob, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
@@ -3597,6 +3613,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       url: sourceUrlMain,
       refUrl,
       refPolicy,
+      overrideBlob,
       settings,
       options,
     });
@@ -3646,6 +3663,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
    * @param {string} params.url
    * @param {string} [params.refUrl]
    * @param {string} [params.refPolicy] - the referrer policy
+   * @param {Blob} [params.overrideBlob]
    * @param {string} params.settings
    * @param {Object} params.options
    * @return {Promise<fetchCssResponse>}
@@ -3653,7 +3671,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
   capturer.fetchCss = async function (params) {
     isDebug && console.debug("call: fetchCss", params);
 
-    const {url: sourceUrl, refUrl, refPolicy, settings, options} = params;
+    const {url: sourceUrl, refUrl, refPolicy, overrideBlob, settings, options} = params;
     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
     const {timeId} = settings;
 
@@ -3661,6 +3679,7 @@ Redirecting to <a href="${scrapbook.escapeHtml(target)}">${scrapbook.escapeHtml(
       url: sourceUrlMain,
       refUrl,
       refPolicy,
+      overrideBlob,
       settings,
       options,
     });

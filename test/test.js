@@ -1879,6 +1879,110 @@ async function test_capture_singleHtml_filename() {
 }
 
 /**
+ * Check if blob URLs can be correctly captured.
+ *
+ * capturer.downloadFile
+ * capturer.fetchCSS
+ */
+async function test_capture_blob() {
+  var blob = await capture({
+    url: `${localhost}/capture_blob/basic.html`,
+    options: baseOptions,
+  }, {delay: 500});
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var uuid = String.raw`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
+  var m;
+
+  var r = regex`${uuid}\.css`;
+  assert(m = doc.querySelector('link').getAttribute('href').match(r));
+
+  var r = rawRegex`@import url("${regex`(${uuid}\.css)`}");
+@font-face { font-family: linkFont; src: url("${regex`(${uuid}\.woff)`}"); }
+#link-font { font-family: linkFont; }
+#link-bg { background-image: url("${regex`(${uuid}\.bmp)`}"); }`;
+  var cssFile = zip.file(m[0]);
+  var cssBlob = await cssFile.async('blob');
+  var cssText = await readFileAsText(cssBlob);
+  assert(m = cssText.trim().match(r));
+  var fontFn = m[2];
+  var imgFn = m[3];
+
+  var r = rawRegex`@font-face { font-family: linkImportFont; src: url("${regex`(${uuid}\.woff)`}"); }
+#link-import-font { font-family: linkImportFont; }
+#link-import-bg { background-image: url("${regex`(${uuid}\.bmp)`}"); }`;
+  var cssFile = zip.file(m[1]);
+  var cssBlob = await cssFile.async('blob');
+  var cssText = await readFileAsText(cssBlob);
+  assert(m = cssText.trim().match(r));
+  assert(m[1] === fontFn);
+  assert(m[2] === imgFn);
+
+  var r = rawRegex`@font-face { font-family: styleFont; src: url("${regex`(${uuid}\.woff)`}"); }
+#style-font { font-family: styleFont; }
+#style-bg { background-image: url("${regex`(${uuid}\.bmp)`}"); }`;
+  assert(m = doc.querySelector('style').textContent.trim().match(r));
+  assert(m[1] === fontFn);
+  assert(m[2] === imgFn);
+
+  assert(doc.querySelector('img').getAttribute('src') === imgFn);
+}
+
+/**
+ * Check handling of revoked blob URLs.
+ *
+ * capturer.downloadFile
+ * capturer.fetchCSS
+ */
+async function test_capture_blob_revoked() {
+  var blob = await capture({
+    url: `${localhost}/capture_blob_revoked/revoked.html`,
+    options: baseOptions,
+  }, {delay: 1000});
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  assert(doc.querySelector('link').getAttribute('href') === 'urn:scrapbook:download:error:blob:');
+  assert(doc.querySelector('style').textContent.trim() === `\
+@font-face { font-family: styleFont; src: url("urn:scrapbook:download:error:blob:"); }
+#style-font { font-family: styleFont; }
+#style-bg { background-image: url("urn:scrapbook:download:error:blob:"); }`);
+  assert(doc.querySelector('img').getAttribute('src') === 'urn:scrapbook:download:error:blob:');
+}
+
+/**
+ * Check handling of blob URLs in an iframe.
+ */
+async function test_capture_blob_frame() {
+  var blob = await capture({
+    url: `${localhost}/capture_blob_frame/basic.html`,
+    options: baseOptions,
+  }, {delay: 500});
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('iframe').getAttribute('src') === 'index_1.html');
+
+  var indexFile = zip.file('index_1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var uuid = String.raw`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
+  var r = regex`${uuid}\.bmp`;
+  assert(doc.querySelector('img').getAttribute('src').match(r));
+}
+
+/**
  * Check if capture selection works
  *
  * capturer.captureDocument
@@ -13019,6 +13123,86 @@ async function test_capture_downLink_indepth_datauri() {
        "path": "test.bmp",
        "role": "resource",
        "token": "273f4b77f14df7c6f331c0cd1ee01746e41797e7"
+      }
+    ]
+  };
+  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+}
+
+/**
+ * Check URL should be removed for blob: in index.json
+ *
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink_indepth_blob() {
+  var options = {
+    "capture.saveResourcesSequentially": true,
+    "capture.downLink.doc.depth": 0,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink_indepth_blob/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  }, {delay: 500});
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var imgElems = doc.querySelectorAll('img');
+  var imgFn =imgElems[0].getAttribute('src');
+  var imgFn1 =imgElems[1].getAttribute('src');
+  var imgFn2 =imgElems[2].getAttribute('src');
+  assert(imgFn === imgFn1);
+  assert(imgFn !== imgFn2);
+
+  var sitemapFile = zip.file('index.json');
+  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var expectedData = {
+    "version": 3,
+    "indexPages": [
+      "index.html"
+    ],
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_downLink_indepth_blob/in-depth.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_downLink_indepth_blob/in-depth.html`, "document")
+      },
+      {
+        "path": "index.xhtml",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "role": "document"
+      },
+      {
+       "path": imgFn,
+       "role": "resource",
+       "token": getToken(`blob:${localhost}/${imgFn.slice(0, -4)}`, "resource")
+      },
+      {
+       "path": imgFn2,
+       "role": "resource",
+       "token": getToken(`blob:${localhost}/${imgFn2.slice(0, -4)}`, "resource")
       }
     ]
   };

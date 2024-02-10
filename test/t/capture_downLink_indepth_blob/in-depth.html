@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test in-depth capture</title>
+<style>img { width: 60px; }</style>
+</head>
+<body>
+<img>
+<img>
+<img>
+<script>
+(async () => {
+var blob = await fetch('green.bmp').then(r => r.blob());
+var urlImg = URL.createObjectURL(blob);
+var urlImg2 = URL.createObjectURL(blob);
+
+var imgElems = document.querySelectorAll('img');
+imgElems[0].src = urlImg;
+imgElems[1].src = urlImg;
+imgElems[2].src = urlImg2;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet">
+<style></style>
+</head>
+<body>
+<blockquote id="link-import-font">link-import-font</blockquote>
+<blockquote id="link-import-bg">link-import-bg</blockquote>
+<blockquote id="link-font">link-font</blockquote>
+<blockquote id="link-bg">link-bg</blockquote>
+<blockquote id="style-font">style-font</blockquote>
+<blockquote id="style-bg">style-bg</blockquote>
+<blockquote><img width="60" height="60"></blockquote>
+<script>
+(async () => {
+var blob = await fetch('font.woff').then(r => r.blob());
+var urlFont = URL.createObjectURL(blob);
+
+var blob = await fetch('green.bmp').then(r => r.blob());
+var urlBg = URL.createObjectURL(blob);
+
+var importText = `\
+@font-face { font-family: linkImportFont; src: url(${urlFont}); }
+#link-import-font { font-family: linkImportFont; }
+#link-import-bg { background-image: url(${urlBg}); }`;
+var blob = new Blob([importText], {type: 'text/css'});
+var urlImport = URL.createObjectURL(blob);
+
+var linkText = `\
+@import url(${urlImport});
+@font-face { font-family: linkFont; src: url(${urlFont}); }
+#link-font { font-family: linkFont; }
+#link-bg { background-image: url(${urlBg}); }`;
+var blob = new Blob([linkText], {type: 'text/css'});
+var url = URL.createObjectURL(blob);
+document.querySelector('link').href = url;
+
+var styleText = `\
+@font-face { font-family: styleFont; src: url(${urlFont}); }
+#style-font { font-family: styleFont; }
+#style-bg { background-image: url(${urlBg}); }`;
+document.querySelector('style').textContent = styleText;
+
+document.querySelector('img').src = urlBg;
+
+setTimeout(() => {
+  URL.revokeObjectURL(url);
+  URL.revokeObjectURL(urlImport);
+  URL.revokeObjectURL(urlFont);
+  URL.revokeObjectURL(urlBg);
+}, 200);
+})();
+</script>
+</body>
+</html>

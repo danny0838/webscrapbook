@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<iframe></iframe>
+<script>
+(async () => {
+var blob = await fetch('green.bmp').then(r => r.blob());
+var urlBg = URL.createObjectURL(blob);
+
+var frameText = `\
+<!DOCTYPE html>
+<style>img { width: 60px; }<\/style>
+<img src="${urlBg}">`;
+var blob = new Blob([frameText], {type: 'text/html'});
+var urlFrame = URL.createObjectURL(blob);
+
+document.querySelector('iframe').src = urlFrame;
+})();
+</script>

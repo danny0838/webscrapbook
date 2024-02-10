@@ -94,6 +94,21 @@
   capturer.downloadFile = async function (params) {
     isDebug && console.debug("call: downloadFile", params);
 
+    const {url} = params;
+
+    // In Firefox, the background script cannot download a blob URI in a
+    // content page, pass the blob object as overrideBlob to workaround that.
+    if (url.startsWith('blob:') && scrapbook.userAgent.is('gecko')) {
+      // throw an Error if the blob is not retrievable
+      const xhr = await scrapbook.xhr({
+        url,
+        responseType: 'blob',
+        allowAnyStatus: true,
+      });
+      const blob = xhr.response;
+      params = Object.assign({}, params, {overrideBlob: blob});
+    }
+
     return await capturer.invoke("downloadFile", params);
   };
 
@@ -104,6 +119,21 @@
    */
   capturer.fetchCss = async function (params) {
     isDebug && console.debug("call: fetchCss", params);
+
+    const {url} = params;
+
+    // In Firefox, the background script cannot download a blob URI in a
+    // content page, pass the blob object as overrideBlob to workaround that.
+    if (url.startsWith('blob:') && scrapbook.userAgent.is('gecko')) {
+      // throw an Error if the blob is not retrievable
+      const xhr = await scrapbook.xhr({
+        url,
+        responseType: 'blob',
+        allowAnyStatus: true,
+      });
+      const blob = xhr.response;
+      params = Object.assign({}, params, {overrideBlob: blob});
+    }
 
     return await capturer.invoke("fetchCss", params);
   };
