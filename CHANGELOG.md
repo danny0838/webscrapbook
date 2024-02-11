@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.6.3] - 2024-02-11
+* Fixed an issue that a blob URL cannot be captured in Firefox.
+* Fixed an issue that MIME type is not detected for a blob URL for a capture in Chromium.
+* Miscellaneous improvements of the internal code and unit test suite.
+
 ## [2.6.2] - 2024-02-09
 * Fixed an issue that meta and favicon in a shadow Root be taken for a capture.
 * Fixed charset and content disposition parsing and meta charset rewriting in some special cases for a capture.
