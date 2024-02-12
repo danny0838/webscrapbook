@@ -13701,6 +13701,100 @@ async function test_capture_downLink_indepth_case() {
 }
 
 /**
+ * Check if linked blob URL files and pages can be correctly captured.
+ *
+ * capture.downLink.file.mode
+ * capture.downLink.file.extFilter
+ */
+async function test_capture_downLink_blob() {
+  var options = {
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `bmp`,
+    "capture.downLink.doc.depth": 1,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink_blob/basic.html`,
+    options: Object.assign({}, baseOptions, options),
+  }, {delay: 500});
+  var uuid = String.raw`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var imgFn = doc.querySelector('#file1 a').getAttribute('href');
+  assert(imgFn.match(regex`^${uuid}\.bmp$`));
+  assert(zip.files[imgFn]);
+
+  var page1Fn = doc.querySelector('#page1 a').getAttribute('href');
+  assert(page1Fn.match(regex`^${uuid}\.html$`));
+
+  var indexFile = zip.file(page1Fn);
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var imgFn1 = doc.querySelector('img').getAttribute('src');
+  assert(imgFn1 === imgFn);
+}
+
+/**
+ * Check if blob URLs in a deep page can be correctly captured.
+ *
+ * capture.downLink.file.mode
+ * capture.downLink.file.extFilter
+ */
+async function test_capture_downLink_blob_deep() {
+  if (userAgent.is('firefox')) {
+    throw new TestSkipError(`Fetching a blob URL generated in a page from an extension page is not allowed in Firefox`);
+  }
+
+  var options = {
+    "capture.downLink.file.mode": "header",
+    "capture.downLink.file.extFilter": `bmp`,
+    "capture.downLink.doc.depth": 2,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink_blob/basic.html`,
+    options: Object.assign({}, baseOptions, options),
+  }, {delay: 500});
+  var uuid = String.raw`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
+
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var imgFn = doc.querySelector('#file1 a').getAttribute('href');
+  assert(imgFn.match(regex`^${uuid}\.bmp$`));
+  assert(zip.files[imgFn]);
+
+  var page1Fn = doc.querySelector('#page1 a').getAttribute('href');
+  assert(page1Fn.match(regex`^${uuid}\.html$`));
+
+  var indexFile = zip.file(page1Fn);
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var imgFn1 = doc.querySelector('img').getAttribute('src');
+  assert(imgFn1 === imgFn);
+  var imgFn2 = doc.querySelectorAll('img')[1].getAttribute('src');
+  assert(zip.files[imgFn2]);
+
+  var page11Fn = doc.querySelector('a').getAttribute('href');
+  assert(page11Fn.match(regex`^${uuid}\.html$`));
+
+  var indexFile = zip.file(page11Fn);
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var imgFn11 = doc.querySelector('img').getAttribute('src');
+  assert(imgFn11 === imgFn);
+}
+
+/**
  * Check if option works
  *
  * capture.recordDocumentMeta

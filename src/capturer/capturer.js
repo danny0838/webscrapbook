@@ -1286,10 +1286,12 @@
   };
 
   /**
+   * @override
    * @param {Object} params
    * @param {string} params.url - may include hash
    * @param {string} [params.refUrl]
    * @param {string} [params.refPolicy] - the referrer policy
+   * @param {Blob} [params.overrideBlob]
    * @param {boolean} [params.isAttachment] - the resource is known to be an attachment
    * @param {boolean} [params.downLink] - is downLink mode (check filter,
    *     and capture as file or register in linkedPages)
@@ -1304,7 +1306,7 @@
 
     const {downLink = false, downLinkExtra = false, downLinkPage = false, settings, options} = params;
     let {timeId, depth} = settings;
-    let {url: sourceUrl, refUrl, refPolicy, isAttachment} = params;
+    let {url: sourceUrl, refUrl, refPolicy, overrideBlob, isAttachment} = params;
     let [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
     let downLinkDoc = downLink && parseInt(options["capture.downLink.doc.depth"], 10) >= 0 && options["capture.saveAs"] !== "singleHtml";
@@ -1357,6 +1359,7 @@
           url: urlMain,
           refUrl,
           refPolicy,
+          overrideBlob,
           ignoreSizeLimit: settings.isMainPage && settings.isMainFrame,
           settings,
           options,

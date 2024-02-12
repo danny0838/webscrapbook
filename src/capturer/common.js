@@ -147,6 +147,35 @@
   /**
    * @kind invokable
    * @param {Object} params
+   * @return {Promise<Object|null>} - The capture result, or null if not to be captured.
+   */
+  capturer.captureUrl = async function (params) {
+    isDebug && console.debug("call: captureUrl", params);
+
+    const {url} = params;
+
+    // In Firefox, the background script cannot download a blob URI in a
+    // content page, pass the blob object as overrideBlob to workaround that.
+    if (url.startsWith('blob:') && scrapbook.userAgent.is('gecko')) {
+      try {
+        const xhr = await scrapbook.xhr({
+          url,
+          responseType: 'blob',
+          allowAnyStatus: true,
+        });
+        const overrideBlob = xhr.response;
+        params = Object.assign({}, params, {overrideBlob});
+      } catch (ex) {
+        // skip Error when the blob is not retrievable
+      }
+    }
+
+    return await capturer.invoke("captureUrl", params);
+  };
+
+  /**
+   * @kind invokable
+   * @param {Object} params
    * @param {Document} params.doc
    * @param {string} [params.docUrl] - an overriding document URL
    * @param {string} [params.baseUrl] - an overriding document base URL
@@ -391,7 +420,7 @@
       }
 
       // check downLink
-      if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
+      if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:') || url.startsWith('blob:')) {
         if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
             (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
           let refPolicy = docRefPolicy;
@@ -399,14 +428,13 @@
             refPolicy = (elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy) || refPolicy;
           }
           downLinkTasks.push(async () => {
-
             const isAttachment = isHtml ? elem.hasAttribute('download') : false;
             const downLinkSettings = Object.assign({}, settings, {
               depth: settings.depth + 1,
               isMainPage: false,
               isMainFrame: true,
             });
-            const response = await capturer.invoke("captureUrl", {
+            const response = await capturer.captureUrl({
               url,
               refUrl,
               refPolicy,
@@ -717,7 +745,7 @@
                             isMainPage: false,
                             isMainFrame: true,
                           });
-                          const response = await capturer.invoke("captureUrl", {
+                          const response = await capturer.captureUrl({
                             url,
                             refUrl,
                             downLink: true,
@@ -1439,7 +1467,7 @@
                     }
                   }
 
-                  return capturer.invoke("captureUrl", {
+                  return capturer.captureUrl({
                     url: sourceUrl,
                     refUrl,
                     refPolicy,
@@ -1957,7 +1985,7 @@
                       }
                     }
 
-                    return capturer.invoke("captureUrl", {
+                    return capturer.captureUrl({
                       url: sourceUrl,
                       refUrl,
                       refPolicy,
@@ -2074,7 +2102,7 @@
                       }
                     }
 
-                    return capturer.invoke("captureUrl", {
+                    return capturer.captureUrl({
                       url: sourceUrl,
                       refUrl,
                       refPolicy,
@@ -2954,7 +2982,7 @@
         const urls = scrapbook.parseOption("capture.downLink.urlExtra", options["capture.downLink.urlExtra"]);
         for (const url of urls) {
           downLinkTasks.push(async () => {
-            const response = await capturer.invoke("captureUrl", {
+            const response = await capturer.captureUrl({
               url,
               refUrl,
               downLink: true,

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<blockquote id="file1"><a>file 1</a></blockquote>
+<blockquote id="page1"><a>page 1</a></blockquote>
+<script>
+(async () => {
+var blob = await fetch('green.bmp').then(r => r.blob());
+var urlFile = URL.createObjectURL(blob);
+
+var blob = await fetch('blue.bmp').then(r => r.blob());
+var urlFile2 = URL.createObjectURL(blob);
+
+var pageHtml11 = `\
+<!DOCTYPE html>
+<style>img { width: 60px; }<\/style>
+<blockquote><img src="${urlFile}"><\/blockquote>
+`;
+var blob = new Blob([pageHtml11], {type: 'text/html'});
+var urlPage11 = URL.createObjectURL(blob);
+
+var pageHtml1 = `\
+<!DOCTYPE html>
+<style>img { width: 60px; }<\/style>
+<blockquote><img src="${urlFile}"><\/blockquote>
+<blockquote><img src="${urlFile2}"><\/blockquote>
+<blockquote><a href="${urlPage11}">page 1-1<\/a><\/blockquote>
+`;
+var blob = new Blob([pageHtml1], {type: 'text/html'});
+var urlPage1 = URL.createObjectURL(blob);
+
+document.querySelector('#file1 a').href = urlFile;
+
+document.querySelector('#page1 a').href = urlPage1;
+})();
+</script>
+</body>
+</html>
