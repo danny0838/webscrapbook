@@ -99,14 +99,17 @@
     // In Firefox, the background script cannot download a blob URI in a
     // content page, pass the blob object as overrideBlob to workaround that.
     if (url.startsWith('blob:') && scrapbook.userAgent.is('gecko')) {
-      // throw an Error if the blob is not retrievable
-      const xhr = await scrapbook.xhr({
-        url,
-        responseType: 'blob',
-        allowAnyStatus: true,
-      });
-      const blob = xhr.response;
-      params = Object.assign({}, params, {overrideBlob: blob});
+      try {
+        const xhr = await scrapbook.xhr({
+          url,
+          responseType: 'blob',
+          allowAnyStatus: true,
+        });
+        const overrideBlob = xhr.response;
+        params = Object.assign({}, params, {overrideBlob});
+      } catch (ex) {
+        // skip Error when the blob is not retrievable
+      }
     }
 
     return await capturer.invoke("downloadFile", params);
@@ -125,14 +128,17 @@
     // In Firefox, the background script cannot download a blob URI in a
     // content page, pass the blob object as overrideBlob to workaround that.
     if (url.startsWith('blob:') && scrapbook.userAgent.is('gecko')) {
-      // throw an Error if the blob is not retrievable
-      const xhr = await scrapbook.xhr({
-        url,
-        responseType: 'blob',
-        allowAnyStatus: true,
-      });
-      const blob = xhr.response;
-      params = Object.assign({}, params, {overrideBlob: blob});
+      try {
+        const xhr = await scrapbook.xhr({
+          url,
+          responseType: 'blob',
+          allowAnyStatus: true,
+        });
+        const overrideBlob = xhr.response;
+        params = Object.assign({}, params, {overrideBlob});
+      } catch (ex) {
+        // skip Error when the blob is not retrievable
+      }
     }
 
     return await capturer.invoke("fetchCss", params);
