@@ -2372,19 +2372,6 @@ ${scrapbook.escapeHtml(content)}
           uneditDate(dialog.querySelector('[name="modify"]'));
         }
 
-        let location;
-        {
-          const locationText = dialog.querySelector('[name="location"]').value;
-          if (locationText) {
-            const obj = JSON.parse(locationText);
-            try {
-              location = scrapbook.validateGeoLocation(obj);
-            } catch (ex) {
-              // skip error
-            }
-          }
-        }
-
         const dialogData = {
           marked: dialog.querySelector('[name="marked"]').checked,
           locked: dialog.querySelector('[name="locked"]').checked,
@@ -2395,7 +2382,19 @@ ${scrapbook.escapeHtml(content)}
           create: dialog.querySelector('[name="create"]').getAttribute('data-id'),
           modify: dialog.querySelector('[name="modify"]').getAttribute('data-id'),
           charset: dialog.querySelector('[name="charset"]').value,
-          location,
+          location: (() => {
+            const elem = dialog.querySelector('[name="location"]');
+            const value = elem.value;
+            if (value) {
+              try {
+                const obj = JSON.parse(value);
+                return scrapbook.validateGeoLocation(obj);
+              } catch (ex) {
+                return item.location;
+              }
+            }
+            return null;
+          })(),
           comment: dialog.querySelector('[name="comment"]').value,
         };
         const newItem = this.book.addItem(item);
