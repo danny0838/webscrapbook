@@ -36,6 +36,10 @@
     "https://*/*"
   ],
 
+  "optional_permissions": [
+    "geolocation"
+  ],
+
   "background": {
     "scripts": [
       "core/common.js",

@@ -2278,7 +2278,24 @@ ${scrapbook.escapeHtml(content)}
           const onLocationReset = async (event) => {
             event.preventDefault();
             const elem = dialog.querySelector('[name="location"]');
-            const location = await scrapbook.getGeoLocation().catch(ex => {
+            const location = await (async () => {
+              try {
+                // Prompt for extension geolocation permission (if not granted)
+                // Firefox < 101: Sidebar cannot prompt and always returns false.
+                // ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1493396
+                await browser.permissions.request({permissions: ['geolocation']});
+              } catch (ex) {
+                // Optional geolocation permission for extension not supported
+                // (Chromium). Prompt for origin-based permission instead.
+                return await scrapbook.getGeoLocation();
+              }
+              // Firefox: Get from the background page as extension geolocation
+              // permission is only honored by it. Throws an error if not
+              // granted.
+              return await scrapbook.invokeExtensionScript({
+                cmd: "background.getGeoLocation",
+              });
+            })().catch(ex => {
               this.warn(`Unable to get geolocation: ${ex.message}`);
             });
             if (location) {

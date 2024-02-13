@@ -419,6 +419,14 @@
     await background.onServerTreeChange(params, sender);
   };
 
+  /**
+   * @kind invokable
+   * @param {Object} [options]
+   */
+  background.getGeoLocation = async function (options) {
+    return scrapbook.getGeoLocation(options);
+  };
+
   function initStorageChangeListener() {
     const toolbarOptions = Object.keys(scrapbook.DEFAULT_OPTIONS).filter(x => x.startsWith('ui.toolbar.'));
 
