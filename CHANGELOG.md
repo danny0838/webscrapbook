@@ -3,6 +3,11 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.6.4] - 2024-02-13
+* Fixed an issue that downloading linked files and in-depth capture for a blob URL doesn't work.
+* Fixed an issue that geolocation cannot be obtained from the sidebar in Firefox. (For Firefox < 101 a one-time grant in a non-sidebar window is required. For some old Firefox versions reloading the extension (by disabling and enabling, restarting the browser, etc.) after the grant is required.)
+* Fixed an issue that clearing geolocation is not corretly saved.
+
 ## [2.6.3] - 2024-02-11
 * Fixed an issue that a blob URL cannot be captured in Firefox.
 * Fixed an issue that MIME type is not detected for a blob URL for a capture in Chromium.
