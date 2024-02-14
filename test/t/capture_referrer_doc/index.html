@@ -8,9 +8,17 @@
 <style>img { width: 60px; }</style>
 <link rel="shortcut icon" href="favicon.py">
 <link rel="stylesheet" href="stylesheet.py">
+<style>
+@import url(./style_import.py);
+@font-face { font-family: styleFont; src: url(./style_font.py); }
+#style-font { font-family: styleFont; }
+#style-bg { background-image: url(./style_bg.py); }
+</style>
 <script src="script.py"></script>
 </head>
 <body>
+<blockquote id="style-bg">style-bg</blockquote>
+<blockquote id="style-font">style-font</blockquote>
 <blockquote><img src="imgsrc.py"></blockquote>
 <blockquote><img srcset="imgsrcset.py 2x"></blockquote>
 <blockquote><iframe src="iframe.py"></iframe></blockquote>

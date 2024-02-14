@@ -3245,8 +3245,6 @@ async function test_capture_base_dynamic() {
     assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp 2x`);
     assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
     assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-    assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp") repeat;`);
-    assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp"); }`);
 
     assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
     assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
@@ -3257,11 +3255,43 @@ async function test_capture_base_dynamic() {
     assert(doc.querySelectorAll('img[srcset]')[1].getAttribute('srcset') === `green.bmp 2x`);
     assert(doc.querySelectorAll('input[type="image"]')[1].getAttribute('src') === `green.bmp`);
     assert(doc.querySelectorAll('table')[1].getAttribute('background') === `green.bmp`);
-    assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background: url("green.bmp") repeat;`);
-    assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("green.bmp"); }`);
 
     assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
     assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
+  }
+}
+
+/**
+ * Check if CSS related URLs are parsed correctly when base changes.
+ *
+ * capture.base
+ */
+async function test_capture_base_dynamic_css() {
+  for (const base of ["save", "blank", "remove"]) {
+    console.debug("capture.base = %s", base);
+
+    var options = {
+      "capture.base": base,
+      "capture.saveResourcesSequentially": true,
+    };
+    var blob = await capture({
+      url: `${localhost}/capture_base_dynamic_css/base.html`,
+      options: Object.assign({}, baseOptions, options),
+    });
+
+    var zip = await new JSZip().loadAsync(blob);
+
+    var indexFile = zip.file('index.html');
+    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+    var doc = await readFileAsDocument(indexBlob);
+
+    assert(doc.querySelector('span').getAttribute('style') === `background-image: url("inline.bmp");`);
+    assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("internal.bmp"); }`);
+
+    // assert(doc.querySelector('base').getAttribute('href') === `${localhost}/test_capture_base_dynamic_css/resources/`);
+
+    assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background-image: url("inline-1.bmp");`);
+    assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("internal-1.bmp"); }`);
   }
 }
 
@@ -10779,6 +10809,18 @@ async function test_capture_referrer_doc() {
   });
   var zip = await new JSZip().loadAsync(blob);
 
+  var file = zip.file('style_import.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('style_font.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
+  var file = zip.file('style_bg.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/`);
+
   var file = zip.file('favicon.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost}/`);
@@ -10932,6 +10974,18 @@ async function test_capture_referrer_doc_force() {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
+
+  var file = zip.file('style_import.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
+
+  var file = zip.file('style_font.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
+
+  var file = zip.file('style_bg.py');
+  var text = (await readFileAsText(await file.async('blob'))).trim();
+  assert(text === `${localhost}/capture_referrer_doc/index.html`);
 
   var file = zip.file('favicon.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();

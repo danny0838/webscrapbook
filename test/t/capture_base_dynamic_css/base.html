@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test bad document for CSS (URLs before base[href])</title>
+</head>
+<body>
+
+<blockquote><span style="background-image: url(./inline.bmp);">style inline</span></blockquote>
+<blockquote id="style1"><style>#style1 { background: url(./internal.bmp); }</style>style internal</blockquote>
+
+<!-- URLs before the first base[href] should not exist according to the spec -->
+<base href="resources/">
+
+<blockquote><span style="background-image: url(./inline.bmp);">style inline</span></blockquote>
+<blockquote id="style2"><style>#style2 { background: url(./internal.bmp); }</style>style internal</blockquote>
+
+</body>
+</html>
