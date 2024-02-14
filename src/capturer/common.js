@@ -629,11 +629,12 @@
               case "save":
               case "link":
               default: {
-                const refUrl = baseUrl;
+                const baseUrlCurrent = baseUrl;
                 const refPolicy = docRefPolicy;
                 tasks.push(async () => {
                   await cssHandler.rewriteCss({
                     elem,
+                    baseUrl: baseUrlCurrent,
                     refUrl,
                     refPolicy,
                     settings,
@@ -882,11 +883,12 @@
                     break;
                   }
 
-                  const refUrl = baseUrl;
+                  const baseUrlCurrent = baseUrl;
                   const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy;
                   tasks.push(async () => {
                     await cssHandler.rewriteCss({
                       elem,
+                      baseUrl: baseUrlCurrent,
                       refUrl,
                       refPolicy,
                       settings,
@@ -1052,11 +1054,12 @@
                   captureRewriteAttr(elem, "data-scrapbook-css-disabled", "");
                   break;
                 }
-                const refUrl = baseUrl;
+                const baseUrlCurrent = baseUrl;
                 const refPolicy = docRefPolicy;
                 tasks.push(async () => {
                   await cssHandler.rewriteCss({
                     elem,
+                    baseUrl: baseUrlCurrent,
                     refUrl,
                     refPolicy,
                     settings,
@@ -2512,13 +2515,14 @@
             break;
           case "save":
           default:
-            const refUrl = baseUrl;
+            const baseUrlCurrent = baseUrl;
             const refPolicy = docRefPolicy;
             switch (options["capture.rewriteCss"]) {
               case "url": {
                 tasks.push(async () => {
                   const response = await cssHandler.rewriteCssText({
                     cssText: elem.getAttribute("style"),
+                    baseUrl: baseUrlCurrent,
                     refUrl,
                     refPolicy,
                     isInline: true,
@@ -2537,6 +2541,7 @@
                 tasks.push(async () => {
                   const response = await cssHandler.rewriteCssText({
                     cssText: elem.style.cssText,
+                    baseUrl: baseUrlCurrent,
                     refUrl,
                     refPolicy,
                     isInline: true,
@@ -3054,7 +3059,8 @@
       //         base[href], which violates the spec.)
       // @FIXME: resolve each URL using dynamic docRefPolicy
       const {usedCssFontUrl, usedCssImageUrl} = await cssHandler.getCssResources({
-        refUrl: baseUrlFinal,
+        baseUrl: baseUrlFinal,
+        refUrl,
         refPolicy: docRefPolicy,
       });
 
@@ -4334,7 +4340,7 @@
      *
      * @return {{usedCssFontUrl: Object, usedCssImageUrl: Object}}
      */
-    async getCssResources({refUrl, refPolicy}) {
+    async getCssResources({baseUrl, refUrl, refPolicy}) {
       const {doc, rootNode, settings, options} = this;
 
       const collector = {
@@ -4433,14 +4439,14 @@
           }
         },
 
-        inspectStyle(style, refUrl, isInline = false) {
+        inspectStyle(style, baseUrl, isInline = false) {
           for (let prop of style) {
             if (prop === 'font-family') {
               this.useFont(style.getPropertyValue('font-family'));
             } else if (prop === 'animation-name') {
               this.useKeyFrame(style.getPropertyValue('animation-name'));
             } else if (!isInline) {
-              forEachUrl(style.getPropertyValue(prop), refUrl, (url) => {
+              forEachUrl(style.getPropertyValue(prop), baseUrl, (url) => {
                 this.useImage(url);
               });
             }
@@ -4486,18 +4492,18 @@
         },
       };
 
-      const parseCssRule = async (cssRule, refUrl, root = rootNode) => {
+      const parseCssRule = async (cssRule, baseUrl, refUrl, root = rootNode) => {
         switch (cssRule.type) {
           case CSSRule.STYLE_RULE: {
             // this CSS rule applies to no node in the captured area
             if (!this.verifySelector(root, cssRule)) { break; }
 
-            collector.inspectStyle(cssRule.style, refUrl);
+            collector.inspectStyle(cssRule.style, baseUrl);
 
             // recurse into sub-rules for nesting CSS
             if (cssRule.cssRules && cssRule.cssRules.length) {
               for (const rule of cssRule.cssRules) {
-                await parseCssRule(rule, refUrl);
+                await parseCssRule(rule, baseUrl, refUrl);
               }
             }
 
@@ -4507,10 +4513,10 @@
             if (!cssRule.styleSheet) { break; }
 
             const css = cssRule.styleSheet;
-            const url = new URL(cssRule.href, refUrl).href;
+            const url = new URL(cssRule.href, baseUrl).href;
             const rules = await this.getRulesFromCss({css, url, refUrl, refPolicy});
             for (const rule of rules) {
-              await parseCssRule(rule, url);
+              await parseCssRule(rule, url, url);
             }
             break;
           }
@@ -4518,7 +4524,7 @@
             if (!cssRule.cssRules) { break; }
 
             for (const rule of cssRule.cssRules) {
-              await parseCssRule(rule, refUrl);
+              await parseCssRule(rule, baseUrl, refUrl);
             }
             break;
           }
@@ -4531,7 +4537,7 @@
             if (!fontFamily || !src) { break; }
 
             // record this font family and its font URLs
-            forEachUrl(src, refUrl, (url) => {
+            forEachUrl(src, baseUrl, (url) => {
               collector.addFontUrl(fontFamily, url);
             });
 
@@ -4540,14 +4546,14 @@
           case CSSRule.PAGE_RULE: {
             if (!cssRule.cssText) { break; }
 
-            collector.inspectStyle(cssRule.style, refUrl);
+            collector.inspectStyle(cssRule.style, baseUrl);
             break;
           }
           case CSSRule.KEYFRAMES_RULE: {
             if (!cssRule.cssRules) { break; }
 
             for (const rule of cssRule.cssRules) {
-              await parseCssRule(rule, refUrl);
+              await parseCssRule(rule, baseUrl, refUrl);
             }
             break;
           }
@@ -4556,7 +4562,7 @@
 
             collector.addKeyFrameFont(cssRule.parentRule.name, cssRule.style.getPropertyValue('font-family'));
 
-            forEachUrl(cssRule.cssText, refUrl, (url) => {
+            forEachUrl(cssRule.cssText, baseUrl, (url) => {
               collector.addKeyFrameUrl(cssRule.parentRule.name, url);
             });
             break;
@@ -4565,7 +4571,7 @@
           case 11/* CSSRule.COUNTER_STYLE_RULE */: {
             if (!cssRule.symbols) { break; }
 
-            forEachUrl(cssRule.symbols, refUrl, (url) => {
+            forEachUrl(cssRule.symbols, baseUrl, (url) => {
               collector.useImage(url);
             });
             break;
@@ -4574,7 +4580,7 @@
             if (!cssRule.cssRules) { break; }
 
             for (const rule of cssRule.cssRules) {
-              await parseCssRule(rule, refUrl);
+              await parseCssRule(rule, baseUrl, refUrl);
             }
             break;
           }
@@ -4582,12 +4588,12 @@
       };
 
       // We pass only elemental css text, which should not contain any at-rule
-      const forEachUrl = (cssText, refUrl, callback = x => x) => {
+      const forEachUrl = (cssText, baseUrl, callback = x => x) => {
         scrapbook.rewriteCssText(cssText, {
           rewriteImportUrl(url) { return {url}; },
           rewriteFontFaceUrl(url) { return {url}; },
           rewriteBackgroundUrl(url) {
-            const targetUrl = capturer.resolveRelativeUrl(url, refUrl);
+            const targetUrl = capturer.resolveRelativeUrl(url, baseUrl);
             callback(targetUrl);
             return {url};
           },
@@ -4599,14 +4605,14 @@
         for (const css of doc.styleSheets) {
           const rules = await this.getRulesFromCss({css, refUrl, refPolicy});
           for (const rule of rules) {
-            await parseCssRule(rule, css.href || refUrl, root);
+            await parseCssRule(rule, css.href || baseUrl, css.href || refUrl, root);
           }
         }
 
         for (const css of capturer.getAdoptedStyleSheets(doc)) {
           const rules = await this.getRulesFromCss({css, refUrl, refPolicy});
           for (const rule of rules) {
-            await parseCssRule(rule, css.href || refUrl, root);
+            await parseCssRule(rule, css.href || baseUrl, css.href || refUrl, root);
           }
         }
 
@@ -4619,7 +4625,7 @@
       const inspectElement = async (elem) => {
         const {style} = elem;
         if (style) {
-          collector.inspectStyle(style, refUrl, true);
+          collector.inspectStyle(style, baseUrl, true);
         }
 
         const shadowRoot = elem.shadowRoot;
@@ -4644,7 +4650,8 @@
      *
      * @param {Object} params
      * @param {string} params.cssText - the CSS text to rewrite.
-     * @param {string} params.refUrl - the reference URL for URL resolving.
+     * @param {string} params.baseUrl - the base URL for URL resolving.
+     * @param {string} params.refUrl - the referrer URL for fetching resources.
      * @param {string} [params.refPolicy] - the referrer policy for fetching
      *     resources.
      * @param {CSSStyleSheet} [params.refCss] - the reference CSS (which
@@ -4655,7 +4662,7 @@
      * @param {Object} [params.settings]
      * @param {Object} [params.options]
      */
-    async rewriteCssText({cssText, refUrl, refPolicy, refCss = null, rootNode, isInline = false, settings, options}) {
+    async rewriteCssText({cssText, baseUrl, refUrl, refPolicy, refCss = null, rootNode, isInline = false, settings, options}) {
       settings = Object.assign({}, this.settings, settings);
       settings = Object.assign(settings, {
         recurseChain: [...settings.recurseChain, scrapbook.splitUrlByAnchor(refUrl)[0]],
@@ -4664,8 +4671,8 @@
 
       const {usedCssFontUrl, usedCssImageUrl} = settings;
 
-      const resolveCssUrl = (sourceUrl, refUrl) => {
-        const url = capturer.resolveRelativeUrl(sourceUrl, refUrl);
+      const resolveCssUrl = (sourceUrl, baseUrl) => {
+        const url = capturer.resolveRelativeUrl(sourceUrl, baseUrl);
         let valid = true;
 
         // do not fetch if the URL is not resolved
@@ -4707,7 +4714,7 @@
       }
 
       const rewriteImportUrl = async (sourceUrl) => {
-        let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
+        let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, baseUrl);
         switch (options["capture.style"]) {
           case "link":
             // do nothing
@@ -4723,6 +4730,7 @@
               await this.rewriteCss({
                 url,
                 refCss: rule && rule.styleSheet,
+                baseUrl,
                 refUrl,
                 refPolicy,
                 rootNode,
@@ -4739,7 +4747,7 @@
       };
 
       const rewriteFontFaceUrl = async (sourceUrl) => {
-        let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
+        let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, baseUrl);
         switch (options["capture.font"]) {
           case "link":
             // do nothing
@@ -4765,7 +4773,7 @@
       };
 
       const rewriteBackgroundUrl = async (sourceUrl) => {
-        let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, refUrl);
+        let {url, recordUrl, valid} = resolveCssUrl(sourceUrl, baseUrl);
         switch (options["capture.imageBackground"]) {
           case "link":
             // do nothing
@@ -4803,7 +4811,7 @@
     /**
      * Rewrite given cssRules to cssText.
      */
-    async rewriteCssRules({cssRules, refUrl, refPolicy, refCss, rootNode, indent = '', settings, options}) {
+    async rewriteCssRules({cssRules, baseUrl, refUrl, refPolicy, refCss, rootNode, indent = '', settings, options}) {
       const rules = [];
       for (const cssRule of cssRules) {
         switch (cssRule.type) {
@@ -4817,6 +4825,7 @@
               // style declarations of this rule
               const cssText1 = await this.rewriteCssText({
                 cssText: cssRule.style.cssText,
+                baseUrl,
                 refUrl,
                 refPolicy,
                 refCss,
@@ -4827,6 +4836,7 @@
               // recurse into sub-rules
               const cssText2 = (await this.rewriteCssRules({
                 cssRules: cssRule.cssRules,
+                baseUrl,
                 refUrl,
                 refPolicy,
                 refCss,
@@ -4845,6 +4855,7 @@
             } else {
               const cssText = await this.rewriteCssText({
                 cssText: cssRule.cssText,
+                baseUrl,
                 refUrl,
                 refPolicy,
                 refCss,
@@ -4860,6 +4871,7 @@
           case CSSRule.IMPORT_RULE: {
             const cssText = await this.rewriteCssText({
               cssText: cssRule.cssText,
+              baseUrl,
               refUrl,
               refPolicy,
               refCss,
@@ -4875,6 +4887,7 @@
           case CSSRule.MEDIA_RULE: {
             const cssText = (await this.rewriteCssRules({
               cssRules: cssRule.cssRules,
+              baseUrl,
               refUrl,
               refPolicy,
               refCss,
@@ -4893,6 +4906,7 @@
           case CSSRule.KEYFRAMES_RULE: {
             const cssText = (await this.rewriteCssRules({
               cssRules: cssRule.cssRules,
+              baseUrl,
               refUrl,
               refPolicy,
               refCss,
@@ -4911,6 +4925,7 @@
           case CSSRule.SUPPORTS_RULE: {
             const cssText = (await this.rewriteCssRules({
               cssRules: cssRule.cssRules,
+              baseUrl,
               refUrl,
               refPolicy,
               refCss,
@@ -4940,6 +4955,7 @@
           default: {
             const cssText = await this.rewriteCssText({
               cssText: cssRule.cssText,
+              baseUrl,
               refUrl,
               refPolicy,
               refCss,
@@ -4967,15 +4983,18 @@
      * @param {string} [params.url] - the source URL of the imported CSS.
      * @param {?CSSStyleSheet} [params.refCss] - the reference CSS of the
      *     imported CSS (CSSImportRule.styleSheet).
-     * @param {string} [params.refUrl] - the reference URL for URL resolving.
-     * @param {string} [params.refPolicy] - the referrer policy
+     * @param {string} [params.baseUrl] - the base URL for URL resolving.
+     * @param {string} [params.refUrl] - the referrer URL for fetching
+     *     resources.
+     * @param {string} [params.refPolicy] - the referrer policy for fetching
+     *     resources.
      * @param {Node} [params.rootNode] - the reference root node for an
      *     imported CSS.
      * @param {Function} params.callback
      * @param {Object} [params.settings]
      * @param {Object} [params.options]
      */
-    async rewriteCss({elem, url, refCss, refUrl, refPolicy, rootNode, callback, settings, options}) {
+    async rewriteCss({elem, url, refCss, baseUrl, refUrl, refPolicy, rootNode, callback, settings, options}) {
       settings = settings ? Object.assign({}, this.settings, settings) : this.settings;
       options = options ? Object.assign({}, this.options, options) : this.options;
 
@@ -5142,6 +5161,7 @@
         case "url": {
           cssText = await this.rewriteCssText({
             cssText,
+            baseUrl: sourceUrl || baseUrl,
             refUrl: sourceUrl || refUrl,
             refPolicy,
             refCss,
@@ -5165,6 +5185,7 @@
           }
           cssText = await this.rewriteCssText({
             cssText,
+            baseUrl: sourceUrl || baseUrl,
             refUrl: sourceUrl || refUrl,
             refPolicy,
             refCss,
@@ -5183,6 +5204,7 @@
           if (cssRules) {
             cssText = await this.rewriteCssRules({
               cssRules,
+              baseUrl: sourceUrl || baseUrl,
               refUrl: sourceUrl || refUrl,
               refPolicy,
               refCss,

@@ -3219,6 +3219,72 @@ async function test_capture_base_rewrite_special() {
 }
 
 /**
+ * Check if referrer is handled correctly when base is set.
+ */
+async function test_capture_base_referrer() {
+  for (const rewriteCss of ["url", "tidy", "match"]) {
+    console.debug("capture.rewriteCss = %s", rewriteCss);
+
+    var options = {
+      "capture.rewriteCss": rewriteCss,
+    };
+    var blob = await capture({
+      url: `${localhost}/capture_base_referrer/index.html`,
+      options: Object.assign({}, baseOptions, options),
+    });
+    var zip = await new JSZip().loadAsync(blob);
+
+    var file = zip.file('link.py.css');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text.match(
+      cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_referrer/index.html"; }
+@font-face { font-family: linkFont; src: url("link_font.py"); }
+#link-font { font-family: linkFont; }
+#link-bg { background-image: url("link_bg.py"); }`
+    ));
+
+    var file = zip.file('link_font.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_referrer/resources/link.py`);
+
+    var file = zip.file('link_bg.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_referrer/resources/link.py`);
+
+    // @FIXME: in Chromium < 80~100, the referrer for the imported CSS is
+    //     erroneously set to document base.
+    var file = zip.file('style_import.py.css');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text.match(
+      cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_referrer/index.html"; }
+@font-face { font-family: styleImportFont; src: url("style_import_font.py"); }
+#style-import-font { font-family: styleImportFont; }
+#style-import-bg { background-image: url("style_import_bg.py"); }`
+    ));
+
+    var file = zip.file('style_import_font.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_referrer/resources/style_import.py`);
+
+    var file = zip.file('style_import_bg.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_referrer/resources/style_import.py`);
+
+    var file = zip.file('style_font.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_referrer/index.html`);
+
+    var file = zip.file('style_bg.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_referrer/index.html`);
+
+    var file = zip.file('img_src.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_referrer/index.html`);
+  }
+}
+
+/**
  * Check if URLs are parsed correctly when base changes.
  *
  * capture.base
