@@ -366,7 +366,7 @@
         if (!info) {
           info = {};
           autoCaptureInfos.set(tabInfo.id, info);
-        }        
+        }
 
         // setup capture task
         if (config.delay > 0) {

@@ -441,7 +441,7 @@
     }
     const url = u.href;
 
-    // launch 
+    // launch
     let tab;
     if (browser.windows) {
       const win = await browser.windows.getCurrent();

@@ -2612,7 +2612,7 @@
     // baseUrl: updates dynamically when the first base[href] is parsed.
     // baseUrlFallback: the initial baseUrl, used for resolving base elements.
     // baseUrlFinal: the final baseUrl, used for resolving links etc.
-    // refUrl: used as the referrer when retrieving resources. Actually same 
+    // refUrl: used as the referrer when retrieving resources. Actually same
     //     as baseUrlFallback.
     //
     // URLs in the document are usually resolved using baseUrl, which can be
@@ -2965,7 +2965,7 @@
 
     // inspect all nodes (and register async tasks) -->
     // some additional tasks that requires some data after nodes are inspected -->
-    // start async tasks and wait form them to complete -->
+    // start async tasks and wait for them to complete -->
     // finalize
     const tasks = [];
     const downLinkTasks = [];
@@ -3842,8 +3842,6 @@
 
   /****************************************************************************
    * A class that handles document CSS analysis.
-   *
-   * @class DocumentCssHandler
    ***************************************************************************/
 
   capturer.DocumentCssHandler = class DocumentCssHandler {

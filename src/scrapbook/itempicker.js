@@ -179,7 +179,7 @@
         cssRules.push(`#tree li[data-id] { display: none; }`);
         for (const type of types) {
           if (type === '') {
-            cssRules.push(`#tree li[data-id]:not([data-type]) { display: block; }`); 
+            cssRules.push(`#tree li[data-id]:not([data-type]) { display: block; }`);
           }
           cssRules.push(`#tree li[data-id][data-type="${CSS.escape(type)}"] { display: block; }`);
         }

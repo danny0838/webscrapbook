@@ -11104,11 +11104,11 @@ async function test_capture_referrer_cross_origin() {
 
   var file = zip.file('css_style_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
+  assert(text === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
 
   var file = zip.file('css_link.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
+  assert(text.split('\n').pop() === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
 
   var file = zip.file('css_link_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -11120,7 +11120,7 @@ async function test_capture_referrer_cross_origin() {
 
   var file = zip.file('css_link_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost2}/capture_referrer_cross_origin/css_link.py; }`);
+  assert(text === `:root { --referrer: "${localhost2}/capture_referrer_cross_origin/css_link.py"; }`);
 
   /* capture.rewriteCss = "tidy" */
   var options = {
@@ -11147,11 +11147,11 @@ async function test_capture_referrer_cross_origin() {
 
   var file = zip.file('css_style_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
+  assert(text === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
 
   var file = zip.file('css_link.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
+  assert(text.split('\n').pop() === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
 
   var file = zip.file('css_link_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -11163,7 +11163,7 @@ async function test_capture_referrer_cross_origin() {
 
   var file = zip.file('css_link_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost2}/capture_referrer_cross_origin/css_link.py; }`);
+  assert(text === `:root { --referrer: "${localhost2}/capture_referrer_cross_origin/css_link.py"; }`);
 
   /* capture.rewriteCss = "match" */
   var options = {
@@ -11190,11 +11190,11 @@ async function test_capture_referrer_cross_origin() {
 
   var file = zip.file('css_style_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
+  assert(text === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
 
   var file = zip.file('css_link.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text.split('\n').pop() === `:root { --referrer: ${localhost}/capture_referrer_cross_origin/index.py; }`);
+  assert(text.split('\n').pop() === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
 
   var file = zip.file('css_link_bg.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
@@ -11206,7 +11206,7 @@ async function test_capture_referrer_cross_origin() {
 
   var file = zip.file('css_link_import.py.css');
   var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: ${localhost2}/capture_referrer_cross_origin/css_link.py; }`);
+  assert(text === `:root { --referrer: "${localhost2}/capture_referrer_cross_origin/css_link.py"; }`);
 }
 
 /**

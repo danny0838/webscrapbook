@@ -1985,7 +1985,7 @@
         clonedNodeMap,
         includeShadowDom,
       } = options;
-      
+
       const newNode = newDoc.importNode(node, deep);
 
       if (deep) {
