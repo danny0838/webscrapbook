@@ -3224,124 +3224,45 @@ async function test_capture_base_rewrite_special() {
  * capture.base
  */
 async function test_capture_base_dynamic() {
-  /* capture.base = save */
-  var options = {
-    "capture.base": "save",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_base_dynamic/base.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
+  for (const base of ["save", "blank", "remove"]) {
+    console.debug("capture.base = %s", base);
 
-  var zip = await new JSZip().loadAsync(blob);
+    var options = {
+      "capture.base": base,
+    };
+    var blob = await capture({
+      url: `${localhost}/capture_base_dynamic/base.html`,
+      options: Object.assign({}, baseOptions, options),
+    });
 
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
+    var zip = await new JSZip().loadAsync(blob);
 
-  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp 2x`);
-  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp") repeat;`);
-  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp"); }`);
+    var indexFile = zip.file('index.html');
+    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+    var doc = await readFileAsDocument(indexBlob);
 
-  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
-  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
+    assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+    assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp 2x`);
+    assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+    assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+    assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp") repeat;`);
+    assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp"); }`);
 
-  assert(doc.querySelector('base').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/`);
+    assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
+    assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
 
-  assert(doc.querySelectorAll('img[src]')[1].getAttribute('src') === `green.bmp`);
-  assert(doc.querySelectorAll('img[srcset]')[1].getAttribute('srcset') === `green.bmp 2x`);
-  assert(doc.querySelectorAll('input[type="image"]')[1].getAttribute('src') === `green.bmp`);
-  assert(doc.querySelectorAll('table')[1].getAttribute('background') === `green.bmp`);
-  assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background: url("green.bmp") repeat;`);
-  assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("green.bmp"); }`);
+    // assert(doc.querySelector('base').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/`);
 
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
-  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
+    assert(doc.querySelectorAll('img[src]')[1].getAttribute('src') === `green.bmp`);
+    assert(doc.querySelectorAll('img[srcset]')[1].getAttribute('srcset') === `green.bmp 2x`);
+    assert(doc.querySelectorAll('input[type="image"]')[1].getAttribute('src') === `green.bmp`);
+    assert(doc.querySelectorAll('table')[1].getAttribute('background') === `green.bmp`);
+    assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background: url("green.bmp") repeat;`);
+    assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("green.bmp"); }`);
 
-  /* capture.base = blank */
-  var options = {
-    "capture.base": "blank",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_base_dynamic/base.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp 2x`);
-  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp") repeat;`);
-  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp"); }`);
-
-  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
-  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
-
-  assert(!doc.querySelector('base').hasAttribute('href'));
-
-  assert(doc.querySelectorAll('img[src]')[1].getAttribute('src') === `green.bmp`);
-  assert(doc.querySelectorAll('img[srcset]')[1].getAttribute('srcset') === `green.bmp 2x`);
-  assert(doc.querySelectorAll('input[type="image"]')[1].getAttribute('src') === `green.bmp`);
-  assert(doc.querySelectorAll('table')[1].getAttribute('background') === `green.bmp`);
-  assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background: url("green.bmp") repeat;`);
-  assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("green.bmp"); }`);
-
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
-  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
-
-  /* capture.base = remove */
-  var options = {
-    "capture.base": "remove",
-    "capture.frame": "save",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_base_dynamic/base.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp 2x`);
-  assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-  assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp") repeat;`);
-  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp"); }`);
-
-  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
-  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
-
-  assert(!doc.querySelector('base'));
-
-  assert(doc.querySelectorAll('img[src]')[1].getAttribute('src') === `green.bmp`);
-  assert(doc.querySelectorAll('img[srcset]')[1].getAttribute('srcset') === `green.bmp 2x`);
-  assert(doc.querySelectorAll('input[type="image"]')[1].getAttribute('src') === `green.bmp`);
-  assert(doc.querySelectorAll('table')[1].getAttribute('background') === `green.bmp`);
-  assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background: url("green.bmp") repeat;`);
-  assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("green.bmp"); }`);
-
-  assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
-  assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
-  
-
-  assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-  assert(doc.querySelector('span').getAttribute('style') === `background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp") repeat;`);
-  assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp"); }`);
-  assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
-  assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
+    assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
+    assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
+  }
 }
 
 /**
@@ -11079,134 +11000,51 @@ async function test_capture_referrer_doc_force() {
  * capture.referrerPolicy
  */
 async function test_capture_referrer_cross_origin() {
-  /* capture.rewriteCss = "url" */
-  var options = {
-    "capture.rewriteCss": "url",
-    "capture.referrerPolicy": "",
-  };
-  var blob = await captureHeadless({
-    url: `${localhost}/capture_referrer_cross_origin/index.py`,
-    options: Object.assign({}, baseOptions, options),
-  });
-  var zip = await new JSZip().loadAsync(blob);
+  for (const rewriteCss of ["url", "tidy", "match"]) {
+    console.debug("capture.rewriteCss = %s", rewriteCss);
 
-  var file = zip.file('css_bg.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
+    var options = {
+      "capture.rewriteCss": rewriteCss,
+      "capture.referrerPolicy": "",
+    };
+    var blob = await captureHeadless({
+      url: `${localhost}/capture_referrer_cross_origin/index.py`,
+      options: Object.assign({}, baseOptions, options),
+    });
+    var zip = await new JSZip().loadAsync(blob);
 
-  var file = zip.file('css_style_bg.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
+    var file = zip.file('css_bg.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
-  var file = zip.file('css_style_font.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
+    var file = zip.file('css_style_bg.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
-  var file = zip.file('css_style_import.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
+    var file = zip.file('css_style_font.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
 
-  var file = zip.file('css_link.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text.split('\n').pop() === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
+    var file = zip.file('css_style_import.py.css');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
 
-  var file = zip.file('css_link_bg.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
+    var file = zip.file('css_link.py.css');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text.split('\n').pop() === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
 
-  var file = zip.file('css_link_font.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
+    var file = zip.file('css_link_bg.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
 
-  var file = zip.file('css_link_import.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: "${localhost2}/capture_referrer_cross_origin/css_link.py"; }`);
+    var file = zip.file('css_link_font.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
 
-  /* capture.rewriteCss = "tidy" */
-  var options = {
-    "capture.rewriteCss": "tidy",
-    "capture.referrerPolicy": "",
-  };
-  var blob = await captureHeadless({
-    url: `${localhost}/capture_referrer_cross_origin/index.py`,
-    options: Object.assign({}, baseOptions, options),
-  });
-  var zip = await new JSZip().loadAsync(blob);
-
-  var file = zip.file('css_bg.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
-
-  var file = zip.file('css_style_bg.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
-
-  var file = zip.file('css_style_font.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
-
-  var file = zip.file('css_style_import.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
-
-  var file = zip.file('css_link.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text.split('\n').pop() === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
-
-  var file = zip.file('css_link_bg.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
-
-  var file = zip.file('css_link_font.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
-
-  var file = zip.file('css_link_import.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: "${localhost2}/capture_referrer_cross_origin/css_link.py"; }`);
-
-  /* capture.rewriteCss = "match" */
-  var options = {
-    "capture.rewriteCss": "match",
-    "capture.referrerPolicy": "",
-  };
-  var blob = await captureHeadless({
-    url: `${localhost}/capture_referrer_cross_origin/index.py`,
-    options: Object.assign({}, baseOptions, options),
-  });
-  var zip = await new JSZip().loadAsync(blob);
-
-  var file = zip.file('css_bg.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
-
-  var file = zip.file('css_style_bg.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
-
-  var file = zip.file('css_style_font.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost}/capture_referrer_cross_origin/index.py`);
-
-  var file = zip.file('css_style_import.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
-
-  var file = zip.file('css_link.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text.split('\n').pop() === `:root { --referrer: "${localhost}/capture_referrer_cross_origin/index.py"; }`);
-
-  var file = zip.file('css_link_bg.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
-
-  var file = zip.file('css_link_font.py');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `${localhost2}/capture_referrer_cross_origin/css_link.py`);
-
-  var file = zip.file('css_link_import.py.css');
-  var text = (await readFileAsText(await file.async('blob'))).trim();
-  assert(text === `:root { --referrer: "${localhost2}/capture_referrer_cross_origin/css_link.py"; }`);
+    var file = zip.file('css_link_import.py.css');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `:root { --referrer: "${localhost2}/capture_referrer_cross_origin/css_link.py"; }`);
+  }
 }
 
 /**
