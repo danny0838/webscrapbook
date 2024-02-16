@@ -6235,6 +6235,7 @@ async function test_capture_imageBackground_used_shadow() {
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.files['green.bmp']);
   assert(zip.files['yellow.bmp']);
+  assert(zip.files['blue.bmp']);
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6246,7 +6247,10 @@ async function test_capture_imageBackground_used_shadow() {
   var shadow1 = frag.content;
   assert(shadow1.querySelector('style').textContent.trim() === `\
 :host { background-image: url("yellow.bmp"); }
-#shadow { background-image: url("green.bmp"); }`);
+#shadow { background-image: url("green.bmp"); }
+@media all {
+  #media { background-image: url("blue.bmp"); }
+}`);
 }
 
 /**

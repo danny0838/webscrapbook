@@ -13,8 +13,12 @@ var s = d.attachShadow({mode: 'open'});
 s.innerHTML = `<style>
 :host { background-image: url("yellow.bmp"); }
 #shadow { background-image: url("green.bmp"); }
+@media all {
+  #media { background-image: url("blue.bmp"); }
+}
 </style>
-<blockquote id="shadow">shadow</blockquote>`;
+<blockquote id="shadow">shadow</blockquote>
+<blockquote id="media">media</blockquote>`;
 </script>
 </body>
 </html>
