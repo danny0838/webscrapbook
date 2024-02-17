@@ -617,6 +617,20 @@
           }
 
           case "style": {
+            const baseUrlCurrent = baseUrl;
+            const refPolicy = docRefPolicy;
+            const css = cssHandler.getElemCss(elem);
+            if (css) {
+              cssTasks.push(async () => {
+                await cssResourcesHandler.inspectCss({
+                  css,
+                  baseUrl: baseUrlCurrent,
+                  refUrl,
+                  refPolicy,
+                  root: elem.getRootNode(),
+                });
+              });
+            }
             switch (options["capture.style"]) {
               case "blank": {
                 captureRewriteTextContent(elem, "");
@@ -629,8 +643,6 @@
               case "save":
               case "link":
               default: {
-                const baseUrlCurrent = baseUrl;
-                const refPolicy = docRefPolicy;
                 tasks.push(async () => {
                   await cssHandler.rewriteCss({
                     elem,
@@ -824,6 +836,8 @@
 
             if (elem.matches('[rel~="stylesheet"][href]')) {
               // styles: link element
+              const baseUrlCurrent = baseUrl;
+              const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy;
               let disableCss = false;
               const css = cssHandler.getElemCss(elem);
               if (css) {
@@ -854,6 +868,15 @@
                     disableCss = true;
                   }
                 }
+                cssTasks.push(async () => {
+                  await cssResourcesHandler.inspectCss({
+                    css,
+                    baseUrl: css.href || baseUrlCurrent,
+                    refUrl: css.href || refUrl,
+                    refPolicy,
+                    root: elem.getRootNode(),
+                  });
+                });
               }
 
               switch (options["capture.style"]) {
@@ -882,9 +905,6 @@
                     captureRewriteAttr(elem, "data-scrapbook-css-disabled", "");
                     break;
                   }
-
-                  const baseUrlCurrent = baseUrl;
-                  const refPolicy = elem.matches('[rel~="noreferrer"]') ? 'no-referrer' : elem.referrerPolicy || docRefPolicy;
                   tasks.push(async () => {
                     await cssHandler.rewriteCss({
                       elem,
@@ -1020,6 +1040,8 @@
 
           // styles: style element
           case "style": {
+            const baseUrlCurrent = baseUrl;
+            const refPolicy = docRefPolicy;
             let disableCss = false;
             const css = cssHandler.getElemCss(elem);
             if (css) {
@@ -1035,6 +1057,26 @@
                   disableCss = true;
                 }
               }
+              cssTasks.push(async () => {
+                await cssResourcesHandler.inspectCss({
+                  css,
+                  baseUrl: baseUrlCurrent,
+                  refUrl,
+                  refPolicy,
+                  root: elem.getRootNode(),
+                });
+              });
+            } else if (scrapbook.getScrapbookObjectType(elem) === 'adoptedStyleSheet') {
+              // special handling of adoptedStyleSheets, who has no origNode
+              cssTasks.push(async () => {
+                await cssResourcesHandler.inspectCss({
+                  css: elem.sheet,
+                  baseUrl: baseUrlCurrent,
+                  refUrl,
+                  refPolicy,
+                  root: elem.getRootNode(),
+                });
+              });
             }
 
             switch (options["capture.style"]) {
@@ -1054,8 +1096,6 @@
                   captureRewriteAttr(elem, "data-scrapbook-css-disabled", "");
                   break;
                 }
-                const baseUrlCurrent = baseUrl;
-                const refPolicy = docRefPolicy;
                 tasks.push(async () => {
                   await cssHandler.rewriteCss({
                     elem,
@@ -2486,7 +2526,9 @@
           if (shadowRoot) {
             const shadowRootOrig = origNodeMap.get(shadowRoot);
             addAdoptedStyleSheets(shadowRootOrig, shadowRoot);
+            cssTasks.push(() => { cssResourcesHandler.scopePush(shadowRootOrig); });
             rewriteRecursively(shadowRoot, rootName, rewriteNode);
+            cssTasks.push(() => { cssResourcesHandler.scopePop(); });
             shadowRootList.push(shadowRoot);
             requireBasicLoader = true;
           }
@@ -2506,6 +2548,19 @@
 
       // styles: style attribute
       if (elem.hasAttribute("style")) {
+        const baseUrlCurrent = baseUrl;
+        const refPolicy = docRefPolicy;
+        const style = elem.style;
+        if (style) {
+          cssTasks.push(async () => {
+            await cssResourcesHandler.inspectStyle({
+              style,
+              baseUrl: baseUrlCurrent,
+              isInline: true,
+            });
+          });
+        }
+
         switch (options["capture.styleInline"]) {
           case "blank":
             captureRewriteAttr(elem, "style", "");
@@ -2515,8 +2570,6 @@
             break;
           case "save":
           default:
-            const baseUrlCurrent = baseUrl;
-            const refPolicy = docRefPolicy;
             switch (options["capture.rewriteCss"]) {
               case "url": {
                 tasks.push(async () => {
@@ -2962,6 +3015,7 @@
       origNodeMap, clonedNodeMap,
       settings, options,
     });
+    const cssResourcesHandler = new capturer.DocumentCssResourcesHandler(cssHandler);
 
     // prepare favicon selector
     const favIconSelector = scrapbook.split(options["capture.faviconAttrs"])
@@ -2972,6 +3026,7 @@
     // some additional tasks that requires some data after nodes are inspected -->
     // start async tasks and wait for them to complete -->
     // finalize
+    const cssTasks = [];
     const tasks = [];
     const downLinkTasks = [];
 
@@ -3054,16 +3109,11 @@
 
     // map used background images and fonts
     if ((options["capture.imageBackground"] === "save-used" || options["capture.font"] === "save-used") && !isHeadless) {
-      // @FIXME: resolve each URL using dynamic baseUrl (Not so mandatory as
-      //         this only have a problem when there's a URL before the first
-      //         base[href], which violates the spec.)
-      // @FIXME: resolve each URL using dynamic docRefPolicy
-      const cssResourcesHandler = new capturer.DocumentCssResourcesHandler(cssHandler);
-      await cssResourcesHandler.run({
-        baseUrl: baseUrlFinal,
-        refUrl,
-        refPolicy: docRefPolicy,
-      });
+      cssTasks.unshift(() => { cssResourcesHandler.start(); });
+      cssTasks.push(() => { cssResourcesHandler.stop(); });
+      await cssTasks.reduce((prevTask, curTask) => {
+        return prevTask.then(curTask);
+      }, Promise.resolve());
 
       // expose filter to settings
       if (options["capture.imageBackground"] === "save-used") {
@@ -4939,6 +4989,16 @@
 
   /****************************************************************************
    * A class that calculates used CSS resources of a document.
+   *
+   * - Currently we only check whether a font is USED (font-family referred
+   *   by CSS) rather than LOADED due to performance consideration and
+   *   technical restriction—even if Document.fonts can be checked, it's
+   *   hard to trace whether a "loading" status will become "loaded" or
+   *   "error".
+   * - Scoped @font-face is hard to implement and is unlikely used. But for
+   *   completeness we currently implement as if it's scoped, just like
+   *   @keyframes.
+   *   ref: https://bugs.chromium.org/p/chromium/issues/detail?id=336876
    ***************************************************************************/
 
   capturer.DocumentCssResourcesHandler = class DocumentCssResourcesHandler {
@@ -4946,86 +5006,23 @@
       this.cssHandler = cssHandler;
     }
 
-    /**
-     * Collect used resource URLs by decendants of rootNode.
-     *
-     * - Currently we only check whether a font is USED (font-family referred
-     *   by CSS) rather than LOADED due to performance consideration and
-     *   technical restriction—even if Document.fonts can be checked, it's
-     *   hard to trace whether a "loading" status will become "loaded" or
-     *   "error".
-     * - Scoped @font-face is hard to implement and is unlikely used. But for
-     *   completeness we currently implement as if it's scoped, just like
-     *   @keyframes.
-     *   ref: https://bugs.chromium.org/p/chromium/issues/detail?id=336876
-     *
-     * @return {{usedCssFontUrl: Object, usedCssImageUrl: Object}}
-     */
-    async run({baseUrl, refUrl, refPolicy}) {
-      const {doc, rootNode} = this.cssHandler;
-
+    /** @public */
+    start() {
       this.scopes = [];
       this.usedFontUrls = {};
       this.usedImageUrls = {};
 
-      const inspectDocOrShadowRoot = async (doc, root) => {
-        for (const css of doc.styleSheets) {
-          const rules = await this.cssHandler.getRulesFromCss({css, refUrl, refPolicy});
-          for (const rule of rules) {
-            await this.parseCssRule({
-              rule,
-              baseUrl: css.href || baseUrl,
-              refUrl: css.href || refUrl,
-              refPolicy,
-              root,
-            });
-          }
-        }
+      this.scopePush(this.cssHandler.doc);
+    }
 
-        for (const css of capturer.getAdoptedStyleSheets(doc)) {
-          const rules = await this.cssHandler.getRulesFromCss({css, refUrl, refPolicy});
-          for (const rule of rules) {
-            await this.parseCssRule({
-              rule,
-              baseUrl: css.href || baseUrl,
-              refUrl: css.href || refUrl,
-              refPolicy,
-              root,
-            });
-          }
-        }
-
-        await inspectElement(root);
-        for (const elem of root.querySelectorAll("*")) {
-          await inspectElement(elem);
-        }
-      };
-
-      const inspectElement = async (elem) => {
-        const {style} = elem;
-        if (style) {
-          this.inspectStyle({style, baseUrl, isInline: true});
-        }
-
-        const shadowRoot = elem.shadowRoot;
-        if (shadowRoot) {
-          const shadowRootOrig = this.cssHandler.origNodeMap.get(shadowRoot);
-          if (shadowRootOrig) {
-            this.scopePush(shadowRootOrig);
-            await inspectDocOrShadowRoot(shadowRootOrig, shadowRoot);
-            this.scopePop();
-          }
-        }
-      };
-
-      this.scopePush(doc);
-      await inspectDocOrShadowRoot(doc, rootNode);
-
+    /** @public */
+    stop() {
       while (this.scopes.length) {
         this.scopePop();
       }
     }
 
+    /** @public */
     scopePush(docOrShadowRoot) {
       this.scopes.push({
         root: docOrShadowRoot,
@@ -5043,6 +5040,7 @@
       });
     }
 
+    /** @public */
     scopePop() {
       // mark used keyFrames
       for (let name of this.scopes[this.scopes.length - 1].keyFrameUsed) {
@@ -5086,6 +5084,21 @@
       }
     }
 
+    /** @public */
+    async inspectCss({css, baseUrl, refUrl, refPolicy, root}) {
+      const rules = await this.cssHandler.getRulesFromCss({css, refUrl, refPolicy});
+      for (const rule of rules) {
+        await this.parseCssRule({
+          rule,
+          baseUrl: css.href || baseUrl,
+          refUrl: css.href || refUrl,
+          refPolicy,
+          root,
+        });
+      }
+    }
+
+    /** @public */
     inspectStyle({style, baseUrl, isInline = false}) {
       for (let prop of style) {
         if (prop === 'font-family') {

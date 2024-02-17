@@ -3334,30 +3334,33 @@ async function test_capture_base_dynamic() {
  */
 async function test_capture_base_dynamic_css() {
   for (const base of ["save", "blank", "remove"]) {
-    console.debug("capture.base = %s", base);
+    for (const imageBackground of ["save", "save-used"]) {
+      console.debug("capture.base = %s, capture.imageBackground = %s", base, imageBackground);
 
-    var options = {
-      "capture.base": base,
-      "capture.saveResourcesSequentially": true,
-    };
-    var blob = await capture({
-      url: `${localhost}/capture_base_dynamic_css/base.html`,
-      options: Object.assign({}, baseOptions, options),
-    });
+      var options = {
+        "capture.base": base,
+        "capture.imageBackground": imageBackground,
+        "capture.saveResourcesSequentially": true,
+      };
+      var blob = await capture({
+        url: `${localhost}/capture_base_dynamic_css/base.html`,
+        options: Object.assign({}, baseOptions, options),
+      });
 
-    var zip = await new JSZip().loadAsync(blob);
+      var zip = await new JSZip().loadAsync(blob);
 
-    var indexFile = zip.file('index.html');
-    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-    var doc = await readFileAsDocument(indexBlob);
+      var indexFile = zip.file('index.html');
+      var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+      var doc = await readFileAsDocument(indexBlob);
 
-    assert(doc.querySelector('span').getAttribute('style') === `background-image: url("inline.bmp");`);
-    assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("internal.bmp"); }`);
+      assert(doc.querySelector('span').getAttribute('style') === `background-image: url("inline.bmp");`);
+      assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("internal.bmp"); }`);
 
-    // assert(doc.querySelector('base').getAttribute('href') === `${localhost}/test_capture_base_dynamic_css/resources/`);
+      // assert(doc.querySelector('base').getAttribute('href') === `${localhost}/test_capture_base_dynamic_css/resources/`);
 
-    assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background-image: url("inline-1.bmp");`);
-    assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("internal-1.bmp"); }`);
+      assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background-image: url("inline-1.bmp");`);
+      assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("internal-1.bmp"); }`);
+    }
   }
 }
 
