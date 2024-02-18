@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test in-depth capture</title>
+<style>a::after { content: attr(href); }</style>
+</head>
+<body>
+<blockquote><a href="about:blank"></a></blockquote>
+<blockquote><a href="about:blank?foo=bar#baz"></a></blockquote>
+<blockquote><a href="about:srcdoc"></a></blockquote>
+<blockquote><a href="about:invalid"></a></blockquote>
+</body>
+</html>

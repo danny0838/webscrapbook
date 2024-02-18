@@ -1,8 +1,9 @@
 'use strict';
 
-/**
+/******************************************************************************
  * Configs
- */
+ *****************************************************************************/
+
 const baseOptions = {
   "capture.saveTo": "memory",
   "capture.saveAs": "zip",
@@ -63,9 +64,10 @@ const baseOptions = {
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const MAF = "http://maf.mozdev.org/metadata/rdf#";
 
-/**
+
+/******************************************************************************
  * Tests
- */
+ *****************************************************************************/
 
 async function test_lib_referrer() {
   // ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
@@ -3219,75 +3221,7 @@ async function test_capture_base_rewrite_special() {
 }
 
 /**
- * Check if referrer is handled correctly when base is set.
- */
-async function test_capture_base_referrer() {
-  for (const rewriteCss of ["url", "tidy", "match"]) {
-    console.debug("capture.rewriteCss = %s", rewriteCss);
-
-    var options = {
-      "capture.rewriteCss": rewriteCss,
-    };
-    var blob = await capture({
-      url: `${localhost}/capture_base_referrer/index.html`,
-      options: Object.assign({}, baseOptions, options),
-    });
-    var zip = await new JSZip().loadAsync(blob);
-
-    var file = zip.file('link.py.css');
-    var text = (await readFileAsText(await file.async('blob'))).trim();
-    assert(text.match(
-      cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_referrer/index.html"; }
-@font-face { font-family: linkFont; src: url("link_font.py"); }
-#link-font { font-family: linkFont; }
-#link-bg { background-image: url("link_bg.py"); }`
-    ));
-
-    var file = zip.file('link_font.py');
-    var text = (await readFileAsText(await file.async('blob'))).trim();
-    assert(text === `${localhost}/capture_base_referrer/resources/link.py`);
-
-    var file = zip.file('link_bg.py');
-    var text = (await readFileAsText(await file.async('blob'))).trim();
-    assert(text === `${localhost}/capture_base_referrer/resources/link.py`);
-
-    // @FIXME: in Chromium < 80~100, the referrer for the imported CSS is
-    //     erroneously set to document base.
-    var file = zip.file('style_import.py.css');
-    var text = (await readFileAsText(await file.async('blob'))).trim();
-    assert(text.match(
-      cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_referrer/index.html"; }
-@font-face { font-family: styleImportFont; src: url("style_import_font.py"); }
-#style-import-font { font-family: styleImportFont; }
-#style-import-bg { background-image: url("style_import_bg.py"); }`
-    ));
-
-    var file = zip.file('style_import_font.py');
-    var text = (await readFileAsText(await file.async('blob'))).trim();
-    assert(text === `${localhost}/capture_base_referrer/resources/style_import.py`);
-
-    var file = zip.file('style_import_bg.py');
-    var text = (await readFileAsText(await file.async('blob'))).trim();
-    assert(text === `${localhost}/capture_base_referrer/resources/style_import.py`);
-
-    var file = zip.file('style_font.py');
-    var text = (await readFileAsText(await file.async('blob'))).trim();
-    assert(text === `${localhost}/capture_base_referrer/index.html`);
-
-    var file = zip.file('style_bg.py');
-    var text = (await readFileAsText(await file.async('blob'))).trim();
-    assert(text === `${localhost}/capture_base_referrer/index.html`);
-
-    var file = zip.file('img_src.py');
-    var text = (await readFileAsText(await file.async('blob'))).trim();
-    assert(text === `${localhost}/capture_base_referrer/index.html`);
-  }
-}
-
-/**
- * Check if URLs are parsed correctly when base changes.
- *
- * capture.base
+ * Check if URLs after base[href] are handled correctly.
  */
 async function test_capture_base_dynamic() {
   for (const base of ["save", "blank", "remove"]) {
@@ -3297,7 +3231,7 @@ async function test_capture_base_dynamic() {
       "capture.base": base,
     };
     var blob = await capture({
-      url: `${localhost}/capture_base_dynamic/base.html`,
+      url: `${localhost}/capture_base_dynamic/basic.html`,
       options: Object.assign({}, baseOptions, options),
     });
 
@@ -3307,169 +3241,323 @@ async function test_capture_base_dynamic() {
     var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
     var doc = await readFileAsDocument(indexBlob);
 
-    assert(doc.querySelector('img[src]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-    assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp 2x`);
-    assert(doc.querySelector('input[type="image"]').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
-    assert(doc.querySelector('table').getAttribute('background') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic/green.bmp`);
+    assert(doc.querySelector('img[src]').getAttribute('src') === `img_src.py`);
+    assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `img_srcset.py 2x`);
+    assert(doc.querySelector('picture source').getAttribute('srcset') === `picture_source.py`);
+    assert(doc.querySelector('input[type="image"]').getAttribute('src') === `input_image.py`);
+    assert(doc.querySelector('table').getAttribute('background') === `table_background.py`);
 
-    assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
-    assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
+    assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/anchor.py`);
+    assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/q.py`);
 
-    // assert(doc.querySelector('base').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/`);
+    var file = zip.file('img_src.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_dynamic/basic.html`);
 
-    assert(doc.querySelectorAll('img[src]')[1].getAttribute('src') === `green.bmp`);
-    assert(doc.querySelectorAll('img[srcset]')[1].getAttribute('srcset') === `green.bmp 2x`);
-    assert(doc.querySelectorAll('input[type="image"]')[1].getAttribute('src') === `green.bmp`);
-    assert(doc.querySelectorAll('table')[1].getAttribute('background') === `green.bmp`);
+    var file = zip.file('img_srcset.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_dynamic/basic.html`);
 
-    assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_base_dynamic/resources/test.html`);
-    assert(doc.querySelectorAll('q')[1].getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/test.html`);
+    var file = zip.file('picture_source.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_dynamic/basic.html`);
+
+    var file = zip.file('input_image.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_dynamic/basic.html`);
+
+    var file = zip.file('table_background.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_dynamic/basic.html`);
   }
 }
 
 /**
- * Check if CSS related URLs are parsed correctly when base changes.
- *
- * capture.base
+ * Check if URLs before base[href] are handled correctly.
+ */
+async function test_capture_base_dynamic_bad() {
+  for (const base of ["save", "blank", "remove"]) {
+    console.debug("capture.base = %s", base);
+
+    var options = {
+      "capture.base": base,
+    };
+    var blob = await capture({
+      url: `${localhost}/capture_base_dynamic/bad.html`,
+      options: Object.assign({}, baseOptions, options),
+    });
+
+    var zip = await new JSZip().loadAsync(blob);
+
+    var indexFile = zip.file('index.html');
+    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+    var doc = await readFileAsDocument(indexBlob);
+
+    assert(doc.querySelector('img[src]').getAttribute('src') === `img_src.py`);
+    assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `img_srcset.py 2x`);
+    assert(doc.querySelector('picture source').getAttribute('srcset') === `picture_source.py`);
+    assert(doc.querySelector('input[type="image"]').getAttribute('src') === `input_image.py`);
+    assert(doc.querySelector('table').getAttribute('background') === `table_background.py`);
+
+    assert(doc.querySelector('a').getAttribute('href') === `${localhost}/capture_base_dynamic/resources/resources/anchor.py`);
+    assert(doc.querySelector('q').getAttribute('cite') === `${localhost}/capture_base_dynamic/resources/resources/q.py`);
+
+    var file = zip.file('img_src.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_dynamic/bad.html`);
+
+    var file = zip.file('img_srcset.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_dynamic/bad.html`);
+
+    var file = zip.file('picture_source.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_dynamic/bad.html`);
+
+    var file = zip.file('input_image.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_dynamic/bad.html`);
+
+    var file = zip.file('table_background.py');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `${localhost}/capture_base_dynamic/bad.html`);
+  }
+}
+
+/**
+ * Check if CSS-related URLs after base[href] are handled correctly.
  */
 async function test_capture_base_dynamic_css() {
-  for (const base of ["save", "blank", "remove"]) {
-    for (const imageBackground of ["save", "save-used"]) {
-      console.debug("capture.base = %s, capture.imageBackground = %s", base, imageBackground);
+  for (const rewriteCss of ["url", "tidy", "match"]) {
+    for (const styleRes of ["save", "save-used"]) {
+      console.debug("capture.rewriteCss = %s, capture.imageBackground = capture.font = %s", rewriteCss, styleRes);
 
       var options = {
-        "capture.base": base,
-        "capture.imageBackground": imageBackground,
-        "capture.saveResourcesSequentially": true,
+        "capture.rewriteCss": rewriteCss,
+        "capture.imageBackground": styleRes,
+        "capture.font": styleRes,
       };
       var blob = await capture({
-        url: `${localhost}/capture_base_dynamic_css/base.html`,
+        url: `${localhost}/capture_base_dynamic_css/basic.html`,
         options: Object.assign({}, baseOptions, options),
       });
-
       var zip = await new JSZip().loadAsync(blob);
 
-      var indexFile = zip.file('index.html');
-      var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-      var doc = await readFileAsDocument(indexBlob);
+      var file = zip.file('link.py.css');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text.match(
+        cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_dynamic_css/basic.html"; }
+@font-face { font-family: linkFont; src: url("link_font.py"); }
+#link-font { font-family: linkFont; }
+#link-bg { background-image: url("link_bg.py"); }`
+      ));
 
-      assert(doc.querySelector('span').getAttribute('style') === `background-image: url("inline.bmp");`);
-      assert(doc.querySelector('#style1 style').textContent === `#style1 { background: url("internal.bmp"); }`);
+      var file = zip.file('link_font.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/resources/link.py`);
 
-      // assert(doc.querySelector('base').getAttribute('href') === `${localhost}/test_capture_base_dynamic_css/resources/`);
+      var file = zip.file('link_bg.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/resources/link.py`);
 
-      assert(doc.querySelectorAll('span')[1].getAttribute('style') === `background-image: url("inline-1.bmp");`);
-      assert(doc.querySelector('#style2 style').textContent === `#style2 { background: url("internal-1.bmp"); }`);
+      // @FIXME: in Chromium < 96, the referrer for the imported CSS is
+      //     erroneously set to document base.
+      var file = zip.file('style_import.py.css');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text.match(
+        cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_dynamic_css/basic.html"; }
+@font-face { font-family: styleImportFont; src: url("style_import_font.py"); }
+#style-import-font { font-family: styleImportFont; }
+#style-import-bg { background-image: url("style_import_bg.py"); }`
+      ));
+
+      var file = zip.file('style_import_font.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/resources/style_import.py`);
+
+      var file = zip.file('style_import_bg.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/resources/style_import.py`);
+
+      var file = zip.file('style_font.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/basic.html`);
+
+      var file = zip.file('style_bg.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/basic.html`);
+
+      var file = zip.file('inline.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/basic.html`);
     }
   }
 }
 
 /**
- * Check if URLs are parsed correctly when base changes for iframes.
- *
- * capture.base
- * capture.frame
- * mode: tab/source
+ * Check if CSS-related URLs before base[href] are handled correctly.
  */
-async function test_capture_base_dynamic_iframe() {
-  /* capture.frame = save */
-  var options = {
-    "capture.base": "blank",
-    "capture.frame": "save",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_base_dynamic_iframe/base.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
+async function test_capture_base_dynamic_css_bad() {
+  for (const rewriteCss of ["url", "tidy", "match"]) {
+    for (const styleRes of ["save", "save-used"]) {
+      console.debug("capture.rewriteCss = %s, capture.imageBackground = capture.font = %s", rewriteCss, styleRes);
 
-  var zip = await new JSZip().loadAsync(blob);
+      var options = {
+        "capture.rewriteCss": rewriteCss,
+        "capture.imageBackground": styleRes,
+        "capture.font": styleRes,
+      };
+      var blob = await capture({
+        url: `${localhost}/capture_base_dynamic_css/bad.html`,
+        options: Object.assign({}, baseOptions, options),
+      });
+      var zip = await new JSZip().loadAsync(blob);
 
-  var indexFile = zip.file('index_1.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img').getAttribute('src') === `green.bmp`);
+      var file = zip.file('link.py.css');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text.match(
+        cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_dynamic_css/bad.html"; }
+@font-face { font-family: linkFont; src: url("link_font.py"); }
+#link-font { font-family: linkFont; }
+#link-bg { background-image: url("link_bg.py"); }`
+      ));
 
-  var indexFile = zip.file('index_2.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic_iframe/resources/resources/green.bmp`);
+      var file = zip.file('link_font.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/resources/link.py`);
 
-  /* capture.frame = save (headless) */
-  var options = {
-    "capture.base": "blank",
-    "capture.frame": "save",
-  };
-  var blob = await captureHeadless({
-    url: `${localhost}/capture_base_dynamic_iframe/base.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
+      var file = zip.file('link_bg.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/resources/link.py`);
 
-  var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index_1.html"]);
-  assert(!zip.files["index_2.html"]);
+      // @FIXME: in Chromium < 96, the referrer for the imported CSS is
+      //     erroneously set to document base.
+      var file = zip.file('style_import.py.css');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text.match(
+        cssRegex`:root { --referrer: "${escapeRegExp(localhost)}/capture_base_dynamic_css/bad.html"; }
+@font-face { font-family: styleImportFont; src: url("style_import_font.py"); }
+#style-import-font { font-family: styleImportFont; }
+#style-import-bg { background-image: url("style_import_bg.py"); }`
+      ));
 
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
+      var file = zip.file('style_import_font.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/resources/style_import.py`);
 
-  // both iframe[srcdoc] are identical and saves as the same file
-  assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
-  assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_1.html`);
+      var file = zip.file('style_import_bg.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/resources/style_import.py`);
 
-  var indexFile = zip.file('index_1.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('img').getAttribute('src') === `green.bmp`);
+      var file = zip.file('style_font.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/bad.html`);
 
-  /* capture.frame = link */
-  var options = {
-    "capture.base": "blank",
-    "capture.frame": "link",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_base_dynamic_iframe/base.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
+      var file = zip.file('style_bg.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/bad.html`);
 
-  var zip = await new JSZip().loadAsync(blob);
+      var file = zip.file('inline.py');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `${localhost}/capture_base_dynamic_css/bad.html`);
+    }
+  }
+}
 
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-  var frames = doc.querySelectorAll('iframe');
+/**
+ * Check if frame-related URLs after base[href] are handled correctly.
+ */
+async function test_capture_base_dynamic_frame() {
+  for (const func of ["capture", "captureHeadless"]) {
+    console.debug("func = %s", func);
 
-  var srcdocBlob = new Blob([frames[0].getAttribute('srcdoc')], {type: "text/html"});
-  var srcdoc = await readFileAsDocument(srcdocBlob);
-  assert(srcdoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+    /* capture.frame = save */
+    var options = {
+      "capture.base": "blank",
+      "capture.frame": "save",
+    };
+    var blob = await globalThis[func]({
+      url: `${localhost}/capture_base_dynamic_frame/srcdoc_basic.html`,
+      options: Object.assign({}, baseOptions, options),
+    });
 
-  var srcdocBlob = new Blob([frames[1].getAttribute('srcdoc')], {type: "text/html"});
-  var srcdoc = await readFileAsDocument(srcdocBlob);
-  assert(srcdoc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic_iframe/resources/resources/green.bmp`);
+    var zip = await new JSZip().loadAsync(blob);
+    assert(zip.files["green.bmp"]);
 
-  /* capture.frame = link (headless) */
-  var options = {
-    "capture.base": "blank",
-    "capture.frame": "link",
-  };
-  var blob = await captureHeadless({
-    url: `${localhost}/capture_base_dynamic_iframe/base.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
+    var indexFile = zip.file('index_1.html');
+    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+    var doc = await readFileAsDocument(indexBlob);
+    assert(doc.querySelector('img').getAttribute('src') === `green.bmp`);
 
-  var zip = await new JSZip().loadAsync(blob);
+    /* capture.frame = link */
+    var options = {
+      "capture.base": "blank",
+      "capture.frame": "link",
+    };
+    var blob = await capture({
+      url: `${localhost}/capture_base_dynamic_frame/srcdoc_basic.html`,
+      options: Object.assign({}, baseOptions, options),
+    });
 
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-  var frames = doc.querySelectorAll('iframe');
+    var zip = await new JSZip().loadAsync(blob);
 
-  var srcdocBlob = new Blob([frames[0].getAttribute('srcdoc')], {type: "text/html"});
-  var srcdoc = await readFileAsDocument(srcdocBlob);
-  assert(srcdoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+    var indexFile = zip.file('index.html');
+    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+    var doc = await readFileAsDocument(indexBlob);
 
-  var srcdocBlob = new Blob([frames[1].getAttribute('srcdoc')], {type: "text/html"});
-  var srcdoc = await readFileAsDocument(srcdocBlob);
-  assert(srcdoc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:${localhost}/capture_base_dynamic_iframe/resources/resources/green.bmp`);
+    var frame = doc.querySelector('iframe');
+    var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
+    var srcdoc = await readFileAsDocument(srcdocBlob);
+    assert(srcdoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+  }
+}
+
+/**
+ * Check if frame-related URLs before base[href] are handled correctly.
+ */
+async function test_capture_base_dynamic_frame_bad() {
+  for (const func of ["capture", "captureHeadless"]) {
+    console.debug("func = %s", func);
+
+    /* capture.frame = save */
+    var options = {
+      "capture.base": "blank",
+      "capture.frame": "save",
+    };
+    var blob = await globalThis[func]({
+      url: `${localhost}/capture_base_dynamic_frame/srcdoc_bad.html`,
+      options: Object.assign({}, baseOptions, options),
+    });
+
+    var zip = await new JSZip().loadAsync(blob);
+    assert(zip.files["green.bmp"]);
+
+    var indexFile = zip.file('index_1.html');
+    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+    var doc = await readFileAsDocument(indexBlob);
+    assert(doc.querySelector('img').getAttribute('src') === `green.bmp`);
+
+    /* capture.frame = link */
+    var options = {
+      "capture.base": "blank",
+      "capture.frame": "link",
+    };
+    var blob = await capture({
+      url: `${localhost}/capture_base_dynamic_frame/srcdoc_bad.html`,
+      options: Object.assign({}, baseOptions, options),
+    });
+
+    var zip = await new JSZip().loadAsync(blob);
+
+    var indexFile = zip.file('index.html');
+    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+    var doc = await readFileAsDocument(indexBlob);
+
+    var frame = doc.querySelector('iframe');
+    var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
+    var srcdoc = await readFileAsDocument(srcdocBlob);
+    assert(srcdoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+  }
 }
 
 /**
@@ -7418,7 +7506,7 @@ async function test_capture_frame_srcdoc() {
   // "srcdoc" attribute exists. We skipped checking the captured document in
   // detail to prevent inconsistent results.
   var blob = await capture({
-    url: `${localhost}/capture_frame/srcdoc2.html`,
+    url: `${localhost}/capture_frame/srcdoc_frame.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7435,7 +7523,7 @@ async function test_capture_frame_srcdoc() {
 
 <style>img { width: 60px; }</style>
 <script>
-document.querySelector('p').textContent = 'srcdoc content modified';
+document.querySelector("p").textContent = "srcdoc content modified";
 </script>`);
   assert(frame.getAttribute('src') === `index_1.html`);
 
@@ -7468,7 +7556,7 @@ document.querySelector('p').textContent = 'srcdoc content modified';
 
   // frame[srcdoc] should be ignored (left unchanged) and its src should be used
   var blob = await capture({
-    url: `${localhost}/capture_frame/srcdoc2.html`,
+    url: `${localhost}/capture_frame/srcdoc_frame.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7485,7 +7573,7 @@ document.querySelector('p').textContent = 'srcdoc content modified';
 
 <style>img { width: 60px; }</style>
 <script>
-document.querySelector('p').textContent = 'srcdoc content modified';
+document.querySelector("p").textContent = "srcdoc content modified";
 </script>`);
   assert(frame.getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html`);
 
@@ -7511,7 +7599,7 @@ document.querySelector('p').textContent = 'srcdoc content modified';
 
   // frame[srcdoc] should be ignored (left unchanged)
   var blob = await capture({
-    url: `${localhost}/capture_frame/srcdoc2.html`,
+    url: `${localhost}/capture_frame/srcdoc_frame.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7528,7 +7616,7 @@ document.querySelector('p').textContent = 'srcdoc content modified';
 
 <style>img { width: 60px; }</style>
 <script>
-document.querySelector('p').textContent = 'srcdoc content modified';
+document.querySelector("p").textContent = "srcdoc content modified";
 </script>`);
   assert(!frame.hasAttribute('src'));
 
@@ -7678,7 +7766,7 @@ async function test_capture_frame_headless_srcdoc() {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc?sha1=d5b4a943636aa76ec3822ea02bac52a7bef28cce"]'));
+  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc?sha1=26055330a3a05ad90b259610f34ed3a38563e69a"]'));
   assert(frameDoc.querySelector('p').textContent.trim() === `srcdoc content`);
   assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
 
@@ -7700,7 +7788,7 @@ async function test_capture_frame_headless_srcdoc() {
 
   // frame[srcdoc] should be ignored (left unchanged) and its src should be used
   var blob = await captureHeadless({
-    url: `${localhost}/capture_frame/srcdoc2.html`,
+    url: `${localhost}/capture_frame/srcdoc_frame.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7717,7 +7805,7 @@ async function test_capture_frame_headless_srcdoc() {
 
 <style>img { width: 60px; }</style>
 <script>
-document.querySelector('p').textContent = 'srcdoc content modified';
+document.querySelector("p").textContent = "srcdoc content modified";
 </script>`);
   assert(frame.getAttribute('src') === `index_1.html`);
 
@@ -7758,7 +7846,7 @@ document.querySelector('p').textContent = 'srcdoc content modified';
 
   // frame[srcdoc] should be ignored (left unchanged) and its src should be used
   var blob = await captureHeadless({
-    url: `${localhost}/capture_frame/srcdoc2.html`,
+    url: `${localhost}/capture_frame/srcdoc_frame.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -7775,7 +7863,7 @@ document.querySelector('p').textContent = 'srcdoc content modified';
 
 <style>img { width: 60px; }</style>
 <script>
-document.querySelector('p').textContent = 'srcdoc content modified';
+document.querySelector("p").textContent = "srcdoc content modified";
 </script>`);
   assert(frame.getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html`);
 }
@@ -8359,28 +8447,36 @@ async function test_capture_anchor() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-
   var anchors = doc.querySelectorAll('a');
+
   assert(anchors[0].getAttribute('href') === ``);
   assert(anchors[1].getAttribute('href') === `#`);
   assert(anchors[2].getAttribute('href') === `#123`);
   assert(anchors[3].getAttribute('href') === `${localhost}/capture_anchor/index.html?id=123`);
+
   assert(anchors[4].getAttribute('href') === ``);
   assert(anchors[5].getAttribute('href') === `#`);
   assert(anchors[6].getAttribute('href') === `#123`);
   assert(anchors[7].getAttribute('href') === `${localhost}/capture_anchor/index.html?id=123`);
+
   assert(anchors[8].getAttribute('href') === `${localhost}/capture_anchor/linked.html`);
   assert(anchors[9].getAttribute('href') === `${localhost}/capture_anchor/linked.html#`);
   assert(anchors[10].getAttribute('href') === `${localhost}/capture_anchor/linked.html#123`);
   assert(anchors[11].getAttribute('href') === `${localhost}/capture_anchor/linked.html?id=123`);
+
   assert(anchors[12].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html`);
   assert(anchors[13].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html#`);
   assert(anchors[14].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html#123`);
   assert(anchors[15].getAttribute('href') === `${localhost}/capture_anchor/subdir/linked.html?id=123`);
-  assert(anchors[16].getAttribute('href') === `http://example.com/`); // slight changed from http://example.com
+
+  assert(anchors[16].getAttribute('href') === `http://example.com/`); // slightly changed from http://example.com
   assert(anchors[17].getAttribute('href') === `http://example.com/#`);
   assert(anchors[18].getAttribute('href') === `http://example.com/#123`);
   assert(anchors[19].getAttribute('href') === `http://example.com/?id=123`);
+
+  assert(anchors[20].getAttribute('href') === `about:blank`);
+  assert(anchors[21].getAttribute('href') === `urn:scrapbook:download:error:http://example.com`);
+  assert(anchors[22].getAttribute('href') === `mailto:noresponse@example.com`);
 }
 
 /**
@@ -9254,14 +9350,14 @@ async function test_capture_embed() {
  *
  * capture.embed
  */
-async function test_capture_embed_cross_origin() {
+async function test_capture_embed_frame() {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.embed": "save",
   };
 
   var blob = await capture({
-    url: `${localhost}/capture_embed_cross_origin/cross_origin.py`,
+    url: `${localhost}/capture_embed_frame/cross_origin.py`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9301,7 +9397,7 @@ async function test_capture_embed_cross_origin() {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "image/svg+xml"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_embed_cross_origin/cross_origin.py`);
+  assert(frameDoc.querySelector('a').getAttribute("href").trim() === `${localhost2}/capture_embed_frame/cross_origin.py`);
 
   // frame4.txt
   var frame = frames[3];
@@ -13175,6 +13271,75 @@ async function test_capture_downLink_indepth_blob() {
 }
 
 /**
+ * Check URL should be kept as-is for about: URLs.
+ *
+ * capture.downLink.doc.depth
+ */
+async function test_capture_downLink_indepth_about() {
+  var options = {
+    "capture.downLink.doc.depth": 1,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_downLink_indepth_about/in-depth.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var anchors = doc.querySelectorAll('a');
+  assert(anchors[0].getAttribute('href') === `about:blank`);
+  assert(anchors[1].getAttribute('href') === `about:blank?foo=bar#baz`);
+  assert(anchors[2].getAttribute('href') === `about:srcdoc`);
+  assert(anchors[3].getAttribute('href') === `about:invalid`);
+
+  var sitemapFile = zip.file('index.json');
+  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var expectedData = {
+    "version": 3,
+    "indexPages": [
+      "index.html"
+    ],
+    "files": [
+      {
+        "path": "index.json"
+      },
+      {
+        "path": "index.dat"
+      },
+      {
+        "path": "index.rdf"
+      },
+      {
+        "path": "history.rdf"
+      },
+      {
+        "path": "^metadata^"
+      },
+      {
+        "path": "index.html",
+        "url": `${localhost}/capture_downLink_indepth_about/in-depth.html`,
+        "role": "document",
+        "token": getToken(`${localhost}/capture_downLink_indepth_about/in-depth.html`, "document")
+      },
+      {
+        "path": "index.xhtml",
+        "role": "document"
+      },
+      {
+        "path": "index.svg",
+        "role": "document"
+      }
+    ]
+  };
+  assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
+}
+
+/**
  * An attachment page should be download as a file and not captured.
  * Also check that links in an embedded SVG or MathML are handled correctly.
  *
@@ -15922,6 +16087,11 @@ async function test_viewer_csp() {
   });
 }
 
+
+/******************************************************************************
+ * Main
+ *****************************************************************************/
+
 async function runTests(prefixes = ['test_']) {
   const tests = Object.keys(window).filter(x => prefixes.some(p => x.startsWith(p)));
   for (const t of tests) {
@@ -15937,9 +16107,6 @@ async function runManualTests() {
   await runTests(config["manual_tests"]);
 }
 
-/**
- * Main flow
- */
 async function main() {
   const mode = new URL(location.href).searchParams.get('m');
 

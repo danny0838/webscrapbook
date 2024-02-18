@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="strict-origin">
+<meta name="referrer" content="unsafe-url">
+<title>Test URLs before base[href]</title>
+</head>
+<body>
+<blockquote><picture><source media="(max-width: 300px)" srcset="resources/picture_source.py"><img src="resources/img_src.py"></picture></blockquote>
+<blockquote><img srcset="resources/img_srcset.py 2x"></blockquote>
+<blockquote><input type="image" src="resources/input_image.py"></blockquote>
+<blockquote><table background="resources/table_background.py"></table></blockquote>
+
+<blockquote><a href="resources/anchor.py">anchor</a></blockquote>
+<blockquote><q cite="resources/q.py">quote</q></blockquote>
+
+<!-- URLs before the first base[href] should not exist according to the spec -->
+<base href="resources/">
+
+<meta name="referrer" content="no-referrer">
+</body>
+</html>

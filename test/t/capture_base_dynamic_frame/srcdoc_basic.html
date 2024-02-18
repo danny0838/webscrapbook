@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="strict-origin">
+<meta name="referrer" content="unsafe-url">
+<base href="resources/">
+<title>Test frame-related URLs after base[href]</title>
+</head>
+<body>
+<blockquote><iframe srcdoc="<style>img { width: 60px; }</style><img src=./green.bmp>"></iframe></blockquote>
+
+<meta name="referrer" content="no-referrer">
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<frameset cols="50%,*">
+<frame name="left" src="frames/frame1.html" srcdoc='<p>srcdoc content</p>
+<img src="frames/red.bmp">
+
+<style>img { width: 60px; }</style>
+<script>
+document.querySelector("p").textContent = "srcdoc content modified";
+</script>'>
+<frame name="right" srcdoc='<meta http-equiv="refresh" content="0; url=frames/frame1.html">'>
+<noframes>Frame not supported.</noframes>
+</frameset>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="strict-origin">
+<meta name="referrer" content="unsafe-url">
+<title>Test frame-related URLs before base[href]</title>
+</head>
+<body>
+<blockquote><iframe srcdoc="<style>img { width: 60px; }</style><img src=resources/green.bmp>"></iframe></blockquote>
+
+<!-- URLs before the first base[href] should not exist according to the spec -->
+<base href="resources/">
+
+<meta name="referrer" content="no-referrer">
+</body>
+</html>

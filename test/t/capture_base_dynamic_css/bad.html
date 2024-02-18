@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="strict-origin">
+<meta name="referrer" content="unsafe-url">
+<title>Test CSS-related URLs before base[href]</title>
+<link rel="stylesheet" href="resources/link.py">
+<style>
+@import url(resources/style_import.py);
+@font-face { font-family: styleFont; src: url(resources/style_font.py); }
+#style-font { font-family: styleFont; }
+#style-bg { background-image: url(resources/style_bg.py); }
+</style>
+</head>
+<body>
+<blockquote id="link-font">link-font</blockquote>
+<blockquote id="link-bg">link-bg</blockquote>
+<blockquote id="style-import-font">style-import-font</blockquote>
+<blockquote id="style-import-bg">style-import-bg</blockquote>
+<blockquote id="style-font">style-font</blockquote>
+<blockquote id="style-bg">style-bg</blockquote>
+<blockquote id="inline" style="background-image: url(resources/inline.py);">inline</blockquote>
+
+<!-- URLs before the first base[href] should not exist according to the spec -->
+<base href="resources/">
+
+<meta name="referrer" content="no-referrer">
+</body>
+</html>
