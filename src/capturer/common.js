@@ -177,6 +177,7 @@
    * @kind invokable
    * @param {Object} params
    * @param {Document} params.doc
+   * @param {string} [params.metaDocUrl] - an overriding meta document URL
    * @param {string} [params.docUrl] - an overriding document URL
    * @param {string} [params.baseUrl] - an overriding document base URL
    * @param {string} [params.refUrl] - the referrer URL
@@ -189,7 +190,7 @@
   capturer.captureDocumentOrFile = async function (params) {
     isDebug && console.debug("call: captureDocumentOrFile", params);
 
-    const {doc = document, docUrl, baseUrl, refUrl, refPolicy, settings, options} = params;
+    const {doc = document, metaDocUrl, docUrl, baseUrl, refUrl, refPolicy, settings, options} = params;
 
     // if not HTML|SVG document, capture as file
     if (!["text/html", "application/xhtml+xml", "image/svg+xml"].includes(doc.contentType)) {
@@ -198,8 +199,10 @@
       if (doc.documentElement.nodeName.toLowerCase() === "html" && options["capture.saveFileAsHtml"]) {
         return await capturer.captureDocument({
           doc,
+          metaDocUrl,
           docUrl,
           baseUrl,
+          refPolicy,
           mime: "text/html",
           settings,
           options,
@@ -221,8 +224,10 @@
     // otherwise, capture as document
     return await capturer.captureDocument({
       doc,
+      metaDocUrl,
       docUrl,
       baseUrl,
+      refPolicy,
       settings,
       options,
     });
@@ -232,10 +237,13 @@
    * @kind invokable
    * @param {Object} params
    * @param {Document} params.doc
-   * @param {string} [params.docUrl] - an overriding document URL (for handling
-   *     document metadata)
+   * @param {string} [params.metaDocUrl] - an overriding meta document URL
+   *     (real doc URL like about:srcdoc, for handling document metadata)
+   * @param {string} [params.docUrl] - an overriding document URL (for request
+   *     referrers)
    * @param {string} [params.baseUrl] - an overriding document base URL (for
-   *     resolving resources)
+   *     resolving relative URLs)
+   * @param {string} [params.refPolicy] - the default document referrer policy
    * @param {string} [params.mime] - an overriding document contentType
    * @param {Object} params.settings
    * @param {string} [params.settings.title] - item title
@@ -1332,6 +1340,8 @@
                     if (frameDoc) {
                       return capturer.captureDocumentOrFile({
                         doc: frameDoc,
+                        metaDocUrl: sourceUrl,
+                        docUrl,
                         baseUrl: baseUrlCurrent,
                         refUrl,
                         refPolicy,
@@ -1342,13 +1352,16 @@
 
                     // frame document inaccessible (headless capture):
                     // contentType of srcdoc is always text/html
+                    frameSettings.isHeadless = true;
+
                     const doc = (new DOMParser()).parseFromString(frame.getAttribute("srcdoc"), 'text/html');
-                    const docUrl = 'about:srcdoc';
 
                     return capturer.captureDocument({
                       doc,
+                      metaDocUrl: sourceUrl,
                       docUrl,
                       baseUrl: baseUrlCurrent,
+                      refPolicy,
                       settings: frameSettings,
                       options: frameOptions,
                     }).then(captureFrameCallback).catch(captureFrameErrorHandler);
@@ -1427,7 +1440,8 @@
                     sourceUrl = frameDoc.URL;
                     return capturer.captureDocumentOrFile({
                       doc: frameDoc,
-                      baseUrl: sourceUrl.startsWith('about:') ? baseUrlCurrent : sourceUrl,
+                      docUrl: capturer.isAboutUrl(sourceUrl) ? docUrl : sourceUrl,
+                      baseUrl: capturer.isAboutUrl(sourceUrl) ? baseUrlCurrent : sourceUrl,
                       refUrl,
                       refPolicy,
                       settings: frameSettings,
@@ -1460,22 +1474,22 @@
 
                   // frame window accessible with special cases:
                   // frame window inaccessible: (headless capture)
+                  frameSettings.isHeadless = true;
 
                   // if the frame has srcdoc, use it
                   if (frame.nodeName.toLowerCase() === 'iframe' &&
                       frame.hasAttribute("srcdoc")) {
                     sourceUrl = 'about:srcdoc';
-                    // contentType of srcdoc is always text/html
-                    const content = frame.getAttribute("srcdoc");
-                    const doc = (new DOMParser()).parseFromString(content, 'text/html');
 
-                    // assign a unique checksum for deduplication
-                    const docUrl = `about:srcdoc?sha1=${scrapbook.sha1(content, "TEXT")}`;
+                    // contentType of srcdoc is always text/html
+                    const doc = (new DOMParser()).parseFromString(frame.getAttribute("srcdoc"), 'text/html');
 
                     return capturer.captureDocument({
                       doc,
+                      metaDocUrl: sourceUrl,
                       docUrl,
                       baseUrl: baseUrlCurrent,
+                      refPolicy,
                       settings: frameSettings,
                       options,
                     }).catch(captureFrameErrorHandler).then(captureFrameCallback);
@@ -1510,8 +1524,7 @@
                   }
 
                   const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
-                  frameSettings.isHeadless = true;
-                  frameSettings.recurseChain.push(refUrl);
+                  frameSettings.recurseChain.push(docUrl);
 
                   // check circular reference if saving as data URL
                   if (frameOptions["capture.saveAs"] === "singleHtml") {
@@ -2689,6 +2702,7 @@
     const {documentElement: docElemNode} = doc;
 
     // determine docUrl, baseUrl, etc.
+    const [metaDocUrl, metaDocUrlHash] = scrapbook.splitUrlByAnchor(params.metaDocUrl || doc.URL);
     const [docUrl, docUrlHash] = scrapbook.splitUrlByAnchor(params.docUrl || doc.URL);
 
     // baseUrl: updates dynamically when the first base[href] is parsed.
@@ -2722,13 +2736,13 @@
       }
       return base;
     })();
-    const refUrl = baseUrlFallback;
+    const refUrl = docUrl;
     let seenBaseElem = false;
 
     // determine mime
     const mime = params.mime || doc.contentType;
 
-    let docRefPolicy = null;
+    let docRefPolicy = capturer.isAboutUrl(metaDocUrl) ? (params.refPolicy || "") : "";
 
     if (isMainPage && isMainFrame) {
       settings.indexFilename = await capturer.formatIndexFilename({
@@ -2745,8 +2759,9 @@
     const registry = await capturer.invoke("registerDocument", {
       docUrl,
       mime,
-      role: options["capture.saveAs"] === "singleHtml" || (docUrl.startsWith("data:") && !options["capture.saveDataUriAsFile"]) ? undefined :
-          (isMainFrame || isHeadless) ? "document" : `document-${scrapbook.getUuid()}`,
+      role: (options["capture.saveAs"] === "singleHtml" || (docUrl.startsWith("data:") && !options["capture.saveDataUriAsFile"])) ? undefined :
+          (isMainFrame || (isHeadless && !capturer.isAboutUrl(metaDocUrl))) ? "document" :
+          `document-${scrapbook.getUuid()}`,
       settings,
       options,
     });
@@ -3093,7 +3108,7 @@
 
     // record metadata
     if (options["capture.recordDocumentMeta"]) {
-      let url = docUrl.startsWith("data:") ? "data:" : docUrl;
+      let url = metaDocUrl.startsWith("data:") ? "data:" : metaDocUrl;
 
       // add hash only for index.html as subframes with different hash
       // must share the same file and record (e.g. foo.html and foo.html#bar)
@@ -3827,6 +3842,21 @@
     } catch (ex) {
       return url;
     }
+  };
+
+  /**
+   * Check if the URL matches about:blank or about:srcdoc
+   *
+   * ref: https://html.spec.whatwg.org/#determining-the-origin
+   */
+  capturer.isAboutUrl = function (url) {
+    if (url === 'about:srcdoc') {
+      return true;
+    }
+    if (/^about:blank(?=[?#]|$)/.test(url)) {
+      return true;
+    }
+    return false;
   };
 
   capturer.getErrorUrl = function (sourceUrl, options) {

@@ -7,7 +7,8 @@
 <title>Test frame-related URLs before base[href]</title>
 </head>
 <body>
-<blockquote><iframe srcdoc="<style>img { width: 60px; }</style><img src=resources/green.bmp>"></iframe></blockquote>
+<blockquote><iframe srcdoc="<img src=resources/img_src.py>"></iframe></blockquote>
+<blockquote><iframe srcdoc="<link rel='stylesheet' href='resources/link.py'>" referrerpolicy="origin"></iframe></blockquote>
 
 <!-- URLs before the first base[href] should not exist according to the spec -->
 <base href="resources/">

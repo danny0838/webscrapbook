@@ -3507,19 +3507,45 @@ async function test_capture_base_dynamic_frame() {
     });
 
     var zip = await new JSZip().loadAsync(blob);
-    assert(zip.file("green.bmp"));
 
     var indexFile = zip.file('index_1.html');
     var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
     var doc = await readFileAsDocument(indexBlob);
-    assert(doc.querySelector('img').getAttribute('src') === `green.bmp`);
+    assert(doc.querySelector('img').getAttribute('src') === `img_src.py.svg`);
+
+    var file = zip.file('img_src.py.svg');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `\
+<!-- referrer: ${localhost}/capture_base_dynamic_frame/srcdoc_basic.html -->
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+  <rect width="60" height="60" fill="lime" />
+</svg>`);
+
+    var indexFile = zip.file('index_2.html');
+    var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+    var doc = await readFileAsDocument(indexBlob);
+    assert(doc.querySelector('link').getAttribute('href') === `link.py.css`);
+
+    // @TODO:
+    // The result of the tab capture depends on the referrer the browser sent.
+    // Some browsers do not handle default referrer policy for the srcdoc
+    // iframe correctly:
+    // - e.g. Chromium 121: default referrer policy is unsafe-url
+    //   (iframe[referrerpolicy] not taken).
+    // - e.g. Firefox 123: default referrer policy is no-referrer.
+    // We only check for headless as the referrer is totally controlled by WSB.
+    if (func === "captureHeadless") {
+      var file = zip.file('link.py.css');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `:root { --referrer: "${localhost}/" }`);
+    }
 
     /* capture.frame = link */
     var options = {
       "capture.base": "blank",
       "capture.frame": "link",
     };
-    var blob = await capture({
+    var blob = await globalThis[func]({
       url: `${localhost}/capture_base_dynamic_frame/srcdoc_basic.html`,
       options: Object.assign({}, baseOptions, options),
     });
@@ -3533,7 +3559,21 @@ async function test_capture_base_dynamic_frame() {
     var frame = doc.querySelector('iframe');
     var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
     var srcdoc = await readFileAsDocument(srcdocBlob);
-    assert(srcdoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+    var text = decodeURIComponent(srcdoc.querySelector('img').getAttribute('src'));
+    assert(text === `data:image/svg+xml;filename=img_src.py.svg,\
+<!-- referrer: ${localhost}/capture_base_dynamic_frame/srcdoc_basic.html -->
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+  <rect width="60" height="60" fill="lime" />
+</svg>`);
+
+    // see above save case
+    if (func === "captureHeadless") {
+      var frame = doc.querySelectorAll('iframe')[1];
+      var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
+      var srcdoc = await readFileAsDocument(srcdocBlob);
+      var text = decodeURIComponent(srcdoc.querySelector('link').getAttribute('href'));
+      assert(text === `data:text/css;filename=link.py.css,:root { --referrer: "${localhost}/" }`);
+    }
   }
 }
 
@@ -3555,19 +3595,33 @@ async function test_capture_base_dynamic_frame_bad() {
     });
 
     var zip = await new JSZip().loadAsync(blob);
-    assert(zip.file("green.bmp"));
 
     var indexFile = zip.file('index_1.html');
     var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
     var doc = await readFileAsDocument(indexBlob);
-    assert(doc.querySelector('img').getAttribute('src') === `green.bmp`);
+    assert(doc.querySelector('img').getAttribute('src') === `img_src.py.svg`);
+
+    var file = zip.file('img_src.py.svg');
+    var text = (await readFileAsText(await file.async('blob'))).trim();
+    assert(text === `\
+<!-- referrer: ${localhost}/capture_base_dynamic_frame/srcdoc_bad.html -->
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+  <rect width="60" height="60" fill="lime" />
+</svg>`);
+
+    // see above save case for test_capture_base_dynamic_frame
+    if (func === "captureHeadless") {
+      var file = zip.file('link.py.css');
+      var text = (await readFileAsText(await file.async('blob'))).trim();
+      assert(text === `:root { --referrer: "${localhost}/" }`);
+    }
 
     /* capture.frame = link */
     var options = {
       "capture.base": "blank",
       "capture.frame": "link",
     };
-    var blob = await capture({
+    var blob = await globalThis[func]({
       url: `${localhost}/capture_base_dynamic_frame/srcdoc_bad.html`,
       options: Object.assign({}, baseOptions, options),
     });
@@ -3581,7 +3635,21 @@ async function test_capture_base_dynamic_frame_bad() {
     var frame = doc.querySelector('iframe');
     var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
     var srcdoc = await readFileAsDocument(srcdocBlob);
-    assert(srcdoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
+    var text = decodeURIComponent(srcdoc.querySelector('img').getAttribute('src'));
+    assert(text === `data:image/svg+xml;filename=img_src.py.svg,\
+<!-- referrer: ${localhost}/capture_base_dynamic_frame/srcdoc_bad.html -->
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+  <rect width="60" height="60" fill="lime" />
+</svg>`);
+
+    // see above save case for test_capture_base_dynamic_frame
+    if (func === "captureHeadless") {
+      var frame = doc.querySelectorAll('iframe')[1];
+      var srcdocBlob = new Blob([frame.getAttribute('srcdoc')], {type: "text/html"});
+      var srcdoc = await readFileAsDocument(srcdocBlob);
+      var text = decodeURIComponent(srcdoc.querySelector('link').getAttribute('href'));
+      assert(text === `data:text/css;filename=link.py.css,:root { --referrer: "${localhost}/" }`);
+    }
   }
 }
 
@@ -7804,7 +7872,7 @@ async function test_capture_frame_headless_srcdoc() {
   };
 
   /* capture.frame = save */
-  // srcdoc content should be rewritten, with source URL with an SHA checksum
+  // srcdoc content should be rewritten
   options["capture.frame"]  = "save";
 
   var blob = await captureHeadless({
@@ -7824,7 +7892,7 @@ async function test_capture_frame_headless_srcdoc() {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc?sha1=26055330a3a05ad90b259610f34ed3a38563e69a"]'));
+  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
   assert(frameDoc.querySelector('p').textContent.trim() === `srcdoc content`);
   assert(frameDoc.querySelector('img').getAttribute('src') === 'red.bmp');
 
@@ -7840,7 +7908,7 @@ async function test_capture_frame_headless_srcdoc() {
   var frameFile = zip.file(frame.getAttribute('src'));
   var frameBlob = new Blob([await frameFile.async('blob')], {type: "text/html"});
   var frameDoc = await readFileAsDocument(frameBlob);
-  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc?sha1=d8574d12e72fddd0ab8d749f1b68c9621cb47ba7"]'));
+  assert(frameDoc.querySelector('html[data-scrapbook-source="about:srcdoc"]'));
   var mrs = frameDoc.querySelectorAll('meta[http-equiv="refresh"]');
   assert(mrs[0].getAttribute('content') === `0; url=${localhost}/capture_frame/frames/frame1.html`);
 

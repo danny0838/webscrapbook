@@ -8,7 +8,8 @@
 <title>Test frame-related URLs after base[href]</title>
 </head>
 <body>
-<blockquote><iframe srcdoc="<style>img { width: 60px; }</style><img src=./green.bmp>"></iframe></blockquote>
+<blockquote><iframe srcdoc="<img src=./img_src.py>"></iframe></blockquote>
+<blockquote><iframe srcdoc="<link rel='stylesheet' href='./link.py'>" referrerpolicy="origin"></iframe></blockquote>
 
 <meta name="referrer" content="no-referrer">
 </body>

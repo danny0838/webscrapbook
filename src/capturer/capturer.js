@@ -1500,10 +1500,13 @@
         return response;
       }
 
+      const docUrl = capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash);
       return await capturer.captureDocumentOrFile({
         doc,
-        docUrl: capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash),
+        metaDocUrl: docUrl,
+        docUrl,
         refUrl,
+        refPolicy,
         settings,
         options,
       });
@@ -1512,6 +1515,7 @@
     return await capturer.captureFile({
       url: capturer.getRedirectedUrl(fetchResponse.url, sourceUrlHash),
       refUrl,
+      refPolicy,
       charset: fetchResponse.headers.charset,
       settings,
       options,
