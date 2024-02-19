@@ -7613,6 +7613,47 @@ document.querySelector("p").textContent = "srcdoc content modified";
 }
 
 /**
+ * Check frame save for about: pages.
+ *
+ * capture.frame
+ */
+async function test_capture_frame_about() {
+  var options = {
+    "capture.frame": "save",
+    "capture.saveResourcesSequentially": true,
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_frame/about.html`,
+    options: Object.assign({}, baseOptions, options),
+  }, {delay: 300});
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var frames = doc.querySelectorAll('iframe');
+
+  // @TODO:
+  // Check only about:blank as the behavior of about: pages may vary across
+  // browsers.
+  // - e.g. Firefox 123: contentDocument of about:blank?query is not accessible.
+  assert(frames[0].getAttribute('src') === "index_1.html");
+  assert(frames[1].getAttribute('src') === "index_2.html");
+
+  var indexFile = zip.file('index_1.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.body.textContent.trim() === 'iframe modified 1');
+
+  var indexFile = zip.file('index_2.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.body.textContent.trim() === 'iframe modified 2');
+}
+
+/**
  * Check duplication and hash handling
  *
  * capture.frame
@@ -7854,6 +7895,38 @@ document.querySelector("p").textContent = "srcdoc content modified";
 document.querySelector("p").textContent = "srcdoc content modified";
 </script>`);
   assert(frame.getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html`);
+}
+
+/**
+ * Check headless frame save for about: pages.
+ *
+ * capture.frame
+ */
+async function test_capture_frame_headless_about() {
+  var options = {
+    "capture.frame": "save",
+    "capture.saveResourcesSequentially": true,
+  };
+
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_frame/about.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var frames = doc.querySelectorAll('iframe');
+  assert(frames[0].getAttribute('src') === "about:blank");
+  assert(frames[1].getAttribute('src') === "about:blank");
+  assert(frames[2].getAttribute('src') === "about:blank?foo=bar");
+  assert(frames[3].getAttribute('src') === "about:blank?foo=bar#frag");
+  assert(frames[4].getAttribute('src') === "about:srcdoc");
+  assert(frames[5].getAttribute('src') === "about:invalid");
+  assert(frames[6].getAttribute('src') === "about:newtab");
+  assert(frames[7].getAttribute('src') === "about:unknown");
 }
 
 /**
@@ -9399,6 +9472,33 @@ async function test_capture_embed_frame() {
 }
 
 /**
+ * about: pages should be kept as-is.
+ *
+ * capture.embed
+ */
+async function test_capture_embed_frame_about() {
+  var options = {
+    "capture.saveResourcesSequentially": true,
+    "capture.embed": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_embed_frame/about.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var frames = doc.querySelectorAll('embed');
+  assert(frames[0].getAttribute('src') === "about:blank");
+  assert(frames[1].getAttribute('src') === "about:blank?foo=bar#baz");
+  assert(frames[2].getAttribute('src') === "about:srcdoc");
+  assert(frames[3].getAttribute('src') === "about:invalid");
+}
+
+/**
  * Check if circular embed referencing is handled correctly like a frame.
  *
  * capture.embed
@@ -9632,6 +9732,33 @@ async function test_capture_object_frame() {
 <style>img { width: 60px; }</style>
 <p>Frame page content.</p>
 <img src="./red.bmp">`);
+}
+
+/**
+ * about: pages should be kept as-is.
+ *
+ * capture.object
+ */
+async function test_capture_object_frame_about() {
+  var options = {
+    "capture.saveResourcesSequentially": true,
+    "capture.object": "save",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_object_frame/about.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var frames = doc.querySelectorAll('object');
+  assert(frames[0].getAttribute('data') === "about:blank");
+  assert(frames[1].getAttribute('data') === "about:blank?foo=bar#baz");
+  assert(frames[2].getAttribute('data') === "about:srcdoc");
+  assert(frames[3].getAttribute('data') === "about:invalid");
 }
 
 /**

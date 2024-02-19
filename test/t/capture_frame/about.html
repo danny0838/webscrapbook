@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test Capture Frame</title>
+</head>
+<body>
+<iframe src="about:blank"></iframe>
+<iframe src="about:blank"></iframe>
+<iframe src="about:blank?foo=bar"></iframe>
+<iframe src="about:blank?foo=bar#frag"></iframe>
+<iframe src="about:srcdoc"></iframe>
+<iframe src="about:invalid"></iframe>
+<iframe src="about:newtab"></iframe>
+<iframe src="about:unknown"></iframe>
+<script>
+setTimeout(() => {
+  let i = 0;
+  for (const iframe of document.querySelectorAll('iframe')) {
+    i++;
+    try {
+      iframe.contentDocument.body.textContent = `iframe modified ${i}`; 
+    } catch (ex) {
+      console.error(`failurd to write iframe %s: %s`, i, ex);
+    }
+  }
+}, 200);
+</script>
+</body>
+</html>

@@ -1482,6 +1482,12 @@
                     return;
                   }
 
+                  // keep original about:blank etc. if the real content is not
+                  // accessible
+                  if (sourceUrl.startsWith('about:')) {
+                    return;
+                  }
+
                   // otherwise, headlessly capture src
                   let frameOptions = options;
 
@@ -1994,6 +2000,12 @@
                       return;
                     }
 
+                    // keep original about:blank etc. as the real content is
+                    // not accessible
+                    if (sourceUrl.startsWith('about:')) {
+                      return;
+                    }
+
                     const [sourceUrlMain, sourceUrlHash] = scrapbook.splitUrlByAnchor(sourceUrl);
 
                     // headlessly capture
@@ -2108,6 +2120,12 @@
                     // skip further processing and keep current src
                     // (point to self, or not resolvable)
                     if (!scrapbook.isUrlAbsolute(sourceUrl)) {
+                      return;
+                    }
+
+                    // keep original about:blank etc. as the real content is
+                    // not accessible
+                    if (sourceUrl.startsWith('about:')) {
                       return;
                     }
 
