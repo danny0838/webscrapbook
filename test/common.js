@@ -56,9 +56,6 @@ var userAgent = (() => {
       flavor.major = parseInt(match[1], 10) || 0;
       soup.add('apple').add('safari');
     }
-    if (manifest.browser_specific_settings && manifest.browser_specific_settings.gecko) {
-      soup.add('gecko');
-    }
     return flavor;
 })();
 
@@ -152,7 +149,7 @@ async function openCapturerTab(url) {
 
   // Firefox does not support focused in windows.create().
   // Firefox ignores top and left in windows.create().
-  if (userAgent.is('gecko')) {
+  if (userAgent.is('firefox')) {
     delete params.focused;
   }
 
@@ -221,7 +218,7 @@ async function capture(params, options = {}) {
 
   // Firefox does not support focused in windows.create().
   // Firefox ignores top and left in windows.create().
-  if (userAgent.is('gecko')) {
+  if (userAgent.is('firefox')) {
     delete windowCreateData.focused;
   }
 
