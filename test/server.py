@@ -80,7 +80,7 @@ def main():
 
     # build hardlinks for shared libraries
     fsrc = os.path.join(os.path.dirname(root), 'src', 'lib')
-    fdst = os.path.join(root, 'lib')
+    fdst = os.path.join(root, 'shared')
     try:
         shutil.rmtree(fdst)
     except FileNotFoundError:
