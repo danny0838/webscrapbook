@@ -1,6 +1,8 @@
-'use strict';
+describe('Manual tests', function () {
 
-async function test_viewer_validate() {
+describe('Test viewer', function () {
+
+it('test_viewer_validate', async function () {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer_validate/index.html'),
     active: true,
@@ -9,9 +11,9 @@ async function test_viewer_validate() {
       resolve(message.args.value);
     }
   });
-}
+});
 
-async function test_viewer_encoding() {
+it('test_viewer_encoding', async function () {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer_encoding/index.html'),
     active: true,
@@ -20,9 +22,9 @@ async function test_viewer_encoding() {
       resolve(message.args.value);
     }
   });
-}
+});
 
-async function test_viewer_attachment() {
+it('test_viewer_attachment', async function () {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer_attachment/index.html'),
     active: true,
@@ -31,9 +33,9 @@ async function test_viewer_attachment() {
       resolve(message.args.value);
     }
   });
-}
+});
 
-async function test_viewer_interlink() {
+it('test_viewer_interlink', async function () {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer_interlink/index.html'),
     active: true,
@@ -42,9 +44,9 @@ async function test_viewer_interlink() {
       resolve(message.args.value);
     }
   });
-}
+});
 
-async function test_viewer_interlink_frame() {
+it('test_viewer_interlink_frame', async function () {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer_interlink_frame/index.html'),
     active: true,
@@ -53,9 +55,9 @@ async function test_viewer_interlink_frame() {
       resolve(message.args.value);
     }
   });
-}
+});
 
-async function test_viewer_interlink_frame_form() {
+it('test_viewer_interlink_frame_form', async function () {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer_interlink_frame_form/index.html'),
     active: true,
@@ -64,9 +66,9 @@ async function test_viewer_interlink_frame_form() {
       resolve(message.args.value);
     }
   });
-}
+});
 
-async function test_viewer_css_rules() {
+it('test_viewer_css_rules', async function () {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer_css_rules/index.html'),
     active: true,
@@ -75,9 +77,9 @@ async function test_viewer_css_rules() {
       resolve(message.args.value);
     }
   });
-}
+});
 
-async function test_viewer_metaRefresh() {
+it('test_viewer_metaRefresh', async function () {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer_metaRefresh/index.html'),
     active: true,
@@ -86,9 +88,9 @@ async function test_viewer_metaRefresh() {
       resolve(message.args.value);
     }
   });
-}
+});
 
-async function test_viewer_archive_in_frame() {
+it('test_viewer_archive_in_frame', async function () {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer_archive_in_frame/index.html'),
     active: true,
@@ -97,9 +99,9 @@ async function test_viewer_archive_in_frame() {
       resolve(message.args.value);
     }
   });
-}
+});
 
-async function test_viewer_csp() {
+it('test_viewer_csp', async function () {
   return await openTestTab({
     url: browser.runtime.getURL('t/viewer_csp/index.html'),
     active: true,
@@ -108,4 +110,8 @@ async function test_viewer_csp() {
       resolve(message.args.value);
     }
   });
-}
+});
+
+});  // Test viewer
+
+});  // Manual tests

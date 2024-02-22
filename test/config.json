@@ -2,6 +2,5 @@
   "wsb_extension_id": "oegnpmiddfljlloiklpkeelagaeejfai",
   "server_port": 8080,
   "server_port2": 8081,
-  "automated_tests": ["test_lib_", "test_capture_"],
-  "manual_tests": ["test_viewer_"]
+  "tests": null
 }

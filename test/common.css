@@ -5,8 +5,3 @@ body {
 pre {
   white-space: pre-wrap;
 }
-
-.error {
-  font-weight: bold;
-  color: red;
-}

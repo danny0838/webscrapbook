@@ -1,6 +1,8 @@
-'use strict';
+describe('Automated tests', function () {
 
-async function test_lib_referrer() {
+describe('Test libraries', function () {
+
+it('test_lib_referrer', function () {
   // ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
 
   /** Referrer.toString */
@@ -270,7 +272,12 @@ async function test_lib_referrer() {
     "https://example.com/page",
     new URL(browser.runtime.getURL('')).href,
   ).isDownGrade === false);
-}
+});
+
+});  // Test libraries
+
+
+describe('Test capture', function () {
 
 /**
  * Check html saving structure in various formats
@@ -280,7 +287,7 @@ async function test_lib_referrer() {
  * capturer.saveDocument
  * capturer.downloadBlob
  */
-async function test_capture_html() {
+it('test_capture_html', async function () {
   /* htz */
   var options = {
     "capture.saveAs": "zip",
@@ -416,7 +423,7 @@ async function test_capture_html() {
   var imgElem = doc.querySelectorAll('img')[1];
   assert(imgElem);
   assert(imgElem.getAttribute('src') === 'data:image/bmp;filename=blue.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
-}
+});
 
 /**
  * Check xhtml saving structure in various formats
@@ -426,7 +433,7 @@ async function test_capture_html() {
  * capturer.saveDocument
  * capturer.downloadBlob
  */
-async function test_capture_xhtml() {
+it('test_capture_xhtml', async function () {
   /* htz */
   var options = {
     "capture.saveAs": "zip",
@@ -574,7 +581,7 @@ async function test_capture_xhtml() {
   var imgElem = doc.querySelectorAll('img')[1];
   assert(imgElem);
   assert(imgElem.getAttribute('src') === 'data:image/bmp;filename=blue.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA');
-}
+});
 
 /**
  * Check file saving structure in various formats
@@ -582,7 +589,7 @@ async function test_capture_xhtml() {
  *
  * capturer.captureFile
  */
-async function test_capture_file() {
+it('test_capture_file', async function () {
   /* htz */
   var options = {
     "capture.saveAs": "zip",
@@ -669,14 +676,14 @@ async function test_capture_file() {
     "0; url=data:image/bmp;filename=file.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
   assert(!doc.querySelector('a[href="file.bmp"]')); // do NOT generate anchor to avoid long content
   assert(!doc.querySelector('img'));
-}
+});
 
 /**
  * Check plain text file encoding is correctly recorded
  *
  * capturer.captureFile
  */
-async function test_capture_file_charset() {
+it('test_capture_file_charset', async function () {
   var options = {
     "capture.saveAs": "maff",
   };
@@ -739,14 +746,14 @@ async function test_capture_file_charset() {
   var text = (await readFileAsText(await savedFile.async('blob'))).trim();
   // The UTF-8 BOM is not included here.
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
-}
+});
 
 /**
  * URLs different only in hash should be considered identical.
  *
  * capturer.downloadFile
  */
-async function test_capture_rename() {
+it('test_capture_rename', async function () {
   var blob = await capture({
     url: `${localhost}/capture_rename/index.html`,
     options: baseOptions,
@@ -759,14 +766,14 @@ async function test_capture_rename() {
   assert(doc.querySelectorAll('img')[0].getAttribute('src') === `green.bmp`);
   assert(doc.querySelectorAll('img')[1].getAttribute('src') === `green.bmp#123`);
   assert(doc.querySelectorAll('img')[2].getAttribute('src') === `green.bmp#456`);
-}
+});
 
 /**
  * Check URL normalization.
  *
  * capturer.fetch
  */
-async function test_capture_rename_normalize() {
+it('test_capture_rename_normalize', async function () {
   var blob = await capture({
     url: `${localhost}/capture_rename_normalize/index.html`,
     options: baseOptions,
@@ -789,7 +796,7 @@ async function test_capture_rename_normalize() {
   assert(imgs[4].getAttribute('src') === "123ABCabc中文%20!%23$%25&'()+,-;=@[]^_`{}_.bmp");
   assert(imgs[5].getAttribute('src') === "abc.bmp#abc%E4%B8%AD%E6%96%87%");
   assert(imgs[6].getAttribute('src') === "abc.bmp#ab%63%e4%b8%ad%e6%96%87%25");
-}
+});
 
 /**
  * Check saved filename is correctly determined by HTTP header
@@ -797,7 +804,7 @@ async function test_capture_rename_normalize() {
  *
  * Check plain text file encoding is correctly recorded
  */
-async function test_capture_header() {
+it('test_capture_header', async function () {
   var blob = await capture({
     url: `${localhost}/capture_header/index.html`,
     options: baseOptions,
@@ -840,7 +847,7 @@ async function test_capture_header() {
   assert(savedFile);
   var b64 = (await readFileAsDataURL(await savedFile.async('blob'))).replace(/^.*,/, "");
   assert(b64 === "Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
-}
+});
 
 /**
  * If filename by URL path or header doesn't match its MIME type,
@@ -848,7 +855,7 @@ async function test_capture_header() {
  *
  * capturer.downloadFile
  */
-async function test_capture_header_mime() {
+it('test_capture_header_mime', async function () {
   var blob = await capture({
     url: `${localhost}/capture_header_mime/index.html`,
     options: baseOptions,
@@ -884,7 +891,7 @@ async function test_capture_header_mime() {
   assert(zip.file("stylesheet.py.css"));
   assert(doc.querySelectorAll('script')[0].getAttribute("src") === "script.py.js")
   assert(zip.file("script.py.js"));
-}
+});
 
 /**
  * Check special char handling for saved resources
@@ -892,7 +899,7 @@ async function test_capture_header_mime() {
  * scrapbook.validateFilename
  * scrapbook.escapeFilename
  */
-async function test_capture_filename() {
+it('test_capture_filename', async function () {
   const EXPECTED_FILENAMES = [
     "file01",
     "file02 file02",
@@ -944,7 +951,7 @@ async function test_capture_filename() {
     fn = fn.replace(/[ %#]+/g, m => encodeURIComponent(m));
     assert(imgs[i].getAttribute('src') === fn);
   });
-}
+});
 
 /**
  * Check renaming for forbidden files
@@ -952,7 +959,7 @@ async function test_capture_filename() {
  * capturer.getUniqueFilename
  * capturer.captureInfo.*.files
  */
-async function test_capture_filename_forbidden() {
+it('test_capture_filename_forbidden', async function () {
   var blob = await capture({
     url: `${localhost}/capture_filename_forbidden/index.html`,
     options: baseOptions,
@@ -973,7 +980,7 @@ async function test_capture_filename_forbidden() {
   assert(imgs[1].getAttribute('src') === "index-1.dat");
   assert(imgs[2].getAttribute('src') === "index-1.rdf");
   assert(imgs[3].getAttribute('src') === "^metadata^-1");
-}
+});
 
 /**
  * Check if redirection is handled correctly.
@@ -984,7 +991,7 @@ async function test_capture_filename_forbidden() {
  *
  * capturer.captureDocument
  */
-async function test_capture_redirect() {
+it('test_capture_redirect', async function () {
   var options = {
     "capture.frameRename": false,
   };
@@ -1002,7 +1009,7 @@ async function test_capture_redirect() {
   assert(doc.querySelector('link').getAttribute('href') === `style.css#abc`);
   assert(doc.querySelector('img').getAttribute('src') === `green.bmp#abc`);
   assert(doc.querySelector('iframe').getAttribute('src') === `frame.html#abc`);
-}
+});
 
 /**
  * Hash in the "Location" header should be ignored.
@@ -1011,7 +1018,7 @@ async function test_capture_redirect() {
  * the source URL hash if not. As the response URL of XMLHttpRequest and
  * fetch API doesn't contain hash, we use the source URL hash currently.
  */
-async function test_capture_redirect_hash() {
+it('test_capture_redirect_hash', async function () {
   var options = {
     "capture.frameRename": false,
   };
@@ -1029,7 +1036,7 @@ async function test_capture_redirect_hash() {
   assert(doc.querySelector('link').getAttribute('href') === `style.css#abc`);
   assert(doc.querySelector('img').getAttribute('src') === `green.bmp#abc`);
   assert(doc.querySelector('iframe').getAttribute('src') === `frame.html#abc`);
-}
+});
 
 /**
  * Check if option works
@@ -1037,7 +1044,7 @@ async function test_capture_redirect_hash() {
  * capture.saveAsciiFilename
  * capture.saveDataUriAsFile
  */
-async function test_capture_saveAsciiFilename() {
+it('test_capture_saveAsciiFilename', async function () {
   /* -saveAsciiFilename */
   var options = {
     "capture.saveAsciiFilename": false,
@@ -1095,14 +1102,14 @@ p { background-image: url("123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2
   assert(doc.querySelectorAll('img')[0].getAttribute('src') === "123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580.bmp");
   assert(doc.querySelectorAll('img')[1].getAttribute('srcset') === "123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580.bmp 1x, 123ABCabc_%25E4%25B8%25AD%25E6%2596%2587_%25F0%25A0%2580%2580-2.bmp 2x");
   assert(doc.querySelectorAll('img')[2].getAttribute('src') === "123%25.dat");
-}
+});
 
 /**
  * Check if option works
  *
  * capture.saveFileAsHtml
  */
-async function test_capture_saveFileAsHtml() {
+it('test_capture_saveFileAsHtml', async function () {
   var options = {
     "capture.saveFileAsHtml": true,
   };
@@ -1156,14 +1163,14 @@ async function test_capture_saveFileAsHtml() {
   assert(!doc.querySelector('meta[http-equiv="refresh"]'));
   var preElem = doc.body.querySelector('pre');
   assert(preElem.textContent.trim() === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
-}
+});
 
 /**
  * Check if option works
  *
  * capture.saveDataUriAsFile
  */
-async function test_capture_dataUri() {
+it('test_capture_dataUri', async function () {
   /* -saveDataUriAsFile */
   var options = {
     "capture.saveDataUriAsFile": false,
@@ -1234,7 +1241,7 @@ p { background-image: url("ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp"); }`);
 p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"); }`);
   assert(doc.querySelector('img').getAttribute('src') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA");
   assert(doc.querySelector('img[srcset]').getAttribute('srcset') === "data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA 1x, data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAA/wAAAAAA 2x");
-}
+});
 
 /**
  * Check URL resolution in a data URL CSS
@@ -1243,7 +1250,7 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
  * capturer.downloadFile
  * capturer.DocumentCssHandler
  */
-async function test_capture_dataUri_css() {
+it('test_capture_dataUri_css', async function () {
   var options = {
     "capture.style": "save",
     "capture.font": "save",
@@ -1343,7 +1350,7 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
 @import "null.css";
 @font-face { font-family: myFont; src: url("null.woff"); }
 p { background-image: url("red.bmp"); }`);
-}
+});
 
 /**
  * Check URL resolution in a data URL frame
@@ -1352,7 +1359,7 @@ p { background-image: url("red.bmp"); }`);
  * capture.saveDataUriAsSrcdoc
  * capturer.captureDocument
  */
-async function test_capture_dataUri_frame() {
+it('test_capture_dataUri_frame', async function () {
   var options = {
     "capture.frame": "save",
     "capture.downLink.file.mode": "url",
@@ -1575,14 +1582,14 @@ async function test_capture_dataUri_frame() {
   assert(frameDoc.querySelector('img[src="red.bmp"]'));
   assert(frameDoc.querySelector('a[href="file.txt"]'));
   assert(frameDoc.querySelector('a[href="page.html"]'));
-}
+});
 
 /**
  * Check support of parameters in a data URL
  *
  * capture.saveDataUriAsFile
  */
-async function test_capture_dataUri_params() {
+it('test_capture_dataUri_params', async function () {
   var blob = await capture({
     url: `${localhost}/capture_dataUri_params/index.html`,
     options: baseOptions,
@@ -1636,7 +1643,7 @@ async function test_capture_dataUri_params() {
   assert(imgs[13].getAttribute('src') === "abc.mp4");
   assert(imgs[14].getAttribute('src') === "abc.webm");
   assert(imgs[15].getAttribute('src') === "abc.ogv");
-}
+});
 
 /**
  * Check encoding and charset for getnerated data URLs.
@@ -1647,7 +1654,7 @@ async function test_capture_dataUri_params() {
  * capturer.captureDocument
  * capturer.downloadBlob
  */
-async function test_capture_singleHtml_encoding() {
+it('test_capture_singleHtml_encoding', async function () {
   var options = {
     "capture.saveAs": "singleHtml",
     "capture.mergeCssResources": false,
@@ -1679,14 +1686,14 @@ data:text/css;filename=link.css,%23external%20%7B%20background%3A%20url%28%22dat
 #internal { background: url("data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA"); }
 #internal::after { content: "內部"; }`);
   assert(srcdoc.querySelector('img').getAttribute('src') === `data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA`);
-}
+});
 
 /**
  * Check if CSS recources merging works
  *
  * capturer.captureDocument
  */
-async function test_capture_singleHtml_mergeCss() {
+it('test_capture_singleHtml_mergeCss', async function () {
   /* capture.mergeCssResources = true */
   var options = {
     "capture.mergeCssResources": true,
@@ -1786,12 +1793,12 @@ async function test_capture_singleHtml_mergeCss() {
   from { transform: rotate(0turn); background-image: url("data:image/bmp;filename=yellow.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP//AAAA"); }
   to { transform: rotate(1turn); }
 }`);
-}
+});
 
 /**
  * Generated filename parameter of data URL should use non-uniquified filename.
  */
-async function test_capture_singleHtml_filename() {
+it('test_capture_singleHtml_filename', async function () {
   var options = {
     "capture.saveAs": "singleHtml",
   };
@@ -1807,7 +1814,7 @@ async function test_capture_singleHtml_filename() {
   assert(imgs[0].getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
   assert(imgs[1].getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
   assert(imgs[2].getAttribute('src') === `data:image/bmp;filename=green.bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAP8AAAAA`);
-}
+});
 
 /**
  * Check if blob URLs can be correctly captured.
@@ -1815,7 +1822,7 @@ async function test_capture_singleHtml_filename() {
  * capturer.downloadFile
  * capturer.fetchCSS
  */
-async function test_capture_blob() {
+it('test_capture_blob', async function () {
   var blob = await capture({
     url: `${localhost}/capture_blob/basic.html`,
     options: baseOptions,
@@ -1859,7 +1866,7 @@ async function test_capture_blob() {
   assert(m[2] === imgFn);
 
   assert(doc.querySelector('img').getAttribute('src') === imgFn);
-}
+});
 
 /**
  * Check handling of revoked blob URLs.
@@ -1867,7 +1874,7 @@ async function test_capture_blob() {
  * capturer.downloadFile
  * capturer.fetchCSS
  */
-async function test_capture_blob_revoked() {
+it('test_capture_blob_revoked', async function () {
   var blob = await capture({
     url: `${localhost}/capture_blob_revoked/revoked.html`,
     options: baseOptions,
@@ -1885,12 +1892,12 @@ async function test_capture_blob_revoked() {
 #style-font { font-family: styleFont; }
 #style-bg { background-image: url("urn:scrapbook:download:error:blob:"); }`);
   assert(doc.querySelector('img').getAttribute('src') === 'urn:scrapbook:download:error:blob:');
-}
+});
 
 /**
  * Check handling of blob URLs in an iframe.
  */
-async function test_capture_blob_frame() {
+it('test_capture_blob_frame', async function () {
   var blob = await capture({
     url: `${localhost}/capture_blob_frame/basic.html`,
     options: baseOptions,
@@ -1909,7 +1916,7 @@ async function test_capture_blob_frame() {
   var uuid = String.raw`[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}`;
   var r = regex`${uuid}\.bmp`;
   assert(doc.querySelector('img').getAttribute('src').match(r));
-}
+});
 
 /**
  * about: URLs should be kept as-is.
@@ -1945,7 +1952,7 @@ p { background-image: url("about:blank"); }`);
  *
  * capturer.captureDocument
  */
-async function test_capture_selection() {
+it('test_capture_selection', async function () {
   var blob = await capture({
     url: `${localhost}/capture_selection/selection.html`,
     options: baseOptions,
@@ -1977,14 +1984,14 @@ async function test_capture_selection() {
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
   assert(!zip.file("blue.bmp"));
-}
+});
 
 /**
  * Test selecting single element
  *
  * capturer.captureDocument
  */
-async function test_capture_selection_element() {
+it('test_capture_selection_element', async function () {
   var blob = await capture({
     url: `${localhost}/capture_selection/selection_element.html`,
     options: baseOptions,
@@ -2016,14 +2023,14 @@ async function test_capture_selection_element() {
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
   assert(!zip.file("blue.bmp"));
-}
+});
 
 /**
  * Test selecting text node
  *
  * capturer.captureDocument
  */
-async function test_capture_selection_text() {
+it('test_capture_selection_text', async function () {
   var blob = await capture({
     url: `${localhost}/capture_selection/selection_text.html`,
     options: baseOptions,
@@ -2055,14 +2062,14 @@ async function test_capture_selection_text() {
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
   assert(!zip.file("blue.bmp"));
-}
+});
 
 /**
  * Test selecting comment node
  *
  * capturer.captureDocument
  */
-async function test_capture_selection_comment() {
+it('test_capture_selection_comment', async function () {
   var blob = await capture({
     url: `${localhost}/capture_selection/selection_comment.html`,
     options: baseOptions,
@@ -2095,14 +2102,14 @@ async function test_capture_selection_comment() {
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
   assert(!zip.file("blue.bmp"));
-}
+});
 
 /**
  * Test selecting CDATA node (for XHTML)
  *
  * capturer.captureDocument
  */
-async function test_capture_selection_cdata() {
+it('test_capture_selection_cdata', async function () {
   var blob = await capture({
     url: `${localhost}/capture_selection/selection_cdata.xhtml`,
     options: baseOptions,
@@ -2135,14 +2142,14 @@ async function test_capture_selection_cdata() {
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
   assert(!zip.file("blue.bmp"));
-}
+});
 
 /**
  * Test multiple selections
  *
  * capturer.captureDocument
  */
-async function test_capture_selection_multiple() {
+itSkipIfNoMultipleSelection()('test_capture_selection_multiple', async function () {
   var blob = await capture({
     url: `${localhost}/capture_selection/selection_multiple.html`,
     options: baseOptions,
@@ -2153,11 +2160,6 @@ async function test_capture_selection_multiple() {
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-
-  // Multiple selection is only supported by some browsers (e.g. Firefox)
-  if (!doc.querySelector('#selection2')) {
-    throw new TestSkipError(`multiple selection not supported`);
-  }
 
   // selected elements and resources
   assert(doc.querySelector('#selection'));
@@ -2180,14 +2182,14 @@ async function test_capture_selection_multiple() {
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
   assert(!zip.file("blue.bmp"));
-}
+});
 
 /**
  * Test multiple selections of text and comment
  *
  * capturer.captureDocument
  */
-async function test_capture_selection_multiple_text() {
+itSkipIfNoMultipleSelection()('test_capture_selection_multiple_text', async function () {
   var blob = await capture({
     url: `${localhost}/capture_selection/selection_multiple_text.xhtml`,
     options: baseOptions,
@@ -2198,11 +2200,6 @@ async function test_capture_selection_multiple_text() {
   var indexFile = zip.file('index.xhtml');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "application/xhtml+xml"});
   var doc = await readFileAsDocument(indexBlob);
-
-  // Multiple selection is only supported by some browsers (e.g. Firefox)
-  if (!doc.querySelector('#selection2')) {
-    throw new TestSkipError(`multiple selection not supported`);
-  }
 
   // selected elements and resources
   assert(doc.querySelector('#selection'));
@@ -2279,7 +2276,7 @@ async function test_capture_selection_multiple_text() {
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
   assert(!zip.file("blue.bmp"));
-}
+});
 
 /**
  * A delay time for tab capture is required to wait for favicon loading
@@ -2288,7 +2285,7 @@ async function test_capture_selection_multiple_text() {
  * capturer.captureTab
  * capturer.captureRemote
  */
-async function test_capture_headless() {
+it('test_capture_headless', async function () {
   /* from tab; source */
   var blob = await capture({
     url: `${localhost}/capture_headless/tab-info.html`,
@@ -2373,14 +2370,14 @@ async function test_capture_headless() {
   var doc = await readFileAsDocument(blob);
   assert(!doc.querySelector(`title`));
   assert(!doc.querySelector(`link[rel~="icon"]`));
-}
+});
 
 /**
  * Capture as file if header content-disposition is attachment.
  *
  * capturer.captureRemote
  */
-async function test_capture_headless_attachment() {
+it('test_capture_headless_attachment', async function () {
   var blob = await captureHeadless({
     url: `${localhost}/capture_headless_attachment/attachment.py`,
     options: baseOptions,
@@ -2418,7 +2415,7 @@ async function test_capture_headless_attachment() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('img[src="./red.bmp"]'));
-}
+});
 
 /**
  * Check headless captures redirected by a zero-time meta refresh.
@@ -2431,7 +2428,7 @@ async function test_capture_headless_attachment() {
  * capturer.captureUrl
  * scrapbook.parseHeaderRefresh
  */
-async function test_capture_headless_metaRefresh() {
+it('test_capture_headless_metaRefresh', async function () {
   var blob = await captureHeadless({
     url: `${localhost}/capture_headless_metaRefresh/case1.html`,
     options: baseOptions,
@@ -2647,14 +2644,14 @@ async function test_capture_headless_metaRefresh() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('meta[http-equiv]').getAttribute('content') === `1; url=${localhost}/capture_headless_metaRefresh/referred.html`);
-}
+});
 
 /**
  * Check if captureBookmark works
  *
  * capturer.captureBookmark
  */
-async function test_capture_bookmark() {
+it('test_capture_bookmark', async function () {
   var blob = await capture({
     url: `${localhost}/capture_bookmark/index.html`,
     mode: "bookmark",
@@ -2671,7 +2668,7 @@ async function test_capture_bookmark() {
   assert(doc.querySelector(`meta[http-equiv="refresh"][content="0; url=${localhost}/capture_bookmark/index.html"]`));
   assert(doc.querySelector(`a[href="${localhost}/capture_bookmark/index.html"]`));
   assert(doc.querySelector(`link[rel="shortcut icon"][href="data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABACAAAAAAAAYAAAASCwAAEgsAAAAAAAAAAAAAAAD/AAAA"]`));
-}
+});
 
 /**
  * Check meta charset is correctly rewritten
@@ -2679,7 +2676,7 @@ async function test_capture_bookmark() {
  * capturer.captureDocument
  * capturer.saveDocument
  */
-async function test_capture_meta_charset() {
+it('test_capture_meta_charset', async function () {
   /* meta new */
   var blob = await capture({
     url: `${localhost}/capture_meta_charset/big5.html`,
@@ -2767,14 +2764,14 @@ async function test_capture_meta_charset() {
 
   var imgElem = doc.querySelectorAll('img')[1];
   assert(imgElem.getAttribute('src') === `圖片.bmp`);
-}
+});
 
 /**
  * Check if the URL in a meta refresh is rewritten correctly
  *
  * capturer.captureDocument
  */
-async function test_capture_meta_refresh() {
+it('test_capture_meta_refresh', async function () {
   var blob = await capture({
     url: `${localhost}/capture_meta_refresh/basic.html`,
     options: baseOptions,
@@ -2800,7 +2797,7 @@ async function test_capture_meta_refresh() {
   assert(mrs[13].getAttribute('content') === `15; url=http://example.com/#`);
   assert(mrs[14].getAttribute('content') === `15; url=http://example.com/#123`);
   assert(mrs[15].getAttribute('content') === `15; url=http://example.com/?id=123`);
-}
+});
 
 /**
  * Check local selection
@@ -2808,7 +2805,7 @@ async function test_capture_meta_refresh() {
  *
  * capturer.captureDocument
  */
-async function test_capture_meta_refresh_selection() {
+it('test_capture_meta_refresh_selection', async function () {
   /* refresh link target not captured */
   var blob = await capture({
     url: `${localhost}/capture_meta_refresh_selection/delayed21.html`,
@@ -2852,14 +2849,14 @@ async function test_capture_meta_refresh_selection() {
   assert(mrs[5].getAttribute('content') === `30; url=${localhost}/capture_meta_refresh_selection/delayed22.html?id=123`);
   assert(mrs[6].getAttribute('content') === `20; url=${localhost}/capture_meta_refresh_selection/referred.html`);
   assert(mrs[7].getAttribute('content') === `15; url=http://example.com/`);
-}
+});
 
 /**
  * Check when base is set to another page
  *
  * capturer.captureDocument
  */
-async function test_capture_meta_refresh_base() {
+it('test_capture_meta_refresh_base', async function () {
   // time = 0 (capture the redirected page)
   var blob = await captureHeadless({
     url: `${localhost}/capture_meta_refresh_base/refresh0.html`,
@@ -2884,14 +2881,14 @@ async function test_capture_meta_refresh_base() {
   var doc = await readFileAsDocument(indexBlob);
   var mrs = doc.querySelectorAll('meta[http-equiv="refresh"]');
   assert(mrs[0].getAttribute('content') === `1; url=${localhost}/capture_meta_refresh_base/subdir/target.html?id=123#456`);
-}
+});
 
 /**
  * Check meta refresh resolve for source/bookmark.
  *
  * capturer.captureDocument
  */
-async function test_capture_meta_refresh_mode() {
+it('test_capture_meta_refresh_mode', async function () {
   /* source */
   var blob = await captureHeadless({
     url: `${localhost}/capture_meta_refresh_mode/refresh.html`,
@@ -2916,14 +2913,14 @@ async function test_capture_meta_refresh_mode() {
   var doc = await readFileAsDocument(blob);
 
   assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_meta_refresh_mode/target.html#abc`);
-}
+});
 
 /**
  * Check meta refresh resolve to file for source/bookmark.
  *
  * capturer.captureDocument
  */
-async function test_capture_meta_refresh_mode_file() {
+it('test_capture_meta_refresh_mode_file', async function () {
   /* source */
   var blob = await captureHeadless({
     url: `${localhost}/capture_meta_refresh_mode_file/refresh.html`,
@@ -2948,14 +2945,14 @@ async function test_capture_meta_refresh_mode_file() {
   var doc = await readFileAsDocument(blob);
 
   assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_meta_refresh_mode_file/target.txt#abc`);
-}
+});
 
 /**
  * Meta refresh in <noscript> should be ignored.
  *
  * capturer.captureDocument
  */
-async function test_capture_meta_refresh_noscript() {
+it('test_capture_meta_refresh_noscript', async function () {
   /* source */
   var blob = await captureHeadless({
     url: `${localhost}/capture_meta_refresh_noscript/refresh.html`,
@@ -2980,14 +2977,14 @@ async function test_capture_meta_refresh_noscript() {
   var doc = await readFileAsDocument(blob);
 
   assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_meta_refresh_noscript/refresh.html`);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.contentSecurityPolicy
  */
-async function test_capture_meta_csp() {
+it('test_capture_meta_csp', async function () {
   /* capture.contentSecurityPolicy = save */
   var options = {
     "capture.contentSecurityPolicy": "save",
@@ -3025,14 +3022,14 @@ async function test_capture_meta_csp() {
   assert(!doc.querySelector('style').hasAttribute('nonce'));
   assert(!doc.querySelector('script[src]').hasAttribute('nonce'));
   assert(!doc.querySelector('script:not([src])').hasAttribute('nonce'));
-}
+});
 
 /**
  * Check meta in a shadowRoot is ignored.
  *
  * capturer.captureDocument
  */
-async function test_capture_meta_shadow() {
+it('test_capture_meta_shadow', async function () {
   var blob = await capture({
     url: `${localhost}/capture_meta_shadow/meta.html`,
     options: baseOptions,
@@ -3052,14 +3049,14 @@ async function test_capture_meta_shadow() {
 <meta http-equiv="content-type" content="text/html; charset=Big5">
 <meta http-equiv="Content-Security-Policy" content="default-src 'nonce-2726c7f26c';">
 <meta http-equiv="refresh" content="0; url=nonexist.html">`);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.base
  */
-async function test_capture_base() {
+it('test_capture_base', async function () {
   /* capture.base = save */
   var options = {
     "capture.base": "save",
@@ -3114,7 +3111,7 @@ async function test_capture_base() {
   var doc = await readFileAsDocument(indexBlob);
   var bases = doc.querySelectorAll('base');
   assert(!bases.length);
-}
+});
 
 /**
  * Check if the URL for general saved resource is rewritten correctly
@@ -3126,7 +3123,7 @@ async function test_capture_base() {
  * capturer.resolveRelativeUrl
  * capturer.captureDocument
  */
-async function test_capture_base_rewrite() {
+it('test_capture_base_rewrite', async function () {
   var blob = await capture({
     url: `${localhost}/capture_base_rewrite/index.html`,
     options: baseOptions,
@@ -3142,7 +3139,7 @@ async function test_capture_base_rewrite() {
 
   assert(doc.querySelector('img').getAttribute('src') === `green.bmp`);
   assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `green.bmp 1x, yellow.bmp 2x`);
-}
+});
 
 /**
  * Check for "", hash, search,
@@ -3151,7 +3148,7 @@ async function test_capture_base_rewrite() {
  * capturer.resolveRelativeUrl
  * capturer.captureDocument
  */
-async function test_capture_base_rewrite_special() {
+it('test_capture_base_rewrite_special', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -3174,12 +3171,12 @@ async function test_capture_base_rewrite_special() {
   assert(imgs[1].getAttribute('src') === `#123`);
   assert(imgs[2].getAttribute('src') === `index-1.html`); // html page saved as img
   assert(imgs[3].getAttribute('src') === `index-2.html`); // html page saved as img
-}
+});
 
 /**
  * Check if URLs after base[href] are handled correctly.
  */
-async function test_capture_base_dynamic() {
+it('test_capture_base_dynamic', async function () {
   for (const base of ["save", "blank", "remove"]) {
     console.debug("capture.base = %s", base);
 
@@ -3226,12 +3223,12 @@ async function test_capture_base_dynamic() {
     var text = (await readFileAsText(await file.async('blob'))).trim();
     assert(text === `${localhost}/capture_base_dynamic/basic.html`);
   }
-}
+});
 
 /**
  * Check if URLs before base[href] are handled correctly.
  */
-async function test_capture_base_dynamic_bad() {
+it('test_capture_base_dynamic_bad', async function () {
   for (const base of ["save", "blank", "remove"]) {
     console.debug("capture.base = %s", base);
 
@@ -3278,12 +3275,15 @@ async function test_capture_base_dynamic_bad() {
     var text = (await readFileAsText(await file.async('blob'))).trim();
     assert(text === `${localhost}/capture_base_dynamic/bad.html`);
   }
-}
+});
 
 /**
  * Check if CSS-related URLs after base[href] are handled correctly.
  */
-async function test_capture_base_dynamic_css() {
+itToFailIf(
+  userAgent.is('chromium') && userAgent.major < 96,
+  'referrer for an imported CSS is erroneously set to document base in Chromium < 96',
+)('test_capture_base_dynamic_css', async function () {
   for (const rewriteCss of ["url", "tidy", "match"]) {
     for (const styleRes of ["save", "save-used"]) {
       console.debug("capture.rewriteCss = %s, capture.imageBackground = capture.font = %s", rewriteCss, styleRes);
@@ -3316,8 +3316,6 @@ async function test_capture_base_dynamic_css() {
       var text = (await readFileAsText(await file.async('blob'))).trim();
       assert(text === `${localhost}/capture_base_dynamic_css/resources/link.py`);
 
-      // @FIXME: in Chromium < 96, the referrer for the imported CSS is
-      //     erroneously set to document base.
       var file = zip.file('style_import.py.css');
       var text = (await readFileAsText(await file.async('blob'))).trim();
       assert(text.match(
@@ -3348,12 +3346,15 @@ async function test_capture_base_dynamic_css() {
       assert(text === `${localhost}/capture_base_dynamic_css/basic.html`);
     }
   }
-}
+});
 
 /**
  * Check if CSS-related URLs before base[href] are handled correctly.
  */
-async function test_capture_base_dynamic_css_bad() {
+itToFailIf(
+  userAgent.is('chromium') && userAgent.major < 96,
+  'referrer for an imported CSS is erroneously set to document base in Chromium < 96',
+)('test_capture_base_dynamic_css_bad', async function () {
   for (const rewriteCss of ["url", "tidy", "match"]) {
     for (const styleRes of ["save", "save-used"]) {
       console.debug("capture.rewriteCss = %s, capture.imageBackground = capture.font = %s", rewriteCss, styleRes);
@@ -3386,8 +3387,6 @@ async function test_capture_base_dynamic_css_bad() {
       var text = (await readFileAsText(await file.async('blob'))).trim();
       assert(text === `${localhost}/capture_base_dynamic_css/resources/link.py`);
 
-      // @FIXME: in Chromium < 96, the referrer for the imported CSS is
-      //     erroneously set to document base.
       var file = zip.file('style_import.py.css');
       var text = (await readFileAsText(await file.async('blob'))).trim();
       assert(text.match(
@@ -3418,12 +3417,12 @@ async function test_capture_base_dynamic_css_bad() {
       assert(text === `${localhost}/capture_base_dynamic_css/bad.html`);
     }
   }
-}
+});
 
 /**
  * Check if frame-related URLs after base[href] are handled correctly.
  */
-async function test_capture_base_dynamic_frame() {
+it('test_capture_base_dynamic_frame', async function () {
   for (const func of ["capture", "captureHeadless"]) {
     console.debug("func = %s", func);
 
@@ -3506,12 +3505,12 @@ async function test_capture_base_dynamic_frame() {
       assert(text === `data:text/css;filename=link.py.css,:root { --referrer: "${localhost}/" }`);
     }
   }
-}
+});
 
 /**
  * Check if frame-related URLs before base[href] are handled correctly.
  */
-async function test_capture_base_dynamic_frame_bad() {
+it('test_capture_base_dynamic_frame_bad', async function () {
   for (const func of ["capture", "captureHeadless"]) {
     console.debug("func = %s", func);
 
@@ -3582,7 +3581,7 @@ async function test_capture_base_dynamic_frame_bad() {
       assert(text === `data:text/css;filename=link.py.css,:root { --referrer: "${localhost}/" }`);
     }
   }
-}
+});
 
 /**
  * Handle base[href] change after resources have been loaded.
@@ -3592,9 +3591,7 @@ async function test_capture_base_dynamic_frame_bad() {
  *
  * capture.base
  */
-async function test_capture_base_dynamic_scripted() {
-  throw new TestSkipError('currently broken');
-
+itToFail()('test_capture_base_dynamic_scripted', async function () {
   var options = {
     "capture.base": "blank",
   };
@@ -3635,14 +3632,14 @@ async function test_capture_base_dynamic_scripted() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('img').getAttribute('src') === "img.bmp");
-}
+});
 
 /**
  * Check if option works
  *
  * capture.favicon
  */
-async function test_capture_favicon() {
+it('test_capture_favicon', async function () {
   /* capture.favicon = save */
   var options = {
     "capture.favicon": "save",
@@ -3718,14 +3715,14 @@ async function test_capture_favicon() {
 
   var iconElem = doc.querySelector('link[rel~="icon"]');
   assert(!iconElem);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.faviconAttrs
  */
-async function test_capture_faviconAttrs() {
+it('test_capture_faviconAttrs', async function () {
   /* capture.faviconAttrs = "apple-touch-icon apple-touch-icon-precomposed" */
   var options = {
     "capture.favicon": "save",
@@ -3797,7 +3794,7 @@ async function test_capture_faviconAttrs() {
   assert(iconElems[0].getAttribute('href') === `red.bmp`);
   assert(iconElems[1].getAttribute('href') === `${localhost}/capture_faviconAttrs/yellow.bmp`);
   assert(iconElems[2].getAttribute('href') === `${localhost}/capture_faviconAttrs/green.bmp`);
-}
+});
 
 /**
  * Check if option works
@@ -3805,7 +3802,7 @@ async function test_capture_faviconAttrs() {
  * capture.style
  * capturer.captureDocument
  */
-async function test_capture_css_style() {
+it('test_capture_css_style', async function () {
   /* capture.style = save */
   var options = {
     "capture.style": "save",
@@ -3885,7 +3882,7 @@ async function test_capture_css_style() {
 
   assert(!doc.querySelector('style'));
   assert(!doc.querySelector('link'));
-}
+});
 
 /**
  * Check if option works
@@ -3893,7 +3890,7 @@ async function test_capture_css_style() {
  * capture.styleInline
  * capturer.captureDocument
  */
-async function test_capture_css_styleInline() {
+it('test_capture_css_styleInline', async function () {
   var options = {
     "capture.style": "remove",
   };
@@ -3959,7 +3956,7 @@ async function test_capture_css_styleInline() {
   assert(!elems[1].hasAttribute('style'));
   assert(!elems[2].hasAttribute('style'));
   assert(!elems[3].hasAttribute('style'));
-}
+});
 
 /**
  * Check if alternative/disabled stylesheets are handled correctly
@@ -3967,7 +3964,7 @@ async function test_capture_css_styleInline() {
  * capture.style
  * capturer.captureDocument
  */
-async function test_capture_css_disabled() {
+it('test_capture_css_disabled', async function () {
   var options = {
     "capture.style": "save",
   };
@@ -4102,7 +4099,7 @@ async function test_capture_css_disabled() {
   assert(styleElem.textContent.trim() === ``);
 
   assert(!zip.file("persistent.css"));
-}
+});
 
 /**
  * Check if option works
@@ -4110,7 +4107,7 @@ async function test_capture_css_disabled() {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss() {
+it('test_capture_css_rewriteCss', async function () {
   /* capture.rewriteCss = url */
   var options = {
     "capture.rewriteCss": "url",
@@ -4358,7 +4355,7 @@ svg|a text, text svg|a {
 
   assert(doc.querySelector('blockquote').getAttribute('style') === `\
 background: blue; background: url(rewrite/green.bmp);`);
-}
+});
 
 /**
  * Check if option works for @supports.
@@ -4366,7 +4363,7 @@ background: blue; background: url(rewrite/green.bmp);`);
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss_at_supports() {
+it('test_capture_css_rewriteCss_at_supports', async function () {
   /* capture.rewriteCss = url */
   var options = {
     "capture.rewriteCss": "url",
@@ -4490,7 +4487,7 @@ async function test_capture_css_rewriteCss_at_supports() {
   }
 }`
   );
-}
+});
 
 /**
  * Check if option works for @counter-style.
@@ -4498,18 +4495,7 @@ async function test_capture_css_rewriteCss_at_supports() {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss_at_counter_style() {
-  try {
-    const d = document.implementation.createHTMLDocument();
-    const style = d.head.appendChild(d.createElement('style'));
-    style.textContent = '@counter-style my { symbols: "1"; }';
-    if (!style.sheet.cssRules.length) {
-      throw new Error('not supported');
-    }
-  } catch (ex) {
-    throw new TestSkipError('@counter-style CSS rule not supported');
-  }
-
+itSkipIfNoAtCounterStyle()('test_capture_css_rewriteCss_at_counter_style', async function () {
   /* capture.rewriteCss = url */
   var options = {
     "capture.rewriteCss": "url",
@@ -4603,7 +4589,7 @@ async function test_capture_css_rewriteCss_at_counter_style() {
   symbols: Ⓐ Ⓑ Ⓒ Ⓓ Ⓔ Ⓕ Ⓖ;
 }`
   );
-}
+});
 
 /**
  * Check if option works for @layer.
@@ -4611,18 +4597,7 @@ async function test_capture_css_rewriteCss_at_counter_style() {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss_at_layer() {
-  try {
-    const d = document.implementation.createHTMLDocument();
-    const style = d.head.appendChild(d.createElement('style'));
-    style.textContent = '@layer mylayer;';
-    if (!style.sheet.cssRules.length) {
-      throw new Error('not supported');
-    }
-  } catch (ex) {
-    throw new TestSkipError('@layer CSS rule not supported');
-  }
-
+itSkipIfNoAtLayer()('test_capture_css_rewriteCss_at_layer', async function () {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
@@ -4658,14 +4633,14 @@ async function test_capture_css_rewriteCss_at_layer() {
   #case2 { background-image: url("case2b.bmp"); }
 }`
   ));
-}
+});
 
 /**
  * Check DOM matching for capture.rewriteCss = "match"
  *
  * capture.rewriteCss
  */
-async function test_capture_css_rewriteCss_match() {
+it('test_capture_css_rewriteCss_match', async function () {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
@@ -4708,9 +4683,9 @@ async function test_capture_css_rewriteCss_match() {
   assert(styleElems[4].textContent.trim().match(regex));
 
   assert(styleElems[5].textContent.trim() === ``);
-}
+});
 
-async function test_capture_css_rewriteCss_match_pseudo() {
+it('test_capture_css_rewriteCss_match_pseudo', async function () {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
@@ -4752,16 +4727,9 @@ async function test_capture_css_rewriteCss_match_pseudo() {
   assert(styleElems[10].textContent.trim() === `:scope > body > #pseudo10 { }`);
 
   assert(styleElems[11].textContent.trim() === ``);
-}
+});
 
-async function test_capture_css_rewriteCss_match_pseudo_is() {
-  // :is() CSS pseudo-class is supported in Firefox >= 78 and Chromium >= 88.
-  try {
-    document.querySelector(':is()');
-  } catch (ex) {
-    throw new TestSkipError(`:is() CSS pseudo-class not supported`);
-  }
-
+itSkipIfNoIsPseudo()('test_capture_css_rewriteCss_match_pseudo_is', async function () {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
@@ -4787,9 +4755,9 @@ async function test_capture_css_rewriteCss_match_pseudo_is() {
   assert(styleElems[3].textContent.trim() === `:is(#pseudo3):not([hidden]) { }`);
 
   assert(styleElems[4].textContent.trim() === `:is(#pseudo4):not(blockquote) { }`);
-}
+});
 
-async function test_capture_css_rewriteCss_match_shadow() {
+it('test_capture_css_rewriteCss_match_shadow', async function () {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
@@ -4836,16 +4804,9 @@ async function test_capture_css_rewriteCss_match_shadow() {
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(shadow.querySelector('style').textContent.trim() === `:host(#nonexist) { background-color: lime; }`);
-}
+});
 
-async function test_capture_css_rewriteCss_match_shadow_host_context() {
-  try {
-    document.querySelector(':host-context(*)');
-  } catch (ex) {
-    // :host-context() not suported in some browsers (e.g. Firefox)
-    throw new TestSkipError(`:host-context() CSS pseudo-class not supported`);
-  }
-
+itSkipIfNoHostContextPseudo()('test_capture_css_rewriteCss_match_shadow_host_context', async function () {
   /* capture.rewriteCss = match */
   var options = {
     "capture.rewriteCss": "match",
@@ -4874,14 +4835,14 @@ async function test_capture_css_rewriteCss_match_shadow_host_context() {
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(shadow.querySelector('style').textContent.trim() === `:host-context(#nonexist) { background-color: lime; }`);
-}
+});
 
 /**
  * Check cross-origin CSS for "tidy" and "match"
  *
  * capture.rewriteCss
  */
-async function test_capture_css_rewriteCss_cross_origin() {
+it('test_capture_css_rewriteCss_cross_origin', async function () {
   /* capture.rewriteCss = tidy */
   var options = {
     "capture.rewriteCss": "tidy",
@@ -4989,7 +4950,7 @@ async function test_capture_css_rewriteCss_cross_origin() {
   var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert(cssText === `\
 #imported { background-color: green; }`);
-}
+});
 
 /**
  * Check if option works for nesting CSS.
@@ -4997,17 +4958,7 @@ async function test_capture_css_rewriteCss_cross_origin() {
  * capture.rewriteCss
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_rewriteCss_nesting() {
-  // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
-  try {
-    // Chrome 109/110 gets null for the querySelector
-    if (!document.querySelector('&')) {
-      throw new Error('bad support');
-    }
-  } catch (ex) {
-    throw new TestSkipError(`CSS nesting not supported`);
-  }
-
+itSkipIfNoNestingCss()('test_capture_css_rewriteCss_nesting', async function () {
   /* capture.rewriteCss = url */
   var options = {
     "capture.rewriteCss": "url",
@@ -5211,14 +5162,14 @@ async function test_capture_css_rewriteCss_nesting() {
     background: url(./resources/case2-1.bmp);
   }
 }`);
-}
+});
 
 /**
  * Check CSS syntax parsing
  *
  * scrapbook.parseCssText
  */
-async function test_capture_css_syntax() {
+it('test_capture_css_syntax', async function () {
   /* background */
   var options = {
     "capture.style": "save",
@@ -5330,14 +5281,14 @@ async function test_capture_css_syntax() {
   assert(css[13].textContent.trim() === `@import "${localhost}/capture_css_syntax/import/style13.css" screen;`);
   assert(css[14].textContent.trim() === `/* @import "import/style14.css"; */`);
   // assert(css[15].textContent.trim() === `#test15::after { content: '@import "import/style15.css"'; }`);
-}
+});
 
 /**
  * Check encoding detection for an external or imported CSS
  *
  * scrapbook.parseCssFile
  */
-async function test_capture_css_charset() {
+it('test_capture_css_charset', async function () {
   const hasBomUtf8 = async function (blob) {
     var u8ar = new Uint8Array(await readFileAsArrayBuffer(blob));
     return u8ar[0] === 0xEF && u8ar[1] === 0xBB && u8ar[2] === 0xBF;
@@ -5397,7 +5348,7 @@ async function test_capture_css_charset() {
   assert(text === `@charset "Big5";
 #test7::after { content: "中文"; }`);
   assert(await hasBomUtf8(blob));
-}
+});
 
 /**
  * Check whether linked and imported CSS are all rewritten
@@ -5405,7 +5356,7 @@ async function test_capture_css_charset() {
  *
  * inline and internal CSS are checked in test_capture_css_rewriteCss
  */
-async function test_capture_css_rewrite() {
+it('test_capture_css_rewrite', async function () {
   var options = {
     "capture.imageBackground": "link",
   };
@@ -5433,12 +5384,12 @@ async function test_capture_css_rewrite() {
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
   assert(text === `#import { background: url("${localhost}/capture_css_rewrite/green.bmp"); }`);
-}
+});
 
 /**
  * Check if URL is resolved correctly when base is set to another directory
  */
-async function test_capture_css_rewrite_base() {
+it('test_capture_css_rewrite_base', async function () {
   var options = {
     "capture.imageBackground": "link",
   };
@@ -5459,13 +5410,13 @@ async function test_capture_css_rewrite_base() {
   var blob = new Blob([await file.async('blob')], {type: "text/css"});
   var text = (await readFileAsText(blob)).trim();
   assert(text === `#link { background: url("${localhost}/capture_css_rewrite_base/link/yellow.bmp"); }`);
-}
+});
 
 /**
  * Check for "" and hash URL
  * They should be ignored and no file is retrieved
  */
-async function test_capture_css_rewrite_empty() {
+it('test_capture_css_rewrite_empty', async function () {
   var blob = await capture({
     url: `${localhost}/capture_css_rewrite_empty/index.html`,
     options: baseOptions,
@@ -5481,13 +5432,13 @@ async function test_capture_css_rewrite_empty() {
   assert(doc.querySelector('style').textContent.trim() === `\
 #invalid1 { background-image: url(""); }
 #invalid2 { background-image: url("#123"); }`);
-}
+});
 
 /**
  * Check for a URL pointing to main page (a bad case)
  * It will be regarded as a CSS file: be fetched, parsed, and saved.
  */
-async function test_capture_css_rewrite_bad() {
+it('test_capture_css_rewrite_bad', async function () {
   var blob = await capture({
     url: `${localhost}/capture_css_rewrite_bad/index.html`,
     options: baseOptions,
@@ -5501,12 +5452,12 @@ async function test_capture_css_rewrite_bad() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelector('style').textContent.trim() === `#bad1 { background-image: url("index-1.html"); }`);
-}
+});
 
 /**
  * Check if circular CSS referencing is handled correctly
  */
-async function test_capture_css_circular() {
+it('test_capture_css_circular', async function () {
   /* htz */
   // keep original inter-referencing between downloaded files
   var options = {
@@ -5570,12 +5521,12 @@ async function test_capture_css_circular() {
   var text = (await xhr({url, responseType: "text"})).response;
   assert(text.trim() === `@import "urn:scrapbook:download:circular:url:${localhost}/capture_css_circular/style1.css";
 body { color: blue; }`);
-}
+});
 
 /**
  * Check if self-pointing circular CSS referencing is handled correctly
  */
-async function test_capture_css_circular_self() {
+it('test_capture_css_circular_self', async function () {
   /* singleHtml */
   // rewrite a circular referencing with urn:scrapbook:download:circular:url:...
   var options = {
@@ -5595,14 +5546,14 @@ async function test_capture_css_circular_self() {
   var text = (await xhr({url, responseType: "text"})).response;
   assert(text.trim() === `@import "urn:scrapbook:download:circular:url:${localhost}/capture_css_circular_self/style1.css";
 body { color: red; }`);
-}
+});
 
 /**
  * When the origin of a CSS file is different from the source document,
  * the script cannot read its CSS rules directly and a workaround is required.
  * Check if it works: only used bg images and fonts are saved.
  */
-async function test_capture_css_cross_origin() {
+it('test_capture_css_cross_origin', async function () {
   var options = {
     "capture.imageBackground": "save-used",
     "capture.font": "save-used",
@@ -5634,14 +5585,14 @@ async function test_capture_css_cross_origin() {
 
 @font-face { font-family: bgFont2; src: url("font2.woff"); }
 @font-face { font-family: neverusedFont2; src: url(""); }`);
-}
+});
 
 /**
  * Check if dynamic stylesheets are handled correctly.
  *
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_dynamic() {
+it('test_capture_css_dynamic', async function () {
   /* save */
   var options = {
     "capture.imageBackground": "save",
@@ -5709,14 +5660,14 @@ async function test_capture_css_dynamic() {
   var cssFile = zip.file('import.css');
   var text = await readFileAsText(await cssFile.async('blob'));
   assert(text.trim() === `#import-inserted { background-image: url("import-inserted.bmp"); }`);
-}
+});
 
 /**
  * Check if dynamic stylesheets rename are handled correctly.
  *
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_dynamic_rename() {
+it('test_capture_css_dynamic_rename', async function () {
   var options = {
     "capture.imageBackground": "save",
     "capture.font": "save",
@@ -5769,19 +5720,14 @@ async function test_capture_css_dynamic_rename() {
   assert(importNames[1][1] === '123');
   assert(importNames[2][1] === 'abc');
   assert(importNames[3][1] === 'def');
-}
+});
 
 /**
  * Check if adoptedStyleSheets are handled correctly.
  *
  * capturer.DocumentCssHandler
  */
-async function test_capture_css_adopted() {
-  // Document.adoptedStyleSheets is not supported by Firefox < 101.
-  if (!document.adoptedStyleSheets) {
-    throw new TestSkipError(`Document.adoptedStyleSheets not supported`);
-  }
-
+itSkipIfNoAdoptedStylesheet()('test_capture_css_adopted', async function () {
   var blob = await capture({
     url: `${localhost}/capture_css_adopted/index.html`,
     options: baseOptions,
@@ -5802,14 +5748,14 @@ async function test_capture_css_adopted() {
   var shadow1 = frag.content;
   var styleElems = shadow1.querySelectorAll('style');
   assert(styleElems[1].textContent.trim() === `#adopted { background-color: rgb(0, 255, 0); }`);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground() {
+it('test_capture_imageBackground', async function () {
   /* capture.imageBackground = save */
   var options = {
     "capture.imageBackground": "save",
@@ -5995,14 +5941,14 @@ async function test_capture_imageBackground() {
   from { transform: rotate(0turn); background-image: url(""); }
   to { transform: rotate(1turn); }
 }`);
-}
+});
 
 /**
  * Check if used background images in the CSS are mapped correctly
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used() {
+it('test_capture_imageBackground_used', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.rewriteCss": "url",
@@ -6169,7 +6115,7 @@ async function test_capture_imageBackground_used() {
   from { background-image: url("import-keyframes.bmp"); }
   to { transform: translateX(40px); }
 }`);
-}
+});
 
 /**
  * Check if used background images are checked correctly for a selector for
@@ -6177,7 +6123,7 @@ async function test_capture_imageBackground_used() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used_root() {
+it('test_capture_imageBackground_used_root', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6196,14 +6142,14 @@ async function test_capture_imageBackground_used_root() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelector('style').textContent.trim() === `html { background-image: url("green.bmp"); }`);
-}
+});
 
 /**
  * Check syntax for used background images
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used_syntax() {
+it('test_capture_imageBackground_used_syntax', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6242,7 +6188,7 @@ async function test_capture_imageBackground_used_syntax() {
   33% { background-image: url("keyframes-multi-2.bmp"); }
   66% { background-image: url("keyframes-multi-3.bmp"); }
 }`);
-}
+});
 
 /**
  * Check if used background images are checked correctly for advanced at-rules
@@ -6250,18 +6196,7 @@ async function test_capture_imageBackground_used_syntax() {
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used_syntax_at() {
-  try {
-    const d = document.implementation.createHTMLDocument();
-    const style = d.head.appendChild(d.createElement('style'));
-    style.textContent = '@layer mylayer;';
-    if (!style.sheet.cssRules.length) {
-      throw new Error('not supported');
-    }
-  } catch (ex) {
-    throw new TestSkipError('@layer CSS rule not supported');
-  }
-
+itSkipIfNoAtLayer()('test_capture_imageBackground_used_syntax_at', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6287,14 +6222,14 @@ async function test_capture_imageBackground_used_syntax_at() {
 @layer base {
   #case1 { background-image: url("base.bmp"); }
 }`);
-}
+});
 
 /**
  * Do not count background images referenced only by inline styles.
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used_inline() {
+it('test_capture_imageBackground_used_inline', async function () {
   var options = {
     "capture.imageBackground": "save-used",
     "capture.rewriteCss": "url",
@@ -6320,14 +6255,14 @@ async function test_capture_imageBackground_used_inline() {
 }`);
 
   assert(doc.querySelector('blockquote').getAttribute('style').trim() === `background-image: url("green.bmp");`);
-}
+});
 
 /**
  * Check if used background images in a shadow DOM are considered
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used_shadow() {
+it('test_capture_imageBackground_used_shadow', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6358,14 +6293,14 @@ async function test_capture_imageBackground_used_shadow() {
 @media all {
   #media { background-image: url("blue.bmp"); }
 }`);
-}
+});
 
 /**
  * Check if used background images in scoped @keyframe are handled correctly
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used_scope() {
+it('test_capture_imageBackground_used_scope', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6427,19 +6362,14 @@ async function test_capture_imageBackground_used_scope() {
   from { background-image: url("shadow-keyframes3.bmp"); }
   to { transform: translateX(40px); }
 }`);
-}
+});
 
 /**
  * Check if used background images in adoptedStyleSheets are handled correctly
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used_adopted() {
-  // Document.adoptedStyleSheets is not supported by Firefox < 101.
-  if (!document.adoptedStyleSheets) {
-    throw new TestSkipError(`Document.adoptedStyleSheets not supported`);
-  }
-
+itSkipIfNoAdoptedStylesheet()('test_capture_imageBackground_used_adopted', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6466,16 +6396,14 @@ async function test_capture_imageBackground_used_adopted() {
   frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
   var shadow1 = frag.content;
   assert(shadow1.querySelector('style').textContent.trim() === `#adopted { background-image: url("shadow.bmp"); }`);
-}
+});
 
 /**
  * Check background images referenced by CSS variable.
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used_var() {
-  throw new TestSkipError(`currently broken`);
-
+itToFail()('test_capture_imageBackground_used_var', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6549,24 +6477,14 @@ async function test_capture_imageBackground_used_var() {
   to { transform: translateX(40px); }
 }
 #var6 { animation: var6 3s linear infinite; }`);
-}
+});
 
 /**
  * Check if used background images are checked correctly for nesting CSS.
  *
  * capture.imageBackground
  */
-async function test_capture_imageBackground_used_nesting() {
-  // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
-  try {
-    // Chrome 109/110 gets null for the querySelector
-    if (!document.querySelector('&')) {
-      throw new Error('bad support');
-    }
-  } catch (ex) {
-    throw new TestSkipError(`CSS nesting not supported`);
-  }
-
+itSkipIfNoNestingCss()('test_capture_imageBackground_used_nesting', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6611,14 +6529,14 @@ async function test_capture_imageBackground_used_nesting() {
     }
   }
 }`);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.font
  */
-async function test_capture_font() {
+it('test_capture_font', async function () {
   /* capture.font = save */
   var options = {
     "capture.font": "save",
@@ -6694,14 +6612,14 @@ async function test_capture_font() {
 
   var styleElems = doc.querySelectorAll('style');
   assert(styleElems[0].textContent.trim() === `@font-face { font-family: myFont; src: url(""); }`);
-}
+});
 
 /**
  * Check if used fonts in the CSS are mapped correctly
  *
  * capture.font = "save-used"
  */
-async function test_capture_font_used() {
+it('test_capture_font_used', async function () {
   /* capture.font = save-used */
   var options = {
     "capture.rewriteCss": "url",
@@ -6798,14 +6716,14 @@ async function test_capture_font_used() {
   var cssFile = zip.file('import.css');
   var text = await readFileAsText(await cssFile.async('blob'));
   assert(text.trim() === `@font-face { font-family: import; src: url("import.woff"); }`);
-}
+});
 
 /**
  * Check syntax for used fonts
  *
  * capture.font = "save-used"
  */
-async function test_capture_font_used_syntax() {
+it('test_capture_font_used_syntax', async function () {
   /* capture.font = save-used */
   var options = {
     "capture.rewriteCss": "url",
@@ -6856,14 +6774,14 @@ async function test_capture_font_used_syntax() {
   from { font-family: keyframes1, "keyframes 2"; }
   to { transform: translateX(40px); font-family: "keyframes\\A 3"; }
 }`);
-}
+});
 
 /**
  * Check if used fonts in scoped @font-face are handled correctly
  *
  * capture.font
  */
-async function test_capture_font_used_scope() {
+it('test_capture_font_used_scope', async function () {
   /* capture.font = save-used */
   var options = {
     "capture.rewriteCss": "url",
@@ -6902,16 +6820,14 @@ async function test_capture_font_used_scope() {
 
 #shadow3 { font-family: internal2; }
 @font-face { font-family: internal2; src: url("shadow3.woff"); }`);
-}
+});
 
 /**
  * Check used fonts referenced by CSS variable.
  *
  * capture.font = "save-used"
  */
-async function test_capture_font_used_var() {
-  throw new TestSkipError(`currently broken`);
-
+itToFail()('test_capture_font_used_var', async function () {
   /* capture.font = save-used */
   var options = {
     "capture.rewriteCss": "url",
@@ -6971,24 +6887,14 @@ async function test_capture_font_used_var() {
   to { transform: translateX(40px); }
 }
 #var5 { animation: anime5 3s linear infinite; font-family: var(--var-5); font-size: 1.1em; }`);
-}
+});
 
 /**
  * Check if used fonts are checked correctly for nesting CSS.
  *
  * capture.font = "save-used"
  */
-async function test_capture_font_used_nesting() {
-  // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
-  try {
-    // Chrome 109/110 gets null for the querySelector
-    if (!document.querySelector('&')) {
-      throw new Error('bad support');
-    }
-  } catch (ex) {
-    throw new TestSkipError(`CSS nesting not supported`);
-  }
-
+itSkipIfNoNestingCss()('test_capture_font_used_nesting', async function () {
   /* capture.font = save-used */
   var options = {
     "capture.font": "save-used",
@@ -7040,14 +6946,14 @@ async function test_capture_font_used_nesting() {
     }
   }
 }`);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.script
  */
-async function test_capture_script() {
+it('test_capture_script', async function () {
   /* capture.script = save */
   var options = {
     "capture.script": "save",
@@ -7190,14 +7096,14 @@ async function test_capture_script() {
   assert(!elem.hasAttribute('onclick'));
   var elem = doc.querySelector('math mrow');
   assert(!elem.hasAttribute('onclick'));
-}
+});
 
 /**
  * Check if option works
  *
  * capture.noscript
  */
-async function test_capture_noscript() {
+it('test_capture_noscript', async function () {
   /* capture.noscript = save */
   var options = {
     "capture.noscript": "save",
@@ -7251,14 +7157,14 @@ async function test_capture_noscript() {
   var doc = await readFileAsDocument(indexBlob);
   var noscripts = doc.querySelectorAll('noscript');
   assert(noscripts.length === 0);
-}
+});
 
 /**
  * Check if headless capture works
  *
  * capture.noscript
  */
-async function test_capture_noscript_headless() {
+it('test_capture_noscript_headless', async function () {
   var options = {
     "capture.noscript": "save",
   };
@@ -7276,14 +7182,14 @@ async function test_capture_noscript_headless() {
   var noscripts = doc.querySelectorAll('noscript');
   assert(noscripts[0].textContent.trim() === `Your browser does not support JavaScript.`);
   assert(noscripts[1].querySelector('img[src="red.bmp"]'));
-}
+});
 
 /**
  * Check frame capture if same origin
  *
  * capture.frame
  */
-async function test_capture_frame() {
+it('test_capture_frame', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -7398,14 +7304,14 @@ async function test_capture_frame() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('iframe').length === 0);
-}
+});
 
 /**
  * Check frame capture if cross origin
  *
  * capture.frame
  */
-async function test_capture_frame_cross_origin() {
+it('test_capture_frame_cross_origin', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -7473,14 +7379,14 @@ async function test_capture_frame_cross_origin() {
 
   /* capture.frame = remove */
   // same as same origin
-}
+});
 
 /**
  * Check frame capture for srcdoc
  *
  * capture.frame
  */
-async function test_capture_frame_srcdoc() {
+it('test_capture_frame_srcdoc', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -7638,14 +7544,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
 
   /* capture.frame = remove */
   // same as same origin
-}
+});
 
 /**
  * Check frame save for about: pages.
  *
  * capture.frame
  */
-async function test_capture_frame_about() {
+it('test_capture_frame_about', async function () {
   var options = {
     "capture.frame": "save",
     "capture.saveResourcesSequentially": true,
@@ -7679,14 +7585,14 @@ async function test_capture_frame_about() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.body.textContent.trim() === 'iframe modified 2');
-}
+});
 
 /**
  * Check duplication and hash handling
  *
  * capture.frame
  */
-async function test_capture_frame_duplicate() {
+it('test_capture_frame_duplicate', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -7730,14 +7636,14 @@ async function test_capture_frame_duplicate() {
   assert(frames[2].getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html#abc`);
   assert(frames[3].getAttribute('src') === `${localhost}/capture_frame/frames/text.txt`);
   assert(frames[4].getAttribute('src') === `${localhost}/capture_frame/frames/text.txt`);
-}
+});
 
 /**
  * Check headless frame save if same origin
  *
  * capture.frame
  */
-async function test_capture_frame_headless() {
+it('test_capture_frame_headless', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -7790,14 +7696,14 @@ async function test_capture_frame_headless() {
   var frameFile = zip.file(frame.getAttribute('src'));
   var text = (await readFileAsText(await frameFile.async('blob'))).trim();
   assert(text === "Lorem ipsum dolor sit amet. 旡羖甾惤怤齶覅煋朸汊狦芎沝抾邞塯乇泹銧裧。");
-}
+});
 
 /**
  * Check headless frame save for srcdoc
  *
  * capture.frame
  */
-async function test_capture_frame_headless_srcdoc() {
+it('test_capture_frame_headless_srcdoc', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -7923,14 +7829,14 @@ document.querySelector("p").textContent = "srcdoc content modified";
 document.querySelector("p").textContent = "srcdoc content modified";
 </script>`);
   assert(frame.getAttribute('src') === `${localhost}/capture_frame/frames/frame1.html`);
-}
+});
 
 /**
  * Check headless frame save for about: pages.
  *
  * capture.frame
  */
-async function test_capture_frame_headless_about() {
+it('test_capture_frame_headless_about', async function () {
   var options = {
     "capture.frame": "save",
     "capture.saveResourcesSequentially": true,
@@ -7955,14 +7861,14 @@ async function test_capture_frame_headless_about() {
   assert(frames[5].getAttribute('src') === "about:invalid");
   assert(frames[6].getAttribute('src') === "about:newtab");
   assert(frames[7].getAttribute('src') === "about:unknown");
-}
+});
 
 /**
  * Check headless frame capture if point to self
  *
  * capture.frame
  */
-async function test_capture_frame_headless_self() {
+it('test_capture_frame_headless_self', async function () {
   /* capture.frame = save */
   var options = {
     "capture.frame": "save",
@@ -7984,14 +7890,14 @@ async function test_capture_frame_headless_self() {
   assert(frames[1].getAttribute('src') === "");
   assert(frames[2].getAttribute('src') === "#123");
   assert(frames[3].getAttribute('src') === "index.html");
-}
+});
 
 /**
  * Check duplication and hash handling
  *
  * capture.frame
  */
-async function test_capture_frame_headless_duplicate() {
+it('test_capture_frame_headless_duplicate', async function () {
   /* capture.frame = save */
   var options = {
     "capture.frame": "save",
@@ -8013,7 +7919,7 @@ async function test_capture_frame_headless_duplicate() {
   assert(frames[2].getAttribute('src') === "index_1.html#abc");
   assert(frames[3].getAttribute('src') === "text.txt");
   assert(frames[4].getAttribute('src') === "text.txt");
-}
+});
 
 /**
  * Check data URI output for frame capture.
@@ -8023,7 +7929,7 @@ async function test_capture_frame_headless_duplicate() {
  * capture.frame
  * capture.saveDataUriAsSrcdoc
  */
-async function test_capture_frame_singleHtml() {
+it('test_capture_frame_singleHtml', async function () {
   /* capture.saveDataUriAsSrcdoc = true */
   // data URI charset should be UTF-8
   var options = {
@@ -8132,7 +8038,7 @@ async function test_capture_frame_singleHtml() {
   assert(frameSrc.match(rawRegex`${'^'}data:application/xhtml+xml;charset=UTF-8;filename=frame2.xhtml,`));
   var frameDoc = (await xhr({url: frameSrc, responseType: "document"})).response;
   assert(frameDoc.querySelector('p').textContent.trim() === `frame2 content modified`);
-}
+});
 
 /**
  * Check data URI output for duplicated references
@@ -8142,7 +8048,7 @@ async function test_capture_frame_singleHtml() {
  *
  * capture.frame
  */
-async function test_capture_frame_singleHtml_duplicate() {
+it('test_capture_frame_singleHtml_duplicate', async function () {
   /* capture.saveDataUriAsSrcdoc = true */
   var options = {
     "capture.saveAs": "singleHtml",
@@ -8180,14 +8086,14 @@ async function test_capture_frame_singleHtml_duplicate() {
   assert(frames[0].getAttribute('src') === frames[1].getAttribute('src'));
   assert(frames[0].getAttribute('src') === frames[2].getAttribute('src'));
   assert(frames[3].getAttribute('src') === frames[4].getAttribute('src'));
-}
+});
 
 /**
  * Check if circular frame referencing is handled correctly
  *
  * capture.frame
  */
-async function test_capture_frame_circular() {
+it('test_capture_frame_circular', async function () {
   /* capture.saveAs = zip */
   // link to corresponding downloaded frame file
   var options = {
@@ -8286,14 +8192,14 @@ async function test_capture_frame_circular() {
   var frame = frameDoc.querySelector('iframe');
   assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular/index.html`);
   assert(!frame.hasAttribute('srcdoc'));
-}
+});
 
 /**
  * Check if self-pointing circular frame referencing is handled correctly
  *
  * capture.frame
  */
-async function test_capture_frame_circular_self() {
+it('test_capture_frame_circular_self', async function () {
   /* capture.frame = save */
   // link to corresponding downloaded frame file
   var options = {
@@ -8352,14 +8258,14 @@ async function test_capture_frame_circular_self() {
   var frame = doc.querySelector('iframe');
   assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_frame_circular_self/index.html`);
   assert(!frame.hasAttribute('srcdoc'));
-}
+});
 
 /**
  * Check if frameRename works correctly.
  *
  * capture.frameRename
  */
-async function test_capture_frameRename() {
+it('test_capture_frameRename', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
   };
@@ -8407,14 +8313,14 @@ async function test_capture_frameRename() {
   assert(doc.querySelectorAll('iframe')[2].getAttribute('src') === `frame3.svg`);
   assert(doc.querySelectorAll('iframe')[3].getAttribute('src') === `text.txt`);
   assert(doc.querySelectorAll('iframe')[4].getAttribute('src') === `red.bmp`);
-}
+});
 
 /**
  * Check if header filename is taken for frameRename
  *
  * capture.frameRename
  */
-async function test_capture_frameRename_header() {
+it('test_capture_frameRename_header', async function () {
   /* capture.frameRename = false */
   var options = {
     "capture.frame": "save",
@@ -8518,14 +8424,14 @@ async function test_capture_frameRename_header() {
 
   var frameSrc = doc.querySelectorAll('iframe')[3].getAttribute('src');
   assert(frameSrc.match(rawRegex`${'^'}data:text/html;charset=UTF-8;filename=a%E4%B8%ADb%23c.php.html,`));
-}
+});
 
 /**
  * Check if the URL in an anchor (link) is rewritten correctly
  *
  * capturer.captureDocument
  */
-async function test_capture_anchor() {
+it('test_capture_anchor', async function () {
   var blob = await capture({
     url: `${localhost}/capture_anchor/index.html`,
     options: baseOptions,
@@ -8566,7 +8472,7 @@ async function test_capture_anchor() {
   assert(anchors[20].getAttribute('href') === `about:blank`);
   assert(anchors[21].getAttribute('href') === `urn:scrapbook:download:error:http://example.com`);
   assert(anchors[22].getAttribute('href') === `mailto:noresponse@example.com`);
-}
+});
 
 /**
  * Check local selection
@@ -8574,7 +8480,7 @@ async function test_capture_anchor() {
  *
  * capturer.captureDocument
  */
-async function test_capture_anchor_self() {
+it('test_capture_anchor_self', async function () {
   /* hash link target not captured */
   var blob = await capture({
     url: `${localhost}/capture_anchor/index21.html`,
@@ -8618,14 +8524,14 @@ async function test_capture_anchor_self() {
   assert(anchors[5].getAttribute('href') === `#`);
   assert(anchors[6].getAttribute('href') === `#target_id`);
   assert(anchors[7].getAttribute('href') === `#target_name`);
-}
+});
 
 /**
  * Check when base is set to another page
  *
  * capturer.captureDocument
  */
-async function test_capture_anchor_base() {
+it('test_capture_anchor_base', async function () {
   var blob = await capture({
     url: `${localhost}/capture_anchor/index3.html`,
     options: baseOptions,
@@ -8647,14 +8553,14 @@ async function test_capture_anchor_base() {
   assert(anchors[6].getAttribute('href') === `#123`);
   assert(anchors[7].getAttribute('href') === `${localhost}/capture_anchor/index3.html?id=123`);
   assert(anchors[8].getAttribute('href') === `http://example.com/`); // slight changed from http://example.com
-}
+});
 
 /**
  * Check if option works
  *
  * capture.ping
  */
-async function test_capture_anchor_ping() {
+it('test_capture_anchor_ping', async function () {
   /* capture.ping = link */
   var options = {
     "capture.ping": "link",
@@ -8686,14 +8592,14 @@ async function test_capture_anchor_ping() {
   var doc = await readFileAsDocument(indexBlob);
   var a = doc.querySelector('a');
   assert(!a.hasAttribute('ping'));
-}
+});
 
 /**
  * Check if option works
  *
  * capture.image
  */
-async function test_capture_image() {
+it('test_capture_image', async function () {
   /* capture.image = save */
   var options = {
     "capture.image": "save",
@@ -8882,14 +8788,14 @@ async function test_capture_image() {
   assert(doc.querySelectorAll('img').length === 0);
   assert(doc.querySelectorAll('picture').length === 0);
   assert(doc.querySelectorAll('input').length === 0);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.audio
  */
-async function test_capture_audio() {
+it('test_capture_audio', async function () {
   // Use headless for most test cases since loading audio in the browser is slow.
 
   /* capture.audio = save (headless) */
@@ -9049,14 +8955,14 @@ async function test_capture_audio() {
   assert(sourceElems.length === 0);
   var trackElems = doc.querySelectorAll('track');
   assert(trackElems.length === 0);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.video
  */
-async function test_capture_video() {
+it('test_capture_video', async function () {
   // Use headless for most test cases since loading video in the browser is slow.
 
   /* capture.video = save (headless) */
@@ -9221,14 +9127,14 @@ async function test_capture_video() {
   assert(sourceElems.length === 0);
   var trackElems = doc.querySelectorAll('track');
   assert(trackElems.length === 0);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.canvas
  */
-async function test_capture_canvas() {
+it('test_capture_canvas', async function () {
   /* capture.canvas = save */
   var options = {
     "capture.canvas": "save",
@@ -9353,14 +9259,14 @@ async function test_capture_canvas() {
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(!shadow.querySelector('canvas'));
-}
+});
 
 /**
  * Check if option works
  *
  * capture.embed
  */
-async function test_capture_embed() {
+it('test_capture_embed', async function () {
   /* capture.embed = save */
   var options = {
     "capture.embed": "save",
@@ -9432,14 +9338,14 @@ async function test_capture_embed() {
   var doc = await readFileAsDocument(indexBlob);
   var embed = doc.querySelector('embed');
   assert(!embed);
-}
+});
 
 /**
  * Headlessly capture embed content like a frame.
  *
  * capture.embed
  */
-async function test_capture_embed_frame() {
+it('test_capture_embed_frame', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.embed": "save",
@@ -9497,14 +9403,14 @@ async function test_capture_embed_frame() {
 <style>img { width: 60px; }</style>
 <p>Frame page content.</p>
 <img src="./red.bmp">`);
-}
+});
 
 /**
  * about: pages should be kept as-is.
  *
  * capture.embed
  */
-async function test_capture_embed_frame_about() {
+it('test_capture_embed_frame_about', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.embed": "save",
@@ -9524,14 +9430,14 @@ async function test_capture_embed_frame_about() {
   assert(frames[1].getAttribute('src') === "about:blank?foo=bar#baz");
   assert(frames[2].getAttribute('src') === "about:srcdoc");
   assert(frames[3].getAttribute('src') === "about:invalid");
-}
+});
 
 /**
  * Check if circular embed referencing is handled correctly like a frame.
  *
  * capture.embed
  */
-async function test_capture_embed_circular() {
+it('test_capture_embed_circular', async function () {
   /* capture.saveAs = zip */
   // link to corresponding downloaded frame file
   var options = {
@@ -9598,14 +9504,14 @@ async function test_capture_embed_circular() {
   // index.html
   var frame = frameDoc.querySelector('embed');
   assert(frame.getAttribute('src') === `urn:scrapbook:download:circular:url:${localhost}/capture_embed_circular/index.html`);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.object
  */
-async function test_capture_object() {
+it('test_capture_object', async function () {
   var options = {
     "capture.frameRename": false,
     "capture.saveResourcesSequentially": true,
@@ -9695,14 +9601,14 @@ async function test_capture_object() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(!doc.querySelector('object'));
-}
+});
 
 /**
  * Headlessly capture object content like a frame.
  *
  * capture.object
  */
-async function test_capture_object_frame() {
+it('test_capture_object_frame', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.object": "save",
@@ -9760,14 +9666,14 @@ async function test_capture_object_frame() {
 <style>img { width: 60px; }</style>
 <p>Frame page content.</p>
 <img src="./red.bmp">`);
-}
+});
 
 /**
  * about: pages should be kept as-is.
  *
  * capture.object
  */
-async function test_capture_object_frame_about() {
+it('test_capture_object_frame_about', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.object": "save",
@@ -9787,14 +9693,14 @@ async function test_capture_object_frame_about() {
   assert(frames[1].getAttribute('data') === "about:blank?foo=bar#baz");
   assert(frames[2].getAttribute('data') === "about:srcdoc");
   assert(frames[3].getAttribute('data') === "about:invalid");
-}
+});
 
 /**
  * Check if circular object referencing is handled correctly like a frame.
  *
  * capture.object
  */
-async function test_capture_object_circular() {
+it('test_capture_object_circular', async function () {
   /* capture.saveAs = zip */
   // link to corresponding downloaded frame file
   var options = {
@@ -9861,14 +9767,14 @@ async function test_capture_object_circular() {
   // index.html
   var frame = frameDoc.querySelector('object');
   assert(frame.getAttribute('data') === `urn:scrapbook:download:circular:url:${localhost}/capture_object_circular/index.html`);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.applet
  */
-async function test_capture_applet() {
+it('test_capture_applet', async function () {
   /* capture.applet = save */
   var options = {
     "capture.applet": "save",
@@ -9954,7 +9860,7 @@ async function test_capture_applet() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(!doc.querySelector('applet'));
-}
+});
 
 /**
  * Check if template content is captured.
@@ -9967,7 +9873,7 @@ async function test_capture_applet() {
  *
  * capturer.captureDocument
  */
-async function test_capture_template() {
+it('test_capture_template', async function () {
   /* tab */
   var blob = await capture({
     url: `${localhost}/capture_template/template.html`,
@@ -9995,14 +9901,14 @@ async function test_capture_template() {
   assert(doc.querySelector('template').innerHTML.trim() === `\
 <img src="./nonexist.bmp">
 <a href="./nonexist.html">anchor</a>`);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.formStatus
  */
-async function test_capture_formStatus() {
+it('test_capture_formStatus', async function () {
   /* capture.formStatus = save-all */
   var options = {
     "capture.formStatus": "save-all",
@@ -10267,14 +10173,14 @@ async function test_capture_formStatus() {
   assert(doc.querySelector('textarea').textContent === "");
   assert(!doc.querySelectorAll('option')[0].hasAttribute('selected'));
   assert(doc.querySelectorAll('option')[1].hasAttribute('selected'));
-}
+});
 
 /**
  * Check if SVG can be captured correctly.
  *
  * capturer.captureDocument
  */
-async function test_capture_svg() {
+it('test_capture_svg', async function () {
   /* embed.html */
   var options = {
     "capture.image": "save",
@@ -10332,14 +10238,14 @@ async function test_capture_svg() {
   assert(doc.querySelectorAll('svg use')[1].getAttribute('xlink:href') === `#img2`);
   assert(doc.querySelectorAll('svg script')[0].getAttribute('href') === `script.js`);
   assert(doc.querySelectorAll('svg script')[1].getAttribute('xlink:href') === `script2.js`);
-}
+});
 
 /**
  * Check if MathML can be captured correctly.
  *
  * capturer.captureDocument
  */
-async function test_capture_mathml() {
+it('test_capture_mathml', async function () {
   /* embed.html */
   var options = {
     "capture.image": "save",
@@ -10359,14 +10265,14 @@ async function test_capture_mathml() {
   assert(doc.querySelectorAll('math')[0].getAttribute('href') === `${localhost}/capture_mathml/resources/green.bmp`);
   assert(doc.querySelectorAll('math msup')[0].getAttribute('href') === `${localhost}/capture_mathml/resources/red.bmp`);
   assert(doc.querySelectorAll('math mi')[2].getAttribute('href') === `${localhost}/capture_mathml/resources/blue.bmp`);
-}
+});
 
 /**
  * Check if <style> or <script> is in another namespace.
  *
  * capturer.captureDocument
  */
-async function test_capture_namespace() {
+it('test_capture_namespace', async function () {
   var blob = await capture({
     url: `${localhost}/capture_namespace/namespace.html`,
     options: baseOptions,
@@ -10388,14 +10294,14 @@ async function test_capture_namespace() {
   assert(scriptElems[1].innerHTML.trim() === `console.log("head > non-html script")`);
   assert(scriptElems[2].innerHTML.trim() === `console.log("svg &gt; svg script")`);
   assert(scriptElems[3].innerHTML.trim() === `console.log("svg &gt; html script")`);
-}
+});
 
 /**
  * Escape bad tags for security
  *
  * capturer.captureDocument
  */
-async function test_capture_invalid_tags() {
+it('test_capture_invalid_tags', async function () {
   var options = {
     "capture.style": "save",
     "capture.script": "save",
@@ -10414,14 +10320,14 @@ async function test_capture_invalid_tags() {
   assert(doc.querySelector('xmp').textContent.trim() === String.raw`Explode <\/xmp> with a bomb!<script>alert("bomb");</script>`);
   assert(doc.querySelector('style').textContent.trim() === String.raw`/*Explode <\/style> with a bomb!<script>alert("bomb");</script>*/`);
   assert(doc.querySelector('script').textContent.trim() === String.raw`/*Explode <\/script> with a bomb!<script>alert("bomb");<\/script>*/`);
-}
+});
 
 /**
  * Check if no error when parent is to be removed and child is to be captured.
  *
  * capturer.captureDocument
  */
-async function test_capture_recursive() {
+it('test_capture_recursive', async function () {
   var options = {
     "capture.image": "remove",
     "capture.script": "save",
@@ -10443,14 +10349,14 @@ async function test_capture_recursive() {
   assert(!doc.querySelector('picture'));
   assert(!doc.querySelector('img'));
   assert(!doc.querySelector('script'));
-}
+});
 
 /**
  * Check if removeHidden works correctly.
  *
  * capturer.removeHidden
  */
-async function test_capture_removeHidden() {
+it('test_capture_removeHidden', async function () {
   /* capture.removeHidden = undisplayed */
   var options = {
     "capture.removeHidden": "undisplayed",
@@ -10515,14 +10421,14 @@ async function test_capture_removeHidden() {
   assert(doc.querySelector('body'));
   assert(doc.querySelector('noscript'));
   assert(doc.querySelector('template'));
-}
+});
 
 /**
  * Check if "cite" attribute is correctly rewritten
  *
  * capturer.captureDocument
  */
-async function test_capture_cite() {
+it('test_capture_cite', async function () {
   var blob = await capture({
     url: `${localhost}/capture_cite/cite.html`,
     options: baseOptions,
@@ -10536,14 +10442,14 @@ async function test_capture_cite() {
   assert(doc.querySelector('blockquote').getAttribute('cite') === `${localhost}/capture_cite/test.html`);
   assert(doc.querySelector('ins').getAttribute('cite') === `${localhost}/capture_cite/test.html`);
   assert(doc.querySelector('del').getAttribute('cite') === `${localhost}/capture_cite/test.html`);
-}
+});
 
 /**
  * Check if option works
  *
  * capture.preload
  */
-async function test_capture_preload() {
+it('test_capture_preload', async function () {
   /* capture.preload = blank */
   var options = {
     "capture.preload": "blank",
@@ -10587,14 +10493,14 @@ async function test_capture_preload() {
   assert(!doc.querySelector('link[rel="modulepreload"]'));
   assert(!doc.querySelector('link[rel="dns-prefetch"]'));
   assert(!doc.querySelector('link[rel="preconnect"]'));
-}
+});
 
 /**
  * Check if option works
  *
  * capture.prefetch
  */
-async function test_capture_prefetch() {
+it('test_capture_prefetch', async function () {
   /* capture.prefetch = blank */
   var options = {
     "capture.prefetch": "blank",
@@ -10631,12 +10537,12 @@ async function test_capture_prefetch() {
   var doc = await readFileAsDocument(indexBlob);
   assert(!doc.querySelector('link[rel="prefetch"]'));
   assert(!doc.querySelector('link[rel="prerender"]'));
-}
+});
 
 /**
  * Check handling of crossorigin attribute
  */
-async function test_capture_crossorigin() {
+it('test_capture_crossorigin', async function () {
   /* save */
   var options = {
     "capture.image": "save",
@@ -10715,12 +10621,12 @@ async function test_capture_crossorigin() {
   assert(doc.querySelector('img').getAttribute('crossorigin') === '');
   assert(doc.querySelector('audio').getAttribute('crossorigin') === '');
   assert(doc.querySelector('video').getAttribute('crossorigin') === '');
-}
+});
 
 /**
  * Check handling of integrity attribute
  */
-async function test_capture_integrity() {
+it('test_capture_integrity', async function () {
   /* save */
   var options = {
     "capture.style": "save",
@@ -10773,14 +10679,14 @@ async function test_capture_integrity() {
 
   assert(!doc.querySelector('link').hasAttribute('integrity'));
   assert(!doc.querySelector('script').hasAttribute('integrity'));
-}
+});
 
 /**
  * Check if option works
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer() {
+it('test_capture_referrer', async function () {
   /* capture.referrerPolicy = no-referrer */
   var options = {
     "capture.referrerPolicy": "no-referrer",
@@ -10908,7 +10814,7 @@ async function test_capture_referrer() {
   var file = zip.file('referrer2.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost}/`);
-}
+});
 
 /**
  * Check if referrer spoofing works
@@ -10916,7 +10822,7 @@ async function test_capture_referrer() {
  * capture.referrerSpoofSource
  * capture.referrerPolicy
  */
-async function test_capture_referrer_spoof() {
+it('test_capture_referrer_spoof', async function () {
   /* capture.referrerSpoofSource = false */
   var options = {
     "capture.referrerPolicy": "unsafe-url",
@@ -10967,7 +10873,7 @@ async function test_capture_referrer_spoof() {
   var file = zip.file('referrer2.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost2}/`);
-}
+});
 
 /**
  * Check if referrerpolicy attribute and rel=noreferrer are honored.
@@ -10975,7 +10881,7 @@ async function test_capture_referrer_spoof() {
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer_attr() {
+it('test_capture_referrer_attr', async function () {
   var options = {
     "capture.referrerPolicy": "unsafe-url",
     "capture.downLink.file.mode": "url",
@@ -11034,7 +10940,7 @@ async function test_capture_referrer_attr() {
   var file = zip.file('area_rel.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === ``);
-}
+});
 
 /**
  * Check if capture.referrerPolicy with "+"-prefix takes higher priority
@@ -11042,7 +10948,7 @@ async function test_capture_referrer_attr() {
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer_attr_force() {
+it('test_capture_referrer_attr_force', async function () {
   var options = {
     "capture.referrerPolicy": "+unsafe-url",
     "capture.downLink.file.mode": "url",
@@ -11101,7 +11007,7 @@ async function test_capture_referrer_attr_force() {
   var file = zip.file('area_rel.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost}/capture_referrer_attr/index.html`);
-}
+});
 
 /**
  * Check if meta[name="referrer"] is honored.
@@ -11109,7 +11015,7 @@ async function test_capture_referrer_attr_force() {
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer_doc() {
+it('test_capture_referrer_doc', async function () {
   var options = {
     "capture.referrerPolicy": "unsafe-url",
     "capture.downLink.file.mode": "url",
@@ -11267,7 +11173,7 @@ async function test_capture_referrer_doc() {
   var file = zip.file('math_msup.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost}/`);
-}
+});
 
 /**
  * Check if capture.referrerPolicy with "+"-prefix takes higher priority
@@ -11275,7 +11181,7 @@ async function test_capture_referrer_doc() {
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer_doc_force() {
+it('test_capture_referrer_doc_force', async function () {
   var options = {
     "capture.referrerPolicy": "+unsafe-url",
     "capture.downLink.file.mode": "url",
@@ -11358,14 +11264,14 @@ async function test_capture_referrer_doc_force() {
   var file = zip.file('math_msup.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost}/capture_referrer_doc/index.html`);
-}
+});
 
 /**
  * Check referrer policy for cross-origin external and imported CSS.
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer_cross_origin() {
+it('test_capture_referrer_cross_origin', async function () {
   for (const rewriteCss of ["url", "tidy", "match"]) {
     console.debug("capture.rewriteCss = %s", rewriteCss);
 
@@ -11411,14 +11317,14 @@ async function test_capture_referrer_cross_origin() {
     var text = (await readFileAsText(await file.async('blob'))).trim();
     assert(text === `:root { --referrer: "${localhost2}/capture_referrer_cross_origin/css_link.py"; }`);
   }
-}
+});
 
 /**
  * Check if dynamic meta[name="referrer"] is honored.
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer_dynamic() {
+it('test_capture_referrer_dynamic', async function () {
   var options = {
     "capture.referrerPolicy": "unsafe-url",
     "capture.downLink.file.mode": "url",
@@ -11441,14 +11347,14 @@ async function test_capture_referrer_dynamic() {
   var file = zip.file('css3.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === ``);
-}
+});
 
 /**
  * meta[name="referrer"] in a shadowRoot should be ignored.
  *
  * capture.referrerPolicy
  */
-async function test_capture_referrer_dynamic_shadow() {
+it('test_capture_referrer_dynamic_shadow', async function () {
   var options = {
     "capture.referrerPolicy": "unsafe-url",
     "capture.downLink.file.mode": "url",
@@ -11474,14 +11380,14 @@ async function test_capture_referrer_dynamic_shadow() {
   var file = zip.file('css3.py');
   var text = (await readFileAsText(await file.async('blob'))).trim();
   assert(text === `${localhost}/capture_referrer_dynamic_shadow/index.html`);
-}
+});
 
 /**
  * Check if shadow DOMs (possibly nested) can be captured correctly.
  *
  * capturer.captureDocument
  */
-async function test_capture_shadowRoot() {
+it('test_capture_shadowRoot', async function () {
   /* capture.shadowDom = save */
   var options = {
     "capture.shadowDom": "save",
@@ -11539,14 +11445,14 @@ async function test_capture_shadowRoot() {
 
   assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
   assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
-}
+});
 
 /**
  * Check for shadow DOM auto-generated via custom elements.
  *
  * capturer.captureDocument
  */
-async function test_capture_shadowRoot_custom() {
+it('test_capture_shadowRoot_custom', async function () {
   var options = {
     "capture.shadowDom": "save",
     "capture.image": "save",
@@ -11592,14 +11498,14 @@ async function test_capture_shadowRoot_custom() {
 
   assert(!doc.querySelector('[data-scrapbook-shadowroot]'));
   assert(!doc.querySelector('script[data-scrapbook-elem="basic-loader"]'));
-}
+});
 
 /**
  * Handle custom elements registry.
  *
  * capturer.captureDocument
  */
-async function test_capture_custom_elements() {
+it('test_capture_custom_elements', async function () {
 	/* capture.script = save */
   var options = {
     "capture.script": "save",
@@ -11661,7 +11567,7 @@ async function test_capture_custom_elements() {
   var doc = await readFileAsDocument(indexBlob);
   var value = doc.querySelector(`script[data-scrapbook-elem="custom-elements-loader"]`).textContent.trim();
   assert(value.match(rawRegex`${'^'}(function (names) {${'.+'}})(["custom-subelem","custom-elem"])${'$'}`));
-}
+});
 
 /**
  * Check if option works
@@ -11669,7 +11575,7 @@ async function test_capture_custom_elements() {
  * capture.downLink.file.mode
  * capture.downLink.file.extFilter
  */
-async function test_capture_downLink_file() {
+it('test_capture_downLink_file', async function () {
   /* header */
   var options = {
     "capture.downLink.file.mode": "header",
@@ -11815,14 +11721,14 @@ async function test_capture_downLink_file() {
   assert(anchors[6].getAttribute('href') === `${localhost}/capture_downLink_file/filename.py`);
   assert(anchors[7].getAttribute('href') === `${localhost}/capture_downLink_file/nofilename.py`);
   assert(anchors[8].getAttribute('href') === `${localhost}/capture_downLink_file/redirect.pyr`);
-}
+});
 
 /**
  * Check extFilter syntax
  *
  * capture.downLink.file.extFilter
  */
-async function test_capture_downLink_file_extFilter() {
+it('test_capture_downLink_file_extFilter', async function () {
   // a rule each line
   // match URL (*.py) but download using resolved filename using header (*.txt)
   var options = {
@@ -12197,14 +12103,14 @@ mime:/.*/i`,
   assert(!zip.file("nofilename.py"));
   assert(!zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 1);
-}
+});
 
 /**
  * Check urlFilter syntax
  *
  * capture.downLink.urlFilter
  */
-async function test_capture_downLink_file_urlFilter() {
+it('test_capture_downLink_file_urlFilter', async function () {
   // a rule each line
   // plain text rule
   // match original URL
@@ -12326,14 +12232,14 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
   assert(!zip.file("nofilename.py"));
   assert(zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 5);
-}
+});
 
 /**
  * Check basic in-depth capture
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth() {
+it('test_capture_downLink_indepth', async function () {
   /* depth = null */
   var options = {
     "capture.downLink.doc.depth": null,
@@ -12687,7 +12593,7 @@ async function test_capture_downLink_indepth() {
     ]
   };
   assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
-}
+});
 
 /**
  * Check no in-depth for singleHtml
@@ -12695,7 +12601,7 @@ async function test_capture_downLink_indepth() {
  * capture.downLink.doc.depth
  * capture.saveAs
  */
-async function test_capture_downLink_indepth_singleHtml() {
+it('test_capture_downLink_indepth_singleHtml', async function () {
   /* depth = 0 */
   var options = {
     "capture.downLink.doc.depth": 0,
@@ -12733,7 +12639,7 @@ async function test_capture_downLink_indepth_singleHtml() {
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-2.html#222`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
-}
+});
 
 /**
  * Check downLink.file should be skipped for doc if downLink.doc.depth is set
@@ -12742,7 +12648,7 @@ async function test_capture_downLink_indepth_singleHtml() {
  * capture.downLink.file.extFilter
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_skip_file() {
+it('test_capture_downLink_indepth_skip_file', async function () {
   var options = {
     "capture.downLink.file.mode": "url",
     "capture.downLink.file.extFilter": `bmp, html`,
@@ -12888,7 +12794,7 @@ async function test_capture_downLink_indepth_skip_file() {
   // skip downLinkFile even if depth exceeds
   assert(!zip.file('linked2-1.html'));
   assert(!zip.file('linked2-2.html'));
-}
+});
 
 /**
  * Check urlFilter for doc
@@ -12896,7 +12802,7 @@ async function test_capture_downLink_indepth_skip_file() {
  * capture.downLink.doc.depth
  * capture.downLink.doc.urlFilter
  */
-async function test_capture_downLink_indepth_urlFilter() {
+it('test_capture_downLink_indepth_urlFilter', async function () {
   /* plain URLs */
   var options = {
     "capture.downLink.doc.depth": 2,
@@ -12986,14 +12892,14 @@ ${localhost}/capture_downLink_indepth/linked2-1.html`,
   assert(!zip.file('linked2-1.html'));
 
   assert(!zip.file('linked2-2.html'));
-}
+});
 
 /**
  * Check link rebuild for non-HTML pages (XHTML and SVG)
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_nonHtml() {
+it('test_capture_downLink_indepth_nonHtml', async function () {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
@@ -13024,14 +12930,14 @@ async function test_capture_downLink_indepth_nonHtml() {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `linked2.html`);
   assert(doc.querySelectorAll('a')[1].getAttribute('xlink:href') === `linked3.html`);
-}
+});
 
 /**
  * A page linked from a frame should have same depth as from the main page.
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_frame() {
+it('test_capture_downLink_indepth_frame', async function () {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
@@ -13057,7 +12963,7 @@ async function test_capture_downLink_indepth_frame() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc);
-}
+});
 
 /**
  * Check frame renaming for deep pages.
@@ -13065,7 +12971,7 @@ async function test_capture_downLink_indepth_frame() {
  * capture.downLink.doc.depth
  * capture.frameRename
  */
-async function test_capture_downLink_indepth_renaming() {
+it('test_capture_downLink_indepth_renaming', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.downLink.doc.depth": 1,
@@ -13112,14 +13018,14 @@ async function test_capture_downLink_indepth_renaming() {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `frame1.html`);
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `frame2.html`);
-}
+});
 
 /**
  * Check links in shadow DOMs are rebuilt
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_shadow() {
+it('test_capture_downLink_indepth_shadow', async function () {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
@@ -13146,14 +13052,14 @@ async function test_capture_downLink_indepth_shadow() {
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(shadow.querySelectorAll('a')[0].getAttribute('href') === `linked2.html#222`);
-}
+});
 
 /**
  * Check links handling for meta refresh
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_metaRefresh() {
+it('test_capture_downLink_indepth_metaRefresh', async function () {
   /* depth = 1 */
   var options = {
     "capture.downLink.doc.depth": 1,
@@ -13227,14 +13133,14 @@ async function test_capture_downLink_indepth_metaRefresh() {
   assert(doc.querySelectorAll('meta[http-equiv="refresh"]')[0].getAttribute('content') === `0; url=linked1-2.html`);
 
   assert(zip.file('refreshed.html'));
-}
+});
 
 /**
  * Check links handling for redirect
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_redirect() {
+it('test_capture_downLink_indepth_redirect', async function () {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
@@ -13251,14 +13157,14 @@ async function test_capture_downLink_indepth_redirect() {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `redirected.html#in-depth`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_downLink_indepth_redirect/linked1-2.pyr#in-depth`);
-}
+});
 
 /**
  * Check URL should be removed for data: in index.json
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_datauri() {
+it('test_capture_downLink_indepth_datauri', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.downLink.doc.depth": 0,
@@ -13327,14 +13233,14 @@ async function test_capture_downLink_indepth_datauri() {
     ]
   };
   assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
-}
+});
 
 /**
  * Check URL should be removed for blob: in index.json
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_blob() {
+it('test_capture_downLink_indepth_blob', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.downLink.doc.depth": 0,
@@ -13406,14 +13312,14 @@ async function test_capture_downLink_indepth_blob() {
     ]
   };
   assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
-}
+});
 
 /**
  * Check URL should be kept as-is for about: URLs.
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_about() {
+it('test_capture_downLink_indepth_about', async function () {
   var options = {
     "capture.downLink.doc.depth": 1,
   };
@@ -13474,7 +13380,7 @@ async function test_capture_downLink_indepth_about() {
     ]
   };
   assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
-}
+});
 
 /**
  * An attachment page should be download as a file and not captured.
@@ -13483,7 +13389,7 @@ async function test_capture_downLink_indepth_about() {
  * capture.downLink.file.mode
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_attachment() {
+it('test_capture_downLink_indepth_attachment', async function () {
   /* downLink */
   var options = {
     "capture.downLink.file.mode": "header",
@@ -13646,7 +13552,7 @@ async function test_capture_downLink_indepth_attachment() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('img[src="red.bmp"]'));
-}
+});
 
 /**
  * Check option capture.downLink.urlExtra
@@ -13655,7 +13561,7 @@ async function test_capture_downLink_indepth_attachment() {
  * capture.downLink.file.mode
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_urlExtra() {
+it('test_capture_downLink_indepth_urlExtra', async function () {
   var options = {
     "capture.downLink.file.extFilter": "jpg",
     "capture.downLink.doc.urlFilter": "/(?!)/",
@@ -13878,14 +13784,14 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
     ]
   };
   assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
-}
+});
 
 /**
  * Check if case is preserved for the paths in index.json
  *
  * capture.downLink.doc.depth
  */
-async function test_capture_downLink_indepth_case() {
+it('test_capture_downLink_indepth_case', async function () {
   var options = {
     "capture.downLink.doc.depth": 1,
     "capture.downLink.file.mode": "url",
@@ -13962,7 +13868,7 @@ async function test_capture_downLink_indepth_case() {
     ]
   };
   assert(await readFileAsText(sitemapBlob) === JSON.stringify(expectedData, null, 1));
-}
+});
 
 /**
  * Check if linked blob URL files and pages can be correctly captured.
@@ -13970,7 +13876,7 @@ async function test_capture_downLink_indepth_case() {
  * capture.downLink.file.mode
  * capture.downLink.file.extFilter
  */
-async function test_capture_downLink_blob() {
+it('test_capture_downLink_blob', async function () {
   var options = {
     "capture.downLink.file.mode": "header",
     "capture.downLink.file.extFilter": `bmp`,
@@ -14001,7 +13907,7 @@ async function test_capture_downLink_blob() {
 
   var imgFn1 = doc.querySelector('img').getAttribute('src');
   assert(imgFn1 === imgFn);
-}
+});
 
 /**
  * Check if blob URLs in a deep page can be correctly captured.
@@ -14009,11 +13915,10 @@ async function test_capture_downLink_blob() {
  * capture.downLink.file.mode
  * capture.downLink.file.extFilter
  */
-async function test_capture_downLink_blob_deep() {
-  if (userAgent.is('firefox')) {
-    throw new TestSkipError(`Fetching a blob URL generated in a page from an extension page is not allowed in Firefox`);
-  }
-
+itToFailIf(
+  userAgent.is('firefox'),
+  'Fetching a blob URL generated in a page from an extension page is not allowed in Firefox',
+)('test_capture_downLink_blob_deep', async function () {
   var options = {
     "capture.downLink.file.mode": "header",
     "capture.downLink.file.extFilter": `bmp`,
@@ -14056,7 +13961,7 @@ async function test_capture_downLink_blob_deep() {
 
   var imgFn11 = doc.querySelector('img').getAttribute('src');
   assert(imgFn11 === imgFn);
-}
+});
 
 /**
  * Check if option works
@@ -14066,7 +13971,7 @@ async function test_capture_downLink_blob_deep() {
  * capturer.captureFile
  * capturer.captureBookmark
  */
-async function test_capture_record_meta() {
+it('test_capture_record_meta', async function () {
   /* html; +capture.recordDocumentMeta */
   var options = {
     "capture.recordDocumentMeta": true,
@@ -14170,7 +14075,7 @@ async function test_capture_record_meta() {
   assert(!html.hasAttribute('data-scrapbook-source'));
   assert(!html.hasAttribute('data-scrapbook-create'));
   assert(!html.hasAttribute('data-scrapbook-type'));
-}
+});
 
 /**
  * Check if hash is recorded in main document and NOT in frames
@@ -14180,7 +14085,7 @@ async function test_capture_record_meta() {
  * capturer.captureFile
  * capturer.captureBookmark
  */
-async function test_capture_record_meta_hash() {
+it('test_capture_record_meta_hash', async function () {
   /* html */
   var options = {
     "capture.recordDocumentMeta": true,
@@ -14258,7 +14163,7 @@ async function test_capture_record_meta_hash() {
   });
   var doc = await readFileAsDocument(blob);
   assert(doc.documentElement.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html#abc`);
-}
+});
 
 /**
  * The recorded URL should be the redirected one.
@@ -14268,7 +14173,7 @@ async function test_capture_record_meta_hash() {
  * capturer.captureFile
  * capturer.captureBookmark
  */
-async function test_capture_record_meta_redirect() {
+it('test_capture_record_meta_redirect', async function () {
   /* html; +capture.recordDocumentMeta */
   var options = {
     "capture.recordDocumentMeta": true,
@@ -14284,7 +14189,7 @@ async function test_capture_record_meta_redirect() {
   var html = doc.documentElement;
 
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.html#abc`);
-}
+});
 
 /**
  * Record metadata in index.html rather than in *.xhtml
@@ -14292,7 +14197,7 @@ async function test_capture_record_meta_redirect() {
  * capture.recordDocumentMeta
  * capturer.captureDocument
  */
-async function test_capture_record_meta_xhtml() {
+it('test_capture_record_meta_xhtml', async function () {
   /* html; +capture.recordDocumentMeta */
   var options = {
     "capture.recordDocumentMeta": true,
@@ -14319,7 +14224,7 @@ async function test_capture_record_meta_xhtml() {
   assert(html.getAttribute('data-scrapbook-source') === `${localhost}/capture_record/meta.xhtml`);
   assert(!html.hasAttribute('data-scrapbook-create'));
   assert(!html.getAttribute('data-scrapbook-type'));
-}
+});
 
 /**
  * Check if removed nodes are recorded
@@ -14327,7 +14232,7 @@ async function test_capture_record_meta_xhtml() {
  * capture.recordRewrites
  * capturer.captureDocument
  */
-async function test_capture_record_nodes_removed() {
+it('test_capture_record_nodes_removed', async function () {
   var options = {
     "capture.image": "remove",
     "capture.favicon": "remove",
@@ -14523,7 +14428,7 @@ async function test_capture_record_nodes_removed() {
   assert(!body.innerHTML.match(
     regex`<!--scrapbook-orig-node-${timeId}=<noscript[^>]*?>[\s\S]*?</noscript>-->`
   ));
-}
+});
 
 /**
  * Check for removed source nodes in picture, audio, and video
@@ -14531,7 +14436,7 @@ async function test_capture_record_nodes_removed() {
  * capture.recordRewrites
  * capturer.captureDocument
  */
-async function test_capture_record_nodes_removed_source() {
+it('test_capture_record_nodes_removed_source', async function () {
   var options = {
     "capture.image": "save-current",
     "capture.audio": "save-current",
@@ -14587,7 +14492,7 @@ async function test_capture_record_nodes_removed_source() {
   assert(!doc.querySelector('video').innerHTML.match(
     regex`<!--scrapbook-orig-node-${timeId}=<source[^>]*?>-->`
   ));
-}
+});
 
 /**
  * Check if added nodes are recorded.
@@ -14595,7 +14500,7 @@ async function test_capture_record_nodes_removed_source() {
  * capture.recordRewrites
  * capturer.captureDocument
  */
-async function test_capture_record_nodes_added() {
+it('test_capture_record_nodes_added', async function () {
   var options = {
     "capture.image": "save-current",
     "capture.audio": "save-current",
@@ -14655,7 +14560,7 @@ async function test_capture_record_nodes_added() {
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
   assert(doc.querySelector(`head:not([data-scrapbook-orig-null-node-${timeId}])`));
   assert(doc.querySelector(`meta[charset="UTF-8"]:not([data-scrapbook-orig-null-node-${timeId}])`));
-}
+});
 
 /**
  * Check if changed attributes are recorded
@@ -14663,7 +14568,7 @@ async function test_capture_record_nodes_added() {
  * capture.recordRewrites
  * capturer.captureDocument
  */
-async function test_capture_record_attrs() {
+it('test_capture_record_attrs', async function () {
   var options = {
     "capture.frame": "save",
     "capture.styleInline": "blank",
@@ -14717,7 +14622,7 @@ async function test_capture_record_attrs() {
   assert(!doc.querySelector('input[type="text"]').hasAttribute(`data-scrapbook-orig-null-attr-value-${timeId}`));
   assert(!doc.querySelector('textarea').hasAttribute(`data-scrapbook-orig-textcontent-${timeId}`));
   assert(!doc.querySelector('select option').hasAttribute(`data-scrapbook-orig-null-attr-selected-${timeId}`));
-}
+});
 
 /**
  * Check for changed attributes: save case
@@ -14726,7 +14631,7 @@ async function test_capture_record_attrs() {
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_attrs_save() {
+it('test_capture_record_attrs_save', async function () {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -14898,7 +14803,7 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url("null.bmp"); }`);
 @font-face { font-family: myFont; src: url("null.woff"); }
 p { background-image: url("null.bmp"); }`);
   assert(doc.querySelector('div').getAttribute('style') === `background: url("null.bmp");`);
-}
+});
 
 /**
  * Check for changed attributes: blank case
@@ -14908,7 +14813,7 @@ p { background-image: url("null.bmp"); }`);
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_attrs_blank() {
+it('test_capture_record_attrs_blank', async function () {
   var options = {
     "capture.image": "blank",
     "capture.imageBackground": "blank",
@@ -15016,7 +14921,7 @@ p { background-image: /*scrapbook-orig-url="./null.bmp"*/url(""); }`);
 @font-face { font-family: myFont; src: url(""); }
 p { background-image: url(""); }`);
   assert(doc.querySelector('div').getAttribute('style') === `background: url("");`);
-}
+});
 
 /**
  * Check for changed attributes: save-current case
@@ -15026,7 +14931,7 @@ p { background-image: url(""); }`);
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_attrs_save_current() {
+it('test_capture_record_attrs_save_current', async function () {
   var options = {
     "capture.image": "save-current",
     "capture.audio": "save-current",
@@ -15088,7 +14993,7 @@ async function test_capture_record_attrs_save_current() {
   assert(!doc.querySelector('video[src]').hasAttribute(`data-scrapbook-orig-attr-poster-${timeId}`));
   assert(!doc.querySelectorAll('video')[1].hasAttribute(`data-scrapbook-orig-null-attr-src-${timeId}`));
   assert(!doc.querySelectorAll('video')[1].hasAttribute(`data-scrapbook-orig-attr-src-${timeId}`));
-}
+});
 
 /**
  * Check for changed attributes: for base
@@ -15097,7 +15002,7 @@ async function test_capture_record_attrs_save_current() {
  * capturer.captureDocument
  * capturer.DocumentCssHandler
  */
-async function test_capture_record_attrs_base() {
+it('test_capture_record_attrs_base', async function () {
   var options = {
     "capture.recordRewrites": true,
   };
@@ -15131,7 +15036,7 @@ async function test_capture_record_attrs_base() {
   var timeId = doc.documentElement.getAttribute('data-scrapbook-create');
 
   assert(doc.querySelector('base').getAttribute(`data-scrapbook-orig-attr-href-${timeId}`) === `./null.html`);
-}
+});
 
 /**
  * Check if option works: for normal URL
@@ -15142,7 +15047,7 @@ async function test_capture_record_attrs_base() {
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri() {
+it('test_capture_linkUnsavedUri', async function () {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -15202,7 +15107,7 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
   assert(doc.querySelector('img').getAttribute('src') === `${localhost}/capture_linkUnsavedUri/nonexist.bmp`);
   assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `${localhost}/capture_linkUnsavedUri/nonexist.bmp 1x, ${localhost}/capture_linkUnsavedUri/nonexist.bmp 2x`);
   assert(doc.querySelector('iframe').getAttribute('src') === `${localhost}/capture_linkUnsavedUri/nonexist.html`);
-}
+});
 
 /**
  * Test for downLink
@@ -15210,7 +15115,7 @@ p { background-image: url("${localhost}/capture_linkUnsavedUri/nonexist.bmp"); }
  * capture.linkUnsavedUri
  * capture.downLink.file.mode
  */
-async function test_capture_linkUnsavedUri_downLink() {
+it('test_capture_linkUnsavedUri_downLink', async function () {
   var options = {
     "capture.downLink.file.extFilter": "txt",
     "capture.downLink.urlFilter": "",
@@ -15272,7 +15177,7 @@ async function test_capture_linkUnsavedUri_downLink() {
 
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.txt`);
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_linkUnsavedUri/nonexist.css`);
-}
+});
 
 /**
  * Test for "" URL:
@@ -15284,7 +15189,7 @@ async function test_capture_linkUnsavedUri_downLink() {
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri_empty() {
+it('test_capture_linkUnsavedUri_empty', async function () {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -15322,7 +15227,7 @@ p { background-image: url(""); }`);
   assert(doc.querySelector('img[srcset]').getAttribute('srcset') === ``);
   assert(doc.querySelector('iframe').getAttribute('src') === ``);
   assert(doc.querySelector('a').getAttribute('href') === ``);
-}
+});
 
 /**
  * Test for hash URL:
@@ -15334,7 +15239,7 @@ p { background-image: url(""); }`);
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri_hash() {
+it('test_capture_linkUnsavedUri_hash', async function () {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -15372,7 +15277,7 @@ p { background-image: url("#123"); }`);
   assert(doc.querySelector('img[srcset]').getAttribute('srcset') === `#123 1x, #123 2x`);
   assert(doc.querySelector('iframe').getAttribute('src') === `#123`);
   assert(doc.querySelector('a').getAttribute('href') === `#123`);
-}
+});
 
 /**
  * Test for non-resolvable URL:
@@ -15384,7 +15289,7 @@ p { background-image: url("#123"); }`);
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri_nonResolvable() {
+it('test_capture_linkUnsavedUri_nonResolvable', async function () {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -15427,7 +15332,7 @@ p { background-image: url("nonexist.bmp"); }`);
   assert(doc.querySelector('iframe').getAttribute('src') === `nonexist.html`);
   assert(doc.querySelector('a').getAttribute('href') === `nonexist.txt`);
   assert(doc.querySelector('a[name]').getAttribute('href') === `nonexist.css`);
-}
+});
 
 /**
  * Test for other protocol URL:
@@ -15439,7 +15344,7 @@ p { background-image: url("nonexist.bmp"); }`);
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri_protocol() {
+it('test_capture_linkUnsavedUri_protocol', async function () {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -15478,7 +15383,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
   assert(doc.querySelector('iframe').getAttribute('src') === `ftp://example.com/nonexist.html`);
   assert(doc.querySelector('a').getAttribute('href') === `ftp://example.com/nonexist.txt`);
   assert(doc.querySelector('a[name]').getAttribute('href') === `mailto:nonexist@example.com`);
-}
+});
 
 /**
  * Test for blob URL:
@@ -15490,7 +15395,7 @@ p { background-image: url("ftp://example.com/nonexist.bmp"); }`);
  * capturer.captureUrl
  * capturer.captureBookmark
  */
-async function test_capture_linkUnsavedUri_blob() {
+it('test_capture_linkUnsavedUri_blob', async function () {
   var options = {
     "capture.image": "save",
     "capture.imageBackground": "save",
@@ -15520,14 +15425,14 @@ async function test_capture_linkUnsavedUri_blob() {
   assert(doc.querySelector('link[rel="stylesheet"]').getAttribute('href') === `urn:scrapbook:download:error:blob:`);
   assert(doc.querySelector('script').getAttribute('src') === `urn:scrapbook:download:error:blob:`);
   assert(doc.querySelector('img').getAttribute('src') === `urn:scrapbook:download:error:blob:`);
-}
+});
 
 /**
  * Test if option works.
  *
  * capture.insertInfoBar
  */
-async function test_capture_insertInfoBar() {
+it('test_capture_insertInfoBar', async function () {
   var options = {};
 
   /* +capture.insertInfoBar */
@@ -15557,7 +15462,7 @@ async function test_capture_insertInfoBar() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(!doc.querySelector('script[data-scrapbook-elem="infobar-loader"]'));
-}
+});
 
 /**
  * Size limit should be applied to normal resource and CSS.
@@ -15565,7 +15470,7 @@ async function test_capture_insertInfoBar() {
  * capturer.captureDocument
  * capturer.linkUnsavedUri
  */
-async function test_capture_sizeLimit() {
+it('test_capture_sizeLimit', async function () {
   var options = {
     "capture.style": "save",
     "capture.image": "save",
@@ -15669,7 +15574,7 @@ async function test_capture_sizeLimit() {
   assert(doc.querySelectorAll('a')[1].getAttribute('href') === `${localhost}/capture_sizeLimit/linked2.txt`);
   assert(doc.querySelectorAll('a')[2].getAttribute('href') === `linked.html`);
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_sizeLimit/linked2.html`);
-}
+});
 
 /**
  * Size limit should be applied to headless frames.
@@ -15677,7 +15582,7 @@ async function test_capture_sizeLimit() {
  * capturer.captureDocument
  * capturer.linkUnsavedUri
  */
-async function test_capture_sizeLimit_frame() {
+it('test_capture_sizeLimit_frame', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.frame": "save",
@@ -15800,7 +15705,7 @@ async function test_capture_sizeLimit_frame() {
 
   assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `${localhost}/capture_sizeLimit_frame/iframe2.html`);
-}
+});
 
 /**
  * Size limit should NOT be applied to data URL.
@@ -15808,7 +15713,7 @@ async function test_capture_sizeLimit_frame() {
  * capturer.captureDocument
  * capturer.linkUnsavedUri
  */
-async function test_capture_sizeLimit_datauri() {
+it('test_capture_sizeLimit_datauri', async function () {
   var options = {
     "capture.style": "save",
     "capture.image": "save",
@@ -15853,7 +15758,7 @@ async function test_capture_sizeLimit_datauri() {
   assert(doc.querySelectorAll('link')[1].getAttribute('href') === `275502e8b8f6089c3b23980127a4b237c92ebd91.css`);
   assert(doc.querySelectorAll('img')[0].getAttribute('src') === `f3c161973c06d37459e1fa3e14b78387fd4216f7.svg`);
   assert(doc.querySelectorAll('img')[1].getAttribute('src') === `5aa9b03760d4bac901b27efe48a29b210d0bc6ec.svg`);
-}
+});
 
 /**
  * Size limit should NOT be applied to data URL (for frames).
@@ -15861,7 +15766,7 @@ async function test_capture_sizeLimit_datauri() {
  * capturer.captureDocument
  * capturer.linkUnsavedUri
  */
-async function test_capture_sizeLimit_frame_datauri() {
+it('test_capture_sizeLimit_frame_datauri', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.frame": "save",
@@ -15902,7 +15807,7 @@ async function test_capture_sizeLimit_frame_datauri() {
 
   assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_2.html`);
-}
+});
 
 /**
  * Size limit should NOT be applied to srcdoc.
@@ -15910,7 +15815,7 @@ async function test_capture_sizeLimit_frame_datauri() {
  * capturer.captureDocument
  * capturer.linkUnsavedUri
  */
-async function test_capture_sizeLimit_frame_srcdoc() {
+it('test_capture_sizeLimit_frame_srcdoc', async function () {
   var options = {
     "capture.saveResourcesSequentially": true,
     "capture.frame": "save",
@@ -15949,7 +15854,7 @@ async function test_capture_sizeLimit_frame_srcdoc() {
 
   assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `index_1.html`);
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `index_2.html`);
-}
+});
 
 /**
  * Check if capture helper works correctly.
@@ -15957,7 +15862,7 @@ async function test_capture_sizeLimit_frame_srcdoc() {
  * capturer.helpersEnabled
  * capture.helpers
  */
-async function test_capture_helpers() {
+it('test_capture_helpers', async function () {
   /* capture.helpers set and enabled */
   var options = {
     "capture.helpersEnabled": true,
@@ -16073,7 +15978,7 @@ async function test_capture_helpers() {
   assert(doc.querySelector('#exclude'));
   assert(doc.querySelector('.exclude'));
   assert(doc.querySelector('img'));
-}
+});
 
 /**
  * Check nested capture helper.
@@ -16081,7 +15986,7 @@ async function test_capture_helpers() {
  * capturer.helpersEnabled
  * capture.helpers
  */
-async function test_capture_helpers_nesting() {
+it('test_capture_helpers_nesting', async function () {
   var options = {
     "capture.helpersEnabled": true,
     "capture.helpers": `\
@@ -16109,4 +16014,8 @@ async function test_capture_helpers_nesting() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelector('img[src="green.bmp"]'));
-}
+});
+
+});  // Test capture
+
+});  // Automated tests

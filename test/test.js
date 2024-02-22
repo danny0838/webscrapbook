@@ -1,5 +1,3 @@
-'use strict';
-
 /******************************************************************************
  * Configs
  *****************************************************************************/
@@ -69,16 +67,153 @@ const MAF = "http://maf.mozdev.org/metadata/rdf#";
  * Helpers
  *****************************************************************************/
 
+/**
+ * Simple assertion that outputs the error to the console for later tracing.
+ */
 function assert(condition, message) {
   if (condition) { return; }
-  throw new Error(message || "Assertion failed");
+  const err = new Error(message || "Assertion failed");
+  console.error(err);
+  throw err;
 }
 
-class TestSkipError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'TestSkipError';
+function itSkip(reason) {
+  return (title, callback) => {
+    const t = `${title} - skipped${reason ? ' (' + reason + ')' : ''}`;
+    xit(t, callback);
+  };
+}
+
+function itSkipIf(cond, reason) {
+  if (!cond) {
+    return it;
   }
+  return itSkip(reason);
+}
+
+function itSkipIfNoMultipleSelection(reason = 'multiple selection not supported') {
+  const sel = document.getSelection();
+
+  const origCount = sel.rangeCount;
+  if (origCount > 1) {
+    return it;
+  }
+
+  const origRanges = [];
+  for (let i = 0; i < origCount; i++) {
+    origRanges.push(sel.getRangeAt(i));
+  }
+
+  const dummyTextNode = document.createTextNode('dummy');
+  try {
+    document.body.appendChild(dummyTextNode);
+
+    let range = document.createRange();
+    range.setStart(dummyTextNode, 0);
+    range.setEnd(dummyTextNode, 1);
+    sel.addRange(range);
+
+    range = document.createRange();
+    range.setStart(dummyTextNode, 2);
+    range.setEnd(dummyTextNode, 3);
+    sel.addRange(range);
+
+    if (sel.rangeCount <= 1) {
+      return itSkip(reason);
+    }
+  } finally {
+    sel.removeAllRanges();
+    for (let i = 0; i < origCount; i++) {
+      sel.addRange(origRanges[i]);
+    }
+    dummyTextNode.remove();
+  }
+
+  return it;
+}
+
+function itSkipIfNoAdoptedStylesheet(reason = 'Document.adoptedStyleSheets not supported') {
+  // Document.adoptedStyleSheets is not supported by Firefox < 101.
+  if (!document.adoptedStyleSheets) {
+    return itSkip(reason);
+  }
+  return it;
+}
+
+function itSkipIfNoNestingCss(reason = 'CSS nesting not supported') {
+  // CSS nesting selector is supported in Firefox >= 117 and Chromium >= 120.
+  try {
+    // Chrome 109/110 gets null for the querySelector
+    if (!document.querySelector('&')) {
+      throw new Error('bad support');
+    }
+  } catch (ex) {
+    return itSkip(reason);
+  }
+  return it;
+}
+
+function itSkipIfNoIsPseudo(reason = ':is() CSS pseudo-class not supported') {
+  // :is() CSS pseudo-class is supported in Firefox >= 78 and Chromium >= 88.
+  try {
+    document.querySelector(':is()');
+  } catch (ex) {
+    return itSkip(reason);
+  }
+  return it;
+}
+
+function itSkipIfNoHostContextPseudo(reason = ':host-context() CSS pseudo-class not supported') {
+  // :host-context() not suported in some browsers (e.g. Firefox)
+  try {
+    document.querySelector(':host-context(*)');
+  } catch (ex) {
+    return itSkip(reason);
+  }
+  return it;
+}
+
+function itSkipIfNoAtCounterStyle(reason = '@counter-style CSS rule not supported') {
+  const d = document.implementation.createHTMLDocument();
+  const style = d.head.appendChild(d.createElement('style'));
+  style.textContent = '@counter-style my { symbols: "1"; }';
+  if (!style.sheet.cssRules.length) {
+    return itSkip(reason);
+  }
+  return it;
+}
+
+function itSkipIfNoAtLayer(reason = '@layer CSS rule not supported') {
+  const d = document.implementation.createHTMLDocument();
+  const style = d.head.appendChild(d.createElement('style'));
+  style.textContent = '@layer mylayer;';
+  if (!style.sheet.cssRules.length) {
+    return itSkip(reason);
+  }
+  return it;
+}
+
+function itToFail(reason) {
+  return (title, callback) => {
+    const titleRewritten = `${title} - expected failure${reason ? ' (' + reason + ')' : ''}`;
+    const callbackRewritten = async function (...args) {
+      try {
+        await callback.call(this, ...args);
+      } catch (ex) {
+        return;
+      }
+      throw new Error('unexpected success');
+    };
+    callbackRewritten.toString = () => callback.toString();
+    it(titleRewritten, callbackRewritten);
+  };
+}
+
+function itToFailIf(cond, reason) {
+  if (!cond) {
+    return it;
+  }
+  return itToFail(reason);
 }
 
 class TestSuite {
@@ -107,15 +242,15 @@ class TestSuite {
     try {
       await xhr({url: localhost, responseType: 'text'});
     } catch (ex) {
-      this.error(`Unable to connect to local server "${localhost}". Make sure the server has been started and the port is not occupied by another application.`);
-      throw ex;
+      console.error(ex);
+      throw new Error(`Unable to connect to local server "${localhost}". Make sure the server has been started and the port is not occupied by another application.`);
     }
 
     try {
       await xhr({url: localhost2, responseType: 'text'});
     } catch (ex) {
-      this.error(`Unable to connect to local server "${localhost2}". Make sure the server has been started and the port is not occupied by another application.`);
-      throw ex;
+      console.error(ex);
+      throw new Error(`Unable to connect to local server "${localhost2}". Make sure the server has been started and the port is not occupied by another application.`);
     }
 
     try {
@@ -123,78 +258,9 @@ class TestSuite {
         throw new Error('ping failure');
       }
     } catch (ex) {
-      this.error(`Unable to connect to the WebScrapBook extension with ID "${config["wsb_extension_id"]}". Make sure the extension is installed and its ID is correctly configured.`);
-      throw ex;
-    }
-  }
-
-  get wrapper() {
-    const value = document.getElementsByTagName('pre')[0];
-    Object.defineProperty(this, 'wrapper', {value});
-    return value;
-  }
-
-  async runTests(prefixes = ['test_']) {
-    this.testTotal = 0;
-    this.testPass = 0;
-    this.testSkipped = 0;
-
-    const tests = Object.keys(globalThis).filter(x => prefixes.some(p => x.startsWith(p)));
-    for (const t of tests) {
-      await this.runTest(globalThis[t]);
-    }
-
-    const reportMethod = (this.testPass === this.testTotal) ? 'log' : 'error';
-    const skippedMsg = this.testSkipped ? ` (skipped=${this.testSkipped})` : '';
-    const reportMsg = `Tests pass/total: ${this.testPass}/${this.testTotal}${skippedMsg}`;
-    this[reportMethod](reportMsg);
-    this.log(`\n`);
-  }
-
-  async runAutomatedTests() {
-    await this.runTests(this.config["automated_tests"]);
-  }
-
-  async runManualTests() {
-    await this.runTests(this.config["manual_tests"]);
-  }
-
-  async runTest(fn) {
-    this.testTotal += 1;
-    this.log(`Testing: ${fn.name}... `);
-    try {
-      // pass
-      await fn();
-      this.testPass += 1;
-      this.log(`pass`);
-      this.log(`\n`);
-    } catch(ex) {
-      if (ex.name === 'TestSkipError') {
-        // skipped
-        this.testSkipped += 1;
-        this.testTotal -= 1;
-        const msg = ex.message ? ` (${ex.message})` : '';
-        this.log(`skipped${msg}`);
-        this.log(`\n`);
-        return;
-      }
-
-      // fail
       console.error(ex);
-      this.error(`fail`);
-      this.log(`\n`);
+      throw new Error(`Unable to connect to the WebScrapBook extension with ID "${config["wsb_extension_id"]}". Make sure the extension is installed and its ID is correctly configured.`);
     }
-  }
-
-  log(msg) {
-    this.wrapper.appendChild(document.createTextNode(msg));
-  }
-
-  error(msg) {
-    const elem = document.createElement('span');
-    elem.classList.add('error');
-    elem.textContent = msg;
-    this.wrapper.appendChild(elem);
   }
 
   async waitTabLoading(tab) {
@@ -276,7 +342,7 @@ class TestSuite {
     });
     await browser.tabs.remove(tab.id);
     if (!result) {
-      throw new Error('Manual test does not pass');
+      throw new Error('Manual test failed');
     }
     return true;
   }
@@ -354,28 +420,64 @@ class TestSuite {
  * Main
  *****************************************************************************/
 
-async function main() {
-  async function loadScript(src) {
-    const p = new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = src;
-      script.onload = resolve;
-      script.onerror = reject;
-      document.head.appendChild(script);
+// Top-level await is available only in Chromium >=89 and Firefox >= 89
+(async () => {
+  const suite = new TestSuite();
+  try {
+    await suite.init();
+  } catch (ex) {
+    /* fail out with a dummy mocha */
+    mocha.setup('bdd');
+
+    // prevent options be overwritten by URL params
+    mocha.options = new Proxy(mocha.options, {
+      set() { return true; },
     });
-    return p;
+
+    before(() => { throw ex; });
+    it('root');  // require a test for before to be run
+    mocha.run();
+    return;
   }
 
-  const mode = new URL(location.href).searchParams.get('m');
+  // initialize mocha and expose global methods such as describe(), it()
+  mocha.setup({
+    ui: 'bdd',
+    checkLeaks: true,
+    timeout: 0,
+    slow: 10000,
+    grep: (() => {
+      const query = new URL(location.href).searchParams;
+      if (!query.get('grep') && !query.get('fgrep')) {
+        const tests = suite.config["tests"];
+        if (Array.isArray(tests)) {
+          return tests.map(t => escapeRegExp(t)).join('|');
+        }
+        return tests;
+      }
+      return void(0);
+    })(),
+  });
 
-  let time = Date.now();
-  const suite = new TestSuite();
-  await suite.init();
-  await loadScript('./test_auto.js');
-  await loadScript('./test_manual.js');
-
-  // export methods/properties to global scope
+  // expose to global scope
   Object.assign(globalThis, {
+    baseOptions,
+    RDF,
+    MAF,
+
+    assert,
+    itSkip,
+    itSkipIf,
+    itSkipIfNoMultipleSelection,
+    itSkipIfNoAdoptedStylesheet,
+    itSkipIfNoNestingCss,
+    itSkipIfNoIsPseudo,
+    itSkipIfNoHostContextPseudo,
+    itSkipIfNoAtCounterStyle,
+    itSkipIfNoAtLayer,
+    itToFail,
+    itToFailIf,
+
     localhost: suite.localhost,
     localhost2: suite.localhost2,
     capture: suite.capture.bind(suite),
@@ -383,19 +485,9 @@ async function main() {
     openTestTab: suite.openTestTab.bind(suite),
   });
 
-  if (mode == 1 || !mode) {
-    await suite.log(`Starting automated tests...\n`);
-    await suite.runAutomatedTests();
-    suite.log(`\n`);
-  }
+  // import all tests
+  await import('./test_auto.js');
+  await import('./test_manual.js');
 
-  if (mode == 2 || !mode) {
-    await suite.log(`Starting manual tests...\n`);
-    await suite.runManualTests();
-    suite.log(`\n`);
-  }
-
-  suite.log(`Done in ${(Date.now() - time) / 1000} seconds.`);
-}
-
-main();
+  mocha.run();
+})();
