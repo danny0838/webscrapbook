@@ -1981,6 +1981,35 @@ async function test_capture_blob_frame() {
 }
 
 /**
+ * about: URLs should be kept as-is.
+ *
+ * capturer.captureDocument
+ * capturer.DocumentCssHandler.rewriteCssText
+ */
+async function test_capture_about() {
+  var blob = await capture({
+    url: `${localhost}/capture_about/basic.html`,
+    options: baseOptions,
+  });
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('link').getAttribute('href') === 'blank');
+  assert(doc.querySelector('style').textContent.trim() === `\
+@import url("blank");
+@font-face { font-family: myFont; src: url("about:blank"); }
+p { background-image: url("about:blank"); }`);
+  assert(doc.querySelector('img[src]').getAttribute('src') === 'about:blank');
+  assert(doc.querySelector('img[srcset]').getAttribute('srcset') === 'about:blank 1x, about:invalid 2x');
+
+  var cssFile = zip.file('blank');
+  var text = (await readFileAsText(await cssFile.async('blob'))).trim();
+  assert(text === '');
+}
+
+/**
  * Check if capture selection works
  *
  * capturer.captureDocument

@@ -257,6 +257,12 @@
     // add hash and error handling
     const downloadFile = async (params) => {
       const {url, options} = params;
+
+      // keep original URL for non-supported protocols
+      if (!['http:', 'https:', 'file:', 'data:', 'blob:'].some(p => url.startsWith(p))) {
+        return {url};
+      }
+
       return capturer.downloadFile(params)
         .then(response => {
           return Object.assign({}, response, {
@@ -4437,6 +4443,11 @@
       };
 
       const downloadFileInCss = async (url) => {
+        // keep original URL for non-supported protocols
+        if (!['http:', 'https:', 'file:', 'data:', 'blob:'].some(p => url.startsWith(p))) {
+          return url;
+        }
+
         const response = await capturer.downloadFile({
           url,
           refUrl,
