@@ -843,9 +843,9 @@ async function test_capture_rename_normalize() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(Object.keys(zip.files).length === 3);
-  assert(zip.files["index.html"]);
-  assert(zip.files["abc.bmp"]);
-  assert(zip.files["123ABCabc中文 !#$%&'()+,-;=@[]^_`{}_.bmp"]);
+  assert(zip.file("index.html"));
+  assert(zip.file("abc.bmp"));
+  assert(zip.file("123ABCabc中文 !#$%&'()+,-;=@[]^_`{}_.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -929,30 +929,30 @@ async function test_capture_header_mime() {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelectorAll('img')[0].getAttribute("src") === "image_bmp.py.bmp")
-  assert(zip.files["image_bmp.py.bmp"]);
+  assert(zip.file("image_bmp.py.bmp"));
   assert(doc.querySelectorAll('img')[1].getAttribute("src") === "image_svg.py.svg")
-  assert(zip.files["image_svg.py.svg"]);
+  assert(zip.file("image_svg.py.svg"));
 
   // extension validation should be case-insensitive
   assert(doc.querySelectorAll('img')[2].getAttribute("src") === "image.SVG")
-  assert(zip.files["image.SVG"]);
+  assert(zip.file("image.SVG"));
 
   // a well-known MIME may have a new-age extension not known yet, don't overfix
   assert(doc.querySelectorAll('img')[3].getAttribute("src") === "newext.mp1")
-  assert(zip.files["newext.mp1"]);
+  assert(zip.file("newext.mp1"));
 
   // always attempt to fix for a file without extension
   assert(doc.querySelectorAll('img')[4].getAttribute("src") === "noext.doc")
-  assert(zip.files["noext.doc"]);
+  assert(zip.file("noext.doc"));
 
   // allow empty extension for universal MIME types, e.g. application/octet-stream
   assert(doc.querySelectorAll('img')[5].getAttribute("src") === "noextoctet")
-  assert(zip.files["noextoctet"]);
+  assert(zip.file("noextoctet"));
 
   assert(doc.querySelectorAll('link')[0].getAttribute("href") === "stylesheet.py.css")
-  assert(zip.files["stylesheet.py.css"]);
+  assert(zip.file("stylesheet.py.css"));
   assert(doc.querySelectorAll('script')[0].getAttribute("src") === "script.py.js")
-  assert(zip.files["script.py.js"]);
+  assert(zip.file("script.py.js"));
 }
 
 /**
@@ -1001,7 +1001,7 @@ async function test_capture_filename() {
 
   var zip = await new JSZip().loadAsync(blob);
   for (const fn of EXPECTED_FILENAMES) {
-    assert(zip.files[fn]);
+    assert(zip.file(fn));
   }
 
   var indexFile = zip.file('index.html');
@@ -1028,10 +1028,10 @@ async function test_capture_filename_forbidden() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index-1.json"]);
-  assert(zip.files["index-1.dat"]);
-  assert(zip.files["index-1.rdf"]);
-  assert(zip.files["^metadata^-1"]);
+  assert(zip.file("index-1.json"));
+  assert(zip.file("index-1.dat"));
+  assert(zip.file("index-1.rdf"));
+  assert(zip.file("^metadata^-1"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1117,11 +1117,11 @@ async function test_capture_saveAsciiFilename() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['123ABCabc_中文_𠀀.bmp']);
-  assert(zip.files['123ABCabc_中文_𠀀-2.bmp']);
-  assert(zip.files['123ABCabc_中文_𠀀.css']);
-  assert(zip.files['123ABCabc_中文_𠀀.woff']);
-  assert(zip.files['123%.dat']);
+  assert(zip.file('123ABCabc_中文_𠀀.bmp'));
+  assert(zip.file('123ABCabc_中文_𠀀-2.bmp'));
+  assert(zip.file('123ABCabc_中文_𠀀.css'));
+  assert(zip.file('123ABCabc_中文_𠀀.woff'));
+  assert(zip.file('123%.dat'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1145,11 +1145,11 @@ p { background-image: url("123ABCabc_中文_𠀀.bmp"); }`);
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.bmp']);
-  assert(zip.files['123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80-2.bmp']);
-  assert(zip.files['123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.css']);
-  assert(zip.files['123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.woff']);
-  assert(zip.files['123%.dat']);
+  assert(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.bmp'));
+  assert(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80-2.bmp'));
+  assert(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.css'));
+  assert(zip.file('123ABCabc_%E4%B8%AD%E6%96%87_%F0%A0%80%80.woff'));
+  assert(zip.file('123%.dat'));
 
   // URLs in the page need to be encoded to represent a percent char,
   // and thus the output looks like %25xx%25xx...
@@ -1267,10 +1267,10 @@ p { background-image: url("data:image/bmp;base64,Qk08AAAAAAAAADYAAAAoAAAAAQAAAAE
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['2206b4fb7241bdce17a71015c888e3de66c2b5c9.css']);
-  assert(zip.files['da39a3ee5e6b4b0d3255bfef95601890afd80709.woff']);
-  assert(zip.files['ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp']);
-  assert(zip.files['4c46aef7be4ed4dda8cb2e887ae3ca7a8702fa16.bmp']);
+  assert(zip.file('2206b4fb7241bdce17a71015c888e3de66c2b5c9.css'));
+  assert(zip.file('da39a3ee5e6b4b0d3255bfef95601890afd80709.woff'));
+  assert(zip.file('ecb6e0b0acec8b20d5f0360a52fe336a7a7cb475.bmp'));
+  assert(zip.file('4c46aef7be4ed4dda8cb2e887ae3ca7a8702fa16.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1398,9 +1398,9 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['null.css']);
-  assert(zip.files['null.woff']);
-  assert(zip.files['red.bmp']);
+  assert(zip.file('null.css'));
+  assert(zip.file('null.woff'));
+  assert(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1600,9 +1600,9 @@ async function test_capture_dataUri_frame() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["red.bmp"]);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["page.html"]);
+  assert(zip.file("red.bmp"));
+  assert(zip.file("file.txt"));
+  assert(zip.file("page.html"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1627,9 +1627,9 @@ async function test_capture_dataUri_frame() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["red.bmp"]);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["page.html"]);
+  assert(zip.file("red.bmp"));
+  assert(zip.file("file.txt"));
+  assert(zip.file("page.html"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -1658,26 +1658,26 @@ async function test_capture_dataUri_params() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.rdf.css"]);
-  assert(zip.files["index.dat.css"]);
-  assert(zip.files["^metadata^.css"]);
+  assert(zip.file("index.rdf.css"));
+  assert(zip.file("index.dat.css"));
+  assert(zip.file("^metadata^.css"));
 
-  assert(zip.files["abc.html"]);
-  assert(zip.files["abc.xml"]);
-  assert(zip.files["abc.bmp"]);
-  assert(zip.files["abc.jpeg"]);
-  assert(zip.files["abc.gif"]);
-  assert(zip.files["abc.png"]);
-  assert(zip.files["abc.svg"]);
-  assert(zip.files["abc.wav"]);
-  assert(zip.files["abcd.wav"]);
-  assert(zip.files["abc.mp3"]);
-  assert(zip.files["abc.oga"]);
-  assert(zip.files["abc.ogx"]);
-  assert(zip.files["abc.mpga"]);
-  assert(zip.files["abc.mp4"]);
-  assert(zip.files["abc.webm"]);
-  assert(zip.files["abc.ogv"]);
+  assert(zip.file("abc.html"));
+  assert(zip.file("abc.xml"));
+  assert(zip.file("abc.bmp"));
+  assert(zip.file("abc.jpeg"));
+  assert(zip.file("abc.gif"));
+  assert(zip.file("abc.png"));
+  assert(zip.file("abc.svg"));
+  assert(zip.file("abc.wav"));
+  assert(zip.file("abcd.wav"));
+  assert(zip.file("abc.mp3"));
+  assert(zip.file("abc.oga"));
+  assert(zip.file("abc.ogx"));
+  assert(zip.file("abc.mpga"));
+  assert(zip.file("abc.mp4"));
+  assert(zip.file("abc.webm"));
+  assert(zip.file("abc.ogv"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -2002,7 +2002,7 @@ async function test_capture_selection() {
   assert(selectedParentElem);
   assert(doc.querySelector('#selected'));
   assert(doc.querySelector('img[src="green.bmp"]'));
-  assert(zip.files["green.bmp"]);
+  assert(zip.file("green.bmp"));
 
   assert(selectedParentElem.firstChild.nodeType === 8);
   assert(selectedParentElem.firstChild.nodeValue === 'scrapbook-capture-selected');
@@ -2012,11 +2012,11 @@ async function test_capture_selection() {
   // non-selected elements and resources
   assert(!doc.querySelector('#previous'));
   assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.files["blue.bmp"]);
+  assert(!zip.file("blue.bmp"));
 }
 
 /**
@@ -2041,7 +2041,7 @@ async function test_capture_selection_element() {
   assert(selectedElem);
   assert(doc.querySelector('#selected'));
   assert(doc.querySelector('img[src="green.bmp"]'));
-  assert(zip.files["green.bmp"]);
+  assert(zip.file("green.bmp"));
 
   assert(selectedElem.previousSibling.nodeType === 8);
   assert(selectedElem.previousSibling.nodeValue === 'scrapbook-capture-selected');
@@ -2051,11 +2051,11 @@ async function test_capture_selection_element() {
   // non-selected elements and resources
   assert(!doc.querySelector('#previous'));
   assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.files["blue.bmp"]);
+  assert(!zip.file("blue.bmp"));
 }
 
 /**
@@ -2086,15 +2086,15 @@ async function test_capture_selection_text() {
 
   // non-selected elements and resources
   assert(!doc.querySelector('img[src="green.bmp"]'));
-  assert(!zip.files["green.bmp"]);
+  assert(!zip.file("green.bmp"));
 
   assert(!doc.querySelector('#previous'));
   assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.files["blue.bmp"]);
+  assert(!zip.file("blue.bmp"));
 }
 
 /**
@@ -2126,15 +2126,15 @@ async function test_capture_selection_comment() {
 
   // non-selected elements and resources
   assert(!doc.querySelector('img[src="green.bmp"]'));
-  assert(!zip.files["green.bmp"]);
+  assert(!zip.file("green.bmp"));
 
   assert(!doc.querySelector('#previous'));
   assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.files["blue.bmp"]);
+  assert(!zip.file("blue.bmp"));
 }
 
 /**
@@ -2166,15 +2166,15 @@ async function test_capture_selection_cdata() {
 
   // non-selected elements and resources
   assert(!doc.querySelector('img[src="green.bmp"]'));
-  assert(!zip.files["green.bmp"]);
+  assert(!zip.file("green.bmp"));
 
   assert(!doc.querySelector('#previous'));
   assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.files["blue.bmp"]);
+  assert(!zip.file("blue.bmp"));
 }
 
 /**
@@ -2203,23 +2203,23 @@ async function test_capture_selection_multiple() {
   assert(doc.querySelector('#selection'));
   assert(doc.querySelector('#selected'));
   assert(doc.querySelector('img[src="green.bmp"]'));
-  assert(zip.files["green.bmp"]);
+  assert(zip.file("green.bmp"));
 
   assert(doc.querySelector('#selection2'));
   assert(doc.querySelector('#selected2'));
   assert(doc.querySelector('img[src="yellow.bmp"]'));
-  assert(zip.files["yellow.bmp"]);
+  assert(zip.file("yellow.bmp"));
 
   // non-selected elements and resources
   assert(!doc.querySelector('#previous'));
   assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   assert(!doc.querySelector('#middle'));
 
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.files["blue.bmp"]);
+  assert(!zip.file("blue.bmp"));
 }
 
 /**
@@ -2310,15 +2310,15 @@ async function test_capture_selection_multiple_text() {
 
   // non-selected elements and resources
   assert(!doc.querySelector('img[src="green.bmp"]'));
-  assert(!zip.files["green.bmp"]);
+  assert(!zip.file("green.bmp"));
 
   assert(!doc.querySelector('#previous'));
   assert(!doc.querySelector('img[src="red.bmp"]'));
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   assert(!doc.querySelector('#next'));
   assert(!doc.querySelector('img[src="blue.bmp"]'));
-  assert(!zip.files["blue.bmp"]);
+  assert(!zip.file("blue.bmp"));
 }
 
 /**
@@ -2344,7 +2344,7 @@ async function test_capture_headless() {
 
   assert(!doc.querySelector(`title`));
   assert(!doc.querySelector(`link[rel~="icon"]`));
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   /* from tab; bookmark */
   var blob = await capture({
@@ -2373,7 +2373,7 @@ async function test_capture_headless() {
 
   assert(!doc.querySelector(`title`));
   assert(!doc.querySelector(`link[rel~="icon"]`));
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   /* from tab frame 0; bookmark */
   var blob = await capture({
@@ -2401,7 +2401,7 @@ async function test_capture_headless() {
 
   assert(!doc.querySelector(`title`));
   assert(!doc.querySelector(`link[rel~="icon"]`));
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   /* from URL; bookmark */
   var blob = await captureHeadless({
@@ -2427,7 +2427,7 @@ async function test_capture_headless_attachment() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   var indexFile = zip.file('index.html');
   assert(indexFile);
@@ -2446,7 +2446,7 @@ async function test_capture_headless_attachment() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files["red.bmp"]);
+  assert(!zip.file("red.bmp"));
 
   var indexFile = zip.file('index.html');
   assert(indexFile);
@@ -3173,8 +3173,8 @@ async function test_capture_base_rewrite() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["green.bmp"]);
-  assert(zip.files["yellow.bmp"]);
+  assert(zip.file("green.bmp"));
+  assert(zip.file("yellow.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3202,8 +3202,8 @@ async function test_capture_base_rewrite_special() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index-1.html"]);
-  assert(zip.files["index-2.html"]);
+  assert(zip.file("index-1.html"));
+  assert(zip.file("index-2.html"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3478,7 +3478,7 @@ async function test_capture_base_dynamic_frame() {
     });
 
     var zip = await new JSZip().loadAsync(blob);
-    assert(zip.files["green.bmp"]);
+    assert(zip.file("green.bmp"));
 
     var indexFile = zip.file('index_1.html');
     var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3526,7 +3526,7 @@ async function test_capture_base_dynamic_frame_bad() {
     });
 
     var zip = await new JSZip().loadAsync(blob);
-    assert(zip.files["green.bmp"]);
+    assert(zip.file("green.bmp"));
 
     var indexFile = zip.file('index_1.html');
     var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3625,7 +3625,7 @@ async function test_capture_favicon() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['red.bmp']);
+  assert(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3709,9 +3709,9 @@ async function test_capture_faviconAttrs() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['red.bmp']);
-  assert(zip.files['yellow.bmp']);
-  assert(zip.files['green.bmp']);
+  assert(zip.file('red.bmp'));
+  assert(zip.file('yellow.bmp'));
+  assert(zip.file('green.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3733,9 +3733,9 @@ async function test_capture_faviconAttrs() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['red.bmp']);
-  assert(zip.files['yellow.bmp']);
-  assert(!zip.files['green.bmp']);
+  assert(zip.file('red.bmp'));
+  assert(zip.file('yellow.bmp'));
+  assert(!zip.file('green.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3757,9 +3757,9 @@ async function test_capture_faviconAttrs() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['red.bmp']);
-  assert(!zip.files['yellow.bmp']);
-  assert(!zip.files['green.bmp']);
+  assert(zip.file('red.bmp'));
+  assert(!zip.file('yellow.bmp'));
+  assert(!zip.file('green.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3788,7 +3788,7 @@ async function test_capture_css_style() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["external.css"]);
+  assert(zip.file("external.css"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3879,9 +3879,9 @@ async function test_capture_css_styleInline() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["green.bmp"]);
-  assert(!zip.files["font.woff"]);
-  assert(!zip.files["import.css"]);
+  assert(zip.file("green.bmp"));
+  assert(!zip.file("font.woff"));
+  assert(!zip.file("import.css"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3962,11 +3962,11 @@ async function test_capture_css_disabled() {
   assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
   assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
 
-  assert(zip.files["persistent.css"]);
-  assert(zip.files["default.css"]);
-  assert(zip.files["default2.css"]);
-  assert(zip.files["alternative.css"]);
-  assert(zip.files["alternative2.css"]);
+  assert(zip.file("persistent.css"));
+  assert(zip.file("default.css"));
+  assert(zip.file("default2.css"));
+  assert(zip.file("alternative.css"));
+  assert(zip.file("alternative2.css"));
 
   var blob = await capture({
     url: `${localhost}/capture_css_disabled/index2.html`,
@@ -3990,11 +3990,11 @@ async function test_capture_css_disabled() {
     assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
     assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
 
-    assert(zip.files["persistent.css"]);
-    assert(!zip.files["default.css"]);
-    assert(!zip.files["default2.css"]);
-    assert(zip.files["alternative.css"]);
-    assert(zip.files["alternative2.css"]);
+    assert(zip.file("persistent.css"));
+    assert(!zip.file("default.css"));
+    assert(!zip.file("default2.css"));
+    assert(zip.file("alternative.css"));
+    assert(zip.file("alternative2.css"));
   } else {
     var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
     assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
@@ -4006,11 +4006,11 @@ async function test_capture_css_disabled() {
     assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
     assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
 
-    assert(zip.files["persistent.css"]);
-    assert(zip.files["default.css"]);
-    assert(zip.files["default2.css"]);
-    assert(zip.files["alternative.css"]);
-    assert(zip.files["alternative2.css"]);
+    assert(zip.file("persistent.css"));
+    assert(zip.file("default.css"));
+    assert(zip.file("default2.css"));
+    assert(zip.file("alternative.css"));
+    assert(zip.file("alternative2.css"));
   }
 
   var blob = await capture({
@@ -4035,11 +4035,11 @@ async function test_capture_css_disabled() {
     assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
     assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
 
-    assert(zip.files["persistent.css"]);
-    assert(zip.files["default.css"]);
-    assert(!zip.files["default2.css"]);
-    assert(zip.files["alternative.css"]);
-    assert(zip.files["alternative2.css"]);
+    assert(zip.file("persistent.css"));
+    assert(zip.file("default.css"));
+    assert(!zip.file("default2.css"));
+    assert(zip.file("alternative.css"));
+    assert(zip.file("alternative2.css"));
   } else {
     var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
     assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
@@ -4051,11 +4051,11 @@ async function test_capture_css_disabled() {
     assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
     assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
 
-    assert(zip.files["persistent.css"]);
-    assert(zip.files["default.css"]);
-    assert(!zip.files["default2.css"]);
-    assert(zip.files["alternative.css"]);
-    assert(!zip.files["alternative2.css"]);
+    assert(zip.file("persistent.css"));
+    assert(zip.file("default.css"));
+    assert(!zip.file("default2.css"));
+    assert(zip.file("alternative.css"));
+    assert(!zip.file("alternative2.css"));
   }
 
   var blob = await capture({
@@ -4073,7 +4073,7 @@ async function test_capture_css_disabled() {
   assert(styleElem.matches('[data-scrapbook-css-disabled]'));
   assert(styleElem.textContent.trim() === ``);
 
-  assert(!zip.files["persistent.css"]);
+  assert(!zip.file("persistent.css"));
 }
 
 /**
@@ -4094,13 +4094,13 @@ async function test_capture_css_rewriteCss() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["imported.css"]);
-  assert(zip.files["sansation_light.woff"]);
-  assert(zip.files["green.bmp"]);
-  assert(zip.files["unsupported-1.bmp"]);
-  assert(zip.files["unsupported-2.bmp"]);
-  assert(zip.files["unsupported-3.bmp"]);
-  assert(zip.files["unsupported-4.bmp"]);
+  assert(zip.file("imported.css"));
+  assert(zip.file("sansation_light.woff"));
+  assert(zip.file("green.bmp"));
+  assert(zip.file("unsupported-1.bmp"));
+  assert(zip.file("unsupported-2.bmp"));
+  assert(zip.file("unsupported-3.bmp"));
+  assert(zip.file("unsupported-4.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4164,13 +4164,13 @@ background: blue; background: url("green.bmp");`);
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["imported.css"]);
-  assert(zip.files["sansation_light.woff"]);
-  assert(zip.files["green.bmp"]);
-  assert(!zip.files["unsupported-1.bmp"]);
-  assert(!zip.files["unsupported-2.bmp"]);
-  assert(!zip.files["unsupported-3.bmp"]);
-  assert(!zip.files["unsupported-4.bmp"]);
+  assert(zip.file("imported.css"));
+  assert(zip.file("sansation_light.woff"));
+  assert(zip.file("green.bmp"));
+  assert(!zip.file("unsupported-1.bmp"));
+  assert(!zip.file("unsupported-2.bmp"));
+  assert(!zip.file("unsupported-3.bmp"));
+  assert(!zip.file("unsupported-4.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4221,13 +4221,13 @@ svg|a text, text svg|a { fill: blue; text-decoration: underline; }`;
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["imported.css"]);
-  assert(zip.files["sansation_light.woff"]);
-  assert(zip.files["green.bmp"]);
-  assert(!zip.files["unsupported-1.bmp"]);
-  assert(!zip.files["unsupported-2.bmp"]);
-  assert(!zip.files["unsupported-3.bmp"]);
-  assert(!zip.files["unsupported-4.bmp"]);
+  assert(zip.file("imported.css"));
+  assert(zip.file("sansation_light.woff"));
+  assert(zip.file("green.bmp"));
+  assert(!zip.file("unsupported-1.bmp"));
+  assert(!zip.file("unsupported-2.bmp"));
+  assert(!zip.file("unsupported-3.bmp"));
+  assert(!zip.file("unsupported-4.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4649,11 +4649,11 @@ async function test_capture_css_rewriteCss_match() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files["green.bmp"]);
-  assert(!zip.files["unsupported-1.bmp"]);
-  assert(!zip.files["unsupported-2.bmp"]);
-  assert(!zip.files["unsupported-3.bmp"]);
-  assert(!zip.files["unsupported-4.bmp"]);
+  assert(!zip.file("green.bmp"));
+  assert(!zip.file("unsupported-1.bmp"));
+  assert(!zip.file("unsupported-2.bmp"));
+  assert(!zip.file("unsupported-3.bmp"));
+  assert(!zip.file("unsupported-4.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4991,15 +4991,15 @@ async function test_capture_css_rewriteCss_nesting() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['case1.bmp']);
-  assert(zip.files['case1-1.bmp']);
-  assert(zip.files['case1-1-1.bmp']);
-  assert(zip.files['case1-1-2.bmp']);
-  assert(zip.files['case1-2.bmp']);
-  assert(zip.files['case1-2-1.bmp']);
-  assert(zip.files['case1-2-2.bmp']);
-  assert(zip.files['case2-1.bmp']);
-  assert(zip.files['dummy.bmp']);
+  assert(zip.file('case1.bmp'));
+  assert(zip.file('case1-1.bmp'));
+  assert(zip.file('case1-1-1.bmp'));
+  assert(zip.file('case1-1-2.bmp'));
+  assert(zip.file('case1-2.bmp'));
+  assert(zip.file('case1-2-1.bmp'));
+  assert(zip.file('case1-2-2.bmp'));
+  assert(zip.file('case2-1.bmp'));
+  assert(zip.file('dummy.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5046,15 +5046,15 @@ async function test_capture_css_rewriteCss_nesting() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['case1.bmp']);
-  assert(zip.files['case1-1.bmp']);
-  assert(zip.files['case1-1-1.bmp']);
-  assert(zip.files['case1-1-2.bmp']);
-  assert(zip.files['case1-2.bmp']);
-  assert(zip.files['case1-2-1.bmp']);
-  assert(zip.files['case1-2-2.bmp']);
-  assert(zip.files['case2-1.bmp']);
-  assert(zip.files['dummy.bmp']);
+  assert(zip.file('case1.bmp'));
+  assert(zip.file('case1-1.bmp'));
+  assert(zip.file('case1-1-1.bmp'));
+  assert(zip.file('case1-1-2.bmp'));
+  assert(zip.file('case1-2.bmp'));
+  assert(zip.file('case1-2-1.bmp'));
+  assert(zip.file('case1-2-2.bmp'));
+  assert(zip.file('case2-1.bmp'));
+  assert(zip.file('dummy.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5094,15 +5094,15 @@ async function test_capture_css_rewriteCss_nesting() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['case1.bmp']);
-  assert(zip.files['case1-1.bmp']);
-  assert(zip.files['case1-1-1.bmp']);
-  assert(zip.files['case1-1-2.bmp']);
-  assert(zip.files['case1-2.bmp']);
-  assert(zip.files['case1-2-1.bmp']);
-  assert(zip.files['case1-2-2.bmp']);
-  assert(zip.files['case2-1.bmp']);
-  assert(!zip.files['dummy.bmp']);
+  assert(zip.file('case1.bmp'));
+  assert(zip.file('case1-1.bmp'));
+  assert(zip.file('case1-1-1.bmp'));
+  assert(zip.file('case1-1-2.bmp'));
+  assert(zip.file('case1-2.bmp'));
+  assert(zip.file('case1-2-1.bmp'));
+  assert(zip.file('case1-2-2.bmp'));
+  assert(zip.file('case2-1.bmp'));
+  assert(!zip.file('dummy.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5140,15 +5140,15 @@ async function test_capture_css_rewriteCss_nesting() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files['case1.bmp']);
-  assert(!zip.files['case1-1.bmp']);
-  assert(!zip.files['case1-1-1.bmp']);
-  assert(!zip.files['case1-1-2.bmp']);
-  assert(!zip.files['case1-2.bmp']);
-  assert(!zip.files['case1-2-1.bmp']);
-  assert(!zip.files['case1-2-2.bmp']);
-  assert(!zip.files['case2-1.bmp']);
-  assert(!zip.files['dummy.bmp']);
+  assert(!zip.file('case1.bmp'));
+  assert(!zip.file('case1-1.bmp'));
+  assert(!zip.file('case1-1-1.bmp'));
+  assert(!zip.file('case1-1-2.bmp'));
+  assert(!zip.file('case1-2.bmp'));
+  assert(!zip.file('case1-2-1.bmp'));
+  assert(!zip.file('case1-2-2.bmp'));
+  assert(!zip.file('case2-1.bmp'));
+  assert(!zip.file('dummy.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5466,7 +5466,7 @@ async function test_capture_css_rewrite_bad() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index-1.html"]);
+  assert(zip.file("index-1.html"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5584,10 +5584,10 @@ async function test_capture_css_cross_origin() {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['bg1.bmp']);
-  assert(zip.files['font1.woff']);
-  assert(zip.files['bg2.bmp']);
-  assert(zip.files['font2.woff']);
+  assert(zip.file('bg1.bmp'));
+  assert(zip.file('font1.woff'));
+  assert(zip.file('bg2.bmp'));
+  assert(zip.file('font2.woff'));
 
   // same origin
   var cssFile = zip.file('style.css');
@@ -5624,14 +5624,14 @@ async function test_capture_css_dynamic() {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['link.css']);
-  assert(zip.files['import.css']);
-  assert(!zip.files['internal-deleted.bmp']);
-  assert(zip.files['internal-inserted.bmp']);
-  assert(!zip.files['link-deleted.bmp']);
-  assert(zip.files['link-inserted.bmp']);
-  assert(!zip.files['import-deleted.bmp']);
-  assert(zip.files['import-inserted.bmp']);
+  assert(zip.file('link.css'));
+  assert(zip.file('import.css'));
+  assert(!zip.file('internal-deleted.bmp'));
+  assert(zip.file('internal-inserted.bmp'));
+  assert(!zip.file('link-deleted.bmp'));
+  assert(zip.file('link-inserted.bmp'));
+  assert(!zip.file('import-deleted.bmp'));
+  assert(zip.file('import-inserted.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5658,14 +5658,14 @@ async function test_capture_css_dynamic() {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['link.css']);
-  assert(zip.files['import.css']);
-  assert(!zip.files['internal-deleted.bmp']);
-  assert(zip.files['internal-inserted.bmp']);
-  assert(!zip.files['link-deleted.bmp']);
-  assert(zip.files['link-inserted.bmp']);
-  assert(!zip.files['import-deleted.bmp']);
-  assert(zip.files['import-inserted.bmp']);
+  assert(zip.file('link.css'));
+  assert(zip.file('import.css'));
+  assert(!zip.file('internal-deleted.bmp'));
+  assert(zip.file('internal-inserted.bmp'));
+  assert(!zip.file('link-deleted.bmp'));
+  assert(zip.file('link-inserted.bmp'));
+  assert(!zip.file('import-deleted.bmp'));
+  assert(zip.file('import-inserted.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5698,16 +5698,16 @@ async function test_capture_css_dynamic_rename() {
     options: Object.assign({}, baseOptions, options),
   });
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['link.css']);
-  assert(zip.files['link-1.css']);
-  assert(zip.files['link-2.css']);
-  assert(zip.files['link-deleted.bmp']);
-  assert(zip.files['link-inserted.bmp']);
-  assert(zip.files['import.css']);
-  assert(zip.files['import-1.css']);
-  assert(zip.files['import-2.css']);
-  assert(zip.files['import-deleted.bmp']);
-  assert(zip.files['import-inserted.bmp']);
+  assert(zip.file('link.css'));
+  assert(zip.file('link-1.css'));
+  assert(zip.file('link-2.css'));
+  assert(zip.file('link-deleted.bmp'));
+  assert(zip.file('link-inserted.bmp'));
+  assert(zip.file('import.css'));
+  assert(zip.file('import-1.css'));
+  assert(zip.file('import-2.css'));
+  assert(zip.file('import-deleted.bmp'));
+  assert(zip.file('import-inserted.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5792,12 +5792,12 @@ async function test_capture_imageBackground() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['link.css']);
-  assert(zip.files['import.css']);
-  assert(zip.files['red.bmp']);
-  assert(zip.files['green.bmp']);
-  assert(zip.files['blue.bmp']);
-  assert(zip.files['yellow.bmp']);
+  assert(zip.file('link.css'));
+  assert(zip.file('import.css'));
+  assert(zip.file('red.bmp'));
+  assert(zip.file('green.bmp'));
+  assert(zip.file('blue.bmp'));
+  assert(zip.file('yellow.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5841,12 +5841,12 @@ async function test_capture_imageBackground() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['link.css']);
-  assert(zip.files['import.css']);
-  assert(zip.files['red.bmp']);
-  assert(zip.files['green.bmp']);
-  assert(zip.files['blue.bmp']);
-  assert(zip.files['yellow.bmp']);
+  assert(zip.file('link.css'));
+  assert(zip.file('import.css'));
+  assert(zip.file('red.bmp'));
+  assert(zip.file('green.bmp'));
+  assert(zip.file('blue.bmp'));
+  assert(zip.file('yellow.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -5987,23 +5987,23 @@ async function test_capture_imageBackground_used() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['link.css']);
-  assert(zip.files['import.css']);
-  assert(zip.files['inline.bmp']);
-  assert(zip.files['internal.bmp']);
-  assert(zip.files['link.bmp']);
-  assert(zip.files['import.bmp']);
-  assert(zip.files['pseudo1.bmp']);
-  assert(zip.files['pseudo2.bmp']);
-  assert(zip.files['pseudo3.bmp']);
-  assert(zip.files['pseudo4.bmp']);
-  assert(zip.files['link-keyframes.css']);
-  assert(zip.files['import-keyframes.css']);
-  assert(zip.files['internal-keyframes.bmp']);
-  assert(zip.files['link-keyframes.bmp']);
-  assert(zip.files['import-keyframes.bmp']);
-  assert(!zip.files['neverused.bmp']);
-  assert(!zip.files['removed.bmp']);
+  assert(zip.file('link.css'));
+  assert(zip.file('import.css'));
+  assert(zip.file('inline.bmp'));
+  assert(zip.file('internal.bmp'));
+  assert(zip.file('link.bmp'));
+  assert(zip.file('import.bmp'));
+  assert(zip.file('pseudo1.bmp'));
+  assert(zip.file('pseudo2.bmp'));
+  assert(zip.file('pseudo3.bmp'));
+  assert(zip.file('pseudo4.bmp'));
+  assert(zip.file('link-keyframes.css'));
+  assert(zip.file('import-keyframes.css'));
+  assert(zip.file('internal-keyframes.bmp'));
+  assert(zip.file('link-keyframes.bmp'));
+  assert(zip.file('import-keyframes.bmp'));
+  assert(!zip.file('neverused.bmp'));
+  assert(!zip.file('removed.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6071,23 +6071,23 @@ async function test_capture_imageBackground_used() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['link.css']);
-  assert(zip.files['import.css']);
-  assert(zip.files['inline.bmp']);
-  assert(zip.files['internal.bmp']);
-  assert(zip.files['link.bmp']);
-  assert(zip.files['import.bmp']);
-  assert(zip.files['pseudo1.bmp']);
-  assert(zip.files['pseudo2.bmp']);
-  assert(zip.files['pseudo3.bmp']);
-  assert(zip.files['pseudo4.bmp']);
-  assert(zip.files['link-keyframes.css']);
-  assert(zip.files['import-keyframes.css']);
-  assert(zip.files['internal-keyframes.bmp']);
-  assert(zip.files['link-keyframes.bmp']);
-  assert(zip.files['import-keyframes.bmp']);
-  assert(zip.files['neverused.bmp']);
-  assert(zip.files['removed.bmp']);
+  assert(zip.file('link.css'));
+  assert(zip.file('import.css'));
+  assert(zip.file('inline.bmp'));
+  assert(zip.file('internal.bmp'));
+  assert(zip.file('link.bmp'));
+  assert(zip.file('import.bmp'));
+  assert(zip.file('pseudo1.bmp'));
+  assert(zip.file('pseudo2.bmp'));
+  assert(zip.file('pseudo3.bmp'));
+  assert(zip.file('pseudo4.bmp'));
+  assert(zip.file('link-keyframes.css'));
+  assert(zip.file('import-keyframes.css'));
+  assert(zip.file('internal-keyframes.bmp'));
+  assert(zip.file('link-keyframes.bmp'));
+  assert(zip.file('import-keyframes.bmp'));
+  assert(zip.file('neverused.bmp'));
+  assert(zip.file('removed.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6161,7 +6161,7 @@ async function test_capture_imageBackground_used_root() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['green.bmp']);
+  assert(zip.file('green.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6187,11 +6187,11 @@ async function test_capture_imageBackground_used_syntax() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['keyframes-1.bmp']);
-  assert(zip.files['keyframes-complex-1.bmp']);
-  assert(zip.files['keyframes-multi-1.bmp']);
-  assert(zip.files['keyframes-multi-2.bmp']);
-  assert(zip.files['keyframes-multi-3.bmp']);
+  assert(zip.file('keyframes-1.bmp'));
+  assert(zip.file('keyframes-complex-1.bmp'));
+  assert(zip.file('keyframes-multi-1.bmp'));
+  assert(zip.file('keyframes-multi-2.bmp'));
+  assert(zip.file('keyframes-multi-3.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6245,8 +6245,8 @@ async function test_capture_imageBackground_used_syntax_at() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['base.bmp']);
-  assert(zip.files['special.bmp']);
+  assert(zip.file('base.bmp'));
+  assert(zip.file('special.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6278,7 +6278,7 @@ async function test_capture_imageBackground_used_inline() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['green.bmp']);
+  assert(zip.file('green.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6312,9 +6312,9 @@ async function test_capture_imageBackground_used_shadow() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['green.bmp']);
-  assert(zip.files['yellow.bmp']);
-  assert(zip.files['blue.bmp']);
+  assert(zip.file('green.bmp'));
+  assert(zip.file('yellow.bmp'));
+  assert(zip.file('blue.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6350,11 +6350,11 @@ async function test_capture_imageBackground_used_scope() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files['internal-keyframes1.bmp']);
-  assert(!zip.files['internal-keyframes2.bmp']);
-  assert(zip.files['shadow-keyframes1.bmp']);
-  assert(zip.files['shadow-keyframes2.bmp']);
-  assert(zip.files['shadow-keyframes3.bmp']);
+  assert(!zip.file('internal-keyframes1.bmp'));
+  assert(!zip.file('internal-keyframes2.bmp'));
+  assert(zip.file('shadow-keyframes1.bmp'));
+  assert(zip.file('shadow-keyframes2.bmp'));
+  assert(zip.file('shadow-keyframes3.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6424,8 +6424,8 @@ async function test_capture_imageBackground_used_adopted() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['doc.bmp']);
-  assert(zip.files['shadow.bmp']);
+  assert(zip.file('doc.bmp'));
+  assert(zip.file('shadow.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6459,12 +6459,12 @@ async function test_capture_imageBackground_used_var() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['var1.bmp']);
-  assert(zip.files['var2.bmp']);  // @FIXME
-  assert(zip.files['var3.bmp']);  // @FIXME
-  assert(zip.files['var4.bmp']);  // @FIXME
-  assert(zip.files['var5.bmp']);
-  assert(zip.files['var6.bmp']);
+  assert(zip.file('var1.bmp'));
+  assert(zip.file('var2.bmp'));  // @FIXME
+  assert(zip.file('var3.bmp'));  // @FIXME
+  assert(zip.file('var4.bmp'));  // @FIXME
+  assert(zip.file('var5.bmp'));
+  assert(zip.file('var6.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6550,13 +6550,13 @@ async function test_capture_imageBackground_used_nesting() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['case1.bmp']);
-  assert(zip.files['case1-1.bmp']);
-  assert(zip.files['case1-1-1.bmp']);
-  assert(zip.files['case1-1-2.bmp']);
-  assert(!zip.files['case1-2.bmp']);
-  assert(!zip.files['case1-2-1.bmp']);
-  assert(!zip.files['case1-2-2.bmp']);
+  assert(zip.file('case1.bmp'));
+  assert(zip.file('case1-1.bmp'));
+  assert(zip.file('case1-1-1.bmp'));
+  assert(zip.file('case1-1-2.bmp'));
+  assert(!zip.file('case1-2.bmp'));
+  assert(!zip.file('case1-2-1.bmp'));
+  assert(!zip.file('case1-2-2.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6601,7 +6601,7 @@ async function test_capture_font() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['sansation_light.woff']);
+  assert(zip.file('sansation_light.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6620,7 +6620,7 @@ async function test_capture_font() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['sansation_light.woff']);
+  assert(zip.file('sansation_light.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6686,15 +6686,15 @@ async function test_capture_font_used() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['internal.woff']);
-  assert(zip.files['link.woff']);
-  assert(zip.files['import.woff']);
-  assert(zip.files['pseudo1.woff']);
-  assert(zip.files['internal-ranged1.woff']);
-  assert(zip.files['internal-ranged2.woff']);
-  assert(zip.files['internal-keyframes.woff']);
-  assert(!zip.files['neverused.woff']);
-  assert(!zip.files['removed.woff']);
+  assert(zip.file('internal.woff'));
+  assert(zip.file('link.woff'));
+  assert(zip.file('import.woff'));
+  assert(zip.file('pseudo1.woff'));
+  assert(zip.file('internal-ranged1.woff'));
+  assert(zip.file('internal-ranged2.woff'));
+  assert(zip.file('internal-keyframes.woff'));
+  assert(!zip.file('neverused.woff'));
+  assert(!zip.file('removed.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6735,15 +6735,15 @@ async function test_capture_font_used() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['internal.woff']);
-  assert(zip.files['link.woff']);
-  assert(zip.files['import.woff']);
-  assert(zip.files['pseudo1.woff']);
-  assert(zip.files['internal-ranged1.woff']);
-  assert(zip.files['internal-ranged2.woff']);
-  assert(zip.files['internal-keyframes.woff']);
-  assert(zip.files['neverused.woff']);
-  assert(zip.files['removed.woff']);
+  assert(zip.file('internal.woff'));
+  assert(zip.file('link.woff'));
+  assert(zip.file('import.woff'));
+  assert(zip.file('pseudo1.woff'));
+  assert(zip.file('internal-ranged1.woff'));
+  assert(zip.file('internal-ranged2.woff'));
+  assert(zip.file('internal-keyframes.woff'));
+  assert(zip.file('neverused.woff'));
+  assert(zip.file('removed.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6789,19 +6789,19 @@ async function test_capture_font_used_syntax() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['identifier-1.woff']);
-  assert(zip.files['identifier-2.woff']);
-  assert(zip.files['string-1.woff']);
-  assert(zip.files['string-2.woff']);
-  assert(zip.files['string-3.woff']);
-  assert(zip.files['string-4.woff']);
-  assert(zip.files['complex-name-1.woff']);
-  assert(zip.files['complex-name-2.woff']);
-  assert(zip.files['multiple-value-1.woff']);
-  assert(zip.files['multiple-value-2.woff']);
-  assert(zip.files['keyframes-1.woff']);
-  assert(zip.files['keyframes-2.woff']);
-  assert(zip.files['keyframes-3.woff']);
+  assert(zip.file('identifier-1.woff'));
+  assert(zip.file('identifier-2.woff'));
+  assert(zip.file('string-1.woff'));
+  assert(zip.file('string-2.woff'));
+  assert(zip.file('string-3.woff'));
+  assert(zip.file('string-4.woff'));
+  assert(zip.file('complex-name-1.woff'));
+  assert(zip.file('complex-name-2.woff'));
+  assert(zip.file('multiple-value-1.woff'));
+  assert(zip.file('multiple-value-2.woff'));
+  assert(zip.file('keyframes-1.woff'));
+  assert(zip.file('keyframes-2.woff'));
+  assert(zip.file('keyframes-3.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6847,11 +6847,11 @@ async function test_capture_font_used_scope() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files['internal1.woff']);
-  assert(!zip.files['internal2.woff']);
-  assert(zip.files['shadow1.woff']);
-  assert(zip.files['shadow2.woff']);
-  assert(zip.files['shadow3.woff']);
+  assert(!zip.file('internal1.woff'));
+  assert(!zip.file('internal2.woff'));
+  assert(zip.file('shadow1.woff'));
+  assert(zip.file('shadow2.woff'));
+  assert(zip.file('shadow3.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6896,11 +6896,11 @@ async function test_capture_font_used_var() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['var1.woff']);  // @FIXME
-  assert(zip.files['var2.woff']);  // @FIXME
-  assert(zip.files['var3.woff']);  // @FIXME
-  assert(zip.files['var4.woff']);  // @FIXME
-  assert(zip.files['var5.woff']);  // @FIXME
+  assert(zip.file('var1.woff'));  // @FIXME
+  assert(zip.file('var2.woff'));  // @FIXME
+  assert(zip.file('var3.woff'));  // @FIXME
+  assert(zip.file('var4.woff'));  // @FIXME
+  assert(zip.file('var5.woff'));  // @FIXME
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -6972,13 +6972,13 @@ async function test_capture_font_used_nesting() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['file1.woff']);
-  assert(zip.files['file1-1.woff']);
-  assert(zip.files['file1-1-1.woff']);
-  assert(zip.files['file1-1-2.woff']);
-  assert(!zip.files['file1-2.woff']);
-  assert(!zip.files['file1-2-1.woff']);
-  assert(!zip.files['file1-2-2.woff']);
+  assert(zip.file('file1.woff'));
+  assert(zip.file('file1-1.woff'));
+  assert(zip.file('file1-1-1.woff'));
+  assert(zip.file('file1-1-2.woff'));
+  assert(!zip.file('file1-2.woff'));
+  assert(!zip.file('file1-2-1.woff'));
+  assert(!zip.file('file1-2-2.woff'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7030,8 +7030,8 @@ async function test_capture_script() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['script1.js']);
-  assert(zip.files['script2.js']);
+  assert(zip.file('script1.js'));
+  assert(zip.file('script2.js'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7180,7 +7180,7 @@ async function test_capture_noscript() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['red.bmp']);
+  assert(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -7240,7 +7240,7 @@ async function test_capture_noscript_headless() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['red.bmp']);
+  assert(zip.file('red.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8330,10 +8330,10 @@ async function test_capture_frameRename_header() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(zip.files["frame1.html"]);
-  assert(zip.files["frame2.html"]);
-  assert(zip.files["frame3.py.html"]);
-  assert(zip.files["a中b#c.php.html"]);
+  assert(zip.file("frame1.html"));
+  assert(zip.file("frame2.html"));
+  assert(zip.file("frame3.py.html"));
+  assert(zip.file("a中b#c.php.html"));
 
   assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `frame1.html`);
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `frame2.html`);
@@ -8356,10 +8356,10 @@ async function test_capture_frameRename_header() {
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  assert(zip.files["frame1.html"]);
-  assert(zip.files["frame2.html"]);
-  assert(zip.files["frame3.py.html"]);
-  assert(zip.files["a中b#c.php.html"]);
+  assert(zip.file("frame1.html"));
+  assert(zip.file("frame2.html"));
+  assert(zip.file("frame3.py.html"));
+  assert(zip.file("a中b#c.php.html"));
 
   assert(doc.querySelectorAll('iframe')[0].getAttribute('src') === `frame1.html`);
   assert(doc.querySelectorAll('iframe')[1].getAttribute('src') === `frame2.html`);
@@ -8603,10 +8603,10 @@ async function test_capture_image() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['red.bmp']);
-  assert(zip.files['green.bmp']);
-  assert(zip.files['blue.bmp']);
-  assert(zip.files['yellow.bmp']);
+  assert(zip.file('red.bmp'));
+  assert(zip.file('green.bmp'));
+  assert(zip.file('blue.bmp'));
+  assert(zip.file('yellow.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8677,10 +8677,10 @@ async function test_capture_image() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['red.bmp']);
-  assert(zip.files['green.bmp']);
-  assert(zip.files['blue.bmp']);
-  assert(zip.files['yellow.bmp']);
+  assert(zip.file('red.bmp'));
+  assert(zip.file('green.bmp'));
+  assert(zip.file('blue.bmp'));
+  assert(zip.file('yellow.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8801,10 +8801,10 @@ async function test_capture_audio() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['horse.ogg']);
-  assert(zip.files['horse.mp3']);
-  assert(zip.files['horse_en.vtt']);
-  assert(zip.files['horse_zh.vtt']);
+  assert(zip.file('horse.ogg'));
+  assert(zip.file('horse.mp3'));
+  assert(zip.file('horse_en.vtt'));
+  assert(zip.file('horse_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8830,8 +8830,8 @@ async function test_capture_audio() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(Object.keys(zip.files).length > 1);
-  assert(zip.files['horse_en.vtt']);
-  assert(zip.files['horse_zh.vtt']);
+  assert(zip.file('horse_en.vtt'));
+  assert(zip.file('horse_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8858,10 +8858,10 @@ async function test_capture_audio() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['horse.ogg']);
-  assert(zip.files['horse.mp3']);
-  assert(zip.files['horse_en.vtt']);
-  assert(zip.files['horse_zh.vtt']);
+  assert(zip.file('horse.ogg'));
+  assert(zip.file('horse.mp3'));
+  assert(zip.file('horse_en.vtt'));
+  assert(zip.file('horse_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8968,10 +8968,10 @@ async function test_capture_video() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['small.mp4']);
-  assert(zip.files['small.webm']);
-  assert(zip.files['small_en.vtt']);
-  assert(zip.files['small_zh.vtt']);
+  assert(zip.file('small.mp4'));
+  assert(zip.file('small.webm'));
+  assert(zip.file('small_en.vtt'));
+  assert(zip.file('small_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -8998,8 +8998,8 @@ async function test_capture_video() {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(Object.keys(zip.files).length > 1);
-  assert(zip.files['small_en.vtt']);
-  assert(zip.files['small_zh.vtt']);
+  assert(zip.file('small_en.vtt'));
+  assert(zip.file('small_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9027,10 +9027,10 @@ async function test_capture_video() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['small.mp4']);
-  assert(zip.files['small.webm']);
-  assert(zip.files['small_en.vtt']);
-  assert(zip.files['small_zh.vtt']);
+  assert(zip.file('small.mp4'));
+  assert(zip.file('small.webm'));
+  assert(zip.file('small_en.vtt'));
+  assert(zip.file('small_zh.vtt'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9270,7 +9270,7 @@ async function test_capture_embed() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['helloworld.swf']);
+  assert(zip.file('helloworld.swf'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9491,11 +9491,11 @@ async function test_capture_object() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['demo.svg']);
-  assert(zip.files['green.bmp']);
-  assert(zip.files['demo2.svg']);
-  assert(zip.files['green2.bmp']);
-  assert(zip.files['demo-1.svg']);
+  assert(zip.file('demo.svg'));
+  assert(zip.file('green.bmp'));
+  assert(zip.file('demo2.svg'));
+  assert(zip.file('green2.bmp'));
+  assert(zip.file('demo-1.svg'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -9724,10 +9724,10 @@ async function test_capture_applet() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['applet.class']);
-  assert(zip.files['applet.jar']);
-  assert(zip.files['applet2.class']);
-  assert(zip.files['applet2.jar']);
+  assert(zip.file('applet.class'));
+  assert(zip.file('applet.jar'));
+  assert(zip.file('applet2.class'));
+  assert(zip.file('applet2.jar'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10131,11 +10131,11 @@ async function test_capture_svg() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["green.bmp"]);
-  assert(zip.files["blue.bmp"]);
-  assert(zip.files["script.js"]);
-  assert(zip.files["script2.js"]);
+  assert(zip.file("index.html"));
+  assert(zip.file("green.bmp"));
+  assert(zip.file("blue.bmp"));
+  assert(zip.file("script.js"));
+  assert(zip.file("script2.js"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10161,9 +10161,9 @@ async function test_capture_svg() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["index.svg"]);
-  assert(zip.files["green.bmp"]);
+  assert(zip.file("index.html"));
+  assert(zip.file("index.svg"));
+  assert(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.svg');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10195,7 +10195,7 @@ async function test_capture_mathml() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
+  assert(zip.file("index.html"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10277,9 +10277,9 @@ async function test_capture_recursive() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(!zip.files["red.bmp"]);
-  assert(!zip.files["blue.bmp"]);
+  assert(zip.file("index.html"));
+  assert(!zip.file("red.bmp"));
+  assert(!zip.file("blue.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10307,8 +10307,8 @@ async function test_capture_removeHidden() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(!zip.files["red.bmp"]);
+  assert(zip.file("index.html"));
+  assert(!zip.file("red.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -10340,8 +10340,8 @@ async function test_capture_removeHidden() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["red.bmp"]);
+  assert(zip.file("index.html"));
+  assert(zip.file("red.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11339,9 +11339,9 @@ async function test_capture_shadowRoot() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["green.bmp"]);
-  assert(zip.files["blue.bmp"]);
+  assert(zip.file("index.html"));
+  assert(zip.file("green.bmp"));
+  assert(zip.file("blue.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11374,9 +11374,9 @@ async function test_capture_shadowRoot() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(!zip.files["green.bmp"]);
-  assert(!zip.files["blue.bmp"]);
+  assert(zip.file("index.html"));
+  assert(!zip.file("green.bmp"));
+  assert(!zip.file("blue.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11405,8 +11405,8 @@ async function test_capture_shadowRoot_custom() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["green.bmp"]);
+  assert(zip.file("index.html"));
+  assert(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11428,8 +11428,8 @@ async function test_capture_shadowRoot_custom() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(!zip.files["green.bmp"]);
+  assert(zip.file("index.html"));
+  assert(!zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -11527,15 +11527,15 @@ async function test_capture_downLink_file() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(zip.files["redirect.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 8);
 
   var indexFile = zip.file('index.html');
@@ -11581,15 +11581,15 @@ async function test_capture_downLink_file() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["file4.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("file4.txt"));
   assert(Object.keys(zip.files).length === 5);
 
   var indexFile = zip.file('index.html');
@@ -11635,15 +11635,15 @@ async function test_capture_downLink_file() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files["file.bmp"]);
-  assert(!zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(!zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["redirect.txt"]);
+  assert(!zip.file("file.bmp"));
+  assert(!zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(!zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 1);
 
   var indexFile = zip.file('index.html');
@@ -11681,15 +11681,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["file2.txt"]);
-  assert(zip.files["unknown.bin"]);
-  assert(zip.files["file3.txt"]);
-  assert(zip.files["nofilename.py"]);
-  assert(!zip.files["file4.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(zip.file("file2.txt"));
+  assert(zip.file("unknown.bin"));
+  assert(zip.file("file3.txt"));
+  assert(zip.file("nofilename.py"));
+  assert(!zip.file("file4.txt"));
   assert(Object.keys(zip.files).length === 8);
 
   // space separator
@@ -11704,15 +11704,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["file4.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("file4.txt"));
   assert(Object.keys(zip.files).length === 4);
 
   // comma separator
@@ -11727,15 +11727,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["file4.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("file4.txt"));
   assert(Object.keys(zip.files).length === 4);
 
   // semicolon separator
@@ -11750,15 +11750,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["file4.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("file4.txt"));
   assert(Object.keys(zip.files).length === 4);
 
   // combined separator
@@ -11773,15 +11773,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["file4.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("file4.txt"));
   assert(Object.keys(zip.files).length === 4);
 
   // match full extension
@@ -11796,15 +11796,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files["file.bmp"]);
-  assert(!zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(!zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["redirect.txt"]);
+  assert(!zip.file("file.bmp"));
+  assert(!zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(!zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 1);
 
   // RegExp rule with flag
@@ -11819,15 +11819,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["file4.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("file4.txt"));
   assert(Object.keys(zip.files).length === 4);
 
   // RegExp rule with no flag
@@ -11842,15 +11842,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files["file.bmp"]);
-  assert(!zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(!zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["redirect.txt"]);
+  assert(!zip.file("file.bmp"));
+  assert(!zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(!zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 1);
 
   // RegExp rule
@@ -11865,15 +11865,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["file4.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("file4.txt"));
   assert(Object.keys(zip.files).length === 5);
 
   // match full extension
@@ -11888,15 +11888,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files["file.bmp"]);
-  assert(!zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(!zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["redirect.txt"]);
+  assert(!zip.file("file.bmp"));
+  assert(!zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(!zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 1);
 
   // unknown MIME should not match any extension
@@ -11911,15 +11911,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(zip.files["file3.txt"]);
-  assert(zip.files["nofilename.py"]);
-  assert(zip.files["redirect.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(zip.file("file3.txt"));
+  assert(zip.file("nofilename.py"));
+  assert(zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 9);
 
   // take URL filename if Content-Disposition without filename
@@ -11934,15 +11934,15 @@ async function test_capture_downLink_file_extFilter() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files["file.bmp"]);
-  assert(!zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(!zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["redirect.txt"]);
+  assert(!zip.file("file.bmp"));
+  assert(!zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(!zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 1);
 
   // mime: filter
@@ -11960,15 +11960,15 @@ mime:application/wsb.unknown`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(!zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["file2.txt"]);
-  assert(zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(zip.files["redirect.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(!zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(zip.file("file2.txt"));
+  assert(zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 6);
 
   // mime: filter with regex
@@ -11984,15 +11984,15 @@ mime:/text/.+/i`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(zip.files["redirect.txt"]);
+  assert(!zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 6);
 
   // mime: filter should not hit if no Content-Type header
@@ -12008,15 +12008,15 @@ mime:/.*/i`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["file2.txt"]);
-  assert(zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(zip.files["redirect.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(zip.file("file2.txt"));
+  assert(zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 8);
 
   // mime: filter should not hit for url mode
@@ -12032,15 +12032,15 @@ mime:/.*/i`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files["file.bmp"]);
-  assert(!zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(!zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["redirect.txt"]);
+  assert(!zip.file("file.bmp"));
+  assert(!zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(!zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 1);
 }
 
@@ -12074,15 +12074,15 @@ ${localhost}/capture_downLink_file/redirect.pyr#bar`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(!zip.files["file.bmp"]);
-  assert(!zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(!zip.files["redirect.txt"]);
+  assert(!zip.file("file.bmp"));
+  assert(!zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(!zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 3);
 
   // plain text rule must match full URL
@@ -12102,15 +12102,15 @@ ${localhost}/capture_downLink_file/file.css`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(!zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(zip.files["redirect.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(!zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 6);
 
   // chars after spaces should be stripped for a plain text rule
@@ -12130,15 +12130,15 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(!zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(zip.files["redirect.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(!zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 6);
 
   // RegExp rule
@@ -12161,15 +12161,15 @@ ${localhost}/capture_downLink_file/file.css\tbar`,
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["file.bmp"]);
-  assert(zip.files["file.css"]);
-  assert(!zip.files["page.html"]);
-  assert(zip.files["file.txt"]);
-  assert(!zip.files["file2.txt"]);
-  assert(!zip.files["unknown.bin"]);
-  assert(!zip.files["file3.txt"]);
-  assert(!zip.files["nofilename.py"]);
-  assert(zip.files["redirect.txt"]);
+  assert(zip.file("file.bmp"));
+  assert(zip.file("file.css"));
+  assert(!zip.file("page.html"));
+  assert(zip.file("file.txt"));
+  assert(!zip.file("file2.txt"));
+  assert(!zip.file("unknown.bin"));
+  assert(!zip.file("file3.txt"));
+  assert(!zip.file("nofilename.py"));
+  assert(zip.file("redirect.txt"));
   assert(Object.keys(zip.files).length === 5);
 }
 
@@ -13835,7 +13835,7 @@ async function test_capture_downLink_blob() {
 
   var imgFn = doc.querySelector('#file1 a').getAttribute('href');
   assert(imgFn.match(regex`^${uuid}\.bmp$`));
-  assert(zip.files[imgFn]);
+  assert(zip.file(imgFn));
 
   var page1Fn = doc.querySelector('#page1 a').getAttribute('href');
   assert(page1Fn.match(regex`^${uuid}\.html$`));
@@ -13878,7 +13878,7 @@ async function test_capture_downLink_blob_deep() {
 
   var imgFn = doc.querySelector('#file1 a').getAttribute('href');
   assert(imgFn.match(regex`^${uuid}\.bmp$`));
-  assert(zip.files[imgFn]);
+  assert(zip.file(imgFn));
 
   var page1Fn = doc.querySelector('#page1 a').getAttribute('href');
   assert(page1Fn.match(regex`^${uuid}\.html$`));
@@ -13890,7 +13890,7 @@ async function test_capture_downLink_blob_deep() {
   var imgFn1 = doc.querySelector('img').getAttribute('src');
   assert(imgFn1 === imgFn);
   var imgFn2 = doc.querySelectorAll('img')[1].getAttribute('src');
-  assert(zip.files[imgFn2]);
+  assert(zip.file(imgFn2));
 
   var page11Fn = doc.querySelector('a').getAttribute('href');
   assert(page11Fn.match(regex`^${uuid}\.html$`));
@@ -15429,14 +15429,14 @@ async function test_capture_sizeLimit() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['link.css']);
-  assert(zip.files['link2.css']);
-  assert(zip.files['img.bmp']);
-  assert(zip.files['img2.bmp']);
-  assert(zip.files['linked.txt']);
-  assert(zip.files['linked2.txt']);
-  assert(zip.files['linked.html']);
-  assert(zip.files['linked2.html']);
+  assert(zip.file('link.css'));
+  assert(zip.file('link2.css'));
+  assert(zip.file('img.bmp'));
+  assert(zip.file('img2.bmp'));
+  assert(zip.file('linked.txt'));
+  assert(zip.file('linked2.txt'));
+  assert(zip.file('linked.html'));
+  assert(zip.file('linked2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15461,14 +15461,14 @@ async function test_capture_sizeLimit() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['link.css']);
-  assert(!zip.files['link2.css']);
-  assert(zip.files['img.bmp']);
-  assert(!zip.files['img2.bmp']);
-  assert(zip.files['linked.txt']);
-  assert(!zip.files['linked2.txt']);
-  assert(zip.files['linked.html']);
-  assert(!zip.files['linked2.html']);
+  assert(zip.file('link.css'));
+  assert(!zip.file('link2.css'));
+  assert(zip.file('img.bmp'));
+  assert(!zip.file('img2.bmp'));
+  assert(zip.file('linked.txt'));
+  assert(!zip.file('linked2.txt'));
+  assert(zip.file('linked.html'));
+  assert(!zip.file('linked2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15493,14 +15493,14 @@ async function test_capture_sizeLimit() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['link.css']);
-  assert(!zip.files['link2.css']);
-  assert(zip.files['img.bmp']);
-  assert(!zip.files['img2.bmp']);
-  assert(zip.files['linked.txt']);
-  assert(!zip.files['linked2.txt']);
-  assert(zip.files['linked.html']);
-  assert(!zip.files['linked2.html']);
+  assert(zip.file('link.css'));
+  assert(!zip.file('link2.css'));
+  assert(zip.file('img.bmp'));
+  assert(!zip.file('img2.bmp'));
+  assert(zip.file('linked.txt'));
+  assert(!zip.file('linked2.txt'));
+  assert(zip.file('linked.html'));
+  assert(!zip.file('linked2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15537,8 +15537,8 @@ async function test_capture_sizeLimit_frame() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['index_1.html']);
-  assert(zip.files['index_2.html']);
+  assert(zip.file('index_1.html'));
+  assert(zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15557,8 +15557,8 @@ async function test_capture_sizeLimit_frame() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['index_1.html']);
-  assert(zip.files['index_2.html']);
+  assert(zip.file('index_1.html'));
+  assert(zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15577,8 +15577,8 @@ async function test_capture_sizeLimit_frame() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['index_1.html']);
-  assert(zip.files['index_2.html']);
+  assert(zip.file('index_1.html'));
+  assert(zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15596,8 +15596,8 @@ async function test_capture_sizeLimit_frame() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['index_1.html']);
-  assert(zip.files['index_2.html']);
+  assert(zip.file('index_1.html'));
+  assert(zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15616,8 +15616,8 @@ async function test_capture_sizeLimit_frame() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['index_1.html']);
-  assert(!zip.files['index_2.html']);
+  assert(zip.file('index_1.html'));
+  assert(!zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15636,8 +15636,8 @@ async function test_capture_sizeLimit_frame() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files['index_1.html']);
-  assert(!zip.files['index_2.html']);
+  assert(zip.file('index_1.html'));
+  assert(!zip.file('index_2.html'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15823,9 +15823,9 @@ async function test_capture_helpers() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(!zip.files["red.bmp"]);
-  assert(!zip.files["green.bmp"]);
+  assert(zip.file("index.html"));
+  assert(!zip.file("red.bmp"));
+  assert(!zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15856,9 +15856,9 @@ async function test_capture_helpers() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["red.bmp"]);
-  assert(zip.files["green.bmp"]);
+  assert(zip.file("index.html"));
+  assert(zip.file("red.bmp"));
+  assert(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15881,9 +15881,9 @@ async function test_capture_helpers() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["red.bmp"]);
-  assert(zip.files["green.bmp"]);
+  assert(zip.file("index.html"));
+  assert(zip.file("red.bmp"));
+  assert(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15906,9 +15906,9 @@ async function test_capture_helpers() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["red.bmp"]);
-  assert(zip.files["green.bmp"]);
+  assert(zip.file("index.html"));
+  assert(zip.file("red.bmp"));
+  assert(zip.file("green.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -15945,9 +15945,9 @@ async function test_capture_helpers_nesting() {
   });
 
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.files["index.html"]);
-  assert(zip.files["green.bmp"]);
-  assert(!zip.files["red.bmp"]);
+  assert(zip.file("index.html"));
+  assert(zip.file("green.bmp"));
+  assert(!zip.file("red.bmp"));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
