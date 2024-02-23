@@ -1382,8 +1382,7 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
   var doc = await readFileAsDocument(indexBlob);
 
   var cssFile = zip.file(doc.querySelector('link').getAttribute('href'));
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var text = (await readFileAsText(cssBlob)).trim();
+  var text = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert(text === `\
 @import "null.css";
 @font-face { font-family: invalid; src: url("null.woff"); }
@@ -1408,8 +1407,7 @@ p { background-image: url("data:image/bmp;filename=red.bmp;base64,Qk08AAAAAAAAAD
   var doc = await readFileAsDocument(indexBlob);
 
   var cssFile = zip.file(doc.querySelector('link').getAttribute('href'));
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var text = (await readFileAsText(cssBlob)).trim();
+  var text = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert(text === `\
 @import "null.css";
 @font-face { font-family: myFont; src: url("null.woff"); }
@@ -1908,8 +1906,7 @@ async function test_capture_blob() {
 #link-font { font-family: linkFont; }
 #link-bg { background-image: url("${regex`(${uuid}\.bmp)`}"); }`;
   var cssFile = zip.file(m[0]);
-  var cssBlob = await cssFile.async('blob');
-  var cssText = await readFileAsText(cssBlob);
+  var cssText = await readFileAsText(await cssFile.async('blob'));
   assert(m = cssText.trim().match(r));
   var fontFn = m[2];
   var imgFn = m[3];
@@ -1918,8 +1915,7 @@ async function test_capture_blob() {
 #link-import-font { font-family: linkImportFont; }
 #link-import-bg { background-image: url("${regex`(${uuid}\.bmp)`}"); }`;
   var cssFile = zip.file(m[1]);
-  var cssBlob = await cssFile.async('blob');
-  var cssText = await readFileAsText(cssBlob);
+  var cssText = await readFileAsText(await cssFile.async('blob'));
   assert(m = cssText.trim().match(r));
   assert(m[1] === fontFn);
   assert(m[2] === imgFn);
@@ -4874,16 +4870,14 @@ async function test_capture_css_rewriteCss_cross_origin() {
   var doc = await readFileAsDocument(indexBlob);
 
   var cssFile = zip.file('linked.css');
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var cssText = (await readFileAsText(cssBlob)).trim();
+  var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert(cssText === `\
 @import url("imported.css");
 #linked { background-color: green; }
 #unused { background-color: red; }`);
 
   var cssFile = zip.file('imported.css');
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var cssText = (await readFileAsText(cssBlob)).trim();
+  var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert(cssText === `\
 #imported { background-color: green; }
 #unused { background-color: red; }`);
@@ -4904,16 +4898,14 @@ async function test_capture_css_rewriteCss_cross_origin() {
   var doc = await readFileAsDocument(indexBlob);
 
   var cssFile = zip.file('linked.css');
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var cssText = (await readFileAsText(cssBlob)).trim();
+  var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert(cssText === `\
 @import url("imported.css");
 #linked { background-color: green; }
 #unused { background-color: red; }`);
 
   var cssFile = zip.file('imported.css');
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var cssText = (await readFileAsText(cssBlob)).trim();
+  var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert(cssText === `\
 #imported { background-color: green; }
 #unused { background-color: red; }`);
@@ -4934,15 +4926,13 @@ async function test_capture_css_rewriteCss_cross_origin() {
   var doc = await readFileAsDocument(indexBlob);
 
   var cssFile = zip.file('linked.css');
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var cssText = (await readFileAsText(cssBlob)).trim();
+  var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert(cssText === `\
 @import url("imported.css");
 #linked { background-color: green; }`);
 
   var cssFile = zip.file('imported.css');
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var cssText = (await readFileAsText(cssBlob)).trim();
+  var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert(cssText === `\
 #imported { background-color: green; }`);
 
@@ -4962,15 +4952,13 @@ async function test_capture_css_rewriteCss_cross_origin() {
   var doc = await readFileAsDocument(indexBlob);
 
   var cssFile = zip.file('linked.css');
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var cssText = (await readFileAsText(cssBlob)).trim();
+  var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert(cssText === `\
 @import url("imported.css");
 #linked { background-color: green; }`);
 
   var cssFile = zip.file('imported.css');
-  var cssBlob = new Blob([await cssFile.async('blob')], {type: "text/css"});
-  var cssText = (await readFileAsText(cssBlob)).trim();
+  var cssText = (await readFileAsText(await cssFile.async('blob'))).trim();
   assert(cssText === `\
 #imported { background-color: green; }`);
 }
@@ -12239,8 +12227,7 @@ async function test_capture_downLink_indepth() {
   assert(doc.querySelectorAll('a')[3].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-3.html#333`);
   assert(doc.querySelectorAll('a')[4].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked1-4.html#444`);
 
-  var sitemapFile = zip.file('index.json');
-  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
     "version": 3,
     "indexPages": [
@@ -12334,8 +12321,7 @@ async function test_capture_downLink_indepth() {
 
   assert(!zip.file('linked2-2.html'));
 
-  var sitemapFile = zip.file('index.json');
-  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
     "version": 3,
     "indexPages": [
@@ -12465,8 +12451,7 @@ async function test_capture_downLink_indepth() {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('a')[0].getAttribute('href') === `${localhost}/capture_downLink_indepth/linked3-1.html#2-2`);
 
-  var sitemapFile = zip.file('index.json');
-  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
     "version": 3,
     "indexPages": [
@@ -13138,8 +13123,7 @@ async function test_capture_downLink_indepth_datauri() {
   assert(doc.querySelectorAll('img')[0].getAttribute('src') === `dbc82be549e49d6db9a5719086722a4f1c5079cd.bmp`);
   assert(doc.querySelectorAll('img')[1].getAttribute('src') === `test.bmp`);
 
-  var sitemapFile = zip.file('index.json');
-  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
     "version": 3,
     "indexPages": [
@@ -13218,8 +13202,7 @@ async function test_capture_downLink_indepth_blob() {
   assert(imgFn === imgFn1);
   assert(imgFn !== imgFn2);
 
-  var sitemapFile = zip.file('index.json');
-  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
     "version": 3,
     "indexPages": [
@@ -13297,8 +13280,7 @@ async function test_capture_downLink_indepth_about() {
   assert(anchors[2].getAttribute('href') === `about:srcdoc`);
   assert(anchors[3].getAttribute('href') === `about:invalid`);
 
-  var sitemapFile = zip.file('index.json');
-  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
     "version": 3,
     "indexPages": [
@@ -13597,8 +13579,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('img[src="1-1.bmp"]'));
 
-  var sitemapFile = zip.file('index.json');
-  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
     "version": 3,
     "indexPages": [
@@ -13678,8 +13659,7 @@ ${localhost}/capture_downLink_indepth_urlExtra/1-3.txt`,
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('img[src="./1-2.bmp"]'));
 
-  var sitemapFile = zip.file('index.json');
-  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
     "version": 3,
     "indexPages": [
@@ -13770,8 +13750,7 @@ async function test_capture_downLink_indepth_case() {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelector('img').getAttribute('src') === `Green.bmp`);
 
-  var sitemapFile = zip.file('index.json');
-  var sitemapBlob = new Blob([await sitemapFile.async('blob')], {type: "application/json"});
+  var sitemapBlob = await zip.file('index.json').async('blob');
   var expectedData = {
     "version": 3,
     "indexPages": [
