@@ -420,7 +420,7 @@
       }
 
       // check downLink
-      if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:') || url.startsWith('blob:')) {
+      if (['http:', 'https:', 'file:', 'blob:'].some(p => url.startsWith(p))) {
         if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
             (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
           let refPolicy = docRefPolicy;
@@ -749,7 +749,7 @@
                     captureRewriteAttr(elem, "content", metaRefresh.time + (url ? "; url=" + url : ""));
 
                     // check downLink
-                    if (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('file:')) {
+                    if (['http:', 'https:', 'file:'].some(p => url.startsWith(p))) {
                       if (["header", "url"].includes(options["capture.downLink.file.mode"]) || 
                           (parseInt(options["capture.downLink.doc.depth"], 10) > 0 && options['capture.saveAs'] !== 'singleHtml')) {
                         downLinkTasks.push(async () => {
@@ -3807,7 +3807,7 @@
 
   capturer.getErrorUrl = function (sourceUrl, options) {
     if (!options || !options["capture.linkUnsavedUri"]) {
-      if (sourceUrl.startsWith("http:") || sourceUrl.startsWith("https:") || sourceUrl.startsWith("file:") || sourceUrl.startsWith("about:")) {
+      if (['http:', 'https:', 'file:', 'about:'].some(p => sourceUrl.startsWith(p))) {
         return `urn:scrapbook:download:error:${sourceUrl}`;
       } else if (sourceUrl.startsWith("data:")) {
         return `urn:scrapbook:download:error:data:`;
