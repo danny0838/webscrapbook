@@ -3959,19 +3959,15 @@ it('test_capture_css_styleInline', async function () {
 });
 
 /**
- * Check if alternative/disabled stylesheets are handled correctly
+ * Save as-is when default (persistent and preferred) stylesheets are picked.
  *
- * capture.style
  * capturer.captureDocument
+ * capturer.DocumentCssHandler.isBrowserPick
  */
-it('test_capture_css_disabled', async function () {
-  var options = {
-    "capture.style": "save",
-  };
-
+it('test_capture_css_disabled_default', async function () {
   var blob = await capture({
-    url: `${localhost}/capture_css_disabled/index1.html`,
-    options: Object.assign({}, baseOptions, options),
+    url: `${localhost}/capture_css_disabled/default.html`,
+    options: baseOptions,
   }, {delay: 100});
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
@@ -3992,98 +3988,177 @@ it('test_capture_css_disabled', async function () {
   assert(zip.file("default2.css"));
   assert(zip.file("alternative.css"));
   assert(zip.file("alternative2.css"));
+});
 
+/**
+ * Save as-is when an alternative stylesheets group is picked.
+ *
+ * capturer.captureDocument
+ * capturer.DocumentCssHandler.isBrowserPick
+ */
+$it.xfailIf(
+  userAgent.is('chromium'),
+  'browser pick of alternative stylesheet is not supported in Chromium',
+)('test_capture_css_disabled_picked', async function () {
   var blob = await capture({
-    url: `${localhost}/capture_css_disabled/index2.html`,
-    options: Object.assign({}, baseOptions, options),
+    url: `${localhost}/capture_css_disabled/picked.html`,
+    options: baseOptions,
   }, {delay: 100});
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  if (userAgent.is('chromium')) {
-    // Chromium: browser pick of alternative CSS is not supported
-    var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
-    assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
-    assert(styleElems[1].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
-    assert(styleElems[2].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
-    assert(styleElems[3].matches('[href="alternative.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
-    assert(styleElems[4].matches('[href="alternative2.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
-    var styleElem = doc.querySelector('style');
-    assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
-    assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
+  var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
+  assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
+  assert(styleElems[1].matches('[href="default.css"][title]:not([rel~="alternate"])'));
+  assert(styleElems[2].matches('[href="default2.css"][title]:not([rel~="alternate"])'));
+  assert(styleElems[3].matches('[href="alternative.css"][title][rel~="alternate"]'));
+  assert(styleElems[4].matches('[href="alternative2.css"][title][rel~="alternate"]'));
+  var styleElem = doc.querySelector('style');
+  assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
+  assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
 
-    assert(zip.file("persistent.css"));
-    assert(!zip.file("default.css"));
-    assert(!zip.file("default2.css"));
-    assert(zip.file("alternative.css"));
-    assert(zip.file("alternative2.css"));
-  } else {
-    var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
-    assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
-    assert(styleElems[1].matches('[href="default.css"][title]:not([rel~="alternate"])'));
-    assert(styleElems[2].matches('[href="default2.css"][title]:not([rel~="alternate"])'));
-    assert(styleElems[3].matches('[href="alternative.css"][title][rel~="alternate"]'));
-    assert(styleElems[4].matches('[href="alternative2.css"][title][rel~="alternate"]'));
-    var styleElem = doc.querySelector('style');
-    assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
-    assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
+  assert(zip.file("persistent.css"));
+  assert(zip.file("default.css"));
+  assert(zip.file("default2.css"));
+  assert(zip.file("alternative.css"));
+  assert(zip.file("alternative2.css"));
+});
 
-    assert(zip.file("persistent.css"));
-    assert(zip.file("default.css"));
-    assert(zip.file("default2.css"));
-    assert(zip.file("alternative.css"));
-    assert(zip.file("alternative2.css"));
-  }
-
+/**
+ * Save enabled stylesheets and all alternative stylesheets in Chromium.
+ *
+ * Chromium has a bug that the disabled propery of an alternative stylesheet
+ * is always false, although they are actually not applied. Save all
+ * alternative stylesheets as the fallback behavior for better cross-platform
+ * interoperability.
+ *
+ * ref: https://issues.chromium.org/issues/41460238
+ *
+ * capturer.captureDocument
+ * capturer.DocumentCssHandler.isBrowserPick
+ */
+$it.skipIf(
+  !userAgent.is('chromium'),
+)('test_capture_css_disabled_picked_chromium', async function () {
   var blob = await capture({
-    url: `${localhost}/capture_css_disabled/index3.html`,
-    options: Object.assign({}, baseOptions, options),
+    url: `${localhost}/capture_css_disabled/picked.html`,
+    options: baseOptions,
   }, {delay: 100});
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
 
-  if (userAgent.is('chromium')) {
-    // Chromium: browser pick of alternative CSS is not supported
-    var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
-    assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
-    assert(styleElems[1].matches('[href="default.css"]:not([title]):not([rel~="alternate"])'));
-    assert(styleElems[2].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
-    assert(styleElems[3].matches('[href="alternative.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
-    assert(styleElems[4].matches('[href="alternative2.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
-    var styleElem = doc.querySelector('style');
-    assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
-    assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
+  var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
+  assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
+  assert(styleElems[1].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+  assert(styleElems[2].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+  assert(styleElems[3].matches('[href="alternative.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
+  assert(styleElems[4].matches('[href="alternative2.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
+  var styleElem = doc.querySelector('style');
+  assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
+  assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
 
-    assert(zip.file("persistent.css"));
-    assert(zip.file("default.css"));
-    assert(!zip.file("default2.css"));
-    assert(zip.file("alternative.css"));
-    assert(zip.file("alternative2.css"));
-  } else {
-    var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
-    assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
-    assert(styleElems[1].matches('[href="default.css"]:not([title]):not([rel~="alternate"])'));
-    assert(styleElems[2].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
-    assert(styleElems[3].matches('[href="alternative.css"]:not([title]):not([rel~="alternate"])'));
-    assert(styleElems[4].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
-    var styleElem = doc.querySelector('style');
-    assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
-    assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
+  assert(zip.file("persistent.css"));
+  assert(!zip.file("default.css"));
+  assert(!zip.file("default2.css"));
+  assert(zip.file("alternative.css"));
+  assert(zip.file("alternative2.css"));
+});
 
-    assert(zip.file("persistent.css"));
-    assert(zip.file("default.css"));
-    assert(!zip.file("default2.css"));
-    assert(zip.file("alternative.css"));
-    assert(!zip.file("alternative2.css"));
-  }
+/**
+ * Mark and skip saving disabled stylesheets when picked by scripts.
+ *
+ * capturer.captureDocument
+ * capturer.DocumentCssHandler.isBrowserPick
+ */
+$it.xfailIf(
+  userAgent.is('chromium'),
+  'disabled property of an alternative stylesheet is misleading in Chromium',
+)('test_capture_css_disabled_scripted', async function () {
+  var blob = await capture({
+    url: `${localhost}/capture_css_disabled/scripted1.html`,
+    options: baseOptions,
+  }, {delay: 100});
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
+  assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
+  assert(styleElems[1].matches('[href="default.css"]:not([title]):not([rel~="alternate"])'));
+  assert(styleElems[2].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+  assert(styleElems[3].matches('[href="alternative.css"]:not([title]):not([rel~="alternate"])'));
+  assert(styleElems[4].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+  var styleElem = doc.querySelector('style');
+  assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
+  assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
+
+  assert(zip.file("persistent.css"));
+  assert(zip.file("default.css"));
+  assert(!zip.file("default2.css"));
+  assert(zip.file("alternative.css"));
+  assert(!zip.file("alternative2.css"));
 
   var blob = await capture({
-    url: `${localhost}/capture_css_disabled/index4.html`,
-    options: Object.assign({}, baseOptions, options),
+    url: `${localhost}/capture_css_disabled/scripted2.html`,
+    options: baseOptions,
+  }, {delay: 100});
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElem = doc.querySelector('link[rel~="stylesheet"]');
+  assert(styleElem.matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+  var styleElem = doc.querySelector('style');
+  assert(styleElem.matches('[data-scrapbook-css-disabled]'));
+  assert(styleElem.textContent.trim() === ``);
+
+  assert(!zip.file("persistent.css"));
+});
+
+/**
+ * Save enabled stylesheets and all alternative stylesheets in Chromium.
+ *
+ * see also: case test_capture_css_disabled_picked_chromium
+ *
+ * capturer.captureDocument
+ * capturer.DocumentCssHandler.isBrowserPick
+ */
+$it.skipIf(
+  !userAgent.is('chromium'),
+)('test_capture_css_disabled_scripted_chromium', async function () {
+  var blob = await capture({
+    url: `${localhost}/capture_css_disabled/scripted1.html`,
+    options: baseOptions,
+  }, {delay: 100});
+  var zip = await new JSZip().loadAsync(blob);
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('link[rel~="stylesheet"]');
+  assert(styleElems[0].matches('[href="persistent.css"]:not([title]):not([rel~="alternate"])'));
+  assert(styleElems[1].matches('[href="default.css"]:not([title]):not([rel~="alternate"])'));
+  assert(styleElems[2].matches(':not([href]):not([title]):not([rel~="alternate"])[data-scrapbook-css-disabled]'));
+  assert(styleElems[3].matches('[href="alternative.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
+  assert(styleElems[4].matches('[href="alternative2.css"]:not([title])[rel~="alternate"]:not([data-scrapbook-css-disabled])'));
+  var styleElem = doc.querySelector('style');
+  assert(!styleElem.matches('[data-scrapbook-css-disabled]'));
+  assert(styleElem.textContent.trim() === `#internal { background: yellow; }`);
+
+  assert(zip.file("persistent.css"));
+  assert(zip.file("default.css"));
+  assert(!zip.file("default2.css"));
+  assert(zip.file("alternative.css"));
+  assert(zip.file("alternative2.css"));
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_disabled/scripted2.html`,
+    options: baseOptions,
   }, {delay: 100});
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
