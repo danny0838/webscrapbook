@@ -3280,7 +3280,7 @@ it('test_capture_base_dynamic_bad', async function () {
 /**
  * Check if CSS-related URLs after base[href] are handled correctly.
  */
-itToFailIf(
+itXfailIf(
   userAgent.is('chromium') && userAgent.major < 96,
   'referrer for an imported CSS is erroneously set to document base in Chromium < 96',
 )('test_capture_base_dynamic_css', async function () {
@@ -3351,7 +3351,7 @@ itToFailIf(
 /**
  * Check if CSS-related URLs before base[href] are handled correctly.
  */
-itToFailIf(
+itXfailIf(
   userAgent.is('chromium') && userAgent.major < 96,
   'referrer for an imported CSS is erroneously set to document base in Chromium < 96',
 )('test_capture_base_dynamic_css_bad', async function () {
@@ -3591,7 +3591,7 @@ it('test_capture_base_dynamic_frame_bad', async function () {
  *
  * capture.base
  */
-itToFail()('test_capture_base_dynamic_scripted', async function () {
+itXfail()('test_capture_base_dynamic_scripted', async function () {
   var options = {
     "capture.base": "blank",
   };
@@ -6403,7 +6403,7 @@ itSkipIfNoAdoptedStylesheet()('test_capture_imageBackground_used_adopted', async
  *
  * capture.imageBackground
  */
-itToFail()('test_capture_imageBackground_used_var', async function () {
+itXfail()('test_capture_imageBackground_used_var', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6827,7 +6827,7 @@ it('test_capture_font_used_scope', async function () {
  *
  * capture.font = "save-used"
  */
-itToFail()('test_capture_font_used_var', async function () {
+itXfail()('test_capture_font_used_var', async function () {
   /* capture.font = save-used */
   var options = {
     "capture.rewriteCss": "url",
@@ -13915,7 +13915,7 @@ it('test_capture_downLink_blob', async function () {
  * capture.downLink.file.mode
  * capture.downLink.file.extFilter
  */
-itToFailIf(
+itXfailIf(
   userAgent.is('firefox'),
   'Fetching a blob URL generated in a page from an extension page is not allowed in Firefox',
 )('test_capture_downLink_blob_deep', async function () {

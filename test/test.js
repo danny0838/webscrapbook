@@ -193,7 +193,7 @@ function itSkipIfNoAtLayer(reason = '@layer CSS rule not supported') {
   return it;
 }
 
-function itToFail(reason) {
+function itXfail(reason) {
   return (title, callback) => {
     const titleRewritten = `${title} - expected failure${reason ? ' (' + reason + ')' : ''}`;
     const callbackRewritten = async function (...args) {
@@ -209,11 +209,11 @@ function itToFail(reason) {
   };
 }
 
-function itToFailIf(cond, reason) {
+function itXfailIf(cond, reason) {
   if (!cond) {
     return it;
   }
-  return itToFail(reason);
+  return itXfail(reason);
 }
 
 class TestSuite {
@@ -475,8 +475,8 @@ class TestSuite {
     itSkipIfNoHostContextPseudo,
     itSkipIfNoAtCounterStyle,
     itSkipIfNoAtLayer,
-    itToFail,
-    itToFailIf,
+    itXfail,
+    itXfailIf,
 
     localhost: suite.localhost,
     localhost2: suite.localhost2,
