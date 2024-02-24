@@ -3972,7 +3972,7 @@ it('test_capture_css_disabled', async function () {
   var blob = await capture({
     url: `${localhost}/capture_css_disabled/index1.html`,
     options: Object.assign({}, baseOptions, options),
-  });
+  }, {delay: 100});
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -3996,8 +3996,7 @@ it('test_capture_css_disabled', async function () {
   var blob = await capture({
     url: `${localhost}/capture_css_disabled/index2.html`,
     options: Object.assign({}, baseOptions, options),
-    delay: 100,
-  });
+  }, {delay: 100});
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4041,8 +4040,7 @@ it('test_capture_css_disabled', async function () {
   var blob = await capture({
     url: `${localhost}/capture_css_disabled/index3.html`,
     options: Object.assign({}, baseOptions, options),
-    delay: 100,
-  });
+  }, {delay: 100});
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
@@ -4086,8 +4084,7 @@ it('test_capture_css_disabled', async function () {
   var blob = await capture({
     url: `${localhost}/capture_css_disabled/index4.html`,
     options: Object.assign({}, baseOptions, options),
-    delay: 100,
-  });
+  }, {delay: 100});
   var zip = await new JSZip().loadAsync(blob);
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
