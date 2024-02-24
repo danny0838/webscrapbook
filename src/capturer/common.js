@@ -5054,10 +5054,14 @@
    *   technical restriction—even if Document.fonts can be checked, it's
    *   hard to trace whether a "loading" status will become "loaded" or
    *   "error".
-   * - Scoped @font-face is hard to implement and is unlikely used. But for
-   *   completeness we currently implement as if it's scoped, just like
-   *   @keyframes.
-   *   ref: https://bugs.chromium.org/p/chromium/issues/detail?id=336876
+   * - Implement scoping of @font-face, @keyframes, etc., according to the
+   *   spec (https://drafts.csswg.org/css-scoping/#shadow-names), regardless
+   *   that it's not yet correctly implemented by most browsers:
+   *   - e.g. In Chromium 121 and Firefox 124, @font-face in a shadow DOM
+   *     doesn't work.
+   *   - e.g. In Chromium 121 and Firefox 124, animation in a shadow DOM
+   *     does not search @keyframes from the ancestor scopes.
+   *   - ref: https://wiki.csswg.org/spec/css-scoping
    ***************************************************************************/
 
   capturer.DocumentCssResourcesHandler = class DocumentCssResourcesHandler {

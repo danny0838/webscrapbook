@@ -6,6 +6,9 @@
 <style>
 @font-face { font-family: internal1; src: url("internal1.woff"); }
 @font-face { font-family: internal2; src: url("internal2.woff"); }
+@font-face { font-family: internal3; src: url("internal3.woff"); }
+@font-face { font-family: internal5; src: url("internal5.woff"); }
+#shadow1::part(internal5) { font-family: internal5; }
 </style>
 </head>
 <body>
@@ -23,10 +26,21 @@ s.innerHTML = `<style>
 
 #shadow3 { font-family: internal2; }
 @font-face { font-family: internal2; src: url("shadow3.woff"); }
+
+#shadow4 { font-family: internal3; }
+
+#shadow5 { font-family: internal4; }
 </style>
 <blockquote id="shadow1">shadow1</blockquote>
 <blockquote id="shadow2">shadow2</blockquote>
-<blockquote id="shadow3">shadow3</blockquote>`;
+<blockquote id="shadow3">shadow3</blockquote>
+<blockquote id="shadow4">shadow4</blockquote>
+<blockquote id="shadow5">shadow5</blockquote>
+<blockquote part="internal5">shadow6</blockquote>
+`;
 </script>
+<style>
+@font-face { font-family: internal4; src: url("internal4.woff"); }
+</style>
 </body>
 </html>

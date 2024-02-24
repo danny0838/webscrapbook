@@ -13,6 +13,17 @@
   from { background-image: url("internal-keyframes2.bmp"); }
   to { transform: translateX(40px); }
 }
+
+@keyframes internal3 {
+  from { background-image: url("internal-keyframes3.bmp"); }
+  to { transform: translateX(40px); }
+}
+
+@keyframes internal5 {
+  from { background-image: url("internal-keyframes5.bmp"); }
+  to { transform: translateX(40px); }
+}
+#shadow1::part(internal5) { animation: internal5 3s linear infinite; }
 </style>
 </head>
 <body>
@@ -45,11 +56,28 @@ s.innerHTML = `<style>
   from { background-image: url("shadow-keyframes3.bmp"); }
   to { transform: translateX(40px); }
 }
+
+#shadow-keyframes4 {
+  animation: internal3 3s linear infinite;
+}
+
+#shadow-keyframes5 {
+  animation: internal4 3s linear infinite;
+}
 </style>
 <blockquote id="shadow-keyframes1">shadow1</blockquote>
 <blockquote id="shadow-keyframes2">shadow2</blockquote>
 <blockquote id="shadow-keyframes3">shadow3</blockquote>
+<blockquote id="shadow-keyframes4">shadow4</blockquote>
+<blockquote id="shadow-keyframes5">shadow5</blockquote>
+<blockquote part="internal5">shadow6</blockquote>
 `;
 </script>
+<style>
+@keyframes internal4 {
+  from { background-image: url("internal-keyframes4.bmp"); }
+  to { transform: translateX(40px); }
+}
+</style>
 </body>
 </html>
