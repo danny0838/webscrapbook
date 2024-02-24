@@ -253,7 +253,7 @@ async function capture(params, options = {}) {
 async function captureHeadless(params, options = {}) {
   return await capture(
     Object.assign({mode: "source"}, params),
-    Object.assign(options, {headless: true}),
+    Object.assign({}, options, {headless: true}),
   );
 }
 
