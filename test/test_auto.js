@@ -6028,7 +6028,7 @@ it('test_capture_imageBackground_used', async function () {
     "capture.imageBackground": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used/index.html`,
+    url: `${localhost}/capture_imageBackground_used/basic/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6112,7 +6112,7 @@ it('test_capture_imageBackground_used', async function () {
     "capture.imageBackground": "save-used",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_imageBackground_used/index.html`,
+    url: `${localhost}/capture_imageBackground_used/basic/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6202,7 +6202,7 @@ it('test_capture_imageBackground_used_root', async function () {
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used_root/index.html`,
+    url: `${localhost}/capture_imageBackground_used/root/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6228,7 +6228,7 @@ it('test_capture_imageBackground_used_syntax', async function () {
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used_syntax/index.html`,
+    url: `${localhost}/capture_imageBackground_used/syntax/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6275,7 +6275,7 @@ $it.skipIf($.noAtLayer)('test_capture_imageBackground_used_syntax_at', async fun
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used_syntax_at/index.html`,
+    url: `${localhost}/capture_imageBackground_used/syntax_at/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6308,7 +6308,7 @@ it('test_capture_imageBackground_used_inline', async function () {
     "capture.styleInline": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used_inline/index.html`,
+    url: `${localhost}/capture_imageBackground_used/inline/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6342,7 +6342,7 @@ it('test_capture_imageBackground_used_shadow', async function () {
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used_shadow/index.html`,
+    url: `${localhost}/capture_imageBackground_used/shadow/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6380,7 +6380,7 @@ it('test_capture_imageBackground_used_scope', async function () {
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used_scope/index.html`,
+    url: `${localhost}/capture_imageBackground_used/scope/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6449,7 +6449,7 @@ $it.skipIf($.noAdoptedStylesheet)('test_capture_imageBackground_used_adopted', a
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used_adopted/index.html`,
+    url: `${localhost}/capture_imageBackground_used/adopted/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6482,7 +6482,7 @@ $it.xfail()('test_capture_imageBackground_used_var', async function () {
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used_var/index.html`,
+    url: `${localhost}/capture_imageBackground_used/var/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6563,7 +6563,7 @@ $it.skipIf($.noNestingCss)('test_capture_imageBackground_used_nesting', async fu
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used_nesting/index.html`,
+    url: `${localhost}/capture_imageBackground_used/nesting/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6699,7 +6699,7 @@ it('test_capture_font_used', async function () {
     "capture.font": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used/index.html`,
+    url: `${localhost}/capture_font_used/basic/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6748,7 +6748,7 @@ it('test_capture_font_used', async function () {
     "capture.font": "save-used",
   };
   var blob = await captureHeadless({
-    url: `${localhost}/capture_font_used/index.html`,
+    url: `${localhost}/capture_font_used/basic/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6802,7 +6802,7 @@ it('test_capture_font_used_syntax', async function () {
     "capture.font": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used_syntax/index.html`,
+    url: `${localhost}/capture_font_used/syntax/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6860,7 +6860,7 @@ it('test_capture_font_used_scope', async function () {
     "capture.font": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used_scope/index.html`,
+    url: `${localhost}/capture_font_used/scope/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6907,7 +6907,7 @@ $it.xfail()('test_capture_font_used_var', async function () {
     "capture.font": "save-used",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used_var/index.html`,
+    url: `${localhost}/capture_font_used/var/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6973,7 +6973,7 @@ $it.skipIf($.noNestingCss)('test_capture_font_used_nesting', async function () {
     "capture.rewriteCss": "url",
   };
   var blob = await capture({
-    url: `${localhost}/capture_font_used_nesting/index.html`,
+    url: `${localhost}/capture_font_used/nesting/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
