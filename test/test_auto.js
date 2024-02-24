@@ -6031,78 +6031,52 @@ it('test_capture_imageBackground_used', async function () {
     url: `${localhost}/capture_imageBackground_used/basic/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
-
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('link.css'));
-  assert(zip.file('import.css'));
-  assert(zip.file('inline.bmp'));
   assert(zip.file('internal.bmp'));
+  assert(!zip.file('internal-unused.bmp'));
+  assert(!zip.file('internal-noncaptured.bmp'));
   assert(zip.file('link.bmp'));
+  assert(!zip.file('link-unused.bmp'));
+  assert(!zip.file('link-noncaptured.bmp'));
   assert(zip.file('import.bmp'));
-  assert(zip.file('pseudo1.bmp'));
-  assert(zip.file('pseudo2.bmp'));
-  assert(zip.file('pseudo3.bmp'));
-  assert(zip.file('pseudo4.bmp'));
-  assert(zip.file('link-keyframes.css'));
-  assert(zip.file('import-keyframes.css'));
-  assert(zip.file('internal-keyframes.bmp'));
-  assert(zip.file('link-keyframes.bmp'));
-  assert(zip.file('import-keyframes.bmp'));
-  assert(!zip.file('neverused.bmp'));
-  assert(!zip.file('removed.bmp'));
+  assert(!zip.file('import-unused.bmp'));
+  assert(!zip.file('import-noncaptured.bmp'));
+  assert(zip.file('pseudo-hover.bmp'));
+  assert(zip.file('pseudo-active.bmp'));
+  assert(zip.file('pseudo-before.bmp'));
+  assert(zip.file('pseudo-after.bmp'));
+  assert(zip.file('pseudo-first-letter.bmp'));
+  assert(zip.file('pseudo-first-line.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-
   var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[0].textContent.trim() === `#internal { background-image: url("internal.bmp"); }`);
-  assert(styleElems[2].textContent.trim() === `\
-#pseudo1::before { background-image: url("pseudo1.bmp"); content: "X"; }
-#pseudo2::after { background-image: url("pseudo2.bmp"); content: "X"; }
-#pseudo3::first-letter { background-image: url("pseudo3.bmp"); }
-#pseudo4::first-line { background-image: url("pseudo4.bmp"); }`);
+  assert(styleElems[1].textContent.trim() === `\
+#internal { background-image: url("internal.bmp"); }
+#internal-unused { background-image: url(""); }
+#internal-noncaptured { background-image: url(""); }`);
   assert(styleElems[3].textContent.trim() === `\
-@keyframes internal {
-  from { background-image: url("internal-keyframes.bmp"); }
-  to { transform: translateX(40px); }
-}`);
-  assert(styleElems[5].textContent.trim() === `#neverused { background-image: url(""); }`);
-  assert(styleElems[6].textContent.trim() === `\
-@keyframes neverused {
-  from { background-image: url(""); }
-  to { transform: translateX(40px); }
-}`);
-  assert(styleElems[7].textContent.trim() === `#removed-internal { background-image: url(""); }`);
-  assert(styleElems[8].textContent.trim() === `\
-@keyframes removed {
-  from { background-image: url(""); }
-  to { transform: translateX(40px); }
-}`);
+#pseudo-hover:hover { background-image: url("pseudo-hover.bmp"); }
+#pseudo-active:active { background-image: url("pseudo-active.bmp"); }
+#pseudo-before::before { background-image: url("pseudo-before.bmp"); content: "X"; }
+#pseudo-after::after { background-image: url("pseudo-after.bmp"); content: "X"; }
+#pseudo-first-letter::first-letter { background-image: url("pseudo-first-letter.bmp"); }
+#pseudo-first-line::first-line { background-image: url("pseudo-first-line.bmp"); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#link { background-image: url("link.bmp"); }`);
+  assert(text.trim() === `\
+#link { background-image: url("link.bmp"); }
+#link-unused { background-image: url(""); }
+#link-noncaptured { background-image: url(""); }`);
 
   var cssFile = zip.file('import.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#import { background-image: url("import.bmp"); }`);
-
-  var cssFile = zip.file('link-keyframes.css');
-  var text = await readFileAsText(await cssFile.async('blob'));
   assert(text.trim() === `\
-@keyframes link {
-  from { background-image: url("link-keyframes.bmp"); }
-  to { transform: translateX(40px); }
-}`);
-
-  var cssFile = zip.file('import-keyframes.css');
-  var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `\
-@keyframes import {
-  from { background-image: url("import-keyframes.bmp"); }
-  to { transform: translateX(40px); }
-}`);
+#import { background-image: url("import.bmp"); }
+#import-unused { background-image: url(""); }
+#import-noncaptured { background-image: url(""); }`);
 
   /* capture.imageBackground = save-used (headless) */
   // the result is same as save
@@ -6115,78 +6089,52 @@ it('test_capture_imageBackground_used', async function () {
     url: `${localhost}/capture_imageBackground_used/basic/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
-
   var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('link.css'));
-  assert(zip.file('import.css'));
-  assert(zip.file('inline.bmp'));
   assert(zip.file('internal.bmp'));
+  assert(zip.file('internal-unused.bmp'));
+  assert(zip.file('internal-noncaptured.bmp'));
   assert(zip.file('link.bmp'));
+  assert(zip.file('link-unused.bmp'));
+  assert(zip.file('link-noncaptured.bmp'));
   assert(zip.file('import.bmp'));
-  assert(zip.file('pseudo1.bmp'));
-  assert(zip.file('pseudo2.bmp'));
-  assert(zip.file('pseudo3.bmp'));
-  assert(zip.file('pseudo4.bmp'));
-  assert(zip.file('link-keyframes.css'));
-  assert(zip.file('import-keyframes.css'));
-  assert(zip.file('internal-keyframes.bmp'));
-  assert(zip.file('link-keyframes.bmp'));
-  assert(zip.file('import-keyframes.bmp'));
-  assert(zip.file('neverused.bmp'));
-  assert(zip.file('removed.bmp'));
+  assert(zip.file('import-unused.bmp'));
+  assert(zip.file('import-noncaptured.bmp'));
+  assert(zip.file('pseudo-hover.bmp'));
+  assert(zip.file('pseudo-active.bmp'));
+  assert(zip.file('pseudo-before.bmp'));
+  assert(zip.file('pseudo-after.bmp'));
+  assert(zip.file('pseudo-first-letter.bmp'));
+  assert(zip.file('pseudo-first-line.bmp'));
 
   var indexFile = zip.file('index.html');
   var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
   var doc = await readFileAsDocument(indexBlob);
-
   var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[0].textContent.trim() === `#internal { background-image: url("internal.bmp"); }`);
-  assert(styleElems[2].textContent.trim() === `\
-#pseudo1::before { background-image: url("pseudo1.bmp"); content: "X"; }
-#pseudo2::after { background-image: url("pseudo2.bmp"); content: "X"; }
-#pseudo3::first-letter { background-image: url("pseudo3.bmp"); }
-#pseudo4::first-line { background-image: url("pseudo4.bmp"); }`);
+  assert(styleElems[1].textContent.trim() === `\
+#internal { background-image: url("internal.bmp"); }
+#internal-unused { background-image: url("internal-unused.bmp"); }
+#internal-noncaptured { background-image: url("internal-noncaptured.bmp"); }`);
   assert(styleElems[3].textContent.trim() === `\
-@keyframes internal {
-  from { background-image: url("internal-keyframes.bmp"); }
-  to { transform: translateX(40px); }
-}`);
-  assert(styleElems[5].textContent.trim() === `#neverused { background-image: url("neverused.bmp"); }`);
-  assert(styleElems[6].textContent.trim() === `\
-@keyframes neverused {
-  from { background-image: url("neverused.bmp"); }
-  to { transform: translateX(40px); }
-}`);
-  assert(styleElems[7].textContent.trim() === `#removed-internal { background-image: url("removed.bmp"); }`);
-  assert(styleElems[8].textContent.trim() === `\
-@keyframes removed {
-  from { background-image: url("removed.bmp"); }
-  to { transform: translateX(40px); }
-}`);
+#pseudo-hover:hover { background-image: url("pseudo-hover.bmp"); }
+#pseudo-active:active { background-image: url("pseudo-active.bmp"); }
+#pseudo-before::before { background-image: url("pseudo-before.bmp"); content: "X"; }
+#pseudo-after::after { background-image: url("pseudo-after.bmp"); content: "X"; }
+#pseudo-first-letter::first-letter { background-image: url("pseudo-first-letter.bmp"); }
+#pseudo-first-line::first-line { background-image: url("pseudo-first-line.bmp"); }`);
 
   var cssFile = zip.file('link.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#link { background-image: url("link.bmp"); }`);
+  assert(text.trim() === `\
+#link { background-image: url("link.bmp"); }
+#link-unused { background-image: url("link-unused.bmp"); }
+#link-noncaptured { background-image: url("link-noncaptured.bmp"); }`);
 
   var cssFile = zip.file('import.css');
   var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `#import { background-image: url("import.bmp"); }`);
-
-  var cssFile = zip.file('link-keyframes.css');
-  var text = await readFileAsText(await cssFile.async('blob'));
   assert(text.trim() === `\
-@keyframes link {
-  from { background-image: url("link-keyframes.bmp"); }
-  to { transform: translateX(40px); }
-}`);
-
-  var cssFile = zip.file('import-keyframes.css');
-  var text = await readFileAsText(await cssFile.async('blob'));
-  assert(text.trim() === `\
-@keyframes import {
-  from { background-image: url("import-keyframes.bmp"); }
-  to { transform: translateX(40px); }
-}`);
+#import { background-image: url("import.bmp"); }
+#import-unused { background-image: url("import-unused.bmp"); }
+#import-noncaptured { background-image: url("import-noncaptured.bmp"); }`);
 });
 
 /**
@@ -6214,119 +6162,6 @@ it('test_capture_imageBackground_used_root', async function () {
   var doc = await readFileAsDocument(indexBlob);
 
   assert(doc.querySelector('style').textContent.trim() === `html { background-image: url("green.bmp"); }`);
-});
-
-/**
- * Check syntax for used background images
- *
- * capture.imageBackground
- */
-it('test_capture_imageBackground_used_syntax', async function () {
-  /* capture.imageBackground = save-used */
-  var options = {
-    "capture.imageBackground": "save-used",
-    "capture.rewriteCss": "url",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used/syntax/index.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('keyframes-1.bmp'));
-  assert(zip.file('keyframes-complex-1.bmp'));
-  assert(zip.file('keyframes-multi-1.bmp'));
-  assert(zip.file('keyframes-multi-2.bmp'));
-  assert(zip.file('keyframes-multi-3.bmp'));
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-
-  var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[1].textContent.trim() === String.raw`@keyframes keyframes1 {
-  from { background-image: url("keyframes-1.bmp"); }
-  to { transform: translateX(40px); }
-}`);
-  assert(styleElems[2].textContent.trim() === String.raw`@keyframes keyframes\Awith\ complex\\syntax {
-  from { background-image: url("keyframes-complex-1.bmp"); }
-  to { transform: translateX(40px); }
-}`);
-  assert(styleElems[3].textContent.trim() === String.raw`@keyframes multi\ 1 {
-  from { background-image: url("keyframes-multi-1.bmp"); }
-  to { transform: translateX(40px); }
-}
-@keyframes multi\"2\" {
-  33% { background-image: url("keyframes-multi-2.bmp"); }
-  66% { background-image: url("keyframes-multi-3.bmp"); }
-}`);
-});
-
-/**
- * Check if used background images are checked correctly for advanced at-rules
- * such as @layer.
- *
- * capture.imageBackground
- */
-$it.skipIf($.noAtLayer)('test_capture_imageBackground_used_syntax_at', async function () {
-  /* capture.imageBackground = save-used */
-  var options = {
-    "capture.imageBackground": "save-used",
-    "capture.rewriteCss": "url",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used/syntax_at/index.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('base.bmp'));
-  assert(zip.file('special.bmp'));
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-  assert(doc.querySelector('style').textContent.trim() === `\
-@layer base, special;
-@layer special {
-  #case1 { background-image: url("special.bmp"); }
-}
-@layer base {
-  #case1 { background-image: url("base.bmp"); }
-}`);
-});
-
-/**
- * Do not count background images referenced only by inline styles.
- *
- * capture.imageBackground
- */
-it('test_capture_imageBackground_used_inline', async function () {
-  var options = {
-    "capture.imageBackground": "save-used",
-    "capture.rewriteCss": "url",
-    "capture.styleInline": "save",
-  };
-  var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used/inline/index.html`,
-    options: Object.assign({}, baseOptions, options),
-  });
-
-  var zip = await new JSZip().loadAsync(blob);
-  assert(zip.file('green.bmp'));
-
-  var indexFile = zip.file('index.html');
-  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
-  var doc = await readFileAsDocument(indexBlob);
-  var styleElems = doc.querySelectorAll('style');
-  assert(styleElems[0].textContent.trim() === `#neverused { background-image: url(""); }`);
-  assert(styleElems[1].textContent.trim() === `\
-@keyframes neverused {
-  from { background-image: url(""); }
-  to { transform: translateX(40px); }
-}`);
-
-  assert(doc.querySelector('blockquote').getAttribute('style').trim() === `background-image: url("green.bmp");`);
 });
 
 /**
@@ -6368,11 +6203,417 @@ it('test_capture_imageBackground_used_shadow', async function () {
 });
 
 /**
+ * Check if used @keyframes background images in the CSS are mapped correctly
+ *
+ * capture.imageBackground
+ */
+it('test_capture_imageBackground_used_keyframes', async function () {
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.rewriteCss": "url",
+    "capture.video": "remove",
+    "capture.imageBackground": "save-used",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used/keyframes/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('internal-inline.bmp'));
+  assert(zip.file('internal-internal.bmp'));
+  assert(zip.file('internal-link.bmp'));
+  assert(zip.file('internal-import.bmp'));
+  assert(zip.file('link-inline.bmp'));
+  assert(zip.file('link-internal.bmp'));
+  assert(zip.file('link-link.bmp'));
+  assert(zip.file('link-import.bmp'));
+  assert(zip.file('import-inline.bmp'));
+  assert(zip.file('import-internal.bmp'));
+  assert(zip.file('import-link.bmp'));
+  assert(zip.file('import-import.bmp'));
+  assert(!zip.file('internal-inline-unused.bmp'));
+  assert(!zip.file('internal-internal-unused.bmp'));
+  assert(!zip.file('internal-link-unused.bmp'));
+  assert(!zip.file('internal-import-unused.bmp'));
+  assert(!zip.file('link-inline-unused.bmp'));
+  assert(!zip.file('link-internal-unused.bmp'));
+  assert(!zip.file('link-link-unused.bmp'));
+  assert(!zip.file('link-import-unused.bmp'));
+  assert(!zip.file('import-inline-unused.bmp'));
+  assert(!zip.file('import-internal-unused.bmp'));
+  assert(!zip.file('import-link-unused.bmp'));
+  assert(!zip.file('import-import-unused.bmp'));
+  assert(zip.file('ref-from.bmp'));
+  assert(zip.file('ref-to.bmp'));
+  assert(!zip.file('ref-from-noncaptured.bmp'));
+  assert(!zip.file('ref-to-noncaptured.bmp'));
+  assert(zip.file('ref-0.bmp'));
+  assert(zip.file('ref-35.bmp'));
+  assert(zip.file('ref-70.bmp'));
+  assert(zip.file('ref-100.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+
+  assert(styleElems[1].textContent.trim() === `\
+@keyframes internal-inline {
+  from { background-image: url("internal-inline.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-inline-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-internal {
+  from { background-image: url("internal-internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-internal-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-link {
+  from { background-image: url("internal-link.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-link-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-import {
+  from { background-image: url("internal-import.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-import-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}`);
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `\
+@keyframes link-inline {
+  from { background-image: url("link-inline.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-inline-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-internal {
+  from { background-image: url("link-internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-internal-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-link {
+  from { background-image: url("link-link.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-link-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-import {
+  from { background-image: url("link-import.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-import-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `\
+@keyframes import-inline {
+  from { background-image: url("import-inline.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-inline-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-internal {
+  from { background-image: url("import-internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-internal-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-link {
+  from { background-image: url("import-link.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-link-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-import {
+  from { background-image: url("import-import.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-import-unused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}`);
+
+  assert(styleElems[5].textContent.trim() === `\
+@keyframes ref-from-to {
+  from { background-image: url("ref-from.bmp"); }
+  to { background-image: url("ref-to.bmp"); }
+}
+
+@keyframes ref-from-to-noncaptured {
+  from { background-image: url(""); }
+  to { background-image: url(""); }
+}
+
+@keyframes ref-percent {
+  0% { background-image: url("ref-0.bmp"); }
+  35% { background-image: url("ref-35.bmp"); }
+  70% { background-image: url("ref-70.bmp"); }
+  100% { background-image: url("ref-100.bmp"); }
+}`);
+
+  /* capture.imageBackground = save-used (headless) */
+  // the result is same as save
+  var options = {
+    "capture.rewriteCss": "url",
+    "capture.video": "remove",
+    "capture.imageBackground": "save-used",
+  };
+  var blob = await captureHeadless({
+    url: `${localhost}/capture_imageBackground_used/keyframes/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('internal-inline.bmp'));
+  assert(zip.file('internal-internal.bmp'));
+  assert(zip.file('internal-link.bmp'));
+  assert(zip.file('internal-import.bmp'));
+  assert(zip.file('link-inline.bmp'));
+  assert(zip.file('link-internal.bmp'));
+  assert(zip.file('link-link.bmp'));
+  assert(zip.file('link-import.bmp'));
+  assert(zip.file('import-inline.bmp'));
+  assert(zip.file('import-internal.bmp'));
+  assert(zip.file('import-link.bmp'));
+  assert(zip.file('import-import.bmp'));
+  assert(zip.file('internal-inline-unused.bmp'));
+  assert(zip.file('internal-internal-unused.bmp'));
+  assert(zip.file('internal-link-unused.bmp'));
+  assert(zip.file('internal-import-unused.bmp'));
+  assert(zip.file('link-inline-unused.bmp'));
+  assert(zip.file('link-internal-unused.bmp'));
+  assert(zip.file('link-link-unused.bmp'));
+  assert(zip.file('link-import-unused.bmp'));
+  assert(zip.file('import-inline-unused.bmp'));
+  assert(zip.file('import-internal-unused.bmp'));
+  assert(zip.file('import-link-unused.bmp'));
+  assert(zip.file('import-import-unused.bmp'));
+  assert(zip.file('ref-from.bmp'));
+  assert(zip.file('ref-to.bmp'));
+  assert(zip.file('ref-from-noncaptured.bmp'));
+  assert(zip.file('ref-to-noncaptured.bmp'));
+  assert(zip.file('ref-0.bmp'));
+  assert(zip.file('ref-35.bmp'));
+  assert(zip.file('ref-70.bmp'));
+  assert(zip.file('ref-100.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+
+  assert(styleElems[1].textContent.trim() === `\
+@keyframes internal-inline {
+  from { background-image: url("internal-inline.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-inline-unused {
+  from { background-image: url("internal-inline-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-internal {
+  from { background-image: url("internal-internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-internal-unused {
+  from { background-image: url("internal-internal-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-link {
+  from { background-image: url("internal-link.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-link-unused {
+  from { background-image: url("internal-link-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-import {
+  from { background-image: url("internal-import.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-import-unused {
+  from { background-image: url("internal-import-unused.bmp"); }
+  to { transform: translateX(40px); }
+}`);
+
+  var cssFile = zip.file('link.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `\
+@keyframes link-inline {
+  from { background-image: url("link-inline.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-inline-unused {
+  from { background-image: url("link-inline-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-internal {
+  from { background-image: url("link-internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-internal-unused {
+  from { background-image: url("link-internal-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-link {
+  from { background-image: url("link-link.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-link-unused {
+  from { background-image: url("link-link-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-import {
+  from { background-image: url("link-import.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-import-unused {
+  from { background-image: url("link-import-unused.bmp"); }
+  to { transform: translateX(40px); }
+}`);
+
+  var cssFile = zip.file('import.css');
+  var text = await readFileAsText(await cssFile.async('blob'));
+  assert(text.trim() === `\
+@keyframes import-inline {
+  from { background-image: url("import-inline.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-inline-unused {
+  from { background-image: url("import-inline-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-internal {
+  from { background-image: url("import-internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-internal-unused {
+  from { background-image: url("import-internal-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-link {
+  from { background-image: url("import-link.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-link-unused {
+  from { background-image: url("import-link-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-import {
+  from { background-image: url("import-import.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-import-unused {
+  from { background-image: url("import-import-unused.bmp"); }
+  to { transform: translateX(40px); }
+}`);
+
+  assert(styleElems[5].textContent.trim() === `\
+@keyframes ref-from-to {
+  from { background-image: url("ref-from.bmp"); }
+  to { background-image: url("ref-to.bmp"); }
+}
+
+@keyframes ref-from-to-noncaptured {
+  from { background-image: url("ref-from-noncaptured.bmp"); }
+  to { background-image: url("ref-to-noncaptured.bmp"); }
+}
+
+@keyframes ref-percent {
+  0% { background-image: url("ref-0.bmp"); }
+  35% { background-image: url("ref-35.bmp"); }
+  70% { background-image: url("ref-70.bmp"); }
+  100% { background-image: url("ref-100.bmp"); }
+}`);
+});
+
+/**
+ * Check syntax for used background images
+ *
+ * capture.imageBackground
+ */
+it('test_capture_imageBackground_used_keyframes_syntax', async function () {
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used/keyframes_syntax/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('keyframes-1.bmp'));
+  assert(zip.file('keyframes-2.bmp'));
+  assert(zip.file('keyframes-complex-1.bmp'));
+  assert(zip.file('keyframes-multi-1.bmp'));
+  assert(zip.file('keyframes-multi-2.bmp'));
+  assert(zip.file('keyframes-multi-3.bmp'));
+  assert(zip.file('keyframes-after.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[1].textContent.trim() === String.raw`@keyframes keyframes1 {
+  from { background-image: url("keyframes-1.bmp"); }
+  to { background-image: url("keyframes-2.bmp"); transform: translateX(40px); }
+}`);
+  assert(styleElems[2].textContent.trim() === String.raw`@keyframes keyframes\Awith\ complex\\syntax {
+  from { background-image: url("keyframes-complex-1.bmp"); }
+  to { transform: translateX(40px); }
+}`);
+  assert(styleElems[3].textContent.trim() === String.raw`@keyframes multi\ 1 {
+  from { background-image: url("keyframes-multi-1.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes multi\"2\" {
+  33% { background-image: url("keyframes-multi-2.bmp"); }
+  66% { background-image: url("keyframes-multi-3.bmp"); }
+}`);
+  assert(styleElems[4].textContent.trim() === String.raw`@keyframes after {
+  from { background-image: url("keyframes-after.bmp"); }
+  to { transform: translateX(40px); }
+}`);
+});
+
+/**
  * Check if used background images in scoped @keyframe are handled correctly
  *
  * capture.imageBackground
  */
-it('test_capture_imageBackground_used_scope', async function () {
+it('test_capture_imageBackground_used_keyframes_scope', async function () {
   /* capture.imageBackground = save-used */
   var options = {
     "capture.imageBackground": "save-used",
@@ -6380,7 +6621,7 @@ it('test_capture_imageBackground_used_scope', async function () {
     "capture.shadowDom": "save",
   };
   var blob = await capture({
-    url: `${localhost}/capture_imageBackground_used/scope/index.html`,
+    url: `${localhost}/capture_imageBackground_used/keyframes_scope/index.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -6434,6 +6675,73 @@ it('test_capture_imageBackground_used_scope', async function () {
   from { background-image: url("shadow-keyframes3.bmp"); }
   to { transform: translateX(40px); }
 }`);
+});
+
+/**
+ * Check if used background images are checked correctly for advanced at-rules
+ * such as @layer.
+ *
+ * capture.imageBackground
+ */
+$it.skipIf($.noAtLayer)('test_capture_imageBackground_used_at', async function () {
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used/at/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('base.bmp'));
+  assert(zip.file('special.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+@layer base, special;
+@layer special {
+  #case1 { background-image: url("special.bmp"); }
+}
+@layer base {
+  #case1 { background-image: url("base.bmp"); }
+}`);
+});
+
+/**
+ * Do not count background images referenced only by inline styles.
+ *
+ * capture.imageBackground
+ */
+it('test_capture_imageBackground_used_inline', async function () {
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+    "capture.styleInline": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used/inline/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('green.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  var styleElems = doc.querySelectorAll('style');
+  assert(styleElems[0].textContent.trim() === `#neverused { background-image: url(""); }`);
+  assert(styleElems[1].textContent.trim() === `\
+@keyframes neverused {
+  from { background-image: url(""); }
+  to { transform: translateX(40px); }
+}`);
+
+  assert(doc.querySelector('blockquote').getAttribute('style').trim() === `background-image: url("green.bmp");`);
 });
 
 /**

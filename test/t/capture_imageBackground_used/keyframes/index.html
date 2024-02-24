@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used background images (@keyframes)</title>
+<style>
+blockquote::before { content: attr(id); }
+video { width: 60px; }
+</style>
+
+<!-- basic -->
+<style>
+@keyframes internal-inline {
+  from { background-image: url("internal-inline.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-inline-unused {
+  from { background-image: url("internal-inline-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-internal {
+  from { background-image: url("internal-internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-internal-unused {
+  from { background-image: url("internal-internal-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-link {
+  from { background-image: url("internal-link.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-link-unused {
+  from { background-image: url("internal-link-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-import {
+  from { background-image: url("internal-import.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes internal-import-unused {
+  from { background-image: url("internal-import-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+</style>
+<link rel="stylesheet" href="link.css">
+<style>@import "import.css";</style>
+
+<style>
+#internal-internal { animation: internal-internal 3s linear infinite; }
+#link-internal { animation: link-internal 3s linear infinite; }
+#import-internal { animation: import-internal 3s linear infinite; }
+</style>
+<link rel="stylesheet" href="link-ref.css">
+<style>@import "import-ref.css";</style>
+
+<!-- reference -->
+<style>
+@keyframes ref-from-to {
+  from { background-image: url("ref-from.bmp"); }
+  to { background-image: url("ref-to.bmp"); }
+}
+
+@keyframes ref-from-to-noncaptured {
+  from { background-image: url("ref-from-noncaptured.bmp"); }
+  to { background-image: url("ref-to-noncaptured.bmp"); }
+}
+
+@keyframes ref-percent {
+  0% { background-image: url("ref-0.bmp"); }
+  35% { background-image: url("ref-35.bmp"); }
+  70% { background-image: url("ref-70.bmp"); }
+  100% { background-image: url("ref-100.bmp"); }
+}
+</style>
+</head>
+<body>
+<h2>Basic</h2>
+<blockquote id="internal-inline" style="animation: internal-inline 3s linear infinite;"></blockquote>
+<blockquote id="internal-internal"></blockquote>
+<blockquote id="internal-link"></blockquote>
+<blockquote id="internal-import"></blockquote>
+<blockquote id="link-inline" style="animation: link-inline 3s linear infinite;"></blockquote>
+<blockquote id="link-internal"></blockquote>
+<blockquote id="link-link"></blockquote>
+<blockquote id="link-import"></blockquote>
+<blockquote id="import-inline" style="animation: import-inline 3s linear infinite;"></blockquote>
+<blockquote id="import-internal"></blockquote>
+<blockquote id="import-link"></blockquote>
+<blockquote id="import-import"></blockquote>
+
+<h2>Reference</h2>
+<blockquote id="ref-from-to" style="animation: ref-from-to 3s linear infinite;"></blockquote>
+<blockquote id="ref-from-to-noncaptured"><video style="animation: ref-from-to-noncaptured 3s linear infinite;"></video></blockquote>
+<blockquote id="ref-percent" style="animation: ref-percent 3s linear infinite;"></blockquote>
+</body>
+</html>

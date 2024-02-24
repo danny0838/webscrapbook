@@ -1,4 +1,0 @@
-@keyframes link {
-  from { background-image: url("link-keyframes.bmp"); }
-  to { transform: translateX(40px); }
-}

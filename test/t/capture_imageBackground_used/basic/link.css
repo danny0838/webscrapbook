@@ -1,1 +1,3 @@
 #link { background-image: url("link.bmp"); }
+#link-unused { background-image: url("link-unused.bmp"); }
+#link-noncaptured { background-image: url("link-noncaptured.bmp"); }

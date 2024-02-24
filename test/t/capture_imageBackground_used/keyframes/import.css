@@ -1,0 +1,32 @@
+@keyframes import-inline {
+  from { background-image: url("import-inline.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-inline-unused {
+  from { background-image: url("import-inline-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-internal {
+  from { background-image: url("import-internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-internal-unused {
+  from { background-image: url("import-internal-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-link {
+  from { background-image: url("import-link.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-link-unused {
+  from { background-image: url("import-link-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-import {
+  from { background-image: url("import-import.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes import-import-unused {
+  from { background-image: url("import-import-unused.bmp"); }
+  to { transform: translateX(40px); }
+}

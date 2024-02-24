@@ -1,4 +1,0 @@
-@keyframes import {
-  from { background-image: url("import-keyframes.bmp"); }
-  to { transform: translateX(40px); }
-}

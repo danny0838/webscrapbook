@@ -1,0 +1,32 @@
+@keyframes link-inline {
+  from { background-image: url("link-inline.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-inline-unused {
+  from { background-image: url("link-inline-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-internal {
+  from { background-image: url("link-internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-internal-unused {
+  from { background-image: url("link-internal-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-link {
+  from { background-image: url("link-link.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-link-unused {
+  from { background-image: url("link-link-unused.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-import {
+  from { background-image: url("link-import.bmp"); }
+  to { transform: translateX(40px); }
+}
+@keyframes link-import-unused {
+  from { background-image: url("link-import-unused.bmp"); }
+  to { transform: translateX(40px); }
+}

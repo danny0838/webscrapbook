@@ -3,78 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <title>Test used background images</title>
+<style>video { width: 60px; }</style>
 
 <!-- Basic -->
 <style>
 #internal { background-image: url("internal.bmp"); }
+#internal-unused { background-image: url("internal-unused.bmp"); }
+#internal-noncaptured { background-image: url("internal-noncaptured.bmp"); }
 </style>
 <link rel="stylesheet" href="link.css">
 <style>
 @import "import.css";
 </style>
 
-<!-- Pseudo-elements -->
+<!-- Pseudo-classes/elements -->
 <style>
-#pseudo1::before { background-image: url("pseudo1.bmp"); content: "X"; }
-#pseudo2::after { background-image: url("pseudo2.bmp"); content: "X"; }
-#pseudo3::first-letter { background-image: url("pseudo3.bmp"); }
-#pseudo4::first-line { background-image: url("pseudo4.bmp"); }
-</style>
-
-<!-- @keyframes -->
-<style>
-@keyframes internal {
-  from { background-image: url("internal-keyframes.bmp"); }
-  to { transform: translateX(40px); }
-}
-</style>
-<link rel="stylesheet" href="link-keyframes.css">
-<style>
-@import "import-keyframes.css";
-</style>
-
-<!-- neverused -->
-<style>
-#neverused { background-image: url("neverused.bmp"); }
-</style>
-<style>
-@keyframes neverused {
-  from { background-image: url("neverused.bmp"); }
-  to { transform: translateX(40px); }
-}
-</style>
-
-<!-- removed elements -->
-<style>
-#removed-internal { background-image: url("removed.bmp"); }
-</style>
-<style>
-@keyframes removed {
-  from { background-image: url("removed.bmp"); }
-  to { transform: translateX(40px); }
-}
+#pseudo-hover:hover { background-image: url("pseudo-hover.bmp"); }
+#pseudo-active:active { background-image: url("pseudo-active.bmp"); }
+#pseudo-before::before { background-image: url("pseudo-before.bmp"); content: "X"; }
+#pseudo-after::after { background-image: url("pseudo-after.bmp"); content: "X"; }
+#pseudo-first-letter::first-letter { background-image: url("pseudo-first-letter.bmp"); }
+#pseudo-first-line::first-line { background-image: url("pseudo-first-line.bmp"); }
 </style>
 </head>
 <body>
 <h2>Basic</h2>
 <blockquote id="inline" style="background-image: url(inline.bmp)">inline</blockquote>
+<blockquote>inline-noncaptured<video style="background-image: url(inline-noncaptured.bmp)"></video></blockquote>
 <blockquote id="internal">internal</blockquote>
+<blockquote>internal-noncaptured<video id="internal-noncaptured"></video></blockquote>
 <blockquote id="link">link</blockquote>
+<blockquote>link-noncaptured<video id="link-noncaptured"></video></blockquote>
 <blockquote id="import">import</blockquote>
+<blockquote>import-noncaptured<video id="import-noncaptured"></video></blockquote>
 
-<h2>Pseudo-elements</h2>
-<blockquote id="pseudo1">before</blockquote>
-<blockquote id="pseudo2">after</blockquote>
-<blockquote id="pseudo3">first-letter</blockquote>
-<blockquote id="pseudo4">first-line<br>second line</blockquote>
-
-<h2>@keyframes</h2>
-<blockquote id="internal-keyframes" style="animation: internal 3s linear infinite;">internal</blockquote>
-<blockquote id="link-keyframes" style="animation: link 3s linear infinite;">link</blockquote>
-<blockquote id="import-keyframes" style="animation: import 3s linear infinite;">import</blockquote>
-
-<h2>Removed elements</h2>
-<video id="removed-internal">removed internal</video>
-<video id="removed-keyframes" style="animation: removed 3s linear infinite;">removed keyframes</video>
+<h2>Pseudo-classes/elements</h2>
+<blockquote id="pseudo-hover">hover</blockquote>
+<blockquote id="pseudo-active">active</blockquote>
+<blockquote id="pseudo-before">before</blockquote>
+<blockquote id="pseudo-after">after</blockquote>
+<blockquote id="pseudo-first-letter">first-letter</blockquote>
+<blockquote id="pseudo-first-line">first-line<br>second line</blockquote>
 </body>
 </html>

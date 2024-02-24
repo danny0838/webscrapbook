@@ -1,1 +1,3 @@
 #import { background-image: url("import.bmp"); }
+#import-unused { background-image: url("import-unused.bmp"); }
+#import-noncaptured { background-image: url("import-noncaptured.bmp"); }

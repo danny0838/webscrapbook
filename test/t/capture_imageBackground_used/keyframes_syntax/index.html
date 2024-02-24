@@ -11,7 +11,7 @@ blockquote::before {
 <style>
 @keyframes keyframes1 {
   from { background-image: url("keyframes-1.bmp"); }
-  to { transform: translateX(40px); }
+  to { background-image: url("keyframes-2.bmp"); transform: translateX(40px); }
 }
 </style>
 <style>
@@ -35,5 +35,12 @@ blockquote::before {
 <blockquote style="animation: keyframes1 3s linear infinite;"></blockquote>
 <blockquote style="animation: keyframes\Awith\ complex\\syntax 3s linear infinite;"></blockquote>
 <blockquote style="animation: multi\ 1 3s linear infinite, multi\&quot;2\&quot; 3s linear infinite;"></blockquote>
+<blockquote style="animation: after 3s linear infinite;"></blockquote>
+<style>
+@keyframes after {
+  from { background-image: url("keyframes-after.bmp"); }
+  to { transform: translateX(40px); }
+}
+</style>
 </body>
 </html>
