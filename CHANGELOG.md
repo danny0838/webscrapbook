@@ -3,6 +3,14 @@
 * Versions before 1.0 are in initial development. APIs are not stable for these versions, even a `y` version can involve a breaking change, and only partial notable changes are summarized in this document. See full commit history in the source repository for details.
 * Backend server requirement in this document refers to the version of [`webscrapbook` Python package](https://github.com/danny0838/pywebscrapbook) (or PyWebScrapBook).
 
+## [2.7.0] - 2024-02-24
+* Fixed bad referrer when capturing `iframe[srcdoc]` headlessly.
+* Fixed possible random errors when capturing an inaccessible `iframe[srcdoc]`.
+* No more save `about:` pages for headless frames.
+* No more save resources whose URL uses an unsupported protocol.
+* Miscellaneous improvements of the internal code and unit test suite.
+* Rewrite the unit test suite with mocha.js.
+
 ## [2.6.5] - 2024-02-17
 * Fixed style images in a nested CSS rule in a shadow DOM be emptied when `Style images` is `Save used` for a capture.
 * Fixed style images that apppear before the first base element be emptied when `Style images` is `Save used` for a capture.
@@ -38,7 +46,7 @@
 * Added support of referrer policy related attributes when performing a capture.
 * Reworked `capture.referrerPolicy` to provide default referrer policy, or provide dominant referrer policy by prepending "+".
 * Fixed some bad referrer handling cases for downgrading requests for a capture.
-* Fixed script error when `rewrite styles` is `(advanced) tidy` for an external or imported CSS for a headless capture.
+* Fixed script error when `Rewrite styles` is `(Advanced) tidy` for an external or imported CSS for a headless capture.
 * Fixed missing resources inside an at-rule like `@layer` when `Style images` is `Save used` for a capture.
 * Fixed `:root` and `:scope` CSS rules not correctly handled when `Rewrite styles` is `Tidy` for a capture.
 * Fixed an issue that constructed stylesheets are not captured in Firefox.
