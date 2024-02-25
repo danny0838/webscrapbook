@@ -9,48 +9,29 @@ div::before { content: attr(id); }
 <body>
 <div id="host1">
 <template>
-<style>
-blockquote::after { content: attr(id); }
-</style>
-<style>
-:root #elem1 { background-color: green; }
-</style>
-<style>
-:scope #elem2 { background-color: green; }
-</style>
-<blockquote id="elem1"></blockquote>
-<blockquote id="elem2"></blockquote>
+  <style>blockquote::after { content: attr(id); }</style>
+  <style>:root #elem1 { background-color: green; }</style>
+  <style>:scope #elem2 { background-color: green; }</style>
+  <blockquote id="elem1"></blockquote>
+  <blockquote id="elem2"></blockquote>
 </template>
 </div>
 <div id="host2">
 <template>
-<style>
-:host { background-color: lime; }
-</style>
+  <style>:host { background-color: lime; }</style>
 </template>
 </div>
 <div id="host3">
 <template>
-<style>
-:host(#host3) { background-color: lime; }
-</style>
+  <style>:host(#host3) { background-color: lime; }</style>
 </template>
 </div>
 <div id="host4">
 <template>
-<style>
-:host(#nonexist) { background-color: lime; }
-</style>
+  <style>:host(#nonexist) { background-color: lime; }</style>
 </template>
 </div>
-<script>
-/* load template content as shadowRoot */
-for (const t of document.querySelectorAll('template')) {
-  const elem = t.parentNode;
-  const shadow = elem.attachShadow({mode: 'open'});
-  shadow.innerHTML = t.innerHTML;
-  t.remove();
-}
-</script>
 </body>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>
 </html>

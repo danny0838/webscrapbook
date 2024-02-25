@@ -230,3 +230,24 @@ function cssRegex(strings, ...args) {
   });
   return new RegExp(results.join(''));
 }
+
+/**
+ * Load template content as the parent node's shadowRoot.
+ */
+function loadShadowDoms(root = document, {
+  recursive = true, clear = true, mode = 'open',
+} = {}) {
+  for (const t of root.querySelectorAll('template')) {
+    const elem = t.parentNode;
+    if (!elem.shadowRoot) {
+      const shadow = elem.attachShadow({mode});
+      shadow.innerHTML = t.innerHTML;
+      if (recursive) {
+        loadShadowDoms(shadow, {recursive, clear, mode});
+      }
+    }
+    if (clear) {
+      t.remove();
+    }
+  }
+}

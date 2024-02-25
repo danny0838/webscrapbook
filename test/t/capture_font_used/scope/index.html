@@ -12,12 +12,9 @@
 </style>
 </head>
 <body>
-<blockquote><div id="shadow1"></div></blockquote>
-
-<script>
-var d = document.querySelector('#shadow1');
-var s = d.attachShadow({mode: 'open'});
-s.innerHTML = `<style>
+<div id="shadow1">
+<template>
+  <style>
 @font-face { font-family: shadow1; src: url("shadow1.woff"); }
 #shadow1 { font-family: shadow1; }
 
@@ -30,17 +27,19 @@ s.innerHTML = `<style>
 #shadow4 { font-family: internal3; }
 
 #shadow5 { font-family: internal4; }
-</style>
-<blockquote id="shadow1">shadow1</blockquote>
-<blockquote id="shadow2">shadow2</blockquote>
-<blockquote id="shadow3">shadow3</blockquote>
-<blockquote id="shadow4">shadow4</blockquote>
-<blockquote id="shadow5">shadow5</blockquote>
-<blockquote part="internal5">shadow6</blockquote>
-`;
-</script>
+  </style>
+  <blockquote id="shadow1">shadow1</blockquote>
+  <blockquote id="shadow2">shadow2</blockquote>
+  <blockquote id="shadow3">shadow3</blockquote>
+  <blockquote id="shadow4">shadow4</blockquote>
+  <blockquote id="shadow5">shadow5</blockquote>
+  <blockquote part="internal5">shadow6</blockquote>
+</template>
+</div>
 <style>
 @font-face { font-family: internal4; src: url("internal4.woff"); }
 </style>
 </body>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>
 </html>

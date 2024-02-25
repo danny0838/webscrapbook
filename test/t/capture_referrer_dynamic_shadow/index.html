@@ -5,18 +5,17 @@
 <title>Test dynamic document referrer policy in shadowRoot</title>
 </head>
 <body>
-<div></div>
-<script>
-var d = document.querySelector('div');
-var s = d.attachShadow({mode: 'open'});
-s.innerHTML = `
-<meta name="referrer" content="unsafe-url">
-<link rel="stylesheet" href="css1.py">
-<meta name="referrer" content="origin">
-<link rel="stylesheet" href="css2.py">
-<meta name="referrer" content="no-referrer">
-<link rel="stylesheet" href="css3.py">
-`;
-</script>
+<div>
+<template>
+  <meta name="referrer" content="unsafe-url">
+  <link rel="stylesheet" href="css1.py">
+  <meta name="referrer" content="origin">
+  <link rel="stylesheet" href="css2.py">
+  <meta name="referrer" content="no-referrer">
+  <link rel="stylesheet" href="css3.py">
+</template>
+</div>
 </body>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>
 </html>

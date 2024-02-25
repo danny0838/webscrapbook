@@ -5,20 +5,20 @@
 <title>Test used background images (shadow DOM)</title>
 </head>
 <body>
-<blockquote><div id="shadow1"></div></blockquote>
-
-<script>
-var d = document.querySelector('#shadow1');
-var s = d.attachShadow({mode: 'open'});
-s.innerHTML = `<style>
+<div id="shadow1">
+<template>
+  <style>
 :host { background-image: url("yellow.bmp"); }
 #shadow { background-image: url("green.bmp"); }
 @media all {
   #media { background-image: url("blue.bmp"); }
 }
-</style>
-<blockquote id="shadow">shadow</blockquote>
-<blockquote id="media">media</blockquote>`;
-</script>
+  </style>
+  <blockquote id="shadow">shadow</blockquote>
+  <blockquote id="media">media</blockquote>
+</template>
+</div>
 </body>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>
 </html>

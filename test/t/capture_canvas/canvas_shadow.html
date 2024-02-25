@@ -5,16 +5,15 @@
 </head>
 <body>
 <span><template><canvas width="200" height="100" style="border:1px solid #c3c3c3;"></template></span>
-
+</body>
+<script src="../../common.js"></script>
 <script>
+loadShadowDoms();
 var d = document.querySelector('span');
-var s = d.attachShadow({mode: 'open'});
-s.appendChild(document.importNode(d.querySelector('template').content, true));
-
+var s = d.shadowRoot;
 var c = s.querySelector("canvas");
 var ctx = c.getContext("2d");
 ctx.fillStyle = "#0000FF";
 ctx.fillRect(50, 0, 100, 75);
 </script>
-</body>
 </html>

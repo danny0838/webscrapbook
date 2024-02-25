@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<div></div>
-<script>
-var d = document.querySelector('div');
-var s = d.attachShadow({mode: 'open'});
-s.innerHTML = `<link rel="shortcut icon" href="red.bmp">`;
-</script>
+<div>
+<template>
+  <link rel="shortcut icon" href="red.bmp">
+</template>
+</div>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>

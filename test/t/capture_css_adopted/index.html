@@ -10,27 +10,25 @@ blockquote::after { content: "#" attr(id); }
 <body>
 <blockquote id="adopted"></blockquote>
 <blockquote id="adopted2"></blockquote>
+<div id="shadow1">
+<template>
+  <style>blockquote::after { content: "#" attr(id); }</style>
+  <blockquote id="adopted"></blockquote>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
 <script>
 var css = new CSSStyleSheet();
 css.insertRule('#adopted { background-color: #0F0; }');
 var css2 = new CSSStyleSheet();
 css2.insertRule('#adopted2 { background-color: #0F0; }');
 document.adoptedStyleSheets = [...document.adoptedStyleSheets, css, css2];
-</script>
 
-<div id="shadow1"></div>
-<script>
-var d = document.querySelector('#shadow1');
-var s = d.attachShadow({mode: 'open'});
-s.innerHTML = `
-<style>
-blockquote::after { content: "#" attr(id); }
-</style>
-<blockquote id="adopted"></blockquote>`;
-
-var css2 = new CSSStyleSheet();
-css2.insertRule('#adopted { background-color: #0F0; }');
-s.adoptedStyleSheets = [...s.adoptedStyleSheets, css2];
+var css = new CSSStyleSheet();
+css.insertRule('#adopted { background-color: #0F0; }');
+loadShadowDoms();
+var s = document.querySelector('#shadow1').shadowRoot;
+s.adoptedStyleSheets = [...s.adoptedStyleSheets, css];
 </script>
-</body>
 </html>

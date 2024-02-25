@@ -5,20 +5,21 @@
 <title>Test in-depth capture</title>
 </head>
 <body>
-<div>dummy</div>
+<div>
+<template>
+  <style>a::after { content: attr(href); }</style>
+  <blockquote><a href="./linked1.html#111"></a></blockquote>
+  <div>
+  <template>
+    <style>a::after { content: attr(href); }</style>
+    <blockquote><a href="./linked2.html#222"></a></blockquote>
+  </template>
+  dummy
+  </div>
+</template>
+dummy
+</div>
 </body>
-<script>
-var d = document.querySelector('div');
-var s = d.attachShadow({mode: 'open'});
-s.innerHTML = `\
-<style>a::after { content: attr(href); }</style>
-<blockquote><a href="./linked1.html#111"></a></blockquote>
-<div>dummy</div>`;
-
-var d2 = s.querySelector('div');
-var s2 = d2.attachShadow({mode: 'open'});
-s2.innerHTML = `\
-<style>a::after { content: attr(href); }</style>
-<blockquote><a href="./linked2.html#222"></a></blockquote>`;
-</script>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>
 </html>

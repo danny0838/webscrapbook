@@ -6,21 +6,23 @@
 </head>
 <body>
 <blockquote id="adopted">#adopted</blockquote>
+
+<div id="shadow1">
+<template>
+  <blockquote id="adopted">#adopted</blockquote>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
 <script>
 var css = new CSSStyleSheet();
 css.insertRule('#adopted { background-image: url(./doc.bmp); }');
 document.adoptedStyleSheets = [...document.adoptedStyleSheets, css];
-</script>
 
-<div id="shadow1"></div>
-<script>
-var d = document.querySelector('#shadow1');
-var s = d.attachShadow({mode: 'open'});
-s.innerHTML = `<blockquote id="adopted">#adopted</blockquote>`;
-
-var css2 = new CSSStyleSheet();
-css2.insertRule('#adopted { background-image: url(./shadow.bmp); }');
-s.adoptedStyleSheets = [...s.adoptedStyleSheets, css2];
+loadShadowDoms();
+var css = new CSSStyleSheet();
+css.insertRule('#adopted { background-image: url(./shadow.bmp); }');
+var s = document.querySelector('#shadow1').shadowRoot;
+s.adoptedStyleSheets = [...s.adoptedStyleSheets, css];
 </script>
-</body>
 </html>
