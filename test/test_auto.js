@@ -9654,7 +9654,7 @@ it('test_capture_canvas', async function () {
 
   // canvas in the shadow DOM
   var blob = await capture({
-    url: `${localhost}/capture_canvas/canvas2.html`,
+    url: `${localhost}/capture_canvas/canvas_shadow.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9695,7 +9695,7 @@ it('test_capture_canvas', async function () {
 
   // canvas in the shadow DOM
   var blob = await capture({
-    url: `${localhost}/capture_canvas/canvas2.html`,
+    url: `${localhost}/capture_canvas/canvas_shadow.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -9736,7 +9736,7 @@ it('test_capture_canvas', async function () {
 
   // canvas in the shadow DOM
   var blob = await capture({
-    url: `${localhost}/capture_canvas/canvas2.html`,
+    url: `${localhost}/capture_canvas/canvas_shadow.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11890,7 +11890,7 @@ it('test_capture_shadowRoot', async function () {
     "capture.script": "remove",
   };
   var blob = await capture({
-    url: `${localhost}/capture_shadowRoot/index.html`,
+    url: `${localhost}/capture_shadowRoot/open.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11925,7 +11925,7 @@ it('test_capture_shadowRoot', async function () {
     "capture.script": "remove",
   };
   var blob = await capture({
-    url: `${localhost}/capture_shadowRoot/index.html`,
+    url: `${localhost}/capture_shadowRoot/open.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11956,7 +11956,7 @@ it('test_capture_shadowRoot_custom', async function () {
 
   /* mode: open */
   var blob = await capture({
-    url: `${localhost}/capture_shadowRoot_custom/index.html`,
+    url: `${localhost}/capture_shadowRoot_custom/open.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
@@ -11979,7 +11979,7 @@ it('test_capture_shadowRoot_custom', async function () {
 
   /* mode: closed */
   var blob = await capture({
-    url: `${localhost}/capture_shadowRoot_custom/index2.html`,
+    url: `${localhost}/capture_shadowRoot_custom/closed.html`,
     options: Object.assign({}, baseOptions, options),
   });
 
