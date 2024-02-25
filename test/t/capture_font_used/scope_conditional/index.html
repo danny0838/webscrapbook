@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used fonts (scoped @font-face with conditional)</title>
+<style>
+@font-face { font-family: myfont; src: url("internal.woff"); }
+</style>
+</head>
+<body>
+<div id="shadow1">
+<template>
+  <style>blockquote::after { content: attr(style); }</style>
+  <style>
+@media print {
+  @font-face { font-family: myfont; src: url("shadow.woff"); }
+}
+  </style>
+  <blockquote style="font-family: myfont;"></blockquote>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>
+</html>

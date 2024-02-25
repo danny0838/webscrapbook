@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used background images (scoped @keyframes with conditional)</title>
+<style>
+@keyframes myframe {
+  from { background-image: url("internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+</style>
+</head>
+<body>
+<div id="shadow1">
+<template>
+  <style>blockquote::after { content: attr(style); }</style>
+  <style>
+@media print {
+  @keyframes myframe {
+    from { background-image: url("shadow.bmp"); }
+    to { transform: translateX(40px); }
+  }
+}
+  </style>
+  <blockquote style="animation: myframe 3s linear infinite;"></blockquote>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>
+</html>

@@ -5065,6 +5065,9 @@
    *   - e.g. In Chromium 121 and Firefox 124, animation in a shadow DOM
    *     does not search @keyframes from the ancestor scopes.
    *   - ref: https://wiki.csswg.org/spec/css-scoping
+   * - A font/keyframe name referenced in a shadow DOM is treated as referenced
+   *   in local and all upper scopes, since the local @font-face/@keyframes rule
+   *   may be inside a conditional rule and not really used.
    ***************************************************************************/
 
   capturer.DocumentCssResourcesHandler = class DocumentCssResourcesHandler {
@@ -5111,20 +5114,14 @@
       // mark used keyFrames
       for (let name of this.scopes[this.scopes.length - 1].keyFrameUsed) {
         for (let i = this.scopes.length; i--;) {
-          if (i === 0 || this.scopes[i].keyFrameMap.has(name)) {
-            this.scopes[i].keyFrameMap.get(name).used = true;
-            break;
-          }
+          this.scopes[i].keyFrameMap.get(name).used = true;
         }
       }
 
       // mark used fonts
       for (let ff of this.scopes[this.scopes.length - 1].fontUsed) {
         for (let i = this.scopes.length; i--;) {
-          if (i === 0 || this.scopes[i].fontMap.has(ff)) {
-            this.scopes[i].fontMap.get(ff).used = true;
-            break;
-          }
+          this.scopes[i].fontMap.get(ff).used = true;
         }
       }
 

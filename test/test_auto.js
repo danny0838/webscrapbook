@@ -6700,7 +6700,7 @@ it('test_capture_imageBackground_used_keyframes_scope', async function () {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.file('internal1.bmp'));
-  assert(!zip.file('internal2.bmp'));
+  assert(zip.file('internal2.bmp'));
   assert(zip.file('internal3.bmp'));
   assert(!zip.file('internal4.bmp'));
   assert(zip.file('internal5.bmp'));
@@ -6727,7 +6727,7 @@ it('test_capture_imageBackground_used_keyframes_scope', async function () {
 }
 
 @keyframes local-upper-by-local {
-  from { background-image: url(""); }
+  from { background-image: url("internal2.bmp"); }
   to { transform: translateX(40px); }
 }
 
@@ -6833,6 +6833,44 @@ $it.skipIf($.noPartPseudo)('test_capture_imageBackground_used_keyframes_scope_pa
 #shadow1::part(mypart) {
   font-size: 2em;
   animation: mykf 3s linear infinite;
+}`);
+});
+
+it('test_capture_imageBackground_used_keyframes_scope_conditional', async function () {
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+    "capture.shadowDom": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used/keyframes_scope_conditional/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('internal.bmp'));
+  assert(zip.file('shadow.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+@keyframes myframe {
+  from { background-image: url("internal.bmp"); }
+  to { transform: translateX(40px); }
+}`);
+
+  var host1 = doc.querySelector('#shadow1');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
+  var shadow1 = frag.content;
+  assert(shadow1.querySelectorAll('style')[1].textContent.trim() === `\
+@media print {
+  @keyframes myframe {
+    from { background-image: url("shadow.bmp"); }
+    to { transform: translateX(40px); }
+  }
 }`);
 });
 
@@ -7333,7 +7371,7 @@ it('test_capture_font_used_scope', async function () {
 
   var zip = await new JSZip().loadAsync(blob);
   assert(zip.file('internal1.woff'));
-  assert(!zip.file('internal2.woff'));
+  assert(zip.file('internal2.woff'));
   assert(zip.file('internal3.woff'));
   assert(!zip.file('internal4.woff'));
   assert(zip.file('internal5.woff'));
@@ -7354,7 +7392,7 @@ it('test_capture_font_used_scope', async function () {
   var doc = await readFileAsDocument(indexBlob);
   assert(doc.querySelectorAll('style')[1].textContent.trim() === `\
 @font-face { font-family: local-upper-by-local-upper; src: url("internal1.woff"); }
-@font-face { font-family: local-upper-by-local; src: url(""); }
+@font-face { font-family: local-upper-by-local; src: url("internal2.woff"); }
 @font-face { font-family: local-upper-by-upper; src: url("internal3.woff"); }
 @font-face { font-family: local-upper-by-none; src: url(""); }
 @font-face { font-family: upper-by-local-upper; src: url("internal5.woff"); }
@@ -7397,6 +7435,36 @@ $it.skipIf($.noPartPseudo)('test_capture_font_used_scope_part', async function (
   assert(doc.querySelector('style').textContent.trim() === `\
 @font-face { font-family: myff; src: url("internal.woff"); }
 #shadow1::part(mypart) { font-family: myff; }`);
+});
+
+it('test_capture_font_used_scope_conditional', async function () {
+  /* capture.font = save-used */
+  var options = {
+    "capture.rewriteCss": "url",
+    "capture.font": "save-used",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_font_used/scope_conditional/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('internal.woff'));
+  assert(zip.file('shadow.woff'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `@font-face { font-family: myfont; src: url("internal.woff"); }`);
+
+  var host1 = doc.querySelector('#shadow1');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host1.getAttribute("data-scrapbook-shadowdom");
+  var shadow1 = frag.content;
+  assert(shadow1.querySelectorAll('style')[1].textContent.trim() === `\
+@media print {
+  @font-face { font-family: myfont; src: url("shadow.woff"); }
+}`);
 });
 
 /**
