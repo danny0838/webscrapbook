@@ -568,6 +568,7 @@ class TestSuite {
       }
       return void(0);
     })(),
+    noHighlighting: true,
   });
 
   // expose to global scope
