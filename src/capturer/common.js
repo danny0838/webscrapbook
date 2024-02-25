@@ -4094,6 +4094,9 @@
     verifySelector(...args) {
       // Do not include :not as the semantic is reversed and the rule could be
       // narrower after rewriting (e.g. :not(:hover) => :not(*)).
+      //
+      // @FIXME: ':host', ':host(...)', ':host-context(...)' not handled correctly,
+      // as ShadowRoot.querySelector() doesn't work for them.
       const ALLOWED_PSEUDO = new Set([
         'root', 'scope',
         'is', 'matches', 'any', 'where', 'has',

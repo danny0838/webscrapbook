@@ -15,11 +15,15 @@
 <style>
 :is(#pseudo4):not(blockquote) {}
 </style>
+<style>
+:where(nonexist, #pseudo5) {}
+</style>
 </head>
 <body>
 <blockquote id="pseudo1"></blockquote>
 <blockquote id="pseudo2"></blockquote>
 <blockquote id="pseudo3"></blockquote>
 <blockquote id="pseudo4"></blockquote>
+<blockquote id="pseudo5"></blockquote>
 </body>
 </html>

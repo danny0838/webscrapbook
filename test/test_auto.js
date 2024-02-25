@@ -4827,6 +4827,8 @@ $it.skipIf($.noIsPseudo)('test_capture_css_rewriteCss_match_pseudo_is', async fu
   assert(styleElems[3].textContent.trim() === `:is(#pseudo3):not([hidden]) { }`);
 
   assert(styleElems[4].textContent.trim() === `:is(#pseudo4):not(blockquote) { }`);
+
+  assert(styleElems[5].textContent.trim() === `:where(nonexist, #pseudo5) { }`);
 });
 
 it('test_capture_css_rewriteCss_match_shadow', async function () {
@@ -4854,7 +4856,7 @@ it('test_capture_css_rewriteCss_match_shadow', async function () {
   if (shadow.querySelector(':scope blockquote')) {
     assert(shadow.querySelectorAll('style')[2].textContent.trim() === `:scope #elem2 { background-color: green; }`);
   } else {
-    // ShadowRoot.querySelector(':scope') not well suported in some browsers (e.g. Firefox <= 123)
+    // ShadowRoot.querySelector(':scope ...') doesn't work in many browsers (e.g. Firefox 124)
     assert(shadow.querySelectorAll('style')[2].textContent.trim() === ``);
   }
 
@@ -4870,12 +4872,54 @@ it('test_capture_css_rewriteCss_match_shadow', async function () {
   var shadow = frag.content;
   assert(shadow.querySelector('style').textContent.trim() === `:host(#host3) { background-color: lime; }`);
 
-  // @TODO: should be empty
   var host = doc.querySelector('#host4');
   var frag = doc.createElement("template");
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(shadow.querySelector('style').textContent.trim() === `:host(#nonexist) { background-color: lime; }`);
+});
+
+$it.xfail()('test_capture_css_rewriteCss_match_shadow_todo', async function () {
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var host = doc.querySelector('#host1');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
+  var shadow = frag.content;
+  assert(shadow.querySelectorAll('style')[1].textContent.trim() === ``);
+  assert(shadow.querySelectorAll('style')[2].textContent.trim() === `:scope #elem2 { background-color: green; }`);
+
+  var host = doc.querySelector('#host2');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
+  var shadow = frag.content;
+  assert(shadow.querySelector('style').textContent.trim() === `:host { background-color: lime; }`);
+
+  var host = doc.querySelector('#host3');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
+  var shadow = frag.content;
+  assert(shadow.querySelector('style').textContent.trim() === `:host(#host3) { background-color: lime; }`);
+
+  var host = doc.querySelector('#host4');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
+  var shadow = frag.content;
+  assert(shadow.querySelector('style').textContent.trim() === ``);
 });
 
 $it.skipIf($.noHostContextPseudo)('test_capture_css_rewriteCss_match_shadow_host_context', async function () {
@@ -4901,12 +4945,41 @@ $it.skipIf($.noHostContextPseudo)('test_capture_css_rewriteCss_match_shadow_host
   var shadow = frag.content;
   assert(shadow.querySelector('style').textContent.trim() === `:host-context(body) { background-color: lime; }`);
 
-  // @TODO: should be empty
   var host = doc.querySelector('#host2');
   var frag = doc.createElement("template");
   frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
   var shadow = frag.content;
   assert(shadow.querySelector('style').textContent.trim() === `:host-context(#nonexist) { background-color: lime; }`);
+});
+
+$it.skipIf($.noHostContextPseudo).xfail()('test_capture_css_rewriteCss_match_shadow_host_context_todo', async function () {
+  /* capture.rewriteCss = match */
+  var options = {
+    "capture.rewriteCss": "match",
+  };
+
+  var blob = await capture({
+    url: `${localhost}/capture_css_rewriteCss_match_shadow/rewrite_host_context.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+
+  var host = doc.querySelector('#host1');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
+  var shadow = frag.content;
+  assert(shadow.querySelector('style').textContent.trim() === `:host-context(body) { background-color: lime; }`);
+
+  var host = doc.querySelector('#host2');
+  var frag = doc.createElement("template");
+  frag.innerHTML = host.getAttribute("data-scrapbook-shadowdom");
+  var shadow = frag.content;
+  assert(shadow.querySelector('style').textContent.trim() === ``);
 });
 
 /**
