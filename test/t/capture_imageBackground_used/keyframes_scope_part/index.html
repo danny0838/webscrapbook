@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used background images (scoped @keyframes)</title>
+<style>
+@keyframes mykf {
+  from { background-image: url("internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+#shadow1::part(mypart) {
+  font-size: 2em;
+  animation: mykf 3s linear infinite;
+}
+</style>
+</head>
+<body>
+<div id="shadow1">
+<template>
+  <blockquote part="mypart">mypart</blockquote>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test used fonts (scoped @font-face)</title>
+<style>
+@font-face { font-family: myff; src: url("internal.woff"); }
+#shadow1::part(mypart) { font-family: myff; }
+</style>
+</head>
+<body>
+<div id="shadow1">
+<template>
+  <blockquote part="mypart">mypart</blockquote>
+</template>
+</div>
+</body>
+<script src="../../common.js"></script>
+<script>loadShadowDoms();</script>
+</html>

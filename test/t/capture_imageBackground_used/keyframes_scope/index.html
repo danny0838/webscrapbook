@@ -18,12 +18,6 @@
   from { background-image: url("internal-keyframes3.bmp"); }
   to { transform: translateX(40px); }
 }
-
-@keyframes internal5 {
-  from { background-image: url("internal-keyframes5.bmp"); }
-  to { transform: translateX(40px); }
-}
-#shadow1::part(internal5) { animation: internal5 3s linear infinite; }
 </style>
 </head>
 <body>
@@ -67,7 +61,6 @@
   <blockquote id="shadow-keyframes3">shadow3</blockquote>
   <blockquote id="shadow-keyframes4">shadow4</blockquote>
   <blockquote id="shadow-keyframes5">shadow5</blockquote>
-  <blockquote part="internal5">shadow6</blockquote>
 </template>
 </div>
 <style>

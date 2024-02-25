@@ -260,6 +260,22 @@ Object.assign(MochaQuery, {
     Object.defineProperty(this, 'noNestingCss', {value});
     return value;
   },
+  get noPartPseudo() {
+    // :part() CSS pseudo-element is supported in Firefox >= 72 and Chromium >= 73.
+    const value = new MochaQuery.Query(
+      (() => {
+        try {
+          document.querySelector('::part(dummy)');
+        } catch (ex) {
+          return true;
+        }
+        return false;
+      })(),
+      '::part() CSS pseudo-element not supported',
+    );
+    Object.defineProperty(this, 'noPartPseudo', {value});
+    return value;
+  },
   get noIsPseudo() {
     // :is() CSS pseudo-class is supported in Firefox >= 78 and Chromium >= 88.
     const value = new MochaQuery.Query(

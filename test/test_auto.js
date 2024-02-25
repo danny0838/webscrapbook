@@ -6703,7 +6703,6 @@ it('test_capture_imageBackground_used_keyframes_scope', async function () {
   assert(!zip.file('internal-keyframes2.bmp'));
   assert(zip.file('internal-keyframes3.bmp'));
   assert(zip.file('internal-keyframes4.bmp'));
-  assert(zip.file('internal-keyframes5.bmp'));
   assert(zip.file('shadow-keyframes1.bmp'));
   assert(zip.file('shadow-keyframes2.bmp'));
   assert(zip.file('shadow-keyframes3.bmp'));
@@ -6727,13 +6726,7 @@ it('test_capture_imageBackground_used_keyframes_scope', async function () {
 @keyframes internal3 {
   from { background-image: url("internal-keyframes3.bmp"); }
   to { transform: translateX(40px); }
-}
-
-@keyframes internal5 {
-  from { background-image: url("internal-keyframes5.bmp"); }
-  to { transform: translateX(40px); }
-}
-#shadow1::part(internal5) { animation: internal5 3s linear infinite; }`);
+}`);
   assert(styleElems[1].textContent.trim() === `\
 @keyframes internal4 {
   from { background-image: url("internal-keyframes4.bmp"); }
@@ -6775,6 +6768,35 @@ it('test_capture_imageBackground_used_keyframes_scope', async function () {
 
 #shadow-keyframes5 {
   animation: internal4 3s linear infinite;
+}`);
+});
+
+$it.skipIf($.noPartPseudo)('test_capture_imageBackground_used_keyframes_scope_part', async function () {
+  /* capture.imageBackground = save-used */
+  var options = {
+    "capture.imageBackground": "save-used",
+    "capture.rewriteCss": "url",
+    "capture.shadowDom": "save",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_imageBackground_used/keyframes_scope_part/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('internal.bmp'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+@keyframes mykf {
+  from { background-image: url("internal.bmp"); }
+  to { transform: translateX(40px); }
+}
+#shadow1::part(mypart) {
+  font-size: 2em;
+  animation: mykf 3s linear infinite;
 }`);
 });
 
@@ -7278,7 +7300,6 @@ it('test_capture_font_used_scope', async function () {
   assert(!zip.file('internal2.woff'));
   assert(zip.file('internal3.woff'));
   assert(zip.file('internal4.woff'));
-  assert(zip.file('internal5.woff'));
   assert(zip.file('shadow1.woff'));
   assert(zip.file('shadow2.woff'));
   assert(zip.file('shadow3.woff'));
@@ -7291,9 +7312,7 @@ it('test_capture_font_used_scope', async function () {
   assert(styleElems[0].textContent.trim() === `\
 @font-face { font-family: internal1; src: url(""); }
 @font-face { font-family: internal2; src: url(""); }
-@font-face { font-family: internal3; src: url("internal3.woff"); }
-@font-face { font-family: internal5; src: url("internal5.woff"); }
-#shadow1::part(internal5) { font-family: internal5; }`);
+@font-face { font-family: internal3; src: url("internal3.woff"); }`);
 
   assert(styleElems[1].textContent.trim() === `\
 @font-face { font-family: internal4; src: url("internal4.woff"); }`);
@@ -7315,6 +7334,28 @@ it('test_capture_font_used_scope', async function () {
 #shadow4 { font-family: internal3; }
 
 #shadow5 { font-family: internal4; }`);
+});
+
+$it.skipIf($.noPartPseudo)('test_capture_font_used_scope_part', async function () {
+  /* capture.font = save-used */
+  var options = {
+    "capture.rewriteCss": "url",
+    "capture.font": "save-used",
+  };
+  var blob = await capture({
+    url: `${localhost}/capture_font_used/scope_part/index.html`,
+    options: Object.assign({}, baseOptions, options),
+  });
+
+  var zip = await new JSZip().loadAsync(blob);
+  assert(zip.file('internal.woff'));
+
+  var indexFile = zip.file('index.html');
+  var indexBlob = new Blob([await indexFile.async('blob')], {type: "text/html"});
+  var doc = await readFileAsDocument(indexBlob);
+  assert(doc.querySelector('style').textContent.trim() === `\
+@font-face { font-family: myff; src: url("internal.woff"); }
+#shadow1::part(mypart) { font-family: myff; }`);
 });
 
 /**
